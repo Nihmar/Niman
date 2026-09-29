@@ -129,11 +129,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get settingsSectionEditor => 'エディタ';
   @override
-  String get settingsSectionLibrary => 'ライブラリ';
-  @override
   String get settingsSectionReminders => 'リマインダー';
-  @override
-  String get settingsSectionShortcuts => 'キーボード';
   @override
   String get keyboardShortcutsTitle => 'キーボードショートカット';
 
@@ -174,8 +170,6 @@ final class JapaneseStrings extends Strings {
   String updateSavedTo(Object path) => 'アップデートを $path に保存しました';
   @override
   String get updateInstallerStarted => 'インストーラーを起動しました';
-  @override
-  String get settingsSectionDiagnostics => '診断';
   @override
   String get settingsSpellCheckTitle => 'スペルチェック';
   @override
@@ -226,8 +220,6 @@ final class JapaneseStrings extends Strings {
   String get themeBrightnessNight => 'ダーク';
   @override
   String get themeTitle => 'テーマ';
-  @override
-  String get themeSubtitle => 'UI とノートの色';
   @override
   String get themePaletteSystem => 'システム';
   // Settings: the themes page (issue #269).
@@ -567,10 +559,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get cheatsheetInsert => 'ノートに挿入';
   @override
-  String get cheatsheetWritten => '記法';
-  @override
-  String get cheatsheetShown => '表示';
-  @override
   String get cheatHeadings => '見出し';
   @override
   String get cheatEmphasis => '太字・斜体・取り消し線';
@@ -711,8 +699,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get showEditorTooltip => 'エディタを表示';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '（生の HTML テーブル）';
 
   // Search (T-M3-05).
   @override
@@ -941,8 +927,6 @@ final class JapaneseStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => '優先度なし';
-  @override
   String get todoNoPriorityShort => 'なし';
   @override
   String get todoMorePriorities => 'もっと…';
@@ -1097,8 +1081,6 @@ final class JapaneseStrings extends Strings {
   String get setAsQuickNote => 'クイックノートに設定';
   @override
   String get currentQuickNote => '現在のクイックノート';
-  @override
-  String get pinnedSection => 'ピン留め';
   @override
   String pinnedSectionCount(int count) => 'ピン留め · $count';
   @override
@@ -1638,8 +1620,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get shortcutRedo => 'やり直す';
   @override
-  String get shortcutChange => 'ショートカットを変更';
-  @override
   String shortcutCaptureTitle(String command) => '「$command」のキー';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1811,8 +1791,6 @@ final class JapaneseStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => '設定';
-  @override
   String get libraryPathTitle => 'ライブラリのパス';
   @override
   String get reindexTitle => '今すぐ再インデックス';
@@ -1859,8 +1837,6 @@ final class JapaneseStrings extends Strings {
       count == 1 ? '（ノート 1 件を書き込めませんでした）' : '（$count 件のノートを書き込めませんでした）';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'アプリについて';
   @override
   String get versionTitle => 'バージョン';
   @override
@@ -2282,10 +2258,6 @@ final class JapaneseStrings extends Strings {
   String get syncRetryAction => '再試行';
   @override
   String get syncOpenSettingsAction => '設定';
-  @override
-  String get syncCloseAction => '閉じる';
-  @override
-  String get syncDoneSnack => '同期しました';
   @override
   String syncTrashedSnack(int count) =>
       '同期しました · 他の場所で削除されたファイル $count 件がごみ箱にあります';

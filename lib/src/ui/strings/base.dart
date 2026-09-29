@@ -61,9 +61,7 @@ abstract base class Strings {
   // Settings: the section headings the list is grouped under.
   String get settingsSectionAppearance;
   String get settingsSectionEditor;
-  String get settingsSectionLibrary;
   String get settingsSectionReminders;
-  String get settingsSectionShortcuts;
   String get keyboardShortcutsTitle;
 
   // Settings home (issue #104): the groups the areas sit under.
@@ -86,7 +84,6 @@ abstract base class Strings {
   String get updateCheckFailed;
   String updateSavedTo(Object path);
   String get updateInstallerStarted;
-  String get settingsSectionDiagnostics;
   String get settingsSpellCheckTitle;
   String get settingsSpellCheckSubtitle;
   String get spellCheckDictionaryTitle;
@@ -118,7 +115,6 @@ abstract base class Strings {
   String get themeBrightnessDay;
   String get themeBrightnessNight;
   String get themeTitle;
-  String get themeSubtitle;
 
   /// The settings area the colors live in, and the mark on the
   /// theme in use (issue #269).
@@ -301,8 +297,6 @@ abstract base class Strings {
   String get cheatsheetCopy;
   String get cheatsheetCopied;
   String get cheatsheetInsert;
-  String get cheatsheetWritten;
-  String get cheatsheetShown;
   String get cheatHeadings;
   String get cheatEmphasis;
   String get cheatHtmlFormats;
@@ -376,8 +370,6 @@ abstract base class Strings {
   // Preview switch (phone mode).
   String get showPreviewTooltip;
   String get showEditorTooltip;
-  // Raw-HTML table fallback.
-  String get htmlTableFallback;
 
   // Search (T-M3-05).
   String get searchHint;
@@ -501,7 +493,6 @@ abstract base class Strings {
   String get todoSortCreation;
 
   // Task dialog pickers (T-TD-06).
-  String get todoNoPriority;
   String get todoNoPriorityShort;
   String get todoMorePriorities;
   String get todoPriorityTitle;
@@ -583,7 +574,6 @@ abstract base class Strings {
   String get newListNoteDefault;
   String get setAsQuickNote;
   String get currentQuickNote;
-  String get pinnedSection;
 
   /// The pinned section's heading, with its count, e.g. "Pinned · 3".
   String pinnedSectionCount(int count);
@@ -868,7 +858,6 @@ abstract base class Strings {
   String get shortcutUseAnyway;
   String get shortcutUndo;
   String get shortcutRedo;
-  String get shortcutChange;
   String shortcutCaptureTitle(String command);
   String shortcutConflict(String keys, String other);
   String shortcutTakesEditorKey(String keys, String what);
@@ -970,7 +959,6 @@ abstract base class Strings {
   String folderPickFailed(Object error);
 
   // Settings screen rows and messages.
-  String get settingsTitle;
   String get libraryPathTitle;
   String get reindexTitle;
   String get reindexDone;
@@ -1008,7 +996,6 @@ abstract base class Strings {
   String replaceWriteFailed(int count);
 
   // The about section (issue #80): the app's version and its changelog.
-  String get settingsSectionAbout;
   String get versionTitle;
   String get changelogTitle;
   String get changelogEmpty;
@@ -1211,8 +1198,6 @@ abstract base class Strings {
   String get syncUpdatePasswordAction;
   String get syncRetryAction;
   String get syncOpenSettingsAction;
-  String get syncCloseAction;
-  String get syncDoneSnack;
   String syncTrashedSnack(int count);
   String syncConflictsSnack(int count);
   String get syncShowAction;

@@ -138,11 +138,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotek';
-  @override
   String get settingsSectionReminders => 'Påminnelser';
-  @override
-  String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Tastaturforkortelser';
 
@@ -186,8 +182,6 @@ final class NorwegianStrings extends Strings {
   String updateSavedTo(Object path) => 'Oppdateringen er lagret i $path';
   @override
   String get updateInstallerStarted => 'Installasjonsprogrammet er startet';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostikk';
   @override
   String get settingsSpellCheckTitle => 'Stavekontroll';
   @override
@@ -244,8 +238,6 @@ final class NorwegianStrings extends Strings {
   String get themeBrightnessNight => 'Mørk';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Fargene i grensesnittet og i notatet';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -598,10 +590,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Sett inn i notatet';
   @override
-  String get cheatsheetWritten => 'Skrevet';
-  @override
-  String get cheatsheetShown => 'Vist';
-  @override
   String get cheatHeadings => 'Overskrifter';
   @override
   String get cheatEmphasis => 'Fet, kursiv, gjennomstreket';
@@ -744,8 +732,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Vis editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(rå HTML-tabell)';
 
   // Search (T-M3-05).
   @override
@@ -993,8 +979,6 @@ final class NorwegianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ingen prioritet';
-  @override
   String get todoNoPriorityShort => 'Ingen';
   @override
   String get todoMorePriorities => 'Flere…';
@@ -1153,8 +1137,6 @@ final class NorwegianStrings extends Strings {
   String get setAsQuickNote => 'Sett som hurtignotat';
   @override
   String get currentQuickNote => 'Gjeldende hurtignotat';
-  @override
-  String get pinnedSection => 'Festet';
   @override
   String pinnedSectionCount(int count) => 'Festet · $count';
   @override
@@ -1735,8 +1717,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get shortcutRedo => 'Gjør om';
   @override
-  String get shortcutChange => 'Endre snarveien';
-  @override
   String shortcutCaptureTitle(String command) => 'Taster for $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1922,8 +1902,6 @@ final class NorwegianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Innstillinger';
-  @override
   String get libraryPathTitle => 'Bibliotekssti';
   @override
   String get reindexTitle => 'Indeksér om nå';
@@ -1974,8 +1952,6 @@ final class NorwegianStrings extends Strings {
       : ' ($count notater kunne ikke skrives)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Om';
   @override
   String get versionTitle => 'Versjon';
   @override
@@ -2455,10 +2431,6 @@ final class NorwegianStrings extends Strings {
   String get syncRetryAction => 'Prøv igjen';
   @override
   String get syncOpenSettingsAction => 'Innstillinger';
-  @override
-  String get syncCloseAction => 'Lukk';
-  @override
-  String get syncDoneSnack => 'Synkronisert';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synkronisert · 1 fil slettet et annet sted ligger i '

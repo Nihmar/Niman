@@ -143,11 +143,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Уредник';
   @override
-  String get settingsSectionLibrary => 'Библиотека';
-  @override
   String get settingsSectionReminders => 'Подсетници';
-  @override
-  String get settingsSectionShortcuts => 'Тастатура';
   @override
   String get keyboardShortcutsTitle => 'Тастатурски прецици';
 
@@ -190,8 +186,6 @@ final class MacedonianStrings extends Strings {
   String updateSavedTo(Object path) => 'Ажурирањето е зачувано во $path';
   @override
   String get updateInstallerStarted => 'Инсталерот е стартуван';
-  @override
-  String get settingsSectionDiagnostics => 'Дијагностика';
   @override
   String get settingsSpellCheckTitle => 'Проверка на правопис';
   @override
@@ -248,8 +242,6 @@ final class MacedonianStrings extends Strings {
   String get themeBrightnessNight => 'Темно';
   @override
   String get themeTitle => 'Тема';
-  @override
-  String get themeSubtitle => 'Бои на интерфејсот и на белешката';
   @override
   String get themePaletteSystem => 'Систем';
   // Settings: the themes page (issue #269).
@@ -608,10 +600,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Вметни во белешката';
   @override
-  String get cheatsheetWritten => 'Напишано';
-  @override
-  String get cheatsheetShown => 'Прикажано';
-  @override
   String get cheatHeadings => 'Наслови';
   @override
   String get cheatEmphasis => 'Задебелено, курзив, прецртано';
@@ -754,8 +742,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Прикажи уредник';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(сурва HTML табела)';
 
   // Search (T-M3-05).
   @override
@@ -1009,8 +995,6 @@ final class MacedonianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Без приоритет';
-  @override
   String get todoNoPriorityShort => 'Нема';
   @override
   String get todoMorePriorities => 'Повеќе…';
@@ -1170,8 +1154,6 @@ final class MacedonianStrings extends Strings {
   String get setAsQuickNote => 'Постави како брзо белешко';
   @override
   String get currentQuickNote => 'Тековно брзо белешко';
-  @override
-  String get pinnedSection => 'Заквакани';
   @override
   String pinnedSectionCount(int count) => 'Заквакани · $count';
   @override
@@ -1763,8 +1745,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get shortcutRedo => 'Повтори';
   @override
-  String get shortcutChange => 'Промени кратенка';
-  @override
   String shortcutCaptureTitle(String command) => 'Копчиња за „$command“';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1952,8 +1932,6 @@ final class MacedonianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Поставки';
-  @override
   String get libraryPathTitle => 'Патешка на библиотека';
   @override
   String get reindexTitle => 'Повторно индексирај сега';
@@ -2005,8 +1983,6 @@ final class MacedonianStrings extends Strings {
       : ' ($count белешки не се запишани)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'За';
   @override
   String get versionTitle => 'Верзија';
   @override
@@ -2487,10 +2463,6 @@ final class MacedonianStrings extends Strings {
   String get syncRetryAction => 'Обиди се повторно';
   @override
   String get syncOpenSettingsAction => 'Поставки';
-  @override
-  String get syncCloseAction => 'Затвори';
-  @override
-  String get syncDoneSnack => 'Синхронизирана';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Синхронизирана · $count датотека избришана на друго место '

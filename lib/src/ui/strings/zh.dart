@@ -129,11 +129,7 @@ final class ChineseStrings extends Strings {
   @override
   String get settingsSectionEditor => '编辑器';
   @override
-  String get settingsSectionLibrary => '文库';
-  @override
   String get settingsSectionReminders => '提醒';
-  @override
-  String get settingsSectionShortcuts => '键盘';
   @override
   String get keyboardShortcutsTitle => '键盘快捷键';
 
@@ -174,8 +170,6 @@ final class ChineseStrings extends Strings {
   String updateSavedTo(Object path) => '更新已保存到 $path';
   @override
   String get updateInstallerStarted => '安装程序已启动';
-  @override
-  String get settingsSectionDiagnostics => '诊断';
   @override
   String get settingsSpellCheckTitle => '拼写检查';
   @override
@@ -227,8 +221,6 @@ final class ChineseStrings extends Strings {
   String get themeBrightnessNight => '深色';
   @override
   String get themeTitle => '主题';
-  @override
-  String get themeSubtitle => '界面和笔记的颜色';
   @override
   String get themePaletteSystem => '跟随系统';
   // Settings: the themes page (issue #269).
@@ -566,10 +558,6 @@ final class ChineseStrings extends Strings {
   @override
   String get cheatsheetInsert => '插入到笔记';
   @override
-  String get cheatsheetWritten => '写法';
-  @override
-  String get cheatsheetShown => '效果';
-  @override
   String get cheatHeadings => '标题';
   @override
   String get cheatEmphasis => '粗体、斜体、删除线';
@@ -710,8 +698,6 @@ final class ChineseStrings extends Strings {
   @override
   String get showEditorTooltip => '显示编辑器';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '（原始 HTML 表格）';
 
   // Search (T-M3-05).
   @override
@@ -936,8 +922,6 @@ final class ChineseStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => '无优先级';
-  @override
   String get todoNoPriorityShort => '无';
   @override
   String get todoMorePriorities => '更多…';
@@ -1087,8 +1071,6 @@ final class ChineseStrings extends Strings {
   String get setAsQuickNote => '设为快速笔记';
   @override
   String get currentQuickNote => '当前快速笔记';
-  @override
-  String get pinnedSection => '已置顶';
   @override
   String pinnedSectionCount(int count) => '已置顶 · $count';
   @override
@@ -1600,8 +1582,6 @@ final class ChineseStrings extends Strings {
   @override
   String get shortcutRedo => '重做';
   @override
-  String get shortcutChange => '更改快捷键';
-  @override
   String shortcutCaptureTitle(String command) => '“$command”的按键';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1766,8 +1746,6 @@ final class ChineseStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => '设置';
-  @override
   String get libraryPathTitle => '文库路径';
   @override
   String get reindexTitle => '立即重建索引';
@@ -1813,8 +1791,6 @@ final class ChineseStrings extends Strings {
       count == 1 ? '（1 篇笔记无法写入）' : '（$count 篇笔记无法写入）';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => '关于';
   @override
   String get versionTitle => '版本';
   @override
@@ -2223,10 +2199,6 @@ final class ChineseStrings extends Strings {
   String get syncRetryAction => '重试';
   @override
   String get syncOpenSettingsAction => '设置';
-  @override
-  String get syncCloseAction => '关闭';
-  @override
-  String get syncDoneSnack => '已同步';
   @override
   String syncTrashedSnack(int count) => '已同步 · $count 个在其他地方删除的文件已移入回收站';
   @override

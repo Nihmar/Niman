@@ -138,11 +138,7 @@ final class BasqueStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Erreditorra';
   @override
-  String get settingsSectionLibrary => 'Biblioteka';
-  @override
   String get settingsSectionReminders => 'Gogorapenak';
-  @override
-  String get settingsSectionShortcuts => 'Teklategia';
   @override
   String get keyboardShortcutsTitle => 'Teklatu-lasterdarrak';
 
@@ -186,8 +182,6 @@ final class BasqueStrings extends Strings {
   String updateSavedTo(Object path) => 'Eguneratzea hemen gorde da: $path';
   @override
   String get updateInstallerStarted => 'Instalatzailea abiarazi da';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Ortografia-egiaztapena';
   @override
@@ -243,8 +237,6 @@ final class BasqueStrings extends Strings {
   String get themeBrightnessNight => 'Iluna';
   @override
   String get themeTitle => 'Gaia';
-  @override
-  String get themeSubtitle => 'Interfazearen eta oharreko koloreak';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -599,10 +591,6 @@ final class BasqueStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Txertatu oharrean';
   @override
-  String get cheatsheetWritten => 'Idatzita';
-  @override
-  String get cheatsheetShown => 'Erakutsita';
-  @override
   String get cheatHeadings => 'Izenburuak';
   @override
   String get cheatEmphasis => 'Lodia, etzana, marratua';
@@ -747,8 +735,6 @@ final class BasqueStrings extends Strings {
   @override
   String get showEditorTooltip => 'Erakutsi erreditorra';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(HTML taula krudoa)';
 
   // Search (T-M3-05).
   @override
@@ -1003,8 +989,6 @@ final class BasqueStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ez dago lehentasunik';
-  @override
   String get todoNoPriorityShort => 'Ez';
   @override
   String get todoMorePriorities => 'Gehiago…';
@@ -1164,8 +1148,6 @@ final class BasqueStrings extends Strings {
   String get setAsQuickNote => 'Ezarri ohar azkar gisa';
   @override
   String get currentQuickNote => 'Ohar azkar uneko';
-  @override
-  String get pinnedSection => 'Txertatua';
   @override
   String pinnedSectionCount(int count) => 'Txertatua · $count';
   @override
@@ -1755,8 +1737,6 @@ final class BasqueStrings extends Strings {
   @override
   String get shortcutRedo => 'Berregin';
   @override
-  String get shortcutChange => 'Aldatu lasterbidea';
-  @override
   String shortcutCaptureTitle(String command) => 'Teklak: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1945,8 +1925,6 @@ final class BasqueStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Ezarpenak';
-  @override
   String get libraryPathTitle => 'Bibliotekararen bidea';
   @override
   String get reindexTitle => 'Berrindekatu orain';
@@ -1998,8 +1976,6 @@ final class BasqueStrings extends Strings {
       : ' ($count ohar ezin izan dira idatzi)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Informazioa';
   @override
   String get versionTitle => 'Bertsioa';
   @override
@@ -2489,10 +2465,6 @@ final class BasqueStrings extends Strings {
   String get syncRetryAction => 'Saiatu berriro';
   @override
   String get syncOpenSettingsAction => 'Ezarpenak';
-  @override
-  String get syncCloseAction => 'Itxi';
-  @override
-  String get syncDoneSnack => 'Sinkronizatuta';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sinkronizatuta · beste nonbait ezabatutako fitxategi 1 '

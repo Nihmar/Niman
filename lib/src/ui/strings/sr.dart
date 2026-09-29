@@ -144,11 +144,7 @@ final class SerbianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Уредитељ';
   @override
-  String get settingsSectionLibrary => 'Библиотека';
-  @override
   String get settingsSectionReminders => 'Подсећања';
-  @override
-  String get settingsSectionShortcuts => 'Тастатура';
   @override
   String get keyboardShortcutsTitle => 'Пречице на тастатури';
 
@@ -191,8 +187,6 @@ final class SerbianStrings extends Strings {
   String updateSavedTo(Object path) => 'Ажурирање сачувано у $path';
   @override
   String get updateInstallerStarted => 'Инсталер је покренут';
-  @override
-  String get settingsSectionDiagnostics => 'Диагностика';
   @override
   String get settingsSpellCheckTitle => 'Провера правописа';
   @override
@@ -249,8 +243,6 @@ final class SerbianStrings extends Strings {
   String get themeBrightnessNight => 'Тамна';
   @override
   String get themeTitle => 'Тема';
-  @override
-  String get themeSubtitle => 'Боје сучеља и белешке';
   @override
   String get themePaletteSystem => 'Систем';
   // Settings: the themes page (issue #269).
@@ -605,10 +597,6 @@ final class SerbianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Уметни у белешку';
   @override
-  String get cheatsheetWritten => 'Написано';
-  @override
-  String get cheatsheetShown => 'Приказано';
-  @override
   String get cheatHeadings => 'Наслови';
   @override
   String get cheatEmphasis => 'Подебљано, курзив, прецртано';
@@ -751,8 +739,6 @@ final class SerbianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Прикажи уредитељ';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(HTML табела извора)';
 
   // Search (T-M3-05).
   @override
@@ -1003,8 +989,6 @@ final class SerbianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Без приоритета';
-  @override
   String get todoNoPriorityShort => 'Ниједан';
   @override
   String get todoMorePriorities => 'Више…';
@@ -1165,8 +1149,6 @@ final class SerbianStrings extends Strings {
   String get setAsQuickNote => 'Постави као брзу белешку';
   @override
   String get currentQuickNote => 'Тренутна брза белешка';
-  @override
-  String get pinnedSection => 'Прикачени';
   @override
   String pinnedSectionCount(int count) => 'Прикачени · $count';
   @override
@@ -1751,8 +1733,6 @@ final class SerbianStrings extends Strings {
   @override
   String get shortcutRedo => 'Понови';
   @override
-  String get shortcutChange => 'Промени пречицу';
-  @override
   String shortcutCaptureTitle(String command) => 'Тастери за „$command“';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1942,8 +1922,6 @@ final class SerbianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Подешавања';
-  @override
   String get libraryPathTitle => 'Путања библиотеке';
   @override
   String get reindexTitle => 'Поново индексирај сада';
@@ -1994,8 +1972,6 @@ final class SerbianStrings extends Strings {
       : ' ($count бележака није записано)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'О апликацији';
   @override
   String get versionTitle => 'Верзија';
   @override
@@ -2480,10 +2456,6 @@ final class SerbianStrings extends Strings {
   String get syncRetryAction => 'Покушај поново';
   @override
   String get syncOpenSettingsAction => 'Подешавања';
-  @override
-  String get syncCloseAction => 'Затвори';
-  @override
-  String get syncDoneSnack => 'Синхронизовано';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Синхронизовано · $count фајл обрисан другде је у кошу'

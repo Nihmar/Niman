@@ -140,11 +140,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Ritari';
   @override
-  String get settingsSectionLibrary => 'Bókasafn';
-  @override
   String get settingsSectionReminders => 'Minnisbrot';
-  @override
-  String get settingsSectionShortcuts => 'Lyklaborð';
   @override
   String get keyboardShortcutsTitle => 'Lyklaborðssnarstæður';
 
@@ -187,8 +183,6 @@ final class IcelandicStrings extends Strings {
   String updateSavedTo(Object path) => 'Uppfærsla vistuð í $path';
   @override
   String get updateInstallerStarted => 'Uppsetningarforrit ræst';
-  @override
-  String get settingsSectionDiagnostics => 'Greining';
   @override
   String get settingsSpellCheckTitle => 'Stafsetningarprófun';
   @override
@@ -245,8 +239,6 @@ final class IcelandicStrings extends Strings {
   String get themeBrightnessNight => 'Dimmt';
   @override
   String get themeTitle => 'Þema';
-  @override
-  String get themeSubtitle => 'Litir viðkomumlegs og athugasraðans';
   @override
   String get themePaletteSystem => 'Kerfi';
   // Settings: the themes page (issue #269).
@@ -600,10 +592,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Setja inn í minnismiðann';
   @override
-  String get cheatsheetWritten => 'Skrifað';
-  @override
-  String get cheatsheetShown => 'Birt';
-  @override
   String get cheatHeadings => 'Fyrirsagnir';
   @override
   String get cheatEmphasis => 'Feitletrað, skáletrað, yfirstrikað';
@@ -747,8 +735,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get showEditorTooltip => 'Sýna ritara';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(hálfraðinn HTML borð)';
 
   // Search (T-M3-05).
   @override
@@ -1000,8 +986,6 @@ final class IcelandicStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Án forrang';
-  @override
   String get todoNoPriorityShort => 'Ekkert';
   @override
   String get todoMorePriorities => 'Fleiri…';
@@ -1160,8 +1144,6 @@ final class IcelandicStrings extends Strings {
   String get setAsQuickNote => 'Stilla sem hraðminnisblað';
   @override
   String get currentQuickNote => 'Núverandi hraðminnisblað';
-  @override
-  String get pinnedSection => 'Fastgirt';
   @override
   String pinnedSectionCount(int count) => 'Fastgirt · $count';
   @override
@@ -1747,8 +1729,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get shortcutRedo => 'Endurtaka';
   @override
-  String get shortcutChange => 'Breyta flýtilykli';
-  @override
   String shortcutCaptureTitle(String command) => 'Lyklar fyrir $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1934,8 +1914,6 @@ final class IcelandicStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Stillingar';
-  @override
   String get libraryPathTitle => 'Leið bókasafns';
   @override
   String get reindexTitle => 'Endurbygga vísu núna';
@@ -1984,8 +1962,6 @@ final class IcelandicStrings extends Strings {
       : ' ($count minnisblöð voru ekki skrifuð)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Um';
   @override
   String get versionTitle => 'Útgáfa';
   @override
@@ -2467,10 +2443,6 @@ final class IcelandicStrings extends Strings {
   String get syncRetryAction => 'Reyna aftur';
   @override
   String get syncOpenSettingsAction => 'Stillingar';
-  @override
-  String get syncCloseAction => 'Loka';
-  @override
-  String get syncDoneSnack => 'Samstillt';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Samstillt · $count skjal sem var eytt annars staðar er í '

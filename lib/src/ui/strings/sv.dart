@@ -141,11 +141,7 @@ final class SwedishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotek';
-  @override
   String get settingsSectionReminders => 'Påminnelser';
-  @override
-  String get settingsSectionShortcuts => 'Tangentbord';
   @override
   String get keyboardShortcutsTitle => 'Tangentbordsgenvägar';
 
@@ -189,8 +185,6 @@ final class SwedishStrings extends Strings {
   String updateSavedTo(Object path) => 'Uppdateringen sparades i $path';
   @override
   String get updateInstallerStarted => 'Installationsprogrammet har startats';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostik';
   @override
   String get settingsSpellCheckTitle => 'Stavkontroll';
   @override
@@ -247,8 +241,6 @@ final class SwedishStrings extends Strings {
   String get themeBrightnessNight => 'Mörk';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Färgerna i gränssnittet och i anteckningen';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -604,10 +596,6 @@ final class SwedishStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Infoga i anteckningen';
   @override
-  String get cheatsheetWritten => 'Skrivet';
-  @override
-  String get cheatsheetShown => 'Visat';
-  @override
   String get cheatHeadings => 'Rubriker';
   @override
   String get cheatEmphasis => 'Fet, kursiv, genomstruken';
@@ -751,8 +739,6 @@ final class SwedishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Visa editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(rå HTML-tabell)';
 
   // Search (T-M3-05).
   @override
@@ -1002,8 +988,6 @@ final class SwedishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ingen prioritet';
-  @override
   String get todoNoPriorityShort => 'Ingen';
   @override
   String get todoMorePriorities => 'Fler…';
@@ -1161,8 +1145,6 @@ final class SwedishStrings extends Strings {
   String get setAsQuickNote => 'Sätt som snabbanteckning';
   @override
   String get currentQuickNote => 'Aktuell snabbanteckning';
-  @override
-  String get pinnedSection => 'Fästa';
   @override
   String pinnedSectionCount(int count) => 'Fästa · $count';
   @override
@@ -1752,8 +1734,6 @@ final class SwedishStrings extends Strings {
   @override
   String get shortcutRedo => 'Gör om';
   @override
-  String get shortcutChange => 'Ändra kortkommandot';
-  @override
   String shortcutCaptureTitle(String command) => 'Tangenter för $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1941,8 +1921,6 @@ final class SwedishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Inställningar';
-  @override
   String get libraryPathTitle => 'Bibliotekspath';
   @override
   String get reindexTitle => 'Indexera om nu';
@@ -1994,8 +1972,6 @@ final class SwedishStrings extends Strings {
       : ' ($count anteckningar kunde inte skrivas)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Om';
   @override
   String get versionTitle => 'Version';
   @override
@@ -2477,10 +2453,6 @@ final class SwedishStrings extends Strings {
   String get syncRetryAction => 'Försök igen';
   @override
   String get syncOpenSettingsAction => 'Inställningar';
-  @override
-  String get syncCloseAction => 'Stäng';
-  @override
-  String get syncDoneSnack => 'Synkat';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synkat · 1 fil som tagits bort på annat håll ligger i '

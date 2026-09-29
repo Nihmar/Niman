@@ -138,11 +138,7 @@ final class EstonianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Redaktor';
   @override
-  String get settingsSectionLibrary => 'Kogu';
-  @override
   String get settingsSectionReminders => 'Meeldetuletused';
-  @override
-  String get settingsSectionShortcuts => 'Klaviatuur';
   @override
   String get keyboardShortcutsTitle => 'Klaviatuuri lühendid';
 
@@ -185,8 +181,6 @@ final class EstonianStrings extends Strings {
   String updateSavedTo(Object path) => 'Uuendus salvestati asukohta $path';
   @override
   String get updateInstallerStarted => 'Paigaldusprogramm käivitati';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Õigekirjapide';
   @override
@@ -242,8 +236,6 @@ final class EstonianStrings extends Strings {
   String get themeBrightnessNight => 'Tume';
   @override
   String get themeTitle => 'Teema';
-  @override
-  String get themeSubtitle => 'Kasutajaliides ja märgiste värvid';
   @override
   String get themePaletteSystem => 'Süsteem';
   // Settings: the themes page (issue #269).
@@ -594,10 +586,6 @@ final class EstonianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Lisa märkmesse';
   @override
-  String get cheatsheetWritten => 'Kirjutatud';
-  @override
-  String get cheatsheetShown => 'Näidatud';
-  @override
   String get cheatHeadings => 'Pealkirjad';
   @override
   String get cheatEmphasis => 'Paks, kaldkiri, läbikriipsutatud';
@@ -741,8 +729,6 @@ final class EstonianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Kuva redaktorit';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(toore HTML-tabel)';
 
   // Search (T-M3-05).
   @override
@@ -989,8 +975,6 @@ final class EstonianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Prioriteedita';
-  @override
   String get todoNoPriorityShort => 'Puudub';
   @override
   String get todoMorePriorities => 'Rohkem …';
@@ -1149,8 +1133,6 @@ final class EstonianStrings extends Strings {
   String get setAsQuickNote => 'Määra kiirmärgiks';
   @override
   String get currentQuickNote => 'Aktuaalne kiirmärge';
-  @override
-  String get pinnedSection => 'Kinnitatud';
   @override
   String pinnedSectionCount(int count) => 'Kinnitatud · $count';
   @override
@@ -1728,8 +1710,6 @@ final class EstonianStrings extends Strings {
   @override
   String get shortcutRedo => 'Tee uuesti';
   @override
-  String get shortcutChange => 'Muuda kiirklahvi';
-  @override
   String shortcutCaptureTitle(String command) => 'Klahvid: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1913,8 +1893,6 @@ final class EstonianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Seaded';
-  @override
   String get libraryPathTitle => 'Kogu aadress';
   @override
   String get reindexTitle => 'Indekseeri uuesti hetkel';
@@ -1963,8 +1941,6 @@ final class EstonianStrings extends Strings {
       : ' ($count märget ei õnnestunud kirjutada)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Rakendusest';
   @override
   String get versionTitle => 'Versioon';
   @override
@@ -2438,10 +2414,6 @@ final class EstonianStrings extends Strings {
   String get syncRetryAction => 'Proovi uuesti';
   @override
   String get syncOpenSettingsAction => 'Seaded';
-  @override
-  String get syncCloseAction => 'Sulge';
-  @override
-  String get syncDoneSnack => 'Sünkroonitud';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sünkroonitud · 1 mujal kustutatud fail on prügikastis'

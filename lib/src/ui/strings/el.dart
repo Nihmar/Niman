@@ -143,11 +143,7 @@ final class GreekStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Επεξεργαστής';
   @override
-  String get settingsSectionLibrary => 'Βιβλιοθήκη';
-  @override
   String get settingsSectionReminders => 'Υπενθυμίσεις';
-  @override
-  String get settingsSectionShortcuts => 'Πληκτρολόγιο';
   @override
   String get keyboardShortcutsTitle => 'Συντόμευση πληκτρολογίου';
 
@@ -191,8 +187,6 @@ final class GreekStrings extends Strings {
   String updateSavedTo(Object path) => 'Η ενημέρωση αποθηκεύτηκε στο $path';
   @override
   String get updateInstallerStarted => 'Το πρόγραμμα εγκατάστασης ξεκίνησε';
-  @override
-  String get settingsSectionDiagnostics => 'Διάγνωση';
   @override
   String get settingsSpellCheckTitle => 'Έλεγχος ορθογραφίας';
   @override
@@ -250,8 +244,6 @@ final class GreekStrings extends Strings {
   String get themeBrightnessNight => 'Σκούρο';
   @override
   String get themeTitle => 'Θέμα';
-  @override
-  String get themeSubtitle => 'Χρώματα της διεπαφής και της σημείωσης';
   @override
   String get themePaletteSystem => 'Σύστημα';
   // Settings: the themes page (issue #269).
@@ -613,10 +605,6 @@ final class GreekStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Εισαγωγή στη σημείωση';
   @override
-  String get cheatsheetWritten => 'Γραμμένο';
-  @override
-  String get cheatsheetShown => 'Εμφάνιση';
-  @override
   String get cheatHeadings => 'Επικεφαλίδες';
   @override
   String get cheatEmphasis => 'Έντονα, πλάγια, διαγραμμένα';
@@ -761,8 +749,6 @@ final class GreekStrings extends Strings {
   @override
   String get showEditorTooltip => 'Εμφάνιση επεξεργαστή';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(μη αναλυμένος HTML πίνακας)';
 
   // Search (T-M3-05).
   @override
@@ -1024,8 +1010,6 @@ final class GreekStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Χωρίς προτεραιότητα';
-  @override
   String get todoNoPriorityShort => 'Καμία';
   @override
   String get todoMorePriorities => 'Περισσότερα…';
@@ -1189,8 +1173,6 @@ final class GreekStrings extends Strings {
   String get setAsQuickNote => 'Ορισμός ως γρήγορη σημείωση';
   @override
   String get currentQuickNote => 'Τρέχουσα γρήγορη σημείωση';
-  @override
-  String get pinnedSection => 'Στιβαρωμένες';
   @override
   String pinnedSectionCount(int count) => 'Στιβαρωμένες · $count';
   @override
@@ -1803,8 +1785,6 @@ final class GreekStrings extends Strings {
   @override
   String get shortcutRedo => 'Επανάληψη';
   @override
-  String get shortcutChange => 'Αλλαγή συντόμευσης';
-  @override
   String shortcutCaptureTitle(String command) => 'Πλήκτρα για «$command»';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -2000,8 +1980,6 @@ final class GreekStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Ρυθμίσεις';
-  @override
   String get libraryPathTitle => 'Διαδρομή βιβλιοθήκης';
   @override
   String get reindexTitle => 'Επαναδημιουργία δείκτη τώρα';
@@ -2056,8 +2034,6 @@ final class GreekStrings extends Strings {
       : ' ($count σημειώσεις δεν γράφτηκαν)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Σχετικά';
   @override
   String get versionTitle => 'Έκδοση';
   @override
@@ -2550,10 +2526,6 @@ final class GreekStrings extends Strings {
   String get syncRetryAction => 'Νέα προσπάθεια';
   @override
   String get syncOpenSettingsAction => 'Ρυθμίσεις';
-  @override
-  String get syncCloseAction => 'Κλείσιμο';
-  @override
-  String get syncDoneSnack => 'Συγχρονίστηκε';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Συγχρονίστηκε · 1 αρχείο που διαγράφηκε αλλού είναι στη '

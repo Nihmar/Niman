@@ -143,11 +143,7 @@ final class ItalianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Libreria';
-  @override
   String get settingsSectionReminders => 'Promemoria';
-  @override
-  String get settingsSectionShortcuts => 'Tastiera';
   @override
   String get keyboardShortcutsTitle => 'Scorciatoie da tastiera';
 
@@ -191,8 +187,6 @@ final class ItalianStrings extends Strings {
   String updateSavedTo(Object path) => 'Aggiornamento salvato in $path';
   @override
   String get updateInstallerStarted => 'Programma di installazione avviato';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostica';
   @override
   String get settingsSpellCheckTitle => 'Controlla ortografia';
   @override
@@ -249,8 +243,6 @@ final class ItalianStrings extends Strings {
   String get themeBrightnessNight => 'Scura';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'I colori dell’interfaccia e della nota';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -608,10 +600,6 @@ final class ItalianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Inserisci nella nota';
   @override
-  String get cheatsheetWritten => 'Scritto';
-  @override
-  String get cheatsheetShown => 'Mostrato';
-  @override
   String get cheatHeadings => 'Titoli';
   @override
   String get cheatEmphasis => 'Grassetto, corsivo, barrato';
@@ -755,8 +743,6 @@ final class ItalianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Mostra editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(tabella HTML grezza)';
 
   // Search (T-M3-05).
   @override
@@ -1005,8 +991,6 @@ final class ItalianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Nessuna priorità';
-  @override
   String get todoNoPriorityShort => 'Nessuna';
   @override
   String get todoMorePriorities => 'Altre…';
@@ -1169,8 +1153,6 @@ final class ItalianStrings extends Strings {
   String get setAsQuickNote => 'Imposta come nota rapida';
   @override
   String get currentQuickNote => 'Nota rapida attuale';
-  @override
-  String get pinnedSection => 'Fissate';
   @override
   String pinnedSectionCount(int count) => 'Fissate · $count';
   @override
@@ -1769,8 +1751,6 @@ final class ItalianStrings extends Strings {
   @override
   String get shortcutRedo => 'Ripeti';
   @override
-  String get shortcutChange => 'Cambia la scorciatoia';
-  @override
   String shortcutCaptureTitle(String command) => 'Tasti per $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1958,8 +1938,6 @@ final class ItalianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Impostazioni';
-  @override
   String get libraryPathTitle => 'Percorso della libreria';
   @override
   String get reindexTitle => 'Reindicizza ora';
@@ -2008,8 +1986,6 @@ final class ItalianStrings extends Strings {
       : ' ($count note non sono state scritte)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Informazioni';
   @override
   String get versionTitle => 'Versione';
   @override
@@ -2484,10 +2460,6 @@ final class ItalianStrings extends Strings {
   String get syncRetryAction => 'Riprova';
   @override
   String get syncOpenSettingsAction => 'Impostazioni';
-  @override
-  String get syncCloseAction => 'Chiudi';
-  @override
-  String get syncDoneSnack => 'Sincronizzata';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sincronizzata · 1 file eliminato altrove è nel cestino'

@@ -146,11 +146,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Urejevalnik';
   @override
-  String get settingsSectionLibrary => 'Knjižnica';
-  @override
   String get settingsSectionReminders => 'Opomniki';
-  @override
-  String get settingsSectionShortcuts => 'Tipkovnica';
   @override
   String get keyboardShortcutsTitle => 'Bližnjice';
 
@@ -193,8 +189,6 @@ final class SlovenianStrings extends Strings {
   String updateSavedTo(Object path) => 'Posodobitev shranjena v $path';
   @override
   String get updateInstallerStarted => 'Namestitveni program zagnan';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Preverjanje pravopisa';
   @override
@@ -249,8 +243,6 @@ final class SlovenianStrings extends Strings {
   String get themeBrightnessNight => 'Temna';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Barve vmesnika in opomb';
   @override
   String get themePaletteSystem => 'Sistem';
   // Settings: the themes page (issue #269).
@@ -607,10 +599,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Vstavi v zapisek';
   @override
-  String get cheatsheetWritten => 'Zapisano';
-  @override
-  String get cheatsheetShown => 'Prikazano';
-  @override
   String get cheatHeadings => 'Naslovi';
   @override
   String get cheatEmphasis => 'Krepko, ležeče, prečrtano';
@@ -753,8 +741,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Prikaži urejevalnik';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(neobdelana HTML tabela)';
 
   // Search (T-M3-05).
   @override
@@ -1001,8 +987,6 @@ final class SlovenianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Brez prioritete';
-  @override
   String get todoNoPriorityShort => 'Ni';
   @override
   String get todoMorePriorities => 'Več …';
@@ -1161,8 +1145,6 @@ final class SlovenianStrings extends Strings {
   String get setAsQuickNote => 'Nastavi kot hitro opombo';
   @override
   String get currentQuickNote => 'Trenutna hitra opomba';
-  @override
-  String get pinnedSection => 'Pripeto';
   @override
   String pinnedSectionCount(int count) => 'Pripeto · $count';
   @override
@@ -1741,8 +1723,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get shortcutRedo => 'Uveljavi';
   @override
-  String get shortcutChange => 'Spremeni bližnjico';
-  @override
   String shortcutCaptureTitle(String command) => 'Tipke za $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1927,8 +1907,6 @@ final class SlovenianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Nastavitve';
-  @override
   String get libraryPathTitle => 'Pot do knjižnice';
   @override
   String get reindexTitle => 'Ponovno indeksiraj zdaj';
@@ -1978,8 +1956,6 @@ final class SlovenianStrings extends Strings {
       : ' ($count opomb ni bilo mogoče zapisati)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'O aplikaciji';
   @override
   String get versionTitle => 'Versija';
   @override
@@ -2474,10 +2450,6 @@ final class SlovenianStrings extends Strings {
   String get syncRetryAction => 'Poskusi znova';
   @override
   String get syncOpenSettingsAction => 'Nastavitve';
-  @override
-  String get syncCloseAction => 'Zapri';
-  @override
-  String get syncDoneSnack => 'Sinhronizirano';
   @override
   String syncTrashedSnack(int count) => count % 100 == 1
       ? 'Sinhronizirano · $count datoteka, izbrisana drugje, je v '

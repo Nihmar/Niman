@@ -142,11 +142,7 @@ final class GermanStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliothek';
-  @override
   String get settingsSectionReminders => 'Erinnerungen';
-  @override
-  String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Tastaturkürzel';
 
@@ -190,8 +186,6 @@ final class GermanStrings extends Strings {
   String updateSavedTo(Object path) => 'Update gespeichert unter $path';
   @override
   String get updateInstallerStarted => 'Installationsprogramm gestartet';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnose';
   @override
   String get settingsSpellCheckTitle => 'Rechtschreibung prüfen';
   @override
@@ -248,8 +242,6 @@ final class GermanStrings extends Strings {
   String get themeBrightnessNight => 'Dunkel';
   @override
   String get themeTitle => 'Design';
-  @override
-  String get themeSubtitle => 'Die Farben der Oberfläche und der Notiz';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -605,10 +597,6 @@ final class GermanStrings extends Strings {
   @override
   String get cheatsheetInsert => 'In die Notiz einfügen';
   @override
-  String get cheatsheetWritten => 'Geschrieben';
-  @override
-  String get cheatsheetShown => 'Angezeigt';
-  @override
   String get cheatHeadings => 'Überschriften';
   @override
   String get cheatEmphasis => 'Fett, kursiv, durchgestrichen';
@@ -752,8 +740,6 @@ final class GermanStrings extends Strings {
   @override
   String get showEditorTooltip => 'Editor zeigen';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(rohe HTML-Tabelle)';
 
   // Search (T-M3-05).
   @override
@@ -1012,8 +998,6 @@ final class GermanStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ohne Priorität';
-  @override
   String get todoNoPriorityShort => 'Keine';
   @override
   String get todoMorePriorities => 'Mehr…';
@@ -1175,8 +1159,6 @@ final class GermanStrings extends Strings {
   String get setAsQuickNote => 'Als Schnellnotiz festlegen';
   @override
   String get currentQuickNote => 'Aktuelle Schnellnotiz';
-  @override
-  String get pinnedSection => 'Angeheftet';
   @override
   String pinnedSectionCount(int count) => 'Angeheftet · $count';
   @override
@@ -1777,8 +1759,6 @@ final class GermanStrings extends Strings {
   @override
   String get shortcutRedo => 'Wiederholen';
   @override
-  String get shortcutChange => 'Kürzel ändern';
-  @override
   String shortcutCaptureTitle(String command) => 'Tasten für $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1975,8 +1955,6 @@ final class GermanStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Einstellungen';
-  @override
   String get libraryPathTitle => 'Bibliothekspfad';
   @override
   String get reindexTitle => 'Jetzt neu indizieren';
@@ -2029,8 +2007,6 @@ final class GermanStrings extends Strings {
       : ' ($count Notizen konnten nicht geschrieben werden)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Info';
   @override
   String get versionTitle => 'Version';
   @override
@@ -2522,10 +2498,6 @@ final class GermanStrings extends Strings {
   String get syncRetryAction => 'Erneut versuchen';
   @override
   String get syncOpenSettingsAction => 'Einstellungen';
-  @override
-  String get syncCloseAction => 'Schließen';
-  @override
-  String get syncDoneSnack => 'Synchronisiert';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synchronisiert · 1 anderswo gelöschte Datei liegt im '

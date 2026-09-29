@@ -137,11 +137,7 @@ final class TurkishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Düzenleyici';
   @override
-  String get settingsSectionLibrary => 'Kütüphane';
-  @override
   String get settingsSectionReminders => 'Hatırlatıcılar';
-  @override
-  String get settingsSectionShortcuts => 'Klavye';
   @override
   String get keyboardShortcutsTitle => 'Klavye kısayolu';
 
@@ -184,8 +180,6 @@ final class TurkishStrings extends Strings {
   String updateSavedTo(Object path) => 'Güncelleme şuraya kaydedildi: $path';
   @override
   String get updateInstallerStarted => 'Yükleyici başlatıldı';
-  @override
-  String get settingsSectionDiagnostics => 'Teşhis';
   @override
   String get settingsSpellCheckTitle => 'Yazım denetimi';
   @override
@@ -239,8 +233,6 @@ final class TurkishStrings extends Strings {
   String get themeBrightnessNight => 'Koyu';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Arayüz ve not renkleri';
   @override
   String get themePaletteSystem => 'Sistem';
   // Settings: the themes page (issue #269).
@@ -595,10 +587,6 @@ final class TurkishStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Nota ekle';
   @override
-  String get cheatsheetWritten => 'Yazılan';
-  @override
-  String get cheatsheetShown => 'Gösterilen';
-  @override
   String get cheatHeadings => 'Başlıklar';
   @override
   String get cheatEmphasis => 'Kalın, italik, üstü çizili';
@@ -742,8 +730,6 @@ final class TurkishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Düzenleyiciyi göster';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(çözümlenmemiş HTML tablo)';
 
   // Search (T-M3-05).
   @override
@@ -992,8 +978,6 @@ final class TurkishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Öncelik yok';
-  @override
   String get todoNoPriorityShort => 'Yok';
   @override
   String get todoMorePriorities => 'Daha fazla…';
@@ -1153,8 +1137,6 @@ final class TurkishStrings extends Strings {
   String get setAsQuickNote => 'Hızlı not olarak ayarla';
   @override
   String get currentQuickNote => 'Geçerli hızlı not';
-  @override
-  String get pinnedSection => 'Sabitlenmiş';
   @override
   String pinnedSectionCount(int count) => 'Sabitlenmiş · $count';
   @override
@@ -1733,8 +1715,6 @@ final class TurkishStrings extends Strings {
   @override
   String get shortcutRedo => 'Yinele';
   @override
-  String get shortcutChange => 'Kısayolu değiştir';
-  @override
   String shortcutCaptureTitle(String command) => '$command için tuşlar';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1919,8 +1899,6 @@ final class TurkishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Ayarlar';
-  @override
   String get libraryPathTitle => 'Kütüphane yolu';
   @override
   String get reindexTitle => 'Dekoru şimdi yeniden oluştur';
@@ -1970,8 +1948,6 @@ final class TurkishStrings extends Strings {
       count == 1 ? ' (1 not yazılamadı)' : ' ($count not yazılamadı)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Hakkında';
   @override
   String get versionTitle => 'Sürüm';
   @override
@@ -2441,10 +2417,6 @@ final class TurkishStrings extends Strings {
   String get syncRetryAction => 'Yeniden dene';
   @override
   String get syncOpenSettingsAction => 'Ayarlar';
-  @override
-  String get syncCloseAction => 'Kapat';
-  @override
-  String get syncDoneSnack => 'Eşitlendi';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Eşitlendi · başka yerde silinen 1 dosya çöp kutusunda'

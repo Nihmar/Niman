@@ -145,11 +145,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Редактор';
   @override
-  String get settingsSectionLibrary => 'Библиотека';
-  @override
   String get settingsSectionReminders => 'Напомняния';
-  @override
-  String get settingsSectionShortcuts => 'Клавиатура';
   @override
   String get keyboardShortcutsTitle => 'Клавишни комбинации';
 
@@ -192,8 +188,6 @@ final class BulgarianStrings extends Strings {
   String updateSavedTo(Object path) => 'Актуализацията е запазена в $path';
   @override
   String get updateInstallerStarted => 'Инсталаторът е стартиран';
-  @override
-  String get settingsSectionDiagnostics => 'Диагностика';
   @override
   String get settingsSpellCheckTitle => 'Проверка за правопис';
   @override
@@ -250,8 +244,6 @@ final class BulgarianStrings extends Strings {
   String get themeBrightnessNight => 'Тъмна';
   @override
   String get themeTitle => 'Тема';
-  @override
-  String get themeSubtitle => 'Цветовете на интерфейса и бележките';
   @override
   String get themePaletteSystem => 'Система';
   // Settings: the themes page (issue #269).
@@ -605,10 +597,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Вмъкни в бележката';
   @override
-  String get cheatsheetWritten => 'Написано';
-  @override
-  String get cheatsheetShown => 'Показано';
-  @override
   String get cheatHeadings => 'Заглавия';
   @override
   String get cheatEmphasis => 'Удебелен, курсив, зачертан';
@@ -752,8 +740,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Покажи редактор';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(неоформена HTML таблица)';
 
   // Search (T-M3-05).
   @override
@@ -1004,8 +990,6 @@ final class BulgarianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Без приоритет';
-  @override
   String get todoNoPriorityShort => 'Няма';
   @override
   String get todoMorePriorities => 'Още…';
@@ -1168,8 +1152,6 @@ final class BulgarianStrings extends Strings {
   String get setAsQuickNote => 'Задай като бърза бележка';
   @override
   String get currentQuickNote => 'Текуща бърза бележка';
-  @override
-  String get pinnedSection => 'Закачени';
   @override
   String pinnedSectionCount(int count) => 'Закачени · $count';
   @override
@@ -1762,8 +1744,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get shortcutRedo => 'Повтори';
   @override
-  String get shortcutChange => 'Промени комбинацията';
-  @override
   String shortcutCaptureTitle(String command) => 'Клавиши за „$command“';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1953,8 +1933,6 @@ final class BulgarianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Настройки';
-  @override
   String get libraryPathTitle => 'Път на библиотеката';
   @override
   String get reindexTitle => 'Презиндексирай сега';
@@ -2005,8 +1983,6 @@ final class BulgarianStrings extends Strings {
       : ' ($count бележки не бяха записани)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'За';
   @override
   String get versionTitle => 'Версия';
   @override
@@ -2486,10 +2462,6 @@ final class BulgarianStrings extends Strings {
   String get syncRetryAction => 'Опитай отново';
   @override
   String get syncOpenSettingsAction => 'Настройки';
-  @override
-  String get syncCloseAction => 'Затвори';
-  @override
-  String get syncDoneSnack => 'Синхронизирана';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Синхронизирана · 1 файл, изтрит другаде, е в коша'

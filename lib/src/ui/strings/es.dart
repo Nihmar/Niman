@@ -143,11 +143,7 @@ final class SpanishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Biblioteca';
-  @override
   String get settingsSectionReminders => 'Recordatorios';
-  @override
-  String get settingsSectionShortcuts => 'Teclado';
   @override
   String get keyboardShortcutsTitle => 'Atajos de teclado';
 
@@ -191,8 +187,6 @@ final class SpanishStrings extends Strings {
   String updateSavedTo(Object path) => 'Actualización guardada en $path';
   @override
   String get updateInstallerStarted => 'Instalador iniciado';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnóstico';
   @override
   String get settingsSpellCheckTitle => 'Comprobar ortografía';
   @override
@@ -249,8 +243,6 @@ final class SpanishStrings extends Strings {
   String get themeBrightnessNight => 'Oscuro';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Los colores de la interfaz y de la nota';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -608,10 +600,6 @@ final class SpanishStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Insertar en la nota';
   @override
-  String get cheatsheetWritten => 'Escrito';
-  @override
-  String get cheatsheetShown => 'Mostrado';
-  @override
   String get cheatHeadings => 'Encabezados';
   @override
   String get cheatEmphasis => 'Negrita, cursiva, tachado';
@@ -755,8 +743,6 @@ final class SpanishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Mostrar editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(tabla HTML en bruto)';
 
   // Search (T-M3-05).
   @override
@@ -1013,8 +999,6 @@ final class SpanishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Sin prioridad';
-  @override
   String get todoNoPriorityShort => 'Ninguna';
   @override
   String get todoMorePriorities => 'Más…';
@@ -1178,8 +1162,6 @@ final class SpanishStrings extends Strings {
   String get setAsQuickNote => 'Fijar como nota rápida';
   @override
   String get currentQuickNote => 'Nota rápida actual';
-  @override
-  String get pinnedSection => 'Fijadas';
   @override
   String pinnedSectionCount(int count) => 'Fijadas · $count';
   @override
@@ -1779,8 +1761,6 @@ final class SpanishStrings extends Strings {
   @override
   String get shortcutRedo => 'Rehacer';
   @override
-  String get shortcutChange => 'Cambiar el atajo';
-  @override
   String shortcutCaptureTitle(String command) => 'Teclas para $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1966,8 +1946,6 @@ final class SpanishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Ajustes';
-  @override
   String get libraryPathTitle => 'Ruta de la biblioteca';
   @override
   String get reindexTitle => 'Reindexar ahora';
@@ -2020,8 +1998,6 @@ final class SpanishStrings extends Strings {
       : ' (no se pudieron escribir $count notas)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Acerca de';
   @override
   String get versionTitle => 'Versión';
   @override
@@ -2505,10 +2481,6 @@ final class SpanishStrings extends Strings {
   String get syncRetryAction => 'Reintentar';
   @override
   String get syncOpenSettingsAction => 'Ajustes';
-  @override
-  String get syncCloseAction => 'Cerrar';
-  @override
-  String get syncDoneSnack => 'Sincronizada';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sincronizada · 1 archivo eliminado en otro lugar está en '

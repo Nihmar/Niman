@@ -140,11 +140,7 @@ final class DutchStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotheek';
-  @override
   String get settingsSectionReminders => 'Herinneringen';
-  @override
-  String get settingsSectionShortcuts => 'Toetsenbord';
   @override
   String get keyboardShortcutsTitle => 'Sneltoetsen';
 
@@ -188,8 +184,6 @@ final class DutchStrings extends Strings {
   String updateSavedTo(Object path) => 'Update opgeslagen in $path';
   @override
   String get updateInstallerStarted => 'Installatieprogramma gestart';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostiek';
   @override
   String get settingsSpellCheckTitle => 'Spellingscontrole';
   @override
@@ -246,8 +240,6 @@ final class DutchStrings extends Strings {
   String get themeBrightnessNight => 'Donker';
   @override
   String get themeTitle => 'Thema';
-  @override
-  String get themeSubtitle => 'De kleuren van de interface en van de notitie';
   @override
   String get themePaletteSystem => 'Systeem';
   // Settings: the themes page (issue #269).
@@ -605,10 +597,6 @@ final class DutchStrings extends Strings {
   @override
   String get cheatsheetInsert => 'In de notitie invoegen';
   @override
-  String get cheatsheetWritten => 'Geschreven';
-  @override
-  String get cheatsheetShown => 'Getoond';
-  @override
   String get cheatHeadings => 'Koppen';
   @override
   String get cheatEmphasis => 'Vet, cursief, doorgehaald';
@@ -752,8 +740,6 @@ final class DutchStrings extends Strings {
   @override
   String get showEditorTooltip => 'Editor tonen';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(ruwe HTML-tabel)';
 
   // Search (T-M3-05).
   @override
@@ -1005,8 +991,6 @@ final class DutchStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Geen prioriteit';
-  @override
   String get todoNoPriorityShort => 'Geen';
   @override
   String get todoMorePriorities => 'Meer…';
@@ -1164,8 +1148,6 @@ final class DutchStrings extends Strings {
   String get setAsQuickNote => 'Instellen als snelnotitie';
   @override
   String get currentQuickNote => 'Huidige snelnotitie';
-  @override
-  String get pinnedSection => 'Vastgezet';
   @override
   String pinnedSectionCount(int count) => 'Vastgezet · $count';
   @override
@@ -1769,8 +1751,6 @@ final class DutchStrings extends Strings {
   @override
   String get shortcutRedo => 'Opnieuw';
   @override
-  String get shortcutChange => 'Sneltoets wijzigen';
-  @override
   String shortcutCaptureTitle(String command) => 'Toetsen voor $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1960,8 +1940,6 @@ final class DutchStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Instellingen';
-  @override
   String get libraryPathTitle => 'Bibliotheekpad';
   @override
   String get reindexTitle => 'Nu herindexeren';
@@ -2012,8 +1990,6 @@ final class DutchStrings extends Strings {
       : ' ($count notities konden niet worden geschreven)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Over';
   @override
   String get versionTitle => 'Versie';
   @override
@@ -2498,10 +2474,6 @@ final class DutchStrings extends Strings {
   String get syncRetryAction => 'Opnieuw proberen';
   @override
   String get syncOpenSettingsAction => 'Instellingen';
-  @override
-  String get syncCloseAction => 'Sluiten';
-  @override
-  String get syncDoneSnack => 'Gesynchroniseerd';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Gesynchroniseerd · 1 elders verwijderd bestand staat in '

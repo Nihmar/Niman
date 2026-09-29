@@ -138,11 +138,7 @@ final class EnglishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Library';
-  @override
   String get settingsSectionReminders => 'Reminders';
-  @override
-  String get settingsSectionShortcuts => 'Keyboard';
   @override
   String get keyboardShortcutsTitle => 'Keyboard shortcuts';
 
@@ -186,8 +182,6 @@ final class EnglishStrings extends Strings {
   String updateSavedTo(Object path) => 'Update saved to $path';
   @override
   String get updateInstallerStarted => 'Installer started';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostics';
   @override
   String get settingsSpellCheckTitle => 'Check spelling';
   @override
@@ -245,8 +239,6 @@ final class EnglishStrings extends Strings {
   String get themeBrightnessNight => 'Dark';
   @override
   String get themeTitle => 'Theme';
-  @override
-  String get themeSubtitle => 'The colors of the interface and of the note';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -599,10 +591,6 @@ final class EnglishStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Insert in the note';
   @override
-  String get cheatsheetWritten => 'Written';
-  @override
-  String get cheatsheetShown => 'Shown';
-  @override
   String get cheatHeadings => 'Headings';
   @override
   String get cheatEmphasis => 'Bold, italic, strikethrough';
@@ -745,8 +733,6 @@ final class EnglishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Show editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(raw HTML table)';
 
   // Search (T-M3-05).
   @override
@@ -992,8 +978,6 @@ final class EnglishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'No priority';
-  @override
   String get todoNoPriorityShort => 'None';
   @override
   String get todoMorePriorities => 'More…';
@@ -1153,8 +1137,6 @@ final class EnglishStrings extends Strings {
   String get setAsQuickNote => 'Set as quick note';
   @override
   String get currentQuickNote => 'Current quick note';
-  @override
-  String get pinnedSection => 'Pinned';
   @override
   String pinnedSectionCount(int count) => 'Pinned · $count';
   @override
@@ -1733,8 +1715,6 @@ final class EnglishStrings extends Strings {
   @override
   String get shortcutRedo => 'Redo';
   @override
-  String get shortcutChange => 'Change the shortcut';
-  @override
   String shortcutCaptureTitle(String command) => 'Keys for $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1918,8 +1898,6 @@ final class EnglishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Settings';
-  @override
   String get libraryPathTitle => 'Library path';
   @override
   String get reindexTitle => 'Re-index now';
@@ -1969,8 +1947,6 @@ final class EnglishStrings extends Strings {
       : ' ($count notes could not be written)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'About';
   @override
   String get versionTitle => 'Version';
   @override
@@ -2442,10 +2418,6 @@ final class EnglishStrings extends Strings {
   String get syncRetryAction => 'Try again';
   @override
   String get syncOpenSettingsAction => 'Settings';
-  @override
-  String get syncCloseAction => 'Close';
-  @override
-  String get syncDoneSnack => 'Synced';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synced · 1 file deleted elsewhere is in the trash'

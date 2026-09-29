@@ -139,11 +139,7 @@ final class DanishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotek';
-  @override
   String get settingsSectionReminders => 'Påmindelser';
-  @override
-  String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Genveje';
 
@@ -187,8 +183,6 @@ final class DanishStrings extends Strings {
   String updateSavedTo(Object path) => 'Opdatering gemt i $path';
   @override
   String get updateInstallerStarted => 'Installationsprogrammet er startet';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostik';
   @override
   String get settingsSpellCheckTitle => 'Stavekontrol';
   @override
@@ -245,8 +239,6 @@ final class DanishStrings extends Strings {
   String get themeBrightnessNight => 'Mørk';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Farverne i grænsefladen og i noten';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -598,10 +590,6 @@ final class DanishStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Indsæt i noten';
   @override
-  String get cheatsheetWritten => 'Skrevet';
-  @override
-  String get cheatsheetShown => 'Vist';
-  @override
   String get cheatHeadings => 'Overskrifter';
   @override
   String get cheatEmphasis => 'Fed, kursiv, gennemstreget';
@@ -744,8 +732,6 @@ final class DanishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Vis editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(rå HTML-tabel)';
 
   // Search (T-M3-05).
   @override
@@ -995,8 +981,6 @@ final class DanishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ingen prioritet';
-  @override
   String get todoNoPriorityShort => 'Ingen';
   @override
   String get todoMorePriorities => 'Flere…';
@@ -1155,8 +1139,6 @@ final class DanishStrings extends Strings {
   String get setAsQuickNote => 'Sæt som kviknote';
   @override
   String get currentQuickNote => 'Aktuel kviknote';
-  @override
-  String get pinnedSection => 'Fastgjort';
   @override
   String pinnedSectionCount(int count) => 'Fastgjort · $count';
   @override
@@ -1741,8 +1723,6 @@ final class DanishStrings extends Strings {
   @override
   String get shortcutRedo => 'Gentag';
   @override
-  String get shortcutChange => 'Skift genvejen';
-  @override
   String shortcutCaptureTitle(String command) => 'Taster til $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1925,8 +1905,6 @@ final class DanishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Indstillinger';
-  @override
   String get libraryPathTitle => 'Bibliotekssti';
   @override
   String get reindexTitle => 'Indeksér om nu';
@@ -1977,8 +1955,6 @@ final class DanishStrings extends Strings {
       : ' ($count noter kunne ikke skrives)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Om';
   @override
   String get versionTitle => 'Version';
   @override
@@ -2457,10 +2433,6 @@ final class DanishStrings extends Strings {
   String get syncRetryAction => 'Prøv igen';
   @override
   String get syncOpenSettingsAction => 'Indstillinger';
-  @override
-  String get syncCloseAction => 'Luk';
-  @override
-  String get syncDoneSnack => 'Synkroniseret';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synkroniseret · 1 fil slettet et andet sted ligger i '

@@ -133,11 +133,7 @@ final class HindiStrings extends Strings {
   @override
   String get settingsSectionEditor => 'एडिटर';
   @override
-  String get settingsSectionLibrary => 'लाइब्रेरी';
-  @override
   String get settingsSectionReminders => 'रिमाइंडर';
-  @override
-  String get settingsSectionShortcuts => 'कीबोर्ड';
   @override
   String get keyboardShortcutsTitle => 'कीबोर्ड शॉर्टकट';
 
@@ -180,8 +176,6 @@ final class HindiStrings extends Strings {
   String updateSavedTo(Object path) => 'अपडेट $path में सहेजा गया';
   @override
   String get updateInstallerStarted => 'इंस्टॉलर शुरू हुआ';
-  @override
-  String get settingsSectionDiagnostics => 'निदान';
   @override
   String get settingsSpellCheckTitle => 'व्याकरण जाँचें';
   @override
@@ -235,8 +229,6 @@ final class HindiStrings extends Strings {
   String get themeBrightnessNight => 'डार्क';
   @override
   String get themeTitle => 'थीम';
-  @override
-  String get themeSubtitle => 'इंटरफ़ेस और नोट के रंग';
   @override
   String get themePaletteSystem => 'सिस्टम';
   // Settings: the themes page (issue #269).
@@ -590,10 +582,6 @@ final class HindiStrings extends Strings {
   @override
   String get cheatsheetInsert => 'नोट में डालें';
   @override
-  String get cheatsheetWritten => 'लिखा हुआ';
-  @override
-  String get cheatsheetShown => 'दिखाया गया';
-  @override
   String get cheatHeadings => 'शीर्षक';
   @override
   String get cheatEmphasis => 'बोल्ड, इटैलिक, स्ट्राइकथ्रू';
@@ -737,8 +725,6 @@ final class HindiStrings extends Strings {
   @override
   String get showEditorTooltip => 'एडिटर दिखाएँ';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(कच्चा HTML तालिका)';
 
   // Search (T-M3-05).
   @override
@@ -982,8 +968,6 @@ final class HindiStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'बिना प्राथमिकता';
-  @override
   String get todoNoPriorityShort => 'कोई नहीं';
   @override
   String get todoMorePriorities => 'और…';
@@ -1143,8 +1127,6 @@ final class HindiStrings extends Strings {
   String get setAsQuickNote => 'क्विक नोट बनाएँ';
   @override
   String get currentQuickNote => 'मौजूदा क्विक नोट';
-  @override
-  String get pinnedSection => 'पिन्ड';
   @override
   String pinnedSectionCount(int count) => 'पिन्ड · $count';
   @override
@@ -1721,8 +1703,6 @@ final class HindiStrings extends Strings {
   @override
   String get shortcutRedo => 'फिर से करें';
   @override
-  String get shortcutChange => 'शॉर्टकट बदलें';
-  @override
   String shortcutCaptureTitle(String command) => '$command के लिए कुंजियाँ';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1906,8 +1886,6 @@ final class HindiStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'सेटिंग';
-  @override
   String get libraryPathTitle => 'लाइब्रेरी-पाथ';
   @override
   String get reindexTitle => 'अभी दोबारा इंडेक्स करें';
@@ -1956,8 +1934,6 @@ final class HindiStrings extends Strings {
       : ' ($count नोट्स लिखी नहीं जा सकीं)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'परिचय';
   @override
   String get versionTitle => 'संस्करण';
   @override
@@ -2433,10 +2409,6 @@ final class HindiStrings extends Strings {
   String get syncRetryAction => 'फिर कोशिश करें';
   @override
   String get syncOpenSettingsAction => 'सेटिंग';
-  @override
-  String get syncCloseAction => 'बंद करें';
-  @override
-  String get syncDoneSnack => 'सिंक पूरा हुआ';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'सिंक पूरा हुआ · कहीं और हटाई गई 1 फ़ाइल ट्रैश में है'

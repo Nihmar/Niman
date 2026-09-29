@@ -143,11 +143,7 @@ final class PolishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Edytor';
   @override
-  String get settingsSectionLibrary => 'Biblioteka';
-  @override
   String get settingsSectionReminders => 'Przypomnienia';
-  @override
-  String get settingsSectionShortcuts => 'Klawiatura';
   @override
   String get keyboardShortcutsTitle => 'Skróty klawiszowe';
 
@@ -191,8 +187,6 @@ final class PolishStrings extends Strings {
   String updateSavedTo(Object path) => 'Aktualizację zapisano w $path';
   @override
   String get updateInstallerStarted => 'Uruchomiono instalator';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostyka';
   @override
   String get settingsSpellCheckTitle => 'Sprawdzanie pisowni';
   @override
@@ -249,8 +243,6 @@ final class PolishStrings extends Strings {
   String get themeBrightnessNight => 'Ciemny';
   @override
   String get themeTitle => 'Motyw';
-  @override
-  String get themeSubtitle => 'Kolory interfejsu i notatki';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -611,10 +603,6 @@ final class PolishStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Wstaw do notatki';
   @override
-  String get cheatsheetWritten => 'Zapis';
-  @override
-  String get cheatsheetShown => 'Wygląd';
-  @override
   String get cheatHeadings => 'Nagłówki';
   @override
   String get cheatEmphasis => 'Pogrubienie, kursywa, przekreślenie';
@@ -758,8 +746,6 @@ final class PolishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Pokaż edytor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(surowa tabela HTML)';
 
   // Search (T-M3-05).
   @override
@@ -1010,8 +996,6 @@ final class PolishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez priorytetu';
-  @override
   String get todoNoPriorityShort => 'Brak';
   @override
   String get todoMorePriorities => 'Więcej…';
@@ -1175,8 +1159,6 @@ final class PolishStrings extends Strings {
   String get setAsQuickNote => 'Ustaw jako szybką notatkę';
   @override
   String get currentQuickNote => 'Aktualna szybka notatka';
-  @override
-  String get pinnedSection => 'Przypięte';
   @override
   String pinnedSectionCount(int count) => 'Przypięte · $count';
   @override
@@ -1770,8 +1752,6 @@ final class PolishStrings extends Strings {
   @override
   String get shortcutRedo => 'Ponów';
   @override
-  String get shortcutChange => 'Zmień skrót';
-  @override
   String shortcutCaptureTitle(String command) => 'Klawisze dla: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1961,8 +1941,6 @@ final class PolishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Ustawienia';
-  @override
   String get libraryPathTitle => 'Ścieżka biblioteki';
   @override
   String get reindexTitle => 'Przeindeksuj teraz';
@@ -2014,8 +1992,6 @@ final class PolishStrings extends Strings {
       : ' ($count notatek nie udało się zapisać)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'O aplikacji';
   @override
   String get versionTitle => 'Wersja';
   @override
@@ -2495,10 +2471,6 @@ final class PolishStrings extends Strings {
   String get syncRetryAction => 'Spróbuj ponownie';
   @override
   String get syncOpenSettingsAction => 'Ustawienia';
-  @override
-  String get syncCloseAction => 'Zamknij';
-  @override
-  String get syncDoneSnack => 'Zsynchronizowano';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Zsynchronizowano · 1 plik usunięty gdzie indziej jest w '

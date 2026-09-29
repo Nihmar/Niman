@@ -139,11 +139,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Redaktues';
   @override
-  String get settingsSectionLibrary => 'Biblioteka';
-  @override
   String get settingsSectionReminders => 'Kujtesat';
-  @override
-  String get settingsSectionShortcuts => 'Tastatura';
   @override
   String get keyboardShortcutsTitle => 'Shkurtoret e tastaturës';
 
@@ -186,8 +182,6 @@ final class AlbanianStrings extends Strings {
   String updateSavedTo(Object path) => 'Përditësimi u ruajt në $path';
   @override
   String get updateInstallerStarted => 'Instaluesi u nis';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostikimi';
   @override
   String get settingsSpellCheckTitle => 'Kontrolli i shkrimit';
   @override
@@ -244,8 +238,6 @@ final class AlbanianStrings extends Strings {
   String get themeBrightnessNight => 'E errët';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Ngjyrat e ndërfaqes dhe të shënit';
   @override
   String get themePaletteSystem => 'Sistemi';
   // Settings: the themes page (issue #269).
@@ -600,10 +592,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Fut në shënim';
   @override
-  String get cheatsheetWritten => 'Shkruar';
-  @override
-  String get cheatsheetShown => 'Shfaqur';
-  @override
   String get cheatHeadings => 'Titujt';
   @override
   String get cheatEmphasis => 'I trashë, i pjerrët, i vijëzuar';
@@ -746,8 +734,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Shfaq redaktorin';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(tabela HTML e thjeshtë)';
 
   // Search (T-M3-05).
   @override
@@ -1003,8 +989,6 @@ final class AlbanianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Pa përparësi';
-  @override
   String get todoNoPriorityShort => "S'ka";
   @override
   String get todoMorePriorities => 'Më shumë…';
@@ -1166,8 +1150,6 @@ final class AlbanianStrings extends Strings {
   String get setAsQuickNote => 'Vendos si shënim i shpejtë';
   @override
   String get currentQuickNote => 'Shënim i shpejtë aktual';
-  @override
-  String get pinnedSection => 'Të ngjitur';
   @override
   String pinnedSectionCount(int count) => 'Të ngjitur · $count';
   @override
@@ -1761,8 +1743,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get shortcutRedo => 'Ribëj';
   @override
-  String get shortcutChange => 'Ndrysho shkurtoren';
-  @override
   String shortcutCaptureTitle(String command) => 'Tastet për $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1951,8 +1931,6 @@ final class AlbanianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Vendosjet';
-  @override
   String get libraryPathTitle => 'Rruga e bibliotekës';
   @override
   String get reindexTitle => 'Rindekso tani';
@@ -2004,8 +1982,6 @@ final class AlbanianStrings extends Strings {
       : ' ($count shënime nuk u shkruan dot)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Rreth';
   @override
   String get versionTitle => 'Versioni';
   @override
@@ -2489,10 +2465,6 @@ final class AlbanianStrings extends Strings {
   String get syncRetryAction => 'Provo përsëri';
   @override
   String get syncOpenSettingsAction => 'Vendosjet';
-  @override
-  String get syncCloseAction => 'Mbyll';
-  @override
-  String get syncDoneSnack => 'Sinkronizuar';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sinkronizuar · 1 skedar i fshirë diku tjetër është në kosh'

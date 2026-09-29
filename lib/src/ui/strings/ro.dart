@@ -144,11 +144,7 @@ final class RomanianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotecă';
-  @override
   String get settingsSectionReminders => 'Mementouri';
-  @override
-  String get settingsSectionShortcuts => 'Tastatură';
   @override
   String get keyboardShortcutsTitle => 'Scurtături de tastatură';
 
@@ -192,8 +188,6 @@ final class RomanianStrings extends Strings {
   String updateSavedTo(Object path) => 'Actualizare salvată în $path';
   @override
   String get updateInstallerStarted => 'Programul de instalare a pornit';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostic';
   @override
   String get settingsSpellCheckTitle => 'Verificarea ortografiei';
   @override
@@ -250,8 +244,6 @@ final class RomanianStrings extends Strings {
   String get themeBrightnessNight => 'Întunecat';
   @override
   String get themeTitle => 'Temă';
-  @override
-  String get themeSubtitle => 'Culorile interfeței și ale notei';
   @override
   String get themePaletteSystem => 'Sistem';
   // Settings: the themes page (issue #269).
@@ -611,10 +603,6 @@ final class RomanianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Inserează în notă';
   @override
-  String get cheatsheetWritten => 'Scris';
-  @override
-  String get cheatsheetShown => 'Afișat';
-  @override
   String get cheatHeadings => 'Titluri';
   @override
   String get cheatEmphasis => 'Aldin, cursiv, tăiat';
@@ -758,8 +746,6 @@ final class RomanianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Afișează editorul';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(tabel HTML brut)';
 
   // Search (T-M3-05).
   @override
@@ -1011,8 +997,6 @@ final class RomanianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Fără prioritate';
-  @override
   String get todoNoPriorityShort => 'Niciuna';
   @override
   String get todoMorePriorities => 'Mai multe…';
@@ -1171,8 +1155,6 @@ final class RomanianStrings extends Strings {
   String get setAsQuickNote => 'Setează ca notă rapidă';
   @override
   String get currentQuickNote => 'Notă rapidă curentă';
-  @override
-  String get pinnedSection => 'Fixate';
   @override
   String pinnedSectionCount(int count) => 'Fixate · $count';
   @override
@@ -1760,8 +1742,6 @@ final class RomanianStrings extends Strings {
   @override
   String get shortcutRedo => 'Refă';
   @override
-  String get shortcutChange => 'Schimbă scurtătura';
-  @override
   String shortcutCaptureTitle(String command) => 'Taste pentru $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1947,8 +1927,6 @@ final class RomanianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Setări';
-  @override
   String get libraryPathTitle => 'Calea bibliotecii';
   @override
   String get reindexTitle => 'Reindexează acum';
@@ -1999,8 +1977,6 @@ final class RomanianStrings extends Strings {
       : ' ($count note nu au putut fi scrise)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Despre';
   @override
   String get versionTitle => 'Versiune';
   @override
@@ -2495,10 +2471,6 @@ final class RomanianStrings extends Strings {
   String get syncRetryAction => 'Încearcă din nou';
   @override
   String get syncOpenSettingsAction => 'Setări';
-  @override
-  String get syncCloseAction => 'Închide';
-  @override
-  String get syncDoneSnack => 'Sincronizată';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sincronizată · 1 fișier șters în altă parte este în coș'

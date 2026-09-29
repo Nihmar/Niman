@@ -141,11 +141,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Рэдактар';
   @override
-  String get settingsSectionLibrary => 'Бібліятэка';
-  @override
   String get settingsSectionReminders => 'Напамінні';
-  @override
-  String get settingsSectionShortcuts => 'Клавіятура';
   @override
   String get keyboardShortcutsTitle => 'Комбінацыі клавіш';
 
@@ -190,8 +186,6 @@ final class BelarusianStrings extends Strings {
   String updateSavedTo(Object path) => 'Абнаўленне захавана ў $path';
   @override
   String get updateInstallerStarted => 'Усталёўшчык запушчаны';
-  @override
-  String get settingsSectionDiagnostics => 'Дыягустыка';
   @override
   String get settingsSpellCheckTitle => 'Праверка арфаграфіі';
   @override
@@ -245,8 +239,6 @@ final class BelarusianStrings extends Strings {
   String get themeBrightnessNight => 'Цёмная';
   @override
   String get themeTitle => 'Тэма';
-  @override
-  String get themeSubtitle => 'Колеры інтэрфейсу і заўваг';
   @override
   String get themePaletteSystem => 'Сістэма';
   // Settings: the themes page (issue #269).
@@ -603,10 +595,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Уставіць у нататку';
   @override
-  String get cheatsheetWritten => 'Напісана';
-  @override
-  String get cheatsheetShown => 'Паказана';
-  @override
   String get cheatHeadings => 'Загалоўкі';
   @override
   String get cheatEmphasis => 'Тоўсты, курсіў, закрэслены';
@@ -749,8 +737,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Паказаць рэдактар';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(HTML-табліца без апрацоўкі)';
 
   // Search (T-M3-05).
   @override
@@ -999,8 +985,6 @@ final class BelarusianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Без прыярытэту';
-  @override
   String get todoNoPriorityShort => 'Няма';
   @override
   String get todoMorePriorities => 'Больш…';
@@ -1160,8 +1144,6 @@ final class BelarusianStrings extends Strings {
   String get setAsQuickNote => 'Усталяваць як хуткую заўвагу';
   @override
   String get currentQuickNote => 'Поточная хуткая заўвага';
-  @override
-  String get pinnedSection => 'Замацаваныя';
   @override
   String pinnedSectionCount(int count) => 'Замацаваныя · $count';
   @override
@@ -1749,8 +1731,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get shortcutRedo => 'Паўтарыць';
   @override
-  String get shortcutChange => 'Змяніць спалучэнне';
-  @override
   String shortcutCaptureTitle(String command) => 'Клавішы для «$command»';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1937,8 +1917,6 @@ final class BelarusianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Налады';
-  @override
   String get libraryPathTitle => 'Шлях бібліятэкі';
   @override
   String get reindexTitle => 'Пераіндэксаваць зараз';
@@ -1988,8 +1966,6 @@ final class BelarusianStrings extends Strings {
       count == 1 ? ' (1 заўвага не запісана)' : ' ($count заўваг не запісаны)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Пра праграму';
   @override
   String get versionTitle => 'Версія';
   @override
@@ -2481,10 +2457,6 @@ final class BelarusianStrings extends Strings {
   String get syncRetryAction => 'Паспрабаваць зноў';
   @override
   String get syncOpenSettingsAction => 'Налады';
-  @override
-  String get syncCloseAction => 'Зачыніць';
-  @override
-  String get syncDoneSnack => 'Сінхранізавана';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Сінхранізавана · $count файл, выдалены ў іншым месцы, у '

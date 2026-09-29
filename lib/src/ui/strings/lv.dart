@@ -140,11 +140,7 @@ final class LatvianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Redaktors';
   @override
-  String get settingsSectionLibrary => 'Bibliotēka';
-  @override
   String get settingsSectionReminders => 'Atgādinājumi';
-  @override
-  String get settingsSectionShortcuts => 'Tastatūra';
   @override
   String get keyboardShortcutsTitle => 'Tastatūras saīsinājumi';
 
@@ -187,8 +183,6 @@ final class LatvianStrings extends Strings {
   String updateSavedTo(Object path) => 'Atjauninājums saglabāts: $path';
   @override
   String get updateInstallerStarted => 'Instalētājs palaists';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Orfogrāfiskā pārbaude';
   @override
@@ -243,8 +237,6 @@ final class LatvianStrings extends Strings {
   String get themeBrightnessNight => 'Tumša';
   @override
   String get themeTitle => 'Tēma';
-  @override
-  String get themeSubtitle => 'Saskarnes un piezīmju krāsas';
   @override
   String get themePaletteSystem => 'Sistēma';
   // Settings: the themes page (issue #269).
@@ -601,10 +593,6 @@ final class LatvianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Ievietot piezīmē';
   @override
-  String get cheatsheetWritten => 'Rakstīts';
-  @override
-  String get cheatsheetShown => 'Parādīts';
-  @override
   String get cheatHeadings => 'Virsraksti';
   @override
   String get cheatEmphasis => 'Treknraksts, slīpraksts, pārsvītrots';
@@ -748,8 +736,6 @@ final class LatvianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Rādīt redaktoru';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(neapstrādāta HTML tabula)';
 
   // Search (T-M3-05).
   @override
@@ -997,8 +983,6 @@ final class LatvianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez prioritātes';
-  @override
   String get todoNoPriorityShort => 'Nav';
   @override
   String get todoMorePriorities => 'Vairāk…';
@@ -1158,8 +1142,6 @@ final class LatvianStrings extends Strings {
   String get setAsQuickNote => 'Iestatīt kā ātro piezīmi';
   @override
   String get currentQuickNote => 'Pašreizējā ātrā piezīme';
-  @override
-  String get pinnedSection => 'Piestiprināts';
   @override
   String pinnedSectionCount(int count) => 'Piestiprināts · $count';
   @override
@@ -1743,8 +1725,6 @@ final class LatvianStrings extends Strings {
   @override
   String get shortcutRedo => 'Atkārtot';
   @override
-  String get shortcutChange => 'Mainīt īsinājumtaustiņu';
-  @override
   String shortcutCaptureTitle(String command) => 'Taustiņi: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1931,8 +1911,6 @@ final class LatvianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Iestatījumi';
-  @override
   String get libraryPathTitle => 'Bibliotēkas ceļš';
   @override
   String get reindexTitle => 'Pārraudzīt tagad';
@@ -1983,8 +1961,6 @@ final class LatvianStrings extends Strings {
       : ' ($count piezīmes neizdevās ierakstīt)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Par lietotni';
   @override
   String get versionTitle => 'Versija';
   @override
@@ -2459,10 +2435,6 @@ final class LatvianStrings extends Strings {
   String get syncRetryAction => 'Mēģināt vēlreiz';
   @override
   String get syncOpenSettingsAction => 'Iestatījumi';
-  @override
-  String get syncCloseAction => 'Aizvērt';
-  @override
-  String get syncDoneSnack => 'Sinhronizēta';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Sinhronizēta · $count citur izdzēsts fails ir konteinerā'

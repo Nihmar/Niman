@@ -139,11 +139,7 @@ final class HungarianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Szerkesztő';
   @override
-  String get settingsSectionLibrary => 'Könyvtár';
-  @override
   String get settingsSectionReminders => 'Emlékeztetők';
-  @override
-  String get settingsSectionShortcuts => 'Billentyűzet';
   @override
   String get keyboardShortcutsTitle => 'Billentyűparancsok';
 
@@ -186,8 +182,6 @@ final class HungarianStrings extends Strings {
   String updateSavedTo(Object path) => 'Frissítés mentve ide: $path';
   @override
   String get updateInstallerStarted => 'A telepítő elindult';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnosztika';
   @override
   String get settingsSpellCheckTitle => 'Helyesírásellenőrzés';
   @override
@@ -244,8 +238,6 @@ final class HungarianStrings extends Strings {
   String get themeBrightnessNight => 'Sötét';
   @override
   String get themeTitle => 'Téma';
-  @override
-  String get themeSubtitle => 'A felület és a jegyzet színei';
   @override
   String get themePaletteSystem => 'Rendszer';
   // Settings: the themes page (issue #269).
@@ -601,10 +593,6 @@ final class HungarianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Beszúrás a jegyzetbe';
   @override
-  String get cheatsheetWritten => 'Leírva';
-  @override
-  String get cheatsheetShown => 'Megjelenítve';
-  @override
   String get cheatHeadings => 'Címsorok';
   @override
   String get cheatEmphasis => 'Félkövér, dőlt, áthúzott';
@@ -749,8 +737,6 @@ final class HungarianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Szerkesztő megjelenítése';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(nyers HTML táblázat)';
 
   // Search (T-M3-05).
   @override
@@ -1001,8 +987,6 @@ final class HungarianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Nincs prioritás';
-  @override
   String get todoNoPriorityShort => 'Nincs';
   @override
   String get todoMorePriorities => 'Több…';
@@ -1164,8 +1148,6 @@ final class HungarianStrings extends Strings {
   String get setAsQuickNote => 'Beállítás gyorsjegyzetnek';
   @override
   String get currentQuickNote => 'Jelenlegi gyorsjegyzet';
-  @override
-  String get pinnedSection => 'Rögzített';
   @override
   String pinnedSectionCount(int count) => 'Rögzített · $count';
   @override
@@ -1759,8 +1741,6 @@ final class HungarianStrings extends Strings {
   @override
   String get shortcutRedo => 'Ismétlés';
   @override
-  String get shortcutChange => 'Billentyűparancs módosítása';
-  @override
   String shortcutCaptureTitle(String command) => 'Billentyűk: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1948,8 +1928,6 @@ final class HungarianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Beállítások';
-  @override
   String get libraryPathTitle => 'A könyvtár útvonala';
   @override
   String get reindexTitle => 'Újra indexelés most';
@@ -2000,8 +1978,6 @@ final class HungarianStrings extends Strings {
       : ' ($count jegyzetet nem sikerült kiírni)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Névjegy';
   @override
   String get versionTitle => 'Verzió';
   @override
@@ -2483,10 +2459,6 @@ final class HungarianStrings extends Strings {
   String get syncRetryAction => 'Próbáld újra';
   @override
   String get syncOpenSettingsAction => 'Beállítások';
-  @override
-  String get syncCloseAction => 'Bezárás';
-  @override
-  String get syncDoneSnack => 'Szinkronizálva';
   @override
   String syncTrashedSnack(int count) =>
       'Szinkronizálva · $count máshol törölt fájl a kukába került';

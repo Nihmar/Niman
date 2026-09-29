@@ -143,11 +143,7 @@ final class UkrainianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Редактор';
   @override
-  String get settingsSectionLibrary => 'Бібліотека';
-  @override
   String get settingsSectionReminders => 'Нагадування';
-  @override
-  String get settingsSectionShortcuts => 'Клавіатура';
   @override
   String get keyboardShortcutsTitle => 'Комбінації клавіш';
 
@@ -192,8 +188,6 @@ final class UkrainianStrings extends Strings {
   String updateSavedTo(Object path) => 'Оновлення збережено в $path';
   @override
   String get updateInstallerStarted => 'Інсталятор запущено';
-  @override
-  String get settingsSectionDiagnostics => 'Діагностика';
   @override
   String get settingsSpellCheckTitle => 'Перевірка орфографії';
   @override
@@ -247,8 +241,6 @@ final class UkrainianStrings extends Strings {
   String get themeBrightnessNight => 'Темна';
   @override
   String get themeTitle => 'Тема';
-  @override
-  String get themeSubtitle => 'Кольори інтерфейсу та нотаток';
   @override
   String get themePaletteSystem => 'Система';
   // Settings: the themes page (issue #269).
@@ -605,10 +597,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Вставити в нотатку';
   @override
-  String get cheatsheetWritten => 'Написано';
-  @override
-  String get cheatsheetShown => 'Показано';
-  @override
   String get cheatHeadings => 'Заголовки';
   @override
   String get cheatEmphasis => 'Жирний, курсив, закреслений';
@@ -752,8 +740,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Показати редактор';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(необроблена HTML-таблиця)';
 
   // Search (T-M3-05).
   @override
@@ -1001,8 +987,6 @@ final class UkrainianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Без пріоритету';
-  @override
   String get todoNoPriorityShort => 'Немає';
   @override
   String get todoMorePriorities => 'Більше…';
@@ -1163,8 +1147,6 @@ final class UkrainianStrings extends Strings {
   String get setAsQuickNote => 'Задати як швидку нотатку';
   @override
   String get currentQuickNote => 'Поточна швидка нотатка';
-  @override
-  String get pinnedSection => 'Закріплені';
   @override
   String pinnedSectionCount(int count) => 'Закріплені · $count';
   @override
@@ -1754,8 +1736,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get shortcutRedo => 'Повторити';
   @override
-  String get shortcutChange => 'Змінити скорочення';
-  @override
   String shortcutCaptureTitle(String command) => 'Клавіші для «$command»';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1940,8 +1920,6 @@ final class UkrainianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Налаштування';
-  @override
   String get libraryPathTitle => 'Шлях бібліотеки';
   @override
   String get reindexTitle => 'Переіндексувати зараз';
@@ -1992,8 +1970,6 @@ final class UkrainianStrings extends Strings {
       : ' ($count нотаток не вдалося записати)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Про застосунок';
   @override
   String get versionTitle => 'Версія';
   @override
@@ -2484,10 +2460,6 @@ final class UkrainianStrings extends Strings {
   String get syncRetryAction => 'Спробувати знову';
   @override
   String get syncOpenSettingsAction => 'Налаштування';
-  @override
-  String get syncCloseAction => 'Закрити';
-  @override
-  String get syncDoneSnack => 'Синхронізовано';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Синхронізовано · $count файл, видалений деінде, у кошику'

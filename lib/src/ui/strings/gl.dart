@@ -143,11 +143,7 @@ final class GalicianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Biblioteca';
-  @override
   String get settingsSectionReminders => 'Lembranzas';
-  @override
-  String get settingsSectionShortcuts => 'Teclado';
   @override
   String get keyboardShortcutsTitle => 'Atallos de teclado';
 
@@ -191,8 +187,6 @@ final class GalicianStrings extends Strings {
   String updateSavedTo(Object path) => 'Actualización gardada en $path';
   @override
   String get updateInstallerStarted => 'Instalador iniciado';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnóstico';
   @override
   String get settingsSpellCheckTitle => 'Comprobación ortográfica';
   @override
@@ -249,8 +243,6 @@ final class GalicianStrings extends Strings {
   String get themeBrightnessNight => 'Escuro';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'As cores da interfaz e da nota';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -607,10 +599,6 @@ final class GalicianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Inserir na nota';
   @override
-  String get cheatsheetWritten => 'Escrito';
-  @override
-  String get cheatsheetShown => 'Amosado';
-  @override
   String get cheatHeadings => 'Títulos';
   @override
   String get cheatEmphasis => 'Negra, cursiva, riscado';
@@ -754,8 +742,6 @@ final class GalicianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Mostrar o editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(táboa HTML a bruto)';
 
   // Search (T-M3-05).
   @override
@@ -1007,8 +993,6 @@ final class GalicianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Sen prioridade';
-  @override
   String get todoNoPriorityShort => 'Ninguna';
   @override
   String get todoMorePriorities => 'Máis…';
@@ -1170,8 +1154,6 @@ final class GalicianStrings extends Strings {
   String get setAsQuickNote => 'Establecer como nota rápida';
   @override
   String get currentQuickNote => 'Nota rápida actual';
-  @override
-  String get pinnedSection => 'Fixadas';
   @override
   String pinnedSectionCount(int count) => 'Fixadas · $count';
   @override
@@ -1763,8 +1745,6 @@ final class GalicianStrings extends Strings {
   @override
   String get shortcutRedo => 'Refacer';
   @override
-  String get shortcutChange => 'Cambiar o atallo';
-  @override
   String shortcutCaptureTitle(String command) => 'Teclas para $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1950,8 +1930,6 @@ final class GalicianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Configuración';
-  @override
   String get libraryPathTitle => 'Camiño da biblioteca';
   @override
   String get reindexTitle => 'Reindexar agora';
@@ -2004,8 +1982,6 @@ final class GalicianStrings extends Strings {
       : ' ($count notas non se puideron escribir)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Sobre';
   @override
   String get versionTitle => 'Versión';
   @override
@@ -2486,10 +2462,6 @@ final class GalicianStrings extends Strings {
   String get syncRetryAction => 'Tentar de novo';
   @override
   String get syncOpenSettingsAction => 'Configuración';
-  @override
-  String get syncCloseAction => 'Pechar';
-  @override
-  String get syncDoneSnack => 'Sincronizada';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sincronizada · 1 ficheiro borrado noutro lugar está no '

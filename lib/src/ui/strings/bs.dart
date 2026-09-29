@@ -144,11 +144,7 @@ final class BosnianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Uređivač';
   @override
-  String get settingsSectionLibrary => 'Biblioteka';
-  @override
   String get settingsSectionReminders => 'Podsjetke';
-  @override
-  String get settingsSectionShortcuts => 'Tastatura';
   @override
   String get keyboardShortcutsTitle => 'Prečice na tastaturi';
 
@@ -191,8 +187,6 @@ final class BosnianStrings extends Strings {
   String updateSavedTo(Object path) => 'Ažuriranje spremljeno u $path';
   @override
   String get updateInstallerStarted => 'Program za instalaciju pokrenut';
-  @override
-  String get settingsSectionDiagnostics => 'Dijagnostika';
   @override
   String get settingsSpellCheckTitle => 'Provjera pravopisa';
   @override
@@ -249,8 +243,6 @@ final class BosnianStrings extends Strings {
   String get themeBrightnessNight => 'Tamna';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Boje sučelja i bilješke';
   @override
   String get themePaletteSystem => 'Sistem';
   // Settings: the themes page (issue #269).
@@ -606,10 +598,6 @@ final class BosnianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Umetni u bilješku';
   @override
-  String get cheatsheetWritten => 'Napisano';
-  @override
-  String get cheatsheetShown => 'Prikazano';
-  @override
   String get cheatHeadings => 'Naslovi';
   @override
   String get cheatEmphasis => 'Podebljano, kurziv, precrtano';
@@ -752,8 +740,6 @@ final class BosnianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Prikaži uređivač';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(tablica sirovog HTML-a)';
 
   // Search (T-M3-05).
   @override
@@ -1003,8 +989,6 @@ final class BosnianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez prioriteta';
-  @override
   String get todoNoPriorityShort => 'Nijedan';
   @override
   String get todoMorePriorities => 'Više…';
@@ -1163,8 +1147,6 @@ final class BosnianStrings extends Strings {
   String get setAsQuickNote => 'Postavi kao brzu bilješku';
   @override
   String get currentQuickNote => 'Trenutna brza bilješka';
-  @override
-  String get pinnedSection => 'Prikvačeno';
   @override
   String pinnedSectionCount(int count) => 'Prikvačeno · $count';
   @override
@@ -1751,8 +1733,6 @@ final class BosnianStrings extends Strings {
   @override
   String get shortcutRedo => 'Ponovi';
   @override
-  String get shortcutChange => 'Promijeni prečicu';
-  @override
   String shortcutCaptureTitle(String command) => 'Tipke za $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1938,8 +1918,6 @@ final class BosnianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Podešavanja';
-  @override
   String get libraryPathTitle => 'Putanje biblioteke';
   @override
   String get reindexTitle => 'Ponovno indeksiraj odmah';
@@ -1991,8 +1969,6 @@ final class BosnianStrings extends Strings {
       : ' ($count bilješki nije zapisano)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'O aplikaciji';
   @override
   String get versionTitle => 'Verzija';
   @override
@@ -2481,10 +2457,6 @@ final class BosnianStrings extends Strings {
   String get syncRetryAction => 'Pokušaj ponovo';
   @override
   String get syncOpenSettingsAction => 'Podešavanja';
-  @override
-  String get syncCloseAction => 'Zatvori';
-  @override
-  String get syncDoneSnack => 'Sinhronizovano';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Sinhronizovano · $count datoteka obrisana drugdje je u '

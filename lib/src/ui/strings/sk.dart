@@ -142,11 +142,7 @@ final class SlovakStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Knižnica';
-  @override
   String get settingsSectionReminders => 'Pripomienky';
-  @override
-  String get settingsSectionShortcuts => 'Klávesnica';
   @override
   String get keyboardShortcutsTitle => 'Klávesové skratky';
 
@@ -190,8 +186,6 @@ final class SlovakStrings extends Strings {
   String updateSavedTo(Object path) => 'Aktualizácia uložená do $path';
   @override
   String get updateInstallerStarted => 'Inštalátor spustený';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
@@ -248,8 +242,6 @@ final class SlovakStrings extends Strings {
   String get themeBrightnessNight => 'Tmavé';
   @override
   String get themeTitle => 'Téma';
-  @override
-  String get themeSubtitle => 'Farby rozhrania a poznámky';
   @override
   String get themePaletteSystem => 'Systém';
   // Settings: the themes page (issue #269).
@@ -605,10 +597,6 @@ final class SlovakStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Vložiť do poznámky';
   @override
-  String get cheatsheetWritten => 'Zápis';
-  @override
-  String get cheatsheetShown => 'Zobrazenie';
-  @override
   String get cheatHeadings => 'Nadpisy';
   @override
   String get cheatEmphasis => 'Tučné, kurzíva, prečiarknuté';
@@ -752,8 +740,6 @@ final class SlovakStrings extends Strings {
   @override
   String get showEditorTooltip => 'Zobraziť editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(hrubá HTML tabuľka)';
 
   // Search (T-M3-05).
   @override
@@ -1002,8 +988,6 @@ final class SlovakStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez priority';
-  @override
   String get todoNoPriorityShort => 'Žiadna';
   @override
   String get todoMorePriorities => 'Viac…';
@@ -1163,8 +1147,6 @@ final class SlovakStrings extends Strings {
   String get setAsQuickNote => 'Nastaviť ako rýchlu poznámku';
   @override
   String get currentQuickNote => 'Aktuálna rýchla poznámka';
-  @override
-  String get pinnedSection => 'Pripnuté';
   @override
   String pinnedSectionCount(int count) => 'Pripnuté · $count';
   @override
@@ -1746,8 +1728,6 @@ final class SlovakStrings extends Strings {
   @override
   String get shortcutRedo => 'Znova';
   @override
-  String get shortcutChange => 'Zmeniť skratku';
-  @override
   String shortcutCaptureTitle(String command) => 'Klávesy pre $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1932,8 +1912,6 @@ final class SlovakStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Nastavenia';
-  @override
   String get libraryPathTitle => 'Cesta knižnice';
   @override
   String get reindexTitle => 'Preindexovať teraz';
@@ -1985,8 +1963,6 @@ final class SlovakStrings extends Strings {
       : ' ($count poznámok nešlo zapísať)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'O aplikácii';
   @override
   String get versionTitle => 'Verzia';
   @override
@@ -2471,10 +2447,6 @@ final class SlovakStrings extends Strings {
   String get syncRetryAction => 'Skúsiť znova';
   @override
   String get syncOpenSettingsAction => 'Nastavenia';
-  @override
-  String get syncCloseAction => 'Zavrieť';
-  @override
-  String get syncDoneSnack => 'Synchronizovaná';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synchronizovaná · 1 súbor vymazaný inde je v koši'

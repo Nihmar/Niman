@@ -145,11 +145,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Redaktorius';
   @override
-  String get settingsSectionLibrary => 'Biblioteka';
-  @override
   String get settingsSectionReminders => 'PrimINIMAI';
-  @override
-  String get settingsSectionShortcuts => 'Klaviatūra';
   @override
   String get keyboardShortcutsTitle => 'Klaviatūros santraupos';
 
@@ -192,8 +188,6 @@ final class LithuanianStrings extends Strings {
   String updateSavedTo(Object path) => 'Atnaujinimas išsaugotas: $path';
   @override
   String get updateInstallerStarted => 'Diegimo programa paleista';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Rašybos patikra';
   @override
@@ -247,8 +241,6 @@ final class LithuanianStrings extends Strings {
   String get themeBrightnessNight => 'Tamsi';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Sąsajos ir pastabų spalvos';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -605,10 +597,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Įterpti į užrašą';
   @override
-  String get cheatsheetWritten => 'Parašyta';
-  @override
-  String get cheatsheetShown => 'Rodoma';
-  @override
   String get cheatHeadings => 'Antraštės';
   @override
   String get cheatEmphasis => 'Paryškintas, kursyvas, perbrauktas';
@@ -752,8 +740,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Rodyti redaktorių';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(neapdorota HTML lentelė)';
 
   // Search (T-M3-05).
   @override
@@ -998,8 +984,6 @@ final class LithuanianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez prioriteto';
-  @override
   String get todoNoPriorityShort => 'Nėra';
   @override
   String get todoMorePriorities => 'Daugiau…';
@@ -1159,8 +1143,6 @@ final class LithuanianStrings extends Strings {
   String get setAsQuickNote => 'Nustatyti kaip greitą pastabą';
   @override
   String get currentQuickNote => 'Dabartinė greita pastaba';
-  @override
-  String get pinnedSection => 'Prisegta';
   @override
   String pinnedSectionCount(int count) => 'Prisegta · $count';
   @override
@@ -1748,8 +1730,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get shortcutRedo => 'Pakartoti';
   @override
-  String get shortcutChange => 'Keisti spartųjį klavišą';
-  @override
   String shortcutCaptureTitle(String command) => 'Klavišai: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1937,8 +1917,6 @@ final class LithuanianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Nustatymai';
-  @override
   String get libraryPathTitle => 'Bibliotekos kelias';
   @override
   String get reindexTitle => 'Perskirti dabar';
@@ -1989,8 +1967,6 @@ final class LithuanianStrings extends Strings {
       : ' ($count užrašų nepavyko įrašyti)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Apie';
   @override
   String get versionTitle => 'Versija';
   @override
@@ -2469,10 +2445,6 @@ final class LithuanianStrings extends Strings {
   String get syncRetryAction => 'Bandyti dar kartą';
   @override
   String get syncOpenSettingsAction => 'Nustatymai';
-  @override
-  String get syncCloseAction => 'Uždaryti';
-  @override
-  String get syncDoneSnack => 'Sinchronizuota';
   @override
   String syncTrashedSnack(int count) => switch ((count % 10, count % 100)) {
     (_, >= 11 && <= 19) =>

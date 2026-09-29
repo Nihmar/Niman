@@ -142,11 +142,7 @@ final class CzechStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Knihovna';
-  @override
   String get settingsSectionReminders => 'Připomínky';
-  @override
-  String get settingsSectionShortcuts => 'Klávesové zkratky';
   @override
   String get keyboardShortcutsTitle => 'Klávesové zkratky';
 
@@ -190,8 +186,6 @@ final class CzechStrings extends Strings {
   String updateSavedTo(Object path) => 'Aktualizace uložena do $path';
   @override
   String get updateInstallerStarted => 'Instalátor spuštěn';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
@@ -247,8 +241,6 @@ final class CzechStrings extends Strings {
   String get themeBrightnessNight => 'Tmavý';
   @override
   String get themeTitle => 'Motiv';
-  @override
-  String get themeSubtitle => 'Barvy rozhraní a poznámek';
   @override
   String get themePaletteSystem => 'Systém';
   // Settings: the themes page (issue #269).
@@ -604,10 +596,6 @@ final class CzechStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Vložit do poznámky';
   @override
-  String get cheatsheetWritten => 'Zápis';
-  @override
-  String get cheatsheetShown => 'Zobrazení';
-  @override
   String get cheatHeadings => 'Nadpisy';
   @override
   String get cheatEmphasis => 'Tučné, kurzíva, přeškrtnuté';
@@ -750,8 +738,6 @@ final class CzechStrings extends Strings {
   @override
   String get showEditorTooltip => 'Zobrazit editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(surová HTML tabulka)';
 
   // Search (T-M3-05).
   @override
@@ -999,8 +985,6 @@ final class CzechStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez priority';
-  @override
   String get todoNoPriorityShort => 'Žádná';
   @override
   String get todoMorePriorities => 'Více…';
@@ -1159,8 +1143,6 @@ final class CzechStrings extends Strings {
   String get setAsQuickNote => 'Nastavit jako rychlou poznámku';
   @override
   String get currentQuickNote => 'Aktuální rychlá poznámka';
-  @override
-  String get pinnedSection => 'Připnuté';
   @override
   String pinnedSectionCount(int count) => 'Připnuté · $count';
   @override
@@ -1740,8 +1722,6 @@ final class CzechStrings extends Strings {
   @override
   String get shortcutRedo => 'Znovu';
   @override
-  String get shortcutChange => 'Změnit zkratku';
-  @override
   String shortcutCaptureTitle(String command) => 'Klávesy pro $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1926,8 +1906,6 @@ final class CzechStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Nastavení';
-  @override
   String get libraryPathTitle => 'Cesta knihovny';
   @override
   String get reindexTitle => 'Přeindexovat nyní';
@@ -1979,8 +1957,6 @@ final class CzechStrings extends Strings {
       : ' ($count poznámek nešlo zapsat)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'O aplikaci';
   @override
   String get versionTitle => 'Verze';
   @override
@@ -2462,10 +2438,6 @@ final class CzechStrings extends Strings {
   String get syncRetryAction => 'Zkusit znovu';
   @override
   String get syncOpenSettingsAction => 'Nastavení';
-  @override
-  String get syncCloseAction => 'Zavřít';
-  @override
-  String get syncDoneSnack => 'Synchronizováno';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synchronizováno · 1 soubor smazaný jinde je v koši'

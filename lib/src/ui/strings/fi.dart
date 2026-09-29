@@ -140,11 +140,7 @@ final class FinnishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Muokkain';
   @override
-  String get settingsSectionLibrary => 'Kirjasto';
-  @override
   String get settingsSectionReminders => 'Muistutukset';
-  @override
-  String get settingsSectionShortcuts => 'Näppäimistö';
   @override
   String get keyboardShortcutsTitle => 'Näppäimistön oikotiet';
 
@@ -188,8 +184,6 @@ final class FinnishStrings extends Strings {
   String updateSavedTo(Object path) => 'Päivitys tallennettu sijaintiin $path';
   @override
   String get updateInstallerStarted => 'Asennusohjelma käynnistetty';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostiikka';
   @override
   String get settingsSpellCheckTitle => 'Oikoluku';
   @override
@@ -245,8 +239,6 @@ final class FinnishStrings extends Strings {
   String get themeBrightnessNight => 'Tumma';
   @override
   String get themeTitle => 'Teema';
-  @override
-  String get themeSubtitle => 'Käyttöliittymän ja muistiinpanon värit';
   @override
   String get themePaletteSystem => 'Järjestelmä';
   // Settings: the themes page (issue #269).
@@ -601,10 +593,6 @@ final class FinnishStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Lisää muistiinpanoon';
   @override
-  String get cheatsheetWritten => 'Kirjoitettu';
-  @override
-  String get cheatsheetShown => 'Näytetty';
-  @override
   String get cheatHeadings => 'Otsikot';
   @override
   String get cheatEmphasis => 'Lihavointi, kursiivi, yliviivaus';
@@ -749,8 +737,6 @@ final class FinnishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Näytä muokkain';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(raaka HTML-taulukko)';
 
   // Search (T-M3-05).
   @override
@@ -1003,8 +989,6 @@ final class FinnishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ei prioriteettia';
-  @override
   String get todoNoPriorityShort => 'Ei';
   @override
   String get todoMorePriorities => 'Lisää…';
@@ -1163,8 +1147,6 @@ final class FinnishStrings extends Strings {
   String get setAsQuickNote => 'Aseta pikamuistiinpanoksi';
   @override
   String get currentQuickNote => 'Nykyinen pikamuistiinpano';
-  @override
-  String get pinnedSection => 'Kiinnitetty';
   @override
   String pinnedSectionCount(int count) => 'Kiinnitetty · $count';
   @override
@@ -1759,8 +1741,6 @@ final class FinnishStrings extends Strings {
   @override
   String get shortcutRedo => 'Tee uudelleen';
   @override
-  String get shortcutChange => 'Vaihda pikanäppäin';
-  @override
   String shortcutCaptureTitle(String command) => 'Näppäimet: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1949,8 +1929,6 @@ final class FinnishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Asetukset';
-  @override
   String get libraryPathTitle => 'Kirjaston polku';
   @override
   String get reindexTitle => 'Luo hakuelokuva nyt';
@@ -2001,8 +1979,6 @@ final class FinnishStrings extends Strings {
       : ' ($count muistiinpanoa ei voitu kirjoittaa)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Tietoja';
   @override
   String get versionTitle => 'Versio';
   @override
@@ -2481,10 +2457,6 @@ final class FinnishStrings extends Strings {
   String get syncRetryAction => 'Yritä uudelleen';
   @override
   String get syncOpenSettingsAction => 'Asetukset';
-  @override
-  String get syncCloseAction => 'Sulje';
-  @override
-  String get syncDoneSnack => 'Synkronoitu';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synkronoitu · 1 muualla poistettu tiedosto on korissa'

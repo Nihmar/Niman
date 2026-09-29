@@ -142,11 +142,7 @@ final class CatalanStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Biblioteca';
-  @override
   String get settingsSectionReminders => 'Recordatoris';
-  @override
-  String get settingsSectionShortcuts => 'Teclat';
   @override
   String get keyboardShortcutsTitle => 'Dreceres de teclat';
 
@@ -190,8 +186,6 @@ final class CatalanStrings extends Strings {
   String updateSavedTo(Object path) => 'Actualització guardada a $path';
   @override
   String get updateInstallerStarted => 'Instal·lador iniciat';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnòstic';
   @override
   String get settingsSpellCheckTitle => 'Comprovació d’ortografia';
   @override
@@ -248,8 +242,6 @@ final class CatalanStrings extends Strings {
   String get themeBrightnessNight => 'Fosc';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Els colors de la interfície i de la nota';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -608,10 +600,6 @@ final class CatalanStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Insereix a la nota';
   @override
-  String get cheatsheetWritten => 'Escrit';
-  @override
-  String get cheatsheetShown => 'Mostrat';
-  @override
   String get cheatHeadings => 'Títols';
   @override
   String get cheatEmphasis => 'Negreta, cursiva, ratllat';
@@ -756,8 +744,6 @@ final class CatalanStrings extends Strings {
   @override
   String get showEditorTooltip => 'Mostra l’editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(taula HTML en brut)';
 
   // Search (T-M3-05).
   @override
@@ -1015,8 +1001,6 @@ final class CatalanStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Sense prioritat';
-  @override
   String get todoNoPriorityShort => 'Cap';
   @override
   String get todoMorePriorities => 'Més…';
@@ -1180,8 +1164,6 @@ final class CatalanStrings extends Strings {
   String get setAsQuickNote => 'Estableix com a nota ràpida';
   @override
   String get currentQuickNote => 'Nota ràpida actual';
-  @override
-  String get pinnedSection => 'Fixades';
   @override
   String pinnedSectionCount(int count) => 'Fixades · $count';
   @override
@@ -1780,8 +1762,6 @@ final class CatalanStrings extends Strings {
   @override
   String get shortcutRedo => 'Refés';
   @override
-  String get shortcutChange => 'Canvia la drecera';
-  @override
   String shortcutCaptureTitle(String command) => 'Tecles per a $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1971,8 +1951,6 @@ final class CatalanStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Configuració';
-  @override
   String get libraryPathTitle => 'Camí de la biblioteca';
   @override
   String get reindexTitle => 'Torna a indexar ara';
@@ -2025,8 +2003,6 @@ final class CatalanStrings extends Strings {
       : ' ($count notes no s’han pogut escriure)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Quant a';
   @override
   String get versionTitle => 'Versió';
   @override
@@ -2509,10 +2485,6 @@ final class CatalanStrings extends Strings {
   String get syncRetryAction => 'Torna-ho a provar';
   @override
   String get syncOpenSettingsAction => 'Configuració';
-  @override
-  String get syncCloseAction => 'Tanca';
-  @override
-  String get syncDoneSnack => 'Sincronitzada';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sincronitzada · 1 fitxer esborrat en un altre lloc és a '
