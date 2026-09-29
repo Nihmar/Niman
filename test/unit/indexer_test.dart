@@ -617,6 +617,20 @@ void main() {
       expect((resolved as ResolvedNote).note.id, indexed.id);
     });
 
+    test('a percent-encoded Markdown href is an edge, as it opens', () async {
+      File(p.join(root.path, 'My Note.md')).writeAsStringSync('target');
+      File(p.join(root.path, 'src.md'))
+          .writeAsStringSync('[x](My%20Note.md#top)');
+      await indexer.fullScan(root.path);
+
+      final src = (await dao.find('src.md'))!;
+      final target = (await dao.find('My Note.md'))!;
+      final edges = await (db.select(
+        db.noteLinks,
+      )..where((l) => l.fromNote.equals(src.id))).get();
+      expect([for (final l in edges) l.toNote], [target.id]);
+    });
+
     test('a relative link is an edge to the note it names (#491)', () async {
       void write(String rel, String text) {
         final file = File(p.join(root.path, p.joinAll(rel.split('/'))));

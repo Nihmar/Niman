@@ -126,20 +126,22 @@ final class LinkResolver implements LinkSource {
     if (h.startsWith('#')) {
       return Future.value(LocalAnchor(heading: h.substring(1)));
     }
-    // The path is percent-decoded, as Obsidian writes a Markdown link
-    // (`My%20Note.md`); the fragment is left alone, a book's place (#282)
-    // decoding its own parts.
+    final read = _markdownPath(h);
+    // A file: a note, or one that is not (a PDF, a book, a picture).
+    if (read == null) return Future.value(UnresolvedNote(target: h));
+    return _resolvePath(read, from: from, beside: true);
+  }
+
+  /// The href [h] (trimmed, no scheme, not an anchor) as a path to resolve:
+  /// its path percent-decoded, as Obsidian writes a Markdown link
+  /// (`My%20Note.md`), its fragment left alone, a book's place (#282)
+  /// decoding its own parts. Null when it names no file (no extension).
+  /// Opening a link and indexing it read it through this one function.
+  static String? _markdownPath(String h) {
     final hash = h.indexOf('#');
     final path = percentDecoded(hash == -1 ? h : h.substring(0, hash));
-    // A file: a note, or one that is not (a PDF, a book, a picture).
-    if (p.url.extension(path).isEmpty) {
-      return Future.value(UnresolvedNote(target: h));
-    }
-    return _resolvePath(
-      hash == -1 ? path : path + h.substring(hash),
-      from: from,
-      beside: true,
-    );
+    if (p.url.extension(path).isEmpty) return null;
+    return hash == -1 ? path : path + h.substring(hash);
   }
 
   /// Whether the note at [path] is one a target naming [target] — already
@@ -351,14 +353,16 @@ final class LinkResolver implements LinkSource {
     final byStem = <String, List<(LinkQuery, _Spec)>>{};
     for (final query in queries) {
       if (out.containsKey(query)) continue;
-      final raw = query.target;
-      if (_clean(raw).isEmpty) {
-        out[query] = UnresolvedNote(target: raw);
+      final written = query.target;
+      // A Markdown href is read as opening it reads it: percent-decoded.
+      final raw = query.markdown ? _markdownPath(written.trim()) : written;
+      if (raw == null || _clean(raw).isEmpty) {
+        out[query] = UnresolvedNote(target: written);
         continue;
       }
       final spec = _split(raw, from: query.from, beside: query.markdown);
       if (spec == null) {
-        out[query] = UnresolvedNote(target: raw);
+        out[query] = UnresolvedNote(target: written);
         continue;
       }
       if (spec.t.isEmpty) {
