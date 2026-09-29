@@ -6,6 +6,53 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.1.4] - 2026-09-29
+
+Say what the note carries.
+
+A note's frontmatter is a panel above it now — one row per key, a chip
+naming its type, **Add a property** at hand, the raw YAML a toggle away —
+in the read view and in the live editor, closed until it is opened and
+out of the way while the note is read. Links and templates learned to
+explain themselves: `[[` lists the notes and the headings while you type,
+a link that points at nothing can make its own note, and a template's
+mistake is marked with its fix a tap away. Under all of it, the 187
+commits merged since v0.1.3 — about 21,000 lines under `lib/` — were read
+three times over: the review's findings, forty in the third pass alone,
+are fixed and verified, each with the test that failed before it.
+
+### Added
+- **A note's frontmatter is a panel above it, in both surfaces** (#157). One row per key — the key, the value and a small chip naming the type (text, number, date, boolean, list) — with `×` to take one out and **Add a property** always at hand, the raw YAML behind a toggle in the header. A `date:` field is picked in the platform's own calendar and written back as the `YYYY-MM-DD` the parser reads as a date. The panel is the note's head: it opens closed, steps aside while the note is scrolled past its frontmatter, and comes back as you left it — and a library that wants none turns it off in *Settings → Editor → Properties panel*. One edit per change, one `.md` file, one undo step
+- **`[[` offers what it can link to** (#475). A panel lists the notes whose name matches what is typed and, once one is named, that note's own headings, with a keyboard walking the list and the page and chapter forms a book answers to. It stays out of fenced code, inline code and maths, closes with the text it was opened on, and a name holding `#`, `|` or `]]` is inserted as a link that reads back whole
+- **A link that points at nothing can make its note** (#477). Ctrl+click on a dead `[[…]]` — long-press on a phone — creates it where the library puts new notes and opens it, instead of leaving a link nobody can follow
+- **A template's mistakes are marked, and the fix is one tap away** (#71). The `{{…}}` commands are read by the engine that fills them: an unclosed pair, a command that is not one, a `{{date:…}}` pattern that will not render — each is marked in the source with what it should be, and taking the fix is one tap. A `}}` with nothing open is text, not a mistake
+- **A tick carries down the branch** (#326). Ticking a list item ticks the tasks nested under it — one undo step for the whole cascade — and unticking a parent leaves its children as they are
+- **The source editor's face is a setting** (#259). Monospace by default, Sans Serif and Serif for anyone who reads code-shaped text better in them, per library, applied to the source pane and the template hints both
+- **A self-signed destination is trusted once, by fingerprint** (#454). Sync refuses a certificate it cannot verify, names the host and shows the SHA-256 it found; trusting it remembers *that* certificate for *that* destination and no other, and a revocation is one tap in the same place
+
+### Changed
+- **A keystroke costs the rows it touched.** A live table measures a revision once rather than every word of it, a caret move lays out its own rows and not the whole table (#494), a markdown line indents four spaces only where a definition can start, and the wikilink panel's headings come from the index rather than a read and an outline per key
+- **Opening a note does not wait for the dictionary** (#453): the spell checker's words load off the frame, so the first frame of a note is the note
+- **A note's bytes are judged once** (#496), and the installer's digest is hashed off the UI isolate (#495), so a hundred-megabyte download does not stop the app for its check
+
+### Fixed
+- **A frontmatter edit leaves the block exactly as it was written.** A value ending in `:`, a list item holding a comma, a multi-line value, an indented entry, an `&anchor` with its alias and a trailing comment all come back as they went in; a quoted key no longer gains a duplicate; a list is rewritten item by item, so the ones nobody touched keep their own YAML; and the type read on the fast path agrees with the full parse
+- **Sync can neither lose an edit nor hang.** A weak ETag is never sent as `If-Match`, so a write can no longer overwrite the change made during the run; a stalled body times out instead of holding the run, and cannot throw out of it; a merge the guard stops leaves no `.niman-tmp-sync-*` behind; the merge is offered only once both sides were read (#365); and a state file that does not parse is a conflict, not a takeover (#336)
+- **A reminder is shown once per task and moment**, and one whose notification failed is retried rather than recorded as shown
+- **Windows: the caption buttons stop answering where the title bar is gone**, so a click on an app-bar action no longer closes or maximizes the window below 600 px; a case-only rename keeps its case, a reserved device name is prefixed and every platform resolves what it wrote; and a rename batch reads its gone rows once, not once per pair
+- **A file's bytes are read the way they were written.** A note that is not UTF-8 opens as its own characters everywhere instead of gaining U+FFFD, and a note the editor refuses as binary is no longer rewritten by Replace All
+- **No write leaves litter.** A failed export keeps no partial archive (#347), the folder export walk does not follow symbolic links (#390), the copy that stands in for a hung rename lands on a temp of its own (#369), the temp files a killed write left are swept when the library opens (#379), and a rename in a case-sensitive folder never takes another note's place
+- **A link resolves from the note it is written in.** A relative Markdown link with `..` or a leading slash is followed again (#491), and an embed target outside the library resolves to nothing instead of outside (#385)
+- **A damaged index is rebuilt in place** rather than forgotten, its connection is closed when the first query fails for any reason, and a rename keeps a note's aliases and its search title
+- **The editor's panels and marks sit on the text they belong to**: no link panel inside code or maths, the panel closes with the text it was opened on (#494), a wrapped row's handles, hints and typewriter light follow the caret's piece, a wide table's caret is drawn on the row it is in, and a checkbox tap no longer settles a scan an edit still owed (#387)
+- **An update cannot install half a file**: a cut-off download keeps no installer name and a silent body fails (#495), and the artifact is verified against the release's own digest (#384)
+- **A Notion export is refused before it expands**, its entries are inflated in chunks that stop at the budget, and an entry with no content is skipped rather than written as an empty note (#382)
+- **Templates count honestly**: a counter is reserved once its name is known and given back when a creation fails — a cancelled name dialog burns nothing (#359's round) — `+1d` is a calendar day across a daylight-saving change (#359), and a `}}` with nothing open is reported as the text it is, so LaTeX and JSON in a template stop being mistakes
+- **A failed replace says so** (#357), and the replace summary counts notes by each language's own plural rule
+- **A reading position is not dropped for a book whose file has not arrived yet** (#367)
+- **The strings the UI still wrote in English speak all 36 other languages** (#381, #498): the properties panel, the source font and the certificate dialogs were English copies in every locale, ten failure snackbars were English everywhere but Italian, the wikilink panel and the template checker wrote English in the code, and three languages counted 21 as `1 …`. Fourteen keys nothing read are gone from the contract and every locale
+- **The docs name the sections that exist**: the settings areas the journal, the history and the changelog point at are the ones on screen
+
 ## [0.1.3] - 2026-09-27
 
 Say what a frame costs.
