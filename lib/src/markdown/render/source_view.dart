@@ -2845,6 +2845,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       budget: _textWidth,
       reveal: inside ? at : null,
       revealLine: inside ? at.line : null,
+      tokensFrom: _styler,
     );
   }
 

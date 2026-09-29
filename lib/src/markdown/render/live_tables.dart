@@ -147,6 +147,7 @@ final class LiveTables {
   int _revision = -1;
   MarkdownTheme? _theme;
   TextScaler? _scaler;
+  Object? _tokensFrom;
 
   /// How many times a cell's text has been laid out for a table, for the test
   /// that holds a revision and a caret move to the work they may do (#494):
@@ -170,6 +171,12 @@ final class LiveTables {
   /// widens the columns measured for its own row alone, so a move measures
   /// that row again — and the row it left — and keeps the rest of the table's
   /// work (#494).
+  ///
+  /// [tokensFrom] is whatever [tokensOf] reads its answers from — the view's
+  /// tokenizer: the colours of a long note land after its first frame, and a
+  /// row measured before then was measured as plain text. When it changes the
+  /// tokens may have, without the text having moved, so every measurement is
+  /// dropped and taken again as the rows are asked for (#494).
   LiveTableRow? rowOf(
     int line,
     Block? block,
@@ -182,17 +189,20 @@ final class LiveTables {
     required double budget,
     Object? reveal,
     int? revealLine,
+    Object? tokensFrom,
   }) {
     if (block == null || block.kind != BlockKind.table) return null;
     if (!identical(buffer, _buffer) ||
         buffer.revision != _revision ||
         !identical(theme, _theme) ||
-        scaler != _scaler) {
+        scaler != _scaler ||
+        tokensFrom != _tokensFrom) {
       _tables.clear();
       _buffer = buffer;
       _revision = buffer.revision;
       _theme = theme;
       _scaler = scaler;
+      _tokensFrom = tokensFrom;
     }
     final at = line - block.startLine;
     if (at < 0 || at >= block.endLine - block.startLine) return null;

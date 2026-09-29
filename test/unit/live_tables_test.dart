@@ -369,6 +369,77 @@ void main() {
       expect(count(askAll), 2 + 8, reason: 'the row the caret left');
     },
   );
+
+  testWidgets('rows measured before their tokens land are measured again', (
+    tester,
+  ) async {
+    final theme = await _theme(tester);
+    // The colours of a long note land after its first frame: a row measured
+    // before then was measured as plain text, its marks drawn as characters,
+    // and asking for it again once they have landed must draw it with them
+    // hidden — without an edit to make the buffer's revision move (#494).
+    const note =
+        '| head | second |\n|---|---|\n'
+        '| **alpha** beta | **gamma** delta |\n'
+        '| **eps** zeta | plain **words** here |\n';
+    for (final budget in <double>[2000, 90]) {
+      final buffer = SourceBuffer.fromText(note);
+      const block = Block(kind: BlockKind.table, startLine: 0, endLine: 4);
+      var landed = false;
+      LiveTableRow? row(LiveTables tables, int line) => tables.rowOf(
+        line,
+        block,
+        buffer,
+        tokensOf: (line) =>
+            landed ? _boldTokens(buffer.lineAt(line)) : const <Token>[],
+        hidden: (line, token) => token.marker,
+        styleOf: (token) => null,
+        theme: theme,
+        scaler: TextScaler.noScaling,
+        budget: budget,
+        tokensFrom: landed,
+      );
+
+      final tables = LiveTables();
+      for (var line = 0; line < 4; line++) {
+        row(tables, line);
+      }
+      final plain = row(tables, 3)!.edges.last;
+
+      landed = true;
+      final fresh = LiveTables();
+      for (var line = 0; line < 4; line++) {
+        _expectSame(
+          row(tables, line)!,
+          row(fresh, line)!,
+          reason: 'line $line at $budget',
+        );
+      }
+      if (budget > 1000) {
+        expect(
+          row(tables, 3)!.edges.last,
+          lessThan(plain),
+          reason: 'the marks are hidden now: the table is narrower',
+        );
+      }
+    }
+  });
+}
+
+/// Expects [a] and [b] to be the same row as far as anything draws it: its
+/// columns, its gaps and its wrapped pieces.
+void _expectSame(LiveTableRow a, LiveTableRow b, {String? reason}) {
+  expect(a.edges, b.edges, reason: reason);
+  expect(a.gaps, b.gaps, reason: reason);
+  // A visual line holds a list, which a record compares by identity: the
+  // pieces are read out.
+  List<Object> pieces(LiveTableRow row) => <Object>[
+    for (final line in row.wrapped) (line.height, line.pieces.toList()),
+  ];
+  expect(pieces(a).toString(), pieces(b).toString(), reason: reason);
+  expect(a.header, b.header, reason: reason);
+  expect(a.delimiter, b.delimiter, reason: reason);
+  expect(a.last, b.last, reason: reason);
 }
 
 /// The tokens of a line's `**bold**` runs: the opening and closing marks —
