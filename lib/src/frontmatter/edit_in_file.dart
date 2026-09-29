@@ -18,6 +18,7 @@ import 'dart:isolate';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/frontmatter/edit.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 
 /// Sets the top-level frontmatter [key] of the note at [path] to [value],
 /// or removes it when [value] is null.
@@ -35,7 +36,7 @@ Future<String?> editFrontmatterKeyInFile(
 ) async {
   final file = File(path);
   final head = await _headOf(file);
-  final text = utf8.decode(head.bytes, allowMalformed: true);
+  final text = decodeNoteText(head.bytes);
   final String edited;
   var skip = head.bytes.length;
   if (head.block) {

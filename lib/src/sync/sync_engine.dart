@@ -10,6 +10,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/diff/record_merge.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
@@ -772,8 +773,8 @@ final class SyncEngine {
         '${base == null ? 'no base' : '${base.length} chars of base'}',
       );
       return ConflictTexts(
-        local: utf8.decode(localBytes, allowMalformed: true),
-        remote: utf8.decode(remoteBytes, allowMalformed: true),
+        local: decodeNoteText(localBytes),
+        remote: decodeNoteText(remoteBytes),
         base: base,
         localSha256: sha256.convert(localBytes).toString(),
         remoteSha256: sha256.convert(remoteBytes).toString(),

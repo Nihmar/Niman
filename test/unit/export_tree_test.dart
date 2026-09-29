@@ -272,7 +272,8 @@ void main() {
 
   test('a note with a broken byte still exports, decoded leniently', () async {
     // `# Broken`, one byte of it not UTF-8: the app reads such a note, so
-    // the export does too, instead of failing the whole folder (E9).
+    // the export does too, instead of failing the whole folder (E9) — the
+    // byte read as its Windows-1252 character, as every path reads it.
     await File(p.join(notes, 'broken.md')).writeAsBytes(<int>[
       0x23,
       0x20,
@@ -293,7 +294,7 @@ void main() {
     );
     final files = await contents();
     expect(files.keys, contains('broken.html'));
-    expect(files['broken.html'], contains('Br\uFFFDoken'));
+    expect(files['broken.html'], contains('Br\u00FFoken'));
     // The book's chapters take the same read.
     zip = p.join(lib.path, 'book.epub');
     await TreeExport.run(
@@ -304,7 +305,7 @@ void main() {
     );
     expect(
       (await contents())['OEBPS/text/broken.xhtml'],
-      contains('Br\uFFFDoken'),
+      contains('Br\u00FFoken'),
     );
   });
 

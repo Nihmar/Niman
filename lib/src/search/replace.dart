@@ -25,6 +25,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:path/path.dart' as p;
 
 /// One replace run's outcome.
@@ -315,7 +316,7 @@ Future<List<ReplaceMatchNote?>> _previewChunk(
     try {
       // The same leniency as the editor and the replace pass: a note with
       // invalid UTF-8 bytes still takes part.
-      final text = utf8.decode(file.readAsBytesSync(), allowMalformed: true);
+      final text = decodeNoteText(file.readAsBytesSync());
       final pattern = wholeWordPattern(term, caseSensitive: caseSensitive);
       if (pattern == null) {
         out.add(null);
@@ -383,7 +384,7 @@ Future<List<(bool, int, String?, String?)>> _replaceChunk(
     try {
       // The editor reads notes with `allowMalformed`, so a note it opens
       // must be replaceable too; strict UTF-8 here would silently drop it.
-      original = utf8.decode(file.readAsBytesSync(), allowMalformed: true);
+      original = decodeNoteText(file.readAsBytesSync());
     } on Object catch (e) {
       out.add((false, 0, null, 'read "$rel" failed: $e'));
       continue;

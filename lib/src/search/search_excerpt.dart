@@ -8,10 +8,10 @@
 library;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 
 /// How many characters of context an excerpt keeps on each side of its
 /// match.
@@ -95,9 +95,9 @@ final RegExp _wordChar = RegExp(r'[\p{L}\p{N}]', unicode: true);
 Future<String?> excerptInFile(String path, ExcerptFinder find) async {
   final Stream<String> slices;
   try {
-    slices = File(path)
-        .openRead()
-        .transform(const Utf8Decoder(allowMalformed: true));
+    // Read by the notes' own rule, as the index read it: a match the index
+    // found in a Latin-1 `café` is there to be found in the excerpt too.
+    slices = decodeNoteTextStream(File(path).openRead());
   } on FileSystemException {
     return null;
   }

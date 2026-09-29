@@ -12,6 +12,11 @@ disk; the app's SQLite database is only a rebuildable index.
 - **Disk is source of truth:** anything the app knows can be rebuilt from
   the files. Never edit the `.niman/` or `.history/` folders by hand,
   but everything else is yours.
+- **Notes are UTF-8.** A note from elsewhere that is not — a Latin-1 file
+  from an old vault — still opens, searches and exports with its accents:
+  each byte UTF-8 has no place for is read as the Windows-1252 character
+  it stands for there (`café`, not `caf�`). Saving writes the note as
+  UTF-8, so its words stay and its encoding becomes the app's.
 - **Multiple libraries:** open several folders from a remembered list and
   switch anytime. Each library has its own settings. On a wide window the
   layers button at the foot of the rail opens the library window: the
