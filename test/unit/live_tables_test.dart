@@ -215,10 +215,10 @@ void main() {
 
   // The work a table costs, held to the number of measurements rather than to
   // a wall-clock (a shared runner reads different milliseconds for the same
-  // commit): a revision measures each of the table's cells once, a table that
-  // fits measures no word at all, a caret move measures the row it entered and
-  // the row it left, and a row's pieces are laid out only when a frame draws
-  // it (#494).
+  // commit): a revision measures the cells of the rows it changed, a table
+  // that fits measures no word at all, a caret move measures the row it
+  // entered (the one it left stands measured at rest), and a row's pieces are
+  // laid out only when a frame draws it (#494).
   testWidgets(
     'a revision measures a fitting table once, a caret move its rows',
     (tester) async {
@@ -284,19 +284,20 @@ void main() {
         reason: "the caret's row widens the table",
       );
 
-      // A second move: the row the caret left, at rest, and the row it entered.
+      // A second move: the row it left is taken back at rest from what was
+      // measured of it, and the row it entered is measured.
       revealed = 3;
       expect(
         count(() => askAll(reveal: 'run')),
-        2 + 2,
-        reason: 'the row it left and the row it entered',
+        2,
+        reason: 'the row it entered; the one it left stood measured',
       );
       // Another run on the same row: the reveal changed, so the row is measured
       // again — its marks stand differently.
       expect(count(() => askAll(reveal: 'other')), 2, reason: 'the same row');
       // The caret leaves the table: the row it left is measured at rest, and
       // nothing else.
-      expect(count(askAll), 2, reason: 'the row the caret left');
+      expect(count(askAll), 0, reason: 'the row the caret left stood measured');
       expect(
         row(3)!.edges.last,
         closeTo(atRest, 0.5),
@@ -365,8 +366,8 @@ void main() {
         2 + 8,
         reason: 'two cells and eight words of one row',
       );
-      // The caret leaves the table: the row it left, at rest, and nothing else.
-      expect(count(askAll), 2 + 8, reason: 'the row the caret left');
+      // The caret leaves the table: the row it left is taken back at rest.
+      expect(count(askAll), 0, reason: 'the row the caret left stood measured');
     },
   );
 
@@ -422,6 +423,154 @@ void main() {
           reason: 'the marks are hidden now: the table is narrower',
         );
       }
+    }
+  });
+
+  // A keystroke is a revision, and a revision used to drop every measurement
+  // of every table: on a phone, a 2,000-row table on screen was every word of
+  // it laid out again for a letter typed anywhere in the note (#494). The
+  // measurements are kept per row of text, so a revision measures the rows it
+  // changed. Held to the number of measurements, not to a wall-clock.
+  testWidgets('a revision measures the rows it changed, not the table', (
+    tester,
+  ) async {
+    final theme = await _theme(tester);
+    final note = StringBuffer('intro\n\n| h1 | h2 | h3 |\n|---|---|---|\n');
+    for (var at = 0; at < 30; at++) {
+      note.write('| r$at alpha | r$at beta gamma | r$at delta |\n');
+    }
+    // 'intro', a blank line, the header, the delimiter row and 30 rows.
+    for (final budget in <double>[2000, 120]) {
+      final fits = budget > 1000;
+      final buffer = SourceBuffer.fromText(note.toString());
+      final tables = LiveTables();
+      var first = 2;
+      LiveTableRow? row(LiveTables tables, int at) => tables.rowOf(
+        first + at,
+        Block(kind: BlockKind.table, startLine: first, endLine: first + 32),
+        buffer,
+        tokensOf: (line) => const <Token>[],
+        hidden: (line, token) => false,
+        styleOf: (token) => null,
+        theme: theme,
+        scaler: TextScaler.noScaling,
+        budget: budget,
+      );
+
+      int count(void Function() body) {
+        LiveTables.measurements = 0;
+        body();
+        return LiveTables.measurements;
+      }
+
+      void askAll() {
+        for (var at = 0; at < 32; at++) {
+          row(tables, at);
+        }
+      }
+
+      expect(count(askAll), greaterThan(90), reason: 'the table, once');
+      expect(count(askAll), 0, reason: 'the same revision');
+
+      // A letter typed above the table.
+      buffer.replaceRange(0, 5, 'INTRO');
+      expect(count(askAll), 0, reason: 'a keystroke outside, at $budget');
+
+      // A line typed above it: every row of the table moves down one line.
+      buffer.replaceRange(0, 0, 'new\n');
+      first = 3;
+      expect(count(askAll), 0, reason: 'a line above the table, at $budget');
+
+      // A letter typed in one cell: that row's three cells, and — in a table
+      // that does not fit — the seven words of the row.
+      final at = buffer.offsetOfLine(first + 2 + 10) + 3;
+      buffer.replaceRange(at, at, 'x');
+      expect(
+        count(askAll),
+        fits ? 3 : 3 + 7,
+        reason: 'one row changed, at $budget',
+      );
+
+      // And what stands is what a table laid out from nothing draws.
+      final fresh = LiveTables();
+      for (var at = 0; at < 32; at++) {
+        _expectSame(
+          row(tables, at)!,
+          row(fresh, at)!,
+          reason: 'row $at at $budget',
+        );
+      }
+    }
+  });
+
+  testWidgets('a row kept across revisions is drawn as a fresh one', (
+    tester,
+  ) async {
+    final theme = await _theme(tester);
+    // Every kind of cell the measuring has an opinion about: a wide one, a
+    // marked one, CJK and emoji, over a table that fits and one that does not
+    // — each step edits the note, moves the caret's run or the pane's width,
+    // and the table must be what one laid out from nothing draws.
+    const rows = <String>[
+      '| head | second | third |',
+      '|:---|---:|:---:|',
+      '| plain words here | **bold** cell | c |',
+      '| 日本語のテキスト | 😀 emoji 👍 | a very long cell that goes on and on |',
+      '| x | y | z |',
+    ];
+    final buffer = SourceBuffer.fromText('${rows.join('\n')}\n');
+    const block = Block(kind: BlockKind.table, startLine: 0, endLine: 5);
+    final tables = LiveTables();
+    int? revealed;
+    double budget = 2000;
+    LiveTableRow? row(LiveTables tables, int line, {Object? reveal}) =>
+        tables.rowOf(
+          line,
+          block,
+          buffer,
+          tokensOf: (line) => _boldTokens(buffer.lineAt(line)),
+          hidden: (line, token) =>
+              token.marker && (reveal == null || line != revealed),
+          styleOf: (token) => null,
+          theme: theme,
+          scaler: TextScaler.noScaling,
+          budget: budget,
+          reveal: reveal,
+          revealLine: reveal == null ? null : revealed,
+        );
+
+    void expectFresh(String step, {Object? reveal}) {
+      final fresh = LiveTables();
+      for (var line = 0; line < 5; line++) {
+        _expectSame(
+          row(tables, line, reveal: reveal)!,
+          row(fresh, line, reveal: reveal)!,
+          reason: '$step, line $line at $budget',
+        );
+      }
+    }
+
+    for (final width in <double>[2000, 260, 2000, 90]) {
+      budget = width;
+      expectFresh('the pane');
+      // An edit of the wide cell, of the CJK one, and of the emoji one.
+      for (final (line, word, insert) in <(int, String, String)>[
+        (3, 'long', 'very '),
+        (3, 'テキスト', '日本語'),
+        (3, 'emoji', '🎉 '),
+        (2, 'plain', 'so '),
+      ]) {
+        final at =
+            buffer.offsetOfLine(line) + buffer.lineAt(line).indexOf(word);
+        buffer.replaceRange(at, at, insert);
+        expectFresh('an edit of $word');
+      }
+      // The caret's run shows its marks on its own row, and leaves.
+      revealed = 2;
+      expectFresh('a reveal', reveal: 'run 2');
+      revealed = 3;
+      expectFresh('a move', reveal: 'run 3');
+      expectFresh('the caret leaves');
     }
   });
 }

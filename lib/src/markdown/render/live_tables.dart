@@ -99,31 +99,45 @@ const double _minCellWidth = 12;
 /// first glyph.
 typedef _Measured = ({double visible, int hidden, int lead});
 
-/// One table's lines, their cells and each cell's width, read once and kept
-/// while the buffer, theme and scaler stand.
+/// One line of a table as measured: its cells, and each one's width.
+///
+/// A line's measurements are a function of its text and of what the tables
+/// are measured with (the theme, the scaler, the tokenizer), so they are kept
+/// under the text and outlive the revision that measured them: an edit
+/// somewhere else in the note, or in one cell, finds every other row already
+/// measured (#494). Only a row at rest is shared — the caret's row shows a
+/// run's marks and is measured on its own.
+final class _RowWork {
+  new(this.cells, this.widths, {required this.delimiter});
+
+  /// The cells' text ranges, trimmed as `cellsOf` trims them.
+  final List<(int, int)> cells;
+
+  /// Whether the line is the delimiter row.
+  final bool delimiter;
+
+  /// Per cell, how wide its text draws.
+  final List<_Measured> widths;
+
+  /// Per cell, how wide its widest word draws — the floor a fitted column
+  /// keeps. Null until a table wider than its pane is laid out: nothing
+  /// measures a word while the table fits (#494).
+  List<double>? least;
+}
+
+/// One table's lines and their measurements, read once per revision.
 ///
 /// The measurements outlive a reveal change: the caret's run shows marks on
 /// the caret's own row and on no other, so a move measures that row again —
 /// and the one it left — and keeps the rest (#494).
 final class _Metrics {
-  new(this.lines, this.cells, this.delimiters, this.widths);
+  new(this.lines, this.rows);
 
   /// The table's lines, top to bottom, without their terminators.
   final List<String> lines;
 
-  /// Each row's cells' text ranges, trimmed as `cellsOf` trims them.
-  final List<List<(int, int)>> cells;
-
-  /// Whether each row is the delimiter row.
-  final List<bool> delimiters;
-
-  /// Per row, per cell, how wide the cell's text draws.
-  final List<List<_Measured>> widths;
-
-  /// Per row, per cell, how wide the cell's widest word draws — the floor a
-  /// fitted column keeps. Null until a table wider than its pane is laid out:
-  /// nothing measures a word while the table fits (#494).
-  List<List<double>>? least;
+  /// Each line's measurements.
+  final List<_RowWork> rows;
 
   /// The line the reveal stood on when the table's cells were last measured —
   /// null for a table measured at rest — and the reveal itself: together they
@@ -134,11 +148,11 @@ final class _Metrics {
 
 /// The tables of a note, laid out a table at a time.
 ///
-/// A table's cells are measured once and kept while the buffer, the theme and
-/// the scaler stand: a caret move leaves the text alone, so it measures the
-/// rows the reveal touched again and keeps the rest. The pieces of a fitted
-/// row wait for a frame to draw the row, so a table scrolled out of view is
-/// not laid out at all (#494).
+/// A row's cells are measured once and kept while the theme and the scaler
+/// stand, under the row's text: a revision measures the rows whose text it
+/// changed, and a caret move the rows the reveal touched, and keeps the rest.
+/// The pieces of a fitted row wait for a frame to draw the row, so a table
+/// scrolled out of view is not laid out at all (#494).
 final class LiveTables {
   /// Each table's measurements and rows, by its first line.
   final Map<int, _Table> _tables = <int, _Table>{};
@@ -148,6 +162,13 @@ final class LiveTables {
   MarkdownTheme? _theme;
   TextScaler? _scaler;
   Object? _tokensFrom;
+
+  /// The rows measured at rest, by whether they are a header and by their
+  /// text — the ones a frame asked for since the buffer last changed — and
+  /// the ones the revision before it kept, which a row still standing is
+  /// taken back from. A row no revision asks for is forgotten after one more.
+  Map<(bool, String), _RowWork> _kept = <(bool, String), _RowWork>{};
+  Map<(bool, String), _RowWork> _prior = <(bool, String), _RowWork>{};
 
   /// How many times a cell's text has been laid out for a table, for the test
   /// that holds a revision and a caret move to the work they may do (#494):
@@ -192,12 +213,17 @@ final class LiveTables {
     Object? tokensFrom,
   }) {
     if (block == null || block.kind != BlockKind.table) return null;
-    if (!identical(buffer, _buffer) ||
-        buffer.revision != _revision ||
-        !identical(theme, _theme) ||
-        scaler != _scaler ||
-        tokensFrom != _tokensFrom) {
+    final same =
+        identical(buffer, _buffer) &&
+        identical(theme, _theme) &&
+        scaler == _scaler &&
+        tokensFrom == _tokensFrom;
+    if (!same || buffer.revision != _revision) {
       _tables.clear();
+      // What the measurements are made with stands: a revision moves the text
+      // and nothing else, and a row of the same text measures the same.
+      _prior = same ? _kept : <(bool, String), _RowWork>{};
+      _kept = <(bool, String), _RowWork>{};
       _buffer = buffer;
       _revision = buffer.revision;
       _theme = theme;
@@ -240,7 +266,7 @@ final class LiveTables {
 
   /// The table's measurements: read at once, then only touched where a reveal
   /// moved — its own row, and the row it left.
-  static _Metrics _metricsFor(
+  _Metrics _metricsFor(
     _Table table,
     SourceBuffer buffer,
     List<Token> Function(int line) tokensOf,
@@ -280,6 +306,7 @@ final class LiveTables {
           block,
           metrics,
           metrics.revealedLine! - block.startLine,
+          false,
           tokensOf,
           hidden,
           styleOf,
@@ -292,6 +319,7 @@ final class LiveTables {
           block,
           metrics,
           shown - block.startLine,
+          true,
           tokensOf,
           hidden,
           styleOf,
@@ -308,8 +336,8 @@ final class LiveTables {
 
   /// Reads [block]'s lines and measures every cell of it, [reveal] being the
   /// run the line [shown] of the table shows — null for a table measured at
-  /// rest.
-  static _Metrics _read(
+  /// rest. A row already measured under its text is not measured again.
+  _Metrics _read(
     Block block,
     SourceBuffer buffer,
     List<Token> Function(int line) tokensOf,
@@ -324,62 +352,76 @@ final class LiveTables {
       for (var line = block.startLine; line < block.endLine; line++)
         buffer.lineAt(line),
     ];
-    final cells = <List<(int, int)>>[];
-    final delimiters = <bool>[];
-    final widths = <List<_Measured>>[];
-    for (var row = 0; row < lines.length; row++) {
-      final text = lines[row];
-      final delimiter = _isDelimiter(text);
-      delimiters.add(delimiter);
-      final own = delimiter ? const <(int, int)>[] : cellsOf(text);
-      cells.add(own);
-      widths.add(
-        _measureCells(
+    final rows = <_RowWork>[
+      for (var row = 0; row < lines.length; row++)
+        _work(
           block,
           row,
-          text,
-          own,
+          lines[row],
+          block.startLine + row == shown,
           tokensOf,
           hidden,
           styleOf,
           theme,
           scaler,
         ),
-      );
-    }
-    return _Metrics(lines, cells, delimiters, widths)
+    ];
+    return _Metrics(lines, rows)
       ..revealedLine = shown
       ..revealedWith = reveal;
   }
 
-  /// Measures row [row] again, after a reveal moved: the row it is on shows a
-  /// run's marks, and the row it left shows them as they stand at rest.
-  static void _measureRow(
+  /// Measures row [row] again, after a reveal moved: the row it is on
+  /// ([revealed]) shows a run's marks, and the row it left shows them as they
+  /// stand at rest.
+  void _measureRow(
     Block block,
     _Metrics metrics,
     int row,
+    bool revealed,
     List<Token> Function(int line) tokensOf,
     bool Function(int line, Token token) hidden,
     TextStyle? Function(Token token) styleOf,
     MarkdownTheme theme,
     TextScaler scaler,
   ) {
-    final text = metrics.lines[row];
-    final cells = metrics.cells[row];
-    metrics.widths[row] = _measureCells(
+    metrics.rows[row] = _work(
       block,
       row,
-      text,
-      cells,
+      metrics.lines[row],
+      revealed,
       tokensOf,
       hidden,
       styleOf,
       theme,
       scaler,
     );
-    final least = metrics.least;
-    if (least != null) {
-      least[row] = _leastRow(
+  }
+
+  /// Row [row]'s measurements: the ones kept under its text when it is at
+  /// rest, measured otherwise. The row that shows a run's marks ([revealed])
+  /// is measured as it is drawn and shared with no other.
+  _RowWork _work(
+    Block block,
+    int row,
+    String text,
+    bool revealed,
+    List<Token> Function(int line) tokensOf,
+    bool Function(int line, Token token) hidden,
+    TextStyle? Function(Token token) styleOf,
+    MarkdownTheme theme,
+    TextScaler scaler,
+  ) {
+    final key = (row == 0, text);
+    if (!revealed) {
+      final kept = _kept[key] ?? _prior[key];
+      if (kept != null) return _kept[key] = kept;
+    }
+    final delimiter = _isDelimiter(text);
+    final cells = delimiter ? const <(int, int)>[] : cellsOf(text);
+    final work = _RowWork(
+      cells,
+      _measureCells(
         block,
         row,
         text,
@@ -389,8 +431,11 @@ final class LiveTables {
         styleOf,
         theme,
         scaler,
-      );
-    }
+      ),
+      delimiter: delimiter,
+    );
+    if (!revealed) _kept[key] = work;
+    return work;
   }
 
   /// Every cell of row [row] measured: how wide its text draws.
@@ -460,7 +505,7 @@ final class LiveTables {
   /// so a table that fits its pane measures no word and lays no piece out,
   /// and a fitted table measures the words of its cells once and the pieces
   /// of its *visible* rows alone (#494).
-  static List<LiveTableRow> _layOut(
+  List<LiveTableRow> _layOut(
     _Table table,
     _Metrics metrics,
     List<Token> Function(int line) tokensOf,
@@ -473,9 +518,10 @@ final class LiveTables {
     final block = table.block;
     final pad = theme.tableCellPadding.left;
     final lines = metrics.lines;
-    final cells = metrics.cells;
-    final widths = metrics.widths;
-    final delimiters = metrics.delimiters;
+    final rows = metrics.rows;
+    final cells = <List<(int, int)>>[for (final row in rows) row.cells];
+    final widths = <List<_Measured>>[for (final row in rows) row.widths];
+    final delimiters = <bool>[for (final row in rows) row.delimiter];
     // A column as wide as its widest cell, with the padding either side.
     final columns = widths.fold<int>(0, (most, row) {
       return row.length > most ? row.length : most;
@@ -495,12 +541,12 @@ final class LiveTables {
     final fits = natural.last <= budget;
     // The widest word of each column: the room a fitted column keeps, so a
     // word is not broken where the read view would keep it whole. Measured
-    // only for a table that does not fit, and kept for the next reveal (#494).
+    // only for a table that does not fit, and kept with the row (#494).
     var least = const <double>[];
     if (!fits) {
-      final words = metrics.least ??= <List<double>>[
+      final words = <List<double>>[
         for (var row = 0; row < lines.length; row++)
-          _leastRow(
+          rows[row].least ??= _leastRow(
             block,
             row,
             lines[row],
