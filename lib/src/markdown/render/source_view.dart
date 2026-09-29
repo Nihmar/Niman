@@ -2312,21 +2312,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// The rectangle a problem's span covers, in global coordinates, or null
-  /// while the line that holds it is not built.
+  /// while the piece that holds it is not built.
+  ///
+  /// As [caretRect], the span is measured in the piece it is drawn in and
+  /// shifted by where that piece stands of the line's box — the piece its own
+  /// text ends in, since a piece a wrap broke after a space ends on that
+  /// space, and the span after it begins where the next piece does.
   Rect? _templateSpanRect(int start, int end) {
     final buffer = widget.buffer;
     final line = buffer.lineOf(start);
     final lineStart = buffer.offsetOfLine(line);
-    final paragraph = _paragraphAt(line);
-    if (paragraph == null || !paragraph.attached || !paragraph.hasSize) {
-      return null;
-    }
+    final lineEnd = lineStart + buffer.lineLengthAt(line);
+    final last = (end > start ? end - 1 : start).clamp(lineStart, lineEnd);
+    final (piece, paragraph) = _fragmentAt(line, last - lineStart);
+    if (piece == null || paragraph == null) return null;
     final length = paragraph.text.toPlainText().length;
-    final from = (start - lineStart).clamp(0, length);
-    final to =
-        (end.clamp(lineStart, lineStart + buffer.lineLengthAt(line)) -
-                lineStart)
-            .clamp(from, length);
+    final from = (start - lineStart - piece.start).clamp(0, length);
+    final to = (end.clamp(lineStart, lineEnd) - lineStart - piece.start).clamp(
+      from,
+      length,
+    );
     final boxes = paragraph.getBoxesForSelection(
       TextSelection(baseOffset: from, extentOffset: to),
     );
@@ -4326,16 +4331,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
   }
 
-  /// The caret rectangle at [offset] in global coordinates, from the line's
-  /// own paragraph — or null when that line is not built.
+  /// The caret rectangle at [offset] in global coordinates, from the piece of
+  /// its line the offset is drawn in — or null when that line is not built.
+  ///
+  /// A wrapped table row is drawn as one paragraph per piece, so the rectangle
+  /// is measured in that piece's own coordinates and shifted by where it
+  /// stands of the line's box, as [caretRect] is.
   Rect? _caretRectAt(int offset) {
     final buffer = widget.buffer;
     final line = buffer.lineOf(offset.clamp(0, buffer.length));
-    final paragraph = _paragraphAt(line);
-    if (paragraph == null || !paragraph.attached || !paragraph.hasSize) {
-      return null;
-    }
-    final local = (offset - buffer.offsetOfLine(line)).clamp(
+    final lineStart = buffer.offsetOfLine(line);
+    final (piece, paragraph) = _fragmentAt(line, offset - lineStart);
+    if (piece == null || paragraph == null) return null;
+    final local = (offset - lineStart - piece.start).clamp(
       0,
       paragraph.text.toPlainText().length,
     );

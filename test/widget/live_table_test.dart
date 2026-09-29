@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -15,6 +16,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/templates/check_state.dart';
 
 const String _note =
     'caret\n\n| a | b |\n|---|---|\n| **one** | two |\n\nafter';
@@ -492,6 +494,116 @@ void main() {
         ..deleteBackward(word: true);
       await tester.pump();
       expect(state.widget.buffer.lineAt(4), '| **one** |  |');
+    });
+  });
+
+  group('the caret rectangle of a wrapped row', () {
+    /// A wrapped row whose first cell is long enough to take several visual
+    /// lines, and whose last word carries a template mistake.
+    const note =
+        '| a first cell far too long for the pane, and {{titlex}} | second |\n'
+        '|---|---|\n'
+        '| one | two |\n';
+
+    /// Pumps [note] in `live` at a phone's pane, the caret at [caret].
+    Future<MarkdownSourceViewState> pump(
+      WidgetTester tester,
+      int? caret, {
+      TemplateCheck? check,
+    }) async {
+      tester.view.physicalSize = const Size(320, 400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final buffer = SourceBuffer.fromText(note);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => MarkdownSourceView(
+                buffer: buffer,
+                theme: markdownThemeOf(context),
+                showLineNumbers: false,
+                hideMarkers: true,
+                templateCommands: true,
+                templateCheck: check,
+                selection: caret == null ? null : SelectionModel.at(caret),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      return tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      );
+    }
+
+    testWidgets('the handles hang from the piece the selection is in', (
+      tester,
+    ) async {
+      // A wrapped row is one paragraph per piece of every visual line, so the
+      // caret's rectangle is its own piece's: a word in the long cell's tail
+      // is on a later visual line, and the handles belong there — not on the
+      // row's first piece, where a caret clamped into the line's paragraph
+      // landed (#494).
+      final state = await pump(tester, null);
+      final buffer = state.widget.buffer;
+      final tail = find.textContaining('{{titlex}}', findRichText: true);
+      await tester.longPressAt(tester.getRect(tail).center);
+      await tester.pumpAndSettle();
+
+      final piece = tester.getRect(tail);
+      final text = buffer.lineAt(0);
+      final local = state.selection.start - buffer.offsetOfLine(0);
+      final shown = tester.widget<RichText>(tail).text.toPlainText();
+      final start = text.indexOf(shown);
+      expect(
+        local,
+        inInclusiveRange(start, start + shown.length),
+        reason: 'the press took a word of the piece it landed in',
+      );
+
+      final handles = tester.widget<TouchSelectionOverlay>(
+        find.byType(TouchSelectionOverlay),
+      );
+      expect(handles.start, isNotNull);
+      expect(handles.end, isNotNull);
+      expect(handles.start!.top, greaterThan(piece.top - 2));
+      expect(handles.start!.bottom, lessThan(piece.bottom + 2));
+      expect(handles.end!.top, greaterThan(piece.top - 2));
+      expect(handles.end!.bottom, lessThan(piece.bottom + 2));
+      // And along it: both ends stand within the piece's own box.
+      expect(handles.start!.left, greaterThanOrEqualTo(piece.left - 1.5));
+      expect(handles.end!.right, lessThanOrEqualTo(piece.right + 1.5));
+    });
+
+    testWidgets('the template hint marks the piece the problem stands in', (
+      tester,
+    ) async {
+      final check = TemplateCheck();
+      addTearDown(check.dispose);
+      final buffer = SourceBuffer.fromText(note);
+      final at = buffer.lineAt(0).indexOf('{{titlex}}') + 2;
+      final state = await pump(tester, at, check: check);
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump();
+
+      expect(find.byKey(const Key('template-hint')), findsOneWidget);
+      expect(
+        state.caretSpot.value.line,
+        0,
+        reason: 'the caret is on the table row the problem is drawn in',
+      );
+      // The card hangs under the span's own box, which is on the row's last
+      // visual line: marked from the line's first piece, it stood whole
+      // visual lines higher (#494).
+      final piece = tester.getRect(
+        find.textContaining('{{titlex}}', findRichText: true),
+      );
+      final card = tester.getRect(find.byKey(const Key('template-hint')));
+      expect(card.top, closeTo(piece.bottom + 7, 4));
     });
   });
 
