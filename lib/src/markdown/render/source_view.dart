@@ -3790,7 +3790,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // panel does not flash its empty words between two keystrokes.
       entries: previous?.entries ?? const <SuggestEntry>[],
       named: query.target.isEmpty ? '' : query.target,
-    );
+    )..answers = previous?.answers;
     setState(() => _suggest = panel);
     _suggestOverlay.show();
     final seq = ++_suggestSeq;
@@ -3835,6 +3835,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ..kind = kind
         ..named = named
         ..entries = _shown(entries, query)
+        ..answers = query
         ..selected = 0;
     });
   }
@@ -3895,7 +3896,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// step — and closes the panel. Nothing is written but the link.
   void _acceptSuggest() {
     final panel = _suggest;
-    if (panel == null) return;
+    if (panel == null || !panel.isCurrent) return;
     final entry = panel.entries.elementAtOrNull(panel.selected);
     if (entry == null) return;
     final query = panel.query;
@@ -4012,7 +4013,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _closeSuggest();
         return KeyEventResult.handled;
       }
-      if (suggest.entries.isNotEmpty && !shift && !control && !alt && !meta) {
+      // Only rows that answer the link as it stands take a key: while the
+      // next answer is on its way the rows drawn are the last link's, and the
+      // key does what it does with no rows.
+      if (suggest.isCurrent &&
+          suggest.entries.isNotEmpty &&
+          !shift &&
+          !control &&
+          !alt &&
+          !meta) {
         if (key == LogicalKeyboardKey.arrowUp) {
           _moveSuggest(-1);
           return KeyEventResult.handled;
@@ -4615,6 +4624,14 @@ final class _SuggestPanel {
 
   /// The rows, best match first.
   List<SuggestEntry> entries;
+
+  /// The link text [entries] answer, or null for no query at all. It trails
+  /// [query] while the next answer is on its way: the rows of the link just
+  /// left stay drawn, but they are not this link's to complete.
+  _LinkQuery? answers;
+
+  /// Whether [entries] answer the link as it stands, so a key may take one.
+  bool get isCurrent => answers?.sameText(query) ?? false;
 
   /// The note (or book) named before `#`; empty for the note being edited.
   String named;

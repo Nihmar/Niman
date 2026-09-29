@@ -468,6 +468,104 @@ void main() {
     expect(state.isSuggesterShown, isFalse);
   });
 
+  group('rows of an earlier query', () {
+    /// Presses Enter the way the desktop embedders do (see `FakeEmbedder`):
+    /// the key goes to the note first, and only a key it left alone becomes
+    /// a line break typed at the caret.
+    Future<void> enter(
+      WidgetTester tester,
+      SourceBuffer buffer,
+      MarkdownSourceViewState state,
+    ) async {
+      if (await tester.sendKeyEvent(LogicalKeyboardKey.enter)) return;
+      final caret = state.selection.extent;
+      await type(
+        tester,
+        buffer.text.replaceRange(caret, caret, '\n'),
+        caret: caret + 1,
+      );
+    }
+
+    testWidgets('Tab after a # does not complete a note listed before it', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = _library();
+      await pump(tester, buffer, suggester);
+      await type(tester, '[[Note');
+      expect(panel(tester).entries.first, isA<NoteSuggestion>());
+
+      // The headings are still on their way: the note rows stay drawn.
+      suggester.holding = true;
+      await type(tester, '[[Notes#');
+      expect(panel(tester).entries.first, isA<NoteSuggestion>());
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      final written = buffer.text;
+      suggester.release();
+      await tester.pump();
+
+      expect(
+        written,
+        await withNoPanel(tester, '[[Notes#', 8, LogicalKeyboardKey.tab),
+        reason: "Tab is the note's, as with no panel",
+      );
+    });
+
+    testWidgets("Enter in another note's link writes none of the last "
+        "note's headings", (tester) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = _library();
+      final state = await pump(tester, buffer, suggester);
+      await type(tester, '[[Notes#');
+      expect(panel(tester).entries.first, isA<HeadingSuggestion>());
+
+      suggester.holding = true;
+      await type(tester, '[[Meeting notes#');
+      await enter(tester, buffer, state);
+      suggester.release();
+      await tester.pump();
+
+      expect(buffer.text, '[[Meeting notes#\n', reason: 'a line break');
+    });
+
+    testWidgets('Enter after the # is deleted is a line break again', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = _library();
+      final state = await pump(tester, buffer, suggester);
+      await type(tester, '[[Notes#');
+      expect(panel(tester).entries.first, isA<HeadingSuggestion>());
+
+      suggester.holding = true;
+      await type(tester, '[[Notes');
+      await enter(tester, buffer, state);
+      suggester.release();
+      await tester.pump();
+
+      expect(buffer.text, '[[Notes\n', reason: 'the key was not swallowed');
+    });
+
+    testWidgets('once the answer lands, its rows complete', (tester) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = _library();
+      await pump(tester, buffer, suggester);
+      await type(tester, '[[Note');
+
+      suggester.holding = true;
+      await type(tester, '[[Notes#');
+      suggester.release();
+      await tester.pump();
+      await tester.pump();
+      expect(panel(tester).entries.first, isA<HeadingSuggestion>());
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+
+      expect(buffer.text, '[[Notes#Links]]');
+    });
+  });
+
   group('completing inside a written link', () {
     /// Puts the caret at [at] in [before], types [typed] there, and presses
     /// [key] on the row the panel picked: the note that is left.
