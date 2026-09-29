@@ -209,8 +209,8 @@ void main() {
   late File dbFile;
 
   setUp(() async {
-    tempDir = await Directory.current.createTemp('niman_migrate_');
-    dbFile = File('${tempDir.path}/niman.db');
+    tempDir = await Directory.systemTemp.createTemp('niman_migrate_');
+    dbFile = File(p.join(tempDir.path, 'niman.db'));
   });
 
   tearDown(() async {
@@ -1407,14 +1407,21 @@ void main() {
       {
         final db = AppDatabase(NativeDatabase(dbFile));
         await _rewindTo(db, 31);
+        // The key as `saveDestination` wrote it, normalized: on Windows
+        // that is `\lib\Work`, and a row keyed `/lib/Work` is one the store
+        // never finds.
         await db.customStatement(
           'INSERT INTO sync_destinations (library_path, url, username) '
-          "VALUES ('/lib/Work', 'https://nas.example/dav/', 'ale')",
+          "VALUES (?, 'https://nas.example/dav/', 'ale')",
+          [p.normalize('/lib/Work')],
         );
         await db.close();
       }
 
       final db = AppDatabase(NativeDatabase(dbFile));
+      // Closed on failure too: an open handle keeps Windows from deleting
+      // the folder, and the teardown's error buries the test's own.
+      addTearDown(db.close);
       final store = SyncStore(db);
       final row = (await store.destination('/lib/Work'))!;
       expect(row.url, 'https://nas.example/dav/');
@@ -1429,7 +1436,6 @@ void main() {
         (await store.destination('/lib/Work'))!.trustedCertFingerprint,
         'AA:BB:CC',
       );
-      await db.close();
     });
   });
 
