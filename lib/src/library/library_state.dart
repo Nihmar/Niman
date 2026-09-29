@@ -1616,12 +1616,20 @@ final class LibraryController implements LibrarySession {
       return db;
     } on Object catch (error) {
       final damaged = _sqliteCause(error);
-      if (damaged == null || !_isDamagedIndex(damaged)) rethrow;
+      if (damaged == null || !_isDamagedIndex(damaged)) {
+        await _closeIndex(db);
+        rethrow;
+      }
       _log.warning('index of $libraryPath is damaged; rebuilding: $damaged');
       await _closeIndex(db);
       await _deleteIndexOf(libraryPath);
       final fresh = await indexDbFactory(libraryPath);
-      await _warmIndex(fresh);
+      try {
+        await _warmIndex(fresh);
+      } on Object {
+        await _closeIndex(fresh);
+        rethrow;
+      }
       return fresh;
     }
   }
