@@ -351,6 +351,39 @@ void main() {
       );
     }
   });
+
+  // The panel shows [IndexWikilinkSuggester.limit] rows. A name it cannot
+  // write must not use one of them: filtered after the cut, a run of them at
+  // the head of the ranking left the panel short of notes that were there.
+  test('names that do not read back take no slot of the panel', () async {
+    for (var i = 0; i < 60; i++) {
+      await addNote('A# $i.md', stems: ['a# $i']);
+    }
+    for (var i = 0; i < 10; i++) {
+      await addNote('B $i.md', stems: ['b $i']);
+    }
+
+    final rows = await suggesterOver().notes('');
+
+    expect(rows.map((r) => r.name).toSet(), {
+      for (var i = 0; i < 10; i++) 'B $i',
+    });
+    expect(rows, hasLength(10));
+  });
+
+  test('a folder that does not read back takes no slot either', () async {
+    // Each name is shared, so its row writes the folder too: `X#/n0` for the
+    // ones that come first, which cannot be written.
+    for (var i = 0; i < 60; i++) {
+      await addNote('X#/n$i.md', stems: ['n$i']);
+      await addNote('Y/n$i.md', stems: ['n$i']);
+    }
+
+    final rows = await suggesterOver().notes('');
+
+    expect(rows, hasLength(IndexWikilinkSuggester.limit));
+    expect(rows.every((r) => r.folder == 'Y'), isTrue);
+  });
 }
 
 /// Records every SELECT a suggester run issues, with its bound arguments, so

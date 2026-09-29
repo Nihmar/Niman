@@ -10,6 +10,8 @@
 /// to fill the panel.
 library;
 
+import 'dart:math' show min;
+
 import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -140,11 +142,23 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   @override
   Future<List<NoteSuggestion>> notes(String query) async {
     final q = query.trim().toLowerCase();
-    final rows = await _qualified(_rank(await _rows(q), q));
-    return [
-      for (final row in rows)
-        if (_readsBack(row.target)) row,
-    ];
+    final ranked = _rank(await _rows(q), q);
+    // A row the panel cannot write takes no slot: [limit] rows are cut from
+    // the ones that read back, not from the ranking, or a run of names with
+    // a `#` at its head would leave the panel short (#491). A name is
+    // dropped before its target is qualified; the folder a qualified target
+    // adds can break it too, so those are counted after, and the ranking is
+    // read on in chunks until the panel is full or it runs out.
+    final out = <NoteSuggestion>[];
+    var at = 0;
+    while (out.length < limit && at < ranked.length) {
+      final end = min(at + limit - out.length, ranked.length);
+      for (final row in await _qualified(ranked.sublist(at, end))) {
+        if (_readsBack(row.target)) out.add(row);
+      }
+      at = end;
+    }
+    return out;
   }
 
   /// Whether [target], written between the `[[` and the `]]`, reads back as
@@ -324,7 +338,10 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
       final byFolder = a.note.folder.compareTo(b.note.folder);
       return byFolder != 0 ? byFolder : a.note.name.compareTo(b.note.name);
     });
-    return [for (final r in ranked.take(limit)) (note: r.note, path: r.path)];
+    return [
+      for (final r in ranked)
+        if (_readsBack(r.note.target)) (note: r.note, path: r.path),
+    ];
   }
 
   /// The name shown for [path]: the file's base name, `.md` dropped.
