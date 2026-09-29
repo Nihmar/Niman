@@ -283,8 +283,10 @@ void main() {
 
     test('a spelling the folder holds is somebody else (#492)', () async {
       // A case-sensitive folder holding both spellings: the lookup finds the
-      // candidate itself and the collision stands.
-      File(p.join(tempDir.path, 'A.md')).writeAsStringSync('x');
+      // candidate itself and the collision stands. Only the candidate's
+      // spelling is written — a folder that folds case (NTFS, APFS) cannot
+      // hold both, and writing the second would rewrite the first, so the
+      // listing would never show the spelling the lookup has to find.
       File(p.join(tempDir.path, 'a.md')).writeAsStringSync('y');
       expect(
         await excludedEntryIn(
