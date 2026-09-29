@@ -129,8 +129,16 @@ String removeFrontmatterKey(String text, String key) {
 
 /// One top-level entry of a block: its half-open line range in the note's
 /// split lines, the key as it is written (quotes included), and the key
-/// as YAML reads it.
-typedef _Entry = ({int start, int end, String writtenKey, String key});
+/// as YAML reads it. `valueEnd` is where the parser says the value ends
+/// (line and column in the note), null when it gave none: the block was read
+/// by lines, or the value is an alias.
+typedef _Entry = ({
+  int start,
+  int end,
+  String writtenKey,
+  String key,
+  ({int line, int column})? valueEnd,
+});
 
 /// The block's top-level entries: as the YAML parser places them, or read
 /// line by line when the parser refuses the block.
@@ -194,57 +202,63 @@ String _anchorOf(String line, String writtenKey) {
   return after.substring(start, at);
 }
 
-/// The comment the entry of [found] trails, or '' when it has none.
+/// The comment the entry of [found] carries, or '' when it has none.
 ///
-/// The value is dropped, so the comment that followed it is kept; it is
-/// read off the entry's last line, except under a block scalar (`|` or
-/// `>`), whose indented lines are text where a `#` is not a comment.
+/// The value is dropped, so the comment that goes with it is kept — but only
+/// the entry's own, and where it stands is settled by the YAML parser, not by
+/// reading the text again. A comment can be in two places:
+///
+/// * on the key's line, after the `:` and whatever properties (`&anchor`,
+///   `!tag`, a block scalar's `|`/`>` header) open the value: the only
+///   comment a value that goes on below can have on this line, and what
+///   follows the colon there can only be a comment or the value, never both;
+/// * after the value, on the line the parser says it ends on — a plain,
+///   quoted or flow value. A block value ends at the start of the next line,
+///   where there is nothing after it: its items' comments and its text
+///   (where a `#` is no comment) are not the entry's.
+///
+/// A block YAML refuses has no spans: a one-line entry with a plain value is
+/// read for its ` #`, which is what a plain value's comment is.
 String _commentOf(List<String> lines, _Entry found) {
-  if (_blockScalarValue(lines[found.start], found.writtenKey)) return '';
-  return _trailingComment(lines[found.end - 1]);
+  final rest = _afterProperties(
+    _afterKey(lines[found.start], found.writtenKey),
+  );
+  if (rest.startsWith('#')) return rest.trimRight();
+  final end = found.valueEnd;
+  if (end == null) {
+    return found.end - found.start == 1 ? _plainComment(rest) : '';
+  }
+  if (end.column == 0 || end.line >= lines.length) return '';
+  final line = lines[end.line];
+  if (end.column > line.length) return '';
+  final after = line.substring(end.column).trimLeft();
+  return after.startsWith('#') ? after.trimRight() : '';
 }
 
-/// Whether the value the entry whose key line is [line] opens is a block
-/// scalar (`|` or `>`), read past the key's whitespace and its anchor.
-bool _blockScalarValue(String line, String writtenKey) {
-  var rest = _afterKey(line, writtenKey).trimLeft();
-  if (rest.startsWith('&')) {
-    final space = rest.indexOf(RegExp(r'[ \t]'));
-    rest = space < 0 ? '' : rest.substring(space).trimLeft();
+/// [rest], the text after a key's colon, without the properties that open
+/// the value — any `&anchor` and `!tag`, then a block scalar's `|`/`>`
+/// header — and without the whitespace between them.
+String _afterProperties(String rest) {
+  var text = rest.trimLeft();
+  var header = false;
+  while (text.isNotEmpty) {
+    final first = text[0];
+    final property = first == '&' || first == '!';
+    if (!property && (header || (first != '|' && first != '>'))) break;
+    header = header || !property;
+    final space = text.indexOf(RegExp(r'[ \t]'));
+    text = space < 0 ? '' : text.substring(space).trimLeft();
   }
-  return rest.startsWith('|') || rest.startsWith('>');
+  return text;
 }
 
-/// The comment [line] ends with — a `#` at its start or after whitespace,
-/// outside quotes — or '' when it has none.
-String _trailingComment(String line) {
-  var quote = '';
-  for (var i = 0; i < line.length; i++) {
-    final char = line[i];
-    if (quote == '"' && char == r'\') {
-      i++;
-      continue;
-    }
-    if (quote.isNotEmpty) {
-      if (char == quote) {
-        // A doubled single quote is one quote inside the scalar.
-        if (quote == "'" && i + 1 < line.length && line[i + 1] == "'") {
-          i++;
-          continue;
-        }
-        quote = '';
-      }
-      continue;
-    }
-    if (char == '"' || char == "'") {
-      quote = char;
-      continue;
-    }
-    if (char == '#' && (i == 0 || line[i - 1] == ' ' || line[i - 1] == '\t')) {
-      return line.substring(i).trimRight();
-    }
-  }
-  return '';
+/// The comment ending [value], a value read where the parser gave no span:
+/// only a plain one has a comment that can be told without reading quotes,
+/// and it starts at the first `#` after whitespace.
+String _plainComment(String value) {
+  if (value.isEmpty || '"\'[{|>'.contains(value[0])) return '';
+  final at = RegExp(r'[ \t]#').firstMatch(value)?.start;
+  return at == null ? '' : value.substring(at + 1).trimRight();
 }
 
 /// The block's top-level entries as the YAML parser places them, or null
@@ -261,20 +275,31 @@ List<_Entry>? _entriesByYaml(List<String> lines, ({int start, int end}) block) {
   if (doc is! YamlMap) return doc.value == null ? const [] : null;
   return [
     for (final MapEntry(key: keyNode, value: valueNode) in doc.nodes.entries)
-      if (keyNode is YamlNode)
-        (
-          start: first + keyNode.span.start.line,
-          end:
-              first +
-              _endLine(
-                keyNode.span.start.line,
-                valueNode.span.end.line,
-                valueNode.span.end.column,
-              ),
-          writtenKey: keyNode.span.text,
-          key: '${keyNode.value}'.trim(),
-        ),
+      if (keyNode is YamlNode) _yamlEntry(first, keyNode, valueNode),
   ];
+}
+
+/// The entry of [keyNode] and [valueNode], for a block whose first line is
+/// line [first] of the note.
+_Entry _yamlEntry(int first, YamlNode keyNode, YamlNode valueNode) {
+  final keyLine = keyNode.span.start.line;
+  final span = valueNode.span;
+  // An alias (`b: *a`) is the node its anchor named, which stands earlier:
+  // the entry is its own line, and the parser has nothing to say about it.
+  final alias = span.start.line < keyLine;
+  return (
+    start: first + keyLine,
+    end:
+        first +
+        (alias
+            ? keyLine + 1
+            : _endLine(keyLine, span.end.line, span.end.column)),
+    writtenKey: keyNode.span.text,
+    key: '${keyNode.value}'.trim(),
+    valueEnd: alias
+        ? null
+        : (line: first + span.end.line, column: span.end.column),
+  );
 }
 
 /// The line after a value that ends at [endLine]:[endColumn], for an entry
@@ -309,6 +334,7 @@ List<_Entry> _entriesByLines(List<String> lines, ({int start, int end}) block) {
       end: end,
       writtenKey: written,
       key: _keyValueOf(written),
+      valueEnd: null,
     ));
   }
   return entries;
