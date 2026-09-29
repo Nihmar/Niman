@@ -3,7 +3,8 @@
 // a walk of the tree), a named note's headings through the session's own
 // read of it (once per revision, #491), and a book's place form from the
 // target itself.
-import 'package:drift/drift.dart' show InsertMode, Value;
+import 'package:drift/drift.dart'
+    show ApplyInterceptor, InsertMode, QueryExecutor, QueryInterceptor, Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -13,6 +14,7 @@ import 'package:niman/src/links/suggester.dart';
 
 void main() {
   late IndexDatabase db;
+  late _QueryLog counter;
 
   /// Adds a note row, and one `note_stems` row per stem given.
   Future<int> addNote(
@@ -53,7 +55,8 @@ void main() {
   );
 
   setUp(() async {
-    db = IndexDatabase(NativeDatabase.memory());
+    counter = _QueryLog();
+    db = IndexDatabase(NativeDatabase.memory().interceptWith(counter));
     addTearDown(db.close);
   });
 
@@ -274,6 +277,48 @@ void main() {
     ], reason: 'a `%` in the query is a character, not a wildcard');
   });
 
+  // #491: a `%q%` match has no stem index to use (`q%` does), so SQLite
+  // evaluates the LIKE against every stem and sorts the matches before the
+  // LIMIT — a scan and a sort per keystroke on a large library. The indexed
+  // prefix query is read first; the contains query is paid only when the
+  // prefix rows leave room under the fetch cap.
+  test('a full cap of prefix rows leaves the contains query unrun', () async {
+    // The fetch cap is 200 stems: the query as a prefix of this many fills it.
+    for (var i = 0; i < 200; i++) {
+      await addNote('aa$i.md', stems: ['aa$i']);
+    }
+    // One note the query reaches only in the middle (`%q%`, not `q%`).
+    await addNote('zz.md', stems: ['zzaa']);
+    counter.reset();
+
+    final rows = await suggesterOver().notes('aa');
+
+    expect(
+      counter.ranContains,
+      isFalse,
+      reason: 'the prefix rows fill the cap, so `%q%` was never queried',
+    );
+    expect(rows, isNotEmpty);
+  });
+
+  test('the contains query runs when the prefix rows leave room', () async {
+    await addNote('aa1.md', stems: ['aa1']);
+    await addNote('zz.md', stems: ['zzaa']);
+    counter.reset();
+
+    final rows = await suggesterOver().notes('aa');
+
+    expect(
+      counter.ranContains,
+      isTrue,
+      reason: 'the prefix rows did not fill the cap, so `%q%` answered too',
+    );
+    expect(rows.map((r) => r.name), [
+      'aa1',
+      'zz',
+    ], reason: 'the prefix match first, the contains match after');
+  });
+
   // #491: a `[[…]]` target has no escape. The link ends at its first `]]`
   // and the parser splits the target at its first `|` or `#`, so a name
   // holding one of those — `C# tips` → target `C`, heading `tips` — is a
@@ -306,4 +351,29 @@ void main() {
       );
     }
   });
+}
+
+/// Records every SELECT a suggester run issues, with its bound arguments, so
+/// a test can pin the work a keystroke is charged rather than its wall clock
+/// (#491).
+final class _QueryLog extends QueryInterceptor {
+  final statements = <({String sql, List<Object?> args})>[];
+
+  void reset() => statements.clear();
+
+  /// Whether any issued SELECT bound a leading-wildcard LIKE — the `%q%`
+  /// (contains) query, which cannot use the stem index.
+  bool get ranContains => statements.any(
+    (s) => s.args.any((a) => a is String && a.startsWith('%')),
+  );
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    statements.add((sql: statement, args: args));
+    return executor.runSelect(statement, args);
+  }
 }

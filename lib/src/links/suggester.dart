@@ -126,9 +126,11 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   /// long session cannot keep a novel's outline per note it ever named.
   static const int _headingCacheNotes = 8;
 
-  /// How many matching rows one query fetches before the list is ranked and
-  /// cut to [limit]. Bounds a contains query, which cannot use the stem
-  /// index (a leading `%`), at a fixed cost per keystroke (#475).
+  /// How many matching rows are fetched before the list is ranked and cut to
+  /// [limit]. The indexed prefix query takes this many; the contains query —
+  /// which cannot use the stem index (a leading `%`) — is read only while the
+  /// prefix rows leave room, so a keystroke is not charged a `%q%` scan the
+  /// prefix already answered (#475, #491).
   static const int _fetch = 200;
 
   /// How many rows the panel is handed.
@@ -218,7 +220,9 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   }
 
   /// The matching `note_stems` rows joined to their file, prefix matches
-  /// first. An empty [q] lists every file, by path.
+  /// first. An empty [q] lists every file, by path; a non-empty one reads the
+  /// indexed prefix matches, then the contains matches only while the cap has
+  /// room (#491).
   Future<List<_StemRow>> _rows(String q) async {
     // A note, a PDF or an EPUB: the files a `[[…]]` link names, and the
     // books the `#` half serves. Other attachments are left to embeds.
@@ -239,20 +243,38 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
           )
           .get();
     } else {
-      // A prefix match (`q%`) can use the stem index; a contains match
-      // (`%q%`) cannot, and is what the fetch cap bounds.
+      // A prefix match (`q%`) is answered by the stem index, so it is read
+      // first and cut by the cap. A contains match (`%q%`) has no index to
+      // use — SQLite would evaluate the LIKE against every stem and sort the
+      // matches before the LIMIT — so it is read, bounded by what the prefix
+      // left, only when the prefix rows do not fill the cap (#491).
       final escaped = _escapeLike(q);
-      result = await _db
+      final prefix = '$escaped%';
+      var rows = await _db
           .customSelect(
             "$select AND s.stem LIKE ? ESCAPE '\\' "
-            r"ORDER BY (s.stem LIKE ? ESCAPE '\') DESC, n.path ASC LIMIT ?",
-            variables: [
-              Variable<String>('%$escaped%'),
-              Variable<String>('$escaped%'),
-              const Variable<int>(_fetch),
-            ],
+            'ORDER BY n.path ASC LIMIT ?',
+            variables: [Variable<String>(prefix), const Variable<int>(_fetch)],
           )
           .get();
+      if (rows.length < _fetch) {
+        rows = [
+          ...rows,
+          ...await _db
+              .customSelect(
+                "$select AND s.stem LIKE ? ESCAPE '\\' "
+                r"AND s.stem NOT LIKE ? ESCAPE '\' "
+                'ORDER BY n.path ASC LIMIT ?',
+                variables: [
+                  Variable<String>('%$escaped%'),
+                  Variable<String>(prefix),
+                  Variable<int>(_fetch - rows.length),
+                ],
+              )
+              .get(),
+        ];
+      }
+      result = rows;
     }
     return [
       for (final row in result)
