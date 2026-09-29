@@ -1,8 +1,9 @@
 // #475: the panel's rows come off the index the app already keeps — the
 // notes and their aliases from `note_stems` (one query per keystroke, never
-// a walk of the tree), a named note's headings from its own text through the
-// outline's scan, and a book's place form from the target itself.
-import 'package:drift/drift.dart' show InsertMode;
+// a walk of the tree), a named note's headings through the session's own
+// read of it (once per revision, #491), and a book's place form from the
+// target itself.
+import 'package:drift/drift.dart' show InsertMode, Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -42,9 +43,14 @@ void main() {
     return id;
   }
 
-  /// The suggester under test, reading a note's text from [notes].
-  IndexWikilinkSuggester suggesterOver(Map<String, String> notes) =>
-      IndexWikilinkSuggester(db, readNote: (path) async => notes[path]);
+  /// The suggester under test, reading a note's headings through
+  /// [readHeadings] — none by default, which the notes list never needs.
+  IndexWikilinkSuggester suggesterOver([
+    Future<List<String>?> Function(String path)? readHeadings,
+  ]) => IndexWikilinkSuggester(
+    db,
+    readHeadings: readHeadings ?? (_) async => null,
+  );
 
   setUp(() async {
     db = IndexDatabase(NativeDatabase.memory());
@@ -56,7 +62,7 @@ void main() {
     () async {
       await addNote('Notes.md', stems: ['notes']);
       await addNote('Guides/Markdown basics.md', stems: ['markdown basics']);
-      final suggester = suggesterOver(const <String, String>{});
+      final suggester = suggesterOver();
 
       final rows = await suggester.notes('');
 
@@ -85,7 +91,7 @@ void main() {
             NoteStemsCompanion.insert(stem: 'md', noteId: id, source: 'alias'),
             mode: InsertMode.insertOrIgnore,
           );
-      final suggester = suggesterOver(const <String, String>{});
+      final suggester = suggesterOver();
 
       final byAlias = await suggester.notes('mD');
       expect(byAlias.map((r) => r.name), contains('Markdown basics'));
@@ -104,7 +110,7 @@ void main() {
     await addNote('Work/Meeting notes.md', stems: ['meeting notes']);
     await addNote('Archive/Notes.md', stems: ['notes']);
     await addNote('Notes.md', stems: ['notes']);
-    final suggester = suggesterOver(const <String, String>{});
+    final suggester = suggesterOver();
 
     final rows = await suggester.notes('NOTE');
 
@@ -121,7 +127,7 @@ void main() {
     await addNote('Work/Meeting.md', stems: ['meeting']);
     await addNote('Home/Meeting.md', stems: ['meeting']);
     await addNote('Work/Plan.md', stems: ['plan']);
-    final suggester = suggesterOver(const <String, String>{});
+    final suggester = suggesterOver();
 
     final rows = await suggester.notes('');
     final targets = {for (final r in rows) '${r.folder}/${r.name}': r.target};
@@ -150,7 +156,7 @@ void main() {
     await addNote('Dune.pdf', stems: ['dune.pdf']);
     await addNote('Sea.epub', stems: ['sea.epub']);
     await addNote('map.png', stems: ['map']);
-    final suggester = suggesterOver(const <String, String>{});
+    final suggester = suggesterOver();
 
     final rows = await suggester.notes('');
 
@@ -174,19 +180,19 @@ void main() {
           ),
         );
     await addNote('Guides/Notes.md', stems: ['notes']);
-    final suggester = suggesterOver(const <String, String>{});
+    final suggester = suggesterOver();
 
     expect(await suggester.notes(''), hasLength(1));
   });
 
-  test("a note's headings come from its own text, through one read", () async {
+  test("a note's headings come from its own read", () async {
     await addNote('Notes.md', stems: ['notes']);
     final reads = <String>[];
     final suggester = IndexWikilinkSuggester(
       db,
-      readNote: (path) async {
+      readHeadings: (path) async {
         reads.add(path);
-        return '# Links\n\nbody\n\n## Dead links\n';
+        return const ['Links', 'Dead links'];
       },
     );
 
@@ -197,21 +203,57 @@ void main() {
     expect(reads, ['Notes.md'], reason: 'the named note is read once');
   });
 
+  // #491: every key after `#` asked again — the whole target note read,
+  // decoded and outlined on the UI isolate, seconds per key on a
+  // novel-length one — although the panel filters the same list locally.
+  // The list is read once per target and per revision, and only the
+  // revision of the note can make it stale.
+  test("a note's headings are read once per revision", () async {
+    final id = await addNote('Novel.md', stems: ['novel']);
+    final reads = <String>[];
+    final suggester = IndexWikilinkSuggester(
+      db,
+      readHeadings: (path) async {
+        reads.add(path);
+        return const ['Chapter 1', 'Chapter 2'];
+      },
+    );
+
+    for (var key = 0; key < 5; key++) {
+      final headings = await suggester.headings('Novel');
+      expect(headings.map((h) => h.heading), ['Chapter 1', 'Chapter 2']);
+    }
+    expect(reads, ['Novel.md'], reason: 'a run of keys is one read');
+
+    // The note changed under the panel: that revision is read again.
+    await (db.update(db.notes)..where((n) => n.id.equals(id))).write(
+      NotesCompanion(
+        modified: Value(DateTime.fromMillisecondsSinceEpoch(1000)),
+        size: const Value(24),
+      ),
+    );
+    expect(await suggester.headings('Novel'), hasLength(2));
+    expect(reads, ['Novel.md', 'Novel.md'], reason: 'a new revision re-reads');
+  });
+
   test('a target that names nothing suggests no heading', () async {
-    final suggester = suggesterOver(const <String, String>{});
+    final suggester = suggesterOver();
     expect(await suggester.headings('zzz'), isEmpty);
   });
 
   test('a note gone since it was named suggests no heading', () async {
     await addNote('Notes.md', stems: ['notes']);
-    final suggester = IndexWikilinkSuggester(db, readNote: (_) async => null);
+    final suggester = IndexWikilinkSuggester(
+      db,
+      readHeadings: (_) async => null,
+    );
     expect(await suggester.headings('Notes'), isEmpty);
   });
 
   test('a book offers its place form, a note offers none', () async {
     await addNote('Dune.pdf', stems: ['dune.pdf']);
     await addNote('Sea.epub', stems: ['sea.epub']);
-    final suggester = suggesterOver(const <String, String>{});
+    final suggester = suggesterOver();
 
     expect((await suggester.bookPlaces('Dune.pdf')).map((p) => p.form), [
       'page=',
@@ -225,7 +267,7 @@ void main() {
   test('a query that is not on disk is matched literally', () async {
     await addNote('100% notes.md', stems: ['100% notes']);
     await addNote('Notes.md', stems: ['notes']);
-    final suggester = suggesterOver(const <String, String>{});
+    final suggester = suggesterOver();
 
     expect((await suggester.notes('%')).map((r) => r.name), [
       '100% notes',
@@ -246,7 +288,7 @@ void main() {
     await addNote('A#b/Plan.md', stems: ['plan']);
     await addNote('Other/Plan.md', stems: ['plan']);
     await addNote('Notes.md', stems: ['notes']);
-    final suggester = suggesterOver(const <String, String>{});
+    final suggester = suggesterOver();
 
     final rows = await suggester.notes('');
 

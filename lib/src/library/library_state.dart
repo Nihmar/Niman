@@ -389,12 +389,14 @@ final class LibraryController implements LibrarySession {
     final reader = _ops;
     return IndexWikilinkSuggester(
       db,
-      // A named note's headings are read off the note itself; a note gone
-      // since the panel named it answers null rather than throwing.
-      readNote: (path) async {
+      // A named note's headings are read off the note itself, on a
+      // background isolate (a novel's read and outline is seconds of work);
+      // a note gone since the panel named it answers null rather than
+      // throwing.
+      readHeadings: (path) async {
         if (reader == null) return null;
         try {
-          return await reader.readNote(path);
+          return await reader.noteHeadings(path);
         } on Object {
           return null;
         }

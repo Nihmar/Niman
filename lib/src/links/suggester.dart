@@ -4,14 +4,14 @@
 /// While a wikilink is typed the panel lists the library's notes after `[[`
 /// and a note's headings after `#`. Everything comes from what the app
 /// already keeps: the notes and their aliases from `note_stems` (one query,
-/// never a walk of the tree), a note's headings from the same block scan the
-/// outline reads ([outlineOfText]), and a book's place forms from the target
-/// itself. Nothing here scans the library to fill the panel.
+/// never a walk of the tree), a note's headings from its own file — read and
+/// outlined off the UI isolate, once per revision of it (#491) — and a
+/// book's place forms from the target itself. Nothing here scans the library
+/// to fill the panel.
 library;
 
 import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
-import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
@@ -84,6 +84,8 @@ abstract interface class WikilinkSuggester {
 
   /// The headings of the note named by the wiki [target] — `note`,
   /// `folder/note` — or none when it does not resolve or cannot be read.
+  /// The list is the note's own headings, as the outline reads them; the
+  /// panel filters it for the heading being typed.
   Future<List<HeadingSuggestion>> headings(String target);
 
   /// The place forms the book named by [target] offers, or none when the
@@ -94,20 +96,35 @@ abstract interface class WikilinkSuggester {
 /// The panel's suggestions, read off the library's index.
 ///
 /// One class, so every read the panel makes is one place: the notes from
-/// `note_stems`, a named note's headings from its own file through [readNote]
-/// and the outline's scan, and a book's forms from the target's extension.
+/// `note_stems`, a named note's headings through [readHeadings] — kept by
+/// note and revision, so a run of keystrokes after `#` reads the target
+/// once (#491) — and a book's forms from the target's extension.
 final class IndexWikilinkSuggester implements WikilinkSuggester {
-  /// Creates a suggester over [_db], reading a named note through [readNote]
-  /// (the session's own read of a library-relative path; null when it is
-  /// gone).
-  new(this._db, {required this.readNote}) : _resolver = LinkResolver(_db);
+  /// Creates a suggester over [_db], reading a named note's headings through
+  /// [readHeadings] (the session's own read and scan of a library-relative
+  /// path, off the UI isolate; null when it is gone).
+  new(this._db, {required this.readHeadings}) : _resolver = LinkResolver(_db);
 
   final IndexDatabase _db;
 
-  /// Reads a library-relative note path's text, or null when it is gone.
-  final Future<String?> Function(String path) readNote;
+  /// The headings of a library-relative note path, in document order, or
+  /// null when it is gone. The whole note is read, decoded and walked, so
+  /// the implementation runs it off the UI isolate.
+  final Future<List<String>?> Function(String path) readHeadings;
 
   final LinkResolver _resolver;
+
+  /// The headings already read, by note and revision. A run of keystrokes
+  /// after `#` names the same target each time and the panel filters the
+  /// list locally, so one read answers them all; only the note's own
+  /// revision (its mtime and size, as the index records it) can make the
+  /// list stale.
+  final Map<(int, DateTime, int), List<HeadingSuggestion>> _headingsByNote = {};
+
+  /// How many notes' headings are kept. More than the run of keystrokes
+  /// needs, so moving between a few targets does not re-read; bounded, so a
+  /// long session cannot keep a novel's outline per note it ever named.
+  static const int _headingCacheNotes = 8;
 
   /// How many matching rows one query fetches before the list is ranked and
   /// cut to [limit]. Bounds a contains query, which cannot use the stem
@@ -305,12 +322,17 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   Future<List<HeadingSuggestion>> headings(String target) async {
     final note = await _resolved(target);
     if (note == null) return const <HeadingSuggestion>[];
-    final text = await readNote(note.path);
-    if (text == null) return const <HeadingSuggestion>[];
-    return [
-      for (final heading in outlineOfText(text))
-        HeadingSuggestion(heading.text),
-    ];
+    final key = (note.id, note.modified, note.size);
+    final kept = _headingsByNote[key];
+    if (kept != null) return kept;
+    final texts = await readHeadings(note.path);
+    if (texts == null) return const <HeadingSuggestion>[];
+    final rows = [for (final text in texts) HeadingSuggestion(text)];
+    if (_headingsByNote.length >= _headingCacheNotes) {
+      _headingsByNote.remove(_headingsByNote.keys.first);
+    }
+    _headingsByNote[key] = rows;
+    return rows;
   }
 
   @override
