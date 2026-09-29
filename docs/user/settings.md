@@ -165,7 +165,7 @@ found, a banner offers the download:
 `Check for updates` runs the same check on demand and downloads
 immediately when newer; it works even with automatic updates off.
 
-The last section, **About**, holds two read-only facts about the
+The **Diagnostics and info** section holds two read-only facts about the
 installation: the app's own **Version**, and **Changelog**, which opens
 the full list of shipped versions, newest first. Each entry's bullets are
 Markdown — their bold, code and links read as they would in a note. The

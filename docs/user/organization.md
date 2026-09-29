@@ -6,9 +6,10 @@ Deletes go to `.trash/` (soft delete) or remove the file permanently
 (hard delete), depending on the library's `trashEnabled` setting
 (default true). Restore by moving the file back out of `.trash/`.
 
-**Emptying it on its own.** *Settings → Auto-empty trash* is **Never**
-until you set it: pick a wait (a week, a month, a year) and every
-deletion that has sat in `.trash/` longer than that is deleted for good
+**Emptying it on its own.** *Settings → Trash and history → Auto-empty
+trash* is **Never** until you set it: pick a wait (a week, a month, a
+year) and every deletion that has sat in `.trash/` longer than that is
+deleted for good
 the next time the library opens. It happens quietly and there is no
 undo, which is why nothing is deleted until you choose a wait. Only what
 Niman put in the trash is counted — a file you moved into `.trash/`
@@ -38,7 +39,7 @@ seconds.
 
 **How many.** The last `historyVersions` versions per note (default 10;
 0 keeps none). Older ones are dropped as new ones arrive. Both settings
-live in **Settings → Library** and in `.niman/settings.json`;
+live in **Settings → Trash and history** and in `.niman/settings.json`;
 out-of-range values in a hand-edited file read back as the defaults.
 
 **Browse and restore.** Long-press a note in the tree (right-click on
@@ -411,7 +412,7 @@ it, and the text lands when a view of the note takes it.
 
 The first time, Niman asks which **model** to use and downloads it once.
 The models stay in the app's storage on this device — never in the library,
-never synced. **Settings → Library → Transcription** holds the model and
+never synced. **Settings → Transcription** holds the model and
 the **language** spoken in your recordings (naming it beats letting whisper
 detect it, and *Same as the app* follows the app's language). Tiny, base,
 small, medium and large are offered, from fastest-and-least-accurate to

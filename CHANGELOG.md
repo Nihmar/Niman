@@ -3,8 +3,8 @@
 All notable changes to Niman, newest version first.
 
 This file ships inside the build and feeds the in-app changelog (the
-launch dialog after an update and the screen under Settings → About).
-Update it in the release commit, before the tag.
+launch dialog after an update and the screen under Settings → Diagnostics
+and info). Update it in the release commit, before the tag.
 
 ## [0.1.3] - 2026-09-27
 
