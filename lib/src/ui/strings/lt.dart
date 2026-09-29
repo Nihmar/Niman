@@ -2830,7 +2830,7 @@ final class LithuanianStrings extends Strings {
     final mod10 = count % 10;
     final mod100 = count % 100;
     if (mod10 == 1 && mod100 != 11) {
-      return '1 problema šiame šablone';
+      return '$count problema šiame šablone';
     }
     if (mod10 >= 2 && mod10 <= 9 && (mod100 < 11 || mod100 > 19)) {
       return '$count problemos šiame šablone';

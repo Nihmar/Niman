@@ -2830,7 +2830,7 @@ final class BelarusianStrings extends Strings {
     final mod10 = count % 10;
     final mod100 = count % 100;
     if (mod10 == 1 && mod100 != 11) {
-      return '1 праблема ў гэтым шаблоне';
+      return '$count праблема ў гэтым шаблоне';
     }
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
       return '$count праблемы ў гэтым шаблоне';

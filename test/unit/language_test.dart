@@ -156,6 +156,48 @@ void main() {
       expect(AppStrings.wordCount(20), '20 de cuvinte');
     });
 
+    // The status row counts the checker's findings, and the same count in
+    // the same language takes the same form there as it does in the word
+    // count: a language whose twenty-one is a singular must not say
+    // "1 problem" for it, and one that also puts twenty-one in the
+    // singular must not take the plural form for it either.
+    test('the template problem count follows its language plural rule', () {
+      AppLanguages.choice = AppLanguage.ukrainian;
+      expect(AppStrings.templateProblems(1), '1 проблема в цьому шаблоні');
+      expect(AppStrings.templateProblems(21), '21 проблема в цьому шаблоні');
+      expect(AppStrings.templateProblems(22), '22 проблеми в цьому шаблоні');
+      expect(AppStrings.templateProblems(11), '11 проблем у цьому шаблоні');
+      expect(AppStrings.templateProblems(25), '25 проблем у цьому шаблоні');
+
+      AppLanguages.choice = AppLanguage.lithuanian;
+      expect(AppStrings.templateProblems(1), '1 problema šiame šablone');
+      expect(AppStrings.templateProblems(21), '21 problema šiame šablone');
+      expect(AppStrings.templateProblems(22), '22 problemos šiame šablone');
+      expect(AppStrings.templateProblems(11), '11 problemų šiame šablone');
+
+      AppLanguages.choice = AppLanguage.belarusian;
+      expect(AppStrings.templateProblems(1), '1 праблема ў гэтым шаблоне');
+      expect(AppStrings.templateProblems(21), '21 праблема ў гэтым шаблоне');
+      expect(AppStrings.templateProblems(22), '22 праблемы ў гэтым шаблоне');
+      expect(AppStrings.templateProblems(11), '11 праблем у гэтым шаблоне');
+      expect(AppStrings.templateProblems(25), '25 праблем у гэтым шаблоне');
+
+      AppLanguages.choice = AppLanguage.croatian;
+      expect(AppStrings.templateProblems(1), '1 problem u ovom predlošku');
+      expect(AppStrings.templateProblems(21), '21 problem u ovom predlošku');
+      expect(AppStrings.templateProblems(11), '11 problema u ovom predlošku');
+
+      AppLanguages.choice = AppLanguage.bosnian;
+      expect(AppStrings.templateProblems(1), '1 problem u ovom predlošku');
+      expect(AppStrings.templateProblems(21), '21 problem u ovom predlošku');
+      expect(AppStrings.templateProblems(11), '11 problema u ovom predlošku');
+
+      AppLanguages.choice = AppLanguage.serbian;
+      expect(AppStrings.templateProblems(1), '1 проблем у овом шаблону');
+      expect(AppStrings.templateProblems(21), '21 проблем у овом шаблону');
+      expect(AppStrings.templateProblems(11), '11 проблема у овом шаблону');
+    });
+
     test('every language answers the note statuses', () {
       for (final language in AppLanguages.supported) {
         AppLanguages.choice = language;

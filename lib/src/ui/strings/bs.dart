@@ -2826,8 +2826,8 @@ final class BosnianStrings extends Strings {
   @override
   String get templateHintDismissAction => 'Odbaci';
   @override
-  String templateProblems(int count) => count == 1
-      ? '1 problem u ovom predlošku'
+  String templateProblems(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count problem u ovom predlošku'
       : '$count problema u ovom predlošku';
   // The wikilink panel (#475) and the two book forms it offers after `#`.
 
