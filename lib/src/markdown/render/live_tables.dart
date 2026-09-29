@@ -177,6 +177,12 @@ final class LiveTables {
   @visibleForTesting
   static int measurements = 0;
 
+  /// How many rows have been laid out — their gaps worked out, their pieces
+  /// made ready — for the test that holds a caret move to the rows it touched
+  /// (#494).
+  @visibleForTesting
+  static int rowsLaid = 0;
+
   /// How line [line] of [buffer] is laid out, [block] being its block; null
   /// for a line of no table. [tokensOf] gives a line's tokens, of which the
   /// ones [hidden] says are marks are drawn as nothing and the rest in
@@ -259,7 +265,8 @@ final class LiveTables {
           budget,
         )
         ..reveal = reveal
-        ..budget = budget;
+        ..budget = budget
+        ..touched.clear();
     }
     return table.rows![at];
   }
@@ -303,7 +310,7 @@ final class LiveTables {
         (shown != null && metrics.revealedWith != reveal)) {
       if (metrics.revealedLine != null && metrics.revealedLine != shown) {
         _measureRow(
-          block,
+          table,
           metrics,
           metrics.revealedLine! - block.startLine,
           false,
@@ -316,7 +323,7 @@ final class LiveTables {
       }
       if (shown != null) {
         _measureRow(
-          block,
+          table,
           metrics,
           shown - block.startLine,
           true,
@@ -375,7 +382,7 @@ final class LiveTables {
   /// ([revealed]) shows a run's marks, and the row it left shows them as they
   /// stand at rest.
   void _measureRow(
-    Block block,
+    _Table table,
     _Metrics metrics,
     int row,
     bool revealed,
@@ -385,8 +392,9 @@ final class LiveTables {
     MarkdownTheme theme,
     TextScaler scaler,
   ) {
+    table.touched.add(row);
     metrics.rows[row] = _work(
-      block,
+      table.block,
       row,
       metrics.lines[row],
       revealed,
@@ -570,53 +578,82 @@ final class LiveTables {
     for (final width in fitted) {
       edges.add(edges.last + width + 2 * pad);
     }
-    final tiny = _tinyAdvance(scaler);
+    // A move of the reveal leaves the columns where they were unless the
+    // caret's row is wider for its marks. When it does, the rows it did not
+    // touch are the rows they were, and only the ones it did are laid out
+    // again.
+    final before = table.rows;
+    final kept =
+        before != null &&
+            before.isNotEmpty &&
+            table.fits == fits &&
+            _sameEdges(before.first.edges, edges)
+        ? before
+        : null;
+    table.fits = fits;
+    late final tiny = _tinyAdvance(scaler);
     // The columns' alignments, from the delimiter row: a right-aligned
     // column's text stands at its right edge, as the read view sets it.
     final aligns = lines.length > 1
         ? MarkdownTable.alignsOf(lines[1])
         : const <TableAlign>[];
+    LiveTableRow build(int row) {
+      rowsLaid++;
+      return LiveTableRow(
+        // The row's pieces are worked out the first time a frame draws it:
+        // a row scrolled out of view is drawn by no frame, and is measured
+        // by none (#494).
+        () => fits || delimiters[row]
+            ? const <LiveTableLine>[]
+            : _wrappedRow(
+                lines[row],
+                tokensOf(block.startLine + row),
+                cells[row],
+                fitted,
+                edges,
+                pad,
+                aligns,
+                row == 0 ? theme.tableHeader : theme.tableCell,
+                scaler,
+                (token) => hidden(block.startLine + row, token),
+                styleOf,
+              ),
+        edges: edges,
+        gaps: fits || delimiters[row]
+            ? _gaps(
+                lines[row],
+                cells[row],
+                widths[row],
+                edges,
+                pad,
+                tiny,
+                (row == 0 ? theme.tableHeader : theme.tableCell)
+                        .letterSpacing ??
+                    0,
+                aligns,
+              )
+            : const <LiveTableGap>[],
+        header: row == 0,
+        delimiter: delimiters[row],
+        last: row == lines.length - 1,
+      );
+    }
+
     return <LiveTableRow>[
       for (var row = 0; row < lines.length; row++)
-        LiveTableRow(
-          // The row's pieces are worked out the first time a frame draws it:
-          // a row scrolled out of view is drawn by no frame, and is measured
-          // by none (#494).
-          () => fits || delimiters[row]
-              ? const <LiveTableLine>[]
-              : _wrappedRow(
-                  lines[row],
-                  tokensOf(block.startLine + row),
-                  cells[row],
-                  fitted,
-                  edges,
-                  pad,
-                  aligns,
-                  row == 0 ? theme.tableHeader : theme.tableCell,
-                  scaler,
-                  (token) => hidden(block.startLine + row, token),
-                  styleOf,
-                ),
-          edges: edges,
-          gaps: fits || delimiters[row]
-              ? _gaps(
-                  lines[row],
-                  cells[row],
-                  widths[row],
-                  edges,
-                  pad,
-                  tiny,
-                  (row == 0 ? theme.tableHeader : theme.tableCell)
-                          .letterSpacing ??
-                      0,
-                  aligns,
-                )
-              : const <LiveTableGap>[],
-          header: row == 0,
-          delimiter: delimiters[row],
-          last: row == lines.length - 1,
-        ),
+        if (kept != null && !table.touched.contains(row))
+          kept[row]
+        else
+          build(row),
     ];
+  }
+
+  static bool _sameEdges(List<double> a, List<double> b) {
+    if (a.length != b.length) return false;
+    for (var at = 0; at < a.length; at++) {
+      if (a[at] != b[at]) return false;
+    }
+    return true;
   }
 
   /// The natural cell [column] widths of a table wider than [budget]: the
@@ -1129,4 +1166,12 @@ final class _Table {
   List<LiveTableRow>? rows;
   Object? reveal;
   double? budget;
+
+  /// Whether the columns fitted the pane when [rows] were laid out.
+  bool? fits;
+
+  /// The rows measured again since [rows] were laid out: the ones a reveal
+  /// moved onto or off, which are the only ones a lay-out over columns that
+  /// stood has to make again.
+  final Set<int> touched = <int>{};
 }

@@ -503,6 +503,77 @@ void main() {
     }
   });
 
+  // A caret move inside a table changes which row shows its run's marks, and
+  // nothing else: when that leaves the columns where they were, only the rows
+  // it touched are laid out again — not a gap list for every row of a
+  // 2,000-row table on each move (#494).
+  testWidgets('a caret move lays out the rows it touched', (tester) async {
+    final theme = await _theme(tester);
+    final note = StringBuffer('| h1 | h2 |\n|---|---|\n');
+    for (var at = 0; at < 30; at++) {
+      note.write('| r$at alpha | r$at beta gamma |\n');
+    }
+    for (final budget in <double>[2000, 120]) {
+      final buffer = SourceBuffer.fromText(note.toString());
+      const block = Block(kind: BlockKind.table, startLine: 0, endLine: 32);
+      int? revealed;
+      LiveTableRow? row(LiveTables tables, int line, {Object? reveal}) =>
+          tables.rowOf(
+            line,
+            block,
+            buffer,
+            tokensOf: (line) => const <Token>[],
+            hidden: (line, token) => false,
+            styleOf: (token) => null,
+            theme: theme,
+            scaler: TextScaler.noScaling,
+            budget: budget,
+            reveal: reveal,
+            revealLine: reveal == null ? null : revealed,
+          );
+      final tables = LiveTables();
+
+      int laid(void Function() body) {
+        LiveTables.rowsLaid = 0;
+        body();
+        return LiveTables.rowsLaid;
+      }
+
+      void askAll({Object? reveal}) {
+        for (var line = 0; line < 32; line++) {
+          row(tables, line, reveal: reveal);
+        }
+      }
+
+      expect(laid(askAll), 32, reason: 'the table, once');
+      expect(laid(askAll), 0, reason: 'the same caret');
+      revealed = 5;
+      expect(
+        laid(() => askAll(reveal: 'run 5')),
+        1,
+        reason: 'the row the caret entered, at $budget',
+      );
+      revealed = 7;
+      expect(
+        laid(() => askAll(reveal: 'run 7')),
+        2,
+        reason: 'the row it left and the row it entered, at $budget',
+      );
+      expect(laid(askAll), 1, reason: 'the row it left, at $budget');
+      // What stands is what a table laid out from nothing draws.
+      revealed = 9;
+      askAll(reveal: 'run 9');
+      final fresh = LiveTables();
+      for (var line = 0; line < 32; line++) {
+        _expectSame(
+          row(tables, line, reveal: 'run 9')!,
+          row(fresh, line, reveal: 'run 9')!,
+          reason: 'line $line at $budget',
+        );
+      }
+    }
+  });
+
   testWidgets('a row kept across revisions is drawn as a fresh one', (
     tester,
   ) async {
