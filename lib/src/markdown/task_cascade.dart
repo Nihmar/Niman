@@ -22,46 +22,66 @@ import 'package:niman/src/markdown/source_buffer.dart';
 ///
 /// A list whose items are blocks of their own — a plain list, or a quoted head
 /// with its indented children — is walked block by block. A quoted list is one
-/// `quote` block however deep its items nest, so its branch is read from the
-/// quote's own lines ([_quotedItems]); the block walk after it still catches
-/// the items that are blocks of their own.
+/// `quote` block however deep its items nest, so an item on any of its lines
+/// has its branch read from the quote's own lines ([_quotedBranch]); the block
+/// walk after the quote still catches the items that are blocks of their own,
+/// when nothing in the quote ended the branch first.
 List<Block> checklistBranch({
   required SourceBuffer buffer,
   required List<Block> blocks,
   required int line,
-}) {
+}) => _branch(buffer, blocks, line)?.items ?? const <Block>[];
+
+/// The branch of the item on [line] among [blocks], and whether it is still
+/// open where [blocks] end — no sibling, no shallower item, no other quote
+/// level closed it — so that what follows the container they are read from
+/// can still belong to it. Null when [line] does not start a task item.
+({List<Block> items, bool open})? _branch(
+  SourceBuffer buffer,
+  List<Block> blocks,
+  int line,
+) {
   final index = _indexOfLine(blocks, line);
-  if (index < 0) return const <Block>[];
+  if (index < 0) return null;
   final parent = blocks[index];
-  if (parent.startLine != line) return const <Block>[];
-  final branch = <Block>[];
+  final items = <Block>[];
   if (parent.kind == BlockKind.quote) {
-    branch.addAll(_quotedItems(buffer, parent));
-    if (branch.isEmpty) return const <Block>[];
-  } else if (parent.kind == BlockKind.listItem) {
-    branch.add(parent);
+    final quoted = _quotedBranch(buffer, parent, line);
+    if (quoted == null) return null;
+    items.addAll(quoted.items);
+    if (!quoted.open) return (items: items, open: false);
+  } else if (parent.kind == BlockKind.listItem && parent.startLine == line) {
+    items.add(parent);
   } else {
-    return const <Block>[];
+    return null;
   }
   for (var at = index + 1; at < blocks.length; at++) {
     final block = blocks[at];
-    if (block.quoteDepth != parent.quoteDepth) break;
+    if (block.quoteDepth != parent.quoteDepth) {
+      return (items: items, open: false);
+    }
     // A continuation, a code block, a paragraph inside a child: not an
     // item, and not the end of the branch either.
     if (block.kind != BlockKind.listItem) continue;
     // The first item that is not deeper is a sibling or the next list:
     // the branch ends there.
-    if (block.listDepth <= parent.listDepth) break;
-    branch.add(block);
+    if (block.listDepth <= parent.listDepth) {
+      return (items: items, open: false);
+    }
+    items.add(block);
   }
-  return branch;
+  return (items: items, open: true);
 }
 
-/// The items nested under the first line of [quote], as blocks of the note:
-/// the quote's own lines with their marks off, read again as a note — the way
-/// the renderer reads a quote — and the item on its first line with everything
-/// deeper under it.
-List<Block> _quotedItems(SourceBuffer buffer, Block quote) {
+/// The branch of the item on [line], a line of [quote], as blocks of the
+/// note: the quote's own lines with their marks off, read again as a note —
+/// the way the renderer reads a quote — and the branch taken from that
+/// reading, a quote nested in it read through the same way.
+({List<Block> items, bool open})? _quotedBranch(
+  SourceBuffer buffer,
+  Block quote,
+  int line,
+) {
   final content = <String>[
     for (var at = quote.startLine; at < quote.endLine; at++)
       buffer
@@ -70,28 +90,27 @@ List<Block> _quotedItems(SourceBuffer buffer, Block quote) {
             BlockParser.quotePrefixLength(buffer.lineAt(at), quote.quoteDepth),
           ),
   ].join('\n');
-  final inner = BlockScanner(SourceBuffer.fromText(content)).index.blocks;
-  if (inner.isEmpty) return const <Block>[];
-  final first = inner.first;
-  if (first.kind != BlockKind.listItem || first.startLine != 0) {
-    return const <Block>[];
-  }
-  Block shifted(Block block) => Block(
-    kind: block.kind,
-    startLine: block.startLine + quote.startLine,
-    endLine: block.endLine + quote.startLine,
-    quoteDepth: quote.quoteDepth,
-    listDepth: block.listDepth,
-    listOrdinal: block.listOrdinal,
+  final inner = SourceBuffer.fromText(content);
+  final branch = _branch(
+    inner,
+    BlockScanner(inner).index.blocks,
+    line - quote.startLine,
   );
-  final items = <Block>[shifted(first)];
-  for (var at = 1; at < inner.length; at++) {
-    final block = inner[at];
-    if (block.kind != BlockKind.listItem) continue;
-    if (block.listDepth <= first.listDepth) break;
-    items.add(shifted(block));
-  }
-  return items;
+  if (branch == null || branch.items.isEmpty) return null;
+  return (
+    items: [
+      for (final block in branch.items)
+        Block(
+          kind: block.kind,
+          startLine: block.startLine + quote.startLine,
+          endLine: block.endLine + quote.startLine,
+          quoteDepth: quote.quoteDepth + block.quoteDepth,
+          listDepth: block.listDepth,
+          listOrdinal: block.listOrdinal,
+        ),
+    ],
+    open: branch.open,
+  );
 }
 
 /// The span of [buffer] that carries the tick of [line] down its branch,

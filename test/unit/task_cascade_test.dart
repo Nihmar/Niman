@@ -90,6 +90,65 @@ void main() {
       );
     });
 
+    test('a quoted item below the first line takes its own children', () {
+      // The whole quoted list is one `quote` block: an item on any of its
+      // lines carries the items nested under it, and only them.
+      const text =
+          '> - [ ] a\n'
+          '>   - [ ] a1\n'
+          '> - [ ] b\n'
+          '>   - [ ] b1\n'
+          '>     - [ ] b11\n'
+          '> - [ ] c';
+      expect(
+        _ticked(text, 2),
+        '> - [ ] a\n'
+        '>   - [ ] a1\n'
+        '> - [x] b\n'
+        '>   - [x] b1\n'
+        '>     - [x] b11\n'
+        '> - [ ] c',
+      );
+      expect(
+        _ticked(text, 3),
+        '> - [ ] a\n'
+        '>   - [ ] a1\n'
+        '> - [ ] b\n'
+        '>   - [x] b1\n'
+        '>     - [x] b11\n'
+        '> - [ ] c',
+      );
+    });
+
+    test("the children past a quote are its last item's alone", () {
+      // Indented items after a quoted head continue its last item: a
+      // sibling above it in the quote does not take them.
+      const text = '> - [ ] a\n> - [ ] b\n  - [ ] child';
+      expect(_ticked(text, 0), '> - [x] a\n> - [ ] b\n  - [ ] child');
+      expect(_ticked(text, 1), '> - [ ] a\n> - [x] b\n  - [x] child');
+    });
+
+    test('a quote in a quote is read through to its items', () {
+      const text = '> intro\n> > - [ ] a\n> >   - [ ] a1\n> > - [ ] b';
+      expect(
+        _ticked(text, 1),
+        '> intro\n> > - [x] a\n> >   - [x] a1\n> > - [ ] b',
+      );
+    });
+
+    test('a quoted line that is not an item carries nothing', () {
+      const text = '> text\n> - [ ] a';
+      final buffer = SourceBuffer.fromText(text);
+      expect(
+        checklistBranch(
+          buffer: buffer,
+          blocks: BlockScanner(buffer).index.blocks,
+          line: 0,
+        ),
+        isEmpty,
+      );
+    });
+
     test('a checklist line in a fenced code block is not a child', () {
       const text =
           '- [ ] parent\n'
