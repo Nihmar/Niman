@@ -100,10 +100,13 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - Cut a release: bump `version:` in `pubspec.yaml`, commit both with the changelog, `git tag vX.Y.Z`, `git push origin vX.Y.Z`.
 - Workflow: `.github/workflows/release.yml`. Artifacts: Android `.apk`; Linux `.tar.gz` + `.AppImage` + `.pkg.tar.zst`; Windows `.exe` (Inno Setup) + `.zip`.
 - Android APK is signed with the release key from the Actions secrets
-  (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
+  (`ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD`,
   `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`). Without them the build
   falls back to the debug key, which changes per run — that is what made
   every release up to v0.0.7 refuse to update over the last one (#160).
+  The names are the repository's own: #449 read a documented
+  `ANDROID_KEYSTORE_PASSWORD` no secret carried, and the v0.1.4 release
+  failed at signing with an empty password.
 - Bump the `+N` build number on every tag, including a re-cut of an
   existing version: it is the Android `versionCode`, and the installer
   rejects a package that does not raise it.

@@ -67,11 +67,14 @@ pages cut before this rule.
 ## Signing
 
 - **Android:** signed with the release key, read from the Actions secrets
-  `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
+  `ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD`,
   `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` (the workflow picks them
-  up automatically). Without them the build falls back to the debug key,
-  which changes from run to run — Android then refuses to update over the
-  last install, which is what happened to every release up to v0.0.7
+  up automatically; the names are the repository's own — a workflow that
+  asks for a name no secret carries fails at signing with an empty
+  password, as v0.1.4 did). Without them the build falls back to the
+  debug key, which changes from run to run — Android then refuses to
+  update over the last install, which is what happened to every release
+  up to v0.0.7
   ([#160](https://github.com/Nihmar/Niman/issues/160)). Never ship a
   release from a debug-signed build.
 - **Linux / Windows:** unsigned, as planned for v1.

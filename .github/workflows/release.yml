@@ -49,12 +49,24 @@ jobs:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          # The keystore (= store) password: AGENTS.md, README.md and
-          # docs/dev/releasing.md all name it ANDROID_KEYSTORE_PASSWORD
-          # (issue #393).
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          # The keystore (= store) password. The repository keeps it as
+          # ANDROID_STORE_PASSWORD and reads that name (#393): #449 switched
+          # this line to ANDROID_KEYSTORE_PASSWORD to follow the docs while
+          # the secret kept its own name, so the v0.1.4 release died at
+          # signing with an empty password (2026-09-29). The docs name the
+          # real one too now.
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
           if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            # An empty alias or password fails inside Gradle, minutes into
+            # the build, as "keystore password was incorrect": say what is
+            # missing here instead.
+            if [ -z "$ANDROID_KEY_ALIAS" ] ||
+               [ -z "$ANDROID_KEY_PASSWORD" ] ||
+               [ -z "$ANDROID_KEYSTORE_PASSWORD" ]; then
+              echo "::error::the keystore is set but a secret it needs is empty: see docs/dev/releasing.md"
+              exit 1
+            fi
             echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
             cat > android/key.properties <<EOF
           storeFile=$RUNNER_TEMP/release.jks

@@ -243,7 +243,7 @@ GitHub Release page.
 ### Signing
 
 - **Android:** signed with the release key stored as Actions secrets
-  (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
+  (`ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD`,
   `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`). Without them a build falls
   back to the debug key, which changes from run to run and makes Android
   refuse to update over the last install — do not ship a release that way.
