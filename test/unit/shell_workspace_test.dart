@@ -65,4 +65,53 @@ void main() {
       expect(workspace.value.tabs.map((t) => t.missing), [true, false]);
     },
   );
+
+  test('a removal of another note leaves the flag standing', () async {
+    final session = FakeLibrarySession();
+    addTearDown(session.dispose);
+    await session.createNote(parentPath: '', name: 'here');
+    session.workspace = Workspace.empty.open('gone.md').open('here.md');
+    final workspace = ShellWorkspace(session);
+    addTearDown(workspace.dispose);
+    await workspace.load();
+
+    // `here.md` is deleted outside the app now: its re-index reports that
+    // removal alone, and `gone.md` is still gone.
+    workspace.missing({'here.md'});
+
+    expect(workspace.value.tabs.map((t) => t.missing), [true, true]);
+  });
+
+  test('a flagged note the index holds again loses its flag', () async {
+    final session = FakeLibrarySession();
+    addTearDown(session.dispose);
+    session.workspace = Workspace.empty.open('back.md').open('gone.md');
+    final workspace = ShellWorkspace(session);
+    addTearDown(workspace.dispose);
+    await workspace.load();
+    expect(workspace.value.tabs.map((t) => t.missing), [true, true]);
+
+    await session.createNote(parentPath: '', name: 'back');
+    await workspace.indexChanged();
+
+    expect(workspace.value.tabs.map((t) => t.missing), [false, true]);
+  });
+
+  test('a removal while the index is asked is not undone', () async {
+    final session = FakeLibrarySession();
+    addTearDown(session.dispose);
+    session.workspace = Workspace.empty.open('back.md');
+    final workspace = ShellWorkspace(session);
+    addTearDown(workspace.dispose);
+    await workspace.load();
+    await session.createNote(parentPath: '', name: 'back');
+
+    // The index is asked while the note is there, and the note goes again
+    // before the answer lands: the answer is older than the removal.
+    final asked = workspace.indexChanged();
+    workspace.missing({'back.md'});
+    await asked;
+
+    expect(workspace.value.tabs.single.missing, isTrue);
+  });
 }

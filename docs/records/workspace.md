@@ -26,7 +26,8 @@ Its rules are tested in `test/unit/workspace_test.dart`:
 | close | The showing tab gives way to its right neighbour, or its left one at the end of the row. A second pane left empty closes the split. |
 | rename / move | The note, or every note under a folder, keeps its tab and memento at the new path. |
 | delete | The note, or every note under a folder, closes. |
-| gone from disk | The tab — and, for a gone folder, every tab under it — stays, marked `missing`. The mark is never stored. |
+| gone from disk | The tab — and, for a gone folder, every tab under it — stays, marked `missing`. The mark is never stored. A later removal adds marks and lifts none: it names what one re-index removed, not everything that is gone. |
+| back on disk | The mark goes once the index holds the note again; the shell asks it about the marked tabs at every index change. |
 
 ## Where it is kept
 

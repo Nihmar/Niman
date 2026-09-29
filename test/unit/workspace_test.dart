@@ -239,7 +239,25 @@ void main() {
       expect(w.tabs.first.missing, isTrue);
       expect(w.tabs.last.missing, isFalse);
       // And unmarked once it is back.
-      expect(w.withMissing({}).tabs.first.missing, isFalse);
+      expect(w.withPresent({'a.md'}).tabs.first.missing, isFalse);
+    });
+
+    test('a later removal adds to the marks, it does not replace them', () {
+      // The shell hands over each re-index's removals, not every path that
+      // is gone: a second note deleted outside the app says nothing about
+      // the first, which is still gone.
+      final w = _opened(['a.md', 'b.md', 'c.md'])
+          .withMissing({'a.md'})
+          .withMissing({'b.md'});
+      expect(w.tabs.map((t) => t.missing), [true, true, false]);
+      expect(w.withMissing({}), w, reason: 'no paths, no change');
+    });
+
+    test('only a note found again loses its mark', () {
+      final w = _opened(['a.md', 'b.md'])
+          .withMissing({'a.md', 'b.md'})
+          .withPresent({'b.md'});
+      expect(w.tabs.map((t) => t.missing), [true, false]);
     });
 
     test('a folder gone from disk marks every tab under it', () {

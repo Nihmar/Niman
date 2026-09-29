@@ -1501,9 +1501,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     FocusManager.instance.addListener(_reclaimFocus);
     _zen.addListener(_onZenChanged);
     unawaited(_workspace.load());
-    _libraryEvents = widget.controller.events.listen(
-      (_) => _homeWidgets.pushNotes(),
-    );
+    _libraryEvents = widget.controller.events.listen((_) {
+      _homeWidgets.pushNotes();
+      unawaited(_workspace.indexChanged());
+    });
     _libraryRemovals = widget.controller.removals.listen(
       (paths) => _workspace.missing(paths),
     );
