@@ -168,8 +168,10 @@ final class ShellTemplateFlow {
     // Per-creation counters (#52, #359, #497): one number per name,
     // reserved on disk once the name is known — never before the name
     // dialog, which the user may still cancel and which used to burn a
-    // number. The file is read and written under [guard], where a failure
-    // is reported instead of escaping the flow.
+    // number. The reservation is persisted before the note exists (a second
+    // window has to see it), so a creation that then fails gives it back
+    // below. The file is read and written under [guard], where a failure is
+    // reported instead of escaping the flow.
     ({CounterStore store, int Function(String name) counter})? reserved;
     Future<bool> reserveCounters() async {
       if (reserved != null) return true;
@@ -229,16 +231,20 @@ final class ShellTemplateFlow {
         counter: counter,
       );
       final content = rendered.text;
-      if (directives.folder case final wanted? when wanted.isNotEmpty) {
-        await ops.ensureFolder(wanted);
-      }
-      final row = directives.append
-          ? await ops.appendToNote(resolvePath(target, '$name.md'), content)
-          : await ops.createNote(
-              parentPath: target,
-              name: name,
-              content: content,
-            );
+      // The numbers are on disk before the note exists: one that could not
+      // be made gives them back, so the next one does not skip them.
+      final row = await CounterStore.whileCreating(counters, () async {
+        if (directives.folder case final wanted? when wanted.isNotEmpty) {
+          await ops.ensureFolder(wanted);
+        }
+        return directives.append
+            ? await ops.appendToNote(resolvePath(target, '$name.md'), content)
+            : await ops.createNote(
+                parentPath: target,
+                name: name,
+                content: content,
+              );
+      });
       await counters?.save();
       if (!context.mounted) return;
       // A template whose frontmatter does not parse declares nothing, and

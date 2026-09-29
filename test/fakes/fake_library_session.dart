@@ -1075,12 +1075,18 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<TemplateSource?> get templateSource async => _FakeTemplateSource(this);
 
+  /// Thrown by [createNote] while non-null, like a disk that refuses the
+  /// file.
+  Exception? createNoteError;
+
   @override
   Future<Note> createNote({
     required String parentPath,
     required String name,
     String content = '',
   }) async {
+    final failure = createNoteError;
+    if (failure != null) throw failure;
     _checkParent(parentPath);
     final clean = sanitizeName(name, fallback: defaultNoteName);
     final unique = _uniqueInParent(parentPath, clean, '.md');

@@ -194,6 +194,60 @@ void main() {
     );
   });
 
+  // #497: the number is on disk before the entry exists, so an entry that
+  // could not be made gives it back rather than leaving a gap.
+  testWidgets('an entry that fails to be made gives its number back', (
+    tester,
+  ) async {
+    final dir = (await tester.runAsync(
+      () => Directory.systemTemp.createTemp('niman_journal_counter_'),
+    ))!;
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final errors = <Object>[];
+    final library = FakeLibrarySession();
+    addTearDown(library.dispose);
+    await library.open(dir.path, create: false);
+    await library.ensureFolder('Templates');
+    await library.createNote(
+      parentPath: 'Templates',
+      name: 'Day',
+      content: '# Day {{counter:day}}\n',
+    );
+    await library.setJournal(
+      const JournalSettings(template: 'Templates/Day.md'),
+    );
+    final journal = JournalFlow(
+      controller: library,
+      templates: ShellTemplateFlow(
+        controller: library,
+        origin: () => (selected: null, isDir: false, treeVisible: true),
+        createParent: () => '',
+        guard: (action) => action(),
+        opensPreviewOnly: () => false,
+        onNoteFiled: ({required path, required preview, required caret}) {},
+      ),
+      guard: (action) async {
+        try {
+          await action();
+        } on Object catch (error) {
+          errors.add(error);
+        }
+      },
+      onOpen: opened.add,
+      onCreated: (path, caret) => created.add((path, caret)),
+      clock: () => now,
+    );
+    final context = await pump(tester);
+    library.createNoteError = const FileSystemException('disk full');
+    await tester.runAsync(() => journal.openToday(context));
+    expect(errors.single, isA<FileSystemException>());
+    expect(created, isEmpty);
+
+    library.createNoteError = null;
+    await tester.runAsync(() => journal.openToday(context));
+    expect(library.contentOf(today), '# Day 1\n');
+  });
+
   testWidgets('previous and next skip the days without an entry', (
     tester,
   ) async {

@@ -25,7 +25,7 @@ Substitution, not a language — unknown `{{…}}` is copied verbatim:
 | `{{now}}` / `{{now:FORMAT}}` | Date + time (default `YYYY-MM-DD HH:mm`) |
 | `{{uuid}}` | A fresh UUID v4, one per occurrence |
 | `{{cursor}}` | Caret stop after insertion (writes nothing; `{{cursor:2}}` numbers stops) |
-| `{{counter:name}}` | Per-library counter, hands out 1, 2, 3… (two creations at once never share a number) |
+| `{{counter:name}}` | Per-library counter, hands out 1, 2, 3… (two creations at once never share a number; cancelling the name prompt, or a note that fails to be created, does not use one up) |
 | `{{clipboard}}` | Paste contents (title-cased by filters below) |
 | `{{selection}}` | The text selected in the editor when the note was created (empty when nothing is) |
 | `{{ask:Label}}` / `{{ask:Label:default}}` | Prompt for a value when creating |
