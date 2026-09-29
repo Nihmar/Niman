@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/export/export_tree.dart';
+import 'package:niman/src/export/export_tree_pages.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:path/path.dart' as p;
 
@@ -41,6 +42,21 @@ final String? _symlinkSkip = () {
     return null;
   } on FileSystemException {
     return 'a symbolic link cannot be created here';
+  } finally {
+    dir.deleteSync(recursive: true);
+  }
+}();
+
+/// Why the case test does not run here: a disk that folds case (Windows,
+/// macOS by default) holds `a.md` and `a.MD` as one file. Probed where the
+/// tests make their library.
+final String? _caseFoldSkip = () {
+  final dir = Directory.current.createTempSync('niman_case_');
+  try {
+    File(p.join(dir.path, 'probe')).createSync();
+    return File(p.join(dir.path, 'PROBE')).existsSync()
+        ? 'this disk folds case: a.md and a.MD are one file'
+        : null;
   } finally {
     dir.deleteSync(recursive: true);
   }
@@ -133,9 +149,8 @@ void main() {
 
   test('two notes whose names differ only by case get one page each', () async {
     // `a.md` is in the fixture. On a case-sensitive disk `a.MD` is a
-    // second note whose stem is the same file name; on Windows it is the
-    // same file written twice. Either way the zip cannot hold one
-    // overwriting the other (E7).
+    // second note whose stem is the same file name, and the zip cannot
+    // hold one overwriting the other (E7).
     await File(p.join(notes, 'a.MD')).writeAsString('# Upper\n');
     await TreeExport.run(
       dir: notes,
@@ -147,6 +162,23 @@ void main() {
     // Path order puts `a.MD` first: it keeps the name, `a.md` is numbered.
     expect(files['a.html'], contains('Upper'));
     expect(files['a-2.html'], contains('>A</h1>'));
+  }, skip: _caseFoldSkip);
+
+  test('names that differ only by case are kept apart', () {
+    // The naming of the test above, on every disk: the tree is built in
+    // memory, so it may hold the pair a case-folding disk cannot.
+    final tree = ExportTreePages.index(notes, <ExportTreeEntry>[
+      for (final rel in <String>['A.md', 'a.MD', 'a.md', 'b.md'])
+        (abs: p.join(notes, rel), rel: rel, isDir: false),
+    ]);
+    // The first in path order keeps the stem; each later one is numbered
+    // rather than take a case variant of a name already given.
+    expect(tree.names, <String, String>{
+      'A.md': 'A',
+      'a.MD': 'a-2',
+      'a.md': 'a-3',
+      'b.md': 'b',
+    });
   });
 
   test('a picture in the wrong case still resolves when unique', () async {
@@ -176,18 +208,20 @@ void main() {
     expect(File(zip).existsSync(), isFalse);
   });
 
-  test('a # or ? in a name is escaped in the page URL', () async {
-    await File(p.join(notes, 'q?x.md')).writeAsString('# Q\n');
-    await File(p.join(notes, 'weird#one.png')).writeAsBytes(<int>[1, 2, 3]);
-    await File(p.join(notes, 'links.md'))
-        .writeAsString('See [[q?x]].\n\n![w](weird#one.png)\n');
-    await TreeExport.run(
-      dir: notes,
-      zipPath: zip,
-      format: ExportTreeFormat.html,
-      language: 'en',
+  test('a # or ? in a name is escaped in the page URL', () {
+    // The tree is built in memory: Windows refuses a `?` in a file name,
+    // and the escaping is the page's, not the disk's.
+    final tree = ExportTreePages.index(notes, <ExportTreeEntry>[
+      for (final rel in <String>['links.md', 'q?x.md', 'weird#one.png'])
+        (abs: p.join(notes, rel), rel: rel, isDir: false),
+    ]);
+    final page = ExportTreePages.page(
+      'See [[q?x]].\n\n![w](weird#one.png)\n',
+      'links.md',
+      tree,
+      'en',
+      '.html',
     );
-    final page = (await contents())['links.html']!;
     // `#` and `?` are URI delimiters: left alone they would make the URL a
     // fragment, and the file it names would be dead (#63 review, L3).
     expect(page, contains('href="q%3Fx.html"'));

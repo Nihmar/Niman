@@ -63,6 +63,14 @@ abstract final class ExportTreePages {
     }
 
     visit(Directory(dir), '');
+    return index(dir, entries);
+  }
+
+  /// The tree of [entries] under [root], in the order given: the lookups
+  /// and the page names, built without touching the disk — so a tree with
+  /// names the host's file system refuses (`a.md` beside `a.MD` on Windows
+  /// or macOS, a `?` on Windows) can still be tested.
+  static ExportTreeWalk index(String root, List<ExportTreeEntry> entries) {
     final files = <String>{
       for (final entry in entries)
         if (!entry.isDir) entry.rel,
@@ -93,7 +101,7 @@ abstract final class ExportTreePages {
       names[file] = name;
     }
     return (
-      root: dir,
+      root: root,
       entries: entries,
       files: files,
       notes: notes,
