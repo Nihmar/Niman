@@ -39,6 +39,7 @@ final class ShellHomeWidgets {
     required this.openTodo,
     required this.openNote,
     required this.mounted,
+    required this.onTargetBlocked,
     this.unsaved,
   });
 
@@ -70,6 +71,11 @@ final class ShellHomeWidgets {
   /// Whether the shell is still on screen: a push after it went is a
   /// no-op, and a target it can no longer open belongs to its successor.
   final bool Function() mounted;
+
+  /// Says a target could not be followed because a note would not save: the
+  /// shell shows the message the other ways out of a library show, so a tap
+  /// on a widget that did nothing says why.
+  final void Function() onTargetBlocked;
 
   /// The target a library switch is carrying.
   ///
@@ -182,6 +188,7 @@ final class ShellHomeWidgets {
         _log.warning(
           'widget target left unopened: a note would not save ($failed)',
         );
+        if (mounted()) onTargetBlocked();
         return;
       }
       if (!mounted()) return;

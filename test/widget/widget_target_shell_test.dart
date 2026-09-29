@@ -156,6 +156,11 @@ void main() {
     await settle(tester);
 
     expect(controller.root, home, reason: 'the library did not go');
+    expect(
+      find.text(AppStrings.closeSaveFailed),
+      findsOneWidget,
+      reason: 'the tap that did nothing says why',
+    );
     await close();
   });
 
