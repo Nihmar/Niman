@@ -2772,12 +2772,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// How line [index] of table [block] is laid out with the caret at [at]:
   /// as every line of it is at rest, but for the run the caret is in, whose
   /// marks show as a paragraph's word does — and widen its column.
+  ///
+  /// Null outside `live`: source draws a table's line as the one paragraph
+  /// it is, so the caret, a tap and the grid are not to look for pieces of a
+  /// fitted row there.
   LiveTableRow? _tableRowAt(
     BuildContext context,
     int index,
     Block block,
     CaretSpot at,
   ) {
+    if (!widget.hideMarkers) return null;
     final inside = at.line >= block.startLine && at.line < block.endLine;
     return _tables.rowOf(
       index,

@@ -269,6 +269,43 @@ void main() {
     expect(await caretAt(0), await caretAt(text.indexOf('a first')));
   });
 
+  testWidgets('in source, a table too wide for the pane is its text', (
+    tester,
+  ) async {
+    // Source draws a table's row as the one paragraph it is, soft-wrapped:
+    // the caret is measured in that paragraph wherever it is on the row,
+    // not in pieces of a fitted layout only live draws.
+    tester.view.physicalSize = const Size(320, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => MarkdownSurface(
+              buffer: SourceBuffer.fromText(_longTable),
+              mode: MarkdownSurfaceMode.source,
+              theme: markdownThemeOf(context),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    final buffer = state.widget.buffer;
+    final text = buffer.lineAt(2);
+    for (final word in <String>['first', 'further', 'second']) {
+      state.placeCaret(buffer.offsetOfLine(2) + text.indexOf(word));
+      await tester.pump();
+      expect(state.caretRect, isNotNull, reason: word);
+    }
+  });
+
   testWidgets("a row's pipes are drawn as room, on the caret's row too", (
     tester,
   ) async {
