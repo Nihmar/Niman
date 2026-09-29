@@ -542,14 +542,27 @@ Future<void> _renameOrCopy(String abs, String tempAbs) async {
 /// as a whole one would outlive the sync that wrote it. A short copy is
 /// dropped there, leaving [abs] as it was.
 ///
+/// The staged rename gets the same [_renameGrace] as the guarded one, and
+/// past it the bytes go straight onto [abs]: the rename this function
+/// stands in for hangs on Windows (issue #103), and the staged one is a
+/// rename too (#492). [renameStaged] and [grace] are seams for a test that
+/// hangs the staged rename without waiting the real grace out.
+///
 /// A temp that will not delete is left where it is. The abandoned rename
 /// may still hold it; it is hidden, the indexer skips it, and the bytes
 /// are already in place, so failing a finished download over it would
 /// help nobody.
-Future<void> copyFileOver(String abs, String tempAbs) async {
+Future<void> copyFileOver(
+  String abs,
+  String tempAbs, {
+  Duration grace = _renameGrace,
+  Future<void> Function(File staged, String abs)? renameStaged,
+}) async {
   const log = AppLogger(name: 'swap');
   final name = p.basename(abs);
   final expected = (await FileStat.stat(tempAbs)).size;
+  final rename =
+      renameStaged ?? (File staged, String target) => staged.rename(target);
   final staged = atomicTempPath(
     File(abs),
     DateTime.now().microsecondsSinceEpoch,
@@ -560,7 +573,20 @@ Future<void> copyFileOver(String abs, String tempAbs) async {
     if (copied != expected) {
       throw FileSystemException('copied $copied of $expected bytes', abs);
     }
-    await staged.rename(abs);
+    try {
+      await rename(staged, abs).timeout(grace);
+    } on TimeoutException {
+      log.warning(
+        '"$name": the staged rename has not returned in '
+        '${grace.inSeconds}s (issue #103) — copying directly',
+      );
+      await File(staged.path).copy(abs);
+      try {
+        await staged.delete();
+      } on FileSystemException {
+        // The abandoned rename may still hold it.
+      }
+    }
   } on Object {
     // The staged copy never becomes the live file: a failure here leaves
     // [abs] holding exactly the bytes it held before (issue #369).
