@@ -2823,4 +2823,90 @@ final class ItalianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problema in questo modello'
       : '$count problemi in questo modello';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Titoli in $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Posizioni in $named';
+  @override
+  String get wikilinkThisNote => 'questa nota';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Nessun titolo corrisponde a “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Nessuna nota corrisponde a “$query”.';
+  @override
+  String get wikilinkNoHeading => 'questa nota non ha un titolo con quel nome';
+  @override
+  String get wikilinkNoNote => 'niente nella libreria ha quel nome o alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'La pagina si sceglie, non si indica da un elenco: digita il suo numero.';
+  @override
+  String get wikilinkFooterMove => 'sposta';
+  @override
+  String get wikilinkFooterOr => 'o';
+  @override
+  String get wikilinkFooterInsert => 'inserisci';
+  @override
+  String get wikilinkFooterClose => 'chiudi';
+  @override
+  String get suggesterPageHint => 'digita un numero';
+  @override
+  String get suggesterChapterHint => 'indica un file del libro';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'parentesi aperte non chiuse: nulla chiude questo segnaposto';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'segnaposto vuoto: non c’è alcun nome tra le parentesi';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'segnaposto sconosciuto “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” non ha un’etichetta: non chiede nulla, e il segnaposto resta al '
+      'suo posto';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” non ha un nome: non conta nulla, e il segnaposto resta al suo '
+      'posto';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” non accetta filtri: il cursore non viene posizionato, e il '
+      'segnaposto resta al suo posto';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'virgoletta non chiusa nel formato data: tutto ciò che segue viene letto '
+      'come testo normale';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token data sconosciuto “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtro vuoto: non c’è alcun nome dopo la “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” sposta una data: solo $formats accettano uno spostamento, e '
+      'solo prima di qualsiasi altro filtro';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” non è uno spostamento di data: uno spostamento è un numero e '
+      'un’unità, come “+7d” o “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” si aggancia a $units, non a “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” vuole un numero per la sua larghezza, e “$argument” non lo è';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtro sconosciuto “$name”';
 }

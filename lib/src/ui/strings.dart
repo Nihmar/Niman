@@ -815,6 +815,59 @@ final class AppStrings {
 
   static String get templateHelpExampleTitle => _s.templateHelpExampleTitle;
 
+  // The wikilink suggester panel (#475), and the two book forms it offers
+  // after `#`.
+  static String wikilinkHeadingsIn(String named) =>
+      _s.wikilinkHeadingsIn(named);
+  static String wikilinkPlacesIn(String named) => _s.wikilinkPlacesIn(named);
+  static String get wikilinkThisNote => _s.wikilinkThisNote;
+  static String wikilinkNoMatchHeading(String query) =>
+      _s.wikilinkNoMatchHeading(query);
+  static String wikilinkNoMatchNote(String query) =>
+      _s.wikilinkNoMatchNote(query);
+  static String get wikilinkNoHeading => _s.wikilinkNoHeading;
+  static String get wikilinkNoNote => _s.wikilinkNoNote;
+  static String wikilinkAlias(String alias) => _s.wikilinkAlias(alias);
+  static String get wikilinkBookNote => _s.wikilinkBookNote;
+  static String get wikilinkFooterMove => _s.wikilinkFooterMove;
+  static String get wikilinkFooterOr => _s.wikilinkFooterOr;
+  static String get wikilinkFooterInsert => _s.wikilinkFooterInsert;
+  static String get wikilinkFooterClose => _s.wikilinkFooterClose;
+  static String get suggesterPageHint => _s.suggesterPageHint;
+  static String get suggesterChapterHint => _s.suggesterChapterHint;
+
+  // What the template checker found, as the hint says it (T-TPL-09).
+  static String get templateProblemUnclosedBraces =>
+      _s.templateProblemUnclosedBraces;
+  static String get templateProblemEmptyPlaceholder =>
+      _s.templateProblemEmptyPlaceholder;
+  static String templateProblemUnknownPlaceholder(String name) =>
+      _s.templateProblemUnknownPlaceholder(name);
+  static String templateProblemAskNoLabel(String name) =>
+      _s.templateProblemAskNoLabel(name);
+  static String templateProblemCounterNoName(String name) =>
+      _s.templateProblemCounterNoName(name);
+  static String templateProblemCursorFilters(String name) =>
+      _s.templateProblemCursorFilters(name);
+  static String get templateProblemUnclosedQuote =>
+      _s.templateProblemUnclosedQuote;
+  static String templateProblemUnknownDateToken(String token) =>
+      _s.templateProblemUnknownDateToken(token);
+  static String get templateProblemEmptyFilter => _s.templateProblemEmptyFilter;
+  static String templateProblemDateMove(String filter, String formats) =>
+      _s.templateProblemDateMove(filter, formats);
+  static String templateProblemNotADateMove(String filter) =>
+      _s.templateProblemNotADateMove(filter);
+  static String templateProblemSnapUnit(
+    String filter,
+    String units,
+    String unit,
+  ) => _s.templateProblemSnapUnit(filter, units, unit);
+  static String templateProblemPadWidth(String filter, String argument) =>
+      _s.templateProblemPadWidth(filter, argument);
+  static String templateProblemUnknownFilter(String name) =>
+      _s.templateProblemUnknownFilter(name);
+
   // What the template checker says as a template is edited (T-TPL-09).
   static String templateHintDidYouMean(String fix) =>
       _s.templateHintDidYouMean(fix);

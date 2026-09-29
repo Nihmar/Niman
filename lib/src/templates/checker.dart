@@ -77,7 +77,8 @@ final class TemplateSyntaxError {
     required this.offset,
     required this.length,
     required this.kind,
-    required this.message,
+    required this.problem,
+    this.parameters = const <String>[],
     this.suggestion,
   });
 
@@ -91,8 +92,15 @@ final class TemplateSyntaxError {
   /// Which of the three families the mistake belongs to.
   final TemplateSyntaxErrorKind kind;
 
-  /// What is wrong, in one sentence, for the person who wrote it.
-  final String message;
+  /// What is wrong, as the checker names it — see [TemplateProblem].
+  final TemplateProblem problem;
+
+  /// The names [problem] carries, in the order its doc lists them.
+  ///
+  /// They are code: a placeholder or a filter as it was written, a date
+  /// token, a date format. The sentence around them is the hint's to
+  /// write, in the language the app speaks.
+  final List<String> parameters;
 
   /// The corrected text for this error's span — see the library doc for
   /// when there is one and when there deliberately is not.
@@ -103,7 +111,8 @@ final class TemplateSyntaxError {
 
   @override
   String toString() =>
-      'TemplateSyntaxError(${kind.name} at $offset+$length): $message'
+      'TemplateSyntaxError(${kind.name}/${problem.name} at $offset+$length)'
+      '${parameters.isEmpty ? '' : ': ${parameters.join(', ')}'}'
       '${suggestion == null ? '' : ' → $suggestion'}';
 
   @override
@@ -112,11 +121,80 @@ final class TemplateSyntaxError {
       other.offset == offset &&
       other.length == length &&
       other.kind == kind &&
-      other.message == message &&
+      other.problem == problem &&
+      _sameWords(other.parameters, parameters) &&
       other.suggestion == suggestion;
 
   @override
-  int get hashCode => Object.hash(offset, length, kind, message, suggestion);
+  int get hashCode => Object.hash(
+    offset,
+    length,
+    kind,
+    problem,
+    Object.hashAll(parameters),
+    suggestion,
+  );
+
+  static bool _sameWords(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+}
+
+/// What is wrong, as a name rather than a sentence.
+///
+/// The checker reports the mistake and the pieces it names; the sentence
+/// the person reads is written where the hint is built, in the language the
+/// app speaks (T-TPL-09). The pieces are the template's own text, so they
+/// stay as written.
+enum TemplateProblem {
+  /// Braces that open and never close. No pieces.
+  unclosedBraces,
+
+  /// A `{{…}}` with no name in it. No pieces.
+  emptyPlaceholder,
+
+  /// A placeholder the engine does not answer: the name written.
+  unknownPlaceholder,
+
+  /// An `{{ask}}` or `{{choice}}` with no label: the placeholder's name.
+  askNoLabel,
+
+  /// A `{{counter}}` with no name to count under: the placeholder's name.
+  counterNoName,
+
+  /// A `{{cursor}}` with filters, which the caret has nothing to apply:
+  /// the placeholder's name.
+  cursorFilters,
+
+  /// A date format whose quote never closes. No pieces.
+  unclosedQuote,
+
+  /// A date-format token the engine does not know: the token.
+  unknownDateToken,
+
+  /// A `|` with no filter name after it. No pieces.
+  emptyFilter,
+
+  /// A date move where the engine reads text: the filter, then the
+  /// placeholders that take a move.
+  dateMove,
+
+  /// A `+…`/`-…` filter that is not a count and a unit: the filter.
+  notADateMove,
+
+  /// A `startof:`/`endof:` the engine does not snap to: the filter, the
+  /// units it does snap to, then the unit written.
+  snapUnit,
+
+  /// A `pad:` whose width is not a number: the filter, then the argument.
+  padWidth,
+
+  /// A filter the engine does not answer: the name written.
+  unknownFilter,
 }
 
 /// Every syntax mistake in [source], in the order they appear.
@@ -171,9 +249,7 @@ void _checkBraces(
           offset: i,
           length: end - i,
           kind: TemplateSyntaxErrorKind.structural,
-          message:
-              'unclosed opening braces: nothing closes this '
-              'placeholder',
+          problem: TemplateProblem.unclosedBraces,
           suggestion: _closed(source, end, run),
         ),
       );
@@ -215,13 +291,15 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
 
   TemplateSyntaxError at(
     TemplateSyntaxErrorKind kind,
-    String message, {
+    TemplateProblem problem, {
+    List<String> parameters = const <String>[],
     String? suggestion,
   }) => TemplateSyntaxError(
     offset: match.start,
     length: whole.length,
     kind: kind,
-    message: message,
+    problem: problem,
+    parameters: parameters,
     suggestion: suggestion,
   );
 
@@ -245,10 +323,7 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
 
   if (name.isEmpty) {
     errors.add(
-      at(
-        TemplateSyntaxErrorKind.structural,
-        'empty placeholder: there is no name between the braces',
-      ),
+      at(TemplateSyntaxErrorKind.structural, TemplateProblem.emptyPlaceholder),
     );
     return;
   }
@@ -261,7 +336,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
     errors.add(
       at(
         TemplateSyntaxErrorKind.unknown,
-        "unknown placeholder '$name'",
+        TemplateProblem.unknownPlaceholder,
+        parameters: <String>[name],
         suggestion: closest == null
             ? null
             : rebuilt(closest, argument, filters),
@@ -272,8 +348,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           TemplateSyntaxErrorKind.argument,
-          "'$name' has no label: it asks nothing, and the placeholder is "
-          'left standing',
+          TemplateProblem.askNoLabel,
+          parameters: <String>[name],
         ),
       );
     }
@@ -282,8 +358,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           TemplateSyntaxErrorKind.argument,
-          "'counter' has no name: it counts nothing, and the placeholder is "
-          'left standing',
+          TemplateProblem.counterNoName,
+          parameters: <String>[name],
         ),
       );
     }
@@ -294,8 +370,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           TemplateSyntaxErrorKind.argument,
-          "'cursor' takes no filters: the caret is not placed, and the "
-          'placeholder is left standing',
+          TemplateProblem.cursorFilters,
+          parameters: <String>[name],
           suggestion: rebuilt(name, argument, const []),
         ),
       );
@@ -306,7 +382,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           fault.kind,
-          fault.message,
+          fault.problem,
+          parameters: fault.parameters,
           suggestion: fault.format == null
               ? null
               : rebuilt(name, fault.format, filters),
@@ -339,7 +416,7 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           TemplateSyntaxErrorKind.structural,
-          "empty filter: there is no name after the '|'",
+          TemplateProblem.emptyFilter,
           // A blank one is only a stray pipe; `:x` is an argument whose
           // filter only its author knows.
           suggestion: filter.isEmpty ? replaced(null) : null,
@@ -355,9 +432,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           TemplateSyntaxErrorKind.argument,
-          "'$filter' moves a date: only "
-          "${templateDateFormats.keys.join(', ')} take a move, and only "
-          'before any other filter',
+          TemplateProblem.dateMove,
+          parameters: <String>[filter, templateDateFormats.keys.join(', ')],
         ),
       );
       continue;
@@ -371,8 +447,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           TemplateSyntaxErrorKind.argument,
-          "'$filter' is not a date move: a move is a count and a unit, "
-          "like '+7d' or '-1w'",
+          TemplateProblem.notADateMove,
+          parameters: <String>[filter],
         ),
       );
       continue;
@@ -385,8 +461,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           TemplateSyntaxErrorKind.argument,
-          "'$filterName' snaps to ${templateDateUnits.join(', ')}, not "
-          "'$unit'",
+          TemplateProblem.snapUnit,
+          parameters: <String>[filterName, templateDateUnits.join(', '), unit],
         ),
       );
       continue;
@@ -399,8 +475,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
       errors.add(
         at(
           TemplateSyntaxErrorKind.argument,
-          "'pad' needs a number for its width, and "
-          "'${filterArgument ?? ''}' is not one",
+          TemplateProblem.padWidth,
+          parameters: <String>[filterName, filterArgument ?? ''],
         ),
       );
       continue;
@@ -414,7 +490,8 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
     errors.add(
       at(
         TemplateSyntaxErrorKind.unknown,
-        "unknown filter '$filterName'",
+        TemplateProblem.unknownFilter,
+        parameters: <String>[filterName],
         suggestion: closest == null
             ? null
             : replaced(
@@ -426,11 +503,12 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
 }
 
 /// One thing wrong with a date format: which family the mistake belongs
-/// to, what to say about it, and the format with it corrected — null when
-/// no correction is safe.
+/// to, what it is, and the format with it corrected — null when no
+/// correction is safe.
 typedef _FormatFault = ({
   TemplateSyntaxErrorKind kind,
-  String message,
+  TemplateProblem problem,
+  List<String> parameters,
   String? format,
 });
 
@@ -451,9 +529,8 @@ List<_FormatFault> _formatFaults(String format) {
       if (end < 0) {
         faults.add((
           kind: TemplateSyntaxErrorKind.argument,
-          message:
-              'unclosed quote in the date format: everything after it '
-              'is read as ordinary text',
+          problem: TemplateProblem.unclosedQuote,
+          parameters: const <String>[],
           format: null,
         ));
         return faults;
@@ -502,7 +579,8 @@ _FormatFault? _tokenFault(String format, int start, int end) {
   final closest = _closest(run, close);
   return (
     kind: TemplateSyntaxErrorKind.unknown,
-    message: "unknown date token '$run'",
+    problem: TemplateProblem.unknownDateToken,
+    parameters: <String>[run],
     format: closest == null ? null : format.replaceRange(start, end, closest),
   );
 }

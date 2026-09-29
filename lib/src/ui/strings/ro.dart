@@ -2846,4 +2846,93 @@ final class RomanianStrings extends Strings {
     }
     return '$count de probleme în acest șablon';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Titluri în $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Locuri în $named';
+  @override
+  String get wikilinkThisNote => 'această notă';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Niciun titlu nu corespunde cu “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Nicio notă nu corespunde cu “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'această notă nu are niciun titlu cu acest nume';
+  @override
+  String get wikilinkNoNote =>
+      'nimic din bibliotecă nu are acest nume sau alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'O pagină se alege, nu se numește dintr-o listă: scrie numărul ei.';
+  @override
+  String get wikilinkFooterMove => 'mută';
+  @override
+  String get wikilinkFooterOr => 'sau';
+  @override
+  String get wikilinkFooterInsert => 'inserează';
+  @override
+  String get wikilinkFooterClose => 'închide';
+  @override
+  String get suggesterPageHint => 'scrie un număr';
+  @override
+  String get suggesterChapterHint => 'numește un fișier din carte';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'acolade deschise fără închidere: nimic nu închide acest substituent';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'substituent gol: nu există niciun nume între acolade';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'substituent necunoscut “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” nu are etichetă: nu întreabă nimic, iar substituentul rămâne pe '
+      'loc';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” nu are nume: nu numără nimic, iar substituentul rămâne pe loc';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” nu acceptă filtre: cursorul nu este plasat, iar substituentul '
+      'rămâne pe loc';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'ghilimea neînchisă în formatul de dată: tot ce urmează este citit ca '
+      'text obișnuit';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token de dată necunoscut “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtru gol: nu există niciun nume după “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” mută o dată: doar $formats acceptă o mutare, și doar înaintea '
+      'oricărui alt filtru';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” nu este o mutare de dată: o mutare este un număr și o '
+      'unitate, '
+      'ca “+7d” sau “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” se aliniază la $units, nu la “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” are nevoie de un număr pentru lățime, iar “$argument” nu este '
+      'unul';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtru necunoscut “$name”';
 }

@@ -2818,4 +2818,87 @@ final class BulgarianStrings extends Strings {
   @override
   String templateProblems(int count) =>
       count == 1 ? '1 проблем в този шаблон' : '$count проблема в този шаблон';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Заглавия в $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Места в $named';
+  @override
+  String get wikilinkThisNote => 'тази бележка';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Никое заглавие не съвпада с „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Никоя бележка не съвпада с „$query”.';
+  @override
+  String get wikilinkNoHeading => 'тази бележка няма заглавие с това име';
+  @override
+  String get wikilinkNoNote =>
+      'нищо в библиотеката няма това име или псевдоним';
+  @override
+  String wikilinkAlias(String alias) => 'псевдоним $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Страницата се избира, не се именува от списък: въведете номера ѝ.';
+  @override
+  String get wikilinkFooterMove => 'премести';
+  @override
+  String get wikilinkFooterOr => 'или';
+  @override
+  String get wikilinkFooterInsert => 'вмъкни';
+  @override
+  String get wikilinkFooterClose => 'затвори';
+  @override
+  String get suggesterPageHint => 'въведете число';
+  @override
+  String get suggesterChapterHint => 'именувайте файл в книгата';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'отворени фигурни скоби без затваряне: нищо не затваря този заместител';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'празен заместител: няма име между скобите';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'непознат заместител „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” няма етикет: не пита нищо и заместителят остава на мястото си';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” няма име: не брои нищо и заместителят остава на мястото си';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” не приема филтри: курсорът не се поставя и заместителят остава '
+      'на мястото си';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'незатворена кавичка във формата за дата: всичко след нея се чете като '
+      'обикновен текст';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'непознат токен за дата „$token”';
+  @override
+  String get templateProblemEmptyFilter => 'празен филтър: няма име след „|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” премества дата: преместване приемат само $formats, и то само '
+      'преди всеки друг филтър';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” не е преместване на дата: преместването е число и единица, '
+      'като „+7d” или „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” се закача за $units, а не за „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” иска число за ширината си, а „$argument” не е число';
+  @override
+  String templateProblemUnknownFilter(String name) => 'непознат филтър „$name”';
 }

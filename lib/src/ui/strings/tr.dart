@@ -2767,4 +2767,88 @@ final class TurkishStrings extends Strings {
   String get templateHintDismissAction => 'Kapat';
   @override
   String templateProblems(int count) => 'Bu şablonda $count sorun';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => '$named içindeki başlıklar';
+  @override
+  String wikilinkPlacesIn(String named) => '$named içindeki yerler';
+  @override
+  String get wikilinkThisNote => 'bu not';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      '“$query” ile eşleşen başlık yok.';
+  @override
+  String wikilinkNoMatchNote(String query) => '“$query” ile eşleşen not yok.';
+  @override
+  String get wikilinkNoHeading => 'bu notta o adı taşıyan başlık yok';
+  @override
+  String get wikilinkNoNote =>
+      'kitaplıkta o adı ya da takma adı taşıyan hiçbir şey yok';
+  @override
+  String wikilinkAlias(String alias) => 'takma ad: $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Sayfa listeden adlandırılmaz, seçilir: numarasını yazın.';
+  @override
+  String get wikilinkFooterMove => 'taşı';
+  @override
+  String get wikilinkFooterOr => 'veya';
+  @override
+  String get wikilinkFooterInsert => 'ekle';
+  @override
+  String get wikilinkFooterClose => 'kapat';
+  @override
+  String get suggesterPageHint => 'bir sayı yazın';
+  @override
+  String get suggesterChapterHint => 'kitaptaki bir dosyayı adlandırın';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'açık küme parantezleri kapanmıyor: bu yer tutucuyu kapatan bir şey yok';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'boş yer tutucu: parantezler arasında ad yok';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'bilinmeyen yer tutucu “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” etiketsiz: hiçbir şey sormuyor ve yer tutucu olduğu gibi '
+      'kalıyor';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” adsız: hiçbir şey saymıyor ve yer tutucu olduğu gibi kalıyor';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” filtre kabul etmiyor: imleç yerleştirilmiyor ve yer tutucu '
+      'olduğu gibi kalıyor';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'tarih biçiminde kapanmayan tırnak: sonrasındaki her şey normal metin '
+      'olarak okunur';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'bilinmeyen tarih belirteci “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'boş filtre: “|” sonrasında ad yok';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” bir tarihi taşır: taşımayı yalnızca $formats kabul eder ve '
+      'yalnızca başka bir filtreden önce';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” bir tarih taşıması değil: taşıma bir sayı ve bir birimdir, '
+      '“+7d” ya da “-1w” gibi';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” $units birimine sabitler, “$unit” birimine değil';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” genişliği için bir sayı ister ve “$argument” sayı değil';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'bilinmeyen filtre “$name”';
 }

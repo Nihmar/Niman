@@ -2766,4 +2766,86 @@ final class EstonianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 probleem selles šabloonis'
       : '$count probleemi selles šabloonis';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Pealkirjad: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Kohad: $named';
+  @override
+  String get wikilinkThisNote => 'see märge';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ükski pealkiri ei vasta päringule „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ükski märge ei vasta päringule „$query”.';
+  @override
+  String get wikilinkNoHeading => 'selles märkes pole sellenimelist pealkirja';
+  @override
+  String get wikilinkNoNote => 'kogus pole midagi selle nime või aliasega';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Leht valitakse, mitte ei nimetata nimekirjast: kirjuta selle number.';
+  @override
+  String get wikilinkFooterMove => 'liiguta';
+  @override
+  String get wikilinkFooterOr => 'või';
+  @override
+  String get wikilinkFooterInsert => 'sisesta';
+  @override
+  String get wikilinkFooterClose => 'sulge';
+  @override
+  String get suggesterPageHint => 'kirjuta number';
+  @override
+  String get suggesterChapterHint => 'nimeta fail raamatus';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'avatud loogsulud ilma lõputa: miski ei sulge seda kohatäidet';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tühi kohatäide: sulgude vahel pole nime';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'tundmatu kohatäide „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” ilma sildita: see ei küsi midagi ja kohatäide jääb paigale';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” ilma nimeta: see ei loenda midagi ja kohatäide jääb paigale';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” ei võta filtreid: kursorit ei asetata ja kohatäide jääb paigale';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'sulgemata jutumärk kuupäevaformaatis: kõik selle järel loetakse '
+      'tavalise '
+      'tekstina';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'tundmatu kuupäevatoken „$token”';
+  @override
+  String get templateProblemEmptyFilter => 'tühi filter: „|” järel pole nime';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” liigutab kuupäeva: liigutamist võtavad vastu ainult $formats, '
+      'ja ainult enne ükskõik millist muud filtrit';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” ei ole kuupäeva liigutamine: liigutamine on arv ja ühik, nagu '
+      '„+7d” või „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” kinnitub $units külge, mitte „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” vajab laiuse jaoks arvu ja „$argument” pole see';
+  @override
+  String templateProblemUnknownFilter(String name) => 'tundmatu filter „$name”';
 }

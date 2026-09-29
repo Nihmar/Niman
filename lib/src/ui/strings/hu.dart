@@ -2817,4 +2817,86 @@ final class HungarianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 probléma ebben a sablonban'
       : '$count probléma ebben a sablonban';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Címsorok: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Helyek: $named';
+  @override
+  String get wikilinkThisNote => 'ez a jegyzet';
+  @override
+  String wikilinkNoMatchHeading(String query) => 'Nincs „$query” címsor.';
+  @override
+  String wikilinkNoMatchNote(String query) => 'Nincs „$query” jegyzet.';
+  @override
+  String get wikilinkNoHeading => 'ennek a jegyzetnek nincs ilyen nevű címsora';
+  @override
+  String get wikilinkNoNote =>
+      'a könyvtárban semminek nincs ilyen neve vagy álneve';
+  @override
+  String wikilinkAlias(String alias) => 'álnév: $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Az oldalt kiválasztják, nem listából nevezik meg: írd be a számát.';
+  @override
+  String get wikilinkFooterMove => 'mozgatás';
+  @override
+  String get wikilinkFooterOr => 'vagy';
+  @override
+  String get wikilinkFooterInsert => 'beszúrás';
+  @override
+  String get wikilinkFooterClose => 'bezárás';
+  @override
+  String get suggesterPageHint => 'írj be egy számot';
+  @override
+  String get suggesterChapterHint => 'nevezd meg a könyv egy fájlját';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'nyitó kapcsos zárójel zárás nélkül: semmi nem zárja be ezt a helyőrzőt';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'üres helyőrző: nincs név a kapcsos zárójelek között';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'ismeretlen helyőrző „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” címke nélkül: nem kérdez semmit, és a helyőrző a helyén marad';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” név nélkül: nem számol semmit, és a helyőrző a helyén marad';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” nem fogad szűrőket: a kurzor nem kerül a helyére, és a helyőrző '
+      'a helyén marad';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'zárás nélküli idézőjel a dátumformátumban: minden utána közönséges '
+      'szövegként olvasódik';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'ismeretlen dátumjelölő „$token”';
+  @override
+  String get templateProblemEmptyFilter => 'üres szűrő: nincs név a „|” után';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” dátumot mozgat: mozgatást csak a $formats fogad, és csak '
+      'minden más szűrő előtt';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” nem dátummozgatás: a mozgatás egy szám és egy egység, mint a '
+      '„+7d” vagy a „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” a $units egységhez igazít, nem a „$unit” egységhez';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” számot kér a szélességéhez, a „$argument” pedig nem az';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'ismeretlen szűrő „$name”';
 }

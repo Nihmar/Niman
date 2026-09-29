@@ -106,7 +106,7 @@ void main() {
         expect(error.offset, 0, reason: source);
         expect(error.length, source.length, reason: source);
         expect(error.suggestion, isNull, reason: source);
-        expect(error.message, contains('no name'), reason: source);
+        expect(error.problem, TemplateProblem.emptyPlaceholder, reason: source);
       }
     });
   });
@@ -117,7 +117,8 @@ void main() {
       expect(error.kind, TemplateSyntaxErrorKind.unknown);
       expect(error.offset, 0);
       expect(error.length, 10);
-      expect(error.message, "unknown placeholder 'titlex'");
+      expect(error.problem, TemplateProblem.unknownPlaceholder);
+      expect(error.parameters, <String>['titlex']);
       expect(error.suggestion, '{{title}}');
       // Case-insensitive: the engine folds the name, and so does the
       // check, so the same typo in capitals is the same typo.
@@ -134,7 +135,8 @@ void main() {
       expect(error.kind, TemplateSyntaxErrorKind.unknown);
       expect(error.offset, 0);
       expect(error.length, 16);
-      expect(error.message, "unknown filter 'upperr'");
+      expect(error.problem, TemplateProblem.unknownFilter);
+      expect(error.parameters, <String>['upperr']);
       expect(error.suggestion, '{{title|upper}}');
       // The filters around it are the ones that were written.
       expect(only('{{title|slug|upperr}}').suggestion, '{{title|slug|upper}}');
@@ -145,7 +147,8 @@ void main() {
       expect(error.kind, TemplateSyntaxErrorKind.unknown);
       expect(error.offset, 0);
       expect(error.length, 14);
-      expect(error.message, "unknown date token 'YYYYY'");
+      expect(error.problem, TemplateProblem.unknownDateToken);
+      expect(error.parameters, <String>['YYYYY']);
       expect(error.suggestion, '{{date:YYYY}}');
       // Only the token is replaced, not the rest of the format.
       expect(only('{{date:YYYYY-MM}}').suggestion, '{{date:YYYY-MM}}');
@@ -156,7 +159,8 @@ void main() {
     test('pad: with a non-numeric width is reported, not guessed at', () {
       final error = only('{{title|pad:wide}}');
       expect(error.kind, TemplateSyntaxErrorKind.argument);
-      expect(error.message, contains('number for its width'));
+      expect(error.problem, TemplateProblem.padWidth);
+      expect(error.parameters, <String>['pad', 'wide']);
       // The issue's table suggests `pad:3`; a width is a number only the
       // author knows, so the checker reports and suggests nothing.
       expect(error.suggestion, isNull);
@@ -167,7 +171,7 @@ void main() {
       for (final source in ['{{date|+xd}}', '{{title|+xd}}', '{{date|+7dd}}']) {
         final error = only(source);
         expect(error.kind, TemplateSyntaxErrorKind.argument, reason: source);
-        expect(error.message, contains('not a date move'), reason: source);
+        expect(error.problem, TemplateProblem.notADateMove, reason: source);
         expect(error.suggestion, isNull, reason: source);
       }
       for (final source in [
@@ -187,7 +191,7 @@ void main() {
       // is exactly the correction the row asks for.
       final unclosed = only("{{time:HH'|'mm");
       expect(unclosed.kind, TemplateSyntaxErrorKind.structural);
-      expect(unclosed.message, contains('unclosed opening braces'));
+      expect(unclosed.problem, TemplateProblem.unclosedBraces);
       expect(unclosed.suggestion, "{{time:HH'|'mm}}");
       // A quote that really is unclosed: everything after it, the pipe
       // included, is read as ordinary text, and closing it would change
@@ -195,7 +199,7 @@ void main() {
       // stops there.
       final quote = only("{{time:HH'|mm}}");
       expect(quote.kind, TemplateSyntaxErrorKind.argument);
-      expect(quote.message, contains('unclosed quote'));
+      expect(quote.problem, TemplateProblem.unclosedQuote);
       expect(quote.suggestion, isNull);
     });
 
@@ -203,7 +207,7 @@ void main() {
       for (final source in ['{{ask:}}', '{{ask}}', '{{choice:}}']) {
         final error = only(source);
         expect(error.kind, TemplateSyntaxErrorKind.argument, reason: source);
-        expect(error.message, contains('no label'), reason: source);
+        expect(error.problem, TemplateProblem.askNoLabel, reason: source);
         expect(error.suggestion, isNull, reason: source);
       }
       for (final source in [
@@ -411,7 +415,7 @@ void main() {
       for (final source in ['{{title|+1d}}', '{{date|upper|+1d}}']) {
         final error = only(source);
         expect(error.kind, TemplateSyntaxErrorKind.argument, reason: source);
-        expect(error.message, contains('moves a date'), reason: source);
+        expect(error.problem, TemplateProblem.dateMove, reason: source);
         expect(error.suggestion, isNull, reason: source);
       }
     });

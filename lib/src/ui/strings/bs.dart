@@ -2829,4 +2829,88 @@ final class BosnianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problem u ovom predlošku'
       : '$count problema u ovom predlošku';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Naslovi u $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Mjesta u $named';
+  @override
+  String get wikilinkThisNote => 'ova bilješka';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Nijedan naslov se ne poklapa sa "$query".';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Nijedna bilješka se ne poklapa sa "$query".';
+  @override
+  String get wikilinkNoHeading => 'ova bilješka nema naslov s tim imenom';
+  @override
+  String get wikilinkNoNote => 'ništa u biblioteci nema to ime ni alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Stranica se bira, ne imenuje iz liste: upišite njen broj.';
+  @override
+  String get wikilinkFooterMove => 'pomjeri';
+  @override
+  String get wikilinkFooterOr => 'ili';
+  @override
+  String get wikilinkFooterInsert => 'umetni';
+  @override
+  String get wikilinkFooterClose => 'zatvori';
+  @override
+  String get suggesterPageHint => 'upišite broj';
+  @override
+  String get suggesterChapterHint => 'imenujte datoteku u knjizi';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'otvorene vitičaste zagrade bez zatvaranja: ništa ne zatvara ovo mjesto '
+      'zamjene';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'prazno mjesto zamjene: nema imena među zagradama';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'nepoznato mjesto zamjene "$name"';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '"$name" nema oznaku: ništa ne pita, a mjesto zamjene ostaje na mjestu';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '"$name" nema ime: ništa ne broji, a mjesto zamjene ostaje na mjestu';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '"$name" ne prima filtere: kursor se ne postavlja, a mjesto zamjene '
+      'ostaje na mjestu';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'nezatvoren navodnik u formatu datuma: sve poslije njega čita se kao '
+      'običan tekst';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'nepoznat token datuma "$token"';
+  @override
+  String get templateProblemEmptyFilter =>
+      'prazan filter: nema imena poslije "|"';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '"$filter" pomjera datum: pomak primaju samo $formats, i to samo prije '
+      'bilo kojeg drugog filtera';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '"$filter" nije pomak datuma: pomak su broj i jedinica, kao "+7d" ili '
+      '"-1w"';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '"$filter" prikvačuje na $units, a ne na "$unit"';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '"$filter" treba broj za svoju širinu, a "$argument" to nije';
+  @override
+  String templateProblemUnknownFilter(String name) => 'nepoznat filter "$name"';
 }

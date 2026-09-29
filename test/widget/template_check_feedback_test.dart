@@ -6,6 +6,7 @@
 // Only a template is checked: a `{{…}}` in an ordinary note is text.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/language.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -85,6 +86,9 @@ Future<void> _pump(
 }
 
 void main() {
+  setUp(AppLanguages.reset);
+  tearDown(AppLanguages.reset);
+
   testWidgets('the span the checker reported wears the wavy mark', (
     tester,
   ) async {
@@ -127,7 +131,7 @@ void main() {
     await _pump(tester, buffer, check, caret: 0);
 
     final words = _hintWords(tester);
-    expect(words, contains("unknown placeholder 'titlex'"));
+    expect(words, contains('unknown placeholder “titlex”'));
     expect(
       words,
       contains('Did you mean {{title}}?'),
@@ -149,6 +153,26 @@ void main() {
     await tester.pump();
     expect(find.byKey(const Key('template-hint')), findsNothing);
     expect(_underlined(tester), isEmpty);
+  });
+
+  testWidgets('the hint says the mistake in the language the app speaks', (
+    tester,
+  ) async {
+    AppLanguages.choice = AppLanguage.italian;
+    final check = TemplateCheck();
+    addTearDown(check.dispose);
+    await _pump(
+      tester,
+      SourceBuffer.fromText('{{titlex}} here\n'),
+      check,
+      caret: 0,
+    );
+
+    expect(
+      _hintWords(tester),
+      contains('segnaposto sconosciuto “titlex”'),
+      reason: 'the checker reports data; the hint writes the sentence',
+    );
   });
 
   testWidgets('a mistake with no fix offers Dismiss alone', (tester) async {

@@ -2821,4 +2821,92 @@ final class GalicianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problema nesta plantilla'
       : '$count problemas nesta plantilla';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Títulos en $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Localizacións en $named';
+  @override
+  String get wikilinkThisNote => 'esta nota';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ningún título coincide con “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ningunha nota coincide con “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'esta nota non ten ningún título con ese nome';
+  @override
+  String get wikilinkNoNote => 'nada na biblioteca ten ese nome nin ese alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Unha páxina escóllese, non se nomea dunha lista: escribe o seu número.';
+  @override
+  String get wikilinkFooterMove => 'mover';
+  @override
+  String get wikilinkFooterOr => 'ou';
+  @override
+  String get wikilinkFooterInsert => 'inserir';
+  @override
+  String get wikilinkFooterClose => 'pechar';
+  @override
+  String get suggesterPageHint => 'escribe un número';
+  @override
+  String get suggesterChapterHint => 'nomea un ficheiro do libro';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'chaves de apertura sen pechar: nada pecha este marcapase';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'marcapase baleiro: non hai ningún nome entre as chaves';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'marcapase descoñecido “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” non ten etiqueta: non pregunta nada, e o marcapase queda tal '
+      'cal';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” non ten nome: non conta nada, e o marcapase queda tal cal';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” non acepta filtros: o cursor non se coloca, e o marcapase queda '
+      'tal cal';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'comiña sen pechar no formato de data: todo o que segue lese como texto '
+      'normal';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token de data descoñecido “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtro baleiro: non hai ningún nome despois do “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” despraza unha data: só $formats aceptan un desprazamento, e '
+      'só '
+      'antes de calquera outro filtro';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” non é un desprazamento de data: un desprazamento é un número '
+      'e '
+      'unha unidade, como “+7d” ou “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” axústase a $units, non a “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” precisa un número para o seu ancho, e “$argument” non o é';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtro descoñecido “$name”';
 }

@@ -245,6 +245,31 @@ void main() {
         'nl/replaceScopeNote',
       };
 
+      // `alias` is the word for it in the languages that took it from
+      // Latin, and the panel's pill says the name and nothing else: no
+      // language has a shorter one to put there.
+      const aliasIsTheWord = <String>[
+        'bs',
+        'cs',
+        'da',
+        'es',
+        'et',
+        'fi',
+        'fr',
+        'gl',
+        'hr',
+        'is',
+        'it',
+        'nb',
+        'nl',
+        'pl',
+        'pt',
+        'ro',
+        'sk',
+        'sq',
+        'sv',
+      ];
+
       final probes = <String, String Function()>{
         'sourceFontTitle': () => AppStrings.sourceFontTitle,
         'sourceFontSubtitle': () => AppStrings.sourceFontSubtitle,
@@ -291,6 +316,56 @@ void main() {
         'syncCertForgetTitle': () => AppStrings.syncCertForgetTitle,
         'syncCertForgetBody': () => AppStrings.syncCertForgetBody,
         'syncCertForgetAction': () => AppStrings.syncCertForgetAction,
+        // The wikilink panel's own words and the book forms' hints
+        // (#475), and what the template checker's hint says (T-TPL-09):
+        // the code wrote them in English until now.
+        'wikilinkHeadingsIn': () => AppStrings.wikilinkHeadingsIn('Note'),
+        'wikilinkPlacesIn': () => AppStrings.wikilinkPlacesIn('Dune.pdf'),
+        'wikilinkThisNote': () => AppStrings.wikilinkThisNote,
+        'wikilinkNoMatchHeading': () =>
+            AppStrings.wikilinkNoMatchHeading('Intro'),
+        'wikilinkNoMatchNote': () => AppStrings.wikilinkNoMatchNote('Intro'),
+        'wikilinkNoHeading': () => AppStrings.wikilinkNoHeading,
+        'wikilinkNoNote': () => AppStrings.wikilinkNoNote,
+        'wikilinkAlias': () => AppStrings.wikilinkAlias('Ada'),
+        'wikilinkBookNote': () => AppStrings.wikilinkBookNote,
+        'wikilinkFooterMove': () => AppStrings.wikilinkFooterMove,
+        'wikilinkFooterOr': () => AppStrings.wikilinkFooterOr,
+        'wikilinkFooterInsert': () => AppStrings.wikilinkFooterInsert,
+        'wikilinkFooterClose': () => AppStrings.wikilinkFooterClose,
+        'suggesterPageHint': () => AppStrings.suggesterPageHint,
+        'suggesterChapterHint': () => AppStrings.suggesterChapterHint,
+        'templateProblemUnclosedBraces': () =>
+            AppStrings.templateProblemUnclosedBraces,
+        'templateProblemEmptyPlaceholder': () =>
+            AppStrings.templateProblemEmptyPlaceholder,
+        'templateProblemUnknownPlaceholder': () =>
+            AppStrings.templateProblemUnknownPlaceholder('titlex'),
+        'templateProblemAskNoLabel': () =>
+            AppStrings.templateProblemAskNoLabel('ask'),
+        'templateProblemCounterNoName': () =>
+            AppStrings.templateProblemCounterNoName('counter'),
+        'templateProblemCursorFilters': () =>
+            AppStrings.templateProblemCursorFilters('cursor'),
+        'templateProblemUnclosedQuote': () =>
+            AppStrings.templateProblemUnclosedQuote,
+        'templateProblemUnknownDateToken': () =>
+            AppStrings.templateProblemUnknownDateToken('YYYYY'),
+        'templateProblemEmptyFilter': () =>
+            AppStrings.templateProblemEmptyFilter,
+        'templateProblemDateMove': () =>
+            AppStrings.templateProblemDateMove('+1d', 'YYYY, MM'),
+        'templateProblemNotADateMove': () =>
+            AppStrings.templateProblemNotADateMove('+xd'),
+        'templateProblemSnapUnit': () => AppStrings.templateProblemSnapUnit(
+          'startof:month',
+          'year, month',
+          'week',
+        ),
+        'templateProblemPadWidth': () =>
+            AppStrings.templateProblemPadWidth('pad', 'wide'),
+        'templateProblemUnknownFilter': () =>
+            AppStrings.templateProblemUnknownFilter('upperr'),
       };
 
       test('no language answers the English text', () {
@@ -306,6 +381,10 @@ void main() {
             expect(value, isNotEmpty, reason: '${language.name} $key');
             if (sameEverywhere.contains(key)) continue;
             if (sameWord.contains('${language.id}/$key')) continue;
+            if (key == 'wikilinkAlias' &&
+                aliasIsTheWord.contains(language.id)) {
+              continue;
+            }
             expect(value, isNot(english[key]), reason: '${language.name} $key');
           }
         }

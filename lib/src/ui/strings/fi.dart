@@ -2820,4 +2820,92 @@ final class FinnishStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 ongelma tässä mallipohjassa'
       : '$count ongelmaa tässä mallipohjassa';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Otsikot: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Paikat: $named';
+  @override
+  String get wikilinkThisNote => 'tämä muistiinpano';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Mikään otsikko ei vastaa hakua “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Mikään muistiinpano ei vastaa hakua “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'tässä muistiinpanossa ei ole sen nimistä otsikkoa';
+  @override
+  String get wikilinkNoNote =>
+      'kirjastossa ei ole mitään sen nimistä tai aliasnimistä';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Sivu valitaan, sitä ei nimetä luettelosta: kirjoita sen numero.';
+  @override
+  String get wikilinkFooterMove => 'siirrä';
+  @override
+  String get wikilinkFooterOr => 'tai';
+  @override
+  String get wikilinkFooterInsert => 'lisää';
+  @override
+  String get wikilinkFooterClose => 'sulje';
+  @override
+  String get suggesterPageHint => 'kirjoita numero';
+  @override
+  String get suggesterChapterHint => 'nimeä tiedosto kirjasta';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'avoimet aaltosulut ilman sulkua: mikään ei sulje tätä paikkamerkkiä';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tyhjä paikkamerkki: sulkujen välissä ei ole nimeä';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'tuntematon paikkamerkki “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” ilman tunnistetta: se ei kysy mitään, ja paikkamerkki jää '
+      'paikalleen';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” ilman nimeä: se ei laske mitään, ja paikkamerkki jää paikalleen';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” ei ota suodattimia: kohdistinta ei aseteta, ja paikkamerkki jää '
+      'paikalleen';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'sulkematon lainausmerkki päivämäärämuodossa: kaikki sen jälkeen luetaan '
+      'tavallisena tekstinä';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'tuntematon päivämäärätunnus “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'tyhjä suodatin: “|” jälkeen ei ole nimeä';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” siirtää päivämäärää: siirron ottavat vastaan vain $formats, '
+      'ja '
+      'vain ennen mitä tahansa muuta suodatinta';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” ei ole päivämäärän siirto: siirto on luku ja yksikkö, kuten '
+      '“+7d” tai “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” kiinnittyy yksikköön $units, ei yksikköön “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” tarvitsee luvun leveydelleen, eikä “$argument” ole luku';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'tuntematon suodatin “$name”';
 }

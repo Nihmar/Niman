@@ -2825,4 +2825,92 @@ final class AlbanianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problem në këtë shabllon'
       : '$count probleme në këtë shabllon';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Titujt në $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Vendndodhjet në $named';
+  @override
+  String get wikilinkThisNote => 'ky shënim';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Asnjë titull nuk përputhet me „$query".';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Asnjë shënim nuk përputhet me „$query".';
+  @override
+  String get wikilinkNoHeading => 'ky shënim nuk ka titull me atë emër';
+  @override
+  String get wikilinkNoNote =>
+      'asgjë në bibliotekë nuk e ka atë emër ose alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Një faqe zgjidhet, nuk emërtohet nga një listë: shkruaj numrin e saj.';
+  @override
+  String get wikilinkFooterMove => 'lëviz';
+  @override
+  String get wikilinkFooterOr => 'ose';
+  @override
+  String get wikilinkFooterInsert => 'fut';
+  @override
+  String get wikilinkFooterClose => 'mbyll';
+  @override
+  String get suggesterPageHint => 'shkruaj një numër';
+  @override
+  String get suggesterChapterHint => 'emërto një skedar në libër';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'kllapa hapëse pa mbyllje: asgjë nuk e mbyll këtë vendëzëvendësues';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'vendëzëvendësues bosh: nuk ka emër midis kllapave';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'vendëzëvendësues i panjohur „$name"';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name" nuk ka etiketë: nuk pyet asgjë dhe vendëzëvendësuesi mbetet në '
+      'vend';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name" nuk ka emër: nuk numëron asgjë dhe vendëzëvendësuesi mbetet në '
+      'vend';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name" nuk pranon filtra: kursori nuk vendoset dhe vendëzëvendësuesi '
+      'mbetet në vend';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'kuotë e pambyllur në formatin e datës: gjithçka pas saj lexohet si '
+      'tekst '
+      'i zakonshëm';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token date i panjohur „$token"';
+  @override
+  String get templateProblemEmptyFilter => 'filtër bosh: nuk ka emër pas „|"';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter" lëviz një datë: lëvizjen e pranojnë vetëm $formats, dhe vetëm '
+      'përpara çdo filtri tjetër';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter" nuk është lëvizje date: një lëvizje është një numër dhe një '
+      'njësi, si „+7d" ose „-1w"';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter" kapet në $units, jo në „$unit"';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter" kërkon një numër për gjerësinë e vet, dhe „$argument" nuk '
+      'është një i tillë';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtër i panjohur „$name"';
 }

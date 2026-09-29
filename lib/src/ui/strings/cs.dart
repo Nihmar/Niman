@@ -2807,4 +2807,87 @@ final class CzechStrings extends Strings {
     }
     return '$count problémů v této šabloně';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Nadpisy v $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Místa v $named';
+  @override
+  String get wikilinkThisNote => 'tato poznámka';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Žádný nadpis neodpovídá „$query“.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Žádná poznámka neodpovídá „$query“.';
+  @override
+  String get wikilinkNoHeading => 'tato poznámka nemá nadpis s tímto názvem';
+  @override
+  String get wikilinkNoNote => 'nic v knihovně nemá tento název ani alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Stránka se vybírá, nepojmenovává se ze seznamu: napište její číslo.';
+  @override
+  String get wikilinkFooterMove => 'přesunout';
+  @override
+  String get wikilinkFooterOr => 'nebo';
+  @override
+  String get wikilinkFooterInsert => 'vložit';
+  @override
+  String get wikilinkFooterClose => 'zavřít';
+  @override
+  String get suggesterPageHint => 'napište číslo';
+  @override
+  String get suggesterChapterHint => 'pojmenujte soubor v knize';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'otevřené složené závorky bez konce: nic tuto zástupnou hodnotu '
+      'neuzavírá';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'prázdná zástupná hodnota: mezi závorkami není žádné jméno';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'neznámá zástupná hodnota „$name“';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name“ nemá štítek: na nic se neptá a zástupná hodnota zůstává stát';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name“ nemá název: nic nepočítá a zástupná hodnota zůstává stát';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name“ nepřijímá filtry: kurzor se neumístí a zástupná hodnota zůstává '
+      'stát';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'neuzavřená uvozovka ve formátu data: vše za ní se čte jako běžný text';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'neznámý token data „$token“';
+  @override
+  String get templateProblemEmptyFilter =>
+      'prázdný filtr: za „|“ není žádné jméno';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter“ posouvá datum: posun přijímají jen $formats, a jen před '
+      'jakýmkoli jiným filtrem';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter“ není posun data: posun je počet a jednotka, jako „+7d“ nebo '
+      '„-1w“';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter“ se přichytí k $units, ne k „$unit“';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter“ potřebuje číslo pro svou šířku, a „$argument“ číslo není';
+  @override
+  String templateProblemUnknownFilter(String name) => 'neznámý filtr „$name“';
 }

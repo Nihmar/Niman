@@ -2399,7 +2399,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         children: [
           TemplateHint(
             anchor: Rect.fromLTWH(at.dx, at.dy, anchor.width, anchor.height),
-            message: hint.error.message,
+            message: templateProblemSentence(hint.error),
             suggestion: hint.error.suggestion,
             onFix: () => _applyTemplateFix(hint.error),
             onDismiss: () => _hint.value = null,

@@ -2831,4 +2831,93 @@ final class BasqueStrings extends Strings {
   String get templateHintDismissAction => 'Baztertu';
   @override
   String templateProblems(int count) => '$count arazo txantiloi honetan';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Izenburuak: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Kokapenak: $named';
+  @override
+  String get wikilinkThisNote => 'ohar hau';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ez dago izenbururik “$query” izenarekin.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ez dago oharrik “$query” izenarekin.';
+  @override
+  String get wikilinkNoHeading => 'ohar honek ez du izen hori duen izenbururik';
+  @override
+  String get wikilinkNoNote =>
+      'liburutegian ez dago izen edo alias hori duen ezer';
+  @override
+  String wikilinkAlias(String alias) => 'aliasa: $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Orrialdea ez da zerrenda batetik aukeratzen: idatzi bere zenbakia.';
+  @override
+  String get wikilinkFooterMove => 'mugitu';
+  @override
+  String get wikilinkFooterOr => 'edo';
+  @override
+  String get wikilinkFooterInsert => 'txertatu';
+  @override
+  String get wikilinkFooterClose => 'itxi';
+  @override
+  String get suggesterPageHint => 'idatzi zenbaki bat';
+  @override
+  String get suggesterChapterHint => 'izendatu liburuko fitxategi bat';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'ireki eta itxi gabeko giltzak: leku-ordain hau ez du ezerk ixten';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'leku-ordain hutsa: ez dago izenik giltzen artean';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'leku-ordain ezezaguna “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” aukerak ez du etiketarik: ez du ezer galdetzen, eta '
+      'leku-ordaina '
+      'bere horretan geratzen da';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” aukerak ez du izenik: ez du ezer zenbatzen, eta leku-ordaina '
+      'bere horretan geratzen da';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” aukerak ez du iragazkirik onartzen: kurtsorea ez da jartzen, '
+      'eta '
+      'leku-ordaina bere horretan geratzen da';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'data-formatuan komatxo bat itxi gabe: ondorengo guztia testu arrunta da';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'data-token ezezaguna “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'iragazki hutsa: ez dago izenik “|” ondoren';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” datak mugitzen ditu: $formats bakarrik onartzen dute '
+      'mugimendua, eta beste iragazki guztien aurretik soilik';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” ez da data-mugimendua: mugimendua zenbaki bat eta unitate bat '
+      'da, “+7d” edo “-1w” bezala';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” $units unitatera doitzen da, ez “$unit” unitatera';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” zabalerarako zenbaki bat behar du, eta “$argument” ez da '
+      'zenbaki bat';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'iragazki ezezaguna “$name”';
 }

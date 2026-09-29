@@ -1326,4 +1326,107 @@ abstract base class Strings {
 
   String get cascadeChecklistTitle;
   String get cascadeChecklistSubtitle;
+
+  // The wikilink suggester panel (#475): the caption over the list, its own
+  // words when nothing matched, the alias a row was found through, the form
+  // a book offers, and the keys drawn in its footer.
+  //
+  // The named things come in as arguments: the caption names the note (or
+  // the book) being linked to, and the empty sentence quotes what was
+  // typed. A language writes them where its own grammar puts them, and its
+  // own quotes around them.
+
+  /// `Headings in <name>`, drawn over the headings a `#` offers.
+  String wikilinkHeadingsIn(String named);
+
+  /// `Places in <name>`, drawn over the places a book offers.
+  String wikilinkPlacesIn(String named);
+
+  /// The name a caption carries when the note being linked to is the one
+  /// being edited.
+  String get wikilinkThisNote;
+
+  /// The panel's sentence when no heading matched [query].
+  String wikilinkNoMatchHeading(String query);
+
+  /// The panel's sentence when no note matched [query].
+  String wikilinkNoMatchNote(String query);
+
+  /// What stands under [wikilinkNoMatchHeading].
+  String get wikilinkNoHeading;
+
+  /// What stands under [wikilinkNoMatchNote].
+  String get wikilinkNoNote;
+
+  /// The pill on a row that was found through an alias.
+  String wikilinkAlias(String alias);
+
+  /// The note over a book's place form, which is a form and not a list.
+  String get wikilinkBookNote;
+
+  /// The footer's words, beside the keys that do them.
+  String get wikilinkFooterMove;
+  String get wikilinkFooterOr;
+  String get wikilinkFooterInsert;
+  String get wikilinkFooterClose;
+
+  /// The dimmed note beside a book's `page=`.
+  String get suggesterPageHint;
+
+  /// The dimmed note beside a book's `chapter=`.
+  String get suggesterChapterHint;
+
+  // What the template checker found, in the words of the hint (T-TPL-09).
+  //
+  // The checker reports what is wrong as data — the problem and the pieces
+  // it names — and the hint builds the sentence here, so it reads in the
+  // active language. The pieces are code the template is written in (a
+  // placeholder or filter name, a date token, a date format), so they stay
+  // as written.
+
+  /// Braces that open and never close.
+  String get templateProblemUnclosedBraces;
+
+  /// Braces that close with nothing open before them.
+
+  /// A `{{…}}` with no name in it.
+  String get templateProblemEmptyPlaceholder;
+
+  /// A placeholder name the engine does not answer.
+  String templateProblemUnknownPlaceholder(String name);
+
+  /// An `{{ask}}` or `{{choice}}` with no label to ask with.
+  String templateProblemAskNoLabel(String name);
+
+  /// A `{{counter}}` with no name to count under.
+  String templateProblemCounterNoName(String name);
+
+  /// A `{{cursor}}` with filters, which the caret has nothing to apply.
+  String templateProblemCursorFilters(String name);
+
+  /// A date format whose quote never closes.
+  String get templateProblemUnclosedQuote;
+
+  /// A date-format token the engine does not know.
+  String templateProblemUnknownDateToken(String token);
+
+  /// A `|` with no filter name after it.
+  String get templateProblemEmptyFilter;
+
+  /// A date move where the engine reads text, with the placeholders that
+  /// take one.
+  String templateProblemDateMove(String filter, String formats);
+
+  /// A `+…`/`-…` filter that is not a count and a unit.
+  String templateProblemNotADateMove(String filter);
+
+  /// A `startof:`/`endof:` the engine does not snap to, with the units it
+  /// does.
+  String templateProblemSnapUnit(String filter, String units, String unit);
+
+  /// A `pad:` whose width is not a number.
+  String templateProblemPadWidth(String filter, String argument);
+
+  /// A filter name the engine does not answer.
+  String templateProblemUnknownFilter(String name);
 }

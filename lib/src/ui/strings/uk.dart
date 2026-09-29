@@ -2840,4 +2840,92 @@ final class UkrainianStrings extends Strings {
     }
     return '$count проблем у цьому шаблоні';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Заголовки в $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Місця в $named';
+  @override
+  String get wikilinkThisNote => 'ця нотатка';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Жоден заголовок не відповідає „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Жодна нотатка не відповідає „$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'у цій нотатці немає заголовка з такою назвою';
+  @override
+  String get wikilinkNoNote =>
+      'нічого в бібліотеці не має такої назви чи псевдоніма';
+  @override
+  String wikilinkAlias(String alias) => 'псевдонім $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Сторінку вибирають, а не називають зі списку: введіть її номер.';
+  @override
+  String get wikilinkFooterMove => 'перемістити';
+  @override
+  String get wikilinkFooterOr => 'або';
+  @override
+  String get wikilinkFooterInsert => 'вставити';
+  @override
+  String get wikilinkFooterClose => 'закрити';
+  @override
+  String get suggesterPageHint => 'введіть число';
+  @override
+  String get suggesterChapterHint => 'назвіть файл у книзі';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'відкриті фігурні дужки без закриття: ніщо не закриває цей заповнювач';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'порожній заповнювач: між дужками немає назви';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'невідомий заповнювач „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” без підпису: він нічого не питає, і заповнювач залишається на '
+      'місці';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” без назви: він нічого не рахує, і заповнювач залишається на '
+      'місці';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” не приймає фільтрів: курсор не ставиться, і заповнювач '
+      'залишається на місці';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'незакрита лапка у форматі дати: усе після неї читається як звичайний '
+      'текст';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'невідомий токен дати „$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'порожній фільтр: після „|” немає назви';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” переміщує дату: переміщення приймають лише $formats, і лише '
+      'перед будь-яким іншим фільтром';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” не є переміщенням дати: переміщення — це число й одиниця, як '
+      '„+7d” або „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” прив’язується до $units, а не до „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” потребує числа для своєї ширини, а „$argument” ним не є';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'невідомий фільтр „$name”';
 }

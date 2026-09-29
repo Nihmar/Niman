@@ -2850,4 +2850,92 @@ final class CatalanStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problema en aquesta plantilla'
       : '$count problemes en aquesta plantilla';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Títols a $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Ubicacions a $named';
+  @override
+  String get wikilinkThisNote => 'aquesta nota';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Cap títol coincideix amb “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Cap nota coincideix amb “$query”.';
+  @override
+  String get wikilinkNoHeading => 'aquesta nota no té cap títol amb aquest nom';
+  @override
+  String get wikilinkNoNote =>
+      'res de la biblioteca no té aquest nom ni aquest àlies';
+  @override
+  String wikilinkAlias(String alias) => 'àlies $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Una pàgina es tria, no es nomena d’una llista: escriu-ne el número.';
+  @override
+  String get wikilinkFooterMove => 'mou';
+  @override
+  String get wikilinkFooterOr => 'o';
+  @override
+  String get wikilinkFooterInsert => 'insereix';
+  @override
+  String get wikilinkFooterClose => 'tanca';
+  @override
+  String get suggesterPageHint => 'escriu un número';
+  @override
+  String get suggesterChapterHint => 'nomena un fitxer del llibre';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'claus d’obertura sense tancar: res no tanca aquest espai reservat';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'espai reservat buit: no hi ha cap nom entre les claus';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'espai reservat desconegut “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” no té etiqueta: no pregunta res, i l’espai reservat queda tal '
+      'com és';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” no té nom: no compta res, i l’espai reservat queda tal com és';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” no accepta filtres: el cursor no es col·loca, i l’espai '
+      'reservat '
+      'queda tal com és';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'cometa sense tancar al format de data: tot el que segueix es llegeix '
+      'com '
+      'a text normal';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token de data desconegut “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtre buit: no hi ha cap nom després del “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” desplaça una data: només $formats accepten un desplaçament, i '
+      'només abans de qualsevol altre filtre';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” no és un desplaçament de data: un desplaçament és un número i '
+      'una unitat, com “+7d” o “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” s’ajusta a $units, no a “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” necessita un número per a l’amplada, i “$argument” no ho és';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtre desconegut “$name”';
 }

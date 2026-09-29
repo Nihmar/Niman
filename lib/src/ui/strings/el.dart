@@ -2896,4 +2896,93 @@ final class GreekStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 πρόβλημα σε αυτό το πρότυπο'
       : '$count προβλήματα σε αυτό το πρότυπο';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Τίτλοι σε $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Θέσεις σε $named';
+  @override
+  String get wikilinkThisNote => 'αυτή η σημείωση';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Κανένας τίτλος δεν ταιριάζει με «$query».';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Καμία σημείωση δεν ταιριάζει με «$query».';
+  @override
+  String get wikilinkNoHeading =>
+      'αυτή η σημείωση δεν έχει τίτλο με αυτό το όνομα';
+  @override
+  String get wikilinkNoNote =>
+      'τίποτα στη βιβλιοθήκη δεν έχει αυτό το όνομα ή ψευδώνυμο';
+  @override
+  String wikilinkAlias(String alias) => 'ψευδώνυμο $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Η σελίδα επιλέγεται, δεν ονομάζεται από λίστα: γράψτε τον αριθμό της.';
+  @override
+  String get wikilinkFooterMove => 'μετακίνηση';
+  @override
+  String get wikilinkFooterOr => 'ή';
+  @override
+  String get wikilinkFooterInsert => 'εισαγωγή';
+  @override
+  String get wikilinkFooterClose => 'κλείσιμο';
+  @override
+  String get suggesterPageHint => 'γράψτε έναν αριθμό';
+  @override
+  String get suggesterChapterHint => 'ονομάστε ένα αρχείο στο βιβλίο';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'ανοιχτές αγκύλες χωρίς κλείσιμο: τίποτα δεν κλείνει αυτό το στοιχείο '
+      'αντικατάστασης';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'κενό στοιχείο αντικατάστασης: δεν υπάρχει όνομα μέσα στις αγκύλες';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'άγνωστο στοιχείο αντικατάστασης «$name»';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '«$name» χωρίς ετικέτα: δεν ρωτά τίποτα και το στοιχείο αντικατάστασης '
+      'μένει στη θέση του';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '«$name» χωρίς όνομα: δεν μετρά τίποτα και το στοιχείο αντικατάστασης '
+      'μένει στη θέση του';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '«$name» δεν δέχεται φίλτρα: ο δείκτης δεν τοποθετείται και το στοιχείο '
+      'αντικατάστασης μένει στη θέση του';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'ανοιχτά εισαγωγικά στη μορφή ημερομηνίας: ό,τι ακολουθεί διαβάζεται ως '
+      'απλό κείμενο';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'άγνωστο σύμβολο ημερομηνίας «$token»';
+  @override
+  String get templateProblemEmptyFilter =>
+      'κενό φίλτρο: δεν υπάρχει όνομα μετά το «|»';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '«$filter» μετακινεί μια ημερομηνία: μετακίνηση δέχονται μόνο τα '
+      '$formats, και μόνο πριν από κάθε άλλο φίλτρο';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '«$filter» δεν είναι μετακίνηση ημερομηνίας: μετακίνηση είναι ένας '
+      'αριθμός και μια μονάδα, όπως «+7d» ή «-1w»';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '«$filter» προσαρμόζεται στο $units, όχι στο «$unit»';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '«$filter» θέλει αριθμό για το πλάτος του και το «$argument» δεν είναι '
+      'αριθμός';
+  @override
+  String templateProblemUnknownFilter(String name) => 'άγνωστο φίλτρο «$name»';
 }

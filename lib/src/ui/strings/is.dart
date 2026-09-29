@@ -2803,4 +2803,88 @@ final class IcelandicStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 vandamál í þessari smíð'
       : '$count vandamál í þessari smíð';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Titlar í $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Staðir í $named';
+  @override
+  String get wikilinkThisNote => 'þessi minnispunktur';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Enginn titill passar við „$query".';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Enginn minnispunktur passar við „$query".';
+  @override
+  String get wikilinkNoHeading =>
+      'þessi minnispunktur hefur engan titil með þessu nafni';
+  @override
+  String get wikilinkNoNote => 'ekkert í safninu ber þetta nafn eða alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Síða er valin, ekki nefnd úr lista: skrifaðu númerið hennar.';
+  @override
+  String get wikilinkFooterMove => 'færa';
+  @override
+  String get wikilinkFooterOr => 'eða';
+  @override
+  String get wikilinkFooterInsert => 'setja inn';
+  @override
+  String get wikilinkFooterClose => 'loka';
+  @override
+  String get suggesterPageHint => 'skrifaðu tölu';
+  @override
+  String get suggesterChapterHint => 'nefndu skrá í bókinni';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'opnar slaufusvigar án loka: ekkert lokar þessum staðgengli';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tómur staðgengill: ekkert nafn milli sviga';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'óþekktur staðgengill „$name"';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name" án merkis: það spyr ekki um neitt og staðgengillinn stendur '
+      'áfram';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name" án nafns: það telur ekki neitt og staðgengillinn stendur áfram';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name" tekur enga sía: bendillinn er ekki settur og staðgengillinn '
+      'stendur áfram';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'ólokin gæsalappir í dagsetningarformi: allt á eftir er lesið sem '
+      'venjulegur texti';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'óþekkt dagsetningartákn „$token"';
+  @override
+  String get templateProblemEmptyFilter => 'tóm sía: ekkert nafn á eftir „|"';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter" færir dagsetningu: aðeins $formats taka við færslu, og aðeins '
+      'fyrir hverja aðra síu';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter" er ekki dagsetningarfærsla: færsla er tala og eining, eins og '
+      '„+7d" eða „-1w"';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter" festist við $units, ekki „$unit"';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter" þarf tölu fyrir breiddina, og „$argument" er engin tala';
+  @override
+  String templateProblemUnknownFilter(String name) => 'óþekkt sía „$name"';
 }

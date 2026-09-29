@@ -2868,4 +2868,94 @@ final class GermanStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 Problem in dieser Vorlage'
       : '$count Probleme in dieser Vorlage';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Überschriften in $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Stellen in $named';
+  @override
+  String get wikilinkThisNote => 'diese Notiz';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Keine Überschrift passt zu „$query“.';
+  @override
+  String wikilinkNoMatchNote(String query) => 'Keine Notiz passt zu „$query“.';
+  @override
+  String get wikilinkNoHeading =>
+      'diese Notiz hat keine Überschrift mit diesem Namen';
+  @override
+  String get wikilinkNoNote =>
+      'nichts in der Bibliothek trägt diesen Namen oder Alias';
+  @override
+  String wikilinkAlias(String alias) => 'Alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Eine Seite wird gewählt, nicht aus einer Liste benannt: gib ihre Nummer '
+      'ein.';
+  @override
+  String get wikilinkFooterMove => 'bewegen';
+  @override
+  String get wikilinkFooterOr => 'oder';
+  @override
+  String get wikilinkFooterInsert => 'einfügen';
+  @override
+  String get wikilinkFooterClose => 'schließen';
+  @override
+  String get suggesterPageHint => 'eine Zahl eingeben';
+  @override
+  String get suggesterChapterHint => 'eine Datei im Buch benennen';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'geöffnete geschweifte Klammern ohne Schluss: nichts schließt diesen '
+      'Platzhalter';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'leerer Platzhalter: kein Name zwischen den Klammern';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'unbekannter Platzhalter „$name“';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name“ hat keine Beschriftung: es fragt nichts, und der Platzhalter '
+      'bleibt stehen';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name“ hat keinen Namen: es zählt nichts, und der Platzhalter bleibt '
+      'stehen';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name“ nimmt keine Filter: der Cursor wird nicht gesetzt, und der '
+      'Platzhalter bleibt stehen';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'nicht geschlossenes Anführungszeichen im Datumsformat: alles danach '
+      'wird '
+      'als gewöhnlicher Text gelesen';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'unbekanntes Datums-Token „$token“';
+  @override
+  String get templateProblemEmptyFilter =>
+      'leerer Filter: kein Name nach dem „|“';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter“ verschiebt ein Datum: nur $formats nehmen eine Verschiebung, '
+      'und nur vor jedem anderen Filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter“ ist keine Datumsverschiebung: eine Verschiebung ist eine Zahl '
+      'und eine Einheit, wie „+7d“ oder „-1w“';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter“ richtet sich auf $units aus, nicht auf „$unit“';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter“ braucht eine Zahl für die Breite, und „$argument“ ist keine';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'unbekannter Filter „$name“';
 }

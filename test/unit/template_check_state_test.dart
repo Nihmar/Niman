@@ -85,7 +85,7 @@ void main() {
     expect(range.start, 0, reason: 'local to the line, not to the note');
     expect(range.end, 10);
     expect(error.suggestion, '{{title}}');
-    expect(error.message, contains('titlex'));
+    expect(error.parameters, <String>['titlex']);
 
     // A window that holds none of it: the first line.
     expect(check.inRange(0, 3), isEmpty);

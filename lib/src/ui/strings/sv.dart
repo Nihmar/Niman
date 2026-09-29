@@ -2811,4 +2811,91 @@ final class SwedishStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problem i den här mallen'
       : '$count problem i den här mallen';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Rubriker i $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Platser i $named';
+  @override
+  String get wikilinkThisNote => 'den här anteckningen';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ingen rubrik matchar “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ingen anteckning matchar “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'den här anteckningen har ingen rubrik med det namnet';
+  @override
+  String get wikilinkNoNote =>
+      'inget i biblioteket har det namnet eller aliaset';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'En sida väljs, den namnges inte i en lista: skriv dess nummer.';
+  @override
+  String get wikilinkFooterMove => 'flytta';
+  @override
+  String get wikilinkFooterOr => 'eller';
+  @override
+  String get wikilinkFooterInsert => 'infoga';
+  @override
+  String get wikilinkFooterClose => 'stäng';
+  @override
+  String get suggesterPageHint => 'skriv ett nummer';
+  @override
+  String get suggesterChapterHint => 'namnge en fil i boken';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'öppnade klammerparenteser utan slut: inget stänger den här '
+      'platshållaren';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tom platshållare: inget namn mellan klammerparenteserna';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'okänd platshållare “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” har ingen etikett: den frågar inget, och platshållaren står '
+      'kvar';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” har inget namn: den räknar inget, och platshållaren står kvar';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” tar inga filter: markören placeras inte, och platshållaren står '
+      'kvar';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'ostängt citattecken i datumformatet: allt efter det läses som vanlig '
+      'text';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'okänd datumtoken “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'tomt filter: inget namn efter “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” flyttar ett datum: bara $formats tar en förskjutning, och '
+      'bara '
+      'före varje annat filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” är ingen datumförskjutning: en förskjutning är ett antal och '
+      'en enhet, som “+7d” eller “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” ställer in på $units, inte “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” behöver ett tal för sin bredd, och “$argument” är inget';
+  @override
+  String templateProblemUnknownFilter(String name) => 'okänt filter “$name”';
 }

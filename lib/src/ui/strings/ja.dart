@@ -2557,4 +2557,77 @@ final class JapaneseStrings extends Strings {
   String get templateHintDismissAction => '破棄';
   @override
   String templateProblems(int count) => 'このテンプレートに $count 件の問題';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => '$named の見出し';
+  @override
+  String wikilinkPlacesIn(String named) => '$named の場所';
+  @override
+  String get wikilinkThisNote => 'このノート';
+  @override
+  String wikilinkNoMatchHeading(String query) => '「$query」 に一致する見出しはありません。';
+  @override
+  String wikilinkNoMatchNote(String query) => '「$query」 に一致するノートはありません。';
+  @override
+  String get wikilinkNoHeading => 'このノートにその名前の見出しはありません';
+  @override
+  String get wikilinkNoNote => 'ライブラリにその名前または別名のものはありません';
+  @override
+  String wikilinkAlias(String alias) => '別名 $alias';
+  @override
+  String get wikilinkBookNote => 'ページは一覧から名前で選ぶものではなく、番号を入力します。';
+  @override
+  String get wikilinkFooterMove => '移動';
+  @override
+  String get wikilinkFooterOr => 'または';
+  @override
+  String get wikilinkFooterInsert => '挿入';
+  @override
+  String get wikilinkFooterClose => '閉じる';
+  @override
+  String get suggesterPageHint => '数字を入力';
+  @override
+  String get suggesterChapterHint => '本の中のファイル名を入力';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      '開き波かっこが閉じられていません: このプレースホルダーを閉じるものがありません';
+  @override
+  String get templateProblemEmptyPlaceholder => '空のプレースホルダー: 波かっこの中に名前がありません';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      '不明なプレースホルダー 「$name」';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '「$name」 にラベルがありません: 何も尋ねず、プレースホルダーはそのまま残ります';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '「$name」 に名前がありません: 何も数えず、プレースホルダーはそのまま残ります';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '「$name」 はフィルターを受け付けません: カーソルは置かれず、プレースホルダーはそのまま残ります';
+  @override
+  String get templateProblemUnclosedQuote =>
+      '日付フォーマットの引用符が閉じられていません: それ以降は通常のテキストとして読み込まれます';
+  @override
+  String templateProblemUnknownDateToken(String token) => '不明な日付トークン 「$token」';
+  @override
+  String get templateProblemEmptyFilter => '空のフィルター: 「|」 の後に名前がありません';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '「$filter」 は日付を移動します: 移動を受け付けるのは $formats だけで、ほかのどのフィルターよりも前に限ります';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '「$filter」 は日付の移動ではありません: 移動は数と単位で、「+7d」 や 「-1w」 のように書きます';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '「$filter」 は $units に合わせます。「$unit」 ではありません';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '「$filter」 の幅には数が必要ですが、「$argument」 は数ではありません';
+  @override
+  String templateProblemUnknownFilter(String name) => '不明なフィルター 「$name」';
 }

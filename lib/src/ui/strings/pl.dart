@@ -2857,4 +2857,90 @@ final class PolishStrings extends Strings {
     }
     return '$count problemów w tym szablonie';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Nagłówki w $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Miejsca w $named';
+  @override
+  String get wikilinkThisNote => 'ta notatka';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Żaden nagłówek nie pasuje do „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Żadna notatka nie pasuje do „$query”.';
+  @override
+  String get wikilinkNoHeading => 'ta notatka nie ma nagłówka o tej nazwie';
+  @override
+  String get wikilinkNoNote => 'nic w bibliotece nie ma tej nazwy ani aliasu';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Stronę wybiera się, a nie nazywa z listy: wpisz jej numer.';
+  @override
+  String get wikilinkFooterMove => 'przenieś';
+  @override
+  String get wikilinkFooterOr => 'lub';
+  @override
+  String get wikilinkFooterInsert => 'wstaw';
+  @override
+  String get wikilinkFooterClose => 'zamknij';
+  @override
+  String get suggesterPageHint => 'wpisz numer';
+  @override
+  String get suggesterChapterHint => 'wskaż plik w książce';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'otwarte nawiasy klamrowe bez zamknięcia: nic nie zamyka tego symbolu '
+      'zastępczego';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'pusty symbol zastępczy: między nawiasami nie ma nazwy';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'nieznany symbol zastępczy „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” nie ma etykiety: o nic nie pyta, a symbol zastępczy zostaje na '
+      'miejscu';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” nie ma nazwy: nic nie liczy, a symbol zastępczy zostaje na '
+      'miejscu';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” nie przyjmuje filtrów: kursor nie zostaje umieszczony, a symbol '
+      'zastępczy zostaje na miejscu';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'niezamknięty cudzysłów w formacie daty: wszystko po nim jest czytane '
+      'jak '
+      'zwykły tekst';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'nieznany token daty „$token”';
+  @override
+  String get templateProblemEmptyFilter => 'pusty filtr: po „|” nie ma nazwy';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” przesuwa datę: przesunięcie przyjmują tylko $formats, i tylko '
+      'przed każdym innym filtrem';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” to nie przesunięcie daty: przesunięcie to liczba i jednostka, '
+      'jak „+7d” lub „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” przyciąga do $units, a nie do „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” potrzebuje liczby jako szerokości, a „$argument” nią nie jest';
+  @override
+  String templateProblemUnknownFilter(String name) => 'nieznany filtr „$name”';
 }

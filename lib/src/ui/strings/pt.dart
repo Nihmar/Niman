@@ -2820,4 +2820,91 @@ final class PortugueseStrings extends Strings {
   @override
   String templateProblems(int count) =>
       count == 1 ? '1 problema neste modelo' : '$count problemas neste modelo';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Títulos em $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Localizações em $named';
+  @override
+  String get wikilinkThisNote => 'esta nota';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Nenhum título corresponde a “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Nenhuma nota corresponde a “$query”.';
+  @override
+  String get wikilinkNoHeading => 'esta nota não tem um título com esse nome';
+  @override
+  String get wikilinkNoNote => 'nada na biblioteca tem esse nome ou alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Uma página escolhe-se, não se nomeia de uma lista: escreve o seu '
+      'número.';
+  @override
+  String get wikilinkFooterMove => 'mover';
+  @override
+  String get wikilinkFooterOr => 'ou';
+  @override
+  String get wikilinkFooterInsert => 'inserir';
+  @override
+  String get wikilinkFooterClose => 'fechar';
+  @override
+  String get suggesterPageHint => 'escreve um número';
+  @override
+  String get suggesterChapterHint => 'nomeia um ficheiro do livro';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'chavetas de abertura sem fecho: nada fecha este marcador';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'marcador vazio: não há nenhum nome entre as chavetas';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'marcador desconhecido “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” não tem etiqueta: não pergunta nada, e o marcador fica como '
+      'está';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” não tem nome: não conta nada, e o marcador fica como está';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” não aceita filtros: o cursor não é colocado, e o marcador fica '
+      'como está';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'aspas sem fechar no formato da data: tudo o que se segue é lido como '
+      'texto normal';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token de data desconhecido “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtro vazio: não há nenhum nome depois do “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” desloca uma data: só $formats aceitam um deslocamento, e só '
+      'antes de qualquer outro filtro';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” não é um deslocamento de data: um deslocamento é um número e '
+      'uma unidade, como “+7d” ou “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” alinha-se a $units, não a “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” precisa de um número para a sua largura, e “$argument” não o '
+      'é';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtro desconhecido “$name”';
 }

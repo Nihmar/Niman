@@ -2479,4 +2479,73 @@ final class ChineseStrings extends Strings {
   String get templateHintDismissAction => '忽略';
   @override
   String templateProblems(int count) => '此模板中有 $count 个问题';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => '$named中的标题';
+  @override
+  String wikilinkPlacesIn(String named) => '$named中的位置';
+  @override
+  String get wikilinkThisNote => '本笔记';
+  @override
+  String wikilinkNoMatchHeading(String query) => '没有标题与「$query」匹配。';
+  @override
+  String wikilinkNoMatchNote(String query) => '没有笔记与「$query」匹配。';
+  @override
+  String get wikilinkNoHeading => '本笔记没有该名称的标题';
+  @override
+  String get wikilinkNoNote => '资料库中没有这个名称或别名的内容';
+  @override
+  String wikilinkAlias(String alias) => '别名 $alias';
+  @override
+  String get wikilinkBookNote => '页码不是从列表中选择的，请直接输入数字。';
+  @override
+  String get wikilinkFooterMove => '移动';
+  @override
+  String get wikilinkFooterOr => '或';
+  @override
+  String get wikilinkFooterInsert => '插入';
+  @override
+  String get wikilinkFooterClose => '关闭';
+  @override
+  String get suggesterPageHint => '输入一个数字';
+  @override
+  String get suggesterChapterHint => '输入书中的一个文件名';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces => '左花括号没有闭合：没有任何内容关闭这个占位符';
+  @override
+  String get templateProblemEmptyPlaceholder => '空占位符：花括号之间没有名称';
+  @override
+  String templateProblemUnknownPlaceholder(String name) => '未知占位符「$name」';
+  @override
+  String templateProblemAskNoLabel(String name) => '「$name」没有标签：它什么都不问，占位符原样保留';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '「$name」没有名称：它什么都不计数，占位符原样保留';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '「$name」不接受筛选器：光标不会被放置，占位符原样保留';
+  @override
+  String get templateProblemUnclosedQuote => '日期格式中的引号没有闭合：其后的内容都按普通文本读取';
+  @override
+  String templateProblemUnknownDateToken(String token) => '未知的日期标记「$token」';
+  @override
+  String get templateProblemEmptyFilter => '空过滤器：「|」之后没有名称';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '「$filter」 移动日期：只有 $formats 接受移动，而且只能在其他任何过滤器之前';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '「$filter」 不是日期移动：移动是数量和单位，例如 「+7d」 或 「-1w」';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '「$filter」 对齐到 $units，而不是 「$unit」';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '「$filter」 的宽度需要一个数字，而 「$argument」 不是数字';
+  @override
+  String templateProblemUnknownFilter(String name) => '未知过滤器「$name」';
 }

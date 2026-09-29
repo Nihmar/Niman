@@ -2791,4 +2791,88 @@ final class DanishStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problem i denne skabelon'
       : '$count problemer i denne skabelon';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Overskrifter i $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Steder i $named';
+  @override
+  String get wikilinkThisNote => 'denne note';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ingen overskrift matcher “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) => 'Ingen noter matcher “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'denne note har ingen overskrift med det navn';
+  @override
+  String get wikilinkNoNote => 'intet i biblioteket har det navn eller alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'En side vælges, den navngives ikke fra en liste: skriv dens nummer.';
+  @override
+  String get wikilinkFooterMove => 'flyt';
+  @override
+  String get wikilinkFooterOr => 'eller';
+  @override
+  String get wikilinkFooterInsert => 'indsæt';
+  @override
+  String get wikilinkFooterClose => 'luk';
+  @override
+  String get suggesterPageHint => 'skriv et tal';
+  @override
+  String get suggesterChapterHint => 'navngiv en fil i bogen';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'åbnede krøllparenteser uden slutning: intet lukker denne pladsholder';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tom pladsholder: intet navn mellem krøllparenteserne';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'ukendt pladsholder “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” har ingen etiket: den spørger om intet, og pladsholderen står '
+      'tilbage';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” har intet navn: den tæller intet, og pladsholderen står tilbage';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” tager ingen filtre: markøren placeres ikke, og pladsholderen '
+      'står tilbage';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'uafsluttet citationstegn i datoformatet: alt efter læses som almindelig '
+      'tekst';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'ukendt datotoken “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'tomt filter: intet navn efter “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” flytter en dato: kun $formats tager en forskydning, og kun '
+      'før '
+      'ethvert andet filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” er ikke en datoforskydning: en forskydning er et antal og en '
+      'enhed, som “+7d” eller “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” sætter til $units, ikke “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” skal have et tal til bredden, og “$argument” er ikke et';
+  @override
+  String templateProblemUnknownFilter(String name) => 'ukendt filter “$name”';
 }

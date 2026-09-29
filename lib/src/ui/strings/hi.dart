@@ -2759,4 +2759,91 @@ final class HindiStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? 'इस टेम्पलेट में 1 समस्या'
       : 'इस टेम्पलेट में $count समस्याएँ';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => '$named में हेडिंग';
+  @override
+  String wikilinkPlacesIn(String named) => '$named में स्थान';
+  @override
+  String get wikilinkThisNote => 'इस नोट में';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      '«$query» से मेल खाती कोई हेडिंग नहीं।';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      '«$query» से मेल खाता कोई नोट नहीं।';
+  @override
+  String get wikilinkNoHeading => 'इस नोट में उस नाम की कोई हेडिंग नहीं है';
+  @override
+  String get wikilinkNoNote => 'लाइब्रेरी में उस नाम या उपनाम वाला कुछ नहीं है';
+  @override
+  String wikilinkAlias(String alias) => 'उपनाम $alias';
+  @override
+  String get wikilinkBookNote =>
+      'पृष्ठ चुना जाता है, सूची से नाम नहीं दिया जाता: उसका नंबर लिखें।';
+  @override
+  String get wikilinkFooterMove => 'खिसकाएँ';
+  @override
+  String get wikilinkFooterOr => 'या';
+  @override
+  String get wikilinkFooterInsert => 'डालें';
+  @override
+  String get wikilinkFooterClose => 'बंद करें';
+  @override
+  String get suggesterPageHint => 'कोई संख्या लिखें';
+  @override
+  String get suggesterChapterHint => 'किताब की कोई फ़ाइल चुनें';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'खुले घुंघराले कोष्ठक बिना बंद हुए: इस प्लेसहोल्डर को कुछ भी बंद नहीं '
+      'करता';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'खाली प्लेसहोल्डर: कोष्ठकों के बीच कोई नाम नहीं';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'अज्ञात प्लेसहोल्डर «$name»';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '«$name» में लेबल नहीं: यह कुछ नहीं पूछता, और प्लेसहोल्डर ज्यों का त्यों '
+      'रहता है';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '«$name» में नाम नहीं: यह कुछ नहीं गिनता, और प्लेसहोल्डर ज्यों का त्यों '
+      'रहता है';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '«$name» फ़िल्टर नहीं लेता: कर्सर नहीं रखा जाता, और प्लेसहोल्डर ज्यों का '
+      'त्यों रहता है';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'तारीख़ के प्रारूप में बिना बंद हुआ उद्धरण चिह्न: इसके बाद सब साधारण पाठ '
+      'की तरह पढ़ा जाता है';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'अज्ञात तारीख़ टोकन «$token»';
+  @override
+  String get templateProblemEmptyFilter =>
+      'खाली फ़िल्टर: «|» के बाद कोई नाम नहीं';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '«$filter» तारीख़ खिसकाता है: खिसकाव सिर्फ़ $formats लेते हैं, और सिर्फ़ '
+      'किसी भी अन्य फ़िल्टर से पहले';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '«$filter» तारीख़ का खिसकाव नहीं है: खिसकाव एक संख्या और एक इकाई है, '
+      'जैसे '
+      '«+7d» या «-1w»';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '«$filter» $units पर लगता है, «$unit» पर नहीं';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '«$filter» की चौड़ाई के लिए संख्या चाहिए, और «$argument» संख्या नहीं है';
+  @override
+  String templateProblemUnknownFilter(String name) => 'अज्ञात फ़िल्टर «$name»';
 }

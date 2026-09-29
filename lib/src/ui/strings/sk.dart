@@ -2815,4 +2815,89 @@ final class SlovakStrings extends Strings {
     }
     return '$count problémov v tejto šablóne';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Nadpisy v $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Miesta v $named';
+  @override
+  String get wikilinkThisNote => 'táto poznámka';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Žiadny nadpis nezodpovedá „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Žiadna poznámka nezodpovedá „$query”.';
+  @override
+  String get wikilinkNoHeading => 'táto poznámka nemá nadpis s týmto názvom';
+  @override
+  String get wikilinkNoNote => 'nič v knižnici nemá tento názov ani alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Strana sa vyberá, nepomenúva sa zo zoznamu: napíšte jej číslo.';
+  @override
+  String get wikilinkFooterMove => 'presunúť';
+  @override
+  String get wikilinkFooterOr => 'alebo';
+  @override
+  String get wikilinkFooterInsert => 'vložiť';
+  @override
+  String get wikilinkFooterClose => 'zavrieť';
+  @override
+  String get suggesterPageHint => 'napíšte číslo';
+  @override
+  String get suggesterChapterHint => 'pomenujte súbor v knihe';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'otvorené zložené zátvorky bez konca: nič túto zástupnú hodnotu '
+      'nezatvára';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'prázdna zástupná hodnota: medzi zátvorkami nie je žiadne meno';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'neznáma zástupná hodnota „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” nemá označenie: na nič sa nepýta a zástupná hodnota zostáva '
+      'stáť';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” nemá názov: nič nepočíta a zástupná hodnota zostáva stáť';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” neprijíma filtre: kurzor sa neumiestni a zástupná hodnota '
+      'zostáva stáť';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'neuzavretá úvodzovka vo formáte dátumu: všetko za ňou sa číta ako bežný '
+      'text';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'neznámy token dátumu „$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'prázdny filter: za „|” nie je žiadne meno';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” posúva dátum: posun prijímajú len $formats, a len pred '
+      'akýmkoľvek iným filtrom';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” nie je posun dátumu: posun je počet a jednotka, ako „+7d” '
+      'alebo „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” sa prichytí na $units, nie na „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” potrebuje číslo pre svoju šírku, a „$argument” ním nie je';
+  @override
+  String templateProblemUnknownFilter(String name) => 'neznámy filter „$name”';
 }

@@ -2837,4 +2837,94 @@ final class LithuanianStrings extends Strings {
     }
     return '$count problemų šiame šablone';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Antraštės: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Vietos: $named';
+  @override
+  String get wikilinkThisNote => 'ši pastaba';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Nė viena antraštė neatitinka „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Nė viena pastaba neatitinka „$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'šioje pastaboje nėra antraštės tokiu pavadinimu';
+  @override
+  String get wikilinkNoNote =>
+      'bibliotekoje nėra nieko tokiu pavadinimu ar slapyvardžiu';
+  @override
+  String wikilinkAlias(String alias) => 'slapyvardis $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Puslapis pasirenkamas, o ne įvardijamas iš sąrašo: įrašykite jo numerį.';
+  @override
+  String get wikilinkFooterMove => 'perkelti';
+  @override
+  String get wikilinkFooterOr => 'arba';
+  @override
+  String get wikilinkFooterInsert => 'įterpti';
+  @override
+  String get wikilinkFooterClose => 'uždaryti';
+  @override
+  String get suggesterPageHint => 'įrašykite skaičių';
+  @override
+  String get suggesterChapterHint => 'pavadinkite failą knygoje';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'atidaryti riestiniai skliaustai neuždaryti: niekas neuždaro šios vietos '
+      'rezervavimo žymos';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tuščia vietos rezervavimo žyma: tarp skliaustų nėra pavadinimo';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'nežinoma vietos rezervavimo žyma „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” be etiketės: nieko neklausia, o vietos rezervavimo žyma lieka '
+      'vietoje';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” be pavadinimo: nieko neskaičiuoja, o vietos rezervavimo žyma '
+      'lieka vietoje';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” nepriima filtrų: žymeklis neįrašomas, o vietos rezervavimo žyma '
+      'lieka vietoje';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'neuždaryta kabutė datų formate: viskas po jos skaitoma kaip paprastas '
+      'tekstas';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'nežinomas datos tokenas „$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'tuščias filtras: po „|” nėra pavadinimo';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” perkelia datą: perkėlimą priima tik $formats, ir tik prieš '
+      'bet '
+      'kurį kitą filtrą';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” nėra datos perkėlimas: perkėlimas yra skaičius ir vienetas, '
+      'kaip „+7d” arba „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” pritraukia prie $units, o ne prie „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” reikia skaičiaus jo pločiui, o „$argument” juo nėra';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'nežinomas filtras „$name”';
 }

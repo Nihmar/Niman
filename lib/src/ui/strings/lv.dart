@@ -2792,4 +2792,91 @@ final class LatvianStrings extends Strings {
   @override
   String templateProblems(int count) =>
       count == 1 ? '1 problēma šajā šablonā' : '$count problēmas šajā šablonā';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Virsraksti: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Vietas: $named';
+  @override
+  String get wikilinkThisNote => 'šī piezīme';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Neviens virsraksts neatbilst „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Neviena piezīme neatbilst „$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'šai piezīmei nav virsraksta ar šādu nosaukumu';
+  @override
+  String get wikilinkNoNote =>
+      'bibliotēkā nekas nav ar šādu nosaukumu vai aizstājvārdu';
+  @override
+  String wikilinkAlias(String alias) => 'aizstājvārds $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Lappuse tiek izvēlēta, nevis nosaukta no saraksta: ierakstiet tās '
+      'numuru.';
+  @override
+  String get wikilinkFooterMove => 'pārvietot';
+  @override
+  String get wikilinkFooterOr => 'vai';
+  @override
+  String get wikilinkFooterInsert => 'ievietot';
+  @override
+  String get wikilinkFooterClose => 'aizvērt';
+  @override
+  String get suggesterPageHint => 'ierakstiet skaitli';
+  @override
+  String get suggesterChapterHint => 'nosauciet failu grāmatā';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'atvērtas krokainās iekavas bez aizvēršanas: nekas neaizver šo vietturi';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tukšs vietturis: starp iekavām nav nosaukuma';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'nezināms vietturis „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” bez etiķetes: tas neko nejautā, un vietturis paliek savā vietā';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” bez nosaukuma: tas neko neskaita, un vietturis paliek savā '
+      'vietā';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” nepieņem filtrus: kursors netiek novietots, un vietturis paliek '
+      'savā vietā';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'neaizvērtas pēdiņas datuma formātā: viss pēc tām tiek lasīts kā parasts '
+      'teksts';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'nezināms datuma tokens „$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'tukšs filtrs: pēc „|” nav nosaukuma';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” pārvieto datumu: pārvietošanu pieņem tikai $formats, un tikai '
+      'pirms jebkura cita filtra';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” nav datuma pārvietošana: pārvietošana ir skaitlis un vienība, '
+      'piemēram, „+7d” vai „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” pieskaņojas $units, nevis „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” platuma dēļ vajag skaitli, un „$argument” nav skaitlis';
+  @override
+  String templateProblemUnknownFilter(String name) => 'nezināms filtrs „$name”';
 }

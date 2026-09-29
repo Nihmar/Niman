@@ -2841,4 +2841,89 @@ final class DutchStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 probleem in dit sjabloon'
       : '$count problemen in dit sjabloon';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Koppen in $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Plaatsen in $named';
+  @override
+  String get wikilinkThisNote => 'deze notitie';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Geen kop komt overeen met “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Geen notitie komt overeen met “$query”.';
+  @override
+  String get wikilinkNoHeading => 'deze notitie heeft geen kop met die naam';
+  @override
+  String get wikilinkNoNote =>
+      'niets in de bibliotheek heeft die naam of dat alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Een pagina kies je; die staat niet in een lijst: typ het nummer.';
+  @override
+  String get wikilinkFooterMove => 'verplaatsen';
+  @override
+  String get wikilinkFooterOr => 'of';
+  @override
+  String get wikilinkFooterInsert => 'invoegen';
+  @override
+  String get wikilinkFooterClose => 'sluiten';
+  @override
+  String get suggesterPageHint => 'typ een nummer';
+  @override
+  String get suggesterChapterHint => 'noem een bestand in het boek';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'geopende accolades zonder slot: niets sluit deze placeholder';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'lege placeholder: geen naam tussen de accolades';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'onbekende placeholder “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” heeft geen label: het vraagt niets, en de placeholder blijft '
+      'staan';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” heeft geen naam: het telt niets, en de placeholder blijft staan';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” neemt geen filters: de cursor wordt niet geplaatst, en de '
+      'placeholder blijft staan';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'niet-gesloten aanhalingsteken in de datumnotatie: alles erna wordt als '
+      'gewone tekst gelezen';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'onbekend datumsymbool “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'leeg filter: geen naam na de “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” verschuift een datum: alleen $formats nemen een verschuiving, '
+      'en alleen vóór elk ander filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” is geen datumverschuiving: een verschuiving is een aantal en '
+      'een eenheid, zoals “+7d” of “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” zet vast op $units, niet op “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” heeft een getal nodig voor de breedte, en “$argument” is er '
+      'geen';
+  @override
+  String templateProblemUnknownFilter(String name) => 'onbekend filter “$name”';
 }

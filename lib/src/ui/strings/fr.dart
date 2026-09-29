@@ -2886,4 +2886,95 @@ final class FrenchStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problème dans ce modèle'
       : '$count problèmes dans ce modèle';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Titres dans $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Emplacements dans $named';
+  @override
+  String get wikilinkThisNote => 'cette note';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Aucun titre ne correspond à « $query ».';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Aucune note ne correspond à « $query ».';
+  @override
+  String get wikilinkNoHeading => 'cette note n’a aucun titre de ce nom';
+  @override
+  String get wikilinkNoNote =>
+      'rien dans la bibliothèque ne porte ce nom ni cet alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Une page se choisit, elle ne se nomme pas dans une liste : tapez son '
+      'numéro.';
+  @override
+  String get wikilinkFooterMove => 'déplacer';
+  @override
+  String get wikilinkFooterOr => 'ou';
+  @override
+  String get wikilinkFooterInsert => 'insérer';
+  @override
+  String get wikilinkFooterClose => 'fermer';
+  @override
+  String get suggesterPageHint => 'tapez un nombre';
+  @override
+  String get suggesterChapterHint => 'nommez un fichier du livre';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'accolades ouvrantes non fermées : rien ne ferme cet emplacement réservé';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'emplacement réservé vide : aucun nom entre les accolades';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'emplacement réservé inconnu « $name »';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '« $name » n’a pas de libellé : il ne demande rien, et l’emplacement '
+      'réservé reste en place';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '« $name » n’a pas de nom : il ne compte rien, et l’emplacement réservé '
+      'reste en place';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '« $name » n’accepte pas de filtres : le curseur n’est pas placé, et '
+      'l’emplacement réservé reste en place';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'guillemet non fermé dans le format de date : tout ce qui suit est lu '
+      'comme du texte ordinaire';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'jeton de date inconnu « $token »';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtre vide : aucun nom après le « | »';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '« $filter » décale une date : seuls $formats acceptent un décalage, et '
+      'seulement avant tout autre filtre';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '« $filter » n’est pas un décalage de date : un décalage est un nombre '
+      'et '
+      'une unité, comme « +7d » ou « -1w »';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '« $filter » s’aligne sur $units, pas sur « $unit »';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '« $filter » demande un nombre pour sa largeur, et « $argument » n’en '
+      'est '
+      'pas un';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtre inconnu « $name »';
 }

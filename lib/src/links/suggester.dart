@@ -13,6 +13,7 @@ library;
 import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
 /// One row the panel can show.
@@ -360,14 +361,19 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   @override
   Future<List<BookSuggestion>> bookPlaces(String target) async {
     final note = await _resolved(target);
+    // The hint beside the form is a label, written when the panel is drawn:
+    // it follows the language the app speaks.
     switch (p.extension(note?.path ?? target).toLowerCase()) {
       case '.pdf':
-        return const <BookSuggestion>[
-          BookSuggestion(form: 'page=', hint: 'type a number'),
+        return <BookSuggestion>[
+          BookSuggestion(form: 'page=', hint: AppStrings.suggesterPageHint),
         ];
       case '.epub':
-        return const <BookSuggestion>[
-          BookSuggestion(form: 'chapter=', hint: 'name a file in the book'),
+        return <BookSuggestion>[
+          BookSuggestion(
+            form: 'chapter=',
+            hint: AppStrings.suggesterChapterHint,
+          ),
         ];
       default:
         return const <BookSuggestion>[];
