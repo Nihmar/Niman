@@ -175,7 +175,7 @@ final class LinkResolver implements LinkSource {
 
   /// [target] trimmed, its backslashes slashes, its leading `./` gone.
   static String _clean(String target) {
-    var t = target.trim().replaceAll(r'\\', '/');
+    var t = target.trim().replaceAll(r'\', '/');
     while (t.startsWith('./')) {
       t = t.substring(2);
     }

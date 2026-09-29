@@ -170,6 +170,26 @@ void main() {
     });
   });
 
+  // A link written on Windows may carry a single `\` between its folders;
+  // it is a separator, not a character of the name.
+  test('a backslash separates the folders of a target', () async {
+    final a = await addNote('a/note.md', stem: 'note');
+    await addNote('b/note.md', stem: 'note');
+    expect(
+      await resolver.resolveWiki(r'a\note'),
+      isA<ResolvedNote>().having((r) => r.note.id, 'note', a.id),
+    );
+    expect(
+      await resolver.resolveMarkdown(r'.\a\note.md'),
+      isA<ResolvedNote>().having((r) => r.note.id, 'note', a.id),
+    );
+    final batch = await resolver.resolveBatch([r'a\note.md']);
+    expect(
+      batch[r'a\note.md'],
+      isA<ResolvedNote>().having((r) => r.note.id, 'note', a.id),
+    );
+  });
+
   test('unknown targets are unresolved', () async {
     await addNote('note.md', stem: 'note');
     expect(await resolver.resolveWiki('missing'), isA<UnresolvedNote>());
