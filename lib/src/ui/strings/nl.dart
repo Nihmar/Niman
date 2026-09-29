@@ -2338,9 +2338,10 @@ final class DutchStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Het certificaat voor $host kan niet worden '
-      'geverifieerd.\n\nSHA-256-vingerafdruk:\n$fingerprint\n\nVertrouw het '
-      'alleen als dit het certificaat is dat je verwacht. Niman accepteert '
-      'meer dan één certificaat van dezelfde host.';
+      'geverifieerd.\n\nSHA-256-vingerafdruk:\n$fingerprint\n\nVertrouw '
+      'het alleen als dit het certificaat is dat je verwacht. Niman '
+      'accepteert alleen dit ene certificaat voor deze bestemming en '
+      'geen ander.';
   @override
   String get syncCertTrustAction => 'Dit certificaat vertrouwen';
   @override

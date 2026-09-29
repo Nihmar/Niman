@@ -2325,8 +2325,9 @@ final class BulgarianStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Сертификатът за $host не може да се провери.\n\nОтпечатък '
-      'SHA-256:\n$fingerprint\n\nДоверете му се само ако това е очакваният '
-      'сертификат. Niman приема повече от един сертификат от един и същ хост.';
+      'SHA-256:\n$fingerprint\n\nДоверете му се само ако това е '
+      'очакваният сертификат. Niman приема само този сертификат за тази '
+      'дестинация и никой друг.';
   @override
   String get syncCertTrustAction => 'Довери се на този сертификат';
   @override

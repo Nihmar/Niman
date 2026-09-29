@@ -2304,8 +2304,9 @@ final class IcelandicStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Ekki er hægt að staðfesta vottorðið fyrir $host.\n\nSHA-256 '
-      'fingrafar:\n$fingerprint\n\nTreystu því aðeins ef þetta er vottorðið '
-      'sem þú býst við. Niman samþykkir fleiri en eitt vottorð frá sama þjóni.';
+      'fingrafar:\n$fingerprint\n\nTreystu því aðeins ef þetta er '
+      'vottorðið sem þú býst við. Niman samþykkir aðeins þetta eina '
+      'vottorð fyrir þennan áfangastað og ekkert annað.';
   @override
   String get syncCertTrustAction => 'Treysta þessu vottorði';
   @override
@@ -2317,7 +2318,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get syncCertForgetBody =>
       'Þessi áfangastaður er prófaður aftur gegn vottorðasafni tækisins og '
-      'sjálfvirkt undirritað vottorð þarf að staðfesta einu sinni enn. Ekkert '
+      'sjálfundirritað vottorð þarf að staðfesta einu sinni enn. Ekkert '
       'annað breytist.';
   @override
   String get syncCertForgetAction => 'Gleyma';

@@ -2279,8 +2279,8 @@ final class HindiStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       '«$host» का प्रमाणपत्र सत्यापित नहीं हो सकता।\n\nSHA-256 '
       'फ़िंगरप्रिंट:\n$fingerprint\n\nइस पर तभी भरोसा करें जब यह वही '
-      'प्रमाणपत्र हो जिसकी आप अपेक्षा करते हैं। Niman एक ही होस्ट से एक से '
-      'अधिक प्रमाणपत्र स्वीकार करता है।';
+      'प्रमाणपत्र हो जिसकी आप अपेक्षा करते हैं। Niman इस गंतव्य के लिए '
+      'केवल यही एक प्रमाणपत्र स्वीकार करता है, कोई और नहीं।';
   @override
   String get syncCertTrustAction => 'इस प्रमाणपत्र पर भरोसा करें';
   @override

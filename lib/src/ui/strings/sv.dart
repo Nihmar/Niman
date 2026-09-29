@@ -2317,9 +2317,10 @@ final class SwedishStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Certifikatet för $host kan inte '
-      'verifieras.\n\nSHA-256-fingeravtryck:\n$fingerprint\n\nLita på det bara '
-      'om det är certifikatet du förväntar dig. Niman accepterar mer än ett '
-      'certifikat från samma värd.';
+      'verifieras.\n\nSHA-256-fingeravtryck:\n$fingerprint\n\nLita på '
+      'det bara om det är certifikatet du förväntar dig. Niman '
+      'accepterar bara det här certifikatet för den här destinationen, '
+      'och inga andra.';
   @override
   String get syncCertTrustAction => 'Lita på detta certifikat';
   @override

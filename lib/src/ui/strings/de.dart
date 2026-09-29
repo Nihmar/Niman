@@ -2357,9 +2357,10 @@ final class GermanStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Das Zertifikat für $host lässt sich nicht '
-      'überprüfen.\n\nSHA-256-Fingerabdruck:\n$fingerprint\n\nVertraue ihm '
-      'nur, wenn es das Zertifikat ist, das du erwartest. Niman akzeptiert '
-      'mehr als ein Zertifikat vom selben Host.';
+      'überprüfen.\n\nSHA-256-Fingerabdruck:\n$fingerprint\n\nVertraue '
+      'ihm nur, wenn es das Zertifikat ist, das du erwartest. Niman '
+      'akzeptiert nur dieses eine Zertifikat für dieses Ziel und kein '
+      'anderes.';
   @override
   String get syncCertTrustAction => 'Diesem Zertifikat vertrauen';
   @override

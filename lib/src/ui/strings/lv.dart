@@ -2303,8 +2303,8 @@ final class LatvianStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'Sertifikātu $host nevar pārbaudīt.\n\nSHA-256 '
       'nospiedums:\n$fingerprint\n\nUzticieties tam tikai tad, ja tas ir '
-      'gaidītais sertifikāts. Niman pieņem vairāk nekā vienu sertifikātu no '
-      'viena servera.';
+      'gaidītais sertifikāts. Niman šim galamērķim pieņem tikai šo '
+      'sertifikātu un nevienu citu.';
   @override
   String get syncCertTrustAction => 'Uzticēties šim sertifikātam';
   @override

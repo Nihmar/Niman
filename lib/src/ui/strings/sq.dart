@@ -2329,8 +2329,9 @@ final class AlbanianStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Certifikata për $host nuk mund të verifikohet.\n\nGjurma '
-      'SHA-256:\n$fingerprint\n\nBesoje vetëm nëse është certifikata që pret. '
-      'Niman pranon më shumë se një certifikatë nga i njëjti host.';
+      'SHA-256:\n$fingerprint\n\nBesoje vetëm nëse është certifikata që '
+      'pret. Niman pranon vetëm këtë certifikatë për këtë destinacion '
+      'dhe asnjë tjetër.';
   @override
   String get syncCertTrustAction => 'Besoju kësaj certifikate';
   @override
@@ -2341,7 +2342,7 @@ final class AlbanianStrings extends Strings {
   String get syncCertForgetTitle => 'Të harrohet kjo certifikatë?';
   @override
   String get syncCertForgetBody =>
-      'Ky destinacion testohet përsëri kundër depove të certifikatave të '
+      'Ky destinacion testohet përsëri kundër depos së certifikatave të '
       'pajisjes dhe një certifikatë e vetë-nënshkruar do të duhet të '
       'konfirmohet edhe një herë. Asgjë tjetër nuk ndryshon.';
   @override

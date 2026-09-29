@@ -2349,7 +2349,8 @@ final class CatalanStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'No es pot verificar el certificat de $host.\n\nEmpremta '
       'SHA-256:\n$fingerprint\n\nConfia-hi només si és el certificat que '
-      'esperes. Niman accepta més d’un certificat del mateix amfitrió.';
+      'esperes. Niman accepta només aquest certificat per a aquesta '
+      'destinació i cap altre.';
   @override
   String get syncCertTrustAction => 'Confia en aquest certificat';
   @override

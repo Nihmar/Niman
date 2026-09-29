@@ -2315,7 +2315,8 @@ final class BelarusianStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'Сертыфікат для $host не ўдаецца праверыць.\n\nАдбітак '
       'SHA-256:\n$fingerprint\n\nДавярайце яму, толькі калі гэта чаканы '
-      'сертыфікат. Niman прымае больш за адзін сертыфікат ад аднаго хоста.';
+      'сертыфікат. Niman прымае толькі гэты сертыфікат для гэтага '
+      'прызначэння і ніякі іншы.';
   @override
   String get syncCertTrustAction => 'Давяраць гэтаму сертыфікату';
   @override

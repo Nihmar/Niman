@@ -2325,8 +2325,8 @@ final class BasqueStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'Ezin da $host zerbitzariaren ziurtagiria egiaztatu.\n\nSHA-256 '
       'aztarna:\n$fingerprint\n\nFida zaitez hura soilik espero duzun '
-      'ziurtagiria bada. Niman-ek zerbitzari beraren ziurtagiri bat baino '
-      'gehiago onartzen ditu.';
+      'ziurtagiria bada. Niman-ek ziurtagiri hau bakarrik onartzen du '
+      'helmuga honetarako, eta beste bat ere ez.';
   @override
   String get syncCertTrustAction => 'Fidatu ziurtagiri honetan';
   @override
@@ -2338,7 +2338,7 @@ final class BasqueStrings extends Strings {
   @override
   String get syncCertForgetBody =>
       'Helmuga hau berriro probatzen da gailuaren ziurtagiri-biltegiaren '
-      'aurka, eta automatikoki sinatutako ziurtagiria beste behin baieztatu '
+      'aurka, eta norberak sinatutako ziurtagiria beste behin baieztatu '
       'beharko da. Beste ezer ez da aldatzen.';
   @override
   String get syncCertForgetAction => 'Ahaztu';

@@ -2329,8 +2329,8 @@ final class ItalianStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'Il certificato di $host non può essere verificato.\n\nImpronta '
       'SHA-256:\n$fingerprint\n\nConsideralo attendibile solo se è il '
-      'certificato che ti aspetti. Niman accetta più di un certificato dallo '
-      'stesso host.';
+      'certificato che ti aspetti. Niman accetta solo questo certificato '
+      'per questa destinazione e nessun altro.';
   @override
   String get syncCertTrustAction => 'Considera attendibile questo certificato';
   @override

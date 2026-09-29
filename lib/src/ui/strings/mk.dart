@@ -2328,8 +2328,9 @@ final class MacedonianStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Сертификатот за $host не може да се потврди.\n\nSHA-256 '
-      'отпечаток:\n$fingerprint\n\nВерувајте му само ако е тоа очекуваниот '
-      'сертификат. Niman прифаќа повеќе од еден сертификат од истиот хост.';
+      'отпечаток:\n$fingerprint\n\nВерувајте му само ако е тоа '
+      'очекуваниот сертификат. Niman прифаќа само овој сертификат за '
+      'оваа дестинација и никој друг.';
   @override
   String get syncCertTrustAction => 'Верувај му на овој сертификат';
   @override

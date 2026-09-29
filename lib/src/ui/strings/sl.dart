@@ -2307,8 +2307,9 @@ final class SlovenianStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Certifikata za $host ni mogoče preveriti.\n\nPrstni odtis '
-      'SHA-256:\n$fingerprint\n\nZaupajte mu le, če je to certifikat, ki ga '
-      'pričakujete. Niman sprejme več kot en certifikat z istega strežnika.';
+      'SHA-256:\n$fingerprint\n\nZaupajte mu le, če je to certifikat, ki '
+      'ga pričakujete. Niman za ta cilj sprejme samo ta certifikat in '
+      'nobenega drugega.';
   @override
   String get syncCertTrustAction => 'Zaupaj temu certifikatu';
   @override

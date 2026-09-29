@@ -2311,9 +2311,9 @@ final class LithuanianStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Nepavyksta patikrinti $host sertifikato.\n\nSHA-256 '
-      'atspaudas:\n$fingerprint\n\nPasitikėkite juo tik jei tai laukiamas '
-      'sertifikatas. Niman priima daugiau nei vieną sertifikatą iš to paties '
-      'serverio.';
+      'atspaudas:\n$fingerprint\n\nPasitikėkite juo tik jei tai '
+      'laukiamas sertifikatas. Niman priima tik šį sertifikatą šiai '
+      'paskirčiai ir jokio kito.';
   @override
   String get syncCertTrustAction => 'Pasitikėti šiuo sertifikatu';
   @override

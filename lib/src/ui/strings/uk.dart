@@ -2319,7 +2319,8 @@ final class UkrainianStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'Сертифікат для $host не вдається перевірити.\n\nВідбиток '
       'SHA-256:\n$fingerprint\n\nДовіряйте йому, лише якщо це очікуваний '
-      'сертифікат. Niman приймає більше ніж один сертифікат від одного хоста.';
+      'сертифікат. Niman приймає лише цей сертифікат для цього '
+      'призначення й жодного іншого.';
   @override
   String get syncCertTrustAction => 'Довіряти цьому сертифікату';
   @override

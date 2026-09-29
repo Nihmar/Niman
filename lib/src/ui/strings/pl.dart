@@ -2339,9 +2339,9 @@ final class PolishStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Nie można zweryfikować certyfikatu dla $host.\n\nOdcisk '
-      'SHA-256:\n$fingerprint\n\nZaufaj mu tylko wtedy, gdy to certyfikat, '
-      'którego oczekujesz. Niman akceptuje więcej niż jeden certyfikat z tego '
-      'samego serwera.';
+      'SHA-256:\n$fingerprint\n\nZaufaj mu tylko wtedy, gdy to '
+      'certyfikat, którego oczekujesz. Niman akceptuje tylko ten jeden '
+      'certyfikat dla tego miejsca docelowego i żaden inny.';
   @override
   String get syncCertTrustAction => 'Zaufaj temu certyfikatowi';
   @override

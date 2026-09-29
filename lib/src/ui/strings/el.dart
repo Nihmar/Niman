@@ -2382,10 +2382,11 @@ final class GreekStrings extends Strings {
   String get syncCertTrustTitle => 'Να εμπιστευτείτε αυτό το πιστοποιητικό;';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'Το πιστοποιητικό για $host δεν μπορεί να επαληθευτεί.\n\nΑποτύπωμα '
-      'SHA-256:\n$fingerprint\n\nΕμπιστευτείτε το μόνο αν είναι το '
-      'πιστοποιητικό που περιμένετε. Το Niman δέχεται περισσότερα από ένα '
-      'πιστοποιητικά από τον ίδιο διακομιστή.';
+      'Το πιστοποιητικό για $host δεν μπορεί να '
+      'επαληθευτεί.\n\nΑποτύπωμα SHA-256:\n$fingerprint\n\nΕμπιστευτείτε '
+      'το μόνο αν είναι το πιστοποιητικό που περιμένετε. Το Niman '
+      'δέχεται μόνο αυτό το πιστοποιητικό για αυτόν τον προορισμό και '
+      'κανένα άλλο.';
   @override
   String get syncCertTrustAction => 'Εμπιστευτείτε αυτό το πιστοποιητικό';
   @override

@@ -2299,9 +2299,9 @@ final class CzechStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Certifikát pro $host nelze ověřit.\n\nOtisk '
-      'SHA-256:\n$fingerprint\n\nVěřte mu jen tehdy, když je to certifikát, '
-      'který očekáváte. Niman přijímá víc než jeden certifikát od stejného '
-      'hostitele.';
+      'SHA-256:\n$fingerprint\n\nVěřte mu jen tehdy, když je to '
+      'certifikát, který očekáváte. Niman přijme jen tento certifikát '
+      'pro tento cíl a žádný jiný.';
   @override
   String get syncCertTrustAction => 'Věřit tomuto certifikátu';
   @override

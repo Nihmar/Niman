@@ -2085,8 +2085,8 @@ final class ChineseStrings extends Strings {
   String get syncCertTrustTitle => '信任此证书？';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      '无法验证 $host 的证书。\n\nSHA-256 指纹：\n$fingerprint\n\n仅当这是你预期的证书时才信任它。Niman '
-      '接受来自同一主机的多个证书。';
+      '无法验证 $host 的证书。\n\nSHA-256 '
+      '指纹：\n$fingerprint\n\n仅当这是你预期的证书时才信任它。Niman 仅为该目标接受这一个证书，不接受其他证书。';
   @override
   String get syncCertTrustAction => '信任此证书';
   @override

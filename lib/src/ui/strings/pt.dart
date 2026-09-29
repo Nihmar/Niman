@@ -2322,9 +2322,10 @@ final class PortugueseStrings extends Strings {
   String get syncCertTrustTitle => 'Confiar neste certificado?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'Não é possível verificar o certificado de $host.\n\nImpressão digital '
-      'SHA-256:\n$fingerprint\n\nConfie nele apenas se for o certificado que '
-      'espera. O Niman aceita mais do que um certificado do mesmo servidor.';
+      'Não é possível verificar o certificado de $host.\n\nImpressão '
+      'digital SHA-256:\n$fingerprint\n\nConfie nele apenas se for o '
+      'certificado que espera. O Niman aceita apenas este certificado '
+      'para este destino e nenhum outro.';
   @override
   String get syncCertTrustAction => 'Confiar neste certificado';
   @override

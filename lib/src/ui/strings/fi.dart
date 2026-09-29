@@ -2320,13 +2320,13 @@ final class FinnishStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Kohteen $host varmennetta ei voi '
-      'tarkistaa.\n\nSHA-256-sormenjälki:\n$fingerprint\n\nLuota siihen vain, '
-      'jos se on odottamasi varmenne. Niman hyväksyy useamman kuin yhden '
-      'varmenteen samalta palvelimelta.';
+      'tarkistaa.\n\nSHA-256-sormenjälki:\n$fingerprint\n\nLuota siihen '
+      'vain, jos se on odottamasi varmenne. Niman hyväksyy tälle '
+      'kohteelle vain tämän yhden varmenteen eikä mitään muuta.';
   @override
   String get syncCertTrustAction => 'Luota tähän varmenteeseen';
   @override
-  String get syncCertTrustedTitle => 'Varmenne on luotettu';
+  String get syncCertTrustedTitle => 'Varmenteeseen luotetaan';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override

@@ -2373,9 +2373,10 @@ final class FrenchStrings extends Strings {
   String get syncCertTrustTitle => 'Approuver ce certificat ?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'Le certificat de $host ne peut pas être vérifié.\n\nEmpreinte SHA-256 '
-      ':\n$fingerprint\n\nNe l’approuvez que si c’est le certificat attendu. '
-      'Niman accepte plusieurs certificats d’un même hôte.';
+      'Le certificat de $host ne peut pas être vérifié.\n\nEmpreinte '
+      'SHA-256 :\n$fingerprint\n\nNe l’approuvez que si c’est le '
+      'certificat attendu. Niman accepte uniquement ce certificat pour '
+      'cette destination, et aucun autre.';
   @override
   String get syncCertTrustAction => 'Approuver ce certificat';
   @override

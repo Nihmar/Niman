@@ -2283,9 +2283,9 @@ final class EstonianStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Sertifikaati hostile $host ei saa kontrollida.\n\nSHA-256 '
-      'sõrmejälg:\n$fingerprint\n\nUsalda seda ainult siis, kui see on oodatud '
-      'sertifikaat. Niman võtab vastu rohkem kui ühe sertifikaadi samalt '
-      'hostilt.';
+      'sõrmejälg:\n$fingerprint\n\nUsalda seda ainult siis, kui see on '
+      'oodatud sertifikaat. Niman aktsepteerib selle sihtkoha jaoks '
+      'ainult seda üht sertifikaati ja ühtegi teist mitte.';
   @override
   String get syncCertTrustAction => 'Usalda seda sertifikaati';
   @override

@@ -2326,8 +2326,8 @@ final class HungarianStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'A(z) $host tanúsítványa nem ellenőrizhető.\n\nSHA-256 '
       'ujjlenyomat:\n$fingerprint\n\nCsak akkor bízz benne, ha ez a várt '
-      'tanúsítvány. A Niman egynél több tanúsítványt is elfogad ugyanattól a '
-      'gazdagéptől.';
+      'tanúsítvány. A Niman ehhez a célhoz csak ezt az egy tanúsítványt '
+      'fogadja el, másikat nem.';
   @override
   String get syncCertTrustAction => 'Megbízom ebben a tanúsítványban';
   @override

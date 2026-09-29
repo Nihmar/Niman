@@ -2344,8 +2344,9 @@ final class SpanishStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'No se puede verificar el certificado de $host.\n\nHuella '
-      'SHA-256:\n$fingerprint\n\nConfía en él solo si es el certificado que '
-      'esperas. Niman acepta más de un certificado del mismo servidor.';
+      'SHA-256:\n$fingerprint\n\nConfía en él solo si es el certificado '
+      'que esperas. Niman acepta solo este certificado para este destino '
+      'y ningún otro.';
   @override
   String get syncCertTrustAction => 'Confiar en este certificado';
   @override

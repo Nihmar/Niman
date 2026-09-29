@@ -2334,8 +2334,8 @@ final class RomanianStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'Certificatul pentru $host nu poate fi verificat.\n\nAmprentă '
       'SHA-256:\n$fingerprint\n\nAi încredere în el doar dacă este '
-      'certificatul așteptat. Niman acceptă mai multe certificate de la '
-      'același server.';
+      'certificatul așteptat. Niman acceptă doar acest certificat pentru '
+      'această destinație și niciun altul.';
   @override
   String get syncCertTrustAction => 'Ai încredere în acest certificat';
   @override

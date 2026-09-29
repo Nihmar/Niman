@@ -2285,8 +2285,9 @@ final class TurkishStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       '$host için sertifika doğrulanamıyor.\n\nSHA-256 parmak '
-      'izi:\n$fingerprint\n\nYalnızca beklediğiniz sertifika ise güvenin. '
-      'Niman aynı ana bilgisayardan birden fazla sertifikayı kabul eder.';
+      'izi:\n$fingerprint\n\nYalnızca beklediğiniz sertifika ise '
+      'güvenin. Niman bu hedef için yalnızca bu sertifikayı kabul eder, '
+      'başkasını kabul etmez.';
   @override
   String get syncCertTrustAction => 'Bu sertifikaya güven';
   @override

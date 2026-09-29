@@ -2299,9 +2299,9 @@ final class DanishStrings extends Strings {
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
       'Certifikatet til $host kan ikke '
-      'bekræftes.\n\nSHA-256-fingeraftryk:\n$fingerprint\n\nStol kun på det, '
-      'hvis det er det certifikat, du forventer. Niman accepterer mere end ét '
-      'certifikat fra samme vært.';
+      'bekræftes.\n\nSHA-256-fingeraftryk:\n$fingerprint\n\nStol kun på '
+      'det, hvis det er det certifikat, du forventer. Niman accepterer '
+      'kun dette ene certifikat til denne destination og ingen andre.';
   @override
   String get syncCertTrustAction => 'Stol på dette certifikat';
   @override

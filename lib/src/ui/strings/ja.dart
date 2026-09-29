@@ -2139,7 +2139,7 @@ final class JapaneseStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       '$host の証明書を検証できません。\n\nSHA-256 '
       'フィンガープリント:\n$fingerprint\n\nこれが想定した証明書である場合にのみ信頼してください。Niman '
-      'は同じホストから複数の証明書を受け入れます。';
+      'はこの接続先について、この証明書だけを受け入れ、ほかの証明書は受け入れません。';
   @override
   String get syncCertTrustAction => 'この証明書を信頼する';
   @override

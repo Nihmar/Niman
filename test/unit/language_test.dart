@@ -445,6 +445,20 @@ void main() {
           }
         }
       });
+
+      // What a translation says cannot be pinned by a test: the certificate
+      // dialog once claimed, in all 36 languages, the opposite of what the
+      // English source says, and every check passed. What a test can hold
+      // is that the dialog still shows the two facts the user decides on.
+      test('the certificate dialog shows the host and the fingerprint', () {
+        for (final language in AppLanguages.supported) {
+          AppLanguages.choice = language;
+          final body = AppStrings.syncCertTrustBody('example.test', 'AB:CD:EF');
+          expect(body, contains('example.test'), reason: language.name);
+          expect(body, contains('AB:CD:EF'), reason: language.name);
+          expect(body, contains('SHA-256'), reason: language.name);
+        }
+      });
     });
   });
 }

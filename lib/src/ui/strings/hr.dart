@@ -2311,8 +2311,8 @@ final class CroatianStrings extends Strings {
   String syncCertTrustBody(String host, String fingerprint) =>
       'Certifikat za $host se ne može provjeriti.\n\nSHA-256 '
       'otisak:\n$fingerprint\n\nVjeruj mu samo ako je to certifikat koji '
-      'očekuješ. Niman prihvaća više od jednog certifikata s istog '
-      'poslužitelja.';
+      'očekuješ. Niman prihvaća samo ovaj certifikat za ovo odredište i '
+      'nijedan drugi.';
   @override
   String get syncCertTrustAction => 'Vjeruj ovom certifikatu';
   @override
