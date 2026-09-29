@@ -82,6 +82,30 @@ void main() {
     });
   });
 
+  test('a reminder fired at its time is not fired again for it', () async {
+    final r = reminder(const Duration(milliseconds: 10));
+    await backend.schedule(r, exact: true);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(notifier.shown.map((posted) => posted.id), [r.id]);
+
+    // Scheduled again for the same moment, now past: it was delivered.
+    await backend.schedule(r, exact: true);
+    expect(await backend.pendingIds(), isEmpty);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(notifier.shown.map((posted) => posted.id), [r.id]);
+
+    // Moved to another moment, it is a reminder not yet delivered.
+    final moved = TodoReminder(
+      id: r.id,
+      title: r.title,
+      body: r.body,
+      when: DateTime.now().add(const Duration(milliseconds: 10)),
+    );
+    await backend.schedule(moved, exact: true);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(notifier.shown.map((posted) => posted.id), [r.id, r.id]);
+  });
+
   test('a cancelled reminder never fires', () async {
     final r = reminder(const Duration(milliseconds: 30));
     await backend.schedule(r, exact: true);

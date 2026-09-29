@@ -409,7 +409,9 @@ final class LocalReminderService implements ReminderService {
   /// [reminderGrace] is one that came due while Niman was closed (or
   /// while a stale set waited out the grant round trip), and it is shown
   /// now; past the grace window it is too old to be useful and is skipped
-  /// like everywhere else.
+  /// like everywhere else. It is also one this run may already have shown
+  /// at its time, and every reconcile in the window hands it over again:
+  /// the backend, which alone knows what it delivered, shows a moment once.
   Future<void> _scheduleAll(
     Map<int, TodoReminder> wanted, {
     required bool exact,
