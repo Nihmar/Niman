@@ -5239,7 +5239,7 @@ final class _Line extends StatelessWidget {
     valueListenable: spot,
     builder: (context, at, child) => CustomPaint(
       painter: at.line == index && rowColor != null
-          ? _RowPainter(rect: caret, color: rowColor!)
+          ? _RowPainter(rect: caret, color: rowColor!, pieceShift: pieceShift)
           : null,
       foregroundPainter: at.line == index
           ? _CaretPainter(
@@ -6133,25 +6133,44 @@ bool _isMarker(TokenKind kind) => switch (kind) {
 /// Lights the caret's row across the line, behind the text: typewriter mode's
 /// row being written. The row is the caret's own — its top and its height —
 /// so a wrapped paragraph lights the row the caret is on, not the paragraph.
+///
+/// A table row laid out in fitted columns is drawn a piece at a time, and the
+/// caret is measured inside the piece it is in: the light takes the piece's
+/// own shift, the way the caret does (`_CaretPainter`), so it stands on the
+/// visual line being written rather than a piece's height too high (#494).
 final class _RowPainter extends CustomPainter {
-  new({required this.rect, required this.color}) : super(repaint: rect);
+  new({required this.rect, required this.color, this.pieceShift})
+    : super(repaint: Listenable.merge(<Listenable?>[rect, pieceShift]));
 
   final ValueListenable<Rect?> rect;
   final Color color;
 
+  /// Where the *piece* the caret is in sits in the same box, for a table row
+  /// laid out in fitted columns: its `y` is what the light has to move by.
+  final ValueListenable<Offset>? pieceShift;
+
+  /// The rectangle the row is lit across, in the box this paints over: the
+  /// caret's own row, shifted with the piece the caret is in — the same
+  /// answer `_CaretPainter` draws from.
+  Rect? drawnRect(Size size) {
+    final value = rect.value;
+    if (value == null) return null;
+    final dy = pieceShift?.value.dy ?? 0;
+    return Rect.fromLTRB(0, value.top + dy, size.width, value.bottom + dy);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
-    final value = rect.value;
-    if (value == null) return;
-    canvas.drawRect(
-      Rect.fromLTRB(0, value.top, size.width, value.bottom),
-      Paint()..color = color,
-    );
+    final drawn = drawnRect(size);
+    if (drawn == null) return;
+    canvas.drawRect(drawn, Paint()..color = color);
   }
 
   @override
   bool shouldRepaint(_RowPainter oldDelegate) =>
-      oldDelegate.rect != rect || oldDelegate.color != color;
+      oldDelegate.rect != rect ||
+      oldDelegate.color != color ||
+      oldDelegate.pieceShift != pieceShift;
 }
 
 /// Draws the caret: a thin vertical bar at the rectangle the line's own layout
