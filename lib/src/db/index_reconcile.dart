@@ -544,20 +544,27 @@ final class IndexReconciler {
     while (true) {
       final rows = await _db
           .customSelect(
-            'SELECT rowid, note_id, target, kind FROM pending_links '
-            'ORDER BY rowid LIMIT $_linkPage',
+            'SELECT l.rowid AS rowid, l.note_id AS note_id, '
+            'l.target AS target, l.kind AS kind, n.path AS path '
+            'FROM pending_links AS l LEFT JOIN notes AS n ON n.id = l.note_id '
+            'ORDER BY l.rowid LIMIT $_linkPage',
           )
           .get();
       if (rows.isEmpty) break;
-      final targets = <String>{
-        for (final row in rows) row.read<String>('target'),
-      };
-      final resolved = await LinkResolver(_db).resolveBatch(targets);
+      // A link resolves from the note it is written in: a `..` walks from
+      // that note's folder (#491).
+      LinkQuery queryOf(QueryRow row) => (
+        target: row.read<String>('target'),
+        from: row.readNullable<String>('path'),
+        markdown: row.read<String>('kind') == 'md',
+      );
+      final resolved = await LinkResolver(_db)
+          .resolveQueries({for (final row in rows) queryOf(row)});
       final last = rows.last.read<int>('rowid');
       await _db.transaction(() async {
         for (final row in rows) {
           final fromNote = row.read<int>('note_id');
-          final outcome = resolved[row.read<String>('target')];
+          final outcome = resolved[queryOf(row)];
           if (outcome is! ResolvedNote || outcome.note.id == fromNote) {
             continue;
           }

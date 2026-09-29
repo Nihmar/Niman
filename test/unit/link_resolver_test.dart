@@ -197,41 +197,195 @@ void main() {
     expect(await resolver.resolveWiki('a/none'), isA<UnresolvedNote>());
   });
 
-  // #491: `..` climbs to the library root and no further — nothing above
-  // it is indexed — and a leading `/` is the root, so both spellings name
-  // the note the path says, as they did before the #330 path check.
+  // #491: a path is read the way Markdown reads it. `..` and `.` walk from
+  // the folder of the note the link is written in; a leading `/` is the
+  // library root; either names exactly the path it ends at, so what climbs
+  // out of the library names nothing, and neither collapses into a bare stem
+  // that the one-candidate shortcut would hand to an unrelated note (#330).
   group('relative and rooted paths', () {
-    const forms = ['../Notes/a', '/Notes/a', 'sub/../a'];
+    Matcher opens(Note note) =>
+        isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id);
 
-    test('resolve like the path they end at', () async {
+    // Without a linking note the library root stands in: what `..` climbs
+    // past it is dropped, as it always was.
+    test('without a source they end at the path they name', () async {
       final note = await addNote('Notes/a.md', stem: 'a');
-      for (final form in forms) {
-        expect(
-          await resolver.resolveWiki(form),
-          isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
-          reason: form,
-        );
+      for (final form in ['../Notes/a', '/Notes/a', 'sub/../Notes/a']) {
+        expect(await resolver.resolveWiki(form), opens(note), reason: form);
         expect(
           await resolver.resolveMarkdown('$form.md'),
-          isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+          opens(note),
           reason: '$form.md',
         );
       }
     });
 
-    test('the batch resolution follows the single one', () async {
+    test('a `..` walks from the folder of the linking note', () async {
+      final deep = await addNote('Deep/Notes/a.md', stem: 'a');
+      final far = await addNote('Notes/a.md', stem: 'a');
+      const from = 'Deep/Sub/b.md';
+      expect(
+        await resolver.resolveMarkdown('../Notes/a.md', from: from),
+        opens(deep),
+      );
+      expect(await resolver.resolveWiki('../Notes/a', from: from), opens(deep));
+      expect(
+        await resolver.resolveMarkdown('../../Notes/a.md', from: from),
+        opens(far),
+      );
+      expect(
+        await resolver.resolveMarkdown('../Notes/a.md', from: 'Other/Sub/b.md'),
+        isA<UnresolvedNote>(),
+        reason: 'Notes/a.md is there, but that is not where the link points',
+      );
+    });
+
+    test('the sole candidate is followed from where the link is', () async {
       final note = await addNote('Notes/a.md', stem: 'a');
-      final batch = await resolver.resolveBatch([
-        ...[for (final form in forms) '$form.md'],
-        '../notes/A.md',
-      ]);
-      for (final entry in batch.entries) {
+      expect(
+        await resolver.resolveMarkdown('../Notes/a.md', from: 'Sub/b.md'),
+        opens(note),
+      );
+      expect(
+        await resolver.resolveMarkdown('./../Notes/a.md', from: 'Sub/b.md'),
+        opens(note),
+      );
+      expect(
+        await resolver.resolveMarkdown('x/../../Notes/a.md', from: 'Sub/b.md'),
+        opens(note),
+      );
+    });
+
+    test('a leading `/` names the library root, not a tail', () async {
+      final root = await addNote('docs/a.md', stem: 'a');
+      await addNote('x/docs/a.md', stem: 'a');
+      for (final from in [null, 'Sub/b.md', 'x/b.md']) {
         expect(
-          entry.value,
-          isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
-          reason: entry.key,
+          await resolver.resolveMarkdown('/docs/a.md', from: from),
+          opens(root),
+          reason: '$from',
+        );
+        expect(
+          await resolver.resolveWiki('/docs/a', from: from),
+          opens(root),
+          reason: '$from',
         );
       }
+    });
+
+    test('a rooted bare name is the root one, or nothing', () async {
+      final root = await addNote('a.md', stem: 'a');
+      await addNote('Sub/a.md', stem: 'a');
+      expect(await resolver.resolveMarkdown('/a.md'), opens(root));
+      expect(
+        await resolver.resolveMarkdown('/a.md', from: 'Sub/b.md'),
+        opens(root),
+      );
+      expect(await resolver.resolveWiki('/a'), opens(root));
+    });
+
+    test('what climbs out of the library names nothing (#330)', () async {
+      await addNote('xa/note.md', stem: 'note');
+      const forms = ['/note', '../note', 'sub/../../note', '/../note'];
+      for (final form in forms) {
+        for (final from in [null, 'b.md', 'Sub/b.md']) {
+          expect(
+            await resolver.resolveWiki(form, from: from),
+            isA<UnresolvedNote>(),
+            reason: '[[$form]] from $from: the only note is at xa/',
+          );
+          expect(
+            await resolver.resolveMarkdown('$form.md', from: from),
+            isA<UnresolvedNote>(),
+            reason: '[$form.md] from $from',
+          );
+        }
+      }
+      expect(
+        await resolver.resolveMarkdown('../note.md', from: 'b.md'),
+        isA<UnresolvedNote>(),
+      );
+      // The root's own `note` is not a way out of the library either.
+      await addNote('note.md', stem: 'note');
+      expect(
+        await resolver.resolveMarkdown('../note.md', from: 'b.md'),
+        isA<UnresolvedNote>(),
+        reason: 'one level above the root is not the root',
+      );
+    });
+
+    test('a plain path is tried beside the linking note first', () async {
+      final root = await addNote('a.md', stem: 'a');
+      final beside = await addNote('Sub/a.md', stem: 'a');
+      await addNote('Other/a.md', stem: 'a');
+      expect(
+        await resolver.resolveMarkdown('a.md', from: 'Sub/b.md'),
+        opens(beside),
+      );
+      expect(
+        await resolver.resolveMarkdown('./a.md#Top', from: 'Sub/b.md'),
+        isA<ResolvedNote>()
+            .having((r) => r.note.id, 'note', beside.id)
+            .having((r) => r.heading, 'heading', 'Top'),
+      );
+      // From the root the note beside is the root one.
+      expect(await resolver.resolveMarkdown('a.md', from: 'b.md'), opens(root));
+      // Nothing beside it: the name still finds its note, as before.
+      expect(
+        await resolver.resolveMarkdown('a.md', from: 'Elsewhere/b.md'),
+        isA<AmbiguousNote>(),
+      );
+      // A wikilink is a name, not a path: it keeps the picker.
+      expect(
+        await resolver.resolveWiki('a', from: 'Sub/b.md'),
+        isA<AmbiguousNote>(),
+      );
+    });
+
+    test('a folder in the path is tried beside the note too', () async {
+      await addNote('x/n.md', stem: 'n');
+      final beside = await addNote('Sub/x/n.md', stem: 'n');
+      expect(
+        await resolver.resolveMarkdown('x/n.md', from: 'Sub/b.md'),
+        opens(beside),
+      );
+    });
+
+    test('the batch resolution follows the single one', () async {
+      final deep = await addNote('Deep/Notes/a.md', stem: 'a');
+      final rooted = await addNote('docs/c.md', stem: 'c');
+      final beside = await addNote('Sub/d.md', stem: 'd');
+      await addNote('d.md', stem: 'd');
+      await addNote('xa/note.md', stem: 'note');
+      LinkQuery q(String target, String from, {bool markdown = true}) =>
+          (target: target, from: from, markdown: markdown);
+      final queries = [
+        q('../Notes/A.md', 'Deep/Sub/b.md'),
+        q('../Notes/a', 'Deep/Sub/b.md', markdown: false),
+        q('/docs/c.md', 'x/b.md'),
+        q('d.md', 'Sub/b.md'),
+        q('d', 'Sub/b.md', markdown: false),
+        q('../note.md', 'b.md'),
+        q('/note', 'b.md', markdown: false),
+      ];
+      final batch = await resolver.resolveQueries(queries);
+      expect(batch[queries[0]], opens(deep));
+      expect(batch[queries[1]], opens(deep));
+      expect(batch[queries[2]], opens(rooted));
+      expect(batch[queries[3]], opens(beside));
+      expect(batch[queries[4]], isA<AmbiguousNote>());
+      expect(batch[queries[5]], isA<UnresolvedNote>());
+      expect(batch[queries[6]], isA<UnresolvedNote>());
+    });
+
+    test('the same target from two notes resolves for each', () async {
+      final one = await addNote('One/a.md', stem: 'a');
+      final two = await addNote('Two/a.md', stem: 'a');
+      const fromOne = (target: 'a.md', from: 'One/b.md', markdown: true);
+      const fromTwo = (target: 'a.md', from: 'Two/b.md', markdown: true);
+      final batch = await resolver.resolveQueries([fromOne, fromTwo]);
+      expect(batch[fromOne], opens(one));
+      expect(batch[fromTwo], opens(two));
     });
   });
 

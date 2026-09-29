@@ -63,10 +63,25 @@ extension is not followed. `![alt](src)` images are not links,
 and neither is a footnote reference (`[^1]`); a link written inside a
 footnote's own text is.
 
-A path is read against the library: `/docs/a.md` from the root, and
-`../Notes/a.md` climbing no further than it (`Sub/b.md` with
-`[x](../Notes/a.md)` is `Notes/a.md`). A note outside the library is not
-in the index and so is not a link target.
+A path is read the way Markdown reads it, against the library:
+
+- `/docs/a.md` is `docs/a.md` **from the library root**, and no other note
+  whose path merely ends in it;
+- `../Notes/a.md` walks **from the folder of the note it is written in**
+  (in `Deep/Sub/b.md` it is `Deep/Notes/a.md`, in `Sub/b.md` it is
+  `Notes/a.md`), and names exactly that path. One that climbs out of the
+  library names nothing: the link is dead, it never falls back to a note of
+  the same name elsewhere;
+- a plain path (`a.md`, `sub/a.md`) is tried **beside the note first**:
+  in `Sub/b.md`, `[x](a.md)` is `Sub/a.md` when there is one. When there is
+  not, it is found as a wikilink is: by its name, and the note's folder
+  qualifies it (`sub/a.md` matches `x/sub/a.md`), the picker offering the
+  candidates when more than one fits.
+
+A wikilink is a name, not a path, so a plain `[[a]]` is never read beside
+the note; `[[/docs/a]]` and `[[../Notes/a]]` follow the same rules as the
+Markdown forms. A note outside the library is not in the index and so is
+not a link target. `\` in a path is `/`.
 
 ## Links into a PDF or a book
 

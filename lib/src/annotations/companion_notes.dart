@@ -59,7 +59,7 @@ final class CompanionNotes {
     final out = <String>[];
     for (final (:note, :value) in await fields.fieldValues(key)) {
       if (out.contains(note.path)) continue;
-      final resolved = await _resolve(value);
+      final resolved = await _resolve(value, from: note.path);
       if (resolved is ResolvedNote && resolved.note.path == path) {
         out.add(note.path);
       }
@@ -80,8 +80,14 @@ final class CompanionNotes {
       final text = normalizedLineEndings(await ops.readNote(note));
       final links = await Isolate.run(() => annotationLinksIn(text));
       for (final link in links) {
-        final key = '${link.markdown}:${link.target}';
-        final here = pointsHere[key] ??= await _pointsAt(link, path);
+        // A path is read from the note it is written in, so the answer is
+        // that note's own.
+        final key = '$note:${link.markdown}:${link.target}';
+        final here = pointsHere[key] ??= await _pointsAt(
+          link,
+          path,
+          from: note,
+        );
         if (!here) continue;
         out.add(
           AnnotationMark(
@@ -96,27 +102,35 @@ final class CompanionNotes {
     return out;
   }
 
-  /// Whether [link] resolves to the file at [path].
-  Future<bool> _pointsAt(AnnotationLink link, String path) async {
+  /// Whether [link], written in the note at [from], resolves to the file at
+  /// [path].
+  Future<bool> _pointsAt(
+    AnnotationLink link,
+    String path, {
+    required String from,
+  }) async {
     final resolved = link.markdown
-        ? await links.resolveMarkdown(link.target)
-        : await links.resolveWiki(link.target);
+        ? await links.resolveMarkdown(link.target, from: from)
+        : await links.resolveWiki(link.target, from: from);
     return resolved is ResolvedNote && resolved.note.path == path;
   }
 
-  /// What a frontmatter [value] names: a wikilink (`[[Books/Dune.epub]]`,
-  /// as Obsidian writes a link in a property), a Markdown link, or a bare
-  /// path.
-  Future<ResolveResult> _resolve(String value) {
+  /// What a frontmatter [value] of the note at [from] names: a wikilink
+  /// (`[[Books/Dune.epub]]`, as Obsidian writes a link in a property), a
+  /// Markdown link, or a bare path.
+  Future<ResolveResult> _resolve(String value, {required String from}) {
     final text = value.trim();
     if (text.startsWith('[[') && text.endsWith(']]')) {
       return links.resolveWiki(
         parseWikiRef(text.substring(2, text.length - 2)).target,
+        from: from,
       );
     }
     final markdown = _markdownLink.firstMatch(text);
-    if (markdown != null) return links.resolveMarkdown(markdown[1]!);
-    return links.resolveWiki(text);
+    if (markdown != null) {
+      return links.resolveMarkdown(markdown[1]!, from: from);
+    }
+    return links.resolveWiki(text, from: from);
   }
 
   static final RegExp _markdownLink = RegExp(r'^\[[^\]]*\]\(([^)]+)\)$');

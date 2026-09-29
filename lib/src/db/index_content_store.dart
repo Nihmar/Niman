@@ -244,18 +244,18 @@ final class IndexContentStore {
     // of two queries per link (the per-link queries dominated the content
     // pass: hundreds of notes × a dozen links each). When the caller defers
     // the edges there is nothing to resolve yet.
-    final batchTargets = <String>{};
+    final batchQueries = <LinkQuery>{};
     if (pendingLink == null) {
-      for (final (_, c) in items) {
+      for (final (row, c) in items) {
         for (final link in c.links) {
-          final target = _linkTarget(link);
-          if (target != null) batchTargets.add(target);
+          final query = _linkQuery(link, row.path);
+          if (query != null) batchQueries.add(query);
         }
       }
     }
     final resolved = pendingLink == null
-        ? await LinkResolver(_db).resolveBatch(batchTargets)
-        : const <String, ResolveResult>{};
+        ? await LinkResolver(_db).resolveQueries(batchQueries)
+        : const <LinkQuery, ResolveResult>{};
 
     // Chunked writes: each chunk its own transaction with a yield between
     // chunks, so a large backfill leaves frames free (typing stays
@@ -286,6 +286,16 @@ final class IndexContentStore {
     _ => null,
   };
 
+  /// [link] as the resolver is asked about it, written in the note at
+  /// library-relative [from] (a `..` walks from its folder, #491), or null
+  /// for a link that never resolves.
+  static LinkQuery? _linkQuery(ParsedLink link, String from) {
+    final target = _linkTarget(link);
+    return target == null
+        ? null
+        : (target: target, from: from, markdown: link is MarkdownLink);
+  }
+
   /// The content-derived rows of one note within a chunk transaction:
   /// FTS (title + body copy), file + alias stems, tags, and the resolved
   /// link edges from the batched resolution map (or the caller's pending
@@ -293,7 +303,7 @@ final class IndexContentStore {
   Future<void> _writeContentRow(
     Note row,
     NoteContent c,
-    Map<String, ResolveResult> resolved,
+    Map<LinkQuery, ResolveResult> resolved,
     void Function(QueuedLink link)? pendingLink,
   ) async {
     await _db.customStatement(
@@ -311,7 +321,7 @@ final class IndexContentStore {
     await _writeAliasStems(row.id, c);
     await _writeTags(row.id, c);
     await writeFields(row.id, fields: c.fields, date: c.date, pinned: c.pinned);
-    await _writeLinks(row.id, c, resolved, pendingLink);
+    await _writeLinks(row, c, resolved, pendingLink);
   }
 
   /// Writes the known frontmatter fields onto the note row itself and the
@@ -421,7 +431,7 @@ final class IndexContentStore {
     }
   }
 
-  /// Rewrites the resolved `note_links` edges of note [noteId] to match
+  /// Rewrites the resolved `note_links` edges of note [note] to match
   /// [c]'s links: wiki and `.md` targets that resolve to another indexed
   /// note become edges; dead links, external URLs, anchors and self-links
   /// are skipped. [resolved] carries the batched resolution results
@@ -433,11 +443,12 @@ final class IndexContentStore {
   /// dropped too — a leftover from a scan that never finished would
   /// resolve against content the note no longer has.
   Future<void> _writeLinks(
-    int noteId,
+    Note note,
     NoteContent c,
-    Map<String, ResolveResult> resolved,
+    Map<LinkQuery, ResolveResult> resolved,
     void Function(QueuedLink link)? pendingLink,
   ) async {
+    final noteId = note.id;
     await (_db.delete(
       _db.noteLinks,
     )..where((l) => l.fromNote.equals(noteId))).go();
@@ -447,14 +458,14 @@ final class IndexContentStore {
     final pending = <QueuedLink>[];
     await _db.batch((batch) {
       for (final link in c.links) {
-        final target = _linkTarget(link);
-        if (target == null) continue;
+        final query = _linkQuery(link, note.path);
+        if (query == null) continue;
         final kind = link is WikiLink ? 'wiki' : 'md';
         if (pendingLink != null) {
-          pending.add((fromNote: noteId, target: target, kind: kind));
+          pending.add((fromNote: noteId, target: query.target, kind: kind));
           continue;
         }
-        final outcome = resolved[target];
+        final outcome = resolved[query];
         if (outcome is! ResolvedNote || outcome.note.id == noteId) continue;
         batch.insert(
           _db.noteLinks,

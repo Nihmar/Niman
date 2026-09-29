@@ -85,11 +85,25 @@ final class ExternalLink extends ResolveResult {
 abstract interface class LinkSource {
   /// Resolves a wiki target (the `[[…]]` content without brackets, e.g.
   /// `note`, `folder/note`, `note.md`).
-  Future<ResolveResult> resolveWiki(String target);
+  ///
+  /// [from] is the library-relative path of the note the link is written
+  /// in, when it is known: a `..` in the target walks from that note's
+  /// folder (#491). A leading `/` is the library root whatever [from] is.
+  Future<ResolveResult> resolveWiki(String target, {String? from});
 
   /// Resolves a markdown `[text](href)`.
-  Future<ResolveResult> resolveMarkdown(String href);
+  ///
+  /// [from] is as for [resolveWiki]; here it also makes a plain relative
+  /// path (`a.md`, `sub/a.md`) prefer the note beside the linking one, the
+  /// way Markdown reads a path.
+  Future<ResolveResult> resolveMarkdown(String href, {String? from});
 }
+
+/// One link to resolve in a batch ([LinkResolver.resolveQueries]): the
+/// `target` as written, the library-relative path of the note it is written
+/// in (`from`, null when unknown), and whether it is a Markdown href rather
+/// than a wiki target.
+typedef LinkQuery = ({String target, String? from, bool markdown});
 
 /// Resolves wiki targets (`[[…]]` target part) and markdown hrefs against
 /// the note index. Not a DAO and not stateful: callers create one per use.
@@ -100,12 +114,12 @@ final class LinkResolver implements LinkSource {
   final IndexDatabase _db;
 
   @override
-  Future<ResolveResult> resolveWiki(String target) {
-    return _resolvePath(target);
+  Future<ResolveResult> resolveWiki(String target, {String? from}) {
+    return _resolvePath(target, from: from, beside: false);
   }
 
   @override
-  Future<ResolveResult> resolveMarkdown(String href) {
+  Future<ResolveResult> resolveMarkdown(String href, {String? from}) {
     final h = href.trim();
     if (h.isEmpty) return Future.value(UnresolvedNote(target: href));
     if (hasScheme(h)) return Future.value(ExternalLink(url: h));
@@ -121,7 +135,11 @@ final class LinkResolver implements LinkSource {
     if (p.url.extension(path).isEmpty) {
       return Future.value(UnresolvedNote(target: h));
     }
-    return _resolvePath(hash == -1 ? path : path + h.substring(hash));
+    return _resolvePath(
+      hash == -1 ? path : path + h.substring(hash),
+      from: from,
+      beside: true,
+    );
   }
 
   /// Whether the note at [path] is one a target naming [target] — already
@@ -137,14 +155,15 @@ final class LinkResolver implements LinkSource {
   /// A Windows device stem answers as it is and as `sanitizeName` moved it
   /// aside: the note `[[Aux]]` creates is `_Aux.md`, and the link has to
   /// find it (#491).
-  static bool pathMatches(String path, String target) {
+  ///
+  /// With [exact] the target is the whole path and nothing else qualifies:
+  /// what a leading `/` or a `..` names (#491).
+  static bool pathMatches(String path, String target, {bool exact = false}) {
     final lower = path.toLowerCase();
     for (final t in _targetVariants(target)) {
       final withMd = '$t.md';
-      if (lower == t ||
-          lower == withMd ||
-          lower.endsWith('/$t') ||
-          lower.endsWith('/$withMd')) {
+      if (lower == t || lower == withMd) return true;
+      if (!exact && (lower.endsWith('/$t') || lower.endsWith('/$withMd'))) {
         return true;
       }
     }
@@ -182,45 +201,84 @@ final class LinkResolver implements LinkSource {
     return t;
   }
 
-  /// [raw] split into its target, normalized ([normalizeTarget], `.md`
-  /// dropped, its path segments resolved by [_pathOf]), and its `#fragment`,
-  /// null when empty. The fragment keeps its case: a heading is found by its
-  /// slug whatever its case, and a place in a book (#282) names a file in
-  /// it, whose name has one.
-  static ({String target, String? fragment}) _split(String raw) {
+  /// [raw] read into what it names ([_Spec]): its target normalized
+  /// ([normalizeTarget], `.md` dropped, its path walked by [_walk]) and its
+  /// `#fragment`, null when empty. The fragment keeps its case: a heading is
+  /// found by its slug whatever its case, and a place in a book (#282) names
+  /// a file in it, whose name has one.
+  ///
+  /// [from] is the linking note's path when it is known, and [beside] asks
+  /// a plain path to be tried next to it first (Markdown links; a wiki
+  /// target is a name, not a path). Null when the target names nothing: it
+  /// climbs out of the library.
+  static _Spec? _split(String raw, {required bool beside, String? from}) {
     final kept = _clean(raw);
     final hash = kept.indexOf('#');
     var target = (hash == -1 ? kept : kept.substring(0, hash)).toLowerCase();
     if (target.endsWith('.md')) target = target.substring(0, target.length - 3);
-    return (
-      target: _pathOf(target),
-      fragment: hash == -1 || hash == kept.length - 1
-          ? null
-          : kept.substring(hash + 1),
-    );
+    final fragment = hash == -1 || hash == kept.length - 1
+        ? null
+        : kept.substring(hash + 1);
+    if (target.isEmpty) {
+      return (t: '', heading: fragment, exact: false, near: null);
+    }
+    final segments = target.split('/');
+    if (!target.startsWith('/') &&
+        !segments.any((s) => s == '.' || s == '..')) {
+      // A plain path: found as its tail wherever it sits, and — for a
+      // Markdown link — first exactly where the note beside it would have it.
+      final folder = beside ? _folderOf(from) : null;
+      return (
+        t: target,
+        heading: fragment,
+        exact: false,
+        near: folder == null ? null : [...folder, target].join('/'),
+      );
+    }
+    final walked = _walk(segments, from, rooted: target.startsWith('/'));
+    if (walked == null) return null;
+    return (t: walked, heading: fragment, exact: true, near: null);
   }
 
-  /// [target]'s path with its `.` and `..` segments resolved and a leading
-  /// `/` gone: the library-relative path the link names (#491).
+  /// The folder segments of the note at library-relative [from], lowercased
+  /// (a target is); null when [from] is not known.
+  static List<String>? _folderOf(String? from) {
+    if (from == null) return null;
+    final segments = [
+      for (final s in from.replaceAll(r'\', '/').toLowerCase().split('/'))
+        if (s.isNotEmpty && s != '.') s,
+    ];
+    if (segments.isNotEmpty) segments.removeLast();
+    return segments;
+  }
+
+  /// The library-relative path [segments] name (#491): a leading `/` starts
+  /// at the library root, anything else at the folder of the note at [from].
+  /// `.` stays where it is and `..` goes up a folder. Null when the path
+  /// names nothing: it climbs out of the library, or ends at the root
+  /// itself.
   ///
-  /// Everything the resolver sees is indexed against the library root, so
-  /// the linking note's own folder is the one thing a `..` cannot climb
-  /// out of: a segment that would leave the root is dropped, and `[[../a]]`
-  /// from the root is `[[a]]`. A target that resolves to no path at all
-  /// (`..`, `a/..`) is left as written — it names nothing, which is what it
-  /// named before.
-  static String _pathOf(String target) {
-    if (!target.startsWith('/') && !target.contains('..')) return target;
-    final resolved = <String>[];
-    for (final segment in target.split('/')) {
+  /// With no [from] a relative path starts at the root and what climbs past
+  /// it is dropped, as it always was: there is no note to walk from.
+  static String? _walk(
+    List<String> segments,
+    String? from, {
+    required bool rooted,
+  }) {
+    final path = <String>[if (!rooted) ...?_folderOf(from)];
+    for (final segment in segments) {
       if (segment.isEmpty || segment == '.') continue;
-      if (segment == '..') {
-        if (resolved.isNotEmpty) resolved.removeLast();
+      if (segment != '..') {
+        path.add(segment);
         continue;
       }
-      resolved.add(segment);
+      if (path.isNotEmpty) {
+        path.removeLast();
+      } else if (rooted || from != null) {
+        return null;
+      }
     }
-    return resolved.isEmpty ? target : resolved.join('/');
+    return path.isEmpty ? null : path.join('/');
   }
 
   /// Resolves a path-style target: exact stem first (indexed, O(log n)),
@@ -230,11 +288,17 @@ final class LinkResolver implements LinkSource {
   ///
   /// A `#fragment` (markdown hrefs) is split off first and rides along on
   /// the result.
-  Future<ResolveResult> _resolvePath(String raw) async {
+  Future<ResolveResult> _resolvePath(
+    String raw, {
+    required String? from,
+    required bool beside,
+  }) async {
     if (_clean(raw).isEmpty) return UnresolvedNote(target: raw);
-    final (target: t, fragment: heading) = _split(raw);
+    final spec = _split(raw, from: from, beside: beside);
+    if (spec == null) return UnresolvedNote(target: raw);
+    final t = spec.t;
     if (t.isEmpty) {
-      return LocalAnchor(heading: heading ?? '');
+      return LocalAnchor(heading: spec.heading ?? '');
     }
     final stem = t.contains('/') ? t.substring(t.lastIndexOf('/') + 1) : t;
     final stems = await (_db.select(
@@ -245,12 +309,7 @@ final class LinkResolver implements LinkSource {
     final notes = await (_db.select(
       _db.notes,
     )..where((n) => n.id.isIn(ids))).get();
-    return _resolveFromCandidates(
-      raw: raw,
-      t: t,
-      heading: heading,
-      notes: notes,
-    );
+    return _resolveFromCandidates(raw: raw, spec: spec, notes: notes);
   }
 
   /// The stems [segment] — a target's last segment — can be indexed under:
@@ -266,51 +325,66 @@ final class LinkResolver implements LinkSource {
   /// then the same per-target rules — exact stem → unique? → path-prefix
   /// filter → ambiguous — applied in Dart). Same results as calling
   /// [resolveWiki] per target, at a fraction of the query count.
+  ///
+  /// Every target is read as written in the note at [from] (null when not
+  /// known), as a Markdown href when [markdown] is set; the result is keyed
+  /// by the target. Links from several notes go through [resolveQueries].
   Future<Map<String, ResolveResult>> resolveBatch(
-    Iterable<String> targets,
+    Iterable<String> targets, {
+    String? from,
+    bool markdown = false,
+  }) async {
+    final queries = [
+      for (final t in targets) (target: t, from: from, markdown: markdown),
+    ];
+    final resolved = await resolveQueries(queries);
+    return {for (final q in queries) q.target: resolved[q]!};
+  }
+
+  /// Resolves many links, each with the note it is written in, in as few
+  /// queries as [resolveBatch]: one stems lookup per distinct last segment,
+  /// one notes lookup, then the per-link rules in Dart (#491).
+  Future<Map<LinkQuery, ResolveResult>> resolveQueries(
+    Iterable<LinkQuery> queries,
   ) async {
-    final out = <String, ResolveResult>{};
-    final byStem = <String, List<String>>{}; // stem -> raw targets
-    final specs = <String, (String t, String? heading)>{}; // raw -> normalized
-    for (final raw in targets) {
-      if (out.containsKey(raw)) continue;
+    final out = <LinkQuery, ResolveResult>{};
+    final byStem = <String, List<(LinkQuery, _Spec)>>{};
+    for (final query in queries) {
+      if (out.containsKey(query)) continue;
+      final raw = query.target;
       if (_clean(raw).isEmpty) {
-        out[raw] = UnresolvedNote(target: raw);
+        out[query] = UnresolvedNote(target: raw);
         continue;
       }
-      final (target: t, fragment: heading) = _split(raw);
-      if (t.isEmpty) {
-        out[raw] = LocalAnchor(heading: heading ?? '');
+      final spec = _split(raw, from: query.from, beside: query.markdown);
+      if (spec == null) {
+        out[query] = UnresolvedNote(target: raw);
         continue;
       }
+      if (spec.t.isEmpty) {
+        out[query] = LocalAnchor(heading: spec.heading ?? '');
+        continue;
+      }
+      final t = spec.t;
       final stem = t.contains('/') ? t.substring(t.lastIndexOf('/') + 1) : t;
-      (byStem[stem] ??= <String>[]).add(raw);
-      specs[raw] = (t, heading);
+      (byStem[stem] ??= <(LinkQuery, _Spec)>[]).add((query, spec));
     }
-    for (final group in byStem.values) {
-      final spec0 = specs[group.first]!;
-      final lastSegment = spec0.$1.contains('/')
-          ? spec0.$1.substring(spec0.$1.lastIndexOf('/') + 1)
-          : spec0.$1;
+    for (final MapEntry(key: stem, value: group) in byStem.entries) {
       final stems = await (_db.select(
         _db.noteStems,
-      )..where((s) => s.stem.isIn(_stemVariants(lastSegment)))).get();
+      )..where((s) => s.stem.isIn(_stemVariants(stem)))).get();
       final ids = <int>{for (final s in stems) s.noteId};
       final notes = ids.isEmpty
           ? <Note>[]
           : await (_db.select(_db.notes)..where((n) => n.id.isIn(ids))).get();
-      for (final raw in group) {
-        final spec = specs[raw]!;
-        if (notes.isEmpty || ids.isEmpty) {
-          out[raw] = UnresolvedNote(target: raw);
-        } else {
-          out[raw] = _resolveFromCandidates(
-            raw: raw,
-            t: spec.$1,
-            heading: spec.$2,
-            notes: notes,
-          );
-        }
+      for (final (query, spec) in group) {
+        out[query] = notes.isEmpty
+            ? UnresolvedNote(target: query.target)
+            : _resolveFromCandidates(
+                raw: query.target,
+                spec: spec,
+                notes: notes,
+              );
       }
     }
     return out;
@@ -320,16 +394,37 @@ final class LinkResolver implements LinkSource {
   /// single-target and batched paths.
   ResolveResult _resolveFromCandidates({
     required String raw,
-    required String t,
-    required String? heading,
+    required _Spec spec,
     required List<Note> notes,
   }) {
+    final (:t, :heading, :exact, :near) = spec;
     // Shortest path first (a bare `[[note]]` picks the closest name); ties
     // in length are alphabetical.
     notes.sort((a, b) {
       final byLen = a.path.length.compareTo(b.path.length);
       return byLen != 0 ? byLen : a.path.compareTo(b.path);
     });
+    // A Markdown path is the note beside the linking one when there is one.
+    if (near != null) {
+      for (final n in notes) {
+        if (pathMatches(n.path, near, exact: true)) {
+          return ResolvedNote(note: n, heading: heading);
+        }
+      }
+    }
+    // A leading `/` or a `..` names one path, whole: there is no tail, and
+    // no bare stem for the shortcut below to hand to an unrelated note
+    // (#330).
+    if (exact) {
+      final named = <Note>[
+        for (final n in notes)
+          if (pathMatches(n.path, t, exact: true)) n,
+      ];
+      if (named.isEmpty) return UnresolvedNote(target: raw);
+      return named.length == 1
+          ? ResolvedNote(note: named.single, heading: heading)
+          : AmbiguousNote(candidates: named);
+    }
     // A bare stem with one candidate resolves to it; a target that names a
     // path still has to name it — with a single candidate the shortcut used
     // to hand back the only note there was, so a stale `[[a/note]]` opened
@@ -355,3 +450,12 @@ final class LinkResolver implements LinkSource {
         : AmbiguousNote(candidates: notes);
   }
 }
+
+/// A link target read: `t` the normalized path (lowercased, `.md` dropped,
+/// `.` and `..` walked), `heading` its `#fragment`, and how `t` is matched.
+///
+/// `exact` — the target names one whole path, from the root (a leading `/`
+/// or a `..`); otherwise it is a tail, matched wherever it sits. `near` — a
+/// whole path to try first, the one beside the note a Markdown link is
+/// written in. An empty `t` is the note itself (`#heading`).
+typedef _Spec = ({String t, String? heading, bool exact, String? near});

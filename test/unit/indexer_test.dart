@@ -617,6 +617,38 @@ void main() {
       expect((resolved as ResolvedNote).note.id, indexed.id);
     });
 
+    test('a relative link is an edge to the note it names (#491)', () async {
+      void write(String rel, String text) {
+        final file = File(p.join(root.path, p.joinAll(rel.split('/'))));
+        file.parent.createSync(recursive: true);
+        file.writeAsStringSync(text);
+      }
+
+      write('Deep/Notes/a.md', 'near');
+      write('Notes/a.md', 'far');
+      write('Deep/Sub/b.md', '[up](../Notes/a.md) [root](/Notes/a.md)');
+      await indexer.fullScan(root.path);
+
+      final b = (await dao.find('Deep/Sub/b.md'))!;
+      final near = (await dao.find('Deep/Notes/a.md'))!;
+      final far = (await dao.find('Notes/a.md'))!;
+      Future<Set<int>> edges() async => {
+        for (final l in await (db.select(
+          db.noteLinks,
+        )..where((l) => l.fromNote.equals(b.id))).get())
+          l.toNote,
+      };
+      // `..` walks from Deep/Sub, the leading `/` from the root.
+      expect(await edges(), {near.id, far.id});
+
+      // The same links, written by a rescan of the one note that changed.
+      write('Deep/Sub/b.md', '[up](../Notes/a.md) and more');
+      await indexer.applyEvents(root.path, [
+        p.join(root.path, 'Deep', 'Sub', 'b.md'),
+      ]);
+      expect(await edges(), {near.id});
+    });
+
     test('a unicode tag is one tag, inline and in frontmatter alike', () async {
       // `#città` used to index as `citt` and `#идея` not at all, so the same
       // tag written inline and in the frontmatter made two rows in `tags` —
