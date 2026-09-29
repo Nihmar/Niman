@@ -154,8 +154,14 @@ void main() {
   testWidgets('a mistake with no fix offers Dismiss alone', (tester) async {
     final check = TemplateCheck();
     addTearDown(check.dispose);
-    // `}}` with nothing open: reported, and nothing the checker would write.
-    await _pump(tester, SourceBuffer.fromText('title}}\n'), check, caret: 5);
+    // A `pad:` width only its author knows: reported, and nothing the
+    // checker would write in its place.
+    await _pump(
+      tester,
+      SourceBuffer.fromText('{{title|pad:wide}}\n'),
+      check,
+      caret: 5,
+    );
 
     expect(_hintWords(tester), contains(AppStrings.templateHintNoFix));
     expect(find.byKey(const Key('template-hint-fix')), findsNothing);

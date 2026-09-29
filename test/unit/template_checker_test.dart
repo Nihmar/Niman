@@ -25,27 +25,24 @@ void main() {
       expect(error.suggestion, '{{title}}');
     });
 
-    test('unclosed closing braces: title}} is reported and left alone', () {
-      final error = only('title}}');
-      expect(error.kind, TemplateSyntaxErrorKind.structural);
-      expect(error.offset, 5);
-      expect(error.length, 2);
-      expect(error.suggestion, isNull);
+    test('a closing pair with nothing open is text, not a mistake', () {
+      // #497. The engine reads `}}` with nothing open before it as ordinary
+      // text, so there is nothing to close and nothing to report: LaTeX and
+      // inline JSON in a template body are not mistakes.
+      expect(checkTemplateSyntax(r'$x^{2^{n}}$'), isEmpty);
+      expect(checkTemplateSyntax('{"a":{"b":1}}'), isEmpty);
+      expect(checkTemplateSyntax('title}}'), isEmpty);
     });
 
-    test('nested braces inside a placeholder: {{ {{title}} }} is split', () {
-      // The inner placeholder is one the engine answers, so the row is the
-      // pair of braces left over around it — one unmatched at each end,
-      // and no correction: the fix is to drop them, not to add more.
-      final errors = checkTemplateSyntax('{{ {{title}} }}');
-      expect(errors, hasLength(2));
-      expect(errors.map((error) => error.offset), [0, 13]);
-      expect(errors.map((error) => error.length), [2, 2]);
-      expect(errors.map((error) => error.kind), [
-        TemplateSyntaxErrorKind.structural,
-        TemplateSyntaxErrorKind.structural,
-      ]);
-      expect(errors.map((error) => error.suggestion), [null, null]);
+    test('nested braces inside a placeholder: {{ {{title}} is one pair', () {
+      // The inner placeholder is one the engine answers; the pair left over
+      // around it is the opening one at the front, and no correction is
+      // offered: the fix is to drop it, not to add more.
+      final error = only('{{ {{title}} }}');
+      expect(error.kind, TemplateSyntaxErrorKind.structural);
+      expect(error.offset, 0);
+      expect(error.length, 2);
+      expect(error.suggestion, isNull);
     });
 
     test('a brace next to a placeholder is literal, not a pair', () {
@@ -53,10 +50,10 @@ void main() {
       // renders `{Title}`, and the lone braces either side are text.
       expect(checkTemplateSyntax('{{{title}}}'), isEmpty);
       expect(checkTemplateSyntax('x{{{title}}'), isEmpty);
-      // Two whole pairs around one are two stray pairs.
-      final errors = checkTemplateSyntax('{{{{title}}}}');
-      expect(errors.map((error) => error.offset), [0, 11]);
-      expect(errors.map((error) => error.length), [2, 2]);
+      // Two opening braces around one are one stray pair.
+      final error = only('{{{{title}}}}');
+      expect(error.offset, 0);
+      expect(error.length, 2);
     });
 
     test('no arrangement of braces makes the checker throw', () {

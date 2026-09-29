@@ -62,13 +62,17 @@ vocabulary — the placeholder names, the filter names and the date tokens
 stands, so a name added to the engine is a name the checker already
 knows. It reports three kinds of mistake:
 
-- braces that do not pair up: `{{title`, `title}}`, `{{ {{title}} }}`,
+- braces that do not pair up: `{{title`, `{{ {{title}}`,
   `{{}}`, and a `|` with no filter after it: `{{title|}}`;
 - a placeholder, filter or date token the engine does not answer:
   `{{titlex}}`, `{{title|upperr}}`, `{{date:YYYYY}}`;
 - an argument the engine cannot read, or a filter where it does not
   apply: `{{title|pad:wide}}`, `{{date|+xd}}`, `{{time:HH'|mm}}`,
   `{{ask:}}`, `{{counter}}`, `{{date|upper|+1d}}`, `{{cursor|upper}}`.
+
+Only an opening brace pair is reported. A `}}` with nothing open before it
+is text the engine leaves exactly as written, so LaTeX (`$x^{2^{n}}$`) and
+inline JSON (`{"a":{"b":1}}`) in a body are not mistakes.
 
 Each mistake says where it is, what is wrong, and — where the correction
 is deterministic and safe — the text that fixes it. A name within two

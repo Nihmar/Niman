@@ -1,8 +1,8 @@
 /// The syntax checker for the template placeholder language (T-TPL-09).
 ///
 /// [checkTemplateSyntax] reads a template and reports what the engine
-/// would not answer: braces that do not pair up, a placeholder or a
-/// filter it does not know, a date format holding something that is not a
+/// would not answer: an opening brace pair nothing closes, a placeholder or
+/// a filter it does not know, a date format holding something that is not a
 /// token, a filter argument it cannot read, and a filter where the engine
 /// does not apply it (a date move after a text filter, a filter on the
 /// caret). The vocabulary it checks against — the placeholder names, the
@@ -57,8 +57,8 @@ const int templateSuggestionDistance = 2;
 
 /// What kind of mistake a [TemplateSyntaxError] is.
 enum TemplateSyntaxErrorKind {
-  /// The braces: an opening with nothing closing it, a closing with
-  /// nothing open, or a placeholder with no name in it.
+  /// The braces: an opening with nothing closing it, or a placeholder with
+  /// no name in it.
   structural,
 
   /// A name the engine does not answer: a placeholder, a filter, or a
@@ -136,13 +136,18 @@ List<TemplateSyntaxError> checkTemplateSyntax(String source) {
   return errors;
 }
 
-/// The `{{` and `}}` of `[from], [to)` — the text between two placeholders,
-/// or either end of the file — where no placeholder can be.
+/// The `{{` of `[from], [to)` — the text between two placeholders, or
+/// either end of the file — where no placeholder can be.
 ///
 /// A pair counts only when both of its braces stand inside the window. In
 /// `{{{title}}}` the window before the placeholder is the one `{` at 0,
 /// and the `{` after it is the placeholder's own: read against the whole
 /// source that looks like a `{{` opening a run that ends before it starts.
+///
+/// Only an opening is reported. A `}}` with nothing open before it is what
+/// the engine keeps as ordinary text — LaTeX (`$x^{2^{n}}$`) and inline
+/// JSON (`{"a":{"b":1}}`) are full of them — so a checker that marked one
+/// would flag templates the engine reads exactly as written.
 void _checkBraces(
   String source,
   int from,
@@ -173,20 +178,6 @@ void _checkBraces(
         ),
       );
       i = end;
-      continue;
-    }
-    if (pairAt('}}', i)) {
-      // The engine reads a closing pair with nothing open before it as
-      // literal text, so there is nothing to close and nothing to suggest.
-      errors.add(
-        TemplateSyntaxError(
-          offset: i,
-          length: 2,
-          kind: TemplateSyntaxErrorKind.structural,
-          message: 'closing braces with no opening braces before them',
-        ),
-      );
-      i += 2;
       continue;
     }
     i++;
