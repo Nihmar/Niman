@@ -59,8 +59,9 @@ List<OutlineEntry> outlineOfText(String text) {
 /// text is the rest of its line, trimmed — the same three things the
 /// tokenizer reports.
 ///
-/// A setext heading is a heading block too, but one of two lines with no
-/// marker to count, and [outlineOfText] reads `#`s only: it is left out here
+/// A setext heading is a heading block too, but its paragraph's lines and
+/// an underline, with no marker to count, and [outlineOfText] reads `#`s
+/// only: it is left out here
 /// rather than listed by this path and not the other (#361).
 ///
 /// [line] reads a line's text by its index; the caller holds the buffer.
