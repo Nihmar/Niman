@@ -318,19 +318,19 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
           runSpacing: 2,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            for (final value in field.values)
+            for (var i = 0; i < field.values.length; i++)
               InputChip(
-                key: Key('frontmatter-chip-${field.key}-$value'),
-                label: Text(value),
+                key: _chipKey(field, i),
+                label: Text(field.values[i]),
                 visualDensity: VisualDensity.compact,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 labelStyle: Theme.of(context).textTheme.bodySmall,
+                // By position: two equal chips are two items, and deleting
+                // one leaves the other. The items that stay keep the YAML
+                // they were written with.
                 onDeleted: () => widget.onSet(
                   field.key,
-                  frontmatterFieldYaml(FrontmatterFieldType.list, [
-                    for (final each in field.values)
-                      if (each != value) each,
-                  ]),
+                  frontmatterListYaml([...field.items]..removeAt(i)),
                 ),
               ),
             IconButton(
@@ -405,21 +405,59 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
     );
   }
 
+  /// The chip of [field]'s item [index]: named after its text, and after
+  /// its place too when an earlier chip already has that text, so equal
+  /// items are distinct chips.
+  static Key _chipKey(FrontmatterField field, int index) {
+    final value = field.values[index];
+    final before = field.values.take(index).where((each) => each == value);
+    return Key(
+      before.isEmpty
+          ? 'frontmatter-chip-${field.key}-$value'
+          : 'frontmatter-chip-${field.key}-$value-${before.length + 1}',
+    );
+  }
+
+  /// The YAML the dialog's answer is written as: a list's values are its
+  /// items' own YAML ([frontmatterListItems]), anything else is text.
+  static String _yamlOf(FrontmatterFieldType type, List<String> values) =>
+      type == FrontmatterFieldType.list
+      ? frontmatterListYaml(values)
+      : frontmatterFieldYaml(type, values);
+
+  /// What the dialog is handed for [field]: a list's items as YAML, so the
+  /// editor shows `"Doe, J", x` and reads it back as two items.
+  static List<String> _dialogValues(FrontmatterField field) =>
+      field.type == FrontmatterFieldType.list ? field.items : field.values;
+
   Future<void> _add(BuildContext context) async {
     final result = await showFrontmatterFieldDialog(context);
     if (result == null) return;
-    widget.onSet(result.key, frontmatterFieldYaml(result.type, result.values));
+    widget.onSet(result.key, _yamlOf(result.type, result.values));
   }
 
   Future<void> _edit(BuildContext context, FrontmatterField field) async {
+    final shown = _dialogValues(field);
     final result = await showFrontmatterFieldDialog(
       context,
       fieldKey: field.key,
       type: field.type,
-      values: field.values,
+      values: shown,
     );
     if (result == null) return;
-    widget.onSet(field.key, frontmatterFieldYaml(result.type, result.values));
+    // Saved as it was shown: nothing is written. Rewriting it anyway put
+    // the value back in the panel's own spelling — `1.10` as `1.1`, a
+    // folded block as one quoted line — over a note nobody changed.
+    if (result.type == field.type && _same(result.values, shown)) return;
+    widget.onSet(field.key, _yamlOf(result.type, result.values));
+  }
+
+  static bool _same(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   static String _typeLabel(FrontmatterFieldType type) => switch (type) {

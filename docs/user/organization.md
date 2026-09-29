@@ -97,6 +97,13 @@ and leaves the rest of the block — comments, quoting, the other keys — exact
 where it was, and it saves and undoes like any other edit. The fields are a
 second way into the same file, not a second file.
 
+A value is shown as it is written (`1.10` stays `1.10`), and a value saved
+unchanged writes nothing. A list's items are edited as a comma-separated line
+in YAML's own spelling: `"Doe, J", x` is two items, the quotes keeping the
+comma inside the first, and an item left alone keeps the YAML it had — `1` a
+number, `"1"` text. A list holding anything a chip cannot show (a nested
+mapping, an empty item) has no row and is edited in the raw YAML.
+
 A block that does not parse shows no field rows at all: the panel says why and
 shows the raw YAML, which is left as written — nothing the panel draws rewrites
 a note it cannot read. A note with no frontmatter shows no panel. Keys whose

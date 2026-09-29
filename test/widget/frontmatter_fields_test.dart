@@ -147,6 +147,83 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Deleting a chip rewrites the list around it: the chip deleted was the
+  // only change — an equal chip beside it, a number, an item holding a
+  // comma all come through as they were.
+  testWidgets('deleting a chip changes nothing else in the list', (
+    tester,
+  ) async {
+    const note =
+        '---\n'
+        'ids: [1, 2, 1]\n'
+        'authors: ["Doe, J", "Roe, K", x]\n'
+        '---\n'
+        '\n'
+        'Body text.\n';
+    await tester.pumpWidget(_app(note));
+    await tester.pumpAndSettle();
+
+    void delete(String key) =>
+        tester.widget<InputChip>(find.byKey(Key(key))).onDeleted!();
+
+    delete('frontmatter-chip-ids-2');
+    await tester.pumpAndSettle();
+    expect(_text(tester), contains('ids: [1, 1]\n'));
+    expect(parseFrontmatter(_text(tester))!.fields['ids'], ['1', '1']);
+
+    // The second of two equal chips is a chip of its own.
+    delete('frontmatter-chip-ids-1-2');
+    await tester.pumpAndSettle();
+    expect(_text(tester), contains('ids: [1]\n'));
+
+    delete('frontmatter-chip-authors-x');
+    await tester.pumpAndSettle();
+    expect(_text(tester), contains('authors: ["Doe, J", "Roe, K"]\n'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a field saved as it was shown leaves the note alone', (
+    tester,
+  ) async {
+    const note =
+        '---\n'
+        'version: 1.10\n'
+        'desc: |\n'
+        '  line one\n'
+        '  line two\n'
+        'authors: ["Doe, J", x]\n'
+        '---\n'
+        '\n'
+        'Body text.\n';
+    await tester.pumpWidget(_app(note));
+    await tester.pumpAndSettle();
+
+    for (final opener in [
+      'frontmatter-value-version',
+      'frontmatter-value-desc',
+      'frontmatter-add-item-authors',
+    ]) {
+      await tester.tap(find.byKey(Key(opener)));
+      await tester.pumpAndSettle();
+      await _fillField(tester);
+      expect(_text(tester), note, reason: opener);
+    }
+
+    // And a list edited in the editor keeps an item's comma inside it.
+    await tester.tap(find.byKey(const Key('frontmatter-add-item-authors')));
+    await tester.pumpAndSettle();
+    await _fillField(tester, value: '"Doe, J", x, "Roe, K"');
+    expect(_text(tester), contains('authors: ["Doe, J", x, "Roe, K"]\n'));
+    expect(parseFrontmatter(_text(tester))!.fields['authors'], [
+      'Doe, J',
+      'x',
+      'Roe, K',
+    ]);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('removing a field takes its line out', (tester) async {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
