@@ -59,4 +59,8 @@ void main() {
       throwsA(isA<EntryOverBudget>()),
     );
   });
+
+  test('an entry with no content answers null, not an empty file', () {
+    expect(readEntryWithin(ArchiveFile.noData('a.md'), 1024), isNull);
+  });
 }

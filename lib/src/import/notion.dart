@@ -303,7 +303,7 @@ Future<({int notes, int assets})> _writeAll(
   for (final entry in entries) {
     final rel = plan[entry.path];
     if (rel == null) continue;
-    final Uint8List bytes;
+    final Uint8List? bytes;
     try {
       bytes = readEntryWithin(entry.file, maxBytes - read);
     } on EntryOverBudget {
@@ -311,12 +311,14 @@ Future<({int notes, int assets})> _writeAll(
         'not a Notion export: an entry expands past the $maxBytes-byte budget',
       );
     }
-    read += bytes.length;
     // The inflated bytes are cached on the archive entry, and the import
     // holds the archive until it returns: release each entry as it is
     // written, so the peak is one entry rather than the whole export
     // (#382).
     entry.file.clear();
+    // An entry with no content at all has nothing to write.
+    if (bytes == null) continue;
+    read += bytes.length;
     final file = File(p.joinAll([target.path, ...p.posix.split(rel)]));
     await file.parent.create(recursive: true);
     if (p.posix.extension(entry.path).toLowerCase() == '.md') {

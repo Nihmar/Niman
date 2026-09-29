@@ -36,17 +36,20 @@ final class EntryOverBudget implements Exception {
 
 /// The bytes of [file], refusing to produce more than [limit] of them.
 ///
-/// Throws [EntryOverBudget] when the entry would. A deflated entry is
+/// Null when the entry holds no content at all (a symlink, a placeholder):
+/// there is nothing to write for it. Throws [EntryOverBudget] when the entry
+/// would go over. A deflated entry is
 /// inflated in chunks that stop at the budget; a stored one is compared with
 /// the budget before it is read. [onInflated] hears the length of every
 /// chunk the inflater produces, so a test can say how far the inflation got
 /// before the refusal.
-Uint8List readEntryWithin(
+Uint8List? readEntryWithin(
   ArchiveFile file,
   int limit, {
   @visibleForTesting void Function(int length)? onInflated,
 }) {
   final raw = file.rawContent;
+  if (raw == null) return null;
   if (raw is ZipFile) {
     final method = raw.compressionMethod;
     if (method == CompressionType.deflate) {
