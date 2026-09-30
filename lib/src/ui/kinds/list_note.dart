@@ -313,6 +313,8 @@ class _ListNoteViewState extends State<ListNoteView>
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
+          // An action would keep it up until it is dismissed by hand (#508).
+          persist: false,
           content: Text(AppStrings.deletedMessage),
           action: SnackBarAction(
             label: AppStrings.actionUndo,

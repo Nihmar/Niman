@@ -3581,6 +3581,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        // An action would keep it up until it is dismissed by hand (#508):
+        // the banner says where the file went, and the way there is offered,
+        // not demanded — it goes on its own.
+        persist: false,
+        // A close button on the roomy layouts; a phone has the swipe and the
+        // timeout, and no width to spare for it.
+        showCloseIcon: _wide,
         content: Text(lines.join('\n')),
         action: supportsTreeContextActions
             ? SnackBarAction(

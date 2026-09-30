@@ -102,6 +102,8 @@ final class ShellAnnotationFlow implements AnnotationMarkSource {
       onWritten();
       messenger.showSnackBar(
         SnackBar(
+          // An action would keep it up until it is dismissed by hand (#508).
+          persist: false,
           content: Text(AppStrings.annotationSaved),
           action: SnackBarAction(
             label: AppStrings.annotationOpenNote,
