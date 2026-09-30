@@ -24,6 +24,8 @@
 ///   target is rewritten.
 library;
 
+import 'dart:convert';
+
 import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/links/parser.dart';
 
@@ -256,11 +258,30 @@ String? _walk(List<String> segments, String? from) {
 bool _hasScheme(String href) =>
     RegExp('^[a-zA-Z][a-zA-Z0-9+.-]*://').hasMatch(href);
 
-/// What a Markdown href cannot hold as written: a space ends it, a `#`
-/// begins its fragment, a `%` would read as an escape.
-final RegExp _unsafeInHref = RegExp('[%\x20()<>#]');
+/// Whether [rune] can sit in a Markdown href as written.
+///
+/// A space ends an href, `#` begins its fragment, `%` would read as an
+/// escape, and `()` `<>` delimit it. Anything outside printable ASCII — an
+/// accented letter, a CJK name — is written as its UTF-8 bytes, the inverse
+/// of [percentDecoded], so the app reads back what it writes.
+bool _hrefSafe(int rune) {
+  if (rune <= 0x20 || rune > 0x7E) return false;
+  return switch (rune) {
+    0x25 || 0x23 || 0x28 || 0x29 || 0x3C || 0x3E => false, // % # ( ) < >
+    _ => true,
+  };
+}
 
-String _encodeHref(String path) => path.replaceAllMapped(
-  _unsafeInHref,
-  (m) => '%${m[0]!.codeUnitAt(0).toRadixString(16).toUpperCase()}',
-);
+String _encodeHref(String path) {
+  final out = StringBuffer();
+  for (final rune in path.runes) {
+    if (_hrefSafe(rune)) {
+      out.writeCharCode(rune);
+      continue;
+    }
+    for (final byte in utf8.encode(String.fromCharCode(rune))) {
+      out.write('%${byte.toRadixString(16).toUpperCase().padLeft(2, '0')}');
+    }
+  }
+  return out.toString();
+}

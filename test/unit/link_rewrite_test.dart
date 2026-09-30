@@ -82,6 +82,18 @@ void main() {
     expect(identical(out, source), isTrue);
   });
 
+  test(
+    'a rewritten href encodes non-ASCII as UTF-8, like the app writes it',
+    () {
+      final out = rewriteMovedLinks(
+        '[x](Docs/Citt%C3%A0.pdf)',
+        from: 'root.md',
+        moves: {'Docs/Città.pdf': 'Books/Città.pdf'},
+      );
+      expect(out, '[x](Books/Citt%C3%A0.pdf)');
+    },
+  );
+
   test('a Markdown href beside the linking note follows that note', () {
     // `Note.md` in a note at `Docs/` names `Docs/Note.md` (the resolver's
     // near path), which is the one that moved.
