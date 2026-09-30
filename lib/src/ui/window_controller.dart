@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/caption_buttons.dart';
+import 'package:niman/src/ui/window_visibility.dart';
 import 'package:window_manager/window_manager.dart'
     show TitleBarStyle, WindowListener, WindowManager;
 
@@ -176,12 +177,16 @@ final class WindowManagerController implements WindowController {
   Future<void> show() async {
     await _manager.show();
     await _manager.focus();
+    // On screen again: whatever draws on a timer may start again (#512).
+    WindowVisibility.show();
   }
 
   @override
   Future<void> hide() async {
     _log.info('window hidden to the tray');
     await _manager.hide();
+    // Nobody can see it: the caret blink and its like stop drawing (#512).
+    WindowVisibility.hide();
   }
 
   @override
