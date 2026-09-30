@@ -26,6 +26,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/reminder_health.dart';
+import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/reminder_health_message.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_date_panel.dart';
@@ -259,8 +260,8 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   Future<void> _pickDue() async {
     if (todoPicksInPlace(context)) return _toggle(_DatePanel.due);
     final today = _day(widget.today);
-    final picked = await showDatePicker(
-      context: context,
+    final picked = await showDayPicker(
+      context,
       initialDate: _due ?? today,
       firstDate: todoFirstDate,
       lastDate: todoLastDate,
@@ -285,8 +286,8 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   Future<void> _pickReminder() async {
     if (todoPicksInPlace(context)) return _toggle(_DatePanel.reminder);
     final today = _day(widget.today);
-    final date = await showDatePicker(
-      context: context,
+    final date = await showDayPicker(
+      context,
       initialDate: _reminder ?? today,
       firstDate: todoFirstDate,
       lastDate: todoLastDate,
@@ -294,8 +295,8 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     if (date == null || !mounted) {
       return;
     }
-    final time = await showTimePicker(
-      context: context,
+    final time = await showClockPicker(
+      context,
       initialTime: TimeOfDay.fromDateTime(_reminder ?? widget.today),
     );
     if (time == null || !mounted) {

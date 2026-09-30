@@ -16,6 +16,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
+import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Shows the field dialog, and answers what was entered or null when it was
@@ -222,8 +223,8 @@ final class _FrontmatterFieldDialogState
 
   /// Asks the platform for a date, over the field's own or today's.
   Future<void> _pickDate(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
+    final picked = await showDayPicker(
+      context,
       initialDate: _date ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),

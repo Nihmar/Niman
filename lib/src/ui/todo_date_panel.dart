@@ -9,7 +9,18 @@ import 'package:flutter/material.dart';
 /// Whether the task dialog picks its dates in place: a window wide and
 /// tall enough to hold a calendar under the fields. A phone, or a phone
 /// on its side, keeps the system pickers, which are made for it.
+///
+/// Desktop only: the reminder's panel carries a text field for the time, and
+/// a touch platform has no business raising the soft keyboard over a
+/// date/time picker (#504). An Android or iOS tablet is wide enough for the
+/// panel by size alone and is sent to the system calendar and dial instead.
 bool todoPicksInPlace(BuildContext context) {
+  final platform = Theme.of(context).platform;
+  final desktop =
+      platform == TargetPlatform.linux ||
+      platform == TargetPlatform.macOS ||
+      platform == TargetPlatform.windows;
+  if (!desktop) return false;
   final size = MediaQuery.sizeOf(context);
   return size.width >= _minWidth && size.height >= _minHeight;
 }
