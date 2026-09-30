@@ -63,6 +63,12 @@ void main() {
       find.byType(MarkdownSourceView),
     );
 
+    expect(
+      state.caretBlinking,
+      isFalse,
+      reason: 'a note the keys are not going to draws no blink',
+    );
+
     await tester.tap(find.byType(MarkdownSourceView));
     await tester.pump();
     expect(state.caretBlinking, isTrue, reason: 'focused, the caret blinks');
@@ -78,6 +84,14 @@ void main() {
     WindowVisibility.show();
     await tester.pump();
     expect(state.caretBlinking, isTrue, reason: 'back on screen, it blinks');
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+    expect(
+      state.caretBlinking,
+      isFalse,
+      reason: 'focus gone, the blink stops with it',
+    );
   });
 
   test(

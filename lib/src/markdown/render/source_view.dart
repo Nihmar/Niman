@@ -3016,9 +3016,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _restartBlink() {
     _caretOn.value = true;
     _blink?.cancel();
-    // A window in the tray is nobody's to see: the blink would repaint it at
-    // its own pace and nothing else would ever stop it (#512).
-    _blink = WindowVisibility.shown.value
+    // A window in the tray is nobody's to see, and a note the keys are not
+    // going to is not being typed in: in either, the blink would repaint at
+    // its own pace and nothing else would ever stop it (#512). The caret
+    // stays drawn, steady.
+    _blink = WindowVisibility.shown.value && _focus.hasFocus
         ? Timer.periodic(const Duration(milliseconds: 550), (_) {
             _caretOn.value = !_caretOn.value;
           })
@@ -3027,14 +3029,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The window was hidden or shown again: the blink stops drawing while it
   /// is hidden and starts over when it is back (#512).
-  void _onWindowShown() {
-    if (WindowVisibility.shown.value) {
-      _restartBlink();
-    } else {
-      _blink?.cancel();
-      _blink = null;
-    }
-  }
+  void _onWindowShown() => _restartBlink();
 
   /// Whether the caret is blinking right now, for the test that holds the
   /// blink to the window's visibility (#512).
@@ -3139,6 +3134,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         autofocus: widget.autofocus,
         onKeyEvent: _menuKey,
         onFocusChange: (hasFocus) {
+          // Only the focused note blinks (#512): an editor the keys are not
+          // going to keeps its caret, steady, and draws no frame for it.
+          _restartBlink();
           if (hasFocus) {
             _input.attach(viewId: View.of(context).viewId);
           } else {
