@@ -85,6 +85,10 @@ lines or when responsibilities mix.
   natively (RemoteViews) and row taps come back as `niman://` intents
   handled off the UI isolate. Placement runs a native config activity
   (library/note pick).
+- **Memory:** where the desktop's resident set goes — the three SQLite
+  connections and their isolates, the open note buffers, the image and math
+  caches, the loaded whisper model — and how to watch it, in
+  [memory.md](memory.md) (#511).
 
 ## Planned, not built
 
