@@ -96,6 +96,7 @@ import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/templates/checker.dart';
 import 'package:niman/src/templates/template_commands.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/window_visibility.dart';
 
 /// The colour a selected run is painted with.
 const Color _selectionColor = Color(0x553B82F6);
@@ -638,6 +639,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.templateCheck?.addListener(_onSpellingChanged);
     widget.findMatches?.addListener(_onSpellingChanged);
     widget.mathCache?.addListener(_onMathTypeset);
+    // A window hidden to the tray draws nothing (#512): the caret blink is
+    // its own frame source and stops while it is off screen.
+    WindowVisibility.shown.addListener(_onWindowShown);
     _scheduleCaret();
     final scroll = widget.surface?.takePendingScroll();
     if (scroll != null) {
@@ -886,6 +890,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _hint.dispose();
     _input.detach();
     if (_ownsFocus) _focus.dispose();
+    WindowVisibility.shown.removeListener(_onWindowShown);
     _blink?.cancel();
     _scanSlice?.cancel();
     _typewriter.dispose();
@@ -3038,10 +3043,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _restartBlink() {
     _caretOn.value = true;
     _blink?.cancel();
-    _blink = Timer.periodic(const Duration(milliseconds: 550), (_) {
-      _caretOn.value = !_caretOn.value;
-    });
+    // A window in the tray is nobody's to see, and a note the keys are not
+    // going to is not being typed in: in either, the blink would repaint at
+    // its own pace and nothing else would ever stop it (#512). The caret
+    // stays drawn, steady.
+    _blink = WindowVisibility.shown.value && _focus.hasFocus
+        ? Timer.periodic(const Duration(milliseconds: 550), (_) {
+            _caretOn.value = !_caretOn.value;
+          })
+        : null;
   }
+
+  /// The window was hidden or shown again: the blink stops drawing while it
+  /// is hidden and starts over when it is back (#512).
+  void _onWindowShown() => _restartBlink();
+
+  /// Whether the caret is blinking right now, for the test that holds the
+  /// blink to the window's visibility (#512).
+  @visibleForTesting
+  bool get caretBlinking => _blink != null;
 
   /// Measures the caret again once the next frame has laid its line out:
   /// the caret stayed where it was while its line was laid out anew, in
@@ -3175,6 +3195,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         autofocus: widget.autofocus,
         onKeyEvent: _menuKey,
         onFocusChange: (hasFocus) {
+          // Only the focused note blinks (#512): an editor the keys are not
+          // going to keeps its caret, steady, and draws no frame for it.
+          _restartBlink();
           if (hasFocus) {
             _input.attach(viewId: View.of(context).viewId);
           } else {
