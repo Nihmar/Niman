@@ -485,4 +485,38 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('typewriter: a note that ends on its closing fence keeps the '
+      'panel on that line (#522)', (tester) async {
+    // No body and no final newline: the head ends on the fence itself, and
+    // the caret there is still on the head.
+    const note = '---\ntitle: x\n---';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteView(
+            path: '/tmp/niman-typewriter-fence-test.md',
+            showLineNumbers: false,
+            autofocusEditor: true,
+            typewriter: true,
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    tester
+        .state<MarkdownSourceViewState>(
+          find.byType(MarkdownSourceView, skipOffstage: false),
+        )
+        .placeCaret(note.length);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('frontmatter-fields')),
+      findsOneWidget,
+      reason: 'the closing fence is the last line of the head',
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

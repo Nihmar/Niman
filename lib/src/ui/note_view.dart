@@ -1554,9 +1554,14 @@ final class _NoteViewState extends State<NoteView>
   bool _caretInHead() {
     final caret = _surfaceCaretLine;
     if (caret == null) return true;
-    final head = _frontmatterHeadOf(_surface?.buffer);
-    if (head == null) return false;
-    return caret <= '\n'.allMatches(head).length;
+    final buffer = _surface?.buffer;
+    final head = _frontmatterHeadOf(buffer);
+    if (buffer == null || head == null || head.isEmpty) return false;
+    // The head's last line, as the buffer counts it: the line its last
+    // character — a terminator, or the closing fence of a note that ends
+    // there — belongs to. Counting `\n`s instead missed that last fence, and
+    // any line a lone `\r` ends.
+    return caret <= buffer.lineOf(head.length - 1) + 1;
   }
 
   /// The panel follows the note's head (#157): away once the note is scrolled
