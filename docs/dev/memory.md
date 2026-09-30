@@ -68,14 +68,14 @@ There are **three connections**, not two:
 - `AppDatabase` — app settings, one row; the small one.
 - `IndexDatabase` — the library's index (tree rows, stems, tags, links,
   FTS5), on its **own background isolate** (`NativeDatabase.createInBackground`,
-  `library_state.dart:1800`).
+  `library_state.dart:1802`).
 - A second `IndexDatabase` over the **same file** for search, also on its own
   isolate (`defaultSearchDatabase`, `library_state.dart:1813`).
 
 Each connection carries SQLite's own page cache (a few MiB by default, in
 the isolate's native heap) and, for the index, the FTS5 tables. `PRAGMA
 auto_vacuum = INCREMENTAL`, `journal_mode = WAL`, `busy_timeout = 5000`
-(`index_database.dart:200`). All three are `close()`d in `_teardown`
+(`index_database.dart:202`). All three are `close()`d in `_teardown`
 (`library_state.dart:1527`), so closing a library releases the connections
 and their caches — which matters for "does it return after switching
 libraries?".
@@ -102,7 +102,7 @@ to watch, not the library size itself.
 ### Spell-check dictionaries
 
 hunspell (desktop) loads `.dic`/`.aff` per selected dictionary
-(`huntsell_spell_checker.dart`); Windows uses the system checker. A
+(`spellcheck/hunspell_spell_checker.dart`); Windows uses the system checker. A
 dictionary is a few MB each and several can be selected
 (`LibraryConfig.spellDictionaries`). The loader is per library; confirm the
 maps are dropped on library close and not re-read per keystroke.
