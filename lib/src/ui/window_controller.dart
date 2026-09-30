@@ -149,7 +149,12 @@ final class WindowManagerController implements WindowController {
   }
 
   @override
-  Future<void> minimize() => _manager.minimize();
+  Future<void> minimize() {
+    // A minimized window is nobody's to see: stop the timers that draw, the
+    // same as the tray hide (#512). The restore/focus events bring it back.
+    WindowVisibility.hide();
+    return _manager.minimize();
+  }
 
   @override
   Future<void> toggleMaximize() async {
@@ -198,9 +203,11 @@ final class WindowManagerController implements WindowController {
 }
 
 /// The [WindowListener] bridge: the platform emits
-/// [WindowListener.onWindowClose] when a close request was refused
-/// (prevent on), and this hands it to the controller's
-/// [WindowController.onCloseRequested].
+/// [WindowListener.onWindowClose] when a close request was refused (prevent
+/// on), and this hands it to the controller's
+/// [WindowController.onCloseRequested]. It also mirrors the window's
+/// visibility into [WindowVisibility] (#512), so a window in the tray or
+/// minimized stops the timers that draw.
 final class _WindowCloseListener extends WindowListener {
   new(this._controller);
 
@@ -214,6 +221,17 @@ final class _WindowCloseListener extends WindowListener {
 
   @override
   void onWindowUnmaximize() => _controller._maximized.value = false;
+
+  @override
+  void onWindowMinimize() => WindowVisibility.hide();
+
+  @override
+  void onWindowRestore() => WindowVisibility.show();
+
+  /// A focused window is on screen whatever hid it before, so this is the
+  /// safety net when a restore event is not emitted (Linux).
+  @override
+  void onWindowFocus() => WindowVisibility.show();
 }
 
 /// The off-desktop controller: no platform close surface to guard

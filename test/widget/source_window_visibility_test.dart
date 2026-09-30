@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 
 const MarkdownTheme _theme = MarkdownTheme(
@@ -78,4 +79,16 @@ void main() {
     await tester.pump();
     expect(state.caretBlinking, isTrue, reason: 'back on screen, it blinks');
   });
+
+  test(
+    'minimizing marks the window hidden, so the timers stop (#512)',
+    () async {
+      final controller = WindowManagerController();
+      WindowVisibility.show();
+      // The platform call is inert here; what is asserted is the flag it sets
+      // before the call, which is what the caret blink reads.
+      await controller.minimize().catchError((Object _) {});
+      expect(WindowVisibility.shown.value, isFalse);
+    },
+  );
 }
