@@ -365,6 +365,25 @@ void main() {
         reason: 'both embed forms follow the folder',
       );
     });
+
+    test(
+      'an embed gets its edge on the save path, not a full scan (#507)',
+      () async {
+        // `createNote` indexes through the direct path (`applyEvents`), not the
+        // deferred full scan: an embed has to resolve there too, or the next
+        // save of a note with an embed drops the edge the move reads.
+        await ops.createNote(parentPath: '', name: 'Old');
+        await ops.createNote(
+          parentPath: '',
+          name: 'Ref',
+          content: '![[Old]]\n',
+        );
+
+        await ops.rename('Old.md', 'New');
+
+        expect(await ops.readNote('Ref.md'), '![[New]]\n');
+      },
+    );
   });
 
   group('pin (T-M4-04)', () {

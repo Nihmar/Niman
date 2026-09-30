@@ -235,7 +235,7 @@ final class IndexContentStore {
     for (final c in contents.values) {
       if (!isNoteFile(p.basename(c.rel))) continue;
       final isPaired = paired.contains(c.rel);
-      if (isPaired && !c.links.any(_dependsOnLocation)) continue;
+      if (isPaired && !_anyDependsOnLocation(c)) continue;
       if (await _dao.find(c.rel) case final Note row) {
         (isPaired ? moved : items).add((row, c));
       }
@@ -259,7 +259,10 @@ final class IndexContentStore {
     final batchQueries = <LinkQuery>{};
     if (pendingLink == null) {
       for (final (row, c) in [...items, ...moved]) {
-        for (final link in c.links) {
+        // Embeds and images resolve here too, or the direct path resolves no
+        // edge for them and the deferred path's are lost on the next save
+        // (#507).
+        for (final link in <ParsedLink>[...c.links, ...c.embeds]) {
           final query = _linkQuery(link, row.path);
           if (query != null) batchQueries.add(query);
         }
@@ -304,6 +307,12 @@ final class IndexContentStore {
     return target != null &&
         LinkResolver.dependsOnLocation(target, markdown: link is MarkdownLink);
   }
+
+  /// Whether any link or embed of [c] reads from the note's folder (#491):
+  /// the paired/moved note the edge is written again for. An embed counts
+  /// like the link it is (#507).
+  static bool _anyDependsOnLocation(NoteContent c) =>
+      c.links.any(_dependsOnLocation) || c.embeds.any(_dependsOnLocation);
 
   /// The target text of [link] to resolve by, or null for a link that
   /// never resolves to an indexed note (external URL, anchor, no extension).
