@@ -106,4 +106,22 @@ void main() {
   test('the actions are offered on the desktop, where the test runs', () {
     expect(supportsTreeContextActions, isTrue);
   });
+
+  test('the Windows switch and path are separate, backslashed arguments', () {
+    // `/select,` and the path as one token is quoted whole as soon as the
+    // path has a space, and explorer stops reading the switch: the file is
+    // not revealed (#510).
+    expect(windowsRevealArgs(r'C:\lib\assets\image.png'), [
+      '/select,',
+      r'C:\lib\assets\image.png',
+    ]);
+    expect(windowsRevealArgs(r'C:\lib\My Notes\image.png'), [
+      '/select,',
+      r'C:\lib\My Notes\image.png',
+    ]);
+    expect(windowsRevealArgs('C:/lib/My Notes/image.png'), [
+      '/select,',
+      r'C:\lib\My Notes\image.png',
+    ], reason: 'a joined path keeps forward slashes; explorer takes backslash');
+  });
 }
