@@ -92,4 +92,39 @@ void main() {
     );
     expect(out, '[x](Other/Note.md)');
   });
+
+  test('an embed follows a folder rename, its bang kept', () {
+    const source =
+        '![[Docs/pic.png]] and ![alt](Docs/pic.png) and [[Docs/pic.png]]';
+    final out = rewriteMovedLinks(
+      source,
+      from: 'root.md',
+      moves: {'Docs/pic.png': 'Books/pic.png'},
+    );
+    expect(
+      out,
+      '![[Books/pic.png]] and ![alt](Books/pic.png) and [[Books/pic.png]]',
+    );
+  });
+
+  test('an embed by name follows a renamed file, and keeps its heading', () {
+    final out = rewriteMovedLinks(
+      '![[Old]] and ![[Old#Head|big]]',
+      from: 'root.md',
+      moves: {'Old.md': 'New.md'},
+      renamedFrom: 'Old.md',
+      renamedTo: 'New.md',
+    );
+    expect(out, '![[New]] and ![[New#Head|big]]');
+  });
+
+  test('an embed that did not move is left exactly as written', () {
+    const source = '![[Elsewhere/pic.png]] and ![alt](Elsewhere/pic.png)';
+    final out = rewriteMovedLinks(
+      source,
+      from: 'root.md',
+      moves: {'Docs/pic.png': 'Books/pic.png'},
+    );
+    expect(identical(out, source), isTrue);
+  });
 }

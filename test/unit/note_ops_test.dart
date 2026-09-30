@@ -347,6 +347,24 @@ void main() {
         '[[Books/Note]] and [x](Books/Note.md) and [[Note]]\n',
       );
     });
+
+    test('renaming a folder follows in the embeds into it (#507)', () async {
+      // Attachments are cited as embeds, not links; the index keeps an edge
+      // for them so the note is found and the reference carried.
+      await ops.createFolder(parentPath: '', name: 'assets');
+      File(p.join(root.path, 'assets', 'pic.png')).writeAsStringSync('img');
+      File(p.join(root.path, 'Ref.md'))
+          .writeAsStringSync('![[assets/pic.png]] and ![p](assets/pic.png)\n');
+      await indexer.fullScan(root.path);
+
+      await ops.rename('assets', 'media');
+
+      expect(
+        await ops.readNote('Ref.md'),
+        '![[media/pic.png]] and ![p](media/pic.png)\n',
+        reason: 'both embed forms follow the folder',
+      );
+    });
   });
 
   group('pin (T-M4-04)', () {

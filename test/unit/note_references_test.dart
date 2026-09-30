@@ -121,6 +121,17 @@ void main() {
     expect(_links('![alt](image.png) and [[]] and [[|]] and [[#]]'), isEmpty);
   });
 
+  test('embeds and images are references, kept apart from the links', () {
+    final refs = noteReferencesOf(
+      '![[assets/pic.png]] then ![alt](assets/pic.png) then [[Note]]\n',
+    );
+    expect(refs.links.map(_key), <String>['wiki Note#null|null']);
+    expect(refs.embeds.map(_key), <String>[
+      'wiki assets/pic.png#null|null',
+      'md assets/pic.png',
+    ], reason: 'an embed is not a link, but a move still carries it (#507)');
+  });
+
   test('every tag and link the legacy readers found in the fixtures', () {
     // The index read notes with the legacy tokenizer until this; on the
     // repo's own notes the unified engine finds the same tags and links —

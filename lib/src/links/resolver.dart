@@ -126,7 +126,7 @@ final class LinkResolver implements LinkSource {
     if (h.startsWith('#')) {
       return Future.value(LocalAnchor(heading: h.substring(1)));
     }
-    final read = _markdownPath(h);
+    final read = markdownPath(h);
     // A file: a note, or one that is not (a PDF, a book, a picture).
     if (read == null) return Future.value(UnresolvedNote(target: h));
     return _resolvePath(read, from: from, beside: true);
@@ -137,7 +137,7 @@ final class LinkResolver implements LinkSource {
   /// (`My%20Note.md`), its fragment left alone, a book's place (#282)
   /// decoding its own parts. Null when it names no file (no extension).
   /// Opening a link and indexing it read it through this one function.
-  static String? _markdownPath(String h) {
+  static String? markdownPath(String h) {
     final hash = h.indexOf('#');
     final path = percentDecoded(hash == -1 ? h : h.substring(0, hash));
     if (p.url.extension(path).isEmpty) return null;
@@ -369,7 +369,7 @@ final class LinkResolver implements LinkSource {
       if (out.containsKey(query)) continue;
       final written = query.target;
       // A Markdown href is read as opening it reads it: percent-decoded.
-      final raw = query.markdown ? _markdownPath(written.trim()) : written;
+      final raw = query.markdown ? markdownPath(written.trim()) : written;
       if (raw == null || _clean(raw).isEmpty) {
         out[query] = UnresolvedNote(target: written);
         continue;

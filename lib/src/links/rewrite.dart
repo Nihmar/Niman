@@ -17,6 +17,9 @@
 ///   beside the linking note, which the resolver tries first) is mapped, and
 ///   the href is written back as the new library-relative path, the way the
 ///   app writes a Markdown link.
+/// * **An embed** (`![[…]]` or `![…](…)`) follows the same rules as the link
+///   it is, its `!` kept (#507): attachments are cited this way, and a moved
+///   attachments folder must carry them.
 /// * A `#fragment` and a `|alias` are carried through untouched; only the
 ///   target is rewritten.
 library;
@@ -45,9 +48,9 @@ String rewriteMovedLinks(
 }) {
   if (moves.isEmpty) return source;
   final replacements = <(int, int, String)>[];
-  for (final link in parseLinks(source)) {
+  for (final link in parseLinks(source, includeEmbeds: true)) {
     switch (link) {
-      case WikiLink(:final start, :final end, :final ref):
+      case WikiLink(:final start, :final end, :final ref, :final embed):
         final target = _wikiTarget(
           ref.target,
           from: from,
@@ -56,12 +59,19 @@ String rewriteMovedLinks(
           renamedTo: renamedTo,
         );
         if (target != null) {
-          replacements.add((start, end, _wikiText(target, ref)));
+          replacements.add((start, end, _wikiText(target, ref, embed: embed)));
         }
-      case MarkdownLink(:final start, :final end, :final text, :final href):
+      case MarkdownLink(
+        :final start,
+        :final end,
+        :final text,
+        :final href,
+        :final embed,
+      ):
         final rewritten = _markdownHref(href, from, moves);
         if (rewritten != null) {
-          replacements.add((start, end, '[$text]($rewritten)'));
+          final bang = embed ? '!' : '';
+          replacements.add((start, end, '$bang[$text]($rewritten)'));
         }
     }
   }
@@ -106,11 +116,12 @@ String? _renamedBareName(String target, String? from, String? to) {
   return written.toLowerCase().endsWith('.md') ? to : _withoutMd(to);
 }
 
-/// The whole `[[…]]` of [target] with [ref]'s heading and alias.
-String _wikiText(String target, WikiRef ref) {
+/// The whole `[[…]]` of [target] with [ref]'s heading and alias, as an embed
+/// (`![[…]]`) when it was written as one.
+String _wikiText(String target, WikiRef ref, {required bool embed}) {
   final heading = ref.heading == null ? '' : '#${ref.heading}';
   final alias = ref.alias == null ? '' : '|${ref.alias}';
-  return '[[$target$heading$alias]]';
+  return '${embed ? '!' : ''}[[$target$heading$alias]]';
 }
 
 /// The new href for the Markdown link [href], or null when it did not move

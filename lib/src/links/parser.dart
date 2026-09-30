@@ -23,31 +23,47 @@ sealed class ParsedLink {
   final int end;
 }
 
-/// A wikilink `[[…]]`.
+/// A wikilink `[[…]]`, or the embed `![[…]]` when [embed] is set.
 final class WikiLink extends ParsedLink {
-  /// Creates a wikilink with its parsed [ref].
-  const new({required super.start, required super.end, required this.ref});
+  /// Creates a wikilink with its parsed [ref]; [embed] marks `![[…]]`.
+  const new({
+    required super.start,
+    required super.end,
+    required this.ref,
+    this.embed = false,
+  });
 
   /// The link's parsed inside.
   final WikiRef ref;
+
+  /// Whether it was written as an embed (`![[…]]`), which the app shows
+  /// rather than links. A move still has to carry it (#507).
+  final bool embed;
 }
 
-/// A standard Markdown link `[text](href)`.
+/// A standard Markdown link `[text](href)`, or the image `![alt](href)` when
+/// [embed] is set.
 final class MarkdownLink extends ParsedLink {
-  /// Creates a Markdown link with its [text] and [href].
+  /// Creates a Markdown link with its [text] and [href]; [embed] marks an
+  /// image (`![…](…)`).
   const new({
     required super.start,
     required super.end,
     required this.text,
     required this.href,
+    this.embed = false,
   });
 
-  /// The link text between `[` and `]` (trimmed).
+  /// The link text between `[` and `]` (trimmed), the alt text for an image.
   final String text;
 
   /// The href between `(` and `)` (trimmed): may be a relative `.md` path, a
   /// `#anchor`, an http(s) URL, an image asset path, …
   final String href;
+
+  /// Whether it was written as an image (`![…](…)`), which the app shows
+  /// rather than links. A move still has to carry it (#507).
+  final bool embed;
 }
 
 /// The inside of `[[…]]`, parsed into target / heading / alias.
@@ -73,9 +89,14 @@ final class WikiRef {
 ///
 /// Skips fenced code, math blocks, inline code and the leading frontmatter
 /// (via the shared tokenizer), so only links the user would see as links are
-/// returned. Markdown images (`![alt](src)`) are not links and are skipped.
-List<ParsedLink> parseLinks(String text) {
-  return linksInDocument(HighlightDocument.fromText(text));
+/// returned. Markdown images (`![alt](src)`) and embeds (`![[…]]`) are not
+/// links and are skipped; [includeEmbeds] returns them too, marked so a
+/// caller that has to carry them on a move (#507) can tell them apart.
+List<ParsedLink> parseLinks(String text, {bool includeEmbeds = false}) {
+  return linksInDocument(
+    HighlightDocument.fromText(text),
+    includeEmbeds: includeEmbeds,
+  );
 }
 
 /// The links of an already-tokenized [doc], in document order.
@@ -83,20 +104,34 @@ List<ParsedLink> parseLinks(String text) {
 /// Same rules as [parseLinks]; callers that need the tokens anyway (the
 /// indexer: links + inline tags from one tokenization pass) pass their
 /// document in and avoid a second one.
-List<ParsedLink> linksInDocument(HighlightDocument doc) {
+List<ParsedLink> linksInDocument(
+  HighlightDocument doc, {
+  bool includeEmbeds = false,
+}) {
   final out = <ParsedLink>[];
   var lineStart = 0;
   for (final line in doc.lines) {
     final src = line.text;
     for (final token in line.tokens) {
       if (token.kind == TokenKind.wikilink) {
-        // `![[…]]` is an embed-style reference, not a note link (M3 has
-        // no embeds), and `[[]]` / `[[|]]` / `[[#]]` carry nothing to
-        // resolve or display — skip both.
+        // `[[]]` / `[[|]]` / `[[#]]` carry nothing to resolve or display.
         final precededByBang =
             token.start > 0 && src.codeUnitAt(token.start - 1) == 0x21;
-        if (precededByBang) continue;
         final ref = parseWikiRef(src.substring(token.start + 2, token.end - 2));
+        if (precededByBang) {
+          // `![[…]]` is an embed, shown rather than linked; it is a reference
+          // a move must still carry, so it is only skipped unless asked for.
+          if (!includeEmbeds || ref.target.isEmpty) continue;
+          out.add(
+            WikiLink(
+              start: token.start - 1 + lineStart,
+              end: token.end + lineStart,
+              ref: ref,
+              embed: true,
+            ),
+          );
+          continue;
+        }
         if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
           continue;
         }
@@ -110,6 +145,10 @@ List<ParsedLink> linksInDocument(HighlightDocument doc) {
       } else if (token.kind == TokenKind.link) {
         out.add(
           _parseMarkdown(src, token.start, token.end, token.start + lineStart),
+        );
+      } else if (token.kind == TokenKind.image && includeEmbeds) {
+        out.add(
+          _parseImage(src, token.start, token.end, token.start + lineStart),
         );
       }
     }
@@ -130,6 +169,21 @@ MarkdownLink _parseMarkdown(String src, int start, int end, int absStart) {
     end: absStart + (end - start),
     text: text,
     href: href,
+  );
+}
+
+MarkdownLink _parseImage(String src, int start, int end, int absStart) {
+  // The tokenizer guarantees `![alt](href)`: the token starts at `!`, the
+  // first `]` closes the alt text, and the last `)` closes the href.
+  final close = src.indexOf(']', start);
+  final text = close == -1 ? '' : src.substring(start + 2, close).trim();
+  final href = src.substring(close + 2, end - 1).trim();
+  return MarkdownLink(
+    start: absStart,
+    end: absStart + (end - start),
+    text: text,
+    href: href,
+    embed: true,
   );
 }
 

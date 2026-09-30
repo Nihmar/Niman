@@ -306,13 +306,13 @@ final class IndexContentStore {
   }
 
   /// The target text of [link] to resolve by, or null for a link that
-  /// never resolves to an indexed note (external URL, anchor, non-`.md`).
+  /// never resolves to an indexed note (external URL, anchor, no extension).
   static String? _linkTarget(ParsedLink link) => switch (link) {
     final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
     final MarkdownLink m
         when !LinkResolver.hasScheme(m.href) &&
             !m.href.trim().startsWith('#') &&
-            m.href.contains('.md') =>
+            LinkResolver.markdownPath(m.href) != null =>
       m.href,
     _ => null,
   };
@@ -488,7 +488,9 @@ final class IndexContentStore {
     )..where((l) => l.noteId.equals(noteId))).go();
     final pending = <QueuedLink>[];
     await _db.batch((batch) {
-      for (final link in c.links) {
+      // Embeds and images are references too: they get an edge so a rename
+      // or move finds the note and carries the reference with it (#507).
+      for (final link in <ParsedLink>[...c.links, ...c.embeds]) {
         final query = _linkQuery(link, note.path);
         if (query == null) continue;
         final kind = link is WikiLink ? 'wiki' : 'md';

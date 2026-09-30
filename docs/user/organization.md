@@ -55,7 +55,9 @@ old one back — the snackbar's **Undo** swaps them again.
 **Following the note.** Renaming or moving a note (or its folder) moves
 its history too, and rewrites the links other notes hold to it: a wikilink
 written by path and a Markdown link follow the new path, and a wikilink
-written by name follows a rename. The settings that name a note or a folder
+written by name follows a rename. Embedded attachments (`![[…]]` and
+`![…](…)`) follow the same way, so a renamed attachments folder keeps the
+pictures and clips that cited it. The settings that name a note or a folder
 follow it the same way — the quick note, the list, template, attachments
 and annotations folders, and the journal's own folder and template — so a
 renamed folder keeps whatever pointed inside it. A note in the trash keeps

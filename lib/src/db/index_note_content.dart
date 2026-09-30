@@ -30,6 +30,7 @@ final class NoteContent {
     required this.inlineTags,
     required this.aliases,
     required this.links,
+    this.embeds = const <ParsedLink>[],
     this.fields = const {},
     this.date,
     this.pinned = false,
@@ -60,6 +61,10 @@ final class NoteContent {
 
   /// The note's links, in document order.
   final List<ParsedLink> links;
+
+  /// The note's embeds (`![[…]]`) and Markdown images (`![…](…)`), which a
+  /// rename or move must carry too (#507).
+  final List<ParsedLink> embeds;
 
   /// Every frontmatter key mapped to its values as text — what the
   /// `frontmatter_fields` rows are written from (T-M4-02).
@@ -193,6 +198,7 @@ NoteContent _extractContent(
     inlineTags: references.tags,
     aliases: fm?.aliases ?? const [],
     links: references.links,
+    embeds: references.embeds,
     fields: fm?.fields ?? const {},
     date: fm?.date,
     pinned: fm?.pinned ?? false,

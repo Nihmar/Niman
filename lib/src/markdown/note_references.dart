@@ -28,10 +28,14 @@ import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/style_run.dart';
 
-/// The inline tags and the links of one note.
+/// The inline tags, the links and the embeds of one note.
 final class NoteReferences {
   /// Creates the references of a note.
-  const new({required this.tags, required this.links});
+  const new({
+    required this.tags,
+    required this.links,
+    this.embeds = const <ParsedLink>[],
+  });
 
   /// Its inline `#tags`, normalized, each once, in the order they first
   /// appear.
@@ -43,6 +47,14 @@ final class NoteReferences {
   /// quote, and inside one measured without the quote's `>` marks. The
   /// index keeps the kind and the target, never the offsets.
   final List<ParsedLink> links;
+
+  /// Its embeds (`![[…]]`) and Markdown images (`![…](…)`), in document
+  /// order, each marked as an embed.
+  ///
+  /// Not links the note offers to follow, but references a rename or a move
+  /// must carry all the same (#507): the index keeps an edge for them, so
+  /// the note is found again and rewritten.
+  final List<ParsedLink> embeds;
 }
 
 /// The tags and links of [text]; see the library comment for what is read.
@@ -69,13 +81,15 @@ NoteReferences noteReferencesOf(String text) {
 typedef BlockReferences = ({
   List<String> tags,
   List<ParsedLink> links,
+  List<ParsedLink> embeds,
   bool scoped,
 });
 
-/// A block with no tag and no link.
+/// A block with no tag and no link and no embed.
 const BlockReferences noBlockReferences = (
   tags: <String>[],
   links: <ParsedLink>[],
+  embeds: <ParsedLink>[],
   scoped: false,
 );
 
@@ -94,12 +108,26 @@ BlockReferences blockReferencesOf(
   const masker = ExtensionMasker();
   final tags = <String>[];
   final links = <ParsedLink>[];
+  final embeds = <ParsedLink>[];
   final source = _SourceOffsets(block, raw, buffer);
   final masked = masker.mask(BlockParser.contentText(block, raw));
   for (final span in masked.spans) {
     switch (span.kind) {
       case ExtensionKind.tag:
         tags.add(normalizeTag(span.text));
+      case ExtensionKind.embed:
+        // `![[…]]`: not a link the note offers, but a reference a move
+        // carries (#507). A target-less embed (`![[#h]]`) names no file.
+        final ref = parseWikiRef(span.inner);
+        if (ref.target.isEmpty) continue;
+        embeds.add(
+          WikiLink(
+            start: source.of(span.start),
+            end: source.of(span.end),
+            ref: ref,
+            embed: true,
+          ),
+        );
       case ExtensionKind.wikilink:
         final ref = parseWikiRef(span.inner);
         // `[[]]`, `[[|]]` and `[[#]]` carry nothing to resolve or show.
@@ -113,8 +141,7 @@ BlockReferences blockReferencesOf(
             ref: ref,
           ),
         );
-      case ExtensionKind.embed ||
-          ExtensionKind.inlineMath ||
+      case ExtensionKind.inlineMath ||
           ExtensionKind.displayMath ||
           ExtensionKind.codeSpan:
         break;
@@ -127,7 +154,21 @@ BlockReferences blockReferencesOf(
     final parsed = parser.parseText(block, _footnoteBodyAsText(raw), scope);
     for (final run in parsed.runs) {
       final href = run.href;
-      if (run.kind != StyleKind.link || href == null) continue;
+      if (href == null) continue;
+      // A Markdown image is an embed, not a link (#507).
+      if (run.kind == StyleKind.image) {
+        embeds.add(
+          MarkdownLink(
+            start: source.of(run.start),
+            end: source.of(run.end),
+            text: parsed.text.substring(run.innerStart, run.innerEnd).trim(),
+            href: href,
+            embed: true,
+          ),
+        );
+        continue;
+      }
+      if (run.kind != StyleKind.link) continue;
       // A footnote reference is drawn as a link to its note, and is none.
       if (href.startsWith('#fn-')) continue;
       links.add(
@@ -140,9 +181,11 @@ BlockReferences blockReferencesOf(
       );
     }
   }
-  if (tags.isEmpty && links.isEmpty && !scoped) return noBlockReferences;
+  if (tags.isEmpty && links.isEmpty && embeds.isEmpty && !scoped) {
+    return noBlockReferences;
+  }
   links.sort((a, b) => a.start.compareTo(b.start));
-  return (tags: tags, links: links, scoped: scoped);
+  return (tags: tags, links: links, embeds: embeds, scoped: scoped);
 }
 
 /// A note's references out of its blocks', given in the blocks' order: each
@@ -151,12 +194,14 @@ BlockReferences blockReferencesOf(
 NoteReferences collectReferences(Iterable<BlockReferences> blocks) {
   final tags = <String>{};
   final links = <ParsedLink>[];
+  final embeds = <ParsedLink>[];
   for (final block in blocks) {
     if (identical(block, noBlockReferences)) continue;
     tags.addAll(block.tags);
     links.addAll(block.links);
+    embeds.addAll(block.embeds);
   }
-  return NoteReferences(tags: tags.toList(), links: links);
+  return NoteReferences(tags: tags.toList(), links: links, embeds: embeds);
 }
 
 /// Whether a block of [kind] has inline text, where a tag or a link can be.
