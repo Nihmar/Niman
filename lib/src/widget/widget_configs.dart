@@ -12,6 +12,7 @@
 library;
 
 import 'package:drift/drift.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:path/path.dart' as p;
 
@@ -84,6 +85,28 @@ final class WidgetConfigStore {
             updatedAt: at ?? DateTime.now(),
           ),
         );
+  }
+
+  /// Points the note widgets reading [libraryPath] at the item that moved
+  /// from [from] to [to], library-relative (#506): the note itself, or — for
+  /// a folder — any note under it. A widget pinned elsewhere is left alone.
+  Future<void> moved(
+    String libraryPath,
+    String from,
+    String to, {
+    required bool isDir,
+  }) async {
+    for (final config in await forLibrary(libraryPath)) {
+      final notePath = config.notePath;
+      if (config.provider != WidgetProvider.note.name || notePath == null) {
+        continue;
+      }
+      final next = pathAfterMove(notePath, from, to, isDir: isDir);
+      if (next == null || next == notePath) continue;
+      await (_db.update(_db.widgetConfigs)
+            ..where((t) => t.androidWidgetId.equals(config.androidWidgetId)))
+          .write(WidgetConfigsCompanion(notePath: Value(next)));
+    }
   }
 
   /// Drops the configuration of [androidWidgetId] (called from the

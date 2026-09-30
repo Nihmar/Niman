@@ -243,6 +243,24 @@ void main() {
       expect(journal.template, 'Books/Tpl.md');
     });
 
+    test(
+      'a rename is handed to what lives outside the library (#506)',
+      () async {
+        final carried = <String>[];
+        final outside = NoteOps(
+          root: ops.root,
+          db: db,
+          indexer: ops.indexer,
+          config: ops.config,
+          carryOutside: (from, to, {required isDir}) async =>
+              carried.add('$from -> $to ${isDir ? 'dir' : 'file'}'),
+        );
+        await outside.createNote(parentPath: '', name: 'Pinned');
+        await outside.rename('Pinned.md', 'Kept');
+        expect(carried, ['Pinned.md -> Kept.md file']);
+      },
+    );
+
     test('a setting pointing at another note is left alone (#506)', () async {
       await ops.createNote(parentPath: '', name: 'A');
       await ops.createNote(parentPath: '', name: 'B');

@@ -59,8 +59,9 @@ written by name follows a rename. Embedded attachments (`![[…]]` and
 `![…](…)`) follow the same way, so a renamed attachments folder keeps the
 pictures and clips that cited it. The settings that name a note or a folder
 follow it the same way — the quick note, the list, template, attachments
-and annotations folders, and the journal's own folder and template — so a
-renamed folder keeps whatever pointed inside it. A note in the trash keeps
+and annotations folders, and the journal's own folder and template — and so
+does a home-screen note widget on Android, so a renamed folder keeps
+whatever pointed inside it. A note in the trash keeps
 its history until the trash is emptied or the item deleted for good; a hard
 delete (trash off) removes it at once.
 

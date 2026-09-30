@@ -73,6 +73,7 @@ final class NoteOps implements NoteOperations {
     required IndexDatabase db,
     required this.indexer,
     required this.config,
+    this.carryOutside,
   }) : _dao = NoteDao(db),
        history = NoteHistory(root: root, config: config) {
     writer = NoteWriter(root: root, indexer: indexer, history: history);
@@ -104,6 +105,13 @@ final class NoteOps implements NoteOperations {
   final NoteHistory history;
 
   final NoteDao _dao;
+
+  /// What else, outside the library's own files, names a note by its path
+  /// and has to follow a rename or a move (#506): the home-screen note
+  /// widgets, kept in the app's database rather than the library's. Null
+  /// (the default, and every test) carries nothing further.
+  final Future<void> Function(String from, String to, {required bool isDir})?
+  carryOutside;
 
   /// Where user operations report the paths they changed; null (the
   /// default, and every library without sync) reports nothing. The sync's
@@ -371,6 +379,7 @@ final class NoteOps implements NoteOperations {
       await history.moved(path, newRel, isDir: row.isDir);
       await _carryReading(path, newRel, isDir: row.isDir);
       await _carrySettings(path, newRel, isDir: row.isDir);
+      await _carryOutside(path, newRel, isDir: row.isDir);
       // Before the index hears of the move: a folder's reindex re-creates
       // its notes, and the edges that named them would be gone (#507).
       final links = await _linksToMove(path, isDir: row.isDir);
@@ -421,6 +430,7 @@ final class NoteOps implements NoteOperations {
       await history.moved(path, newRel, isDir: row.isDir);
       await _carryReading(path, newRel, isDir: row.isDir);
       await _carrySettings(path, newRel, isDir: row.isDir);
+      await _carryOutside(path, newRel, isDir: row.isDir);
       // Before the index hears of the move: a folder's reindex re-creates
       // its notes, and the edges that named them would be gone (#507).
       final links = await _linksToMove(path, isDir: row.isDir);
@@ -442,6 +452,24 @@ final class NoteOps implements NoteOperations {
   /// subtree; a note only itself. Nothing pointed at it means no write.
   Future<void> _carrySettings(String from, String to, {required bool isDir}) {
     return config.update((c) => c.renamed(from, to, isDir: isDir));
+  }
+
+  /// Hands the move to [carryOutside] (#506). The move is already done on
+  /// disk: a failure there is logged and leaves the rename standing.
+  Future<void> _carryOutside(
+    String from,
+    String to, {
+    required bool isDir,
+  }) async {
+    final carry = carryOutside;
+    if (carry == null) return;
+    try {
+      await carry(from, to, isDir: isDir);
+    } on Object catch (error) {
+      const AppLogger(
+        name: 'notes',
+      ).warning('could not carry "$from" -> "$to" outside the library: $error');
+    }
   }
 
   /// The referrers of what is about to move from [from] (#507), read from

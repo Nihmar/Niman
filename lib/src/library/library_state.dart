@@ -524,6 +524,10 @@ final class LibraryController implements LibrarySession {
       db: indexDb,
       indexer: indexer,
       config: config,
+      // A home-screen note widget names its note by path, in the app's own
+      // database: a rename or a move carries it too (#506).
+      carryOutside: (from, to, {required isDir}) =>
+          WidgetConfigStore(appDb).moved(abs, from, to, isDir: isDir),
     );
     // A library indexed for the first time opens on its tree, and its
     // notes are read behind it: the search, the tags and the links fill
