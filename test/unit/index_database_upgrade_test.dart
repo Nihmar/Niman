@@ -58,4 +58,24 @@ void main() {
       );
     },
   );
+
+  test('an index from before embeds were edges is emptied for a rescan '
+      '(#507)', () async {
+    final dir = Directory.systemTemp.createTempSync('niman_index_v5_');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'index.db'));
+
+    // A v5 index with a link edge and no edge for the image the note embeds:
+    // the rename that moves the image would not find the note (#507).
+    sqlite3.sqlite3.open(file.path)
+      ..execute('CREATE TABLE note_links (from_note INTEGER, to_note INTEGER)')
+      ..execute('INSERT INTO note_links VALUES (1, 2)')
+      ..execute('PRAGMA user_version = 5')
+      ..close();
+
+    final db = IndexDatabase(NativeDatabase(file, setup: indexDatabaseSetup));
+    final edges = await db.select(db.noteLinks).get();
+    expect(edges, isEmpty, reason: 'the next full scan writes them anew');
+    await db.close();
+  });
 }

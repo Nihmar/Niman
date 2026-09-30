@@ -236,9 +236,11 @@ class IndexDatabase extends _$IndexDatabase {
   /// the six indexes the million-note pass showed missing (T-M6-01). v4:
   /// the full-text table keeps its word index and no copy of the text.
   /// v5: the pending link edges a directory-at-a-time scan resolves at the
-  /// end of its walk (#302).
+  /// end of its walk (#302). v6: embeds and images are edges too, so a
+  /// rename finds the notes that cite an attachment (#507) — an index
+  /// written before holds none for them, and is wiped and rescanned.
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
