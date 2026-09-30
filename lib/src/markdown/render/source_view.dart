@@ -27,6 +27,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -3056,23 +3057,46 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final position = TextPosition(
       offset: (local - piece.start).clamp(0, length),
     );
-    // The caret is the *surface's* answer, not a metric computed beside it: the
-    // painter reports the offset the way it paints it, over the run it is
-    // really
-    // over. The prototype's width matters only on the RTL side and its height
-    // not
-    // at all (the phase-1 spike), so the height comes from the line.
-    final rect = paragraph.getOffsetForCaret(
+    _caretRect.value = _caretRectIn(paragraph, position);
+    _sendGeometry();
+  }
+
+  /// The caret's rectangle in [paragraph] at [position], in the paragraph's
+  /// own coordinates.
+  ///
+  /// The horizontal offset is the painter's, over the run the caret is really
+  /// over. Its *row* — the top and the height — comes from the paragraph's own
+  /// line metrics, not from the glyph the caret stands by: the space at the
+  /// end of a line is measured from a fallback face and answers a shorter box
+  /// than the line, so the caret shrank and the typewriter light over it
+  /// shrank with it (#509). An empty paragraph has no line metrics, and the
+  /// glyph's own height is all there is there.
+  Rect _caretRectIn(RenderParagraph paragraph, TextPosition position) {
+    final at = paragraph.getOffsetForCaret(
       position,
       Rect.fromLTWH(0, 0, _caretWidth, 0),
     );
-    _caretRect.value = Rect.fromLTWH(
-      rect.dx,
-      rect.dy,
+    // The line the caret stands on, as the paragraph bounds it: boxes of the
+    // whole paragraph, one per visual line, each as tall as the line's strut
+    // — the same style the painter measures a letter's caret with, so a
+    // normal glyph and a trailing space answer alike.
+    final length = paragraph.text.toPlainText().length;
+    for (final box in paragraph.getBoxesForSelection(
+      TextSelection(baseOffset: 0, extentOffset: length),
+      boxHeightStyle: ui.BoxHeightStyle.max,
+    )) {
+      final row = box.toRect();
+      if (at.dy >= row.top && at.dy < row.bottom) {
+        return Rect.fromLTWH(at.dx, row.top, _caretWidth, row.height);
+      }
+    }
+    // An empty paragraph bounds no line: the glyph's own height is all there.
+    return Rect.fromLTWH(
+      at.dx,
+      at.dy,
       _caretWidth,
       paragraph.getFullHeightForCaret(position),
     );
-    _sendGeometry();
   }
 
   /// How wide the caret is drawn.

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart' show KatexOptions, renderToBox;
+import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -154,6 +155,48 @@ void main() {
       state.caretRect!.height,
       closeTo(lineHeightAtCaret(), 0.5),
       reason: 'the caret is its line, once the formula has landed',
+    );
+  });
+
+  testWidgets('the caret after a trailing space is the line, not the space', (
+    tester,
+  ) async {
+    // The glyph at the very end of a line is the space before the newline,
+    // and its box is shorter than the line: on the test font 14 px against
+    // 21. A caret measured from that glyph shrank, and the typewriter light
+    // over it shrank with it (#509).
+    const note = 'abc \n';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSurface(
+            buffer: SourceBuffer.fromText(note),
+            mode: MarkdownSurfaceMode.live,
+            theme: _theme,
+            showLineNumbers: false,
+            selection: const SelectionModel.at(4),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    final paragraph = tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((p) => p.text.toPlainText().startsWith('abc'));
+
+    expect(
+      paragraph.getFullHeightForCaret(const TextPosition(offset: 4)),
+      lessThan(paragraph.preferredLineHeight),
+      reason: 'the trap: the trailing space measures short',
+    );
+    expect(
+      state.caretRect!.height,
+      closeTo(paragraph.preferredLineHeight, 0.5),
+      reason: 'the caret is the line, trailing space or not',
     );
   });
 }
