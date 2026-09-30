@@ -75,10 +75,12 @@ There are **three connections**, not two:
 Each connection carries SQLite's own page cache (a few MiB by default, in
 the isolate's native heap) and, for the index, the FTS5 tables. `PRAGMA
 auto_vacuum = INCREMENTAL`, `journal_mode = WAL`, `busy_timeout = 5000`
-(`index_database.dart:202`). All three are `close()`d in `_teardown`
-(`library_state.dart:1527`), so closing a library releases the connections
-and their caches — which matters for "does it return after switching
-libraries?".
+(`index_database.dart:202`). The library's two index connections are
+`close()`d in `_teardown` (`library_state.dart:1527`); the `AppDatabase`
+outlives every library and is closed once, in `dispose`
+(`library_state.dart:1472`). So closing a library releases the index
+connections and their caches — which matters for "does it return after
+switching libraries?".
 
 ### Materialized tree rows
 
