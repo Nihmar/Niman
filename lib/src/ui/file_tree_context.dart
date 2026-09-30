@@ -9,6 +9,7 @@ library;
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -55,7 +56,7 @@ base class OsLauncher {
       // `explorer` reports exit code 1 even when it opens the window, so
       // its result says nothing: only a failure to start is a failure.
       try {
-        await Process.run('explorer', ['/select,$path']);
+        await Process.run('explorer', windowsRevealArgs(path));
         return true;
       } on ProcessException {
         return false;
@@ -96,6 +97,21 @@ base class OsLauncher {
     }
   }
 }
+
+/// The arguments `explorer` is handed to reveal [path]: the switch and the
+/// path as two tokens, the path in backslashes.
+///
+/// As one token (`/select,C:\dir with space\file`) a path with a space makes
+/// the process layer quote the whole argument, and `explorer` no longer reads
+/// its `/select,` switch — the folder does not open with the file selected,
+/// which is what a non-`.md` file in a folder with a space ran into (#510).
+/// A library-relative path keeps its forward slashes through `join`, and
+/// `explorer` takes only backslashes.
+@visibleForTesting
+List<String> windowsRevealArgs(String path) => [
+  '/select,',
+  path.replaceAll('/', r'\'),
+];
 
 /// Whether this platform can hand a file to the OS at all.
 ///
