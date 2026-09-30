@@ -442,6 +442,28 @@ void main() {
       expect(isUnder('', 'note.md'), isTrue);
       expect(isUnder('a/b', 'a/b'), isFalse);
     });
+
+    test('pathAfterMove follows the item and, for a folder, its subtree', () {
+      expect(
+        pathAfterMove('Inbox/x.md', 'Inbox/x.md', 'Done.md', isDir: false),
+        'Done.md',
+      );
+      expect(
+        pathAfterMove('Inbox/x.md', 'Inbox', 'Done/x.md', isDir: false),
+        'Inbox/x.md',
+        reason: 'a file carries only itself',
+      );
+      expect(
+        pathAfterMove('Inbox/x.md', 'Inbox', 'Done', isDir: true),
+        'Done/x.md',
+      );
+      expect(
+        pathAfterMove('Inbox/x.md', 'Elsewhere', 'Done', isDir: true),
+        'Inbox/x.md',
+      );
+      expect(pathAfterMove(null, 'a', 'b', isDir: true), isNull);
+      expect(pathAfterMove('', 'a', 'b', isDir: true), '');
+    });
   });
 
   group('splitFileName', () {

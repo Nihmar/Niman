@@ -545,6 +545,27 @@ String resolvePath(String parentPath, String name) {
   return parentPath.isEmpty ? name : '$parentPath/$name';
 }
 
+/// [path] after the item at [from] moved to [to] (#506): the path itself, or
+/// — for a folder — anything under it. A path that is neither comes back
+/// unchanged, and a null path stays null.
+///
+/// Library-relative paths, slash-separated: the settings that hold them spell
+/// ancestors the same way the tree does, so a renamed folder carries its
+/// subtree and a renamed note carries only itself.
+String? pathAfterMove(
+  String? path,
+  String from,
+  String to, {
+  required bool isDir,
+}) {
+  if (path == null || path.isEmpty) return path;
+  if (path == from) return to;
+  if (isDir && path.startsWith('$from/')) {
+    return '$to${path.substring(from.length)}';
+  }
+  return path;
+}
+
 /// Truncates [dt] to whole seconds, the precision at which drift stores
 /// `dateTime` columns (unix epoch seconds, mapped back to local time on
 /// read).

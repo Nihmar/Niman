@@ -127,4 +127,45 @@ void main() {
     await store.removeForLibrary(lib('Work'));
     expect((await store.all()).map((r) => r.androidWidgetId), [8]);
   });
+
+  test(
+    'a renamed note or folder carries the note widgets on it (#506)',
+    () async {
+      await store.upsert(
+        androidWidgetId: 1,
+        provider: WidgetProvider.note,
+        libraryPath: lib('Work'),
+        notePath: 'Inbox.md',
+      );
+      await store.upsert(
+        androidWidgetId: 2,
+        provider: WidgetProvider.note,
+        libraryPath: lib('Work'),
+        notePath: 'Docs/Plan.md',
+      );
+      await store.upsert(
+        androidWidgetId: 3,
+        provider: WidgetProvider.note,
+        libraryPath: lib('Home'),
+        notePath: 'Inbox.md',
+      );
+      await store.upsert(
+        androidWidgetId: 4,
+        provider: WidgetProvider.todo,
+        libraryPath: lib('Work'),
+      );
+
+      await store.moved(lib('Work'), 'Inbox.md', 'Today.md', isDir: false);
+      await store.moved(lib('Work'), 'Docs', 'Books', isDir: true);
+
+      expect((await store.find(1))!.notePath, 'Today.md');
+      expect((await store.find(2))!.notePath, 'Books/Plan.md');
+      expect(
+        (await store.find(3))!.notePath,
+        'Inbox.md',
+        reason: "another library's widget is not this rename's",
+      );
+      expect((await store.find(4))!.notePath, isNull);
+    },
+  );
 }
