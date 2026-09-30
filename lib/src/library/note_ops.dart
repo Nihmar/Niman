@@ -509,18 +509,25 @@ final class NoteOps implements NoteOperations {
       // A referrer inside the moved subtree moved with it.
       final path = pathAfterMove(oldReferrer, from, to, isDir: isDir)!;
       if (!seen.add(path)) continue;
-      final text = await readNote(path);
-      final next = rewriteMovedLinks(
-        text,
-        from: path,
-        moves: moves,
-        renamedFrom: renamedFrom,
-        renamedTo: renamedTo,
-      );
-      if (next == text) continue;
-      await writer.save(path, next);
-      _hint(path, SyncOpKind.changed);
-      updated++;
+      // One referrer that cannot be read or written must not stop the rest:
+      // the move is already done, and the others still need their links fixed.
+      try {
+        final text = await readNote(path);
+        final next = rewriteMovedLinks(
+          text,
+          from: path,
+          moves: moves,
+          renamedFrom: renamedFrom,
+          renamedTo: renamedTo,
+        );
+        if (next == text) continue;
+        await writer.save(path, next);
+        _hint(path, SyncOpKind.changed);
+        updated++;
+      } on Object catch (error) {
+        const AppLogger(name: 'links')
+            .warning('could not rewrite links in "$path": $error');
+      }
     }
     if (updated > 0) {
       const AppLogger(name: 'links')
