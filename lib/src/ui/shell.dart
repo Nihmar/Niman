@@ -748,11 +748,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   late final ShellRowActions _rowActions = ShellRowActions(
     controller: widget.controller,
     guard: _guard,
+    saveOpen: () => widget.unsavedTracker.saveAll(),
     creates: _createFlow,
     templates: _templateFlow,
     selectedPath: () => _selected,
     onMoved: (from, to) {
       _workspace.moved(from, to);
+      // The move rewrote the links other notes hold to it, on disk (#507):
+      // an open one re-reads its file, which a clean buffer adopts — and
+      // every buffer is clean, the move having saved them first.
+      setState(() => _noteReloadToken++);
       // The selection follows only a rename that is about it: the note
       // itself, or a folder it sits in. Renaming another row — a folder
       // above nothing selected — used to select that row while the shell
