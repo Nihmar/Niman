@@ -795,6 +795,31 @@ void main() {
       expect(state.widget.buffer.text, note);
     });
 
+    testWidgets('the pointer is the hand over a box, the text beside it', (
+      tester,
+    ) async {
+      await pumpMode(tester, MarkdownSurfaceMode.live, caret: 0, text: note);
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(mouse.removePointer);
+      await mouse.addPointer(location: boxOf(tester, '- [ ] da'));
+      await mouse.moveTo(boxOf(tester, '- [ ] da'));
+      await tester.pump();
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.click,
+        reason: 'a box is clickable, so the hand (#505)',
+      );
+      await mouse.moveTo(
+        tester.getCenter(find.text('caret', findRichText: true)),
+      );
+      await tester.pump();
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.text,
+        reason: 'beside the box the note is text again',
+      );
+    });
+
     testWidgets('source draws no box, and ticks none', (tester) async {
       final state = await pumpMode(
         tester,
