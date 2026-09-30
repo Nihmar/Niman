@@ -9,8 +9,6 @@
 /// dropped before the picker opens and again once it returns.
 library;
 
-import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
 /// Shows the calendar dialog, over [initialDate] between [firstDate] and
@@ -21,7 +19,8 @@ Future<DateTime?> showDayPicker(
   required DateTime firstDate,
   required DateTime lastDate,
 }) async {
-  _dropKeyboard();
+  final touch = _touch(context);
+  _dropKeyboard(touch: touch);
   final picked = await showDatePicker(
     context: context,
     initialDate: initialDate,
@@ -33,7 +32,7 @@ Future<DateTime?> showDayPicker(
     // ignore: avoid_redundant_argument_values
     initialEntryMode: DatePickerEntryMode.calendar,
   );
-  _dropKeyboard();
+  _dropKeyboard(touch: touch);
   return picked;
 }
 
@@ -43,7 +42,8 @@ Future<TimeOfDay?> showClockPicker(
   BuildContext context, {
   required TimeOfDay initialTime,
 }) async {
-  _dropKeyboard();
+  final touch = _touch(context);
+  _dropKeyboard(touch: touch);
   final picked = await showTimePicker(
     context: context,
     initialTime: initialTime,
@@ -52,20 +52,25 @@ Future<TimeOfDay?> showClockPicker(
     // ignore: avoid_redundant_argument_values
     initialEntryMode: TimePickerEntryMode.dial,
   );
-  _dropKeyboard();
+  _dropKeyboard(touch: touch);
   return picked;
 }
 
-/// Drops whatever held the soft keyboard, on the touch platforms where one
-/// can sit over the picker. Called before a dialog opens, so nothing is
-/// focused to restore when it closes, and after it returns, so a restored
-/// focus does not bring the keyboard back with it (#504). A desktop has no
-/// soft keyboard, and unfocusing there would only steal focus from the
-/// dialog.
-void _dropKeyboard() {
-  final touch =
-      defaultTargetPlatform == TargetPlatform.android ||
-      defaultTargetPlatform == TargetPlatform.iOS;
+/// Whether [context] is on a touch platform, where a soft keyboard can sit
+/// over the picker. Read from the theme, the same answer the task dialog's
+/// in-place panel asks (`todoPicksInPlace`), so the two cannot disagree; read
+/// before the dialog opens, since the context may be gone once it returns.
+bool _touch(BuildContext context) => switch (Theme.of(context).platform) {
+  TargetPlatform.android || TargetPlatform.iOS => true,
+  _ => false,
+};
+
+/// Drops whatever held the soft keyboard when [touch]. Called before a dialog
+/// opens, so nothing is focused to restore when it closes, and after it
+/// returns, so a restored focus does not bring the keyboard back with it
+/// (#504). A desktop has no soft keyboard, and unfocusing there would only
+/// steal focus from the dialog.
+void _dropKeyboard({required bool touch}) {
   if (!touch) return;
   FocusManager.instance.primaryFocus?.unfocus();
 }

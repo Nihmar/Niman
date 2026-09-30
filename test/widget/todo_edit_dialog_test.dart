@@ -232,42 +232,42 @@ void main() {
     });
   });
 
-  testWidgets(
-    'a picker drops the keyboard, and does not bring it back (#504)',
-    (tester) async {
-      await open(tester);
-      // Typing the description is a keyboard; the reminder is not.
-      await tester.enterText(field, 'call mum');
-      await tester.pump();
-      expect(tester.testTextInput.isVisible, isTrue);
-      await tester.tap(find.byKey(const Key('todo-dialog-reminder')));
-      await tester.pumpAndSettle();
-      expect(find.byType(DatePickerDialog), findsOne);
-      expect(
-        tester.testTextInput.isVisible,
-        isFalse,
-        reason: 'the keyboard is down over the calendar',
-      );
-      await tester.tap(find.text('OK'));
-      await tester.pumpAndSettle();
-      final clock = tester.widget<TimePickerDialog>(
-        find.byType(TimePickerDialog),
-      );
-      expect(clock.initialEntryMode, TimePickerEntryMode.dial);
-      expect(
-        tester.testTextInput.isVisible,
-        isFalse,
-        reason: 'and over the dial',
-      );
-      await tester.tap(find.text('OK'));
-      await tester.pumpAndSettle();
-      expect(
-        tester.testTextInput.isVisible,
-        isFalse,
-        reason: 'and it stays down once the pair is set',
-      );
-    },
-  );
+  testWidgets('a picker drops the keyboard and keeps it down (#504)', (
+    tester,
+  ) async {
+    // A phone: the soft keyboard is a touch platform's, and so is dropping it.
+    await open(tester, platform: TargetPlatform.android);
+    // Typing the description is a keyboard; the reminder is not.
+    await tester.enterText(field, 'call mum');
+    await tester.pump();
+    expect(tester.testTextInput.isVisible, isTrue);
+    await tester.tap(find.byKey(const Key('todo-dialog-reminder')));
+    await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsOne);
+    expect(
+      tester.testTextInput.isVisible,
+      isFalse,
+      reason: 'the keyboard is down over the calendar',
+    );
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    final clock = tester.widget<TimePickerDialog>(
+      find.byType(TimePickerDialog),
+    );
+    expect(clock.initialEntryMode, TimePickerEntryMode.dial);
+    expect(
+      tester.testTextInput.isVisible,
+      isFalse,
+      reason: 'and over the dial',
+    );
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.testTextInput.isVisible,
+      isFalse,
+      reason: 'and it stays down once the pair is set',
+    );
+  });
 
   // T-TD-07: a reminder scheduled while a precondition fails is warned
   // about where it is set, not only in the Todo tab's banner.

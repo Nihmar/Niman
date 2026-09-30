@@ -15,11 +15,12 @@ import 'package:flutter/material.dart';
 /// date/time picker (#504). An Android or iOS tablet is wide enough for the
 /// panel by size alone and is sent to the calendar and clock dialogs instead.
 bool todoPicksInPlace(BuildContext context) {
-  final platform = Theme.of(context).platform;
-  final desktop =
-      platform == TargetPlatform.linux ||
-      platform == TargetPlatform.macOS ||
-      platform == TargetPlatform.windows;
+  final desktop = switch (Theme.of(context).platform) {
+    TargetPlatform.linux ||
+    TargetPlatform.macOS ||
+    TargetPlatform.windows => true,
+    _ => false,
+  };
   if (!desktop) return false;
   final size = MediaQuery.sizeOf(context);
   return size.width >= _minWidth && size.height >= _minHeight;
