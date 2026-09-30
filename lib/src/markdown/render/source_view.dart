@@ -27,6 +27,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -3082,23 +3083,57 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final position = TextPosition(
       offset: (local - piece.start).clamp(0, length),
     );
-    // The caret is the *surface's* answer, not a metric computed beside it: the
-    // painter reports the offset the way it paints it, over the run it is
-    // really
-    // over. The prototype's width matters only on the RTL side and its height
-    // not
-    // at all (the phase-1 spike), so the height comes from the line.
-    final rect = paragraph.getOffsetForCaret(
+    _caretRect.value = _caretRectIn(paragraph, position, length);
+    _sendGeometry();
+  }
+
+  /// The caret's rectangle in [paragraph] at [position], in the paragraph's
+  /// own coordinates.
+  ///
+  /// The horizontal offset is the painter's, over the run the caret is really
+  /// over. Its *row* — the top and the height — comes from the paragraph's own
+  /// line metrics, not from the glyph the caret stands by: the space at the
+  /// end of a line is measured from a fallback face and answers a shorter box
+  /// than the line, so the caret shrank and the typewriter light over it
+  /// shrank with it (#509). An empty paragraph has no line metrics, and the
+  /// glyph's own height is all there is there.
+  Rect _caretRectIn(
+    RenderParagraph paragraph,
+    TextPosition position,
+    int length,
+  ) {
+    final at = paragraph.getOffsetForCaret(
       position,
       Rect.fromLTWH(0, 0, _caretWidth, 0),
     );
-    _caretRect.value = Rect.fromLTWH(
-      rect.dx,
-      rect.dy,
+    // The line the caret stands on, as the paragraph bounds it: a box as tall
+    // as the tallest run on its visual line ([ui.BoxHeightStyle.max]). Only
+    // the characters either side of the caret are asked for, so a paragraph
+    // the length of a chapter costs the same as a word; at a soft wrap the two
+    // sit on different lines, and the one the caret's own offset is on wins.
+    // That row is what makes a normal glyph and the trailing fallback space
+    // answer alike, where the glyph's own box is shorter.
+    final offset = position.offset;
+    final boxes = paragraph.getBoxesForSelection(
+      TextSelection(
+        baseOffset: math.max(0, offset - 1),
+        extentOffset: math.min(length, offset + 1),
+      ),
+      boxHeightStyle: ui.BoxHeightStyle.max,
+    );
+    for (final box in boxes) {
+      final row = box.toRect();
+      if (at.dy >= row.top && at.dy < row.bottom) {
+        return Rect.fromLTWH(at.dx, row.top, _caretWidth, row.height);
+      }
+    }
+    // An empty paragraph bounds no line: the glyph's own height is all there.
+    return Rect.fromLTWH(
+      at.dx,
+      at.dy,
       _caretWidth,
       paragraph.getFullHeightForCaret(position),
     );
-    _sendGeometry();
   }
 
   /// How wide the caret is drawn.
