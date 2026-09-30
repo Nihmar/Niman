@@ -17,6 +17,7 @@ void main() {
     WidgetTester tester, {
     double width = 400,
     double height = 900,
+    TargetPlatform platform = TargetPlatform.windows,
   }) async {
     tester.view.physicalSize = Size(width, height);
     tester.view.devicePixelRatio = 1;
@@ -24,6 +25,10 @@ void main() {
     String? result;
     await tester.pumpWidget(
       MaterialApp(
+        // Tests run with the target platform forced to Android, where the
+        // in-place panel is off (#504). The platform is named so the two
+        // behaviours are both reachable.
+        theme: ThemeData(platform: platform),
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(
@@ -205,6 +210,63 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(DatePickerDialog), findsOne);
     });
+
+    testWidgets('an Android tablet keeps the system calendar (#504)', (
+      tester,
+    ) async {
+      // Wide and tall enough for the panel by size, but Android has no
+      // business raising a soft keyboard over a picker: its time field would.
+      await open(tester, width: 1200, platform: TargetPlatform.android);
+      await tester.tap(find.byKey(const Key('todo-dialog-due')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(DatePickerDialog),
+        findsOne,
+        reason: 'the system calendar, not the in-place panel',
+      );
+      expect(find.byKey(const Key('todo-reminder-time')), findsNothing);
+      final dialog = tester.widget<DatePickerDialog>(
+        find.byType(DatePickerDialog),
+      );
+      expect(dialog.initialEntryMode, DatePickerEntryMode.calendar);
+    });
+  });
+
+  testWidgets('a picker drops the keyboard and keeps it down (#504)', (
+    tester,
+  ) async {
+    // A phone: the soft keyboard is a touch platform's, and so is dropping it.
+    await open(tester, platform: TargetPlatform.android);
+    // Typing the description is a keyboard; the reminder is not.
+    await tester.enterText(field, 'call mum');
+    await tester.pump();
+    expect(tester.testTextInput.isVisible, isTrue);
+    await tester.tap(find.byKey(const Key('todo-dialog-reminder')));
+    await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsOne);
+    expect(
+      tester.testTextInput.isVisible,
+      isFalse,
+      reason: 'the keyboard is down over the calendar',
+    );
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    final clock = tester.widget<TimePickerDialog>(
+      find.byType(TimePickerDialog),
+    );
+    expect(clock.initialEntryMode, TimePickerEntryMode.dial);
+    expect(
+      tester.testTextInput.isVisible,
+      isFalse,
+      reason: 'and over the dial',
+    );
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.testTextInput.isVisible,
+      isFalse,
+      reason: 'and it stays down once the pair is set',
+    );
   });
 
   // T-TD-07: a reminder scheduled while a precondition fails is warned

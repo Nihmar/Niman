@@ -1,15 +1,27 @@
 /// The task dialog's date pickers, in place (#268): on a window with the
 /// room, the due date and the reminder are chosen inside the dialog, under
-/// their row, instead of in the system pickers stacked over it (a date
-/// dialog, then for a reminder a time dialog over that).
+/// their row, instead of in the date and time dialogs stacked over it (a
+/// date dialog, then for a reminder a time dialog over that).
 library;
 
 import 'package:flutter/material.dart';
 
 /// Whether the task dialog picks its dates in place: a window wide and
 /// tall enough to hold a calendar under the fields. A phone, or a phone
-/// on its side, keeps the system pickers, which are made for it.
+/// on its side, keeps the date and time dialogs, which are made for it.
+///
+/// Desktop only: the reminder's panel carries a text field for the time, and
+/// a touch platform has no business raising the soft keyboard over a
+/// date/time picker (#504). An Android or iOS tablet is wide enough for the
+/// panel by size alone and is sent to the calendar and clock dialogs instead.
 bool todoPicksInPlace(BuildContext context) {
+  final desktop = switch (Theme.of(context).platform) {
+    TargetPlatform.linux ||
+    TargetPlatform.macOS ||
+    TargetPlatform.windows => true,
+    _ => false,
+  };
+  if (!desktop) return false;
   final size = MediaQuery.sizeOf(context);
   return size.width >= _minWidth && size.height >= _minHeight;
 }
