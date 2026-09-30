@@ -127,4 +127,7 @@ overwrites the last one: a second zip of the same folder is written as
 ## Where it lands
 
 The save dialog on the desktop, or the system picker on Android, decides.
-Niman says where the file went when it is done.
+Niman says where the file went when it is done. The banner goes away on its
+own after a few seconds; on a wide window it also has a close button, and on
+desktop it offers **Show in file manager** to open the folder with the file
+selected. Nothing waits for you to press it.

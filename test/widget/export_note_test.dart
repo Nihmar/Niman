@@ -124,25 +124,60 @@ void main() {
     await settle(tester);
   }
 
-  Future<void> chooseExport(WidgetTester tester, String format) async {
+  /// Chooses [format] from the export menu. [sweep] runs the shared settle,
+  /// which is past the banner's own timeout; a test that wants to see the
+  /// banner itself passes false and pumps only enough for it to appear.
+  Future<void> chooseExport(
+    WidgetTester tester,
+    String format, {
+    bool sweep = true,
+  }) async {
     await tester.tap(find.byKey(const Key('note-menu')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('note-menu-export')));
     await settle(tester);
     await tester.tap(find.byKey(Key('export-format-$format')));
-    await settle(tester);
+    if (sweep) {
+      await settle(tester);
+    } else {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+    }
   }
 
   testWidgets('the ⋮ menu exports the note as Markdown', (tester) async {
     place = '/tmp/note.md';
     await pumpShell(tester);
-    await chooseExport(tester, 'markdown');
+    await chooseExport(tester, 'markdown', sweep: false);
 
     expect(saved?.name, 'note.md');
     expect(saved?.mimeType, 'text/markdown');
     expect(saved?.dialogTitle, AppStrings.exportTitle);
     expect(utf8.decode(saved!.bytes), '# Note\n');
     expect(find.text(AppStrings.exportDone('/tmp/note.md')), findsOne);
+  });
+
+  testWidgets('the export banner times out, and closes on demand (#508)', (
+    tester,
+  ) async {
+    place = '/tmp/note.md';
+    await pumpShell(tester);
+    await chooseExport(tester, 'markdown', sweep: false);
+
+    final bar = tester.widget<SnackBar>(find.byType(SnackBar));
+    expect(bar.persist, isFalse, reason: 'an action must not pin it forever');
+    expect(
+      find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byIcon(Icons.close),
+      ),
+      findsOneWidget,
+      reason: 'a way to drop it without going to the folder',
+    );
+    // A few seconds on it goes on its own.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(SnackBar), findsNothing);
   });
 
   testWidgets('the chooser offers Markdown, HTML, PDF and EPUB', (
