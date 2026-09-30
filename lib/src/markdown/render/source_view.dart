@@ -3076,10 +3076,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       position,
       Rect.fromLTWH(0, 0, _caretWidth, 0),
     );
-    // The line the caret stands on, as the paragraph bounds it: boxes of the
-    // whole paragraph, one per visual line, each as tall as the line's strut
-    // — the same style the painter measures a letter's caret with, so a
-    // normal glyph and a trailing space answer alike.
+    // The line the caret stands on, as the paragraph bounds it: one box per
+    // visual line, each as tall as the tallest run on it
+    // ([ui.BoxHeightStyle.max]). A paragraph here is one source line,
+    // wrapped at most a few times, so this stays cheap. That row is what
+    // makes a normal glyph and the trailing fallback space answer alike,
+    // where the glyph's own box is shorter.
     final length = paragraph.text.toPlainText().length;
     for (final box in paragraph.getBoxesForSelection(
       TextSelection(baseOffset: 0, extentOffset: length),
