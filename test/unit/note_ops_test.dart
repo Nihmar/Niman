@@ -319,6 +319,91 @@ void main() {
     );
   });
 
+  group('links follow a move (#507)', () {
+    test('renaming a note follows in a bare-name wikilink', () async {
+      await ops.createNote(parentPath: '', name: 'Old');
+      await ops.createNote(
+        parentPath: '',
+        name: 'Ref',
+        content: 'See [[Old]].\n',
+      );
+      await ops.rename('Old.md', 'New');
+      expect(await ops.readNote('Ref.md'), 'See [[New]].\n');
+    });
+
+    test(
+      'moving a note follows in a path link, and a bare one stays',
+      () async {
+        await ops.createFolder(parentPath: '', name: 'A');
+        await ops.createFolder(parentPath: '', name: 'B');
+        await ops.createNote(parentPath: 'A', name: 'Note');
+        await ops.createNote(
+          parentPath: '',
+          name: 'Ref',
+          content: '[[A/Note]] and [[Note]]\n',
+        );
+        await ops.move('A/Note.md', 'B');
+        expect(
+          await ops.readNote('Ref.md'),
+          '[[B/Note]] and [[Note]]\n',
+          reason: 'the path follows; the bare name is found wherever it sits',
+        );
+      },
+    );
+
+    test('renaming a folder follows in every link into its subtree', () async {
+      await ops.createFolder(parentPath: '', name: 'Docs');
+      await ops.createNote(parentPath: 'Docs', name: 'Note');
+      await ops.createNote(
+        parentPath: '',
+        name: 'Ref',
+        content: '[[Docs/Note]] and [x](Docs/Note.md) and [[Note]]\n',
+      );
+      await ops.rename('Docs', 'Books');
+      expect(
+        await ops.readNote('Ref.md'),
+        '[[Books/Note]] and [x](Books/Note.md) and [[Note]]\n',
+      );
+    });
+
+    test('renaming a folder follows in the embeds into it (#507)', () async {
+      // Attachments are cited as embeds, not links; the index keeps an edge
+      // for them so the note is found and the reference carried.
+      await ops.createFolder(parentPath: '', name: 'assets');
+      File(p.join(root.path, 'assets', 'pic.png')).writeAsStringSync('img');
+      File(p.join(root.path, 'Ref.md'))
+          .writeAsStringSync('![[assets/pic.png]] and ![p](assets/pic.png)\n');
+      await indexer.fullScan(root.path);
+
+      await ops.rename('assets', 'media');
+
+      expect(
+        await ops.readNote('Ref.md'),
+        '![[media/pic.png]] and ![p](media/pic.png)\n',
+        reason: 'both embed forms follow the folder',
+      );
+    });
+
+    test(
+      'an embed gets its edge on the save path, not a full scan (#507)',
+      () async {
+        // `createNote` indexes through the direct path (`applyEvents`), not the
+        // deferred full scan: an embed has to resolve there too, or the next
+        // save of a note with an embed drops the edge the move reads.
+        await ops.createNote(parentPath: '', name: 'Old');
+        await ops.createNote(
+          parentPath: '',
+          name: 'Ref',
+          content: '![[Old]]\n',
+        );
+
+        await ops.rename('Old.md', 'New');
+
+        expect(await ops.readNote('Ref.md'), '![[New]]\n');
+      },
+    );
+  });
+
   group('pin (T-M4-04)', () {
     test('pinning writes the key into the note and the index', () async {
       await ops.createNote(parentPath: '', name: 'Note', content: 'body\n');

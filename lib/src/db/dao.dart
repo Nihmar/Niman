@@ -175,6 +175,36 @@ final class NoteDao {
     return [for (final row in rows) row.read(_db.notes.path)!];
   }
 
+  /// The paths of the notes holding a link to any note in [toIds], distinct.
+  ///
+  /// The reverse of the `note_links` primary key, answered by its
+  /// `links_to` index: the backlinks of a moved note, in one lookup per
+  /// [_pathChunk] target ids rather than a walk of every note (#507).
+  Future<List<String>> referrerPaths(Iterable<int> toIds) async {
+    final wanted = toIds.toSet().toList(growable: false);
+    if (wanted.isEmpty) return const <String>[];
+    final paths = <String>{};
+    for (var i = 0; i < wanted.length; i += _pathChunk) {
+      final end = i + _pathChunk < wanted.length
+          ? i + _pathChunk
+          : wanted.length;
+      final placeholders = List.filled(end - i, '?').join(', ');
+      final rows = await _db
+          .customSelect(
+            'SELECT DISTINCT n.path AS path FROM note_links l '
+            'JOIN notes n ON n.id = l.from_note '
+            'WHERE l.to_note IN ($placeholders)',
+            variables: [
+              for (final id in wanted.sublist(i, end)) Variable.withInt(id),
+            ],
+            readsFrom: {_db.noteLinks, _db.notes},
+          )
+          .get();
+      paths.addAll([for (final row in rows) row.read<String>('path')]);
+    }
+    return paths.toList(growable: false);
+  }
+
   /// Every indexed row, for full-scan reconciliation.
   Future<List<Note>> allRows() {
     return _db.select(_db.notes).get();

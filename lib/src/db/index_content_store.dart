@@ -235,7 +235,7 @@ final class IndexContentStore {
     for (final c in contents.values) {
       if (!isNoteFile(p.basename(c.rel))) continue;
       final isPaired = paired.contains(c.rel);
-      if (isPaired && !c.links.any(_dependsOnLocation)) continue;
+      if (isPaired && !_anyDependsOnLocation(c)) continue;
       if (await _dao.find(c.rel) case final Note row) {
         (isPaired ? moved : items).add((row, c));
       }
@@ -259,7 +259,10 @@ final class IndexContentStore {
     final batchQueries = <LinkQuery>{};
     if (pendingLink == null) {
       for (final (row, c) in [...items, ...moved]) {
-        for (final link in c.links) {
+        // Embeds and images resolve here too, or the direct path resolves no
+        // edge for them and the deferred path's are lost on the next save
+        // (#507).
+        for (final link in <ParsedLink>[...c.links, ...c.embeds]) {
           final query = _linkQuery(link, row.path);
           if (query != null) batchQueries.add(query);
         }
@@ -305,14 +308,20 @@ final class IndexContentStore {
         LinkResolver.dependsOnLocation(target, markdown: link is MarkdownLink);
   }
 
+  /// Whether any link or embed of [c] reads from the note's folder (#491):
+  /// the paired/moved note the edge is written again for. An embed counts
+  /// like the link it is (#507).
+  static bool _anyDependsOnLocation(NoteContent c) =>
+      c.links.any(_dependsOnLocation) || c.embeds.any(_dependsOnLocation);
+
   /// The target text of [link] to resolve by, or null for a link that
-  /// never resolves to an indexed note (external URL, anchor, non-`.md`).
+  /// never resolves to an indexed note (external URL, anchor, no extension).
   static String? _linkTarget(ParsedLink link) => switch (link) {
     final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
     final MarkdownLink m
         when !LinkResolver.hasScheme(m.href) &&
             !m.href.trim().startsWith('#') &&
-            m.href.contains('.md') =>
+            LinkResolver.markdownPath(m.href) != null =>
       m.href,
     _ => null,
   };
@@ -488,7 +497,9 @@ final class IndexContentStore {
     )..where((l) => l.noteId.equals(noteId))).go();
     final pending = <QueuedLink>[];
     await _db.batch((batch) {
-      for (final link in c.links) {
+      // Embeds and images are references too: they get an edge so a rename
+      // or move finds the note and carries the reference with it (#507).
+      for (final link in <ParsedLink>[...c.links, ...c.embeds]) {
         final query = _linkQuery(link, note.path);
         if (query == null) continue;
         final kind = link is WikiLink ? 'wiki' : 'md';

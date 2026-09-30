@@ -29,6 +29,7 @@ final class ShellRowActions {
   new({
     required this.controller,
     required this.guard,
+    required this.saveOpen,
     required this.creates,
     required this.templates,
     required this.selectedPath,
@@ -46,6 +47,12 @@ final class ShellRowActions {
 
   /// Serializes mutating flows, reporting errors.
   final Future<void> Function(Future<void> Function() action) guard;
+
+  /// Writes every open note's unsaved edits to disk (#507). A rename or a
+  /// move rewrites the links other notes hold, on disk: an open note's
+  /// buffer must be there first, or its next save would put the old links
+  /// back. A note that will not save stops the rename with it.
+  final Future<void> Function() saveOpen;
 
   /// Creating a note or a folder in the pressed row's folder.
   final ShellCreateFlow creates;
@@ -158,6 +165,7 @@ final class ShellRowActions {
     );
     if (name == null) return;
     await guard(() async {
+      await saveOpen();
       final row = await controller.ops!.rename(sel, name);
       onMoved(sel, row.path);
     });
@@ -186,6 +194,7 @@ final class ShellRowActions {
     );
     if (target == null) return;
     await guard(() async {
+      await saveOpen();
       final row = await controller.ops!.move(sel, target);
       onMoved(sel, row.path);
     });

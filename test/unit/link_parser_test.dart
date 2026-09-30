@@ -133,6 +133,22 @@ void main() {
       expect(ref.target, 'My Note');
     });
 
+    test('embeds are skipped unless asked for, and marked when kept', () {
+      const text = 'a [[note]] ![[pic.png]] ![alt](pic.png) [x](a.md)';
+      expect(parseLinks(text), hasLength(2)); // the wikilink and [x](a.md)
+      final kept = parseLinks(text, includeEmbeds: true);
+      expect(kept, hasLength(4));
+      final embed = kept[1] as WikiLink;
+      expect(embed.embed, isTrue);
+      expect(text.substring(embed.start, embed.end), '![[pic.png]]');
+      final image = kept[2] as MarkdownLink;
+      expect(image.embed, isTrue);
+      expect(image.text, 'alt');
+      expect(image.href, 'pic.png');
+      expect(text.substring(image.start, image.end), '![alt](pic.png)');
+      expect((kept[0] as WikiLink).embed, isFalse);
+    });
+
     test('empty, unclosed and malformed forms', () {
       expect(parseLinks('[[]]'), isEmpty); // nothing to link
       expect(parseLinks('[[|]]'), isEmpty);

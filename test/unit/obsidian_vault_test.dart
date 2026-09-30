@@ -61,15 +61,17 @@ void main() {
     expect(await dao.find('.obsidian/notes.md'), isNull);
     expect(await dao.find('.trash/old.md'), isNull);
 
-    // Wikilinks, an aliased one included, became edges.
+    // Wikilinks, an aliased one included, and the embed — a reference a
+    // move must carry (#507) — became edges.
     final welcome = (await dao.find('Welcome.md'))!;
     final ideas = (await dao.find('Ideas.md'))!;
     final deep = (await dao.find('Notes/Deep note.md'))!;
+    final pic = (await dao.find('attachments/pic.png'))!;
     final links = await (db.select(
       db.noteLinks,
     )..where((l) => l.fromNote.equals(welcome.id))).get();
     expect(links.map((l) => l.kind), everyElement('wiki'));
-    expect(links.map((l) => l.toNote).toSet(), {ideas.id, deep.id});
+    expect(links.map((l) => l.toNote).toSet(), {ideas.id, deep.id, pic.id});
 
     // The frontmatter tags are indexed, and the embed resolves by bare
     // name the way Obsidian's does.

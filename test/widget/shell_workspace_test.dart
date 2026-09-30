@@ -1,12 +1,15 @@
 // Issue #23, PR 1: the shell keeps the workspace current — the note it
 // shows, and the library changing under it — and keeps it on this device,
 // with nothing on screen changed yet.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
@@ -18,10 +21,14 @@ import '../fakes/shell_harness.dart';
 void main() {
   late FakeLibrarySession controller;
   late FakeFilePicker filePicker;
+  late UnsavedTracker unsaved;
 
   setUp(() {
     controller = FakeLibrarySession();
     filePicker = useFakeFilePicker();
+    // Not disposed here: the shell watches it, and the test binding
+    // finalizes the tree after tear-down callbacks.
+    unsaved = UnsavedTracker();
   });
 
   Future<void> pumpShell(WidgetTester tester) async {
@@ -30,6 +37,7 @@ void main() {
       ProviderScope(
         overrides: [
           librarySessionProvider.overrideWithValue(controller),
+          unsavedTrackerProvider.overrideWithValue(unsaved),
           todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
           windowControllerProvider.overrideWithValue(
             FakeWindowController(customTitleBar: true),
@@ -85,6 +93,40 @@ void main() {
     expect(controller.workspace.activePath, 'Books/alpha.md');
   });
 
+  // #507: a rename rewrites the links other notes hold, on disk, so an open
+  // note's unsaved edits go there first — or its next save would put the old
+  // links back.
+  testWidgets('a rename saves the open notes first', (tester) async {
+    await pumpShell(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    final dirty = _DirtyNote();
+    unsaved.register(dirty);
+
+    await rowMenu(tester, 'alpha.md', 'rename');
+    await tester.enterText(dialogField(), 'omega');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    expect(dirty.saves, 1);
+    expect(noteRow('omega.md'), findsOne);
+  });
+
+  testWidgets('a note that will not save stops the rename', (tester) async {
+    await pumpShell(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    unsaved.register(_DirtyNote(fails: true));
+
+    await rowMenu(tester, 'alpha.md', 'rename');
+    await tester.enterText(dialogField(), 'omega');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    expect(noteRow('alpha.md'), findsOne, reason: 'nothing renamed');
+    expect(noteRow('omega.md'), findsNothing);
+  });
+
   testWidgets('a deleted note leaves nothing open', (tester) async {
     await pumpShell(tester);
     await controller.createNote(parentPath: '', name: 'alpha');
@@ -110,4 +152,27 @@ void main() {
     expect(find.byKey(const Key('note-tab-1')), findsOne);
     expect(find.byKey(const Key('note-top-bar')), findsOne);
   });
+}
+
+/// An open note holding edits the disk does not have yet.
+final class _DirtyNote implements UnsavedNote {
+  new({this.fails = false});
+
+  /// Whether its save fails, as a full disk's would.
+  final bool fails;
+
+  /// How many times it was saved.
+  int saves = 0;
+
+  @override
+  String get path => '/fake/library/open.md';
+
+  @override
+  bool get unsaved => saves == 0;
+
+  @override
+  Future<void> save() async {
+    if (fails) throw const FileSystemException('disk full');
+    saves++;
+  }
 }
