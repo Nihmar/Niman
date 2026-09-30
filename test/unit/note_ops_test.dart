@@ -10,6 +10,7 @@ import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:path/path.dart' as p;
 
@@ -207,6 +208,48 @@ void main() {
       final renamed = await ops.rename('Same.md', 'Same');
       expect(renamed.id, row.id);
     });
+
+    test('renaming a note carries the quick note with it (#506)', () async {
+      await ops.createNote(parentPath: '', name: 'Scratch');
+      await ops.setQuickNotePath(path: 'Scratch.md');
+      await ops.rename('Scratch.md', 'Inbox');
+      expect(await ops.quickNotePath, 'Inbox.md');
+    });
+
+    test('renaming a folder carries every setting that points inside it '
+        '(#506)', () async {
+      await ops.createFolder(parentPath: '', name: 'Docs');
+      await ops.createNote(parentPath: 'Docs', name: 'Tpl');
+      await ops.setListNoteFolder(folder: 'Docs/lists');
+      await ops.setTemplateFolder(folder: 'Docs');
+      await ops.setAttachmentsFolder(folder: 'Docs/assets');
+      await ops.setAnnotationsFolder(folder: 'Elsewhere');
+      await ops.setJournal(
+        const JournalSettings(folder: 'Docs', template: 'Docs/Tpl.md'),
+      );
+
+      await ops.rename('Docs', 'Books');
+
+      expect(await ops.listNoteFolder, 'Books/lists');
+      expect(await ops.templateFolder, 'Books');
+      expect(await ops.attachmentsFolder, 'Books/assets');
+      expect(
+        await ops.annotationsFolder,
+        'Elsewhere',
+        reason: 'a setting pointing elsewhere is left alone',
+      );
+      final journal = await ops.journal;
+      expect(journal.folder, 'Books');
+      expect(journal.template, 'Books/Tpl.md');
+    });
+
+    test('a setting pointing at another note is left alone (#506)', () async {
+      await ops.createNote(parentPath: '', name: 'A');
+      await ops.createNote(parentPath: '', name: 'B');
+      await ops.setQuickNotePath(path: 'B.md');
+      await ops.rename('A.md', 'Z');
+      expect(await ops.quickNotePath, 'B.md');
+    });
   });
 
   group('move', () {
@@ -226,6 +269,14 @@ void main() {
       await ops.move('X.md', 'Docs');
       expect(await dao.find('Docs/X.md'), isNotNull);
       expect(await dao.find('Docs/X_1.md'), isNotNull);
+    });
+
+    test('moving a note carries the quick note with it (#506)', () async {
+      await ops.createFolder(parentPath: '', name: 'Docs');
+      await ops.createNote(parentPath: '', name: 'Scratch');
+      await ops.setQuickNotePath(path: 'Scratch.md');
+      await ops.move('Scratch.md', 'Docs');
+      expect(await ops.quickNotePath, 'Docs/Scratch.md');
     });
 
     test(

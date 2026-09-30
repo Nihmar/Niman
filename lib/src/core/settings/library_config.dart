@@ -732,6 +732,30 @@ final class LibraryConfig {
     );
   }
 
+  /// This config with every library-relative path that pointed at the item
+  /// that moved from [from] to [to] rewritten (#506): the quick note, the
+  /// list, template, attachments and annotations folders, and the journal's
+  /// own folder and template.
+  ///
+  /// A folder carries everything under it; a note only itself. A config
+  /// nothing pointed to comes back equal, so the write is skipped and the
+  /// settings file is not churned.
+  LibraryConfig renamed(String from, String to, {required bool isDir}) {
+    String rewrite(String value) =>
+        pathAfterMove(value, from, to, isDir: isDir) ?? value;
+    return copyWith(
+      quickNotePath: pathAfterMove(quickNotePath, from, to, isDir: isDir),
+      listNoteFolder: rewrite(listNoteFolder),
+      templateFolder: rewrite(templateFolder),
+      attachmentsFolder: rewrite(attachmentsFolder),
+      annotationsFolder: rewrite(annotationsFolder),
+      journal: journal.copyWith(
+        folder: rewrite(journal.folder),
+        template: pathAfterMove(journal.template, from, to, isDir: isDir),
+      ),
+    );
+  }
+
   /// The keys kept on the device rather than in `settings.json`.
   static const Set<String> deviceKeys = {
     'pinnedCollapsed',

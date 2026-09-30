@@ -368,6 +368,7 @@ final class NoteOps implements NoteOperations {
       _hint(newRel, SyncOpKind.moved, fromPath: path);
       await history.moved(path, newRel, isDir: row.isDir);
       await _carryReading(path, newRel, isDir: row.isDir);
+      await _carrySettings(path, newRel, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
     });
@@ -407,9 +408,18 @@ final class NoteOps implements NoteOperations {
       _hint(newRel, SyncOpKind.moved, fromPath: path);
       await history.moved(path, newRel, isDir: row.isDir);
       await _carryReading(path, newRel, isDir: row.isDir);
+      await _carrySettings(path, newRel, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
     });
+  }
+
+  /// Rewrites every setting that pointed at what moved from [from] to [to]
+  /// (#506): the quick note, the list, template, attachments and annotations
+  /// folders, and the journal's folder and template. A folder carries its
+  /// subtree; a note only itself. Nothing pointed at it means no write.
+  Future<void> _carrySettings(String from, String to, {required bool isDir}) {
+    return config.update((c) => c.renamed(from, to, isDir: isDir));
   }
 
   /// Carries the reading positions of what moved from [from] to [to]

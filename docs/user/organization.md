@@ -53,9 +53,12 @@ this version** keeps the current text as a version first, then puts the
 old one back — the snackbar's **Undo** swaps them again.
 
 **Following the note.** Renaming or moving a note (or its folder) moves
-its history too. A note in the trash keeps its history until the trash
-is emptied or the item deleted for good; a hard delete (trash off)
-removes it at once.
+its history too. The settings that name a note or a folder follow it the
+same way — the quick note, the list, template, attachments and annotations
+folders, and the journal's own folder and template — so a renamed folder
+keeps whatever pointed inside it. A note in the trash keeps its history
+until the trash is emptied or the item deleted for good; a hard delete
+(trash off) removes it at once.
 
 **On disk.** `.history/<path>.v<n>` holds each version byte for byte,
 and `.history/<path>.json` lists them (time, reason, size, hash). The
