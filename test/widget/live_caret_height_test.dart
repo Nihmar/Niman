@@ -199,4 +199,46 @@ void main() {
       reason: 'the caret is the line, trailing space or not',
     );
   });
+
+  testWidgets('a wrapped line gives the caret the row it is on', (
+    tester,
+  ) async {
+    // Only the characters beside the caret are measured (#509): on the last
+    // visual line of a wrapped paragraph the caret is that line, not the
+    // first one, and still a whole line tall.
+    final note = '${List.filled(40, 'word').join(' ')}\n';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 240,
+            child: MarkdownSurface(
+              buffer: SourceBuffer.fromText(note),
+              mode: MarkdownSurfaceMode.live,
+              theme: _theme,
+              showLineNumbers: false,
+              selection: SelectionModel.at(note.length - 1),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    final paragraph = tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((p) => p.text.toPlainText().startsWith('word'));
+    final caret = state.caretRect!;
+
+    expect(
+      paragraph.size.height,
+      greaterThan(paragraph.preferredLineHeight * 2),
+      reason: 'the line wraps',
+    );
+    expect(caret.top, greaterThan(0), reason: 'the last row, not the first');
+    expect(caret.height, closeTo(paragraph.preferredLineHeight, 0.5));
+  });
 }
