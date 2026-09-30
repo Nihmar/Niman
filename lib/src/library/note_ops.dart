@@ -20,6 +20,7 @@ import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/link_moves.dart';
 import 'package:niman/src/links/rewrite.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
@@ -516,10 +517,12 @@ final class NoteOps implements NoteOperations {
     required List<String> referrers,
   }) async {
     if (oldPaths.isEmpty || referrers.isEmpty) return;
-    final moves = <String, String>{
+    // Indexed once for every referrer: a link is a lookup, not a walk of
+    // everything that moved.
+    final moves = LinkMoves({
       for (final old in oldPaths)
         old: pathAfterMove(old, from, to, isDir: isDir)!,
-    };
+    });
     // A renamed file is the one case a bare-name wikilink follows.
     String? renamedFrom;
     String? renamedTo;
@@ -543,7 +546,10 @@ final class NoteOps implements NoteOperations {
         final text = await readNote(path);
         final next = rewriteMovedLinks(
           text,
-          from: path,
+          // Its links were written where it stood; a relative one is
+          // written back from where it stands now.
+          from: oldReferrer,
+          at: path,
           moves: moves,
           renamedFrom: renamedFrom,
           renamedTo: renamedTo,
