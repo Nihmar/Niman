@@ -440,4 +440,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  // #522: typewriter mode drives the scroll, and the panel's own height moves
+  // the scroll's extent, so deciding by the offset made the two chase each
+  // other on a short note — a bounce per keystroke. The caret decides instead.
+  testWidgets('typewriter: the panel rides the caret, not the scroll', (
+    tester,
+  ) async {
+    const note = '---\ntitle: x\n---\n\none line\n';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteView(
+            path: '/tmp/niman-typewriter-frontmatter-test.md',
+            showLineNumbers: false,
+            autofocusEditor: true,
+            typewriter: true,
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView, skipOffstage: false),
+    );
+    final place = state.placeCaret;
+
+    place(0);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('frontmatter-fields')),
+      findsOneWidget,
+      reason: 'the caret is on the head',
+    );
+
+    place(note.indexOf('one line'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('frontmatter-fields')),
+      findsNothing,
+      reason: 'the caret is in the body, and the panel cannot pull it back',
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

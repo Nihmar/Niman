@@ -1356,6 +1356,9 @@ final class _NoteViewState extends State<NoteView>
         },
         onSelection: (selection) {
           _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
+          // In typewriter mode the fields panel rides the caret, not the
+          // scroll the follow drives (#522).
+          if (widget.typewriter) _frontmatterScrolled();
         },
       ),
     );
@@ -1530,10 +1533,30 @@ final class _NoteViewState extends State<NoteView>
   ///
   /// A pane that has not been laid out yet — a note just opened — counts as
   /// showing its head: the panel opens with the note it belongs to.
+  ///
+  /// In typewriter mode the scroll is the caret's, not the reader's, and the
+  /// panel's own height moves the scroll's extent (the editor sits in the
+  /// room the panel leaves). Asking the offset there would make the two
+  /// chase each other: centering pushes the offset past the head, the panel
+  /// hides, the smaller extent clamps the offset back under the head, and
+  /// the panel shows again — once per keystroke on a short note (#522). The
+  /// caret's line does not move with the panel, so it decides instead.
   bool _headInView() {
+    if (widget.typewriter && !_previewIn(widget)) return _caretInHead();
     final controller = _previewIn(widget) ? _previewScroll : _sourceScroll;
     return !controller.hasClients ||
         controller.offset <= _frontmatterHeadExtent;
+  }
+
+  /// Whether the editor's caret is on one of the note's head lines (#522):
+  /// with no caret reported yet — a note just opened — the head counts as
+  /// shown, as a pane not yet laid out does.
+  bool _caretInHead() {
+    final caret = _surfaceCaretLine;
+    if (caret == null) return true;
+    final head = _frontmatterHeadOf(_surface?.buffer);
+    if (head == null) return false;
+    return caret <= '\n'.allMatches(head).length;
   }
 
   /// The panel follows the note's head (#157): away once the note is scrolled
@@ -1542,6 +1565,7 @@ final class _NoteViewState extends State<NoteView>
   /// The reader's own choice is kept as it was, so coming back to the top of a
   /// note finds the panel closed or open exactly as they left it.
   void _frontmatterScrolled() {
+    if (!mounted) return;
     final atHead = _headInView();
     if (atHead == _frontmatterAtHead) return;
     setState(() => _frontmatterAtHead = atHead);

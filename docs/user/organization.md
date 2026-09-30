@@ -98,9 +98,12 @@ The panel is the note's *head*, and it behaves like one. It opens **closed**:
 one row with the handle and **Add a property**, the fields a tap away on the
 handle. Scroll the note past its frontmatter and the panel steps aside — the
 note, not the panel, is what you scrolled to — and it comes back, as you left
-it, when the head is on screen again. A library that would rather have no panel
-at all turns it off in **Settings › Editor › Properties panel**; off, a note is
-its own text in both surfaces.
+it, when the head is on screen again. With typewriter mode on, where the note
+scrolls to follow the caret, the panel follows the caret's own line instead:
+it shows while the caret is on the head and steps aside once it is in the
+body, so the two never chase each other on a short note. A library that would
+rather have no panel at all turns it off in **Settings › Editor › Properties
+panel**; off, a note is its own text in both surfaces.
 
 A date is picked, not typed: a `date:` field opens the platform's own calendar,
 and the file gets back the `YYYY-MM-DD` the parser reads as a date.
