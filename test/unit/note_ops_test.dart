@@ -301,6 +301,54 @@ void main() {
     );
   });
 
+  group('links follow a move (#507)', () {
+    test('renaming a note follows in a bare-name wikilink', () async {
+      await ops.createNote(parentPath: '', name: 'Old');
+      await ops.createNote(
+        parentPath: '',
+        name: 'Ref',
+        content: 'See [[Old]].\n',
+      );
+      await ops.rename('Old.md', 'New');
+      expect(await ops.readNote('Ref.md'), 'See [[New]].\n');
+    });
+
+    test(
+      'moving a note follows in a path link, and a bare one stays',
+      () async {
+        await ops.createFolder(parentPath: '', name: 'A');
+        await ops.createFolder(parentPath: '', name: 'B');
+        await ops.createNote(parentPath: 'A', name: 'Note');
+        await ops.createNote(
+          parentPath: '',
+          name: 'Ref',
+          content: '[[A/Note]] and [[Note]]\n',
+        );
+        await ops.move('A/Note.md', 'B');
+        expect(
+          await ops.readNote('Ref.md'),
+          '[[B/Note]] and [[Note]]\n',
+          reason: 'the path follows; the bare name is found wherever it sits',
+        );
+      },
+    );
+
+    test('renaming a folder follows in every link into its subtree', () async {
+      await ops.createFolder(parentPath: '', name: 'Docs');
+      await ops.createNote(parentPath: 'Docs', name: 'Note');
+      await ops.createNote(
+        parentPath: '',
+        name: 'Ref',
+        content: '[[Docs/Note]] and [x](Docs/Note.md) and [[Note]]\n',
+      );
+      await ops.rename('Docs', 'Books');
+      expect(
+        await ops.readNote('Ref.md'),
+        '[[Books/Note]] and [x](Books/Note.md) and [[Note]]\n',
+      );
+    });
+  });
+
   group('pin (T-M4-04)', () {
     test('pinning writes the key into the note and the index', () async {
       await ops.createNote(parentPath: '', name: 'Note', content: 'body\n');

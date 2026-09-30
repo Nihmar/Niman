@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/dao.dart';
@@ -19,6 +20,7 @@ import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/rewrite.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -369,7 +371,17 @@ final class NoteOps implements NoteOperations {
       await history.moved(path, newRel, isDir: row.isDir);
       await _carryReading(path, newRel, isDir: row.isDir);
       await _carrySettings(path, newRel, isDir: row.isDir);
+      // Before the index hears of the move: a folder's reindex re-creates
+      // its notes, and the edges that named them would be gone (#507).
+      final links = await _linksToMove(path, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
+      await _rewriteLinks(
+        path,
+        newRel,
+        isDir: row.isDir,
+        oldPaths: links.oldPaths,
+        referrers: links.referrers,
+      );
       return await _mustFind(newRel);
     });
   }
@@ -409,7 +421,17 @@ final class NoteOps implements NoteOperations {
       await history.moved(path, newRel, isDir: row.isDir);
       await _carryReading(path, newRel, isDir: row.isDir);
       await _carrySettings(path, newRel, isDir: row.isDir);
+      // Before the index hears of the move: a folder's reindex re-creates
+      // its notes, and the edges that named them would be gone (#507).
+      final links = await _linksToMove(path, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
+      await _rewriteLinks(
+        path,
+        newRel,
+        isDir: row.isDir,
+        oldPaths: links.oldPaths,
+        referrers: links.referrers,
+      );
       return await _mustFind(newRel);
     });
   }
@@ -420,6 +442,90 @@ final class NoteOps implements NoteOperations {
   /// subtree; a note only itself. Nothing pointed at it means no write.
   Future<void> _carrySettings(String from, String to, {required bool isDir}) {
     return config.update((c) => c.renamed(from, to, isDir: isDir));
+  }
+
+  /// The referrers of what is about to move from [from] (#507), read from
+  /// the index *before* the move: the index's resolved link edges
+  /// (`note_links`, answered by its `links_to` index) and the moved files'
+  /// own old paths.
+  ///
+  /// Read first because a folder's rename re-creates the notes under it with
+  /// new ids, and the edges that pointed at them would be gone by the time
+  /// the move is done; the referrer's own path is what the rewrite needs, and
+  /// it is unchanged for anyone outside the subtree.
+  Future<({List<String> oldPaths, List<String> referrers})> _linksToMove(
+    String from, {
+    required bool isDir,
+  }) async {
+    final oldPaths = isDir ? await _dao.filePathsUnder(from) : <String>[from];
+    if (oldPaths.isEmpty) {
+      return (oldPaths: oldPaths, referrers: const <String>[]);
+    }
+    final rows = await _dao.byPaths(oldPaths);
+    if (rows.isEmpty) {
+      return (oldPaths: oldPaths, referrers: const <String>[]);
+    }
+    final referrers = await _dao.referrerPaths([
+      for (final row in rows.values) row.id,
+    ]);
+    return (oldPaths: oldPaths, referrers: referrers);
+  }
+
+  /// Rewrites the links in every note that pointed at what moved from [from]
+  /// to [to] (#507).
+  ///
+  /// [oldPaths] are the moved files' old library-relative paths and
+  /// [referrers] their referring notes' paths, as [_linksToMove] read them
+  /// before the move. Each changed note is written through the writer — the
+  /// normal save path — so its edit is a save with its own history version
+  /// and sync hint. The rewrite itself reads no index: it maps the written
+  /// targets through the old->new paths alone ([rewriteMovedLinks]).
+  Future<void> _rewriteLinks(
+    String from,
+    String to, {
+    required bool isDir,
+    required List<String> oldPaths,
+    required List<String> referrers,
+  }) async {
+    if (oldPaths.isEmpty || referrers.isEmpty) return;
+    final moves = <String, String>{
+      for (final old in oldPaths)
+        old: pathAfterMove(old, from, to, isDir: isDir)!,
+    };
+    // A renamed file is the one case a bare-name wikilink follows.
+    String? renamedFrom;
+    String? renamedTo;
+    if (!isDir) {
+      final oldName = p.basename(from);
+      final newName = p.basename(to);
+      if (oldName != newName) {
+        renamedFrom = oldName;
+        renamedTo = newName;
+      }
+    }
+    var updated = 0;
+    final seen = <String>{};
+    for (final oldReferrer in referrers) {
+      // A referrer inside the moved subtree moved with it.
+      final path = pathAfterMove(oldReferrer, from, to, isDir: isDir)!;
+      if (!seen.add(path)) continue;
+      final text = await readNote(path);
+      final next = rewriteMovedLinks(
+        text,
+        from: path,
+        moves: moves,
+        renamedFrom: renamedFrom,
+        renamedTo: renamedTo,
+      );
+      if (next == text) continue;
+      await writer.save(path, next);
+      _hint(path, SyncOpKind.changed);
+      updated++;
+    }
+    if (updated > 0) {
+      const AppLogger(name: 'links')
+          .info('$updated note(s) updated after "$from" -> "$to"');
+    }
   }
 
   /// Carries the reading positions of what moved from [from] to [to]
