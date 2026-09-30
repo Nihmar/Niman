@@ -559,6 +559,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The first line of the table under the mouse, or null.
   final ValueNotifier<int?> _tableHover = ValueNotifier<int?>(null);
 
+  /// The pointer over the note: the text's, or the hand's over a task box a
+  /// click ticks (#505). A notifier, not state, so crossing a box repaints the
+  /// pointer alone and never rebuilds the note.
+  final ValueNotifier<MouseCursor> _hoverCursor = ValueNotifier<MouseCursor>(
+    SystemMouseCursors.text,
+  );
+
   /// Whether the mouse is on one of the handles, off the table itself.
   bool _overTableHandles = false;
 
@@ -869,6 +876,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void dispose() {
     _tableHoverClear?.cancel();
     _tableHover.dispose();
+    _hoverCursor.dispose();
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
     widget.templateCheck?.removeListener(_onSpellingChanged);
@@ -2027,7 +2035,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// read. Selection by touch belongs to the platform's own handles, which is a
   /// separate piece of work.
   Widget _mouseSelection(Widget child) => Listener(
-    onPointerHover: (event) => _hoverTableAt(event.position),
+    onPointerHover: (event) {
+      _hoverTableAt(event.position);
+      _hoverCursorAt(event.position);
+    },
     onPointerDown: (event) {
       _lastPointerKind = event.kind;
       // A mouse asks for the keyboard as it goes down, which is where a click
@@ -3206,10 +3217,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   _showTouch(toolbar: true);
                 },
                 // The text's own pointer over the note; the gutter keeps the
-                // arrow (`_Line`).
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.text,
-                  onExit: (_) => _leaveTable(),
+                // arrow (`_Line`), and a drawn task box the hand (#505).
+                child: ValueListenableBuilder<MouseCursor>(
+                  valueListenable: _hoverCursor,
+                  builder: (context, cursor, child) => MouseRegion(
+                    cursor: cursor,
+                    onExit: (_) {
+                      _leaveTable();
+                      _hoverCursor.value = SystemMouseCursors.text;
+                    },
+                    child: child,
+                  ),
                   child: CustomScrollView(
                     key: _scrollKey,
                     controller: _scroll,
@@ -3461,6 +3479,48 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _tableHoverClear?.cancel();
     _tableHover.value = table;
     _tableOverlay.show();
+  }
+
+  /// Points the mouse's cursor at what is under it: the hand over a drawn task
+  /// box, which a click ticks, the text's everywhere else (#505).
+  void _hoverCursorAt(Offset global) {
+    final cursor = _overTaskBox(global)
+        ? SystemMouseCursors.click
+        : SystemMouseCursors.text;
+    if (_hoverCursor.value != cursor) _hoverCursor.value = cursor;
+  }
+
+  /// Whether a drawn task box is under [global]. Reads the one line the point
+  /// is on, not the note, so a hover costs no scan; the box is where the
+  /// painter puts it ([liveItemSlot]), so the cursor and the click agree.
+  bool _overTaskBox(Offset global) {
+    if (!widget.hideMarkers) return false;
+    final offset = offsetAt(global);
+    if (offset == null) return false;
+    final index = widget.buffer.lineOf(offset);
+    // On the caret's line the markers are drawn as written: a click is a
+    // caret, not a tick.
+    if (index == _caretSpot.value.line) return false;
+    final paragraph = _lineKeys[index]?.currentContext?.findRenderObject();
+    if (paragraph is! RenderParagraph ||
+        !paragraph.attached ||
+        !paragraph.hasSize) {
+      return false;
+    }
+    final styled = _lineAt(index);
+    final block = _styler?.blockOf(index);
+    final shape = LineShape.of(
+      styled,
+      block,
+      index,
+      quoted: _quotes.of(index, block, widget.buffer),
+    );
+    if (shape.marker == null || shape.task == null) return false;
+    return liveItemSlot(
+      paragraph,
+      shape,
+      widget.theme,
+    ).contains(paragraph.globalToLocal(global));
   }
 
   /// The mouse is off the table: its handles go, unless it is on them.
