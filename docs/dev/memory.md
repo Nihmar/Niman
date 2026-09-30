@@ -7,17 +7,16 @@ resident memory, and bring it down.
 
 This is the **code audit** half of the investigation. The absolute numbers
 (resident at idle, with a large library, with many tabs, and after long
-editing sessions) were **not captured** in the PR that added this file: the
-host it was written on cannot run a desktop profile build (the repo says so
-for Windows hosts in `AGENTS.md`). The measurement procedure below is the
-one to run on a Linux or Windows desktop; the fixes that follow each ask for
-a printed before/after, so the report is completed by the run that makes
-them.
+editing sessions) are **not recorded here yet**: they come from a profile
+build on a Linux or Windows desktop, following the procedure below. Each
+fix that follows asks for a printed before/after, so the figures land with
+the change that moves them.
 
 What *is* in this file: the owners of desktop memory, read from the code,
 with their limits and lifetimes; what is kept for notes and tabs that are
 not visible; and how the scale rule (1M notes, novel-length files) holds up.
-Every claim carries the file to check it in.
+Every claim carries the file — and, where it helps, the symbol — to check
+it in; line numbers are left out, since they move with every change.
 
 ## How to measure
 
@@ -67,25 +66,25 @@ There are **three connections**, not two:
 
 - `AppDatabase` — app settings, one row; the small one.
 - `IndexDatabase` — the library's index (tree rows, stems, tags, links,
-  FTS5), on its **own background isolate** (`NativeDatabase.createInBackground`,
-  `library_state.dart:1802`).
+  FTS5), on its **own background isolate** (`NativeDatabase.createInBackground`
+  in `defaultIndexDatabase`, `library_state.dart`).
 - A second `IndexDatabase` over the **same file** for search, also on its own
-  isolate (`defaultSearchDatabase`, `library_state.dart:1813`).
+  isolate (`defaultSearchDatabase`, `library_state.dart`).
 
 Each connection carries SQLite's own page cache (a few MiB by default, in
 the isolate's native heap) and, for the index, the FTS5 tables. `PRAGMA
 auto_vacuum = INCREMENTAL`, `journal_mode = WAL`, `busy_timeout = 5000`
-(`index_database.dart:202`). The library's two index connections are
-`close()`d in `_teardown` (`library_state.dart:1527`); the `AppDatabase`
-outlives every library and is closed once, in `dispose`
-(`library_state.dart:1472`). So closing a library releases the index
+(`indexDatabaseSetup`, `index_database.dart`). The library's two index
+connections are `close()`d in `_teardown` (`library_state.dart`); the
+`AppDatabase` outlives every library and is closed once, in `dispose`
+(same file). So closing a library releases the index
 connections and their caches — which matters for "does it return after
 switching libraries?".
 
 ### Materialized tree rows
 
 `NoteDao.tree` runs **one query** returning the rows of the root and of the
-expanded folders (`dao.dart:45`); the tree widget materializes only what it
+expanded folders (`NoteDao.tree`, `dao.dart`); the tree widget materializes only what it
 shows. At 1M notes the index holds 1M row objects *on disk*, but the app
 holds only the visible/expanded set. Confirm by expanding the whole tree of
 a large library that the query's result set is what grows — that is the term
@@ -134,7 +133,7 @@ whole file:
 
 - FTS5 for search; the tree is materialized per expanded folder; the index
   full scan is **directory-at-a-time with bounded memory** (#302).
-- `filePathsUnder` is an index seek, not a walk (`dao.dart:163`).
+- `filePathsUnder` is an index seek, not a walk (`dao.dart`).
 - A novel-length note is read in slices for the scan
   (`background_scan.dart`) and saved through a streamed producer
   (`note_write_stream.dart`), so it is not joined on the UI isolate.
