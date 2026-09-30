@@ -9,7 +9,6 @@ library;
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -107,7 +106,6 @@ base class OsLauncher {
 /// which is what a non-`.md` file in a folder with a space ran into (#510).
 /// A library-relative path keeps its forward slashes through `join`, and
 /// `explorer` takes only backslashes.
-@visibleForTesting
 List<String> windowsRevealArgs(String path) => [
   '/select,',
   path.replaceAll('/', r'\'),
