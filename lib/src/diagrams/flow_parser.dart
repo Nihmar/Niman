@@ -13,6 +13,7 @@ library;
 import 'package:niman/src/diagrams/flow_edge_scanner.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
+import 'package:niman/src/diagrams/mermaid_lines.dart';
 
 /// Parses a flowchart body (the fence's content, header included).
 Flowchart parseFlowchart(String source) => _FlowParser(source).parse();
@@ -44,24 +45,12 @@ final class _FlowParser {
   /// Runs the parse and returns the chart.
   Flowchart parse() {
     final lines = source.split('\n');
-    var index = 0;
-
-    // An optional YAML frontmatter block (mermaid allows one) is skipped.
-    if (_trim(lines, 0) == '---') {
-      index = 1;
-      while (index < lines.length && _trim(lines, index) != '---') {
-        index++;
-      }
-      if (index >= lines.length) {
-        throw const MermaidParseException(1, 'unterminated frontmatter');
-      }
-      index++;
-    }
+    var index = mermaidBodyStart(lines);
 
     FlowDirection? direction;
     var sawHeader = false;
     for (; index < lines.length; index++) {
-      for (final line in _statements(_stripComment(lines[index]))) {
+      for (final line in _statements(stripMermaidComment(lines[index]))) {
         if (!sawHeader) {
           final word = _firstWord(line);
           if (word == 'flowchart' || word == 'graph') {
@@ -286,20 +275,6 @@ final class _FlowParser {
     return match?.group(0) ?? '';
   }
 
-  /// [line] without its `%%` comment; a `%%` inside quotes is text.
-  static String _stripComment(String line) {
-    var quoted = false;
-    for (var i = 0; i < line.length; i++) {
-      final ch = line[i];
-      if (ch == '"') {
-        quoted = !quoted;
-      } else if (!quoted && line.startsWith('%%', i)) {
-        return line.substring(0, i);
-      }
-    }
-    return line;
-  }
-
   /// The statements on [line], trimmed and not empty: Mermaid ends one at
   /// a `;` as well as at the end of the line (`graph TD;`, `A-->B;C`). A
   /// `;` inside quotes, a node's brackets or an edge's `|label|` is text.
@@ -332,9 +307,6 @@ final class _FlowParser {
     final last = line.substring(start).trim();
     if (last.isNotEmpty) yield last;
   }
-
-  static String _trim(List<String> lines, int index) =>
-      index < lines.length ? lines[index].trim() : '';
 
   static String? _unquoteOrNull(String? text) =>
       text == null ? null : _unquote(text);

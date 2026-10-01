@@ -9,6 +9,7 @@ library;
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/flow_parser.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
+import 'package:niman/src/diagrams/mermaid_lines.dart';
 import 'package:niman/src/diagrams/mindmap_parser.dart';
 
 /// A parsed Mermaid diagram.
@@ -67,13 +68,13 @@ MermaidDiagram parseMermaid(String source) {
   throw MermaidParseException(1, 'unsupported diagram type "$first"');
 }
 
-/// The first word of the first non-empty line, or the empty string.
+/// The first word of the diagram's header — past a front matter, comments
+/// and directives — or the empty string.
 String _firstWord(String source) {
-  for (final line in source.split('\n')) {
-    final trimmed = line.trim();
-    if (trimmed.isEmpty) continue;
-    final match = RegExp('^[A-Za-z_][A-Za-z0-9_-]*').firstMatch(trimmed);
-    return match?.group(0) ?? '';
-  }
-  return '';
+  final lines = source.split('\n');
+  final header = mermaidBodyStart(lines);
+  if (header >= lines.length) return '';
+  final match = RegExp('^[A-Za-z_][A-Za-z0-9_-]*')
+      .firstMatch(lines[header].trim());
+  return match?.group(0) ?? '';
 }

@@ -9,6 +9,7 @@ library;
 
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
+import 'package:niman/src/diagrams/mermaid_lines.dart';
 
 /// The columns a tab counts as when indentation is measured.
 const int _tabColumns = 4;
@@ -33,8 +34,8 @@ final class _MindmapParser {
   Flowchart parse() {
     final lines = source.split('\n');
     var sawHeader = false;
-    for (var index = 0; index < lines.length; index++) {
-      final raw = _stripComment(lines[index]);
+    for (var index = mermaidBodyStart(lines); index < lines.length; index++) {
+      final raw = stripMermaidComment(lines[index]);
       if (raw.trim().isEmpty) continue;
       if (!sawHeader) {
         if (_firstWord(raw) != 'mindmap') {
@@ -137,10 +138,5 @@ final class _MindmapParser {
     final match = RegExp('^[A-Za-z_][A-Za-z0-9_-]*')
         .firstMatch(line.trimLeft());
     return match?.group(0) ?? '';
-  }
-
-  static String _stripComment(String line) {
-    final at = line.indexOf('%%');
-    return at < 0 ? line : line.substring(0, at);
   }
 }

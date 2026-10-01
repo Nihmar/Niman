@@ -294,4 +294,20 @@ void main() {
     expect(_node(chart, 'B').label, 'Box');
     expect(chart.edges, hasLength(2));
   });
+
+  test('front matter, comments and directives come before any header', () {
+    const preamble = '---\ntitle: A map\n---\n%%{init: {}}%%\n%% note\n';
+    expect(parseMermaid('${preamble}mindmap\n  root'), isA<MermaidFlowchart>());
+    expect(_chart('${preamble}flowchart LR\nA --> B').nodes, hasLength(2));
+    expect(
+      () => parseMermaid('%% note\npie\n"a": 1'),
+      throwsA(
+        isA<MermaidParseException>().having(
+          (e) => e.message,
+          'message',
+          contains('unsupported diagram type "pie"'),
+        ),
+      ),
+    );
+  });
 }
