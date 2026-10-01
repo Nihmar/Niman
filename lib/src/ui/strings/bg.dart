@@ -2901,4 +2901,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get commandConvertListToMindMap =>
       'Превърни списъка в интелектуална карта';
+  @override
+  String get toolMindMapSubtitle =>
+      'Заменя списъка при курсора с интелектуална карта';
+
+  @override
+  String get toolMindMapNeedsList => 'Курсорът не е в списък';
 }

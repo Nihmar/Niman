@@ -2885,4 +2885,10 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Breyta lista í hugarkort';
+  @override
+  String get toolMindMapSubtitle =>
+      'Skiptir listanum við bendilinn út fyrir hugarkort';
+
+  @override
+  String get toolMindMapNeedsList => 'Bendillinn er ekki í lista';
 }

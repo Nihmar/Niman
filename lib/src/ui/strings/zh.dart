@@ -2542,4 +2542,9 @@ final class ChineseStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => '将列表转换为思维导图';
+  @override
+  String get toolMindMapSubtitle => '将光标处的列表替换为思维导图';
+
+  @override
+  String get toolMindMapNeedsList => '光标不在列表中';
 }

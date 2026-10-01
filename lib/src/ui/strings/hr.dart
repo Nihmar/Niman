@@ -2921,4 +2921,10 @@ final class CroatianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Pretvori popis u mentalnu mapu';
+  @override
+  String get toolMindMapSubtitle =>
+      'Zamjenjuje popis na pokazivaču mentalnom mapom';
+
+  @override
+  String get toolMindMapNeedsList => 'Pokazivač nije na popisu';
 }

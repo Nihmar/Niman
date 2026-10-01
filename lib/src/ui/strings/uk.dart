@@ -2933,4 +2933,10 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Перетворити список на карту думок';
+  @override
+  String get toolMindMapSubtitle =>
+      'Замінює список під курсором на карту думок';
+
+  @override
+  String get toolMindMapNeedsList => 'Курсор не в списку';
 }

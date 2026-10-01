@@ -2896,4 +2896,10 @@ final class HungarianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Lista átalakítása elmetérképpé';
+  @override
+  String get toolMindMapSubtitle =>
+      'A kurzornál lévő listát elmetérképre cseréli';
+
+  @override
+  String get toolMindMapNeedsList => 'A kurzor nincs listában';
 }

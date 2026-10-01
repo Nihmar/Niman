@@ -2938,4 +2938,10 @@ final class RomanianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Transformă lista în hartă mentală';
+  @override
+  String get toolMindMapSubtitle =>
+      'Înlocuiește lista de la cursor cu o hartă mentală';
+
+  @override
+  String get toolMindMapNeedsList => 'Cursorul nu este într-o listă';
 }

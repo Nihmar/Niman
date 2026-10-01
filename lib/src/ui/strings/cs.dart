@@ -2891,4 +2891,10 @@ final class CzechStrings extends Strings {
   @override
   String get commandConvertListToMindMap =>
       'Převést seznam na myšlenkovou mapu';
+  @override
+  String get toolMindMapSubtitle =>
+      'Nahradí seznam na kurzoru myšlenkovou mapou';
+
+  @override
+  String get toolMindMapNeedsList => 'Kurzor není v seznamu';
 }

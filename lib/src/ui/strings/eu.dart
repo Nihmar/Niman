@@ -2918,4 +2918,10 @@ final class BasqueStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Bihurtu zerrenda mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Kurtsorean dagoen zerrenda mapa mental batekin ordezkatzen du';
+
+  @override
+  String get toolMindMapNeedsList => 'Kurtsorea ez dago zerrenda batean';
 }

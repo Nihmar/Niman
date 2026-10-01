@@ -2957,4 +2957,10 @@ final class GermanStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Liste in Mindmap umwandeln';
+  @override
+  String get toolMindMapSubtitle =>
+      'Ersetzt die Liste am Cursor durch eine Mindmap';
+
+  @override
+  String get toolMindMapNeedsList => 'Der Cursor steht nicht in einer Liste';
 }

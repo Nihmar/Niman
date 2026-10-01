@@ -2908,4 +2908,10 @@ final class GalicianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Converter lista en mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Substitúe a lista no cursor por un mapa mental';
+
+  @override
+  String get toolMindMapNeedsList => 'O cursor non está nunha lista';
 }

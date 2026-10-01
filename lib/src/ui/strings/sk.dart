@@ -2901,4 +2901,10 @@ final class SlovakStrings extends Strings {
   @override
   String get commandConvertListToMindMap =>
       'Previesť zoznam na myšlienkovú mapu';
+  @override
+  String get toolMindMapSubtitle =>
+      'Nahradí zoznam na kurzore myšlienkovou mapou';
+
+  @override
+  String get toolMindMapNeedsList => 'Kurzor nie je v zozname';
 }

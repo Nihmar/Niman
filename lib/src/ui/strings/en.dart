@@ -2850,4 +2850,10 @@ final class EnglishStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Convert list to mind map';
+  @override
+  String get toolMindMapSubtitle =>
+      'Replace the list at the cursor with a mind map';
+
+  @override
+  String get toolMindMapNeedsList => 'The cursor is not in a list';
 }

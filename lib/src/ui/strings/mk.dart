@@ -2915,4 +2915,10 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Претвори листа во ментална мапа';
+  @override
+  String get toolMindMapSubtitle =>
+      'Ја заменува листата на курсорот со ментална мапа';
+
+  @override
+  String get toolMindMapNeedsList => 'Курсорот не е во листа';
 }

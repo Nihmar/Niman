@@ -2925,4 +2925,10 @@ final class DutchStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Lijst omzetten in mindmap';
+  @override
+  String get toolMindMapSubtitle =>
+      'Vervangt de lijst bij de cursor door een mindmap';
+
+  @override
+  String get toolMindMapNeedsList => 'De cursor staat niet in een lijst';
 }

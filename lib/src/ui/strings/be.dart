@@ -2930,4 +2930,9 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Пераўтварыць спіс у карту думак';
+  @override
+  String get toolMindMapSubtitle => 'Замяняе спіс пад курсорам на карту думак';
+
+  @override
+  String get toolMindMapNeedsList => 'Курсор не ў спісе';
 }

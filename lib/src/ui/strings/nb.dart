@@ -2873,4 +2873,10 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Gjør listen om til tankekart';
+  @override
+  String get toolMindMapSubtitle =>
+      'Erstatter listen ved markøren med et tankekart';
+
+  @override
+  String get toolMindMapNeedsList => 'Markøren er ikke i en liste';
 }

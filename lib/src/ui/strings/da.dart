@@ -2874,4 +2874,10 @@ final class DanishStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Konverter liste til mindmap';
+  @override
+  String get toolMindMapSubtitle =>
+      'Erstatter listen ved markøren med et mindmap';
+
+  @override
+  String get toolMindMapNeedsList => 'Markøren er ikke i en liste';
 }

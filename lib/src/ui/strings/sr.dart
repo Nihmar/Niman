@@ -2918,4 +2918,9 @@ final class SerbianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Претвори листу у мапу ума';
+  @override
+  String get toolMindMapSubtitle => 'Замењује листу на курзору мапом ума';
+
+  @override
+  String get toolMindMapNeedsList => 'Курзор није у листи';
 }

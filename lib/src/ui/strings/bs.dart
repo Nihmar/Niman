@@ -2920,4 +2920,10 @@ final class BosnianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Pretvori listu u mentalnu mapu';
+  @override
+  String get toolMindMapSubtitle =>
+      'Zamjenjuje listu na kursoru mentalnom mapom';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursor nije u listi';
 }

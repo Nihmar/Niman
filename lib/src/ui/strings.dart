@@ -487,6 +487,8 @@ final class AppStrings {
   static String get toolCountListTitle => _s.toolCountListTitle;
   static String get toolCountListSubtitle => _s.toolCountListSubtitle;
   static String get toolCountListNeedsList => _s.toolCountListNeedsList;
+  static String get toolMindMapSubtitle => _s.toolMindMapSubtitle;
+  static String get toolMindMapNeedsList => _s.toolMindMapNeedsList;
   static String get diagramTitle => _s.diagramTitle;
   static String get diagramFullScreen => _s.diagramFullScreen;
   static String get commandInsertDiagram => _s.commandInsertDiagram;

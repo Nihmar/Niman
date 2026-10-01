@@ -2907,4 +2907,10 @@ final class FinnishStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Muunna luettelo miellekartaksi';
+  @override
+  String get toolMindMapSubtitle =>
+      'Korvaa kohdistimen luettelon miellekartalla';
+
+  @override
+  String get toolMindMapNeedsList => 'Kohdistin ei ole luettelossa';
 }

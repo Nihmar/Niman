@@ -2932,4 +2932,10 @@ final class SpanishStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Convertir la lista en mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Reemplaza la lista del cursor por un mapa mental';
+
+  @override
+  String get toolMindMapNeedsList => 'El cursor no está en una lista';
 }

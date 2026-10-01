@@ -2930,4 +2930,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get commandConvertListToMindMap =>
       'Konvertuoti sąrašą į minčių žemėlapį';
+  @override
+  String get toolMindMapSubtitle =>
+      'Pakeičia sąrašą prie žymeklio minčių žemėlapiu';
+
+  @override
+  String get toolMindMapNeedsList => 'Žymeklis nėra sąraše';
 }

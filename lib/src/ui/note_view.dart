@@ -2683,13 +2683,26 @@ final class _NoteViewState extends State<NoteView>
   Future<void> _openTools() async {
     final tool = await showEditorToolsSheet(
       context,
-      available: <EditorTool>{if (_hasListToCount) EditorTool.countList},
+      available: <EditorTool>{
+        if (_hasListToCount) EditorTool.countList,
+        if (_hasListAtCaret) EditorTool.mindMap,
+      },
     );
     if (!mounted || tool == null) return;
     switch (tool) {
       case EditorTool.countList:
         await _countList();
+      case EditorTool.mindMap:
+        convertListToMindMap();
     }
+  }
+
+  /// Whether the caret stands in a list, so the mind-map tool can run.
+  bool get _hasListAtCaret {
+    final lines = _editText.split('\n');
+    final line = _editCaretLine;
+    if (line < 0 || line >= lines.length) return false;
+    return listItemHead(lines[line]) != null;
   }
 
   /// Whether the note has a list the count could run on.

@@ -2886,4 +2886,10 @@ final class LatvianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Pārvērst sarakstu prāta kartē';
+  @override
+  String get toolMindMapSubtitle =>
+      'Aizstāj sarakstu pie kursora ar prāta karti';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursors nav sarakstā';
 }

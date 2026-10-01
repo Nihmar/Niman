@@ -2942,4 +2942,9 @@ final class PolishStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Przekształć listę w mapę myśli';
+  @override
+  String get toolMindMapSubtitle => 'Zastępuje listę pod kursorem mapą myśli';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursor nie znajduje się na liście';
 }

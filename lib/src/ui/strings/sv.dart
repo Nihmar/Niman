@@ -2897,4 +2897,10 @@ final class SwedishStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Omvandla lista till tankekarta';
+  @override
+  String get toolMindMapSubtitle =>
+      'Ersätter listan vid markören med en tankekarta';
+
+  @override
+  String get toolMindMapNeedsList => 'Markören står inte i en lista';
 }

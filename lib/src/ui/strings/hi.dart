@@ -2844,4 +2844,9 @@ final class HindiStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'सूची को माइंड मैप में बदलें';
+  @override
+  String get toolMindMapSubtitle => 'कर्सर पर सूची को माइंड मैप से बदलता है';
+
+  @override
+  String get toolMindMapNeedsList => 'कर्सर किसी सूची में नहीं है';
 }

@@ -2845,4 +2845,9 @@ final class EstonianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Teisenda loend mõttemapiks';
+  @override
+  String get toolMindMapSubtitle => 'Asendab kursoril oleva loendi mõttemapiga';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursor ei ole loendis';
 }

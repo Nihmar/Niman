@@ -2938,4 +2938,10 @@ final class CatalanStrings extends Strings {
   @override
   String get commandConvertListToMindMap =>
       'Converteix la llista en mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Reemplaça la llista del cursor per un mapa mental';
+
+  @override
+  String get toolMindMapNeedsList => 'El cursor no és en una llista';
 }

@@ -2906,4 +2906,10 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Converter lista em mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Substitui a lista no cursor por um mapa mental';
+
+  @override
+  String get toolMindMapNeedsList => 'O cursor não está numa lista';
 }

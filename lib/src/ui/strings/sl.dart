@@ -2912,4 +2912,10 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Pretvori seznam v miselni vzorec';
+  @override
+  String get toolMindMapSubtitle =>
+      'Zamenja seznam pri kazalki z miselnim vzorcem';
+
+  @override
+  String get toolMindMapNeedsList => 'Kazalka ni na seznamu';
 }

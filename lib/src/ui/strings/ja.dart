@@ -2626,4 +2626,9 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'リストをマインドマップに変換';
+  @override
+  String get toolMindMapSubtitle => 'カーソル位置のリストをマインドマップに置き換えます';
+
+  @override
+  String get toolMindMapNeedsList => 'カーソルがリストの中にありません';
 }

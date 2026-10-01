@@ -2911,4 +2911,10 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Shndërro listën në hartë mendore';
+  @override
+  String get toolMindMapSubtitle =>
+      'Zëvendëson listën te kursori me një hartë mendore';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursori nuk është në një listë';
 }

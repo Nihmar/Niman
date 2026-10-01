@@ -2851,4 +2851,10 @@ final class TurkishStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Listeyi zihin haritasına dönüştür';
+  @override
+  String get toolMindMapSubtitle =>
+      'İmleçteki listeyi zihin haritasıyla değiştirir';
+
+  @override
+  String get toolMindMapNeedsList => 'İmleç bir listede değil';
 }

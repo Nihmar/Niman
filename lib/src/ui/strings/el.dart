@@ -2984,4 +2984,10 @@ final class GreekStrings extends Strings {
 
   @override
   String get commandConvertListToMindMap => 'Μετατροπή λίστας σε νοητικό χάρτη';
+  @override
+  String get toolMindMapSubtitle =>
+      'Αντικαθιστά τη λίστα στον δείκτη με νοητικό χάρτη';
+
+  @override
+  String get toolMindMapNeedsList => 'Ο δείκτης δεν βρίσκεται σε λίστα';
 }
