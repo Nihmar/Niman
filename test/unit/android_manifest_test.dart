@@ -28,7 +28,12 @@ void main() {
     expect(file.existsSync(), isTrue, reason: 'run from the package root');
     final manifest = XmlDocument.parse(file.readAsStringSync());
 
-    const permission = 'dev.niman.niman.permission.WIDGET_TAP';
+    // Named after the application ID, so the official app keeps
+    // `dev.niman.niman.permission.WIDGET_TAP` and the beta gets a name of its
+    // own: two packages signed with different keys cannot define the same
+    // permission, and a fixed name kept the beta from installing next to the
+    // official app.
+    const permission = r'${applicationId}.permission.WIDGET_TAP';
     final declared = manifest.rootElement
         .findElements('permission')
         .where((e) => e.getAttribute('android:name') == permission)

@@ -44,7 +44,10 @@ the code's own text, and completing it there would write a note name and a
 panel waits for them — the next keystroke in the link opens it.
 
 `↑`/`↓` move, `⏎` or `Tab` complete the link, `Esc` closes the panel and
-leaves the text as it was. Typed into a link already closed, the choice
+leaves the text as it was; a tap or a click on a row completes the link with
+that row. The panel's footer names those keys only where there is a keyboard
+to press them: on a phone or a tablet it shows once a physical keyboard has
+been used, and the rows are taller there, to be tapped. Typed into a link already closed, the choice
 replaces the whole name (or heading) up to its `#`, `|` or `]]`; what
 follows is kept. The panel writes nothing but the link that was
 chosen: no note is created from it, and a name that matches nothing is
