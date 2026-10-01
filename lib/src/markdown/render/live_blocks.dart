@@ -62,19 +62,31 @@ Widget liveFormulaUnder(
 /// [line] — the fence's first line, its source hidden — with the diagram
 /// drawn under it, as the read view draws it.
 ///
-/// A tap on the diagram lands on the line, which puts the caret in the block
-/// and shows its source again.
+/// A tap on the diagram calls [onTapSource] with a line of the diagram's
+/// own source (1-based) — its first, or the one a parse error names — for
+/// the caret to go to, which shows the source again. [onPointerDown] hears
+/// a pointer going down on it before the note does.
 Widget liveDiagramUnder(
   Widget line, {
   required DiagramCache cache,
   required String source,
   required MarkdownTheme theme,
+  required void Function(PointerDownEvent event) onPointerDown,
+  required void Function(int line) onTapSource,
 }) => Column(
   crossAxisAlignment: CrossAxisAlignment.stretch,
   children: <Widget>[
     line,
     Center(
-      child: BlockDiagramView(source: source, theme: theme, cache: cache),
+      child: Listener(
+        onPointerDown: onPointerDown,
+        child: BlockDiagramView(
+          source: source,
+          theme: theme,
+          cache: cache,
+          onTapSource: onTapSource,
+        ),
+      ),
     ),
   ],
 );

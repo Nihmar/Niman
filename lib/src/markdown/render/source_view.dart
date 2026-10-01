@@ -388,9 +388,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   final Map<int, int?> _sectionEnds = <int, int?>{};
   int _sectionEndsRevision = -1;
 
-  /// A press on a fold arrow, so the pointer going down under it places no
-  /// caret.
-  bool _foldPress = false;
+  /// A press on a control `live` draws over the note — a fold arrow, a
+  /// diagram and its buttons — so the pointer going down under it places no
+  /// caret: the control answers the tap itself.
+  bool _controlPress = false;
 
   /// The keyboard, wired to the buffer this view draws.
   late SourceInput _input;
@@ -2075,8 +2076,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (event.kind != PointerDeviceKind.mouse) return;
       _hideTouch();
       _requestKeyboard();
-      if (_foldPress) {
-        _foldPress = false;
+      if (_controlPress) {
+        _controlPress = false;
         return;
       }
       if (event.buttons == kSecondaryMouseButton) {
@@ -2180,6 +2181,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Takes the focus, or — when the surface has it — opens the connection
   /// again if the platform closed it, and asks for the keyboard either way.
+  /// A pointer went down on a diagram `live` draws (#530). A mouse's
+  /// primary button would place the caret under it as it goes down — in the
+  /// block, revealing its source and taking the diagram, and the button the
+  /// pointer is on, away before it is let go; the diagram answers the click
+  /// instead.
+  void _diagramDown(PointerDownEvent event) {
+    if (event.kind != PointerDeviceKind.mouse) return;
+    if (event.buttons != kPrimaryMouseButton) return;
+    _controlPress = true;
+  }
+
+  /// A tap on a diagram `live` draws, or on its parse error: the caret on
+  /// note line [line] — the block's first, or the one the error names — and
+  /// the block's source shown again (#530).
+  void _openDiagramLine(int line) {
+    if (line < 0 || line >= widget.buffer.lineCount) return;
+    _requestKeyboard();
+    placeCaret(widget.buffer.offsetOfLine(line));
+  }
+
   void _requestKeyboard() {
     if (!_focus.hasFocus) {
       // The focus change attaches (see `onFocusChange`).
@@ -3369,7 +3390,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 key: ValueKey<int>(index),
                                 fold: _foldMarkOf(index),
                                 onFold: () => toggleFold(index),
-                                onFoldDown: () => _foldPress = true,
+                                onFoldDown: () => _controlPress = true,
+                                onDiagramDown: _diagramDown,
+                                onDiagramLine: _openDiagramLine,
                                 paragraphKey: _keyFor(index),
                                 styled: styled,
                                 shape: widget.hideMarkers
@@ -4987,6 +5010,8 @@ final class _Line extends StatelessWidget {
     required this.fold,
     required this.onFold,
     required this.onFoldDown,
+    required this.onDiagramDown,
+    required this.onDiagramLine,
     required this.index,
     required this.spot,
     required this.caret,
@@ -5089,6 +5114,13 @@ final class _Line extends StatelessWidget {
 
   /// A pointer went down on the arrow (before the note hears it).
   final VoidCallback onFoldDown;
+
+  /// A pointer went down on the line's diagram (before the note hears it).
+  final void Function(PointerDownEvent event) onDiagramDown;
+
+  /// The line's diagram, or its parse error, was tapped: the note line to
+  /// put the caret on.
+  final void Function(int line) onDiagramLine;
 
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
@@ -5347,6 +5379,8 @@ final class _Line extends StatelessWidget {
         cache: diagramCache ?? sharedDiagramCache,
         source: drawing.source,
         theme: theme,
+        onPointerDown: onDiagramDown,
+        onTapSource: (inner) => onDiagramLine(drawing.start + inner),
       );
     }
     final resolver = embedResolver;
