@@ -58,6 +58,80 @@ void main() {
     expect(_moved(text, text.length, CaretMotion.wordLeft), 28);
   });
 
+  test('at the head of a line, Ctrl+Left is the line above, its end', () {
+    // A caret at the head of a line — past the indentation, the quote marks and
+    // a list item's marker and box — is where `Ctrl+←` leaves the line for the
+    // one above, rather than skipping back over the marker, the spaces and the
+    // line above's closing punctuation into its last word (#528).
+    const above = 'lo deve sapere il chiamante (davvero)';
+    const end = above.length;
+    const head = end + 1;
+    const text = '$above\n  - [ ] La funzionalita';
+    final body = text.indexOf('La funzionalita');
+    for (final at in <int>[
+      head, // the line's own start
+      head + 2, // among the leading spaces
+      head + 5, // inside the marker, past the `[`
+      body, // the head of the text, after the marker and its box
+    ]) {
+      expect(
+        _moved(text, at, CaretMotion.wordLeft),
+        end,
+        reason: 'from $at, the head of the line',
+      );
+    }
+    // Mid-word it is still the word motion, and it never reaches the line
+    // above.
+    final inside = text.indexOf('funzionalita') + 4;
+    expect(
+      _moved(text, inside, CaretMotion.wordLeft),
+      text.indexOf('funzionalita'),
+    );
+  });
+
+  test('the head of a line is its head whatever its shape', () {
+    // A plain line, an indented one, an ordered item, a checked task and a
+    // quoted one: a line's text starts past all of it, and `Ctrl+←` there
+    // answers the line above.
+    const above = 'riga precedente';
+    const end = above.length;
+    for (final line in <String>[
+      'seconda',
+      '    seconda',
+      '1. seconda',
+      '10) seconda',
+      '- [x] seconda',
+      '> seconda',
+      '> > seconda',
+    ]) {
+      final text = '$above\n$line';
+      expect(
+        _moved(text, text.length - 'seconda'.length, CaretMotion.wordLeft),
+        end,
+        reason: 'the head of `$line`',
+      );
+    }
+    // The first line has nothing above it: the motion is the wall at 0.
+    expect(_moved('solo', 0, CaretMotion.wordLeft), 0);
+    // A blank line answers the end of the line above, and so on down.
+    const blank = 'prima\n\nseconda';
+    expect(_moved(blank, blank.indexOf('seconda'), CaretMotion.wordLeft), 6);
+    expect(_moved(blank, 6, CaretMotion.wordLeft), 5);
+  });
+
+  test('shift extends the line motion the same way', () {
+    const text = 'il chiamante\n- [ ] La';
+    final buffer = SourceBuffer.fromText(text);
+    final selected = moveCaret(
+      const SelectionModel.at(19),
+      CaretMotion.wordLeft,
+      buffer: buffer,
+      extend: true,
+    );
+    expect(selected.anchor, 19);
+    expect(selected.extent, 'il chiamante'.length);
+  });
+
   test('the line motions respect the note, not the screen', () {
     const text = 'prima riga\n    indentata\nultima';
     expect(_moved(text, 5, CaretMotion.lineEnd), 10);

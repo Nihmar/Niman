@@ -15,6 +15,7 @@
 // `characters` comes with Flutter (`package:flutter/widgets.dart` re-exports
 // it), so a grapheme cluster is available without a dependency of our own.
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -217,10 +218,24 @@ int _characterRight(SourceBuffer buffer, int at) {
   return at + _firstUnit(buffer, at).length;
 }
 
-/// The start of the word before [at]: back over punctuation and space, then
-/// over
-/// the word itself.
+/// The start of the word before [at], or the end of the line above when [at]
+/// stands at the head of its own.
+///
+/// At the head of a line — only the syntax before its text, which
+/// [lineBodyStart] measures, before the caret — `Ctrl+←` is the line's motion,
+/// not the note's: it goes to the end of the line above, the way it does at the
+/// head of any line. Skipping a marker, the spaces and the previous line's
+/// closing punctuation to land *inside* its last word is what a writer does not
+/// expect (#528).
+///
+/// Mid-line it is the word motion, unchanged: back over punctuation and
+/// space, then over the word itself.
 int _wordLeft(SourceBuffer buffer, int at) {
+  final line = buffer.lineOf(at);
+  if (line > 0 && at <= lineBodyStart(buffer, line)) {
+    final above = line - 1;
+    return buffer.offsetOfLine(above) + buffer.lineLengthAt(above);
+  }
   var index = at;
   while (index > 0 && !_wordChar(_lastUnit(buffer, index))) {
     index -= _unitLengthBefore(buffer, index);
