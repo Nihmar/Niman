@@ -454,6 +454,39 @@ one another; one written with a single space round each cell stays that
 way. A column's alignment (`:--`, `:-:`, `--:`) is drawn in both the read
 view and live mode.
 
+### Diagrams (Mermaid)
+
+A fenced block whose language is `mermaid` is drawn as a diagram, in the
+read view and in live mode alike:
+
+    ```mermaid
+    flowchart TD
+      A[Start] --> B{Ok?}
+      B -->|Yes| C[End]
+    ```
+
+Flowcharts — all four directions, the node shapes, subgraphs and edge
+labels — and mind maps are drawn. While the caret is in the fence, live
+mode shows the source again; the read view opens it on a tap. A syntax
+error leaves the block as source, the offending line underlined and the
+message under it ("Line 4: expected \"-->\" after \"--\""), so the
+diagram is one edit away.
+
+The icon at the top right of a diagram opens it alone, to pinch and drag.
+An export carries the diagram as SVG: the HTML, the PDF and the EPUB show
+it, and outside Niman the block stays standard Mermaid.
+
+The engine is Niman's own, written in Dart and drawn on every platform;
+there is no browser and no script inside the app.
+
+### Mind map
+
+**Convert list to mind map** replaces the list at the cursor with a
+`mindmap` fence as one undo step, so Ctrl+Z brings the list back. It is
+in the command palette, and in the editor's Tools sheet on a phone. One
+outermost item becomes the root; several get a root to hang from. The
+**Tools** section below lists the sheet.
+
 ## Tools
 
 The toolbar's **Tools** button opens the editor's extra tools. They are
@@ -516,8 +549,8 @@ reading it, too: flipping to the preview, back to
 the editor, or between source and live keeps the line at the top of the
 pane at its top, however differently the two draw what is above it.
 
-The rendered note shows Markdown, math, and fenced code coloured by the
-language its fence names.
+The rendered note shows Markdown, math, diagrams, and fenced code
+coloured by the language its fence names.
 
 Extras: word count, heading outline, heading folding.
 
