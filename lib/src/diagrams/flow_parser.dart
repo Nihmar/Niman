@@ -116,13 +116,14 @@ final class _FlowParser {
           final word = _firstWord(line);
           if (word == 'flowchart' || word == 'graph') {
             final rest = line.substring(word.length).trim();
-            final parsed = FlowDirection.parse(_firstWord(rest));
+            // No direction is top-down, as Mermaid draws it.
+            final parsed = rest.isEmpty
+                ? FlowDirection.topDown
+                : FlowDirection.parse(_firstWord(rest));
             if (parsed == null) {
               throw MermaidParseException(
                 index + 1,
-                rest.isEmpty
-                    ? 'expected a direction (TD, TB, BT, LR or RL)'
-                    : 'unknown direction "$rest"',
+                'unknown direction "$rest" (TD, TB, BT, LR or RL)',
               );
             }
             direction = parsed;

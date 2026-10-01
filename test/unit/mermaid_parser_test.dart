@@ -17,13 +17,18 @@ void main() {
     expect(_chart('graph BT\nA --> B').direction, FlowDirection.bottomUp);
   });
 
-  test('a missing direction is an error on line 1', () {
+  test('a missing direction is top-down, as in Mermaid', () {
+    expect(_chart('flowchart\nA --> B').direction, FlowDirection.topDown);
+    expect(_chart('graph;A --> B').direction, FlowDirection.topDown);
+  });
+
+  test('an unknown direction is an error on line 1', () {
     expect(
-      () => parseMermaid('flowchart\nA --> B'),
+      () => parseMermaid('flowchart XY\nA --> B'),
       throwsA(
         isA<MermaidParseException>()
             .having((e) => e.line, 'line', 1)
-            .having((e) => e.message, 'message', contains('a direction')),
+            .having((e) => e.message, 'message', contains('"XY"')),
       ),
     );
   });
