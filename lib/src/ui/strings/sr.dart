@@ -2905,4 +2905,9 @@ final class SerbianStrings extends Strings {
       '„$filter" треба број за своју ширину, а „$argument" то није';
   @override
   String templateProblemUnknownFilter(String name) => 'непознат филтер „$name"';
+  @override
+  String get diagramTitle => 'Дијаграм';
+
+  @override
+  String get diagramFullScreen => 'Цео екран';
 }

@@ -2898,4 +2898,9 @@ final class AlbanianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtër i panjohur „$name"';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Ekran i plotë';
 }

@@ -2907,4 +2907,9 @@ final class BosnianStrings extends Strings {
       '"$filter" treba broj za svoju širinu, a "$argument" to nije';
   @override
   String templateProblemUnknownFilter(String name) => 'nepoznat filter "$name"';
+  @override
+  String get diagramTitle => 'Dijagram';
+
+  @override
+  String get diagramFullScreen => 'Cijeli ekran';
 }

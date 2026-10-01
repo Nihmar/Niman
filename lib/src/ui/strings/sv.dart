@@ -2884,4 +2884,9 @@ final class SwedishStrings extends Strings {
       '“$filter” behöver ett tal för sin bredd, och “$argument” är inget';
   @override
   String templateProblemUnknownFilter(String name) => 'okänt filter “$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Helskärm';
 }

@@ -2883,4 +2883,9 @@ final class HungarianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'ismeretlen szűrő „$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Teljes képernyő';
 }

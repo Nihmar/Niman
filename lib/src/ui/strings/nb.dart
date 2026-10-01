@@ -2860,4 +2860,9 @@ final class NorwegianStrings extends Strings {
       '“$filter” trenger et tall for bredden, og “$argument” er ikke ett';
   @override
   String templateProblemUnknownFilter(String name) => 'ukjent filter “$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Fullskjerm';
 }

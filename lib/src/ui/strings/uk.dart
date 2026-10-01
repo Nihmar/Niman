@@ -2920,4 +2920,9 @@ final class UkrainianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'невідомий фільтр „$name”';
+  @override
+  String get diagramTitle => 'Діаграма';
+
+  @override
+  String get diagramFullScreen => 'Повний екран';
 }

@@ -2963,4 +2963,9 @@ final class FrenchStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtre inconnu « $name »';
+  @override
+  String get diagramTitle => 'Diagramme';
+
+  @override
+  String get diagramFullScreen => 'Plein écran';
 }

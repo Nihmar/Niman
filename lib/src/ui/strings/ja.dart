@@ -2613,4 +2613,9 @@ final class JapaneseStrings extends Strings {
       '「$filter」 の幅には数が必要ですが、「$argument」 は数ではありません';
   @override
   String templateProblemUnknownFilter(String name) => '不明なフィルター 「$name」';
+  @override
+  String get diagramTitle => '図';
+
+  @override
+  String get diagramFullScreen => '全画面';
 }

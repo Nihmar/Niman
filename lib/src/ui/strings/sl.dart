@@ -2899,4 +2899,9 @@ final class SlovenianStrings extends Strings {
       '„$filter” potrebuje število za svojo širino, in „$argument” to ni';
   @override
   String templateProblemUnknownFilter(String name) => 'neznan filter „$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Celoten zaslon';
 }

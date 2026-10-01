@@ -2872,4 +2872,9 @@ final class IcelandicStrings extends Strings {
       '„$filter" þarf tölu fyrir breiddina, og „$argument" er engin tala';
   @override
   String templateProblemUnknownFilter(String name) => 'óþekkt sía „$name"';
+  @override
+  String get diagramTitle => 'Skýringarmynd';
+
+  @override
+  String get diagramFullScreen => 'Skjár í fullri stærð';
 }

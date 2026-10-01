@@ -37,6 +37,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
+import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/links/parser.dart' show wikiDisplayText;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -45,6 +46,7 @@ import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/render/callout_box.dart';
+import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/live_table_grid.dart';
@@ -65,12 +67,14 @@ final class BlockView extends StatelessWidget {
     required this.parsed,
     required this.theme,
     required this.mathCache,
+    this.diagramCache,
     this.availableWidth,
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
     this.embedImages,
     this.onToggleTask,
+    this.onTapDiagramSource,
     this.scope,
     this.quoteNesting = 0,
     super.key,
@@ -102,6 +106,14 @@ final class BlockView extends StatelessWidget {
   /// The math render cache, one per surface.
   final MathCache mathCache;
 
+  /// The diagram cache; null uses the shared one, so the read view can draw
+  /// a diagram without every call site threading a cache through.
+  final DiagramCache? diagramCache;
+
+  /// Called with a note line when a diagram — or its parse error — is tapped,
+  /// to show the block's source again (#530).
+  final void Function(int line)? onTapDiagramSource;
+
   /// How wide the pane is, so a display formula wider than it can be broken
   /// across lines instead of cut (#257). Null when the caller does not know —
   /// a test, an intrinsic pass — and the formula is drawn whole.
@@ -132,7 +144,7 @@ final class BlockView extends StatelessWidget {
       ),
       BlockKind.listItem => _listItem(context),
       BlockKind.quote => _quote(context),
-      BlockKind.fencedCode => _code(context, block.fenceInfo),
+      BlockKind.fencedCode => _fenced(context),
       BlockKind.indentedCode => _code(context, null),
       BlockKind.math => _blockMath(context),
       BlockKind.table => _table(context),
@@ -412,6 +424,33 @@ final class BlockView extends StatelessWidget {
   /// fence's row above and below it — the rows `live` draws the fences on,
   /// hidden, inside its box — so the code's rows land on `live`'s.
   ///
+  /// A fenced block: a Mermaid diagram when its language says so, code
+  /// otherwise.
+  Widget _fenced(BuildContext context) {
+    final language = parsed.block.fenceInfo;
+    if (language != null && language.toLowerCase() == 'mermaid') {
+      return _diagram(context);
+    }
+    return _code(context, language);
+  }
+
+  /// A Mermaid fence drawn as a diagram, or as its source when it does not
+  /// parse (#530).
+  Widget _diagram(BuildContext context) {
+    final content = _fenceContent(parsed.text).text;
+    if (content == null || content.trim().isEmpty) {
+      return _code(context, parsed.block.fenceInfo);
+    }
+    final tap = onTapDiagramSource;
+    final line = parsed.block.startLine;
+    return BlockDiagramView(
+      source: content,
+      theme: theme,
+      cache: diagramCache ?? sharedDiagramCache,
+      onTapSource: tap == null ? null : (inner) => tap(line + inner),
+    );
+  }
+
   /// The tokens come from the same `highlight` core the preview's highlighter
   /// uses, one block at a time and only for the blocks a frame draws. The
   /// engine's own line-state lexer (§8.8.2) is the design's replacement when

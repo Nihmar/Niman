@@ -2894,4 +2894,9 @@ final class FinnishStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'tuntematon suodatin “$name”';
+  @override
+  String get diagramTitle => 'Kaavio';
+
+  @override
+  String get diagramFullScreen => 'Koko näyttö';
 }

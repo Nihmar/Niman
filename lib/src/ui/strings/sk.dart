@@ -2887,4 +2887,9 @@ final class SlovakStrings extends Strings {
       '„$filter” potrebuje číslo pre svoju šírku, a „$argument” ním nie je';
   @override
   String templateProblemUnknownFilter(String name) => 'neznámy filter „$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Celá obrazovka';
 }

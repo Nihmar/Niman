@@ -2905,4 +2905,9 @@ final class BasqueStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'iragazki ezezaguna “$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Pantaila osoa';
 }

@@ -487,6 +487,8 @@ final class AppStrings {
   static String get toolCountListTitle => _s.toolCountListTitle;
   static String get toolCountListSubtitle => _s.toolCountListSubtitle;
   static String get toolCountListNeedsList => _s.toolCountListNeedsList;
+  static String get diagramTitle => _s.diagramTitle;
+  static String get diagramFullScreen => _s.diagramFullScreen;
   static String get tallySourceLabel => _s.tallySourceLabel;
   static String get tallyCutLabel => _s.tallyCutLabel;
   static String get tallyCutDash => _s.tallyCutDash;

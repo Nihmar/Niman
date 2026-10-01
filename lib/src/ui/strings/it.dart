@@ -2894,4 +2894,9 @@ final class ItalianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtro sconosciuto “$name”';
+  @override
+  String get diagramTitle => 'Diagramma';
+
+  @override
+  String get diagramFullScreen => 'Schermo intero';
 }

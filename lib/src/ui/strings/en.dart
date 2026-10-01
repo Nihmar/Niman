@@ -2837,4 +2837,9 @@ final class EnglishStrings extends Strings {
       '“$filter” needs a number for its width, and “$argument” is not one';
   @override
   String templateProblemUnknownFilter(String name) => 'unknown filter “$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Full screen';
 }

@@ -2877,4 +2877,9 @@ final class CzechStrings extends Strings {
       '„$filter“ potřebuje číslo pro svou šířku, a „$argument“ číslo není';
   @override
   String templateProblemUnknownFilter(String name) => 'neznámý filtr „$name“';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Celá obrazovka';
 }

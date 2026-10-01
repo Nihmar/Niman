@@ -2831,4 +2831,9 @@ final class HindiStrings extends Strings {
       '«$filter» की चौड़ाई के लिए संख्या चाहिए, और «$argument» संख्या नहीं है';
   @override
   String templateProblemUnknownFilter(String name) => 'अज्ञात फ़िल्टर «$name»';
+  @override
+  String get diagramTitle => 'आरेख';
+
+  @override
+  String get diagramFullScreen => 'पूर्ण स्क्रीन';
 }

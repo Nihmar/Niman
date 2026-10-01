@@ -2895,4 +2895,9 @@ final class GalicianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtro descoñecido “$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Pantalla completa';
 }

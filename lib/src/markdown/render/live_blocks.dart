@@ -11,6 +11,8 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/diagrams/diagram_cache.dart';
+import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
@@ -21,6 +23,10 @@ import 'package:niman/src/preview/math_widget.dart';
 /// A display formula as `live` draws it: its lines, `[start, end)`, and its
 /// TeX.
 typedef LiveFormula = ({int start, int end, String tex});
+
+/// A Mermaid diagram as `live` draws it: its fence's lines, `[start, end)`,
+/// and the source between them (#530).
+typedef LiveDiagram = ({int start, int end, String source});
 
 /// [line] — the formula's first line, its source hidden — with the formula
 /// typeset under it, centred as the read view centres it.
@@ -49,6 +55,26 @@ Widget liveFormulaUnder(
           style: mathStyleFor(theme.body),
         ),
       ),
+    ),
+  ],
+);
+
+/// [line] — the fence's first line, its source hidden — with the diagram
+/// drawn under it, as the read view draws it.
+///
+/// A tap on the diagram lands on the line, which puts the caret in the block
+/// and shows its source again.
+Widget liveDiagramUnder(
+  Widget line, {
+  required DiagramCache cache,
+  required String source,
+  required MarkdownTheme theme,
+}) => Column(
+  crossAxisAlignment: CrossAxisAlignment.stretch,
+  children: <Widget>[
+    line,
+    Center(
+      child: BlockDiagramView(source: source, theme: theme, cache: cache),
     ),
   ],
 );

@@ -2971,4 +2971,9 @@ final class GreekStrings extends Strings {
       'αριθμός';
   @override
   String templateProblemUnknownFilter(String name) => 'άγνωστο φίλτρο «$name»';
+  @override
+  String get diagramTitle => 'Διάγραμμα';
+
+  @override
+  String get diagramFullScreen => 'Πλήρης οθόνη';
 }

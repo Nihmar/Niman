@@ -38,6 +38,7 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/theme_tokens.dart';
+import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlight_style.dart';
@@ -144,6 +145,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.onOpenLink,
     this.activeItems,
     this.mathCache,
+    this.diagramCache,
     this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
@@ -262,6 +264,10 @@ final class MarkdownSourceView extends StatefulWidget {
   /// The typeset formulas, for `live` mode's display maths; without it a
   /// formula stays its source.
   final MathCache? mathCache;
+
+  /// The resolved diagrams, for `live` mode's Mermaid blocks; without it the
+  /// shared cache is used (#530).
+  final DiagramCache? diagramCache;
 
   /// Where an embed's target is on disk, for `live` mode's pictures; without
   /// it a picture stays its source.
@@ -2785,6 +2791,36 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return (start: block.startLine, end: block.endLine, tex: tex);
   }
 
+  /// The Mermaid block line [index] is part of, for `live` mode to draw in
+  /// its lines' place: its fence's lines and the source between them. Null
+  /// for any other line, and for a `mermaid` fence with no body.
+  LiveDiagram? _diagramOf(int index) {
+    final block = _styler?.blockOf(index);
+    if (block == null || block.kind != BlockKind.fencedCode) return null;
+    final info = block.fenceInfo;
+    if (info == null || info.toLowerCase() != 'mermaid') return null;
+    final source = _diagramSource(block);
+    if (source == null) return null;
+    return (start: block.startLine, end: block.endLine, source: source);
+  }
+
+  /// The code between a fence's opening and closing lines, or null when
+  /// there is none.
+  String? _diagramSource(Block block) {
+    final lines = BlockParser.blockText(block, widget.buffer).split('\n');
+    if (lines.isEmpty) return null;
+    final first = lines.first.trimLeft();
+    final opens = first.startsWith('```') || first.startsWith('~~~');
+    final start = opens ? 1 : 0;
+    var end = lines.length;
+    if (end > start) {
+      final last = lines.last.trim();
+      if (last.startsWith('```') || last.startsWith('~~~')) end -= 1;
+    }
+    final body = lines.sublist(start, end).join('\n');
+    return body.trim().isEmpty ? null : body;
+  }
+
   /// Moves the colours along [edit], already made to the buffer.
   void _styleEdited(SourceEdit edit) {
     _styler?.edited(edit);
@@ -3358,6 +3394,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                     ? _formulaOf(index)
                                     : null,
                                 mathCache: widget.mathCache,
+                                diagram: widget.hideMarkers
+                                    ? _diagramOf(index)
+                                    : null,
+                                diagramCache: widget.diagramCache,
                                 tableRow:
                                     widget.hideMarkers &&
                                         block?.kind == BlockKind.table
@@ -4921,6 +4961,8 @@ final class _Line extends StatelessWidget {
     required this.embedResolver,
     required this.formula,
     required this.mathCache,
+    required this.diagram,
+    required this.diagramCache,
     required this.codeRuns,
     required this.definition,
     required this.tableRow,
@@ -4968,6 +5010,11 @@ final class _Line extends StatelessWidget {
   /// its lines while the caret is out of it.
   final LiveFormula? formula;
   final MathCache? mathCache;
+
+  /// The Mermaid block the line belongs to, which `live` draws in place of
+  /// its lines while the caret is out of it (#530).
+  final LiveDiagram? diagram;
+  final DiagramCache? diagramCache;
 
   /// The colours of the line's code, as the read view colours its block;
   /// null for a line that is not code the read view colours.
@@ -5131,6 +5178,12 @@ final class _Line extends StatelessWidget {
         index != math.start) {
       return true;
     }
+    final drawing = diagram;
+    if (drawing != null &&
+        (at.line < drawing.start || at.line >= drawing.end) &&
+        index != drawing.start) {
+      return true;
+    }
     final defined = definition;
     if (defined != null && (at.line < defined.$1 || at.line >= defined.$2)) {
       return true;
@@ -5147,6 +5200,9 @@ final class _Line extends StatelessWidget {
         math != null &&
         mathCache != null &&
         (at.line < math.start || at.line >= math.end);
+    final drawing = diagram;
+    final drawn =
+        drawing != null && (at.line < drawing.start || at.line >= drawing.end);
     final defined = definition;
     final table = tableRow?.call(at);
     // A table's row stays on the grid under the caret, as the read view
@@ -5156,7 +5212,7 @@ final class _Line extends StatelessWidget {
     final folded =
         (defined != null && (at.line < defined.$1 || at.line >= defined.$2)) ||
         (table != null && table.delimiter);
-    final inline = typeset || folded
+    final inline = typeset || drawn || folded
         ? const <InlineFormula>[]
         : _inlineFormulas(run: mine ? (at.runStart, at.runEnd) : null);
     // A callout's mark (#279), where the caret is not: as wide as the icon
@@ -5167,7 +5223,7 @@ final class _Line extends StatelessWidget {
         ? callout
         : null;
     final concealed = <_Concealed>[
-      if (typeset || folded)
+      if (typeset || drawn || folded)
         (0, styled.text.length, _hiddenMarker, whole: false),
       if (hideMarkers && !mine)
         for (final picture in pictures)
@@ -5228,7 +5284,7 @@ final class _Line extends StatelessWidget {
       // its first one instead. Nor do definitions out of the caret's reach:
       // the read view does not draw them there, and ends the note with the
       // footnotes, as `live` does.
-      style: typeset || folded
+      style: typeset || drawn || folded
           ? _lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
           : _lineStyle(revealed: revealed),
       // A table row is at least a line of its text tall. A row of empty
@@ -5282,6 +5338,15 @@ final class _Line extends StatelessWidget {
         tex: math.tex,
         theme: theme,
         maxWidth: width,
+      );
+    }
+    if (drawn) {
+      if (index != drawing.start) return line;
+      return liveDiagramUnder(
+        line,
+        cache: diagramCache ?? sharedDiagramCache,
+        source: drawing.source,
+        theme: theme,
       );
     }
     final resolver = embedResolver;

@@ -2893,4 +2893,9 @@ final class PortugueseStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtro desconhecido “$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Tela cheia';
 }

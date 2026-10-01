@@ -2887,4 +2887,9 @@ final class BulgarianStrings extends Strings {
       '„$filter” иска число за ширината си, а „$argument” не е число';
   @override
   String templateProblemUnknownFilter(String name) => 'непознат филтър „$name”';
+  @override
+  String get diagramTitle => 'Диаграма';
+
+  @override
+  String get diagramFullScreen => 'Цял екран';
 }

@@ -2916,4 +2916,9 @@ final class LithuanianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'nežinomas filtras „$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Visas ekranas';
 }

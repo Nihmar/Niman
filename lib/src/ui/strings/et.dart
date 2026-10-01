@@ -2832,4 +2832,9 @@ final class EstonianStrings extends Strings {
       '„$filter” vajab laiuse jaoks arvu ja „$argument” pole see';
   @override
   String templateProblemUnknownFilter(String name) => 'tundmatu filter „$name”';
+  @override
+  String get diagramTitle => 'Diagramm';
+
+  @override
+  String get diagramFullScreen => 'Täisekraan';
 }

@@ -2912,4 +2912,9 @@ final class DutchStrings extends Strings {
       'geen';
   @override
   String templateProblemUnknownFilter(String name) => 'onbekend filter “$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Volledig scherm';
 }

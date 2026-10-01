@@ -2529,4 +2529,9 @@ final class ChineseStrings extends Strings {
       '「$filter」 的宽度需要一个数字，而 「$argument」 不是数字';
   @override
   String templateProblemUnknownFilter(String name) => '未知过滤器「$name」';
+  @override
+  String get diagramTitle => '图表';
+
+  @override
+  String get diagramFullScreen => '全屏';
 }

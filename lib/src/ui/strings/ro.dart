@@ -2925,4 +2925,9 @@ final class RomanianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtru necunoscut “$name”';
+  @override
+  String get diagramTitle => 'Diagramă';
+
+  @override
+  String get diagramFullScreen => 'Ecran complet';
 }

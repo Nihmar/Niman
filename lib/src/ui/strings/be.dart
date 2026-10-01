@@ -2917,4 +2917,9 @@ final class BelarusianStrings extends Strings {
       '„$filter” патрабуе лік для сваёй шырыні, а „$argument” ім не з’яўляецца';
   @override
   String templateProblemUnknownFilter(String name) => 'невядомы фільтр „$name”';
+  @override
+  String get diagramTitle => 'Дыяграма';
+
+  @override
+  String get diagramFullScreen => 'Поўны экран';
 }

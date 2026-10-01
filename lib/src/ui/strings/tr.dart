@@ -2838,4 +2838,9 @@ final class TurkishStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'bilinmeyen filtre “$name”';
+  @override
+  String get diagramTitle => 'Diyagram';
+
+  @override
+  String get diagramFullScreen => 'Tam ekran';
 }

@@ -2861,4 +2861,9 @@ final class DanishStrings extends Strings {
       '“$filter” skal have et tal til bredden, og “$argument” er ikke et';
   @override
   String templateProblemUnknownFilter(String name) => 'ukendt filter “$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Fuld skærm';
 }

@@ -2873,4 +2873,9 @@ final class LatvianStrings extends Strings {
       '„$filter” platuma dēļ vajag skaitli, un „$argument” nav skaitlis';
   @override
   String templateProblemUnknownFilter(String name) => 'nezināms filtrs „$name”';
+  @override
+  String get diagramTitle => 'Diagramma';
+
+  @override
+  String get diagramFullScreen => 'Pilnekrāns';
 }

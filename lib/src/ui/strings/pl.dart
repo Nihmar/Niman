@@ -2929,4 +2929,9 @@ final class PolishStrings extends Strings {
       '„$filter” potrzebuje liczby jako szerokości, a „$argument” nią nie jest';
   @override
   String templateProblemUnknownFilter(String name) => 'nieznany filtr „$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Pełny ekran';
 }

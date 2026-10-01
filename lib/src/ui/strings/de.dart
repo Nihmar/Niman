@@ -2944,4 +2944,9 @@ final class GermanStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'unbekannter Filter „$name“';
+  @override
+  String get diagramTitle => 'Diagramm';
+
+  @override
+  String get diagramFullScreen => 'Vollbild';
 }

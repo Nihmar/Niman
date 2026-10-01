@@ -2902,4 +2902,9 @@ final class MacedonianStrings extends Strings {
       '„$filter" бара број за својата ширина, а „$argument" не е број';
   @override
   String templateProblemUnknownFilter(String name) => 'непознат филтер „$name"';
+  @override
+  String get diagramTitle => 'Дијаграм';
+
+  @override
+  String get diagramFullScreen => 'Целосен екран';
 }

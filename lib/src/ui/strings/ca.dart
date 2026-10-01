@@ -2924,4 +2924,9 @@ final class CatalanStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtre desconegut “$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Pantalla completa';
 }
