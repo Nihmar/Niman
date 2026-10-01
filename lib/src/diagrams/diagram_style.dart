@@ -139,6 +139,7 @@ final class DiagramStyle {
   String get cacheKey => [
     fontSize,
     lineHeight,
+    fontFamily,
     nodePadding,
     rankGap,
     nodeGap,
