@@ -184,4 +184,31 @@ void main() {
     expect(page, contains('<title>A &lt;b&gt;</title>'));
     expect(page, isNot(contains('@font-face')));
   });
+
+  test('a mermaid fence is an inline SVG diagram (#530)', () {
+    final note = NoteHtml(
+      const NoteHtmlSource(
+        text: 'Before\n\n```mermaid\nflowchart TD\nA[Start] --> B\n```\n',
+        title: 't',
+      ),
+    );
+    final html = note.body();
+    expect(html, contains('<div class="diagram"><svg '));
+    expect(html, contains('Start'));
+    expect(html, isNot(contains('language-mermaid')));
+    expect(note.usesSvg, isTrue);
+  });
+
+  test('a mermaid fence that does not parse stays code (#530)', () {
+    final note = NoteHtml(
+      const NoteHtmlSource(
+        text: '```mermaid\nflowchart TD\nA -- B\n```\n',
+        title: 't',
+      ),
+    );
+    final html = note.body();
+    expect(html, contains('<pre class="code">'));
+    expect(html, isNot(contains('<svg')));
+    expect(note.usesSvg, isFalse);
+  });
 }

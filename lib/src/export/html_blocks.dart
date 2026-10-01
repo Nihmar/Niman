@@ -4,6 +4,8 @@
 library;
 
 import 'package:highlight/highlight.dart' show highlight;
+import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/diagram_svg.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/markdown/callout.dart';
@@ -13,12 +15,11 @@ import 'package:niman/src/markdown/render/math_text.dart' show displayTexOf;
 /// A fence's opening line: its indent, its run and its info string.
 final RegExp _opening = RegExp(r'^( {0,3})(`{3,}|~{3,})(.*)$');
 
-/// A fenced code block's [lines], the fences included, as a coloured
-/// `<pre>`: coloured by the language its info string names, as the read
-/// view colours it, and plain when the grammar does not know it.
-String fencedCodeHtml(List<String> lines) {
+/// A fenced block's language and inner code, or null when [lines] is not a
+/// fence.
+({String language, String code})? _fenceParts(List<String> lines) {
   final open = lines.isEmpty ? null : _opening.firstMatch(lines.first);
-  if (open == null) return _pre(lines.join('\n'), 'code');
+  if (open == null) return null;
   final indent = open.group(1)!.length;
   final fence = open.group(2)!;
   final language = open.group(3)!.trim().split(RegExp(r'\s+')).first;
@@ -32,11 +33,37 @@ String fencedCodeHtml(List<String> lines) {
   }
   // The fence's own indent comes off every line of its code, as far as
   // the line has it (CommonMark 4.5).
-  final code = [for (final line in body) _dedent(line, indent)].join('\n');
-  final coloured = _highlighted(code, language);
-  final cls = language.isEmpty ? 'hljs' : 'hljs language-$language';
+  return (
+    language: language,
+    code: [for (final line in body) _dedent(line, indent)].join('\n'),
+  );
+}
+
+/// A fenced code block's [lines], the fences included, as a coloured
+/// `<pre>`: coloured by the language its info string names, as the read
+/// view colours it, and plain when the grammar does not know it.
+String fencedCodeHtml(List<String> lines) {
+  final parts = _fenceParts(lines);
+  if (parts == null) return _pre(lines.join('\n'), 'code');
+  final coloured = _highlighted(parts.code, parts.language);
+  final cls = parts.language.isEmpty
+      ? 'hljs'
+      : 'hljs language-${parts.language}';
   return '<pre class="code"><code class="${escapeAttribute(cls)}">'
-      '${coloured ?? escapeHtml(code)}</code></pre>';
+      '${coloured ?? escapeHtml(parts.code)}</code></pre>';
+}
+
+/// A `mermaid` fence's [lines] as an inline-SVG diagram, or null when it is
+/// not Mermaid or does not parse — for the caller to keep as code (#530).
+String? mermaidBlockHtml(
+  List<String> lines, {
+  DiagramStyle style = const DiagramStyle(),
+}) {
+  final parts = _fenceParts(lines);
+  if (parts == null || parts.language.toLowerCase() != 'mermaid') return null;
+  final svg = diagramSvg(parts.code, style);
+  if (svg == null) return null;
+  return '<div class="diagram">$svg</div>';
 }
 
 /// A math block's [text], `$$` and all, as a centred formula; its source
