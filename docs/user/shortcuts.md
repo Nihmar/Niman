@@ -52,7 +52,9 @@ the two have always shared.
 
 Moving and selecting in the source editor, on Windows and Linux:
 
-- `Ctrl+←` / `Ctrl+→` — jump a word
+- `Ctrl+←` / `Ctrl+→` — jump a word; at the head of a line `Ctrl+←` goes to
+  the end of the line above, and at the end of a line `Ctrl+→` to the head
+  of the line below (past its indentation and any list marker)
 - `Ctrl+Shift+←` / `Ctrl+Shift+→` — select a word
 - `Home` / `End` — start and end of the line, `Shift` to select
 - `Ctrl+Home` / `Ctrl+End` — start and end of the note
