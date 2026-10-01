@@ -1035,6 +1035,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _updateShownTab((m) => m.copyWith(preview: show));
   }
 
+  /// Shows the showing note's editor in place of its read pane, for a tap
+  /// on a diagram there (#530).
+  void _showSource() {
+    if (_notePreview) _updateShownTab((m) => m.copyWith(preview: false));
+  }
+
   /// Whether a note opened right now would show only the preview (the
   /// editor hidden): the IME has no target and must go before the
   /// transition, or its resize lands mid-fade.
@@ -1164,6 +1170,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         sourceFont: _editorSettings.sourceFont,
         toolbarLayout: _editorSettings.toolbarLayout,
         showPreview: _notePreview,
+        onShowSource: _showSource,
         showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
         // A single enabled editor has nowhere to switch to: the note hides
         // its switch instead of offering a dead toggle.
@@ -4171,6 +4178,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           cascadeChecklist: _editorSettings.cascadeChecklist,
           frontmatterPanel: _editorSettings.frontmatterPanel,
           onToggleTypewriter: _toggleTypewriter,
+          onShowSource: _showSourceOf,
           onLoaded: _workspace.noteLoaded,
           onEditedNoteClosed: _tidyClosedNote,
           showLineNumbers: _editorSettings.lineNumbers,
@@ -4254,6 +4262,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         compact: true,
       ),
     ];
+  }
+
+  /// Shows the editor of the tab showing [path] in place of its read pane,
+  /// for a tap on a diagram there (#530); a tab already editing stays.
+  void _showSourceOf(String path) {
+    final tab = _workspace.value.tabs.where((t) => t.path == path).firstOrNull;
+    if (tab == null || !(tab.memento.preview ?? false)) return;
+    _workspace.controller.update(
+      (w) => w.withMemento(tab.path, tab.memento.copyWith(preview: false)),
+    );
   }
 
   /// Flips the preview of the tab showing [path], wherever it is.
