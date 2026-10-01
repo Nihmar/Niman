@@ -10,52 +10,12 @@
 /// never silently mis-drawn.
 library;
 
+import 'package:niman/src/diagrams/flow_edge_scanner.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 
 /// Parses a flowchart body (the fence's content, header included).
 Flowchart parseFlowchart(String source) => _FlowParser(source).parse();
-
-/// What an edge spelling means: its stroke, tail cap and head cap.
-typedef _EdgeMeaning = (FlowEdgeStyle, FlowEdgeEnd, FlowEdgeEnd);
-
-/// The edge spellings that carry no label, longest first.
-const Map<String, _EdgeMeaning> _edgeTokens = {
-  '<-->': (FlowEdgeStyle.solid, FlowEdgeEnd.arrow, FlowEdgeEnd.arrow),
-  'x--x': (FlowEdgeStyle.solid, FlowEdgeEnd.cross, FlowEdgeEnd.cross),
-  'o--o': (FlowEdgeStyle.solid, FlowEdgeEnd.circle, FlowEdgeEnd.circle),
-  'o--x': (FlowEdgeStyle.solid, FlowEdgeEnd.circle, FlowEdgeEnd.cross),
-  'x--o': (FlowEdgeStyle.solid, FlowEdgeEnd.cross, FlowEdgeEnd.circle),
-  '-.->': (FlowEdgeStyle.dotted, FlowEdgeEnd.none, FlowEdgeEnd.arrow),
-  '<--': (FlowEdgeStyle.solid, FlowEdgeEnd.arrow, FlowEdgeEnd.none),
-  'x--': (FlowEdgeStyle.solid, FlowEdgeEnd.cross, FlowEdgeEnd.none),
-  'o--': (FlowEdgeStyle.solid, FlowEdgeEnd.circle, FlowEdgeEnd.none),
-  '-->': (FlowEdgeStyle.solid, FlowEdgeEnd.none, FlowEdgeEnd.arrow),
-  '---': (FlowEdgeStyle.solid, FlowEdgeEnd.none, FlowEdgeEnd.none),
-  '--x': (FlowEdgeStyle.solid, FlowEdgeEnd.none, FlowEdgeEnd.cross),
-  '--o': (FlowEdgeStyle.solid, FlowEdgeEnd.none, FlowEdgeEnd.circle),
-  '-.-': (FlowEdgeStyle.dotted, FlowEdgeEnd.none, FlowEdgeEnd.none),
-  '-.x': (FlowEdgeStyle.dotted, FlowEdgeEnd.none, FlowEdgeEnd.cross),
-  '-.o': (FlowEdgeStyle.dotted, FlowEdgeEnd.none, FlowEdgeEnd.circle),
-  '==>': (FlowEdgeStyle.thick, FlowEdgeEnd.none, FlowEdgeEnd.arrow),
-  '===': (FlowEdgeStyle.thick, FlowEdgeEnd.none, FlowEdgeEnd.none),
-  '==x': (FlowEdgeStyle.thick, FlowEdgeEnd.none, FlowEdgeEnd.cross),
-  '==o': (FlowEdgeStyle.thick, FlowEdgeEnd.none, FlowEdgeEnd.circle),
-};
-
-/// An edge with an inline label: `-- text -->`, `-. text .->`, `== text ==>`.
-final RegExp _inlineLabeled = RegExp(
-  r'(--|==|-\.)\s*(.+?)\s*'
-  r'(-->|---|--x|--o|==>|===|==x|==o|-\.->|-\.-|-\.x|-\.o)',
-);
-
-/// The opening runs that must be followed by an edge spelling, with the
-/// spellings to suggest when they are not (the error a dangling `--` gives).
-const List<(String, List<String>)> _dangling = [
-  ('--', ['-->', '--x', '--o', '---']),
-  ('==', ['==>', '==x', '==o', '===']),
-  ('-.', ['-.->', '-.x', '-.o', '-.-']),
-];
 
 /// The keywords that open a directive a note draws nothing for; skipped.
 const Set<String> _directives = {
@@ -67,15 +27,6 @@ const Set<String> _directives = {
   'link',
   'callback',
 };
-
-/// One scanned edge: where it ends in the statement and what it means.
-typedef _EdgeScan = ({
-  int end,
-  FlowEdgeStyle style,
-  FlowEdgeEnd start,
-  FlowEdgeEnd endCap,
-  String? label,
-});
 
 /// Parses one flowchart source.
 final class _FlowParser {
@@ -227,7 +178,7 @@ final class _FlowParser {
     while (true) {
       cursor.skipSpaces();
       if (cursor.atEnd) return;
-      final scan = _scanEdge(cursor, number);
+      final scan = scanFlowEdge(cursor.source, cursor.position, number);
       if (scan == null) {
         throw MermaidParseException(
           number,
@@ -238,7 +189,7 @@ final class _FlowParser {
       cursor
         ..position = scan.end
         ..skipSpaces();
-      var label = cursor.readPipeLabel() ?? scan.label;
+      var label = cursor.readPipeLabel() ?? _unquoteOrNull(scan.label);
       if (label != null && label.isEmpty) label = null;
       final targets = _nodeList(cursor, number);
       for (final from in sources) {
@@ -315,52 +266,6 @@ final class _FlowParser {
     return _mention(id);
   }
 
-  _EdgeScan? _scanEdge(_Cursor cursor, int number) {
-    // An unlabelled spelling wins: without this, `A --> B --> C` would read
-    // the second arrow as the close of an inline label on the first.
-    for (final entry in _edgeTokens.entries) {
-      if (cursor.source.startsWith(entry.key, cursor.position)) {
-        final (style, start, endCap) = entry.value;
-        return (
-          end: cursor.position + entry.key.length,
-          style: style,
-          start: start,
-          endCap: endCap,
-          label: null,
-        );
-      }
-    }
-    final labelMatch = _inlineLabeled.matchAsPrefix(
-      cursor.source,
-      cursor.position,
-    );
-    if (labelMatch != null) {
-      final open = labelMatch.group(1)!;
-      final close = labelMatch.group(3)!;
-      final meaning = _edgeTokens[close]!;
-      return (
-        end: labelMatch.end,
-        style: switch (open) {
-          '==' => FlowEdgeStyle.thick,
-          '-.' => FlowEdgeStyle.dotted,
-          _ => meaning.$1,
-        },
-        start: FlowEdgeEnd.none,
-        endCap: meaning.$3,
-        label: _unquote(labelMatch.group(2)!.trim()),
-      );
-    }
-    for (final (prefix, options) in _dangling) {
-      if (cursor.source.startsWith(prefix, cursor.position)) {
-        throw MermaidParseException(
-          number,
-          'expected ${options.join(", ")} after "$prefix"',
-        );
-      }
-    }
-    return null;
-  }
-
   // -- small helpers -----------------------------------------------------
 
   static String _firstWord(String s) {
@@ -417,6 +322,9 @@ final class _FlowParser {
 
   static String _trim(List<String> lines, int index) =>
       index < lines.length ? lines[index].trim() : '';
+
+  static String? _unquoteOrNull(String? text) =>
+      text == null ? null : _unquote(text);
 
   /// [text] without the double quotes around it. Only `"` quotes in
   /// Mermaid: an apostrophe is a letter (`Don't`, `l'utente`).

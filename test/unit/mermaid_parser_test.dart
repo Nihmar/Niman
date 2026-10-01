@@ -232,4 +232,33 @@ void main() {
     expect(_node(chart, 'A').label, '50%% done');
     expect(chart.edges, hasLength(1));
   });
+
+  test('a longer run is a longer link of the same edge', () {
+    final chart = _chart(
+      'flowchart TD\nA ---> B\nB ===> C\nC -..-> D\nD ---- E\nE -.- F',
+    );
+    expect(chart.edges, hasLength(5));
+    expect(chart.edges[0].style, FlowEdgeStyle.solid);
+    expect(chart.edges[0].end, FlowEdgeEnd.arrow);
+    expect(chart.edges[1].style, FlowEdgeStyle.thick);
+    expect(chart.edges[1].end, FlowEdgeEnd.arrow);
+    expect(chart.edges[2].style, FlowEdgeStyle.dotted);
+    expect(chart.edges[2].end, FlowEdgeEnd.arrow);
+    expect(chart.edges[3].end, FlowEdgeEnd.none);
+    expect(chart.edges[4].style, FlowEdgeStyle.dotted);
+  });
+
+  test('a dotted edge carries its label inside', () {
+    final chart = _chart(
+      'flowchart TD\nA -. maybe .-> B\nB -. "x" .- C\nC --xenon--> D',
+    );
+    expect(chart.edges[0].style, FlowEdgeStyle.dotted);
+    expect(chart.edges[0].label, 'maybe');
+    expect(chart.edges[0].end, FlowEdgeEnd.arrow);
+    expect(chart.edges[1].label, 'x');
+    expect(chart.edges[1].end, FlowEdgeEnd.none);
+    // An x straight before a letter is the label's, not a cross.
+    expect(chart.edges[2].label, 'xenon');
+    expect(chart.edges[2].end, FlowEdgeEnd.arrow);
+  });
 }
