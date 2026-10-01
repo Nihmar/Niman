@@ -367,9 +367,18 @@ final class _FlowParser {
     return match?.group(0) ?? '';
   }
 
+  /// [line] without its `%%` comment; a `%%` inside quotes is text.
   static String _stripComment(String line) {
-    final at = line.indexOf('%%');
-    return at < 0 ? line : line.substring(0, at);
+    var quoted = false;
+    for (var i = 0; i < line.length; i++) {
+      final ch = line[i];
+      if (ch == '"') {
+        quoted = !quoted;
+      } else if (!quoted && line.startsWith('%%', i)) {
+        return line.substring(0, i);
+      }
+    }
+    return line;
   }
 
   /// The statements on [line], trimmed and not empty: Mermaid ends one at

@@ -221,4 +221,10 @@ void main() {
     expect(chart.subgraphs.single.nodeIds, ['C', 'D', 'E']);
     expect(_node(chart, 'F').label, 'a;b');
   });
+
+  test('%% inside quotes is text, not a comment', () {
+    final chart = _chart('flowchart TD\nA["50%% done"] --> B %% note');
+    expect(_node(chart, 'A').label, '50%% done');
+    expect(chart.edges, hasLength(1));
+  });
 }
