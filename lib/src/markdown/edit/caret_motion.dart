@@ -246,10 +246,22 @@ int _wordLeft(SourceBuffer buffer, int at) {
   return index;
 }
 
-/// The start of the word after [at]: past punctuation and space, then to the
-/// end
-/// of the word — which is where the *next* press starts from, as editors do.
+/// The start of the word after [at], or the head of the line below when [at]
+/// stands at the end of its own.
+///
+/// The twin of [_wordLeft]: at the end of a line's text — the terminator after
+/// the caret — `Ctrl+→` is the line's motion, not the note's: it goes to the
+/// head of the line below, past its indentation and any marker, rather than
+/// crossing the break to stop at the end of the next line's first word (#528).
+///
+/// Mid-line it is the word motion, unchanged: past punctuation and space, then
+/// to the end of the word — which is where the *next* press starts from, as
+/// editors do.
 int _wordRight(SourceBuffer buffer, int at) {
+  final line = buffer.lineOf(at);
+  if (line + 1 < buffer.lineCount && at >= _lineEnd(buffer, at)) {
+    return lineBodyStart(buffer, line + 1);
+  }
   var index = at;
   while (index < buffer.length && !_wordChar(_firstUnit(buffer, index))) {
     index += _unitLengthAt(buffer, index);

@@ -119,6 +119,45 @@ void main() {
     expect(_moved(blank, 6, CaretMotion.wordLeft), 5);
   });
 
+  test('at the end of a line, Ctrl+Right is the line below, its head', () {
+    // The twin of the head rule: the caret at the end of a line's text goes to
+    // the head of the line below, not to the end of its first word (#528).
+    const above = 'lo deve sapere il chiamante)';
+    const end = above.length;
+    const text = '$above\n  - [ ] La funzionalita';
+    final head = text.indexOf('La funzionalita');
+    expect(_moved(text, end, CaretMotion.wordRight), head);
+    // Mid-word it is still the word motion.
+    expect(_moved(text, head, CaretMotion.wordRight), head + 'La'.length);
+    // The head and the end are each other's inverse.
+    expect(_moved(text, head, CaretMotion.wordLeft), end);
+    // The last line has nothing below it: the motion is the wall at the end.
+    expect(_moved(above, end, CaretMotion.wordRight), end);
+  });
+
+  test(
+    'the end of a line answers the head of the next, whatever its shape',
+    () {
+      const first = 'riga';
+      for (final line in <String>[
+        'seconda',
+        '    seconda',
+        '1. seconda',
+        '10) seconda',
+        '- [x] seconda',
+        '> seconda',
+        '> > seconda',
+      ]) {
+        final text = '$first\n$line';
+        expect(
+          _moved(text, first.length, CaretMotion.wordRight),
+          text.length - 'seconda'.length,
+          reason: 'the end of `$first` into `$line`',
+        );
+      }
+    },
+  );
+
   test('shift extends the line motion the same way', () {
     const text = 'il chiamante\n- [ ] La';
     final buffer = SourceBuffer.fromText(text);
