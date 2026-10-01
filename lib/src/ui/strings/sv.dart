@@ -1044,6 +1044,8 @@ final class SwedishStrings extends Strings {
   @override
   String get actionCancel => 'Avbryt';
   @override
+  String get actionDownload => 'Ladda ned';
+  @override
   String get actionCreate => 'Skapa';
   @override
   String get actionNew => 'Ny';

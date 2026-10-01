@@ -1045,6 +1045,8 @@ final class FinnishStrings extends Strings {
   @override
   String get actionCancel => 'Peruuta';
   @override
+  String get actionDownload => 'Lataa';
+  @override
   String get actionCreate => 'Luo';
   @override
   String get actionNew => 'Uusi';

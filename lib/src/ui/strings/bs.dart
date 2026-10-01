@@ -1045,6 +1045,8 @@ final class BosnianStrings extends Strings {
   @override
   String get actionCancel => 'Odustani';
   @override
+  String get actionDownload => 'Preuzmi';
+  @override
   String get actionCreate => 'Kreiraj';
   @override
   String get actionNew => 'Novo';

@@ -1050,6 +1050,8 @@ final class ItalianStrings extends Strings {
   @override
   String get actionCancel => 'Annulla';
   @override
+  String get actionDownload => 'Scarica';
+  @override
   String get actionCreate => 'Crea';
   @override
   String get actionNew => 'Nuovo';

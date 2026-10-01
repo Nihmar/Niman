@@ -163,8 +163,11 @@ found, a banner offers the download:
   package) into Downloads; when the variant cannot be detected, the
   release's Linux assets are listed instead.
 
-`Check for updates` runs the same check on demand and downloads
-immediately when newer; it works even with automatic updates off.
+`Check for updates` runs the same check on demand, and only checks: it
+says whether a newer release is out, and when one is, the **Download** row
+under it turns on. Nothing is fetched until you press it. It works even
+with automatic updates off, and an update the automatic check already
+found is ready to download when you open the screen.
 
 The **Diagnostics and info** section holds two read-only facts about the
 installation: the app's own **Version**, and **Changelog**, which opens

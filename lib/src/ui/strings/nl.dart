@@ -1047,6 +1047,8 @@ final class DutchStrings extends Strings {
   @override
   String get actionCancel => 'Annuleren';
   @override
+  String get actionDownload => 'Downloaden';
+  @override
   String get actionCreate => 'Aanmaken';
   @override
   String get actionNew => 'Nieuw';

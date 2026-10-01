@@ -678,6 +678,7 @@ final class AppStrings {
   // Actions and buttons shared by the dialogs (T-L10N-06).
   static String get actionOk => _s.actionOk;
   static String get actionCancel => _s.actionCancel;
+  static String get actionDownload => _s.actionDownload;
   static String get actionCreate => _s.actionCreate;
 
   /// The desktop tree footer's create menu (T-PP-22).

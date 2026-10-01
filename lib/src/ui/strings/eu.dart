@@ -1046,6 +1046,8 @@ final class BasqueStrings extends Strings {
   @override
   String get actionCancel => 'Utzi';
   @override
+  String get actionDownload => 'Deskargatu';
+  @override
   String get actionCreate => 'Sortu';
   @override
   String get actionNew => 'Berria';

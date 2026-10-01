@@ -1044,6 +1044,8 @@ final class SlovakStrings extends Strings {
   @override
   String get actionCancel => 'Zrušiť';
   @override
+  String get actionDownload => 'Stiahnuť';
+  @override
   String get actionCreate => 'Vytvoriť';
   @override
   String get actionNew => 'Nové';

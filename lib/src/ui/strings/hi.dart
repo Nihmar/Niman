@@ -1024,6 +1024,8 @@ final class HindiStrings extends Strings {
   @override
   String get actionCancel => 'रद्द करें';
   @override
+  String get actionDownload => 'डाउनलोड करें';
+  @override
   String get actionCreate => 'बनाएँ';
   @override
   String get actionNew => 'नया';

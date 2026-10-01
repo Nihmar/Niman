@@ -1053,6 +1053,8 @@ final class RomanianStrings extends Strings {
   @override
   String get actionCancel => 'Anulează';
   @override
+  String get actionDownload => 'Descarcă';
+  @override
   String get actionCreate => 'Creează';
   @override
   String get actionNew => 'Nouă';

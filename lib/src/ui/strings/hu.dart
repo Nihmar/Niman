@@ -1046,6 +1046,8 @@ final class HungarianStrings extends Strings {
   @override
   String get actionCancel => 'Mégse';
   @override
+  String get actionDownload => 'Letöltés';
+  @override
   String get actionCreate => 'Létrehozás';
   @override
   String get actionNew => 'Új';

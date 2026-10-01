@@ -1043,6 +1043,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get actionCancel => 'Скасувати';
   @override
+  String get actionDownload => 'Завантажити';
+  @override
   String get actionCreate => 'Створити';
   @override
   String get actionNew => 'Новий';

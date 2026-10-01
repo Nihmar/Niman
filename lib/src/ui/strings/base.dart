@@ -519,6 +519,7 @@ abstract base class Strings {
   // Actions and buttons shared by the dialogs (T-L10N-06).
   String get actionOk;
   String get actionCancel;
+  String get actionDownload;
   String get actionCreate;
   String get actionNew;
   String get actionSave;

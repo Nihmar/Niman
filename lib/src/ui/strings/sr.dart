@@ -1045,6 +1045,8 @@ final class SerbianStrings extends Strings {
   @override
   String get actionCancel => 'Откажи';
   @override
+  String get actionDownload => 'Преузми';
+  @override
   String get actionCreate => 'Креирај';
   @override
   String get actionNew => 'Ново';

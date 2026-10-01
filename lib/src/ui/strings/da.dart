@@ -1037,6 +1037,8 @@ final class DanishStrings extends Strings {
   @override
   String get actionCancel => 'Annuller';
   @override
+  String get actionDownload => 'Download';
+  @override
   String get actionCreate => 'Opret';
   @override
   String get actionNew => 'Ny';

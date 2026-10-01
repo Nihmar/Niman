@@ -980,6 +980,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get actionCancel => 'キャンセル';
   @override
+  String get actionDownload => 'ダウンロード';
+  @override
   String get actionCreate => '作成';
   @override
   String get actionNew => '新規';

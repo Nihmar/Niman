@@ -1060,6 +1060,8 @@ final class FrenchStrings extends Strings {
   @override
   String get actionCancel => 'Annuler';
   @override
+  String get actionDownload => 'Télécharger';
+  @override
   String get actionCreate => 'Créer';
   @override
   String get actionNew => 'Nouveau';

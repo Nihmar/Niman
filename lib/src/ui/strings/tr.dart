@@ -1034,6 +1034,8 @@ final class TurkishStrings extends Strings {
   @override
   String get actionCancel => 'İptal';
   @override
+  String get actionDownload => 'İndir';
+  @override
   String get actionCreate => 'Oluştur';
   @override
   String get actionNew => 'Yeni';

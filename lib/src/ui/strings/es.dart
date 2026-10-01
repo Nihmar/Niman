@@ -1059,6 +1059,8 @@ final class SpanishStrings extends Strings {
   @override
   String get actionCancel => 'Cancelar';
   @override
+  String get actionDownload => 'Descargar';
+  @override
   String get actionCreate => 'Crear';
   @override
   String get actionNew => 'Nuevo';
