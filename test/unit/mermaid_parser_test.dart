@@ -261,4 +261,20 @@ void main() {
     expect(chart.edges[2].label, 'xenon');
     expect(chart.edges[2].end, FlowEdgeEnd.arrow);
   });
+
+  test('a node may be named like a directive', () {
+    final chart = _chart(
+      'flowchart TD\nClass --> Student\nlink --> page\nclick --> B\n'
+      'class Student red\nstyle page fill:#f00\nclick B callback',
+    );
+    expect(chart.nodes.map((n) => n.id), [
+      'Class',
+      'Student',
+      'link',
+      'page',
+      'click',
+      'B',
+    ]);
+    expect(chart.edges, hasLength(3));
+  });
 }

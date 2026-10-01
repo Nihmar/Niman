@@ -18,14 +18,13 @@ import 'package:niman/src/diagrams/mermaid_error.dart';
 Flowchart parseFlowchart(String source) => _FlowParser(source).parse();
 
 /// The keywords that open a directive a note draws nothing for; skipped.
+/// Mermaid's own spelling, case and all: `Class` or `link` is a node.
 const Set<String> _directives = {
-  'classdef',
+  'classDef',
   'class',
   'style',
-  'linkstyle',
+  'linkStyle',
   'click',
-  'link',
-  'callback',
 };
 
 /// Parses one flowchart source.
@@ -125,7 +124,7 @@ final class _FlowParser {
       if (_stack.isNotEmpty) _stack.last.direction = dir;
       return;
     }
-    if (_directives.contains(word)) return;
+    if (_isDirective(line)) return;
     _chain(line, number);
   }
 
@@ -267,6 +266,18 @@ final class _FlowParser {
   }
 
   // -- small helpers -----------------------------------------------------
+
+  /// Whether [line] is a directive: its keyword, then a space and an
+  /// argument — not an edge or a shape, which make the word a node's id
+  /// (`click --> B`).
+  static bool _isDirective(String line) {
+    final word = _firstWord(line);
+    if (!_directives.contains(word)) return false;
+    final rest = line.substring(word.length);
+    if (rest.isEmpty || (rest[0] != ' ' && rest[0] != '\t')) return false;
+    final argument = rest.trimLeft();
+    return argument.isNotEmpty && !'-=.&[({>:'.contains(argument[0]);
+  }
 
   static String _firstWord(String s) {
     final match = RegExp('^[A-Za-z_][A-Za-z0-9_-]*').firstMatch(s);
