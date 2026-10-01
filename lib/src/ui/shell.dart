@@ -321,43 +321,50 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
             children: [
               UpdateAvailableBanner(session: controller),
               Expanded(
-                child: _LibraryShell(
-                  controller: controller,
-                  reminders: ref.read(reminderServiceProvider),
-                  spellCheck: ref.read(spellCheckProvider),
-                  transcription: ref.read(transcriptionModelsProvider),
-                  openNotes: ref.read(openAudioNotesProvider),
-                  shortcuts: ref.read(shortcutServiceProvider),
-                  shareIn: ref.read(shareInServiceProvider),
-                  todoSourceFactory: ref.read(todoSourceFactoryProvider),
-                  unsavedTracker: ref.watch(unsavedTrackerProvider),
-                  saveExportFile: ref.read(saveExportFileProvider),
-                  pickExportFolder: ref.read(pickExportFolderProvider),
-                  pdfPrinter: ref.read(pdfPrinterProvider),
-                  // The engine search is a process on Windows: looked up when
-                  // a folder export actually asks for it, never at startup
-                  // (L4), and awaited before the chooser can offer PDF (L5).
-                  pdfEngineLookup: () async {
-                    final engine = await ref.read(pdfEngineProvider.future);
-                    // A "no engine" is not kept for the session: a slow
-                    // first lookup — a `reg.exe` the antivirus was scanning
-                    // right after an install — is not a machine without a
-                    // browser, and the next export deserves a fresh answer
-                    // (device report, 2026-09-29).
-                    if (engine == null) ref.invalidate(pdfEngineProvider);
-                    return engine;
-                  },
-                  // A book's metadata source, checked before the export starts
-                  // (E3); widget tests answer for their library root.
-                  epubMetadataProblem: ref.read(epubMetadataProblemProvider),
-                  epubExport: ref.read(epubNoteExportProvider),
-                  outsideFiles: ref.read(outsideFilesProvider),
-                  launchRequests: ref.read(launchRequestsProvider),
-                  targets: ref.read(widgetTargetServiceProvider),
-                  widgetUpdater: ref.read(widgetUpdaterProvider),
-                  widgetHost: ref.read(widgetHostServiceProvider),
-                  tray: ref.read(trayServiceProvider),
-                  window: ref.read(windowControllerProvider),
+                // The banner above holds the status bar's inset while it is
+                // up; the shell would pad for it a second time.
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: controller.pendingUpdate != null,
+                  child: _LibraryShell(
+                    controller: controller,
+                    reminders: ref.read(reminderServiceProvider),
+                    spellCheck: ref.read(spellCheckProvider),
+                    transcription: ref.read(transcriptionModelsProvider),
+                    openNotes: ref.read(openAudioNotesProvider),
+                    shortcuts: ref.read(shortcutServiceProvider),
+                    shareIn: ref.read(shareInServiceProvider),
+                    todoSourceFactory: ref.read(todoSourceFactoryProvider),
+                    unsavedTracker: ref.watch(unsavedTrackerProvider),
+                    saveExportFile: ref.read(saveExportFileProvider),
+                    pickExportFolder: ref.read(pickExportFolderProvider),
+                    pdfPrinter: ref.read(pdfPrinterProvider),
+                    // The engine search is a process on Windows: looked up when
+                    // a folder export actually asks for it, never at startup
+                    // (L4), and awaited before the chooser can offer PDF (L5).
+                    pdfEngineLookup: () async {
+                      final engine = await ref.read(pdfEngineProvider.future);
+                      // A "no engine" is not kept for the session: a slow
+                      // first lookup — a `reg.exe` the antivirus was scanning
+                      // right after an install — is not a machine without a
+                      // browser, and the next export deserves a fresh answer
+                      // (device report, 2026-09-29).
+                      if (engine == null) ref.invalidate(pdfEngineProvider);
+                      return engine;
+                    },
+                    // A book's metadata source, checked before the export
+                    // starts (E3); widget tests answer for their library
+                    // root.
+                    epubMetadataProblem: ref.read(epubMetadataProblemProvider),
+                    epubExport: ref.read(epubNoteExportProvider),
+                    outsideFiles: ref.read(outsideFilesProvider),
+                    launchRequests: ref.read(launchRequestsProvider),
+                    targets: ref.read(widgetTargetServiceProvider),
+                    widgetUpdater: ref.read(widgetUpdaterProvider),
+                    widgetHost: ref.read(widgetHostServiceProvider),
+                    tray: ref.read(trayServiceProvider),
+                    window: ref.read(windowControllerProvider),
+                  ),
                 ),
               ),
             ],

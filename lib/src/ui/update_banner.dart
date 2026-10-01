@@ -27,27 +27,33 @@ final class UpdateAvailableBanner extends StatelessWidget {
     final update = session.pendingUpdate;
     if (update == null) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
-    return MaterialBanner(
-      key: const Key('update-available-banner'),
-      leading: Icon(Icons.system_update, color: scheme.primary),
-      content: Text(AppStrings.updateAvailableMessage(update.version)),
-      actions: [
-        TextButton(
-          key: const Key('update-available-download'),
-          onPressed: () => unawaited(
-            downloadAndApplyUpdate(
-              context,
-              update,
-            ).then((_) => session.clearPendingUpdate()),
+    // The banner is the top of the window, above the shell's own scaffold:
+    // on a phone that is under the status bar, which cut its first line off.
+    // The shell below gives the inset up while the banner holds it.
+    return SafeArea(
+      bottom: false,
+      child: MaterialBanner(
+        key: const Key('update-available-banner'),
+        leading: Icon(Icons.system_update, color: scheme.primary),
+        content: Text(AppStrings.updateAvailableMessage(update.version)),
+        actions: [
+          TextButton(
+            key: const Key('update-available-download'),
+            onPressed: () => unawaited(
+              downloadAndApplyUpdate(
+                context,
+                update,
+              ).then((_) => session.clearPendingUpdate()),
+            ),
+            child: Text(AppStrings.actionDownload),
           ),
-          child: Text(AppStrings.checkForUpdatesTitle),
-        ),
-        TextButton(
-          key: const Key('update-available-dismiss'),
-          onPressed: session.clearPendingUpdate,
-          child: Text(AppStrings.actionCancel),
-        ),
-      ],
+          TextButton(
+            key: const Key('update-available-dismiss'),
+            onPressed: session.clearPendingUpdate,
+            child: Text(AppStrings.actionCancel),
+          ),
+        ],
+      ),
     );
   }
 }
