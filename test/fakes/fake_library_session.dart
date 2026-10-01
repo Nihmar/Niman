@@ -343,11 +343,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setAutoUpdateEnabled({required bool enabled}) async {}
 
+  /// What a scheduled check left for the banner and the Updates screen;
+  /// a test sets it.
   @override
-  UpdateAvailable? get pendingUpdate => null;
+  UpdateAvailable? pendingUpdate;
 
   @override
-  void clearPendingUpdate() {}
+  void clearPendingUpdate() {
+    pendingUpdate = null;
+    _bump();
+  }
 
   /// The settings a library keeps for itself (T-ML-10), in memory. A
   /// fresh fake starts at the shipped defaults, as a fresh library does.
