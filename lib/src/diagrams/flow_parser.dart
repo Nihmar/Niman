@@ -284,8 +284,18 @@ final class _FlowParser {
     }
     // A bare mention names a node; it does not redraw one already given a
     // shape and a label (`B{Decide}` then `B --> C`).
-    if (_byId.containsKey(id)) return id;
+    if (_byId.containsKey(id)) return _mention(id);
     return _declare(id, FlowNodeShape.rect, null);
+  }
+
+  /// Puts [id] in every subgraph open around the statement naming it: a
+  /// node belongs to the subgraph it is mentioned in, as in Mermaid, not
+  /// only to the one around its first mention.
+  String _mention(String id) {
+    for (final build in _stack) {
+      if (build.members.add(id)) build.nodeIds.add(id);
+    }
+    return id;
   }
 
   /// Declares node [id], or redraws it with the [shape] and [label] a later
@@ -298,13 +308,10 @@ final class _FlowParser {
     if (at == null) {
       _indexOf[id] = _nodes.length;
       _nodes.add(node);
-      for (final build in _stack) {
-        if (!build.nodeIds.contains(id)) build.nodeIds.add(id);
-      }
     } else {
       _nodes[at] = node;
     }
-    return id;
+    return _mention(id);
   }
 
   _EdgeScan? _scanEdge(_Cursor cursor, int number) {
@@ -385,6 +392,7 @@ final class _SubgraphBuild {
   final String id;
   final String title;
   final List<String> nodeIds = [];
+  final Set<String> members = {};
   FlowDirection? direction;
 }
 

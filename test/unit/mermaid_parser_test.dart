@@ -196,4 +196,11 @@ void main() {
     expect(_node(redrawn, 'B').shape, FlowNodeShape.circle);
     expect(_node(redrawn, 'B').label, 'Round');
   });
+
+  test('a node mentioned in a subgraph joins it, wherever it was first', () {
+    final chart = _chart(
+      'flowchart TD\nA --> B\nsubgraph S\nA\nB\nend\nA --> C',
+    );
+    expect(chart.subgraphs.single.nodeIds, ['A', 'B']);
+  });
 }
