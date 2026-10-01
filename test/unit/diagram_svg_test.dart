@@ -31,6 +31,14 @@ void main() {
     expect(svg, contains('Yes'));
   });
 
+  test('a mind map becomes a standalone SVG (#530)', () {
+    final svg = diagramSvg('mindmap\nroot((Central))\n  A\n  B\n', _style);
+    expect(svg, isNotNull);
+    expect(svg, contains('Central'));
+    expect(svg, contains('>A<'));
+    expect(svg, contains('>B<'));
+  });
+
   test('a source that does not parse comes back null, for the fence', () {
     expect(diagramSvg('flowchart TD\nA -- B', _style), isNull);
     expect(diagramSvg('sequenceDiagram\nA->>B: hi', _style), isNull);

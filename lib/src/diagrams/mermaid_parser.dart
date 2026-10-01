@@ -9,6 +9,7 @@ library;
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/flow_parser.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
+import 'package:niman/src/diagrams/mindmap_parser.dart';
 
 /// A parsed Mermaid diagram.
 sealed class MermaidDiagram {
@@ -37,7 +38,6 @@ const Set<String> _otherDiagramTypes = {
   'journey',
   'gantt',
   'pie',
-  'mindmap',
   'timeline',
   'gitgraph',
   'quadrantchart',
@@ -58,6 +58,7 @@ const Set<String> _otherDiagramTypes = {
 /// Throws a [MermaidParseException] when the source does not parse.
 MermaidDiagram parseMermaid(String source) {
   final first = _firstWord(source).toLowerCase();
+  if (first == 'mindmap') return MermaidFlowchart(parseMindmap(source));
   if (first == 'flowchart' ||
       first == 'graph' ||
       !_otherDiagramTypes.contains(first)) {
