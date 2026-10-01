@@ -75,6 +75,7 @@ final class BlockView extends StatelessWidget {
     this.embedImages,
     this.onToggleTask,
     this.onTapDiagramSource,
+    this.printed = false,
     this.scope,
     this.quoteNesting = 0,
     super.key,
@@ -113,6 +114,11 @@ final class BlockView extends StatelessWidget {
   /// Called with a note line when a diagram — or its parse error — is tapped,
   /// to show the block's source again (#530).
   final void Function(int line)? onTapDiagramSource;
+
+  /// Whether the block is drawn on a page (an export) rather than on a
+  /// screen: a diagram carries no full-screen button there, which a page
+  /// cannot press and the raster fallback has no overlay to build.
+  final bool printed;
 
   /// How wide the pane is, so a display formula wider than it can be broken
   /// across lines instead of cut (#257). Null when the caller does not know —
@@ -440,6 +446,7 @@ final class BlockView extends StatelessWidget {
       source: content,
       theme: theme,
       cache: diagramCache ?? sharedDiagramCache,
+      fullScreen: !printed,
       onTapSource: tap == null ? null : (inner) => tap(line + inner),
     );
   }

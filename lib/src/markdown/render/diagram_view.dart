@@ -26,6 +26,7 @@ final class BlockDiagramView extends StatelessWidget {
     required this.theme,
     required this.cache,
     this.onTapSource,
+    this.fullScreen = true,
     super.key,
   });
 
@@ -42,6 +43,10 @@ final class BlockDiagramView extends StatelessWidget {
   /// source again: the whole diagram on a tap, the offending line on an
   /// error.
   final void Function(int line)? onTapSource;
+
+  /// Whether the diagram carries the button that opens it alone; an export
+  /// draws it without.
+  final bool fullScreen;
 
   /// The style the diagram is drawn with, from the note's theme.
   DiagramStyle styleFor(BuildContext context) => DiagramStyle(
@@ -83,18 +88,19 @@ final class BlockDiagramView extends StatelessWidget {
         child: Stack(
           children: [
             canvas,
-            Positioned(
-              top: 0,
-              right: 0,
-              child: IconButton(
-                key: const Key('diagram-full-screen'),
-                tooltip: AppStrings.diagramFullScreen,
-                iconSize: 20,
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.fullscreen),
-                onPressed: () => _openFullScreen(context, layout, style),
+            if (fullScreen)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                  key: const Key('diagram-full-screen'),
+                  tooltip: AppStrings.diagramFullScreen,
+                  iconSize: 20,
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.fullscreen),
+                  onPressed: () => _openFullScreen(context, layout, style),
+                ),
               ),
-            ),
           ],
         ),
       ),

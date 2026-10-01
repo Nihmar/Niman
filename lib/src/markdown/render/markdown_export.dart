@@ -98,6 +98,7 @@ final class MarkdownExportView extends StatelessWidget {
                 theme: theme,
                 mathCache: mathCache,
                 embedImages: embedImages,
+                printed: true,
               ),
           ],
         ),
