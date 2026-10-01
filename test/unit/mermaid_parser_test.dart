@@ -211,4 +211,14 @@ void main() {
     // Double quotes still keep a bracket inside a label.
     expect(_node(_chart('flowchart TD\nA["a ] b"]'), 'A').label, 'a ] b');
   });
+
+  test('a semicolon ends a statement', () {
+    final chart = _chart(
+      'graph TD;\nA-->B;\nsubgraph S;\nC;D-->E;\nend;\nF["a;b"] --> G',
+    );
+    expect(chart.nodes.map((n) => n.id), ['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+    expect(chart.edges, hasLength(3));
+    expect(chart.subgraphs.single.nodeIds, ['C', 'D', 'E']);
+    expect(_node(chart, 'F').label, 'a;b');
+  });
 }

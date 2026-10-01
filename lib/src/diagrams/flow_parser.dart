@@ -111,31 +111,31 @@ final class _FlowParser {
     FlowDirection? direction;
     var sawHeader = false;
     for (; index < lines.length; index++) {
-      final line = _stripComment(lines[index]).trim();
-      if (line.isEmpty) continue;
-      if (!sawHeader) {
-        final word = _firstWord(line);
-        if (word == 'flowchart' || word == 'graph') {
-          final rest = line.substring(word.length).trim();
-          final parsed = FlowDirection.parse(_firstWord(rest));
-          if (parsed == null) {
-            throw MermaidParseException(
-              index + 1,
-              rest.isEmpty
-                  ? 'expected a direction (TD, TB, BT, LR or RL)'
-                  : 'unknown direction "$rest"',
-            );
+      for (final line in _statements(_stripComment(lines[index]))) {
+        if (!sawHeader) {
+          final word = _firstWord(line);
+          if (word == 'flowchart' || word == 'graph') {
+            final rest = line.substring(word.length).trim();
+            final parsed = FlowDirection.parse(_firstWord(rest));
+            if (parsed == null) {
+              throw MermaidParseException(
+                index + 1,
+                rest.isEmpty
+                    ? 'expected a direction (TD, TB, BT, LR or RL)'
+                    : 'unknown direction "$rest"',
+              );
+            }
+            direction = parsed;
+            sawHeader = true;
+            continue;
           }
-          direction = parsed;
-          sawHeader = true;
-          continue;
+          throw MermaidParseException(
+            index + 1,
+            'expected "flowchart" or "graph"',
+          );
         }
-        throw MermaidParseException(
-          index + 1,
-          'expected "flowchart" or "graph"',
-        );
+        _statement(line, index + 1);
       }
-      _statement(line, index + 1);
     }
     if (!sawHeader) {
       throw const MermaidParseException(1, 'expected "flowchart" or "graph"');
@@ -370,6 +370,39 @@ final class _FlowParser {
   static String _stripComment(String line) {
     final at = line.indexOf('%%');
     return at < 0 ? line : line.substring(0, at);
+  }
+
+  /// The statements on [line], trimmed and not empty: Mermaid ends one at
+  /// a `;` as well as at the end of the line (`graph TD;`, `A-->B;C`). A
+  /// `;` inside quotes, a node's brackets or an edge's `|label|` is text.
+  static Iterable<String> _statements(String line) sync* {
+    var start = 0;
+    var depth = 0;
+    var quoted = false;
+    var piped = false;
+    for (var i = 0; i < line.length; i++) {
+      final ch = line[i];
+      if (quoted) {
+        if (ch == '"') quoted = false;
+        continue;
+      }
+      switch (ch) {
+        case '"':
+          quoted = true;
+        case '[' || '(' || '{':
+          depth++;
+        case ']' || ')' || '}':
+          if (depth > 0) depth--;
+        case '|' when depth == 0:
+          piped = !piped;
+        case ';' when depth == 0 && !piped:
+          final statement = line.substring(start, i).trim();
+          if (statement.isNotEmpty) yield statement;
+          start = i + 1;
+      }
+    }
+    final last = line.substring(start).trim();
+    if (last.isNotEmpty) yield last;
   }
 
   static String _trim(List<String> lines, int index) =>
