@@ -1061,6 +1061,8 @@ final class CatalanStrings extends Strings {
   @override
   String get actionCancel => 'Cancel·la';
   @override
+  String get actionDownload => 'Baixa';
+  @override
   String get actionCreate => 'Crea';
   @override
   String get actionNew => 'Nova';

@@ -1040,6 +1040,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get actionCancel => 'Atšaukti';
   @override
+  String get actionDownload => 'Atsisiųsti';
+  @override
   String get actionCreate => 'Sukurti';
   @override
   String get actionNew => 'Naujas';

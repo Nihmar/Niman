@@ -1051,6 +1051,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get actionCancel => 'Откажи';
   @override
+  String get actionDownload => 'Преземи';
+  @override
   String get actionCreate => 'Креирај';
   @override
   String get actionNew => 'Ново';

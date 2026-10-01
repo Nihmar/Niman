@@ -1055,6 +1055,8 @@ final class PolishStrings extends Strings {
   @override
   String get actionCancel => 'Anuluj';
   @override
+  String get actionDownload => 'Pobierz';
+  @override
   String get actionCreate => 'Utwórz';
   @override
   String get actionNew => 'Nowa';

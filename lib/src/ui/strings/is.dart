@@ -1042,6 +1042,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get actionCancel => 'Hætta við';
   @override
+  String get actionDownload => 'Sækja';
+  @override
   String get actionCreate => 'Búa til';
   @override
   String get actionNew => 'Nýtt';

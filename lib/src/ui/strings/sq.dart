@@ -1046,6 +1046,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get actionCancel => 'Anulo';
   @override
+  String get actionDownload => 'Shkarko';
+  @override
   String get actionCreate => 'Krijo';
   @override
   String get actionNew => 'E re';

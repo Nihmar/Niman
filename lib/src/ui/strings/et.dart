@@ -1031,6 +1031,8 @@ final class EstonianStrings extends Strings {
   @override
   String get actionCancel => 'Tühista';
   @override
+  String get actionDownload => 'Laadi alla';
+  @override
   String get actionCreate => 'Loo';
   @override
   String get actionNew => 'Uus';

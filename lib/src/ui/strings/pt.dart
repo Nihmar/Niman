@@ -1045,6 +1045,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get actionCancel => 'Cancelar';
   @override
+  String get actionDownload => 'Baixar';
+  @override
   String get actionCreate => 'Criar';
   @override
   String get actionNew => 'Novo';

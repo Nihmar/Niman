@@ -1041,6 +1041,8 @@ final class CzechStrings extends Strings {
   @override
   String get actionCancel => 'Zrušit';
   @override
+  String get actionDownload => 'Stáhnout';
+  @override
   String get actionCreate => 'Vytvořit';
   @override
   String get actionNew => 'Nová';

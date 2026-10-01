@@ -1041,6 +1041,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get actionCancel => 'Адмяніць';
   @override
+  String get actionDownload => 'Спампаваць';
+  @override
   String get actionCreate => 'Стварыць';
   @override
   String get actionNew => 'Новы';

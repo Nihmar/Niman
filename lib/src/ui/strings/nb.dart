@@ -1035,6 +1035,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get actionCancel => 'Avbryt';
   @override
+  String get actionDownload => 'Last ned';
+  @override
   String get actionCreate => 'Opprett';
   @override
   String get actionNew => 'Ny';

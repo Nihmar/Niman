@@ -1049,6 +1049,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get actionCancel => 'Отказ';
   @override
+  String get actionDownload => 'Изтегляне';
+  @override
   String get actionCreate => 'Създай';
   @override
   String get actionNew => 'Нов';

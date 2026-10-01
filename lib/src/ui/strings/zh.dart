@@ -971,6 +971,8 @@ final class ChineseStrings extends Strings {
   @override
   String get actionCancel => '取消';
   @override
+  String get actionDownload => '下载';
+  @override
   String get actionCreate => '创建';
   @override
   String get actionNew => '新建';

@@ -1070,6 +1070,8 @@ final class GreekStrings extends Strings {
   @override
   String get actionCancel => 'Ακύρωση';
   @override
+  String get actionDownload => 'Λήψη';
+  @override
   String get actionCreate => 'Δημιουργία';
   @override
   String get actionNew => 'Νέο';

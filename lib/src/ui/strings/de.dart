@@ -1056,6 +1056,8 @@ final class GermanStrings extends Strings {
   @override
   String get actionCancel => 'Abbrechen';
   @override
+  String get actionDownload => 'Herunterladen';
+  @override
   String get actionCreate => 'Erstellen';
   @override
   String get actionNew => 'Neu';

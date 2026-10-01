@@ -1043,6 +1043,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get actionCancel => 'Prekliči';
   @override
+  String get actionDownload => 'Prenesi';
+  @override
   String get actionCreate => 'Ustvari';
   @override
   String get actionNew => 'Novo';

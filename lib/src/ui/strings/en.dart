@@ -1035,6 +1035,8 @@ final class EnglishStrings extends Strings {
   @override
   String get actionCancel => 'Cancel';
   @override
+  String get actionDownload => 'Download';
+  @override
   String get actionCreate => 'Create';
   @override
   String get actionNew => 'New';

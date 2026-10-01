@@ -1039,6 +1039,8 @@ final class LatvianStrings extends Strings {
   @override
   String get actionCancel => 'Atcelt';
   @override
+  String get actionDownload => 'Lejupielādēt';
+  @override
   String get actionCreate => 'Izveidot';
   @override
   String get actionNew => 'Jauns';
