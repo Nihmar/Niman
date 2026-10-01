@@ -417,13 +417,6 @@ final class BlockView extends StatelessWidget {
     ];
   }
 
-  /// A code block: a filled box of monospace lines, the fence taken out, the
-  /// code coloured by the language the fence names.
-  ///
-  /// The box is `live`'s: its code a padding in from the sides, and a
-  /// fence's row above and below it — the rows `live` draws the fences on,
-  /// hidden, inside its box — so the code's rows land on `live`'s.
-  ///
   /// A fenced block: a Mermaid diagram when its language says so, code
   /// otherwise.
   Widget _fenced(BuildContext context) {
@@ -451,6 +444,13 @@ final class BlockView extends StatelessWidget {
     );
   }
 
+  /// A code block: a filled box of monospace lines, the fence taken out, the
+  /// code coloured by the language the fence names.
+  ///
+  /// The box is `live`'s: its code a padding in from the sides, and a
+  /// fence's row above and below it — the rows `live` draws the fences on,
+  /// hidden, inside its box — so the code's rows land on `live`'s.
+  ///
   /// The tokens come from the same `highlight` core the preview's highlighter
   /// uses, one block at a time and only for the blocks a frame draws. The
   /// engine's own line-state lexer (§8.8.2) is the design's replacement when
