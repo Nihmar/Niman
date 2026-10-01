@@ -2,8 +2,9 @@
 ///
 /// Keyed by the source and the style's numbers, so a note scrolled past
 /// again does not re-parse, and a theme change (which changes the style)
-/// does not serve the old one. It is the read view's cache; the persisted
-/// one in the index is keyed by the block's hash and is a later phase.
+/// does not serve the old one. It is the only one: a drawing is a pure
+/// function of its source and style, so nothing of it is persisted — the
+/// library's index holds no diagram, and an export draws its own.
 library;
 
 import 'dart:collection';
