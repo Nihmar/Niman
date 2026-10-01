@@ -62,17 +62,18 @@ final class _MindmapParser {
 
   void _line(String raw, int number) {
     final indent = _indentOf(raw);
-    if (_nodes.isEmpty && indent != 0) {
-      throw MermaidParseException(number, 'the root is not indented');
-    }
     final node = _nodeOf(raw.trim());
     final id = 'n${_declared++}';
     _nodes.add(FlowNode(id: id, label: node.label, shape: node.shape));
+    // The root's own indentation is whatever the first line carries; every
+    // later line no deeper than it is a second root, which a mind map has
+    // not.
+    final rootIndent = _open.isEmpty ? indent : _open.first.indent;
     while (_open.isNotEmpty && _open.last.indent >= indent) {
       _open.removeLast();
     }
     if (_open.isEmpty) {
-      if (_nodes.length > 1) {
+      if (_nodes.length > 1 || indent > rootIndent) {
         throw MermaidParseException(number, 'only one root is allowed');
       }
     } else {
