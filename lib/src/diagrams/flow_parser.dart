@@ -375,10 +375,10 @@ final class _FlowParser {
   static String _trim(List<String> lines, int index) =>
       index < lines.length ? lines[index].trim() : '';
 
+  /// [text] without the double quotes around it. Only `"` quotes in
+  /// Mermaid: an apostrophe is a letter (`Don't`, `l'utente`).
   static String _unquote(String text) {
-    if (text.length >= 2 &&
-        ((text.startsWith('"') && text.endsWith('"')) ||
-            (text.startsWith("'") && text.endsWith("'")))) {
+    if (text.length >= 2 && text.startsWith('"') && text.endsWith('"')) {
       return text.substring(1, text.length - 1);
     }
     return text;
@@ -567,7 +567,7 @@ final class _Cursor {
         i++;
         continue;
       }
-      if (ch == '"' || ch == "'") {
+      if (ch == '"') {
         quote = ch;
         i++;
         continue;

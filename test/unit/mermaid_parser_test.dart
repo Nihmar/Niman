@@ -203,4 +203,12 @@ void main() {
     );
     expect(chart.subgraphs.single.nodeIds, ['A', 'B']);
   });
+
+  test('an apostrophe is a letter, not a quote', () {
+    final chart = _chart("flowchart TD\nA[Don't stop] --> B(l'utente)");
+    expect(_node(chart, 'A').label, "Don't stop");
+    expect(_node(chart, 'B').label, "l'utente");
+    // Double quotes still keep a bracket inside a label.
+    expect(_node(_chart('flowchart TD\nA["a ] b"]'), 'A').label, 'a ] b');
+  });
 }
