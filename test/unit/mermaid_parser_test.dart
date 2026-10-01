@@ -277,4 +277,12 @@ void main() {
     ]);
     expect(chart.edges, hasLength(3));
   });
+
+  test('quotes around a title or a piped label are not part of it', () {
+    final chart = _chart(
+      'flowchart TD\nsubgraph s1["My group"]\nA -->|"yes"| B\nend',
+    );
+    expect(chart.subgraphs.single.title, 'My group');
+    expect(chart.edges.single.label, 'yes');
+  });
 }

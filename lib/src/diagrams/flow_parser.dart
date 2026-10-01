@@ -139,7 +139,7 @@ final class _FlowParser {
       if (close < 0) {
         throw MermaidParseException(number, 'expected "]" to close the title');
       }
-      title = rest.substring(bracket + 1, close).trim();
+      title = _unquote(rest.substring(bracket + 1, close).trim());
     } else {
       id = rest;
     }
@@ -188,7 +188,7 @@ final class _FlowParser {
       cursor
         ..position = scan.end
         ..skipSpaces();
-      var label = cursor.readPipeLabel() ?? _unquoteOrNull(scan.label);
+      var label = _unquoteOrNull(cursor.readPipeLabel() ?? scan.label);
       if (label != null && label.isEmpty) label = null;
       final targets = _nodeList(cursor, number);
       for (final from in sources) {
