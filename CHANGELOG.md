@@ -6,6 +6,43 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.1.5] - 2026-10-01
+
+A rename takes what pointed at it.
+
+Renaming or moving a note or a folder now rewrites the links other notes
+hold to it — wikilinks, Markdown links, embedded pictures and clips — each
+in the form it was written in, and carries the settings and the home-screen
+widgets that named it. Around it, a round of fixes from using the app on a
+phone and in the tray: pickers that no longer raise the keyboard, a link
+panel that answers a tap, an update check that only checks, and a window in
+the tray that stops drawing.
+
+**The first launch rebuilds each library's index once**, so that the
+pictures and clips a note embeds are found by a rename: a large library
+takes a moment longer to open the first time.
+
+### Added
+- **A renamed or moved note rewrites the links that point at it** (#507). Wikilinks by path and Markdown links follow the new path, a wikilink by name follows a rename, and `![[…]]` / `![…](…)` embeds follow the same way, so a renamed attachments folder keeps its pictures. Each link keeps its form — a relative Markdown link stays relative, a rooted one rooted — and a link that still finds the note as written is left alone. Open notes are saved before the rename and re-read after it; a note that will not save stops the rename
+- **A renamed or moved note carries the settings that name it** (#506): the quick note, the list, template, attachments and annotations folders, the journal's folder and template, and an Android home-screen note widget
+
+### Changed
+- **Check for updates only checks** (#524). It says whether a newer release is out, and a **Download** row under it turns on when one is; nothing is fetched until it is pressed. The update banner's button says **Download**
+- **A window hidden to the tray draws nothing** (#512): the caret's blink stops while the window is hidden or minimized, and only the focused note blinks at all
+- **The caret is as tall as its line** (#509), a trailing space included, and the typewriter light with it
+- **A live task box shows the hand under the mouse** (#505)
+- **The properties panel keeps room over it** (#501), apart from the day strip, the find bar and the note's own row
+
+### Fixed
+- **Android: a date or time picker never raises the keyboard** (#504): the field behind it lets go of the focus, the calendar and the clock open in their own modes, and a tablet uses the system pickers rather than the desktop's in-place panel with its typed time
+- **Android: the wikilink panel answers a tap**, with rows a finger can hit, and its footer names keys only once a physical keyboard has been used
+- **Android: the update banner clears the status bar** instead of sitting under it (#524)
+- **Android: the beta installs next to the official app**: the widgets' signature permission is named after each build's own application ID
+- **Typewriter mode no longer bounces a short note** under the properties panel (#522): with typewriter on, the panel follows the caret's line, not the scroll
+- **An export banner goes away on its own** (#508), with a close button on a wide window, as do the other snackbars that carry an action
+- **Windows: Show in file manager selects a file whose path has a space** (#510)
+- **A PDF engine that fails prints with a profile of its own, and says so** (#500), instead of falling back to a picture of the pages without a word
+
 ## [0.1.4] - 2026-09-29
 
 Say what the note carries.
