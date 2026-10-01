@@ -186,4 +186,14 @@ void main() {
       throwsA(isA<MermaidParseException>().having((e) => e.line, 'line', 4)),
     );
   });
+
+  test('a bare mention keeps the shape and label the node was given', () {
+    final chart = _chart('flowchart TD\nA[Start] --> B{Decide}\nB --> C');
+    expect(_node(chart, 'B').shape, FlowNodeShape.diamond);
+    expect(_node(chart, 'B').label, 'Decide');
+    // A later declaration with a shape of its own still wins.
+    final redrawn = _chart('flowchart TD\nA --> B\nB((Round))');
+    expect(_node(redrawn, 'B').shape, FlowNodeShape.circle);
+    expect(_node(redrawn, 'B').label, 'Round');
+  });
 }

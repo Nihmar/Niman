@@ -85,6 +85,7 @@ final class _FlowParser {
   final String source;
   final List<FlowNode> _nodes = [];
   final Map<String, FlowNode> _byId = {};
+  final Map<String, int> _indexOf = {};
   final List<FlowEdge> _edges = [];
   final List<FlowSubgraph> _subgraphs = [];
   final List<_SubgraphBuild> _stack = [];
@@ -276,30 +277,32 @@ final class _FlowParser {
         'expected a node id, found "${cursor.rest}"',
       );
     }
-    var shape = FlowNodeShape.rect;
-    String? label;
     final open = cursor.peek;
     if (open == '[' || open == '(' || open == '{' || open == '>') {
       final shaped = cursor.readShape(number);
-      shape = shaped.shape;
-      label = shaped.label;
+      return _declare(id, shaped.shape, shaped.label);
     }
-    return _declare(id, shape, label);
+    // A bare mention names a node; it does not redraw one already given a
+    // shape and a label (`B{Decide}` then `B --> C`).
+    if (_byId.containsKey(id)) return id;
+    return _declare(id, FlowNodeShape.rect, null);
   }
 
+  /// Declares node [id], or redraws it with the [shape] and [label] a later
+  /// statement wrote for it.
   String _declare(String id, FlowNodeShape shape, String? label) {
-    final existing = _byId[id];
+    final at = _indexOf[id];
     final text = (label == null || label.isEmpty) ? id : label;
     final node = FlowNode(id: id, label: text, shape: shape);
-    if (existing == null) {
+    _byId[id] = node;
+    if (at == null) {
+      _indexOf[id] = _nodes.length;
       _nodes.add(node);
-      _byId[id] = node;
       for (final build in _stack) {
         if (!build.nodeIds.contains(id)) build.nodeIds.add(id);
       }
     } else {
-      _byId[id] = node;
-      _nodes[_nodes.indexOf(existing)] = node;
+      _nodes[at] = node;
     }
     return id;
   }
