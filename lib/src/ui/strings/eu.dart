@@ -2910,4 +2910,12 @@ final class BasqueStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Pantaila osoa';
+  @override
+  String get commandInsertDiagram => 'Txertatu diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Txertatu mapa mentala';
+
+  @override
+  String get commandConvertListToMindMap => 'Bihurtu zerrenda mapa mental';
 }

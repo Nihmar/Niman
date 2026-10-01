@@ -2976,4 +2976,12 @@ final class GreekStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Πλήρης οθόνη';
+  @override
+  String get commandInsertDiagram => 'Εισαγωγή διαγράμματος (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Εισαγωγή νοητικού χάρτη';
+
+  @override
+  String get commandConvertListToMindMap => 'Μετατροπή λίστας σε νοητικό χάρτη';
 }

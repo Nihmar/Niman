@@ -2922,4 +2922,12 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Поўны экран';
+  @override
+  String get commandInsertDiagram => 'Уставіць дыяграму (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Уставіць карту думак';
+
+  @override
+  String get commandConvertListToMindMap => 'Пераўтварыць спіс у карту думак';
 }

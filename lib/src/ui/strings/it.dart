@@ -2899,4 +2899,12 @@ final class ItalianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Schermo intero';
+  @override
+  String get commandInsertDiagram => 'Inserisci diagramma (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Inserisci mappa mentale';
+
+  @override
+  String get commandConvertListToMindMap => 'Converti elenco in mappa mentale';
 }

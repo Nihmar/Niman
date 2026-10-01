@@ -2925,4 +2925,12 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Повний екран';
+  @override
+  String get commandInsertDiagram => 'Вставити діаграму (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Вставити карту думок';
+
+  @override
+  String get commandConvertListToMindMap => 'Перетворити список на карту думок';
 }

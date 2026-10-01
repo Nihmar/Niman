@@ -2892,4 +2892,13 @@ final class SlovakStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Celá obrazovka';
+  @override
+  String get commandInsertDiagram => 'Vložiť diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Vložiť myšlienkovú mapu';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Previesť zoznam na myšlienkovú mapu';
 }

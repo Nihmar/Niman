@@ -2934,4 +2934,12 @@ final class PolishStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Pełny ekran';
+  @override
+  String get commandInsertDiagram => 'Wstaw diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Wstaw mapę myśli';
+
+  @override
+  String get commandConvertListToMindMap => 'Przekształć listę w mapę myśli';
 }

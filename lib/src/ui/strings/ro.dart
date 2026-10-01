@@ -2930,4 +2930,12 @@ final class RomanianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Ecran complet';
+  @override
+  String get commandInsertDiagram => 'Inserează diagramă (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Inserează hartă mentală';
+
+  @override
+  String get commandConvertListToMindMap => 'Transformă lista în hartă mentală';
 }

@@ -2907,4 +2907,12 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Целосен екран';
+  @override
+  String get commandInsertDiagram => 'Вметни дијаграм (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Вметни ментална мапа';
+
+  @override
+  String get commandConvertListToMindMap => 'Претвори листа во ментална мапа';
 }

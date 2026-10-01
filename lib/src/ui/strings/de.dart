@@ -2949,4 +2949,12 @@ final class GermanStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Vollbild';
+  @override
+  String get commandInsertDiagram => 'Diagramm einfügen (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Mindmap einfügen';
+
+  @override
+  String get commandConvertListToMindMap => 'Liste in Mindmap umwandeln';
 }

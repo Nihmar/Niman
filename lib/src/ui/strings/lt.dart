@@ -2921,4 +2921,13 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Visas ekranas';
+  @override
+  String get commandInsertDiagram => 'Įterpti diagramą (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Įterpti minčių žemėlapį';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Konvertuoti sąrašą į minčių žemėlapį';
 }

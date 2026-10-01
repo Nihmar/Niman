@@ -2866,4 +2866,12 @@ final class DanishStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Fuld skærm';
+  @override
+  String get commandInsertDiagram => 'Indsæt diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Indsæt mindmap';
+
+  @override
+  String get commandConvertListToMindMap => 'Konverter liste til mindmap';
 }

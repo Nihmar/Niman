@@ -2904,4 +2904,12 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Celoten zaslon';
+  @override
+  String get commandInsertDiagram => 'Vstavi diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Vstavi miselni vzorec';
+
+  @override
+  String get commandConvertListToMindMap => 'Pretvori seznam v miselni vzorec';
 }

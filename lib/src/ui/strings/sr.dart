@@ -2910,4 +2910,12 @@ final class SerbianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Цео екран';
+  @override
+  String get commandInsertDiagram => 'Убаци дијаграм (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Убаци мапу ума';
+
+  @override
+  String get commandConvertListToMindMap => 'Претвори листу у мапу ума';
 }

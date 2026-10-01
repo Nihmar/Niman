@@ -2912,4 +2912,12 @@ final class BosnianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Cijeli ekran';
+  @override
+  String get commandInsertDiagram => 'Umetni dijagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Umetni mentalnu mapu';
+
+  @override
+  String get commandConvertListToMindMap => 'Pretvori listu u mentalnu mapu';
 }

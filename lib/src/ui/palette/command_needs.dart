@@ -60,6 +60,9 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.moveNote ||
   AppCommand.deleteNote => const {CommandNeed.openNote},
   AppCommand.formatNote ||
+  AppCommand.insertDiagram ||
+  AppCommand.insertMindMap ||
+  AppCommand.convertListToMindMap ||
   AppCommand.exportNote ||
   AppCommand.noteHistory => const {CommandNeed.textNote},
   AppCommand.closeTab ||

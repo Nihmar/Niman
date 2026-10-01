@@ -2924,4 +2924,12 @@ final class SpanishStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Pantalla completa';
+  @override
+  String get commandInsertDiagram => 'Insertar diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Insertar mapa mental';
+
+  @override
+  String get commandConvertListToMindMap => 'Convertir la lista en mapa mental';
 }

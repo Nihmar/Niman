@@ -2877,4 +2877,12 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Skjár í fullri stærð';
+  @override
+  String get commandInsertDiagram => 'Setja inn skýringarmynd (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Setja inn hugarkort';
+
+  @override
+  String get commandConvertListToMindMap => 'Breyta lista í hugarkort';
 }

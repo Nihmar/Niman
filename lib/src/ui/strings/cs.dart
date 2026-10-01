@@ -2882,4 +2882,13 @@ final class CzechStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Celá obrazovka';
+  @override
+  String get commandInsertDiagram => 'Vložit diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Vložit myšlenkovou mapu';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Převést seznam na myšlenkovou mapu';
 }

@@ -2888,4 +2888,12 @@ final class HungarianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Teljes képernyő';
+  @override
+  String get commandInsertDiagram => 'Diagram beszúrása (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Elmetérkép beszúrása';
+
+  @override
+  String get commandConvertListToMindMap => 'Lista átalakítása elmetérképpé';
 }

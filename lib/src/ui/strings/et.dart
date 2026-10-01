@@ -2837,4 +2837,12 @@ final class EstonianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Täisekraan';
+  @override
+  String get commandInsertDiagram => 'Lisa diagramm (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Lisa mõttemap';
+
+  @override
+  String get commandConvertListToMindMap => 'Teisenda loend mõttemapiks';
 }

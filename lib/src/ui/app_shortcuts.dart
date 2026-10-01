@@ -74,6 +74,15 @@ enum AppCommand {
   /// Tidy the note's Markdown (#227).
   formatNote,
 
+  /// Insert a Mermaid diagram fence at the caret (#530).
+  insertDiagram,
+
+  /// Insert a mind map fence at the caret (#530).
+  insertMindMap,
+
+  /// Turn the list at the caret into a mind map (#530).
+  convertListToMindMap,
+
   /// Write the note on screen out as a file (#24).
   exportNote,
 
@@ -279,6 +288,9 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.zenMode => AppStrings.zenMode,
   AppCommand.typewriterMode => AppStrings.typewriterTitle,
   AppCommand.formatNote => AppStrings.formatNoteTitle,
+  AppCommand.insertDiagram => AppStrings.commandInsertDiagram,
+  AppCommand.insertMindMap => AppStrings.commandInsertMindMap,
+  AppCommand.convertListToMindMap => AppStrings.commandConvertListToMindMap,
   AppCommand.exportNote => AppStrings.exportTitle,
   AppCommand.exportLibrary => AppStrings.exportLibraryTitle,
   AppCommand.markdownCheatsheet => AppStrings.cheatsheetTitle,

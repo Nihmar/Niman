@@ -2899,4 +2899,12 @@ final class FinnishStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Koko näyttö';
+  @override
+  String get commandInsertDiagram => 'Lisää kaavio (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Lisää miellekartta';
+
+  @override
+  String get commandConvertListToMindMap => 'Muunna luettelo miellekartaksi';
 }

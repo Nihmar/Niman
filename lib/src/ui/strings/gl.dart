@@ -2900,4 +2900,12 @@ final class GalicianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Pantalla completa';
+  @override
+  String get commandInsertDiagram => 'Inserir diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Inserir mapa mental';
+
+  @override
+  String get commandConvertListToMindMap => 'Converter lista en mapa mental';
 }

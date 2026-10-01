@@ -2917,4 +2917,12 @@ final class DutchStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Volledig scherm';
+  @override
+  String get commandInsertDiagram => 'Diagram invoegen (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Mindmap invoegen';
+
+  @override
+  String get commandConvertListToMindMap => 'Lijst omzetten in mindmap';
 }

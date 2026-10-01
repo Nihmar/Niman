@@ -2898,4 +2898,12 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Tela cheia';
+  @override
+  String get commandInsertDiagram => 'Inserir diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Inserir mapa mental';
+
+  @override
+  String get commandConvertListToMindMap => 'Converter lista em mapa mental';
 }

@@ -2836,4 +2836,12 @@ final class HindiStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'पूर्ण स्क्रीन';
+  @override
+  String get commandInsertDiagram => 'आरेख डालें (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'माइंड मैप डालें';
+
+  @override
+  String get commandConvertListToMindMap => 'सूची को माइंड मैप में बदलें';
 }

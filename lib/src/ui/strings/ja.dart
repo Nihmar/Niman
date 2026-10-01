@@ -2618,4 +2618,12 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get diagramFullScreen => '全画面';
+  @override
+  String get commandInsertDiagram => '図を挿入（Mermaid）';
+
+  @override
+  String get commandInsertMindMap => 'マインドマップを挿入';
+
+  @override
+  String get commandConvertListToMindMap => 'リストをマインドマップに変換';
 }

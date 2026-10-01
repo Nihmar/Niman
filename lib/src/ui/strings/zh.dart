@@ -2534,4 +2534,12 @@ final class ChineseStrings extends Strings {
 
   @override
   String get diagramFullScreen => '全屏';
+  @override
+  String get commandInsertDiagram => '插入图表（Mermaid）';
+
+  @override
+  String get commandInsertMindMap => '插入思维导图';
+
+  @override
+  String get commandConvertListToMindMap => '将列表转换为思维导图';
 }

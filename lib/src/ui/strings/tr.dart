@@ -2843,4 +2843,12 @@ final class TurkishStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Tam ekran';
+  @override
+  String get commandInsertDiagram => 'Diyagram ekle (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Zihin haritası ekle';
+
+  @override
+  String get commandConvertListToMindMap => 'Listeyi zihin haritasına dönüştür';
 }

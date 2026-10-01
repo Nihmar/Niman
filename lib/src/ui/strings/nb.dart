@@ -2865,4 +2865,12 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Fullskjerm';
+  @override
+  String get commandInsertDiagram => 'Sett inn diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Sett inn tankekart';
+
+  @override
+  String get commandConvertListToMindMap => 'Gjør listen om til tankekart';
 }

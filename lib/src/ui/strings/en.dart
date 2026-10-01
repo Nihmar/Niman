@@ -2842,4 +2842,12 @@ final class EnglishStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Full screen';
+  @override
+  String get commandInsertDiagram => 'Insert diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Insert mind map';
+
+  @override
+  String get commandConvertListToMindMap => 'Convert list to mind map';
 }

@@ -2892,4 +2892,13 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Цял екран';
+  @override
+  String get commandInsertDiagram => 'Вмъкни диаграма (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Вмъкни интелектуална карта';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Превърни списъка в интелектуална карта';
 }

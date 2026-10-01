@@ -2878,4 +2878,12 @@ final class LatvianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Pilnekrāns';
+  @override
+  String get commandInsertDiagram => 'Ievietot diagrammu (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Ievietot prāta karti';
+
+  @override
+  String get commandConvertListToMindMap => 'Pārvērst sarakstu prāta kartē';
 }

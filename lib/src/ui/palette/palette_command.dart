@@ -52,6 +52,9 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.switchEditor ||
   AppCommand.typewriterMode ||
   AppCommand.formatNote ||
+  AppCommand.insertDiagram ||
+  AppCommand.insertMindMap ||
+  AppCommand.convertListToMindMap ||
   AppCommand.markdownCheatsheet => PaletteGroup.editor,
   AppCommand.toggleSidebar ||
   AppCommand.toggleDock ||

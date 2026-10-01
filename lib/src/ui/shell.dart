@@ -21,6 +21,7 @@ import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/export/epub_note.dart';
@@ -3007,6 +3008,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // switch are hidden, and this is the way to it (#70).
       AppCommand.typewriterMode: _toggleTypewriter,
       AppCommand.formatNote: () => unawaited(_formatNote()),
+      AppCommand.insertDiagram: () =>
+          _panelNote?.insertAtCaret(mermaidDiagramTemplate),
+      AppCommand.insertMindMap: () =>
+          _panelNote?.insertAtCaret(mermaidMindMapTemplate),
+      AppCommand.convertListToMindMap: () => _panelNote?.convertListToMindMap(),
       AppCommand.exportNote: () => unawaited(_exportShownNote()),
       AppCommand.exportLibrary: () =>
           unawaited(_exportFolder('', library: true)),

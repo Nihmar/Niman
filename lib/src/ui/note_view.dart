@@ -22,6 +22,7 @@ import 'package:niman/src/editor/find_bar.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/editor/list_tally_edit.dart';
+import 'package:niman/src/editor/list_to_mindmap.dart' as mindmap;
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -476,6 +477,20 @@ final class _NoteViewState extends State<NoteView>
       // A block keeps a blank line from the lines either side.
       context: 1,
     );
+  }
+
+  @override
+  void convertListToMindMap() {
+    if (!canInsert) return;
+    final surface = _surface;
+    if (surface == null) return;
+    final at = surface.selection;
+    final edit = mindmap.convertListToMindMap(
+      text: _editText,
+      selection: TextSelection.collapsed(offset: at.start),
+    );
+    if (edit == null) return;
+    _applyMarkdownEdit(edit);
   }
 
   /// The unified note's revision the word count and the outline were last

@@ -2913,4 +2913,12 @@ final class CroatianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Cijeli zaslon';
+  @override
+  String get commandInsertDiagram => 'Umetni dijagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Umetni mentalnu mapu';
+
+  @override
+  String get commandConvertListToMindMap => 'Pretvori popis u mentalnu mapu';
 }

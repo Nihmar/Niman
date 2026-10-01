@@ -2889,4 +2889,12 @@ final class SwedishStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Helskärm';
+  @override
+  String get commandInsertDiagram => 'Infoga diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Infoga tankekarta';
+
+  @override
+  String get commandConvertListToMindMap => 'Omvandla lista till tankekarta';
 }

@@ -2968,4 +2968,13 @@ final class FrenchStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Plein écran';
+  @override
+  String get commandInsertDiagram => 'Insérer un diagramme (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Insérer une carte mentale';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Convertir la liste en carte mentale';
 }

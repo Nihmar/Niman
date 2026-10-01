@@ -2903,4 +2903,12 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Ekran i plotë';
+  @override
+  String get commandInsertDiagram => 'Fut diagramë (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Fut hartë mendore';
+
+  @override
+  String get commandConvertListToMindMap => 'Shndërro listën në hartë mendore';
 }

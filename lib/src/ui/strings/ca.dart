@@ -2929,4 +2929,13 @@ final class CatalanStrings extends Strings {
 
   @override
   String get diagramFullScreen => 'Pantalla completa';
+  @override
+  String get commandInsertDiagram => 'Insereix diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Insereix mapa mental';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Converteix la llista en mapa mental';
 }

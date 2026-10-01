@@ -349,6 +349,9 @@ abstract base class Strings {
   // Diagrams (#530): the full-screen view and the window that holds it.
   String get diagramTitle;
   String get diagramFullScreen;
+  String get commandInsertDiagram;
+  String get commandInsertMindMap;
+  String get commandConvertListToMindMap;
   String get tallySourceLabel;
   String get tallyCutLabel;
   String get tallyCutDash;
