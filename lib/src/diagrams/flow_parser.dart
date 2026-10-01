@@ -231,8 +231,10 @@ final class _FlowParser {
     final open = cursor.peek;
     if (open == '[' || open == '(' || open == '{' || open == '>') {
       final shaped = cursor.readShape(number);
+      cursor.skipClass();
       return _declare(id, shaped.shape, shaped.label);
     }
+    cursor.skipClass();
     // A bare mention names a node; it does not redraw one already given a
     // shape and a label (`B{Decide}` then `B --> C`).
     if (_byId.containsKey(id)) return _mention(id);
@@ -389,6 +391,25 @@ final class _Cursor {
       position++;
     }
     return source.substring(start, position);
+  }
+
+  /// Steps over a node's `:::class` shorthand: a class is a colour a note's
+  /// diagram is drawn without, like a `classDef`.
+  void skipClass() {
+    if (!source.startsWith(':::', position)) return;
+    position += 3;
+    while (!atEnd && !_classEnds) {
+      position++;
+    }
+  }
+
+  /// Whether a `:::class` name ends at [position]: at a space, a `&`, or
+  /// the edge after it (`A:::warn-->B`); a lone `-` is the name's own.
+  bool get _classEnds {
+    final ch = source[position];
+    if (' \t&=<'.contains(ch)) return true;
+    return source.startsWith('--', position) ||
+        source.startsWith('-.', position);
   }
 
   String? readPipeLabel() {

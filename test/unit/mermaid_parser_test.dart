@@ -285,4 +285,13 @@ void main() {
     expect(chart.subgraphs.single.title, 'My group');
     expect(chart.edges.single.label, 'yes');
   });
+
+  test('a node may carry a :::class, drawn without it', () {
+    final chart = _chart(
+      'flowchart TD\nA:::warn --> B[Box]:::ok-class\nB:::x-->C',
+    );
+    expect(chart.nodes.map((n) => n.id), ['A', 'B', 'C']);
+    expect(_node(chart, 'B').label, 'Box');
+    expect(chart.edges, hasLength(2));
+  });
 }
