@@ -95,6 +95,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/templates/checker.dart';
 import 'package:niman/src/templates/template_commands.dart';
+import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 
@@ -4186,7 +4187,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final panel = _suggest;
     if (panel == null) return const SizedBox.shrink();
     return ListenableBuilder(
-      listenable: Listenable.merge([_scroll, _caretRect]),
+      // A keyboard plugged in while the panel is up brings its keys along.
+      listenable: Listenable.merge([
+        _scroll,
+        _caretRect,
+        KeyboardPresence.shared,
+      ]),
       builder: (context, _) => _suggestAt(context, panel),
     );
   }
@@ -4206,6 +4212,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final pane = box == null
         ? null
         : toOverlay(box.localToGlobal(Offset.zero) & box.size);
+    // A row is tapped on a touch screen, and taller for it; the keys are
+    // named only where a keyboard has been seen to press them.
+    final touch = switch (Theme.of(context).platform) {
+      TargetPlatform.android || TargetPlatform.iOS => true,
+      _ => false,
+    };
+    final rowHeight = touch
+        ? wikilinkPanelTouchRowHeight
+        : wikilinkPanelRowHeight;
+    final keys = KeyboardPresence.shared.attached;
     return WikilinkPanelPositioned(
       caret: toOverlay(caret),
       pane: pane,
@@ -4213,6 +4229,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         panel.entries.length,
         panel.kind,
         hasBodyNote: panel.kind == WikilinkPanelKind.book,
+        rowHeight: rowHeight,
+        keys: keys,
       ),
       child: WikilinkPanel(
         kind: panel.kind,
@@ -4220,8 +4238,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         selected: panel.selected,
         query: panel.query.matchText,
         named: panel.named,
+        onPick: _pickSuggest,
+        keys: keys,
+        rowHeight: rowHeight,
       ),
     );
+  }
+
+  /// Completes the link with the row at [index], tapped or clicked: the
+  /// same edit Enter makes on the selected one.
+  void _pickSuggest(int index) {
+    final panel = _suggest;
+    if (panel == null || index >= panel.entries.length) return;
+    panel.selected = index;
+    _acceptSuggest();
   }
 
   /// Whether the suggester panel is up, for the shell's tour and the tests.

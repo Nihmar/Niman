@@ -12,6 +12,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/render/wikilink_panel.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/ui/keyboard_presence.dart';
 
 import '../fakes/fake_wikilink_suggester.dart';
 
@@ -387,6 +388,55 @@ void main() {
     expect(find.text('Tab'), findsOneWidget);
     expect(find.text('insert'), findsOneWidget);
     expect(find.text('close'), findsOneWidget);
+  });
+
+  testWidgets('a tapped row completes the link, the one tapped', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    final state = await pump(tester, buffer, _library());
+
+    await type(tester, '[[Note');
+    final entries = panel(tester).entries;
+    final meeting = entries.indexWhere(
+      (entry) => entry is NoteSuggestion && entry.name == 'Meeting notes',
+    );
+    expect(meeting, greaterThan(0), reason: 'not the selected row');
+
+    await tester.tap(find.byKey(Key('wikilink-panel-row-$meeting')));
+    await tester.pump();
+
+    expect(buffer.text, '[[Meeting notes]]');
+    expect(state.isSuggesterShown, isFalse, reason: 'completing closes it');
+  });
+
+  testWidgets('on a phone the rows are a fingertip tall', (tester) async {
+    // The tests run as Android: rows there are tapped.
+    await pump(tester, SourceBuffer.fromText(''), _library());
+    await type(tester, '[[');
+    expect(panel(tester).rowHeight, wikilinkPanelTouchRowHeight);
+    expect(
+      tester.getSize(find.byKey(const Key('wikilink-panel-row-0'))).height,
+      wikilinkPanelTouchRowHeight,
+    );
+  });
+
+  group('with no keyboard seen', () {
+    late bool wasAttached;
+    setUp(() {
+      wasAttached = KeyboardPresence.shared.attached;
+      KeyboardPresence.shared.attached = false;
+    });
+    tearDown(() => KeyboardPresence.shared.attached = wasAttached);
+
+    testWidgets('the footer names no keys', (tester) async {
+      await pump(tester, SourceBuffer.fromText(''), _library());
+      await type(tester, '[[');
+
+      expect(find.byKey(const Key('wikilink-panel')), findsOneWidget);
+      expect(find.text('Tab'), findsNothing);
+      expect(find.text('Esc'), findsNothing);
+    });
   });
 
   testWidgets('a name that matches nothing says so', (tester) async {

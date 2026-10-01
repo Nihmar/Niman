@@ -27,8 +27,12 @@ enum WikilinkPanelKind {
 /// The width the panel is drawn at (the drawing's 300).
 const double wikilinkPanelWidth = 300;
 
-/// The height of one list row.
+/// The height of one list row, under a mouse.
 const double wikilinkPanelRowHeight = 26;
+
+/// The height of one list row on a touch screen: a row is tapped there, and
+/// 26 pixels is less than a fingertip.
+const double wikilinkPanelTouchRowHeight = 40;
 
 /// The panel's height at most, for the caller that flips it above the caret
 /// when there is no room below.
@@ -36,11 +40,14 @@ double wikilinkPanelHeight(
   int rows,
   WikilinkPanelKind kind, {
   bool hasBodyNote = false,
+  double rowHeight = wikilinkPanelRowHeight,
+  bool keys = true,
 }) {
-  final body = rows == 0 ? 58.0 : rows * wikilinkPanelRowHeight;
+  final body = rows == 0 ? 58.0 : rows * rowHeight;
   final caption = kind == WikilinkPanelKind.notes ? 0.0 : 25.0;
   final note = hasBodyNote ? 40.0 : 0.0;
-  return caption + body + note + 27.0;
+  final footer = keys ? 27.0 : 0.0;
+  return caption + body + note + footer;
 }
 
 /// The rows and the keys, drawn where the caret is.
@@ -55,6 +62,9 @@ final class WikilinkPanel extends StatelessWidget {
     required this.selected,
     required this.query,
     this.named = '',
+    this.onPick,
+    this.keys = true,
+    this.rowHeight = wikilinkPanelRowHeight,
     super.key,
   });
 
@@ -72,6 +82,17 @@ final class WikilinkPanel extends StatelessWidget {
 
   /// The note (or book) named before `#`; empty means the note being edited.
   final String named;
+
+  /// Chooses the row at the given index, as Enter does on the selected one:
+  /// a tap or a click on a row. Null leaves the rows to the keys.
+  final ValueChanged<int>? onPick;
+
+  /// Whether the footer names the keys: only where there is a keyboard to
+  /// press them — a phone without one is not told about Tab and Esc.
+  final bool keys;
+
+  /// The height of one row: taller on a touch screen, where it is tapped.
+  final double rowHeight;
 
   /// Whether the book form carries its explaining note.
   bool get _hasBodyNote => kind == WikilinkPanelKind.book && entries.isNotEmpty;
@@ -105,9 +126,9 @@ final class WikilinkPanel extends StatelessWidget {
               _empty(context)
             else
               for (var i = 0; i < entries.length; i++)
-                _row(context, entries[i], selected: i == selected),
+                _row(context, i, selected: i == selected),
             if (_hasBodyNote) _bodyNote(context),
-            _footer(context),
+            if (keys) _footer(context),
           ],
         ),
       ),
@@ -177,14 +198,13 @@ final class WikilinkPanel extends StatelessWidget {
     );
   }
 
-  Widget _row(
-    BuildContext context,
-    SuggestEntry entry, {
-    required bool selected,
-  }) {
+  Widget _row(BuildContext context, int index, {required bool selected}) {
     final scheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      height: wikilinkPanelRowHeight,
+    final entry = entries[index];
+    final pick = onPick;
+    final row = SizedBox(
+      key: Key('wikilink-panel-row-$index'),
+      height: rowHeight,
       child: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -213,6 +233,15 @@ final class WikilinkPanel extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+    if (pick == null) return row;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => pick(index),
+        child: row,
       ),
     );
   }
