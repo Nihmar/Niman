@@ -45,9 +45,12 @@
          own PendingIntents (WidgetBackgroundTemplate, NoteItemAddActivity
          and the plugin's getBroadcast), which run with this app's identity,
          so a signature-level permission closes the path to other apps
-         without touching the widget flow. -->
+         without touching the widget flow. Named after the application ID:
+         two packages signed with different keys cannot define the same
+         permission, and a fixed name made the beta refuse to install next
+         to the official app (INSTALL_FAILED_DUPLICATE_PERMISSION). -->
     <permission
-        android:name="dev.niman.niman.permission.WIDGET_TAP"
+        android:name="${applicationId}.permission.WIDGET_TAP"
         android:protectionLevel="signature" />
 
     <!-- Auto-backup (issue #383): the default `allowBackup` is true, which
@@ -167,7 +170,7 @@
         <receiver
             android:name=".WidgetTapReceiver"
             android:exported="true"
-            android:permission="dev.niman.niman.permission.WIDGET_TAP">
+            android:permission="${applicationId}.permission.WIDGET_TAP">
             <intent-filter>
                 <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
             </intent-filter>
@@ -175,7 +178,7 @@
         <receiver
             android:name="es.antonborri.home_widget.HomeWidgetBackgroundReceiver"
             android:exported="true"
-            android:permission="dev.niman.niman.permission.WIDGET_TAP">
+            android:permission="${applicationId}.permission.WIDGET_TAP">
             <intent-filter>
                 <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
             </intent-filter>
