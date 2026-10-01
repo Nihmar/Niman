@@ -48,6 +48,67 @@ void main() {
     expect(find.byKey(const Key('diagram-full-screen-close')), findsOneWidget);
   });
 
+  testWidgets('a diagram wider than the pane is scaled to fit it whole', (
+    tester,
+  ) async {
+    const width = 240.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: width,
+              child: MarkdownReadView(
+                buffer: SourceBuffer.fromText(
+                  '```mermaid\nflowchart LR\n'
+                  'A[First step] --> B[Second step] --> C[Third step]'
+                  ' --> D[Fourth step]\n```\n',
+                ),
+                parser: BlockParser(),
+                mathCache: MathCache(),
+                diagramCache: DiagramCache(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final paint = find.byWidgetPredicate(
+      (widget) => widget is CustomPaint && widget.painter is DiagramPainter,
+    );
+    final painter = tester.widget<CustomPaint>(paint).painter!;
+    final drawing = (painter as DiagramPainter).layout.size;
+    expect(drawing.width, greaterThan(width));
+    // Painted at its own size — not cut to the pane's — and shrunk inside it.
+    expect(tester.getSize(paint), drawing);
+    expect(tester.getRect(paint).right, lessThanOrEqualTo(width + 0.01));
+  });
+
+  testWidgets('the full screen view is drawn on the theme surface', (
+    tester,
+  ) async {
+    await _pump(tester, '```mermaid\nflowchart TD\nA --> B\n```\n');
+    await tester.tap(find.byKey(const Key('diagram-full-screen')));
+    await tester.pumpAndSettle();
+    final context = tester.element(
+      find.byKey(const Key('diagram-full-screen-close')),
+    );
+    final scaffold = tester.widget<Scaffold>(
+      find
+          .ancestor(
+            of: find.byKey(const Key('diagram-full-screen-close')),
+            matching: find.byType(Scaffold),
+          )
+          .first,
+    );
+    // The diagram's dark lines are drawn for the theme's own surface, not
+    // over the near-black barrier, where they would vanish.
+    expect(scaffold.backgroundColor, Theme.of(context).colorScheme.surface);
+  });
+
   testWidgets('a syntax error stays source, with the line and message', (
     tester,
   ) async {

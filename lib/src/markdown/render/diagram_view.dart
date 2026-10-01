@@ -65,11 +65,16 @@ final class BlockDiagramView extends StatelessWidget {
     DiagramLayout layout,
     DiagramStyle style,
   ) {
+    // A diagram wider than the pane is shrunk to fit it, never cut: the
+    // full screen view is where it is read at its own size.
     final canvas = GestureDetector(
       onTap: onTapSource == null ? null : () => onTapSource!(1),
-      child: CustomPaint(
-        size: layout.size,
-        painter: DiagramPainter(layout: layout, style: style),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: CustomPaint(
+          size: layout.size,
+          painter: DiagramPainter(layout: layout, style: style),
+        ),
       ),
     );
     return Padding(
@@ -147,7 +152,9 @@ final class BlockDiagramView extends StatelessWidget {
     unawaited(
       showDialog<void>(
         context: context,
-        barrierColor: Colors.black87,
+        // The view is opaque and keeps to the safe area itself, so it
+        // covers the whole screen rather than leaving the barrier's bars.
+        useSafeArea: false,
         barrierLabel: AppStrings.diagramTitle,
         builder: (context) => _DiagramFullScreen(layout: layout, style: style),
       ),
@@ -164,8 +171,11 @@ final class _DiagramFullScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    // The theme's surface, which the diagram's palette is chosen for: over
+    // the dark barrier a light theme's dark lines and labels would vanish.
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: Stack(
           children: [
@@ -189,7 +199,8 @@ final class _DiagramFullScreen extends StatelessWidget {
               right: 8,
               child: IconButton(
                 key: const Key('diagram-full-screen-close'),
-                icon: const Icon(Icons.close, color: Colors.white),
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                icon: Icon(Icons.close, color: colors.onSurface),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
