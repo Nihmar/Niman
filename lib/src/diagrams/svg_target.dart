@@ -8,6 +8,9 @@ library;
 import 'package:flutter/painting.dart';
 import 'package:niman/src/diagrams/diagram_target.dart';
 
+/// The control characters XML 1.0 does not allow, tab and line ends aside.
+final RegExp _notXml = RegExp('[\x00-\x08\x0B\x0C\x0E-\x1F]');
+
 /// Writes a diagram as an SVG string.
 final class SvgDiagramTarget implements DiagramTarget {
   /// Creates a target for a drawing of [width] by [height].
@@ -153,7 +156,10 @@ final class SvgDiagramTarget implements DiagramTarget {
     return rounded.replaceFirst(RegExp(r'\.?0+$'), '');
   }
 
+  /// [text] as XML character data: the markup characters escaped, and the
+  /// control characters XML has no place for dropped.
   static String _escape(String text) => text
+      .replaceAll(_notXml, '')
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')

@@ -72,4 +72,15 @@ void main() {
     ).paint(CanvasDiagramTarget(canvas));
     recorder.endRecording().dispose();
   });
+
+  test('a control character in a label is dropped, not written', () {
+    // XML has no such characters, outside a few: one in an EPUB's XHTML
+    // makes the whole chapter ill-formed.
+    final svg = diagramSvg(
+      'flowchart TD\nA["form \u000Cfeed \u0007bell"] --> B',
+      const DiagramStyle(),
+    )!;
+    expect(svg, contains('form feed bell'));
+    expect(svg.codeUnits.where((unit) => unit < 0x20), isEmpty);
+  });
 }
