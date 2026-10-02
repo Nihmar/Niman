@@ -187,6 +187,7 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
       [for (final edge in edges) transformer.edge(edge)],
       turned,
       [for (final node in nodes) node.rect],
+      padding: style.edgeLabelPadding.left,
     ),
     subgraphs: turned,
     lines: lines,
@@ -195,7 +196,10 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
 
 /// The gap below each rank: the style's, or more where an edge to the next
 /// rank carries a label, end texts or caps that need the room — a label
-/// on a short edge sat on its caps and on the texts at its ends.
+/// on a short edge sat on its caps and on the texts at its ends. A
+/// labelled edge into or out of a subgraph also crosses its box's padding
+/// and title band in the gap: room for those too, so the label fits
+/// wholly in the box or wholly out of it rather than across its outline.
 List<double> _rankGaps(
   Flowchart chart,
   List<List<String>> layers,
@@ -223,6 +227,13 @@ List<double> _rankGaps(
     return math.max(cap.isMarked ? _capRoom : 0, room);
   }
 
+  final members = [
+    for (final subgraph in chart.subgraphs) subgraph.nodeIds.toSet(),
+  ];
+  // What a box's outline takes in the gap: its padding and its title band
+  // (`flowSubgraphBoxes`).
+  final outline = style.subgraphPadding + line + 8;
+
   final gaps = List<double>.filled(layers.length, style.rankGap);
   for (final edge in chart.edges) {
     final r = rank[edge.from];
@@ -236,7 +247,12 @@ List<double> _rankGaps(
     final need = label == 0
         ? end(edge.start, edge.startLabel) + end(edge.end, edge.endLabel)
         : 2 * ends + label + style.edgeLabelPadding.vertical + 4;
-    gaps[r] = math.max(gaps[r], need);
+    final crossed = label == 0
+        ? 0
+        : members
+              .where((m) => m.contains(edge.from) != m.contains(edge.to))
+              .length;
+    gaps[r] = math.max(gaps[r], need + crossed * outline);
   }
   return gaps;
 }
