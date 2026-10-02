@@ -3,6 +3,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/er_parser.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/flow_parser.dart';
 import 'package:niman/src/diagrams/flowchart_layout.dart';
@@ -229,6 +230,57 @@ void main() {
       final label = layout.edges.first.labelBox!;
       final title = layout.subgraphs.single.titleRect;
       expect(label.overlaps(title), isFalse, reason: direction);
+    }
+  });
+
+  test('a bent edge stays clear of a node all down its height', () {
+    final layout = _layout(
+      'flowchart TD\nC[CUSTOMER] --> O[An ORDER with a long, long label]\n'
+      'C --> D[DELIVERY-ADDRESS]\nP[PRODUCT] --> L[LINE-ITEM]\nO --> L',
+    );
+    final long = layout.edges.firstWhere((e) => e.edge.from == 'P');
+    for (final id in ['O', 'D']) {
+      final rect = layout.nodeOf(id)!.rect;
+      for (var i = 1; i < 100; i++) {
+        final t = i / 100;
+        final u = 1 - t;
+        final point =
+            long.start * (u * u * u) +
+            long.control1 * (3 * u * u * t) +
+            long.control2 * (3 * u * t * t) +
+            long.end * (t * t * t);
+        expect(rect.contains(point), isFalse, reason: '$id at t=$t');
+      }
+    }
+  });
+
+  test('a relationship past an entity keeps clear of it', () {
+    final layout = layoutFlowchart(
+      parseErDiagram(
+        'erDiagram\nCUSTOMER ||--o{ ORDER : places\n'
+        'ORDER ||--|{ LINE-ITEM : contains\n'
+        'CUSTOMER }|..|{ DELIVERY-ADDRESS : uses\n'
+        'PRODUCT |o--o{ LINE-ITEM : "appears in"\n'
+        'CUSTOMER {\nstring name\nstring custNumber PK\nstring sector\n}\n'
+        'ORDER {\nint orderNumber PK\n'
+        'string deliveryAddress FK "where it goes"\n}',
+      ),
+      const DiagramStyle(),
+    );
+    final long = layout.edges.firstWhere((e) => e.edge.from == 'PRODUCT');
+    for (final node in layout.nodes) {
+      if (node.node.id == 'PRODUCT' || node.node.id == 'LINE-ITEM') continue;
+      for (var i = 1; i < 100; i++) {
+        final t = i / 100;
+        final u = 1 - t;
+        final point =
+            long.start * (u * u * u) +
+            long.control1 * (3 * u * u * t) +
+            long.control2 * (3 * u * t * t) +
+            long.end * (t * t * t);
+        expect(node.rect.contains(point), isFalse, reason: node.node.id);
+      }
+      expect(node.rect.overlaps(long.labelBox!), isFalse);
     }
   });
 }

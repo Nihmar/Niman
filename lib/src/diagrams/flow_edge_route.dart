@@ -19,6 +19,9 @@ const double endTextGap = 4;
 /// How far an edge keeps from a node it goes round.
 const double _clearance = 16;
 
+/// How many steps along a curve are checked for the nodes it goes round.
+const int _samples = 24;
+
 /// How far a cycle's way back bulges past the nodes it goes round.
 const double _backBulge = 36;
 
@@ -70,7 +73,7 @@ LaidOutEdge routeFlowEdge(
     start = Offset(from.center.dx, from.bottom);
     end = Offset(to.center.dx, to.top);
     final bend = (end.dy - start.dy) * _curveBend;
-    final aside = _aside(start, end, passing);
+    final aside = _aside(start, end, bend, passing);
     control1 = Offset(aside ?? start.dx, start.dy + bend);
     control2 = Offset(aside ?? end.dx, end.dy - bend);
   } else {
@@ -131,31 +134,104 @@ LaidOutEdge routeFlowEdge(
   );
 }
 
-/// The x both control points of a downward edge from [start] to [end]
-/// take to bend it round the nodes of the ranks it passes, or null when
-/// none is in its way. An edge past a rank otherwise ran straight through
-/// the node between its ends.
+/// The x both control points of a downward edge from [start] to [end],
+/// bending [bend] down from one and up to the other, take to go round the
+/// nodes of the ranks it passes; null when none is in its way. An edge
+/// past a rank otherwise ran straight through the node between its ends.
 ///
-/// It goes round on the nearer side, its middle — where a cubic whose two
-/// control points share an x bulges furthest, three quarters of the way to
-/// them — clear of every node in the way.
-double? _aside(Offset start, Offset end, Iterable<Rect> rects) {
+/// It goes round on the nearer side, and far enough that the curve is
+/// clear of every node in its way all down that node's height — not only
+/// at its middle, where it bulges most: a curve checked there alone still
+/// cut the corner of a node lower down.
+double? _aside(Offset start, Offset end, double bend, Iterable<Rect> rects) {
+  final between = [
+    for (final rect in rects)
+      if (rect.top > start.dy && rect.bottom < end.dy) rect,
+  ];
+  final blocking = [
+    for (final rect in between)
+      if (_across(start, end, rect)) rect,
+  ];
+  if (blocking.isEmpty) return null;
+  // Going round the nodes in the way can lead into others of their ranks:
+  // those join the ones to go round, until the curve meets none.
+  for (var round = 0; round <= between.length; round++) {
+    final control = _control(start, end, bend, blocking);
+    final hit = between.where(
+      (rect) =>
+          !blocking.contains(rect) && _meets(start, end, bend, control, rect),
+    );
+    if (hit.isEmpty) return control;
+    blocking.addAll(hit);
+  }
+  return _control(start, end, bend, blocking);
+}
+
+/// The control x that takes the curve round [blocking] on its nearer side.
+double _control(Offset start, Offset end, double bend, List<Rect> blocking) {
   var left = double.infinity;
   var right = double.negativeInfinity;
-  for (final rect in rects) {
-    if (rect.top <= start.dy || rect.bottom >= end.dy) continue;
-    final t = (rect.center.dy - start.dy) / (end.dy - start.dy);
-    final x = start.dx + (end.dx - start.dx) * t;
-    if (x < rect.left - _clearance || x > rect.right + _clearance) continue;
+  for (final rect in blocking) {
     left = math.min(left, rect.left);
     right = math.max(right, rect.right);
   }
-  if (left > right) return null;
   final middle = (start.dx + end.dx) / 2;
-  final goal = right - middle <= middle - left
-      ? right + _clearance
-      : left - _clearance;
-  return (goal - middle / 4) * 4 / 3;
+  final goRight = right - middle <= middle - left;
+  final goal = goRight ? right + _clearance : left - _clearance;
+  // x(t) = u³·start + t³·end + (3u²t + 3ut²)·cx: for every t whose point
+  // is level with a node in the way, cx puts x(t) past the goal.
+  double? control;
+  for (var i = 1; i < _samples; i++) {
+    final t = i / _samples;
+    final u = 1 - t;
+    final y = _y(start, end, bend, t);
+    final level = blocking.any(
+      (rect) => y >= rect.top - _clearance && y <= rect.bottom + _clearance,
+    );
+    if (!level) continue;
+    final fixed = u * u * u * start.dx + t * t * t * end.dx;
+    final needed = (goal - fixed) / (3 * u * u * t + 3 * u * t * t);
+    control = control == null
+        ? needed
+        : (goRight ? math.max(control, needed) : math.min(control, needed));
+  }
+  return control ?? (goal - middle / 4) * 4 / 3;
+}
+
+/// Whether the curve with both control points at [control] meets [rect].
+bool _meets(Offset start, Offset end, double bend, double control, Rect rect) {
+  for (var i = 1; i < _samples; i++) {
+    final t = i / _samples;
+    final u = 1 - t;
+    final x =
+        u * u * u * start.dx +
+        (3 * u * u * t + 3 * u * t * t) * control +
+        t * t * t * end.dx;
+    if (rect
+        .inflate(_clearance / 2)
+        .contains(Offset(x, _y(start, end, bend, t)))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// The curve's y at [t]: its control points [bend] below its start and
+/// above its end.
+double _y(Offset start, Offset end, double bend, double t) {
+  final u = 1 - t;
+  return u * u * u * start.dy +
+      3 * u * u * t * (start.dy + bend) +
+      3 * u * t * t * (end.dy - bend) +
+      t * t * t * end.dy;
+}
+
+/// Whether the straight line from [start] to [end] passes [rect], level
+/// with its middle.
+bool _across(Offset start, Offset end, Rect rect) {
+  final t = (rect.center.dy - start.dy) / (end.dy - start.dy);
+  final x = start.dx + (end.dx - start.dx) * t;
+  return x >= rect.left - _clearance && x <= rect.right + _clearance;
 }
 
 /// Where [text] sits beside the end of an edge at [at], the curve leaving
