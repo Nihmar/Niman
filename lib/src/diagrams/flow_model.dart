@@ -1,6 +1,10 @@
 /// The flowchart model (#530): the nodes, edges and subgraphs a Mermaid
 /// `flowchart` (or `graph`) fence holds, once its source has been parsed.
 ///
+/// It is the model of every diagram that is a graph of boxes: a mind map,
+/// a class diagram and a state diagram are parsed into it too, which is
+/// why it has a class's box, a state's start and end, and UML's ends.
+///
 /// The model is what the layout and the two drawings (Flutter canvas and
 /// exported SVG) share. It carries no geometry: where a node sits is the
 /// layout's, so the same model is laid out at any size and in any
@@ -87,10 +91,32 @@ enum FlowNodeShape {
   trapezoid,
 
   /// `id[\text/]`, a trapezoid the other way up.
-  trapezoidAlt;
+  trapezoidAlt,
+
+  /// A state diagram's start, `[*]` before an arrow: a filled dot.
+  start,
+
+  /// A state diagram's end, `[*]` after an arrow: a ringed dot.
+  end,
+
+  /// A state diagram's `<<fork>>` or `<<join>>`: a bar across the flow.
+  bar,
+
+  /// A note beside a state or a class.
+  note,
+
+  /// A class: its name, its attributes and its methods, one compartment
+  /// each ([FlowNode.sections]).
+  classBox;
 
   /// Whether the text sits inside a bounded box at all.
   bool get isClosed => this != FlowNodeShape.asymmetric;
+
+  /// Whether the node is a mark with no text: a start, an end, a bar.
+  bool get isMark =>
+      this == FlowNodeShape.start ||
+      this == FlowNodeShape.end ||
+      this == FlowNodeShape.bar;
 }
 
 /// The stroke an edge is drawn with.
@@ -120,7 +146,16 @@ enum FlowEdgeEnd {
   cross,
 
   /// A small circle (`o`).
-  circle;
+  circle,
+
+  /// A hollow triangle: UML's inheritance and realization (`<|`, `|>`).
+  triangle,
+
+  /// A filled diamond: UML's composition (`*`).
+  diamond,
+
+  /// A hollow diamond: UML's aggregation (`o` in a class diagram).
+  hollowDiamond;
 
   /// Whether the end carries any mark at all.
   bool get isMarked => this != FlowEdgeEnd.none;
@@ -129,7 +164,12 @@ enum FlowEdgeEnd {
 /// One box of a flowchart.
 final class FlowNode {
   /// Creates a node.
-  const new({required this.id, required this.label, required this.shape});
+  const new({
+    required this.id,
+    required this.label,
+    required this.shape,
+    this.sections = const [],
+  });
 
   /// The identifier that edges refer to it by.
   final String id;
@@ -139,6 +179,11 @@ final class FlowNode {
 
   /// The outline it is drawn with.
   final FlowNodeShape shape;
+
+  /// A class box's compartments, each a list of lines: its name (with any
+  /// stereotype above it), its attributes, its methods. Empty for every
+  /// other shape, whose text is [label].
+  final List<List<String>> sections;
 }
 
 /// One connection between two nodes.
@@ -151,6 +196,8 @@ final class FlowEdge {
     this.style = FlowEdgeStyle.solid,
     this.start = FlowEdgeEnd.none,
     this.end = FlowEdgeEnd.arrow,
+    this.startLabel,
+    this.endLabel,
   });
 
   /// The id of the node it leaves.
@@ -170,6 +217,12 @@ final class FlowEdge {
 
   /// What its head is capped with.
   final FlowEdgeEnd end;
+
+  /// The text at its tail — a class relation's cardinality — or null.
+  final String? startLabel;
+
+  /// The text at its head, or null.
+  final String? endLabel;
 
   /// Whether both ends carry no mark: a plain connecting line.
   bool get isOpen => !start.isMarked && !end.isMarked;

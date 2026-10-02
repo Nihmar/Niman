@@ -6,14 +6,14 @@
 /// the two cannot drift apart.
 library;
 
-import 'dart:math' as math;
-
 import 'package:flutter/painting.dart';
+import 'package:niman/src/diagrams/diagram_caps.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/diagram_shapes.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/diagram_target.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
+import 'package:niman/src/diagrams/flow_node_size.dart';
 
 /// Draws a [DiagramLayout] through a [DiagramTarget].
 final class DiagramRenderer {
@@ -32,6 +32,7 @@ final class DiagramRenderer {
     _subgraphs(target);
     _edges(target);
     _edgeLabels(target);
+    _endLabels(target);
     _nodes(target);
   }
 
@@ -69,64 +70,21 @@ final class DiagramRenderer {
         strokeWidth: edge.edge.style.width,
         dashed: edge.edge.style == FlowEdgeStyle.dotted,
       );
-      _cap(target, edge.start, edge.control1, edge.edge.start);
-      _cap(target, edge.end, edge.control2, edge.edge.end);
+      paintEdgeCap(
+        target,
+        edge.start,
+        edge.control1,
+        edge.edge.start,
+        style.palette,
+      );
+      paintEdgeCap(
+        target,
+        edge.end,
+        edge.control2,
+        edge.edge.end,
+        style.palette,
+      );
     }
-  }
-
-  void _cap(
-    DiagramTarget target,
-    Offset point,
-    Offset towards,
-    FlowEdgeEnd end,
-  ) {
-    if (!end.isMarked) return;
-    final direction = _unit(point - towards);
-    switch (end) {
-      case FlowEdgeEnd.none:
-        return;
-      case FlowEdgeEnd.arrow:
-        _arrow(target, point, direction);
-      case FlowEdgeEnd.cross:
-        _cross(target, point, direction);
-      case FlowEdgeEnd.circle:
-        _circle(target, point);
-    }
-  }
-
-  void _arrow(DiagramTarget target, Offset tip, Offset direction) {
-    const length = 11.0;
-    const half = 5.0;
-    final back = tip - direction * length;
-    final normal = Offset(-direction.dy, direction.dx);
-    target.polygon([
-      tip,
-      back + normal * half,
-      back - normal * half,
-    ], fill: style.palette.edge);
-  }
-
-  void _cross(DiagramTarget target, Offset at, Offset direction) {
-    const s = 5.0;
-    final normal = Offset(-direction.dy, direction.dx);
-    final a = at - direction * s - normal * s;
-    final b = at + direction * s + normal * s;
-    final c = at - direction * s + normal * s;
-    final d = at + direction * s - normal * s;
-    target
-      ..line(a, b, color: style.palette.edge, strokeWidth: 2)
-      ..line(c, d, color: style.palette.edge, strokeWidth: 2);
-  }
-
-  void _circle(DiagramTarget target, Offset at) {
-    const r = 5.0;
-    final rect = Rect.fromCircle(center: at, radius: r);
-    target.polygon(
-      DiagramShapes.polygonFor(FlowNodeShape.circle, rect),
-      fill: style.palette.edgeLabelBackground,
-      stroke: style.palette.edge,
-      strokeWidth: 2,
-    );
   }
 
   void _edgeLabels(DiagramTarget target) {
@@ -153,40 +111,140 @@ final class DiagramRenderer {
     }
   }
 
-  void _nodes(DiagramTarget target) {
-    for (final node in layout.nodes) {
-      target.polygon(
-        DiagramShapes.polygonFor(
-          node.node.shape,
-          node.rect,
-          radius: style.cornerRadius,
-        ),
-        fill: style.palette.nodeFill,
-        stroke: node.node.shape.isClosed ? style.palette.nodeStroke : null,
-        strokeWidth: style.nodeStrokeWidth,
-      );
-      if (node.node.shape == FlowNodeShape.subroutine) {
-        for (final (a, b) in DiagramShapes.subroutineBars(node.rect)) {
-          target.line(
-            a,
-            b,
-            color: style.palette.nodeStroke,
-            strokeWidth: style.nodeStrokeWidth,
-          );
-        }
+  /// The texts at an edge's ends: a class relation's cardinalities.
+  void _endLabels(DiagramTarget target) {
+    for (final edge in layout.edges) {
+      for (final (text, box) in [
+        (edge.edge.startLabel, edge.startLabelBox),
+        (edge.edge.endLabel, edge.endLabelBox),
+      ]) {
+        if (text == null || box == null) continue;
+        target.text(
+          [text],
+          box,
+          color: style.palette.edge,
+          fontSize: style.fontSize,
+        );
       }
-      target.text(
-        layout.lines[node.node.id] ?? [node.node.label],
-        node.rect,
-        color: style.palette.nodeText,
-        fontSize: style.fontSize,
-      );
     }
   }
 
-  static Offset _unit(Offset vector) {
-    final length = math.sqrt(vector.dx * vector.dx + vector.dy * vector.dy);
-    if (length == 0) return const Offset(0, 1);
-    return Offset(vector.dx / length, vector.dy / length);
+  void _nodes(DiagramTarget target) {
+    for (final node in layout.nodes) {
+      switch (node.node.shape) {
+        case FlowNodeShape.start:
+          target.polygon(_outline(node), fill: style.palette.edge);
+        case FlowNodeShape.end:
+          target
+            ..polygon(
+              _outline(node),
+              fill: style.palette.edgeLabelBackground,
+              stroke: style.palette.edge,
+              strokeWidth: 1.5,
+            )
+            ..polygon(
+              DiagramShapes.polygonFor(
+                FlowNodeShape.circle,
+                node.rect.deflate(node.rect.width * 0.22),
+              ),
+              fill: style.palette.edge,
+            );
+        case FlowNodeShape.bar:
+          target.polygon(_outline(node), fill: style.palette.edge);
+        case FlowNodeShape.classBox:
+          _classBox(target, node);
+        case FlowNodeShape.note:
+          target
+            ..polygon(
+              _outline(node),
+              fill: style.palette.subgraphFill,
+              stroke: style.palette.subgraphStroke,
+            )
+            ..text(
+              layout.lines[node.node.id] ?? [node.node.label],
+              node.rect,
+              color: style.palette.subgraphTitle,
+              fontSize: style.fontSize,
+            );
+        case _:
+          _box(target, node);
+      }
+    }
   }
+
+  /// A flowchart's own node: its outline and its label.
+  void _box(DiagramTarget target, LaidOutNode node) {
+    target.polygon(
+      _outline(node),
+      fill: style.palette.nodeFill,
+      stroke: node.node.shape.isClosed ? style.palette.nodeStroke : null,
+      strokeWidth: style.nodeStrokeWidth,
+    );
+    if (node.node.shape == FlowNodeShape.subroutine) {
+      for (final (a, b) in DiagramShapes.subroutineBars(node.rect)) {
+        target.line(
+          a,
+          b,
+          color: style.palette.nodeStroke,
+          strokeWidth: style.nodeStrokeWidth,
+        );
+      }
+    }
+    target.text(
+      layout.lines[node.node.id] ?? [node.node.label],
+      node.rect,
+      color: style.palette.nodeText,
+      fontSize: style.fontSize,
+    );
+  }
+
+  /// A class: its box, a rule between compartments, its name centred and
+  /// its members from the left.
+  void _classBox(DiagramTarget target, LaidOutNode node) {
+    final rect = node.rect;
+    target.polygon(
+      _outline(node),
+      fill: style.palette.nodeFill,
+      stroke: style.palette.nodeStroke,
+      strokeWidth: style.nodeStrokeWidth,
+    );
+    final heights = classSectionHeights(node.node, style);
+    final inset = style.nodePadding.left;
+    var y = rect.top;
+    for (var i = 0; i < node.node.sections.length; i++) {
+      final section = node.node.sections[i];
+      if (i > 0) {
+        target.line(
+          Offset(rect.left, y),
+          Offset(rect.right, y),
+          color: style.palette.nodeStroke,
+          strokeWidth: style.nodeStrokeWidth,
+        );
+      }
+      if (section.isNotEmpty) {
+        target.text(
+          section,
+          i == 0
+              ? Rect.fromLTWH(rect.left, y, rect.width, heights[i])
+              : Rect.fromLTWH(
+                  rect.left + inset,
+                  y,
+                  rect.width - 2 * inset,
+                  heights[i],
+                ),
+          color: style.palette.nodeText,
+          fontSize: style.fontSize,
+          alignLeft: i > 0,
+          weight: i == 0 ? FontWeight.w600 : FontWeight.normal,
+        );
+      }
+      y += heights[i];
+    }
+  }
+
+  List<Offset> _outline(LaidOutNode node) => DiagramShapes.polygonFor(
+    node.node.shape,
+    node.rect,
+    radius: style.cornerRadius,
+  );
 }

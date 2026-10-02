@@ -68,6 +68,10 @@ final class FlowOrientation {
     end: point(edge.end),
     label: edge.label,
     labelBox: edge.labelBox == null ? null : rect(edge.labelBox!),
+    startLabelBox: edge.startLabelBox == null
+        ? null
+        : rect(edge.startLabelBox!),
+    endLabelBox: edge.endLabelBox == null ? null : rect(edge.endLabelBox!),
   );
 
   /// [sub], turned: its title is text, kept its size and put at the top

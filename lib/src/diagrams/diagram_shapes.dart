@@ -23,7 +23,13 @@ abstract final class DiagramShapes {
     switch (shape) {
       case FlowNodeShape.rect:
       case FlowNodeShape.subroutine:
+      case FlowNodeShape.bar:
+      case FlowNodeShape.note:
+      case FlowNodeShape.classBox:
         return [rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft];
+      case FlowNodeShape.start:
+      case FlowNodeShape.end:
+        return _ellipse(cx, cy, rect.width / 2, rect.height / 2, 32);
       case FlowNodeShape.round:
         return _roundRect(rect, radius);
       case FlowNodeShape.stadium:

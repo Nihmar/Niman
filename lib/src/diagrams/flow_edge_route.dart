@@ -104,6 +104,34 @@ LaidOutEdge routeFlowEdge(
     end: end,
     label: label,
     labelBox: labelBox,
+    startLabelBox: _endBox(edge.startLabel, start, control1, style, across),
+    endLabelBox: _endBox(edge.endLabel, end, control2, style, across),
+  );
+}
+
+/// Where [text] sits beside the end of an edge at [at], the curve leaving
+/// towards [towards]: a little along the edge and off to its side, clear
+/// of the line and of the cap.
+Rect? _endBox(
+  String? text,
+  Offset at,
+  Offset towards,
+  DiagramStyle style,
+  bool across,
+) {
+  if (text == null || text.isEmpty) return null;
+  final width = DiagramMetrics.textWidth(text, style.fontSize);
+  final height = style.fontSize * style.lineHeight;
+  var along = towards - at;
+  final length = along.distance;
+  along = length == 0 ? const Offset(0, 1) : along / length;
+  final aside = Offset(-along.dy, along.dx);
+  final reach = across ? height : width;
+  final centre = at + along * (height + 4) + aside * (reach / 2 + 6);
+  return Rect.fromCenter(
+    center: centre,
+    width: across ? height : width,
+    height: across ? width : height,
   );
 }
 

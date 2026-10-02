@@ -16,6 +16,7 @@ import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/flow_edge_route.dart';
 import 'package:niman/src/diagrams/flow_layers.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
+import 'package:niman/src/diagrams/flow_node_size.dart';
 import 'package:niman/src/diagrams/flow_orientation.dart';
 import 'package:niman/src/diagrams/flow_subgraph_boxes.dart';
 
@@ -39,10 +40,14 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
   for (final node in chart.nodes) {
     final labelLines = DiagramMetrics.lines(node.label);
     lines[node.id] = labelLines;
-    final size = _nodeSize(node, labelLines, style);
+    final size = flowNodeSize(node, labelLines, style);
     // The layout runs top-down and is turned at the end: a chart drawn
     // across lays its nodes out on their sides, so the turn stands them up.
-    sizes[node.id] = across ? size.flipped : size;
+    // A bar is the one laid out as it is: it lies across the flow, and the
+    // turn is what puts it there.
+    sizes[node.id] = across && node.shape != FlowNodeShape.bar
+        ? size.flipped
+        : size;
   }
 
   final layers = flowLayers(chart);
@@ -109,7 +114,9 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     include(sub.rect);
   }
   for (final edge in edges) {
-    if (edge.labelBox != null) include(edge.labelBox!);
+    for (final box in [edge.labelBox, edge.startLabelBox, edge.endLabelBox]) {
+      if (box != null) include(box);
+    }
   }
   minX -= _margin;
   minY -= _margin;
@@ -133,42 +140,4 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     subgraphs: [for (final sub in subgraphs) transformer.subgraph(sub)],
     lines: lines,
   );
-}
-
-/// The size of one node's box, text plus padding, widened for its shape.
-Size _nodeSize(FlowNode node, List<String> lines, DiagramStyle style) {
-  var text = 0.0;
-  for (final line in lines) {
-    text = math.max(text, DiagramMetrics.textWidth(line, style.fontSize));
-  }
-  var width = text + style.nodePadding.horizontal;
-  var height =
-      lines.length * style.fontSize * style.lineHeight +
-      style.nodePadding.vertical;
-  switch (node.shape) {
-    case FlowNodeShape.circle:
-      final diameter = math.max(width, height) * 1.3;
-      width = diameter;
-      height = diameter;
-    case FlowNodeShape.diamond:
-      width *= 1.7;
-      height *= 1.9;
-    case FlowNodeShape.hexagon:
-      width *= 1.35;
-    case FlowNodeShape.stadium:
-      width += height * 0.4;
-    case FlowNodeShape.subroutine:
-      width += 12;
-    case FlowNodeShape.database:
-      height += 10;
-    case FlowNodeShape.asymmetric:
-    case FlowNodeShape.rect:
-    case FlowNodeShape.round:
-    case FlowNodeShape.parallelogram:
-    case FlowNodeShape.parallelogramAlt:
-    case FlowNodeShape.trapezoid:
-    case FlowNodeShape.trapezoidAlt:
-      break;
-  }
-  return Size(math.max(width, 34), math.max(height, 28));
 }

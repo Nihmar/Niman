@@ -66,6 +66,8 @@ final class LaidOutEdge {
     required this.end,
     this.label,
     this.labelBox,
+    this.startLabelBox,
+    this.endLabelBox,
   });
 
   /// The model edge.
@@ -88,6 +90,12 @@ final class LaidOutEdge {
 
   /// The box the label sits in, or null.
   final Rect? labelBox;
+
+  /// Where [FlowEdge.startLabel] sits, beside the tail, or null.
+  final Rect? startLabelBox;
+
+  /// Where [FlowEdge.endLabel] sits, beside the head, or null.
+  final Rect? endLabelBox;
 }
 
 /// One subgraph and the box drawn round it.
