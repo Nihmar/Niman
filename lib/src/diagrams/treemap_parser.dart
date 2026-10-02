@@ -164,12 +164,21 @@ final class _Build {
         '"$label" needs a value, or nodes indented under it',
       );
     }
-    return TreemapNode(
+    final node = TreemapNode(
       label: label,
       value: value,
       children: List.unmodifiable([
         for (final child in children) child.build(),
       ]),
     );
+    // Values each a number may still add up past one: a section of
+    // Infinity has no share of the whole to be drawn at.
+    if (!node.total.isFinite) {
+      throw MermaidParseException(
+        line,
+        'the values under "$label" add up past what a number holds',
+      );
+    }
+    return node;
   }
 }

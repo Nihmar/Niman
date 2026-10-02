@@ -155,17 +155,24 @@ List<String> _leafLines(TreemapNode leaf, Rect box, DiagramStyle style) {
 /// the sum, squarified; null for a value of zero, which takes no room.
 List<Rect?> squarify(List<double> values, Rect rect) {
   final result = List<Rect?>.filled(values.length, null);
-  final total = values.fold<double>(0, (sum, v) => sum + v);
-  if (total <= 0 || rect.isEmpty) return result;
-  final scale = rect.width * rect.height / total;
+  if (rect.isEmpty) return result;
+  // Each value as a share of the largest: values near a double's limit add
+  // up to Infinity, which left every box an area of nothing.
+  final largest = values.fold<double>(0, math.max);
+  if (largest <= 0) return result;
+  final shares = [for (final v in values) (v > 0 ? v : 0) / largest];
   final order = [
-    for (var i = 0; i < values.length; i++)
-      if (values[i] > 0) i,
-  ]..sort((a, b) => values[b].compareTo(values[a]));
+    for (var i = 0; i < shares.length; i++)
+      if (shares[i] > 0) i,
+  ]..sort((a, b) => shares[b].compareTo(shares[a]));
+  if (order.isEmpty) return result;
 
   var free = rect;
+  var remaining = order.fold<double>(0, (sum, i) => sum + shares[i]);
+  var left = order.length;
+  final scale = rect.width * rect.height / remaining;
   final row = <int>[];
-  double area(int i) => values[i] * scale;
+  double area(int i) => shares[i] * scale;
 
   /// The worst aspect ratio of [items] laid along a side [side] long.
   double worst(List<int> items, double side) {
@@ -182,14 +189,21 @@ List<Rect?> squarify(List<double> values, Rect rect) {
     );
   }
 
+  /// Lays the row out across what is free. Its thickness is its part of
+  /// what is left to lay, of the free rectangle's — never its area divided
+  /// by that rectangle's side, which rounding wears to nothing beside a
+  /// value a million million times larger, and a row's area divided by
+  /// nothing is Infinity. The last row takes all that is free.
   void lay() {
-    final sum = row.fold<double>(0, (s, i) => s + area(i));
+    final sum = row.fold<double>(0, (s, i) => s + shares[i]);
+    left -= row.length;
+    final part = left == 0 ? 1 : math.min(1, sum / remaining);
     if (free.width >= free.height) {
       // A column down the left of what is free.
-      final width = sum / free.height;
+      final width = free.width * part;
       var y = free.top;
       for (final i in row) {
-        final h = area(i) / width;
+        final h = free.height * shares[i] / sum;
         result[i] = Rect.fromLTWH(free.left, y, width, h);
         y += h;
       }
@@ -201,10 +215,10 @@ List<Rect?> squarify(List<double> values, Rect rect) {
       );
     } else {
       // A row across the top.
-      final height = sum / free.width;
+      final height = free.height * part;
       var x = free.left;
       for (final i in row) {
-        final w = area(i) / height;
+        final w = free.width * shares[i] / sum;
         result[i] = Rect.fromLTWH(x, free.top, w, height);
         x += w;
       }
@@ -215,6 +229,7 @@ List<Rect?> squarify(List<double> values, Rect rect) {
         free.bottom,
       );
     }
+    remaining -= sum;
     row.clear();
   }
 

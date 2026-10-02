@@ -66,6 +66,10 @@ void main() {
     );
     expect(() => parseTreemap('treemap-beta\n"A": lots'), _error(2, 'number'));
     expect(() => parseTreemap('treemap-beta\n"A": -1'), _error(2, 'number'));
+    expect(
+      () => parseTreemap('treemap-beta\n"S"\n  "A": 1e308\n  "B": 1e308'),
+      _error(2, 'add up past'),
+    );
     expect(() => parseTreemap('treemap-beta\n"A: 1'), _error(2, 'quote'));
     expect(() => parseTreemap('treemap-beta\n"": 1'), _error(2, 'a name'));
     expect(() => parseTreemap('treemap-beta'), _error(1, 'needs a node'));
@@ -83,6 +87,31 @@ void main() {
         final overlap = boxes[i].intersect(boxes[j]);
         expect(overlap.width <= 1e-9 || overlap.height <= 1e-9, isTrue);
       }
+    }
+  });
+
+  test("values near a double's limit, or far apart, still share the area", () {
+    const rect = Rect.fromLTWH(0, 0, 300, 200);
+    // Their sum is Infinity, which made every share nothing.
+    final huge = squarify([1e308, 1e308], rect).cast<Rect>();
+    for (final box in huge) {
+      expect(_area(box) / _area(rect), closeTo(0.5, 1e-9));
+    }
+    // Rounding wore the free room beside 1e17 to nothing, and a row's area
+    // divided by it was Infinity.
+    for (final values in [
+      <double>[100000000000000000, 180, 0.5],
+      <double>[1e40, 90, 180],
+    ]) {
+      final boxes = squarify(values, rect).cast<Rect>();
+      for (final box in boxes) {
+        for (final edge in [box.left, box.top, box.right, box.bottom]) {
+          expect(edge.isFinite, isTrue, reason: '$values: $box');
+        }
+        expect(rect.inflate(1e-9).contains(box.topLeft), isTrue);
+        expect(rect.inflate(1e-9).contains(box.bottomRight), isTrue);
+      }
+      expect(_area(boxes.first) / _area(rect), closeTo(1, 1e-9));
     }
   });
 
