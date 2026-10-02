@@ -15,6 +15,7 @@ import 'package:niman/src/diagrams/mermaid_parser.dart';
 import 'package:niman/src/diagrams/packet_layout.dart';
 import 'package:niman/src/diagrams/pie_layout.dart';
 import 'package:niman/src/diagrams/quadrant_layout.dart';
+import 'package:niman/src/diagrams/radar_layout.dart';
 import 'package:niman/src/diagrams/sankey_layout.dart';
 import 'package:niman/src/diagrams/sequence_layout.dart';
 import 'package:niman/src/diagrams/timeline_layout.dart';
@@ -75,6 +76,7 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
       MermaidSankey(:final chart) => SankeyDrawing(layoutSankey(chart, style)),
       MermaidBlock(:final diagram) => BlockDrawing(layoutBlock(diagram, style)),
       MermaidPacket(:final chart) => PacketDrawing(layoutPacket(chart, style)),
+      MermaidRadar(:final chart) => RadarDrawing(layoutRadar(chart, style)),
     });
   } on MermaidParseException catch (error) {
     return DiagramFailed(error);

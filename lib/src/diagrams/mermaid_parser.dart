@@ -29,6 +29,8 @@ import 'package:niman/src/diagrams/pie_model.dart';
 import 'package:niman/src/diagrams/pie_parser.dart';
 import 'package:niman/src/diagrams/quadrant_model.dart';
 import 'package:niman/src/diagrams/quadrant_parser.dart';
+import 'package:niman/src/diagrams/radar_model.dart';
+import 'package:niman/src/diagrams/radar_parser.dart';
 import 'package:niman/src/diagrams/sankey_model.dart';
 import 'package:niman/src/diagrams/sankey_parser.dart';
 import 'package:niman/src/diagrams/sequence_model.dart';
@@ -144,6 +146,15 @@ final class MermaidPacket extends MermaidDiagram {
   final PacketChart chart;
 }
 
+/// A `radar-beta` chart.
+final class MermaidRadar extends MermaidDiagram {
+  /// Wraps a parsed [chart].
+  const new(this.chart);
+
+  /// The parsed radar chart.
+  final RadarChart chart;
+}
+
 /// A `pie` chart.
 final class MermaidPie extends MermaidDiagram {
   /// Wraps a parsed [pie].
@@ -169,7 +180,6 @@ const Set<String> _otherDiagramTypes = {
   'requirementdiagram',
   'c4context',
   'architecture-beta',
-  'radar-beta',
   'treemap-beta',
 };
 
@@ -190,6 +200,9 @@ MermaidDiagram parseMermaid(String source) {
   if (first == 'xychart-beta') return MermaidXyChart(parseXyChart(source));
   if (first == 'sankey-beta' || first == 'sankey') {
     return MermaidSankey(parseSankey(source));
+  }
+  if (first == 'radar-beta' || first == 'radar') {
+    return MermaidRadar(parseRadar(source));
   }
   if (first == 'packet-beta' || first == 'packet') {
     return MermaidPacket(parsePacket(source));

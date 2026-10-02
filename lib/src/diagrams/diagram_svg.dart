@@ -18,6 +18,7 @@ import 'package:niman/src/diagrams/kanban_renderer.dart';
 import 'package:niman/src/diagrams/packet_renderer.dart';
 import 'package:niman/src/diagrams/pie_renderer.dart';
 import 'package:niman/src/diagrams/quadrant_renderer.dart';
+import 'package:niman/src/diagrams/radar_renderer.dart';
 import 'package:niman/src/diagrams/sankey_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
 import 'package:niman/src/diagrams/svg_target.dart';
@@ -58,6 +59,8 @@ String drawingSvg(DiagramDrawing drawing, DiagramStyle style) {
       BlockRenderer(layout: layout, style: style).paint(target);
     case PacketDrawing(:final layout):
       PacketRenderer(layout: layout, style: style).paint(target);
+    case RadarDrawing(:final layout):
+      RadarRenderer(layout: layout, style: style).paint(target);
     case KanbanDrawing(:final layout):
       KanbanRenderer(layout: layout, style: style).paint(target);
     case QuadrantDrawing(:final layout):
