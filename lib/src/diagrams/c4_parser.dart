@@ -22,6 +22,7 @@
 /// its line.
 library;
 
+import 'package:niman/src/diagrams/c4_calls.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_lines.dart';
@@ -33,56 +34,6 @@ const Set<String> c4Headers = {
   'c4component',
   'c4dynamic',
   'c4deployment',
-};
-
-/// A call: its name, its arguments, and a `{` opening a boundary.
-final RegExp _call = RegExp(r'^(\w+)\s*\((.*)\)\s*(\{)?\s*$');
-
-/// A named argument: `$name=value`.
-final RegExp _named = RegExp(r'^\$(\w+)\s*=\s*(.*)$');
-
-/// An element's kind, the positions of its technology and description
-/// among its arguments (after the alias and the label), and its outline.
-typedef _ElementKind = ({String family, int? techn, int? descr});
-
-/// The elements, by the family their keyword names: `person`, `system`,
-/// `container`, `component`.
-const Map<String, _ElementKind> _families = {
-  'person': (family: 'person', techn: null, descr: 0),
-  'system': (family: 'system', techn: null, descr: 0),
-  'container': (family: 'container', techn: 0, descr: 1),
-  'component': (family: 'component', techn: 0, descr: 1),
-};
-
-/// The boundaries, by keyword, and the type their title shows when the
-/// call gives none.
-const Map<String, String?> _boundaries = {
-  'boundary': null,
-  'enterprise_boundary': 'Enterprise',
-  'system_boundary': 'System',
-  'container_boundary': 'Container',
-  'deployment_node': null,
-  'node': null,
-  'node_l': null,
-  'node_r': null,
-};
-
-/// The relationships, by keyword, and which way their arrows point.
-enum _Arrows { forward, back, both }
-
-const Map<String, _Arrows> _relations = {
-  'rel': _Arrows.forward,
-  'rel_u': _Arrows.forward,
-  'rel_up': _Arrows.forward,
-  'rel_d': _Arrows.forward,
-  'rel_down': _Arrows.forward,
-  'rel_l': _Arrows.forward,
-  'rel_left': _Arrows.forward,
-  'rel_r': _Arrows.forward,
-  'rel_right': _Arrows.forward,
-  'rel_back': _Arrows.back,
-  'birel': _Arrows.both,
-  'relindex': _Arrows.forward,
 };
 
 /// Parses a C4 diagram (the fence's content, header included).
@@ -103,7 +54,7 @@ typedef _Written = ({
   String from,
   String to,
   String? label,
-  _Arrows arrows,
+  C4Arrows arrows,
   int line,
 });
 
@@ -158,7 +109,7 @@ final class _C4Parser {
       _description = line.contains('{') && !line.contains('}');
       return;
     }
-    final call = _call.firstMatch(line);
+    final call = c4Call.firstMatch(line);
     if (call == null) {
       throw MermaidParseException(
         number,
@@ -169,8 +120,8 @@ final class _C4Parser {
     final name = call.group(1)!.toLowerCase();
     // Styles, tags and layout settings: drawn without.
     if (name.startsWith('update') || name.startsWith('add')) return;
-    final (positional, named) = _arguments(call.group(2)!, number);
-    if (_boundaries.containsKey(name)) {
+    final (positional, named) = readC4Arguments(call.group(2)!, number);
+    if (c4Boundaries.containsKey(name)) {
       if (call.group(3) == null) {
         throw MermaidParseException(number, 'expected "{" after ${call[1]}');
       }
@@ -179,7 +130,7 @@ final class _C4Parser {
     if (call.group(3) != null) {
       throw MermaidParseException(number, '${call[1]} cannot hold others');
     }
-    final arrows = _relations[name];
+    final arrows = c4Relations[name];
     if (arrows != null) return _relate(name, arrows, positional, named, number);
     _element(call.group(1)!, name, positional, named, number);
   }
@@ -201,7 +152,7 @@ final class _C4Parser {
     final familyName = variant == null
         ? base
         : base.substring(0, base.length - variant.length);
-    final family = _families[familyName];
+    final family = c4Families[familyName];
     if (family == null || (familyName == 'person' && variant != null)) {
       throw MermaidParseException(
         number,
@@ -221,7 +172,8 @@ final class _C4Parser {
     }
     String? at(int? index, String key) {
       final value =
-          named[key] ?? (index == null ? null : _at(positional, 2 + index));
+          named[key] ??
+          (index == null ? null : c4ArgumentAt(positional, 2 + index));
       return value == null || value.isEmpty ? null : value;
     }
 
@@ -268,7 +220,8 @@ final class _C4Parser {
     if (_nodes.containsKey(id) || !_boundaryIds.add(id)) {
       throw MermaidParseException(number, '"$id" is declared twice');
     }
-    final type = named['type'] ?? _at(positional, 2) ?? _boundaries[name];
+    final type =
+        named['type'] ?? c4ArgumentAt(positional, 2) ?? c4Boundaries[name];
     _open.add((
       id: id,
       title: positional[1],
@@ -312,7 +265,7 @@ final class _C4Parser {
 
   void _relate(
     String name,
-    _Arrows arrows,
+    C4Arrows arrows,
     List<String> positional,
     Map<String, String> named,
     int number,
@@ -322,8 +275,8 @@ final class _C4Parser {
     if (positional.length < first + 2) {
       throw MermaidParseException(number, 'a relationship needs two aliases');
     }
-    final label = named['label'] ?? _at(positional, first + 2);
-    final techn = named['techn'] ?? _at(positional, first + 3);
+    final label = named['label'] ?? c4ArgumentAt(positional, first + 2);
+    final techn = named['techn'] ?? c4ArgumentAt(positional, first + 3);
     final text = [
       if (indexed) '${positional[0]}:',
       if (label != null && label.isNotEmpty) label,
@@ -358,10 +311,10 @@ final class _C4Parser {
       to: relation.to,
       label: relation.label,
       style: FlowEdgeStyle.dotted,
-      start: relation.arrows == _Arrows.forward
+      start: relation.arrows == C4Arrows.forward
           ? FlowEdgeEnd.none
           : FlowEdgeEnd.arrow,
-      end: relation.arrows == _Arrows.back
+      end: relation.arrows == C4Arrows.back
           ? FlowEdgeEnd.none
           : FlowEdgeEnd.arrow,
     );
@@ -372,48 +325,5 @@ final class _C4Parser {
     for (final open in _open) {
       open.ids.add(id);
     }
-  }
-
-  static String? _at(List<String> values, int index) =>
-      index < values.length ? values[index] : null;
-
-  /// The arguments of a call: the positional ones in order and the named
-  /// ones by name, each unquoted with its entities written out. A comma
-  /// inside quotes is text.
-  static (List<String>, Map<String, String>) _arguments(
-    String text,
-    int number,
-  ) {
-    final parts = <String>[];
-    var quoted = false;
-    var start = 0;
-    for (var i = 0; i < text.length; i++) {
-      final ch = text[i];
-      if (ch == '"') {
-        quoted = !quoted;
-      } else if (ch == ',' && !quoted) {
-        parts.add(text.substring(start, i));
-        start = i + 1;
-      }
-    }
-    if (quoted) throw MermaidParseException(number, 'a quote is never closed');
-    parts.add(text.substring(start));
-    final positional = <String>[];
-    final named = <String, String>{};
-    String clean(String value) =>
-        decodeMermaidEntities(unquoteMermaid(value.trim()));
-    for (final part in parts) {
-      final match = _named.firstMatch(part.trim());
-      if (match != null) {
-        named[match.group(1)!.toLowerCase()] = clean(match.group(2)!);
-      } else {
-        positional.add(clean(part));
-      }
-    }
-    // `Person(a, "A")` and `Person(a, "A", )` read alike.
-    while (positional.isNotEmpty && positional.last.isEmpty) {
-      positional.removeLast();
-    }
-    return (positional, named);
   }
 }
