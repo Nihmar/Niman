@@ -109,4 +109,34 @@ void main() {
     );
     expect(layout.size, Size.zero);
   });
+
+  test('a node keeps its proportions in every direction', () {
+    for (final direction in ['TD', 'BT', 'LR', 'RL']) {
+      final layout = _layout(
+        'flowchart $direction\nA[A very long label here] -->|a long label| B',
+      );
+      final node = layout.nodeOf('A')!.rect;
+      expect(node.width, greaterThan(node.height), reason: direction);
+      final label = layout.edges.single.labelBox!;
+      expect(label.width, greaterThan(label.height), reason: direction);
+    }
+  });
+
+  test('a subgraph title sits at the top of its box in every direction', () {
+    for (final direction in ['TD', 'BT', 'LR', 'RL']) {
+      final layout = _layout(
+        'flowchart $direction\nsubgraph S [A group title]\nA --> B\nend',
+      );
+      final box = layout.subgraphs.single;
+      expect(box.titleRect.width, greaterThan(box.titleRect.height));
+      expect(box.titleRect.top - box.rect.top, lessThan(10), reason: direction);
+      for (final node in layout.nodes) {
+        expect(
+          node.rect.top,
+          greaterThan(box.titleRect.bottom),
+          reason: '$direction: the title is not over a node',
+        );
+      }
+    }
+  });
 }

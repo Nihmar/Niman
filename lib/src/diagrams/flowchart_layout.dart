@@ -33,12 +33,16 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
       lines: {},
     );
   }
+  final across = !chart.direction.isVertical;
   final sizes = <String, Size>{};
   final lines = <String, List<String>>{};
   for (final node in chart.nodes) {
     final labelLines = DiagramMetrics.lines(node.label);
     lines[node.id] = labelLines;
-    sizes[node.id] = _nodeSize(node, labelLines, style);
+    final size = _nodeSize(node, labelLines, style);
+    // The layout runs top-down and is turned at the end: a chart drawn
+    // across lays its nodes out on their sides, so the turn stands them up.
+    sizes[node.id] = across ? size.flipped : size;
   }
 
   final layers = flowLayers(chart);
@@ -83,7 +87,8 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
   }
 
   final edges = [
-    for (final edge in chart.edges) routeFlowEdge(edge, rects, style),
+    for (final edge in chart.edges)
+      routeFlowEdge(edge, rects, style, across: across),
   ];
   final subgraphs = flowSubgraphBoxes(chart, rects, style);
 

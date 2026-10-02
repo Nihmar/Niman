@@ -21,12 +21,10 @@ List<LaidOutSubgraph> flowSubgraphBoxes(
         if (rects[id] != null) rects[id]!,
     ]);
     if (bounds == null) continue;
-    final titleHeight = style.fontSize * style.lineHeight + 8;
-    bounds = Rect.fromLTRB(
-      bounds.left - style.subgraphPadding,
-      bounds.top - style.subgraphPadding - titleHeight,
-      bounds.right + style.subgraphPadding,
-      bounds.bottom + style.subgraphPadding,
+    bounds = _withTitleBand(
+      bounds.inflate(style.subgraphPadding),
+      chart.direction,
+      style.fontSize * style.lineHeight + 8,
     );
     boxes.add((subgraph: subgraph, rect: bounds));
   }
@@ -70,6 +68,31 @@ List<LaidOutSubgraph> flowSubgraphBoxes(
       ),
   ];
 }
+
+/// [box] grown by a [band] for the title on the side that the turn to
+/// [direction] puts at the top: the canonical top, but the bottom for a
+/// chart drawn upwards and the left for one drawn across.
+Rect _withTitleBand(Rect box, FlowDirection direction, double band) =>
+    switch (direction) {
+      FlowDirection.topDown => Rect.fromLTRB(
+        box.left,
+        box.top - band,
+        box.right,
+        box.bottom,
+      ),
+      FlowDirection.bottomUp => Rect.fromLTRB(
+        box.left,
+        box.top,
+        box.right,
+        box.bottom + band,
+      ),
+      FlowDirection.leftRight || FlowDirection.rightLeft => Rect.fromLTRB(
+        box.left - band,
+        box.top,
+        box.right,
+        box.bottom,
+      ),
+    };
 
 Rect? _union(List<Rect> rects) {
   if (rects.isEmpty) return null;

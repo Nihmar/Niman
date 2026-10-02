@@ -11,12 +11,14 @@ import 'package:niman/src/diagrams/flow_model.dart';
 /// The curve's straight run before it reaches a node, as a share of the gap.
 const double _curveBend = 0.45;
 
-/// The curve joining two placed nodes.
+/// The curve joining two placed nodes; [across] when the chart is drawn
+/// left to right or right to left, and its label box is laid on its side.
 LaidOutEdge routeFlowEdge(
   FlowEdge edge,
   Map<String, Rect> rects,
-  DiagramStyle style,
-) {
+  DiagramStyle style, {
+  required bool across,
+}) {
   final from = rects[edge.from];
   final to = rects[edge.to];
   if (from == null || to == null) {
@@ -64,10 +66,12 @@ LaidOutEdge routeFlowEdge(
       style.fontSize * style.lineHeight + style.edgeLabelPadding.vertical,
     );
     final mid = _cubicMidpoint(start, control1, control2, end);
+    // Laid out across, the box is turned with the drawing: its canonical
+    // sides are the text's the other way round.
     labelBox = Rect.fromCenter(
       center: mid,
-      width: size.width,
-      height: size.height,
+      width: across ? size.height : size.width,
+      height: across ? size.width : size.height,
     );
   }
   return LaidOutEdge(

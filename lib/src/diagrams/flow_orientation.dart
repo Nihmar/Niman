@@ -70,11 +70,20 @@ final class FlowOrientation {
     labelBox: edge.labelBox == null ? null : rect(edge.labelBox!),
   );
 
-  /// [sub], turned.
-  LaidOutSubgraph subgraph(LaidOutSubgraph sub) => LaidOutSubgraph(
-    subgraph: sub.subgraph,
-    rect: rect(sub.rect),
-    titleRect: rect(sub.titleRect),
-    title: sub.title,
-  );
+  /// [sub], turned: its title is text, kept its size and put at the top
+  /// left of the turned box, where the box's title band has come to be.
+  LaidOutSubgraph subgraph(LaidOutSubgraph sub) {
+    final box = rect(sub.rect);
+    return LaidOutSubgraph(
+      subgraph: sub.subgraph,
+      rect: box,
+      titleRect: Rect.fromLTWH(
+        box.left + 8,
+        box.top + 4,
+        sub.titleRect.width,
+        sub.titleRect.height,
+      ),
+      title: sub.title,
+    );
+  }
 }
