@@ -13,6 +13,9 @@ import 'package:niman/src/diagrams/flow_model.dart';
 /// The curve's straight run before it reaches a node, as a share of the gap.
 const double _curveBend = 0.45;
 
+/// How far from an edge's end the text there begins, along the edge.
+const double endTextGap = 4;
+
 /// How far a cycle's way back bulges past the nodes it goes round.
 const double _backBulge = 36;
 
@@ -110,8 +113,9 @@ LaidOutEdge routeFlowEdge(
 }
 
 /// Where [text] sits beside the end of an edge at [at], the curve leaving
-/// towards [towards]: a little along the edge and off to its side, clear
-/// of the line and of the cap.
+/// towards [towards]: from just past the end along the edge, and off to its
+/// side clear of the line and of the widest cap. The layout leaves the
+/// edge room for it between two ranks.
 Rect? _endBox(
   String? text,
   Offset at,
@@ -126,8 +130,13 @@ Rect? _endBox(
   final length = along.distance;
   along = length == 0 ? const Offset(0, 1) : along / length;
   final aside = Offset(-along.dy, along.dx);
-  final reach = across ? height : width;
-  final centre = at + along * (height + 4) + aside * (reach / 2 + 6);
+  // Along the edge and across it, in the canonical space this runs in.
+  final alongExtent = across ? width : height;
+  final asideExtent = across ? height : width;
+  final centre =
+      at +
+      along * (alongExtent / 2 + endTextGap) +
+      aside * (asideExtent / 2 + 10);
   return Rect.fromCenter(
     center: centre,
     width: across ? height : width,

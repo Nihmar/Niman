@@ -3,6 +3,7 @@
 // edge's ends, and every cap drawn on the canvas and in the SVG.
 import 'dart:ui' as ui;
 
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diagrams/canvas_target.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
@@ -146,5 +147,45 @@ void main() {
     expect(text, contains('+makeSound() void'));
     expect(text, contains('«interface»'));
     expect(text, contains('a note'));
+  });
+
+  test('a short edge makes room for its label, end texts and caps', () {
+    const nodes = [
+      FlowNode(id: 'Zoo', label: 'Zoo', shape: FlowNodeShape.classBox),
+      FlowNode(id: 'Animal', label: 'Animal', shape: FlowNodeShape.classBox),
+    ];
+    const edges = [
+      FlowEdge(
+        from: 'Zoo',
+        to: 'Animal',
+        label: 'houses',
+        start: FlowEdgeEnd.diamond,
+        end: FlowEdgeEnd.none,
+        startLabel: '1',
+        endLabel: 'many',
+      ),
+    ];
+    double gapTo(Rect box, Offset point) {
+      final dx = point.dx < box.left
+          ? box.left - point.dx
+          : (point.dx > box.right ? point.dx - box.right : 0.0);
+      final dy = point.dy < box.top
+          ? box.top - point.dy
+          : (point.dy > box.bottom ? point.dy - box.bottom : 0.0);
+      return Offset(dx, dy).distance;
+    }
+
+    for (final direction in [FlowDirection.topDown, FlowDirection.leftRight]) {
+      final edge = _lay(nodes, edges, direction).edges.single;
+      final label = edge.labelBox!;
+      // Clear of the diamond at the tail, eighteen long.
+      expect(gapTo(label, edge.start), greaterThan(18), reason: '$direction');
+      expect(
+        label.overlaps(edge.startLabelBox!),
+        isFalse,
+        reason: '$direction',
+      );
+      expect(label.overlaps(edge.endLabelBox!), isFalse, reason: '$direction');
+    }
   });
 }

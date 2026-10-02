@@ -23,6 +23,10 @@ import 'package:niman/src/diagrams/flow_subgraph_boxes.dart';
 /// The room kept round the whole drawing.
 const double _margin = 12;
 
+/// The length of the longest cap an edge ends with (a diamond), and a
+/// little air.
+const double _capRoom = 22;
+
 /// Lays [chart] out with [style].
 DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
   if (chart.nodes.isEmpty) {
@@ -61,11 +65,12 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     }
     rankMain[r] = tallest;
   }
+  final gaps = _rankGaps(chart, layers, style, across: across);
   final rankTop = List<double>.filled(layers.length, 0);
   var cursor = 0.0;
   for (var r = 0; r < layers.length; r++) {
     rankTop[r] = cursor;
-    cursor += rankMain[r] + style.rankGap;
+    cursor += rankMain[r] + gaps[r];
   }
 
   // Cross-axis (x) positions: each rank centred and packed.
@@ -140,4 +145,52 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     subgraphs: [for (final sub in subgraphs) transformer.subgraph(sub)],
     lines: lines,
   );
+}
+
+/// The gap below each rank: the style's, or more where an edge to the next
+/// rank carries a label, end texts or caps that need the room — a label
+/// on a short edge sat on its caps and on the texts at its ends.
+List<double> _rankGaps(
+  Flowchart chart,
+  List<List<String>> layers,
+  DiagramStyle style, {
+  required bool across,
+}) {
+  final rank = <String, int>{
+    for (var r = 0; r < layers.length; r++)
+      for (final id in layers[r]) id: r,
+  };
+  final line = style.fontSize * style.lineHeight;
+  // How far a text reaches along the edge: its height, or its width once
+  // the drawing is turned across.
+  double reach(String? text) {
+    if (text == null || text.isEmpty) return 0;
+    return across ? DiagramMetrics.textWidth(text, style.fontSize) : line;
+  }
+
+  // What an end of an edge takes along it: its cap, or the text beside it
+  // and the gap the router leaves before it (`_endBox`).
+  double end(FlowEdgeEnd cap, String? text) {
+    final room = text == null || text.isEmpty
+        ? 0.0
+        : reach(text) + endTextGap + 4;
+    return math.max(cap.isMarked ? _capRoom : 0, room);
+  }
+
+  final gaps = List<double>.filled(layers.length, style.rankGap);
+  for (final edge in chart.edges) {
+    final r = rank[edge.from];
+    if (r == null || rank[edge.to] != r + 1) continue;
+    final label = reach(edge.label);
+    final ends = math.max(
+      end(edge.start, edge.startLabel),
+      end(edge.end, edge.endLabel),
+    );
+    // The label sits halfway: clear of the larger end on both sides.
+    final need = label == 0
+        ? end(edge.start, edge.startLabel) + end(edge.end, edge.endLabel)
+        : 2 * ends + label + style.edgeLabelPadding.vertical + 4;
+    gaps[r] = math.max(gaps[r], need);
+  }
+  return gaps;
 }
