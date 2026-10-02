@@ -98,4 +98,15 @@ void main() {
       ),
     );
   });
+
+  test('a quoted label keeps its brackets, %% and quotes', () {
+    final chart = _chart(
+      'mindmap\n  n0["Buy milk (2 litres)"]\n    n1["50%% #quot;off#quot;"]',
+    );
+    expect(chart.nodes.map((n) => n.label), [
+      'Buy milk (2 litres)',
+      '50%% "off"',
+    ]);
+    expect(chart.nodes.first.shape, FlowNodeShape.rect);
+  });
 }

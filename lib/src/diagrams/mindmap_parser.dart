@@ -129,10 +129,11 @@ final class _MindmapParser {
     return at <= 0 ? text : text.substring(at);
   }
 
-  static String _inner(String body, int open, int close) {
-    final label = body.substring(open, body.length - close).trim();
-    return label;
-  }
+  /// The label between a shape's delimiters: quotes keep brackets and
+  /// `%%` in it as text, and `#quot;` is a quote, as in Mermaid.
+  static String _inner(String body, int open, int close) =>
+      unquoteMermaid(body.substring(open, body.length - close).trim())
+          .replaceAll('#quot;', '"');
 
   static String _firstWord(String line) {
     final match = RegExp('^[A-Za-z_][A-Za-z0-9_-]*')
