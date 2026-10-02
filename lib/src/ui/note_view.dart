@@ -491,7 +491,13 @@ final class _NoteViewState extends State<NoteView>
     final surface = _surface;
     if (surface == null) return;
     final map = _mindMapAtCaret();
-    if (map == null) return;
+    if (map == null) {
+      // The palette offers the command anywhere: say why it did nothing.
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      final reason = SnackBar(content: Text(AppStrings.toolMindMapNeedsList));
+      messenger?.showSnackBar(reason);
+      return;
+    }
     // Only the list's lines are replaced: one undo step, and the note is
     // never copied whole to make it.
     final buffer = surface.buffer;

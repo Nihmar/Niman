@@ -1,10 +1,12 @@
 // Convert list to mind map, as the palette runs it on an open note (#530):
-// the list's lines become the fence, and one undo step gives the list back.
+// the list's lines become the fence, one undo step gives the list back, and
+// outside a list it says why nothing happened.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
+import 'package:niman/src/ui/strings.dart';
 
 Future<NoteViewHandle> _open(WidgetTester tester, String note) async {
   final key = GlobalKey<State<NoteView>>();
@@ -48,5 +50,17 @@ void main() {
 
     expect(editor.undo(), isTrue);
     expect(editor.widget.buffer.text, note);
+  });
+
+  testWidgets('outside a list it says so and changes nothing', (tester) async {
+    const note = 'Just prose\n';
+    final handle = await _open(tester, note);
+    _editor(tester).placeCaret(3);
+    await tester.pump();
+
+    handle.convertListToMindMap();
+    await tester.pump();
+    expect(_editor(tester).widget.buffer.text, note);
+    expect(find.text(AppStrings.toolMindMapNeedsList), findsOneWidget);
   });
 }
