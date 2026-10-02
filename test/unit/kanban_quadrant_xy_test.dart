@@ -210,6 +210,26 @@ void main() {
       expect(bars[1].top, greaterThan(bars[0].top));
     });
 
+    test('the drawing ends under its lowest text, wherever titles sit', () {
+      for (final source in [
+        // The value title over the plot: nothing of it under the labels.
+        'xychart-beta\ny-axis "Notes" 0 --> 120\nx-axis [a, b]\nbar [1, 2]',
+        // The category title under the labels: room for it.
+        'xychart-beta\nx-axis "Month" [a, b]\nbar [1, 2]',
+      ]) {
+        final layout = layoutXyChart(parseXyChart(source), _style);
+        var lowest = layout.plot.bottom;
+        for (final text in [
+          ...layout.valueLabels,
+          ...layout.categoryLabels,
+          ...layout.axisTitles,
+        ]) {
+          lowest = lowest > text.box.bottom ? lowest : text.box.bottom;
+        }
+        expect(layout.size.height - lowest, closeTo(6 + 12, 1e-9));
+      }
+    });
+
     test('a chart dispatches, paints and exports', () {
       expect(parseMermaid(_xy), isA<MermaidXyChart>());
       _paints(_xy);

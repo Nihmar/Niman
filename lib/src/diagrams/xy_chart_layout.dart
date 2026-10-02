@@ -217,7 +217,13 @@ XyLayout layoutXyChart(XyChart chart, DiagramStyle style) {
 
   // A legend under everything, when the series have names.
   final named = chart.series.any((s) => s.name != null);
-  var y = plot.bottom + line + 12 + (axisTitles.isEmpty ? 0 : line + 6);
+  // It starts under the lowest text under the plot: a value axis's title
+  // drawn over the plot takes no room down here.
+  var y = plot.bottom;
+  for (final text in [...valueLabels, ...categoryLabels, ...axisTitles]) {
+    y = math.max(y, text.box.bottom);
+  }
+  y += 6;
   final legend = <({Rect swatch, XyText name, int series})>[];
   if (named) {
     var x = plot.left;
