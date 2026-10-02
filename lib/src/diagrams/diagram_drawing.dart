@@ -1,8 +1,8 @@
 /// A laid-out diagram of one of the kinds the engine draws (#530).
 ///
 /// A graph of boxes (a flowchart, a mind map, a class, state or ER
-/// diagram), a sequence, a pie and a Gantt chart lay out to different
-/// geometry; the painter and the SVG export dispatch
+/// diagram), a sequence, a pie, a Gantt chart and a timeline lay out to
+/// different geometry; the painter and the SVG export dispatch
 /// on this one type, so the engine grows a kind at a time and no call site
 /// learns about each.
 library;
@@ -12,6 +12,7 @@ import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/gantt_geometry.dart';
 import 'package:niman/src/diagrams/pie_geometry.dart';
 import 'package:niman/src/diagrams/sequence_geometry.dart';
+import 'package:niman/src/diagrams/timeline_geometry.dart';
 
 /// A laid-out diagram.
 sealed class DiagramDrawing {
@@ -65,6 +66,18 @@ final class GanttDrawing extends DiagramDrawing {
 
   /// The placed chart.
   final GanttLayout layout;
+
+  @override
+  Size get size => layout.size;
+}
+
+/// A timeline.
+final class TimelineDrawing extends DiagramDrawing {
+  /// Wraps a [layout].
+  const new(this.layout);
+
+  /// The placed timeline.
+  final TimelineLayout layout;
 
   @override
   Size get size => layout.size;

@@ -20,6 +20,8 @@ import 'package:niman/src/diagrams/pie_parser.dart';
 import 'package:niman/src/diagrams/sequence_model.dart';
 import 'package:niman/src/diagrams/sequence_parser.dart';
 import 'package:niman/src/diagrams/state_parser.dart';
+import 'package:niman/src/diagrams/timeline_model.dart';
+import 'package:niman/src/diagrams/timeline_parser.dart';
 
 /// A parsed Mermaid diagram.
 sealed class MermaidDiagram {
@@ -45,6 +47,15 @@ final class MermaidGantt extends MermaidDiagram {
   final GanttChart gantt;
 }
 
+/// A `timeline`.
+final class MermaidTimeline extends MermaidDiagram {
+  /// Wraps a parsed [timeline].
+  const new(this.timeline);
+
+  /// The parsed timeline.
+  final TimelineChart timeline;
+}
+
 /// A `pie` chart.
 final class MermaidPie extends MermaidDiagram {
   /// Wraps a parsed [pie].
@@ -68,7 +79,6 @@ final class MermaidSequence extends MermaidDiagram {
 /// parser, which reports its own header error.
 const Set<String> _otherDiagramTypes = {
   'journey',
-  'timeline',
   'gitgraph',
   'quadrantchart',
   'requirementdiagram',
@@ -92,6 +102,7 @@ MermaidDiagram parseMermaid(String source) {
   if (first == 'sequencediagram') return MermaidSequence(parseSequence(source));
   if (first == 'pie') return MermaidPie(parsePie(source));
   if (first == 'gantt') return MermaidGantt(parseGantt(source));
+  if (first == 'timeline') return MermaidTimeline(parseTimeline(source));
   if (first == 'classdiagram' || first == 'classdiagram-v2') {
     return MermaidFlowchart(parseClassDiagram(source));
   }

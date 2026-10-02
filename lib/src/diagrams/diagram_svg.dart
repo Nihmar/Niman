@@ -14,6 +14,7 @@ import 'package:niman/src/diagrams/gantt_renderer.dart';
 import 'package:niman/src/diagrams/pie_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
 import 'package:niman/src/diagrams/svg_target.dart';
+import 'package:niman/src/diagrams/timeline_renderer.dart';
 
 /// [source] as a standalone `<svg>` document, or null when it does not
 /// parse.
@@ -39,6 +40,8 @@ String drawingSvg(DiagramDrawing drawing, DiagramStyle style) {
       PieRenderer(layout: layout, style: style).paint(target);
     case GanttDrawing(:final layout):
       GanttRenderer(layout: layout, style: style).paint(target);
+    case TimelineDrawing(:final layout):
+      TimelineRenderer(layout: layout, style: style).paint(target);
   }
   return target.finish();
 }
