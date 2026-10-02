@@ -93,6 +93,31 @@ void paintEdgeCap(
     case FlowEdgeEnd.zeroOrMore:
       _foot(target, point, direction, normal, palette);
       _ring(target, point - direction * 18, palette);
+    case FlowEdgeEnd.containment:
+      const r = 7.0;
+      final centre = point - direction * r;
+      target
+        ..polygon(
+          DiagramShapes.polygonFor(
+            FlowNodeShape.circle,
+            Rect.fromCircle(center: centre, radius: r),
+          ),
+          fill: palette.edgeLabelBackground,
+          stroke: palette.edge,
+          strokeWidth: 1.5,
+        )
+        ..line(
+          centre - direction * r,
+          centre + direction * r,
+          color: palette.edge,
+          strokeWidth: 1.5,
+        )
+        ..line(
+          centre - normal * r,
+          centre + normal * r,
+          color: palette.edge,
+          strokeWidth: 1.5,
+        );
   }
 }
 

@@ -165,7 +165,11 @@ enum FlowEdgeEnd {
   oneOrMore,
 
   /// Crow's foot, zero or more (`}o`, `o{`): the foot and a circle.
-  zeroOrMore;
+  zeroOrMore,
+
+  /// A circle with a cross in it, against the node: a requirement's
+  /// `contains`, at the end of the one that contains.
+  containment;
 
   /// Whether the end carries any mark at all.
   bool get isMarked => this != FlowEdgeEnd.none;

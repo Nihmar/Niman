@@ -31,6 +31,7 @@ import 'package:niman/src/diagrams/quadrant_model.dart';
 import 'package:niman/src/diagrams/quadrant_parser.dart';
 import 'package:niman/src/diagrams/radar_model.dart';
 import 'package:niman/src/diagrams/radar_parser.dart';
+import 'package:niman/src/diagrams/requirement_parser.dart';
 import 'package:niman/src/diagrams/sankey_model.dart';
 import 'package:niman/src/diagrams/sankey_parser.dart';
 import 'package:niman/src/diagrams/sequence_model.dart';
@@ -187,11 +188,7 @@ final class MermaidSequence extends MermaidDiagram {
 /// The Mermaid diagram kinds this engine does not draw yet. A first word
 /// among these is refused by name; anything else is handed to the flowchart
 /// parser, which reports its own header error.
-const Set<String> _otherDiagramTypes = {
-  'requirementdiagram',
-  'c4context',
-  'architecture-beta',
-};
+const Set<String> _otherDiagramTypes = {'c4context', 'architecture-beta'};
 
 /// Parses [source] (the fence's content, header included).
 ///
@@ -230,6 +227,9 @@ MermaidDiagram parseMermaid(String source) {
     return MermaidFlowchart(parseStateDiagram(source));
   }
   if (first == 'erdiagram') return MermaidFlowchart(parseErDiagram(source));
+  if (first == 'requirementdiagram') {
+    return MermaidFlowchart(parseRequirementDiagram(source));
+  }
   if (first == 'flowchart' ||
       first == 'graph' ||
       !_otherDiagramTypes.contains(first)) {
