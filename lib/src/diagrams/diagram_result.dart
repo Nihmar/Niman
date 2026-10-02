@@ -6,6 +6,7 @@ import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/flowchart_layout.dart';
 import 'package:niman/src/diagrams/gantt_layout.dart';
+import 'package:niman/src/diagrams/git_graph_layout.dart';
 import 'package:niman/src/diagrams/journey_layout.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_parser.dart';
@@ -54,6 +55,9 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
       ),
       MermaidJourney(:final journey) => JourneyDrawing(
         layoutJourney(journey, style),
+      ),
+      MermaidGitGraph(:final graph) => GitGraphDrawing(
+        layoutGitGraph(graph, style),
       ),
     });
   } on MermaidParseException catch (error) {

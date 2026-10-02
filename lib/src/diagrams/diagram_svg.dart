@@ -11,6 +11,7 @@ import 'package:niman/src/diagrams/diagram_renderer.dart';
 import 'package:niman/src/diagrams/diagram_result.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/gantt_renderer.dart';
+import 'package:niman/src/diagrams/git_graph_renderer.dart';
 import 'package:niman/src/diagrams/journey_renderer.dart';
 import 'package:niman/src/diagrams/pie_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
@@ -45,6 +46,8 @@ String drawingSvg(DiagramDrawing drawing, DiagramStyle style) {
       TimelineRenderer(layout: layout, style: style).paint(target);
     case JourneyDrawing(:final layout):
       JourneyRenderer(layout: layout, style: style).paint(target);
+    case GitGraphDrawing(:final layout):
+      GitGraphRenderer(layout: layout, style: style).paint(target);
   }
   return target.finish();
 }

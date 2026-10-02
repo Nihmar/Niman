@@ -12,6 +12,8 @@ import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/flow_parser.dart';
 import 'package:niman/src/diagrams/gantt_model.dart';
 import 'package:niman/src/diagrams/gantt_parser.dart';
+import 'package:niman/src/diagrams/git_graph_model.dart';
+import 'package:niman/src/diagrams/git_graph_parser.dart';
 import 'package:niman/src/diagrams/journey_model.dart';
 import 'package:niman/src/diagrams/journey_parser.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
@@ -67,6 +69,15 @@ final class MermaidJourney extends MermaidDiagram {
   final JourneyChart journey;
 }
 
+/// A `gitGraph`.
+final class MermaidGitGraph extends MermaidDiagram {
+  /// Wraps a parsed [graph].
+  const new(this.graph);
+
+  /// The parsed git graph.
+  final GitGraph graph;
+}
+
 /// A `pie` chart.
 final class MermaidPie extends MermaidDiagram {
   /// Wraps a parsed [pie].
@@ -89,7 +100,6 @@ final class MermaidSequence extends MermaidDiagram {
 /// among these is refused by name; anything else is handed to the flowchart
 /// parser, which reports its own header error.
 const Set<String> _otherDiagramTypes = {
-  'gitgraph',
   'quadrantchart',
   'requirementdiagram',
   'c4context',
@@ -114,6 +124,7 @@ MermaidDiagram parseMermaid(String source) {
   if (first == 'gantt') return MermaidGantt(parseGantt(source));
   if (first == 'timeline') return MermaidTimeline(parseTimeline(source));
   if (first == 'journey') return MermaidJourney(parseJourney(source));
+  if (first == 'gitgraph') return MermaidGitGraph(parseGitGraph(source));
   if (first == 'classdiagram' || first == 'classdiagram-v2') {
     return MermaidFlowchart(parseClassDiagram(source));
   }

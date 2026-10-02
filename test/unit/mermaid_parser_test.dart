@@ -300,12 +300,12 @@ void main() {
     expect(parseMermaid('${preamble}mindmap\n  root'), isA<MermaidFlowchart>());
     expect(_chart('${preamble}flowchart LR\nA --> B').nodes, hasLength(2));
     expect(
-      () => parseMermaid('%% note\ngitGraph\ncommit'),
+      () => parseMermaid('%% note\nsankey-beta\nA,B,1'),
       throwsA(
         isA<MermaidParseException>().having(
           (e) => e.message,
           'message',
-          contains('unsupported diagram type "gitgraph"'),
+          contains('unsupported diagram type "sankey-beta"'),
         ),
       ),
     );
