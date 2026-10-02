@@ -465,7 +465,7 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Ten kinds are drawn:
+Eleven kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
@@ -493,11 +493,13 @@ Ten kinds are drawn:
   under them, sections in a colour each.
 - **User journeys** (`journey`): the tasks of each section with a face
   that shows how each went, and dots for the actors who took part.
+- **Git graphs** (`gitGraph`): branches as lanes, commits with their ids,
+  tags and types, merges and cherry-picks, left to right or top to bottom.
 - **Mind maps** (`mindmap`), the tree drawn left to right.
 
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber` — is read and drawn without, in the theme's
-own colours. Any other kind (gitGraph, quadrantChart, sankey…) is left as
+own colours. Any other kind (quadrantChart, sankey, C4…) is left as
 source with a note saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
