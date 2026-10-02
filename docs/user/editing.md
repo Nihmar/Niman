@@ -465,7 +465,7 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Twenty kinds are drawn:
+Twenty-one kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
@@ -485,6 +485,12 @@ Twenty kinds are drawn:
 - **Entity-relationship diagrams** (`erDiagram`): entities with their
   attributes and keys, and relationships ending in the crow's feet of
   their cardinalities, solid or dashed, with their labels.
+- **C4 diagrams** (`C4Context`, `C4Container`, `C4Component`,
+  `C4Dynamic`, `C4Deployment`): people, systems, containers and
+  components — external ones, databases and queues too — as cards with
+  their technology and description, inside nested boundaries, and the
+  relationships between them; a relationship's direction (`Rel_U`,
+  `Rel_L`…) is left to the layout.
 - **Requirement diagrams** (`requirementDiagram`): requirements of every
   kind and elements, each with its attributes (a long text wrapped), and
   the relationships between them — `contains` with its circled cross, the
@@ -529,9 +535,10 @@ written out after the line is read, so `#58;` puts a colon in a label
 where a plain `:` would end it.
 
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
-activations, `autonumber` — is read and drawn without, in the theme's
-own colours. Any other kind (C4, architecture) is left as
-source with a note saying so. While the caret is in the fence, live mode
+activations, `autonumber`, C4's `UpdateElementStyle` and
+`UpdateLayoutConfig` — is read and drawn without, in the theme's own
+colours. Any other kind (architecture) is left as source with a note
+saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
 message under it ("Line 4: expected \"-->\" after \"--\""), so the
