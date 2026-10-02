@@ -388,6 +388,33 @@ void main() {
       expect(_depths(scanner), <int>[0, 1, 0]);
     });
 
+    test('an item goes on with paragraph text only', () {
+      // A line that opens a block of its own ends the item's text: the
+      // item took any line without a marker, `# Heading` under a list
+      // included, and drew it as the item's words.
+      for (final (line, kind, depth) in [
+        ('# Heading', BlockKind.heading, -1),
+        ('> quoted', BlockKind.quote, -1),
+        ('```', BlockKind.fencedCode, -1),
+        ('---', BlockKind.thematicBreak, -1),
+        ('  > quoted in the item', BlockKind.quote, 0),
+        ('  ```', BlockKind.fencedCode, 0),
+      ]) {
+        final scanner = BlockScanner(SourceBuffer.fromText('- item\n$line\n'));
+        expect(scanner.blockAt(0)!.endLine, 1, reason: line);
+        final after = scanner.blockAt(1)!;
+        expect((after.kind, after.listDepth), (kind, depth), reason: line);
+      }
+      // Paragraph text goes on, indented into the item or lazily.
+      for (final line in ['  wrapped', 'lazy']) {
+        final scanner = BlockScanner(SourceBuffer.fromText('- item\n$line\n'));
+        expect(scanner.blockAt(1)!.startLine, 0, reason: line);
+      }
+      // After a rule, the list is over.
+      final scanner = BlockScanner(SourceBuffer.fromText('- a\n---\nafter\n'));
+      expect(scanner.blockAt(2)!.listDepth, -1);
+    });
+
     test("a line back at an item's content column is that item again", () {
       // After a blank line, `  back in A` is indented past A's content column
       // but not B's: it closes B and is A's second paragraph, not a line
