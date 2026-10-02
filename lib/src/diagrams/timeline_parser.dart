@@ -37,7 +37,7 @@ TimelineChart parseTimeline(String source) {
     if (lower.startsWith('title ')) {
       title = line.substring(6).trim();
     } else if (lower.startsWith('section ')) {
-      names.add(line.substring(8).trim());
+      names.add(decodeMermaidEntities(line.substring(8).trim()));
       periods.add([]);
     } else if (lower.startsWith('acctitle') || lower.startsWith('accdescr')) {
       continue;
@@ -53,7 +53,7 @@ TimelineChart parseTimeline(String source) {
     } else {
       final parts = line.split(_separator);
       periods.last.add((
-        label: parts.first.trim(),
+        label: decodeMermaidEntities(parts.first.trim()),
         events: _events(parts.skip(1).join(':')),
       ));
     }
@@ -62,7 +62,7 @@ TimelineChart parseTimeline(String source) {
     throw const MermaidParseException(1, 'a timeline needs a period');
   }
   return TimelineChart(
-    title: title == null || title.isEmpty ? null : title,
+    title: title == null || title.isEmpty ? null : decodeMermaidEntities(title),
     sections: [
       for (var s = 0; s < names.length; s++)
         if (periods[s].isNotEmpty || names[s] != null)
@@ -83,5 +83,5 @@ TimelineChart parseTimeline(String source) {
 /// The events [written] after a period's colon, empty ones left out.
 List<String> _events(String written) => [
   for (final event in written.split(_separator))
-    if (event.trim().isNotEmpty) event.trim(),
+    if (event.trim().isNotEmpty) decodeMermaidEntities(event.trim()),
 ];

@@ -72,7 +72,7 @@ GanttChart parseGantt(String source) {
         excludes = rest;
         excludeLine = number;
       case 'section':
-        names.add(rest);
+        names.add(decodeMermaidEntities(rest));
       case _ when _ignored.contains(word):
         break;
       default:
@@ -85,7 +85,7 @@ GanttChart parseGantt(String source) {
         }
         specs.add(
           readGanttTask(
-            line.substring(0, colon).trim(),
+            decodeMermaidEntities(line.substring(0, colon).trim()),
             line.substring(colon + 1),
             names.length - 1,
             number,
@@ -102,7 +102,7 @@ GanttChart parseGantt(String source) {
     _excludes(excludes, format, excludeLine),
   );
   return GanttChart(
-    title: title == null || title.isEmpty ? null : title,
+    title: title == null || title.isEmpty ? null : decodeMermaidEntities(title),
     axisFormat: axisFormat == null || axisFormat.isEmpty ? null : axisFormat,
     sections: [
       for (var s = 0; s < names.length; s++)

@@ -37,7 +37,7 @@ JourneyChart parseJourney(String source) {
       continue;
     }
     if (lower.startsWith('section ')) {
-      names.add(line.substring(8).trim());
+      names.add(decodeMermaidEntities(line.substring(8).trim()));
       tasks.add([]);
       continue;
     }
@@ -60,7 +60,7 @@ JourneyChart parseJourney(String source) {
     }
     final who = <int>[];
     for (final actor in (task.group(3) ?? '').split(',')) {
-      final name = actor.trim();
+      final name = decodeMermaidEntities(actor.trim());
       if (name.isEmpty) continue;
       var at = actors.indexOf(name);
       if (at < 0) {
@@ -70,14 +70,18 @@ JourneyChart parseJourney(String source) {
       if (!who.contains(at)) who.add(at);
     }
     tasks.last.add(
-      JourneyTask(label: task.group(1)!.trim(), score: score, actors: who),
+      JourneyTask(
+        label: decodeMermaidEntities(task.group(1)!.trim()),
+        score: score,
+        actors: who,
+      ),
     );
   }
   if (tasks.every((section) => section.isEmpty)) {
     throw const MermaidParseException(1, 'a journey needs a task');
   }
   return JourneyChart(
-    title: title == null || title.isEmpty ? null : title,
+    title: title == null || title.isEmpty ? null : decodeMermaidEntities(title),
     actors: List.unmodifiable(actors),
     sections: [
       for (var s = 0; s < names.length; s++)

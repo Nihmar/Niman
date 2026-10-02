@@ -129,7 +129,9 @@ final class _FlowParser {
       if (close < 0) {
         throw MermaidParseException(number, 'expected "]" to close the title');
       }
-      title = unquoteMermaid(rest.substring(bracket + 1, close).trim());
+      title = decodeMermaidEntities(
+        unquoteMermaid(rest.substring(bracket + 1, close).trim()),
+      );
     } else {
       id = rest;
     }
@@ -312,7 +314,7 @@ final class _FlowParser {
   }
 
   static String? _unquoteOrNull(String? text) =>
-      text == null ? null : unquoteMermaid(text);
+      text == null ? null : decodeMermaidEntities(unquoteMermaid(text));
 }
 
 /// The mutable state of one open `subgraph`.

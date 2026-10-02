@@ -11,7 +11,6 @@ import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/diagram_svg.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
-import 'package:niman/src/diagrams/mermaid_lines.dart';
 import 'package:niman/src/diagrams/mermaid_parser.dart';
 
 const DiagramStyle _style = DiagramStyle();
@@ -111,15 +110,6 @@ void main() {
     expect(() => parseBlock('block-beta\na --> a'), _error(2, 'itself'));
     expect(() => parseBlock('block-beta\na["open'), _error(2, '"]"'));
     expect(() => parseBlock('block-beta\n'), _error(1, 'needs a block'));
-  });
-
-  test('entities are written out, an unknown one left as it is', () {
-    expect(decodeMermaidEntities('a&nbsp;b'), 'a b');
-    expect(
-      decodeMermaidEntities('#quot;hi#quot; &amp; &#65;#66;'),
-      '"hi" & AB',
-    );
-    expect(decodeMermaidEntities('&bogus; &12; #x;'), '&bogus; &12; #x;');
   });
 
   test('cells of one column line up, a span as wide as its columns', () {

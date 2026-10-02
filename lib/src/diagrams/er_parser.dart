@@ -85,12 +85,15 @@ final class _ErParser {
         for (final MapEntry(key: id, value: entity) in _entities.entries)
           FlowNode(
             id: id,
-            label: entity.label,
+            label: decodeMermaidEntities(entity.label),
             shape: FlowNodeShape.classBox,
             sections: [
-              [entity.label],
+              [decodeMermaidEntities(entity.label)],
               if (entity.attributes.isNotEmpty)
-                List.unmodifiable(entity.attributes),
+                [
+                  for (final text in entity.attributes)
+                    decodeMermaidEntities(text),
+                ],
             ],
           ),
       ],
@@ -168,7 +171,7 @@ final class _ErParser {
   };
 
   static String? _label(String written) {
-    final label = unquoteMermaid(written.trim());
+    final label = decodeMermaidEntities(unquoteMermaid(written.trim()));
     return label.isEmpty ? null : label;
   }
 

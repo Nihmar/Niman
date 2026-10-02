@@ -240,8 +240,8 @@ final class _BlockParser {
     if (i >= source.length) {
       throw MermaidParseException(number, 'expected "]>" after "<["');
     }
-    final label = unquoteMermaid(
-      source.substring(cursor.position + 2, i).trim(),
+    final label = decodeMermaidEntities(
+      unquoteMermaid(source.substring(cursor.position + 2, i).trim()),
     );
     final match = RegExp(r'\(\s*(\w+)\s*\)').matchAsPrefix(source, i + 2);
     final direction = match == null
@@ -289,7 +289,7 @@ final class _BlockParser {
         ..shape = ref.shape!
         ..label = (ref.label == null || ref.label!.isEmpty)
             ? ref.id
-            : decodeMermaidEntities(ref.label!)
+            : ref.label!
         ..arrow = ref.arrow;
     }
     if (ref.span != null) node.span = ref.span!;

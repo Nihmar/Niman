@@ -176,7 +176,7 @@ final class _SequenceParser {
       SequenceMessage(
         from: from,
         to: to,
-        text: (match.group(4) ?? '').trim(),
+        text: decodeMermaidEntities((match.group(4) ?? '').trim()),
         dashed: operator.contains('--'),
         twoWay: operator.startsWith('<<'),
         arrow: operator.endsWith('>>')
@@ -201,7 +201,7 @@ final class _SequenceParser {
           _ => SequenceNotePlacement.rightOf,
         },
         participants: ids,
-        text: match.group(3)!.trim(),
+        text: decodeMermaidEntities(match.group(3)!.trim()),
       ),
     );
   }
@@ -223,7 +223,7 @@ final class _SequenceParser {
         sections: [
           for (final section in open.sections)
             SequenceSection(
-              label: section.label,
+              label: decodeMermaidEntities(section.label),
               items: List.unmodifiable(section.items),
             ),
         ],
@@ -239,14 +239,19 @@ final class _SequenceParser {
   void _ensure(String id) {
     if (_byId.containsKey(id)) return;
     _byId[id] = _participants.length;
-    _participants.add(SequenceParticipant(id: id, label: id));
+    _participants.add(
+      SequenceParticipant(id: id, label: decodeMermaidEntities(id)),
+    );
   }
 
   /// Declares participant [id], with the [alias] drawn in its box.
   void _declare(String id, String? alias) {
     _ensure(id);
     if (alias == null || alias.isEmpty) return;
-    _participants[_byId[id]!] = SequenceParticipant(id: id, label: alias);
+    _participants[_byId[id]!] = SequenceParticipant(
+      id: id,
+      label: decodeMermaidEntities(alias),
+    );
   }
 
   static String _firstWord(String line) =>

@@ -68,7 +68,7 @@ PieChart parsePie(String source) {
   }
   return PieChart(
     slices: List.unmodifiable(slices),
-    title: title == null || title.isEmpty ? null : title,
+    title: title == null || title.isEmpty ? null : decodeMermaidEntities(title),
     showData: showData,
   );
 }
@@ -94,5 +94,8 @@ PieSlice _sliceOf(String line, int number) {
   if (value < 0) {
     throw MermaidParseException(number, 'a slice cannot be negative');
   }
-  return PieSlice(label: match.group(1)!.trim(), value: value);
+  return PieSlice(
+    label: decodeMermaidEntities(match.group(1)!.trim()),
+    value: value,
+  );
 }

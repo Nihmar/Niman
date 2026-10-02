@@ -83,7 +83,7 @@ final class _XyParser {
     final rest = space < 0 ? '' : line.substring(space).trim();
     switch (word) {
       case 'title':
-        _title = unquoteMermaid(rest);
+        _title = decodeMermaidEntities(unquoteMermaid(rest));
       case 'x-axis' || 'y-axis':
         final axis = _axis.firstMatch(rest);
         if (axis == null) {
@@ -92,7 +92,8 @@ final class _XyParser {
             'expected an axis title, then [a, b] or "min --> max"',
           );
         }
-        final title = (axis.group(1) ?? axis.group(2))?.trim();
+        final written = (axis.group(1) ?? axis.group(2))?.trim();
+        final title = written == null ? null : decodeMermaidEntities(written);
         final range = axis.group(4) == null
             ? null
             : (
@@ -106,7 +107,8 @@ final class _XyParser {
           if (list != null) {
             _categories = [
               for (final item in list.split(','))
-                if (item.trim().isNotEmpty) unquoteMermaid(item.trim()),
+                if (item.trim().isNotEmpty)
+                  decodeMermaidEntities(unquoteMermaid(item.trim())),
             ];
           }
         } else {

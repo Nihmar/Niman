@@ -48,8 +48,8 @@ SankeyChart parseSankey(String source) {
         'expected a value of zero or more, found "${fields[2]}"',
       );
     }
-    final from = node(fields[0]);
-    final to = node(fields[1]);
+    final from = node(decodeMermaidEntities(fields[0]));
+    final to = node(decodeMermaidEntities(fields[1]));
     if (from == to || _reaches(out, to, from)) {
       throw MermaidParseException(
         number,

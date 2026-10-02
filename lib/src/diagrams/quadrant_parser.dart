@@ -46,7 +46,9 @@ QuadrantChart parseQuadrant(String source) {
       case 'y-axis':
         yAxis = _axis(rest);
       case 'quadrant-1' || 'quadrant-2' || 'quadrant-3' || 'quadrant-4':
-        quadrants[int.parse(word.substring(9)) - 1] = rest;
+        quadrants[int.parse(word.substring(9)) - 1] = decodeMermaidEntities(
+          rest,
+        );
       case 'classdef' || 'acctitle' || 'accdescr' || 'acctitle:':
         break;
       default:
@@ -54,7 +56,7 @@ QuadrantChart parseQuadrant(String source) {
     }
   }
   return QuadrantChart(
-    title: title == null || title.isEmpty ? null : title,
+    title: title == null || title.isEmpty ? null : decodeMermaidEntities(title),
     quadrants: List.unmodifiable(quadrants),
     points: List.unmodifiable(points),
     xLow: xAxis.$1,
@@ -68,7 +70,7 @@ QuadrantChart parseQuadrant(String source) {
 (String?, String?) _axis(String written) {
   final parts = written.split('-->');
   String? clean(String text) {
-    final trimmed = unquoteMermaid(text.trim());
+    final trimmed = decodeMermaidEntities(unquoteMermaid(text.trim()));
     return trimmed.isEmpty ? null : trimmed;
   }
 
@@ -95,7 +97,7 @@ QuadrantPoint _pointOf(String line, int number) {
   }
   final radius = RegExp(r'radius\s*:\s*([\d.]+)').firstMatch(match.group(4)!);
   return QuadrantPoint(
-    label: unquoteMermaid(match.group(1)!.trim()),
+    label: decodeMermaidEntities(unquoteMermaid(match.group(1)!.trim())),
     x: x,
     y: y,
     radius: radius == null ? null : double.tryParse(radius.group(1)!),

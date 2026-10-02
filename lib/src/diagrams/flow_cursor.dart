@@ -170,7 +170,7 @@ final class FlowCursor {
       throw MermaidParseException(number, 'expected "$close" after $what');
     }
     position = found.end;
-    return unquoteMermaid(found.text.trim());
+    return decodeMermaidEntities(unquoteMermaid(found.text.trim()));
   }
 
   ({String text, String close}) _scanAny(
@@ -193,8 +193,10 @@ final class FlowCursor {
         'expected one of ${closes.join(", ")} after $what',
       );
     }
-    final text = unquoteMermaid(
-      source.substring(position, best - bestClose.length).trim(),
+    final text = decodeMermaidEntities(
+      unquoteMermaid(
+        source.substring(position, best - bestClose.length).trim(),
+      ),
     );
     position = best;
     return (text: text, close: bestClose);

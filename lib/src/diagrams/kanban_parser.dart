@@ -68,8 +68,8 @@ KanbanCard _card(String line, int number) {
   };
   return KanbanCard(
     text: _text(line.substring(0, at).trim()),
-    ticket: data['ticket'],
-    assigned: data['assigned'],
+    ticket: _decoded(data['ticket']),
+    assigned: _decoded(data['assigned']),
     priority: switch (data['priority']?.toLowerCase()) {
       'very high' => KanbanPriority.veryHigh,
       'high' => KanbanPriority.high,
@@ -81,5 +81,9 @@ KanbanCard _card(String line, int number) {
 }
 
 /// A node's text, out of its brackets.
-String _text(String written) =>
-    (_bracketed.firstMatch(written)?.group(1) ?? written).trim();
+String _text(String written) => decodeMermaidEntities(
+  (_bracketed.firstMatch(written)?.group(1) ?? written).trim(),
+);
+
+String? _decoded(String? text) =>
+    text == null ? null : decodeMermaidEntities(text);

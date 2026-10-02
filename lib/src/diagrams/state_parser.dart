@@ -133,7 +133,9 @@ final class _StateParser {
         FlowEdge(
           from: _exit(transition.from),
           to: _entry(transition.to),
-          label: transition.label,
+          label: transition.label == null
+              ? null
+              : decodeMermaidEntities(transition.label!),
         ),
       ..._ties(),
     ];
@@ -146,9 +148,11 @@ final class _StateParser {
           if (_members[state.id]?.isNotEmpty != true)
             FlowNode(
               id: state.id,
-              label: state.lines.isNotEmpty
-                  ? state.lines.join('\n')
-                  : state.label ?? state.id,
+              label: decodeMermaidEntities(
+                state.lines.isNotEmpty
+                    ? state.lines.join('\n')
+                    : state.label ?? state.id,
+              ),
               shape: state.shape,
             ),
         ..._notes,
@@ -158,7 +162,7 @@ final class _StateParser {
         for (final composite in _closed)
           FlowSubgraph(
             id: composite.id,
-            title: composite.title,
+            title: decodeMermaidEntities(composite.title),
             nodeIds: List.unmodifiable(composite.ids),
             parent: composite.parent,
           ),
@@ -294,7 +298,13 @@ final class _StateParser {
 
   void _noteFor(String target, String text) {
     final id = 'note-${_notes.length}';
-    _notes.add(FlowNode(id: id, label: text, shape: FlowNodeShape.note));
+    _notes.add(
+      FlowNode(
+        id: id,
+        label: decodeMermaidEntities(text),
+        shape: FlowNodeShape.note,
+      ),
+    );
     _join(id);
     _stateOf(target);
     _noteTargets.add((id, target));

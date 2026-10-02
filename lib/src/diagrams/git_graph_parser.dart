@@ -56,7 +56,15 @@ final class _GitGraphParser {
       throw const MermaidParseException(1, 'a git graph needs a commit');
     }
     return GitGraph(
-      branches: List.unmodifiable(_branches),
+      // Names and ids are matched as written; only what is drawn is
+      // decoded.
+      branches: List.unmodifiable([
+        for (final branch in _branches)
+          GitBranch(
+            name: decodeMermaidEntities(branch.name),
+            order: branch.order,
+          ),
+      ]),
       commits: List.unmodifiable(_commits),
       direction: switch (direction.group(1)?.toUpperCase()) {
         'TB' => GitGraphDirection.topDown,
@@ -168,8 +176,8 @@ final class _GitGraphParser {
       GitCommit(
         branch: _current,
         parents: parents,
-        label: id ?? label,
-        tag: arguments['tag'],
+        label: _decoded(id ?? label),
+        tag: _decoded(arguments['tag']),
         type: type,
         merge: merge,
         cherryPick: cherryPick,
@@ -177,6 +185,9 @@ final class _GitGraphParser {
     );
     _heads[_current] = _commits.length - 1;
   }
+
+  static String? _decoded(String? text) =>
+      text == null ? null : decodeMermaidEntities(text);
 
   String _branchName(String rest, int number) {
     final match = _name.firstMatch(rest);

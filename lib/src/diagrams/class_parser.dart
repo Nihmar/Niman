@@ -205,9 +205,11 @@ final class _ClassParser {
             : FlowEdgeStyle.solid,
         start: _end(match.group(3)),
         end: _end(match.group(5)),
-        startLabel: match.group(2),
-        endLabel: match.group(6),
-        label: label == null || label.isEmpty ? null : label,
+        startLabel: _decoded(match.group(2)),
+        endLabel: _decoded(match.group(6)),
+        label: label == null || label.isEmpty
+            ? null
+            : decodeMermaidEntities(label),
       ),
     );
   }
@@ -225,7 +227,7 @@ final class _ClassParser {
     _notes.add(
       FlowNode(
         id: id,
-        label: match.group(2)!.replaceAll(r'\n', '\n'),
+        label: decodeMermaidEntities(match.group(2)!.replaceAll(r'\n', '\n')),
         shape: FlowNodeShape.note,
       ),
     );
@@ -306,17 +308,27 @@ final class _ClassParser {
     }
   }
 
+  static String? _decoded(String? text) =>
+      text == null ? null : decodeMermaidEntities(text);
+
   static String _generic(String name) =>
       name.replaceAllMapped(RegExp('~([^~]*)~'), (m) => '<${m[1]}>');
 
-  static FlowNode _node(_Class build) => FlowNode(
-    id: build.id,
-    label: build.name,
-    shape: FlowNodeShape.classBox,
-    sections: [
-      [for (final annotation in build.annotations) '«$annotation»', build.name],
-      List.unmodifiable(build.attributes),
-      List.unmodifiable(build.methods),
-    ],
-  );
+  static FlowNode _node(_Class build) {
+    final name = decodeMermaidEntities(build.name);
+    return FlowNode(
+      id: build.id,
+      label: name,
+      shape: FlowNodeShape.classBox,
+      sections: [
+        [
+          for (final annotation in build.annotations)
+            '«${decodeMermaidEntities(annotation)}»',
+          name,
+        ],
+        [for (final text in build.attributes) decodeMermaidEntities(text)],
+        [for (final text in build.methods) decodeMermaidEntities(text)],
+      ],
+    );
+  }
 }

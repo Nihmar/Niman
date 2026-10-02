@@ -65,7 +65,13 @@ final class _MindmapParser {
     final indent = _indentOf(raw);
     final node = _nodeOf(raw.trim());
     final id = 'n${_declared++}';
-    _nodes.add(FlowNode(id: id, label: node.label, shape: node.shape));
+    _nodes.add(
+      FlowNode(
+        id: id,
+        label: decodeMermaidEntities(node.label),
+        shape: node.shape,
+      ),
+    );
     // The root's own indentation is whatever the first line carries; every
     // later line no deeper than it is a second root, which a mind map has
     // not.
@@ -130,10 +136,9 @@ final class _MindmapParser {
   }
 
   /// The label between a shape's delimiters: quotes keep brackets and
-  /// `%%` in it as text, and `#quot;` is a quote, as in Mermaid.
+  /// `%%` in it as text.
   static String _inner(String body, int open, int close) =>
-      unquoteMermaid(body.substring(open, body.length - close).trim())
-          .replaceAll('#quot;', '"');
+      unquoteMermaid(body.substring(open, body.length - close).trim());
 
   static String _firstWord(String line) {
     final match = RegExp('^[A-Za-z_][A-Za-z0-9_-]*')
