@@ -38,7 +38,6 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/theme_tokens.dart';
-import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlight_style.dart';
@@ -146,7 +145,6 @@ final class MarkdownSourceView extends StatefulWidget {
     this.onOpenLink,
     this.activeItems,
     this.mathCache,
-    this.diagramCache,
     this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
@@ -265,10 +263,6 @@ final class MarkdownSourceView extends StatefulWidget {
   /// The typeset formulas, for `live` mode's display maths; without it a
   /// formula stays its source.
   final MathCache? mathCache;
-
-  /// The resolved diagrams, for `live` mode's Mermaid blocks; without it the
-  /// shared cache is used (#530).
-  final DiagramCache? diagramCache;
 
   /// Where an embed's target is on disk, for `live` mode's pictures; without
   /// it a picture stays its source.
@@ -3422,7 +3416,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 diagram: widget.hideMarkers
                                     ? _diagramOf(index)
                                     : null,
-                                diagramCache: widget.diagramCache,
                                 tableRow:
                                     widget.hideMarkers &&
                                         block?.kind == BlockKind.table
@@ -4987,7 +4980,6 @@ final class _Line extends StatelessWidget {
     required this.formula,
     required this.mathCache,
     required this.diagram,
-    required this.diagramCache,
     required this.codeRuns,
     required this.definition,
     required this.tableRow,
@@ -5041,7 +5033,6 @@ final class _Line extends StatelessWidget {
   /// The Mermaid block the line belongs to, which `live` draws in place of
   /// its lines while the caret is out of it (#530).
   final LiveDiagram? diagram;
-  final DiagramCache? diagramCache;
 
   /// The colours of the line's code, as the read view colours its block;
   /// null for a line that is not code the read view colours.
@@ -5378,7 +5369,6 @@ final class _Line extends StatelessWidget {
       if (index != drawing.start) return line;
       return liveDiagramUnder(
         line,
-        cache: diagramCache ?? sharedDiagramCache,
         // The block's first line is the one that carries its source.
         source: drawing.source!,
         theme: theme,

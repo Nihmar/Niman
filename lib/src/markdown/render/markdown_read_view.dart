@@ -21,7 +21,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -52,7 +51,6 @@ final class MarkdownReadView extends StatefulWidget {
     required this.buffer,
     required this.parser,
     required this.mathCache,
-    this.diagramCache,
     this.controller,
     this.padding = const EdgeInsets.symmetric(vertical: 8),
     this.column = NoteColumn.off,
@@ -94,9 +92,6 @@ final class MarkdownReadView extends StatefulWidget {
 
   /// The math render cache, one per surface.
   final MathCache mathCache;
-
-  /// The diagram cache; null uses the shared one.
-  final DiagramCache? diagramCache;
 
   /// Called with a note line when a diagram or its parse error is tapped, to
   /// show the source again (#530).
@@ -957,7 +952,6 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       parsed: parsed,
       theme: _theme ?? _fallbackTheme,
       mathCache: widget.mathCache,
-      diagramCache: widget.diagramCache,
       availableWidth: availableWidth,
       onTapLink: widget.onTapLink,
       onTapWikiLink: widget.onTapWikiLink,

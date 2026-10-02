@@ -2,7 +2,6 @@
 // as code with the error when it does not.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_painter.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -19,7 +18,6 @@ Future<void> _pump(WidgetTester tester, String document) async {
           buffer: SourceBuffer.fromText(document),
           parser: BlockParser(),
           mathCache: MathCache(),
-          diagramCache: DiagramCache(),
         ),
       ),
     ),
@@ -94,7 +92,6 @@ void main() {
                 ),
                 parser: BlockParser(),
                 mathCache: MathCache(),
-                diagramCache: DiagramCache(),
               ),
             ),
           ),

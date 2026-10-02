@@ -11,7 +11,6 @@
 library;
 
 import 'package:flutter/widgets.dart';
-import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -69,7 +68,6 @@ Widget liveFormulaUnder(
 /// a pointer going down on it before the note does.
 Widget liveDiagramUnder(
   Widget line, {
-  required DiagramCache cache,
   required String source,
   required MarkdownTheme theme,
   required void Function(PointerDownEvent event) onPointerDown,
@@ -84,7 +82,6 @@ Widget liveDiagramUnder(
         child: BlockDiagramView(
           source: source,
           theme: theme,
-          cache: cache,
           onTapSource: onTapSource,
         ),
       ),

@@ -24,7 +24,6 @@ final class BlockDiagramView extends StatelessWidget {
   const new({
     required this.source,
     required this.theme,
-    required this.cache,
     this.onTapSource,
     this.fullScreen = true,
     super.key,
@@ -35,9 +34,6 @@ final class BlockDiagramView extends StatelessWidget {
 
   /// The typography and colours it is drawn with.
   final MarkdownTheme theme;
-
-  /// The cache of resolved diagrams, one per surface.
-  final DiagramCache cache;
 
   /// Called with a line of the diagram's own source (1-based) to show the
   /// source again: the whole diagram on a tap, the offending line on an
@@ -58,7 +54,7 @@ final class BlockDiagramView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = styleFor(context);
-    final result = cache.resolve(source, style);
+    final result = diagramCache.resolve(source, style);
     return switch (result) {
       DiagramReady(:final drawing) => _diagram(context, drawing, style),
       DiagramFailed(:final error) => _error(context, error),

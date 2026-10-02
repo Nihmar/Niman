@@ -37,7 +37,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
-import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/links/parser.dart' show wikiDisplayText;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -68,7 +67,6 @@ final class BlockView extends StatelessWidget {
     required this.parsed,
     required this.theme,
     required this.mathCache,
-    this.diagramCache,
     this.availableWidth,
     this.onTapLink,
     this.onTapWikiLink,
@@ -107,10 +105,6 @@ final class BlockView extends StatelessWidget {
 
   /// The math render cache, one per surface.
   final MathCache mathCache;
-
-  /// The diagram cache; null uses the shared one, so the read view can draw
-  /// a diagram without every call site threading a cache through.
-  final DiagramCache? diagramCache;
 
   /// Called with a note line when a diagram — or its parse error — is tapped,
   /// to show the block's source again (#530).
@@ -446,7 +440,6 @@ final class BlockView extends StatelessWidget {
     return BlockDiagramView(
       source: content,
       theme: theme,
-      cache: diagramCache ?? sharedDiagramCache,
       fullScreen: !printed,
       onTapSource: tap == null ? null : (inner) => tap(line + inner),
     );
