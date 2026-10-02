@@ -108,8 +108,15 @@ final class CanvasDiagramTarget implements DiagramTarget {
       ),
       textDirection: TextDirection.ltr,
       textAlign: alignLeft ? TextAlign.left : TextAlign.center,
-    )..layout(maxWidth: box.width);
-    painter.paint(canvas, Offset(box.left, box.center.dy - painter.height / 2));
+    )..layout();
+    // Unbounded: the layout broke the label into its lines already, and a
+    // face a little wider than the estimate it was measured with keeps
+    // each one whole. Placed by its own width, centred on the box as the
+    // SVG centres it (`text-anchor="middle"`), or from its left.
+    final x = alignLeft ? box.left : box.center.dx - painter.width / 2;
+    painter
+      ..paint(canvas, Offset(x, box.center.dy - painter.height / 2))
+      ..dispose();
   }
 
   void _stroke(Path path, Color color, double width, bool dashed) {
