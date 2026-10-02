@@ -54,3 +54,49 @@ String unquoteMermaid(String text) {
   }
   return text;
 }
+
+/// The named entities a label may write, by name.
+const Map<String, String> _entities = {
+  'nbsp': ' ',
+  'amp': '&',
+  'lt': '<',
+  'gt': '>',
+  'quot': '"',
+  'apos': "'",
+  'hash': '#',
+};
+
+/// An entity: HTML's `&name;`, `&#38;`, `&#x26;`, or Mermaid's own `#38;`
+/// and `#quot;`.
+final RegExp _entity = RegExp(
+  r'([&#])(?:#(\d{1,7})|#x([0-9a-fA-F]{1,6})|(\d{1,7})|([a-zA-Z]+));',
+);
+
+/// [text] with its entities written out: `&nbsp;` a no-break space,
+/// `#quot;` a quote. One the engine does not know stays as written, and
+/// Mermaid's `#` form takes a number or a name only, so `#12;` is the
+/// character 12 but `&12;` is text.
+String decodeMermaidEntities(String text) {
+  if (!text.contains(';')) return text;
+  return text.replaceAllMapped(_entity, (m) {
+    final html = m.group(1) == '&';
+    final String? decoded;
+    if (m.group(2) != null && html) {
+      decoded = _character(int.parse(m.group(2)!));
+    } else if (m.group(3) != null && html) {
+      decoded = _character(int.parse(m.group(3)!, radix: 16));
+    } else if (m.group(4) != null && !html) {
+      decoded = _character(int.parse(m.group(4)!));
+    } else if (m.group(5) != null) {
+      decoded = _entities[m.group(5)!.toLowerCase()];
+    } else {
+      decoded = null;
+    }
+    return decoded ?? m.group(0)!;
+  });
+}
+
+String? _character(int code) =>
+    code > 0 && code <= 0x10FFFF && (code < 0xD800 || code > 0xDFFF)
+    ? String.fromCharCode(code)
+    : null;

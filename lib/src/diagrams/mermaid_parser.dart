@@ -6,6 +6,8 @@
 /// change to every call site.
 library;
 
+import 'package:niman/src/diagrams/block_model.dart';
+import 'package:niman/src/diagrams/block_parser.dart';
 import 'package:niman/src/diagrams/class_parser.dart';
 import 'package:niman/src/diagrams/er_parser.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
@@ -122,6 +124,15 @@ final class MermaidSankey extends MermaidDiagram {
   final SankeyChart chart;
 }
 
+/// A `block-beta` diagram.
+final class MermaidBlock extends MermaidDiagram {
+  /// Wraps a parsed [diagram].
+  const new(this.diagram);
+
+  /// The parsed block diagram.
+  final BlockDiagram diagram;
+}
+
 /// A `pie` chart.
 final class MermaidPie extends MermaidDiagram {
   /// Wraps a parsed [pie].
@@ -146,7 +157,6 @@ final class MermaidSequence extends MermaidDiagram {
 const Set<String> _otherDiagramTypes = {
   'requirementdiagram',
   'c4context',
-  'block-beta',
   'packet-beta',
   'architecture-beta',
   'radar-beta',
@@ -170,6 +180,9 @@ MermaidDiagram parseMermaid(String source) {
   if (first == 'xychart-beta') return MermaidXyChart(parseXyChart(source));
   if (first == 'sankey-beta' || first == 'sankey') {
     return MermaidSankey(parseSankey(source));
+  }
+  if (first == 'block-beta' || first == 'block') {
+    return MermaidBlock(parseBlock(source));
   }
   if (first == 'classdiagram' || first == 'classdiagram-v2') {
     return MermaidFlowchart(parseClassDiagram(source));

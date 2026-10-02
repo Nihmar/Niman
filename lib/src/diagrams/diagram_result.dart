@@ -2,6 +2,7 @@
 /// error to fall back to source with.
 library;
 
+import 'package:niman/src/diagrams/block_layout.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/flowchart_layout.dart';
@@ -71,6 +72,7 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
         layoutXyChart(chart, style),
       ),
       MermaidSankey(:final chart) => SankeyDrawing(layoutSankey(chart, style)),
+      MermaidBlock(:final diagram) => BlockDrawing(layoutBlock(diagram, style)),
     });
   } on MermaidParseException catch (error) {
     return DiagramFailed(error);

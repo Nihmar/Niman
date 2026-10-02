@@ -3,12 +3,14 @@
 /// Each kind lays out to geometry of its own: a graph of boxes (a
 /// flowchart, a mind map, a class, state or ER diagram), a sequence, a
 /// pie, a Gantt chart, a timeline, a user journey, a git graph, a kanban
-/// board, a quadrant chart, an xy chart, a Sankey diagram. The painter and
+/// board, a quadrant chart, an xy chart, a Sankey diagram, a block
+/// diagram. The painter and
 /// the SVG export dispatch on this one type, so the engine grows a kind at
 /// a time and no call site learns about each.
 library;
 
 import 'package:flutter/painting.dart';
+import 'package:niman/src/diagrams/block_layout.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/gantt_geometry.dart';
 import 'package:niman/src/diagrams/git_graph_geometry.dart';
@@ -109,6 +111,18 @@ final class GitGraphDrawing extends DiagramDrawing {
 
   /// The placed graph.
   final GitGraphLayout layout;
+
+  @override
+  Size get size => layout.size;
+}
+
+/// A block diagram.
+final class BlockDrawing extends DiagramDrawing {
+  /// Wraps a [layout].
+  const new(this.layout);
+
+  /// The placed diagram.
+  final BlockLayout layout;
 
   @override
   Size get size => layout.size;

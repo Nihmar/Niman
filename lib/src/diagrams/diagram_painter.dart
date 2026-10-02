@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/rendering.dart';
+import 'package:niman/src/diagrams/block_renderer.dart';
 import 'package:niman/src/diagrams/canvas_target.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_renderer.dart';
@@ -46,6 +47,8 @@ final class DiagramPainter extends CustomPainter {
         JourneyRenderer(layout: layout, style: style).paint(target);
       case GitGraphDrawing(:final layout):
         GitGraphRenderer(layout: layout, style: style).paint(target);
+      case BlockDrawing(:final layout):
+        BlockRenderer(layout: layout, style: style).paint(target);
       case KanbanDrawing(:final layout):
         KanbanRenderer(layout: layout, style: style).paint(target);
       case QuadrantDrawing(:final layout):

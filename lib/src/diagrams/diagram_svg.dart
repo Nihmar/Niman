@@ -6,6 +6,7 @@
 /// code block.
 library;
 
+import 'package:niman/src/diagrams/block_renderer.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_renderer.dart';
 import 'package:niman/src/diagrams/diagram_result.dart';
@@ -52,6 +53,8 @@ String drawingSvg(DiagramDrawing drawing, DiagramStyle style) {
       JourneyRenderer(layout: layout, style: style).paint(target);
     case GitGraphDrawing(:final layout):
       GitGraphRenderer(layout: layout, style: style).paint(target);
+    case BlockDrawing(:final layout):
+      BlockRenderer(layout: layout, style: style).paint(target);
     case KanbanDrawing(:final layout):
       KanbanRenderer(layout: layout, style: style).paint(target);
     case QuadrantDrawing(:final layout):

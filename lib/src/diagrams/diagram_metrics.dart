@@ -27,7 +27,7 @@ abstract final class DiagramMetrics {
   /// The advance, in em, of one character. Narrow punctuation and wide
   /// scripts are the two cases the average gets wrong.
   static double _advance(int rune) {
-    if (rune == 0x20) return 0.30;
+    if (rune == 0x20 || rune == 0xA0) return 0.30;
     if (_isNarrow(rune)) return 0.30;
     if (_isWide(rune)) return 1;
     return 0.58;
