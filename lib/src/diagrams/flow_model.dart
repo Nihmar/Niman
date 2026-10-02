@@ -183,6 +183,7 @@ final class FlowSubgraph {
     required this.title,
     required this.nodeIds,
     this.direction,
+    this.parent,
   });
 
   /// The identifier written after `subgraph`.
@@ -196,6 +197,9 @@ final class FlowSubgraph {
 
   /// Its own `direction`, when it declares one.
   final FlowDirection? direction;
+
+  /// The id of the subgraph it is written inside, or null at the top.
+  final String? parent;
 }
 
 /// A parsed flowchart.
@@ -217,6 +221,7 @@ final class Flowchart {
   /// Every edge, in the order it was written.
   final List<FlowEdge> edges;
 
-  /// Every subgraph, outermost first.
+  /// Every subgraph, in the order each is closed: one inside another comes
+  /// before it.
   final List<FlowSubgraph> subgraphs;
 }

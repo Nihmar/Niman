@@ -310,4 +310,13 @@ void main() {
       ),
     );
   });
+
+  test('a subgraph inside another names it as its parent', () {
+    final chart = _chart(
+      'flowchart TD\nsubgraph outer\nsubgraph inner\nA-->B\nend\nC\nend',
+    );
+    expect(chart.subgraphs.map((s) => s.id), ['inner', 'outer']);
+    expect(chart.subgraphs.first.parent, 'outer');
+    expect(chart.subgraphs.last.parent, isNull);
+  });
 }

@@ -9,16 +9,23 @@ import 'package:niman/src/diagrams/flow_model.dart';
 
 /// The box drawn round each subgraph of [chart], whose nodes sit at
 /// [rects], outermost first.
+///
+/// A subgraph's box holds its nodes and the boxes of the subgraphs written
+/// inside it, title bands and all, so nested boxes nest rather than lie on
+/// one another. The chart lists a subgraph after those inside it, so each
+/// child's box is ready when its parent's is drawn round it.
 List<LaidOutSubgraph> flowSubgraphBoxes(
   Flowchart chart,
   Map<String, Rect> rects,
   DiagramStyle style,
 ) {
   final boxes = <_SubgraphBox>[];
+  final children = <String, List<Rect>>{};
   for (final subgraph in chart.subgraphs) {
     var bounds = _union([
       for (final id in subgraph.nodeIds)
         if (rects[id] != null) rects[id]!,
+      ...?children[subgraph.id],
     ]);
     if (bounds == null) continue;
     bounds = _withTitleBand(
@@ -27,34 +34,12 @@ List<LaidOutSubgraph> flowSubgraphBoxes(
       style.fontSize * style.lineHeight + 8,
     );
     boxes.add((subgraph: subgraph, rect: bounds));
+    final parent = subgraph.parent;
+    if (parent != null) (children[parent] ??= []).add(bounds);
   }
-  // A subgraph that holds another must contain its box too.
-  for (var pass = 0; pass < boxes.length; pass++) {
-    var changed = false;
-    for (var i = 0; i < boxes.length; i++) {
-      for (var j = 0; j < boxes.length; j++) {
-        if (i == j) continue;
-        final outer = boxes[i].rect;
-        final inner = boxes[j].rect;
-        if (outer.contains(inner.topLeft) &&
-            !outer.contains(inner.bottomRight)) {
-          boxes[i] = (
-            subgraph: boxes[i].subgraph,
-            rect: outer.expandToInclude(inner),
-          );
-          changed = true;
-        }
-      }
-    }
-    if (!changed) break;
-  }
-  // Outer boxes are the larger ones; painting order is big to small.
-  boxes.sort(
-    (a, b) =>
-        (b.rect.width * b.rect.height).compareTo(a.rect.width * a.rect.height),
-  );
+  // Painted parents first, so a child's box lies over its parent's.
   return [
-    for (final box in boxes)
+    for (final box in boxes.reversed)
       LaidOutSubgraph(
         subgraph: box.subgraph,
         rect: box.rect,

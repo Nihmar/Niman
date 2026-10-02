@@ -138,6 +138,7 @@ final class _FlowParser {
       _SubgraphBuild(
         id: id,
         title: (title == null || title.isEmpty) ? id : title,
+        parent: _stack.isEmpty ? null : _stack.last.id,
       ),
     );
   }
@@ -154,6 +155,7 @@ final class _FlowParser {
         title: build.title,
         nodeIds: List.unmodifiable(build.nodeIds),
         direction: build.direction,
+        parent: build.parent,
       ),
     );
   }
@@ -323,10 +325,11 @@ final class _FlowParser {
 
 /// The mutable state of one open `subgraph`.
 final class _SubgraphBuild {
-  new({required this.id, required this.title});
+  new({required this.id, required this.title, this.parent});
 
   final String id;
   final String title;
+  final String? parent;
   final List<String> nodeIds = [];
   final Set<String> members = {};
   FlowDirection? direction;

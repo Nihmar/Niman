@@ -139,4 +139,19 @@ void main() {
       }
     }
   });
+
+  test('a subgraph inside another is boxed inside it, title and all', () {
+    final layout = _layout(
+      'flowchart TD\nsubgraph outer [Outer]\nsubgraph inner [Inner]\n'
+      'A-->B\nend\nend',
+    );
+    final outer = layout.subgraphs.firstWhere((s) => s.title == 'Outer');
+    final inner = layout.subgraphs.firstWhere((s) => s.title == 'Inner');
+    expect(layout.subgraphs.first, outer, reason: 'painted first, under');
+    expect(outer.rect.top, lessThan(inner.rect.top));
+    expect(outer.titleRect.bottom, lessThanOrEqualTo(inner.rect.top));
+    expect(outer.rect.left, lessThan(inner.rect.left));
+    expect(outer.rect.right, greaterThan(inner.rect.right));
+    expect(outer.rect.bottom, greaterThan(inner.rect.bottom));
+  });
 }
