@@ -119,6 +119,25 @@ void main() {
     ]);
   });
 
+  test('asking whether a line has a list answers as converting it does', () {
+    // The Tools sheet asks with one block read; the command converts.
+    for (final note in [
+      'para\n- A\n  - B\n\npara\n- C\n',
+      '- A\n\n  more about A\n\n  ```\n  code\n  ```\n- B\n\nafter\n',
+      '```yaml\n- x\n```\n> - quoted\n---\n',
+      '1. one\n2. two\n- A\n',
+    ]) {
+      final buffer = SourceBuffer.fromText(note);
+      for (var line = 0; line < buffer.lineCount; line++) {
+        expect(
+          hasListAt(buffer: buffer, line: line),
+          listToMindMap(buffer: buffer, line: line) != null,
+          reason: 'line $line of $note',
+        );
+      }
+    }
+  });
+
   test('depth is the list nesting, not the count of spaces', () {
     // One space is not a level in CommonMark: B is A's sibling.
     final map = _convert('- A\n - B\n   - C\n', 'C')!;

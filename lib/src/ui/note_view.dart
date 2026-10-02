@@ -41,6 +41,7 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
+import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -515,16 +516,27 @@ final class _NoteViewState extends State<NoteView>
   /// The mind map the list at the caret becomes, or null when the caret is
   /// not in one — what the palette command converts and the Tools sheet
   /// offers, read the same way for both.
-  mindmap.ListMindMap? _mindMapAtCaret() {
+  mindmap.ListMindMap? _mindMapAtCaret() =>
+      _caretList<mindmap.ListMindMap?>(mindmap.listToMindMap);
+
+  /// [read] of the list at the caret, or null without a note: the caret's
+  /// line, and the pane's own scan when it draws this buffer — a scan as far
+  /// as the list otherwise.
+  T? _caretList<T>(
+    T Function({
+      required SourceBuffer buffer,
+      required int line,
+      Block? Function(int line)? blockAt,
+    })
+    read,
+  ) {
     final surface = _surface;
     if (surface == null) return null;
     final buffer = surface.buffer;
     final view = _sourceViewKey.currentState;
-    return mindmap.listToMindMap(
+    return read(
       buffer: buffer,
       line: buffer.lineOf(surface.selection.extent),
-      // The pane's own scan when it draws this buffer; a scan as far as the
-      // list otherwise.
       blockAt: identical(view?.widget.buffer, buffer) ? view?.blockAt : null,
     );
   }
@@ -2769,7 +2781,8 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// Whether the caret stands in a list, so the mind-map tool can run.
-  bool get _hasListAtCaret => _mindMapAtCaret() != null;
+  /// One block read, not the conversion: the sheet only asks.
+  bool get _hasListAtCaret => _caretList(mindmap.hasListAt) ?? false;
 
   /// Whether the note has a list the count could run on.
   ///

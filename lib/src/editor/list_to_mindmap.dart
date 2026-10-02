@@ -23,6 +23,23 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// the fence's lines that replace them.
 typedef ListMindMap = ({int startLine, int endLine, List<String> fence});
 
+/// Whether [listToMindMap] converts the list around [line]: one block read,
+/// where the conversion reads every item's words — what a menu asks before
+/// it offers the command.
+bool hasListAt({
+  required SourceBuffer buffer,
+  required int line,
+  Block? Function(int line)? blockAt,
+}) {
+  final at = (blockAt ?? BlockScanner(buffer).blockAt)(line);
+  return at != null && _converts(at);
+}
+
+/// Whether the caret in [block] has a list to convert: a block of one
+/// outside any quote, past its blank lines — a list begins with an item,
+/// so there is one around it.
+bool _converts(Block block) => _inList(block) && block.kind != BlockKind.blank;
+
 /// The mind map the list around [line] of [buffer] becomes, or null when
 /// the line is not in a list outside any quote — an item, or a paragraph or
 /// a fence an item holds.
@@ -36,7 +53,7 @@ ListMindMap? listToMindMap({
 }) {
   final blockOf = blockAt ?? BlockScanner(buffer).blockAt;
   final at = blockOf(line);
-  if (at == null || !_inList(at) || at.kind == BlockKind.blank) return null;
+  if (at == null || !_converts(at)) return null;
   final family = _familyAbove(at, blockOf, buffer);
   // Every block of the list but its blank lines, in order.
   final blocks = <Block>[at];
