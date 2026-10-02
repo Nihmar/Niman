@@ -61,6 +61,7 @@ import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
+import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
@@ -2830,21 +2831,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return (start: block.startLine, end: block.endLine, source: source);
   }
 
-  /// The code between a fence's opening and closing lines, or null when
-  /// there is none.
+  /// The code between a fence's opening and closing lines, as the read view
+  /// and the export read it, or null when there is none.
   String? _diagramSource(Block block) {
     final lines = BlockParser.blockText(block, widget.buffer).split('\n');
-    if (lines.isEmpty) return null;
-    final first = lines.first.trimLeft();
-    final opens = first.startsWith('```') || first.startsWith('~~~');
-    final start = opens ? 1 : 0;
-    var end = lines.length;
-    if (end > start) {
-      final last = lines.last.trim();
-      if (last.startsWith('```') || last.startsWith('~~~')) end -= 1;
-    }
-    final body = lines.sublist(start, end).join('\n');
-    return body.trim().isEmpty ? null : body;
+    final code = fenceBody(lines)?.code;
+    return code == null || code.trim().isEmpty ? null : code;
   }
 
   /// Moves the colours along [edit], already made to the buffer.

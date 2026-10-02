@@ -6,6 +6,7 @@ import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_painter.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -40,6 +41,18 @@ void main() {
     );
     expect(_painters(tester), isNotEmpty);
     expect(find.byKey(const Key('diagram-full-screen')), findsOneWidget);
+  });
+
+  testWidgets('a fence in a list item is drawn from its code, the indent off', (
+    tester,
+  ) async {
+    // The export took the fence's indent off; the read view kept it.
+    await _pump(
+      tester,
+      '- item\n\n  ```mermaid\n  flowchart TD\n  A --> B\n  ```\n',
+    );
+    final view = tester.widget<BlockDiagramView>(find.byType(BlockDiagramView));
+    expect(view.source, 'flowchart TD\nA --> B');
   });
 
   testWidgets('a sequence fence is drawn as a sequence', (tester) async {

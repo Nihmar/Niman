@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diagrams/diagram_painter.dart';
+import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
@@ -101,6 +102,18 @@ void main() {
       expect(surface.selection.caret, note.indexOf('A -- B'));
     });
   }
+
+  testWidgets('a fence in a list item is drawn from its code, the indent off', (
+    tester,
+  ) async {
+    // The export took the fence's indent off; `live` kept it.
+    await _pumpLive(
+      tester,
+      '- item\n\n  ```mermaid\n  flowchart TD\n  A --> B\n  ```\n\ntail\n',
+    );
+    final view = tester.widget<BlockDiagramView>(find.byType(BlockDiagramView));
+    expect(view.source, 'flowchart TD\nA --> B');
+  });
 
   testWidgets('the diagram is drawn while the caret is out of the fence', (
     tester,

@@ -9,6 +9,7 @@ import 'package:niman/src/diagrams/diagram_svg.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/markdown/callout.dart';
+import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/math_text.dart' show displayTexOf;
 
@@ -17,38 +18,11 @@ import 'package:niman/src/markdown/render/math_text.dart' show displayTexOf;
 /// EPUB reader — would run over them.
 const String _diagramFont = 'system-ui, sans-serif';
 
-/// A fence's opening line: its indent, its run and its info string.
-final RegExp _opening = RegExp(r'^( {0,3})(`{3,}|~{3,})(.*)$');
-
-/// A fenced block's language and inner code, or null when [lines] is not a
-/// fence.
-({String language, String code})? _fenceParts(List<String> lines) {
-  final open = lines.isEmpty ? null : _opening.firstMatch(lines.first);
-  if (open == null) return null;
-  final indent = open.group(1)!.length;
-  final fence = open.group(2)!;
-  final language = open.group(3)!.trim().split(RegExp(r'\s+')).first;
-  var body = lines.skip(1).toList();
-  final closing = RegExp(
-    '^ {0,3}${RegExp.escape(fence[0])}{${fence.length},}'
-    r'\s*$',
-  );
-  if (body.isNotEmpty && closing.hasMatch(body.last)) {
-    body = body.sublist(0, body.length - 1);
-  }
-  // The fence's own indent comes off every line of its code, as far as
-  // the line has it (CommonMark 4.5).
-  return (
-    language: language,
-    code: [for (final line in body) _dedent(line, indent)].join('\n'),
-  );
-}
-
 /// A fenced code block's [lines], the fences included, as a coloured
 /// `<pre>`: coloured by the language its info string names, as the read
 /// view colours it, and plain when the grammar does not know it.
 String fencedCodeHtml(List<String> lines) {
-  final parts = _fenceParts(lines);
+  final parts = fenceBody(lines);
   if (parts == null) return _pre(lines.join('\n'), 'code');
   final coloured = _highlighted(parts.code, parts.language);
   final cls = parts.language.isEmpty
@@ -64,7 +38,7 @@ String? mermaidBlockHtml(
   List<String> lines, {
   DiagramStyle style = const DiagramStyle(fontFamily: _diagramFont),
 }) {
-  final parts = _fenceParts(lines);
+  final parts = fenceBody(lines);
   if (parts == null || parts.language.toLowerCase() != 'mermaid') return null;
   final svg = diagramSvg(parts.code, style);
   if (svg == null) return null;
@@ -117,29 +91,6 @@ String calloutHtml(Callout callout, String bodyHtml) {
 
 String _pre(String text, String cls) =>
     '<pre class="$cls"><code>${escapeHtml(text)}</code></pre>';
-
-String _dedent(String line, int indent) {
-  var column = 0;
-  var at = 0;
-  while (column < indent && at < line.length) {
-    final char = line.codeUnitAt(at);
-    if (char == 0x20) {
-      column++;
-      at++;
-    } else if (char == 0x09) {
-      // A tab advances to the next multiple of four, as CommonMark
-      // counts indentation.
-      column = (column ~/ 4 + 1) * 4;
-      at++;
-    } else {
-      break;
-    }
-  }
-  // A tab that reached past the fence's indent is partly that indent and
-  // partly code: the columns past it stay, as spaces.
-  final extra = column > indent ? column - indent : 0;
-  return '${' ' * extra}${line.substring(at)}';
-}
 
 /// [code] coloured by [language]'s grammar, or null when there is none.
 String? _highlighted(String code, String language) {

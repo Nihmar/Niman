@@ -44,6 +44,7 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/render/callout_box.dart';
 import 'package:niman/src/markdown/render/diagram_view.dart';
@@ -436,7 +437,7 @@ final class BlockView extends StatelessWidget {
   /// A Mermaid fence drawn as a diagram, or as its source when it does not
   /// parse (#530).
   Widget _diagram(BuildContext context) {
-    final content = _fenceContent(parsed.text).text;
+    final content = fenceBody(parsed.text.split('\n'))?.code;
     if (content == null || content.trim().isEmpty) {
       return _code(context, parsed.block.fenceInfo);
     }
