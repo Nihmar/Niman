@@ -120,12 +120,13 @@ void main() {
       );
     });
 
-    test("the children past a quote are its last item's alone", () {
-      // Indented items after a quoted head continue its last item: a
-      // sibling above it in the quote does not take them.
+    test("an item past a quote is no quoted item's child", () {
+      // A marker line without its own `>` is not a lazy line of the quote
+      // (CommonMark: only paragraph text is): the item is a list of its own
+      // after the quote, and neither quoted item takes it.
       const text = '> - [ ] a\n> - [ ] b\n  - [ ] child';
       expect(_ticked(text, 0), '> - [x] a\n> - [ ] b\n  - [ ] child');
-      expect(_ticked(text, 1), '> - [ ] a\n> - [x] b\n  - [x] child');
+      expect(_ticked(text, 1), '> - [ ] a\n> - [x] b\n  - [ ] child');
     });
 
     test('a quote in a quote is read through to its items', () {

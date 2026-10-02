@@ -84,6 +84,7 @@ final class LineState {
     this.quoteDepth = 0,
     this.listStack = const <({int marker, int content})>[],
     this.table = false,
+    this.openParagraph = false,
   });
 
   /// The top-level state, where a document starts and where a scan converges.
@@ -131,6 +132,15 @@ final class LineState {
   /// Whether a GFM table is running.
   final bool table;
 
+  /// Whether the line before was paragraph text inside a list item.
+  ///
+  /// A line of paragraph text written short of the innermost item's content
+  /// column goes on with that paragraph lazily, and every item stays open
+  /// around it; after anything else — a blank line, a fence, a heading — the
+  /// same line closes the items whose content column it does not reach. Only
+  /// set inside a list, so prose outside one keeps the shared state.
+  final bool openParagraph;
+
   /// Whether the line is anywhere a block-level construct can still start —
   /// outside every fence, math block, frontmatter, HTML block and indented
   /// code.
@@ -148,7 +158,8 @@ final class LineState {
       other.htmlClosing == htmlClosing &&
       other.quoteDepth == quoteDepth &&
       _sameStack(other.listStack, listStack) &&
-      other.table == table;
+      other.table == table &&
+      other.openParagraph == openParagraph;
 
   /// Whether two stacks hold the same items: records compare by value, so a
   /// plain element-wise walk is the whole of it (the engine has no
@@ -175,11 +186,13 @@ final class LineState {
     quoteDepth,
     Object.hashAll(listStack),
     table,
+    openParagraph,
   );
 
   @override
   String toString() =>
       'LineState(fence: $fence, math: $math, frontmatter: $frontmatter, '
       'code: $indentedCode, html: $html, quote: $quoteDepth, '
-      'list: $listDepth at $listIndent, table: $table)';
+      'list: $listDepth at $listIndent, table: $table, '
+      'paragraph: $openParagraph)';
 }

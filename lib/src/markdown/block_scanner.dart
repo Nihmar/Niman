@@ -667,7 +667,7 @@ final class BlockScanner {
     // there was drawn at the previous item's indent — siblings at different
     // indents, the item after a sublist pushed right (device report,
     // 2026-09-21).
-    final listStack = _listAfter(text, _entering[line]);
+    final listStack = _listAfter(line, text, _entering[line]);
     final listDepth = listStack.isEmpty ? -1 : listStack.length - 1;
     return Block(
       kind: kind,
@@ -747,7 +747,8 @@ final class BlockScanner {
   BlockKind _kindOf(int line) {
     final state = _entering[line];
     final text = _text(line);
-    if (state.fence != null || _fenceOpen(text) != null) {
+    if (state.fence != null ||
+        _fenceOpen(text, _contentColumn(text, state)) != null) {
       return BlockKind.fencedCode;
     }
     if (state.math || _isDisplayLineAt(line, text, state)) {
@@ -792,32 +793,43 @@ final class BlockScanner {
   LineState _exitOf(int line) {
     final state = _entering[line];
     final text = _text(line);
+    // A fence, a formula or an HTML block in a list item keeps the items it
+    // is in, and leaves them open when it ends: dropping them made the item
+    // after a fence a list of its own, one level up.
     if (state.fence != null) {
-      return _isFenceClose(text, state.fence!) ? LineState.initial : state;
+      return _isFenceClose(text, state.fence!, state.listIndent)
+          ? _inItems(state.listStack)
+          : state;
     }
     if (state.math) {
-      return _closesMath(text) ? LineState.initial : state;
+      return _closesMath(text) ? _inItems(state.listStack) : state;
     }
     if (state.frontmatter) {
       return _closesFrontmatter(text) ? LineState.initial : state;
     }
     if (state.html != null) {
-      return _closesHtml(text, state) ? LineState.initial : state;
+      return _closesHtml(text, state) ? _inItems(state.listStack) : state;
     }
     if (_opensFrontmatter(line, text)) {
       return const LineState(frontmatter: true);
     }
-    final fence = _fenceOpen(text);
-    if (fence != null) return LineState(fence: fence);
+    final fence = _fenceOpen(text, _contentColumn(text, state));
+    if (fence != null) {
+      return LineState(fence: fence, listStack: _listAfter(line, text, state));
+    }
     // Only the multi-line form opens a state: a `$$…$$` written on one line
     // is over on that line, and leaving the state open swallowed whatever
     // followed it.
     if (_isDisplayLineAt(line, text, state) && isDisplayOpen(text.trim())) {
-      return const LineState(math: true);
+      return LineState(math: true, listStack: _listAfter(line, text, state));
     }
     final html = _htmlOpen(text);
     if (html != null) {
-      final opened = LineState(html: html.$1, htmlClosing: html.$2);
+      final opened = LineState(
+        html: html.$1,
+        htmlClosing: html.$2,
+        listStack: _listAfter(line, text, state),
+      );
       // A comment, a raw-text tag, a processing instruction, a declaration or
       // a CDATA section ends on the line with its end marker — which can be
       // the line it opens on. Left open, a one-line `<!-- note -->` made an
@@ -826,9 +838,14 @@ final class BlockScanner {
       if (!_closesOnItsOwnLine(text, opened)) return opened;
     }
     final quoteDepth = _quoteDepthAfter(line, text, state);
-    final listStack = _listAfter(text, state);
+    final listStack = _listAfter(line, text, state);
     final table = _tableContinues(line, state);
     final indentedCode = _indentedCodeContinues(line, text, state);
+    final openParagraph =
+        listStack.isNotEmpty &&
+        !table &&
+        !indentedCode &&
+        _isParagraphText(text, state);
     // A line that leaves the scan outside every construct is the shared
     // state, not a new object equal to it. That is the common line of a long
     // note of prose, and a state apiece was 68 MB of the shell running the
@@ -845,7 +862,22 @@ final class BlockScanner {
       listStack: listStack,
       table: table,
       indentedCode: indentedCode,
+      openParagraph: openParagraph,
     );
+  }
+
+  /// The state of a line in [items] and in nothing else: the shared plain
+  /// state outside a list.
+  static LineState _inItems(List<({int marker, int content})> items) =>
+      items.isEmpty ? LineState.initial : LineState(listStack: items);
+
+  /// Whether [text], entered in [state], is a line of paragraph text: an
+  /// item's marker with text after it, or a line no other block takes.
+  static bool _isParagraphText(String text, LineState state) {
+    if (text.trim().isEmpty || _hr.hasMatch(text)) return false;
+    if (_headingLevel(text) > 0) return false;
+    final marker = _listMarker(text, _markerReach(state));
+    return marker == null || text.substring(marker.$3).trim().isNotEmpty;
   }
 
   /// The line's text, without a byte-order mark on the first line.
@@ -930,10 +962,11 @@ final class BlockScanner {
     return char == 0x3D ? 1 : 2;
   }
 
-  /// The fence a line opens, or null.
-  static FenceMarker? _fenceOpen(String text) {
+  /// The fence a line opens, or null: up to three spaces in from [base], the
+  /// content column of the item the line is in ([_contentColumn]).
+  static FenceMarker? _fenceOpen(String text, [int base = 0]) {
     var indent = 0;
-    while (indent < 3 &&
+    while (indent < base + 3 &&
         indent < text.length &&
         _isSpace(text.codeUnitAt(indent))) {
       indent++;
@@ -953,10 +986,12 @@ final class BlockScanner {
     return FenceMarker(char: char, length: length, indent: indent);
   }
 
-  /// Whether [text] closes [fence].
-  static bool _isFenceClose(String text, FenceMarker fence) {
+  /// Whether [text] closes [fence], opened in an item whose content starts at
+  /// [listIndent] (-1 outside a list): up to three spaces in from there.
+  static bool _isFenceClose(String text, FenceMarker fence, int listIndent) {
+    final reach = (listIndent < 0 ? 0 : listIndent) + 3;
     var indent = 0;
-    while (indent < 3 &&
+    while (indent < reach &&
         indent < text.length &&
         _isSpace(text.codeUnitAt(indent))) {
       indent++;
@@ -974,7 +1009,7 @@ final class BlockScanner {
   /// language a highlighter wants.
   String? _fenceInfo(int line) {
     final text = _text(line);
-    final fence = _fenceOpen(text);
+    final fence = _fenceOpen(text, _contentColumn(text, _entering[line]));
     if (fence == null) return null;
     final rest = text.substring(fence.indent + fence.length).trim();
     return rest.isEmpty ? null : rest.split(RegExp(r'\s+')).first;
@@ -1110,12 +1145,27 @@ final class BlockScanner {
 
   /// The quote depth after [line], keeping a lazily continued paragraph in its
   /// quote.
+  ///
+  /// Only paragraph text is lazy: a line that opens a block of its own — an
+  /// item's marker, a heading, a rule, a fence — is outside the quote.
   static int _quoteDepthAfter(int line, String text, LineState state) {
     final own = _quoteDepth(text);
     if (own > 0) return own;
-    if (state.quoteDepth > 0 && text.trim().isNotEmpty) return state.quoteDepth;
+    if (state.quoteDepth > 0 &&
+        text.trim().isNotEmpty &&
+        !_opensBlock(text, state)) {
+      return state.quoteDepth;
+    }
     return 0;
   }
+
+  /// Whether [text], entered in [state], opens a block that ends a paragraph
+  /// rather than going on with it.
+  static bool _opensBlock(String text, LineState state) =>
+      _listMarker(text, _markerReach(state)) != null ||
+      _headingLevel(text) > 0 ||
+      _hr.hasMatch(text) ||
+      _fenceOpen(text, _contentColumn(text, state)) != null;
 
   /// Where the item starting at [line] sits in its list.
   ///
@@ -1204,12 +1254,19 @@ final class BlockScanner {
   (int, int, int)? _markerOn(int line) =>
       _listMarker(_text(line), _markerReach(_entering[line]));
 
-  /// The open list items after [text], given those entering it.
+  /// The open list items after line [line], whose text is [text], given
+  /// those entering it.
   ///
   /// A marker opens an item: it keeps every open item whose content column it
   /// starts at or past, and closes the rest — an item written to the left of
   /// an open one's content is outside it. What survives is its parents.
-  static List<({int marker, int content})> _listAfter(
+  ///
+  /// Any other line is in the items whose content column it reaches, and
+  /// closes the rest — `  back in A` after a blank line under `  - B` is A's
+  /// text, not a line outside the list. Unless it is lazy: paragraph text
+  /// that goes on with the paragraph before it keeps every item open.
+  List<({int marker, int content})> _listAfter(
+    int line,
     String text,
     LineState state,
   ) {
@@ -1226,10 +1283,35 @@ final class BlockScanner {
     }
     if (text.trim().isEmpty) return state.listStack;
     if (state.listStack.isEmpty) return const <({int marker, int content})>[];
-    final indent = text.length - text.trimLeft().length;
-    return indent >= state.listIndent
-        ? state.listStack
-        : const <({int marker, int content})>[];
+    final indent = _indentOf(text);
+    if (indent >= state.listIndent) return state.listStack;
+    if (state.openParagraph && _kindOf(line) == BlockKind.paragraph) {
+      return state.listStack;
+    }
+    var reached = 0;
+    while (reached < state.listStack.length &&
+        state.listStack[reached].content <= indent) {
+      reached++;
+    }
+    return reached == 0
+        ? const <({int marker, int content})>[]
+        : state.listStack.sublist(0, reached);
+  }
+
+  /// How many spaces [text] starts with.
+  static int _indentOf(String text) => text.length - text.trimLeft().length;
+
+  /// The content column of the innermost item in [state] that [text] is
+  /// indented into, or 0 when it reaches none: where a block on the line
+  /// counts its own up-to-three spaces of indent from.
+  static int _contentColumn(String text, LineState state) {
+    final indent = _indentOf(text);
+    var column = 0;
+    for (final item in state.listStack) {
+      if (item.content > indent) break;
+      column = item.content;
+    }
+    return column;
   }
 
   /// Whether [line] is inside a GFM table.
