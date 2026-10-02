@@ -21,6 +21,9 @@ import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_lines.dart';
 
+/// The most columns a block spans.
+const int _widest = 1 << 16;
+
 /// The lines that only colour a diagram.
 const Set<String> _colourLines = {'style', 'classdef', 'class', 'linkstyle'};
 
@@ -267,7 +270,10 @@ final class _BlockParser {
     return _span(match.group(1)!);
   }
 
-  int _span(String digits) => int.parse(digits).clamp(1, 1 << 16);
+  /// A span of [digits] columns, at most the widest a row takes: digits
+  /// past what an int holds are past that too.
+  int _span(String digits) =>
+      (int.tryParse(digits) ?? _widest).clamp(1, _widest);
 
   void _declare(_Ref ref, bool place, int number) {
     if (_groupIds.contains(ref.id)) {

@@ -71,6 +71,15 @@ void main() {
     expect((root.children[5] as BlockNode).shape, FlowNodeShape.database);
   });
 
+  test('a span of more digits than an int holds is the widest', () {
+    // `int.parse` threw on them, past the source fallback.
+    final digits = '9' * 40;
+    final root = parseBlock('block-beta\na:$digits\nblock:g:$digits\nb\nend')
+        .root;
+    expect((root.children.first as BlockNode).span, 1 << 16);
+    expect((root.children.last as BlockGroup).span, 1 << 16);
+  });
+
   test('edges join blocks by id, their stroke and label read', () {
     final edges = parseBlock(_system).edges;
     expect(
