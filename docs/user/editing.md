@@ -572,8 +572,9 @@ there is no browser and no script inside the app.
 **Convert list to mind map** replaces the list at the cursor with a
 `mindmap` fence as one undo step, so Ctrl+Z brings the list back. It is
 in the command palette, and in the editor's Tools sheet on a phone. One
-outermost item becomes the root; several get a root to hang from. The
-**Tools** section below lists the sheet.
+outermost item becomes the root; several get a root to hang from. A
+paragraph or a code block an item holds joins that item's words, and the
+cursor may stand in one. The **Tools** section below lists the sheet.
 
 ## Tools
 

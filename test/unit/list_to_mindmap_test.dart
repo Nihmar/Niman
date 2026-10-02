@@ -83,6 +83,42 @@ void main() {
     ]);
   });
 
+  test('what an item holds past its first line is its, the list going on', () {
+    // A paragraph or a fence an item holds is a block of its own: the list
+    // stopped at it, and the items after it were left a list.
+    const held =
+        '- A\n'
+        '\n'
+        '  more about A\n'
+        '\n'
+        '  ```\n'
+        '  code of A\n'
+        '  ```\n'
+        '- B\n'
+        '\n'
+        'after\n';
+    for (final marker in ['A\n', 'more', 'code of', 'B\n']) {
+      final map = _convert(held, marker)!;
+      expect((map.startLine, map.endLine), (0, 8), reason: marker);
+      expect(_parse(map).nodes.map((n) => n.label), [
+        'root',
+        'A more about A code of A',
+        'B',
+      ]);
+    }
+    expect(_convert(held, 'after'), isNull);
+    // A paragraph goes to the item as deep as it, not to the one before.
+    const nested = '- A\n  - B\n\n    more about B\n- C\n';
+    final map = _convert(nested, 'more')!;
+    expect((map.startLine, map.endLine), (0, 5));
+    expect(_parse(map).nodes.map((n) => n.label), [
+      'root',
+      'A',
+      'B more about B',
+      'C',
+    ]);
+  });
+
   test('depth is the list nesting, not the count of spaces', () {
     // One space is not a level in CommonMark: B is A's sibling.
     final map = _convert('- A\n - B\n   - C\n', 'C')!;
