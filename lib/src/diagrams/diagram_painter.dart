@@ -6,6 +6,7 @@ import 'package:niman/src/diagrams/canvas_target.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_renderer.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/pie_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
 
 /// Paints a [DiagramDrawing] with a [DiagramStyle], whatever its kind.
@@ -27,6 +28,8 @@ final class DiagramPainter extends CustomPainter {
         DiagramRenderer(layout: layout, style: style).paint(target);
       case SequenceDrawing(:final layout):
         SequenceRenderer(layout: layout, style: style).paint(target);
+      case PieDrawing(:final layout):
+        PieRenderer(layout: layout, style: style).paint(target);
     }
   }
 

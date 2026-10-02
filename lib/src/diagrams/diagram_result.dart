@@ -7,6 +7,7 @@ import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/flowchart_layout.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_parser.dart';
+import 'package:niman/src/diagrams/pie_layout.dart';
 import 'package:niman/src/diagrams/sequence_layout.dart';
 
 /// The outcome for one diagram source at one style.
@@ -43,6 +44,7 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
       MermaidSequence(:final sequence) => SequenceDrawing(
         layoutSequence(sequence, style),
       ),
+      MermaidPie(:final pie) => PieDrawing(layoutPie(pie, style)),
     });
   } on MermaidParseException catch (error) {
     return DiagramFailed(error);

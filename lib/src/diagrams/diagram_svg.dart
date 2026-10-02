@@ -10,6 +10,7 @@ import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_renderer.dart';
 import 'package:niman/src/diagrams/diagram_result.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/pie_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
 import 'package:niman/src/diagrams/svg_target.dart';
 
@@ -33,6 +34,8 @@ String drawingSvg(DiagramDrawing drawing, DiagramStyle style) {
       DiagramRenderer(layout: layout, style: style).paint(target);
     case SequenceDrawing(:final layout):
       SequenceRenderer(layout: layout, style: style).paint(target);
+    case PieDrawing(:final layout):
+      PieRenderer(layout: layout, style: style).paint(target);
   }
   return target.finish();
 }

@@ -22,6 +22,7 @@ final class DiagramPalette {
     required this.subgraphFill,
     required this.subgraphStroke,
     required this.subgraphTitle,
+    required this.series,
   });
 
   /// The default light palette, close to Mermaid's own.
@@ -34,6 +35,16 @@ final class DiagramPalette {
     subgraphFill: Color(0xFFFFF8DD),
     subgraphStroke: Color(0xFFAAAA33),
     subgraphTitle: Color(0xFF333333),
+    series: [
+      Color(0xFF2A78D6),
+      Color(0xFFEB6834),
+      Color(0xFF1BAF7A),
+      Color(0xFFEDA100),
+      Color(0xFFE87BA4),
+      Color(0xFF008300),
+      Color(0xFF4A3AA7),
+      Color(0xFFE34948),
+    ],
   );
 
   /// The dark palette, for a dark theme.
@@ -46,6 +57,16 @@ final class DiagramPalette {
     subgraphFill: Color(0xFF262838),
     subgraphStroke: Color(0xFF5F6288),
     subgraphTitle: Color(0xFFCFD1E4),
+    series: [
+      Color(0xFF3987E5),
+      Color(0xFFD95926),
+      Color(0xFF199E70),
+      Color(0xFFC98500),
+      Color(0xFFD55181),
+      Color(0xFF008300),
+      Color(0xFF9085E9),
+      Color(0xFFE66767),
+    ],
   );
 
   /// The fill inside a node.
@@ -71,6 +92,12 @@ final class DiagramPalette {
 
   /// The text of a subgraph's title.
   final Color subgraphTitle;
+
+  /// The colours of a chart's series — a pie's slices — in the order they
+  /// are handed out, never cycled: eight hues, checked for colour-blind
+  /// separation against this palette's surface, each slot keeping its
+  /// entity. A chart with more folds the rest into one.
+  final List<Color> series;
 
   /// The palette for a [brightness].
   static DiagramPalette of(Brightness brightness) =>
@@ -155,5 +182,6 @@ final class DiagramStyle {
     palette.subgraphFill.toARGB32(),
     palette.subgraphStroke.toARGB32(),
     palette.subgraphTitle.toARGB32(),
+    for (final colour in palette.series) colour.toARGB32(),
   ].join(',');
 }
