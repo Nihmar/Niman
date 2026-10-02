@@ -13,10 +13,13 @@ import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/gantt_renderer.dart';
 import 'package:niman/src/diagrams/git_graph_renderer.dart';
 import 'package:niman/src/diagrams/journey_renderer.dart';
+import 'package:niman/src/diagrams/kanban_renderer.dart';
 import 'package:niman/src/diagrams/pie_renderer.dart';
+import 'package:niman/src/diagrams/quadrant_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
 import 'package:niman/src/diagrams/svg_target.dart';
 import 'package:niman/src/diagrams/timeline_renderer.dart';
+import 'package:niman/src/diagrams/xy_chart_renderer.dart';
 
 /// [source] as a standalone `<svg>` document, or null when it does not
 /// parse.
@@ -48,6 +51,12 @@ String drawingSvg(DiagramDrawing drawing, DiagramStyle style) {
       JourneyRenderer(layout: layout, style: style).paint(target);
     case GitGraphDrawing(:final layout):
       GitGraphRenderer(layout: layout, style: style).paint(target);
+    case KanbanDrawing(:final layout):
+      KanbanRenderer(layout: layout, style: style).paint(target);
+    case QuadrantDrawing(:final layout):
+      QuadrantRenderer(layout: layout, style: style).paint(target);
+    case XyChartDrawing(:final layout):
+      XyChartRenderer(layout: layout, style: style).paint(target);
   }
   return target.finish();
 }

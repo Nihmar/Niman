@@ -163,7 +163,7 @@ void main() {
 
   test('an unsupported diagram type is refused, not mis-drawn', () {
     expect(
-      () => parseMermaid('quadrantChart\ntitle Reach'),
+      () => parseMermaid('C4Context\ntitle A system'),
       throwsA(
         isA<MermaidParseException>().having(
           (e) => e.message,

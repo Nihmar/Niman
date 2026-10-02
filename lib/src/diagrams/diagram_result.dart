@@ -8,11 +8,14 @@ import 'package:niman/src/diagrams/flowchart_layout.dart';
 import 'package:niman/src/diagrams/gantt_layout.dart';
 import 'package:niman/src/diagrams/git_graph_layout.dart';
 import 'package:niman/src/diagrams/journey_layout.dart';
+import 'package:niman/src/diagrams/kanban_layout.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_parser.dart';
 import 'package:niman/src/diagrams/pie_layout.dart';
+import 'package:niman/src/diagrams/quadrant_layout.dart';
 import 'package:niman/src/diagrams/sequence_layout.dart';
 import 'package:niman/src/diagrams/timeline_layout.dart';
+import 'package:niman/src/diagrams/xy_chart_layout.dart';
 
 /// The outcome for one diagram source at one style.
 sealed class DiagramResult {
@@ -58,6 +61,13 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
       ),
       MermaidGitGraph(:final graph) => GitGraphDrawing(
         layoutGitGraph(graph, style),
+      ),
+      MermaidKanban(:final board) => KanbanDrawing(layoutKanban(board, style)),
+      MermaidQuadrant(:final chart) => QuadrantDrawing(
+        layoutQuadrant(chart, style),
+      ),
+      MermaidXyChart(:final chart) => XyChartDrawing(
+        layoutXyChart(chart, style),
       ),
     });
   } on MermaidParseException catch (error) {

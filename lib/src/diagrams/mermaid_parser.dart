@@ -16,16 +16,22 @@ import 'package:niman/src/diagrams/git_graph_model.dart';
 import 'package:niman/src/diagrams/git_graph_parser.dart';
 import 'package:niman/src/diagrams/journey_model.dart';
 import 'package:niman/src/diagrams/journey_parser.dart';
+import 'package:niman/src/diagrams/kanban_model.dart';
+import 'package:niman/src/diagrams/kanban_parser.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_lines.dart';
 import 'package:niman/src/diagrams/mindmap_parser.dart';
 import 'package:niman/src/diagrams/pie_model.dart';
 import 'package:niman/src/diagrams/pie_parser.dart';
+import 'package:niman/src/diagrams/quadrant_model.dart';
+import 'package:niman/src/diagrams/quadrant_parser.dart';
 import 'package:niman/src/diagrams/sequence_model.dart';
 import 'package:niman/src/diagrams/sequence_parser.dart';
 import 'package:niman/src/diagrams/state_parser.dart';
 import 'package:niman/src/diagrams/timeline_model.dart';
 import 'package:niman/src/diagrams/timeline_parser.dart';
+import 'package:niman/src/diagrams/xy_chart_model.dart';
+import 'package:niman/src/diagrams/xy_chart_parser.dart';
 
 /// A parsed Mermaid diagram.
 sealed class MermaidDiagram {
@@ -78,6 +84,33 @@ final class MermaidGitGraph extends MermaidDiagram {
   final GitGraph graph;
 }
 
+/// A `kanban` board.
+final class MermaidKanban extends MermaidDiagram {
+  /// Wraps a parsed [board].
+  const new(this.board);
+
+  /// The parsed board.
+  final KanbanBoard board;
+}
+
+/// A `quadrantChart`.
+final class MermaidQuadrant extends MermaidDiagram {
+  /// Wraps a parsed [chart].
+  const new(this.chart);
+
+  /// The parsed quadrant chart.
+  final QuadrantChart chart;
+}
+
+/// An `xychart-beta`.
+final class MermaidXyChart extends MermaidDiagram {
+  /// Wraps a parsed [chart].
+  const new(this.chart);
+
+  /// The parsed xy chart.
+  final XyChart chart;
+}
+
 /// A `pie` chart.
 final class MermaidPie extends MermaidDiagram {
   /// Wraps a parsed [pie].
@@ -100,15 +133,12 @@ final class MermaidSequence extends MermaidDiagram {
 /// among these is refused by name; anything else is handed to the flowchart
 /// parser, which reports its own header error.
 const Set<String> _otherDiagramTypes = {
-  'quadrantchart',
   'requirementdiagram',
   'c4context',
   'sankey-beta',
-  'xychart-beta',
   'block-beta',
   'packet-beta',
   'architecture-beta',
-  'kanban',
   'radar-beta',
   'treemap-beta',
 };
@@ -125,6 +155,9 @@ MermaidDiagram parseMermaid(String source) {
   if (first == 'timeline') return MermaidTimeline(parseTimeline(source));
   if (first == 'journey') return MermaidJourney(parseJourney(source));
   if (first == 'gitgraph') return MermaidGitGraph(parseGitGraph(source));
+  if (first == 'kanban') return MermaidKanban(parseKanban(source));
+  if (first == 'quadrantchart') return MermaidQuadrant(parseQuadrant(source));
+  if (first == 'xychart-beta') return MermaidXyChart(parseXyChart(source));
   if (first == 'classdiagram' || first == 'classdiagram-v2') {
     return MermaidFlowchart(parseClassDiagram(source));
   }
