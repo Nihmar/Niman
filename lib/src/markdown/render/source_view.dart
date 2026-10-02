@@ -2184,8 +2184,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.holdSync = false;
   }
 
-  /// Takes the focus, or — when the surface has it — opens the connection
-  /// again if the platform closed it, and asks for the keyboard either way.
   /// A pointer went down on a diagram `live` draws (#530). A mouse's
   /// primary button would place the caret under it as it goes down — in the
   /// block, revealing its source and taking the diagram, and the button the
@@ -2206,6 +2204,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     placeCaret(widget.buffer.offsetOfLine(line));
   }
 
+  /// Takes the focus, or — when the surface has it — opens the connection
+  /// again if the platform closed it, and asks for the keyboard either way.
   void _requestKeyboard() {
     if (!_focus.hasFocus) {
       // The focus change attaches (see `onFocusChange`).
