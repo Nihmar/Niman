@@ -163,7 +163,7 @@ void main() {
 
   test('an unsupported diagram type is refused, not mis-drawn', () {
     expect(
-      () => parseMermaid('architecture-beta\ngroup api(cloud)[API]'),
+      () => parseMermaid('zenuml\n  Alice->Bob: hi'),
       throwsA(
         isA<MermaidParseException>().having(
           (e) => e.message,
@@ -300,12 +300,12 @@ void main() {
     expect(parseMermaid('${preamble}mindmap\n  root'), isA<MermaidFlowchart>());
     expect(_chart('${preamble}flowchart LR\nA --> B').nodes, hasLength(2));
     expect(
-      () => parseMermaid('%% note\narchitecture-beta\nservice db(database)'),
+      () => parseMermaid('%% note\nzenuml\n  Alice->Bob: hi'),
       throwsA(
         isA<MermaidParseException>().having(
           (e) => e.message,
           'message',
-          contains('unsupported diagram type "architecture-beta"'),
+          contains('unsupported diagram type "zenuml"'),
         ),
       ),
     );

@@ -4,12 +4,14 @@
 /// flowchart, a mind map, a class, state or ER diagram), a sequence, a
 /// pie, a Gantt chart, a timeline, a user journey, a git graph, a kanban
 /// board, a quadrant chart, an xy chart, a Sankey diagram, a block
-/// diagram, a packet diagram, a radar chart, a treemap. The painter and
+/// diagram, a packet diagram, a radar chart, a treemap, an architecture
+/// diagram. The painter and
 /// the SVG export dispatch on this one type, so the engine grows a kind at
 /// a time and no call site learns about each.
 library;
 
 import 'package:flutter/painting.dart';
+import 'package:niman/src/diagrams/architecture_layout.dart';
 import 'package:niman/src/diagrams/block_layout.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/gantt_geometry.dart';
@@ -162,6 +164,18 @@ final class TreemapDrawing extends DiagramDrawing {
 
   /// The placed treemap.
   final TreemapLayout layout;
+
+  @override
+  Size get size => layout.size;
+}
+
+/// An architecture diagram.
+final class ArchitectureDrawing extends DiagramDrawing {
+  /// Wraps a [layout].
+  const new(this.layout);
+
+  /// The placed diagram.
+  final ArchitectureLayout layout;
 
   @override
   Size get size => layout.size;

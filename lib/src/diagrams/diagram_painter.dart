@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/rendering.dart';
+import 'package:niman/src/diagrams/architecture_renderer.dart';
 import 'package:niman/src/diagrams/block_renderer.dart';
 import 'package:niman/src/diagrams/canvas_target.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
@@ -58,6 +59,8 @@ final class DiagramPainter extends CustomPainter {
         RadarRenderer(layout: layout, style: style).paint(target);
       case TreemapDrawing(:final layout):
         TreemapRenderer(layout: layout, style: style).paint(target);
+      case ArchitectureDrawing(:final layout):
+        ArchitectureRenderer(layout: layout, style: style).paint(target);
       case KanbanDrawing(:final layout):
         KanbanRenderer(layout: layout, style: style).paint(target);
       case QuadrantDrawing(:final layout):

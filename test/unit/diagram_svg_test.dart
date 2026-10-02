@@ -47,10 +47,7 @@ void main() {
 
   test('a source that does not parse comes back null, for the fence', () {
     expect(diagramSvg('flowchart TD\nA -- B', _style), isNull);
-    expect(
-      diagramSvg('architecture-beta\nservice db(database)', _style),
-      isNull,
-    );
+    expect(diagramSvg('zenuml\n  Alice->Bob: hi', _style), isNull);
   });
 
   test('label text is escaped for XML', () {

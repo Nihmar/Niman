@@ -6,6 +6,8 @@
 /// change to every call site.
 library;
 
+import 'package:niman/src/diagrams/architecture_model.dart';
+import 'package:niman/src/diagrams/architecture_parser.dart';
 import 'package:niman/src/diagrams/block_model.dart';
 import 'package:niman/src/diagrams/block_parser.dart';
 import 'package:niman/src/diagrams/c4_parser.dart';
@@ -168,6 +170,15 @@ final class MermaidTreemap extends MermaidDiagram {
   final TreemapChart chart;
 }
 
+/// An `architecture-beta` diagram.
+final class MermaidArchitecture extends MermaidDiagram {
+  /// Wraps a parsed [diagram].
+  const new(this.diagram);
+
+  /// The parsed architecture diagram.
+  final ArchitectureDiagram diagram;
+}
+
 /// A `pie` chart.
 final class MermaidPie extends MermaidDiagram {
   /// Wraps a parsed [pie].
@@ -186,10 +197,11 @@ final class MermaidSequence extends MermaidDiagram {
   final SequenceDiagram sequence;
 }
 
-/// The Mermaid diagram kinds this engine does not draw yet. A first word
-/// among these is refused by name; anything else is handed to the flowchart
-/// parser, which reports its own header error.
-const Set<String> _otherDiagramTypes = {'architecture-beta'};
+/// The Mermaid diagram kinds this engine does not draw: ZenUML, a plugin
+/// Mermaid itself loads from outside. A first word among these is refused
+/// by name; anything else is handed to the flowchart parser, which reports
+/// its own header error.
+const Set<String> _otherDiagramTypes = {'zenuml'};
 
 /// Parses [source] (the fence's content, header included).
 ///
@@ -208,6 +220,9 @@ MermaidDiagram parseMermaid(String source) {
   if (first == 'xychart-beta') return MermaidXyChart(parseXyChart(source));
   if (first == 'sankey-beta' || first == 'sankey') {
     return MermaidSankey(parseSankey(source));
+  }
+  if (first == 'architecture-beta' || first == 'architecture') {
+    return MermaidArchitecture(parseArchitecture(source));
   }
   if (first == 'treemap-beta' || first == 'treemap') {
     return MermaidTreemap(parseTreemap(source));

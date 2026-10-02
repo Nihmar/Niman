@@ -2,6 +2,7 @@
 /// error to fall back to source with.
 library;
 
+import 'package:niman/src/diagrams/architecture_layout.dart';
 import 'package:niman/src/diagrams/block_layout.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
@@ -78,6 +79,9 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
       MermaidBlock(:final diagram) => BlockDrawing(layoutBlock(diagram, style)),
       MermaidPacket(:final chart) => PacketDrawing(layoutPacket(chart, style)),
       MermaidRadar(:final chart) => RadarDrawing(layoutRadar(chart, style)),
+      MermaidArchitecture(:final diagram) => ArchitectureDrawing(
+        layoutArchitecture(diagram, style),
+      ),
       MermaidTreemap(:final chart) => TreemapDrawing(
         layoutTreemap(chart, style),
       ),
