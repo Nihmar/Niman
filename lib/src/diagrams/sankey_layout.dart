@@ -15,6 +15,7 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:niman/src/diagrams/diagram_metrics.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/diagram_values.dart';
 import 'package:niman/src/diagrams/sankey_model.dart';
 
 const double _margin = 12;
@@ -135,7 +136,7 @@ SankeyLayout layoutSankey(SankeyChart chart, DiagramStyle style) {
   final nodes = <SankeyNodeBox>[];
   for (var i = 0; i < n; i++) {
     final rect = Rect.fromLTWH(xOf(i), top[i], _nodeWidth, heights[i]);
-    final label = '${chart.nodes[i]} ${_number(values[i])}';
+    final label = '${chart.nodes[i]} ${diagramValue(values[i])}';
     final labelWidth = DiagramMetrics.textWidth(label, fontSize);
     // Beside the bar, towards the middle: right of the first columns,
     // left of the last.
@@ -254,13 +255,4 @@ List<Offset> _curve(Offset from, Offset to) {
         return Offset(x, y);
       }(),
   ];
-}
-
-/// A value as a label writes it: two decimals at most, none when whole.
-String _number(double value) {
-  if (value == value.roundToDouble()) return value.toStringAsFixed(0);
-  return value
-      .toStringAsFixed(2)
-      .replaceFirst(RegExp(r'0+$'), '')
-      .replaceFirst(RegExp(r'\.$'), '');
 }
