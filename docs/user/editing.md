@@ -465,7 +465,7 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Nineteen kinds are drawn:
+Twenty kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
@@ -485,6 +485,10 @@ Nineteen kinds are drawn:
 - **Entity-relationship diagrams** (`erDiagram`): entities with their
   attributes and keys, and relationships ending in the crow's feet of
   their cardinalities, solid or dashed, with their labels.
+- **Requirement diagrams** (`requirementDiagram`): requirements of every
+  kind and elements, each with its attributes (a long text wrapped), and
+  the relationships between them — `contains` with its circled cross, the
+  others dashed with an arrow.
 - **Gantt charts** (`gantt`): sections and their tasks on a time axis,
   every way of writing a start and an end (dates, durations, `after`,
   `until`), `done`, `active`, `crit` and milestones, the days `excludes`
@@ -526,7 +530,7 @@ where a plain `:` would end it.
 
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber` — is read and drawn without, in the theme's
-own colours. Any other kind (C4, architecture, requirement…) is left as
+own colours. Any other kind (C4, architecture) is left as
 source with a note saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
