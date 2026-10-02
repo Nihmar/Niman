@@ -283,4 +283,36 @@ void main() {
       expect(node.rect.overlaps(long.labelBox!), isFalse);
     }
   });
+
+  test('edges leaving or reaching one side spread along it, in order', () {
+    final layout = _layout(
+      'flowchart TD\nA[A wide source node] --> B\nA --> C\nA --> D\n'
+      'B --> E[A wide target node]\nC --> E',
+    );
+    List<double> startsOf(String id) => [
+      for (final e in layout.edges)
+        if (e.edge.from == id) e.start.dx,
+    ];
+    final out = startsOf('A');
+    expect(out.toSet(), hasLength(3), reason: 'no two share a point');
+    final targets = [
+      for (final e in layout.edges)
+        if (e.edge.from == 'A') layout.nodeOf(e.edge.to)!.rect.center.dx,
+    ];
+    // The leftmost target is reached from the leftmost point, and so on.
+    for (var i = 0; i < out.length; i++) {
+      for (var j = 0; j < out.length; j++) {
+        if (targets[i] < targets[j]) expect(out[i], lessThan(out[j]));
+      }
+    }
+    final into = [
+      for (final e in layout.edges)
+        if (e.edge.to == 'E') e.end.dx,
+    ];
+    expect(into.toSet(), hasLength(2));
+    final source = layout.nodeOf('A')!.rect;
+    for (final x in out) {
+      expect(x, inInclusiveRange(source.left, source.right));
+    }
+  });
 }

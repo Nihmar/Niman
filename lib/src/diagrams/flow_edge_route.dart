@@ -28,6 +28,10 @@ const double _backBulge = 36;
 /// The curve joining two placed nodes; [across] when the chart is drawn
 /// left to right or right to left, and its label box is laid on its side.
 ///
+/// A downward edge leaves its node's bottom at [startX] and reaches the
+/// other's top at [endX]: the layout spreads the edges sharing a side
+/// along it. Without them it uses the middles.
+///
 /// [passing] are the nodes of the ranks the edge passes, which it bends
 /// round: the ranks strictly between its ends, or for a cycle's way back
 /// the ranks it spans, its own two included. The layout hands only those,
@@ -39,6 +43,8 @@ LaidOutEdge routeFlowEdge(
   DiagramStyle style, {
   required bool across,
   Iterable<Rect> passing = const [],
+  double? startX,
+  double? endX,
 }) {
   final from = rects[edge.from];
   final to = rects[edge.to];
@@ -70,8 +76,8 @@ LaidOutEdge routeFlowEdge(
     control1 = Offset(start.dx + bend, start.dy);
     control2 = Offset(end.dx - bend, end.dy);
   } else if (to.center.dy > from.center.dy) {
-    start = Offset(from.center.dx, from.bottom);
-    end = Offset(to.center.dx, to.top);
+    start = Offset(startX ?? from.center.dx, from.bottom);
+    end = Offset(endX ?? to.center.dx, to.top);
     final bend = (end.dy - start.dy) * _curveBend;
     final aside = _aside(start, end, bend, passing);
     control1 = Offset(aside ?? start.dx, start.dy + bend);

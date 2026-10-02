@@ -113,9 +113,18 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     ];
   }
 
+  final ports = _ports(chart.edges, rankOf, rects);
   final edges = [
-    for (final edge in chart.edges)
-      routeFlowEdge(edge, rects, style, across: across, passing: passing(edge)),
+    for (var i = 0; i < chart.edges.length; i++)
+      routeFlowEdge(
+        chart.edges[i],
+        rects,
+        style,
+        across: across,
+        passing: passing(chart.edges[i]),
+        startX: ports.starts[i],
+        endX: ports.ends[i],
+      ),
   ];
   final subgraphs = flowSubgraphBoxes(chart, rects, style);
 
@@ -218,4 +227,53 @@ List<double> _rankGaps(
     gaps[r] = math.max(gaps[r], need);
   }
   return gaps;
+}
+
+/// Where each downward edge leaves its node's bottom and reaches the other
+/// node's top, by edge index: the edges sharing a side spread along its
+/// middle three fifths, each where its other end lies — the leftmost
+/// target reached from the leftmost point — so neither their lines nor the
+/// marks at their ends lie on one another. A side with one edge keeps its
+/// middle (null).
+({Map<int, double> starts, Map<int, double> ends}) _ports(
+  List<FlowEdge> edges,
+  Map<String, int> rankOf,
+  Map<String, Rect> rects,
+) {
+  final leaving = <String, List<int>>{};
+  final reaching = <String, List<int>>{};
+  for (var i = 0; i < edges.length; i++) {
+    final edge = edges[i];
+    final from = rankOf[edge.from];
+    final to = rankOf[edge.to];
+    if (from == null || to == null || to <= from) continue;
+    (leaving[edge.from] ??= []).add(i);
+    (reaching[edge.to] ??= []).add(i);
+  }
+  Map<int, double> spread(
+    Map<String, List<int>> sides,
+    String Function(FlowEdge edge) other,
+  ) {
+    final ports = <int, double>{};
+    for (final MapEntry(key: id, value: indices) in sides.entries) {
+      if (indices.length < 2) continue;
+      final rect = rects[id]!;
+      indices.sort(
+        (a, b) => rects[other(edges[a])]!.center.dx.compareTo(
+          rects[other(edges[b])]!.center.dx,
+        ),
+      );
+      final span = rect.width * 0.6;
+      for (var k = 0; k < indices.length; k++) {
+        ports[indices[k]] =
+            rect.center.dx - span / 2 + span * k / (indices.length - 1);
+      }
+    }
+    return ports;
+  }
+
+  return (
+    starts: spread(leaving, (edge) => edge.to),
+    ends: spread(reaching, (edge) => edge.from),
+  );
 }
