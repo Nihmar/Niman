@@ -465,7 +465,7 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Twenty-one kinds are drawn:
+Twenty-two kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
@@ -527,6 +527,12 @@ Twenty-one kinds are drawn:
 - **Treemaps** (`treemap-beta`): a tree written by indentation, each leaf
   a rectangle as large as its value's share, each section holding its
   nodes under its name; a leaf too small for its name is drawn without it.
+- **Architecture diagrams** (`architecture-beta`): services with their
+  icons (`cloud`, `database`, `disk`, `internet`, `server`; any other a
+  plain box), junctions and nested groups, set on a grid by the sides
+  their edges name (`db:L -- R:server` puts the server left of the
+  database), each edge at right angles from side to side with its
+  arrows and label.
 - **Mind maps** (`mindmap`), the tree drawn left to right.
 
 In any of them a label may write a character as an entity, as in Mermaid:
@@ -537,8 +543,8 @@ where a plain `:` would end it.
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber`, C4's `UpdateElementStyle` and
 `UpdateLayoutConfig` — is read and drawn without, in the theme's own
-colours. Any other kind (architecture) is left as source with a note
-saying so. While the caret is in the fence, live mode
+colours. ZenUML, a plugin Mermaid itself loads from outside, is left
+as source with a note saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
 message under it ("Line 4: expected \"-->\" after \"--\""), so the
