@@ -490,13 +490,37 @@ final class _NoteViewState extends State<NoteView>
     if (!canInsert) return;
     final surface = _surface;
     if (surface == null) return;
-    final at = surface.selection;
-    final edit = mindmap.convertListToMindMap(
-      text: _editText,
-      selection: TextSelection.collapsed(offset: at.start),
+    final map = _mindMapAtCaret();
+    if (map == null) return;
+    // Only the list's lines are replaced: one undo step, and the note is
+    // never copied whole to make it.
+    final buffer = surface.buffer;
+    final last = map.endLine - 1;
+    final terminator = buffer.terminatorAt(map.startLine);
+    surface.applyEdit(
+      map.fence.join(terminator.isEmpty ? '\n' : terminator),
+      const TextSelection.collapsed(offset: 0),
+      start: buffer.offsetOfLine(map.startLine),
+      end: buffer.offsetOfLine(last) + buffer.lineLengthAt(last),
     );
-    if (edit == null) return;
-    _applyMarkdownEdit(edit);
+    _focus.requestFocus();
+  }
+
+  /// The mind map the list at the caret becomes, or null when the caret is
+  /// not in one — what the palette command converts and the Tools sheet
+  /// offers, read the same way for both.
+  mindmap.ListMindMap? _mindMapAtCaret() {
+    final surface = _surface;
+    if (surface == null) return null;
+    final buffer = surface.buffer;
+    final view = _sourceViewKey.currentState;
+    return mindmap.listToMindMap(
+      buffer: buffer,
+      line: buffer.lineOf(surface.selection.extent),
+      // The pane's own scan when it draws this buffer; a scan as far as the
+      // list otherwise.
+      blockAt: identical(view?.widget.buffer, buffer) ? view?.blockAt : null,
+    );
   }
 
   /// The unified note's revision the word count and the outline were last
@@ -2739,12 +2763,7 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// Whether the caret stands in a list, so the mind-map tool can run.
-  bool get _hasListAtCaret {
-    final lines = _editText.split('\n');
-    final line = _editCaretLine;
-    if (line < 0 || line >= lines.length) return false;
-    return listItemHead(lines[line]) != null;
-  }
+  bool get _hasListAtCaret => _mindMapAtCaret() != null;
 
   /// Whether the note has a list the count could run on.
   ///

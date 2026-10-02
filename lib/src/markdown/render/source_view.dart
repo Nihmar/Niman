@@ -464,6 +464,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// [SourceStyler.blocks] copies the list.
   List<Block>? get blocks => _styler?.blocks;
 
+  /// The block holding a line, as the scan behind the colours has it —
+  /// scanned up to the line when the scan still owes it — or null while
+  /// there is no scan. O(log blocks) a line, never the note read.
+  Block? Function(int line)? get blockAt => _styler?.blockOf;
+
   /// The note's blocks and definitions as of [MarkdownSourceView.buffer]'s
   /// revision, with what changed since the last hand-over, or null while
   /// there is no whole, current scan of it ([SourceStyler.handOver]): what
