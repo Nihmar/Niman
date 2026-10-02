@@ -1,5 +1,6 @@
-/// The marks an edge ends with (#530): arrowheads, crosses, circles, and
-/// UML's triangles and diamonds.
+/// The marks an edge ends with (#530): arrowheads, crosses, circles, UML's
+/// triangles and diamonds, and the crow's feet of an entity-relationship
+/// diagram.
 library;
 
 import 'dart:math' as math;
@@ -80,6 +81,63 @@ void paintEdgeCap(
         stroke: palette.edge,
         strokeWidth: 1.5,
       );
+    case FlowEdgeEnd.one:
+      _bar(target, point, direction, normal, 6, palette);
+      _bar(target, point, direction, normal, 11, palette);
+    case FlowEdgeEnd.zeroOrOne:
+      _bar(target, point, direction, normal, 6, palette);
+      _ring(target, point - direction * 15, palette);
+    case FlowEdgeEnd.oneOrMore:
+      _foot(target, point, direction, normal, palette);
+      _bar(target, point, direction, normal, 16, palette);
+    case FlowEdgeEnd.zeroOrMore:
+      _foot(target, point, direction, normal, palette);
+      _ring(target, point - direction * 18, palette);
+  }
+}
+
+/// A bar across the edge, [back] from its end.
+void _bar(
+  DiagramTarget target,
+  Offset point,
+  Offset direction,
+  Offset normal,
+  double back,
+  DiagramPalette palette,
+) {
+  final at = point - direction * back;
+  target.line(
+    at + normal * 7,
+    at - normal * 7,
+    color: palette.edge,
+    strokeWidth: 1.5,
+  );
+}
+
+/// A small ring on the edge at [centre], filled with the surface.
+void _ring(DiagramTarget target, Offset centre, DiagramPalette palette) {
+  target.polygon(
+    DiagramShapes.polygonFor(
+      FlowNodeShape.circle,
+      Rect.fromCircle(center: centre, radius: 4.5),
+    ),
+    fill: palette.edgeLabelBackground,
+    stroke: palette.edge,
+    strokeWidth: 1.5,
+  );
+}
+
+/// A crow's foot: three toes from a point on the edge to the node.
+void _foot(
+  DiagramTarget target,
+  Offset point,
+  Offset direction,
+  Offset normal,
+  DiagramPalette palette,
+) {
+  final heel = point - direction * 12;
+  for (final toe in [point + normal * 7, point, point - normal * 7]) {
+    target.line(heel, toe, color: palette.edge, strokeWidth: 1.5);
   }
 }
 

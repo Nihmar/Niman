@@ -2,8 +2,9 @@
 /// `flowchart` (or `graph`) fence holds, once its source has been parsed.
 ///
 /// It is the model of every diagram that is a graph of boxes: a mind map,
-/// a class diagram and a state diagram are parsed into it too, which is
-/// why it has a class's box, a state's start and end, and UML's ends.
+/// a class, a state and an entity-relationship diagram are parsed into it
+/// too, which is why it has a class's box, a state's start and end, UML's
+/// ends and crow's feet.
 ///
 /// The model is what the layout and the two drawings (Flutter canvas and
 /// exported SVG) share. It carries no geometry: where a node sits is the
@@ -155,7 +156,19 @@ enum FlowEdgeEnd {
   diamond,
 
   /// A hollow diamond: UML's aggregation (`o` in a class diagram).
-  hollowDiamond;
+  hollowDiamond,
+
+  /// Crow's foot, exactly one (`||`): two bars.
+  one,
+
+  /// Crow's foot, zero or one (`|o`, `o|`): a bar and a circle.
+  zeroOrOne,
+
+  /// Crow's foot, one or more (`}|`, `|{`): the foot and a bar.
+  oneOrMore,
+
+  /// Crow's foot, zero or more (`}o`, `o{`): the foot and a circle.
+  zeroOrMore;
 
   /// Whether the end carries any mark at all.
   bool get isMarked => this != FlowEdgeEnd.none;

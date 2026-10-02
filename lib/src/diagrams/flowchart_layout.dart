@@ -24,9 +24,9 @@ import 'package:niman/src/diagrams/flow_subgraph_boxes.dart';
 /// The room kept round the whole drawing.
 const double _margin = 12;
 
-/// The length of the longest cap an edge ends with (a diamond), and a
-/// little air.
-const double _capRoom = 22;
+/// The length of the longest cap an edge ends with (a crow's foot and its
+/// ring), and a little air.
+const double _capRoom = 26;
 
 /// Lays [chart] out with [style].
 DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
