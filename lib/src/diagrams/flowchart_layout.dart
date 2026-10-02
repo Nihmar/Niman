@@ -113,7 +113,14 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     ];
   }
 
-  final ports = _ports(chart.edges, rankOf, rects);
+  // A first routing says which way each edge leaves and arrives — round a
+  // node in its way, it comes from the side it bent to — and so where on
+  // the shared side it should be put.
+  final draft = [
+    for (final edge in chart.edges)
+      routeFlowEdge(edge, rects, style, across: across, passing: passing(edge)),
+  ];
+  final ports = _ports(chart.edges, rankOf, rects, draft);
   final edges = [
     for (var i = 0; i < chart.edges.length; i++)
       routeFlowEdge(
@@ -231,14 +238,16 @@ List<double> _rankGaps(
 
 /// Where each downward edge leaves its node's bottom and reaches the other
 /// node's top, by edge index: the edges sharing a side spread along its
-/// middle three fifths, each where its other end lies — the leftmost
-/// target reached from the leftmost point — so neither their lines nor the
-/// marks at their ends lie on one another. A side with one edge keeps its
-/// middle (null).
+/// middle three fifths, each where it comes from or goes to — the edge
+/// heading furthest left leaving from the leftmost point — so neither
+/// their lines nor the marks at their ends lie on one another. Which way
+/// an edge heads is read off its [draft] routing. A side with one edge
+/// keeps its middle (null).
 ({Map<int, double> starts, Map<int, double> ends}) _ports(
   List<FlowEdge> edges,
   Map<String, int> rankOf,
   Map<String, Rect> rects,
+  List<LaidOutEdge> draft,
 ) {
   final leaving = <String, List<int>>{};
   final reaching = <String, List<int>>{};
@@ -250,19 +259,27 @@ List<double> _rankGaps(
     (leaving[edge.from] ??= []).add(i);
     (reaching[edge.to] ??= []).add(i);
   }
+  // Where an edge heads from its start, and comes from at its end: its
+  // bend when it goes round a node, its other end when it runs straight.
+  double heading(int i) {
+    final edge = draft[i];
+    return edge.control1.dx != edge.start.dx ? edge.control1.dx : edge.end.dx;
+  }
+
+  double approach(int i) {
+    final edge = draft[i];
+    return edge.control2.dx != edge.end.dx ? edge.control2.dx : edge.start.dx;
+  }
+
   Map<int, double> spread(
     Map<String, List<int>> sides,
-    String Function(FlowEdge edge) other,
+    double Function(int i) towards,
   ) {
     final ports = <int, double>{};
     for (final MapEntry(key: id, value: indices) in sides.entries) {
       if (indices.length < 2) continue;
       final rect = rects[id]!;
-      indices.sort(
-        (a, b) => rects[other(edges[a])]!.center.dx.compareTo(
-          rects[other(edges[b])]!.center.dx,
-        ),
-      );
+      indices.sort((a, b) => towards(a).compareTo(towards(b)));
       final span = rect.width * 0.6;
       for (var k = 0; k < indices.length; k++) {
         ports[indices[k]] =
@@ -272,8 +289,5 @@ List<double> _rankGaps(
     return ports;
   }
 
-  return (
-    starts: spread(leaving, (edge) => edge.to),
-    ends: spread(reaching, (edge) => edge.from),
-  );
+  return (starts: spread(leaving, heading), ends: spread(reaching, approach));
 }

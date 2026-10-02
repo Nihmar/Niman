@@ -1,6 +1,7 @@
 // Laying a flowchart out (#530): ranks, directions and bounds.
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/diagrams/class_parser.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/er_parser.dart';
@@ -314,5 +315,24 @@ void main() {
     for (final x in out) {
       expect(x, inInclusiveRange(source.left, source.right));
     }
+  });
+
+  test('an edge that bends round a node arrives on the side it bent to', () {
+    // Animal and Duck stand one above the other, so where they stand says
+    // nothing of the side Animal's edge to Fish comes in by: its bend does.
+    final layout = layoutFlowchart(
+      parseClassDiagram(
+        'classDiagram\nAnimal <|-- Duck\nAnimal <|-- Fish\nDuck ..> Fish',
+      ),
+      const DiagramStyle(),
+    );
+    final long = layout.edges.firstWhere(
+      (e) => e.edge.from == 'Animal' && e.edge.to == 'Fish',
+    );
+    final short = layout.edges.firstWhere((e) => e.edge.from == 'Duck');
+    final centre = layout.nodeOf('Fish')!.rect.center.dx;
+    expect(long.control2.dx, isNot(closeTo(centre, 1)), reason: 'it bends');
+    final bentRight = long.control2.dx > centre;
+    expect(long.end.dx > short.end.dx, bentRight);
   });
 }
