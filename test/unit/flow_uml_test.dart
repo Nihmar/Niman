@@ -188,4 +188,38 @@ void main() {
       expect(label.overlaps(edge.endLabelBox!), isFalse, reason: '$direction');
     }
   });
+
+  test('a note tied to a node sits beside it, in its rank', () {
+    const nodes = [
+      FlowNode(id: 'A', label: 'A', shape: FlowNodeShape.round),
+      FlowNode(id: 'B', label: 'B', shape: FlowNodeShape.round),
+      FlowNode(id: 'C', label: 'C', shape: FlowNodeShape.round),
+      FlowNode(id: 'n', label: 'a note', shape: FlowNodeShape.note),
+    ];
+    const edges = [
+      FlowEdge(from: 'A', to: 'B'),
+      FlowEdge(from: 'A', to: 'C'),
+      FlowEdge(
+        from: 'B',
+        to: 'n',
+        style: FlowEdgeStyle.dotted,
+        end: FlowEdgeEnd.none,
+      ),
+    ];
+    final layout = _lay(nodes, edges);
+    final b = layout.nodeOf('B')!.rect;
+    final note = layout.nodeOf('n')!.rect;
+    expect(note.center.dy, closeTo(b.center.dy, 0.01));
+    expect(note.left, greaterThan(b.right));
+    // Nothing between the note and its node.
+    for (final other in layout.nodes) {
+      if (other.node.id == 'B' || other.node.id == 'n') continue;
+      final r = other.rect;
+      final between =
+          (r.center.dy - b.center.dy).abs() < 1 &&
+          r.left > b.right &&
+          r.right < note.left;
+      expect(between, isFalse);
+    }
+  });
 }

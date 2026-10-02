@@ -18,24 +18,59 @@ const int _sweeps = 4;
 
 /// The nodes of [chart] in layers, one per rank, each ordered to cut
 /// crossings.
+///
+/// A note tied to one node by an edge sits beside it, as a sequence's note
+/// sits beside its lifeline: in its rank, right after it, the tie taking no
+/// part in the ranking or the ordering. A note drawn a rank below fell in
+/// whatever stood there — the box of a composite state, for one.
 List<List<String>> flowLayers(Flowchart chart) {
   final ids = [for (final node in chart.nodes) node.id];
+  final beside = _tiedNotes(chart);
   final out = <String, List<String>>{for (final id in ids) id: []};
   final incoming = <String, List<String>>{for (final id in ids) id: []};
   final seen = <(String, String)>{};
   for (final edge in chart.edges) {
     if (edge.from == edge.to || !seen.add((edge.from, edge.to))) continue;
+    if (beside[edge.from] == edge.to || beside[edge.to] == edge.from) {
+      continue;
+    }
     out[edge.from]!.add(edge.to);
     incoming[edge.to]!.add(edge.from);
   }
   final rank = _ranks(ids, out);
+  beside.forEach((note, target) => rank[note] = rank[target]!);
   final depth = rank.values.fold(0, math.max) + 1;
   final layers = List.generate(depth, (_) => <String>[]);
   for (final id in ids) {
-    layers[rank[id]!].add(id);
+    if (!beside.containsKey(id)) layers[rank[id]!].add(id);
   }
   _order(layers, incoming, out);
+  // Each note right after the node it is tied to, once the rest is placed.
+  for (final MapEntry(key: note, value: target) in beside.entries) {
+    final layer = layers[rank[target]!];
+    layer.insert(layer.indexOf(target) + 1, note);
+  }
   return layers;
+}
+
+/// The notes tied to exactly one other node, and that node.
+Map<String, String> _tiedNotes(Flowchart chart) {
+  final notes = {
+    for (final node in chart.nodes)
+      if (node.shape == FlowNodeShape.note) node.id,
+  };
+  final ties = <String, Set<String>>{};
+  for (final edge in chart.edges) {
+    final (note, other) = notes.contains(edge.from)
+        ? (edge.from, edge.to)
+        : (edge.to, edge.from);
+    if (!notes.contains(note) || notes.contains(other)) continue;
+    (ties[note] ??= {}).add(other);
+  }
+  return {
+    for (final MapEntry(key: note, value: others) in ties.entries)
+      if (others.length == 1) note: others.single,
+  };
 }
 
 /// The rank of every node of [ids], whose edges are [out]: the longest
