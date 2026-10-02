@@ -261,7 +261,9 @@ Future<String?> findPdfEngine({
   return null;
 }
 
-/// The first of [names] that is a file in one of [dirs].
+/// The first of [names] that is a file in one of [dirs], a Linux PATH:
+/// joined the POSIX way whatever the host, which is the only way a Linux
+/// path is spelled.
 Future<String?> _firstOnPath(
   List<String> names,
   List<String> dirs,
@@ -269,7 +271,7 @@ Future<String?> _firstOnPath(
 ) async {
   for (final name in names) {
     for (final dir in dirs) {
-      final candidate = p.join(dir, name);
+      final candidate = p.posix.join(dir, name);
       if (await isFile(candidate)) return candidate;
     }
   }
