@@ -211,4 +211,11 @@ void main() {
     expect(html, isNot(contains('<svg')));
     expect(note.usesSvg, isFalse);
   });
+
+  test('a diagram keeps a light plate on a dark page (#530)', () {
+    // The SVG is drawn in the light palette: its dark lines would sit on
+    // the page's dark background, in the HTML and the EPUB alike.
+    final rule = RegExp(r'\.diagram svg \{[^}]*\}').firstMatch(pageStyle)!;
+    expect(rule.group(0), contains('background: #fff'));
+  });
 }

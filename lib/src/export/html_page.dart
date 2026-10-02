@@ -84,7 +84,8 @@ svg.math { color: inherit; }
 .math-block { text-align: center; overflow-x: auto; }
 .math-block svg.math { display: inline-block; }
 .diagram { text-align: center; overflow-x: auto; }
-.diagram svg { display: inline-block; max-width: 100%; height: auto; }
+.diagram svg { display: inline-block; max-width: 100%; height: auto;
+  background: #fff; border-radius: 6px; }
 .callout { border-left: 4px solid var(--callout);
   background: color-mix(in srgb, var(--callout) 10%, transparent);
   border-radius: 4px; padding: 0.6em 1em; }
