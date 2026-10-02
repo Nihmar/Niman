@@ -222,4 +222,24 @@ void main() {
       expect(between, isFalse);
     }
   });
+
+  test("a cycle's way back takes the side its ends leave free", () {
+    const nodes = [
+      FlowNode(id: 'A', label: 'Draft', shape: FlowNodeShape.round),
+      FlowNode(id: 'B', label: 'Review', shape: FlowNodeShape.round),
+      FlowNode(id: 'n', label: 'a note', shape: FlowNodeShape.note),
+    ];
+    const edges = [
+      FlowEdge(from: 'A', to: 'B'),
+      FlowEdge(from: 'B', to: 'A', label: 'redo'),
+      FlowEdge(from: 'A', to: 'n', end: FlowEdgeEnd.none),
+    ];
+    final layout = _lay(nodes, edges);
+    final back = layout.edges[1];
+    final draft = layout.nodeOf('A')!.rect;
+    final note = layout.nodeOf('n')!.rect;
+    expect(note.left, greaterThan(draft.right), reason: 'the note is right');
+    expect(back.control1.dx, lessThan(draft.left), reason: 'so back goes left');
+    expect(back.end.dx, closeTo(draft.left, 0.01));
+  });
 }

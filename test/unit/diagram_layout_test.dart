@@ -186,15 +186,16 @@ void main() {
   });
 
   test("a cycle's way back passes beside its own ranks' other nodes", () {
-    // D and C share a rank, C to D's right: D's way back to A leaves by
-    // its right side, past C.
+    // L, D and C share a rank, D between the other two: with no side of D
+    // free, its way back to A leaves by its right side, past C.
     final layout = _layout(
-      'flowchart TD\nA --> D\nA --> C[A wide node here]\nD --> A',
+      'flowchart TD\nA --> L\nA --> D\nA --> C[A wide node here]\nD --> A',
     );
     final back = layout.edges.last;
     expect(back.edge.from, 'D');
     final from = layout.nodeOf('D')!.rect;
     final wide = layout.nodeOf('C')!.rect;
+    expect(layout.nodeOf('L')!.rect.right, lessThan(from.left));
     expect(wide.left, greaterThan(from.right));
     expect(back.control1.dx, greaterThan(wide.right));
   });

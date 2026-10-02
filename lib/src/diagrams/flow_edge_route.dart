@@ -77,15 +77,26 @@ LaidOutEdge routeFlowEdge(
     // Upwards is a cycle's way back (the ranking sets those edges aside,
     // so every other edge runs down): straight up it would cross the very
     // edges it closes, and every node between. It leaves and comes back
-    // by the right sides and bulges past the nodes of the ranks it spans,
-    // its own two included.
-    var reach = math.max(from.right, to.right);
+    // by the nodes' sides and bulges past the nodes of the ranks it spans,
+    // its own two included — by the right, unless a node stands right
+    // beside one of its ends (a note, say) and none on the left.
+    bool beside(Rect end, {required bool right}) => passing.any(
+      (rect) =>
+          (rect.center.dy - end.center.dy).abs() < 1 &&
+          (right ? rect.left >= end.right : rect.right <= end.left),
+    );
+    final blockedRight = beside(from, right: true) || beside(to, right: true);
+    final blockedLeft = beside(from, right: false) || beside(to, right: false);
+    final right = !blockedRight || blockedLeft;
+    var reach = right
+        ? math.max(from.right, to.right)
+        : math.min(from.left, to.left);
     for (final rect in passing) {
-      reach = math.max(reach, rect.right);
+      reach = right ? math.max(reach, rect.right) : math.min(reach, rect.left);
     }
-    final bulge = reach + _backBulge;
-    start = Offset(from.right, from.center.dy);
-    end = Offset(to.right, to.center.dy);
+    final bulge = right ? reach + _backBulge : reach - _backBulge;
+    start = Offset(right ? from.right : from.left, from.center.dy);
+    end = Offset(right ? to.right : to.left, to.center.dy);
     control1 = Offset(bulge, start.dy);
     control2 = Offset(bulge, end.dy);
   }
