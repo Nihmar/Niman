@@ -74,7 +74,7 @@ XyLayout layoutXyChart(XyChart chart, DiagramStyle style) {
   final firstTick = (bottom / step).ceilToDouble();
   final tickCount = ((top / step + 1e-9).floorToDouble() - firstTick).round();
   final ticks = [for (var i = 0; i <= tickCount; i++) (firstTick + i) * step];
-  final tickTexts = [for (final v in ticks) _format(v, step)];
+  final tickTexts = _tickTexts(ticks, step);
 
   // Room for the texts beside each axis.
   var widestCategory = 0.0;
@@ -282,16 +282,35 @@ double _niceStep((double, double)? range, double low, double high) {
   final (from, to) = range ?? (low, high);
   final rough = (to - from).abs() / 5;
   if (rough == 0) return 1;
-  final power = math.pow(10, (math.log(rough) / math.ln10).floor()).toDouble();
+  // A double's power: an int's wraps round past 10^18, which made a step of
+  // nothing, or of less than nothing, out of a range to 10^19.
+  final power = math
+      .pow(10.0, (math.log(rough) / math.ln10).floor())
+      .toDouble();
   for (final factor in [1, 2, 5, 10]) {
     if (rough <= factor * power) return factor * power;
   }
   return 10 * power;
 }
 
-/// [value] written with as many decimals as [step] needs.
-String _format(double value, double step) {
-  if (step >= 1) return value.toStringAsFixed(0);
-  final decimals = (-math.log(step) / math.ln10).ceil();
-  return value.toStringAsFixed(decimals);
+/// [ticks] written with as many decimals as [step] needs, all alike.
+///
+/// `toStringAsFixed` writes twenty decimals at most — a finer step threw —
+/// and a value of 10^21 or more with every digit a double holds, rounding
+/// errors and all. Past either the ticks are powers of ten, with the
+/// digits the step needs past the largest one's first.
+List<String> _tickTexts(List<double> ticks, double step) {
+  final decimals = step >= 1 ? 0 : (-math.log(step) / math.ln10).ceil();
+  final largest = ticks.fold<double>(0, (most, v) => math.max(most, v.abs()));
+  if (decimals <= 20 && largest < 1e21) {
+    return [for (final v in ticks) v.toStringAsFixed(decimals)];
+  }
+  final digits = (_magnitude(largest) - _magnitude(step)).clamp(0, 20);
+  return [
+    for (final v in ticks)
+      if (v == 0) '0' else v.toStringAsExponential(digits),
+  ];
 }
+
+/// The power of ten [value] is written with: 2 for 500, -3 for 0.004.
+int _magnitude(double value) => (math.log(value) / math.ln10).floor();

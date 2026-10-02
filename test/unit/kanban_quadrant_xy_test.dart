@@ -217,6 +217,28 @@ void main() {
       }
     });
 
+    test('an axis to 10^40 or to 10^-22 still cuts round steps', () {
+      // An int's power of ten wrapped round past 10^18: a step of nothing,
+      // and ticks without end.
+      final wide = layoutXyChart(
+        parseXyChart('xychart-beta\ny-axis 0 --> ${'9' * 40}\nbar [1]'),
+        _style,
+      );
+      expect(wide.valueLabels.map((v) => v.text), ['0', '5.0e+39', '1.0e+40']);
+      // Past the twenty decimals `toStringAsFixed` writes, which threw.
+      final narrow = layoutXyChart(
+        parseXyChart(
+          'xychart-beta\ny-axis 0 --> 0.0000000000000000000001\nline [0]',
+        ),
+        _style,
+      );
+      expect(narrow.valueLabels.map((v) => v.text), [
+        '0',
+        '5.0e-23',
+        '1.0e-22',
+      ]);
+    });
+
     test('a horizontal chart turns the bars across', () {
       final layout = layoutXyChart(
         parseXyChart('xychart-beta horizontal\nx-axis [a, b]\nbar [1, 3]'),
