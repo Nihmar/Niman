@@ -200,6 +200,19 @@ void main() {
       expect(layout.valueLabels.map((v) => v.text).last, '10000');
     });
 
+    test('values too large for a step of one still end their ticks', () {
+      // Every value the same gives a step of 1, which 1e17 cannot hold:
+      // adding it up never reached the top, and the layout never returned.
+      const big = '100000000000000000';
+      for (final source in [
+        'xychart-beta\nline [$big, $big]',
+        'xychart-beta\ny-axis $big --> $big\nline [1e17]',
+      ]) {
+        final layout = layoutXyChart(parseXyChart(source), _style);
+        expect(layout.valueLabels.map((v) => v.text), [big]);
+      }
+    });
+
     test('a horizontal chart turns the bars across', () {
       final layout = layoutXyChart(
         parseXyChart('xychart-beta horizontal\nx-axis [a, b]\nbar [1, 3]'),

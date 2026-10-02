@@ -67,14 +67,13 @@ XyLayout layoutXyChart(XyChart chart, DiagramStyle style) {
         (high / step).ceilToDouble() * step,
       );
   final span = top == bottom ? 1.0 : top - bottom;
-  final ticks = [
-    for (
-      var v = (bottom / step).ceilToDouble() * step;
-      v <= top + step * 1e-9;
-      v += step
-    )
-      v,
-  ];
+  // The ticks counted, not added up: at a value whose precision is coarser
+  // than the step — every value 1e17, a step of 1 — `v += step` leaves `v`
+  // where it is and never reaches the top. The step is a fifth of the
+  // range or more, so there are a handful of them.
+  final firstTick = (bottom / step).ceilToDouble();
+  final tickCount = ((top / step + 1e-9).floorToDouble() - firstTick).round();
+  final ticks = [for (var i = 0; i <= tickCount; i++) (firstTick + i) * step];
   final tickTexts = [for (final v in ticks) _format(v, step)];
 
   // Room for the texts beside each axis.
