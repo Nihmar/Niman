@@ -465,7 +465,7 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Fifteen kinds are drawn:
+Sixteen kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
@@ -504,11 +504,15 @@ Fifteen kinds are drawn:
 - **Sankey diagrams** (`sankey-beta`): flows written as CSV, drawn as
   bands as wide as their values between bars as tall as what passes
   through them.
+- **Block diagrams** (`block-beta`): blocks in a grid of `columns`, as
+  wide as the columns they `span`, empty cells with `space`, groups
+  nesting a grid of their own, block arrows pointing any way, and edges
+  between blocks.
 - **Mind maps** (`mindmap`), the tree drawn left to right.
 
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber` — is read and drawn without, in the theme's
-own colours. Any other kind (C4, block, packet, architecture…) is left as
+own colours. Any other kind (C4, packet, architecture…) is left as
 source with a note saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
