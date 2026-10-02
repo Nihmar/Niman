@@ -88,7 +88,8 @@ QuadrantPoint _pointOf(String line, int number) {
   }
   final x = double.tryParse(match.group(2)!);
   final y = double.tryParse(match.group(3)!);
-  if (x == null || y == null || x < 0 || x > 1 || y < 0 || y > 1) {
+  // Written the way round that refuses NaN, which no comparison holds.
+  if (x == null || y == null || !(x >= 0 && x <= 1 && y >= 0 && y <= 1)) {
     throw MermaidParseException(
       number,
       'a point sits from 0 to 1 on each axis, '

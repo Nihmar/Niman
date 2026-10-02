@@ -42,7 +42,7 @@ SankeyChart parseSankey(String source) {
       );
     }
     final value = double.tryParse(fields[2]);
-    if (value == null || value < 0) {
+    if (value == null || !value.isFinite || value < 0) {
       throw MermaidParseException(
         number,
         'expected a value of zero or more, found "${fields[2]}"',

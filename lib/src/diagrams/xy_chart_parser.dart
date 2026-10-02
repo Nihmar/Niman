@@ -162,10 +162,16 @@ final class _XyParser {
       ? value.toStringAsFixed(0)
       : value.toStringAsFixed(1);
 
-  static double _number(String text, int number) =>
-      double.tryParse(text.trim()) ??
-      (throw MermaidParseException(
+  /// [text] as a finite number: `NaN`, `Infinity` and a number too large
+  /// for a double read, and no chart can be drawn from them.
+  static double _number(String text, int number) {
+    final value = double.tryParse(text.trim());
+    if (value == null || !value.isFinite) {
+      throw MermaidParseException(
         number,
         'expected a number, found "${text.trim()}"',
-      ));
+      );
+    }
+    return value;
+  }
 }

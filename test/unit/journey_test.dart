@@ -49,6 +49,10 @@ void main() {
   test('what does not read names its line', () {
     expect(() => parseJourney('journey\nTea: 7: Me'), _error(2, 'from 0 to 5'));
     expect(
+      () => parseJourney('journey\nTea: NaN: Me'),
+      _error(2, 'from 0 to 5'),
+    );
+    expect(
       () => parseJourney('journey\nJust words'),
       _error(2, 'expected a task'),
     );

@@ -157,6 +157,10 @@ void main() {
         _error(2, 'from 0 to 1'),
       );
       expect(
+        () => parseQuadrant('quadrantChart\nA: [0.5, NaN]'),
+        _error(2, 'from 0 to 1'),
+      );
+      expect(
         () => parseQuadrant('quadrantChart\nA point'),
         _error(2, 'expected a point'),
       );
@@ -255,6 +259,16 @@ void main() {
       );
       expect(
         () => parseXyChart('xychart-beta\nbar [1, many]'),
+        _error(2, 'expected a number'),
+      );
+      // NaN and Infinity read as doubles, and no axis can be cut from them.
+      expect(
+        () => parseXyChart('xychart-beta\nline [1, NaN]'),
+        _error(2, 'expected a number'),
+      );
+      expect(
+        // Digits past a double's range read as Infinity.
+        () => parseXyChart('xychart-beta\ny-axis 0 --> ${'9' * 400}\nbar [1]'),
         _error(2, 'expected a number'),
       );
       expect(

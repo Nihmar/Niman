@@ -60,6 +60,13 @@ void main() {
       () => parseSankey('sankey-beta\nA,B,lots'),
       _error(2, 'expected a value'),
     );
+    // NaN and Infinity read as numbers, and no bar can be drawn from them.
+    for (final value in ['NaN', 'Infinity', '1e400']) {
+      expect(
+        () => parseSankey('sankey-beta\nA,B,$value'),
+        _error(2, 'expected a value'),
+      );
+    }
     expect(() => parseSankey('sankey-beta\nA,B'), _error(2, '2 fields'));
     expect(() => parseSankey('sankey-beta'), _error(1, 'needs a flow'));
   });

@@ -52,7 +52,8 @@ JourneyChart parseJourney(String source) {
       );
     }
     final score = double.tryParse(task.group(2)!);
-    if (score == null || score < 0 || score > 5) {
+    // Written the way round that refuses NaN, which no comparison holds.
+    if (score == null || !(score >= 0 && score <= 5)) {
       throw MermaidParseException(
         number,
         'a score is a number from 0 to 5, found "${task.group(2)}"',
