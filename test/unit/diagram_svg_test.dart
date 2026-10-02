@@ -42,7 +42,7 @@ void main() {
 
   test('a source that does not parse comes back null, for the fence', () {
     expect(diagramSvg('flowchart TD\nA -- B', _style), isNull);
-    expect(diagramSvg('journey\ntitle A plan', _style), isNull);
+    expect(diagramSvg('quadrantChart\ntitle Reach', _style), isNull);
   });
 
   test('label text is escaped for XML', () {
