@@ -90,9 +90,6 @@ final RegExp _backward = RegExp('^($_name)\\s*<-\\s*(\\w+)\\s*-\\s*($_name)\$');
 /// `key: value` inside a block.
 final RegExp _attribute = RegExp(r'^(\w+)\s*:\s*(.*)$');
 
-/// How many characters a line of a requirement's text holds.
-const int _textColumns = 36;
-
 /// Parses a requirement diagram (the fence's content, header included).
 Flowchart parseRequirementDiagram(String source) =>
     _RequirementParser(source).parse();
@@ -278,7 +275,7 @@ final class _RequirementParser {
       for (final MapEntry(:key, value: written) in names.entries)
         if (box.attributes[key] case final value?)
           ...switch (key) {
-            'text' => _wrapped('$written: $value'),
+            'text' => wrapMermaidText('$written: $value'),
             'risk' || 'verifymethod' => ['$written: ${_capital(value)}'],
             _ => ['$written: $value'],
           },
@@ -319,22 +316,4 @@ final class _RequirementParser {
   static String _capital(String value) => value.isEmpty
       ? value
       : value[0].toUpperCase() + value.substring(1).toLowerCase();
-
-  /// [text] broken at words into lines of [_textColumns] characters, a
-  /// word longer than that on a line of its own.
-  static List<String> _wrapped(String text) {
-    final lines = <String>[];
-    var line = '';
-    for (final word in text.split(RegExp(r'\s+'))) {
-      if (word.isEmpty) continue;
-      if (line.isNotEmpty && line.length + 1 + word.length > _textColumns) {
-        lines.add(line);
-        line = word;
-      } else {
-        line = line.isEmpty ? word : '$line $word';
-      }
-    }
-    if (line.isNotEmpty) lines.add(line);
-    return lines;
-  }
 }

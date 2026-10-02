@@ -100,3 +100,27 @@ String? _character(int code) =>
     code > 0 && code <= 0x10FFFF && (code < 0xD800 || code > 0xDFFF)
     ? String.fromCharCode(code)
     : null;
+
+/// How many characters a line of wrapped text holds: a requirement's text,
+/// a C4 element's description.
+const int mermaidTextColumns = 36;
+
+/// [text] broken at words into lines of [columns] characters, a word
+/// longer than that on a line of its own. The parsers wrap by characters,
+/// with no font to measure, so a long text makes a box taller rather than
+/// wider whatever it is drawn at.
+List<String> wrapMermaidText(String text, {int columns = mermaidTextColumns}) {
+  final lines = <String>[];
+  var line = '';
+  for (final word in text.split(RegExp(r'\s+'))) {
+    if (word.isEmpty) continue;
+    if (line.isNotEmpty && line.length + 1 + word.length > columns) {
+      lines.add(line);
+      line = word;
+    } else {
+      line = line.isEmpty ? word : '$line $word';
+    }
+  }
+  if (line.isNotEmpty) lines.add(line);
+  return lines;
+}
