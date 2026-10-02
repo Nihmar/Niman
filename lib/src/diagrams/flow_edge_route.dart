@@ -16,16 +16,26 @@ const double _curveBend = 0.45;
 /// How far from an edge's end the text there begins, along the edge.
 const double endTextGap = 4;
 
+/// How far an edge keeps from a node it goes round.
+const double _clearance = 16;
+
 /// How far a cycle's way back bulges past the nodes it goes round.
 const double _backBulge = 36;
 
 /// The curve joining two placed nodes; [across] when the chart is drawn
 /// left to right or right to left, and its label box is laid on its side.
+///
+/// [passing] are the nodes of the ranks the edge passes, which it bends
+/// round: the ranks strictly between its ends, or for a cycle's way back
+/// the ranks it spans, its own two included. The layout hands only those,
+/// so an edge between neighbouring ranks — nearly every one — looks at
+/// none.
 LaidOutEdge routeFlowEdge(
   FlowEdge edge,
   Map<String, Rect> rects,
   DiagramStyle style, {
   required bool across,
+  Iterable<Rect> passing = const [],
 }) {
   final from = rects[edge.from];
   final to = rects[edge.to];
@@ -60,8 +70,9 @@ LaidOutEdge routeFlowEdge(
     start = Offset(from.center.dx, from.bottom);
     end = Offset(to.center.dx, to.top);
     final bend = (end.dy - start.dy) * _curveBend;
-    control1 = Offset(start.dx, start.dy + bend);
-    control2 = Offset(end.dx, end.dy - bend);
+    final aside = _aside(start, end, passing);
+    control1 = Offset(aside ?? start.dx, start.dy + bend);
+    control2 = Offset(aside ?? end.dx, end.dy - bend);
   } else {
     // Upwards is a cycle's way back (the ranking sets those edges aside,
     // so every other edge runs down): straight up it would cross the very
@@ -69,11 +80,8 @@ LaidOutEdge routeFlowEdge(
     // by the right sides and bulges past the nodes of the ranks it spans,
     // its own two included.
     var reach = math.max(from.right, to.right);
-    for (final rect in rects.values) {
-      final centre = rect.center.dy;
-      if (centre >= to.center.dy - 1 && centre <= from.center.dy + 1) {
-        reach = math.max(reach, rect.right);
-      }
+    for (final rect in passing) {
+      reach = math.max(reach, rect.right);
     }
     final bulge = reach + _backBulge;
     start = Offset(from.right, from.center.dy);
@@ -110,6 +118,33 @@ LaidOutEdge routeFlowEdge(
     startLabelBox: _endBox(edge.startLabel, start, control1, style, across),
     endLabelBox: _endBox(edge.endLabel, end, control2, style, across),
   );
+}
+
+/// The x both control points of a downward edge from [start] to [end]
+/// take to bend it round the nodes of the ranks it passes, or null when
+/// none is in its way. An edge past a rank otherwise ran straight through
+/// the node between its ends.
+///
+/// It goes round on the nearer side, its middle — where a cubic whose two
+/// control points share an x bulges furthest, three quarters of the way to
+/// them — clear of every node in the way.
+double? _aside(Offset start, Offset end, Iterable<Rect> rects) {
+  var left = double.infinity;
+  var right = double.negativeInfinity;
+  for (final rect in rects) {
+    if (rect.top <= start.dy || rect.bottom >= end.dy) continue;
+    final t = (rect.center.dy - start.dy) / (end.dy - start.dy);
+    final x = start.dx + (end.dx - start.dx) * t;
+    if (x < rect.left - _clearance || x > rect.right + _clearance) continue;
+    left = math.min(left, rect.left);
+    right = math.max(right, rect.right);
+  }
+  if (left > right) return null;
+  final middle = (start.dx + end.dx) / 2;
+  final goal = right - middle <= middle - left
+      ? right + _clearance
+      : left - _clearance;
+  return (goal - middle / 4) * 4 / 3;
 }
 
 /// Where [text] sits beside the end of an edge at [at], the curve leaving

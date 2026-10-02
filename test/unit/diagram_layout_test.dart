@@ -198,4 +198,24 @@ void main() {
     expect(wide.left, greaterThan(from.right));
     expect(back.control1.dx, greaterThan(wide.right));
   });
+
+  test('an edge past a rank goes round the nodes in its way', () {
+    for (final direction in ['TD', 'LR']) {
+      final layout = _layout(
+        'flowchart $direction\nA[Animal] --> B[Duck]\nB --> C[Fish]\nA --> C',
+      );
+      final long = layout.edges.last;
+      final between = layout.nodeOf('B')!.rect;
+      for (var i = 1; i < 20; i++) {
+        final t = i / 20;
+        final u = 1 - t;
+        final point =
+            long.start * (u * u * u) +
+            long.control1 * (3 * u * u * t) +
+            long.control2 * (3 * u * t * t) +
+            long.end * (t * t * t);
+        expect(between.contains(point), isFalse, reason: '$direction t=$t');
+      }
+    }
+  });
 }

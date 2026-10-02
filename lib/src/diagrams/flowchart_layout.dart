@@ -96,9 +96,25 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     }
   }
 
+  final rankOf = <String, int>{
+    for (var r = 0; r < layers.length; r++)
+      for (final id in layers[r]) id: r,
+  };
+  // The nodes of the ranks an edge passes, which it bends round.
+  Iterable<Rect> passing(FlowEdge edge) {
+    final from = rankOf[edge.from];
+    final to = rankOf[edge.to];
+    if (from == null || to == null || from == to) return const [];
+    final (first, last) = to > from ? (from + 1, to - 1) : (to, from);
+    return [
+      for (var r = first; r <= last; r++)
+        for (final id in layers[r]) rects[id]!,
+    ];
+  }
+
   final edges = [
     for (final edge in chart.edges)
-      routeFlowEdge(edge, rects, style, across: across),
+      routeFlowEdge(edge, rects, style, across: across, passing: passing(edge)),
   ];
   final subgraphs = flowSubgraphBoxes(chart, rects, style);
 
@@ -121,6 +137,11 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
   for (final edge in edges) {
     for (final box in [edge.labelBox, edge.startLabelBox, edge.endLabelBox]) {
       if (box != null) include(box);
+    }
+    // A curve stays inside its control points: an edge that bends round a
+    // node, or a cycle's way back, is drawn whole.
+    for (final point in [edge.control1, edge.control2]) {
+      include(Rect.fromCircle(center: point, radius: 0));
     }
   }
   minX -= _margin;
