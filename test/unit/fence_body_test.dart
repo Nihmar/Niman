@@ -27,6 +27,33 @@ void main() {
     expect(_body('```'), (language: '', code: '', closed: false));
   });
 
+  test('asking for code answers as reading the fence does', () {
+    // Every fence of up to three lines past its opening, drawn from these:
+    // `live` asks on each of a fence's lines, and reads only the first
+    // one's whole.
+    const openings = ['```mermaid', '````mermaid', '  ~~~mermaid'];
+    const lines = ['````', '```', '~~~', '', '  ', 'A', '``` x'];
+    var fences = [
+      for (final open in openings) [open],
+    ];
+    final all = [...fences];
+    for (var more = 0; more < 3; more++) {
+      fences = [
+        for (final fence in fences)
+          for (final line in lines) [...fence, line],
+      ];
+      all.addAll(fences);
+    }
+    for (final fence in all) {
+      final read = fenceBody(fence)!.code.trim().isNotEmpty;
+      expect(
+        fenceHasCode((line) => fence[line], 0, fence.length),
+        read,
+        reason: fence.join(r'\n'),
+      );
+    }
+  });
+
   test("the opening line's indent comes off the code, as far as it goes", () {
     // A list item's indent and the fence's own, four spaces and past.
     expect(

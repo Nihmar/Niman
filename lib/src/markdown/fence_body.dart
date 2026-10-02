@@ -39,6 +39,21 @@ FenceBody? fenceBody(List<String> lines) {
   );
 }
 
+/// Whether the fence on lines `[start, end)` of [lineAt] holds code that is
+/// not blank, as [fenceBody] reads it: read up to the first such line, where
+/// [fenceBody] reads them all — for `live`, which asks on every line of a
+/// fence.
+bool fenceHasCode(String Function(int line) lineAt, int start, int end) {
+  final last = end - 1;
+  for (var line = start + 1; line < last; line++) {
+    if (lineAt(line).trim().isNotEmpty) return true;
+  }
+  if (last <= start || lineAt(last).trim().isEmpty) return false;
+  // The last line is code unless it closes the fence.
+  final ends = fenceBody([lineAt(start), lineAt(last)]);
+  return ends != null && !ends.closed;
+}
+
 /// How many columns [indent] takes, a tab to the next multiple of four.
 int _columns(String indent) {
   var column = 0;

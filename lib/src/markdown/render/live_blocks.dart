@@ -25,8 +25,9 @@ import 'package:niman/src/preview/math_widget.dart';
 typedef LiveFormula = ({int start, int end, String tex});
 
 /// A Mermaid diagram as `live` draws it: its fence's lines, `[start, end)`,
-/// and the source between them (#530).
-typedef LiveDiagram = ({int start, int end, String source});
+/// and the source between them (#530) — on its first line, the one it is
+/// drawn under, and null on the others, which only hide.
+typedef LiveDiagram = ({int start, int end, String? source});
 
 /// [line] — the formula's first line, its source hidden — with the formula
 /// typeset under it, centred as the read view centres it.

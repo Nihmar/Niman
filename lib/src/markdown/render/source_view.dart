@@ -2819,24 +2819,29 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// The Mermaid block line [index] is part of, for `live` mode to draw in
-  /// its lines' place: its fence's lines and the source between them. Null
-  /// for any other line, and for a `mermaid` fence with no body.
+  /// its lines' place: its fence's lines, and on the first of them — the
+  /// one the diagram is drawn under — the source between them. Null for any
+  /// other line, and for a `mermaid` fence with no code.
+  ///
+  /// Every line of the block asks, every build: the block's text is read
+  /// for its first line alone, where reading it for each made a diagram of
+  /// k lines cost k² of them. The others only ask whether there is code,
+  /// which the first line of it answers.
   LiveDiagram? _diagramOf(int index) {
     final block = _styler?.blockOf(index);
     if (block == null || block.kind != BlockKind.fencedCode) return null;
     final info = block.fenceInfo;
     if (info == null || info.toLowerCase() != 'mermaid') return null;
-    final source = _diagramSource(block);
-    if (source == null) return null;
-    return (start: block.startLine, end: block.endLine, source: source);
-  }
-
-  /// The code between a fence's opening and closing lines, as the read view
-  /// and the export read it, or null when there is none.
-  String? _diagramSource(Block block) {
+    if (index != block.startLine) {
+      final lineAt = widget.buffer.lineAt;
+      if (!fenceHasCode(lineAt, block.startLine, block.endLine)) return null;
+      return (start: block.startLine, end: block.endLine, source: null);
+    }
     final lines = BlockParser.blockText(block, widget.buffer).split('\n');
+    // The code as the read view and the export read it.
     final code = fenceBody(lines)?.code;
-    return code == null || code.trim().isEmpty ? null : code;
+    if (code == null || code.trim().isEmpty) return null;
+    return (start: block.startLine, end: block.endLine, source: code);
   }
 
   /// Moves the colours along [edit], already made to the buffer.
@@ -5374,7 +5379,8 @@ final class _Line extends StatelessWidget {
       return liveDiagramUnder(
         line,
         cache: diagramCache ?? sharedDiagramCache,
-        source: drawing.source,
+        // The block's first line is the one that carries its source.
+        source: drawing.source!,
         theme: theme,
         onPointerDown: onDiagramDown,
         onTapSource: (inner) => onDiagramLine(drawing.start + inner),
