@@ -7,6 +7,7 @@
 library;
 
 import 'package:niman/src/diagrams/class_parser.dart';
+import 'package:niman/src/diagrams/er_parser.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/flow_parser.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
@@ -55,7 +56,6 @@ final class MermaidSequence extends MermaidDiagram {
 /// among these is refused by name; anything else is handed to the flowchart
 /// parser, which reports its own header error.
 const Set<String> _otherDiagramTypes = {
-  'erdiagram',
   'journey',
   'gantt',
   'timeline',
@@ -87,6 +87,7 @@ MermaidDiagram parseMermaid(String source) {
   if (first == 'statediagram' || first == 'statediagram-v2') {
     return MermaidFlowchart(parseStateDiagram(source));
   }
+  if (first == 'erdiagram') return MermaidFlowchart(parseErDiagram(source));
   if (first == 'flowchart' ||
       first == 'graph' ||
       !_otherDiagramTypes.contains(first)) {
