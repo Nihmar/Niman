@@ -465,7 +465,7 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Seventeen kinds are drawn:
+Eighteen kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
@@ -511,6 +511,9 @@ Seventeen kinds are drawn:
 - **Packet diagrams** (`packet-beta`): fields by their bits (`0-15`, `106`
   or `+16`) in rows of 32, each with its first and last bit's numbers, a
   field longer than its row going on in the next.
+- **Radar charts** (`radar-beta`): axes as spokes clockwise from the top,
+  curves with a value for each axis (in order or by axis id), rings as
+  circles or polygons, `min`, `max`, `ticks` and a legend.
 - **Mind maps** (`mindmap`), the tree drawn left to right.
 
 In any of them a label may write a character as an entity, as in Mermaid:
@@ -520,7 +523,7 @@ where a plain `:` would end it.
 
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber` — is read and drawn without, in the theme's
-own colours. Any other kind (C4, architecture, radar…) is left as
+own colours. Any other kind (C4, architecture, treemap…) is left as
 source with a note saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
