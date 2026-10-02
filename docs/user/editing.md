@@ -465,7 +465,7 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Eight kinds are drawn:
+Nine kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
@@ -489,11 +489,13 @@ Eight kinds are drawn:
   every way of writing a start and an end (dates, durations, `after`,
   `until`), `done`, `active`, `crit` and milestones, the days `excludes`
   leaves out, the `dateFormat` and the `axisFormat`.
+- **Timelines** (`timeline`): periods along a time line, their events
+  under them, sections in a colour each.
 - **Mind maps** (`mindmap`), the tree drawn left to right.
 
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber` — is read and drawn without, in the theme's
-own colours. Any other kind (timeline, journey, gitGraph…) is left as
+own colours. Any other kind (journey, gitGraph, quadrantChart…) is left as
 source with a note saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
