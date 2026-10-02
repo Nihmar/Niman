@@ -2,140 +2,135 @@
 /// layout, in canonical space — ranks run downwards, the order within a
 /// rank runs to the right.
 ///
-/// Nodes are ranked by longest path and ordered within a rank by
-/// barycentre, to cut crossings.
+/// A cycle is broken where a walk in the order the nodes were written
+/// meets it again, so the node written first stays on top; the rest is
+/// ranked by longest path and ordered within a rank by barycentre, to cut
+/// crossings. Every step is linear in the chart, or a sort of one rank:
+/// the read view lays a diagram out in build.
 library;
 
 import 'dart:math' as math;
 
 import 'package:niman/src/diagrams/flow_model.dart';
 
+/// How many down-and-up sweeps the ordering makes.
+const int _sweeps = 4;
+
 /// The nodes of [chart] in layers, one per rank, each ordered to cut
 /// crossings.
-List<List<String>> flowLayers(Flowchart chart) =>
-    _orderedLayers(chart, _ranks(chart));
-
-/// The rank of every node, cycle-safe.
-Map<String, int> _ranks(Flowchart chart) {
-  final order = [for (final node in chart.nodes) node.id];
-  final out = <String, Set<String>>{for (final id in order) id: <String>{}};
-  final incoming = <String, Set<String>>{
-    for (final id in order) id: <String>{},
-  };
+List<List<String>> flowLayers(Flowchart chart) {
+  final ids = [for (final node in chart.nodes) node.id];
+  final out = <String, List<String>>{for (final id in ids) id: []};
+  final incoming = <String, List<String>>{for (final id in ids) id: []};
+  final seen = <(String, String)>{};
   for (final edge in chart.edges) {
-    if (edge.from == edge.to) continue;
-    if (out[edge.from]!.add(edge.to)) incoming[edge.to]!.add(edge.from);
-  }
-
-  final rank = <String, int>{for (final id in order) id: 0};
-  final indegree = <String, int>{
-    for (final id in order) id: incoming[id]!.length,
-  };
-  final queue = [
-    for (final id in order)
-      if (indegree[id] == 0) id,
-  ];
-  final processed = <String>{};
-  for (var head = 0; head < queue.length; head++) {
-    final id = queue[head];
-    processed.add(id);
-    for (final next in out[id]!) {
-      rank[next] = math.max(rank[next]!, rank[id]! + 1);
-      indegree[next] = indegree[next]! - 1;
-      if (indegree[next] == 0) queue.add(next);
-    }
-  }
-  final remaining = [
-    for (final id in order)
-      if (!processed.contains(id)) id,
-  ];
-  if (remaining.isNotEmpty) {
-    final rest = remaining.toSet();
-    for (final id in remaining) {
-      var best = 0;
-      for (final pred in incoming[id]!) {
-        if (!rest.contains(pred)) best = math.max(best, rank[pred]! + 1);
-      }
-      rank[id] = best;
-    }
-    for (var pass = 0; pass < remaining.length; pass++) {
-      var changed = false;
-      for (final id in remaining) {
-        for (final next in out[id]!) {
-          if (!rest.contains(next)) continue;
-          if (rank[next]! <= rank[id]!) {
-            rank[next] = rank[id]! + 1;
-            changed = true;
-          }
-        }
-      }
-      if (!changed) break;
-    }
-  }
-
-  final distinct = rank.values.toSet().toList()..sort();
-  final index = <int, int>{
-    for (var i = 0; i < distinct.length; i++) distinct[i]: i,
-  };
-  return {for (final id in order) id: index[rank[id]]!};
-}
-
-/// The nodes grouped by rank, ordered to cut crossings.
-List<List<String>> _orderedLayers(Flowchart chart, Map<String, int> ranks) {
-  final depth = ranks.values.fold(0, math.max) + 1;
-  final layers = List.generate(depth, (_) => <String>[]);
-  for (final node in chart.nodes) {
-    layers[ranks[node.id]!].add(node.id);
-  }
-  final incoming = <String, List<String>>{};
-  final outgoing = <String, List<String>>{};
-  for (final node in chart.nodes) {
-    incoming[node.id] = [];
-    outgoing[node.id] = [];
-  }
-  for (final edge in chart.edges) {
-    if (edge.from == edge.to) continue;
-    outgoing[edge.from]!.add(edge.to);
+    if (edge.from == edge.to || !seen.add((edge.from, edge.to))) continue;
+    out[edge.from]!.add(edge.to);
     incoming[edge.to]!.add(edge.from);
   }
-
-  final position = <String, int>{};
-  void reindex() {
-    for (final layer in layers) {
-      for (var i = 0; i < layer.length; i++) {
-        position[layer[i]] = i;
-      }
-    }
+  final rank = _ranks(ids, out);
+  final depth = rank.values.fold(0, math.max) + 1;
+  final layers = List.generate(depth, (_) => <String>[]);
+  for (final id in ids) {
+    layers[rank[id]!].add(id);
   }
-
-  reindex();
-  for (var pass = 0; pass < 4; pass++) {
-    for (var r = 1; r < depth; r++) {
-      _sortBy(layers[r], incoming, position);
-      reindex();
-    }
-    for (var r = depth - 2; r >= 0; r--) {
-      _sortBy(layers[r], outgoing, position);
-      reindex();
-    }
-  }
+  _order(layers, incoming, out);
   return layers;
 }
 
+/// The rank of every node of [ids], whose edges are [out]: the longest
+/// path to it once the edges that close a cycle are set aside.
+Map<String, int> _ranks(List<String> ids, Map<String, List<String>> out) {
+  // An edge back to a node still on the walk's path closes a cycle.
+  final onPath = <String>{};
+  final done = <String>{};
+  final forward = <String, List<String>>{for (final id in ids) id: []};
+  for (final root in ids) {
+    if (done.contains(root)) continue;
+    final stack = <(String, int)>[(root, 0)];
+    onPath.add(root);
+    while (stack.isNotEmpty) {
+      final (id, next) = stack.last;
+      final targets = out[id]!;
+      if (next == targets.length) {
+        stack.removeLast();
+        onPath.remove(id);
+        done.add(id);
+        continue;
+      }
+      stack.last = (id, next + 1);
+      final target = targets[next];
+      if (onPath.contains(target)) continue;
+      forward[id]!.add(target);
+      if (done.contains(target)) continue;
+      onPath.add(target);
+      stack.add((target, 0));
+    }
+  }
+  final indegree = <String, int>{for (final id in ids) id: 0};
+  for (final id in ids) {
+    for (final target in forward[id]!) {
+      indegree[target] = indegree[target]! + 1;
+    }
+  }
+  final rank = <String, int>{for (final id in ids) id: 0};
+  final queue = [
+    for (final id in ids)
+      if (indegree[id] == 0) id,
+  ];
+  for (var head = 0; head < queue.length; head++) {
+    final id = queue[head];
+    for (final target in forward[id]!) {
+      rank[target] = math.max(rank[target]!, rank[id]! + 1);
+      indegree[target] = indegree[target]! - 1;
+      if (indegree[target] == 0) queue.add(target);
+    }
+  }
+  return rank;
+}
+
+/// Orders each of [layers] by the barycentre of its neighbours in the rank
+/// before it, then after it, a few sweeps down and up.
+void _order(
+  List<List<String>> layers,
+  Map<String, List<String>> incoming,
+  Map<String, List<String>> outgoing,
+) {
+  final position = <String, int>{};
+  for (final layer in layers) {
+    _place(layer, position);
+  }
+  for (var sweep = 0; sweep < _sweeps; sweep++) {
+    for (var r = 1; r < layers.length; r++) {
+      _sortBy(layers[r], incoming, position);
+    }
+    for (var r = layers.length - 2; r >= 0; r--) {
+      _sortBy(layers[r], outgoing, position);
+    }
+  }
+}
+
+/// Sorts [layer] by the mean position of each node's [neighbours], keeping
+/// the present order between equals, and records the new positions.
 void _sortBy(
   List<String> layer,
   Map<String, List<String>> neighbours,
   Map<String, int> position,
 ) {
-  final base = {for (var i = 0; i < layer.length; i++) layer[i]: i};
+  final key = {
+    for (final id in layer) id: _barycentre(id, neighbours, position),
+  };
   layer.sort((a, b) {
-    final cmp = _barycentre(
-      a,
-      neighbours,
-      position,
-    ).compareTo(_barycentre(b, neighbours, position));
-    return cmp != 0 ? cmp : base[a]!.compareTo(base[b]!);
+    final cmp = key[a]!.compareTo(key[b]!);
+    return cmp != 0 ? cmp : position[a]!.compareTo(position[b]!);
   });
+  _place(layer, position);
+}
+
+void _place(List<String> layer, Map<String, int> position) {
+  for (var i = 0; i < layer.length; i++) {
+    position[layer[i]] = i;
+  }
 }
 
 double _barycentre(

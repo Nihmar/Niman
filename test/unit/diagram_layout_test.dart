@@ -154,4 +154,11 @@ void main() {
     expect(outer.rect.right, greaterThan(inner.rect.right));
     expect(outer.rect.bottom, greaterThan(inner.rect.bottom));
   });
+
+  test('a cycle is ranked from the node written first', () {
+    final layout = _layout('flowchart TD\nA-->B\nB-->C\nC-->A');
+    expect(_rank(layout, 'A'), 0);
+    expect(_rank(layout, 'B'), 1);
+    expect(_rank(layout, 'C'), 2);
+  });
 }
