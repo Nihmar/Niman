@@ -161,4 +161,41 @@ void main() {
     expect(_rank(layout, 'B'), 1);
     expect(_rank(layout, 'C'), 2);
   });
+
+  test("a cycle's way back goes round the nodes, not through them", () {
+    for (final direction in ['TD', 'LR']) {
+      final layout = _layout(
+        'flowchart $direction\nA[First step] --> B[Second]\nB --> C\nC --> A',
+      );
+      final back = layout.edges.last;
+      expect(back.edge.from, 'C');
+      double across(Offset p) => direction == 'TD' ? p.dx : p.dy;
+      final reach = layout.nodes
+          .map((n) => direction == 'TD' ? n.rect.right : n.rect.bottom)
+          .reduce((a, b) => a > b ? a : b);
+      // Both control points lie beyond every node it passes.
+      expect(across(back.control1), greaterThan(reach), reason: direction);
+      expect(across(back.control2), greaterThan(reach), reason: direction);
+      for (final node in layout.nodes) {
+        expect(
+          node.rect.contains(back.labelBox?.center ?? Offset.infinite),
+          isFalse,
+        );
+      }
+    }
+  });
+
+  test("a cycle's way back passes beside its own ranks' other nodes", () {
+    // D and C share a rank, C to D's right: D's way back to A leaves by
+    // its right side, past C.
+    final layout = _layout(
+      'flowchart TD\nA --> D\nA --> C[A wide node here]\nD --> A',
+    );
+    final back = layout.edges.last;
+    expect(back.edge.from, 'D');
+    final from = layout.nodeOf('D')!.rect;
+    final wide = layout.nodeOf('C')!.rect;
+    expect(wide.left, greaterThan(from.right));
+    expect(back.control1.dx, greaterThan(wide.right));
+  });
 }

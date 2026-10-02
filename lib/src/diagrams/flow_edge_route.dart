@@ -2,6 +2,8 @@
 /// its label sits in (#530), in canonical space.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/painting.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/diagram_metrics.dart';
@@ -10,6 +12,9 @@ import 'package:niman/src/diagrams/flow_model.dart';
 
 /// The curve's straight run before it reaches a node, as a share of the gap.
 const double _curveBend = 0.45;
+
+/// How far a cycle's way back bulges past the nodes it goes round.
+const double _backBulge = 36;
 
 /// The curve joining two placed nodes; [across] when the chart is drawn
 /// left to right or right to left, and its label box is laid on its side.
@@ -48,13 +53,30 @@ LaidOutEdge routeFlowEdge(
     final bend = (end.dx - start.dx) * _curveBend;
     control1 = Offset(start.dx + bend, start.dy);
     control2 = Offset(end.dx - bend, end.dy);
-  } else {
-    final down = to.center.dy > from.center.dy;
-    start = Offset(from.center.dx, down ? from.bottom : from.top);
-    end = Offset(to.center.dx, down ? to.top : to.bottom);
+  } else if (to.center.dy > from.center.dy) {
+    start = Offset(from.center.dx, from.bottom);
+    end = Offset(to.center.dx, to.top);
     final bend = (end.dy - start.dy) * _curveBend;
     control1 = Offset(start.dx, start.dy + bend);
     control2 = Offset(end.dx, end.dy - bend);
+  } else {
+    // Upwards is a cycle's way back (the ranking sets those edges aside,
+    // so every other edge runs down): straight up it would cross the very
+    // edges it closes, and every node between. It leaves and comes back
+    // by the right sides and bulges past the nodes of the ranks it spans,
+    // its own two included.
+    var reach = math.max(from.right, to.right);
+    for (final rect in rects.values) {
+      final centre = rect.center.dy;
+      if (centre >= to.center.dy - 1 && centre <= from.center.dy + 1) {
+        reach = math.max(reach, rect.right);
+      }
+    }
+    final bulge = reach + _backBulge;
+    start = Offset(from.right, from.center.dy);
+    end = Offset(to.right, to.center.dy);
+    control1 = Offset(bulge, start.dy);
+    control2 = Offset(bulge, end.dy);
   }
 
   final label = edge.label == null || edge.label!.isEmpty ? null : edge.label;
