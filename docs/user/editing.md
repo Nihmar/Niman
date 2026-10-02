@@ -465,18 +465,22 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Three kinds are drawn:
+Four kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
 - **Sequence diagrams** (`sequenceDiagram`): participants and their
   aliases, every message arrow, notes, and the frames of `loop`, `alt`,
   `opt`, `par`, `critical` and `break` with their sections.
+- **Pie charts** (`pie`): the slices clockwise from the top with their
+  shares, a legend (with each value under `showData`) and the title. Each
+  slice has a colour of its own, told apart by colour-blind readers too;
+  past eight slices the rest are gathered into "Other".
 - **Mind maps** (`mindmap`), the tree drawn left to right.
 
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber` — is read and drawn without, in the theme's
-own colours. Any other kind (class, state, gantt, pie…) is left as
+own colours. Any other kind (class, state, gantt…) is left as
 source with a note saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
