@@ -705,9 +705,13 @@ final class BlockScanner {
       case BlockKind.thematicBreak:
         return false;
       case BlockKind.listItem:
-        // A new marker starts a new item, and a blank line ends this one; a
-        // line with neither continues it, which keeps a wrapped item whole.
-        return _text(end).trim().isNotEmpty && _markerOn(end) == null;
+        // The item's block is its first paragraph: paragraph text goes on
+        // with it, indented into the item or lazily, which keeps a wrapped
+        // item whole. A line that opens a block of its own — a marker, a
+        // heading, a rule, a fence, a quote — does not: taking any line
+        // without a marker swallowed `# Heading` under a list into the
+        // item's text.
+        return _kindOf(end) == BlockKind.paragraph;
       case BlockKind.quote:
         // A blank line ends the quoted run; a line that is still a quote line —
         // with a marker or lazily without one — continues it.
@@ -1248,11 +1252,6 @@ final class BlockScanner {
   /// margin outside a list.
   static int _markerReach(LineState state) =>
       (state.listIndent < 0 ? 0 : state.listIndent) + 3;
-
-  /// The list marker on line [line], read with the reach the state entering
-  /// it gives ([_markerReach]).
-  (int, int, int)? _markerOn(int line) =>
-      _listMarker(_text(line), _markerReach(_entering[line]));
 
   /// The open list items after line [line], whose text is [text], given
   /// those entering it.
