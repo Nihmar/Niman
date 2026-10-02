@@ -4,7 +4,7 @@
 /// flowchart, a mind map, a class, state or ER diagram), a sequence, a
 /// pie, a Gantt chart, a timeline, a user journey, a git graph, a kanban
 /// board, a quadrant chart, an xy chart, a Sankey diagram, a block
-/// diagram. The painter and
+/// diagram, a packet diagram. The painter and
 /// the SVG export dispatch on this one type, so the engine grows a kind at
 /// a time and no call site learns about each.
 library;
@@ -16,6 +16,7 @@ import 'package:niman/src/diagrams/gantt_geometry.dart';
 import 'package:niman/src/diagrams/git_graph_geometry.dart';
 import 'package:niman/src/diagrams/journey_geometry.dart';
 import 'package:niman/src/diagrams/kanban_layout.dart';
+import 'package:niman/src/diagrams/packet_layout.dart';
 import 'package:niman/src/diagrams/pie_geometry.dart';
 import 'package:niman/src/diagrams/quadrant_layout.dart';
 import 'package:niman/src/diagrams/sankey_layout.dart';
@@ -123,6 +124,18 @@ final class BlockDrawing extends DiagramDrawing {
 
   /// The placed diagram.
   final BlockLayout layout;
+
+  @override
+  Size get size => layout.size;
+}
+
+/// A packet diagram.
+final class PacketDrawing extends DiagramDrawing {
+  /// Wraps a [layout].
+  const new(this.layout);
+
+  /// The placed diagram.
+  final PacketLayout layout;
 
   @override
   Size get size => layout.size;

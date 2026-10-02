@@ -11,6 +11,7 @@ import 'package:niman/src/diagrams/gantt_renderer.dart';
 import 'package:niman/src/diagrams/git_graph_renderer.dart';
 import 'package:niman/src/diagrams/journey_renderer.dart';
 import 'package:niman/src/diagrams/kanban_renderer.dart';
+import 'package:niman/src/diagrams/packet_renderer.dart';
 import 'package:niman/src/diagrams/pie_renderer.dart';
 import 'package:niman/src/diagrams/quadrant_renderer.dart';
 import 'package:niman/src/diagrams/sankey_renderer.dart';
@@ -49,6 +50,8 @@ final class DiagramPainter extends CustomPainter {
         GitGraphRenderer(layout: layout, style: style).paint(target);
       case BlockDrawing(:final layout):
         BlockRenderer(layout: layout, style: style).paint(target);
+      case PacketDrawing(:final layout):
+        PacketRenderer(layout: layout, style: style).paint(target);
       case KanbanDrawing(:final layout):
         KanbanRenderer(layout: layout, style: style).paint(target);
       case QuadrantDrawing(:final layout):

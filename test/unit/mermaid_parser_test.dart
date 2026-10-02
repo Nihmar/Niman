@@ -300,12 +300,12 @@ void main() {
     expect(parseMermaid('${preamble}mindmap\n  root'), isA<MermaidFlowchart>());
     expect(_chart('${preamble}flowchart LR\nA --> B').nodes, hasLength(2));
     expect(
-      () => parseMermaid('%% note\npacket-beta\n0-15: "Port"'),
+      () => parseMermaid('%% note\narchitecture-beta\nservice db(database)'),
       throwsA(
         isA<MermaidParseException>().having(
           (e) => e.message,
           'message',
-          contains('unsupported diagram type "packet-beta"'),
+          contains('unsupported diagram type "architecture-beta"'),
         ),
       ),
     );
