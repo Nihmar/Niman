@@ -174,15 +174,18 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     height: maxY - minY,
   );
   final turned = [for (final sub in subgraphs) transformer.subgraph(sub)];
+  final nodes = [
+    for (final node in chart.nodes)
+      LaidOutNode(node: node, rect: transformer.rect(rects[node.id]!)),
+  ];
   return DiagramLayout(
     size: transformer.size,
-    nodes: [
-      for (final node in chart.nodes)
-        LaidOutNode(node: node, rect: transformer.rect(rects[node.id]!)),
-    ],
-    edges: [
-      for (final edge in edges) clearOfTitles(transformer.edge(edge), turned),
-    ],
+    nodes: nodes,
+    edges: placeEdgeLabels(
+      [for (final edge in edges) transformer.edge(edge)],
+      turned,
+      [for (final node in nodes) node.rect],
+    ),
     subgraphs: turned,
     lines: lines,
   );
