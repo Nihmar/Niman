@@ -2909,7 +2909,7 @@ final class ItalianStrings extends Strings {
   String get commandConvertListToMindMap => 'Converti elenco in mappa mentale';
   @override
   String get toolMindMapSubtitle =>
-      "Sostituisce l'elenco al cursore con una mappa mentale";
+      'Sostituisce con una mappa mentale l’elenco in cui si trova il cursore';
 
   @override
   String get toolMindMapNeedsList => 'Il cursore non è in un elenco';
