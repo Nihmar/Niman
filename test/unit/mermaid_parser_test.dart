@@ -163,7 +163,7 @@ void main() {
 
   test('an unsupported diagram type is refused, not mis-drawn', () {
     expect(
-      () => parseMermaid('C4Context\ntitle A system'),
+      () => parseMermaid('architecture-beta\ngroup api(cloud)[API]'),
       throwsA(
         isA<MermaidParseException>().having(
           (e) => e.message,

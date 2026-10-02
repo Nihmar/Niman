@@ -190,12 +190,35 @@ final class DiagramRenderer {
         );
       }
     }
+    if (node.node.sections.isNotEmpty) return _card(target, node);
     target.text(
       layout.lines[node.node.id] ?? [node.node.label],
       node.rect,
       color: style.palette.nodeText,
       fontSize: style.fontSize,
     );
+  }
+
+  /// A card's sections stacked and centred in its box, the middle one —
+  /// the name — bold.
+  void _card(DiagramTarget target, LaidOutNode node) {
+    final sections = node.node.sections;
+    final line = style.fontSize * style.lineHeight;
+    final total = node.node.stackedLines.length * line;
+    var y = node.rect.center.dy - total / 2;
+    for (var i = 0; i < sections.length; i++) {
+      final height = sections[i].length * line;
+      if (height > 0) {
+        target.text(
+          sections[i],
+          Rect.fromLTWH(node.rect.left, y, node.rect.width, height),
+          color: style.palette.nodeText,
+          fontSize: style.fontSize,
+          weight: i == 1 ? FontWeight.w600 : FontWeight.normal,
+        );
+      }
+      y += height;
+    }
   }
 
   /// A class: its box, a rule between compartments, its name centred and

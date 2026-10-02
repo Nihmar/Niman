@@ -25,13 +25,16 @@ Size flowNodeSize(FlowNode node, List<String> lines, DiagramStyle style) {
     case _:
       break;
   }
+  // A card is as big as all its lines, its outline's room added as for
+  // any label.
+  final shown = node.sections.isNotEmpty ? node.stackedLines : lines;
   var text = 0.0;
-  for (final line in lines) {
+  for (final line in shown) {
     text = math.max(text, DiagramMetrics.textWidth(line, style.fontSize));
   }
   var width = text + style.nodePadding.horizontal;
   var height =
-      lines.length * style.fontSize * style.lineHeight +
+      shown.length * style.fontSize * style.lineHeight +
       style.nodePadding.vertical;
   switch (node.shape) {
     case FlowNodeShape.circle:

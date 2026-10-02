@@ -195,9 +195,16 @@ final class FlowNode {
   final FlowNodeShape shape;
 
   /// A class box's compartments, each a list of lines: its name (with any
-  /// stereotype above it), its attributes, its methods. Empty for every
-  /// other shape, whose text is [label].
+  /// stereotype above it), its attributes, its methods.
+  ///
+  /// Any other shape given sections — a C4 element's card — stacks them
+  /// centred, the middle one bold: what goes over its name (a stereotype),
+  /// its name, what goes under it (a technology, a description). Empty for
+  /// a node whose text is its [label] alone.
   final List<List<String>> sections;
+
+  /// Every line of a stacked node's [sections], top to bottom.
+  List<String> get stackedLines => [for (final section in sections) ...section];
 }
 
 /// One connection between two nodes.
