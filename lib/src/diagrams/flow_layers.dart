@@ -11,6 +11,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:niman/src/diagrams/flow_clusters.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 
 /// How many down-and-up sweeps the ordering makes.
@@ -45,6 +46,7 @@ List<List<String>> flowLayers(Flowchart chart) {
     if (!beside.containsKey(id)) layers[rank[id]!].add(id);
   }
   _order(layers, incoming, out);
+  groupSubgraphMembers(layers, chart);
   // Each note right after the node it is tied to, once the rest is placed.
   for (final MapEntry(key: note, value: target) in beside.entries) {
     final layer = layers[rank[target]!];

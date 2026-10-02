@@ -13,6 +13,7 @@ import 'package:flutter/painting.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/diagram_metrics.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/flow_clusters.dart';
 import 'package:niman/src/diagrams/flow_edge_route.dart';
 import 'package:niman/src/diagrams/flow_label_clearance.dart';
 import 'package:niman/src/diagrams/flow_layers.dart';
@@ -96,6 +97,7 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
       x += size.width + style.nodeGap;
     }
   }
+  clearSubgraphBoxes(chart, layers, rects, style);
 
   final rankOf = <String, int>{
     for (var r = 0; r < layers.length; r++)
