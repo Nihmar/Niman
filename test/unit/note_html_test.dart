@@ -218,4 +218,15 @@ void main() {
     final rule = RegExp(r'\.diagram svg \{[^}]*\}').firstMatch(pageStyle)!;
     expect(rule.group(0), contains('background: #fff'));
   });
+
+  test("a diagram's labels name a sans face, not the reader's (#530)", () {
+    // Its boxes are sized for a sans; an EPUB reader's serif runs over them.
+    final html = NoteHtml(
+      const NoteHtmlSource(
+        text: '```mermaid\nflowchart TD\nA[Start] --> B\n```\n',
+        title: 't',
+      ),
+    ).body();
+    expect(html, contains('font-family="system-ui, sans-serif"'));
+  });
 }

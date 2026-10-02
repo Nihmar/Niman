@@ -12,6 +12,11 @@ import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/math_text.dart' show displayTexOf;
 
+/// The face an exported diagram's labels are set in: the sans its boxes
+/// are measured for, where the reader's own face — often a serif in an
+/// EPUB reader — would run over them.
+const String _diagramFont = 'system-ui, sans-serif';
+
 /// A fence's opening line: its indent, its run and its info string.
 final RegExp _opening = RegExp(r'^( {0,3})(`{3,}|~{3,})(.*)$');
 
@@ -57,7 +62,7 @@ String fencedCodeHtml(List<String> lines) {
 /// not Mermaid or does not parse — for the caller to keep as code (#530).
 String? mermaidBlockHtml(
   List<String> lines, {
-  DiagramStyle style = const DiagramStyle(),
+  DiagramStyle style = const DiagramStyle(fontFamily: _diagramFont),
 }) {
   final parts = _fenceParts(lines);
   if (parts == null || parts.language.toLowerCase() != 'mermaid') return null;
