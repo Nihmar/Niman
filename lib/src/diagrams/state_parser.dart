@@ -79,8 +79,13 @@ final class _StateParser {
   final Map<String, _State> _states = {};
   final List<FlowNode> _notes = [];
   final List<_Transition> _transitions = [];
-  final List<FlowEdge> _ties = [];
-  final List<FlowSubgraph> _subgraphs = [];
+
+  /// Each note and the state it was written for, tied once every
+  /// composite is known.
+  final List<(String, String)> _noteTargets = [];
+
+  /// The composites closed so far, inner before outer.
+  final List<_Composite> _closed = [];
   final List<_Composite> _open = [];
 
   /// Every composite's members once closed, by its id.
@@ -130,7 +135,7 @@ final class _StateParser {
           to: _entry(transition.to),
           label: transition.label,
         ),
-      ..._ties,
+      ..._ties(),
     ];
     return Flowchart(
       direction: _direction,
@@ -149,7 +154,15 @@ final class _StateParser {
         ..._notes,
       ],
       edges: edges,
-      subgraphs: List.unmodifiable(_subgraphs),
+      subgraphs: List.unmodifiable([
+        for (final composite in _closed)
+          FlowSubgraph(
+            id: composite.id,
+            title: composite.title,
+            nodeIds: List.unmodifiable(composite.ids),
+            parent: composite.parent,
+          ),
+      ]),
     );
   }
 
@@ -232,14 +245,7 @@ final class _StateParser {
     if (_open.isEmpty) throw MermaidParseException(number, 'unexpected "}"');
     final composite = _open.removeLast();
     _members[composite.id] = composite.ids;
-    _subgraphs.add(
-      FlowSubgraph(
-        id: composite.id,
-        title: composite.title,
-        nodeIds: List.unmodifiable(composite.ids),
-        parent: composite.parent,
-      ),
-    );
+    _closed.add(composite);
   }
 
   /// The state `[*]` is in the scope open now: its start before an arrow,
@@ -262,8 +268,8 @@ final class _StateParser {
   /// Where a transition into [id] arrives: a composite's start, else its
   /// first state; any other state itself.
   String _entry(String id) {
-    final members = _members[id];
-    if (members == null || members.isEmpty) return id;
+    final members = _statesOf(id);
+    if (members.isEmpty) return id;
     final start = '[*] start $id';
     return members.contains(start) ? start : _entry(members.first);
   }
@@ -271,24 +277,50 @@ final class _StateParser {
   /// Where a transition out of [id] leaves: a composite's end, else its
   /// last state; any other state itself.
   String _exit(String id) {
-    final members = _members[id];
-    if (members == null || members.isEmpty) return id;
+    final members = _statesOf(id);
+    if (members.isEmpty) return id;
     final end = '[*] end $id';
     return members.contains(end) ? end : _exit(members.last);
   }
+
+  /// The states of composite [id], its notes left out: empty for a state
+  /// that is not a composite.
+  List<String> _statesOf(String id) => [
+    for (final member in _members[id] ?? const <String>[])
+      if (!_noteIds.contains(member)) member,
+  ];
+
+  Set<String> get _noteIds => {for (final note in _notes) note.id};
 
   void _noteFor(String target, String text) {
     final id = 'note-${_notes.length}';
     _notes.add(FlowNode(id: id, label: text, shape: FlowNodeShape.note));
     _join(id);
-    _ties.add(
-      FlowEdge(
-        from: _stateOf(target).id,
-        to: id,
-        style: FlowEdgeStyle.dotted,
-        end: FlowEdgeEnd.none,
-      ),
-    );
+    _stateOf(target);
+    _noteTargets.add((id, target));
+  }
+
+  /// The dotted ties from each note to its state. A composite state is a
+  /// box rather than a node, so its note goes in the box — and in the
+  /// boxes round it — tied to where the composite is entered.
+  List<FlowEdge> _ties() {
+    final byId = {for (final composite in _closed) composite.id: composite};
+    return [
+      for (final (note, target) in _noteTargets)
+        FlowEdge(
+          from: () {
+            if (_statesOf(target).isEmpty) return target;
+            for (var box = byId[target]; box != null;) {
+              if (!box.ids.contains(note)) box.ids.add(note);
+              box = box.parent == null ? null : byId[box.parent];
+            }
+            return _entry(target);
+          }(),
+          to: note,
+          style: FlowEdgeStyle.dotted,
+          end: FlowEdgeEnd.none,
+        ),
+    ];
   }
 
   /// State [id], made on first mention — inside every composite open now —

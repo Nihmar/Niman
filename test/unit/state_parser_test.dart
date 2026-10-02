@@ -2,7 +2,9 @@
 // end, forks, joins and choices, composite states and the transitions in
 // and out of them, notes, and the errors that name a line.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
+import 'package:niman/src/diagrams/flowchart_layout.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_parser.dart';
 import 'package:niman/src/diagrams/state_parser.dart';
@@ -108,6 +110,28 @@ void main() {
       chart.edges.where((e) => e.style == FlowEdgeStyle.dotted),
       hasLength(2),
     );
+  });
+
+  test("a composite's note sits in its box, tied to where it is entered", () {
+    // Written before the composite and after it: either way the composite
+    // is a box, not a node, so the tie cannot end on its id.
+    const before =
+        'stateDiagram\nnote right of S : busy\nA --> S\n'
+        'state S {\n  [*] --> W\n  W --> [*]\n}\nS --> B';
+    const after =
+        'stateDiagram\nA --> S\nstate S {\n  W --> X\n}\n'
+        'S --> B\nnote right of S : busy';
+    for (final source in [before, after]) {
+      final chart = parseStateDiagram(source);
+      final tie = chart.edges.firstWhere((e) => e.to == 'note-0');
+      final ids = {for (final node in chart.nodes) node.id};
+      expect(ids, contains(tie.from), reason: source);
+      final box = chart.subgraphs.single;
+      expect(box.nodeIds, containsAll([tie.from, 'note-0']));
+      // A transition out still leaves from a state, never from the note.
+      expect(chart.edges.firstWhere((e) => e.to == 'B').from, isNot('note-0'));
+      expect(layoutFlowchart(chart, const DiagramStyle()).nodes, isNotEmpty);
+    }
   });
 
   test('direction, styling and concurrency borders are read past', () {
