@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diagrams/canvas_target.dart';
+import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_renderer.dart';
 import 'package:niman/src/diagrams/diagram_result.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
@@ -41,7 +42,7 @@ void main() {
 
   test('a source that does not parse comes back null, for the fence', () {
     expect(diagramSvg('flowchart TD\nA -- B', _style), isNull);
-    expect(diagramSvg('sequenceDiagram\nA->>B: hi', _style), isNull);
+    expect(diagramSvg('classDiagram\nclass Animal', _style), isNull);
   });
 
   test('label text is escaped for XML', () {
@@ -63,11 +64,11 @@ void main() {
       'flowchart TD\nA[Start] --> B{Ok?}\nB -->|Yes| C(End)',
       _style,
     );
-    final ready = result as DiagramReady;
+    final drawing = (result as DiagramReady).drawing as FlowDrawing;
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder);
     DiagramRenderer(
-      layout: ready.layout,
+      layout: drawing.layout,
       style: _style,
     ).paint(CanvasDiagramTarget(canvas));
     recorder.endRecording().dispose();

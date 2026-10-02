@@ -6,29 +6,33 @@
 /// code block.
 library;
 
-import 'package:niman/src/diagrams/diagram_layout.dart';
+import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_renderer.dart';
 import 'package:niman/src/diagrams/diagram_result.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/sequence_renderer.dart';
 import 'package:niman/src/diagrams/svg_target.dart';
 
 /// [source] as a standalone `<svg>` document, or null when it does not
 /// parse.
-String? diagramSvg(String source, DiagramStyle style) {
-  final result = resolveDiagram(source, style);
-  return switch (result) {
-    DiagramReady(:final layout) => diagramLayoutSvg(layout, style),
-    DiagramFailed() => null,
-  };
-}
+String? diagramSvg(String source, DiagramStyle style) =>
+    switch (resolveDiagram(source, style)) {
+      DiagramReady(:final drawing) => drawingSvg(drawing, style),
+      DiagramFailed() => null,
+    };
 
-/// A laid-out [layout] as a standalone `<svg>` document.
-String diagramLayoutSvg(DiagramLayout layout, DiagramStyle style) {
+/// A laid-out [drawing] as a standalone `<svg>` document.
+String drawingSvg(DiagramDrawing drawing, DiagramStyle style) {
   final target = SvgDiagramTarget(
-    width: layout.size.width,
-    height: layout.size.height,
+    width: drawing.size.width,
+    height: drawing.size.height,
     fontFamily: style.fontFamily,
   );
-  DiagramRenderer(layout: layout, style: style).paint(target);
+  switch (drawing) {
+    case FlowDrawing(:final layout):
+      DiagramRenderer(layout: layout, style: style).paint(target);
+    case SequenceDrawing(:final layout):
+      SequenceRenderer(layout: layout, style: style).paint(target);
+  }
   return target.finish();
 }

@@ -10,7 +10,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/diagrams/diagram_cache.dart';
-import 'package:niman/src/diagrams/diagram_layout.dart';
+import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_painter.dart';
 import 'package:niman/src/diagrams/diagram_result.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
@@ -60,14 +60,14 @@ final class BlockDiagramView extends StatelessWidget {
     final style = styleFor(context);
     final result = cache.resolve(source, style);
     return switch (result) {
-      DiagramReady(:final layout) => _diagram(context, layout, style),
+      DiagramReady(:final drawing) => _diagram(context, drawing, style),
       DiagramFailed(:final error) => _error(context, error),
     };
   }
 
   Widget _diagram(
     BuildContext context,
-    DiagramLayout layout,
+    DiagramDrawing drawing,
     DiagramStyle style,
   ) {
     // A diagram wider than the pane is shrunk to fit it, never cut: the
@@ -77,8 +77,8 @@ final class BlockDiagramView extends StatelessWidget {
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: CustomPaint(
-          size: layout.size,
-          painter: DiagramPainter(layout: layout, style: style),
+          size: drawing.size,
+          painter: DiagramPainter(drawing: drawing, style: style),
         ),
       ),
     );
@@ -98,7 +98,7 @@ final class BlockDiagramView extends StatelessWidget {
                   iconSize: 20,
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.fullscreen),
-                  onPressed: () => _openFullScreen(context, layout, style),
+                  onPressed: () => _openFullScreen(context, drawing, style),
                 ),
               ),
           ],
@@ -152,7 +152,7 @@ final class BlockDiagramView extends StatelessWidget {
 
   void _openFullScreen(
     BuildContext context,
-    DiagramLayout layout,
+    DiagramDrawing drawing,
     DiagramStyle style,
   ) {
     unawaited(
@@ -162,7 +162,8 @@ final class BlockDiagramView extends StatelessWidget {
         // covers the whole screen rather than leaving the barrier's bars.
         useSafeArea: false,
         barrierLabel: AppStrings.diagramTitle,
-        builder: (context) => _DiagramFullScreen(layout: layout, style: style),
+        builder: (context) =>
+            _DiagramFullScreen(drawing: drawing, style: style),
       ),
     );
   }
@@ -170,9 +171,9 @@ final class BlockDiagramView extends StatelessWidget {
 
 /// The diagram alone, to pinch and drag.
 final class _DiagramFullScreen extends StatelessWidget {
-  const new({required this.layout, required this.style});
+  const new({required this.drawing, required this.style});
 
-  final DiagramLayout layout;
+  final DiagramDrawing drawing;
   final DiagramStyle style;
 
   @override
@@ -192,9 +193,9 @@ final class _DiagramFullScreen extends StatelessWidget {
                   maxScale: 8,
                   boundaryMargin: const EdgeInsets.all(80),
                   child: SizedBox.fromSize(
-                    size: layout.size,
+                    size: drawing.size,
                     child: CustomPaint(
-                      painter: DiagramPainter(layout: layout, style: style),
+                      painter: DiagramPainter(drawing: drawing, style: style),
                     ),
                   ),
                 ),

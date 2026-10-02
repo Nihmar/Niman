@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diagrams/diagram_cache.dart';
+import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_painter.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
@@ -39,6 +40,19 @@ void main() {
     );
     expect(_painters(tester), isNotEmpty);
     expect(find.byKey(const Key('diagram-full-screen')), findsOneWidget);
+  });
+
+  testWidgets('a sequence fence is drawn as a sequence', (tester) async {
+    await _pump(
+      tester,
+      '```mermaid\nsequenceDiagram\n'
+      'Alice->>Bob: Hello\nBob-->>Alice: Hi\n```\n',
+    );
+    expect(
+      _painters(tester).map((painter) => painter.drawing),
+      everyElement(isA<SequenceDrawing>()),
+    );
+    expect(_painters(tester), isNotEmpty);
   });
 
   testWidgets('the full screen button opens the diagram alone', (tester) async {
@@ -80,7 +94,7 @@ void main() {
       (widget) => widget is CustomPaint && widget.painter is DiagramPainter,
     );
     final painter = tester.widget<CustomPaint>(paint).painter!;
-    final drawing = (painter as DiagramPainter).layout.size;
+    final drawing = (painter as DiagramPainter).drawing.size;
     expect(drawing.width, greaterThan(width));
     // Painted at its own size — not cut to the pane's — and shrunk inside it.
     expect(tester.getSize(paint), drawing);

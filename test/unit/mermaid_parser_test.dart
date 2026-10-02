@@ -163,7 +163,7 @@ void main() {
 
   test('an unsupported diagram type is refused, not mis-drawn', () {
     expect(
-      () => parseMermaid('sequenceDiagram\nA->>B: hi'),
+      () => parseMermaid('classDiagram\nclass Animal'),
       throwsA(
         isA<MermaidParseException>().having(
           (e) => e.message,

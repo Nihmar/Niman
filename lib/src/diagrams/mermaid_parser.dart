@@ -11,6 +11,8 @@ import 'package:niman/src/diagrams/flow_parser.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_lines.dart';
 import 'package:niman/src/diagrams/mindmap_parser.dart';
+import 'package:niman/src/diagrams/sequence_model.dart';
+import 'package:niman/src/diagrams/sequence_parser.dart';
 
 /// A parsed Mermaid diagram.
 sealed class MermaidDiagram {
@@ -27,11 +29,19 @@ final class MermaidFlowchart extends MermaidDiagram {
   final Flowchart chart;
 }
 
+/// A `sequenceDiagram`.
+final class MermaidSequence extends MermaidDiagram {
+  /// Wraps a parsed [sequence].
+  const new(this.sequence);
+
+  /// The parsed sequence.
+  final SequenceDiagram sequence;
+}
+
 /// The Mermaid diagram kinds this engine does not draw yet. A first word
 /// among these is refused by name; anything else is handed to the flowchart
 /// parser, which reports its own header error.
 const Set<String> _otherDiagramTypes = {
-  'sequencediagram',
   'classdiagram',
   'statediagram',
   'statediagram-v2',
@@ -60,6 +70,7 @@ const Set<String> _otherDiagramTypes = {
 MermaidDiagram parseMermaid(String source) {
   final first = _firstWord(source).toLowerCase();
   if (first == 'mindmap') return MermaidFlowchart(parseMindmap(source));
+  if (first == 'sequencediagram') return MermaidSequence(parseSequence(source));
   if (first == 'flowchart' ||
       first == 'graph' ||
       !_otherDiagramTypes.contains(first)) {
