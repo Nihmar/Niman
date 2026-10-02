@@ -5,6 +5,7 @@ library;
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/flowchart_layout.dart';
+import 'package:niman/src/diagrams/gantt_layout.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_parser.dart';
 import 'package:niman/src/diagrams/pie_layout.dart';
@@ -45,6 +46,7 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
         layoutSequence(sequence, style),
       ),
       MermaidPie(:final pie) => PieDrawing(layoutPie(pie, style)),
+      MermaidGantt(:final gantt) => GanttDrawing(layoutGantt(gantt, style)),
     });
   } on MermaidParseException catch (error) {
     return DiagramFailed(error);

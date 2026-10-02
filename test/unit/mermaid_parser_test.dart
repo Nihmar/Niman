@@ -300,12 +300,12 @@ void main() {
     expect(parseMermaid('${preamble}mindmap\n  root'), isA<MermaidFlowchart>());
     expect(_chart('${preamble}flowchart LR\nA --> B').nodes, hasLength(2));
     expect(
-      () => parseMermaid('%% note\ngantt\ntitle A plan'),
+      () => parseMermaid('%% note\ntimeline\ntitle A plan'),
       throwsA(
         isA<MermaidParseException>().having(
           (e) => e.message,
           'message',
-          contains('unsupported diagram type "gantt"'),
+          contains('unsupported diagram type "timeline"'),
         ),
       ),
     );
