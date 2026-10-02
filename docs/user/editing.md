@@ -510,6 +510,11 @@ Sixteen kinds are drawn:
   between blocks.
 - **Mind maps** (`mindmap`), the tree drawn left to right.
 
+In any of them a label may write a character as an entity, as in Mermaid:
+`&amp;`, `&nbsp;`, `&#65;`, or Mermaid's own `#quot;` and `#58;`. They are
+written out after the line is read, so `#58;` puts a colon in a label
+where a plain `:` would end it.
+
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber` — is read and drawn without, in the theme's
 own colours. Any other kind (C4, packet, architecture…) is left as
