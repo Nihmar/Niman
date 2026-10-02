@@ -177,7 +177,7 @@ final class DiagramRenderer {
     target.polygon(
       _outline(node),
       fill: style.palette.nodeFill,
-      stroke: node.node.shape.isClosed ? style.palette.nodeStroke : null,
+      stroke: style.palette.nodeStroke,
       strokeWidth: style.nodeStrokeWidth,
     );
     if (node.node.shape == FlowNodeShape.subroutine) {

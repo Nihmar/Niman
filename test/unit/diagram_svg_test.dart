@@ -32,6 +32,11 @@ void main() {
     expect(svg, contains('Yes'));
   });
 
+  test('a flag node has its outline, as every other shape', () {
+    final svg = diagramSvg('flowchart TD\nM>Flag]', _style)!;
+    expect(RegExp('<polygon[^>]* stroke=').hasMatch(svg), isTrue);
+  });
+
   test('a mind map becomes a standalone SVG (#530)', () {
     final svg = diagramSvg('mindmap\nroot((Central))\n  A\n  B\n', _style);
     expect(svg, isNotNull);

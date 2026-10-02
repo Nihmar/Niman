@@ -110,9 +110,6 @@ enum FlowNodeShape {
   /// each ([FlowNode.sections]).
   classBox;
 
-  /// Whether the text sits inside a bounded box at all.
-  bool get isClosed => this != FlowNodeShape.asymmetric;
-
   /// Whether the node is a mark with no text: a start, an end, a bar.
   bool get isMark =>
       this == FlowNodeShape.start ||
