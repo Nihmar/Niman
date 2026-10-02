@@ -45,3 +45,12 @@ String stripMermaidComment(String line) {
   }
   return line;
 }
+
+/// [text] without the double quotes around it. Only `"` quotes in
+/// Mermaid: an apostrophe is a letter (`Don't`, `l'utente`).
+String unquoteMermaid(String text) {
+  if (text.length >= 2 && text.startsWith('"') && text.endsWith('"')) {
+    return text.substring(1, text.length - 1);
+  }
+  return text;
+}

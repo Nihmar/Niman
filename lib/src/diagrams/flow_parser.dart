@@ -10,6 +10,7 @@
 /// never silently mis-drawn.
 library;
 
+import 'package:niman/src/diagrams/flow_cursor.dart';
 import 'package:niman/src/diagrams/flow_edge_scanner.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
@@ -128,7 +129,7 @@ final class _FlowParser {
       if (close < 0) {
         throw MermaidParseException(number, 'expected "]" to close the title');
       }
-      title = _unquote(rest.substring(bracket + 1, close).trim());
+      title = unquoteMermaid(rest.substring(bracket + 1, close).trim());
     } else {
       id = rest;
     }
@@ -163,7 +164,7 @@ final class _FlowParser {
   // -- nodes and edges ---------------------------------------------------
 
   void _chain(String s, int number) {
-    final cursor = _Cursor(s);
+    final cursor = FlowCursor(s);
     var sources = _nodeList(cursor, number);
     while (true) {
       cursor.skipSpaces();
@@ -200,7 +201,7 @@ final class _FlowParser {
     }
   }
 
-  List<String> _nodeList(_Cursor cursor, int number) {
+  List<String> _nodeList(FlowCursor cursor, int number) {
     final ids = <String>[];
     while (true) {
       ids.add(_nodeRef(cursor, number));
@@ -210,7 +211,7 @@ final class _FlowParser {
     }
   }
 
-  String _nodeRef(_Cursor cursor, int number) {
+  String _nodeRef(FlowCursor cursor, int number) {
     cursor.skipSpaces();
     final id = cursor.readId();
     if (id.isEmpty) {
@@ -311,16 +312,7 @@ final class _FlowParser {
   }
 
   static String? _unquoteOrNull(String? text) =>
-      text == null ? null : _unquote(text);
-
-  /// [text] without the double quotes around it. Only `"` quotes in
-  /// Mermaid: an apostrophe is a letter (`Don't`, `l'utente`).
-  static String _unquote(String text) {
-    if (text.length >= 2 && text.startsWith('"') && text.endsWith('"')) {
-      return text.substring(1, text.length - 1);
-    }
-    return text;
-  }
+      text == null ? null : unquoteMermaid(text);
 }
 
 /// The mutable state of one open `subgraph`.
@@ -333,208 +325,4 @@ final class _SubgraphBuild {
   final List<String> nodeIds = [];
   final Set<String> members = {};
   FlowDirection? direction;
-}
-
-/// A position over one statement's text.
-final class _Cursor {
-  new(this.source);
-
-  final String source;
-  int position = 0;
-
-  bool get atEnd => position >= source.length;
-  String? get peek => atEnd ? null : source[position];
-  String get rest => source.substring(position);
-
-  void skipSpaces() {
-    while (!atEnd && (source[position] == ' ' || source[position] == '\t')) {
-      position++;
-    }
-  }
-
-  String readId() {
-    final start = position;
-    while (!atEnd) {
-      final ch = source.codeUnitAt(position);
-      final isId =
-          (ch >= 0x41 && ch <= 0x5A) ||
-          (ch >= 0x61 && ch <= 0x7A) ||
-          (ch >= 0x30 && ch <= 0x39) ||
-          ch == 0x5F ||
-          ch > 0x7F;
-      if (!isId) break;
-      position++;
-    }
-    return source.substring(start, position);
-  }
-
-  /// Steps over a node's `:::class` shorthand: a class is a colour a note's
-  /// diagram is drawn without, like a `classDef`.
-  void skipClass() {
-    if (!source.startsWith(':::', position)) return;
-    position += 3;
-    while (!atEnd && !_classEnds) {
-      position++;
-    }
-  }
-
-  /// Whether a `:::class` name ends at [position]: at a space, a `&`, or
-  /// the edge after it (`A:::warn-->B`); a lone `-` is the name's own.
-  bool get _classEnds {
-    final ch = source[position];
-    if (' \t&=<'.contains(ch)) return true;
-    return source.startsWith('--', position) ||
-        source.startsWith('-.', position);
-  }
-
-  String? readPipeLabel() {
-    if (peek != '|') return null;
-    final end = source.indexOf('|', position + 1);
-    if (end < 0) return null;
-    final label = source.substring(position + 1, end).trim();
-    position = end + 1;
-    return label;
-  }
-
-  ({FlowNodeShape shape, String label}) readShape(int number) {
-    final open = peek!;
-    if (open == '>') {
-      position++;
-      return (
-        shape: FlowNodeShape.asymmetric,
-        label: _readUntil(']', number, '">"'),
-      );
-    }
-    if (open == '[') {
-      if (source.startsWith('[[', position)) {
-        position += 2;
-        return (
-          shape: FlowNodeShape.subroutine,
-          label: _readUntil(']]', number, '"[["'),
-        );
-      }
-      if (source.startsWith('[(', position)) {
-        position += 2;
-        return (
-          shape: FlowNodeShape.database,
-          label: _readUntil(')]', number, '"[("'),
-        );
-      }
-      if (source.startsWith('[/', position)) {
-        position += 2;
-        final found = _scanAny(['/]', r'\]'], number, '"[/"');
-        return (
-          shape: found.close == '/]'
-              ? FlowNodeShape.parallelogram
-              : FlowNodeShape.trapezoid,
-          label: found.text,
-        );
-      }
-      if (source.startsWith(r'[\', position)) {
-        position += 2;
-        final found = _scanAny([r'\]', '/]'], number, r'"[\"');
-        return (
-          shape: found.close == r'\]'
-              ? FlowNodeShape.parallelogramAlt
-              : FlowNodeShape.trapezoidAlt,
-          label: found.text,
-        );
-      }
-      position++;
-      return (shape: FlowNodeShape.rect, label: _readUntil(']', number, '"["'));
-    }
-    if (open == '(') {
-      if (source.startsWith('((', position)) {
-        position += 2;
-        return (
-          shape: FlowNodeShape.circle,
-          label: _readUntil('))', number, '"(("'),
-        );
-      }
-      if (source.startsWith('([', position)) {
-        position += 2;
-        return (
-          shape: FlowNodeShape.stadium,
-          label: _readUntil('])', number, '"(["'),
-        );
-      }
-      position++;
-      return (
-        shape: FlowNodeShape.round,
-        label: _readUntil(')', number, '"("'),
-      );
-    }
-    // open == '{'
-    if (source.startsWith('{{', position)) {
-      position += 2;
-      return (
-        shape: FlowNodeShape.hexagon,
-        label: _readUntil('}}', number, '"{{"'),
-      );
-    }
-    position++;
-    return (
-      shape: FlowNodeShape.diamond,
-      label: _readUntil('}', number, '"{"'),
-    );
-  }
-
-  String _readUntil(String close, int number, String what) {
-    final found = _scan(close);
-    if (found == null) {
-      throw MermaidParseException(number, 'expected "$close" after $what');
-    }
-    position = found.end;
-    return _FlowParser._unquote(found.text.trim());
-  }
-
-  ({String text, String close}) _scanAny(
-    List<String> closes,
-    int number,
-    String what,
-  ) {
-    var best = -1;
-    String? bestClose;
-    for (final close in closes) {
-      final found = _scan(close);
-      if (found != null && (best < 0 || found.end < best)) {
-        best = found.end;
-        bestClose = close;
-      }
-    }
-    if (bestClose == null) {
-      throw MermaidParseException(
-        number,
-        'expected one of ${closes.join(", ")} after $what',
-      );
-    }
-    final text = _FlowParser._unquote(
-      source.substring(position, best - bestClose.length).trim(),
-    );
-    position = best;
-    return (text: text, close: bestClose);
-  }
-
-  ({String text, int end})? _scan(String close) {
-    var i = position;
-    String? quote;
-    while (i < source.length) {
-      final ch = source[i];
-      if (quote != null) {
-        if (ch == quote) quote = null;
-        i++;
-        continue;
-      }
-      if (ch == '"') {
-        quote = ch;
-        i++;
-        continue;
-      }
-      if (source.startsWith(close, i)) {
-        return (text: source.substring(position, i), end: i + close.length);
-      }
-      i++;
-    }
-    return null;
-  }
 }
