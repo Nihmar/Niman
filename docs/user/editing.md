@@ -465,7 +465,7 @@ read view and in live mode alike:
       B -->|Yes| C[End]
     ```
 
-Four kinds are drawn:
+Six kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
   shapes, subgraphs (nested too), every edge spelling and its label.
@@ -476,11 +476,17 @@ Four kinds are drawn:
   shares, a legend (with each value under `showData`) and the title. Each
   slice has a colour of its own, told apart by colour-blind readers too;
   past eight slices the rest are gathered into "Other".
+- **Class diagrams** (`classDiagram`): classes in three compartments —
+  name and stereotype, attributes, methods — every UML relation with its
+  ends, cardinalities and label, notes and namespaces.
+- **State diagrams** (`stateDiagram`, `stateDiagram-v2`): states, the
+  start and end `[*]`, forks, joins and choices, composite states (nested
+  too) and notes.
 - **Mind maps** (`mindmap`), the tree drawn left to right.
 
 What only colours or animates a diagram — `classDef`, `style`, `rect`,
 activations, `autonumber` — is read and drawn without, in the theme's
-own colours. Any other kind (class, state, gantt…) is left as
+own colours. Any other kind (ER, gantt, timeline…) is left as
 source with a note saying so. While the caret is in the fence, live mode
 shows the source again; the read view opens it on a tap. A syntax error
 leaves the block as source, the offending line underlined and the
