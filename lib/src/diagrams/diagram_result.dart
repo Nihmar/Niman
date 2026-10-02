@@ -19,6 +19,7 @@ import 'package:niman/src/diagrams/radar_layout.dart';
 import 'package:niman/src/diagrams/sankey_layout.dart';
 import 'package:niman/src/diagrams/sequence_layout.dart';
 import 'package:niman/src/diagrams/timeline_layout.dart';
+import 'package:niman/src/diagrams/treemap_layout.dart';
 import 'package:niman/src/diagrams/xy_chart_layout.dart';
 
 /// The outcome for one diagram source at one style.
@@ -77,6 +78,9 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
       MermaidBlock(:final diagram) => BlockDrawing(layoutBlock(diagram, style)),
       MermaidPacket(:final chart) => PacketDrawing(layoutPacket(chart, style)),
       MermaidRadar(:final chart) => RadarDrawing(layoutRadar(chart, style)),
+      MermaidTreemap(:final chart) => TreemapDrawing(
+        layoutTreemap(chart, style),
+      ),
     });
   } on MermaidParseException catch (error) {
     return DiagramFailed(error);

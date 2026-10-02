@@ -23,6 +23,7 @@ import 'package:niman/src/diagrams/sankey_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
 import 'package:niman/src/diagrams/svg_target.dart';
 import 'package:niman/src/diagrams/timeline_renderer.dart';
+import 'package:niman/src/diagrams/treemap_renderer.dart';
 import 'package:niman/src/diagrams/xy_chart_renderer.dart';
 
 /// [source] as a standalone `<svg>` document, or null when it does not
@@ -61,6 +62,8 @@ String drawingSvg(DiagramDrawing drawing, DiagramStyle style) {
       PacketRenderer(layout: layout, style: style).paint(target);
     case RadarDrawing(:final layout):
       RadarRenderer(layout: layout, style: style).paint(target);
+    case TreemapDrawing(:final layout):
+      TreemapRenderer(layout: layout, style: style).paint(target);
     case KanbanDrawing(:final layout):
       KanbanRenderer(layout: layout, style: style).paint(target);
     case QuadrantDrawing(:final layout):

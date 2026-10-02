@@ -38,6 +38,8 @@ import 'package:niman/src/diagrams/sequence_parser.dart';
 import 'package:niman/src/diagrams/state_parser.dart';
 import 'package:niman/src/diagrams/timeline_model.dart';
 import 'package:niman/src/diagrams/timeline_parser.dart';
+import 'package:niman/src/diagrams/treemap_model.dart';
+import 'package:niman/src/diagrams/treemap_parser.dart';
 import 'package:niman/src/diagrams/xy_chart_model.dart';
 import 'package:niman/src/diagrams/xy_chart_parser.dart';
 
@@ -155,6 +157,15 @@ final class MermaidRadar extends MermaidDiagram {
   final RadarChart chart;
 }
 
+/// A `treemap-beta` diagram.
+final class MermaidTreemap extends MermaidDiagram {
+  /// Wraps a parsed [chart].
+  const new(this.chart);
+
+  /// The parsed treemap.
+  final TreemapChart chart;
+}
+
 /// A `pie` chart.
 final class MermaidPie extends MermaidDiagram {
   /// Wraps a parsed [pie].
@@ -180,7 +191,6 @@ const Set<String> _otherDiagramTypes = {
   'requirementdiagram',
   'c4context',
   'architecture-beta',
-  'treemap-beta',
 };
 
 /// Parses [source] (the fence's content, header included).
@@ -200,6 +210,9 @@ MermaidDiagram parseMermaid(String source) {
   if (first == 'xychart-beta') return MermaidXyChart(parseXyChart(source));
   if (first == 'sankey-beta' || first == 'sankey') {
     return MermaidSankey(parseSankey(source));
+  }
+  if (first == 'treemap-beta' || first == 'treemap') {
+    return MermaidTreemap(parseTreemap(source));
   }
   if (first == 'radar-beta' || first == 'radar') {
     return MermaidRadar(parseRadar(source));

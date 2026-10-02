@@ -18,6 +18,7 @@ import 'package:niman/src/diagrams/radar_renderer.dart';
 import 'package:niman/src/diagrams/sankey_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
 import 'package:niman/src/diagrams/timeline_renderer.dart';
+import 'package:niman/src/diagrams/treemap_renderer.dart';
 import 'package:niman/src/diagrams/xy_chart_renderer.dart';
 
 /// Paints a [DiagramDrawing] with a [DiagramStyle], whatever its kind.
@@ -55,6 +56,8 @@ final class DiagramPainter extends CustomPainter {
         PacketRenderer(layout: layout, style: style).paint(target);
       case RadarDrawing(:final layout):
         RadarRenderer(layout: layout, style: style).paint(target);
+      case TreemapDrawing(:final layout):
+        TreemapRenderer(layout: layout, style: style).paint(target);
       case KanbanDrawing(:final layout):
         KanbanRenderer(layout: layout, style: style).paint(target);
       case QuadrantDrawing(:final layout):
