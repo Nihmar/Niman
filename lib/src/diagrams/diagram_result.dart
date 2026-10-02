@@ -13,6 +13,7 @@ import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_parser.dart';
 import 'package:niman/src/diagrams/pie_layout.dart';
 import 'package:niman/src/diagrams/quadrant_layout.dart';
+import 'package:niman/src/diagrams/sankey_layout.dart';
 import 'package:niman/src/diagrams/sequence_layout.dart';
 import 'package:niman/src/diagrams/timeline_layout.dart';
 import 'package:niman/src/diagrams/xy_chart_layout.dart';
@@ -69,6 +70,7 @@ DiagramResult resolveDiagram(String source, DiagramStyle style) {
       MermaidXyChart(:final chart) => XyChartDrawing(
         layoutXyChart(chart, style),
       ),
+      MermaidSankey(:final chart) => SankeyDrawing(layoutSankey(chart, style)),
     });
   } on MermaidParseException catch (error) {
     return DiagramFailed(error);

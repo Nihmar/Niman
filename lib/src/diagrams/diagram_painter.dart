@@ -12,6 +12,7 @@ import 'package:niman/src/diagrams/journey_renderer.dart';
 import 'package:niman/src/diagrams/kanban_renderer.dart';
 import 'package:niman/src/diagrams/pie_renderer.dart';
 import 'package:niman/src/diagrams/quadrant_renderer.dart';
+import 'package:niman/src/diagrams/sankey_renderer.dart';
 import 'package:niman/src/diagrams/sequence_renderer.dart';
 import 'package:niman/src/diagrams/timeline_renderer.dart';
 import 'package:niman/src/diagrams/xy_chart_renderer.dart';
@@ -51,6 +52,8 @@ final class DiagramPainter extends CustomPainter {
         QuadrantRenderer(layout: layout, style: style).paint(target);
       case XyChartDrawing(:final layout):
         XyChartRenderer(layout: layout, style: style).paint(target);
+      case SankeyDrawing(:final layout):
+        SankeyRenderer(layout: layout, style: style).paint(target);
     }
   }
 
