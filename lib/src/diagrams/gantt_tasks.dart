@@ -163,7 +163,15 @@ DateTime? _end(
     return starts[other];
   }
   final duration = ganttDuration(written);
-  if (duration != null) return start.add(duration);
+  if (duration != null) {
+    if (duration > ganttLatest.difference(start)) {
+      throw MermaidParseException(
+        spec.line,
+        '"$written" ends the task past the year 9999',
+      );
+    }
+    return start.add(duration);
+  }
   return format.read(written) ??
       (throw MermaidParseException(
         spec.line,

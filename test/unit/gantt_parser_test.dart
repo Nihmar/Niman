@@ -28,6 +28,13 @@ void main() {
     final european = GanttDateFormat.of('DD/MM/YYYY HH:mm');
     expect(european.read('06/01/2014 09:30'), DateTime.utc(2014, 1, 6, 9, 30));
     expect(GanttDateFormat.of('X').read('86400'), _d(1970, 1, 2));
+    // Past the year 9999, or past what an int holds: not a date a chart
+    // can hold, where the timestamp threw from `DateTime`, or from
+    // `int.parse`.
+    expect(GanttDateFormat.of('X').read('253402300800'), isNull);
+    expect(GanttDateFormat.of('X').read('9' * 30), isNull);
+    expect(GanttDateFormat.of('x').read('253402300799999'), isNotNull);
+    expect(GanttDateFormat.of('x').read('253402300800000'), isNull);
   });
 
   test('a duration is written in its units', () {
@@ -123,6 +130,18 @@ void main() {
     expect(
       () => parseGantt('gantt\nA :2024-01-01, soon'),
       _error(2, 'expected a duration'),
+    );
+    // A duration past the year 9999 threw from `DateTime.add`, and one
+    // past a double's range from `round()`, past the source fallback.
+    for (final duration in ['99999999999d', '${'9' * 400}d']) {
+      expect(
+        () => parseGantt('gantt\nA :2024-01-01, $duration'),
+        _error(2, 'past the year 9999'),
+      );
+    }
+    expect(
+      () => parseGantt('gantt\nA :2024-01-01, 2900000d\nB :2900000d'),
+      _error(3, 'past the year 9999'),
     );
     expect(
       () => parseGantt('gantt\nA :after nobody, 1d'),

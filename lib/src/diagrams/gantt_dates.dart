@@ -53,6 +53,15 @@ const List<String> _days = [
   'Sunday',
 ];
 
+/// The first instant a chart holds: the year 0000, the first `YYYY` writes.
+final DateTime ganttEarliest = DateTime.utc(0);
+
+/// The first instant past what a chart holds: the end of the year 9999, the
+/// last `YYYY` writes. Every date a chart reads, and every end a duration
+/// gives, falls before it, so nothing the chart computes from them —
+/// excluded days, ticks a step past the end — leaves `DateTime`'s range.
+final DateTime ganttLatest = DateTime.utc(10000);
+
 /// A `dateFormat` made into a reader of dates.
 final class GanttDateFormat {
   /// Reads dates written in the dayjs [format].
@@ -99,7 +108,9 @@ final class GanttDateFormat {
     var minute = 0;
     var second = 0;
     for (var i = 0; i < _tokens.length; i++) {
-      final value = int.parse(match.group(i + 1)!);
+      // A timestamp's digits may be more than an int holds.
+      final value = int.tryParse(match.group(i + 1)!);
+      if (value == null) return null;
       switch (_tokens[i]) {
         case 'YYYY':
           year = value;
@@ -115,10 +126,16 @@ final class GanttDateFormat {
           minute = value;
         case 'ss' || 's':
           second = value;
-        case 'X':
-          return DateTime.fromMillisecondsSinceEpoch(value * 1000, isUtc: true);
-        case 'x':
-          return DateTime.fromMillisecondsSinceEpoch(value, isUtc: true);
+        case 'X' || 'x':
+          // Compared before it is multiplied, which could wrap round.
+          final perUnit = _tokens[i] == 'X' ? 1000 : 1;
+          if (value >= ganttLatest.millisecondsSinceEpoch ~/ perUnit) {
+            return null;
+          }
+          return DateTime.fromMillisecondsSinceEpoch(
+            value * perUnit,
+            isUtc: true,
+          );
       }
     }
     if (month < 1 || month > 12 || day < 1 || day > 31) return null;
@@ -144,7 +161,14 @@ Duration? ganttDuration(String text) {
     'd' => 24 * 60 * 60 * 1000,
     _ => 7 * 24 * 60 * 60 * 1000,
   };
-  return Duration(milliseconds: (amount * unit).round());
+  final milliseconds = amount * unit;
+  // Longer than every chart — or than a double, at Infinity — it is the
+  // whole span and a millisecond: too long, whatever it was, and with no
+  // `round()` of a number an int cannot hold.
+  final longest = ganttLatest.difference(ganttEarliest).inMilliseconds;
+  return Duration(
+    milliseconds: milliseconds > longest ? longest + 1 : milliseconds.round(),
+  );
 }
 
 /// [date] written in the strftime [format] the axis uses.
