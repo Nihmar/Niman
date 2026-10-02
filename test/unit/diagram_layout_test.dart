@@ -219,4 +219,16 @@ void main() {
       }
     }
   });
+
+  test("an edge's label into a subgraph keeps off its title", () {
+    for (final direction in ['TD', 'LR']) {
+      final layout = _layout(
+        'flowchart $direction\nA -->|a label here| B\n'
+        'subgraph S [The group title]\nB --> C\nend',
+      );
+      final label = layout.edges.first.labelBox!;
+      final title = layout.subgraphs.single.titleRect;
+      expect(label.overlaps(title), isFalse, reason: direction);
+    }
+  });
 }

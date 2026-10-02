@@ -14,6 +14,7 @@ import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/diagram_metrics.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/flow_edge_route.dart';
+import 'package:niman/src/diagrams/flow_label_clearance.dart';
 import 'package:niman/src/diagrams/flow_layers.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/flow_node_size.dart';
@@ -156,14 +157,17 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     width: maxX - minX,
     height: maxY - minY,
   );
+  final turned = [for (final sub in subgraphs) transformer.subgraph(sub)];
   return DiagramLayout(
     size: transformer.size,
     nodes: [
       for (final node in chart.nodes)
         LaidOutNode(node: node, rect: transformer.rect(rects[node.id]!)),
     ],
-    edges: [for (final edge in edges) transformer.edge(edge)],
-    subgraphs: [for (final sub in subgraphs) transformer.subgraph(sub)],
+    edges: [
+      for (final edge in edges) clearOfTitles(transformer.edge(edge), turned),
+    ],
+    subgraphs: turned,
     lines: lines,
   );
 }
