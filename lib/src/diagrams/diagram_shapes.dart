@@ -10,6 +10,9 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 
+/// The longest a straight segment of a sampled arc is, in pixels.
+const double _arcStep = 3;
+
 /// Builds the outline points of a node shape.
 abstract final class DiagramShapes {
   /// The points of [shape] fitted to [rect], sampled for a [radius] corner.
@@ -29,13 +32,13 @@ abstract final class DiagramShapes {
         return [rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft];
       case FlowNodeShape.start:
       case FlowNodeShape.end:
-        return _ellipse(cx, cy, rect.width / 2, rect.height / 2, 32);
+        return _ellipse(cx, cy, rect.width / 2, rect.height / 2);
       case FlowNodeShape.round:
         return _roundRect(rect, radius);
       case FlowNodeShape.stadium:
         return _stadium(rect);
       case FlowNodeShape.circle:
-        return _ellipse(cx, cy, rect.width / 2, rect.height / 2, 32);
+        return _ellipse(cx, cy, rect.width / 2, rect.height / 2);
       case FlowNodeShape.diamond:
         return [
           Offset(cx, rect.top),
@@ -149,13 +152,12 @@ abstract final class DiagramShapes {
     ];
   }
 
-  static List<Offset> _ellipse(
-    double cx,
-    double cy,
-    double rx,
-    double ry,
-    int steps,
-  ) {
+  static List<Offset> _ellipse(double cx, double cy, double rx, double ry) {
+    // As an arc: a segment every few pixels round.
+    final steps = (2 * math.pi * math.max(rx, ry) / _arcStep).ceil().clamp(
+      16,
+      128,
+    );
     final points = <Offset>[];
     for (var i = 0; i < steps; i++) {
       final angle = 2 * math.pi * i / steps;
@@ -172,7 +174,11 @@ abstract final class DiagramShapes {
     double start,
     double sweep,
   ) {
-    const steps = 8;
+    // A segment every few pixels of the arc's length, so a large curve —
+    // a tall card's stadium end, a wide cylinder's cap — stays round
+    // rather than turning into facets.
+    final length = sweep.abs() * math.max(rx, ry);
+    final steps = (length / _arcStep).ceil().clamp(4, 64);
     final points = <Offset>[];
     for (var i = 0; i <= steps; i++) {
       final angle = start + sweep * i / steps;
