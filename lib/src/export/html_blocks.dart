@@ -68,7 +68,11 @@ String? mermaidBlockHtml(
   if (parts == null || parts.language.toLowerCase() != 'mermaid') return null;
   final svg = diagramSvg(parts.code, style);
   if (svg == null) return null;
-  return '<div class="diagram">$svg</div>';
+  // The source rides on the box, line breaks as references so an XML
+  // reader keeps them: the drawing is not what a note holds, and an EPUB
+  // read back into Niman gets its fence again.
+  final source = escapeAttribute(parts.code).replaceAll('\n', '&#10;');
+  return '<div class="diagram" data-mermaid="$source">$svg</div>';
 }
 
 /// A math block's [text], `$$` and all, as a centred formula; its source

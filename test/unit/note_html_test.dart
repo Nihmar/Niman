@@ -193,7 +193,8 @@ void main() {
       ),
     );
     final html = note.body();
-    expect(html, contains('<div class="diagram"><svg '));
+    expect(html, contains('<div class="diagram" data-mermaid="'));
+    expect(html, contains('"><svg '));
     expect(html, contains('Start'));
     expect(html, isNot(contains('language-mermaid')));
     expect(note.usesSvg, isTrue);

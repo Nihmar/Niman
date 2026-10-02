@@ -89,6 +89,11 @@ final class XhtmlMarkdown {
         final code = element.text.replaceAll('\r\n', '\n');
         final fence = code.contains('```') ? '~~~~' : '```';
         out.add(context.wrap('$fence\n${code.trimRight()}\n$fence'));
+      case 'div' when element.attributes.containsKey('data-mermaid'):
+        // A diagram Niman exported: its fence, not its drawing (#530).
+        final source = element.attributes['data-mermaid']!.trimRight();
+        final fence = source.contains('```') ? '~~~~' : '```';
+        out.add(context.wrap('${fence}mermaid\n$source\n$fence'));
       case 'hr':
         out.add(context.wrap('---'));
       case 'table':
