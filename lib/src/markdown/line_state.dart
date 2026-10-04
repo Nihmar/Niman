@@ -90,6 +90,11 @@ final class LineState {
   /// The top-level state, where a document starts and where a scan converges.
   static const LineState initial = LineState();
 
+  /// The shared state after a plain line of paragraph text: nothing is open
+  /// but the paragraph the line goes on with. A second shared constant, for
+  /// the common line of a long note of prose, beside [initial] (#346).
+  static const LineState paragraphOpen = LineState(openParagraph: true);
+
   /// The open fence, if a fenced code block is running.
   final FenceMarker? fence;
 
@@ -132,13 +137,18 @@ final class LineState {
   /// Whether a GFM table is running.
   final bool table;
 
-  /// Whether the line before was paragraph text inside a list item.
+  /// Whether the line before was paragraph text — anywhere, not only inside
+  /// a list.
   ///
   /// A line of paragraph text written short of the innermost item's content
   /// column goes on with that paragraph lazily, and every item stays open
   /// around it; after anything else — a blank line, a fence, a heading — the
-  /// same line closes the items whose content column it does not reach. Only
-  /// set inside a list, so prose outside one keeps the shared state.
+  /// same line closes the items whose content column it does not reach. And
+  /// an indented code block cannot interrupt a paragraph, so a four-space
+  /// line after paragraph text is the paragraph's, not code's: the flag is
+  /// what [BlockScanner._opensIndentedCode] asks of the state entering the
+  /// line. Only set for paragraph text, so a heading, a fence or a blank
+  /// line keeps the shared state.
   final bool openParagraph;
 
   /// Whether the line is anywhere a block-level construct can still start —
