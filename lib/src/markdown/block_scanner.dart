@@ -753,8 +753,22 @@ final class BlockScanner {
   BlockKind _kindOf(int line) {
     final state = _entering[line];
     final text = _text(line);
-    if (state.fence != null ||
-        _fenceOpen(text, _contentColumn(text, state)) != null) {
+    if (state.fence != null) {
+      // Inside a fence: every line is code until the closing fence, except
+      // a non-blank line short of the innermost item's content column that
+      // opens a new block — a marker, a heading, a rule, a quote — which
+      // ends the item and the fence with it.
+      if (state.listIndent >= 0 &&
+          text.trim().isNotEmpty &&
+          _indentOf(text) < state.listIndent) {
+        final outside = _kindOutsideFence(line, text, state);
+        if (outside != BlockKind.paragraph && outside != BlockKind.blank) {
+          return outside;
+        }
+      }
+      return BlockKind.fencedCode;
+    }
+    if (_fenceOpen(text, _contentColumn(text, state)) != null) {
       return BlockKind.fencedCode;
     }
     if (state.math || _isDisplayLineAt(line, text, state)) {
@@ -807,6 +821,25 @@ final class BlockScanner {
     return BlockKind.paragraph;
   }
 
+  /// Classifies [line] as if no fence were open: the checks that decide
+  /// whether the line opens a block of its own, without the fence guard.
+  /// Used by [_kindOf] to detect a line that closes an item's fence.
+  BlockKind _kindOutsideFence(int line, String text, LineState state) {
+    if (text.trim().isEmpty) return BlockKind.blank;
+    if (_hr.hasMatch(text)) return BlockKind.thematicBreak;
+    if (_headingLevel(text, _contentColumn(text, state)) > 0)
+      return BlockKind.heading;
+    if (_quoteDepth(text, _contentColumn(text, state)) > 0) {
+      return BlockKind.quote;
+    }
+    final marker = _listMarker(text, _markerReach(state));
+    if (marker != null) return BlockKind.listItem;
+    if (_indentedCodeContinues(line, text, state)) {
+      return BlockKind.indentedCode;
+    }
+    return BlockKind.paragraph;
+  }
+
   /// The state after line [line], given the state entering it.
   LineState _exitOf(int line) {
     final state = _entering[line];
@@ -815,6 +848,16 @@ final class BlockScanner {
     // is in, and leaves them open when it ends: dropping them made the item
     // after a fence a list of its own, one level up.
     if (state.fence != null) {
+      // A non-blank line short of the innermost item's content column that
+      // opens a new block ends the item and the fence with it.
+      if (state.listIndent >= 0 &&
+          text.trim().isNotEmpty &&
+          _indentOf(text) < state.listIndent) {
+        final outside = _kindOutsideFence(line, text, state);
+        if (outside != BlockKind.paragraph && outside != BlockKind.blank) {
+          return LineState.initial;
+        }
+      }
       return _isFenceClose(text, state.fence!, state.listIndent)
           ? _inItems(state.listStack)
           : state;
@@ -1379,8 +1422,10 @@ final class BlockScanner {
   bool _opensIndentedCode(int line, String text) {
     final state = _entering[line];
     if (text.trim().isEmpty) return false;
-    if (text.length - text.trimLeft().length < 4) return false;
-    if (state.listIndent >= 0) return false;
+    // Four spaces in from the item's content column, as the block opened:
+    // absolute at top level, relative inside a list.
+    final indent = text.length - text.trimLeft().length;
+    if (indent < _contentColumn(text, state) + 4) return false;
     // An indented code block cannot interrupt a paragraph: a four-space line
     // after paragraph text is the paragraph's, not code's. It may open at the
     // start of a note, or after a heading, a rule or a fence — anything that
@@ -1392,7 +1437,8 @@ final class BlockScanner {
   bool _indentedCodeContinues(int line, String text, LineState state) {
     if (!state.indentedCode) return _opensIndentedCode(line, text);
     if (text.trim().isEmpty) return true;
-    return text.length - text.trimLeft().length >= 4;
+    // Four spaces in from the item's content column, as the block opened.
+    return _indentOf(text) >= _contentColumn(text, state) + 4;
   }
 
   static bool _isSpace(int char) => char == 0x20 || char == 0x09;
