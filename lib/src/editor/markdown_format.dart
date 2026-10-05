@@ -161,7 +161,11 @@ List<({_Unit kind, List<String> lines})> _units(String source) {
     if (block.kind == BlockKind.blank) continue;
     if (block.kind == BlockKind.listItem) {
       final lines = linesOf(block);
-      // The list goes on over blank lines as long as another item follows.
+      // The list goes on over blank lines as long as another item follows —
+      // or a block inside one of its items: a paragraph after a blank line,
+      // a fence, the code an item's marker opened. Cut out as a unit of its
+      // own, such a block was set apart by blank lines, and blank lines in
+      // an item's code are code.
       while (at + 1 < blocks.length) {
         var next = at + 1;
         final gap = <String>[];
@@ -169,7 +173,9 @@ List<({_Unit kind, List<String> lines})> _units(String source) {
           gap.addAll(linesOf(blocks[next]));
           next++;
         }
-        if (next >= blocks.length || blocks[next].kind != BlockKind.listItem) {
+        if (next >= blocks.length ||
+            (blocks[next].kind != BlockKind.listItem &&
+                blocks[next].listDepth < 0)) {
           break;
         }
         lines

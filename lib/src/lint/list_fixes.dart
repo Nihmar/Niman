@@ -107,13 +107,31 @@ bool _startsCode(String gap, {required int from}) {
 }
 
 /// Whether the blank line at [at] sits between two items: the next line
-/// that is not blank is another item's marker.
+/// that is not blank is another item's marker — and the item before it
+/// holds no blank line of its own.
+///
+/// An item that does — a second paragraph, code under its text — is
+/// written loose, and the blank line after it is that item's as much as
+/// the one inside it: taking it away rewrote the item's spacing.
 bool _blankJoinsItem(List<String> lines, int at) {
+  var item = false;
   for (var next = at + 1; next < lines.length; next++) {
     if (lines[next].trim().isEmpty) continue;
-    return listMarker.hasMatch(lines[next]);
+    item = listMarker.hasMatch(lines[next]);
+    break;
   }
-  return false;
+  if (!item) return false;
+  // Past the blank lines of the same gap, back through the item.
+  var back = at - 1;
+  while (back >= 0 && lines[back].trim().isEmpty) {
+    back--;
+  }
+  for (; back >= 0; back--) {
+    final line = lines[back];
+    if (listMarker.hasMatch(line)) return true;
+    if (line.trim().isEmpty) return false;
+  }
+  return true;
 }
 
 /// [lines] with their task boxes written canonically — `[x]` for a ticked
