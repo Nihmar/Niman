@@ -154,4 +154,44 @@ Phase 1 in progress.
   1-4, and on seed 5 the one table the read view's pipeline misses too.
   The gate holds both readings at 0 over 2 000 documents.
 
-Next: link reference and footnote definitions as blocks.
+Next: link reference and footnote definitions as blocks — a footnote
+definition as a **container in the scanner** (decided 2026-10-05).
+
+### Footnote and link reference definitions: what is known
+
+Read from `package:markdown` 7.3.1's sources; not yet confirmed by
+running examples (the survey was stopped before its empirical checks).
+
+- **GFM adds** `FencedCodeBlockSyntax`, `TableSyntax`, the two checkbox
+  list syntaxes and `FootnoteDefSyntax` (`extension_set.dart`), tried
+  **before** the standard syntaxes (`block_parser.dart:80-83`).
+- **A footnote definition** opens on `footnotePattern`:
+  `^[ ]{0,3}\[\^([^\] \r\n\x00\t]+)\]:[ \t]*` — up to three spaces, a
+  label without spaces or tabs. It does not override `canEndBlock`
+  (default `true`), so it **interrupts a paragraph**.
+- **It is a container.** `FootnoteDefSyntax.parseChildLines` takes the
+  rest of its first line, then: a blank line (and remembers it); a line
+  starting with four literal spaces, those four taken off (a tab is not
+  four spaces here); after a blank line, any other line ends it;
+  otherwise a line on which any block syntax's pattern matches ends it,
+  and any other line is taken as it stands (lazily). The lines are parsed
+  again as blocks (`BlockParser(lines, document).parseLines()`), so a
+  footnote holds paragraphs, lists, code.
+- **Where it goes**: `Document.parseLines` ends with `_filterFootnotes`,
+  which takes the definitions out of the top-level nodes, keeps those
+  whose label is referenced, sorts them by first reference and appends
+  them as `section.footnotes > ol > li`. Only top-level nodes are
+  filtered — whether a definition inside a list or a quote stays in place
+  is to be checked.
+- **A link reference definition** (`LinkReferenceDefinitionSyntax`,
+  pattern `^[ ]{0,3}\[`) has `canEndBlock` false: it **cannot interrupt
+  a paragraph**. Its multi-line forms and what happens when it is invalid
+  partway are to be checked.
+
+To do, in order: confirm the above by running examples (the harness's
+reference side has to place a footnote's words — `li` inside the
+section must not count as an item); the scanner's container (a field of
+its own in `LineState`, or `OpenItem` with an indent of four and a flag
+— every user of `listStack` / `listDepth` decides which); the consumers
+that find definitions by line today (`DocumentScope`, `footnote_list`,
+`source_styler`, `note_html`).
