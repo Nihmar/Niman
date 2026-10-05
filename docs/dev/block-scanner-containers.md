@@ -110,14 +110,18 @@ numbers real, and five things that keep it off `main`, each measured:
    100 000 lines: 86 ms before the branch, 188 ms on it (two runs each).
    `_listAfter` classifies the line again (`_kindOf(line)`) that its caller
    has just classified.
-5. **Decisions read more than the state.** `_listAfter` and
-   `_fenceClosesItem` read `_text(line - 1)`, and `_listAfter` asks
-   `_kindOf(line)` — the state the line *entered* in — even when its caller
-   passed another (`_exitOfFrom(line, LineState.initial)`). The rescan
-   relies on "same state + same text = same blocks"; a decision that reads
-   anything else breaks it. The marker-interrupts rule is written twice
-   (`_kindOf`, `_listAfter`), and `_kindOutsideFence` is a partial copy of
-   `_kindOf` that does not know fences.
+5. **Structure.** The marker-interrupts rule is written twice (`_kindOf`,
+   `_listAfter`), and `_kindOutsideFence` is a partial copy of `_kindOf`
+   that does not know fences. `_listAfter` asks `_kindOf(line)` — the
+   state the line *entered* in — even when its caller passed another
+   (`_exitOfFrom(line, LineState.initial)`).
+
+   The review also took `_listAfter` and `_fenceClosesItem` reading
+   `_text(line - 1)` for a break of the rescan's "same state + same text =
+   same blocks". It is not one: the rescan is built for one line of
+   lookback (`settledFrom` never converges on the line after the edit), and
+   "the rescan reads one line back, and keeps what that line decides"
+   (`block_scanner_test.dart`) now pins it. Two lines back would break it.
 
 Also: `block_scanner.dart` went from 1 354 lines to 1 763, and
 `task_cascade_test.dart` records a user-visible change (`> - [ ] b` /
@@ -129,19 +133,29 @@ changelog.
 Each phase is gated: the unit suite, the harness count (it must not rise),
 and, from phase 1 on, the rescan test unskipped.
 
-1. **The blockers, on the current code** — independent of the rewrite.
-   - *Rescan:* `_reopened`, `_headed` and `_convergesAt` learn that a
-     setext heading can be an item's first paragraph, and keep its ordinal.
-     Unskip "a rescan that stops short"; search again for the smallest
-     failing edit sequence in case another class hides behind this one.
-   - *Indented ATX headings:* one rule in the three readers (the scanner,
-     `HighlightDocument.forEachHeading`, the styler). `headingLevelOf`
-     answers where the `#`s start as well as how many; `source_styler` and
-     `outlineOfBlocks` read from there. Gate: `word_count_index_test`.
-   - *State and speed together:* the line's kind is decided once and handed
-     to `_listAfter`; whether the line before was blank lives in
-     `LineState` instead of being read back; the interrupt rule is one
-     function. Gate: the 100 000-line list back near 86 ms.
+1. **The blockers, on the current code** — done.
+   - *Rescan* (`79dcb128`): a cut setext heading is read again from its
+     first line, so an item that loses its underline is an item again;
+     convergence takes a setext heading from an open item. "A rescan that
+     stops short" runs again, and a search of 240 000 random edit sequences
+     (items, nested items, quotes in items, fences, tables, HTML) found no
+     other class.
+   - *Indented ATX headings* (`96bdbbc1`): `BlockScanner.headingMarkerOf`
+     answers where the `#`s start and how many; the styler and the block
+     outline read from there, and the tokenizer takes up to three spaces.
+     `word_count_index_test` is green.
+   - *Speed* (`c2dc98c9`): the line on the scan is classified once, the
+     rule expression runs only on a line that could be a rule, and a run
+     of lines in one construct shares one state. The 100 000-line list:
+     188 → 132 ms, against 86 before the rework. The rest is the lazy run
+     the fixture is made of (an item, then 60 000 lines without a blank):
+     it used to close the item on its first lazy line and go on as plain
+     prose, and now keeps the item open, as CommonMark does. Per 100 000
+     lines, before the rework → now: prose 54 → 45 ms, items 145 → 164,
+     nested items 199 → 232, a lazy run 24 → 64.
+   - *One interrupt rule* (`485f03dd`): one function, read by both places;
+     two of its five conditions were dead. Harness unchanged at 309 / 138
+     through all of phase 1.
 2. **Split the file, no behaviour change.** The pure line readers (marker,
    heading, fence, HTML, quote, rule, setext) to `line_syntax.dart`; the
    scan and the rescan stay; the builder to its own file. Gate: harness at
