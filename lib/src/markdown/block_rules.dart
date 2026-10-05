@@ -4,9 +4,10 @@
 library;
 
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/line_read.dart';
 import 'package:niman/src/markdown/line_rules.dart';
+import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
-import 'package:niman/src/markdown/table_line_syntax.dart';
 
 /// The blocks the scan makes of the lines [LineRules] reads.
 final class BlockRules {
@@ -79,10 +80,7 @@ final class BlockRules {
         if (read.walk.quote != null) {
           return LineSyntax.quoteDepth(read.text) == 0;
         }
-        return (read.kind == BlockKind.paragraph &&
-                read.carried &&
-                entering.openParagraph) ||
-            underlineLevel(open, end) > 0;
+        return _continues(read, entering) || underlineLevel(open, end) > 0;
       case BlockKind.paragraph:
         // Paragraph text goes on with the paragraph — an item's block is its
         // first one — indented into it or lazily, which keeps a wrapped item
@@ -91,10 +89,7 @@ final class BlockRules {
         // that opens a block of its own — a marker, a heading, a rule, a
         // fence, a quote — does not: taking any line without a marker
         // swallowed `# Heading` under a list into the item's text.
-        return (read.kind == BlockKind.paragraph &&
-                read.carried &&
-                entering.openParagraph) ||
-            underlineLevel(open, end) > 0;
+        return _continues(read, entering) || underlineLevel(open, end) > 0;
       case BlockKind.quote:
         // The quote's line, by its `>` or lazily.
         return read.walk.quote != null;
@@ -126,6 +121,19 @@ final class BlockRules {
     }
   }
 
+  /// Whether [read], a line entered in [entering], goes on with the
+  /// paragraph open before it: paragraph text read with that paragraph
+  /// still open — not over a table's delimiter row, a head the parser tries
+  /// first, which ends the paragraph whether or not its cells fit.
+  static bool _continues(LineRead read, LineState entering) {
+    if (read.kind != BlockKind.paragraph ||
+        !read.carried ||
+        !entering.openParagraph) {
+      return false;
+    }
+    return !read.heads;
+  }
+
   /// The level of the setext heading [line] makes of [paragraph], the
   /// paragraph the scan has open, when it is its underline — or 0.
   ///
@@ -143,8 +151,7 @@ final class BlockRules {
     if (!read.carried || !_lines.entering(line).openParagraph) return 0;
     // A table's head is tried first: a line over a delimiter row ends the
     // paragraph, whether or not it is a table.
-    final next = read.walk.next;
-    if (next != null && TableLineSyntax.isDelimiter(next)) return 0;
+    if (read.heads) return 0;
     return LineSyntax.setextLevel(read.text);
   }
 

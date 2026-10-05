@@ -17,6 +17,7 @@ final class LineRead {
     required this.quoteDepth,
     required this.carried,
     required this.exit,
+    this.heads = false,
   });
 
   /// What the line is.
@@ -41,6 +42,12 @@ final class LineRead {
 
   /// The state after the line.
   final LineState exit;
+
+  /// Whether the line is a table's head to the parser: the next line is a
+  /// delimiter row in its container. It ends a paragraph the line would
+  /// have gone on with, and is no setext underline, whether or not its
+  /// cells fit the table.
+  final bool heads;
 
   /// The line as its innermost item reads it ([ContainerWalk.text]), its
   /// leading tabs four columns each, as the parser's patterns count them.

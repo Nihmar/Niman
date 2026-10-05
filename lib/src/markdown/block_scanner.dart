@@ -28,6 +28,7 @@ import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
+import 'package:niman/src/markdown/table_line_syntax.dart';
 
 /// Reads a note's lines into blocks, and keeps up with edits.
 final class BlockScanner {
@@ -261,14 +262,28 @@ final class BlockScanner {
     // ([BlockList.shiftFrom]): everything below reads them where they are.
     _blocks.shiftFrom(tailStart, edit.lineDelta);
     var start = edit.firstLine;
-    // The line before the edit reads the edited line when it asks whether
-    // it heads a table (the delimiter row is the line under it) — any line
-    // may, pipes or not — so it is not the line it was: the rebuild starts
-    // a line back, and takes the block it is in open, cut there, as at any
-    // line. A setext underline asks nothing of the lines above it — it turns
-    // the paragraph the rebuild has open into a heading when it reaches it —
-    // so neither one typed nor one taken away sends the rebuild further.
-    if (start > 0 && start - 1 < buffer.lineCount) start--;
+    // The lines before the edit read it: a line heads a table — any line
+    // may, pipes or not — when the line under it is a delimiter row that
+    // stays in its container, which the line under that decides; and a
+    // setext underline heads its paragraph only over no delimiter row. So
+    // the rebuild starts a line back — two when that line is a delimiter
+    // row, which the line above it may head — and takes the block it lands
+    // in open, cut there, as at any line. It stops at a blank line, which
+    // reads nothing after it: a block after a blank line is not read again
+    // for an edit on its first line.
+    for (
+      var back = 0;
+      back < 2 &&
+          start > 0 &&
+          start - 1 < buffer.lineCount &&
+          _rules.lineText(start - 1).trim().isNotEmpty;
+      back++
+    ) {
+      start--;
+      if (!TableLineSyntax.isDelimiter(_rules.lineText(start).trimLeft())) {
+        break;
+      }
+    }
     // An edit at or past a frontier lands on lines that are not current: the
     // rebuild starts where they begin.
     if (_frontiers.isNotEmpty && _frontiers.first < start) {
@@ -506,7 +521,9 @@ final class BlockScanner {
           (old.kind == BlockKind.heading ||
               (old.kind == BlockKind.listItem && old.headingLevel > 0)) &&
           open.quoteDepth == old.quoteDepth &&
-          open.listDepth == old.listDepth;
+          open.listDepth == old.listDepth &&
+          // An item's number counts the items after it on.
+          open.listOrdinal == old.listOrdinal;
       if (!setext) return -1;
       builder.headOpen(old.headingLevel);
     }

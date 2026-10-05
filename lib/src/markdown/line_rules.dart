@@ -130,6 +130,14 @@ final class LineRules {
     // tab is four columns to the parser's patterns.
     final text = LineSyntax.expandIndent(content ?? walk.text);
     final base = within ?? walk.items;
+    // A table's head: the next line is a delimiter row in the same
+    // container. The parser looks for it among that container's lines only;
+    // one that ends the container is no row of this line's.
+    final heads =
+        LineSyntax.indentOf(text) < text.length &&
+        next != null &&
+        TableLineSyntax.isDelimiter(next) &&
+        _stays(line + 1, base);
     LineRead made(
       BlockKind kind, {
       List<OpenItem>? items,
@@ -159,6 +167,7 @@ final class LineRules {
       indentedCode: indentedCode,
       table: table,
       openParagraph: openParagraph,
+      heads: heads,
     );
 
     // Inside a block that runs to an end marker, every line is the block's.
@@ -210,7 +219,6 @@ final class LineRules {
     // head, tried before anything but a fence — and before a paragraph goes
     // on: it ends the paragraph even when its cells do not fit the
     // delimiter's columns, and is then read as if nothing were open.
-    final heads = !blank && next != null && TableLineSyntax.isDelimiter(next);
     if (open.table && !blank && !_endsTableRow(text, next, base.isNotEmpty)) {
       return made(BlockKind.table, table: true);
     }
@@ -322,6 +330,18 @@ final class LineRules {
     return made(BlockKind.paragraph, openParagraph: !underline);
   }
 
+  /// Whether line [line] stays in [items], the items of the line before it:
+  /// it does not end any of them.
+  bool _stays(int line, List<OpenItem> items) {
+    if (items.isEmpty) return true;
+    if (line >= buffer.lineCount) return false;
+    return !ContainerWalk.of(
+      LineState(listStack: items),
+      lineText(line),
+      line + 1 < buffer.lineCount ? lineText(line + 1) : null,
+    ).closed;
+  }
+
   /// Whether [text], following a table's rows, ends the table: a line that
   /// would start a block of its own — another table's head, a fence, an HTML
   /// block (all but a lone tag), a heading, a quote, a rule, or a marker
@@ -359,6 +379,7 @@ final class LineRules {
     bool indentedCode = false,
     bool table = false,
     bool openParagraph = false,
+    bool heads = false,
   }) {
     final stack = items ?? walk.items;
     return LineRead(
@@ -367,6 +388,7 @@ final class LineRules {
       items: stack,
       quoteDepth: quoteDepth,
       carried: carried,
+      heads: heads,
       exit: _exit(
         state,
         stack,
