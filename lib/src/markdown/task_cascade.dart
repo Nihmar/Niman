@@ -87,7 +87,11 @@ List<Block> checklistBranch({
       buffer
           .lineAt(at)
           .substring(
-            BlockParser.quotePrefixLength(buffer.lineAt(at), quote.quoteDepth),
+            BlockParser.quotePrefixLength(
+              buffer.lineAt(at),
+              quote.quoteDepth,
+              BlockParser.itemColumnOf(quote),
+            ),
           ),
   ].join('\n');
   final inner = SourceBuffer.fromText(content);

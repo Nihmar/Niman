@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
@@ -79,6 +80,7 @@ final class LineShape {
   /// Creates a shape.
   const new({
     this.quoteDepth = 0,
+    this.quoteIndent = 0,
     this.marker,
     this.listDepth = 0,
     this.continued = false,
@@ -171,6 +173,7 @@ final class LineShape {
     }
     return LineShape(
       quoteDepth: quoteDepth,
+      quoteIndent: block == null ? 0 : BlockParser.itemColumnOf(block),
       marker: marker,
       // A line the scan has not reached yet is at the top level.
       listDepth: marker == null && !continued
@@ -194,6 +197,11 @@ final class LineShape {
 
   /// How many quote levels the line is in.
   final int quoteDepth;
+
+  /// How far in the line's quote marks are counted from: the content column
+  /// of the list item its block stands in ([BlockParser.itemColumnOf]), 0
+  /// outside a list.
+  final int quoteIndent;
 
   /// Where the line's list marker starts, when it opens a list item.
   final int? marker;
@@ -250,6 +258,7 @@ final class LineShape {
   bool operator ==(Object other) =>
       other is LineShape &&
       other.quoteDepth == quoteDepth &&
+      other.quoteIndent == quoteIndent &&
       other.marker == marker &&
       other.listDepth == listDepth &&
       other.continued == continued &&
@@ -266,6 +275,7 @@ final class LineShape {
   @override
   int get hashCode => Object.hash(
     quoteDepth,
+    quoteIndent,
     marker,
     listDepth,
     continued,

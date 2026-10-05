@@ -461,7 +461,11 @@ final class SourceStyler {
       case BlockKind.table:
         break;
     }
-    final prefix = BlockParser.quotePrefixLength(text, block.quoteDepth);
+    final prefix = BlockParser.quotePrefixLength(
+      text,
+      block.quoteDepth,
+      BlockParser.itemColumnOf(block),
+    );
     final structural = _structure(block, line, text, prefix, tokens);
     final parsed = _parsedOf(block);
     if (parsed != null) {

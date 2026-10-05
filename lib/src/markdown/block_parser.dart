@@ -235,9 +235,15 @@ final class BlockParser {
   /// [raw], the text of [block], as the parse reads it: each line without
   /// what [linePrefixLength] says the parse takes off it.
   static String contentText(Block block, String raw) {
-    if (block.quoteDepth <= 0 && block.kind != BlockKind.listItem) return raw;
+    final itemColumn = itemColumnOf(block);
+    if (block.quoteDepth <= 0 &&
+        block.kind != BlockKind.listItem &&
+        itemColumn == 0) {
+      return raw;
+    }
     final lines = raw.split('\n');
     if (block.quoteDepth <= 0 &&
+        itemColumn == 0 &&
         lines.length == 1 &&
         listIndentOf(block, lines.first) == 0) {
       return raw;
@@ -284,7 +290,11 @@ final class BlockParser {
   /// marks, and up to [listStrip] spaces after them ([listStripOf]). A
   /// reader puts the parse's offsets back on the line by adding this.
   static int linePrefixLength(Block block, String line, int listStrip) {
-    final quote = quotePrefixLength(line, block.quoteDepth);
+    final quote = quotePrefixLength(
+      line,
+      block.quoteDepth,
+      itemColumnOf(block),
+    );
     var at = quote;
     while (at - quote < listStrip &&
         at < line.length &&
@@ -298,8 +308,19 @@ final class BlockParser {
   /// to three spaces before it and the one after — as far as the line has
   /// them: what the parse takes off a quote's lines, so a reader can put the
   /// parse's offsets back on the line.
-  static int quotePrefixLength(String line, int depth) {
+  ///
+  /// Counted past [itemColumn] spaces first: a block in a list item stands
+  /// at the item's content column ([itemColumnOf]), and its quote marks are
+  /// three spaces in from *there*. Counted from the margin, `- a` /
+  /// `    > b` — a quote in the item — kept its `>`, and its inside was read
+  /// as indented code.
+  static int quotePrefixLength(String line, int depth, [int itemColumn = 0]) {
     var from = 0;
+    while (from < itemColumn &&
+        from < line.length &&
+        line.codeUnitAt(from) == 0x20) {
+      from++;
+    }
     for (var level = 0; level < depth; level++) {
       var at = from;
       while (at < line.length && at - from < 3 && line.codeUnitAt(at) == 0x20) {
@@ -311,6 +332,22 @@ final class BlockParser {
       from = at;
     }
     return from;
+  }
+
+  /// The content column of the list item [block] stands in, from the state
+  /// entering it: how far in its lines stand before anything of their own,
+  /// which the parse — given the block alone — must not read as indent. A
+  /// paragraph four spaces into `- a` / `  - b` is the second item's text,
+  /// and four spaces of it were an indented code block to the parse.
+  ///
+  /// 0 for a block in no item; for an item's own block, whose marker says
+  /// where its text starts ([listStripOf]); and for a block the scanner did
+  /// not make, which carries no state.
+  static int itemColumnOf(Block block) {
+    if (block.listDepth < 0 || block.kind == BlockKind.listItem) return 0;
+    final items = block.entering?.listStack;
+    if (items == null || items.length <= block.listDepth) return 0;
+    return items[block.listDepth].content;
   }
 
   /// The block's own text, its lines joined with `\n`.
