@@ -661,16 +661,25 @@ final class BlockScanner {
     // has no depth before its own `>`, so taking the entering state left
     // every quote block at depth 0 — which made the renderer draw it as an
     // unnested quote and the parser read the `>` as text.
-    final quoteDepth = _quoteClosesToCode(text, _entering[line])
+    final entering = _entering[line];
+    // A line that ends an item's fence (opens a block short of the content
+    // column) is not in the item: the state it enters carries the item the
+    // fence was in, but the fence closes it here, so depth and items start
+    // from nothing (`* w` / `  ``` ` / `* w` / `  * w` has the second item at
+    // 0 and its sublist at 1, not both at 0).
+    final base = _fenceClosesItem(line, text, entering)
+        ? LineState.initial
+        : entering;
+    final quoteDepth = _quoteClosesToCode(text, base)
         ? 0
-        : _quoteDepthAfter(line, text, _entering[line]);
+        : _quoteDepthAfter(line, text, base);
     // The depth *on* the line, like the quote's: the state entering a marker
     // line describes the item before it, so a block that took its depth from
     // there was drawn at the previous item's indent — siblings at different
     // indents, the item after a sublist pushed right (device report,
     // 2026-09-21).
-    final quoteItems = _quoteItems(text, _entering[line]);
-    final listStack = quoteItems ?? _listAfter(line, text, _entering[line]);
+    final quoteItems = _quoteItems(text, base);
+    final listStack = quoteItems ?? _listAfter(line, text, base);
     final listDepth = listStack.isEmpty ? -1 : listStack.length - 1;
     return Block(
       kind: kind,
@@ -760,17 +769,13 @@ final class BlockScanner {
     final state = _entering[line];
     final text = _text(line);
     if (state.fence != null) {
-      // Inside a fence: every line is code until the closing fence, except
-      // a non-blank line short of the innermost item's content column that
-      // opens a new block — a marker, a heading, a rule, a quote — which
-      // ends the item and the fence with it.
-      if (state.listIndent >= 0 &&
-          text.trim().isNotEmpty &&
-          _indentOf(text) < state.listIndent) {
-        final outside = _kindOutsideFence(line, text, state);
-        if (outside != BlockKind.paragraph && outside != BlockKind.blank) {
-          return outside;
-        }
+      // Inside a fence: every line is code until the closing fence, except a
+      // line that ends the item and the fence with it ([_fenceClosesItem]) —
+      // a non-blank line short of the content column that opens a new block,
+      // or any such line after a blank one. Such a line is read as if no
+      // fence were open.
+      if (_fenceClosesItem(line, text, state)) {
+        return _kindOutsideFence(line, text, state);
       }
       return BlockKind.fencedCode;
     }
@@ -868,23 +873,43 @@ final class BlockScanner {
     return BlockKind.paragraph;
   }
 
+  /// Whether [text] ends the item a running fence is in: a non-blank line
+  /// short of the innermost item's content column that opens a new block,
+  /// or any such line after a blank one. [BlockScanner._kindOf] decides the
+  /// same thing for the line's kind; this is what [_blockStarting] and
+  /// [_exitOf] ask to drop the item with the fence.
+  bool _fenceClosesItem(int line, String text, LineState state) {
+    if (state.fence == null ||
+        state.listIndent < 0 ||
+        text.trim().isEmpty ||
+        _indentOf(text) >= state.listIndent) {
+      return false;
+    }
+    final outside = _kindOutsideFence(line, text, state);
+    if (outside != BlockKind.paragraph && outside != BlockKind.blank) {
+      return true;
+    }
+    return line > 0 && _text(line - 1).trim().isEmpty;
+  }
+
   /// The state after line [line], given the state entering it.
-  LineState _exitOf(int line) {
-    final state = _entering[line];
+  LineState _exitOf(int line) => _exitOfFrom(line, _entering[line]);
+
+  /// The state after [line], entered in [state]. When a fence it is in ends
+  /// the item on this line, the caller passes [LineState.initial] so the line
+  /// opens (or is) what it reads as outside the item, not nothing.
+  LineState _exitOfFrom(int line, LineState state) {
     final text = _text(line);
     // A fence, a formula or an HTML block in a list item keeps the items it
     // is in, and leaves them open when it ends: dropping them made the item
     // after a fence a list of its own, one level up.
     if (state.fence != null) {
       // A non-blank line short of the innermost item's content column that
-      // opens a new block ends the item and the fence with it.
-      if (state.listIndent >= 0 &&
-          text.trim().isNotEmpty &&
-          _indentOf(text) < state.listIndent) {
-        final outside = _kindOutsideFence(line, text, state);
-        if (outside != BlockKind.paragraph && outside != BlockKind.blank) {
-          return LineState.initial;
-        }
+      // opens a new block ends the item and the fence with it; after a blank
+      // line, even plain text does. The line is then read as if no fence were
+      // open, so the item it opens (or the text it is) is the state after it.
+      if (_fenceClosesItem(line, text, state)) {
+        return _exitOfFrom(line, LineState.initial);
       }
       return _isFenceClose(text, state.fence!, state.listIndent)
           ? _inItems(state.listStack)
