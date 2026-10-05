@@ -223,6 +223,24 @@ Each partial change fixes the shape it aimed at and moves others by the
 hundreds, which is what makes this a rewrite: the four numbers above are
 the same lesson four times.
 
+A fifth attempt, this session, went further: it made `_listMarker`
+measure past the quotes, `_contentColumn` read the content position past
+them, `_quoteDepthAfter` sum a nested `>` past an item's content,
+`_quoteOuterItems` give a quote block the items outside it, and added a
+`quoteIndent` for the indented-code boundary. It **passed fourteen of
+the fifteen cases** (all but the quote-at-the-margin one) and still sat
+at 4 476 of 40 000 differing / 577 minimal, against 309/138 before it —
+145 of the new repros are `quoted → code` shapes like `1. w` /
+`   ``` ` / `  > w`, where an item and a quote interleave.
+
+The reason is the one the four numbers already carry: `_listMarker`
+returned absolute columns, `_contentColumn` compared a position past the
+quotes, and every other reader sat between the two. A rewrite that
+measures once, in the walk, removes the gap; patching the three readers
+keeps it and moves the errors around. The fifteen cases are a good
+checkpoint for that rewrite — they are green in the fifth attempt — but
+the harness count is the gate, and it did not fall.
+
 The fifteen cases are in `block_scanner_test.dart`'s "the indentation
 model" group: eight run, seven are `skip: pending` with this document's
 name. The rewrite unskips them.
