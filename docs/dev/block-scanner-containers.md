@@ -84,6 +84,90 @@ item below.
 7. **Empty item followed by a blank line** — covered by the container rules
    above.
 
+## Review (2026-10-05): what blocks the merge
+
+A review of the branch at `2786f53b` found the method sound and the
+numbers real, and five things that keep it off `main`, each measured:
+
+1. **A unit test is red.** `word_count_index_test.dart`, "a scan of a note
+   reads the same headings the text does": cause 2 makes the scanner read
+   `   # x` as a heading, and the text outline (`outlineOfText`, the
+   tokenizer's `forEachHeading`) does not.
+2. **`headingLevelOf` changed its contract.** It now skips up to three
+   spaces but still returns only the `#` count, and its callers take that
+   count as an offset from the line start: `source_styler.dart` marks the
+   spaces as the heading marker on `  ## x`, and `outlineOfBlocks` cuts the
+   heading's text at the wrong place.
+3. **The rescan test was skipped on a wrong diagnosis.** The smallest
+   failing case is `- item` / `  ---`, with the second line then replaced
+   by an empty one: the rescan answers `paragraph`, a fresh scan
+   `listItem`. Cause 4 lets a setext underline head an item's text, and the
+   builder follows it, but the three rescan helpers do not: `_reopened`
+   turns any cut heading back into a `paragraph`, `_headed` drops the
+   item's ordinal, and `_convergesAt` takes a setext heading only from an
+   open `paragraph`. `openParagraph` has nothing to do with it.
+4. **A list scans twice as slowly.** `test/perf/list_count_check_test.dart`,
+   100 000 lines: 86 ms before the branch, 188 ms on it (two runs each).
+   `_listAfter` classifies the line again (`_kindOf(line)`) that its caller
+   has just classified.
+5. **Decisions read more than the state.** `_listAfter` and
+   `_fenceClosesItem` read `_text(line - 1)`, and `_listAfter` asks
+   `_kindOf(line)` — the state the line *entered* in — even when its caller
+   passed another (`_exitOfFrom(line, LineState.initial)`). The rescan
+   relies on "same state + same text = same blocks"; a decision that reads
+   anything else breaks it. The marker-interrupts rule is written twice
+   (`_kindOf`, `_listAfter`), and `_kindOutsideFence` is a partial copy of
+   `_kindOf` that does not know fences.
+
+Also: `block_scanner.dart` went from 1 354 lines to 1 763, and
+`task_cascade_test.dart` records a user-visible change (`> - [ ] b` /
+`  - [ ] child` no longer ticks the child with `b`) that belongs in the
+changelog.
+
+## Plan
+
+Each phase is gated: the unit suite, the harness count (it must not rise),
+and, from phase 1 on, the rescan test unskipped.
+
+1. **The blockers, on the current code** — independent of the rewrite.
+   - *Rescan:* `_reopened`, `_headed` and `_convergesAt` learn that a
+     setext heading can be an item's first paragraph, and keep its ordinal.
+     Unskip "a rescan that stops short"; search again for the smallest
+     failing edit sequence in case another class hides behind this one.
+   - *Indented ATX headings:* one rule in the three readers (the scanner,
+     `HighlightDocument.forEachHeading`, the styler). `headingLevelOf`
+     answers where the `#`s start as well as how many; `source_styler` and
+     `outlineOfBlocks` read from there. Gate: `word_count_index_test`.
+   - *State and speed together:* the line's kind is decided once and handed
+     to `_listAfter`; whether the line before was blank lives in
+     `LineState` instead of being read back; the interrupt rule is one
+     function. Gate: the 100 000-line list back near 86 ms.
+2. **Split the file, no behaviour change.** The pure line readers (marker,
+   heading, fence, HTML, quote, rule, setext) to `line_syntax.dart`; the
+   scan and the rescan stay; the builder to its own file. Gate: harness at
+   exactly the count it had, suite unchanged.
+3. **The indentation model** (`docs/dev/block-scanner-indent-model.md`),
+   with one change to its design: not `quoteDepth` and `listStack` side by
+   side plus quote columns — that cannot hold an item in a quote in an item
+   — but **one ordered stack of containers** (quote or item), each column
+   kept *relative to its parent's content*. One walk consumes the open
+   containers, then opens new ones, as CommonMark's algorithm does;
+   `listStack`, `quoteDepth` and `listIndent` become getters derived from
+   the stack, so their readers do not change. Gates: the fifteen pinned
+   cases, the harness falling at every step (a step that raises it is
+   reverted whole), the rescan test, the perf file.
+4. **The harness becomes a gate.** A short run (≈2 000 documents) in the
+   default suite that fails, with an explicit list of `package:markdown`
+   quirks it tolerates; the 40 000 stay behind `NIMAN_SCANNER_DIFF`. New
+   forms: tabs, `+`, `10.`, `===`, `$$`, HTML, tables. And an incremental
+   variant — edit sequences against a fresh scan, shrunk the same way — which
+   is what found item 3 above in seconds.
+5. **Downstream and merge.** `BlockParser.contentText` strips the item's
+   content column from every block in a list (below); restore the tests the
+   #530 work avoided, which live on that branch — so #530 lands first and
+   this branch is rebased on `main` after it; the changelog notes the task
+   cascade change.
+
 ## Still open
 
 - **The remaining repros need the indentation model**, not another fix to
@@ -92,13 +176,6 @@ item below.
   incremental attempts to move the indent reading regressed the harness by
   thousands, so it is a rewrite of `_contentColumn`/`_indentOf`/`_listMarker`
   together, not a patch.
-- **The incremental rescan keeps a stale hint across a blank line** once
-  `openParagraph` can turn a hint paragraph into an item. The fresh scan is
-  correct; `blockAt` on a stopped-short rescan can still answer the old
-  block. `block_scanner_test.dart`, "a rescan that stops short answers every
-  line as a fresh scan would" is skipped with this reason, to be fixed with
-  `openParagraph`-aware convergence (an `_isBlockBoundary`/`_convergesAt`
-  check on the block the boundary line opens).
 - **About 309 of 40 000 documents still differ** (138 minimal). All of them
   want containers measured as CommonMark does, from the line's own indent
   rather than from column 0, and the two pieces of that are one refactor:

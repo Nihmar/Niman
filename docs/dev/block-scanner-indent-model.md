@@ -195,9 +195,9 @@ The red classes, in the harness's own counts: 1 and 4 are the
    `NIMAN_SCANNER_DIFF=1 flutter test
    test/unit/block_scanner_commonmark_test.dart`; the minimal count must
    fall at every step. A step that raises it is reverted whole.
-4. When cases 1-15 pass and the harness is as low as it goes, unskip
-   `block_scanner_test.dart`'s "a rescan that stops short" (the rescan
-   convergence the `openParagraph` flag needs).
+4. Keep `block_scanner_test.dart`'s "a rescan that stops short" green at
+   every step: phase 1 of the plan in `docs/dev/block-scanner-containers.md`
+   unskips it before the rewrite starts.
 5. Only then touch the downstream `BlockParser.contentText` indent
    strip `docs/dev/block-scanner-containers.md` lists.
 
