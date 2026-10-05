@@ -785,6 +785,36 @@ void main() {
   });
 
   group('incremental rescanning', () {
+    test('an item that loses its underline is an item again', () {
+      // `- item` / `  ---` is an item whose text is a setext heading. An
+      // edit that takes the underline away reopens the heading cut short of
+      // it — and what it was before the underline reached it is the item,
+      // not a paragraph: the rescan answered `paragraph` where a fresh scan
+      // answers `listItem`. Its underline back, the rescan stops on the old
+      // heading and must take it as the item's.
+      for (final (text, line, replacement) in <(String, int, String)>[
+        ('- item\n  ---', 1, ''),
+        ('1. item\n   ===\n2. next', 1, 'more'),
+        ('- item\n  more', 1, '  ---'),
+        ('- a\n\n- item\n  ---\n\n- b', 3, ''),
+      ]) {
+        final buffer = SourceBuffer.fromText(text);
+        final scanner = BlockScanner(buffer);
+        final at = buffer.offsetOfLine(line);
+        scanner.edited(
+          buffer.replaceRange(at, at + buffer.lineAt(line).length, replacement),
+        );
+        final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+        expect(
+          _described(scanner),
+          _described(fresh),
+          reason:
+              'line $line of ${text.replaceAll('\n', r'\n')} made '
+              '"$replacement"',
+        );
+      }
+    });
+
     test(
       'an edit at the top, the middle and the end agrees with a fresh scan',
       () {
@@ -972,96 +1002,85 @@ void main() {
       }
     });
 
-    test(
-      'a rescan that stops short answers every line as a fresh scan '
-      'would',
-      skip:
-          'the incremental rescan keeps a stale hint across a blank '
-          'line once a marker can turn a paragraph into an item (the open '
-          'paragraph flag, causes 1-4): the state at the boundary is the '
-          'same but the hint block is not, and the convergence leaves it. '
-          'The fresh scan is correct; blockAt on a stopped-short rescan '
-          'can still answer the old block. Tracked to fix with '
-          'openParagraph-aware convergence.',
-      () {
-        // A budget of three lines, so nearly every edit leaves a frontier, and
-        // the next edit lands above it, on it or on the lines past it that are
-        // still hints. Nothing is settled between the steps except by the
-        // reads themselves: `blockAt` catches up as far as it needs to, and
-        // `advance` carries the scan on a few lines at a time — which is what
-        // the editor does between keystrokes.
-        const pieces = <String>[
-          '',
-          '',
-          'prose',
-          r'$$',
-          'x = 1',
-          '```',
-          '~~~',
-          '# h',
-          '- item',
-          '1. one',
-          '   cont',
-          '> quote',
-          'lazy',
-          '    code',
-          '| a | b |',
-          '|---|---|',
-          '---',
-          '===',
-          '  ---',
-          '<div>',
-          '</div>',
-        ];
-        final random = Random(20260924);
-        String piece() => pieces[random.nextInt(pieces.length)];
-        for (var round = 0; round < 1000; round++) {
-          final buffer = SourceBuffer.fromText(
-            List<String>.generate(
-              20 + random.nextInt(120),
-              (_) => piece(),
-            ).join('\n'),
-          );
-          final scanner = BlockScanner(buffer, budget: 3);
-          for (var step = 0; step < 16; step++) {
+    test('a rescan that stops short answers every line as a fresh scan '
+        'would', () {
+      // A budget of three lines, so nearly every edit leaves a frontier, and
+      // the next edit lands above it, on it or on the lines past it that are
+      // still hints. Nothing is settled between the steps except by the
+      // reads themselves: `blockAt` catches up as far as it needs to, and
+      // `advance` carries the scan on a few lines at a time — which is what
+      // the editor does between keystrokes.
+      const pieces = <String>[
+        '',
+        '',
+        'prose',
+        r'$$',
+        'x = 1',
+        '```',
+        '~~~',
+        '# h',
+        '- item',
+        '1. one',
+        '   cont',
+        '> quote',
+        'lazy',
+        '    code',
+        '| a | b |',
+        '|---|---|',
+        '---',
+        '===',
+        '  ---',
+        '<div>',
+        '</div>',
+      ];
+      final random = Random(20260924);
+      String piece() => pieces[random.nextInt(pieces.length)];
+      for (var round = 0; round < 1000; round++) {
+        final buffer = SourceBuffer.fromText(
+          List<String>.generate(
+            20 + random.nextInt(120),
+            (_) => piece(),
+          ).join('\n'),
+        );
+        final scanner = BlockScanner(buffer, budget: 3);
+        for (var step = 0; step < 16; step++) {
+          final line = random.nextInt(buffer.lineCount);
+          final at = buffer.offsetOfLine(line);
+          final end = at + buffer.lineAt(line).length;
+          final edit = switch (random.nextInt(5)) {
+            0 => buffer.replaceRange(at, at, '${piece()}\n'),
+            1 when line > 0 => buffer.replaceRange(at - 1, at, ''),
+            2 => buffer.replaceRange(at, end, piece()),
+            3 => buffer.replaceRange(
+              at,
+              at,
+              r'$$'
+              '\n',
+            ),
+            _ => buffer.replaceRange(end, end, '\n${piece()}'),
+          };
+          scanner.edited(edit);
+          if (random.nextBool()) scanner.advance(random.nextInt(6));
+          final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+          for (var probe = 0; probe < 3; probe++) {
             final line = random.nextInt(buffer.lineCount);
-            final at = buffer.offsetOfLine(line);
-            final end = at + buffer.lineAt(line).length;
-            final edit = switch (random.nextInt(5)) {
-              0 => buffer.replaceRange(at, at, '${piece()}\n'),
-              1 when line > 0 => buffer.replaceRange(at - 1, at, ''),
-              2 => buffer.replaceRange(at, end, piece()),
-              3 => buffer.replaceRange(
-                at,
-                at,
-                r'$$'
-                '\n',
-              ),
-              _ => buffer.replaceRange(end, end, '\n${piece()}'),
-            };
-            scanner.edited(edit);
-            if (random.nextBool()) scanner.advance(random.nextInt(6));
-            final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
-            for (var probe = 0; probe < 3; probe++) {
-              final line = random.nextInt(buffer.lineCount);
-              expect(
-                _describedBlock(scanner.blockAt(line)),
-                _describedBlock(fresh.blockAt(line)),
-                reason: 'round $round step $step line $line on ${buffer.text}',
-              );
-            }
-            if (step % 5 == 4) {
-              expect(
-                _described(scanner),
-                _described(fresh),
-                reason: 'round $round step $step on ${buffer.text}',
-              );
-              expect(scanner.settled, isTrue, reason: 'index settles');
-            }
+            expect(
+              _describedBlock(scanner.blockAt(line)),
+              _describedBlock(fresh.blockAt(line)),
+              reason: 'round $round step $step line $line on ${buffer.text}',
+            );
+          }
+          if (step % 5 == 4) {
+            expect(
+              _described(scanner),
+              _described(fresh),
+              reason: 'round $round step $step on ${buffer.text}',
+            );
+            expect(scanner.settled, isTrue, reason: 'index settles');
           }
         }
-      },
-    );
+      }
+    });
 
     test('an edit that changes the rest of the note costs its budget', () {
       // Two hundred formulas: opening one more at the top turns every one

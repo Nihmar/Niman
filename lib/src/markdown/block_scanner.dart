@@ -321,7 +321,7 @@ final class BlockScanner {
     // The block the line before the rebuild is in, cut at the rebuild: what a
     // fresh scan has open when it reaches the edited line.
     final open = start > 0 && headEnd < _blocks.length
-        ? _reopened(_at(headEnd), start)
+        ? _reopened(_at(headEnd), headEnd, start)
         : null;
     final builder = _BlockBuilder(
       this,
@@ -500,9 +500,11 @@ final class BlockScanner {
     if (!goesOn) return -1;
     if (!open.sameShape(old)) {
       // A heading that started above [line] is a setext one: an ATX
-      // heading is its own line alone.
+      // heading is its own line alone. Its open block is a paragraph, or an
+      // item whose first paragraph the underline heads.
       final setext =
-          open.kind == BlockKind.paragraph &&
+          (open.kind == BlockKind.paragraph ||
+              open.kind == BlockKind.listItem) &&
           old.kind == BlockKind.heading &&
           open.quoteDepth == old.quoteDepth &&
           open.listDepth == old.listDepth;
@@ -513,20 +515,17 @@ final class BlockScanner {
     return index + 1;
   }
 
-  /// [block] cut at [end] to be taken open again: a setext heading cut short
-  /// of its underline is the paragraph it was before the underline reached
-  /// it, and goes on as one.
-  static Block _reopened(Block block, int end) {
+  /// [block], at index [index], cut at [end] to be taken open again: a
+  /// setext heading cut short of its underline is the block it was before
+  /// the underline reached it, and goes on as one. That is a paragraph, or
+  /// an item whose first paragraph the underline headed — so it is read
+  /// again from its first line, which the edit did not touch, rather than
+  /// assumed: taken for a paragraph, `- item` / `  ---` with its underline
+  /// gone was a paragraph to the rescan and an item to a fresh scan.
+  Block _reopened(Block block, int index, int end) {
     final cut = _cut(block, end);
     if (block.kind != BlockKind.heading || end >= block.endLine) return cut;
-    return Block(
-      kind: BlockKind.paragraph,
-      startLine: cut.startLine,
-      endLine: cut.endLine,
-      quoteDepth: cut.quoteDepth,
-      listDepth: cut.listDepth,
-      entering: cut.entering,
-    );
+    return _cut(_blockStarting(block.startLine, _nonBlankBefore(index)), end);
   }
 
   /// [block], a paragraph, as the setext heading of [level] its underline
