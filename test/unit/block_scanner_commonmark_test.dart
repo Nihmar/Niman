@@ -32,35 +32,71 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// around it, outermost first.
 typedef Where = ({String kind, String path});
 
+/// The lines documents are made of, `W` standing for a word of its own:
+/// the containers in their forms — bullets and numbers, empty items, a
+/// container right after a marker — and the blocks that end or interrupt
+/// them.
 const _forms = [
   '',
   'W',
   '- W',
   '* W',
+  '+ W',
   '1. W',
   '2) W',
+  '10. W',
+  '-',
+  '1.',
+  '- - W',
+  '- > W',
+  '- # W',
+  '- ```',
   '> W',
+  '>W',
+  '>',
   '> - W',
   '# W',
   '```',
+  '~~~',
   '---',
+  '* * *',
+  '===',
+  '| W | x |',
+  '|---|---|',
+  '<div>',
+  '<!-- W -->',
 ];
-const _indents = [0, 0, 0, 2, 3, 4, 6];
+
+/// What a line is indented with: mostly nothing, then spaces either side
+/// of an item's content columns, and a tab.
+const _indents = ['', '', '', '  ', '   ', '    ', '      ', '\t'];
 final RegExp _token = RegExp(r'w\d+');
+final RegExp _heading = RegExp(r'^h[1-6]$');
 
 Map<String, Where> _reference(List<String> lines) {
   final doc = md.Document(
     encodeHtml: false,
-    extensionSet: md.ExtensionSet.commonMark,
+    extensionSet: md.ExtensionSet.gitHubFlavored,
   );
   final nodes = doc.parseLines(lines);
   final out = <String, Where>{};
   void walk(md.Node node, List<String> path) {
     if (node is md.Text) {
       for (final token in _token.allMatches(node.text)) {
+        // An HTML block is a text node of its own, outside any paragraph,
+        // and starts with its tag.
+        final html =
+            node.text.trimLeft().startsWith('<') &&
+            !path.any(
+              (t) => t == 'p' || t == 'td' || t == 'th' || _heading.hasMatch(t),
+            );
         final kind = path.contains('pre')
             ? 'code'
-            : path.any((t) => RegExp(r'^h[1-6]$').hasMatch(t))
+            : path.contains('table')
+            ? 'table'
+            : html
+            ? 'html'
+            : path.any(_heading.hasMatch)
             ? 'heading'
             : 'text';
         out[token.group(0)!] = (
@@ -86,31 +122,57 @@ Map<String, Where> _reference(List<String> lines) {
 
 Map<String, Where> _scanner(List<String> lines) {
   final out = <String, Where>{};
-  _scanInto(lines.join('\n'), '', out);
+  _scanInto(lines.join('\n'), '', out, 0);
   return out;
 }
 
-/// Scans [text], whose containers outside it are [outer], into [out]: a
-/// quote block's inside scanned again, as the app draws it.
-void _scanInto(String text, String outer, Map<String, Where> out) {
+/// Scans [text], whose containers outside it are [outer], into [out], the
+/// way the app draws it: a quote block's inside scanned again
+/// (`BlockView._quoteContent`), a block of inline content — a paragraph, a
+/// heading, an item — parsed by the package from the text the block parser
+/// gives it (`BlockParser.contentText`), and code, HTML and tables taken as
+/// the scanner says, since the read view draws those itself.
+void _scanInto(String text, String outer, Map<String, Where> out, int depth) {
   final buffer = SourceBuffer.fromText(text);
   for (final block in BlockScanner(buffer).index.blocks) {
-    final path = outer + 'L' * (block.listDepth + 1) + 'Q' * block.quoteDepth;
+    final raw = BlockParser.blockText(block, buffer);
     if (block.quoteDepth > 0) {
-      final raw = BlockParser.blockText(block, buffer);
-      _scanInto(BlockParser.contentText(block, raw), path, out);
+      final path = outer + 'L' * (block.listDepth + 1) + 'Q' * block.quoteDepth;
+      // As deep as the read view reads quotes inside quotes.
+      if (depth < 8) {
+        _scanInto(BlockParser.contentText(block, raw), path, out, depth + 1);
+      }
       continue;
     }
-    final kind = switch (block.kind) {
-      BlockKind.fencedCode || BlockKind.indentedCode => 'code',
-      BlockKind.heading => 'heading',
-      BlockKind.paragraph || BlockKind.listItem => 'text',
-      _ => block.kind.name,
-    };
-    for (var line = block.startLine; line < block.endLine; line++) {
-      for (final token in _token.allMatches(buffer.lineAt(line))) {
-        out[token.group(0)!] = (kind: kind, path: path);
-      }
+    switch (block.kind) {
+      case BlockKind.paragraph || BlockKind.heading || BlockKind.listItem:
+        // An item's own block parses as the item, `L` and all.
+        final content = BlockParser.contentText(block, raw);
+        final items = block.kind == BlockKind.listItem
+            ? block.listDepth
+            : block.listDepth + 1;
+        for (final MapEntry(:key, :value) in _reference(
+          content.split('\n'),
+        ).entries) {
+          out[key] = (kind: value.kind, path: outer + 'L' * items + value.path);
+        }
+      case BlockKind.fencedCode ||
+          BlockKind.indentedCode ||
+          BlockKind.html ||
+          BlockKind.table ||
+          BlockKind.math ||
+          BlockKind.frontmatter ||
+          BlockKind.thematicBreak ||
+          BlockKind.blank ||
+          BlockKind.quote:
+        final kind = switch (block.kind) {
+          BlockKind.fencedCode || BlockKind.indentedCode => 'code',
+          _ => block.kind.name,
+        };
+        final path = outer + 'L' * (block.listDepth + 1);
+        for (final token in _token.allMatches(raw)) {
+          out[token.group(0)!] = (kind: kind, path: path);
+        }
     }
   }
 }
@@ -191,7 +253,7 @@ void main() {
       var w = 0;
       final lines = [
         for (var i = 0; i < count; i++)
-          ' ' * _indents[random.nextInt(_indents.length)] +
+          _indents[random.nextInt(_indents.length)] +
               _forms[random.nextInt(_forms.length)].replaceFirst(
                 'W',
                 'w${w++}',
@@ -219,14 +281,22 @@ void main() {
     print('docs differing: $docs / 40000, minimal: ${found.length}');
     // The classes: each minimal repro's first difference, without its word.
     final classes = <String, int>{};
-    for (final diff in found.values) {
-      final first = diff.split('; ').first.replaceFirst(_token, 'w');
+    final examples = <String, String>{};
+    for (final MapEntry(:key, :value) in found.entries) {
+      final first = value.split('; ').first.replaceFirst(_token, 'w');
       classes[first] = (classes[first] ?? 0) + 1;
+      final example = examples[first];
+      if (example == null || key.length < example.length) {
+        examples[first] = key;
+      }
     }
     final ranked = classes.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     for (final entry in ranked) {
-      print('class ${entry.value}: ${entry.key}');
+      print(
+        'class ${entry.value}: ${entry.key}   '
+        'e.g. ${examples[entry.key]!.replaceAll(' ', '·')}',
+      );
     }
     final keys = found.keys.toList()
       ..sort((a, b) => a.length.compareTo(b.length));
