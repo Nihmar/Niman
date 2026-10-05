@@ -815,6 +815,34 @@ void main() {
       }
     });
 
+    test('what the line before a line was is in the state it enters', () {
+      // Lazy text after an item's heading stays in the item; after a blank
+      // line it does not. The two lines leave the same items open, so if
+      // the difference is not in the state, a rescan that turns the blank
+      // into the heading stops on the line after it and keeps its old block.
+      for (final (text, line, replacement) in <(String, int, String)>[
+        ('- a\n\n w', 1, '  # h'),
+        ('- a\n  # h\n w', 1, ''),
+        ('- a\n  ```\n  x\n\n w\n  ```', 3, '  y'),
+        ('- a\n  ```\n  x\n  y\n w\n  ```', 3, ''),
+      ]) {
+        final buffer = SourceBuffer.fromText(text);
+        final scanner = BlockScanner(buffer);
+        final at = buffer.offsetOfLine(line);
+        scanner.edited(
+          buffer.replaceRange(at, at + buffer.lineAt(line).length, replacement),
+        );
+        final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+        expect(
+          _described(scanner),
+          _described(fresh),
+          reason:
+              'line $line of ${text.replaceAll('\n', r'\n')} made '
+              '"$replacement"',
+        );
+      }
+    });
+
     test(
       'an edit at the top, the middle and the end agrees with a fresh scan',
       () {
