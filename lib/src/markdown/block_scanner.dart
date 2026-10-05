@@ -768,9 +768,36 @@ final class BlockScanner {
   bool _isDisplayLineAt(int line, String text, LineState state) =>
       !_indentedCodeContinues(line, text, state) && isDisplayLine(text.trim());
 
-  /// What line [line] is.
+  /// The line [_kindOf] last classified, the state it entered in and the
+  /// buffer's revision then; [_kind] is the answer. One line, because a
+  /// scan asks about the line it is on: whether it goes on with the open
+  /// block, what block it starts, and which items it leaves open all ask
+  /// what it is, and classifying it afresh each time doubled the scan of a
+  /// note that is one long list (`list_count_check_test`, 86 → 188 ms).
+  int _kindLine = -1;
+  LineState? _kindState;
+  int _kindRevision = -1;
+  BlockKind _kind = BlockKind.blank;
+
+  /// What line [line] is: a function of the line's text, the lines next to
+  /// it and the state it enters in, so the answer is kept while none of
+  /// them has changed.
   BlockKind _kindOf(int line) {
     final state = _entering[line];
+    if (line == _kindLine &&
+        identical(state, _kindState) &&
+        buffer.revision == _kindRevision) {
+      return _kind;
+    }
+    _kind = _classify(line, state);
+    _kindLine = line;
+    _kindState = state;
+    _kindRevision = buffer.revision;
+    return _kind;
+  }
+
+  /// What line [line], entered in [state], is.
+  BlockKind _classify(int line, LineState state) {
     final text = _text(line);
     if (state.fence != null) {
       // Inside a fence: every line is code until the closing fence, except a
@@ -986,6 +1013,23 @@ final class BlockScanner {
     if (quoteDepth == 0 && listStack.isEmpty && !table && !indentedCode) {
       return openParagraph ? LineState.paragraphOpen : LineState.initial;
     }
+    // Inside a construct, a line that leaves the state as it found it — the
+    // next line of an item's paragraph, of a quote, of a code block — hands
+    // on the state it entered in, for the same reason: the run's lines share
+    // one object. A long paragraph in an item now keeps the item open, as
+    // CommonMark does, where it used to close it after its first lazy line.
+    if (state.fence == null &&
+        !state.math &&
+        !state.frontmatter &&
+        state.html == null &&
+        state.quoteDepth == quoteDepth &&
+        state.quoteIndented == quoteIndented &&
+        identical(state.listStack, listStack) &&
+        state.table == table &&
+        state.indentedCode == indentedCode &&
+        state.openParagraph == openParagraph) {
+      return state;
+    }
     return LineState(
       quoteDepth: quoteDepth,
       quoteIndented: quoteIndented,
@@ -1045,11 +1089,35 @@ final class BlockScanner {
   /// outside a list): `····---` inside an item whose content starts at two is
   /// the item's rule, not text.
   static bool _isRule(String text, LineState state) {
-    if (_hr.hasMatch(text)) return true;
+    if (_isHr(text, 0)) return true;
     final column = _contentColumn(text, state);
-    return column > 0 &&
-        column <= text.length &&
-        _hr.hasMatch(text.substring(column));
+    return column > 0 && column <= text.length && _isHr(text, column);
+  }
+
+  /// Whether [text] from [from] on matches [_hr].
+  ///
+  /// The expression cannot match unless three of one `-`, `*` or `_` in a
+  /// row stand within the first four characters with only whitespace before
+  /// them, so a line with anything else there — nearly every line of prose,
+  /// and every list item's `- ` — is answered without running it. Every
+  /// line is asked, twice (its kind, and whether it is paragraph text), and
+  /// the expression was the largest single cost of a scan.
+  static bool _isHr(String text, int from) {
+    for (var at = from; at < text.length && at < from + 4; at++) {
+      final char = text.codeUnitAt(at);
+      if (char == 0x2D || char == 0x2A || char == 0x5F) {
+        return at + 2 < text.length &&
+            text.codeUnitAt(at + 1) == char &&
+            text.codeUnitAt(at + 2) == char &&
+            _hr.hasMatch(from == 0 ? text : text.substring(from));
+      }
+      // What `\s` may match: ASCII whitespace, or past ASCII, where Unicode
+      // whitespace is — taken as space, so the expression decides.
+      final space =
+          char == 0x20 || (char >= 0x09 && char <= 0x0D) || char > 0x7F;
+      if (!space) return false;
+    }
+    return false;
   }
 
   /// Whether [text], entered in [state], is a line of paragraph text: an
