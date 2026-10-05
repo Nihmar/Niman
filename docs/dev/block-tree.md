@@ -82,19 +82,19 @@ offsets by construction instead of by search.
 Each phase is gated by the unit suite, the CommonMark harness at 0, the
 rescan test, and `test/perf/list_count_check_test.dart`.
 
-1. **The tree, beside the current path.** `BlockPath` and a builder that
-   gives any scanner block its path and subtree, leaves with their
-   segments; link reference and footnote definitions read by the
-   scanner. Nothing draws from it yet. The harness compares it with the
-   package's tree directly — leaf kind and container path of every word —
-   instead of going through `contentText` and a parse.
-2. **HTML from the tree.** A writer from the tree (containers, tight /
-   loose lists, leaves through `md.InlineParser` and the package's
-   renderer) — the oracle this plan has been missing: for a generated
-   document it is compared **byte for byte** with
-   `md.markdownToHtml` of the whole note, which tests the structure, the
-   leaf texts and their segments at once. Quirks the containers plan
-   excluded stay excluded, counted.
+1. **The tree, beside the current path.** A builder that gives a text
+   its tree, each leaf's lines mapped to the note; link reference and
+   footnote definitions read by the scanner. Nothing draws from it yet.
+   The harness compares it with the package's tree directly — leaf kind
+   and container path of every word — instead of going through
+   `contentText` and a parse.
+2. **HTML from the tree.** Each leaf's inline text and its segments; a
+   writer from the tree (containers, tight / loose lists, leaves through
+   `md.InlineParser` and the package's renderer) — the oracle this plan
+   has been missing: for a generated document it is compared **byte for
+   byte** with `md.markdownToHtml` of the whole note, which tests the
+   structure, the leaf texts and their segments at once. Quirks the
+   containers plan excluded stay excluded, counted.
 3. **The read view on the tree.** `BlockParser.parseText` builds a
    `ParsedBlock` from a leaf's inline text and its segments; `BlockView`
    draws containers from the path and subtree (quotes, items, callouts,
@@ -132,3 +132,26 @@ rescan test, and `test/perf/list_count_check_test.dart`.
 ## State
 
 Phase 1 in progress.
+
+- **The builder** (`BlockTree.of`, nodes in `block_node.dart`): the
+  scanner's blocks, a quote's content and an item's content scanned
+  again, each later block of a list hung under the item its depth names
+  (an item its marker line opens inside — `- - a` — included). Each
+  leaf's lines map to the note by `(line, start, end)`, composed through
+  every level of content. Two things the flat blocks do not say, which
+  the builder had to:
+  - *A tab's columns left over.* An item's indent may end inside a tab;
+    the parser hands the rest on, counting toward an inner item's indent
+    only. A scan of a container's content now takes them per line
+    (`BlockScanner(leftOver:)`, `ContainerWalk.of`): `- - w` / `\t---`
+    is the inner item's heading.
+  - *A construct a marker line opened* (`- > x` / `  > y`, a fence after
+    a marker): its later lines are blocks of their own to the scanner,
+    entered with the construct still open; the builder joins them to the
+    node the marker line's content made — a quote's content is scanned
+    again whole.
+- **The harness** (`READER=tree`): 0 of 40 000 documents differ on seeds
+  1-4, and on seed 5 the one table the read view's pipeline misses too.
+  The gate holds both readings at 0 over 2 000 documents.
+
+Next: link reference and footnote definitions as blocks.

@@ -24,8 +24,10 @@ import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/block_tree.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -181,9 +183,53 @@ void _scanInto(String text, String outer, Map<String, Where> out, int depth) {
   }
 }
 
-String? _differs(List<String> lines) {
+/// What a reader of [lines] makes of each word: the reference, or one of
+/// the app's readings.
+typedef _Reader = Map<String, Where> Function(List<String> lines);
+
+/// The words of [lines] as the block tree reads them
+/// (`docs/dev/block-tree.md`): each leaf's kind, under the items and quotes
+/// the tree puts it in — the package parses nothing.
+Map<String, Where> _tree(List<String> lines) {
+  final out = <String, Where>{};
+  void walk(BlockNode node, String path) {
+    switch (node) {
+      case QuoteNode(:final children):
+        for (final child in children) {
+          walk(child, '${path}Q');
+        }
+      case ListNode(:final items):
+        for (final item in items) {
+          walk(item, path);
+        }
+      case ItemNode(:final children):
+        for (final child in children) {
+          walk(child, '${path}L');
+        }
+      case LeafNode(:final kind, lines: final spans):
+        final name = switch (kind) {
+          BlockKind.paragraph => 'text',
+          BlockKind.fencedCode || BlockKind.indentedCode => 'code',
+          _ => kind.name,
+        };
+        for (final span in spans) {
+          final text = lines[span.line].substring(span.start, span.end);
+          for (final token in _token.allMatches(text)) {
+            out[token.group(0)!] = (kind: name, path: path);
+          }
+        }
+    }
+  }
+
+  for (final node in BlockTree.of(lines.join('\n'))) {
+    walk(node, '');
+  }
+  return out;
+}
+
+String? _differs(List<String> lines, _Reader reader) {
   final want = _reference(lines);
-  final got = _scanner(lines);
+  final got = reader(lines);
   final diffs = [
     for (final token in got.keys)
       if (want[token] != got[token])
@@ -191,6 +237,13 @@ String? _differs(List<String> lines) {
   ];
   return diffs.isEmpty ? null : diffs.join('; ');
 }
+
+/// The app's readings the gate holds to the reference: the read view's
+/// pipeline, and the block tree that is to replace it.
+const List<(String, _Reader)> _readers = [
+  ('the read view', _scanner),
+  ('the block tree', _tree),
+];
 
 /// Whether the run asked for the report.
 final bool _asked = Platform.environment['NIMAN_SCANNER_DIFF'] == '1';
@@ -246,22 +299,40 @@ void main() {
     }
   });
 
-  test('the scanner reads a sample of documents as the parser does', () {
-    // The gate: two thousand documents, every one read alike but those the
-    // parser itself gets wrong (_quirkOf). The full report is behind
-    // NIMAN_SCANNER_DIFF.
-    final run = _run(2000, 1);
-    expect(
-      run.found.keys.take(5).toList(),
-      isEmpty,
-      reason: '${run.docs} of 2000 documents differ',
-    );
+  group('the block tree', () {
+    for (final (name, text) in _shapes) {
+      test(name, () {
+        var w = 0;
+        final lines = [
+          for (final line in text.split('\n'))
+            line.replaceAllMapped('w', (_) => 'w${w++}'),
+        ];
+        expect(_tree(lines), _reference(lines));
+      });
+    }
   });
 
+  for (final (what, reader) in _readers) {
+    test('$what reads a sample of documents as the parser does', () {
+      // The gate: two thousand documents, every one read alike but those
+      // the parser itself gets wrong (_quirkOf). The full report is behind
+      // NIMAN_SCANNER_DIFF.
+      final run = _run(2000, 1, reader);
+      expect(
+        run.found.keys.take(5).toList(),
+        isEmpty,
+        reason: '${run.docs} of 2000 documents differ',
+      );
+    });
+  }
+
   test('the scanner reads containers as CommonMark does', skip: !_asked, () {
+    // READER=tree reports on the block tree instead of the read view.
+    const which = String.fromEnvironment('READER', defaultValue: 'view');
     final run = _run(
       40000,
       int.parse(const String.fromEnvironment('SEED', defaultValue: '1')),
+      which == 'tree' ? _tree : _scanner,
     );
     final found = run.found;
     print(
@@ -301,6 +372,7 @@ void main() {
 ({int docs, Map<String, int> skipped, Map<String, String> found}) _run(
   int count,
   int seed,
+  _Reader reader,
 ) {
   final random = math.Random(seed);
   final found = <String, String>{};
@@ -314,7 +386,7 @@ void main() {
       skipped[quirk] = (skipped[quirk] ?? 0) + 1;
       continue;
     }
-    if (_differs(lines) == null) continue;
+    if (_differs(lines, reader) == null) continue;
     docs++;
     // Shrink: drop lines while it still differs.
     var small = lines;
@@ -324,7 +396,7 @@ void main() {
         final fewer = [...small]..removeAt(i);
         if (fewer.first.trim() != '---' &&
             _quirkOf(fewer) == null &&
-            _differs(fewer) != null) {
+            _differs(fewer, reader) != null) {
           small = fewer;
           changed = true;
           break;
@@ -332,7 +404,7 @@ void main() {
       }
     }
     final key = small.map((l) => l.replaceAll(_token, 'w')).join(r'\n');
-    found.putIfAbsent(key, () => _differs(small)!);
+    found.putIfAbsent(key, () => _differs(small, reader)!);
   }
   return (docs: docs, skipped: skipped, found: found);
 }
