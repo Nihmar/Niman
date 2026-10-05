@@ -93,12 +93,26 @@ item below.
   line as a fresh scan would" is skipped with this reason, to be fixed with
   `openParagraph`-aware convergence (an `_isBlockBoundary`/`_convergesAt`
   check on the block the boundary line opens).
-- **About 309 of 40 000 documents still differ** (138 minimal). The bulk are
-  deep-item interactions: a marker or quote a level or two in, after a
-  more-indented sublist and a dedent (`  1. w` / `      - w` / `    * w`
-  wants the last item at list 2, the scanner has it at 0), setext headings
-  there, and a quote written after a dedent. Rerun the harness for the
-  current list.
+- **About 309 of 40 000 documents still differ** (138 minimal). All of them
+  want containers measured as CommonMark does, from the line's own indent
+  rather than from column 0, and the two pieces of that are one refactor:
+
+  1. **Inside a quote, measure past the `>`.** A line `> - w` has its item
+     *after* the marker: `_listMarker`, `_indentOf` and the item's content
+     column all start at the wrong place today, so `> - w` / `    > w` (a
+     quote in the item, two levels) and `> - w` / `  > w` (the item's text,
+     one level) are not told apart. The fix is to pass the offset past the
+     quotes (`_afterQuotes`) into the marker/indent readers — not only into
+     `_listAfter`, which was tried and regressed the whole harness.
+  2. **Indented code inside an item is measured from the item's marker,
+     not its content column.** `  2) w` / `      ---` / `    w` has a setext
+     heading in the item and then `    w` at four spaces from the margin,
+     inside the item: code in the item, not a line outside it.
+
+  Both need the indent reading changed in one place and threaded through
+  `_contentColumn`, `_opensIndentedCode` and `_listAfter` together; a partial
+  change moves the count by thousands, as measured. The remaining classes
+  (26 text, 23 code, 25 quoted/heading, then a long tail) are these two.
 
 Full list of minimal repros: rerun the harness (≈40 s) — sort order is
 shortest first.
