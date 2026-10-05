@@ -156,10 +156,27 @@ and, from phase 1 on, the rescan test unskipped.
    - *One interrupt rule* (`485f03dd`): one function, read by both places;
      two of its five conditions were dead. Harness unchanged at 309 / 138
      through all of phase 1.
-2. **Split the file, no behaviour change.** The pure line readers (marker,
-   heading, fence, HTML, quote, rule, setext) to `line_syntax.dart`; the
-   scan and the rescan stay; the builder to its own file. Gate: harness at
-   exactly the count it had, suite unchanged.
+2. **Split the file, no behaviour change** — done (`841c2a09`…`3c4f5273`,
+   five commits, each at 309 / 138 with the scanner's tests green; the
+   100 000-line list scans in the time it did). `block_scanner.dart` was
+   1 837 lines; it is now six files under `lib/src/markdown/`:
+
+   | File | What it holds |
+   |---|---|
+   | `block_scanner.dart` | the index: rescan, frontiers, convergence |
+   | `line_rules.dart` (`LineRules`) | what a line is, the state it leaves, the items it stays in |
+   | `block_rules.dart` (`BlockRules`) | the block a line starts, whether it goes on with the open one, setext, ordinals |
+   | `line_containers.dart` (`LineContainers`) | a line against the open items and quotes — **what phase 3 rewrites** |
+   | `line_syntax.dart` (`LineSyntax`), `html_block_syntax.dart` | what a line says on its own text |
+   | `block_builder.dart` (`BlockBuilder`) | blocks built line by line; `Block.cutAt`/`cutFrom`/`headed` |
+
+   The names this document and `block-scanner-indent-model.md` use are
+   the ones they had before the split: `_contentColumn`, `_markerReach`,
+   `_quoteItems`, `_quoteDepthAfter`, `_isIndented` are now
+   `LineContainers.*`; `_listMarker`, `_indentOf`, `_headingLevel`,
+   `_fenceOpen`, `_quoteDepth` are `LineSyntax.*`; `_kindOf`, `_exitOf`,
+   `_listAfter`, `_fenceClosesItem` are `LineRules.*`; `_blockStarting`,
+   `_mergesInto`, `_underlineLevel`, `_ordinalOf` are `BlockRules.*`.
 3. **The indentation model** (`docs/dev/block-scanner-indent-model.md`),
    with one change to its design: not `quoteDepth` and `listStack` side by
    side plus quote columns — that cannot hold an item in a quote in an item

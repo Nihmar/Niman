@@ -11,6 +11,13 @@ Do not start from the current code's `_contentColumn`/`_indentOf`/`
 _listMarker`; start from the model below and rewrite those three to
 follow it.
 
+The names below are the ones the code had when this was written. Since
+phase 2 of the plan (`docs/dev/block-scanner-containers.md`) the readers
+live in `line_containers.dart` (`LineContainers.contentColumn`, …),
+`line_syntax.dart` (`LineSyntax.listMarker`, `LineSyntax.indentOf`, …)
+and `line_rules.dart` (`LineRules.listAfter`, …); that document has the
+full map. The rewrite is `LineContainers`, and `LineState`'s two stacks.
+
 ## Evidence
 
 Every minimal repro left wants containers measured where their content

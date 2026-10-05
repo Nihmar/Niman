@@ -1,10 +1,11 @@
 /// What one line of Markdown says on its own: the markers it starts with,
 /// read off its text alone.
 ///
-/// No state here: where a line stands among the containers already open,
-/// and what the scan makes of it, are `block_scanner.dart`'s. The readers
-/// take the column to start from, or how far in a marker may stand, when
-/// the caller knows it.
+/// No state here: where a line stands among the containers already open
+/// is `line_containers.dart`'s, and what the scan makes of it is
+/// `line_rules.dart`'s and `block_rules.dart`'s. The readers take the
+/// column to start from, or how far in a marker may stand, when the caller
+/// knows it.
 library;
 
 import 'package:niman/src/editor/math_rule.dart';
