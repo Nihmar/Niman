@@ -42,6 +42,13 @@ doubtful repro against the spec before fixing the scanner for it.
 | quote absorbs one indented continuation (`d4b6c333`) | 942 | 614 |
 | quotes, lazy items and rules from the item's column (`327ada12`) | 368 | 194 |
 | item and fence close on the line that ends them (`01963d99`) | 309 | 138 |
+| *the harness reads quotes as the app does (`c3d56535`), same scanner* | *1 684* | *212* |
+| a block in an item read past the item's column (`2ab50765`) | 285 | 224 |
+| the container walk (phase 3) | 0 | 0 |
+
+The rows in italics and below are the second harness — the scanner read
+through the app's own quote pipeline, words compared by their full path
+of items and quotes — and do not compare with the rows above it.
 
 `ae23fb49`: `_mergesInto(listItem)` took any non-blank line without a
 marker, so `# Heading`, `> quote`, a fence or `---` under a list became the
@@ -177,73 +184,88 @@ and, from phase 1 on, the rescan test unskipped.
    `_fenceOpen`, `_quoteDepth` are `LineSyntax.*`; `_kindOf`, `_exitOf`,
    `_listAfter`, `_fenceClosesItem` are `LineRules.*`; `_blockStarting`,
    `_mergesInto`, `_underlineLevel`, `_ordinalOf` are `BlockRules.*`.
-3. **The indentation model** (`docs/dev/block-scanner-indent-model.md`),
-   with one change to its design: not `quoteDepth` and `listStack` side by
-   side plus quote columns — that cannot hold an item in a quote in an item
-   — but **one ordered stack of containers** (quote or item), each column
-   kept *relative to its parent's content*. One walk consumes the open
-   containers, then opens new ones, as CommonMark's algorithm does;
-   `listStack`, `quoteDepth` and `listIndent` become getters derived from
-   the stack, so their readers do not change. Gates: the fifteen pinned
-   cases, the harness falling at every step (a step that raises it is
-   reverted whole), the rescan test, the perf file.
+3. **The indentation model** — done, by another design than either this
+   plan or `block-scanner-indent-model.md` had. Three steps:
+
+   - **The harness first** (`c3d56535`). It compared, for a word in a
+     quote, every quote around it with the depth of the scanner's quote
+     block; but a quote is one block by design, its inside scanned again
+     by the read view and `live`, so `> a` / `> > b` counted as a fault.
+     It now reads the scanner's side through that same pipeline —
+     `BlockParser.contentText`, then a scan of the content, down to the
+     blocks that are not quotes — and compares each word's leaf and full
+     path of items and quotes (`LQL`) with `package:markdown`'s. The
+     fifteen shapes moved into it, their answers computed by the
+     reference: the two nested-quote ones passed at once (they were the
+     harness's). Measured on the old scanner: 1 684 / 212.
+   - **Phase 5's strip, brought forward** (`2ab50765`): a block in a list
+     item is read past the item's indentation, quotes included. Most of
+     the 1 684 were this — a quote four spaces into an item kept its `>`
+     and its inside was read as code — and the harness could not tell
+     the scanner's faults from these while they stood: 285 / 224 after it.
+   - **The rewrite**: not CommonMark's container stack but the reading of
+     the parser the read view draws with. `package:markdown` does not keep
+     a stack: a list gathers each item's lines — a line at least the
+     item's indent in, with that taken off, or a line short of it
+     *lazily*, **as it stands** — and parses them again on their own; a
+     quote does the same with its `>` off. So each container measures the
+     line where its parent left it, and a lazy line is handed on
+     undedented, which is what the six failed attempts kept colliding
+     with: `  1. w` / `      - w` / `    * w` is three levels because
+     `    * w` is lazy for the first item and reaches the second.
+
+     `ContainerWalk` walks a line through the open items, outermost
+     first, with each item's indent *relative* to its parent
+     (`OpenItem.indent`) and the cumulative column a reader strips
+     (`OpenItem.content`); it ends a list at a rule, a marker, a block
+     that may interrupt or text after a blank line, and decides whether
+     the open quote takes the line (by its `>`, or lazily by the quote's
+     last line: `LineState.quoteLast`). What is left is read by
+     `LineRules` in the innermost item's coordinates, as at a margin —
+     no rule measures from the note's margin any more, and
+     `LineContainers` is gone. Each line is read once (`LineRead`), and
+     a block goes on only in the container it is in (`LineRead.carried`:
+     a fence in an item ends with its list).
+
+     And `BlockParser.itemPrefixLength` strips per line what the walk
+     does — an item's indent off a line that reaches it, nothing off a
+     lazy one — not a fixed column; `SourceStyler`'s parse cache keys on
+     the items' indents, since the parsed text now depends on them.
+
+   **Result: 0 of 40 000 documents differ**, on four seeds (1-4, 160 000
+   documents); the fifteen shapes all pass, the rescan test is green.
+   Scans got faster, from reading each line once: per 100 000 lines,
+   before the branch → now, prose 54 → 21 ms, items 145 → 107, nested
+   items 199 → 107, a lazy run 24 → 25; the list fixture 86 → 85.
 4. **The harness becomes a gate.** A short run (≈2 000 documents) in the
-   default suite that fails, with an explicit list of `package:markdown`
-   quirks it tolerates; the 40 000 stay behind `NIMAN_SCANNER_DIFF`. New
-   forms: tabs, `+`, `10.`, `===`, `$$`, HTML, tables. And an incremental
-   variant — edit sequences against a fresh scan, shrunk the same way — which
-   is what found item 3 above in seconds.
-5. **Downstream and merge.** `BlockParser.contentText` strips the item's
-   content column from every block in a list (below) — `- a` / `` /
-   `     # deep` is a heading block to the scanner and indented code to the
-   parse, which styles ` d` as inline code; restore the tests the
-   #530 work avoided, which live on that branch — so #530 lands first and
-   this branch is rebased on `main` after it; the changelog notes the task
-   cascade change.
+   default suite that fails — at zero now, with no quirk list needed;
+   the 40 000 stay behind `NIMAN_SCANNER_DIFF`. New forms: tabs, `+`,
+   `10.`, `===`, `$$`, HTML, tables, a marker followed by a container
+   (`- > q`, `- - a`). And an incremental variant — edit sequences
+   against a fresh scan, shrunk the same way — which is what found
+   item 3 of the review in seconds.
+5. **Downstream and merge.** The strip is done (above). Left: restore
+   the tests the #530 work avoided, which live on that branch — so #530
+   lands first and this branch is rebased on `main` after it — and the
+   changelog notes the task cascade change.
 
 ## Still open
 
-- **The remaining repros need the indentation model**, not another fix to
-  the current one: see `docs/dev/block-scanner-indent-model.md` for the
-  evidence, the model, the fifteen pinning cases and the method. Both
-  incremental attempts to move the indent reading regressed the harness by
-  thousands, so it is a rewrite of `_contentColumn`/`_indentOf`/`_listMarker`
-  together, not a patch.
-- **About 309 of 40 000 documents still differ** (138 minimal). All of them
-  want containers measured as CommonMark does, from the line's own indent
-  rather than from column 0, and the two pieces of that are one refactor:
+What the harness's forms do not reach, so the reading of these is not
+measured yet (phase 4 adds them):
 
-  1. **Inside a quote, measure past the `>`.** A line `> - w` has its item
-     *after* the marker: `_listMarker`, `_indentOf` and the item's content
-     column all start at the wrong place today, so `> - w` / `    > w` (a
-     quote in the item, two levels) and `> - w` / `  > w` (the item's text,
-     one level) are not told apart. The fix is to pass the offset past the
-     quotes (`_afterQuotes`) into the marker/indent readers — not only into
-     `_listAfter`, which was tried and regressed the whole harness.
-  2. **Indented code inside an item is measured from the item's marker,
-     not its content column.** `  2) w` / `      ---` / `    w` has a setext
-     heading in the item and then `    w` at four spaces from the margin,
-     inside the item: code in the item, not a line outside it.
-
-  Both need the indent reading changed in one place and threaded through
-  `_contentColumn`, `_opensIndentedCode` and `_listAfter` together; a partial
-  change moves the count by thousands, as measured. The remaining classes
-  (26 text, 23 code, 25 quoted/heading, then a long tail) are these two.
-
-Full list of minimal repros: rerun the harness (≈40 s) — sort order is
-shortest first.
-
-## Downstream to check before merging
-
-`BlockParser.contentText` strips the indent only for `listItem` blocks and
-quotes. A paragraph, heading or fence *inside* a deep item (4+ spaces in,
-`listDepth >= 1`) is handed to `package:markdown` with its indent, which
-reads 4+ spaces as indented code. The scanner now produces such blocks more
-often (`f2efd5bc` and the fixes above): check the read view renders
-`- A\n  - B\n\n    para of B` as a paragraph, and strip the item's content
-column for every block in a list, not only items.
-
-Also restore, once the scanner reads them, the tests the #530 work had to
-avoid: `test/unit/list_to_mindmap_test.dart` (nested paragraph after a
-sublist, fence in a nested item) and an export test for a Mermaid fence
-four spaces into a list item (`test/unit/note_html_test.dart`).
+- **Tabs** count as one column; `package:markdown` expands them to tab
+  stops of four.
+- **A rule with spaces in it** (`* * *`, `- - -`): `package:markdown`'s
+  rule allows them, `LineSyntax.isHr` does not, so such a line is an item.
+- **A container on a marker line** — `- > q`, `- - a`, `- ```` — opens
+  only the item: the item's block holds the line and the parse renders
+  it right, but the state after it does not know the quote, the sublist
+  or the fence inside, and the lines after are read without them.
+- **GFM's own blocks in the lazy readings**: a table only by the next
+  line being a delimiter row; footnote definitions and alerts not at
+  all; a setext underline in a quote that ends lazily, which
+  `package:markdown` does not head, is headed by the inner scan.
+- **A quote that opens deeper than it goes on** (`> > a` / `>` / `> b`):
+  the block keeps its first line's depth, so its content strips two
+  levels where it has one.

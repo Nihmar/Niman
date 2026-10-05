@@ -1,5 +1,16 @@
 # Block scanner: the indentation model (design for the remaining repros)
 
+> **Superseded, kept for its evidence.** The model was built — phase 3 of
+> the plan in `docs/dev/block-scanner-containers.md` — but not as this
+> document designs it. Its diagnosis held (each container must measure
+> the line where its parent left it); its model did not: the target
+> parser, `package:markdown`, keeps no container stack, and hands a lazy
+> line on *undedented*, which is what this document's cases 10-13 are.
+> The walk that emulates it (`ContainerWalk`) reaches 0 of 40 000, and
+> cases 1 and 4 turned out to be the harness's, not the scanner's. Read
+> the plan document for what was done; the tables below are the evidence
+> it started from.
+
 `docs/dev/block-scanner-containers.md` records the container rework up to
 309 of 40 000 documents differing (138 minimal) on
 `fix/block-scanner-containers`. Everything left needs one change the
