@@ -22,6 +22,7 @@ import 'package:niman/src/markdown/line_read.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/table_line_syntax.dart';
 
 /// The rules the block scan applies to each line of [buffer].
 final class LineRules {
@@ -108,21 +109,25 @@ final class LineRules {
       walk,
       carried ? state : LineState.initial,
       carried,
-      next,
+      walk.next,
     );
   }
 
   /// The line [walk] leaves, read in its container, where [open] holds what
-  /// was open there before it.
+  /// was open there before it — or [content], what a marker line holds
+  /// after its marker, read in the item it opens, [within].
   LineRead _readLeaf(
     int line,
     LineState state,
     ContainerWalk walk,
     LineState open,
     bool carried,
-    String? next,
-  ) {
-    final text = walk.text;
+    String? next, {
+    String? content,
+    List<OpenItem>? within,
+  }) {
+    final text = content ?? walk.text;
+    final base = within ?? walk.items;
     LineRead made(
       BlockKind kind, {
       List<OpenItem>? items,
@@ -141,7 +146,7 @@ final class LineRules {
       state,
       walk,
       carried: carried,
-      items: items,
+      items: items ?? base,
       quoteDepth: quoteDepth,
       quoteLast: quoteLast,
       fence: fence,
@@ -186,19 +191,34 @@ final class LineRules {
       }
       return made(BlockKind.blank);
     }
-    if (line == 0 &&
-        walk.items.isEmpty &&
-        LineSyntax.opensFrontmatter(line, text)) {
+    if (line == 0 && base.isEmpty && LineSyntax.opensFrontmatter(line, text)) {
       return made(BlockKind.frontmatter, frontmatter: true);
     }
     final opened = LineSyntax.fenceOpen(text);
     if (opened != null) return made(BlockKind.fencedCode, fence: opened);
     // Indented code: four spaces in from the container's margin. It runs on
-    // over blank lines; it cannot interrupt a paragraph, so a four-space line
-    // after paragraph text is the paragraph's.
+    // over blank lines, whatever its lines look like — a table's head
+    // included; it cannot interrupt a paragraph, so a four-space line after
+    // paragraph text is the paragraph's.
+    if (open.indentedCode && !blank && indent >= 4) {
+      return made(BlockKind.indentedCode, indentedCode: true);
+    }
+    // A table, as GFM reads one: its rows run on until a line that would
+    // start a block of its own. A line whose next is a delimiter row is a
+    // head, tried before anything but a fence — and before a paragraph goes
+    // on: it ends the paragraph even when its cells do not fit the
+    // delimiter's columns, and is then read as if nothing were open.
+    final heads = !blank && next != null && TableLineSyntax.isDelimiter(next);
+    if (open.table && !blank && !_endsTableRow(text, next, base.isNotEmpty)) {
+      return made(BlockKind.table, table: true);
+    }
+    if (heads && TableLineSyntax.heads(text, next)) {
+      return made(BlockKind.table, table: true);
+    }
+    final paragraph = open.openParagraph && !heads;
     final code = open.indentedCode
         ? blank || indent >= 4
-        : !blank && indent >= 4 && !open.openParagraph;
+        : !blank && indent >= 4 && !paragraph;
     // Display math, either form — `math_rule.dart` says what a display line
     // is, as the preview reads it (#252) — unless it is indented code, which
     // the preview's parser reads first. Only the multi-line form opens a
@@ -206,7 +226,8 @@ final class LineRules {
     if (!code && isDisplayLine(text.trim())) {
       return made(BlockKind.math, math: isDisplayOpen(text.trim()));
     }
-    final tag = HtmlBlockSyntax.open(text);
+    // Up to three spaces in, as every block's marker: four are code.
+    final tag = indent <= 3 ? HtmlBlockSyntax.open(text) : null;
     if (tag != null) {
       // A comment, a raw-text tag, a processing instruction, a declaration
       // or a CDATA section ends on the line with its end marker — which can
@@ -225,10 +246,6 @@ final class LineRules {
       );
     }
     if (blank) return made(BlockKind.blank, indentedCode: open.indentedCode);
-    if (LineSyntax.hasPipe(text) &&
-        (open.table || (next != null && LineSyntax.isDelimiterRow(next)))) {
-      return made(BlockKind.table, table: true);
-    }
     // Not a setext heading, which no line is on its own: it is a paragraph
     // whose underline goes on with it (`BlockRules.underlineLevel`).
     if (LineSyntax.isHr(text, 0)) return made(BlockKind.thematicBreak);
@@ -242,13 +259,13 @@ final class LineRules {
         quoteLast: ContainerWalk.lastOf(LineSyntax.quoteChild(text)),
       );
     }
-    final items = walk.items;
+    final items = base;
     final marker = LineSyntax.listMarker(text);
     if (marker != null) {
       // An ordered list not starting at 1, or an empty item, goes on with an
       // open paragraph lazily — a marker in an item starts a list whatever
       // its number.
-      if (open.openParagraph &&
+      if (paragraph &&
           !LineSyntax.markerInterrupts(
             marker,
             text,
@@ -258,35 +275,66 @@ final class LineRules {
       }
       final (itemIndent, empty) = LineSyntax.itemIndent(text, marker);
       final parent = items.isEmpty ? 0 : items.last.content;
-      return made(
-        BlockKind.listItem,
-        items: [
-          ...items,
-          (
-            indent: itemIndent,
-            content: parent + itemIndent,
-            blanks: empty ? 1 : null,
-            lastBlank: empty,
-          ),
-        ],
-        openParagraph: !empty && _isParagraphText(text.substring(itemIndent)),
+      final opened = <OpenItem>[
+        ...items,
+        (
+          indent: itemIndent,
+          content: parent + itemIndent,
+          blanks: empty ? 1 : null,
+          lastBlank: empty,
+        ),
+      ];
+      // What follows the marker and its one space is the item's first line,
+      // read in the item with nothing open there: a fence, a quote, a
+      // sublist or indented code opens in the item on the marker's own line
+      // (`- > q`, `- - a`, `- ```` `). The line is still the item's block.
+      final (start, width, _) = marker;
+      final after = start + width + 1;
+      final inner = _readLeaf(
+        line,
+        state,
+        walk,
+        LineState.initial,
+        carried,
+        next,
+        content: after < text.length ? text.substring(after) : '',
+        within: opened,
+      );
+      // The block is the first item's — a sublist opened after its marker is
+      // in its content, which the read view parses with it — and the state
+      // after it holds whatever the content opened.
+      return LineRead(
+        kind: BlockKind.listItem,
+        walk: walk,
+        items: opened,
+        quoteDepth: 0,
+        carried: carried,
+        exit: inner.exit,
       );
     }
     // A setext underline heads the paragraph above it and ends it.
-    final underline =
-        carried && open.openParagraph && LineSyntax.setextLevel(text) > 0;
+    final underline = carried && paragraph && LineSyntax.setextLevel(text) > 0;
     return made(BlockKind.paragraph, openParagraph: !underline);
   }
 
-  /// Whether [text], an item's text on its marker line, is paragraph text:
-  /// not a rule, a heading, a fence or a quote, which the item would open
-  /// instead.
-  static bool _isParagraphText(String text) =>
-      LineSyntax.indentOf(text) < text.length &&
-      !LineSyntax.isHr(text, 0) &&
-      LineSyntax.headingLevel(text) == 0 &&
-      LineSyntax.fenceOpen(text) == null &&
-      LineSyntax.quoteDepth(text) == 0;
+  /// Whether [text], following a table's rows, ends the table: a line that
+  /// would start a block of its own — another table's head, a fence, an HTML
+  /// block (all but a lone tag), a heading, a quote, a rule, or a marker
+  /// that may interrupt a paragraph. Anything else is a row, pipes or not.
+  static bool _endsTableRow(String text, String? next, bool inItem) {
+    if (next != null && TableLineSyntax.isDelimiter(next)) return true;
+    if (LineSyntax.fenceOpen(text) != null) return true;
+    if (LineSyntax.indentOf(text) <= 3) {
+      final html = HtmlBlockSyntax.open(text);
+      if (html != null && html.$1 != HtmlBlockKind.completeTag) return true;
+    }
+    if (LineSyntax.headingLevel(text) > 0) return true;
+    if (LineSyntax.quoteDepth(text) > 0) return true;
+    if (LineSyntax.isHr(text, 0)) return true;
+    final marker = LineSyntax.listMarker(text);
+    return marker != null &&
+        LineSyntax.markerInterrupts(marker, text, inItem: inItem);
+  }
 
   /// The read of a line of [kind], entered in [state] and walked as [walk],
   /// leaving [items] (the walk's when null) and the rest.

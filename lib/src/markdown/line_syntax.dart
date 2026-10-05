@@ -272,51 +272,34 @@ abstract final class LineSyntax {
     return digits ?? 0;
   }
 
-  /// Whether [text] from [from] on matches [_hr].
+  /// Whether [text] from [from] on is a thematic break, as the read view's
+  /// parser reads one: up to three spaces, then three or more of one `-`,
+  /// `*` or `_`, with spaces or tabs between them and nothing else —
+  /// `* * *` as much as `***`.
   ///
-  /// The expression cannot match unless three of one `-`, `*` or `_` in a
-  /// row stand within the first four characters with only whitespace before
-  /// them, so a line with anything else there — nearly every line of prose,
-  /// and every list item's `- ` — is answered without running it. Every
-  /// line is asked, twice (its kind, and whether it is paragraph text), and
-  /// the expression was the largest single cost of a scan.
+  /// Read by hand, not by an expression: every line is asked, twice (its
+  /// kind, and whether it is paragraph text), and the expression was the
+  /// largest single cost of a scan. Nearly every line is answered at its
+  /// first character.
   static bool isHr(String text, int from) {
-    for (var at = from; at < text.length && at < from + 4; at++) {
-      final char = text.codeUnitAt(at);
-      if (char == 0x2D || char == 0x2A || char == 0x5F) {
-        return at + 2 < text.length &&
-            text.codeUnitAt(at + 1) == char &&
-            text.codeUnitAt(at + 2) == char &&
-            _hr.hasMatch(from == 0 ? text : text.substring(from));
+    var at = from;
+    while (at < text.length && at - from < 3 && text.codeUnitAt(at) == 0x20) {
+      at++;
+    }
+    if (at >= text.length) return false;
+    final char = text.codeUnitAt(at);
+    if (char != 0x2D && char != 0x2A && char != 0x5F) return false;
+    var count = 0;
+    for (; at < text.length; at++) {
+      final next = text.codeUnitAt(at);
+      if (next == char) {
+        count++;
+      } else if (next != 0x20 && next != 0x09) {
+        return false;
       }
-      // What `\s` may match: ASCII whitespace, or past ASCII, where Unicode
-      // whitespace is — taken as space, so the expression decides.
-      final space =
-          char == 0x20 || (char >= 0x09 && char <= 0x0D) || char > 0x7F;
-      if (!space) return false;
     }
-    return false;
+    return count >= 3;
   }
-
-  static final RegExp _hr = RegExp(
-    r'^\s{0,3}((?:-{3,})|(?:\*{3,})|(?:_{3,}))\s*$',
-  );
-
-  /// Whether [text] is a table's delimiter row: only `-`, `:`, `|` and spaces,
-  /// with at least one `-`.
-  static bool isDelimiterRow(String text) {
-    final trimmed = text.trim();
-    if (!trimmed.contains('-') || !trimmed.contains('|')) return false;
-    if (!hasPipe(trimmed)) return false;
-    for (final rune in trimmed.codeUnits) {
-      final ok = rune == 0x2D || rune == 0x3A || rune == 0x7C || isSpace(rune);
-      if (!ok) return false;
-    }
-    return true;
-  }
-
-  /// Whether [text] has a `|`, which every table row does.
-  static bool hasPipe(String text) => text.contains('|');
 
   /// How many spaces [text] starts with.
   static int indentOf(String text) => text.length - text.trimLeft().length;

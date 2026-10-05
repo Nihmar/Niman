@@ -165,16 +165,30 @@ final class Block {
   );
 
   /// The block, a paragraph or an item's first one, as the setext heading
-  /// of [level] its underline makes it.
-  Block headed(int level) => Block(
-    kind: BlockKind.heading,
-    startLine: startLine,
-    endLine: endLine,
-    quoteDepth: quoteDepth,
-    listDepth: listDepth,
-    headingLevel: level,
-    entering: entering,
-  );
+  /// of [level] its underline makes it. An item stays an item, its text
+  /// headed: the parse reads its block as the item, marker and all, and a
+  /// heading block that held a marker was given to it as text — four spaces
+  /// of a sublist's marker were indented code.
+  Block headed(int level) => kind == BlockKind.listItem
+      ? Block(
+          kind: kind,
+          startLine: startLine,
+          endLine: endLine,
+          quoteDepth: quoteDepth,
+          listDepth: listDepth,
+          listOrdinal: listOrdinal,
+          headingLevel: level,
+          entering: entering,
+        )
+      : Block(
+          kind: BlockKind.heading,
+          startLine: startLine,
+          endLine: endLine,
+          quoteDepth: quoteDepth,
+          listDepth: listDepth,
+          headingLevel: level,
+          entering: entering,
+        );
 
   @override
   String toString() =>

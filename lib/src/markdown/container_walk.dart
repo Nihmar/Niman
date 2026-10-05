@@ -16,10 +16,18 @@ library;
 import 'package:niman/src/markdown/html_block_syntax.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
+import 'package:niman/src/markdown/table_line_syntax.dart';
 
 /// What the containers open before a line make of it.
 final class ContainerWalk {
-  const new _(this.items, this.closed, this.text, this.lazy, this.quote);
+  const new _(
+    this.items,
+    this.closed,
+    this.text,
+    this.lazy,
+    this.quote,
+    this.next,
+  );
 
   /// [raw], entered in [entering], walked through the items and the quote
   /// open around it; [next] is the line after it, which a table's head row
@@ -27,10 +35,12 @@ final class ContainerWalk {
   factory of(LineState entering, String raw, String? next) {
     final open = entering.listStack;
     if (open.isEmpty && entering.quoteDepth == 0) {
-      return ContainerWalk._(open, false, raw, false, null);
+      return ContainerWalk._(open, false, raw, false, null, next);
     }
     final blank = LineSyntax.indentOf(raw) == raw.length;
     var text = raw;
+    // The line after it, as each item in turn reads it.
+    var after = next;
     var lazy = false;
     var kept = open.length;
     List<OpenItem>? changed;
@@ -47,6 +57,7 @@ final class ContainerWalk {
             lastBlank: true,
           );
         }
+        after = _reach(after, item.indent);
         continue;
       }
       if (LineSyntax.indentOf(text) >= item.indent) {
@@ -65,16 +76,18 @@ final class ContainerWalk {
             lastBlank: false,
           );
         }
+        after = _reach(after, item.indent);
         continue;
       }
       // Short of it: a rule, a marker or a block that may interrupt ends the
       // list, and so does anything after a blank line. Anything else is the
       // item's lazily, read as it stands.
-      if (item.lastBlank || _endsList(text, next)) {
+      if (item.lastBlank || _endsList(text, after)) {
         kept = at;
         break;
       }
       lazy = true;
+      after = _reach(after, item.indent);
     }
     final items = kept < open.length
         ? (changed ?? open).sublist(0, kept)
@@ -83,11 +96,11 @@ final class ContainerWalk {
     if (kept == open.length && entering.quoteDepth > 0) {
       if (LineSyntax.quoteDepth(text) > 0) {
         quote = LineSyntax.quoteChild(text);
-      } else if (_quoteTakesLazily(text, entering.quoteLast)) {
+      } else if (_quoteTakesLazily(text, entering.quoteLast, after)) {
         quote = text;
       }
     }
-    return ContainerWalk._(items, kept < open.length, text, lazy, quote);
+    return ContainerWalk._(items, kept < open.length, text, lazy, quote, after);
   }
 
   /// The items the line stays in, outermost first: the ones open before it,
@@ -106,13 +119,33 @@ final class ContainerWalk {
   /// Whether an item took the line lazily, short of its indent.
   final bool lazy;
 
+  /// The line after it as the same items read it — each one's indent taken
+  /// off where that line reaches it, as the items will take it — which is
+  /// where a table's delimiter row is looked for. Not as this line was
+  /// taken: an item that took this line lazily may take the next by its
+  /// indent.
+  final String? next;
+
+  /// [line] as an item of [indent] reads it: the indent off a line that
+  /// reaches it, the line as it stands otherwise.
+  static String? _reach(String? line, int indent) {
+    if (line == null) return null;
+    var spaces = 0;
+    while (spaces < line.length &&
+        LineSyntax.isSpace(line.codeUnitAt(spaces))) {
+      spaces++;
+    }
+    return spaces >= indent ? line.substring(indent) : line;
+  }
+
   /// What the line holds inside the open quote, when it is the quote's —
   /// by its `>` or lazily; null when no quote is open or the line leaves it.
   final String? quote;
 
   /// Whether [text], short of an open item's indent, ends its list: a rule,
   /// a list marker, or a block that may interrupt a paragraph — a fence, a
-  /// heading, a quote, an HTML block (all but a lone tag) or a table.
+  /// heading, a quote, an HTML block (all but a lone tag) or a table's
+  /// head.
   static bool _endsList(String text, String? next) {
     if (LineSyntax.isHr(text, 0)) return true;
     if (LineSyntax.listMarker(text) != null) return true;
@@ -123,17 +156,20 @@ final class ContainerWalk {
       final html = HtmlBlockSyntax.open(text);
       if (html != null && html.$1 != HtmlBlockKind.completeTag) return true;
     }
-    return next != null &&
-        LineSyntax.hasPipe(text) &&
-        LineSyntax.isDelimiterRow(next);
+    // A table's head: the parser tries it on any line whose next is a
+    // delimiter row, and it may end a block whether or not the head fits.
+    return next != null && TableLineSyntax.isDelimiter(next);
   }
 
   /// Whether the open quote takes [text], a line without a `>`, lazily: the
   /// first block it could start is a paragraph and the quote's last line
   /// ([last], [LineState.quoteLast]) was neither blank nor a fence, or it
-  /// is indented code and that line was not indented.
-  static bool _quoteTakesLazily(String text, int last) {
+  /// is indented code and that line was not indented; [next] heading a
+  /// table makes it a table's head instead.
+  static bool _quoteTakesLazily(String text, int last, String? next) {
     if (LineSyntax.indentOf(text) == text.length) return false;
+    // A table's head is tried first, a paragraph's line after it.
+    if (next != null && TableLineSyntax.isDelimiter(next)) return false;
     if (LineSyntax.fenceOpen(text) != null) return false;
     final indent = LineSyntax.indentOf(text);
     if (indent <= 3 && HtmlBlockSyntax.open(text) != null) return false;

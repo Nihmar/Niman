@@ -262,16 +262,13 @@ final class BlockScanner {
     _blocks.shiftFrom(tailStart, edit.lineDelta);
     var start = edit.firstLine;
     // The line before the edit reads the edited line when it asks whether
-    // it heads a table (the delimiter row is the line under it), so it is
-    // not the line it was: the rebuild takes in its whole block. A setext
-    // underline asks nothing of the lines above it — it turns the paragraph
-    // the rebuild has open into a heading when it reaches it — so neither
-    // one typed nor one taken away sends the rebuild back.
-    if (start > 0 && start - 1 < buffer.lineCount) {
-      if (LineSyntax.hasPipe(_rules.lineText(start - 1))) {
-        start = _blockHolding(start - 1)?.startLine ?? 0;
-      }
-    }
+    // it heads a table (the delimiter row is the line under it) — any line
+    // may, pipes or not — so it is not the line it was: the rebuild starts
+    // a line back, and takes the block it is in open, cut there, as at any
+    // line. A setext underline asks nothing of the lines above it — it turns
+    // the paragraph the rebuild has open into a heading when it reaches it —
+    // so neither one typed nor one taken away sends the rebuild further.
+    if (start > 0 && start - 1 < buffer.lineCount) start--;
     // An edit at or past a frontier lands on lines that are not current: the
     // rebuild starts where they begin.
     if (_frontiers.isNotEmpty && _frontiers.first < start) {
@@ -506,7 +503,8 @@ final class BlockScanner {
       final setext =
           (open.kind == BlockKind.paragraph ||
               open.kind == BlockKind.listItem) &&
-          old.kind == BlockKind.heading &&
+          (old.kind == BlockKind.heading ||
+              (old.kind == BlockKind.listItem && old.headingLevel > 0)) &&
           open.quoteDepth == old.quoteDepth &&
           open.listDepth == old.listDepth;
       if (!setext) return -1;
@@ -524,7 +522,10 @@ final class BlockScanner {
   /// assumed: taken for a paragraph, `- item` / `  ---` with its underline
   /// gone was a paragraph to the rescan and an item to a fresh scan.
   Block _reopened(Block block, int index, int end) {
-    if (block.kind != BlockKind.heading || end >= block.endLine) {
+    final headed =
+        block.kind == BlockKind.heading ||
+        (block.kind == BlockKind.listItem && block.headingLevel > 0);
+    if (!headed || end >= block.endLine) {
       return block.cutAt(end);
     }
     return _blockRules

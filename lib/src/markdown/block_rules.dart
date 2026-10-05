@@ -6,6 +6,7 @@ library;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/line_rules.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
+import 'package:niman/src/markdown/table_line_syntax.dart';
 
 /// The blocks the scan makes of the lines [LineRules] reads.
 final class BlockRules {
@@ -68,8 +69,21 @@ final class BlockRules {
         // An ATX heading is its own line, and a setext one ends with its
         // underline: nothing goes on with either.
         return false;
-      case BlockKind.paragraph:
       case BlockKind.listItem:
+        // A lazy line of a quote its marker line opened (`- > q` / `   r`)
+        // goes on in the item's block: it needs the paragraph the quote
+        // holds, which a quote block begun on it would not have. A line with
+        // its own `>` starts a quote block, drawn with its bar. A quote open
+        // below an item's block is one the marker line opened — a later one
+        // has a block of its own, the open one.
+        if (read.walk.quote != null) {
+          return LineSyntax.quoteDepth(read.text) == 0;
+        }
+        return (read.kind == BlockKind.paragraph &&
+                read.carried &&
+                entering.openParagraph) ||
+            underlineLevel(open, end) > 0;
+      case BlockKind.paragraph:
         // Paragraph text goes on with the paragraph — an item's block is its
         // first one — indented into it or lazily, which keeps a wrapped item
         // whole. A setext underline goes on with the paragraph it heads
@@ -127,7 +141,10 @@ final class BlockRules {
   int underlineLevel(Block paragraph, int line) {
     final read = _lines.read(line);
     if (!read.carried || !_lines.entering(line).openParagraph) return 0;
-    if (read.items.length - 1 != paragraph.listDepth) return 0;
+    // A table's head is tried first: a line over a delimiter row ends the
+    // paragraph, whether or not it is a table.
+    final next = read.walk.next;
+    if (next != null && TableLineSyntax.isDelimiter(next)) return 0;
     return LineSyntax.setextLevel(read.text);
   }
 
