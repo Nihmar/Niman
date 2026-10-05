@@ -852,30 +852,11 @@ final class BlockScanner {
     }
     final marker = _listMarker(text, _markerReach(state));
     if (marker != null) {
-      // A paragraph is open and the marker cannot interrupt it — an ordered
-      // list that does not start at 1, or an empty item — and the marker is
-      // neither at or above the innermost item's own marker (where it is a
-      // sibling or an ancestor, so it closes the deeper items and starts
-      // one) nor nested in an open item (past its content column, where it
-      // would start a list of its own), so the line goes on with the
-      // paragraph lazily, not a new item. Only a paragraph outside every
-      // item and quote is protected: inside an item, or under a quote whose
-      // line this is not, the marker always breaks it (`1. w` / `  2) w`
-      // starts a second list; `> w` / `2) w` starts a list outside the
-      // quote, it does not go on with the quoted paragraph).
-      final siblingOrAncestor =
-          state.listStack.isNotEmpty &&
-          marker.$1 <= state.listStack.last.marker;
-      final nested = state.listIndent >= 0 && marker.$1 >= state.listIndent;
-      final inItemOrQuote = state.listStack.isNotEmpty || state.quoteDepth > 0;
-      if (state.openParagraph &&
-          !inItemOrQuote &&
-          !siblingOrAncestor &&
-          !nested &&
-          !_markerInterrupts(marker, text)) {
-        return BlockKind.paragraph;
-      }
-      return BlockKind.listItem;
+      // An ordered list not starting at 1, or an empty item, under an open
+      // paragraph goes on with it lazily: not a new item.
+      return _markerContinuesParagraph(marker, text, state)
+          ? BlockKind.paragraph
+          : BlockKind.listItem;
     }
     if (text.trim().isNotEmpty && state.listIndent >= 0) {
       return BlockKind.paragraph;
@@ -1520,6 +1501,25 @@ final class BlockScanner {
   static int _markerReach(LineState state) =>
       (state.listIndent < 0 ? 0 : state.listIndent) + 3;
 
+  /// Whether [marker] on [text], entered in [state], goes on with the open
+  /// paragraph lazily instead of starting an item — what [_kindOf] reads the
+  /// line as and [_listAfter] keeps the items by.
+  ///
+  /// Only a paragraph outside every item and quote is protected, and only
+  /// from a marker that may not interrupt it ([_markerInterrupts]). Inside
+  /// an item, or under a quote whose line this is not, a marker always
+  /// breaks the paragraph: `1. w` / `  2) w` starts a second list, and
+  /// `> w` / `2) w` starts a list outside the quote.
+  static bool _markerContinuesParagraph(
+    (int, int, int) marker,
+    String text,
+    LineState state,
+  ) =>
+      state.openParagraph &&
+      state.listStack.isEmpty &&
+      state.quoteDepth == 0 &&
+      !_markerInterrupts(marker, text);
+
   /// Whether the marker [marker] on [text] may interrupt an open paragraph:
   /// an unordered item always may, an ordered one only if it starts at 1, and
   /// an empty item (a marker with no content) never does.
@@ -1552,23 +1552,11 @@ final class BlockScanner {
     // (`  2) w` / `` / `    - w` has the last line as code outside the
     // list). [_kindOf] decides this first; [_listAfter] follows it.
     if (marker != null && _kindOf(line) != BlockKind.indentedCode) {
-      // The same rule [_kindOf] applies: a marker that cannot interrupt an
-      // open paragraph — an ordered list not starting at 1, or an empty item
-      // — and is not a sibling or an ancestor of the innermost item goes on
-      // with the paragraph lazily, so no item opens and the items already
-      // open stay as they are (`w` / `2) w` / `2) w` is one paragraph, not a
-      // list). Left to open an item here, the state carried it and the next
-      // line read as the item's.
-      final siblingOrAncestor =
-          state.listStack.isNotEmpty &&
-          marker.$1 <= state.listStack.last.marker;
-      final nested = state.listIndent >= 0 && marker.$1 >= state.listIndent;
-      final inItemOrQuote = state.listStack.isNotEmpty || state.quoteDepth > 0;
-      if (state.openParagraph &&
-          !inItemOrQuote &&
-          !siblingOrAncestor &&
-          !nested &&
-          !_markerInterrupts(marker, text)) {
+      // A marker that goes on with the paragraph opens no item, and the
+      // items already open stay as they are (`w` / `2) w` / `2) w` is one
+      // paragraph, not a list). Left to open an item here, the state carried
+      // it and the next line read as the item's.
+      if (_markerContinuesParagraph(marker, text, state)) {
         return state.listStack;
       }
       final (start, _, content) = marker;
