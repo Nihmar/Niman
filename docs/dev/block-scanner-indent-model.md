@@ -209,3 +209,20 @@ The red classes, in the harness's own counts: 1 and 4 are the
   4 343, with `quoted → code` and `code → quoted` swapping places. The
   columns alone are not enough; the **walk** is, because it makes the
   indent one value instead of two half-measured ones.
+- Measuring the indent past the quotes (`_indentAfterQuotes`) and making
+  the marker columns relative to it: 309 → 6 346. The stack's item
+  columns are absolute and a relative marker does not compare to them —
+  the walk has to carry **how many quotes were consumed** and compare
+  items only at the same quote level.
+- Making indented code in an item measure from the item's marker alone
+  (not its content column): 309 → 352, 59 new minimal repros. A marker
+  four in is a sublist, not code in the item; the rule needs the walk's
+  effective indent to tell them apart.
+
+Each partial change fixes the shape it aimed at and moves others by the
+hundreds, which is what makes this a rewrite: the four numbers above are
+the same lesson four times.
+
+The fifteen cases are in `block_scanner_test.dart`'s "the indentation
+model" group: eight run, seven are `skip: pending` with this document's
+name. The rewrite unskips them.
