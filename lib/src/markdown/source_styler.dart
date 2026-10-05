@@ -491,6 +491,7 @@ final class SourceStyler {
           block,
           buffer.lineAt(block.startLine),
           line - block.startLine,
+          text,
         ),
       );
 

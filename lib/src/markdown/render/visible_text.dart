@@ -20,6 +20,7 @@
 library;
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/style_run.dart';
@@ -198,6 +199,32 @@ List<(int, int)> hiddenRangesOf(ParsedBlock block) {
   final hidden = <(int, int)>[];
   for (final run in block.runs) {
     hidden.addAll(_markersOf(text, run));
+  }
+  if (block.block.kind == BlockKind.listItem) {
+    hidden.addAll(_continuationIndents(text, block.runs));
+  }
+  return hidden;
+}
+
+/// The spaces an item's lines after its first stand in by: the item's
+/// indent, which the parse reads its lines without, and which a paragraph's
+/// line does not show. An item's block keeps them because the parse is
+/// given it as it stands in its parent (`BlockParser.contentText`). Not in
+/// a code span, whose spaces are its text.
+List<(int, int)> _continuationIndents(String text, List<StyleRun> runs) {
+  final hidden = <(int, int)>[];
+  var at = text.indexOf('\n');
+  while (at >= 0) {
+    var end = at + 1;
+    while (end < text.length &&
+        (text.codeUnitAt(end) == 0x20 || text.codeUnitAt(end) == 0x09)) {
+      end++;
+    }
+    final inCode = runs.any(
+      (run) => run.kind == StyleKind.code && run.start <= at && at < run.end,
+    );
+    if (end > at + 1 && !inCode) hidden.add((at + 1, end));
+    at = text.indexOf('\n', end);
   }
   return hidden;
 }

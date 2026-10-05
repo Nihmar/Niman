@@ -423,10 +423,20 @@ inline math $x$ and a #tag, all in one block.
       final prefix = BlockParser.linePrefixLength(
         block,
         lines[index],
-        BlockParser.listStripOf(block, lines.first, index),
+        BlockParser.listStripOf(block, lines.first, index, lines[index]),
       );
       expect(lines[index].substring(prefix), text);
     }
+  });
+
+  test("an item's line far past its content keeps what the parse takes", () {
+    // `      # w` is four spaces past the item's content: a paragraph's line
+    // to the note. The parse reads the block as the item and takes two
+    // spaces off itself; taking the content column here too left `  # w`,
+    // a heading.
+    final parsed = _parse('+ w\n      # w');
+    expect(parsed.text, '+ w\n      # w');
+    expect(_run(parsed, StyleKind.heading), isNull);
   });
 
   test('a quotation mark is placed, and so is what follows it', () {
