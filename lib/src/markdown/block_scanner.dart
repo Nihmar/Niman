@@ -371,7 +371,7 @@ final class BlockScanner {
       } else if (block.startLine >= line) {
         keepFrom = index;
       } else {
-        rebuilt.add(_cutFront(block, line, end));
+        rebuilt.add(block.cutFrom(line, end));
         keepFrom = index + 1;
       }
     }
@@ -442,19 +442,6 @@ final class BlockScanner {
     return (touched, block, end);
   }
 
-  /// [block] from [start] on, to [end]: what is left of a block a scan
-  /// stopped inside.
-  static Block _cutFront(Block block, int start, int end) => Block(
-    kind: block.kind,
-    startLine: start,
-    endLine: end,
-    quoteDepth: block.quoteDepth,
-    listDepth: block.listDepth,
-    listOrdinal: block.listOrdinal,
-    headingLevel: block.headingLevel,
-    fenceInfo: block.fenceInfo,
-  );
-
   /// Whether the rebuild can stop before [line] — whose entering state is
   /// the one it had, as is the line before it — and, when it can, the index
   /// of the first old block to keep; -1 when it cannot.
@@ -523,36 +510,11 @@ final class BlockScanner {
   /// assumed: taken for a paragraph, `- item` / `  ---` with its underline
   /// gone was a paragraph to the rescan and an item to a fresh scan.
   Block _reopened(Block block, int index, int end) {
-    final cut = _cut(block, end);
-    if (block.kind != BlockKind.heading || end >= block.endLine) return cut;
-    return _cut(_blockStarting(block.startLine, _nonBlankBefore(index)), end);
+    if (block.kind != BlockKind.heading || end >= block.endLine) {
+      return block.cutAt(end);
+    }
+    return _blockStarting(block.startLine, _nonBlankBefore(index)).cutAt(end);
   }
-
-  /// [block], a paragraph, as the setext heading of [level] its underline
-  /// makes it.
-  static Block _headed(Block block, int level) => Block(
-    kind: BlockKind.heading,
-    startLine: block.startLine,
-    endLine: block.endLine,
-    quoteDepth: block.quoteDepth,
-    listDepth: block.listDepth,
-    headingLevel: level,
-    entering: block.entering,
-  );
-
-  /// [block] as it was before [end]: the run it covered up to a line inside
-  /// it, which is what an edit leaves of the block it landed in.
-  static Block _cut(Block block, int end) => Block(
-    kind: block.kind,
-    startLine: block.startLine,
-    endLine: end,
-    quoteDepth: block.quoteDepth,
-    listDepth: block.listDepth,
-    listOrdinal: block.listOrdinal,
-    headingLevel: block.headingLevel,
-    fenceInfo: block.fenceInfo,
-    entering: block.entering,
-  );
 
   /// The first block index at or after [fromIndex] whose `test` holds, or the
   /// list's length when none does.
@@ -1817,7 +1779,7 @@ final class _BlockBuilder {
   /// Makes the open paragraph the setext heading of [level] its underline
   /// makes it.
   void headOpen(int level) {
-    _open = BlockScanner._headed(_open!, level);
+    _open = _open!.headed(level);
   }
 
   /// The blocks built, the open one closed.
@@ -1829,9 +1791,7 @@ final class _BlockBuilder {
   void _close() {
     final open = _open;
     if (open == null) return;
-    _blocks.add(
-      open.endLine == openEnd ? open : BlockScanner._cut(open, openEnd),
-    );
+    _blocks.add(open.endLine == openEnd ? open : open.cutAt(openEnd));
     _open = null;
   }
 }

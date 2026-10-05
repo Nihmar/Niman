@@ -137,6 +137,45 @@ final class Block {
     );
   }
 
+  /// The block as it was before [end]: the run it covered up to a line
+  /// inside it, which is what an edit leaves of the block it landed in.
+  Block cutAt(int end) => Block(
+    kind: kind,
+    startLine: startLine,
+    endLine: end,
+    quoteDepth: quoteDepth,
+    listDepth: listDepth,
+    listOrdinal: listOrdinal,
+    headingLevel: headingLevel,
+    fenceInfo: fenceInfo,
+    entering: entering,
+  );
+
+  /// The block from [start] on, to [end]: what is left of a block a scan
+  /// stopped inside. Without its entering state, which was its first line's.
+  Block cutFrom(int start, int end) => Block(
+    kind: kind,
+    startLine: start,
+    endLine: end,
+    quoteDepth: quoteDepth,
+    listDepth: listDepth,
+    listOrdinal: listOrdinal,
+    headingLevel: headingLevel,
+    fenceInfo: fenceInfo,
+  );
+
+  /// The block, a paragraph or an item's first one, as the setext heading
+  /// of [level] its underline makes it.
+  Block headed(int level) => Block(
+    kind: BlockKind.heading,
+    startLine: startLine,
+    endLine: endLine,
+    quoteDepth: quoteDepth,
+    listDepth: listDepth,
+    headingLevel: level,
+    entering: entering,
+  );
+
   @override
   String toString() =>
       'Block(${kind.name} $startLine..$endLine'
