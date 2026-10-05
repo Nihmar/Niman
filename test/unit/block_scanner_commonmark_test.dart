@@ -26,6 +26,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// Where a line's words are: its leaf, and the items (`L`) and quotes (`Q`)
@@ -68,8 +69,11 @@ const _forms = [
 ];
 
 /// What a line is indented with: mostly nothing, then spaces either side
-/// of an item's content columns, and a tab.
-const _indents = ['', '', '', '  ', '   ', '    ', '      ', '\t'];
+/// of an item's content columns.
+const _indents = ['', '', '', '  ', '   ', '    ', '      '];
+
+/// The same in tabs, for a document indented as Obsidian writes one.
+const _tabs = ['', '', '', '\t', '\t', '\t\t'];
 final RegExp _token = RegExp(r'w\d+');
 final RegExp _heading = RegExp(r'^h[1-6]$');
 
@@ -242,43 +246,28 @@ void main() {
     }
   });
 
+  test('the scanner reads a sample of documents as the parser does', () {
+    // The gate: two thousand documents, every one read alike but those the
+    // parser itself gets wrong (_quirkOf). The full report is behind
+    // NIMAN_SCANNER_DIFF.
+    final run = _run(2000, 1);
+    expect(
+      run.found.keys.take(5).toList(),
+      isEmpty,
+      reason: '${run.docs} of 2000 documents differ',
+    );
+  });
+
   test('the scanner reads containers as CommonMark does', skip: !_asked, () {
-    final random = math.Random(
+    final run = _run(
+      40000,
       int.parse(const String.fromEnvironment('SEED', defaultValue: '1')),
     );
-    final found = <String, String>{};
-    var docs = 0;
-    for (var n = 0; n < 40000; n++) {
-      final count = 2 + random.nextInt(5);
-      var w = 0;
-      final lines = [
-        for (var i = 0; i < count; i++)
-          _indents[random.nextInt(_indents.length)] +
-              _forms[random.nextInt(_forms.length)].replaceFirst(
-                'W',
-                'w${w++}',
-              ),
-      ];
-      if (lines.first.trim() == '---') continue;
-      if (_differs(lines) == null) continue;
-      docs++;
-      // Shrink: drop lines while it still differs.
-      var small = lines;
-      for (var changed = true; changed;) {
-        changed = false;
-        for (var i = 0; i < small.length && small.length > 1; i++) {
-          final fewer = [...small]..removeAt(i);
-          if (fewer.first.trim() != '---' && _differs(fewer) != null) {
-            small = fewer;
-            changed = true;
-            break;
-          }
-        }
-      }
-      final key = small.map((l) => l.replaceAll(_token, 'w')).join(r'\n');
-      found.putIfAbsent(key, () => _differs(small)!);
-    }
-    print('docs differing: $docs / 40000, minimal: ${found.length}');
+    final found = run.found;
+    print(
+      'docs differing: ${run.docs} / 40000, minimal: ${found.length} '
+      '(left out: ${run.skipped})',
+    );
     // The classes: each minimal repro's first difference, without its word.
     final classes = <String, int>{};
     final examples = <String, String>{};
@@ -304,4 +293,102 @@ void main() {
       print('== ${key.replaceAll(' ', '·')}   ${found[key]}');
     }
   });
+}
+
+/// [count] documents made from [seed]: how many differ, how many were left
+/// out for the parser's own faults, and each difference shrunk to the
+/// fewest lines that still show it, by its lines with the words blanked.
+({int docs, Map<String, int> skipped, Map<String, String> found}) _run(
+  int count,
+  int seed,
+) {
+  final random = math.Random(seed);
+  final found = <String, String>{};
+  var docs = 0;
+  final skipped = <String, int>{};
+  for (var n = 0; n < count; n++) {
+    final lines = _document(random);
+    if (lines.first.trim() == '---') continue;
+    final quirk = _quirkOf(lines);
+    if (quirk != null) {
+      skipped[quirk] = (skipped[quirk] ?? 0) + 1;
+      continue;
+    }
+    if (_differs(lines) == null) continue;
+    docs++;
+    // Shrink: drop lines while it still differs.
+    var small = lines;
+    for (var changed = true; changed;) {
+      changed = false;
+      for (var i = 0; i < small.length && small.length > 1; i++) {
+        final fewer = [...small]..removeAt(i);
+        if (fewer.first.trim() != '---' &&
+            _quirkOf(fewer) == null &&
+            _differs(fewer) != null) {
+          small = fewer;
+          changed = true;
+          break;
+        }
+      }
+    }
+    final key = small.map((l) => l.replaceAll(_token, 'w')).join(r'\n');
+    found.putIfAbsent(key, () => _differs(small)!);
+  }
+  return (docs: docs, skipped: skipped, found: found);
+}
+
+/// A document of two to six lines, from [_forms] indented by [_indents] —
+/// or, one in four, by [_tabs].
+List<String> _document(math.Random random) {
+  final indents = random.nextInt(4) == 0 ? _tabs : _indents;
+  final count = 2 + random.nextInt(5);
+  var w = 0;
+  return [
+    for (var i = 0; i < count; i++)
+      indents[random.nextInt(indents.length)] +
+          _forms[random.nextInt(_forms.length)].replaceFirst('W', 'w${w++}'),
+  ];
+}
+
+/// What the parser itself gets wrong in [lines], or what the app cannot
+/// hand it, if anything: the documents the comparison leaves out, by name.
+///
+/// * A lone `-` under a line of text. The text's paragraph takes it for a
+///   setext underline and ends, but GFM's list syntax is tried before the
+///   underline's, opens an empty item on it — and the paragraph's text is
+///   gone from the output.
+/// * `===` in a quote's run of lines. A quote whose last line is lazy has
+///   its setext underlines turned off, so `===` there is text; the scanner
+///   reads the quote's content on its own, and heads it.
+/// * Tabs and spaces indenting the lines of one list — the app's limit,
+///   not the parser's. A tab an item's indent ends inside of leaves columns
+///   of it to the item's text, which the text the read view hands the
+///   parser — a substring of the line — cannot hold: the tab goes whole. A
+///   list indented with tabs alone, as Obsidian writes one, loses the same
+///   columns on every line and reads alike ([_tabs]); mixed with spaces it
+///   does not. The documents made here do not mix them.
+String? _quirkOf(List<String> lines) {
+  var quoted = false;
+  var listed = false;
+  var tabs = false;
+  var spaces = false;
+  for (var at = 0; at < lines.length; at++) {
+    final raw = lines[at];
+    final line = raw.trim();
+    if (line.isEmpty) {
+      quoted = false;
+      continue;
+    }
+    if (at > 0 && line == '-' && lines[at - 1].trim().isNotEmpty) {
+      return 'a lone `-`';
+    }
+    if (quoted && line.replaceAll('=', '').isEmpty) return '`===` in a quote';
+    if (raw.contains('>')) quoted = true;
+    if (LineSyntax.listMarkerOf(line) != null) listed = true;
+    final indent = raw.substring(0, raw.length - raw.trimLeft().length);
+    if (listed && indent.contains('\t')) tabs = true;
+    if (listed && indent.contains(' ')) spaces = true;
+    if (tabs && spaces) return 'tabs and spaces in one list';
+  }
+  return null;
 }
