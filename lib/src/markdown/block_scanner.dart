@@ -36,7 +36,15 @@ final class BlockScanner {
   ///
   /// An edit's rescan reads at most [budget] lines past the edit before it
   /// leaves the rest to [advance] (see [edited]).
-  new(this.buffer, {this.budget = defaultBudget}) : _blocks = BlockList() {
+  ///
+  /// `leftOver` is, for a container's content read again, what a tab left
+  /// over before each of its lines (`ContainerWalk.of`); such a scan is
+  /// read once, never edited.
+  new(
+    this.buffer, {
+    this.budget = defaultBudget,
+    this._leftOver = const <int>[],
+  }) : _blocks = BlockList() {
     _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
     // The changes are counted from the list a reader first takes.
     _changes
@@ -50,6 +58,7 @@ final class BlockScanner {
   /// The two must hold the same lines, which is the caller's to promise.
   new rebound(BlockScanner scanned, this.buffer)
     : budget = scanned.budget,
+      _leftOver = scanned._leftOver,
       _blocks = BlockList.sharing((scanned..settle())._blocks) {
     _entering.addAll(scanned._entering);
     _lineCount = scanned._lineCount;
@@ -68,8 +77,11 @@ final class BlockScanner {
   /// The state entering each scanned line.
   final List<LineState> _entering = <LineState>[];
 
+  /// What a tab left over before each line, for a container's content.
+  final List<int> _leftOver;
+
   /// What the scan makes of each line, read against [_entering].
-  late final LineRules _rules = LineRules(buffer, _entering);
+  late final LineRules _rules = LineRules(buffer, _entering, _leftOver);
 
   /// The blocks the scan makes of those lines.
   late final BlockRules _blockRules = BlockRules(_rules);
@@ -234,6 +246,7 @@ final class BlockScanner {
   /// stops there and leaves a [frontier]: the rest is what the edit changed,
   /// and [advance] carries on with it.
   void edited(SourceEdit edit) {
+    assert(_leftOver.isEmpty, "a container's content is not edited");
     final untouched = edit.firstUntouchedLine;
     if (edit.firstLine < _entering.length) {
       _replaceStates(

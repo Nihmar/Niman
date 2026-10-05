@@ -28,13 +28,19 @@ import 'package:niman/src/markdown/table_line_syntax.dart';
 final class LineRules {
   /// Rules over [buffer], reading the state entering each line from the
   /// scanner's own list of them, which it keeps up to date.
-  new(this.buffer, this._entering);
+  new(this.buffer, this._entering, [this._leftOver = const <int>[]]);
 
   /// The text being scanned.
   final SourceBuffer buffer;
 
   /// The state entering each scanned line.
   final List<LineState> _entering;
+
+  /// What a tab left over before each line, for a container's content read
+  /// again ([ContainerWalk.of]); empty for a note.
+  final List<int> _leftOver;
+
+  int _leftOverAt(int line) => line < _leftOver.length ? _leftOver[line] : 0;
 
   /// The line [read] last read, the state it entered in and the buffer's
   /// revision then; [_last] is the read. One line, because a scan asks
@@ -85,7 +91,12 @@ final class LineRules {
   /// Line [line], entered in [state], read.
   LineRead _read(int line, LineState state) {
     final next = line + 1 < buffer.lineCount ? lineText(line + 1) : null;
-    final walk = ContainerWalk.of(state, lineText(line), next);
+    final walk = ContainerWalk.of(
+      state,
+      lineText(line),
+      next,
+      _leftOverAt(line),
+    );
     final quoted = walk.quote;
     if (quoted != null) {
       // The quote's line: what is inside the quote is the quote's content's
@@ -339,6 +350,7 @@ final class LineRules {
       LineState(listStack: items),
       lineText(line),
       line + 1 < buffer.lineCount ? lineText(line + 1) : null,
+      _leftOverAt(line),
     ).closed;
   }
 

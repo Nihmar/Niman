@@ -33,16 +33,21 @@ final class ContainerWalk {
   /// [raw], entered in [entering], walked through the items and the quote
   /// open around it; [next] is the line after it, which a table's head row
   /// is told by.
-  factory of(LineState entering, String raw, String? next) {
+  ///
+  /// [leftOver] is what a tab left of the line's indent before the text
+  /// being scanned began: a container's content read again — an item's,
+  /// whose indent ended inside a tab — hands each line on with it, as the
+  /// parser does (`BlockTree`).
+  factory of(LineState entering, String raw, String? next, [int leftOver = 0]) {
     final open = entering.listStack;
     if (open.isEmpty && entering.quoteDepth == 0) {
-      return ContainerWalk._(open, false, raw, false, null, next, 0);
+      return ContainerWalk._(open, false, raw, false, null, next, leftOver);
     }
     final blank = LineSyntax.indentOf(raw) == raw.length;
     var text = raw;
     // Columns a tab an item took off left over, which count toward the
     // next item's indent (`LineSyntax.dedent`).
-    var remaining = 0;
+    var remaining = leftOver;
     // The line after it, as each item in turn reads it.
     var after = next;
     var lazy = false;
