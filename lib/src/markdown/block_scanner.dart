@@ -23,6 +23,7 @@ import 'package:niman/src/markdown/block_changes.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_list.dart';
 import 'package:niman/src/markdown/html_block_syntax.dart';
+import 'package:niman/src/markdown/line_containers.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -633,15 +634,15 @@ final class BlockScanner {
     final base = _fenceClosesItem(line, text, entering)
         ? LineState.initial
         : entering;
-    final quoteDepth = _quoteClosesToCode(text, base)
+    final quoteDepth = LineContainers.quoteClosesToCode(text, base)
         ? 0
-        : _quoteDepthAfter(line, text, base);
+        : LineContainers.quoteDepthAfter(text, base);
     // The depth *on* the line, like the quote's: the state entering a marker
     // line describes the item before it, so a block that took its depth from
     // there was drawn at the previous item's indent — siblings at different
     // indents, the item after a sublist pushed right (device report,
     // 2026-09-21).
-    final quoteItems = _quoteItems(text, base);
+    final quoteItems = LineContainers.quoteItems(text, base);
     final listStack = quoteItems ?? _listAfter(line, text, base);
     final listDepth = listStack.isEmpty ? -1 : listStack.length - 1;
     return Block(
@@ -700,7 +701,7 @@ final class BlockScanner {
         // of the open item's content column is a quote of its own, outside:
         // it closes the item, so it does not go on with this block.
         return _kindOf(end) == BlockKind.quote &&
-            _quoteItems(_text(end), _entering[end]) == null;
+            LineContainers.quoteItems(_text(end), _entering[end]) == null;
       case BlockKind.fencedCode:
       case BlockKind.indentedCode:
       case BlockKind.frontmatter:
@@ -774,7 +775,8 @@ final class BlockScanner {
       }
       return BlockKind.fencedCode;
     }
-    if (LineSyntax.fenceOpen(text, _contentColumn(text, state)) != null) {
+    if (LineSyntax.fenceOpen(text, LineContainers.contentColumn(text, state)) !=
+        null) {
       return BlockKind.fencedCode;
     }
     if (state.math || _isDisplayLineAt(line, text, state)) {
@@ -794,8 +796,12 @@ final class BlockScanner {
     if (_isTableRow(line)) return BlockKind.table;
     // Not a setext heading, which no line is on its own: it is a paragraph
     // whose underline goes on with it ([_underlineLevel]).
-    if (_isRule(text, state)) return BlockKind.thematicBreak;
-    if (LineSyntax.headingLevel(text, _contentColumn(text, state)) > 0) {
+    if (LineContainers.isRule(text, state)) return BlockKind.thematicBreak;
+    if (LineSyntax.headingLevel(
+          text,
+          LineContainers.contentColumn(text, state),
+        ) >
+        0) {
       return BlockKind.heading;
     }
     // Code while it is four spaces in: a line less than that ends the block.
@@ -804,21 +810,25 @@ final class BlockScanner {
     }
     // A second indented line under a quote leaves it for code ([LineState.
     // quoteIndented]): the quote has already taken its one continuation.
-    if (_quoteClosesToCode(text, state)) {
+    if (LineContainers.quoteClosesToCode(text, state)) {
       return BlockKind.indentedCode;
     }
     // Containers, innermost first: a line with its own quote marker is a quote
     // line, a line with a list marker starts an item, and a line with neither
     // either continues the item it is indented into or the quote it is lazily
     // part of.
-    if (LineSyntax.quoteDepth(text, _contentColumn(text, state)) > 0) {
+    if (LineSyntax.quoteDepth(text, LineContainers.contentColumn(text, state)) >
+        0) {
       return BlockKind.quote;
     }
-    final marker = LineSyntax.listMarker(text, _markerReach(state));
+    final marker = LineSyntax.listMarker(
+      text,
+      LineContainers.markerReach(state),
+    );
     if (marker != null) {
       // An ordered list not starting at 1, or an empty item, under an open
       // paragraph goes on with it lazily: not a new item.
-      return _markerContinuesParagraph(marker, text, state)
+      return LineContainers.markerContinuesParagraph(marker, text, state)
           ? BlockKind.paragraph
           : BlockKind.listItem;
     }
@@ -834,14 +844,22 @@ final class BlockScanner {
   /// Used by [_kindOf] to detect a line that closes an item's fence.
   BlockKind _kindOutsideFence(int line, String text, LineState state) {
     if (text.trim().isEmpty) return BlockKind.blank;
-    if (_isRule(text, state)) return BlockKind.thematicBreak;
-    if (LineSyntax.headingLevel(text, _contentColumn(text, state)) > 0) {
+    if (LineContainers.isRule(text, state)) return BlockKind.thematicBreak;
+    if (LineSyntax.headingLevel(
+          text,
+          LineContainers.contentColumn(text, state),
+        ) >
+        0) {
       return BlockKind.heading;
     }
-    if (LineSyntax.quoteDepth(text, _contentColumn(text, state)) > 0) {
+    if (LineSyntax.quoteDepth(text, LineContainers.contentColumn(text, state)) >
+        0) {
       return BlockKind.quote;
     }
-    final marker = LineSyntax.listMarker(text, _markerReach(state));
+    final marker = LineSyntax.listMarker(
+      text,
+      LineContainers.markerReach(state),
+    );
     if (marker != null) return BlockKind.listItem;
     if (_indentedCodeContinues(line, text, state)) {
       return BlockKind.indentedCode;
@@ -888,24 +906,29 @@ final class BlockScanner {
         return _exitOfFrom(line, LineState.initial);
       }
       return LineSyntax.isFenceClose(text, state.fence!, state.listIndent)
-          ? _inItems(state.listStack)
+          ? LineContainers.inItems(state.listStack)
           : state;
     }
     if (state.math) {
-      return LineSyntax.closesMath(text) ? _inItems(state.listStack) : state;
+      return LineSyntax.closesMath(text)
+          ? LineContainers.inItems(state.listStack)
+          : state;
     }
     if (state.frontmatter) {
       return LineSyntax.closesFrontmatter(text) ? LineState.initial : state;
     }
     if (state.html != null) {
       return HtmlBlockSyntax.closes(text, state)
-          ? _inItems(state.listStack)
+          ? LineContainers.inItems(state.listStack)
           : state;
     }
     if (LineSyntax.opensFrontmatter(line, text)) {
       return const LineState(frontmatter: true);
     }
-    final fence = LineSyntax.fenceOpen(text, _contentColumn(text, state));
+    final fence = LineSyntax.fenceOpen(
+      text,
+      LineContainers.contentColumn(text, state),
+    );
     if (fence != null) {
       return LineState(fence: fence, listStack: _listAfter(line, text, state));
     }
@@ -929,17 +952,17 @@ final class BlockScanner {
       // of the worst-note fixture drawn as raw HTML, and their links unread.
       if (!HtmlBlockSyntax.closesOnItsOwnLine(text, opened)) return opened;
     }
-    final quoteDepth = _quoteClosesToCode(text, state)
+    final quoteDepth = LineContainers.quoteClosesToCode(text, state)
         ? 0
-        : _quoteDepthAfter(line, text, state);
-    final quoteItems = _quoteItems(text, state);
+        : LineContainers.quoteDepthAfter(text, state);
+    final quoteItems = LineContainers.quoteItems(text, state);
     final listStack = quoteItems ?? _listAfter(line, text, state);
     final table = _tableContinues(line, state);
     final indentedCode =
         _indentedCodeContinues(line, text, state) ||
-        _quoteClosesToCode(text, state);
+        LineContainers.quoteClosesToCode(text, state);
     final openParagraph =
-        !table && !indentedCode && _isParagraphText(text, state);
+        !table && !indentedCode && LineContainers.isParagraphText(text, state);
     // A quote takes one indented continuation of its paragraph; a second in
     // a row is not a lazy continuation any more and opens code, which closes
     // it. A line that is not indented breaks the run: the next indented line
@@ -947,7 +970,8 @@ final class BlockScanner {
     // the last line in the quote).
     final quoteIndented =
         quoteDepth > 0 &&
-        (_quoteClosesToCode(text, state) || _isIndented(text, state));
+        (LineContainers.quoteClosesToCode(text, state) ||
+            LineContainers.isIndented(text, state));
     // A line that leaves the scan outside every construct is the shared
     // state, not a new object equal to it. That is the common line of a long
     // note of prose, and a state apiece was 68 MB of the shell running the
@@ -985,71 +1009,6 @@ final class BlockScanner {
       indentedCode: indentedCode,
       openParagraph: openParagraph,
     );
-  }
-
-  /// Whether [text] starts four spaces or more in from the innermost item's
-  /// content column (the margin at top level), blank lines aside: the
-  /// indented code a quote has no room left for.
-  static bool _isIndented(String text, LineState state) =>
-      text.trim().isNotEmpty &&
-      LineSyntax.indentOf(text) >= _contentColumn(text, state) + 4;
-
-  /// The items [text] stays inside when it is a quote line short of the
-  /// innermost item's content column: a `>` marker opens a block of its own,
-  /// so it never goes on with the item lazily, but it is still inside every
-  /// item whose content column its indent reaches (`1. w` / `    1. w` /
-  /// `    > w` is a quote in the outer item). The items it does not reach
-  /// close. Null when the line is not such a quote line.
-  static List<({int marker, int content})>? _quoteItems(
-    String text,
-    LineState state,
-  ) {
-    if (state.listIndent < 0 ||
-        LineSyntax.indentOf(text) >= state.listIndent ||
-        LineSyntax.quoteDepth(text, _contentColumn(text, state)) == 0) {
-      return null;
-    }
-    final indent = LineSyntax.indentOf(text);
-    var reached = 0;
-    while (reached < state.listStack.length &&
-        state.listStack[reached].content <= indent) {
-      reached++;
-    }
-    return state.listStack.sublist(0, reached);
-  }
-
-  /// Whether [text] is a quote line whose indent makes it the indented
-  /// continuation that the open quote has no room left for: the state
-  /// entered with [LineState.quoteIndented] set and the line is indented
-  /// four spaces or more past the quote's content, so it opens an indented
-  /// code block outside the quote instead of going on with its paragraph.
-  static bool _quoteClosesToCode(String text, LineState state) =>
-      state.quoteDepth > 0 && state.quoteIndented && _isIndented(text, state);
-
-  /// The state of a line in [items] and in nothing else: the shared plain
-  /// state outside a list.
-  static LineState _inItems(List<({int marker, int content})> items) =>
-      items.isEmpty ? LineState.initial : LineState(listStack: items);
-
-  /// Whether [text] is a thematic break, counting up to three spaces of its
-  /// leading indent from the innermost item's content column (or the margin
-  /// outside a list): `····---` inside an item whose content starts at two is
-  /// the item's rule, not text.
-  static bool _isRule(String text, LineState state) {
-    if (LineSyntax.isHr(text, 0)) return true;
-    final column = _contentColumn(text, state);
-    return column > 0 && column <= text.length && LineSyntax.isHr(text, column);
-  }
-
-  /// Whether [text], entered in [state], is a line of paragraph text: an
-  /// item's marker with text after it, or a line no other block takes.
-  static bool _isParagraphText(String text, LineState state) {
-    if (text.trim().isEmpty || _isRule(text, state)) return false;
-    if (LineSyntax.headingLevel(text, _contentColumn(text, state)) > 0) {
-      return false;
-    }
-    final marker = LineSyntax.listMarker(text, _markerReach(state));
-    return marker == null || text.substring(marker.$3).trim().isNotEmpty;
   }
 
   /// The line's text, without a byte-order mark on the first line.
@@ -1097,36 +1056,12 @@ final class BlockScanner {
     final text = _text(line);
     final fence = LineSyntax.fenceOpen(
       text,
-      _contentColumn(text, _entering[line]),
+      LineContainers.contentColumn(text, _entering[line]),
     );
     if (fence == null) return null;
     final rest = text.substring(fence.indent + fence.length).trim();
     return rest.isEmpty ? null : rest.split(RegExp(r'\s+')).first;
   }
-
-  /// The quote depth after [line], keeping a lazily continued paragraph in its
-  /// quote.
-  ///
-  /// Only paragraph text is lazy: a line that opens a block of its own — an
-  /// item's marker, a heading, a rule, a fence — is outside the quote.
-  static int _quoteDepthAfter(int line, String text, LineState state) {
-    final own = LineSyntax.quoteDepth(text, _contentColumn(text, state));
-    if (own > 0) return own;
-    if (state.quoteDepth > 0 &&
-        text.trim().isNotEmpty &&
-        !_opensBlock(text, state)) {
-      return state.quoteDepth;
-    }
-    return 0;
-  }
-
-  /// Whether [text], entered in [state], opens a block that ends a paragraph
-  /// rather than going on with it.
-  static bool _opensBlock(String text, LineState state) =>
-      LineSyntax.listMarker(text, _markerReach(state)) != null ||
-      LineSyntax.headingLevel(text, _contentColumn(text, state)) > 0 ||
-      _isRule(text, state) ||
-      LineSyntax.fenceOpen(text, _contentColumn(text, state)) != null;
 
   /// Where the item starting at [line] sits in its list.
   ///
@@ -1149,32 +1084,6 @@ final class BlockScanner {
     return written;
   }
 
-  /// How far in a marker may stand on a line entering in [state]: three
-  /// spaces past the content column of the innermost open item, or past the
-  /// margin outside a list.
-  static int _markerReach(LineState state) =>
-      (state.listIndent < 0 ? 0 : state.listIndent) + 3;
-
-  /// Whether [marker] on [text], entered in [state], goes on with the open
-  /// paragraph lazily instead of starting an item — what [_kindOf] reads the
-  /// line as and [_listAfter] keeps the items by.
-  ///
-  /// Only a paragraph outside every item and quote is protected, and only
-  /// from a marker that may not interrupt it
-  /// ([LineSyntax.markerInterrupts]). Inside an item, or under a quote whose
-  /// line this is not, a marker always breaks the paragraph: `1. w` /
-  /// `  2) w` starts a second list, and `> w` / `2) w` starts a list
-  /// outside the quote.
-  static bool _markerContinuesParagraph(
-    (int, int, int) marker,
-    String text,
-    LineState state,
-  ) =>
-      state.openParagraph &&
-      state.listStack.isEmpty &&
-      state.quoteDepth == 0 &&
-      !LineSyntax.markerInterrupts(marker, text);
-
   /// The open list items after line [line], whose text is [text], given
   /// those entering it.
   ///
@@ -1191,7 +1100,10 @@ final class BlockScanner {
     String text,
     LineState state,
   ) {
-    final marker = LineSyntax.listMarker(text, _markerReach(state));
+    final marker = LineSyntax.listMarker(
+      text,
+      LineContainers.markerReach(state),
+    );
     // A line the scanner reads as indented code is not a marker: four spaces
     // in from the margin with no open item reaching it is code, not an item
     // (`  2) w` / `` / `    - w` has the last line as code outside the
@@ -1201,7 +1113,7 @@ final class BlockScanner {
       // items already open stay as they are (`w` / `2) w` / `2) w` is one
       // paragraph, not a list). Left to open an item here, the state carried
       // it and the next line read as the item's.
-      if (_markerContinuesParagraph(marker, text, state)) {
+      if (LineContainers.markerContinuesParagraph(marker, text, state)) {
         return state.listStack;
       }
       final (start, _, content) = marker;
@@ -1238,19 +1150,6 @@ final class BlockScanner {
         : state.listStack.sublist(0, reached);
   }
 
-  /// The content column of the innermost item in [state] that [text] is
-  /// indented into, or 0 when it reaches none: where a block on the line
-  /// counts its own up-to-three spaces of indent from.
-  static int _contentColumn(String text, LineState state) {
-    final indent = LineSyntax.indentOf(text);
-    var column = 0;
-    for (final item in state.listStack) {
-      if (item.content > indent) break;
-      column = item.content;
-    }
-    return column;
-  }
-
   /// Whether [line] is inside a GFM table.
   bool _isTableRow(int line) {
     final text = _text(line);
@@ -1277,7 +1176,7 @@ final class BlockScanner {
     // Four spaces in from the item's content column, as the block opened:
     // absolute at top level, relative inside a list.
     final indent = text.length - text.trimLeft().length;
-    if (indent < _contentColumn(text, state) + 4) return false;
+    if (indent < LineContainers.contentColumn(text, state) + 4) return false;
     // An indented code block cannot interrupt a paragraph: a four-space line
     // after paragraph text is the paragraph's, not code's. It may open at the
     // start of a note, or after a heading, a rule or a fence — anything that
@@ -1290,7 +1189,8 @@ final class BlockScanner {
     if (!state.indentedCode) return _opensIndentedCode(line, text);
     if (text.trim().isEmpty) return true;
     // Four spaces in from the item's content column, as the block opened.
-    return LineSyntax.indentOf(text) >= _contentColumn(text, state) + 4;
+    return LineSyntax.indentOf(text) >=
+        LineContainers.contentColumn(text, state) + 4;
   }
 }
 
