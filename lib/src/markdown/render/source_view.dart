@@ -341,7 +341,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       final prefix = BlockParser.quotePrefixLength(
         text,
         block.quoteDepth,
-        BlockParser.itemColumnOf(block),
+        BlockParser.itemPrefixLength(block, text),
       );
       final rest = text.substring(prefix);
       markStart = prefix + rest.length - rest.trimLeft().length;

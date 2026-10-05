@@ -173,7 +173,9 @@ final class LineShape {
     }
     return LineShape(
       quoteDepth: quoteDepth,
-      quoteIndent: block == null ? 0 : BlockParser.itemColumnOf(block),
+      quoteIndent: block == null
+          ? 0
+          : BlockParser.itemPrefixLength(block, line.text),
       marker: marker,
       // A line the scan has not reached yet is at the top level.
       listDepth: marker == null && !continued
@@ -198,9 +200,9 @@ final class LineShape {
   /// How many quote levels the line is in.
   final int quoteDepth;
 
-  /// How far in the line's quote marks are counted from: the content column
-  /// of the list item its block stands in ([BlockParser.itemColumnOf]), 0
-  /// outside a list.
+  /// Where on the line its quote marks are counted from: past what the list
+  /// items its block stands in take off it ([BlockParser.itemPrefixLength]),
+  /// 0 outside a list.
   final int quoteIndent;
 
   /// Where the line's list marker starts, when it opens a list item.

@@ -104,14 +104,14 @@ final class LiveQuoteContent {
     return null;
   }
 
-  /// [line], a line of [quote], without its quote marks — counted from the
-  /// content column of the item the quote stands in, as the read view takes
+  /// [line], a line of [quote], without its quote marks — counted from where
+  /// the items the quote stands in leave the line, as the read view takes
   /// them off ([BlockParser.contentText]).
   static String _unquoted(String line, Block quote) => line.substring(
     BlockParser.quotePrefixLength(
       line,
       quote.quoteDepth,
-      BlockParser.itemColumnOf(quote),
+      BlockParser.itemPrefixLength(quote, line),
     ),
   );
 }

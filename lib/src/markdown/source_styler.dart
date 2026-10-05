@@ -464,7 +464,7 @@ final class SourceStyler {
     final prefix = BlockParser.quotePrefixLength(
       text,
       block.quoteDepth,
-      BlockParser.itemColumnOf(block),
+      BlockParser.itemPrefixLength(block, text),
     );
     final structural = _structure(block, line, text, prefix, tokens);
     final parsed = _parsedOf(block);
@@ -627,7 +627,11 @@ final class SourceStyler {
     _blockTextReads++;
     final raw = BlockParser.blockText(block, buffer);
     if (raw.length > _inlineLimit) return null;
-    final key = '${block.kind.index}:${block.quoteDepth}|$raw';
+    // The items' indents too: what the parse is given of a block in a list
+    // depends on them (`BlockParser.contentText`).
+    final key =
+        '${block.kind.index}:${block.quoteDepth}:'
+        '${BlockParser.itemKeyOf(block)}|$raw';
     var parsed = _parses.remove(key);
     if (parsed == null || parsed.block.kind != block.kind) {
       parsed = _Parsed(block, _parser.parseText(block, raw, () => _scope));

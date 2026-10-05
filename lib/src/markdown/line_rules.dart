@@ -1,16 +1,24 @@
-/// What the block scan makes of one line: what it is, the state it leaves,
-/// the block it starts, and whether it goes on with the block before it.
+/// What the block scan makes of one line: what it is, the containers it
+/// stands in, and the state it leaves.
 ///
-/// A function of the line's text, the lines next to it and the state it
-/// enters in — `docs/records/unified-surface.md` §8.5 — so a scan can stop
-/// where the states agree. The states are the scanner's: it records them,
-/// and these rules read them.
+/// A function of the line's text, the line after it (a table's head row is
+/// told by its delimiter row) and the state it enters in —
+/// `docs/records/unified-surface.md` §8.5 — so a scan can stop where the
+/// states agree. The states are the scanner's: it records them, and these
+/// rules read them.
+///
+/// A line is read in two steps. The containers open before it walk it
+/// first ([ContainerWalk]): the items it stays in, whether the open quote
+/// takes it, and the text the innermost item reads. What is left is read
+/// in that item's coordinates, as if at a margin of its own — so no rule
+/// below measures from the note's margin.
 library;
 
 import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/container_walk.dart';
 import 'package:niman/src/markdown/html_block_syntax.dart';
-import 'package:niman/src/markdown/line_containers.dart';
+import 'package:niman/src/markdown/line_read.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -27,16 +35,16 @@ final class LineRules {
   /// The state entering each scanned line.
   final List<LineState> _entering;
 
-  /// The line [kindOf] last classified, the state it entered in and the
-  /// buffer's revision then; [_kind] is the answer. One line, because a
-  /// scan asks about the line it is on: whether it goes on with the open
-  /// block, what block it starts, and which items it leaves open all ask
-  /// what it is, and classifying it afresh each time doubled the scan of a
-  /// note that is one long list (`list_count_check_test`, 86 → 188 ms).
-  int _kindLine = -1;
-  LineState? _kindState;
-  int _kindRevision = -1;
-  BlockKind _kind = BlockKind.blank;
+  /// The line [read] last read, the state it entered in and the buffer's
+  /// revision then; [_last] is the read. One line, because a scan asks
+  /// about the line it is on several times — whether it goes on with the
+  /// open block, what block it starts, the state it leaves — and reading it
+  /// afresh each time doubled the scan of a note that is one long list
+  /// (`list_count_check_test`, 86 → 188 ms).
+  int _lastLine = -1;
+  LineState? _lastState;
+  int _lastRevision = -1;
+  LineRead? _last;
 
   /// The state entering [line], as the scanner recorded it.
   LineState entering(int line) => _entering[line];
@@ -44,397 +52,347 @@ final class LineRules {
   /// The line's text, without a byte-order mark on the first line.
   String lineText(int line) {
     final text = buffer.lineAt(line);
-    if (line == 0 && text.startsWith('\uFEFF')) return text.substring(1);
+    if (line == 0 && text.startsWith('﻿')) return text.substring(1);
     return text;
   }
 
-  /// What line [line] is: a function of the line's text, the lines next to
-  /// it and the state it enters in, so the answer is kept while none of
-  /// them has changed.
-  BlockKind kindOf(int line) {
+  /// What the scan makes of line [line], entered in the state recorded for
+  /// it: kept while neither that state nor the buffer has changed.
+  LineRead read(int line) {
     final state = _entering[line];
-    if (line == _kindLine &&
-        identical(state, _kindState) &&
-        buffer.revision == _kindRevision) {
-      return _kind;
+    final last = _last;
+    if (last != null &&
+        line == _lastLine &&
+        identical(state, _lastState) &&
+        buffer.revision == _lastRevision) {
+      return last;
     }
-    _kind = _classify(line, state);
-    _kindLine = line;
-    _kindState = state;
-    _kindRevision = buffer.revision;
-    return _kind;
+    final read = _read(line, state);
+    _last = read;
+    _lastLine = line;
+    _lastState = state;
+    _lastRevision = buffer.revision;
+    return read;
   }
 
-  /// What line [line], entered in [state], is.
-  BlockKind _classify(int line, LineState state) {
-    final text = lineText(line);
-    if (state.fence != null) {
-      // Inside a fence: every line is code until the closing fence, except a
-      // line that ends the item and the fence with it ([fenceClosesItem]) —
-      // a non-blank line short of the content column that opens a new block,
-      // or any such line after a blank one. Such a line is read as if no
-      // fence were open.
-      if (fenceClosesItem(line, text, state)) {
-        return _kindOutsideFence(line, text, state);
-      }
-      return BlockKind.fencedCode;
-    }
-    if (LineSyntax.fenceOpen(text, LineContainers.contentColumn(text, state)) !=
-        null) {
-      return BlockKind.fencedCode;
-    }
-    if (state.math || _isDisplayLineAt(line, text, state)) {
-      return BlockKind.math;
-    }
-    if (state.frontmatter || LineSyntax.opensFrontmatter(line, text)) {
-      return BlockKind.frontmatter;
-    }
-    if (state.html != null &&
-        !(text.trim().isEmpty &&
-            (state.html == HtmlBlockKind.blockTag ||
-                state.html == HtmlBlockKind.completeTag))) {
-      return BlockKind.html;
-    }
-    if (HtmlBlockSyntax.open(text) != null) return BlockKind.html;
-    if (text.trim().isEmpty) return BlockKind.blank;
-    if (_isTableRow(line)) return BlockKind.table;
-    // Not a setext heading, which no line is on its own: it is a paragraph
-    // whose underline goes on with it ([underlineLevel]).
-    if (LineContainers.isRule(text, state)) return BlockKind.thematicBreak;
-    if (LineSyntax.headingLevel(
-          text,
-          LineContainers.contentColumn(text, state),
-        ) >
-        0) {
-      return BlockKind.heading;
-    }
-    // Code while it is four spaces in: a line less than that ends the block.
-    if (_indentedCodeContinues(line, text, state)) {
-      return BlockKind.indentedCode;
-    }
-    // A second indented line under a quote leaves it for code ([LineState.
-    // quoteIndented]): the quote has already taken its one continuation.
-    if (LineContainers.quoteClosesToCode(text, state)) {
-      return BlockKind.indentedCode;
-    }
-    // Containers, innermost first: a line with its own quote marker is a quote
-    // line, a line with a list marker starts an item, and a line with neither
-    // either continues the item it is indented into or the quote it is lazily
-    // part of.
-    if (LineSyntax.quoteDepth(text, LineContainers.contentColumn(text, state)) >
-        0) {
-      return BlockKind.quote;
-    }
-    final marker = LineSyntax.listMarker(
-      text,
-      LineContainers.markerReach(state),
-    );
-    if (marker != null) {
-      // An ordered list not starting at 1, or an empty item, under an open
-      // paragraph goes on with it lazily: not a new item.
-      return LineContainers.markerContinuesParagraph(marker, text, state)
-          ? BlockKind.paragraph
-          : BlockKind.listItem;
-    }
-    if (text.trim().isNotEmpty && state.listIndent >= 0) {
-      return BlockKind.paragraph;
-    }
-    if (text.trim().isNotEmpty && state.quoteDepth > 0) return BlockKind.quote;
-    return BlockKind.paragraph;
-  }
-
-  /// Classifies [line] as if no fence were open: the checks that decide
-  /// whether the line opens a block of its own, without the fence guard.
-  /// Used by [kindOf] to detect a line that closes an item's fence.
-  BlockKind _kindOutsideFence(int line, String text, LineState state) {
-    if (text.trim().isEmpty) return BlockKind.blank;
-    if (LineContainers.isRule(text, state)) return BlockKind.thematicBreak;
-    if (LineSyntax.headingLevel(
-          text,
-          LineContainers.contentColumn(text, state),
-        ) >
-        0) {
-      return BlockKind.heading;
-    }
-    if (LineSyntax.quoteDepth(text, LineContainers.contentColumn(text, state)) >
-        0) {
-      return BlockKind.quote;
-    }
-    final marker = LineSyntax.listMarker(
-      text,
-      LineContainers.markerReach(state),
-    );
-    if (marker != null) return BlockKind.listItem;
-    if (_indentedCodeContinues(line, text, state)) {
-      return BlockKind.indentedCode;
-    }
-    return BlockKind.paragraph;
-  }
-
-  /// Whether [text] ends the item a running fence is in: a non-blank line
-  /// short of the innermost item's content column that opens a new block,
-  /// or any such line after a blank one. [kindOf] decides the
-  /// same thing for the line's kind; this is what the block a line starts
-  /// and [exitOf] ask to drop the item with the fence.
-  bool fenceClosesItem(int line, String text, LineState state) {
-    if (state.fence == null ||
-        state.listIndent < 0 ||
-        text.trim().isEmpty ||
-        LineSyntax.indentOf(text) >= state.listIndent) {
-      return false;
-    }
-    final outside = _kindOutsideFence(line, text, state);
-    if (outside != BlockKind.paragraph && outside != BlockKind.blank) {
-      return true;
-    }
-    return line > 0 && lineText(line - 1).trim().isEmpty;
-  }
-
-  /// Whether [line] is display math — either form — rather than code.
-  ///
-  /// Two rules, both of them the preview's rather than the scanner's own:
-  ///
-  /// * **The shared rule says what a display line is** (`math_rule.dart`):
-  ///   a `$$…$$` that opens and closes on one line is a display block too.
-  ///   Keeping a private copy here is what made `$$x$$` a paragraph in the
-  ///   read view and a centered block in the preview (#252).
-  /// * **An indented `$$` line is code.** The preview's parser runs its
-  ///   indented-code syntax before the math one, so a `$$` line indented four
-  ///   spaces never opens a formula; display math is otherwise indent-blind.
-  bool _isDisplayLineAt(int line, String text, LineState state) =>
-      !_indentedCodeContinues(line, text, state) && isDisplayLine(text.trim());
+  /// What line [line] is.
+  BlockKind kindOf(int line) => read(line).kind;
 
   /// The state after line [line], given the state entering it.
-  LineState exitOf(int line) => _exitOfFrom(line, _entering[line]);
+  LineState exitOf(int line) => read(line).exit;
 
-  /// The state after [line], entered in [state]. When a fence it is in ends
-  /// the item on this line, the caller passes [LineState.initial] so the line
-  /// opens (or is) what it reads as outside the item, not nothing.
-  LineState _exitOfFrom(int line, LineState state) {
-    final text = lineText(line);
-    // A fence, a formula or an HTML block in a list item keeps the items it
-    // is in, and leaves them open when it ends: dropping them made the item
-    // after a fence a list of its own, one level up.
-    if (state.fence != null) {
-      // A non-blank line short of the innermost item's content column that
-      // opens a new block ends the item and the fence with it; after a blank
-      // line, even plain text does. The line is then read as if no fence were
-      // open, so the item it opens (or the text it is) is the state after it.
-      if (fenceClosesItem(line, text, state)) {
-        return _exitOfFrom(line, LineState.initial);
-      }
-      return LineSyntax.isFenceClose(text, state.fence!, state.listIndent)
-          ? LineContainers.inItems(state.listStack)
-          : state;
-    }
-    if (state.math) {
-      return LineSyntax.closesMath(text)
-          ? LineContainers.inItems(state.listStack)
-          : state;
-    }
-    if (state.frontmatter) {
-      return LineSyntax.closesFrontmatter(text) ? LineState.initial : state;
-    }
-    if (state.html != null) {
-      return HtmlBlockSyntax.closes(text, state)
-          ? LineContainers.inItems(state.listStack)
-          : state;
-    }
-    if (LineSyntax.opensFrontmatter(line, text)) {
-      return const LineState(frontmatter: true);
-    }
-    final fence = LineSyntax.fenceOpen(
-      text,
-      LineContainers.contentColumn(text, state),
-    );
-    if (fence != null) {
-      return LineState(fence: fence, listStack: listAfter(line, text, state));
-    }
-    // Only the multi-line form opens a state: a `$$…$$` written on one line
-    // is over on that line, and leaving the state open swallowed whatever
-    // followed it.
-    if (_isDisplayLineAt(line, text, state) && isDisplayOpen(text.trim())) {
-      return LineState(math: true, listStack: listAfter(line, text, state));
-    }
-    final html = HtmlBlockSyntax.open(text);
-    if (html != null) {
-      final opened = LineState(
-        html: html.$1,
-        htmlClosing: html.$2,
-        listStack: listAfter(line, text, state),
+  /// Line [line], entered in [state], read.
+  LineRead _read(int line, LineState state) {
+    final next = line + 1 < buffer.lineCount ? lineText(line + 1) : null;
+    final walk = ContainerWalk.of(state, lineText(line), next);
+    final quoted = walk.quote;
+    if (quoted != null) {
+      // The quote's line: what is inside the quote is the quote's content's
+      // to read, scanned again on its own.
+      return _made(
+        BlockKind.quote,
+        state,
+        walk,
+        carried: false,
+        quoteDepth: state.quoteDepth,
+        quoteLast: ContainerWalk.lastOf(quoted),
       );
-      // A comment, a raw-text tag, a processing instruction, a declaration or
-      // a CDATA section ends on the line with its end marker — which can be
-      // the line it opens on. Left open, a one-line `<!-- note -->` made an
-      // HTML block of everything under it until the next `-->`: 1 656 lines
-      // of the worst-note fixture drawn as raw HTML, and their links unread.
-      if (!HtmlBlockSyntax.closesOnItsOwnLine(text, opened)) return opened;
     }
-    final quoteDepth = LineContainers.quoteClosesToCode(text, state)
-        ? 0
-        : LineContainers.quoteDepthAfter(text, state);
-    final quoteItems = LineContainers.quoteItems(text, state);
-    final listStack = quoteItems ?? listAfter(line, text, state);
-    final table = _tableContinues(line, state);
-    final indentedCode =
-        _indentedCodeContinues(line, text, state) ||
-        LineContainers.quoteClosesToCode(text, state);
-    final openParagraph =
-        !table && !indentedCode && LineContainers.isParagraphText(text, state);
-    // A quote takes one indented continuation of its paragraph; a second in
-    // a row is not a lazy continuation any more and opens code, which closes
-    // it. A line that is not indented breaks the run: the next indented line
-    // is a first continuation again (`> w` / `    ---` / `w` / `    w` keeps
-    // the last line in the quote).
-    final quoteIndented =
-        quoteDepth > 0 &&
-        (LineContainers.quoteClosesToCode(text, state) ||
-            LineContainers.isIndented(text, state));
+    // What was open in the line's container goes on only while the
+    // container does: a line that ends an item, or leaves a quote, is read
+    // with nothing open where it lands.
+    final carried = !walk.closed && state.quoteDepth == 0;
+    return _readLeaf(
+      line,
+      state,
+      walk,
+      carried ? state : LineState.initial,
+      carried,
+      next,
+    );
+  }
+
+  /// The line [walk] leaves, read in its container, where [open] holds what
+  /// was open there before it.
+  LineRead _readLeaf(
+    int line,
+    LineState state,
+    ContainerWalk walk,
+    LineState open,
+    bool carried,
+    String? next,
+  ) {
+    final text = walk.text;
+    LineRead made(
+      BlockKind kind, {
+      List<OpenItem>? items,
+      int quoteDepth = 0,
+      int quoteLast = 0,
+      FenceMarker? fence,
+      bool math = false,
+      bool frontmatter = false,
+      HtmlBlockKind? html,
+      String? htmlClosing,
+      bool indentedCode = false,
+      bool table = false,
+      bool openParagraph = false,
+    }) => _made(
+      kind,
+      state,
+      walk,
+      carried: carried,
+      items: items,
+      quoteDepth: quoteDepth,
+      quoteLast: quoteLast,
+      fence: fence,
+      math: math,
+      frontmatter: frontmatter,
+      html: html,
+      htmlClosing: htmlClosing,
+      indentedCode: indentedCode,
+      table: table,
+      openParagraph: openParagraph,
+    );
+
+    // Inside a block that runs to an end marker, every line is the block's.
+    final fence = open.fence;
+    if (fence != null) {
+      final closes = LineSyntax.isFenceClose(text, fence, -1);
+      return made(BlockKind.fencedCode, fence: closes ? null : fence);
+    }
+    if (open.math) {
+      return made(BlockKind.math, math: !LineSyntax.closesMath(text));
+    }
+    if (open.frontmatter) {
+      return made(
+        BlockKind.frontmatter,
+        frontmatter: !LineSyntax.closesFrontmatter(text),
+      );
+    }
+    final indent = LineSyntax.indentOf(text);
+    final blank = indent == text.length;
+    final html = open.html;
+    if (html != null) {
+      // A tag's block ends at a blank line, which is a blank line.
+      final endsOnBlank =
+          html == HtmlBlockKind.blockTag || html == HtmlBlockKind.completeTag;
+      if (!(blank && endsOnBlank)) {
+        final closes = HtmlBlockSyntax.closes(text, open);
+        return made(
+          BlockKind.html,
+          html: closes ? null : html,
+          htmlClosing: closes ? null : open.htmlClosing,
+        );
+      }
+      return made(BlockKind.blank);
+    }
+    if (line == 0 &&
+        walk.items.isEmpty &&
+        LineSyntax.opensFrontmatter(line, text)) {
+      return made(BlockKind.frontmatter, frontmatter: true);
+    }
+    final opened = LineSyntax.fenceOpen(text);
+    if (opened != null) return made(BlockKind.fencedCode, fence: opened);
+    // Indented code: four spaces in from the container's margin. It runs on
+    // over blank lines; it cannot interrupt a paragraph, so a four-space line
+    // after paragraph text is the paragraph's.
+    final code = open.indentedCode
+        ? blank || indent >= 4
+        : !blank && indent >= 4 && !open.openParagraph;
+    // Display math, either form — `math_rule.dart` says what a display line
+    // is, as the preview reads it (#252) — unless it is indented code, which
+    // the preview's parser reads first. Only the multi-line form opens a
+    // state: a `$$…$$` on one line is over on it.
+    if (!code && isDisplayLine(text.trim())) {
+      return made(BlockKind.math, math: isDisplayOpen(text.trim()));
+    }
+    final tag = HtmlBlockSyntax.open(text);
+    if (tag != null) {
+      // A comment, a raw-text tag, a processing instruction, a declaration
+      // or a CDATA section ends on the line with its end marker — which can
+      // be the line it opens on. Left open, a one-line `<!-- note -->` made
+      // an HTML block of everything under it until the next `-->`: 1 656
+      // lines of the worst-note fixture drawn as raw HTML, and their links
+      // unread.
+      final closes = HtmlBlockSyntax.closesOnItsOwnLine(
+        text,
+        LineState(html: tag.$1, htmlClosing: tag.$2),
+      );
+      return made(
+        BlockKind.html,
+        html: closes ? null : tag.$1,
+        htmlClosing: closes ? null : tag.$2,
+      );
+    }
+    if (blank) return made(BlockKind.blank, indentedCode: open.indentedCode);
+    if (LineSyntax.hasPipe(text) &&
+        (open.table || (next != null && LineSyntax.isDelimiterRow(next)))) {
+      return made(BlockKind.table, table: true);
+    }
+    // Not a setext heading, which no line is on its own: it is a paragraph
+    // whose underline goes on with it (`BlockRules.underlineLevel`).
+    if (LineSyntax.isHr(text, 0)) return made(BlockKind.thematicBreak);
+    if (LineSyntax.headingLevel(text) > 0) return made(BlockKind.heading);
+    if (code) return made(BlockKind.indentedCode, indentedCode: true);
+    final quoteDepth = LineSyntax.quoteDepth(text);
+    if (quoteDepth > 0) {
+      return made(
+        BlockKind.quote,
+        quoteDepth: quoteDepth,
+        quoteLast: ContainerWalk.lastOf(LineSyntax.quoteChild(text)),
+      );
+    }
+    final items = walk.items;
+    final marker = LineSyntax.listMarker(text);
+    if (marker != null) {
+      // An ordered list not starting at 1, or an empty item, goes on with an
+      // open paragraph lazily — a marker in an item starts a list whatever
+      // its number.
+      if (open.openParagraph &&
+          !LineSyntax.markerInterrupts(
+            marker,
+            text,
+            inItem: items.isNotEmpty,
+          )) {
+        return made(BlockKind.paragraph, openParagraph: true);
+      }
+      final (itemIndent, empty) = LineSyntax.itemIndent(text, marker);
+      final parent = items.isEmpty ? 0 : items.last.content;
+      return made(
+        BlockKind.listItem,
+        items: [
+          ...items,
+          (
+            indent: itemIndent,
+            content: parent + itemIndent,
+            blanks: empty ? 1 : null,
+            lastBlank: empty,
+          ),
+        ],
+        openParagraph: !empty && _isParagraphText(text.substring(itemIndent)),
+      );
+    }
+    // A setext underline heads the paragraph above it and ends it.
+    final underline =
+        carried && open.openParagraph && LineSyntax.setextLevel(text) > 0;
+    return made(BlockKind.paragraph, openParagraph: !underline);
+  }
+
+  /// Whether [text], an item's text on its marker line, is paragraph text:
+  /// not a rule, a heading, a fence or a quote, which the item would open
+  /// instead.
+  static bool _isParagraphText(String text) =>
+      LineSyntax.indentOf(text) < text.length &&
+      !LineSyntax.isHr(text, 0) &&
+      LineSyntax.headingLevel(text) == 0 &&
+      LineSyntax.fenceOpen(text) == null &&
+      LineSyntax.quoteDepth(text) == 0;
+
+  /// The read of a line of [kind], entered in [state] and walked as [walk],
+  /// leaving [items] (the walk's when null) and the rest.
+  static LineRead _made(
+    BlockKind kind,
+    LineState state,
+    ContainerWalk walk, {
+    required bool carried,
+    List<OpenItem>? items,
+    int quoteDepth = 0,
+    int quoteLast = 0,
+    FenceMarker? fence,
+    bool math = false,
+    bool frontmatter = false,
+    HtmlBlockKind? html,
+    String? htmlClosing,
+    bool indentedCode = false,
+    bool table = false,
+    bool openParagraph = false,
+  }) {
+    final stack = items ?? walk.items;
+    return LineRead(
+      kind: kind,
+      walk: walk,
+      items: stack,
+      quoteDepth: quoteDepth,
+      carried: carried,
+      exit: _exit(
+        state,
+        stack,
+        quoteDepth: quoteDepth,
+        quoteLast: quoteLast,
+        fence: fence,
+        math: math,
+        frontmatter: frontmatter,
+        html: html,
+        htmlClosing: htmlClosing,
+        indentedCode: indentedCode,
+        table: table,
+        openParagraph: openParagraph,
+      ),
+    );
+  }
+
+  /// The state after a line entered in [state]: the shared one where it can
+  /// be, and [state] itself when the line leaves it as it was.
+  static LineState _exit(
+    LineState state,
+    List<OpenItem> items, {
+    required int quoteDepth,
+    required int quoteLast,
+    required FenceMarker? fence,
+    required bool math,
+    required bool frontmatter,
+    required HtmlBlockKind? html,
+    required String? htmlClosing,
+    required bool indentedCode,
+    required bool table,
+    required bool openParagraph,
+  }) {
     // A line that leaves the scan outside every construct is the shared
     // state, not a new object equal to it. That is the common line of a long
     // note of prose, and a state apiece was 68 MB of the shell running the
     // million-line fixture (#346: 281 MB held after that scan, 213 MB with
     // the shared state, `ProcessInfo` RSS) — a million copies of one value,
-    // held for as long as the scan is. [LineState.initial] is what this would
-    // build, field for field, and everything that reads a state compares it
-    // by value, the scan's own convergence check included. A plain paragraph
-    // line is [LineState.paragraphOpen], the second shared constant.
-    if (quoteDepth == 0 && listStack.isEmpty && !table && !indentedCode) {
+    // held for as long as the scan is. A plain paragraph line is
+    // [LineState.paragraphOpen], the second shared constant.
+    if (items.isEmpty &&
+        quoteDepth == 0 &&
+        fence == null &&
+        !math &&
+        !frontmatter &&
+        html == null &&
+        !indentedCode &&
+        !table) {
       return openParagraph ? LineState.paragraphOpen : LineState.initial;
     }
     // Inside a construct, a line that leaves the state as it found it — the
     // next line of an item's paragraph, of a quote, of a code block — hands
     // on the state it entered in, for the same reason: the run's lines share
-    // one object. A long paragraph in an item now keeps the item open, as
-    // CommonMark does, where it used to close it after its first lazy line.
-    if (state.fence == null &&
-        !state.math &&
-        !state.frontmatter &&
-        state.html == null &&
+    // one object.
+    if (identical(state.listStack, items) &&
         state.quoteDepth == quoteDepth &&
-        state.quoteIndented == quoteIndented &&
-        identical(state.listStack, listStack) &&
-        state.table == table &&
+        state.quoteLast == quoteLast &&
+        state.fence == fence &&
+        state.math == math &&
+        state.frontmatter == frontmatter &&
+        state.html == html &&
+        state.htmlClosing == htmlClosing &&
         state.indentedCode == indentedCode &&
+        state.table == table &&
         state.openParagraph == openParagraph) {
       return state;
     }
     return LineState(
-      quoteDepth: quoteDepth,
-      quoteIndented: quoteIndented,
-      listStack: listStack,
-      table: table,
+      fence: fence,
+      math: math,
+      frontmatter: frontmatter,
       indentedCode: indentedCode,
+      html: html,
+      htmlClosing: htmlClosing,
+      quoteDepth: quoteDepth,
+      quoteLast: quoteLast,
+      listStack: items,
+      table: table,
       openParagraph: openParagraph,
     );
-  }
-
-  /// The open list items after line [line], whose text is [text], given
-  /// those entering it.
-  ///
-  /// A marker opens an item: it keeps every open item whose content column it
-  /// starts at or past, and closes the rest — an item written to the left of
-  /// an open one's content is outside it. What survives is its parents.
-  ///
-  /// Any other line is in the items whose content column it reaches, and
-  /// closes the rest — `  back in A` after a blank line under `  - B` is A's
-  /// text, not a line outside the list. Unless it is lazy: paragraph text
-  /// that goes on with the paragraph before it keeps every item open.
-  List<({int marker, int content})> listAfter(
-    int line,
-    String text,
-    LineState state,
-  ) {
-    final marker = LineSyntax.listMarker(
-      text,
-      LineContainers.markerReach(state),
-    );
-    // A line the scanner reads as indented code is not a marker: four spaces
-    // in from the margin with no open item reaching it is code, not an item
-    // (`  2) w` / `` / `    - w` has the last line as code outside the
-    // list). [kindOf] decides this first; [listAfter] follows it.
-    if (marker != null && kindOf(line) != BlockKind.indentedCode) {
-      // A marker that goes on with the paragraph opens no item, and the
-      // items already open stay as they are (`w` / `2) w` / `2) w` is one
-      // paragraph, not a list). Left to open an item here, the state carried
-      // it and the next line read as the item's.
-      if (LineContainers.markerContinuesParagraph(marker, text, state)) {
-        return state.listStack;
-      }
-      final (start, _, content) = marker;
-      final open = <({int marker, int content})>[];
-      for (final item in state.listStack) {
-        if (item.content > start) break;
-        open.add(item);
-      }
-      open.add((marker: start, content: content));
-      return open;
-    }
-    if (text.trim().isEmpty) return state.listStack;
-    if (state.listStack.isEmpty) return const <({int marker, int content})>[];
-    final indent = LineSyntax.indentOf(text);
-    if (indent >= state.listIndent) return state.listStack;
-    // Paragraph text written short of the item's content column goes on with
-    // the item, lazily — after a heading or a rule in the item too, where
-    // the app's parser (`package:markdown`) keeps it in the item: `* w` /
-    // `  # w` / `w` has the last line in the item. A blank line above it ends
-    // the lazy run: `1. w` / `` / `w` has the last line outside the item.
-    // Only a line that opens a block of its own closes the items it does not
-    // reach otherwise.
-    final afterBlank = line > 0 && lineText(line - 1).trim().isEmpty;
-    if (!afterBlank && kindOf(line) == BlockKind.paragraph) {
-      return state.listStack;
-    }
-    var reached = 0;
-    while (reached < state.listStack.length &&
-        state.listStack[reached].content <= indent) {
-      reached++;
-    }
-    return reached == 0
-        ? const <({int marker, int content})>[]
-        : state.listStack.sublist(0, reached);
-  }
-
-  /// Whether [line] is inside a GFM table.
-  bool _isTableRow(int line) {
-    final text = lineText(line);
-    if (text.trim().isEmpty) return false;
-    if (_entering[line].table) return LineSyntax.hasPipe(text);
-    if (line + 1 >= buffer.lineCount) return false;
-    return LineSyntax.hasPipe(text) &&
-        LineSyntax.isDelimiterRow(lineText(line + 1));
-  }
-
-  bool _tableContinues(int line, LineState state) {
-    final text = lineText(line);
-    if (text.trim().isEmpty) return false;
-    if (state.table) return LineSyntax.hasPipe(text);
-    if (line + 1 >= buffer.lineCount) return false;
-    return LineSyntax.hasPipe(text) &&
-        LineSyntax.isDelimiterRow(lineText(line + 1));
-  }
-
-  /// Whether an indented code block opens: four spaces, after a blank line.
-  bool _opensIndentedCode(int line, String text) {
-    final state = _entering[line];
-    if (text.trim().isEmpty) return false;
-    // Four spaces in from the item's content column, as the block opened:
-    // absolute at top level, relative inside a list.
-    final indent = text.length - text.trimLeft().length;
-    if (indent < LineContainers.contentColumn(text, state) + 4) return false;
-    // An indented code block cannot interrupt a paragraph: a four-space line
-    // after paragraph text is the paragraph's, not code's. It may open at the
-    // start of a note, or after a heading, a rule or a fence — anything that
-    // is not an open paragraph.
-    return !state.openParagraph;
-  }
-
-  /// Whether an indented code block runs on after [text].
-  bool _indentedCodeContinues(int line, String text, LineState state) {
-    if (!state.indentedCode) return _opensIndentedCode(line, text);
-    if (text.trim().isEmpty) return true;
-    // Four spaces in from the item's content column, as the block opened.
-    return LineSyntax.indentOf(text) >=
-        LineContainers.contentColumn(text, state) + 4;
   }
 }

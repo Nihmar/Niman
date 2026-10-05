@@ -211,6 +211,16 @@ void main() {
       expect(text('- a\n\n     # deep', 2), '   # deep');
     });
 
+    test('a lazy line keeps what the item did not take', () {
+      // `    ---` is four spaces into an item of five: the item's lazily,
+      // so it stands as it is — the quote's paragraph goes on, and is not
+      // headed by an underline.
+      expect(text('   - w\n      > w\n    ---', 1), 'w\n    ---');
+      // Lazy for the outer item, reaching the inner one: the inner one's
+      // indent comes off, the outer one's does not.
+      expect(text('  2) w\n      - w\n    > w', 2), 'w');
+    });
+
     test('a block outside every item keeps its text', () {
       expect(text('    code', 0), '    code');
       expect(text('> a\n    > b', 0), 'a\n    > b');

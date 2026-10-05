@@ -201,13 +201,63 @@ abstract final class LineSyntax {
     return (at, width, after + padding);
   }
 
+  /// How far in the lines of the item [marker] opens on [text] stand, and
+  /// whether the marker has no text after it — `package:markdown`'s rule,
+  /// which the read view draws with: past the marker and one space, plus
+  /// the spaces after that up to three; four or more are the item's
+  /// indented code, and count as one.
+  static (int, bool) itemIndent(String text, (int, int, int) marker) {
+    final (start, width, _) = marker;
+    final base = start + width + 1;
+    var at = start + width + 1;
+    while (at < text.length && isSpace(text.codeUnitAt(at))) {
+      at++;
+    }
+    if (at >= text.length) return (base, true);
+    final spaces = at - base;
+    return (spaces >= 4 ? base : at, false);
+  }
+
+  /// What a quote line [text] holds inside its first `>`: past the marker
+  /// and the one space or tab after it.
+  static String quoteChild(String text) {
+    var at = 0;
+    while (at < text.length && text.codeUnitAt(at) != 0x3E) {
+      at++;
+    }
+    at++;
+    if (at < text.length && isSpace(text.codeUnitAt(at))) at++;
+    return at >= text.length ? '' : text.substring(at);
+  }
+
+  /// Whether [text] could start a link reference definition (`[label]:`),
+  /// which is not paragraph text to a quote's lazy reading.
+  static bool startsLinkReference(String text) {
+    var at = 0;
+    while (at < 3 && at < text.length && text.codeUnitAt(at) == 0x20) {
+      at++;
+    }
+    return at < text.length && text.codeUnitAt(at) == 0x5B;
+  }
+
   /// Whether the marker [marker] on [text] may interrupt an open paragraph:
-  /// an unordered item always may, an ordered one only if it starts at 1, and
-  /// an empty item (a marker with no content) never does.
-  static bool markerInterrupts((int, int, int) marker, String text) {
-    if (marker.$3 >= text.length) return false;
-    final char = text.codeUnitAt(marker.$1);
-    if (isDigit(char)) return marker.$2 == 2 && char == 0x31;
+  /// an empty item (a marker with only spaces after it) never does; an
+  /// ordered one only if it starts at 1, unless the paragraph is in a list
+  /// item ([inItem]), where any marker starts a list.
+  static bool markerInterrupts(
+    (int, int, int) marker,
+    String text, {
+    bool inItem = false,
+  }) {
+    final (start, width, _) = marker;
+    var at = start + width;
+    while (at < text.length && isSpace(text.codeUnitAt(at))) {
+      at++;
+    }
+    if (at >= text.length) return false;
+    if (inItem) return true;
+    final char = text.codeUnitAt(start);
+    if (isDigit(char)) return width == 2 && char == 0x31;
     return true;
   }
 

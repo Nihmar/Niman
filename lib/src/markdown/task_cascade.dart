@@ -90,7 +90,7 @@ List<Block> checklistBranch({
             BlockParser.quotePrefixLength(
               buffer.lineAt(at),
               quote.quoteDepth,
-              BlockParser.itemColumnOf(quote),
+              BlockParser.itemPrefixLength(quote, buffer.lineAt(at)),
             ),
           ),
   ].join('\n');

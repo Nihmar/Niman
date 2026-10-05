@@ -70,6 +70,27 @@ enum HtmlBlockKind {
   completeTag,
 }
 
+/// One open list item, as `package:markdown` — the parser the read view
+/// draws with — keeps it while it gathers the item's lines.
+///
+/// * `indent` is how far in the item's lines stand **in the item's own
+///   coordinates**: the text its list read, which is the parent item's
+///   text with the parent's indent taken off. A line at least this far in
+///   is the item's, with that much taken off it; a line short of it is the
+///   item's only lazily, and then it is read as it stands.
+/// * `content` is where those lines' text starts on the note's line when
+///   every item around them took them by their indent: the sum of the
+///   indents, outermost first. It is what a reader of a block in the item
+///   takes off its lines (`BlockParser.itemPrefixLength`). Not the column of
+///   the item's own text on its marker line: a sublist opened by a lazy
+///   line stands somewhere else on that line.
+/// * `blanks` counts the blank lines after a marker with no text after it,
+///   which may be followed by one blank line at most; null for an item
+///   whose marker line had text.
+/// * `lastBlank` is whether the last line the item took was blank: text
+///   short of its indent after one is not lazy, and ends the list.
+typedef OpenItem = ({int indent, int content, int? blanks, bool lastBlank});
+
 /// The block state entering a line.
 @immutable
 final class LineState {
@@ -82,11 +103,20 @@ final class LineState {
     this.html,
     this.htmlClosing,
     this.quoteDepth = 0,
-    this.quoteIndented = false,
-    this.listStack = const <({int marker, int content})>[],
+    this.quoteLast = 0,
+    this.listStack = const <OpenItem>[],
     this.table = false,
     this.openParagraph = false,
   });
+
+  /// [quoteLast]'s bit for a blank last line.
+  static const int lastBlank = 1;
+
+  /// [quoteLast]'s bit for a last line that is a code fence.
+  static const int lastFence = 2;
+
+  /// [quoteLast]'s bit for a last line indented four spaces or more.
+  static const int lastIndented = 4;
 
   /// The top-level state, where a document starts and where a scan converges.
   static const LineState initial = LineState();
@@ -115,27 +145,25 @@ final class LineState {
   /// `style` or `textarea`), matched case-insensitively in the text.
   final String? htmlClosing;
 
-  /// How many blockquote levels the line sits in.
+  /// How many blockquote levels the open quote's first line had, or 0 when
+  /// no quote is open.
+  ///
+  /// A quote is one block to the scan, inside the items [listStack] holds:
+  /// what is inside it — items, further quotes — is read again from its
+  /// content, the way the read view draws it.
   final int quoteDepth;
 
-  /// Whether the innermost open quote has already taken one indented (four
-  /// spaces or more) continuation of its paragraph.
-  ///
-  /// A quote absorbs one such line as the paragraph's own; a second is not
-  /// a lazy continuation any more, and opens an indented code block that
-  /// closes the quote — `> w` / `    w` / `    w` is a quote holding one
-  /// paragraph and, after it, a code block at the top level.
-  final bool quoteIndented;
+  /// What the open quote's last line was, inside the quote — the bits
+  /// [lastBlank], [lastFence] and [lastIndented] — which is what decides
+  /// whether a line without a `>` goes on with it lazily: paragraph text
+  /// does unless that line was blank or a fence, and an indented line does
+  /// unless it was indented too (`> w` / `    w` / `    w` is a quote of
+  /// one paragraph, then code).
+  final int quoteLast;
 
-  /// The list items this line sits inside, outermost first.
-  ///
-  /// Each open item is kept as the column its marker *starts* at and the
-  /// column its content starts at, because the two answer different
-  /// questions: a marker is a child when it starts at or past the open item's
-  /// content column, and a sibling when it starts at the same column as that
-  /// item's own marker — which is how `9. ` and `10. ` stay one list however
-  /// much their content columns differ.
-  final List<({int marker, int content})> listStack;
+  /// The list items this line sits inside, outermost first, outside any
+  /// quote (see [OpenItem]).
+  final List<OpenItem> listStack;
 
   /// The content indentation of the innermost open item, or -1 outside a list.
   int get listIndent => listStack.isEmpty ? -1 : listStack.last.content;
@@ -147,18 +175,14 @@ final class LineState {
   /// Whether a GFM table is running.
   final bool table;
 
-  /// Whether the line before was paragraph text — anywhere, not only inside
-  /// a list.
+  /// Whether a paragraph is open in the innermost container: the line
+  /// before was paragraph text there.
   ///
-  /// A line of paragraph text written short of the innermost item's content
-  /// column goes on with that paragraph lazily, and every item stays open
-  /// around it; after anything else — a blank line, a fence, a heading — the
-  /// same line closes the items whose content column it does not reach. And
-  /// an indented code block cannot interrupt a paragraph, so a four-space
-  /// line after paragraph text is the paragraph's, not code's: the flag is
-  /// what `BlockScanner._opensIndentedCode` asks of the state entering the
-  /// line. Only set for paragraph text, so a heading, a fence or a blank
-  /// line keeps the shared state.
+  /// A paragraph decides what may interrupt it: an indented code block
+  /// cannot, so a four-space line after paragraph text is the paragraph's;
+  /// an ordered list may only from 1, and an empty item not at all. Only
+  /// set for paragraph text, so a heading, a fence or a blank line keeps
+  /// the shared state.
   final bool openParagraph;
 
   /// Whether the line is anywhere a block-level construct can still start —
@@ -177,7 +201,7 @@ final class LineState {
       other.html == html &&
       other.htmlClosing == htmlClosing &&
       other.quoteDepth == quoteDepth &&
-      other.quoteIndented == quoteIndented &&
+      other.quoteLast == quoteLast &&
       _sameStack(other.listStack, listStack) &&
       other.table == table &&
       other.openParagraph == openParagraph;
@@ -185,10 +209,8 @@ final class LineState {
   /// Whether two stacks hold the same items: records compare by value, so a
   /// plain element-wise walk is the whole of it (the engine has no
   /// `package:collection`).
-  static bool _sameStack(
-    List<({int marker, int content})> a,
-    List<({int marker, int content})> b,
-  ) {
+  static bool _sameStack(List<OpenItem> a, List<OpenItem> b) {
+    if (identical(a, b)) return true;
     if (a.length != b.length) return false;
     for (var at = 0; at < a.length; at++) {
       if (a[at] != b[at]) return false;
@@ -205,7 +227,7 @@ final class LineState {
     html,
     htmlClosing,
     quoteDepth,
-    quoteIndented,
+    quoteLast,
     Object.hashAll(listStack),
     table,
     openParagraph,
@@ -215,7 +237,7 @@ final class LineState {
   String toString() =>
       'LineState(fence: $fence, math: $math, frontmatter: $frontmatter, '
       'code: $indentedCode, html: $html, quote: $quoteDepth, '
-      'quoteIndented: $quoteIndented, '
+      'quoteLast: $quoteLast, '
       'list: $listDepth at $listIndent, table: $table, '
       'paragraph: $openParagraph)';
 }

@@ -159,7 +159,7 @@ const List<(String, String)> _shapes = [
 ];
 
 /// The shapes the scanner does not read yet: what the rewrite is for.
-const Set<int> _pending = <int>{9, 10, 11, 12, 13};
+const Set<int> _pending = <int>{};
 
 void main() {
   group('the indentation model', () {
