@@ -301,6 +301,82 @@ abstract final class LineSyntax {
     return count >= 3;
   }
 
+  /// [text] with the tabs of its leading whitespace made spaces, to the
+  /// next stop of four columns: what the read view's parser counts a
+  /// line's indent in. Obsidian indents a sublist with a tab, which is four
+  /// columns and so inside an item of two — counted as one, the sublist
+  /// was a sibling. The tabs after a marker stay as they are: the parser
+  /// takes the one after a marker as its one space.
+  static String expandIndent(String text) {
+    var at = 0;
+    var tab = false;
+    while (at < text.length && isSpace(text.codeUnitAt(at))) {
+      if (text.codeUnitAt(at) == 0x09) tab = true;
+      at++;
+    }
+    if (!tab) return text;
+    final spaces = StringBuffer();
+    var column = 0;
+    for (var i = 0; i < at; i++) {
+      final width = text.codeUnitAt(i) == 0x09 ? 4 - column % 4 : 1;
+      for (var space = 0; space < width; space++) {
+        spaces.write(' ');
+      }
+      column += width;
+    }
+    return '$spaces${text.substring(at)}';
+  }
+
+  /// How far in [text] stands, in columns, a tab to the next stop of four,
+  /// plus [remaining] columns a tab taken off it before left over: what a
+  /// list item compares with its indent (`package:markdown`'s
+  /// `indentation()` and `tabRemaining`).
+  static int columnsOf(String text, [int remaining = 0]) {
+    var columns = 0;
+    for (var at = 0; at < text.length; at++) {
+      final char = text.codeUnitAt(at);
+      if (char == 0x09) {
+        columns += 4 - columns % 4;
+      } else if (char == 0x20) {
+        columns++;
+      } else {
+        break;
+      }
+    }
+    return columns + remaining;
+  }
+
+  /// [text] with [indent] columns of its leading whitespace taken off, the
+  /// way the read view's parser takes an item's indent off its lines
+  /// (`package:markdown`'s `dedent`): a tab is four columns wherever it
+  /// stands, and goes whole once the indent is reached in it, its columns
+  /// past the indent left over — the second of the pair, which counts
+  /// toward the next item's indent and nothing else. A tab short of the
+  /// indent goes too, and leaves nothing.
+  static (String, int) dedent(String text, int indent) {
+    var start = 0;
+    var columns = 0;
+    var remaining = 0;
+    var tab = false;
+    for (; start < text.length && start < indent; start++) {
+      final char = text.codeUnitAt(start);
+      if (char != 0x20 && char != 0x09) break;
+      final isTab = char == 0x09;
+      if (isTab) {
+        columns += 4;
+        tab = true;
+      } else {
+        columns += 1;
+      }
+      if (columns >= indent) {
+        if (tab) remaining = columns - indent;
+        if (columns == indent || isTab) start++;
+        return (text.substring(start), remaining);
+      }
+    }
+    return (text.substring(start), 0);
+  }
+
   /// How many spaces [text] starts with.
   static int indentOf(String text) => text.length - text.trimLeft().length;
 

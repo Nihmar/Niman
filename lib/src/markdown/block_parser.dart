@@ -327,19 +327,34 @@ final class BlockParser {
   /// spaces in from *there*. Counted from the margin, `- a` / `    > b` — a
   /// quote in the item — kept its `>`, and its inside was read as indented
   /// code.
+  ///
+  /// The three spaces are columns, a tab to the next stop of four, as the
+  /// scanner reads them: `\t>` is four columns in, indented code and no
+  /// quote mark.
   static int quotePrefixLength(String line, int depth, [int start = 0]) {
     var from = start;
+    var column = 0;
+    for (var at = 0; at < start && at < line.length; at++) {
+      column += line.codeUnitAt(at) == 0x09 ? 4 - column % 4 : 1;
+    }
     for (var level = 0; level < depth; level++) {
       var at = from;
-      while (at < line.length &&
-          at - from < 3 &&
-          LineSyntax.isSpace(line.codeUnitAt(at))) {
+      var reached = column;
+      while (at < line.length && LineSyntax.isSpace(line.codeUnitAt(at))) {
+        final width = line.codeUnitAt(at) == 0x09 ? 4 - reached % 4 : 1;
+        if (reached + width - column > 3) break;
+        reached += width;
         at++;
       }
       if (at >= line.length || line.codeUnitAt(at) != 0x3E) return from;
       at++;
-      if (at < line.length && LineSyntax.isSpace(line.codeUnitAt(at))) at++;
+      reached++;
+      if (at < line.length && LineSyntax.isSpace(line.codeUnitAt(at))) {
+        reached += line.codeUnitAt(at) == 0x09 ? 4 - reached % 4 : 1;
+        at++;
+      }
       from = at;
+      column = reached;
     }
     return from;
   }
@@ -363,17 +378,18 @@ final class BlockParser {
   static int itemPrefixLength(Block block, String line) {
     final items = _itemsOf(block);
     if (items == null) return 0;
-    var at = 0;
+    // Each item takes its indent off as the parser does
+    // (`LineSyntax.dedent`): a tab whole once the indent is reached in it,
+    // its columns past the indent counting toward the next item's.
+    var rest = line;
+    var remaining = 0;
     for (var level = 0; level < _levelsOf(block); level++) {
       final indent = items[level].indent;
-      var spaces = 0;
-      while (at + spaces < line.length &&
-          LineSyntax.isSpace(line.codeUnitAt(at + spaces))) {
-        spaces++;
+      if (LineSyntax.columnsOf(rest, remaining) >= indent) {
+        (rest, remaining) = LineSyntax.dedent(rest, indent);
       }
-      if (spaces >= indent) at += indent;
     }
-    return at;
+    return line.length - rest.length;
   }
 
   /// What, beside its kind, depths and text, decides what [contentText]

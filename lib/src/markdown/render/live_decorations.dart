@@ -173,7 +173,7 @@ final class LineShape {
     }
     return LineShape(
       quoteDepth: quoteDepth,
-      quoteIndent: block == null
+      quoteIndent: block == null || quoteDepth == 0
           ? 0
           : BlockParser.itemPrefixLength(block, line.text),
       marker: marker,

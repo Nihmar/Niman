@@ -27,6 +27,7 @@ final class ContainerWalk {
     this.lazy,
     this.quote,
     this.next,
+    this.remaining,
   );
 
   /// [raw], entered in [entering], walked through the items and the quote
@@ -35,10 +36,13 @@ final class ContainerWalk {
   factory of(LineState entering, String raw, String? next) {
     final open = entering.listStack;
     if (open.isEmpty && entering.quoteDepth == 0) {
-      return ContainerWalk._(open, false, raw, false, null, next);
+      return ContainerWalk._(open, false, raw, false, null, next, 0);
     }
     final blank = LineSyntax.indentOf(raw) == raw.length;
     var text = raw;
+    // Columns a tab an item took off left over, which count toward the
+    // next item's indent (`LineSyntax.dedent`).
+    var remaining = 0;
     // The line after it, as each item in turn reads it.
     var after = next;
     var lazy = false;
@@ -60,14 +64,14 @@ final class ContainerWalk {
         after = _reach(after, item.indent);
         continue;
       }
-      if (LineSyntax.indentOf(text) >= item.indent) {
+      if (LineSyntax.columnsOf(text, remaining) >= item.indent) {
         // At least the item's indent in: the item's, read without it — but
         // an item whose marker had no text takes one blank line at most.
         if ((item.blanks ?? 0) > 1) {
           kept = at;
           break;
         }
-        text = text.substring(item.indent);
+        (text, remaining) = LineSyntax.dedent(text, item.indent);
         if (item.lastBlank) {
           (changed ??= [...open])[at] = (
             indent: item.indent,
@@ -82,7 +86,7 @@ final class ContainerWalk {
       // Short of it: a rule, a marker or a block that may interrupt ends the
       // list, and so does anything after a blank line. Anything else is the
       // item's lazily, read as it stands.
-      if (item.lastBlank || _endsList(text, after)) {
+      if (item.lastBlank || _endsList(LineSyntax.expandIndent(text), after)) {
         kept = at;
         break;
       }
@@ -94,13 +98,23 @@ final class ContainerWalk {
         : changed ?? open;
     String? quote;
     if (kept == open.length && entering.quoteDepth > 0) {
-      if (LineSyntax.quoteDepth(text) > 0) {
+      // A block's marker stands up to three spaces in; a tab is four.
+      final columns = LineSyntax.expandIndent(text);
+      if (LineSyntax.quoteDepth(columns) > 0) {
         quote = LineSyntax.quoteChild(text);
-      } else if (_quoteTakesLazily(text, entering.quoteLast, after)) {
+      } else if (_quoteTakesLazily(columns, entering.quoteLast, after)) {
         quote = text;
       }
     }
-    return ContainerWalk._(items, kept < open.length, text, lazy, quote, after);
+    return ContainerWalk._(
+      items,
+      kept < open.length,
+      text,
+      lazy,
+      quote,
+      after,
+      remaining,
+    );
   }
 
   /// The items the line stays in, outermost first: the ones open before it,
@@ -119,6 +133,11 @@ final class ContainerWalk {
   /// Whether an item took the line lazily, short of its indent.
   final bool lazy;
 
+  /// The columns of a tab the last item's indent ended inside of, left over
+  /// past [text]: they count toward the indent of an item [text] opens, as
+  /// they count toward an open one's.
+  final int remaining;
+
   /// The line after it as the same items read it — each one's indent taken
   /// off where that line reaches it, as the items will take it — which is
   /// where a table's delimiter row is looked for. Not as this line was
@@ -130,12 +149,9 @@ final class ContainerWalk {
   /// reaches it, the line as it stands otherwise.
   static String? _reach(String? line, int indent) {
     if (line == null) return null;
-    var spaces = 0;
-    while (spaces < line.length &&
-        LineSyntax.isSpace(line.codeUnitAt(spaces))) {
-      spaces++;
-    }
-    return spaces >= indent ? line.substring(indent) : line;
+    return LineSyntax.columnsOf(line) >= indent
+        ? LineSyntax.dedent(line, indent).$1
+        : line;
   }
 
   /// What the line holds inside the open quote, when it is the quote's —
@@ -183,16 +199,18 @@ final class ContainerWalk {
 
   /// The bits of [LineState.quoteLast] for [child], a line inside a quote.
   static int lastOf(String child) {
-    final indent = LineSyntax.indentOf(child);
+    final indent = LineSyntax.columnsOf(child);
     // Four spaces and nothing else are blank and indented both.
-    if (indent == child.length) {
+    if (LineSyntax.indentOf(child) == child.length) {
       return indent >= 4
           ? LineState.lastBlank | LineState.lastIndented
           : LineState.lastBlank;
     }
     var bits = 0;
     if (indent >= 4) bits |= LineState.lastIndented;
-    if (LineSyntax.fenceOpen(child) != null) bits |= LineState.lastFence;
+    if (LineSyntax.fenceOpen(LineSyntax.expandIndent(child)) != null) {
+      bits |= LineState.lastFence;
+    }
     return bits;
   }
 }

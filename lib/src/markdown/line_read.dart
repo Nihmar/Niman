@@ -4,6 +4,7 @@ library;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/container_walk.dart';
 import 'package:niman/src/markdown/line_state.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 
 /// What the scan makes of one line, entered in a state: what it is, the
 /// containers it stands in, and the state it leaves.
@@ -41,6 +42,7 @@ final class LineRead {
   /// The state after the line.
   final LineState exit;
 
-  /// The line as its innermost item reads it ([ContainerWalk.text]).
-  String get text => walk.text;
+  /// The line as its innermost item reads it ([ContainerWalk.text]), its
+  /// leading tabs four columns each, as the parser's patterns count them.
+  String get text => LineSyntax.expandIndent(walk.text);
 }

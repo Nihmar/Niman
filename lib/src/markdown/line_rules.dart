@@ -126,7 +126,9 @@ final class LineRules {
     String? content,
     List<OpenItem>? within,
   }) {
-    final text = content ?? walk.text;
+    // A block's marker stands up to three spaces in, and four are code: a
+    // tab is four columns to the parser's patterns.
+    final text = LineSyntax.expandIndent(content ?? walk.text);
     final base = within ?? walk.items;
     LineRead made(
       BlockKind kind, {
@@ -273,7 +275,10 @@ final class LineRules {
           )) {
         return made(BlockKind.paragraph, openParagraph: true);
       }
-      final (itemIndent, empty) = LineSyntax.itemIndent(text, marker);
+      final (marked, empty) = LineSyntax.itemIndent(text, marker);
+      // The columns a tab left over count toward the item's indent, as they
+      // count toward an open item's (`ContainerWalk.remaining`).
+      final itemIndent = marked + (content == null ? walk.remaining : 0);
       final parent = items.isEmpty ? 0 : items.last.content;
       final opened = <OpenItem>[
         ...items,
