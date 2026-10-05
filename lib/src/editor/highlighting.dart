@@ -609,7 +609,7 @@ final class HighlightDocument {
   /// disagree about what counts as a heading.
   /// Where the `#`s of an ATX heading on [text] start and how many there
   /// are, or null: up to three spaces in, as CommonMark and the block
-  /// scanner read it (`BlockScanner.headingMarkerOf`).
+  /// scanner read it (`LineSyntax.headingMarkerOf`).
   static (int, int)? _headingHashes(String text) {
     var at = 0;
     while (at < 3 && at < text.length && _isSpaceChar(text.codeUnitAt(at))) {

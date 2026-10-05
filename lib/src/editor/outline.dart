@@ -12,7 +12,7 @@ import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_list.dart';
-import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 
 /// One heading in the outline.
 final class OutlineEntry {
@@ -87,7 +87,7 @@ List<OutlineEntry> outlineOfBlocks(
     final text = line(block.startLine);
     // The text starts past the `#`s where they stand: a heading may be
     // indented, and cutting its level off the line's start left `# ` in it.
-    final marker = BlockScanner.headingMarkerOf(text);
+    final marker = LineSyntax.headingMarkerOf(text);
     final after = marker == null ? text.length : marker.$1 + marker.$2;
     out.add(
       OutlineEntry(

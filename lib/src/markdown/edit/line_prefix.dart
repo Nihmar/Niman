@@ -10,7 +10,7 @@
 /// a heading is one to six `#` then a space, a list marker is a bullet (`-`,
 /// `+`, `*`) or one to nine digits and a `.` or `)`, then at least one space.
 /// The marker's own indent is not asked about, exactly as
-/// `BlockScanner.listMarkerOf` does not.
+/// `LineSyntax.listMarkerOf` does not.
 library;
 
 import 'package:niman/src/markdown/source_buffer.dart';

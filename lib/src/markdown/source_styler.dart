@@ -29,7 +29,6 @@ import 'dart:collection';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
-
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -37,6 +36,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/note_reference_cache.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
@@ -553,7 +553,7 @@ final class SourceStyler {
     final opensItem =
         (block.kind == BlockKind.listItem && line == block.startLine) ||
         block.kind == BlockKind.quote;
-    final marker = opensItem ? BlockScanner.listMarkerOf(rest) : null;
+    final marker = opensItem ? LineSyntax.listMarkerOf(rest) : null;
     if (marker != null) {
       final (start, width, content) = marker;
       out.add(
@@ -576,7 +576,7 @@ final class SourceStyler {
     }
     // A heading block is one the scanner decided; a quote's inside is not,
     // and a `#` four spaces into it is code, not a heading.
-    final heading = BlockScanner.headingMarkerOf(
+    final heading = LineSyntax.headingMarkerOf(
       from == 0 ? text : text.substring(from),
       block.kind == BlockKind.quote ? 3 : null,
     );

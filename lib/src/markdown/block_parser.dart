@@ -24,9 +24,9 @@ library;
 import 'package:markdown/markdown.dart' as md;
 import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/block.dart';
-import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_masker.dart';
 import 'package:niman/src/markdown/inline_syntaxes.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/masked_block.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -263,7 +263,7 @@ final class BlockParser {
     if (block.kind != BlockKind.listItem) return 0;
     if (index == 0) return listIndentOf(block, firstLine);
     final from = quotePrefixLength(firstLine, block.quoteDepth);
-    final marker = BlockScanner.listMarkerOf(firstLine.substring(from));
+    final marker = LineSyntax.listMarkerOf(firstLine.substring(from));
     return marker?.$3 ?? listIndentOf(block, firstLine);
   }
 
