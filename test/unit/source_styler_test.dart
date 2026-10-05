@@ -130,6 +130,19 @@ void main() {
       ]);
     });
 
+    test('an indented heading marks its `#`s, not the spaces before', () {
+      // Up to three spaces from the margin, or past an item's content: the
+      // marker is where the `#`s stand. Taking the level for an offset from
+      // the line's start marked `  ` and left `##` as text.
+      expect(_line('  ## A *b*'), [
+        'headingMarker[##]',
+        'italic*[*]',
+        'italic[b]',
+        'italic*[*]',
+      ]);
+      expect(_line('> ## q'), ['blockquote[>]', 'headingMarker[##]']);
+    });
+
     test('a list item, with its task box', () {
       expect(_line('- [ ] do *it*'), [
         'listMarker[-]',

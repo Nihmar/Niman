@@ -574,15 +574,26 @@ final class SourceStyler {
         from += 3;
       }
     }
-    final hashes = BlockScanner.headingLevelOf(
+    // A heading block is one the scanner decided; a quote's inside is not,
+    // and a `#` four spaces into it is code, not a heading.
+    final heading = BlockScanner.headingMarkerOf(
       from == 0 ? text : text.substring(from),
+      block.kind == BlockKind.quote ? 3 : null,
     );
-    if (hashes > 0 &&
+    if (heading != null &&
         (block.kind == BlockKind.heading || block.kind == BlockKind.quote)) {
+      // The `#`s where they stand: a heading may be indented, in an item or
+      // up to three spaces from the margin, and the spaces are not marker.
+      final (start, hashes) = heading;
       out.add(
-        _Piece(TokenKind.headingMarker, from, from + hashes, _structural),
+        _Piece(
+          TokenKind.headingMarker,
+          from + start,
+          from + start + hashes,
+          _structural,
+        ),
       );
-      from += hashes;
+      from += start + hashes;
     }
     return from;
   }

@@ -694,8 +694,13 @@ final class BlockScanner {
           ? _ordinalOf(line, listDepth, quoteDepth, previous)
           : 0,
       // An ATX heading's: a setext one starts as its paragraph, and is
-      // made a heading when its underline goes on with it.
-      headingLevel: kind == BlockKind.heading ? _headingLevel(text) : 0,
+      // made a heading when its underline goes on with it. Read past the
+      // indent the kind was already decided with: a heading in an item
+      // stands up to three spaces past the item's content, more than three
+      // from the margin.
+      headingLevel: kind == BlockKind.heading
+          ? headingMarkerOf(text)?.$2 ?? 0
+          : 0,
       fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(line) : null,
       entering: _entering[line],
     );
@@ -1072,15 +1077,29 @@ final class BlockScanner {
   static (int, int, int)? listMarkerOf(String text) =>
       _listMarker(text, text.length);
 
-  /// How many `#` open a heading on [text], or 0.
-  static int headingLevelOf(String text) => _headingLevel(text);
+  /// The `#`s that open a heading on [text] — where they start and how many
+  /// — or null: the scanner's own rule, for a reader that colours or lists a
+  /// line the scanner already took for a heading, which is why the indent
+  /// before them is not asked about. Where they start is part of the answer
+  /// because a heading may stand indented (up to three spaces in from the
+  /// margin or from an item's content): a count alone, read as an offset
+  /// from the line's start, put the marker on the spaces. A reader that has
+  /// not had the line decided for it — a quote's inside — passes the
+  /// [reach] CommonMark allows, three.
+  static (int, int)? headingMarkerOf(String text, [int? reach]) =>
+      _headingMarker(text, 0, reach ?? text.length);
 
-  /// How many `#` open a heading on [text], or 0.
-  static int _headingLevel(String text, [int column = 0]) {
+  /// How many `#` open a heading on [text], or 0: up to three spaces in from
+  /// [column], the content column of the item the line is in.
+  static int _headingLevel(String text, [int column = 0]) =>
+      _headingMarker(text, column, 3)?.$2 ?? 0;
+
+  /// Where the `#`s of a heading on [text] start and how many there are, at
+  /// most [reach] spaces in from [column]; null when the line is no heading.
+  static (int, int)? _headingMarker(String text, int column, int reach) {
     var at = column;
-    // An ATX heading may stand up to three spaces in from the content column.
     while (at < text.length &&
-        at - column < 3 &&
+        at - column < reach &&
         _isSpace(text.codeUnitAt(at))) {
       at++;
     }
@@ -1092,9 +1111,9 @@ final class BlockScanner {
         hashes <= 6 &&
         (at + hashes == text.length ||
             _isSpace(text.codeUnitAt(at + hashes)))) {
-      return hashes;
+      return (at, hashes);
     }
-    return 0;
+    return null;
   }
 
   /// The level of the setext heading [line] makes of [paragraph], the
