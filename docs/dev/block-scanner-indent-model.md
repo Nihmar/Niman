@@ -241,6 +241,41 @@ keeps it and moves the errors around. The fifteen cases are a good
 checkpoint for that rewrite — they are green in the fifth attempt — but
 the harness count is the gate, and it did not fall.
 
+A sixth attempt made the marker and item columns **relative** to the
+quote prefix (so both halves measure from the same point) and gave a
+quote block the items before its `>`: 309 → 4 229 / 413, two of the
+fifteen cases red again. Same signature.
+
+### Why patching cannot work (six attempts, six times)
+
+| Attempt | Harness (diff / minimal) |
+|---|---|
+| starting point | 309 / 138 |
+| offset past quotes in `_listAfter` only | 6 393 / — |
+| `quoteColumn`/`quoteIndent` as state | 4 343 / — |
+| indent past quotes, marker columns relative | 6 346 / 197 |
+| indented code from the item's marker | 352 / 175 |
+| five readers moved together (14/15 cases) | 4 476 / 577 |
+| marker and item columns relative + `_quoteOuterItems` | 4 229 / 413 |
+
+Every attempt is a different subset of {`_listMarker`, `_contentColumn`,
+`_indentOf`/`_indentPastQuotes`, `_quoteDepthAfter`, `_quoteOuterItems`,
+`quoteIndent`} moved to measure past the quotes, and every one leaves the
+same defect: an item's column is measured on the line that opened it,
+a line's position is measured on the line being read, and the two are
+compared as if they were one space. The walk has to produce **both** in
+the same coordinates — the item's column when it opened is itself the
+result of a walk over its own line — and no patch to the readers gives
+that, because the item columns are already in the stack from earlier
+lines.
+
+So the rewrite is: replace `_contentColumn`, `_indentOf`/`_afterQuotes`
+and `_listMarker` with one `_consume(text, state)` that walks the line
+and returns the content position, the depth and the markers **in the
+line's own coordinates**, and make the stack hold each item's column
+**as that walk produced it** (so opening and reading use one function).
+The fifteen cases and the harness are the gate.
+
 The fifteen cases are in `block_scanner_test.dart`'s "the indentation
 model" group: eight run, seven are `skip: pending` with this document's
 name. The rewrite unskips them.
