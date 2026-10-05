@@ -39,7 +39,9 @@ doubtful repro against the spec before fixing the scanner for it.
 | `ae23fb49` — an item goes on with paragraph text only | 15 897 | 724 |
 | causes 1-4 (`66598421`) | 1 896 | 1 164 |
 | cause 5 + indented code from the content column (`de0922be`) | 1 425 | 932 |
-| quote absorbs one indented continuation (`f290`-to-commit) | 942 | 614 |
+| quote absorbs one indented continuation (`d4b6c333`) | 942 | 614 |
+| quotes, lazy items and rules from the item's column (`327ada12`) | 368 | 194 |
+| item and fence close on the line that ends them (`01963d99`) | 309 | 138 |
 
 `ae23fb49`: `_mergesInto(listItem)` took any non-blank line without a
 marker, so `# Heading`, `> quote`, a fence or `---` under a list became the
@@ -91,9 +93,12 @@ item below.
   line as a fresh scan would" is skipped with this reason, to be fixed with
   `openParagraph`-aware convergence (an `_isBlockBoundary`/`_convergesAt`
   check on the block the boundary line opens).
-- **About 942 of 40 000 documents still differ** (614 minimal). The bulk are
-  quote/indented-code and deep-item interactions the rules above do not yet
-  reach; rerun the harness for the current list.
+- **About 309 of 40 000 documents still differ** (138 minimal). The bulk are
+  deep-item interactions: a marker or quote a level or two in, after a
+  more-indented sublist and a dedent (`  1. w` / `      - w` / `    * w`
+  wants the last item at list 2, the scanner has it at 0), setext headings
+  there, and a quote written after a dedent. Rerun the harness for the
+  current list.
 
 Full list of minimal repros: rerun the harness (≈40 s) — sort order is
 shortest first.
