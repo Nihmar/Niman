@@ -86,6 +86,12 @@ item below.
 
 ## Still open
 
+- **The remaining repros need the indentation model**, not another fix to
+  the current one: see `docs/dev/block-scanner-indent-model.md` for the
+  evidence, the model, the fifteen pinning cases and the method. Both
+  incremental attempts to move the indent reading regressed the harness by
+  thousands, so it is a rewrite of `_contentColumn`/`_indentOf`/`_listMarker`
+  together, not a patch.
 - **The incremental rescan keeps a stale hint across a blank line** once
   `openParagraph` can turn a hint paragraph into an item. The fresh scan is
   correct; `blockAt` on a stopped-short rescan can still answer the old
