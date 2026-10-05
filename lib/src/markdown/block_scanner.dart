@@ -22,6 +22,7 @@ import 'package:niman/src/markdown/block_builder.dart';
 import 'package:niman/src/markdown/block_changes.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_list.dart';
+import 'package:niman/src/markdown/block_rules.dart';
 import 'package:niman/src/markdown/line_rules.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
@@ -68,6 +69,9 @@ final class BlockScanner {
 
   /// What the scan makes of each line, read against [_entering].
   late final LineRules _rules = LineRules(buffer, _entering);
+
+  /// The blocks the scan makes of those lines.
+  late final BlockRules _blockRules = BlockRules(_rules);
 
   /// The blocks of the scanned prefix, in line order.
   ///
@@ -329,7 +333,7 @@ final class BlockScanner {
         ? _reopened(_at(headEnd), headEnd, start)
         : null;
     final builder = BlockBuilder(
-      _rules,
+      _blockRules,
       open: open,
       before: _nonBlankBefore(headEnd),
     );
@@ -479,11 +483,11 @@ final class BlockScanner {
     final (index, old, oldEnd) = _hintAt(line, tailStart, headEnd, edit);
     if (old == null || old.kind == BlockKind.blank) return -1;
     final open = builder.open;
-    final goesOn = open != null && _rules.mergesInto(open, line);
+    final goesOn = open != null && _blockRules.mergesInto(open, line);
     if (old.startLine == line) {
       if (goesOn) return -1;
       if (old.kind == BlockKind.listItem &&
-          _rules.ordinalOf(
+          _blockRules.ordinalOf(
                 line,
                 old.listDepth,
                 old.quoteDepth,
@@ -523,7 +527,7 @@ final class BlockScanner {
     if (block.kind != BlockKind.heading || end >= block.endLine) {
       return block.cutAt(end);
     }
-    return _rules
+    return _blockRules
         .blockStarting(block.startLine, _nonBlankBefore(index))
         .cutAt(end);
   }

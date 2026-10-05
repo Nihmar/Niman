@@ -38,6 +38,9 @@ final class LineRules {
   int _kindRevision = -1;
   BlockKind _kind = BlockKind.blank;
 
+  /// The state entering [line], as the scanner recorded it.
+  LineState entering(int line) => _entering[line];
+
   /// The line's text, without a byte-order mark on the first line.
   String lineText(int line) {
     final text = buffer.lineAt(line);
@@ -67,11 +70,11 @@ final class LineRules {
     final text = lineText(line);
     if (state.fence != null) {
       // Inside a fence: every line is code until the closing fence, except a
-      // line that ends the item and the fence with it ([_fenceClosesItem]) —
+      // line that ends the item and the fence with it ([fenceClosesItem]) —
       // a non-blank line short of the content column that opens a new block,
       // or any such line after a blank one. Such a line is read as if no
       // fence were open.
-      if (_fenceClosesItem(line, text, state)) {
+      if (fenceClosesItem(line, text, state)) {
         return _kindOutsideFence(line, text, state);
       }
       return BlockKind.fencedCode;
@@ -171,9 +174,9 @@ final class LineRules {
   /// Whether [text] ends the item a running fence is in: a non-blank line
   /// short of the innermost item's content column that opens a new block,
   /// or any such line after a blank one. [kindOf] decides the
-  /// same thing for the line's kind; this is what [blockStarting] and
-  /// [exitOf] ask to drop the item with the fence.
-  bool _fenceClosesItem(int line, String text, LineState state) {
+  /// same thing for the line's kind; this is what the block a line starts
+  /// and [exitOf] ask to drop the item with the fence.
+  bool fenceClosesItem(int line, String text, LineState state) {
     if (state.fence == null ||
         state.listIndent < 0 ||
         text.trim().isEmpty ||
@@ -217,7 +220,7 @@ final class LineRules {
       // opens a new block ends the item and the fence with it; after a blank
       // line, even plain text does. The line is then read as if no fence were
       // open, so the item it opens (or the text it is) is the state after it.
-      if (_fenceClosesItem(line, text, state)) {
+      if (fenceClosesItem(line, text, state)) {
         return _exitOfFrom(line, LineState.initial);
       }
       return LineSyntax.isFenceClose(text, state.fence!, state.listIndent)
@@ -245,20 +248,20 @@ final class LineRules {
       LineContainers.contentColumn(text, state),
     );
     if (fence != null) {
-      return LineState(fence: fence, listStack: _listAfter(line, text, state));
+      return LineState(fence: fence, listStack: listAfter(line, text, state));
     }
     // Only the multi-line form opens a state: a `$$…$$` written on one line
     // is over on that line, and leaving the state open swallowed whatever
     // followed it.
     if (_isDisplayLineAt(line, text, state) && isDisplayOpen(text.trim())) {
-      return LineState(math: true, listStack: _listAfter(line, text, state));
+      return LineState(math: true, listStack: listAfter(line, text, state));
     }
     final html = HtmlBlockSyntax.open(text);
     if (html != null) {
       final opened = LineState(
         html: html.$1,
         htmlClosing: html.$2,
-        listStack: _listAfter(line, text, state),
+        listStack: listAfter(line, text, state),
       );
       // A comment, a raw-text tag, a processing instruction, a declaration or
       // a CDATA section ends on the line with its end marker — which can be
@@ -271,7 +274,7 @@ final class LineRules {
         ? 0
         : LineContainers.quoteDepthAfter(text, state);
     final quoteItems = LineContainers.quoteItems(text, state);
-    final listStack = quoteItems ?? _listAfter(line, text, state);
+    final listStack = quoteItems ?? listAfter(line, text, state);
     final table = _tableContinues(line, state);
     final indentedCode =
         _indentedCodeContinues(line, text, state) ||
@@ -337,7 +340,7 @@ final class LineRules {
   /// closes the rest — `  back in A` after a blank line under `  - B` is A's
   /// text, not a line outside the list. Unless it is lazy: paragraph text
   /// that goes on with the paragraph before it keeps every item open.
-  List<({int marker, int content})> _listAfter(
+  List<({int marker, int content})> listAfter(
     int line,
     String text,
     LineState state,
@@ -349,7 +352,7 @@ final class LineRules {
     // A line the scanner reads as indented code is not a marker: four spaces
     // in from the margin with no open item reaching it is code, not an item
     // (`  2) w` / `` / `    - w` has the last line as code outside the
-    // list). [kindOf] decides this first; [_listAfter] follows it.
+    // list). [kindOf] decides this first; [listAfter] follows it.
     if (marker != null && kindOf(line) != BlockKind.indentedCode) {
       // A marker that goes on with the paragraph opens no item, and the
       // items already open stay as they are (`w` / `2) w` / `2) w` is one
@@ -390,175 +393,6 @@ final class LineRules {
     return reached == 0
         ? const <({int marker, int content})>[]
         : state.listStack.sublist(0, reached);
-  }
-
-  /// The block that starts on [line], one line long: the builder extends it.
-  ///
-  /// [previous] is the last non-blank block before it, which an ordered item
-  /// counts on from.
-  Block blockStarting(int line, Block? previous) {
-    final kind = kindOf(line);
-    final text = lineText(line);
-    // The depth *on* the line, not the one entering it: a quote's first line
-    // has no depth before its own `>`, so taking the entering state left
-    // every quote block at depth 0 — which made the renderer draw it as an
-    // unnested quote and the parser read the `>` as text.
-    final entering = _entering[line];
-    // A line that ends an item's fence (opens a block short of the content
-    // column) is not in the item: the state it enters carries the item the
-    // fence was in, but the fence closes it here, so depth and items start
-    // from nothing (`* w` / `  ``` ` / `* w` / `  * w` has the second item at
-    // 0 and its sublist at 1, not both at 0).
-    final base = _fenceClosesItem(line, text, entering)
-        ? LineState.initial
-        : entering;
-    final quoteDepth = LineContainers.quoteClosesToCode(text, base)
-        ? 0
-        : LineContainers.quoteDepthAfter(text, base);
-    // The depth *on* the line, like the quote's: the state entering a marker
-    // line describes the item before it, so a block that took its depth from
-    // there was drawn at the previous item's indent — siblings at different
-    // indents, the item after a sublist pushed right (device report,
-    // 2026-09-21).
-    final quoteItems = LineContainers.quoteItems(text, base);
-    final listStack = quoteItems ?? _listAfter(line, text, base);
-    final listDepth = listStack.isEmpty ? -1 : listStack.length - 1;
-    return Block(
-      kind: kind,
-      startLine: line,
-      endLine: line + 1,
-      quoteDepth: quoteDepth,
-      listDepth: listDepth,
-      // An ordered list counts from its first item on, wherever the list
-      // starts; a list written `1. 1. 1.` renders 1, 2, 3, which is CommonMark
-      // and what the preview draws. The count lives here because this is where
-      // the *list* is still visible: a block knows only its own item.
-      listOrdinal: kind == BlockKind.listItem
-          ? ordinalOf(line, listDepth, quoteDepth, previous)
-          : 0,
-      // An ATX heading's: a setext one starts as its paragraph, and is
-      // made a heading when its underline goes on with it. Read past the
-      // indent the kind was already decided with: a heading in an item
-      // stands up to three spaces past the item's content, more than three
-      // from the margin.
-      headingLevel: kind == BlockKind.heading
-          ? LineSyntax.headingMarkerOf(text)?.$2 ?? 0
-          : 0,
-      fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(line) : null,
-      entering: _entering[line],
-    );
-  }
-
-  /// Whether line [end] belongs to [open], the block the scan has open.
-  bool mergesInto(Block open, int end) {
-    switch (open.kind) {
-      case BlockKind.heading:
-        // An ATX heading is its own line, and a setext one ends with its
-        // underline: nothing goes on with either.
-        return false;
-      case BlockKind.paragraph:
-        // A setext underline goes on with the paragraph it heads
-        // ([underlineLevel]), which the builder then makes a heading.
-        return kindOf(end) == BlockKind.paragraph ||
-            underlineLevel(open, end) > 0;
-      case BlockKind.thematicBreak:
-        return false;
-      case BlockKind.listItem:
-        // The item's block is its first paragraph: paragraph text goes on
-        // with it, indented into the item or lazily, which keeps a wrapped
-        // item whole. A setext underline under it heads the item's text, as
-        // it does a paragraph's. A line that opens a block of its own — a
-        // marker, a heading, a rule, a fence, a quote — does not: taking any
-        // line without a marker swallowed `# Heading` under a list into the
-        // item's text.
-        return kindOf(end) == BlockKind.paragraph ||
-            underlineLevel(open, end) > 0;
-      case BlockKind.quote:
-        // A blank line ends the quoted run; a line that is still a quote line —
-        // with a marker or lazily without one — continues it. A quote short
-        // of the open item's content column is a quote of its own, outside:
-        // it closes the item, so it does not go on with this block.
-        return kindOf(end) == BlockKind.quote &&
-            LineContainers.quoteItems(lineText(end), _entering[end]) == null;
-      case BlockKind.fencedCode:
-      case BlockKind.indentedCode:
-      case BlockKind.frontmatter:
-      case BlockKind.html:
-      case BlockKind.table:
-      case BlockKind.blank:
-        return kindOf(end) == open.kind;
-      case BlockKind.math:
-        // A display block runs while it is open, and the state entering the
-        // line is the only thing that knows: the line that *closes* a block
-        // starts with `$$` as much as the line that opens one does. Asking
-        // the line instead of the state stitched two neighbouring formulas
-        // into one block whose tex was both of them (#252).
-        return _entering[end].math;
-    }
-  }
-
-  /// The level of the setext heading [line] makes of [paragraph], the
-  /// paragraph the scan has open, when it is its underline — or 0.
-  ///
-  /// A setext heading is a paragraph and the underline under it: the whole
-  /// paragraph is the heading's text, as CommonMark and the export's
-  /// `SetextHeaderWithIdSyntax` read it (#361). So what the line above is
-  /// is asked of the block, not of its text: a table row, a quote, a list
-  /// item's marker line are no paragraph, and none of them is headed.
-  ///
-  /// And the underline has to stand in the paragraph's own container,
-  /// because a paragraph continues lazily and an underline never does: in
-  /// a quote it would need its own `>` (and then the quote's reading heads
-  /// it), in a list item it has to be indented into the item.
-  int underlineLevel(Block paragraph, int line) {
-    final state = _entering[line];
-    if (state.quoteDepth != 0 || state.listDepth != paragraph.listDepth) {
-      return 0;
-    }
-    final text = lineText(line);
-    // In an item, the underline's up to three spaces are counted from the
-    // item's content column, which it has to reach.
-    final column = state.listIndent < 0 ? 0 : state.listIndent;
-    for (var at = 0; at < column; at++) {
-      if (at >= text.length || !LineSyntax.isSpace(text.codeUnitAt(at))) {
-        return 0;
-      }
-    }
-    return LineSyntax.setextLevel(text, column);
-  }
-
-  /// Where the item starting at [line] sits in its list.
-  ///
-  /// A continuation of the list already in progress — the previous block was an
-  /// item at the same indent, and both are written as ordered items — keeps
-  /// counting. Anything else starts a list, and starts it at the number the
-  /// note wrote.
-  int ordinalOf(int line, int listDepth, int quoteDepth, Block? previous) {
-    final written = LineSyntax.writtenOrdinal(lineText(line));
-    // The same list is the same depth in the same quote: an item after a
-    // quote's list is a list of its own, not the quote's list counted on.
-    if (previous != null &&
-        previous.kind == BlockKind.listItem &&
-        previous.listDepth == listDepth &&
-        previous.quoteDepth == quoteDepth &&
-        previous.listOrdinal > 0 &&
-        written > 0) {
-      return previous.listOrdinal + 1;
-    }
-    return written;
-  }
-
-  /// The fence's info string: the first word after the fence run, which is the
-  /// language a highlighter wants.
-  String? _fenceInfo(int line) {
-    final text = lineText(line);
-    final fence = LineSyntax.fenceOpen(
-      text,
-      LineContainers.contentColumn(text, _entering[line]),
-    );
-    if (fence == null) return null;
-    final rest = text.substring(fence.indent + fence.length).trim();
-    return rest.isEmpty ? null : rest.split(RegExp(r'\s+')).first;
   }
 
   /// Whether [line] is inside a GFM table.

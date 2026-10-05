@@ -2,7 +2,7 @@
 library;
 
 import 'package:niman/src/markdown/block.dart';
-import 'package:niman/src/markdown/line_rules.dart';
+import 'package:niman/src/markdown/block_rules.dart';
 
 /// Blocks built line by line, as a scan reaches each line.
 ///
@@ -18,7 +18,7 @@ final class BlockBuilder {
     : _open = open,
       openEnd = open?.endLine ?? 0;
 
-  final LineRules _rules;
+  final BlockRules _rules;
   final List<Block> _blocks = <Block>[];
 
   /// The block the next line may go on with. Its own end is not kept up:
