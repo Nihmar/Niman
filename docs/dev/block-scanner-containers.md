@@ -163,7 +163,9 @@ and, from phase 1 on, the rescan test unskipped.
    variant — edit sequences against a fresh scan, shrunk the same way — which
    is what found item 3 above in seconds.
 5. **Downstream and merge.** `BlockParser.contentText` strips the item's
-   content column from every block in a list (below); restore the tests the
+   content column from every block in a list (below) — `- a` / `` /
+   `     # deep` is a heading block to the scanner and indented code to the
+   parse, which styles ` d` as inline code; restore the tests the
    #530 work avoided, which live on that branch — so #530 lands first and
    this branch is rebased on `main` after it; the changelog notes the task
    cascade change.
