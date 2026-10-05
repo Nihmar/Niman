@@ -45,6 +45,7 @@ doubtful repro against the spec before fixing the scanner for it.
 | *the harness reads quotes as the app does (`c3d56535`), same scanner* | *1 684* | *212* |
 | a block in an item read past the item's column (`2ab50765`) | 285 | 224 |
 | the container walk (phase 3) | 0 | 0 |
+| *GFM, wider forms, tabs (phase 4), same seeds* | *0 (seeds 1-4); 1 (seed 5)* | *0; 1* |
 
 The rows in italics and below are the second harness — the scanner read
 through the app's own quote pipeline, words compared by their full path
@@ -237,13 +238,49 @@ and, from phase 1 on, the rescan test unskipped.
    Scans got faster, from reading each line once: per 100 000 lines,
    before the branch → now, prose 54 → 21 ms, items 145 → 107, nested
    items 199 → 107, a lazy run 24 → 25; the list fixture 86 → 85.
-4. **The harness becomes a gate.** A short run (≈2 000 documents) in the
-   default suite that fails — at zero now, with no quirk list needed;
-   the 40 000 stay behind `NIMAN_SCANNER_DIFF`. New forms: tabs, `+`,
-   `10.`, `===`, `$$`, HTML, tables, a marker followed by a container
-   (`- > q`, `- - a`). And an incremental variant — edit sequences
-   against a fresh scan, shrunk the same way — which is what found
-   item 3 of the review in seconds.
+4. **The harness becomes a gate** — done. The reference now parses with
+   `ExtensionSet.gitHubFlavored`, the read view's set, and each block is
+   read the way the view draws it: its `contentText` parsed by the
+   package (`60a907b6`). New forms: `+`, `10.`, empty items, a container
+   right after a marker (`- > q`, `- - a`, a fence), `* * *`, `===`,
+   tables, HTML, `>W`, and tab indents (one document in four). What they
+   found, fixed:
+
+   - *GFM's blocks* (`22ec68f9`): `* * *` is a rule; HTML opens up to
+     three spaces in; a line over a delimiter row is a table's head,
+     tried before anything but a fence, ending a paragraph and denying
+     an underline whether or not its cells fit; what follows a marker is
+     read in the item it opens; a setext underline in an item keeps the
+     block an item, headed.
+   - *A block parsed in its container's coordinates* (`cce4bbfb`): the
+     view hands the parser each block alone, and an item's continuation
+     lines lost the column the parser, seeing the marker, took off again.
+     The spaces they now keep are hidden in `live`.
+   - *Tabs* (`53a34ae1`): four columns to the parser's patterns, an
+     item's indent taken off with the parser's `dedent` — a tab whole once
+     the indent is reached in it, its leftover columns counting toward
+     the next item's.
+   - *A table's head in its container* (`c31a652e`): the delimiter row
+     has to stay in the head's items, which the line under it decides.
+     The rescan starts a line back, two over a delimiter row, none over a
+     blank line; a headed item converges only with its number.
+
+   The gate: 2 000 documents, seed 1, in the default suite; 40 000 behind
+   `NIMAN_SCANNER_DIFF=1`. Two of the package's quirks are left out of
+   the comparison, counted: a lone `-` under a paragraph (its task-list
+   syntax takes an empty item and drops the text before it, ≈3 800 per
+   40 000) and `===` in a quote (no setext heading where a quote ends
+   lazily, ≈1 700). Seeds 1-4: 0 / 40 000 each; seed 5: 1 (below).
+
+   The incremental variant is `block_scanner_rescan_test.dart`: random
+   edit sequences over the hard lines, each step against a fresh scan,
+   the shortest case kept per kind — 4 000 sequences always, 240 000
+   behind the same variable: none differ. It found the headed item's
+   ordinal and the table head two lines up.
+
+   Two fixes outside the scanner followed from its blocks: the formatter
+   keeps a list's inner blocks in the list's unit, and the lint keeps
+   the blank line after an item that holds one of its own (`00490154`).
 5. **Downstream and merge.** The strip is done (above). Left: restore
    the tests the #530 work avoided, which live on that branch — so #530
    lands first and this branch is rebased on `main` after it — and the
@@ -251,21 +288,24 @@ and, from phase 1 on, the rescan test unskipped.
 
 ## Still open
 
-What the harness's forms do not reach, so the reading of these is not
-measured yet (phase 4 adds them):
+The harness compares the scanner with `package:markdown`, not with the
+CommonMark spec's examples: it passes what it generates, the package's
+quirks included. Known differences:
 
-- **Tabs** count as one column; `package:markdown` expands them to tab
-  stops of four.
-- **A rule with spaces in it** (`* * *`, `- - -`): `package:markdown`'s
-  rule allows them, `LineSyntax.isHr` does not, so such a line is an item.
-- **A container on a marker line** — `- > q`, `- - a`, `- ```` — opens
-  only the item: the item's block holds the line and the parse renders
-  it right, but the state after it does not know the quote, the sublist
-  or the fence inside, and the lines after are read without them.
-- **GFM's own blocks in the lazy readings**: a table only by the next
-  line being a delimiter row; footnote definitions and alerts not at
-  all; a setext underline in a quote that ends lazily, which
-  `package:markdown` does not head, is headed by the inner scan.
+- **A table head nested in containers** whose delimiter row the walk
+  reads otherwise — one document in 40 000 (seed 5):
+  `+ w` / `  >w` / `      1. w` / `|---|---|` / `  |---|---|`.
+- **A list mixing tabs and spaces** where a tab straddles an item's
+  indent: the parser splits the tab into spaces, but `contentText` has
+  to be a substring of the note, so the block keeps the whole tab.
+- **A fence on a marker line** (`- ```js`): the scanner reads it, but
+  the view renders the code as a block of its own after the item's, and
+  its closing fence as code text.
+- **The package's quirks**, left out of the harness and followed by the
+  view: the lone `-` under a paragraph, `===` in a lazily ending quote.
+- **GFM's footnote definitions and alerts** are not among the forms.
 - **A quote that opens deeper than it goes on** (`> > a` / `>` / `> b`):
   the block keeps its first line's depth, so its content strips two
   levels where it has one.
+- **The spec's own examples** have not been run against the scanner;
+  they would reach forms the generator does not write.
