@@ -82,6 +82,7 @@ final class LineState {
     this.html,
     this.htmlClosing,
     this.quoteDepth = 0,
+    this.quoteIndented = false,
     this.listStack = const <({int marker, int content})>[],
     this.table = false,
     this.openParagraph = false,
@@ -117,6 +118,15 @@ final class LineState {
   /// How many blockquote levels the line sits in.
   final int quoteDepth;
 
+  /// Whether the innermost open quote has already taken one indented (four
+  /// spaces or more) continuation of its paragraph.
+  ///
+  /// A quote absorbs one such line as the paragraph's own; a second is not
+  /// a lazy continuation any more, and opens an indented code block that
+  /// closes the quote — `> w` / `    w` / `    w` is a quote holding one
+  /// paragraph and, after it, a code block at the top level.
+  final bool quoteIndented;
+
   /// The list items this line sits inside, outermost first.
   ///
   /// Each open item is kept as the column its marker *starts* at and the
@@ -146,7 +156,7 @@ final class LineState {
   /// same line closes the items whose content column it does not reach. And
   /// an indented code block cannot interrupt a paragraph, so a four-space
   /// line after paragraph text is the paragraph's, not code's: the flag is
-  /// what [BlockScanner._opensIndentedCode] asks of the state entering the
+  /// what `BlockScanner._opensIndentedCode` asks of the state entering the
   /// line. Only set for paragraph text, so a heading, a fence or a blank
   /// line keeps the shared state.
   final bool openParagraph;
@@ -167,6 +177,7 @@ final class LineState {
       other.html == html &&
       other.htmlClosing == htmlClosing &&
       other.quoteDepth == quoteDepth &&
+      other.quoteIndented == quoteIndented &&
       _sameStack(other.listStack, listStack) &&
       other.table == table &&
       other.openParagraph == openParagraph;
@@ -194,6 +205,7 @@ final class LineState {
     html,
     htmlClosing,
     quoteDepth,
+    quoteIndented,
     Object.hashAll(listStack),
     table,
     openParagraph,
@@ -203,6 +215,7 @@ final class LineState {
   String toString() =>
       'LineState(fence: $fence, math: $math, frontmatter: $frontmatter, '
       'code: $indentedCode, html: $html, quote: $quoteDepth, '
+      'quoteIndented: $quoteIndented, '
       'list: $listDepth at $listIndent, table: $table, '
       'paragraph: $openParagraph)';
 }

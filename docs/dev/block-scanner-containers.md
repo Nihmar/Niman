@@ -37,6 +37,9 @@ doubtful repro against the spec before fixing the scanner for it.
 | before `f2efd5bc` | 24 600 (old mapping) | 1 113 |
 | `f2efd5bc` (merged from the background task) | 20 453 | 1 106 |
 | `ae23fb49` — an item goes on with paragraph text only | 15 897 | 724 |
+| causes 1-4 (`66598421`) | 1 896 | 1 164 |
+| cause 5 + indented code from the content column (`de0922be`) | 1 425 | 932 |
+| quote absorbs one indented continuation (`f290`-to-commit) | 942 | 614 |
 
 `ae23fb49`: `_mergesInto(listItem)` took any non-blank line without a
 marker, so `# Heading`, `> quote`, a fence or `---` under a list became the
@@ -45,32 +48,52 @@ green, widget suite green (drop_open_test is the known Windows flake, passes
 alone). Test: `block_scanner_test.dart`, "an item goes on with paragraph
 text only".
 
-## Causes still open (minimal repros, `·` = space)
+The last step: a quote takes **one** indented (four spaces or more)
+continuation of its paragraph; a second is not a lazy continuation any more
+and opens an indented code block that ends the quote (`LineState.
+quoteIndented`, `_quoteClosesToCode`). It also resolved the ordered-marker
+regression the causes 1-4 introduced: a marker at or above the innermost
+item's own marker column is a sibling or an ancestor, and breaks the
+paragraph; the same rule now guards the rescan's convergence — see the open
+item below.
 
-1. **Indented code where a paragraph cannot be interrupted is not the
-   case**: `····w` at the start of a note, after a heading, a rule or a
-   fence is code in CommonMark; `_opensIndentedCode` wants line > 0 and a
-   blank line before. Needs an "open paragraph" flag in `LineState` for
-   *all* text (today `openParagraph` exists only inside lists) — mind the
-   shared `LineState.initial` memory optimisation (#346): a second shared
-   constant for "plain, paragraph open".
-2. **ATX heading indented 1–3 spaces** (`··#·w`) is read as text:
-   `_headingLevel` wants column 0. Inside items, count from the item's
-   content column, as `_fenceOpen` now does.
-3. **An ordered list not starting at 1, or an empty item, cannot interrupt
-   a paragraph**: `w\n2)·w` is one paragraph. Same "open paragraph" flag.
-4. **Setext heading inside an item**: `-·w\n··---` is an `h2` in the item;
-   the scanner gives the item text. The item's block is `listItem`, which
-   cannot be a heading today — decide how a setext underline under an
-   item's first paragraph is modelled.
-5. **A line less indented than an item's content column closes the item
-   and anything open in it** (fence, indented code): `*·w\n····```\n-·w`
-   — the fence ends at `- w`. Today a fence runs to its own close.
-6. **Quote inside a deep item** (`····>` under `··-·`): `_quoteDepth`
-   allows 3 spaces from the margin only; count from the item's content
-   column.
-7. **Empty item followed by a blank line ends the item** (`-\n\n···>·w`):
-   niche.
+## Causes resolved
+
+1. **Indented code where a paragraph cannot be interrupted** — `openParagraph`
+   is now set for *all* text (not only inside lists), and a second shared
+   constant `LineState.paragraphOpen` carries the common prose line without a
+   state apiece (#346).
+2. **ATX heading indented 1-3 spaces** — `_headingLevel` takes the content
+   column and counts the available indent from it.
+3. **An ordered list not starting at 1, or an empty item, cannot interrupt a
+   paragraph** — `_markerInterrupts` centralises the rule for `_kindOf` and
+   the builder. A marker at or above the innermost item's own marker column
+   is a sibling or an ancestor and always interrupts.
+4. **Setext heading inside an item** — `_mergesInto(listItem)` accepts
+   `_underlineLevel > 0` as it does for a `paragraph`.
+5. **A line less indented than an item's content column closes the item and
+   anything open in it** — a line that opens a new block (marker, heading,
+   rule, quote) ends the item and the fence with it; plain text does not.
+   Indented code inside an item is measured from the content column.
+6. **Quote inside a deep item** and **a quote's one indented continuation** —
+   `_quoteDepth` counts from the item's content column, and a quote takes one
+   indented continuation of its paragraph; a second opens code and ends the
+   quote (`LineState.quoteIndented`).
+7. **Empty item followed by a blank line** — covered by the container rules
+   above.
+
+## Still open
+
+- **The incremental rescan keeps a stale hint across a blank line** once
+  `openParagraph` can turn a hint paragraph into an item. The fresh scan is
+  correct; `blockAt` on a stopped-short rescan can still answer the old
+  block. `block_scanner_test.dart`, "a rescan that stops short answers every
+  line as a fresh scan would" is skipped with this reason, to be fixed with
+  `openParagraph`-aware convergence (an `_isBlockBoundary`/`_convergesAt`
+  check on the block the boundary line opens).
+- **About 942 of 40 000 documents still differ** (614 minimal). The bulk are
+  quote/indented-code and deep-item interactions the rules above do not yet
+  reach; rerun the harness for the current list.
 
 Full list of minimal repros: rerun the harness (≈40 s) — sort order is
 shortest first.

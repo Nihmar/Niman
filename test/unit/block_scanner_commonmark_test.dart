@@ -2,6 +2,8 @@
 // a report, not a gate yet — the containers' rework that makes the two
 // agree is in progress (docs/dev/block-scanner-containers.md).
 //
+// ignore_for_file: avoid_print
+//
 // Every content line carries a word of its own (`w17`), found again in the
 // reference's tree: its leaf (text, code, heading), the list items around
 // it and the quotes. A quote is one block to the scanner, its inside
