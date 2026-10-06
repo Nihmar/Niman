@@ -1,11 +1,7 @@
-/// Our inline parser against `package:markdown`'s, on the same leaves
-/// (`docs/dev/block-tree.md`, "Speed"): the paragraphs and headings of the
-/// markdown fixtures and of a math-heavy note, each parsed
-///
-/// * by ours (`InlineParser`);
-/// * by the package's inline parser alone (`md.InlineParser`);
-/// * the way the app reads a leaf today: masked, then the package's whole
-///   parse of the block (`md.Document.parseLines`).
+/// Our inline parser on the paragraphs and headings of the markdown
+/// fixtures and of a math-heavy note (`docs/dev/block-tree.md`, "Speed"),
+/// with the app's syntax and without it. What it replaced — the package's
+/// parse, masked — is gone with the package; its numbers are in the plan.
 ///
 /// Usage: `dart run tool/inline_bench.dart` — the best of five runs each.
 library;
@@ -15,14 +11,11 @@ library;
 
 import 'dart:io';
 
-import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_tree.dart';
-import 'package:niman/src/markdown/extension_masker.dart';
 import 'package:niman/src/markdown/html/leaf_text.dart';
 import 'package:niman/src/markdown/inline/inline_parser.dart';
-import 'package:niman/src/markdown/inline_syntaxes.dart';
 import 'package:path/path.dart' as p;
 
 /// [args]: more notes to measure, by path — a note of one's own, which
@@ -41,8 +34,8 @@ void main(List<String> args) {
         .readAsStringSync(),
     'math prose (generated)': mathProse(4000),
   };
-  print('| note | leaves | ours | package inline | app today |');
-  print('|---|---:|---:|---:|---:|');
+  print('| note | leaves | ours | without the app syntax |');
+  print('|---|---:|---:|---:|');
   for (final MapEntry(key: name, value: note) in notes.entries) {
     final texts = leafTexts(note);
     final ours = _best(() {
@@ -50,28 +43,12 @@ void main(List<String> args) {
         InlineParser(text).parse();
       }
     });
-    final document = md.Document(
-      extensionSet: md.ExtensionSet.gitHubFlavored,
-      inlineSyntaxes: nimanInlineSyntaxes,
-    );
-    final package = _best(() {
+    final plain = _best(() {
       for (final text in texts) {
-        md.InlineParser(text, document).parse();
+        InlineParser(text, appSyntax: false).parse();
       }
     });
-    const masker = ExtensionMasker();
-    final today = _best(() {
-      for (final text in texts) {
-        md.Document(
-          extensionSet: md.ExtensionSet.gitHubFlavored,
-          inlineSyntaxes: nimanInlineSyntaxes,
-        ).parseLines(masker.mask(text).text.split('\n'));
-      }
-    });
-    print(
-      '| $name | ${texts.length} | ${_ms(ours)} | ${_ms(package)} '
-      '| ${_ms(today)} |',
-    );
+    print('| $name | ${texts.length} | ${_ms(ours)} | ${_ms(plain)} |');
   }
 }
 
