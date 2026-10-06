@@ -10,9 +10,34 @@
     "html": "<blockquote>\n<p>a</p>\n</blockquote>\n<pre><code>b\n</code></pre>\n"
   },
   {
+    "about": "a lazy line of an item in a quote is text, not a quote",
+    "markdown": "> - w\n    > w\n",
+    "html": "<blockquote>\n<ul>\n<li>w\n&gt; w</li>\n</ul>\n</blockquote>\n"
+  },
+  {
+    "about": "a lazy line is text, not a heading",
+    "markdown": "> - w\n    # w\n",
+    "html": "<blockquote>\n<ul>\n<li>w\n# w</li>\n</ul>\n</blockquote>\n"
+  },
+  {
+    "about": "a lazy line short of a sublist is text, not an item",
+    "markdown": "   - - w\n    - w\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>w\n- w</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a tab-indented lazy line is text, not a sublist",
+    "markdown": "> - w\n\t- - w\n",
+    "html": "<blockquote>\n<ul>\n<li>w\n- - w</li>\n</ul>\n</blockquote>\n"
+  },
+  {
     "about": "a lazy === is text, not an underline",
     "markdown": "- - w\n===\n",
     "html": "<ul>\n<li>\n<ul>\n<li>w\n===</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a lazy === under an item's paragraph",
+    "markdown": "- a\n===\nb\n",
+    "html": "<ul>\n<li>a\n===\nb</li>\n</ul>\n"
   },
   {
     "about": "a lazy tab-indented <div> is text",
@@ -65,14 +90,34 @@
     "html": "<p>===</p>\n"
   },
   {
+    "about": "--- under definitions alone is text, not a rule",
+    "markdown": "[r]: /u\n---\n",
+    "html": "<p>---</p>\n"
+  },
+  {
+    "about": "an underline heads a paragraph before it is read for definitions",
+    "markdown": "[r]:\n===\n",
+    "html": "<h1>[r]:</h1>\n"
+  },
+  {
     "about": "another delimiter starts a list from its own number",
     "markdown": "10. a\n2) b\n",
     "html": "<ol start=\"10\">\n<li>a</li>\n</ol>\n<ol start=\"2\">\n<li>b</li>\n</ol>\n"
   },
   {
+    "about": "a fence in an item keeps the columns a tab left over",
+    "markdown": "- ```\n\tw\n  ```\n",
+    "html": "<ul>\n<li>\n<pre><code>  w\n</code></pre>\n</li>\n</ul>\n"
+  },
+  {
     "about": "a fence in an ordered item keeps the columns a tab left over",
     "markdown": "2) w\n\t~~~\n\t/u \"t\"\n",
     "html": "<ol start=\"2\">\n<li>w\n<pre><code>/u &quot;t&quot;\n</code></pre>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a paragraph of definitions makes no list loose",
+    "markdown": "- w\n\n  [r]: /u\n",
+    "html": "<ul>\n<li>w</li>\n</ul>\n"
   },
   {
     "about": "a blank line before definitions still loosens the list",

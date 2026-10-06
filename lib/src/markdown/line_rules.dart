@@ -229,6 +229,14 @@ final class LineRules {
         definitionsOnly: true,
       );
     }
+    // A lazy line — short of an item it goes on in, or of the quote whose
+    // content this is — is its paragraph's text, whatever it looks like: a
+    // container takes one lazily only for an open paragraph, and only when
+    // it opens no block (`ContainerWalk.startsBlock`). Read again, four
+    // columns past the containers it did reach, it looked like one.
+    if (content == null && (walk.lazy || lazyAt(line))) {
+      return made(BlockKind.paragraph, openParagraph: true);
+    }
     // Inside a block that runs to an end marker, every line is the block's.
     final fence = open.fence;
     if (fence != null) {
@@ -348,6 +356,15 @@ final class LineRules {
       );
     }
     if (blank) return made(BlockKind.blank, indentedCode: open.indentedCode);
+    // An underline under definitions alone: they are taken off the
+    // paragraph, which leaves no text to head, and the line is the
+    // paragraph's text — `---` too, which is no rule there.
+    if (paragraph &&
+        open.definitionsOnly &&
+        carried &&
+        LineSyntax.setextLevel(text) > 0) {
+      return made(BlockKind.paragraph, openParagraph: true);
+    }
     // Not a setext heading, which no line is on its own: it is a paragraph
     // whose underline goes on with it (`BlockRules.underlineLevel`).
     if (LineSyntax.isHr(text, 0)) return made(BlockKind.thematicBreak);
@@ -440,7 +457,10 @@ final class LineRules {
         );
         if (walked.closed) return null;
         final columns = LineSyntax.expandIndent(walked.text);
+        // A setext underline heads the paragraph's text before it is read
+        // for definitions: no part of one.
         if (LineSyntax.indentOf(columns) == columns.length ||
+            LineSyntax.setextLevel(columns) > 0 ||
             ContainerWalk.interruptsParagraph(columns, walked.next)) {
           return null;
         }

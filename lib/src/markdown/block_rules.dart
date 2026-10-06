@@ -172,8 +172,9 @@ final class BlockRules {
     if (!read.carried || !entering.openParagraph || entering.definitionsOnly) {
       return 0;
     }
-    // A lazy line of a quote or an item underlines nothing.
-    if (_lines.lazyAt(line)) return 0;
+    // A lazy line of a quote or an item underlines nothing: the paragraph's
+    // text, whether its container is the note's or one read again.
+    if (read.walk.lazy || _lines.lazyAt(line)) return 0;
     // A table's head is tried first: a line over a delimiter row ends the
     // paragraph, whether or not it is a table.
     if (read.heads) return 0;

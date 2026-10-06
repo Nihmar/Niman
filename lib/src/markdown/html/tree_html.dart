@@ -243,12 +243,12 @@ final class TreeHtml {
   }
 
   /// Whether [list] is tight: no blank line between its items, nor between
-  /// two blocks of one of them.
-  static bool _tight(ListNode list) {
+  /// two blocks of one of them — a block that writes nothing, a paragraph
+  /// of definitions, being none.
+  bool _tight(ListNode list) {
     for (var at = 0; at < list.items.length; at++) {
-      final children = list.items[at].children;
       var blank = false;
-      for (final child in children) {
+      for (final child in _kept(list.items[at].children)) {
         if (blank && !_blank(child)) return false;
         // A blank line at the end of a block — a sublist's last item's
         // own — stands between it and the next one as much.
@@ -264,18 +264,32 @@ final class TreeHtml {
   static bool _blank(BlockNode node) =>
       node is LeafNode && node.kind == BlockKind.blank;
 
-  static bool _endsBlank(BlockNode node) => switch (node) {
+  /// [children] as `cmark` keeps them: a block that writes nothing is
+  /// taken off, its blank lines left standing where it was.
+  Iterable<BlockNode> _kept(List<BlockNode> children) =>
+      children.where((child) => _blank(child) || _draws(child));
+
+  bool _endsBlank(BlockNode node) => switch (node) {
     LeafNode() => node.kind == BlockKind.blank,
     ListNode(:final items) => _endsBlank(items.last),
-    ItemNode(:final children) =>
-      children.isNotEmpty && _endsBlank(children.last),
+    ItemNode(:final children) => switch (_kept(children).lastOrNull) {
+      final last? => _endsBlank(last),
+      null => false,
+    },
     _ => false,
   };
 
   /// Writes [leaf]; whether it took [tail].
   bool _leaf(LeafNode leaf, {required bool tight, String? tail}) {
     final lines = LeafText.linesOf(leaf, _lines);
-    final drawn = _isBlock(leaf.kind) ? hooks.leaf(leaf, lines) : null;
+    final drawn = _isBlock(leaf.kind)
+        ? hooks.leaf(
+            leaf,
+            leaf.kind == BlockKind.fencedCode
+                ? LeafText.withLeftOver(leaf, lines)
+                : lines,
+          )
+        : null;
     if (drawn != null) {
       _cr();
       _write(drawn);
@@ -314,7 +328,7 @@ final class TreeHtml {
         _write('<hr />\n');
       case BlockKind.fencedCode:
         _cr();
-        _write(CodeHtml.fenced(lines));
+        _write(CodeHtml.fenced(LeafText.withLeftOver(leaf, lines)));
       case BlockKind.indentedCode:
         _cr();
         _write(
