@@ -711,6 +711,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final theme = _theme ?? _fallbackTheme;
     // A line at the size the text is read at: the theme's is the text's own.
     final line = _textScaler.scale(theme.lineHeight);
+    // A footnote definition is drawn with the footnotes ([BlockView]).
+    if (block.footnote != 0 && block.kind != BlockKind.blank) return 0;
     return switch (block.kind) {
       BlockKind.frontmatter => 0,
       BlockKind.thematicBreak => line,

@@ -231,12 +231,40 @@ final class SourceStyler {
 
   /// Whether [block] is nothing but definitions — link references or
   /// footnotes — which the read view does not draw where they stand: a
-  /// paragraph whose parse gave nothing back. False for a block too long to
-  /// parse, which is drawn as it is.
+  /// block of a footnote definition, whatever its kind but blank — blank
+  /// lines are the note's spacing — or a paragraph whose parse gave nothing
+  /// back. False for a block too long to parse, which is drawn as it is.
   bool definesOnly(Block block) {
+    if (block.footnote != 0) return block.kind != BlockKind.blank;
     if (block.kind != BlockKind.paragraph) return false;
     final parsed = _parsedOf(block);
     return parsed != null && parsed.parse.runs.isEmpty;
+  }
+
+  /// The lines `[start, end)` of the run of definitions [block] is in, or
+  /// null when it is no definition ([definesOnly]): the blocks of
+  /// definitions next to it, no blank line between. A footnote definition
+  /// ends where a link reference starts, as the parser reads them, and the
+  /// caret in one of a run written together still shows the run.
+  (int, int)? definitionRunOf(Block block) {
+    if (!definesOnly(block)) return null;
+    var start = block.startLine;
+    var end = block.endLine;
+    for (
+      var before = blockOf(start - 1);
+      before != null && before.endLine == start && definesOnly(before);
+      before = blockOf(start - 1)
+    ) {
+      start = before.startLine;
+    }
+    for (
+      var after = blockOf(end);
+      after != null && after.startLine == end && definesOnly(after);
+      after = blockOf(end)
+    ) {
+      end = after.endLine;
+    }
+    return (start, end);
   }
 
   /// The line footnote [label]'s definition is on, or null when no line

@@ -3439,11 +3439,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                           : _fragmentKey(index, at)
                                     : null,
                                 pieceShift: _caretShift,
-                                definition:
-                                    widget.hideMarkers &&
-                                        block != null &&
-                                        (_styler?.definesOnly(block) ?? false)
-                                    ? (block.startLine, block.endLine)
+                                definition: widget.hideMarkers && block != null
+                                    ? _styler?.definitionRunOf(block)
                                     : null,
                                 codeRuns: !widget.hideMarkers
                                     ? null

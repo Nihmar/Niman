@@ -17,6 +17,7 @@ library;
 import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/container_walk.dart';
+import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/html_block_syntax.dart';
 import 'package:niman/src/markdown/line_read.dart';
 import 'package:niman/src/markdown/line_state.dart';
@@ -148,7 +149,7 @@ final class LineRules {
         LineSyntax.indentOf(text) < text.length &&
         next != null &&
         TableLineSyntax.isDelimiter(next) &&
-        _stays(line + 1, base);
+        _stays(line + 1, base, walk.footnote);
     LineRead made(
       BlockKind kind, {
       List<OpenItem>? items,
@@ -235,6 +236,35 @@ final class LineRules {
     }
     if (heads && TableLineSyntax.heads(text, next)) {
       return made(BlockKind.table, table: true);
+    }
+    // A footnote definition, at the note's margin only — in an item or a
+    // quote the parser leaves it where it stands. It interrupts a
+    // paragraph; what follows its label is its first line, read inside it
+    // with nothing open, as an item's marker line is.
+    final opening = content == null && base.isEmpty && walk.footnote == 0
+        ? FootnoteSyntax.opening(text)
+        : null;
+    if (opening != null) {
+      final inner = _readLeaf(
+        line,
+        state,
+        walk,
+        LineState.initial,
+        false,
+        next,
+        content: text.substring(opening.$2),
+        within: const <OpenItem>[],
+      );
+      return LineRead(
+        kind: inner.kind,
+        walk: walk,
+        items: inner.items,
+        quoteDepth: inner.quoteDepth,
+        carried: false,
+        exit: _footnoted(inner.exit),
+        heads: inner.heads,
+        footnote: Block.opensFootnote,
+      );
     }
     final paragraph = open.openParagraph && !heads;
     final code = open.indentedCode
@@ -334,6 +364,7 @@ final class LineRules {
         quoteDepth: 0,
         carried: carried,
         exit: inner.exit,
+        footnote: walk.footnote == 0 ? 0 : Block.inFootnote,
       );
     }
     // A setext underline heads the paragraph above it and ends it.
@@ -343,11 +374,11 @@ final class LineRules {
 
   /// Whether line [line] stays in [items], the items of the line before it:
   /// it does not end any of them.
-  bool _stays(int line, List<OpenItem> items) {
+  bool _stays(int line, List<OpenItem> items, int footnote) {
     if (items.isEmpty) return true;
     if (line >= buffer.lineCount) return false;
     return !ContainerWalk.of(
-      LineState(listStack: items),
+      LineState(listStack: items, footnote: footnote),
       lineText(line),
       line + 1 < buffer.lineCount ? lineText(line + 1) : null,
       _leftOverAt(line),
@@ -356,8 +387,9 @@ final class LineRules {
 
   /// Whether [text], following a table's rows, ends the table: a line that
   /// would start a block of its own — another table's head, a fence, an HTML
-  /// block (all but a lone tag), a heading, a quote, a rule, or a marker
-  /// that may interrupt a paragraph. Anything else is a row, pipes or not.
+  /// block (all but a lone tag), a heading, a quote, a rule, a footnote
+  /// definition, or a marker that may interrupt a paragraph. Anything else
+  /// is a row, pipes or not.
   static bool _endsTableRow(String text, String? next, bool inItem) {
     if (next != null && TableLineSyntax.isDelimiter(next)) return true;
     if (LineSyntax.fenceOpen(text) != null) return true;
@@ -368,6 +400,7 @@ final class LineRules {
     if (LineSyntax.headingLevel(text) > 0) return true;
     if (LineSyntax.quoteDepth(text) > 0) return true;
     if (LineSyntax.isHr(text, 0)) return true;
+    if (FootnoteSyntax.opening(text) != null) return true;
     final marker = LineSyntax.listMarker(text);
     return marker != null &&
         LineSyntax.markerInterrupts(marker, text, inItem: inItem);
@@ -401,9 +434,11 @@ final class LineRules {
       quoteDepth: quoteDepth,
       carried: carried,
       heads: heads,
+      footnote: walk.footnote == 0 ? 0 : Block.inFootnote,
       exit: _exit(
         state,
         stack,
+        footnote: walk.footnote,
         quoteDepth: quoteDepth,
         quoteLast: quoteLast,
         fence: fence,
@@ -423,6 +458,7 @@ final class LineRules {
   static LineState _exit(
     LineState state,
     List<OpenItem> items, {
+    required int footnote,
     required int quoteDepth,
     required int quoteLast,
     required FenceMarker? fence,
@@ -442,6 +478,7 @@ final class LineRules {
     // held for as long as the scan is. A plain paragraph line is
     // [LineState.paragraphOpen], the second shared constant.
     if (items.isEmpty &&
+        footnote == 0 &&
         quoteDepth == 0 &&
         fence == null &&
         !math &&
@@ -456,6 +493,7 @@ final class LineRules {
     // on the state it entered in, for the same reason: the run's lines share
     // one object.
     if (identical(state.listStack, items) &&
+        state.footnote == footnote &&
         state.quoteDepth == quoteDepth &&
         state.quoteLast == quoteLast &&
         state.fence == fence &&
@@ -480,6 +518,23 @@ final class LineRules {
       listStack: items,
       table: table,
       openParagraph: openParagraph,
+      footnote: footnote,
     );
   }
+
+  /// [state] inside the footnote definition its line opened.
+  static LineState _footnoted(LineState state) => LineState(
+    fence: state.fence,
+    math: state.math,
+    frontmatter: state.frontmatter,
+    indentedCode: state.indentedCode,
+    html: state.html,
+    htmlClosing: state.htmlClosing,
+    quoteDepth: state.quoteDepth,
+    quoteLast: state.quoteLast,
+    listStack: state.listStack,
+    table: state.table,
+    openParagraph: state.openParagraph,
+    footnote: LineState.footnoteOpen,
+  );
 }

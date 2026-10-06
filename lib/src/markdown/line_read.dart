@@ -18,6 +18,7 @@ final class LineRead {
     required this.carried,
     required this.exit,
     this.heads = false,
+    this.footnote = 0,
   });
 
   /// What the line is.
@@ -48,6 +49,10 @@ final class LineRead {
   /// have gone on with, and is no setext underline, whether or not its
   /// cells fit the table.
   final bool heads;
+
+  /// The footnote definition the line stands in: [Block.footnote]'s
+  /// values.
+  final int footnote;
 
   /// The line as its innermost item reads it ([ContainerWalk.text]), its
   /// leading tabs four columns each, as the parser's patterns count them.

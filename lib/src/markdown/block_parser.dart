@@ -25,6 +25,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/extension_masker.dart';
+import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/inline_syntaxes.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
@@ -246,6 +247,7 @@ final class BlockParser {
   /// the item it is, and takes the item's indent off its lines itself.
   static String contentText(Block block, String raw) {
     if (block.quoteDepth <= 0 &&
+        block.footnote == 0 &&
         _itemsOf(block) == null &&
         block.kind != BlockKind.listItem) {
       return raw;
@@ -375,13 +377,17 @@ final class BlockParser {
   /// An item's own block is read in its parent, so its parents' indents
   /// come off it and not its own. 0 for a block in no item, and for a block
   /// the scanner did not make, which carries no state.
+  ///
+  /// A footnote definition around them takes its part first
+  /// ([footnotePrefixLength]).
   static int itemPrefixLength(Block block, String line) {
+    final footnote = footnotePrefixLength(block, line);
     final items = _itemsOf(block);
-    if (items == null) return 0;
+    if (items == null) return footnote;
     // Each item takes its indent off as the parser does
     // (`LineSyntax.dedent`): a tab whole once the indent is reached in it,
     // its columns past the indent counting toward the next item's.
-    var rest = line;
+    var rest = line.substring(footnote);
     var remaining = 0;
     for (var level = 0; level < _levelsOf(block); level++) {
       final indent = items[level].indent;
@@ -398,14 +404,27 @@ final class BlockParser {
   /// parse of the same text in another item, offsets and all.
   static String itemKeyOf(Block block) {
     final items = _itemsOf(block);
-    if (items == null) return '';
     final indents = StringBuffer();
+    if (block.footnote != 0) indents.write('f${block.footnote};');
+    if (items == null) return indents.toString();
     for (var level = 0; level < _levelsOf(block); level++) {
       indents
         ..write(items[level].indent)
         ..write(',');
     }
     return indents.toString();
+  }
+
+  /// How much of [line], a line of [block], the footnote definition it
+  /// stands in takes off: the label on the definition's own line, four
+  /// spaces on a line indented into it, nothing on a lazy one.
+  static int footnotePrefixLength(Block block, String line) {
+    if (block.footnote == 0) return 0;
+    if (block.footnote == Block.opensFootnote) {
+      final opening = FootnoteSyntax.opening(line);
+      if (opening != null) return opening.$2;
+    }
+    return FootnoteSyntax.indented(line) ? FootnoteSyntax.indent : 0;
   }
 
   /// The items [block] is read inside ([_levelsOf]), from the state

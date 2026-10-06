@@ -132,6 +132,12 @@ final class BlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final block = parsed.block;
+    // A footnote definition's blocks are drawn with the footnotes, at the
+    // note's end, not where the definition stands; its blank lines are the
+    // note's spacing, as they were.
+    if (block.footnote != 0 && block.kind != BlockKind.blank) {
+      return const SizedBox.shrink();
+    }
     return switch (block.kind) {
       BlockKind.paragraph => _rich(context),
       BlockKind.heading => _rich(

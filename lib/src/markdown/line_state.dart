@@ -107,7 +107,15 @@ final class LineState {
     this.listStack = const <OpenItem>[],
     this.table = false,
     this.openParagraph = false,
+    this.footnote = 0,
   });
+
+  /// [footnote] when a footnote definition is open.
+  static const int footnoteOpen = 1;
+
+  /// [footnote] when a footnote definition is open and its last line was
+  /// blank: a line not four spaces in ends it.
+  static const int footnoteAfterBlank = 2;
 
   /// [quoteLast]'s bit for a blank last line.
   static const int lastBlank = 1;
@@ -185,6 +193,13 @@ final class LineState {
   /// the shared state.
   final bool openParagraph;
 
+  /// Whether a footnote definition is open around everything else —
+  /// [footnoteOpen], [footnoteAfterBlank] — or 0. One opens only at the
+  /// note's margin, outside every item and quote, the only place the read
+  /// view's parser takes it out to the footnotes; the items and the quote
+  /// this state holds are inside it.
+  final int footnote;
+
   /// Whether the line is anywhere a block-level construct can still start —
   /// outside every fence, math block, frontmatter, HTML block and indented
   /// code.
@@ -204,7 +219,8 @@ final class LineState {
       other.quoteLast == quoteLast &&
       _sameStack(other.listStack, listStack) &&
       other.table == table &&
-      other.openParagraph == openParagraph;
+      other.openParagraph == openParagraph &&
+      other.footnote == footnote;
 
   /// Whether two stacks hold the same items: records compare by value, so a
   /// plain element-wise walk is the whole of it (the engine has no
@@ -231,6 +247,7 @@ final class LineState {
     Object.hashAll(listStack),
     table,
     openParagraph,
+    footnote,
   );
 
   @override
@@ -239,5 +256,5 @@ final class LineState {
       'code: $indentedCode, html: $html, quote: $quoteDepth, '
       'quoteLast: $quoteLast, '
       'list: $listDepth at $listIndent, table: $table, '
-      'paragraph: $openParagraph)';
+      'paragraph: $openParagraph, footnote: $footnote)';
 }

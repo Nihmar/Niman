@@ -53,6 +53,7 @@ final class BlockRules {
           : 0,
       fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(read.text) : null,
       entering: _lines.entering(line),
+      footnote: read.footnote,
     );
   }
 
@@ -64,6 +65,12 @@ final class BlockRules {
   bool mergesInto(Block open, int end) {
     final read = _lines.read(end);
     final entering = _lines.entering(end);
+    // A footnote definition's line starts a block, and nothing goes on
+    // into it from outside or out of it.
+    if (read.footnote == Block.opensFootnote ||
+        (open.footnote == 0) != (read.footnote == 0)) {
+      return false;
+    }
     switch (open.kind) {
       case BlockKind.heading:
       case BlockKind.thematicBreak:
