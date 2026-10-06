@@ -1,11 +1,17 @@
-/// A footnote definition's lines, as the read view's parser reads them
-/// (`package:markdown`'s `FootnoteDefSyntax`, `docs/dev/block-tree.md`).
+/// A footnote definition's lines, as `cmark-gfm` reads them: a container
+/// opened by `[^label]:` at the margin, holding the lines four columns in
+/// and, lazily, the lines that go on with its paragraph
+/// (`docs/dev/block-tree.md`).
 library;
 
-import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/markdown/line_syntax.dart';
 
-/// What a line says about a footnote definition: whether it opens one,
-/// goes on with one, or ends one.
+/// What a line says about a footnote definition: whether it opens one, or
+/// goes on with one by its indent.
+///
+/// Whether a line short of that indent ends one is whether it would open
+/// a block that interrupts a paragraph (`ContainerWalk.interruptsParagraph`):
+/// anything else goes on with the definition's paragraph lazily.
 abstract final class FootnoteSyntax {
   /// The definition [text] opens — its label, and where its content starts
   /// past `[^label]:` and the spaces after — or null: up to three spaces in,
@@ -13,41 +19,24 @@ abstract final class FootnoteSyntax {
   static (String, int)? opening(String text) {
     final match = _opening.firstMatch(text);
     if (match == null) return null;
-    return (match.group(2)!, match.end);
+    return (match.group(1)!, match.end);
   }
 
-  /// Whether [text], a line under an open definition that is neither blank
-  /// nor four spaces in, ends it: the line would open a block of any kind —
-  /// the parser asks every block syntax's pattern, not whether the block
-  /// could interrupt a paragraph. A line that does not goes on with the
-  /// definition lazily.
-  static bool ends(String text) => _blocks.any((block) => block.hasMatch(text));
-
-  /// How many characters a line takes to go on with an open definition by
-  /// its indent: four spaces, literally — a tab is not four spaces here.
+  /// How many columns a line stands in to go on with an open definition by
+  /// its indent.
   static const int indent = 4;
 
-  /// Whether [text] goes on with an open definition by its indent.
-  static bool indented(String text) => text.startsWith('    ');
+  /// Whether [text] goes on with an open definition by its indent: four
+  /// columns in, a tab to the next stop of four.
+  static bool indented(String text) => LineSyntax.columnsOf(text) >= indent;
 
-  static final RegExp _opening = const md.FootnoteDefSyntax().pattern;
+  /// [text], a line [indented] into a definition, past its four columns:
+  /// the rest, and the columns of a tab the four ended inside of, left
+  /// over toward an item inside (`LineSyntax.dedent`).
+  static (String, int) content(String text) => LineSyntax.dedent(text, indent);
 
-  /// The patterns of the block syntaxes the parser tries, GFM's and the
-  /// standard ones, but for the empty line and those that match nothing
-  /// (a table, a paragraph): `FootnoteDefSyntax._isBlock`.
-  static final List<RegExp> _blocks = <RegExp>[
-    const md.FencedCodeBlockSyntax().pattern,
-    const md.UnorderedListWithCheckboxSyntax().pattern,
-    const md.OrderedListWithCheckboxSyntax().pattern,
-    const md.FootnoteDefSyntax().pattern,
-    const md.HtmlBlockSyntax().pattern,
-    const md.SetextHeaderSyntax().pattern,
-    const md.HeaderSyntax().pattern,
-    const md.CodeBlockSyntax().pattern,
-    const md.BlockquoteSyntax().pattern,
-    const md.HorizontalRuleSyntax().pattern,
-    const md.UnorderedListSyntax().pattern,
-    const md.OrderedListSyntax().pattern,
-    const md.LinkReferenceDefinitionSyntax().pattern,
-  ];
+  /// `[^label]:` up to three spaces in, a label without white space.
+  static final RegExp _opening = RegExp(
+    r'^ {0,3}\[\^([^\] \r\n\x00\t]+)\]:[ \t]*',
+  );
 }

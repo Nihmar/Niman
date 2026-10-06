@@ -46,19 +46,20 @@ final class ContainerWalk {
     var footnote = entering.footnote;
     var line = raw;
     var below = next;
+    var carried = leftOver;
     if (footnote != 0) {
       // A footnote definition holds every other container. It takes a blank
-      // line, a line four spaces in — those four off — and, lazily, a line
-      // that would open no block; after a blank line, only the indented
-      // one. Any other line ends it, and everything open inside it, and is
-      // read at the margin.
+      // line, a line four columns in — those four off — and, lazily, a line
+      // that goes on with its paragraph, opening no block that interrupts
+      // one; after a blank line, only the indented one. Any other line ends
+      // it, and everything open inside it, and is read at the margin.
       if (LineSyntax.indentOf(line) == line.length) {
         footnote = LineState.footnoteAfterBlank;
       } else if (FootnoteSyntax.indented(line)) {
-        line = line.substring(FootnoteSyntax.indent);
+        (line, carried) = FootnoteSyntax.content(line);
         footnote = LineState.footnoteOpen;
       } else if (footnote == LineState.footnoteAfterBlank ||
-          FootnoteSyntax.ends(line)) {
+          interruptsParagraph(LineSyntax.expandIndent(line), next)) {
         return ContainerWalk._(
           const <OpenItem>[],
           true,
@@ -73,7 +74,7 @@ final class ContainerWalk {
         footnote = LineState.footnoteOpen;
       }
       if (below != null && FootnoteSyntax.indented(below)) {
-        below = below.substring(FootnoteSyntax.indent);
+        below = FootnoteSyntax.content(below).$1;
       }
     }
     if (open.isEmpty && entering.quoteDepth == 0) {
@@ -84,7 +85,7 @@ final class ContainerWalk {
         false,
         null,
         below,
-        leftOver,
+        carried,
         footnote,
       );
     }
@@ -92,7 +93,7 @@ final class ContainerWalk {
     var text = line;
     // Columns a tab an item took off left over, which count toward the
     // next item's indent (`LineSyntax.dedent`).
-    var remaining = leftOver;
+    var remaining = carried;
     // The line after it, as each item in turn reads it.
     var after = below;
     var lazy = false;
@@ -232,6 +233,33 @@ final class ContainerWalk {
     // A table's head: the parser tries it on any line whose next is a
     // delimiter row, and it may end a block whether or not the head fits.
     return next != null && TableLineSyntax.isDelimiter(next);
+  }
+
+  /// Whether [text] would open a block that interrupts a paragraph — the
+  /// head of a table ([next] its delimiter row), a fence, an HTML block
+  /// (all but a lone tag), a heading, a quote, a rule, a footnote
+  /// definition, or a list marker that may ([LineSyntax.markerInterrupts];
+  /// any one in an item, [inItem]): what ends a table's rows, and a
+  /// footnote definition a line short of its indent does not go on with
+  /// lazily, as `cmark-gfm` reads a container's lazy line.
+  static bool interruptsParagraph(
+    String text,
+    String? next, {
+    bool inItem = false,
+  }) {
+    if (next != null && TableLineSyntax.isDelimiter(next)) return true;
+    if (LineSyntax.fenceOpen(text) != null) return true;
+    if (LineSyntax.indentOf(text) <= 3) {
+      final html = HtmlBlockSyntax.open(text);
+      if (html != null && html.$1 != HtmlBlockKind.completeTag) return true;
+    }
+    if (LineSyntax.headingLevel(text) > 0) return true;
+    if (LineSyntax.quoteDepth(text) > 0) return true;
+    if (LineSyntax.isHr(text, 0)) return true;
+    if (FootnoteSyntax.opening(text) != null) return true;
+    final marker = LineSyntax.listMarker(text);
+    return marker != null &&
+        LineSyntax.markerInterrupts(marker, text, inItem: inItem);
   }
 
   /// Whether the open quote takes [text], a line without a `>`, lazily: the

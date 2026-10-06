@@ -476,25 +476,11 @@ final class LineRules {
   }
 
   /// Whether [text], following a table's rows, ends the table: a line that
-  /// would start a block of its own — another table's head, a fence, an HTML
-  /// block (all but a lone tag), a heading, a quote, a rule, a footnote
-  /// definition, or a marker that may interrupt a paragraph. Anything else
-  /// is a row, pipes or not.
-  static bool _endsTableRow(String text, String? next, bool inItem) {
-    if (next != null && TableLineSyntax.isDelimiter(next)) return true;
-    if (LineSyntax.fenceOpen(text) != null) return true;
-    if (LineSyntax.indentOf(text) <= 3) {
-      final html = HtmlBlockSyntax.open(text);
-      if (html != null && html.$1 != HtmlBlockKind.completeTag) return true;
-    }
-    if (LineSyntax.headingLevel(text) > 0) return true;
-    if (LineSyntax.quoteDepth(text) > 0) return true;
-    if (LineSyntax.isHr(text, 0)) return true;
-    if (FootnoteSyntax.opening(text) != null) return true;
-    final marker = LineSyntax.listMarker(text);
-    return marker != null &&
-        LineSyntax.markerInterrupts(marker, text, inItem: inItem);
-  }
+  /// would start a block of its own, one that interrupts a paragraph
+  /// ([ContainerWalk.interruptsParagraph]). Anything else is a row, pipes
+  /// or not.
+  static bool _endsTableRow(String text, String? next, bool inItem) =>
+      ContainerWalk.interruptsParagraph(text, next, inItem: inItem);
 
   /// The read of a line of [kind], entered in [state] and walked as [walk],
   /// leaving [items] (the walk's when null) and the rest.

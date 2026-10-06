@@ -100,6 +100,19 @@ void main() {
     );
   });
 
+  test("a footnote's indent is four columns, a tab among them", () {
+    // `cmark-gfm` counts columns, where the package wanted four spaces.
+    expect(_treeOf('[^n]: a\n\n\tb'), 'Fn[paragraph"a" blank"" paragraph"b"]');
+  });
+
+  test('a line that interrupts no paragraph goes on with the footnote', () {
+    // An ordered marker past 1 cannot interrupt a paragraph: the line is
+    // the footnote's lazily, as `cmark-gfm` reads it. A bullet can, and
+    // ends it.
+    expect(_treeOf('[^n]: a\n2. b'), 'Fn[paragraph"a/2. b"]');
+    expect(_treeOf('[^n]: a\n- b'), 'Fn[paragraph"a"] ul[-[paragraph"b"]]');
+  });
+
   test('a footnote definition interrupts a paragraph and ends at a block', () {
     expect(
       _treeOf('p\n[^n]: a\n# h'),

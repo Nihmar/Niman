@@ -160,14 +160,14 @@ abstract final class BlockParser {
   /// [itemPrefixLength], and the columns of a tab the last item's indent
   /// ended inside of, left over (`LineSyntax.dedent`).
   static (int, int) itemPrefix(Block block, String line) {
-    final footnote = footnotePrefixLength(block, line);
+    final (footnote, footnoteLeft) = footnotePrefix(block, line);
     final items = _itemsOf(block);
-    if (items == null) return (footnote, 0);
+    if (items == null) return (footnote, footnoteLeft);
     // Each item takes its indent off as the parser does
     // (`LineSyntax.dedent`): a tab whole once the indent is reached in it,
     // its columns past the indent counting toward the next item's.
     var rest = line.substring(footnote);
-    var remaining = 0;
+    var remaining = footnoteLeft;
     for (var level = 0; level < _levelsOf(block); level++) {
       final indent = items[level].indent;
       if (LineSyntax.columnsOf(rest, remaining) >= indent) {
@@ -196,14 +196,21 @@ abstract final class BlockParser {
 
   /// How much of [line], a line of [block], the footnote definition it
   /// stands in takes off: the label on the definition's own line, four
-  /// spaces on a line indented into it, nothing on a lazy one.
-  static int footnotePrefixLength(Block block, String line) {
-    if (block.footnote == 0) return 0;
+  /// columns on a line indented into it, nothing on a lazy one.
+  static int footnotePrefixLength(Block block, String line) =>
+      footnotePrefix(block, line).$1;
+
+  /// [footnotePrefixLength], and the columns of a tab its four ended inside
+  /// of, left over toward an item inside it.
+  static (int, int) footnotePrefix(Block block, String line) {
+    if (block.footnote == 0) return (0, 0);
     if (block.footnote == Block.opensFootnote) {
       final opening = FootnoteSyntax.opening(line);
-      if (opening != null) return opening.$2;
+      if (opening != null) return (opening.$2, 0);
     }
-    return FootnoteSyntax.indented(line) ? FootnoteSyntax.indent : 0;
+    if (!FootnoteSyntax.indented(line)) return (0, 0);
+    final (rest, columns) = FootnoteSyntax.content(line);
+    return (line.length - rest.length, columns);
   }
 
   /// The items [block] is read inside ([_levelsOf]), from the state
