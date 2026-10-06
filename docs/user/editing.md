@@ -547,7 +547,8 @@ activations, `autonumber`, C4's `UpdateElementStyle` and
 `UpdateLayoutConfig` — is read and drawn without, in the theme's own
 colours. ZenUML, a plugin Mermaid itself loads from outside, is left
 as source with a note saying so. While the caret is in the fence, live mode
-shows the source again; the read view opens it on a tap. A syntax error
+shows the source again; a tap in the read view leaves it a diagram, and the
+read view where it is. A syntax error
 leaves the block as source, the offending line underlined and the
 message under it ("Line 4: expected \"-->\" after \"--\""), so the
 diagram is one edit away.

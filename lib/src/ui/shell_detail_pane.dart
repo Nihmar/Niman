@@ -55,7 +55,6 @@ final class ShellDetailPane extends StatelessWidget {
     this.cascadeChecklist = true,
     this.frontmatterPanel = true,
     this.onToggleTypewriter,
-    this.onShowSource,
     this.onMemento,
     this.onLoaded,
     this.onEditedNoteClosed,
@@ -181,10 +180,6 @@ final class ShellDetailPane extends StatelessWidget {
   /// See [typewriter].
   final VoidCallback? onToggleTypewriter;
 
-  /// Shows the editor of the note at the path in place of its read pane,
-  /// for a tap on a diagram there (#530).
-  final ValueChanged<String>? onShowSource;
-
   /// External-change reload requests for the open note (home-screen
   /// widget toggles); forwarded to the NoteView.
   final int reloadToken;
@@ -299,7 +294,6 @@ final class ShellDetailPane extends StatelessWidget {
     cascadeChecklist: cascadeChecklist,
     frontmatterPanel: frontmatterPanel,
     onToggleTypewriter: onToggleTypewriter,
-    onShowSource: onShowSource == null ? null : () => onShowSource!(tab.path),
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,
     onEditorKindChanged: onEditorKindChanged,

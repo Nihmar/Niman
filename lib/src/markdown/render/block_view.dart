@@ -73,7 +73,6 @@ final class BlockView extends StatelessWidget {
     this.embedResolver,
     this.embedImages,
     this.onToggleTask,
-    this.onTapDiagramSource,
     this.printed = false,
     this.scope,
     this.quoteNesting = 0,
@@ -105,10 +104,6 @@ final class BlockView extends StatelessWidget {
 
   /// The math render cache, one per surface.
   final MathCache mathCache;
-
-  /// Called with a note line when a diagram — or its parse error — is tapped,
-  /// to show the block's source again (#530).
-  final void Function(int line)? onTapDiagramSource;
 
   /// Whether the block is drawn on a page (an export) rather than on a
   /// screen: a diagram carries no full-screen button there, which a page
@@ -435,13 +430,12 @@ final class BlockView extends StatelessWidget {
     if (content == null || content.trim().isEmpty) {
       return _code(context, parsed.block.fenceInfo);
     }
-    final tap = onTapDiagramSource;
-    final line = parsed.block.startLine;
+    // A tap reads the diagram, and leaves the read view where it is: only
+    // `live`, where the source is, shows it on a tap.
     return BlockDiagramView(
       source: content,
       theme: theme,
       fullScreen: !printed,
-      onTapSource: tap == null ? null : (inner) => tap(line + inner),
     );
   }
 
