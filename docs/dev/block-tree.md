@@ -159,8 +159,41 @@ definition as a **container in the scanner** (decided 2026-10-05).
 
 ### Footnote and link reference definitions: what is known
 
-Read from `package:markdown` 7.3.1's sources; not yet confirmed by
-running examples (the survey was stopped before its empirical checks).
+Read from `package:markdown` 7.3.1's sources, then confirmed by running
+`Document.parseLines` (GFM) on examples, a footnote cited after it:
+
+| Input | The package |
+|---|---|
+| `p` / `[^1]: a` | the definition interrupts the paragraph |
+| `[^1]: a` / `    b` | `a\nb`, one paragraph in the footnote |
+| `[^1]: a` / `b` | `a\nb`: a line that opens no block goes on lazily |
+| `[^1]: a` / blank / `    b` | two paragraphs in the footnote |
+| `[^1]: a` / blank / `        code` | code in the footnote |
+| `[^1]: a` / blank / `b` | `b` is a paragraph after it |
+| `[^1]: a` / blank / tab `b` | code after it: four *literal* spaces only |
+| `[^1]: a` / `     b` (five) | `a\n b`: four come off, the fifth stays |
+| `[^1]: a` / `# h`, `- i`, `> q`, a fence, `***`, `---`, `<div>` | each ends it |
+| `[^1]: a` / `\| x \| y \|` / `\|---\|---\|` | the table goes **into** the footnote (lazy head) |
+| `[^1]:` / `    a`, `[^1]:a`, `   [^1]: a` | definitions |
+| `    [^1]: a` | code |
+| `[^a b]: a` | no footnote: a link reference with label `^a b` |
+| `- [^1]: a`, `> [^1]: a` | the definition stays **in place** inside the item or quote, no section |
+| a definition never cited | dropped from the output |
+| `[^1]: a` / `[^2]: b`, both cited | only `2` is drawn, `[^1]` stays text — a quirk |
+| `[^1]: a` / blank / `    - x` | **throws** (`_appendBackref` expects elements) |
+
+Link reference definitions: `p` / `[x]: /u` is one paragraph (it cannot
+interrupt one); `[x]: /u` / `text` is a definition, then a paragraph;
+the multi-line forms hold (title or URL on the next line, a label over
+two lines); a definition invalid partway (`[x]: /u "t`) leaves the whole
+paragraph as text; in an item or a quote it is taken out and leaves the
+container empty; four spaces in, it is code.
+
+The throw is a bug of the app's too: the export parses the whole note
+with the package, so a cited footnote that ends with a list cannot be
+exported.
+
+The source reading, for the record:
 
 - **GFM adds** `FencedCodeBlockSyntax`, `TableSyntax`, the two checkbox
   list syntaxes and `FootnoteDefSyntax` (`extension_set.dart`), tried
