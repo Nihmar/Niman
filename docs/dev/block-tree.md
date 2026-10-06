@@ -338,10 +338,12 @@ Phase 1 in progress.
 
 Left in phase 2: nothing the plan names; the blocks are phase 3.
 
-### Phase 3 (in progress): the blocks to the spec
+### Phase 3 (done): the blocks to the spec
 
-GFM **674 / 677** (the package: 662), CommonMark 0.31.2 **643 / 652**
-(the package: 645), `cmark-gfm`'s extensions 30 / 30. What it took:
+GFM **677 / 677** (the package: 662), CommonMark 0.31.2 **649 / 652**
+(the package: 645; the three left are where 0.31 moved on from GFM
+0.29, decided for GFM), `cmark-gfm`'s extensions **30 / 30**. What it
+took:
 
 - HTML blocks: kind 7 is one whole tag as the spec writes it
   (`InlineScanners.tag`, the inline parser's own rule) — an autolink
@@ -364,11 +366,13 @@ GFM **674 / 677** (the package: 662), CommonMark 0.31.2 **643 / 652**
   spec wins, and the random harness leaves them out, counted. The tree
   reads 0 of 40 000 documents otherwise on seeds 1-5.
 
-Left: the three tab examples (GFM 5-7) — a tab a container's prefix
-ends inside of, whose columns past it the content has to keep: `- foo`
-/ blank / `\t\tbar` is code `  bar`. The scanner keeps those columns
-while it walks a line (`ContainerWalk.remaining`) but a leaf's text and
-an item's indent after its marker drop them.
+- A tab a container's prefix ends inside of keeps its columns past it:
+  an item's indent is counted in columns (`LineSyntax.itemContent`),
+  the prefixes say what they leave over (`BlockParser.linePrefix`), the
+  leaves keep it (`LeafNode.leftOver`), and the writer counts code's four
+  columns from where the content starts, tabs to their stops.
+
+Next: phase 4 — the app's extensions as syntaxes of our parser.
 
 ### An open question: `$` as a currency sign
 
