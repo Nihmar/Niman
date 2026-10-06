@@ -1,16 +1,14 @@
 /// Niman's own inline constructs on an exported page (#24): what the read
-/// view draws a code span, a formula, a wikilink, an embed and a tag as.
+/// view draws a formula, a wikilink, an embed and a tag as.
 ///
-/// They are found by the preview's own rule (`ExtensionMasker`), never by a
-/// second one, so the page and the note agree on where each one is.
+/// They are found by the read view's own parser, never by a second rule,
+/// so the page and the note agree on where each one is.
 library;
 
-import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/links/parser.dart';
-import 'package:niman/src/markdown/extension_span.dart';
 
 /// One construct as HTML, and as the plain text an attribute can hold.
 typedef HtmlSpan = ({String html, String plain});
@@ -26,25 +24,13 @@ final class HtmlSpans {
   /// The page's formula renderer.
   final MathSvg math;
 
-  /// [span] on the page.
-  HtmlSpan render(ExtensionSpan span) => switch (span.kind) {
-    ExtensionKind.codeSpan => (
-      html: '<code>${escapeHtml(_codeContent(span.text))}</code>',
-      plain: _codeContent(span.text),
-    ),
-    ExtensionKind.inlineMath => _math(span.inner, span.text, display: false),
-    // `$$…$$` sharing a line with prose: set in the line, as the read view
-    // sets it.
-    ExtensionKind.displayMath => _math(span.inner, span.text, display: true),
-    ExtensionKind.wikilink => _wikilink(span.inner),
-    ExtensionKind.embed => _embed(span.inner),
-    ExtensionKind.tag => (
-      html: '<span class="tag">${escapeHtml(span.text)}</span>',
-      plain: span.text,
-    ),
-  };
+  /// A tag, `#` and all, as [written].
+  HtmlSpan tag(String written) =>
+      (html: '<span class="tag">${escapeHtml(written)}</span>', plain: written);
 
-  HtmlSpan _math(String tex, String written, {required bool display}) {
+  /// A formula of [tex], [written] with its dollars; [display] for `$$…$$`
+  /// sharing a line with prose, set in the line as the read view sets it.
+  HtmlSpan formula(String tex, String written, {required bool display}) {
     final svg = math.render(tex.trim(), display: display);
     return (
       html: svg ?? '<code class="math-source">${escapeHtml(written)}</code>',
@@ -52,7 +38,8 @@ final class HtmlSpans {
     );
   }
 
-  HtmlSpan _wikilink(String inner) {
+  /// A wikilink whose inside is [inner].
+  HtmlSpan wikilink(String inner) {
     final ref = parseWikiRef(inner);
     final plain = wikiDisplayText(inner);
     final shown = escapeHtml(plain);
@@ -70,7 +57,8 @@ final class HtmlSpans {
     );
   }
 
-  HtmlSpan _embed(String inner) {
+  /// An embed whose inside is [inner].
+  HtmlSpan embed(String inner) {
     final ref = parseWikiRef(inner);
     final pipe = inner.indexOf('|');
     final shown = (pipe >= 0 ? inner.substring(pipe + 1) : inner).trim();
@@ -90,25 +78,15 @@ final class HtmlSpans {
   }
 }
 
-/// The `id` a heading reading [text] gets on the page: the Markdown
-/// package's own rule, so `[[Note#Part]]` lands on `Part`.
-String headingAnchor(String text) =>
-    md.BlockSyntax.generateAnchorHash(md.Element('h1', [md.Text(text)]));
+/// The `id` a heading reading [text], as written, gets on the page, so
+/// `[[Note#Part]]` lands on `Part`: lowercased, all but `a`-`z`, digits,
+/// `_`, `-` and spaces taken out, each space a `-` — the rule pages exported
+/// before kept (`package:markdown`'s), so their links still land.
+String headingAnchor(String text) => text
+    .toLowerCase()
+    .trim()
+    .replaceAll(_notInAnchor, '')
+    .replaceAll(_space, '-');
 
-/// A code span's content: its backtick runs off, and one space off each end
-/// when both ends have one and it is not all spaces (CommonMark 6.1).
-String _codeContent(String written) {
-  var run = 0;
-  while (run < written.length && written.codeUnitAt(run) == 0x60) {
-    run++;
-  }
-  var content = written.substring(run, written.length - run);
-  content = content.replaceAll('\n', ' ');
-  if (content.length >= 2 &&
-      content.startsWith(' ') &&
-      content.endsWith(' ') &&
-      content.trim().isNotEmpty) {
-    content = content.substring(1, content.length - 1);
-  }
-  return content;
-}
+final RegExp _notInAnchor = RegExp('[^a-z0-9 _-]');
+final RegExp _space = RegExp(r'\s');

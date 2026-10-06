@@ -1,9 +1,11 @@
-// A note as HTML (#24): parsed whole by the Markdown package, with Niman's
-// own constructs found by the read view's rules and drawn as it draws them.
+// A note as HTML (#24): read as the read view reads it and written by the
+// tree's writer, `cmark-gfm`'s HTML, with Niman's own constructs drawn as
+// the read view draws them.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:xml/xml.dart';
 
 String body(
   String text, {
@@ -98,11 +100,8 @@ void main() {
 
   test("a task's box shows its state and cannot be ticked", () {
     final html = body('- [x] done\n- [ ] open\n');
-    expect(
-      html,
-      contains('<input type="checkbox" checked="true" disabled="">'),
-    );
-    expect(html, contains('<input type="checkbox" disabled="">'));
+    expect(html, contains('<input type="checkbox" checked="" disabled="" />'));
+    expect(html, contains('<input type="checkbox" disabled="" />'));
   });
 
   test('a tag and a highlight', () {
@@ -239,5 +238,43 @@ void main() {
       ),
     ).body();
     expect(html, contains('font-family="system-ui, sans-serif"'));
+  });
+
+  group('on the tree and its writer (docs/dev/block-tree.md, phase 7)', () {
+    test("a callout's written title keeps its inlines", () {
+      final html = body('> [!tip] Mind **this**\n> body\n');
+      expect(
+        html,
+        contains('<div class="callout-title">Mind <strong>this</strong></div>'),
+      );
+    });
+
+    test('a footnote ending with a list is written, not a crash', () {
+      // The package threw on a cited footnote whose body ends with a list,
+      // and the export failed on the note.
+      final html = body(
+        'A claim[^1].\n\n[^1]: Sources:\n    - one\n    - two\n',
+      );
+      expect(html, contains('<section class="footnotes" data-footnotes="">'));
+      expect(html, contains('<li>one</li>'));
+    });
+
+    test('a link defined over two lines is a link', () {
+      final html = body('[the docs]\n\n[the docs]:\n  https://example.com\n');
+      expect(html, contains('<a href="https://example.com">the docs</a>'));
+    });
+
+    test('a second heading of one text has an id of its own', () {
+      final html = body('# Part\n\n# Part\n');
+      expect(html, contains('<h1 id="part">Part</h1>'));
+      expect(html, contains('<h1 id="part-2">Part</h1>'));
+    });
+
+    test('the body is well-formed XML, as an EPUB chapter must be', () {
+      final html = body(
+        'A[^1] ![p](p.png) <br>\n\n- [x] done\n\n---\n\n[^1]: note\n',
+      );
+      expect(() => XmlDocument.parse('<div>$html</div>'), returnsNormally);
+    });
   });
 }

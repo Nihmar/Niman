@@ -17,13 +17,7 @@ import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/export/picture_mime.dart';
 import 'package:niman/src/links/embed_path.dart';
-import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
-import 'package:niman/src/markdown/block.dart';
-import 'package:niman/src/markdown/block_scanner.dart';
-import 'package:niman/src/markdown/extension_masker.dart';
-import 'package:niman/src/markdown/extension_span.dart';
-import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:path/path.dart' as p;
 
 const AppLogger _log = AppLogger(name: 'export');
@@ -206,50 +200,21 @@ abstract final class ExportSources {
   });
 
   /// The picture targets [text] names, as written: an embed's
-  /// (`![[photo.png]]`) and a Markdown image's (the parser's `img src`).
+  /// (`![[photo.png]]`) and a Markdown image's `src`, as the page reads
+  /// them — a `![[…]]` in code, math, raw HTML or the frontmatter is none.
   ///
   /// Only an embed with an image extension counts: `![[notes.md]]` is a
   /// link to a file that happens to be an embed, the same rule the read
   /// view draws by — over the export's own list, which carries SVG (E8).
   static List<String> pictureTargets(String text) {
-    final out = <String>{};
-    for (final target in _embeds(text)) {
-      if (pictureExtension.hasMatch(target)) out.add(target);
-    }
-    out.addAll(NoteHtml(NoteHtmlSource(text: text, title: '')).imageTargets());
-    return out.toList();
+    final targets = NoteHtml(NoteHtmlSource(text: text, title: ''))
+        .pictureTargets();
+    return <String>{
+      for (final target in targets.embeds)
+        if (pictureExtension.hasMatch(target)) target,
+      ...targets.images,
+    }.toList();
   }
-
-  /// The embed targets of [text], through the read view's own masker: a
-  /// `![[…]]` in code, math, raw HTML or the frontmatter is not one.
-  static List<String> _embeds(String text) {
-    const masker = ExtensionMasker();
-    final buffer = SourceBuffer.fromText(text);
-    final out = <String>[];
-    for (final block in BlockScanner(buffer).index.blocks) {
-      if (!_carriesEmbeds(block.kind)) continue;
-      final blockText = [
-        for (var line = block.startLine; line < block.endLine; line++)
-          buffer.lineAt(line),
-      ].join('\n');
-      for (final span in masker.mask(blockText).spans) {
-        if (span.kind != ExtensionKind.embed) continue;
-        final target = parseWikiRef(span.inner).target;
-        if (target.isNotEmpty) out.add(target);
-      }
-    }
-    return out;
-  }
-
-  /// Whether a block's text is read as constructs at all.
-  static bool _carriesEmbeds(BlockKind kind) => switch (kind) {
-    BlockKind.frontmatter ||
-    BlockKind.fencedCode ||
-    BlockKind.indentedCode ||
-    BlockKind.math ||
-    BlockKind.html => false,
-    _ => true,
-  };
 
   /// One picture target resolved to the file it is, or null.
   ///
