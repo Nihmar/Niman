@@ -62,6 +62,9 @@ const List<String> _pieces = <String>[
   '  |---|---|',
   'a | b',
   '[^f]: note',
+  '[r]: /u',
+  '[r]:',
+  '"t"',
   '[^f]:',
   '    more',
 ];

@@ -108,6 +108,7 @@ final class LineState {
     this.table = false,
     this.openParagraph = false,
     this.footnote = 0,
+    this.definition = 0,
   });
 
   /// [footnote] when a footnote definition is open.
@@ -200,6 +201,11 @@ final class LineState {
   /// this state holds are inside it.
   final int footnote;
 
+  /// How many more lines the open link reference definition takes, or 0:
+  /// its first line decided them (`LinkDefinitionSyntax`). No paragraph is
+  /// open while one is, nor after it.
+  final int definition;
+
   /// Whether the line is anywhere a block-level construct can still start —
   /// outside every fence, math block, frontmatter, HTML block and indented
   /// code.
@@ -220,7 +226,8 @@ final class LineState {
       _sameStack(other.listStack, listStack) &&
       other.table == table &&
       other.openParagraph == openParagraph &&
-      other.footnote == footnote;
+      other.footnote == footnote &&
+      other.definition == definition;
 
   /// Whether two stacks hold the same items: records compare by value, so a
   /// plain element-wise walk is the whole of it (the engine has no
@@ -248,6 +255,7 @@ final class LineState {
     table,
     openParagraph,
     footnote,
+    definition,
   );
 
   @override
@@ -256,5 +264,6 @@ final class LineState {
       'code: $indentedCode, html: $html, quote: $quoteDepth, '
       'quoteLast: $quoteLast, '
       'list: $listDepth at $listIndent, table: $table, '
-      'paragraph: $openParagraph, footnote: $footnote)';
+      'paragraph: $openParagraph, footnote: $footnote, '
+      'definition: $definition)';
 }

@@ -297,6 +297,26 @@ final class BlockScanner {
         break;
       }
     }
+    // Whether a line opens a link reference definition is read off the lines
+    // after it too ([Block.reach]): an edit on one of them may change what
+    // that line is, and the rebuild starts at its block. No reading reaches
+    // further than the farthest one made, which bounds the look back.
+    final farthest = _rules.farthestReach;
+    if (farthest > 0) {
+      for (
+        var at = _firstIndexWhere(0, (block) => block.endLine > start);
+        at >= 0;
+        at--
+      ) {
+        if (at >= tailStart) continue;
+        final block = _at(at);
+        if (block.startLine + farthest <= edit.firstLine) break;
+        if (block.startLine < start &&
+            block.startLine + block.reach > edit.firstLine) {
+          start = block.startLine;
+        }
+      }
+    }
     // An edit at or past a frontier lands on lines that are not current: the
     // rebuild starts where they begin.
     if (_frontiers.isNotEmpty && _frontiers.first < start) {

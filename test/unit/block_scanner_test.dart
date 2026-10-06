@@ -1052,6 +1052,24 @@ void main() {
       }
     });
 
+    test('an edit a link definition read reads the definition again', () {
+      // `[r]:` takes its destination from the next line, and a line heads a
+      // table by the one under it: what the first line is depends on lines
+      // below it, and an edit there has to read it again.
+      for (final (text, line, inserted) in <(String, int, String)>[
+        ('[r]:\n\$\$\n  |---|---|\n', 2, '\n'),
+        ('[r]:\nx\n', 1, '\n'),
+        ('[r]: /u\n"t\n', 1, '"'),
+      ]) {
+        final buffer = SourceBuffer.fromText(text);
+        final scanner = BlockScanner(buffer);
+        final at = buffer.offsetOfLine(line);
+        scanner.edited(buffer.replaceRange(at, at, inserted));
+        final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+        expect(_described(scanner), _described(fresh), reason: text);
+      }
+    });
+
     test('lines added and removed here and there, read without settling', () {
       // `index` pays every owed shift, so the test above never sees one
       // owed; `blockAt` reads through them. Edits that add and remove lines

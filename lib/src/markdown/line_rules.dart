@@ -22,6 +22,7 @@ import 'package:niman/src/markdown/html_block_syntax.dart';
 import 'package:niman/src/markdown/line_read.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
+import 'package:niman/src/markdown/link_definition_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/table_line_syntax.dart';
 
@@ -42,6 +43,10 @@ final class LineRules {
   final List<int> _leftOver;
 
   int _leftOverAt(int line) => line < _leftOver.length ? _leftOver[line] : 0;
+
+  /// The most lines any reading of a link reference definition looked at,
+  /// in this scan's life: how far back an edit may change what a line is.
+  int farthestReach = 0;
 
   /// The line [read] last read, the state it entered in and the buffer's
   /// revision then; [_last] is the read. One line, because a scan asks
@@ -163,12 +168,18 @@ final class LineRules {
       bool indentedCode = false,
       bool table = false,
       bool openParagraph = false,
+      int definition = 0,
+      int definitionRead = 0,
+      int reach = 0,
     }) => _made(
       kind,
       state,
       walk,
       carried: carried,
       items: items ?? base,
+      definition: definition,
+      definitionRead: definitionRead,
+      reach: reach,
       quoteDepth: quoteDepth,
       quoteLast: quoteLast,
       fence: fence,
@@ -182,6 +193,14 @@ final class LineRules {
       heads: heads,
     );
 
+    // A link reference definition's lines are the ones its first line read.
+    if (open.definition > 0) {
+      return made(
+        BlockKind.paragraph,
+        definition: open.definition - 1,
+        definitionRead: 1,
+      );
+    }
     // Inside a block that runs to an end marker, every line is the block's.
     final fence = open.fence;
     if (fence != null) {
@@ -365,7 +384,48 @@ final class LineRules {
         carried: carried,
         exit: inner.exit,
         footnote: walk.footnote == 0 ? 0 : Block.inFootnote,
+        reach: inner.reach,
       );
+    }
+    // A link reference definition, where no paragraph is open: the lines
+    // the package's parser reads one off — this one and those after it in
+    // the same container, up to a line that would end a paragraph.
+    if (!paragraph && LinkDefinitionSyntax.opens(text)) {
+      var examined = line;
+      String? more() {
+        final at = examined + 1;
+        if (at >= buffer.lineCount) return null;
+        examined = at;
+        final walked = ContainerWalk.of(
+          LineState(listStack: base, footnote: walk.footnote),
+          lineText(at),
+          at + 1 < buffer.lineCount ? lineText(at + 1) : null,
+          _leftOverAt(at),
+        );
+        if (walked.closed) return null;
+        final columns = LineSyntax.expandIndent(walked.text);
+        if (LineSyntax.indentOf(columns) == columns.length ||
+            _endsTableRow(columns, walked.next, base.isNotEmpty)) {
+          return null;
+        }
+        return walked.text;
+      }
+
+      final lines = LinkDefinitionSyntax.linesOf(content ?? walk.text, more);
+      // The last line examined, and the one after it, which said whether it
+      // heads a table and so ends the paragraph.
+      final reach = examined - line + 2;
+      if (reach > farthestReach) farthestReach = reach;
+      if (lines > 0) {
+        return made(
+          BlockKind.paragraph,
+          definition: lines - 1,
+          definitionRead: Block.opensDefinition,
+          reach: reach,
+        );
+      }
+      final underline = carried && LineSyntax.setextLevel(text) > 0;
+      return made(BlockKind.paragraph, openParagraph: !underline, reach: reach);
     }
     // A setext underline heads the paragraph above it and ends it.
     final underline = carried && paragraph && LineSyntax.setextLevel(text) > 0;
@@ -425,6 +485,9 @@ final class LineRules {
     bool table = false,
     bool openParagraph = false,
     bool heads = false,
+    int definition = 0,
+    int definitionRead = 0,
+    int reach = 0,
   }) {
     final stack = items ?? walk.items;
     return LineRead(
@@ -435,10 +498,13 @@ final class LineRules {
       carried: carried,
       heads: heads,
       footnote: walk.footnote == 0 ? 0 : Block.inFootnote,
+      definition: definitionRead,
+      reach: reach,
       exit: _exit(
         state,
         stack,
         footnote: walk.footnote,
+        definition: definition,
         quoteDepth: quoteDepth,
         quoteLast: quoteLast,
         fence: fence,
@@ -459,6 +525,7 @@ final class LineRules {
     LineState state,
     List<OpenItem> items, {
     required int footnote,
+    required int definition,
     required int quoteDepth,
     required int quoteLast,
     required FenceMarker? fence,
@@ -479,6 +546,7 @@ final class LineRules {
     // [LineState.paragraphOpen], the second shared constant.
     if (items.isEmpty &&
         footnote == 0 &&
+        definition == 0 &&
         quoteDepth == 0 &&
         fence == null &&
         !math &&
@@ -494,6 +562,7 @@ final class LineRules {
     // one object.
     if (identical(state.listStack, items) &&
         state.footnote == footnote &&
+        state.definition == definition &&
         state.quoteDepth == quoteDepth &&
         state.quoteLast == quoteLast &&
         state.fence == fence &&
@@ -519,6 +588,7 @@ final class LineRules {
       table: table,
       openParagraph: openParagraph,
       footnote: footnote,
+      definition: definition,
     );
   }
 
@@ -536,5 +606,6 @@ final class LineRules {
     table: state.table,
     openParagraph: state.openParagraph,
     footnote: LineState.footnoteOpen,
+    definition: state.definition,
   );
 }

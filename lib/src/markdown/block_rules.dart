@@ -54,6 +54,10 @@ final class BlockRules {
       fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(read.text) : null,
       entering: _lines.entering(line),
       footnote: read.footnote,
+      definition: read.definition == Block.opensDefinition
+          ? Block.opensDefinition
+          : 0,
+      reach: read.reach,
     );
   }
 
@@ -71,6 +75,10 @@ final class BlockRules {
         (open.footnote == 0) != (read.footnote == 0)) {
       return false;
     }
+    // A link reference definition starts a block, and its lines are the
+    // ones its first line read.
+    if (read.definition == Block.opensDefinition) return false;
+    if (entering.definition > 0) return true;
     switch (open.kind) {
       case BlockKind.heading:
       case BlockKind.thematicBreak:

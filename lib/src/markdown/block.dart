@@ -65,7 +65,12 @@ final class Block {
     this.fenceInfo,
     this.entering,
     this.footnote = 0,
+    this.definition = 0,
+    this.reach = 0,
   });
+
+  /// [definition] for a link reference definition's block.
+  static const int opensDefinition = 2;
 
   /// [footnote] for a block inside a footnote definition.
   static const int inFootnote = 1;
@@ -113,6 +118,17 @@ final class Block {
   /// [opensFootnote] when its first line opens the definition — or 0.
   final int footnote;
 
+  /// [opensDefinition] when the block is a link reference definition, or 0.
+  /// The read view draws nothing of it: the parser files it with the note's
+  /// links.
+  final int definition;
+
+  /// How many lines, from its first, reading whether the block opens a
+  /// link reference definition looked at — it may have, whether or not it
+  /// does — or 0: an edit on one of them may change what the first line is,
+  /// and a rescan reads the block again from its start.
+  final int reach;
+
   /// How many lines it covers.
   int get lineCount => endLine - startLine;
 
@@ -128,7 +144,9 @@ final class Block {
       listOrdinal == other.listOrdinal &&
       headingLevel == other.headingLevel &&
       fenceInfo == other.fenceInfo &&
-      footnote == other.footnote;
+      footnote == other.footnote &&
+      definition == other.definition &&
+      reach == other.reach;
 
   /// The same block, [delta] lines further down.
   ///
@@ -148,6 +166,8 @@ final class Block {
       fenceInfo: fenceInfo,
       entering: entering,
       footnote: footnote,
+      definition: definition,
+      reach: reach,
     );
   }
 
@@ -164,6 +184,8 @@ final class Block {
     fenceInfo: fenceInfo,
     entering: entering,
     footnote: footnote,
+    definition: definition,
+    reach: reach,
   );
 
   /// The block from [start] on, to [end]: what is left of a block a scan
@@ -216,5 +238,6 @@ final class Block {
       'Block(${kind.name} $startLine..$endLine'
       '${quoteDepth > 0 ? ' quote:$quoteDepth' : ''}'
       '${listDepth >= 0 ? ' list:$listDepth' : ''}'
-      '${footnote > 0 ? ' footnote:$footnote' : ''})';
+      '${footnote > 0 ? ' footnote:$footnote' : ''}'
+      '${definition > 0 ? ' definition' : ''})';
 }
