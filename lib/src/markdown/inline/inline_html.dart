@@ -10,13 +10,30 @@ import 'package:niman/src/markdown/inline/inline_node.dart';
 abstract final class InlineHtml {
   /// [nodes] as HTML into [out]; a footnote reference written by
   /// [footnote], or as its text when there is none.
+  ///
+  /// Without recursion: emphasis and links nest as deep as a note writes
+  /// them. The stack holds nodes still to write and the closing tags of
+  /// the ones open.
   static void write(
     StringBuffer out,
     List<InlineNode> nodes, {
     String Function(FootnoteRefNode node)? footnote,
   }) {
-    for (final node in nodes) {
-      switch (node) {
+    final stack = <Object>[...nodes.reversed];
+    void open(String tag, String close, List<InlineNode> children) {
+      out.write(tag);
+      stack
+        ..add(close)
+        ..addAll(children.reversed);
+    }
+
+    while (stack.isNotEmpty) {
+      final item = stack.removeLast();
+      if (item is String) {
+        out.write(item);
+        continue;
+      }
+      switch (item as InlineNode) {
         case TextNode(:final text):
           out.write(escape(text));
         case CodeNode(:final code):
@@ -25,25 +42,18 @@ abstract final class InlineHtml {
             ..write(escape(code))
             ..write('</code>');
         case EmphasisNode(:final children):
-          _wrap(out, 'em', children, footnote);
+          open('<em>', '</em>', children);
         case StrongNode(:final children):
-          _wrap(out, 'strong', children, footnote);
+          open('<strong>', '</strong>', children);
         case StrikethroughNode(:final children):
-          _wrap(out, 'del', children, footnote);
+          open('<del>', '</del>', children);
         case LinkNode(:final destination, :final title, :final children):
-          out
-            ..write('<a href="')
-            ..write(escapeHref(destination))
-            ..write('"');
-          if (title != null) {
-            out
-              ..write(' title="')
-              ..write(escape(title))
-              ..write('"');
-          }
-          out.write('>');
-          write(out, children, footnote: footnote);
-          out.write('</a>');
+          final titled = title == null ? '' : ' title="${escape(title)}"';
+          open(
+            '<a href="${escapeHref(destination)}"$titled>',
+            '</a>',
+            children,
+          );
         case ImageNode(:final destination, :final title, :final children):
           out
             ..write('<img src="')
@@ -64,7 +74,7 @@ abstract final class InlineHtml {
           out.write('\n');
         case HardBreakNode():
           out.write('<br />\n');
-        case FootnoteRefNode():
+        case final FootnoteRefNode node:
           out.write(
             footnote == null ? escape('[^${node.label}]') : footnote(node),
           );
@@ -72,40 +82,26 @@ abstract final class InlineHtml {
     }
   }
 
-  static void _wrap(
-    StringBuffer out,
-    String tag,
-    List<InlineNode> children,
-    String Function(FootnoteRefNode node)? footnote,
-  ) {
-    out.write('<$tag>');
-    write(out, children, footnote: footnote);
-    out.write('</$tag>');
-  }
-
   /// [nodes] as an image's description: their text, a line break a space.
   static String plain(List<InlineNode> nodes) {
     final out = StringBuffer();
-    void walk(List<InlineNode> nodes) {
-      for (final node in nodes) {
-        switch (node) {
-          case TextNode(:final text):
-            out.write(text);
-          case CodeNode(:final code):
-            out.write(code);
-          case HtmlNode(:final html):
-            out.write(html);
-          case SoftBreakNode() || HardBreakNode():
-            out.write(' ');
-          case FootnoteRefNode(:final label):
-            out.write('[^$label]');
-          case InlineContainer(:final children):
-            walk(children);
-        }
+    final stack = <InlineNode>[...nodes.reversed];
+    while (stack.isNotEmpty) {
+      switch (stack.removeLast()) {
+        case TextNode(:final text):
+          out.write(text);
+        case CodeNode(:final code):
+          out.write(code);
+        case HtmlNode(:final html):
+          out.write(html);
+        case SoftBreakNode() || HardBreakNode():
+          out.write(' ');
+        case FootnoteRefNode(:final label):
+          out.write('[^$label]');
+        case InlineContainer(:final children):
+          stack.addAll(children.reversed);
       }
     }
-
-    walk(nodes);
     return out.toString();
   }
 

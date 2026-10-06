@@ -11,48 +11,61 @@ abstract final class GfmAutolinks {
   /// Links the extended autolinks in the text nodes under [root], whose
   /// offsets are in [source].
   static void apply(InlineBuild root, String source) {
-    _consolidate(root);
-    for (var node = root.first; node != null;) {
-      final next = node.next;
-      switch (node.kind) {
-        case InlineKind.text:
-          _split(node, source);
-        case InlineKind.emphasis ||
-            InlineKind.strong ||
-            InlineKind.strikethrough:
-          apply(node, source);
-        case InlineKind.root ||
-            InlineKind.link ||
-            InlineKind.image ||
-            InlineKind.code ||
-            InlineKind.html ||
-            InlineKind.softBreak ||
-            InlineKind.hardBreak ||
-            InlineKind.footnoteRef:
-          break;
+    // The containers to visit, without recursion: emphasis nests as deep
+    // as a note writes it.
+    final containers = <InlineBuild>[root];
+    final texts = <InlineBuild>[];
+    while (containers.isNotEmpty) {
+      final container = containers.removeLast();
+      _consolidate(container);
+      for (var node = container.first; node != null; node = node.next) {
+        switch (node.kind) {
+          case InlineKind.text:
+            texts.add(node);
+          case InlineKind.emphasis ||
+              InlineKind.strong ||
+              InlineKind.strikethrough:
+            containers.add(node);
+          case InlineKind.root ||
+              InlineKind.link ||
+              InlineKind.image ||
+              InlineKind.code ||
+              InlineKind.html ||
+              InlineKind.softBreak ||
+              InlineKind.hardBreak ||
+              InlineKind.footnoteRef:
+            break;
+        }
       }
-      node = next;
+    }
+    for (final text in texts) {
+      _split(text, source);
     }
   }
 
-  /// Joins the adjacent text nodes under [root] that are their source as
-  /// written: a delimiter run that made no emphasis is text of its own
-  /// until here, and an address may run through it (`a_b@c.d`). An escape
-  /// or a character reference stays a node of its own, so that every
-  /// node's offsets still map to the source one to one.
+  /// Joins the adjacent text nodes among [root]'s children that are their
+  /// source as written: a delimiter run that made no emphasis is text of
+  /// its own until here, and an address may run through it (`a_b@c.d`). An
+  /// escape or a character reference stays a node of its own, so that
+  /// every node's offsets still map to the source one to one.
   static void _consolidate(InlineBuild root) {
     bool asWritten(InlineBuild node) =>
         node.kind == InlineKind.text &&
         node.end - node.start == node.text.length;
     for (var node = root.first; node != null; node = node.next) {
-      if (!asWritten(node)) continue;
+      if (!asWritten(node) || node.next == null || !asWritten(node.next!)) {
+        continue;
+      }
+      // One buffer for the run: joining two at a time copies the run once
+      // per node, which is quadratic in a run of single-character nodes.
+      final joined = StringBuffer(node.text);
       while (node.next != null && asWritten(node.next!)) {
         final next = node.next!;
-        node
-          ..text = node.text + next.text
-          ..end = next.end;
+        joined.write(next.text);
+        node.end = next.end;
         next.unlink();
       }
+      node.text = joined.toString();
     }
   }
 
@@ -215,6 +228,10 @@ abstract final class GfmAutolinks {
   /// ends a sentence, an unbalanced `)` and an entity-like `&…;`.
   static int _delimit(String text, int start, int end) {
     var to = end;
+    // The parentheses in the link, counted once: a run of `)` taking one
+    // off at a time counted the link again for each.
+    var opening = -1;
+    var closing = -1;
     while (to > start) {
       final last = text.codeUnitAt(to - 1);
       if ('?!.,:*_~\'"'.codeUnits.contains(last)) {
@@ -230,15 +247,18 @@ abstract final class GfmAutolinks {
           to--;
         }
       } else if (last == 0x29) {
-        var opening = 0;
-        var closing = 0;
-        for (var i = start; i < to; i++) {
-          final char = text.codeUnitAt(i);
-          if (char == 0x28) opening++;
-          if (char == 0x29) closing++;
+        if (opening < 0) {
+          opening = 0;
+          closing = 0;
+          for (var i = start; i < to; i++) {
+            final char = text.codeUnitAt(i);
+            if (char == 0x28) opening++;
+            if (char == 0x29) closing++;
+          }
         }
         if (closing <= opening) break;
         to--;
+        closing--;
       } else {
         break;
       }

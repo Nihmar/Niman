@@ -14,6 +14,7 @@ final class Bracket {
     required this.image,
     required this.previousDelimiter,
     required this.previous,
+    required this.links,
   });
 
   /// The text node of `[` or `![`.
@@ -32,9 +33,12 @@ final class Bracket {
   /// The bracket below it.
   final Bracket? previous;
 
-  /// Whether it may still open a link: a link inside a link deactivates
-  /// the brackets before it.
-  bool active = true;
+  /// How many links the parse had made when it was pushed. A link inside
+  /// a link deactivates the link brackets before it: one is active while
+  /// no link has been made since, which costs nothing to keep — walking
+  /// the stack to deactivate them was quadratic (`cmark`'s pathological
+  /// `![[]()`).
+  final int links;
 
   /// Whether another bracket was opened after it: its text is then no
   /// shortcut reference.

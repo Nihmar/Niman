@@ -41,6 +41,16 @@ final class InlineParser {
   final DelimiterStack _delimiters = DelimiterStack();
   Bracket? _brackets;
 
+  /// How many links the parse has made ([Bracket.links]).
+  int _links = 0;
+
+  /// Whether the text was scanned to its end for a code span's closing run
+  /// once, and the last start of a run of each length it saw: an opening
+  /// run with no closing one after it is then known without scanning
+  /// again (`cmark`'s `scanned_for_backticks`).
+  bool _backticksScanned = false;
+  final Map<int, int> _lastBacktickRun = <int, int>{};
+
   /// The text's inline nodes.
   List<InlineNode> parse() {
     while (_pos < text.length) {
@@ -173,6 +183,10 @@ final class InlineParser {
       open++;
     }
     final length = open - start;
+    if (_backticksScanned && (_lastBacktickRun[length] ?? -1) < open) {
+      _text(start, open);
+      return;
+    }
     var i = open;
     while (i < text.length) {
       if (text.codeUnitAt(i) != 0x60) {
@@ -183,6 +197,8 @@ final class InlineParser {
       while (run < text.length && text.codeUnitAt(run) == 0x60) {
         run++;
       }
+      final seen = _lastBacktickRun[run - i];
+      if (seen == null || seen < i) _lastBacktickRun[run - i] = i;
       if (run - i == length) {
         var code = text
             .substring(open, i)
@@ -203,6 +219,7 @@ final class InlineParser {
       }
       i = run;
     }
+    _backticksScanned = true;
     _text(start, open);
   }
 
@@ -317,6 +334,7 @@ final class InlineParser {
       image: image,
       previousDelimiter: _delimiters.last,
       previous: _brackets,
+      links: _links,
     );
   }
 
@@ -329,7 +347,7 @@ final class InlineParser {
       _text(close, close + 1);
       return;
     }
-    if (!opener.active) {
+    if (!opener.image && opener.links != _links) {
       _brackets = opener.previous;
       _text(close, close + 1);
       return;
@@ -337,7 +355,12 @@ final class InlineParser {
     final afterText = close + 1;
     final link = _inlineLink(afterText) ?? _referenceLink(opener, afterText);
     if (link == null) {
-      final footnote = _footnote(text.substring(opener.textStart, close));
+      final footnote =
+          close - opener.textStart <= 1000 &&
+              opener.textStart < close &&
+              text.codeUnitAt(opener.textStart) == 0x5E
+          ? _footnote(text.substring(opener.textStart, close))
+          : null;
       _brackets = opener.previous;
       if (footnote == null) {
         _text(close, close + 1);
@@ -382,11 +405,7 @@ final class InlineParser {
     opener.node.unlink();
     _delimiters.process(opener.previousDelimiter);
     _brackets = opener.previous;
-    if (!opener.image) {
-      for (var before = _brackets; before != null; before = before.previous) {
-        if (!before.image) before.active = false;
-      }
-    }
+    if (!opener.image) _links++;
     assert(node.parent != null, 'the link stands among the leaf inlines');
   }
 
@@ -419,7 +438,8 @@ final class InlineParser {
     if (label != null && label.$1.isNotEmpty) {
       raw = label.$1;
       end = label.$2;
-    } else if (!opener.bracketAfter) {
+    } else if (!opener.bracketAfter &&
+        afterText - 1 - opener.textStart <= 999) {
       // Collapsed (`[text][]`) or shortcut (`[text]`): the text is the label.
       raw = text.substring(opener.textStart, afterText - 1);
       if (label != null) end = label.$2;

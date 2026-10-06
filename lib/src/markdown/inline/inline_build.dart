@@ -145,10 +145,32 @@ final class InlineBuild {
   }
 
   /// The finished node.
+  ///
+  /// Without recursion: emphasis may nest as deep as a note writes it, and
+  /// thousands of levels overflowed the stack (`cmark`'s pathological
+  /// "nested strong emphasis").
   InlineNode freeze() {
-    final children = <InlineNode>[
-      for (var child = first; child != null; child = child.next) child.freeze(),
-    ];
+    final nodes = <InlineBuild>[this];
+    final children = <List<InlineNode>>[<InlineNode>[]];
+    final next = <InlineBuild?>[first];
+    while (true) {
+      final cursor = next.last;
+      if (cursor != null) {
+        next.last = cursor.next;
+        nodes.add(cursor);
+        children.add(<InlineNode>[]);
+        next.add(cursor.first);
+        continue;
+      }
+      final frozen = nodes.removeLast()._frozen(children.removeLast());
+      next.removeLast();
+      if (nodes.isEmpty) return frozen;
+      children.last.add(frozen);
+    }
+  }
+
+  /// This node, finished, with its [children] finished.
+  InlineNode _frozen(List<InlineNode> children) {
     return switch (kind) {
       InlineKind.root ||
       InlineKind.text => TextNode(text, start: start, end: end),
