@@ -139,7 +139,9 @@ counts (they may only go up).
    references and tag filter. The spec files read as examples; each
    leaf's inline text from the tree; a writer in `cmark-gfm`'s form
    (containers, tight and loose lists, task items, tables, footnotes).
-   Measured by section, inline sections first.
+   Measured by section, inline sections first — and for speed: the
+   pathological inputs linear, the bench against the package's inline
+   parser at least even (Decisions, "Speed").
 3. **The blocks to the spec.** Every block section at its examples:
    where the scanner follows the package and the spec says otherwise
    (a lone `-` under a paragraph, setext in a lazily ending quote,
@@ -186,11 +188,32 @@ counts (they may only go up).
   against it one by one.
 - **Until phase 5, nothing a user sees changes**: the views keep drawing
   with the package; the tree and the writer are measured beside them.
-- **Speed.** A plain item does not scan again; a quote and a container
-  item do, once per revision of the block, cached as the parse is now.
-  Measured against the list fixture and the 100 000-line benches at
-  each phase; the inline parser against the package's on the same
-  fixtures.
+- **Speed is a requirement, as much as conformance** (asked for,
+  2026-10-06). The app holds 1M-note libraries and novel-length notes,
+  and every keystroke in live reparses what it touches. So:
+  - *Linear time, always.* The inline parser keeps `cmark`'s guarantees
+    — the openers' lower bounds in the emphasis search, the 999-character
+    label, the bracket stack's deactivation, a code span's closing run
+    found once — and a test runs `cmark`'s pathological inputs (deep
+    nesting of brackets and emphasis, long backtick and delimiter runs,
+    many unclosed links) at growing sizes and fails on anything worse
+    than linear.
+  - *At least as fast as what it replaces.* A bench in `tool/` parses
+    the same leaves with ours and with `package:markdown`'s inline
+    parser — the 10 KB, 1 MB and worst-note fixtures, and a
+    math-heavy note (`_` runs inside formulas are the masker's own
+    measure) — and a `test/perf` file holds ours to it, the absolute bar
+    behind `NIMAN_PERF` as AGENTS.md has it. Masking goes away with the
+    package, which is time saved, not spent.
+  - *No work per character that does not have to be.* ASCII on fast
+    paths (no regular expression per character), text runs taken in one
+    `substring`, nothing allocated for a character that is plain text.
+  - *Only what is seen.* As now: the scanner is incremental, and a leaf
+    is parsed when it is drawn, cached until its text changes.
+  - *The blocks too.* A plain item does not scan again; a quote and a
+    container item do, once per revision of the block, cached as the
+    parse is now. Measured against the list fixture and the 100 000-line
+    benches at each phase.
 
 ## Later
 
@@ -258,8 +281,40 @@ Phase 1 in progress.
   divergence (it found the next-line reach). The list fixture scans in
   the time it did (113-122 ms against 108-115, the same host).
 
-Next (plan revised 2026-10-06): phase 2 — our inline parser, with the
-spec harness and the writer.
+### Phase 2 (in progress): our inline parser
+
+- **The parser** (`lib/src/markdown/inline/`): `cmark`'s algorithm —
+  the delimiter stack (`DelimiterStack`, the rule of 3 and the openers'
+  lower bounds), the bracket stack (`Bracket`: inline, full, collapsed
+  and shortcut references, deactivation of outer links), code spans,
+  escapes, HTML5 character references (`html5_entities.dart`, generated
+  from WHATWG's `entities.json` by `tool/gen_html5_entities.dart`),
+  autolinks, raw HTML by the 0.29 rules, hard and soft breaks; GFM's
+  strikethrough (one or two tildes, runs of equal length), footnote
+  references (`![^1]` a `!` and the reference, as `cmark-gfm`) and
+  extended autolinks (`www.`, `http(s)://`, `ftp://`, addresses, with
+  `mailto:` and `xmpp:` written). Every node carries its offsets in the
+  leaf's text; text nodes are joined only where they are their source as
+  written, so the offsets stay one to one.
+- **The writer** (`lib/src/markdown/html/`): the tree in `cmark-gfm`'s
+  HTML — tight and loose lists, task items, tables with alignment,
+  footnotes numbered by citation with their links back, the tag filter.
+  Link reference definitions are read with `cmark`'s rules
+  (`LinkReferences`) from every paragraph's start.
+- **The measure** (`dart run tool/tree_spec.dart`), against the
+  package's 645 / 652 and 662 / 677: **596 / 652** CommonMark 0.31.2,
+  **625 / 677** GFM 0.29, **30 / 30** `cmark-gfm`'s extensions. Every
+  inline section passes but for failures that are the blocks' — an
+  autolink or a tag-like line alone on its line is read by the scanner
+  as an HTML block (the package's type-7 rule), and the tab, setext,
+  code, HTML block and list cases — and three examples where CommonMark
+  0.31 moved on from GFM 0.29 (symbols as punctuation, two comment
+  rules). The gate (`tree_conformance_test.dart`, both ways like the
+  package's) holds them in `tree_nonconforming.txt`, buckets `blocks`
+  (phase 3) and `version`.
+
+Left in phase 2: the speed bar (the pathological inputs, the bench
+against the package's inline parser).
 
 ### Footnote and link reference definitions: what is known
 
