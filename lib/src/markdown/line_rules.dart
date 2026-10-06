@@ -174,9 +174,12 @@ final class LineRules {
     // container, with as many columns as the line has cells — a row that
     // does not fit heads nothing, and is the paragraph's text, as
     // `cmark-gfm` reads it. One that ends the container is no row of this
-    // line's.
+    // line's. Four columns in, the line is code unless a paragraph goes on
+    // with it, which a head is taken off as its last line.
+    final indent = LineSyntax.indentOf(text);
     final heads =
-        LineSyntax.indentOf(text) < text.length &&
+        indent < text.length &&
+        (indent < 4 || (content == null && open.openParagraph)) &&
         TableLineSyntax.heads(text, next) &&
         _stays(line + 1, base, walk.footnote);
     LineRead made(
@@ -256,7 +259,6 @@ final class LineRules {
         frontmatter: !LineSyntax.closesFrontmatter(text),
       );
     }
-    final indent = LineSyntax.indentOf(text);
     final blank = indent == text.length;
     final html = open.html;
     if (html != null) {
@@ -517,9 +519,10 @@ final class LineRules {
 
   /// Whether [text], following a table's rows, ends the table: a line that
   /// starts a block of its own ([ContainerWalk.startsBlock]) — any list
-  /// marker among them, `10.` too, as `cmark-gfm` reads a table's end.
-  /// Anything else is a row, pipes or not.
-  static bool _endsTableRow(String text) => ContainerWalk.startsBlock(text);
+  /// marker among them, `10.` too, as `cmark-gfm` reads a table's end — or
+  /// stands four columns in, code. Anything else is a row, pipes or not.
+  static bool _endsTableRow(String text) =>
+      LineSyntax.indentOf(text) >= 4 || ContainerWalk.startsBlock(text);
 
   /// The read of a line of [kind], entered in [state] and walked as [walk],
   /// leaving [items] (the walk's when null) and the rest.

@@ -148,5 +148,30 @@
     "about": "a fence in an inner item keeps the columns a tab left over",
     "markdown": "2) w\n\t- ```\n\t\tw\n",
     "html": "<ol start=\"2\">\n<li>w\n<ul>\n<li>\n<pre><code>  w\n</code></pre>\n</li>\n</ul>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a head four columns in, with no paragraph open, is code",
+    "markdown": "\t| w | x |\n|---|---|\n",
+    "html": "<pre><code>| w | x |\n</code></pre>\n<p>|---|---|</p>\n"
+  },
+  {
+    "about": "a head four columns in under a paragraph is its last line",
+    "markdown": "p\n    | a |\n|---|\n",
+    "html": "<p>p</p>\n<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n</table>\n"
+  },
+  {
+    "about": "a delimiter row four columns in is code",
+    "markdown": "    |---|---|\n|---|---|\n",
+    "html": "<pre><code>|---|---|\n</code></pre>\n<p>|---|---|</p>\n"
+  },
+  {
+    "about": "a row four columns in ends the table, code",
+    "markdown": "| a |\n|---|\n    b\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n</table>\n<pre><code>b\n</code></pre>\n"
+  },
+  {
+    "about": "a row three columns in is still a row",
+    "markdown": "| a |\n|---|\n   b\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>b</td>\n</tr>\n</tbody>\n</table>\n"
   }
 ]
