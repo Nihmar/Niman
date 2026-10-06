@@ -21,6 +21,7 @@ final class InlineParser {
     this.text, {
     this.references = const <String, LinkReference>{},
     this.footnotes = const <String>{},
+    this.extendedAutolinks = true,
   });
 
   /// The leaf's inline text.
@@ -31,6 +32,10 @@ final class InlineParser {
 
   /// The note's footnote labels.
   final Set<String> footnotes;
+
+  /// Whether bare URLs and addresses are links (GFM's extended autolinks):
+  /// always in the app; off for the spec's examples of plain CommonMark.
+  final bool extendedAutolinks;
 
   int _pos = 0;
   late final InlineBuild _root = InlineBuild(
@@ -57,7 +62,7 @@ final class InlineParser {
       _step();
     }
     _delimiters.process(null);
-    GfmAutolinks.apply(_root, text);
+    if (extendedAutolinks) GfmAutolinks.apply(_root, text);
     return <InlineNode>[
       for (var node = _root.first; node != null; node = node.next)
         node.freeze(),

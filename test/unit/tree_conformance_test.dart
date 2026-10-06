@@ -33,7 +33,10 @@ void main() {
         final id = '$name/${example.number}';
         final allowed = allowlist.containsKey(id);
         test('$id @${example.section}${allowed ? ' [accepted]' : ''}', () {
-          final actual = TreeHtml(example.markdown).render();
+          final actual = TreeHtml(
+            example.markdown,
+            extensions: extensionsFor(name, example),
+          ).render();
           // `<IGNORE>`: the example only asks that the parse not fail.
           final matches =
               example.html == '<IGNORE>\n' ||

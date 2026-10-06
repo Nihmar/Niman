@@ -17,11 +17,16 @@ import 'package:niman/src/markdown/inline/link_references.dart';
 
 /// Writes one note as HTML.
 final class TreeHtml {
-  /// A writer of [source].
-  new(this.source) : _lines = source.split('\n');
+  /// A writer of [source], GFM's [extensions] on — extended autolinks and
+  /// the tag filter — as in the app; off for the spec's examples of plain
+  /// CommonMark, as `cmark-gfm` runs them.
+  new(this.source, {this.extensions = true}) : _lines = source.split('\n');
 
   /// The note.
   final String source;
+
+  /// Whether GFM's extensions are on.
+  final bool extensions;
   final List<String> _lines;
   final StringBuffer _out = StringBuffer();
   int _last = 0x0A;
@@ -229,24 +234,13 @@ final class TreeHtml {
         _write(CodeHtml.indented(lines));
       case BlockKind.html:
         _cr();
-        _write(InlineHtml.filterTags(lines.join('\n')));
+        final html = lines.join('\n');
+        _write(extensions ? InlineHtml.filterTags(html) : html);
         _write('\n');
       case BlockKind.table:
         _cr();
         final out = StringBuffer();
-        TableHtml.write(out, lines, (text) {
-          final cell = StringBuffer();
-          InlineHtml.write(
-            cell,
-            InlineParser(
-              text,
-              references: _references,
-              footnotes: _definitions.keys.toSet(),
-            ).parse(),
-            footnote: _footnotes.reference,
-          );
-          out.write(cell);
-        });
+        TableHtml.write(out, lines, (text) => _inlineInto(out, text));
         _write(out.toString());
       case BlockKind.blank ||
           BlockKind.frontmatter ||
@@ -258,17 +252,24 @@ final class TreeHtml {
   }
 
   void _inline(String text) {
-    final cell = StringBuffer();
+    final out = StringBuffer();
+    _inlineInto(out, text);
+    _write(out.toString());
+  }
+
+  /// [text]'s inlines, parsed and written into [out].
+  void _inlineInto(StringBuffer out, String text) {
     InlineHtml.write(
-      cell,
+      out,
       InlineParser(
         text,
         references: _references,
         footnotes: _definitions.keys.toSet(),
+        extendedAutolinks: extensions,
       ).parse(),
       footnote: _footnotes.reference,
+      tagFilter: extensions,
     );
-    _write(cell.toString());
   }
 
   /// The footnotes cited, at the note's end.

@@ -36,7 +36,10 @@ void main(List<String> args) {
       total[example.section] = (total[example.section] ?? 0) + 1;
       String got;
       try {
-        got = TreeHtml(example.markdown).render();
+        got = TreeHtml(
+          example.markdown,
+          extensions: extensionsFor(name, example),
+        ).render();
       } on Object catch (error) {
         got = 'THROWS $error';
       }

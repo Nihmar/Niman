@@ -9,7 +9,8 @@ import 'package:niman/src/markdown/inline/inline_node.dart';
 /// Writes inline nodes as HTML.
 abstract final class InlineHtml {
   /// [nodes] as HTML into [out]; a footnote reference written by
-  /// [footnote], or as its text when there is none.
+  /// [footnote], or as its text when there is none; raw HTML through
+  /// GFM's tag filter unless [tagFilter] is off.
   ///
   /// Without recursion: emphasis and links nest as deep as a note writes
   /// them. The stack holds nodes still to write and the closing tags of
@@ -18,6 +19,7 @@ abstract final class InlineHtml {
     StringBuffer out,
     List<InlineNode> nodes, {
     String Function(FootnoteRefNode node)? footnote,
+    bool tagFilter = true,
   }) {
     final stack = <Object>[...nodes.reversed];
     void open(String tag, String close, List<InlineNode> children) {
@@ -69,7 +71,7 @@ abstract final class InlineHtml {
           }
           out.write(' />');
         case HtmlNode(:final html):
-          out.write(filterTags(html));
+          out.write(tagFilter ? filterTags(html) : html);
         case SoftBreakNode():
           out.write('\n');
         case HardBreakNode():

@@ -155,3 +155,9 @@ List<SpecExample> loadExtensionExamples() {
   }
   return examples;
 }
+
+/// Whether GFM's extensions are on for [example] of suite [name], as
+/// `cmark-gfm`'s runner turns them on: for its extension tests and the GFM
+/// spec's sections marked "(extension)"; the rest is plain CommonMark.
+bool extensionsFor(String name, SpecExample example) =>
+    name == cmarkGfmExtensionsName || example.section.contains('(extension)');
