@@ -1,4 +1,13 @@
-# One block tree: the scanner's structure, package:markdown for inlines only (work in progress)
+# One block tree and our own inline parser, to cmark-gfm (work in progress)
+
+**Revised 2026-10-06.** The plan first kept `package:markdown` for the
+inlines and compared the tree's HTML with the package's, byte for byte.
+The aim is GitHub Flavored Markdown as `cmark-gfm` reads it, not the
+package — whose quirks that comparison would have had us copy and then
+throw away. So the oracle is the specifications' own examples, and the
+package goes entirely: the inlines get a parser of our own too. The
+history below the plan keeps the first version's reasoning where it
+still holds.
 
 Follows [block-scanner-containers.md](block-scanner-containers.md), whose
 phases 1-4 made the scanner read containers as `package:markdown` does
@@ -9,9 +18,9 @@ it is handed — so the scanner had to agree with the package line by
 line, quirks included, or the two readings drew different notes.
 
 The aim: the scanner's reading is the only one. Every surface — read
-view, live, export, index — takes its blocks from it, and the package
-parses only the inline text of a leaf (a paragraph's, a heading's, a
-cell's), with `md.InlineParser`.
+view, live, export, index — takes its blocks from it, and a leaf's
+inline text (a paragraph's, a heading's, a cell's) is read by our own
+inline parser. Both follow `cmark-gfm`.
 
 ## Where the package decides structure today
 
@@ -71,63 +80,117 @@ leading spaces off) and where it ends (closing `#`s, a setext underline
 left out). The inline text is those segments joined by `\n`, and a
 position in it maps back by segment: no searching, no `approximate`.
 
-**Inlines**: `md.InlineParser(text, document).parse()` over the masked
-leaf text (`ExtensionMasker`, as now), with the document seeded with the
-note's link references and footnotes (`DocumentScope`, as now) and the
-app's inline syntaxes. The walk from nodes to `StyleRun`s keeps its
-offsets by construction instead of by search.
+**Inlines**: our own parser over a leaf's inline text, `cmark-gfm`'s
+algorithm (the spec's appendix: the delimiter stack for emphasis, the
+bracket stack for links and images), each node carrying its offsets in
+the leaf's text — and through the segments, in the note. The app's own
+constructs (wikilinks and embeds, tags, inline math, `==highlight==`,
+`<u>`/`<sup>`/`<sub>`) are syntaxes of the same parser, where today they
+are masked before the package sees the text and put back after.
+
+## The oracle
+
+The specifications' examples — already in the repository since the
+package was measured against them (2026-09-21, `test/fixtures/spec/`,
+sources and licence in its README; loader `tool/spec_suite.dart`,
+cmark's normalizer ported in `tool/html_normalize.dart` and proved on a
+375-case corpus):
+
+- `gfm-0.29-gfm.json` — the published GFM spec, 677 examples:
+  CommonMark 0.29 and GFM's tables, task lists, strikethrough, extended
+  autolinks and tag filter. **The reference.**
+- `cmark-gfm-extensions.txt` — `cmark-gfm`'s extension tests, 30
+  examples, footnotes among them (no spec covers them); added
+  2026-10-06.
+- `commonmark-0.31.2.json` — 652 examples: a second count, for where
+  CommonMark moved on since 0.29.
+
+**The bar**: the package, whole-document, passes 645 / 652 CommonMark and
+662 / 677 GFM (`markdown_conformance_test.dart`, 22 triaged in
+`nonconforming.txt`). Our parser does at least as well before anything
+draws with it. The gate works as that test's does, both ways — every
+example outside an allowlist passes, every one inside still fails — and
+results are counted by the spec's sections, so block failures and inline
+ones read apart.
+
+The random harness against `package:markdown` stays as the structure's
+regression net until the read view stops drawing with the package
+(phase 5); where the package and the spec part — its quirks, already
+counted apart — the spec wins.
 
 ## Plan
 
-Each phase is gated by the unit suite, the CommonMark harness at 0, the
-rescan test, and `test/perf/list_count_check_test.dart`.
+Each phase is gated by the unit suite, the random harness, the rescan
+test, `test/perf/list_count_check_test.dart` and, from phase 2, the spec
+counts (they may only go up).
 
-1. **The tree, beside the current path.** A builder that gives a text
-   its tree, each leaf's lines mapped to the note; link reference and
-   footnote definitions read by the scanner. Nothing draws from it yet.
-   The harness compares it with the package's tree directly — leaf kind
-   and container path of every word — instead of going through
-   `contentText` and a parse.
-2. **HTML from the tree.** Each leaf's inline text and its segments; a
-   writer from the tree (containers, tight / loose lists, leaves through
-   `md.InlineParser` and the package's renderer) — the oracle this plan
-   has been missing: for a generated document it is compared **byte for
-   byte** with `md.markdownToHtml` of the whole note, which tests the
-   structure, the leaf texts and their segments at once. Quirks the
-   containers plan excluded stay excluded, counted.
-3. **The read view on the tree.** `BlockParser.parseText` builds a
-   `ParsedBlock` from a leaf's inline text and its segments; `BlockView`
-   draws containers from the path and subtree (quotes, items, callouts,
-   tables by cell) and leaves from their runs. `_sourceFormOf`, the
-   search and `approximate` go.
-4. **Live on the tree.** `SourceStyler` takes a quote's runs from its
-   subtree, like the read view; `LiveQuoteContent` becomes the subtree.
-5. **Export on the tree.** `NoteHtml` renders with phase 2's writer plus
-   its own rewrites (callouts, math, wikilinks, heading ids,
-   `imageTargets` from the tree); compared with the current export on the
-   export tests' fixtures.
-6. **The package for inlines only.** No `parseLines` left in `lib/`.
-   The harness keeps the package as its oracle for structure for as long
-   as the app reads as the package does.
-7. **The CommonMark spec** (asked for, 2026-10-06). The spec's examples
-   (`spec.json`, each a Markdown input and its HTML) run against the
-   tree's HTML writer: first measured, then each failure fixed or kept
-   as a decision with its reason. Where the spec and the package part —
-   the package's quirks, which the harness counts today — the spec wins,
-   and the harness's oracle becomes the spec's reading.
+1. **The tree, beside the current path** — done. A builder that gives a
+   text its tree, each leaf's lines mapped to the note; footnote and link
+   reference definitions read by the scanner. Nothing draws from it yet.
+2. **Our inline parser, the spec harness and the HTML writer** —
+   together, with no stop at the package's inlines (reordered
+   2026-10-06: measuring a parser we would throw away was no step). The
+   HTML entity table generated from WHATWG's `entities.json`
+   (`tool/`); the parser, `cmark-gfm`'s algorithm, every node with its
+   offsets in the leaf's text: escapes, entities, code spans, emphasis
+   and strong (the delimiter stack), links and images (the bracket
+   stack, reference definitions from the tree), autolinks, raw HTML,
+   breaks; then GFM's strikethrough, extended autolinks, footnote
+   references and tag filter. The spec files read as examples; each
+   leaf's inline text from the tree; a writer in `cmark-gfm`'s form
+   (containers, tight and loose lists, task items, tables, footnotes).
+   Measured by section, inline sections first.
+3. **The blocks to the spec.** Every block section at its examples:
+   where the scanner follows the package and the spec says otherwise
+   (a lone `-` under a paragraph, setext in a lazily ending quote,
+   definitions inside containers, the tab limits), the scanner follows
+   the spec.
+4. **The app's extensions in the parser.** Math, wikilinks and embeds,
+   tags, highlight, `<u>`/`<sup>`/`<sub>`, template placeholders, as
+   syntaxes in the masking order (Decisions); each tested on its own,
+   and the spec counts unchanged with them on.
+5. **The read view on the tree.** `ParsedBlock` from a leaf's inlines
+   and its segments; `BlockView` draws containers from the tree (quotes,
+   items, callouts, tables by cell) and leaves from their runs.
+   `ExtensionMasker`, `_sourceFormOf`, the search and `approximate` go.
+6. **Live on the tree.** `SourceStyler` takes its runs from the tree,
+   quotes included; `LiveQuoteContent` becomes the subtree.
+7. **Export on the tree.** `NoteHtml` renders with the writer plus its
+   own rewrites (callouts, math, wikilinks, heading ids, picture
+   targets); checked against the export tests.
+8. **`package:markdown` removed** from `pubspec.yaml`: nothing in `lib/`
+   imports it; the random harness, its last user, retires with it.
 
 ## Decisions
 
-- **Whose semantics.** While the plan runs, the package's (the harness
-  keeps it at 0): nothing a user sees changes. Once the package parses
-  no structure, matching it is a choice, not a constraint — moving to
-  CommonMark proper (the quirks: a lone `-` under a paragraph, setext in
-  a lazily ending quote) can be decided then, with the spec's examples
-  run against the scanner.
+- **Whose semantics: `cmark-gfm`'s** (GFM spec 0.29 and its extension
+  tests). CommonMark 0.31.2's changes since are counted and decided case
+  by case.
+- **The app's extensions are additions to it**, each documented, each
+  tested on its own, never a change to what GFM reads where they are
+  absent:
+  - *inline*: `$…$` math (`math_rule.dart`'s predicate), `$$…$$` within
+    a line, `[[wikilinks]]` and `![[embeds]]` (`links/parser.dart`'s
+    rule), `#tags`, `==highlight==`, `<u>`, `<sup>`, `<sub>`, and the
+    templates' `{{…}}` placeholders;
+  - *block*: `$$` display math, frontmatter, callouts (`> [!type]`, `-`
+    or `+` to fold, a title), and `mermaid` fences drawn as diagrams.
+
+  Their precedence is today's masking order, as syntaxes of the parser:
+  a code span hides everything in it, then display math, inline math,
+  wikilinks and embeds, tags — so the emphasis algorithm never reads a
+  `_` inside a formula (`extension_masker.dart`'s measure: 7 530 `_`
+  runs in one note, 17 of them emphasis). A spec example holds none of
+  them, except the `$` and `#` a spec example may write as text: those
+  are where an extension could change GFM's reading, and are checked
+  against it one by one.
+- **Until phase 5, nothing a user sees changes**: the views keep drawing
+  with the package; the tree and the writer are measured beside them.
 - **Speed.** A plain item does not scan again; a quote and a container
   item do, once per revision of the block, cached as the parse is now.
   Measured against the list fixture and the 100 000-line benches at
-  each phase.
+  each phase; the inline parser against the package's on the same
+  fixtures.
 
 ## Later
 
@@ -195,7 +258,8 @@ Phase 1 in progress.
   divergence (it found the next-line reach). The list fixture scans in
   the time it did (113-122 ms against 108-115, the same host).
 
-Next: phase 2 — each leaf's inline text and the HTML writer.
+Next (plan revised 2026-10-06): phase 2 — our inline parser, with the
+spec harness and the writer.
 
 ### Footnote and link reference definitions: what is known
 
