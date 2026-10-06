@@ -1,0 +1,122 @@
+# Examples the block tree and our inline parser do not match yet, each with
+# its bucket and reason (docs/dev/block-tree.md).
+#
+# Format: `<suite>/<example> <bucket>: <reason>`, the bucket one of:
+#
+#   blocks   the scanner reads the blocks otherwise than the spec: phase 3
+#   version  CommonMark 0.31.2 reads it otherwise than GFM 0.29, which is
+#            the reference (`cmark-gfm`); decided for GFM
+#
+# `flutter test` fails if an example outside this file fails, and fails again
+# if an example inside it starts passing, so the list cannot rot.
+#
+# Measured 2026-10-06 with `dart run tool/tree_spec.dart --ids`.
+
+commonmark/0.31.2/5 blocks: tab columns in containers
+commonmark/0.31.2/6 blocks: tab columns in containers
+commonmark/0.31.2/7 blocks: tab columns in containers
+commonmark/0.31.2/20 blocks: the autolink is read as an HTML block
+commonmark/0.31.2/85 blocks: setext reading
+commonmark/0.31.2/93 blocks: setext reading
+commonmark/0.31.2/96 blocks: setext reading
+commonmark/0.31.2/98 blocks: setext reading
+commonmark/0.31.2/110 blocks: indented code
+commonmark/0.31.2/111 blocks: indented code
+commonmark/0.31.2/112 blocks: indented code
+commonmark/0.31.2/126 blocks: fences
+commonmark/0.31.2/127 blocks: fences
+commonmark/0.31.2/137 blocks: fences
+commonmark/0.31.2/139 blocks: fences
+commonmark/0.31.2/170 blocks: HTML block starts and ends
+commonmark/0.31.2/171 blocks: HTML block starts and ends
+commonmark/0.31.2/172 blocks: HTML block starts and ends
+commonmark/0.31.2/173 blocks: HTML block starts and ends
+commonmark/0.31.2/176 blocks: HTML block starts and ends
+commonmark/0.31.2/178 blocks: HTML block starts and ends
+commonmark/0.31.2/187 blocks: HTML block starts and ends
+commonmark/0.31.2/237 blocks: quotes
+commonmark/0.31.2/264 blocks: list items
+commonmark/0.31.2/278 blocks: list items
+commonmark/0.31.2/279 blocks: list items
+commonmark/0.31.2/281 blocks: list items
+commonmark/0.31.2/282 blocks: list items
+commonmark/0.31.2/283 blocks: list items
+commonmark/0.31.2/289 blocks: list items
+commonmark/0.31.2/325 blocks: lists
+commonmark/0.31.2/354 version: 0.31 counts symbols (`£`, `€`) as punctuation for flanking; 0.29 does not
+commonmark/0.31.2/594 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/595 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/596 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/597 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/598 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/599 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/600 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/601 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/602 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/603 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/604 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/605 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/606 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/608 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/609 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/610 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/611 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/612 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+commonmark/0.31.2/619 blocks: a line that is no tag to the spec is read as an HTML block
+commonmark/0.31.2/622 blocks: a line that is no tag to the spec is read as an HTML block
+commonmark/0.31.2/624 blocks: a line that is no tag to the spec is read as an HTML block
+commonmark/0.31.2/625 version: 0.31 changed what an HTML comment is (`<!-->`, `--` inside)
+commonmark/0.31.2/626 version: 0.31 changed what an HTML comment is (`<!-->`, `--` inside)
+commonmark/0.31.2/632 blocks: a line that is no tag to the spec is read as an HTML block
+gfm/0.29-gfm/5 blocks: tab columns in containers
+gfm/0.29-gfm/6 blocks: tab columns in containers
+gfm/0.29-gfm/7 blocks: tab columns in containers
+gfm/0.29-gfm/55 blocks: setext reading
+gfm/0.29-gfm/63 blocks: setext reading
+gfm/0.29-gfm/66 blocks: setext reading
+gfm/0.29-gfm/68 blocks: setext reading
+gfm/0.29-gfm/80 blocks: indented code
+gfm/0.29-gfm/81 blocks: indented code
+gfm/0.29-gfm/82 blocks: indented code
+gfm/0.29-gfm/96 blocks: fences
+gfm/0.29-gfm/97 blocks: fences
+gfm/0.29-gfm/107 blocks: fences
+gfm/0.29-gfm/109 blocks: fences
+gfm/0.29-gfm/140 blocks: HTML block starts and ends
+gfm/0.29-gfm/141 blocks: HTML block starts and ends
+gfm/0.29-gfm/142 blocks: HTML block starts and ends
+gfm/0.29-gfm/145 blocks: HTML block starts and ends
+gfm/0.29-gfm/147 blocks: HTML block starts and ends
+gfm/0.29-gfm/156 blocks: HTML block starts and ends
+gfm/0.29-gfm/215 blocks: quotes
+gfm/0.29-gfm/242 blocks: list items
+gfm/0.29-gfm/256 blocks: list items
+gfm/0.29-gfm/257 blocks: list items
+gfm/0.29-gfm/259 blocks: list items
+gfm/0.29-gfm/260 blocks: list items
+gfm/0.29-gfm/261 blocks: list items
+gfm/0.29-gfm/267 blocks: list items
+gfm/0.29-gfm/305 blocks: lists
+gfm/0.29-gfm/316 blocks: the autolink is read as an HTML block
+gfm/0.29-gfm/603 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/604 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/605 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/606 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/607 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/608 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/609 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/610 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/611 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/612 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/613 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/614 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/615 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/617 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/618 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/619 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/620 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/621 blocks: an autolink alone on its line is read as an HTML block (type 7 takes it for a tag)
+gfm/0.29-gfm/642 blocks: a line that is no tag to the spec is read as an HTML block
+gfm/0.29-gfm/645 blocks: a line that is no tag to the spec is read as an HTML block
+gfm/0.29-gfm/647 blocks: a line that is no tag to the spec is read as an HTML block
+gfm/0.29-gfm/656 blocks: a line that is no tag to the spec is read as an HTML block
