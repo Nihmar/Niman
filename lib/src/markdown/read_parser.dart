@@ -9,6 +9,7 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/block_tree.dart';
 import 'package:niman/src/markdown/html/code_html.dart';
+import 'package:niman/src/markdown/html/leaf_text.dart';
 import 'package:niman/src/markdown/inline/inline_parser.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
 import 'package:niman/src/markdown/leaf_inline.dart';
@@ -210,7 +211,7 @@ final class _Reader {
       case BlockKind.fencedCode:
         final fence = entering?.fence;
         final parts = CodeHtml.fenceParts(
-          lines,
+          LeafText.withLeftOver(node, lines),
           open: fence == null ? null : (fence.char, fence.length, fence.indent),
         );
         return ReadLeaf(

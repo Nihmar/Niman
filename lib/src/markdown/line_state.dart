@@ -109,6 +109,8 @@ final class LineState {
     this.openParagraph = false,
     this.footnote = 0,
     this.definition = 0,
+    this.definitionsOnly = false,
+    this.tableTried = false,
   });
 
   /// [footnote] when a footnote definition is open.
@@ -123,6 +125,10 @@ final class LineState {
 
   /// [quoteLast]'s bit for a last line that is a code fence.
   static const int lastFence = 2;
+
+  /// [quoteLast]'s bit for a last line that closed its block on it: a
+  /// heading, a rule. No paragraph is open after it.
+  static const int lastClosed = 8;
 
   /// [quoteLast]'s bit for a last line indented four spaces or more.
   static const int lastIndented = 4;
@@ -202,9 +208,21 @@ final class LineState {
   final int footnote;
 
   /// How many more lines the open link reference definition takes, or 0:
-  /// its first line decided them (`LinkDefinitionSyntax`). No paragraph is
-  /// open while one is, nor after it.
+  /// its first line decided them (`LinkDefinitionSyntax`).
   final int definition;
+
+  /// Whether the paragraph open ([openParagraph]) holds link reference
+  /// definitions and nothing else yet. A definition is a paragraph's text
+  /// until the paragraph closes, as `cmark` reads it — what follows goes
+  /// on with it, `2) x` and four-space lines too — but an underline under
+  /// definitions alone heads nothing: they leave no text to head.
+  final bool definitionsOnly;
+
+  /// Whether a delimiter row went on with the paragraph open
+  /// ([openParagraph]) for want of a head that fit it. `cmark-gfm` tries a
+  /// paragraph for a table once: after that no line of it heads one
+  /// (`w` / `|---|---|---|` / `x | y` / `|---|---|` is all text).
+  final bool tableTried;
 
   /// Whether the line is anywhere a block-level construct can still start —
   /// outside every fence, math block, frontmatter, HTML block and indented
@@ -227,7 +245,9 @@ final class LineState {
       other.table == table &&
       other.openParagraph == openParagraph &&
       other.footnote == footnote &&
-      other.definition == definition;
+      other.definition == definition &&
+      other.definitionsOnly == definitionsOnly &&
+      other.tableTried == tableTried;
 
   /// Whether two stacks hold the same items: records compare by value, so a
   /// plain element-wise walk is the whole of it (the engine has no
@@ -256,6 +276,8 @@ final class LineState {
     openParagraph,
     footnote,
     definition,
+    definitionsOnly,
+    tableTried,
   );
 
   @override
@@ -265,5 +287,6 @@ final class LineState {
       'quoteLast: $quoteLast, '
       'list: $listDepth at $listIndent, table: $table, '
       'paragraph: $openParagraph, footnote: $footnote, '
-      'definition: $definition)';
+      'definition: $definition, definitionsOnly: $definitionsOnly, '
+      'tableTried: $tableTried)';
 }

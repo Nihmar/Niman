@@ -4,7 +4,7 @@
 library;
 
 import 'package:niman/src/editor/math_rule.dart';
-import 'package:niman/src/markdown/extension_masker.dart';
+import 'package:niman/src/markdown/app_syntax.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/inline/bracket.dart';
 import 'package:niman/src/markdown/inline/delimiter.dart';
@@ -44,11 +44,9 @@ final class InlineParser {
 
   /// Whether the app's own inline syntax is read — math, wikilinks and
   /// embeds, tags, `==highlight==`, `<u>`/`<sup>`/`<sub>` — in
-  /// `ExtensionMasker`'s order (`docs/dev/block-tree.md`, phase 4). Always
+  /// `AppSyntax`'s order (`docs/dev/block-tree.md`, phase 4). Always
   /// in the app; off for the specifications' examples.
   final bool appSyntax;
-
-  static const ExtensionMasker _masker = ExtensionMasker();
 
   /// Where a `$` and a `$$` first found no closing one, past the text when
   /// none has failed yet ([_appConstruct]).
@@ -161,7 +159,7 @@ final class InlineParser {
         (inline && _pos >= _noInlineCloseFrom)) {
       return false;
     }
-    final span = _masker.extensionAt(text, _pos);
+    final span = AppSyntax.at(text, _pos);
     if (span == null) {
       if (display) _noDisplayCloseFrom = _pos;
       if (inline) _noInlineCloseFrom = _pos;

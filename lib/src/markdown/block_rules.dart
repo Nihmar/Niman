@@ -79,6 +79,10 @@ final class BlockRules {
     // ones its first line read.
     if (read.definition == Block.opensDefinition) return false;
     if (entering.definition > 0) return true;
+    // What goes on with definitions is their paragraph's text, but a block
+    // of its own: the definitions draw nothing, the text after them is
+    // what the paragraph — or the heading it makes — says.
+    if (entering.definitionsOnly) return false;
     switch (open.kind) {
       case BlockKind.heading:
       case BlockKind.thematicBreak:
@@ -163,9 +167,14 @@ final class BlockRules {
   /// reading that heads it.
   int underlineLevel(Block paragraph, int line) {
     final read = _lines.read(line);
-    if (!read.carried || !_lines.entering(line).openParagraph) return 0;
-    // A lazy line of a quote or an item underlines nothing.
-    if (_lines.lazyAt(line)) return 0;
+    final entering = _lines.entering(line);
+    // Definitions alone leave no text to head.
+    if (!read.carried || !entering.openParagraph || entering.definitionsOnly) {
+      return 0;
+    }
+    // A lazy line of a quote or an item underlines nothing: the paragraph's
+    // text, whether its container is the note's or one read again.
+    if (read.walk.lazy || _lines.lazyAt(line)) return 0;
     // A table's head is tried first: a line over a delimiter row ends the
     // paragraph, whether or not it is a table.
     if (read.heads) return 0;
@@ -175,11 +184,13 @@ final class BlockRules {
   /// Where the item starting at [line] sits in its list.
   ///
   /// A continuation of the list already in progress — the previous block was an
-  /// item at the same indent, and both are written as ordered items — keeps
-  /// counting. Anything else starts a list, and starts it at the number the
-  /// note wrote.
+  /// item at the same indent, both written as ordered items with the same
+  /// delimiter — keeps counting. Anything else starts a list, and starts it
+  /// at the number the note wrote: `10.` then `2)` are two lists, the second
+  /// from 2, as `cmark` reads them.
   int ordinalOf(int line, int listDepth, int quoteDepth, Block? previous) {
-    final written = LineSyntax.writtenOrdinal(_lines.lineText(line));
+    final text = _lines.lineText(line);
+    final written = LineSyntax.writtenOrdinal(text);
     // The same list is the same depth in the same quote: an item after a
     // quote's list is a list of its own, not the quote's list counted on.
     if (previous != null &&
@@ -187,7 +198,9 @@ final class BlockRules {
         previous.listDepth == listDepth &&
         previous.quoteDepth == quoteDepth &&
         previous.listOrdinal > 0 &&
-        written > 0) {
+        written > 0 &&
+        LineSyntax.writtenDelimiter(_lines.lineText(previous.startLine)) ==
+            LineSyntax.writtenDelimiter(text)) {
       return previous.listOrdinal + 1;
     }
     return written;

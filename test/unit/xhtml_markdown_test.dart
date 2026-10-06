@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/epub/xhtml_markdown.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
-import 'package:niman/src/markdown/extension_masker.dart';
+import 'package:niman/src/markdown/inline/inline_node.dart';
+import 'package:niman/src/markdown/inline/inline_parser.dart';
 
 void main() {
   final pictures = <String>[];
@@ -173,7 +174,18 @@ void main() {
       final text = markdown(
         r'<p>#tag $5 and $6 $$x$$ [[note]] ![[pic.png]] ==hi==</p>',
       );
-      expect(const ExtensionMasker().mask(text).spans, isEmpty, reason: text);
+      final nodes = InlineParser(text).parse();
+      expect(
+        nodes.where(
+          (node) =>
+              node is MathNode ||
+              node is WikiLinkNode ||
+              node is TagNode ||
+              node is HighlightNode,
+        ),
+        isEmpty,
+        reason: text,
+      );
     });
 
     test('a backslash is kept as one', () {

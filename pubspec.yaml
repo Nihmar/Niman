@@ -65,9 +65,6 @@ dependencies:
   katex: ^1.0.0
   katex_dart: ^0.1.1
 
-  # The CommonMark/GFM parser (D2 of docs/records/unified-surface.md): the
-  # unified engine walks its AST.
-  markdown: ^7.3.1
   # Filesystem location for the library root.
   meta: ^1.19.0
 

@@ -9,7 +9,8 @@
 > The walk that emulates it (`ContainerWalk`) reaches 0 of 40 000, and
 > cases 1 and 4 turned out to be the harness's, not the scanner's. Read
 > the plan document for what was done; the tables below are the evidence
-> it started from.
+> it started from. The package itself is gone since
+> (`docs/dev/block-tree.md`, phase 8): the reading is `cmark-gfm`'s.
 
 `docs/dev/block-scanner-containers.md` records the container rework up to
 309 of 40 000 documents differing (138 minimal) on

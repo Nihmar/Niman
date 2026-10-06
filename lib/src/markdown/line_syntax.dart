@@ -281,20 +281,15 @@ abstract final class LineSyntax {
 
   /// Whether the marker [marker] on [text] may interrupt an open paragraph:
   /// an empty item (a marker with only spaces after it) never does; an
-  /// ordered one only if it starts at 1, unless the paragraph is in a list
-  /// item ([inItem]), where any marker starts a list.
-  static bool markerInterrupts(
-    (int, int, int) marker,
-    String text, {
-    bool inItem = false,
-  }) {
+  /// ordered one only if it starts at 1 — in a list item as much as
+  /// outside one, as `cmark` reads it.
+  static bool markerInterrupts((int, int, int) marker, String text) {
     final (start, width, _) = marker;
     var at = start + width;
     while (at < text.length && isSpace(text.codeUnitAt(at))) {
       at++;
     }
     if (at >= text.length) return false;
-    if (inItem) return true;
     final char = text.codeUnitAt(start);
     if (isDigit(char)) return width == 2 && char == 0x31;
     return true;
@@ -309,6 +304,17 @@ abstract final class LineSyntax {
     final slice = text.substring(start, start + width).trim();
     final digits = int.tryParse(slice.replaceAll(RegExp('[^0-9]'), ''));
     return digits ?? 0;
+  }
+
+  /// The character an item's marker on [text] ends with — `-`, `+`, `*`,
+  /// or `.` or `)` after a number — or null for a line that opens none:
+  /// what keeps items one list.
+  static String? writtenDelimiter(String text) {
+    final marker = listMarker(text, text.length);
+    if (marker == null) return null;
+    final (start, width, _) = marker;
+    final marked = text.substring(start, start + width).trimRight();
+    return marked.substring(marked.length - 1);
   }
 
   /// Whether [text] from [from] on is a thematic break, as the read view's
@@ -385,35 +391,29 @@ abstract final class LineSyntax {
     return columns + remaining;
   }
 
-  /// [text] with [indent] columns of its leading whitespace taken off, the
-  /// way the read view's parser takes an item's indent off its lines
-  /// (`package:markdown`'s `dedent`): a tab is four columns wherever it
-  /// stands, and goes whole once the indent is reached in it, its columns
-  /// past the indent left over — the second of the pair, which counts
-  /// toward the next item's indent and nothing else. A tab short of the
-  /// indent goes too, and leaves nothing.
-  static (String, int) dedent(String text, int indent) {
-    var start = 0;
+  /// [text] with [indent] columns of its leading whitespace taken off, as
+  /// `cmark` takes an item's indent off its lines: a tab runs to the next
+  /// stop of four, and goes whole once the indent is reached in it, its
+  /// columns past the indent left over — the second of the pair, which
+  /// counts toward the next item's indent and the blocks inside it. A tab
+  /// short of the indent goes too, and leaves nothing.
+  ///
+  /// [leftOver] is what a tab an outer container took off left over before
+  /// [text]: those columns come off first, and [text] is untouched while
+  /// they cover the indent — `- - w` / tab tab `- w` is two tabs' columns
+  /// in, the inner item's text, not a third item. A tab that left columns
+  /// over ended on a stop, so [text]'s tabs run to stops counted from it.
+  static (String, int) dedent(String text, int indent, [int leftOver = 0]) {
+    if (leftOver >= indent) return (text, leftOver - indent);
+    final need = indent - leftOver;
     var columns = 0;
-    var remaining = 0;
-    var tab = false;
-    for (; start < text.length && start < indent; start++) {
+    for (var start = 0; start < text.length; start++) {
       final char = text.codeUnitAt(start);
-      if (char != 0x20 && char != 0x09) break;
-      final isTab = char == 0x09;
-      if (isTab) {
-        columns += 4;
-        tab = true;
-      } else {
-        columns += 1;
-      }
-      if (columns >= indent) {
-        if (tab) remaining = columns - indent;
-        if (columns == indent || isTab) start++;
-        return (text.substring(start), remaining);
-      }
+      if (char != 0x20 && char != 0x09) return (text.substring(start), 0);
+      columns += char == 0x09 ? 4 - columns % 4 : 1;
+      if (columns >= need) return (text.substring(start + 1), columns - need);
     }
-    return (text.substring(start), 0);
+    return ('', 0);
   }
 
   /// How many spaces [text] starts with.

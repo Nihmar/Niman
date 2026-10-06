@@ -1,0 +1,202 @@
+[
+  {
+    "about": "a quote takes indented lines lazily while its paragraph is open",
+    "markdown": "> a\n    b\n    c\n",
+    "html": "<blockquote>\n<p>a\nb\nc</p>\n</blockquote>\n"
+  },
+  {
+    "about": "no paragraph open in the quote, no lazy line",
+    "markdown": "> a\n>\n    b\n",
+    "html": "<blockquote>\n<p>a</p>\n</blockquote>\n<pre><code>b\n</code></pre>\n"
+  },
+  {
+    "about": "a lazy line of an item in a quote is text, not a quote",
+    "markdown": "> - w\n    > w\n",
+    "html": "<blockquote>\n<ul>\n<li>w\n&gt; w</li>\n</ul>\n</blockquote>\n"
+  },
+  {
+    "about": "a lazy line is text, not a heading",
+    "markdown": "> - w\n    # w\n",
+    "html": "<blockquote>\n<ul>\n<li>w\n# w</li>\n</ul>\n</blockquote>\n"
+  },
+  {
+    "about": "a lazy line short of a sublist is text, not an item",
+    "markdown": "   - - w\n    - w\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>w\n- w</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a tab-indented lazy line is text, not a sublist",
+    "markdown": "> - w\n\t- - w\n",
+    "html": "<blockquote>\n<ul>\n<li>w\n- - w</li>\n</ul>\n</blockquote>\n"
+  },
+  {
+    "about": "a lazy === is text, not an underline",
+    "markdown": "- - w\n===\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>w\n===</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a lazy === under an item's paragraph",
+    "markdown": "- a\n===\nb\n",
+    "html": "<ul>\n<li>a\n===\nb</li>\n</ul>\n"
+  },
+  {
+    "about": "a lazy tab-indented <div> is text",
+    "markdown": "- w\n\t<div>\n",
+    "html": "<ul>\n<li>w\n  <div>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a tab's columns past an item's indent count toward the next",
+    "markdown": "- - w\n\t---\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>\n<h2>w</h2>\n</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a line short of a footnote that opens a list ends it",
+    "markdown": "[^n]: a\n2. b\n\nx[^n]\n",
+    "html": "<ol start=\"2\">\n<li>b</li>\n</ol>\n<p>x<sup class=\"footnote-ref\"><a href=\"#fn-n\" id=\"fnref-n\" data-footnote-ref>1</a></sup></p>\n<section class=\"footnotes\" data-footnotes>\n<ol>\n<li id=\"fn-n\">\n<p>a <a href=\"#fnref-n\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"1\" aria-label=\"Back to reference 1\">↩</a></p>\n</li>\n</ol>\n</section>\n"
+  },
+  {
+    "about": "a list marker interrupts an item's paragraph only as it would anywhere",
+    "markdown": "- a\n  2. b\n",
+    "html": "<ul>\n<li>a\n2. b</li>\n</ul>\n"
+  },
+  {
+    "about": "a table head needs as many cells as its delimiter row",
+    "markdown": "| a | b |\n|---|---|---|\n",
+    "html": "<p>| a | b |\n|---|---|---|</p>\n"
+  },
+  {
+    "about": "a table row ends at a line that opens a block",
+    "markdown": "| a |\n|---|\n> q\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n</table>\n<blockquote>\n<p>q</p>\n</blockquote>\n"
+  },
+  {
+    "about": "a lone - under a paragraph is a setext underline",
+    "markdown": "p\n-\n",
+    "html": "<h2>p</h2>\n"
+  },
+  {
+    "about": "after a definition a tab-indented line is paragraph text",
+    "markdown": "[r]: /u\n\tcode\n",
+    "html": "<p>code</p>\n"
+  },
+  {
+    "about": "after a definition 2) is paragraph text",
+    "markdown": "[r]: /u\n2) item\n",
+    "html": "<p>2) item</p>\n"
+  },
+  {
+    "about": "an underline under definitions alone is text",
+    "markdown": "[r]: /u\n===\n",
+    "html": "<p>===</p>\n"
+  },
+  {
+    "about": "--- under definitions alone is text, not a rule",
+    "markdown": "[r]: /u\n---\n",
+    "html": "<p>---</p>\n"
+  },
+  {
+    "about": "an underline heads a paragraph before it is read for definitions",
+    "markdown": "[r]:\n===\n",
+    "html": "<h1>[r]:</h1>\n"
+  },
+  {
+    "about": "another delimiter starts a list from its own number",
+    "markdown": "10. a\n2) b\n",
+    "html": "<ol start=\"10\">\n<li>a</li>\n</ol>\n<ol start=\"2\">\n<li>b</li>\n</ol>\n"
+  },
+  {
+    "about": "a fence in an item keeps the columns a tab left over",
+    "markdown": "- ```\n\tw\n  ```\n",
+    "html": "<ul>\n<li>\n<pre><code>  w\n</code></pre>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a fence in an ordered item keeps the columns a tab left over",
+    "markdown": "2) w\n\t~~~\n\t/u \"t\"\n",
+    "html": "<ol start=\"2\">\n<li>w\n<pre><code>/u &quot;t&quot;\n</code></pre>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a paragraph of definitions makes no list loose",
+    "markdown": "- w\n\n  [r]: /u\n",
+    "html": "<ul>\n<li>w</li>\n</ul>\n"
+  },
+  {
+    "about": "a blank line before definitions still loosens the list",
+    "markdown": "- a\n- b\n\n  [ref]: /url\n- d\n",
+    "html": "<ul>\n<li>\n<p>a</p>\n</li>\n<li>\n<p>b</p>\n</li>\n<li>\n<p>d</p>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a line lazy for an outer item is lazy for the inner one, however far in",
+    "markdown": "   1. w\n      + w\n    1. w\n",
+    "html": "<ol>\n<li>w\n<ul>\n<li>w\n1. w</li>\n</ul>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a lazy line reaching an inner item's indent is still its text",
+    "markdown": "  2) w\n      - w\n    > w\n",
+    "html": "<ol start=\"2\">\n<li>w\n<ul>\n<li>w\n&gt; w</li>\n</ul>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a tab's columns an outer item left over count toward the inner item's indent first",
+    "markdown": "- - w\n\t\t- w\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>w\n- w</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "the inner item's code, past the columns a tab left over",
+    "markdown": "- - w\n\n\t\t|---|---|\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>\n<p>w</p>\n<pre><code>|---|---|\n</code></pre>\n</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a fence in an inner item keeps the columns a tab left over",
+    "markdown": "2) w\n\t- ```\n\t\tw\n",
+    "html": "<ol start=\"2\">\n<li>w\n<ul>\n<li>\n<pre><code>  w\n</code></pre>\n</li>\n</ul>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a head four columns in, with no paragraph open, is code",
+    "markdown": "\t| w | x |\n|---|---|\n",
+    "html": "<pre><code>| w | x |\n</code></pre>\n<p>|---|---|</p>\n"
+  },
+  {
+    "about": "a head four columns in under a paragraph is its last line",
+    "markdown": "p\n    | a |\n|---|\n",
+    "html": "<p>p</p>\n<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n</table>\n"
+  },
+  {
+    "about": "a delimiter row four columns in is code",
+    "markdown": "    |---|---|\n|---|---|\n",
+    "html": "<pre><code>|---|---|\n</code></pre>\n<p>|---|---|</p>\n"
+  },
+  {
+    "about": "a row four columns in ends the table, code",
+    "markdown": "| a |\n|---|\n    b\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n</table>\n<pre><code>b\n</code></pre>\n"
+  },
+  {
+    "about": "a row three columns in is still a row",
+    "markdown": "| a |\n|---|\n   b\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>b</td>\n</tr>\n</tbody>\n</table>\n"
+  },
+  {
+    "about": "a lazy line heads no table",
+    "markdown": "* w\n| w | x |\n|---|---|\n",
+    "html": "<ul>\n<li>w\n| w | x |\n|---|---|</li>\n</ul>\n"
+  },
+  {
+    "about": "a lazy line in a quote in an item heads no table",
+    "markdown": "- > w\n| w | x |\n|---|---|\n",
+    "html": "<ul>\n<li>\n<blockquote>\n<p>w\n| w | x |\n|---|---|</p>\n</blockquote>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a delimiter row that fit no head leaves the paragraph tried",
+    "markdown": "w\n|---|---|\n  |---|---|\n",
+    "html": "<p>w\n|---|---|\n|---|---|</p>\n"
+  },
+  {
+    "about": "a paragraph is tried for a table once",
+    "markdown": "w\n|---|---|---|\nx | y\n|---|---|\n",
+    "html": "<p>w\n|---|---|---|\nx | y\n|---|---|</p>\n"
+  },
+  {
+    "about": "a blank line opens a paragraph that may head a table again",
+    "markdown": "w\n|---|---|---|\n\nx | y\n|---|---|\n",
+    "html": "<p>w\n|---|---|---|</p>\n<table>\n<thead>\n<tr>\n<th>x</th>\n<th>y</th>\n</tr>\n</thead>\n</table>\n"
+  }
+]

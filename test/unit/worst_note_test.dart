@@ -12,9 +12,10 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
-import 'package:niman/src/markdown/extension_masker.dart';
-import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/inline/inline_node.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:path/path.dart' as p;
 
@@ -207,30 +208,60 @@ void main() {
       expect(kinds['frontmatter'], 1);
     });
 
-    test('every block masks with both properties intact', () {
-      const masker = ExtensionMasker();
-      final counts = <ExtensionKind, int>{};
-      var blocksWithSpans = 0;
+    test("every block's constructs are read, in order", () {
+      // The app's own and the code spans, as the read view reads them: the
+      // formulas, the embeds and the code the note was written with.
+      final parser = ReadParser();
+      final counts = <Type, int>{};
+      var blocksWithThem = 0;
       for (final block in scanner.index.blocks) {
-        final parts = <String>[];
-        for (var line = block.startLine; line < block.endLine; line++) {
-          parts.add(buffer.lineAt(line));
+        final read = parser.of(block, buffer);
+        var found = false;
+        void inlines(List<InlineNode> nodes) {
+          var at = 0;
+          for (final node in nodes) {
+            expect(node.start, greaterThanOrEqualTo(at), reason: '$block');
+            at = node.end;
+            final kind = switch (node) {
+              MathNode(display: false) => MathNode,
+              WikiLinkNode(embed: true) => WikiLinkNode,
+              CodeNode() => CodeNode,
+              _ => null,
+            };
+            if (kind != null) {
+              counts[kind] = (counts[kind] ?? 0) + 1;
+              found = true;
+            }
+            if (node is InlineContainer) inlines(node.children);
+          }
         }
-        final blockText = parts.join('\n');
-        final masked = masker.mask(blockText);
-        expect(masked.text.length, blockText.length, reason: '$block');
-        var at = 0;
-        for (final span in masked.spans) {
-          expect(span.start, greaterThanOrEqualTo(at), reason: '$block');
-          at = span.end;
-          counts[span.kind] = (counts[span.kind] ?? 0) + 1;
+
+        void visit(BlockNode node) {
+          switch (node) {
+            case QuoteNode(:final children) ||
+                ItemNode(:final children) ||
+                FootnoteNode(:final children):
+              children.forEach(visit);
+            case ListNode(:final items):
+              items.forEach(visit);
+            case LeafNode():
+              final leaf = read.leaf(node);
+              if (leaf.inline != null) inlines(leaf.inline!.nodes);
+              for (final row in leaf.rows) {
+                for (final cell in row) {
+                  inlines(cell.nodes);
+                }
+              }
+          }
         }
-        if (masked.isMasked) blocksWithSpans++;
+
+        visit(read.node);
+        if (found) blocksWithThem++;
       }
-      expect(blocksWithSpans, greaterThan(500));
-      expect(counts[ExtensionKind.inlineMath], greaterThan(13000));
-      expect(counts[ExtensionKind.embed], greaterThanOrEqualTo(38));
-      expect(counts[ExtensionKind.codeSpan], greaterThanOrEqualTo(8));
+      expect(blocksWithThem, greaterThan(500));
+      expect(counts[MathNode], greaterThan(13000));
+      expect(counts[WikiLinkNode], greaterThanOrEqualTo(38));
+      expect(counts[CodeNode], greaterThanOrEqualTo(8));
     });
 
     test('a keystroke in prose re-scans a few lines', () {

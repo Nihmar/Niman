@@ -12,6 +12,18 @@ abstract final class LeafText {
       lines[span.line].substring(span.start, span.end),
   ];
 
+  /// [lines], a fence's, each with the columns of a tab its container's
+  /// prefix ended inside of written as spaces: the code's own (`- ```` /
+  /// tab `w` is the code `  w`), or the opening fence's indent, which comes
+  /// off the code after (`CodeHtml.fenceParts`).
+  static List<String> withLeftOver(LeafNode leaf, List<String> lines) => [
+    for (var at = 0; at < lines.length; at++)
+      if (at < leaf.leftOver.length && leaf.leftOver[at] > 0)
+        '${' ' * leaf.leftOver[at]}${lines[at]}'
+      else
+        lines[at],
+  ];
+
   /// A paragraph's inline text: each line's leading white space off, the
   /// last line's trailing white space too, the lines joined.
   static String paragraph(List<String> lines) =>

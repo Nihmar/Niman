@@ -50,9 +50,10 @@ void main() {
       // so it stands as it is — the quote's paragraph goes on, and is not
       // headed by an underline.
       expect(_text('   - w\n      > w\n    ---', 1), 'w\n    ---');
-      // Lazy for the outer item, reaching the inner one: the inner one's
-      // indent comes off, the outer one's does not.
-      expect(_text('  2) w\n      - w\n    > w', 2), 'w');
+      // Lazy for the outer item, and so for the inner one, however far in
+      // it stands: the inner item's paragraph goes on with it, as
+      // `cmark-gfm` reads it — no quote, and no indent taken off.
+      expect(_text('  2) w\n      - w\n    > w', 1), 'w\n    > w');
     });
 
     test('a block outside every item keeps its text', () {
