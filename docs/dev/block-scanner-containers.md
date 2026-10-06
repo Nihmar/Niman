@@ -281,10 +281,14 @@ and, from phase 1 on, the rescan test unskipped.
    Two fixes outside the scanner followed from its blocks: the formatter
    keeps a list's inner blocks in the list's unit, and the lint keeps
    the blank line after an item that holds one of its own (`00490154`).
-5. **Downstream and merge.** The strip is done (above). Left: restore
-   the tests the #530 work avoided, which live on that branch — so #530
-   lands first and this branch is rebased on `main` after it — and the
-   changelog notes the task cascade change.
+5. **Downstream and merge** — done. The strip is done (above). #530
+   landed (#542) and the branch is rebased on `main`; the tests the #530
+   work left out are back (`cbb49c7f`: a fence in a nested item, a
+   diagram four spaces into an item), both read right on `main` already
+   since `f2efd5bc`. The task cascade change (`> - [ ] b` / `  - [ ] child`
+   no longer ticks the child with `b`: the child is no item of the quote)
+   is for the changelog of the release that ships it, which is written in
+   the release commit.
 
 ## Still open
 
