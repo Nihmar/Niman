@@ -15,6 +15,7 @@ import 'package:niman/src/markdown/inline/inline_html.dart';
 import 'package:niman/src/markdown/inline/inline_parser.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
+import 'package:niman/src/markdown/task_box.dart';
 
 /// Writes one note as HTML.
 final class TreeHtml {
@@ -170,14 +171,14 @@ final class TreeHtml {
     final first = item.children.isEmpty ? null : item.children.first;
     if (first is LeafNode && first.kind == BlockKind.paragraph) {
       final text = _paragraphs[first] ?? '';
-      final task = _task.matchAsPrefix(text);
+      final task = TaskBox.of(text);
       if (task != null) {
         _write(
-          task.group(1) == ' '
-              ? '<input type="checkbox" disabled="" /> '
-              : '<input type="checkbox" checked="" disabled="" /> ',
+          task.checked
+              ? '<input type="checkbox" checked="" disabled="" /> '
+              : '<input type="checkbox" disabled="" /> ',
         );
-        _paragraphs[first] = text.substring(task.end);
+        _paragraphs[first] = text.substring(task.length);
       }
     }
     _blocks(item.children, tight: tight);
@@ -321,8 +322,4 @@ final class TreeHtml {
     }
     _write('</ol>\n</section>\n');
   }
-
-  /// A task item's box: `[ ]`, `[x]` or `[X]` and the white space after
-  /// it.
-  static final RegExp _task = RegExp(r'\[([ xX])\][ \t]+');
 }
