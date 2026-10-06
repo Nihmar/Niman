@@ -161,11 +161,14 @@ counts (they may only go up).
    from the tree and our parser, quotes included; `LiveQuoteContent`
    reads a quote's content as the tree does; the index's references
    too. The bridge to the package's parse goes.
-7. **Export on the tree.** `NoteHtml` renders with the writer plus its
-   own rewrites (callouts, math, wikilinks, heading ids, picture
-   targets); checked against the export tests.
+7. **Export on the tree** — done. `NoteHtml` renders with the writer
+   and its hooks (callouts, code, math, diagrams, wikilinks, heading ids,
+   picture targets); checked against the export tests.
 8. **`package:markdown` removed** from `pubspec.yaml`: nothing in `lib/`
-   imports it; the random harness, its last user, retires with it.
+   imports it (`footnote_syntax.dart`'s block patterns and
+   `inline_syntaxes.dart` are what is left); `ExtensionMasker`'s `mask`,
+   which nothing in `lib/` calls, goes with its tests ported to our
+   parser; the random harness, the package's last user, retires.
 
 ## Decisions
 
@@ -483,7 +486,31 @@ Left after phase 5: `ExtensionMasker`, `_sourceFormOf` and
   keystroke's edit 0.20 ms against 0.19, a 21 MB note's open 822 ms
   against 815. Even.
 
-Next: phase 7 — the export on the tree.
+### Phase 7 (done): the export on the tree
+
+- **The writer's hooks** (`html/html_hooks.dart`): `TreeHtml` and
+  `InlineHtml` ask a page what it draws its own way — a fence, a math or
+  an HTML block, a callout's frame around its body (and its written
+  title's inlines), a heading's id, the app's inline constructs and raw
+  HTML, where a link goes or that it goes nowhere, where a picture is
+  read from — and write attributes with a value each when it wants XHTML
+  (`data-footnotes=""`).
+- **The page** (`export/note_html.dart`, `export/export_hooks.dart`):
+  the note read by the tree and written by the writer, the export's
+  forms drawn by `ExportHooks` from the pieces it had (`html_blocks`,
+  `html_spans`). The tokens masked in and put back after the package's
+  parse are gone, and so is the package's parse. A heading's id keeps
+  the rule earlier pages had, so links into them still land, `-2` for a
+  second heading of one text. The pictures an export resolves come from
+  the same reading (`PictureTargets`).
+- What changed on a page: a footnote ending with a list is written (the
+  package threw: `fix/export-footnote-list` worked around it); a link
+  whose destination is on the next line is a link; a callout's written
+  title keeps its inlines; a task's box and the footnotes are
+  `cmark-gfm`'s, valid XHTML. The export tests pass unchanged but for
+  the box's spelling.
+
+Next: phase 8 — `package:markdown` removed.
 
 ### Decided: `$` as a currency sign (#547)
 
