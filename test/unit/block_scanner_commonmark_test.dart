@@ -496,9 +496,11 @@ List<String> _document(math.Random random) {
 ///   setext underline and ends, but GFM's list syntax is tried before the
 ///   underline's, opens an empty item on it — and the paragraph's text is
 ///   gone from the output.
-/// * `===` in a quote's run of lines. A quote whose last line is lazy has
-///   its setext underlines turned off, so `===` there is text; the scanner
-///   reads the quote's content on its own, and heads it.
+/// * `===` in the run of lines of a quote or an item. A lazy line is no
+///   setext underline (the spec, and the tree since it knows lazy lines);
+///   the package heads a lazy `===` in an item all the same, and the read
+///   view's pipeline, reading a quote's content on its own, heads one in a
+///   quote. Where the package and the spec part, the spec wins.
 /// * Tabs and spaces indenting the lines of one list — the app's limit,
 ///   not the parser's. A tab an item's indent ends inside of leaves columns
 ///   of it to the item's text, which the text the read view hands the
@@ -526,7 +528,7 @@ String? _quirkOf(List<String> lines) {
       _definesInside(BlockTree.of(lines.join('\n')), lines, false)) {
     return 'a definition inside a container';
   }
-  var quoted = false;
+  var contained = false;
   var listed = false;
   var tabs = false;
   var spaces = false;
@@ -534,14 +536,28 @@ String? _quirkOf(List<String> lines) {
     final raw = lines[at];
     final line = raw.trim();
     if (line.isEmpty) {
-      quoted = false;
+      contained = false;
       continue;
     }
     if (at > 0 && line == '-' && lines[at - 1].trim().isNotEmpty) {
       return 'a lone `-`';
     }
-    if (quoted && line.replaceAll('=', '').isEmpty) return '`===` in a quote';
-    if (raw.contains('>')) quoted = true;
+    if (contained && line.replaceAll('=', '').isEmpty) {
+      return '`===` in a quote or an item';
+    }
+    // `> - w` / `    ---`: no `>`, four columns in — neither code nor an
+    // underline can start there over a paragraph, so the line goes on with
+    // the paragraph lazily (cmark's `S_process_line`); the package heads
+    // the item's text with it.
+    if (contained &&
+        !raw.contains('>') &&
+        line.replaceAll('-', '').isEmpty &&
+        LineSyntax.columnsOf(raw) >= 4) {
+      return '`---` four columns in, lazily under a quote';
+    }
+    if (raw.contains('>') || LineSyntax.listMarkerOf(line) != null) {
+      contained = true;
+    }
     if (LineSyntax.listMarkerOf(line) != null) listed = true;
     final indent = raw.substring(0, raw.length - raw.trimLeft().length);
     if (listed && indent.contains('\t')) tabs = true;

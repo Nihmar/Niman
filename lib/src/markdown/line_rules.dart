@@ -34,8 +34,18 @@ final class LineRules {
     this.buffer,
     this._entering, {
     this._leftOver = const <int>[],
+    this._lazy = const <bool>[],
     this.appSyntax = true,
   });
+
+  /// Which lines are lazy in the content around them — a quote's line
+  /// without its `>`, an item's short of its indent — for a container's
+  /// content read again; empty for a note.
+  final List<bool> _lazy;
+
+  /// Whether line [line] is lazy: no setext underline, the spec says, in a
+  /// quote or an item.
+  bool lazyAt(int line) => line < _lazy.length && _lazy[line];
 
   /// Whether the app's own block syntax is read: frontmatter and `$$`
   /// display math. Always in the app; off for the specifications'
@@ -439,11 +449,16 @@ final class LineRules {
           reach: reach,
         );
       }
-      final underline = carried && LineSyntax.setextLevel(text) > 0;
+      final underline =
+          carried && !lazyAt(line) && LineSyntax.setextLevel(text) > 0;
       return made(BlockKind.paragraph, openParagraph: !underline, reach: reach);
     }
     // A setext underline heads the paragraph above it and ends it.
-    final underline = carried && paragraph && LineSyntax.setextLevel(text) > 0;
+    final underline =
+        carried &&
+        paragraph &&
+        !lazyAt(line) &&
+        LineSyntax.setextLevel(text) > 0;
     return made(BlockKind.paragraph, openParagraph: !underline);
   }
 

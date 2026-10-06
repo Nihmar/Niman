@@ -44,6 +44,7 @@ final class BlockScanner {
     this.buffer, {
     this.budget = defaultBudget,
     this._leftOver = const <int>[],
+    this._lazy = const <bool>[],
     this.appSyntax = true,
   }) : _blocks = BlockList() {
     _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
@@ -60,6 +61,7 @@ final class BlockScanner {
   new rebound(BlockScanner scanned, this.buffer)
     : budget = scanned.budget,
       _leftOver = scanned._leftOver,
+      _lazy = scanned._lazy,
       appSyntax = scanned.appSyntax,
       _blocks = BlockList.sharing((scanned..settle())._blocks) {
     _entering.addAll(scanned._entering);
@@ -82,6 +84,10 @@ final class BlockScanner {
   /// What a tab left over before each line, for a container's content.
   final List<int> _leftOver;
 
+  /// Which lines are lazy, for a container's content read again
+  /// (`LineRules.lazyAt`).
+  final List<bool> _lazy;
+
   /// Whether the app's own block syntax is read (`LineRules.appSyntax`).
   final bool appSyntax;
 
@@ -90,6 +96,7 @@ final class BlockScanner {
     buffer,
     _entering,
     leftOver: _leftOver,
+    lazy: _lazy,
     appSyntax: appSyntax,
   );
 

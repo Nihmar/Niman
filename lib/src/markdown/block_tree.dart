@@ -14,7 +14,11 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// columns of a tab an item's indent ended inside that it carries on: they
 /// count toward the indent of an item inside, and nothing else
 /// (`LineSyntax.dedent`).
-typedef _Origin = ({int line, int column, int leftOver});
+///
+/// And whether the line is lazy — in a quote without its `>`, in an item
+/// short of its indent — at this level or any around it: a lazy line is
+/// no setext underline.
+typedef _Origin = ({int line, int column, int leftOver, bool lazy});
 
 /// A quote's content: how many quotes its first line opened, and the lines
 /// inside their marks, with where each starts.
@@ -43,7 +47,7 @@ final class BlockTree {
     final lines = text.split('\n');
     return BlockTree._(appSyntax: appSyntax)._build(text, [
       for (var at = 0; at < lines.length; at++)
-        (line: at, column: 0, leftOver: 0),
+        (line: at, column: 0, leftOver: 0, lazy: false),
     ]);
   }
 
@@ -58,6 +62,7 @@ final class BlockTree {
     final scanner = BlockScanner(
       buffer,
       leftOver: [for (final origin in origins) origin.leftOver],
+      lazy: [for (final origin in origins) origin.lazy],
       appSyntax: appSyntax,
     );
     final note = <BlockNode>[];
@@ -217,10 +222,15 @@ final class BlockTree {
             );
       local.add(text.substring(prefix));
       final origin = origins[line];
+      // A quote's line without its `>` is the quote's lazily.
+      final lazy =
+          block.quoteDepth > 0 &&
+          prefix <= BlockParser.itemPrefixLength(block, text);
       starts.add((
         line: origin.line,
         column: origin.column + prefix,
         leftOver: prefix == 0 ? origin.leftOver : 0,
+        lazy: origin.lazy || lazy,
       ));
     }
     return (local, starts);
@@ -274,12 +284,13 @@ final class BlockTree {
     final (indent, empty) = LineSyntax.itemIndent(first, marker);
     final content = <String>[];
     final from = <_Origin>[];
-    void add(int at, int cut, int leftOver) {
+    void add(int at, int cut, int leftOver, {bool lazy = false}) {
       content.add(local[at].substring(cut));
       from.add((
         line: starts[at].line,
         column: starts[at].column + cut,
         leftOver: leftOver,
+        lazy: starts[at].lazy || lazy,
       ));
     }
 
@@ -288,7 +299,7 @@ final class BlockTree {
       final text = local[at];
       final leftOver = starts[at].leftOver;
       if (LineSyntax.columnsOf(text, leftOver) < indent) {
-        add(at, 0, leftOver);
+        add(at, 0, leftOver, lazy: true);
         continue;
       }
       final (rest, columns) = LineSyntax.dedent(text, indent);

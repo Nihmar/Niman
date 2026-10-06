@@ -164,6 +164,8 @@ final class BlockRules {
   int underlineLevel(Block paragraph, int line) {
     final read = _lines.read(line);
     if (!read.carried || !_lines.entering(line).openParagraph) return 0;
+    // A lazy line of a quote or an item underlines nothing.
+    if (_lines.lazyAt(line)) return 0;
     // A table's head is tried first: a line over a delimiter row ends the
     // paragraph, whether or not it is a table.
     if (read.heads) return 0;
