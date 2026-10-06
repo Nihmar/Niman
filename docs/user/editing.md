@@ -274,6 +274,10 @@ in the item; a paragraph written under an item after a blank line stands
 at the item's indent; `- [ ]` with nothing after it is an empty task; a
 link's destination may sit on the line after its `[label]:`; `\*` and
 `&amp;` read as `*` and `&`; a footnote is cited by its number, raised.
+The WYSIWYG editor reads the note the same way: the backslash of an
+escape is hidden as any mark is (`\$5` shows `$5`), a footnote citation
+shows its label raised, and a callout's title is drawn with its own
+formatting, in both.
 
 **Callouts**, as Obsidian writes them: a quote whose first line is
 `[!type]`, with a title of its own after it or the type's as its title.

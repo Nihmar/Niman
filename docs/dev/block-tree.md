@@ -157,8 +157,10 @@ counts (they may only go up).
    tables by cell) and leaves from their nodes. `ExtensionMasker`,
    `_sourceFormOf`, the search and `approximate` go when `live`, their
    last reader, moves too (phase 6).
-6. **Live on the tree.** `SourceStyler` takes its runs from the tree,
-   quotes included; `LiveQuoteContent` becomes the subtree.
+6. **Live on the tree** — done. `SourceStyler` takes its constructs
+   from the tree and our parser, quotes included; `LiveQuoteContent`
+   reads a quote's content as the tree does; the index's references
+   too. The bridge to the package's parse goes.
 7. **Export on the tree.** `NoteHtml` renders with the writer plus its
    own rewrites (callouts, math, wikilinks, heading ids, picture
    targets); checked against the export tests.
@@ -402,7 +404,7 @@ fixture-1mb 18.5 against 323, the worst note 20.6 against 578 — faster
 than without it, the formulas being single nodes the emphasis algorithm
 never walks.
 
-### Phase 5 (in progress): the read view on the tree
+### Phase 5 (done): the read view on the tree
 
 The read view, the export's page and the footnotes' section (the read
 view's and `live`'s) draw from the tree and our parser; `live` still
@@ -440,8 +442,48 @@ colours from `BlockParser` (phase 6).
   fixture-50kb against 316–325, 87–93 for fixture-200kb against 99–104;
   the jump 100–111 against 121–127. The same blocks are read (95 and 86).
 
-Left in phase 5: `ExtensionMasker`, `_sourceFormOf` and `approximate`
-are `live`'s still (`BlockParser`), and go with it in phase 6.
+Left after phase 5: `ExtensionMasker`, `_sourceFormOf` and
+`approximate` were `live`'s still (`BlockParser`); phase 6 took them.
+
+### Phase 6 (done): live on the tree
+
+- **The way back to the note** (`source_map.dart`, `leaf_inline.dart`):
+  a leaf's inline text — a paragraph's, a heading's, a cell's, a
+  callout's title — is read off the note's lines with a `SourceMap`, the
+  text in stretches of one line each, character for character; the line
+  endings between a paragraph's lines and a cell's `\` before `|` map
+  nowhere. The text is asserted to be the writer's (`LeafText`,
+  `TableHtml.cellsOf`); every character of every spec example's inline
+  text maps to itself (`source_map_test.dart`).
+- **The colours** (`live_inlines.dart`): `SourceStyler` reads a block
+  with `ReadParser` and puts each node on its lines through the map, its
+  markers apart from its text, once per block — the lines counted from
+  the block's first, so a block keeps its reading wherever it moves. The
+  pictures and the links Ctrl+click follows come from the same nodes.
+  Against the package's runs (a token dump of the fixtures and a page of
+  edge cases, before and after), what changed is what the old walk got
+  wrong: an escape's backslash, a footnote citation's `[^` and `]`, a
+  reference link's `][label]`, an autolink's `<` and `>`, `<u>`'s tags,
+  the outer `*` of `***x***`, a cell's `\|` — and a callout's written
+  title, inline text now in both views (`QuoteNode.title`).
+- **The index's references** (`note_references.dart`): tags, wikilinks,
+  embeds, links and images from the same nodes, their offsets from the
+  map, exact in a quote, a cell, a callout's title, a footnote's body.
+- **A quote's lines** (`quote_content.dart`): `live` reads a quote's
+  content as the tree does — a callout's title apart, laziness and a
+  tab's columns handed to the scan — where it scanned it its own way:
+  `> [!note] T` / `>     code` is code in both views now.
+- **The bridge goes**: `BlockParser`'s parse of a block, the walk, its
+  estimates, `ParsedBlock`, `StyleRun`, `DocumentScope.links`, and the
+  tests and tools that measured them. `BlockParser` keeps the line
+  prefixes; the masker stays for the export.
+- **Speed**, the same host, before (phase 5's end) and after, debug
+  harness: a keystroke to its frame 10.5 / 8.9 ms against 10.9 / 8.8 (400
+  and 20 000 lines), the caret's reveal 5.2 / 3.5 against 4.6 / 3.7, a
+  keystroke's edit 0.20 ms against 0.19, a 21 MB note's open 822 ms
+  against 815. Even.
+
+Next: phase 7 — the export on the tree.
 
 ### Decided: `$` as a currency sign (#547)
 
