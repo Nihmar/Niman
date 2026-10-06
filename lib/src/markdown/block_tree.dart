@@ -202,6 +202,7 @@ final class BlockTree {
       lines: _spans(local, starts),
       headingLevel: block.headingLevel,
       fenceInfo: block.fenceInfo,
+      definition: block.definition != 0,
     );
   }
 

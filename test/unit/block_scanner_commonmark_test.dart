@@ -71,6 +71,9 @@ const _forms = [
   '<!-- W -->',
   '[^f]: W',
   '[^f]:',
+  '[r]: /u',
+  '[r]:',
+  '/u "t"',
 ];
 
 /// What a line is indented with: mostly nothing, then spaces either side
@@ -242,6 +245,9 @@ Map<String, Where> _tree(List<String> lines) {
         for (final child in children) {
           walk(child, '${path}L');
         }
+      case LeafNode(:final definition) when definition:
+        // A definition gives the parser no text.
+        break;
       case LeafNode(:final kind, lines: final spans):
         final name = switch (kind) {
           BlockKind.paragraph => 'text',

@@ -106,6 +106,29 @@ void main() {
     );
   });
 
+  test('a link definition leaves no paragraph open behind it', () {
+    // After the definition, a tab-indented line is code and `2)` opens a
+    // list, as neither could after paragraph text.
+    expect(
+      _treeOf('[r]: /u\n\tcode'),
+      'paragraph"[r]: /u" indentedCode"\tcode"',
+    );
+    expect(
+      _treeOf('[r]: /u\n2) item'),
+      'paragraph"[r]: /u" ol2[)[paragraph"item"]]',
+    );
+    final nodes = BlockTree.of('[r]:\n/u\n"t"\ntext');
+    expect((nodes.first as LeafNode).definition, isTrue);
+    expect((nodes.first as LeafNode).lines, hasLength(3));
+    expect((nodes.last as LeafNode).definition, isFalse);
+  });
+
+  test('a line like a definition that is none is paragraph text', () {
+    final nodes = BlockTree.of('[a link](u) and text\n\tmore');
+    expect(nodes, hasLength(1));
+    expect((nodes.single as LeafNode).definition, isFalse);
+  });
+
   test("a tab's columns past an item's indent count toward the next", () {
     // The outer item takes two of the tab's four columns; the other two
     // put `---` inside the inner item, as the underline of its text.

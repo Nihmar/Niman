@@ -108,6 +108,7 @@ final class LeafNode extends BlockNode {
     required this.lines,
     this.headingLevel = 0,
     this.fenceInfo,
+    this.definition = false,
   });
 
   /// What it is: never a quote or an item, which are containers.
@@ -121,6 +122,10 @@ final class LeafNode extends BlockNode {
 
   /// The fence's info string, for fenced code.
   final String? fenceInfo;
+
+  /// Whether the leaf is a link reference definition: a paragraph's lines
+  /// that draw nothing, read for the note's links.
+  final bool definition;
 
   @override
   int get line => lines.first.line;
