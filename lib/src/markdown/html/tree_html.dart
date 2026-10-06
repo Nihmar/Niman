@@ -20,7 +20,10 @@ final class TreeHtml {
   /// A writer of [source], GFM's [extensions] on — extended autolinks and
   /// the tag filter — as in the app; off for the spec's examples of plain
   /// CommonMark, as `cmark-gfm` runs them.
-  new(this.source, {this.extensions = true})
+  ///
+  /// [appSyntax] off reads the blocks without the app's frontmatter and
+  /// display math, as the specifications' examples are written.
+  new(this.source, {this.extensions = true, this.appSyntax = true})
     : _body = _withoutLastBreak(source),
       _lines = _withoutLastBreak(source).split('\n');
 
@@ -29,6 +32,9 @@ final class TreeHtml {
 
   /// Whether GFM's extensions are on.
   final bool extensions;
+
+  /// Whether the app's own block syntax is read.
+  final bool appSyntax;
 
   /// The note without the line break that ends its last line: it ends a
   /// line, and opens none — kept, it was an empty last line, inside a fence
@@ -53,7 +59,7 @@ final class TreeHtml {
 
   /// The note as HTML.
   String render() {
-    final tree = BlockTree.of(_body);
+    final tree = BlockTree.of(_body, appSyntax: appSyntax);
     _collect(tree);
     _blocks(tree, tight: false);
     _section();

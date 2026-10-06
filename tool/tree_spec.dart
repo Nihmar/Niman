@@ -39,6 +39,7 @@ void main(List<String> args) {
         got = TreeHtml(
           example.markdown,
           extensions: extensionsFor(name, example),
+          appSyntax: false,
         ).render();
       } on Object catch (error) {
         got = 'THROWS $error';

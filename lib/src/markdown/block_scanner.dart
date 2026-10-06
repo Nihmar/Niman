@@ -44,6 +44,7 @@ final class BlockScanner {
     this.buffer, {
     this.budget = defaultBudget,
     this._leftOver = const <int>[],
+    this.appSyntax = true,
   }) : _blocks = BlockList() {
     _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
     // The changes are counted from the list a reader first takes.
@@ -59,6 +60,7 @@ final class BlockScanner {
   new rebound(BlockScanner scanned, this.buffer)
     : budget = scanned.budget,
       _leftOver = scanned._leftOver,
+      appSyntax = scanned.appSyntax,
       _blocks = BlockList.sharing((scanned..settle())._blocks) {
     _entering.addAll(scanned._entering);
     _lineCount = scanned._lineCount;
@@ -80,8 +82,16 @@ final class BlockScanner {
   /// What a tab left over before each line, for a container's content.
   final List<int> _leftOver;
 
+  /// Whether the app's own block syntax is read (`LineRules.appSyntax`).
+  final bool appSyntax;
+
   /// What the scan makes of each line, read against [_entering].
-  late final LineRules _rules = LineRules(buffer, _entering, _leftOver);
+  late final LineRules _rules = LineRules(
+    buffer,
+    _entering,
+    leftOver: _leftOver,
+    appSyntax: appSyntax,
+  );
 
   /// The blocks the scan makes of those lines.
   late final BlockRules _blockRules = BlockRules(_rules);

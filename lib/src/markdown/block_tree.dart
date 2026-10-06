@@ -30,12 +30,18 @@ typedef _Quoted = ({int depth, List<String> lines, List<_Origin> starts});
 /// has always done for quotes; and it hangs each later block of a list
 /// under the item its depth names.
 final class BlockTree {
-  new _();
+  new _({required this.appSyntax});
+
+  /// Whether the app's own block syntax is read (`LineRules.appSyntax`).
+  final bool appSyntax;
 
   /// The tree of [text], a whole note.
-  static List<BlockNode> of(String text) {
+  ///
+  /// [appSyntax] off reads it as the specifications do, without the app's
+  /// frontmatter and display math.
+  static List<BlockNode> of(String text, {bool appSyntax = true}) {
     final lines = text.split('\n');
-    return BlockTree._()._build(text, [
+    return BlockTree._(appSyntax: appSyntax)._build(text, [
       for (var at = 0; at < lines.length; at++)
         (line: at, column: 0, leftOver: 0),
     ]);
@@ -52,6 +58,7 @@ final class BlockTree {
     final scanner = BlockScanner(
       buffer,
       leftOver: [for (final origin in origins) origin.leftOver],
+      appSyntax: appSyntax,
     );
     final note = <BlockNode>[];
     // The footnote definition open where the scan is: the items in it are

@@ -36,6 +36,7 @@ void main() {
           final actual = TreeHtml(
             example.markdown,
             extensions: extensionsFor(name, example),
+            appSyntax: false,
           ).render();
           // `<IGNORE>`: the example only asks that the parse not fail.
           final matches =

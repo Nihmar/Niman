@@ -30,7 +30,17 @@ import 'package:niman/src/markdown/table_line_syntax.dart';
 final class LineRules {
   /// Rules over [buffer], reading the state entering each line from the
   /// scanner's own list of them, which it keeps up to date.
-  new(this.buffer, this._entering, [this._leftOver = const <int>[]]);
+  new(
+    this.buffer,
+    this._entering, {
+    this._leftOver = const <int>[],
+    this.appSyntax = true,
+  });
+
+  /// Whether the app's own block syntax is read: frontmatter and `$$`
+  /// display math. Always in the app; off for the specifications'
+  /// examples, which know neither.
+  final bool appSyntax;
 
   /// The text being scanned.
   final SourceBuffer buffer;
@@ -233,7 +243,10 @@ final class LineRules {
       }
       return made(BlockKind.blank);
     }
-    if (line == 0 && base.isEmpty && LineSyntax.opensFrontmatter(line, text)) {
+    if (appSyntax &&
+        line == 0 &&
+        base.isEmpty &&
+        LineSyntax.opensFrontmatter(line, text)) {
       return made(BlockKind.frontmatter, frontmatter: true);
     }
     final opened = LineSyntax.fenceOpen(text);
@@ -293,7 +306,7 @@ final class LineRules {
     // is, as the preview reads it (#252) — unless it is indented code, which
     // the preview's parser reads first. Only the multi-line form opens a
     // state: a `$$…$$` on one line is over on it.
-    if (!code && isDisplayLine(text.trim())) {
+    if (appSyntax && !code && isDisplayLine(text.trim())) {
       return made(BlockKind.math, math: isDisplayOpen(text.trim()));
     }
     // Up to three spaces in, as every block's marker: four are code.
