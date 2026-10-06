@@ -30,6 +30,14 @@ final Map<String, String Function(int n)> _cases = {
   'unclosed comments': (n) => '<!--' * n,
   'many links in unclosed brackets': (n) => '${'[' * n}${'[a](b) ' * n}',
   'a run of closing parentheses': (n) => 'http://a.b/${')' * n}',
+  // The app's own syntax (docs/dev/block-tree.md, phase 4).
+  'dollars no closing one answers': (n) => r'$1 ' * n,
+  'unclosed display math': (n) => r'$$a ' * n,
+  'unclosed wikilinks': (n) => '[[a ' * n,
+  'tags': (n) => '#a ' * n,
+  'highlight openers with no closers': (n) => '==a ' * n,
+  'underlines with no closing tag': (n) => '<u>a ' * n,
+  'math between emphasis': (n) => r'*a $b_c$ ' * n,
 };
 
 /// The fastest of three parses of [text], in microseconds.

@@ -3,6 +3,9 @@
 /// the GFM spec 0.29).
 library;
 
+import 'package:niman/src/editor/math_rule.dart';
+import 'package:niman/src/markdown/extension_masker.dart';
+import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/inline/bracket.dart';
 import 'package:niman/src/markdown/inline/delimiter.dart';
 import 'package:niman/src/markdown/inline/delimiter_stack.dart';
@@ -12,6 +15,7 @@ import 'package:niman/src/markdown/inline/inline_chars.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
 import 'package:niman/src/markdown/inline/inline_scanners.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
+import 'package:niman/src/markdown/inline/style_tags.dart';
 
 /// Reads one leaf's inline text.
 final class InlineParser {
@@ -22,6 +26,7 @@ final class InlineParser {
     this.references = const <String, LinkReference>{},
     this.footnotes = const <String>{},
     this.extendedAutolinks = true,
+    this.appSyntax = true,
   });
 
   /// The leaf's inline text.
@@ -36,6 +41,19 @@ final class InlineParser {
   /// Whether bare URLs and addresses are links (GFM's extended autolinks):
   /// always in the app; off for the spec's examples of plain CommonMark.
   final bool extendedAutolinks;
+
+  /// Whether the app's own inline syntax is read — math, wikilinks and
+  /// embeds, tags, `==highlight==`, `<u>`/`<sup>`/`<sub>` — in
+  /// `ExtensionMasker`'s order (`docs/dev/block-tree.md`, phase 4). Always
+  /// in the app; off for the specifications' examples.
+  final bool appSyntax;
+
+  static const ExtensionMasker _masker = ExtensionMasker();
+
+  /// Where a `$` and a `$$` first found no closing one, past the text when
+  /// none has failed yet ([_appConstruct]).
+  late int _noInlineCloseFrom = text.length + 1;
+  late int _noDisplayCloseFrom = text.length + 1;
 
   int _pos = 0;
   late final InlineBuild _root = InlineBuild(
@@ -62,6 +80,7 @@ final class InlineParser {
       _step();
     }
     _delimiters.process(null);
+    if (appSyntax) StyleTags.apply(_root);
     if (extendedAutolinks) GfmAutolinks.apply(_root, text);
     return <InlineNode>[
       for (var node = _root.first; node != null; node = node.next)
@@ -71,6 +90,7 @@ final class InlineParser {
 
   void _step() {
     final char = text.codeUnitAt(_pos);
+    if (appSyntax && _appConstruct(char)) return;
     switch (char) {
       case 0x0A || 0x0D:
         _newline();
@@ -83,6 +103,8 @@ final class InlineParser {
       case 0x3C:
         _angle();
       case 0x2A || 0x5F || 0x7E:
+        _delimiterRun(char);
+      case 0x3D when appSyntax:
         _delimiterRun(char);
       case 0x5B:
         _openBracket(image: false, width: 1);
@@ -103,7 +125,7 @@ final class InlineParser {
     }
   }
 
-  static bool _special(int char) => switch (char) {
+  bool _special(int char) => switch (char) {
     0x0A ||
     0x0D ||
     0x60 ||
@@ -116,8 +138,73 @@ final class InlineParser {
     0x5B ||
     0x21 ||
     0x5D => true,
+    // The app's: `$`, `#`, `=`.
+    0x24 || 0x23 || 0x3D => appSyntax,
     _ => false,
   };
+
+  /// The app's construct at the parse's position — math, a wikilink or an
+  /// embed, a tag — read whole; whether there was one.
+  bool _appConstruct(int char) {
+    if (char != 0x24 && char != 0x5B && char != 0x21 && char != 0x23) {
+      return false;
+    }
+    final display =
+        char == 0x24 &&
+        _pos + 1 < text.length &&
+        text.codeUnitAt(_pos + 1) == 0x24;
+    final inline = char == 0x24 && !display && opensInlineMath(text, _pos);
+    // A `$` that found no closing one to the text's end: none after it
+    // will, the closing ones being the same — not scanned for again, or
+    // `$1 $2 $3…` was quadratic.
+    if ((display && _pos >= _noDisplayCloseFrom) ||
+        (inline && _pos >= _noInlineCloseFrom)) {
+      return false;
+    }
+    final span = _masker.extensionAt(text, _pos);
+    if (span == null) {
+      if (display) _noDisplayCloseFrom = _pos;
+      if (inline) _noInlineCloseFrom = _pos;
+      return false;
+    }
+    final node = switch (span.kind) {
+      ExtensionKind.inlineMath => InlineBuild(
+        InlineKind.math,
+        start: span.start,
+        end: span.end,
+        text: text.substring(span.start + 1, span.end - 1),
+      ),
+      ExtensionKind.displayMath => InlineBuild(
+        InlineKind.math,
+        start: span.start,
+        end: span.end,
+        text: text.substring(span.start + 2, span.end - 2),
+      )..flag = true,
+      ExtensionKind.wikilink => InlineBuild(
+        InlineKind.wikilink,
+        start: span.start,
+        end: span.end,
+        text: text.substring(span.start + 2, span.end - 2),
+      ),
+      ExtensionKind.embed => InlineBuild(
+        InlineKind.wikilink,
+        start: span.start,
+        end: span.end,
+        text: text.substring(span.start + 3, span.end - 2),
+      )..flag = true,
+      ExtensionKind.tag => InlineBuild(
+        InlineKind.tag,
+        start: span.start,
+        end: span.end,
+        text: text.substring(span.start + 1, span.end),
+      ),
+      ExtensionKind.codeSpan => null,
+    };
+    if (node == null) return false;
+    _root.append(node);
+    _pos = span.end;
+    return true;
+  }
 
   /// A text node over `[start, end)`, reading as [literal] — the source
   /// itself when null — and the parse past it.
@@ -306,8 +393,10 @@ final class InlineParser {
     }
     final count = end - start;
     final node = _text(start, end);
-    // GFM's strikethrough is one or two tildes.
+    // GFM's strikethrough is one or two tildes; the app's highlight two
+    // equals signs.
     if (char == 0x7E && count > 2) return;
+    if (char == 0x3D && count != 2) return;
     final before = InlineChars.before(text, start);
     final after = InlineChars.at(text, end);
     final beforeSpace = InlineChars.isWhitespace(before);

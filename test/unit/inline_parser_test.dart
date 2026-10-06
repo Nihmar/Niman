@@ -20,6 +20,11 @@ String _shape(List<InlineNode> nodes) => nodes
             SoftBreakNode() => 'soft',
             HardBreakNode() => 'hard',
             FootnoteRefNode() => 'fn',
+            MathNode() => 'math',
+            WikiLinkNode() => 'wiki',
+            TagNode() => 'tag',
+            HighlightNode() => 'mark',
+            StyledNode() => 'styled',
           }}[${node.start},${node.end})'
           '${node is InlineContainer ? '{${_shape(node.children)}}' : ''}',
     )

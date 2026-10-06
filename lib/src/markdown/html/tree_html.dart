@@ -294,6 +294,7 @@ final class TreeHtml {
         references: _references,
         footnotes: _definitions.keys.toSet(),
         extendedAutolinks: extensions,
+        appSyntax: appSyntax,
       ).parse(),
       footnote: _footnotes.reference,
       tagFilter: extensions,

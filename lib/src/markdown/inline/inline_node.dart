@@ -137,6 +137,75 @@ final class HardBreakNode extends InlineNode {
   const new({required super.start, required super.end});
 }
 
+/// The app's inline math: `$…$`, or `$$…$$` sharing its line with text.
+final class MathNode extends InlineNode {
+  /// The formula [tex] over `[start, end)`, its dollars included.
+  const new(
+    this.tex, {
+    required this.display,
+    required super.start,
+    required super.end,
+  });
+
+  /// The formula, without its dollars.
+  final String tex;
+
+  /// Whether it is display math, `$$…$$`.
+  final bool display;
+}
+
+/// The app's wikilink, `[[target]]` with its `|alias` and `#heading`, or
+/// an embed, `![[target]]`.
+final class WikiLinkNode extends InlineNode {
+  /// The link whose inside is [inner], over `[start, end)`.
+  const new(
+    this.inner, {
+    required this.embed,
+    required super.start,
+    required super.end,
+  });
+
+  /// What is between the brackets, as written: `links/parser.dart`'s
+  /// `parseWikiRef` reads it.
+  final String inner;
+
+  /// Whether it embeds, `![[…]]`, rather than links.
+  final bool embed;
+}
+
+/// The app's tag, `#tag`.
+final class TagNode extends InlineNode {
+  /// The tag [name] over `[start, end)`, its `#` included.
+  const new(this.name, {required super.start, required super.end});
+
+  /// The tag, without its `#`.
+  final String name;
+}
+
+/// The app's `==highlight==`.
+final class HighlightNode extends InlineContainer {
+  /// A highlight over its delimiters and [children].
+  const new({
+    required super.start,
+    required super.end,
+    required super.children,
+  });
+}
+
+/// The HTML tags the app reads as styles: `<u>`, `<sup>`, `<sub>`.
+final class StyledNode extends InlineContainer {
+  /// [children] styled by [tag], over its tags.
+  const new(
+    this.tag, {
+    required super.start,
+    required super.end,
+    required super.children,
+  });
+
+  /// `u`, `sup` or `sub`.
+  final String tag;
+}
+
 /// A footnote reference, `[^label]`, to a definition the note has.
 final class FootnoteRefNode extends InlineNode {
   /// A reference to [label].

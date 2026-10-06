@@ -61,7 +61,7 @@ final class DelimiterStack {
           !identical(opener, bottom) &&
           !identical(opener, floor)) {
         if (opener.canOpen && opener.char == current.char) {
-          if (current.char == 0x7E) {
+          if (current.char == 0x7E || current.char == 0x3D) {
             if (opener.count == current.count) {
               found = true;
               break;
@@ -95,8 +95,10 @@ final class DelimiterStack {
   /// Makes the node [opener] and [closer] delimit, and returns the
   /// delimiter to go on from.
   Delimiter? _insert(Delimiter opener, Delimiter closer) {
-    final tilde = closer.char == 0x7E;
-    final use = tilde
+    // `~` and the app's `=` match whole runs of one length, the others
+    // two characters or one.
+    final whole = closer.char == 0x7E || closer.char == 0x3D;
+    final use = whole
         ? closer.count
         : (closer.count >= 2 && opener.count >= 2 ? 2 : 1);
     final open = opener.node;
@@ -111,8 +113,10 @@ final class DelimiterStack {
       ..text = close.text.substring(use)
       ..start += use;
     final made = InlineBuild(
-      tilde
+      closer.char == 0x7E
           ? InlineKind.strikethrough
+          : closer.char == 0x3D
+          ? InlineKind.highlight
           : use == 1
           ? InlineKind.emphasis
           : InlineKind.strong,

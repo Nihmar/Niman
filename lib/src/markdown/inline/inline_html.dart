@@ -49,6 +49,14 @@ abstract final class InlineHtml {
           open('<strong>', '</strong>', children);
         case StrikethroughNode(:final children):
           open('<del>', '</del>', children);
+        case HighlightNode(:final children):
+          open('<mark>', '</mark>', children);
+        case StyledNode(:final tag, :final children):
+          open('<$tag>', '</$tag>', children);
+        case MathNode() || WikiLinkNode() || TagNode():
+          // The app's own: written as its source until the export gives it
+          // a form of its own (docs/dev/block-tree.md, phase 7).
+          out.write(escape(source(item)));
         case LinkNode(:final destination, :final title, :final children):
           final titled = title == null ? '' : ' title="${escape(title)}"';
           open(
@@ -100,12 +108,27 @@ abstract final class InlineHtml {
           out.write(' ');
         case FootnoteRefNode(:final label):
           out.write('[^$label]');
+        case final MathNode node:
+          out.write(source(node));
+        case final WikiLinkNode node:
+          out.write(source(node));
+        case final TagNode node:
+          out.write(source(node));
         case InlineContainer(:final children):
           stack.addAll(children.reversed);
       }
     }
     return out.toString();
   }
+
+  /// The app's construct [node] written as its source.
+  static String source(InlineNode node) => switch (node) {
+    MathNode(:final tex, :final display) =>
+      display ? '\$\$$tex\$\$' : '\$$tex\$',
+    WikiLinkNode(:final inner, :final embed) => '${embed ? '!' : ''}[[$inner]]',
+    TagNode(:final name) => '#$name',
+    _ => '',
+  };
 
   /// [text] with `&`, `<`, `>` and `"` escaped.
   static String escape(String text) {

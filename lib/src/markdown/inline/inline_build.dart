@@ -41,6 +41,21 @@ enum InlineKind {
 
   /// A footnote reference.
   footnoteRef,
+
+  /// The app's math, inline or display.
+  math,
+
+  /// The app's wikilink or embed.
+  wikilink,
+
+  /// The app's tag.
+  tag,
+
+  /// The app's `==highlight==`.
+  highlight,
+
+  /// An HTML style tag the app reads: `<u>`, `<sup>`, `<sub>`.
+  styled,
 }
 
 /// One node being built, linked to its siblings and its children.
@@ -69,6 +84,9 @@ final class InlineBuild {
 
   /// Whether a link is an autolink.
   bool auto = false;
+
+  /// Whether math is display math, a wikilink an embed.
+  bool flag = false;
 
   /// The node it is a child of.
   InlineBuild? parent;
@@ -209,6 +227,25 @@ final class InlineBuild {
       InlineKind.softBreak => SoftBreakNode(start: start, end: end),
       InlineKind.hardBreak => HardBreakNode(start: start, end: end),
       InlineKind.footnoteRef => FootnoteRefNode(text, start: start, end: end),
+      InlineKind.math => MathNode(text, display: flag, start: start, end: end),
+      InlineKind.wikilink => WikiLinkNode(
+        text,
+        embed: flag,
+        start: start,
+        end: end,
+      ),
+      InlineKind.tag => TagNode(text, start: start, end: end),
+      InlineKind.highlight => HighlightNode(
+        start: start,
+        end: end,
+        children: children,
+      ),
+      InlineKind.styled => StyledNode(
+        text,
+        start: start,
+        end: end,
+        children: children,
+      ),
     };
   }
 }

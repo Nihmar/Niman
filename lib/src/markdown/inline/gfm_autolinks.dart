@@ -24,7 +24,9 @@ abstract final class GfmAutolinks {
             texts.add(node);
           case InlineKind.emphasis ||
               InlineKind.strong ||
-              InlineKind.strikethrough:
+              InlineKind.strikethrough ||
+              InlineKind.highlight ||
+              InlineKind.styled:
             containers.add(node);
           case InlineKind.root ||
               InlineKind.link ||
@@ -33,7 +35,10 @@ abstract final class GfmAutolinks {
               InlineKind.html ||
               InlineKind.softBreak ||
               InlineKind.hardBreak ||
-              InlineKind.footnoteRef:
+              InlineKind.footnoteRef ||
+              InlineKind.math ||
+              InlineKind.wikilink ||
+              InlineKind.tag:
             break;
         }
       }
