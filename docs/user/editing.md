@@ -60,7 +60,10 @@ same Markdown either way, and only how it is drawn differs. The read view
   cell to cell rather than onto the pipes, and Backspace or Delete stop at
   the cell's edge. Footnote and link definitions take no room
   where they are written: the note ends with its footnotes, as in the read
-  view, and a tap on one puts the caret in its definition. The read view is
+  view, and a tap on one puts the caret in its definition. A footnote
+  holds the lines that follow its own without a blank line, and the lines
+  indented four spaces under it, blank lines between them included — more
+  paragraphs, a list, code. The read view is
   the same page: a blank line is as tall in both, and flipping between
   them leaves the text where it was. Columns, bullets,
   checkboxes and numbers grow with the note text size. Display formulas (`$$…$$`) and inline ones

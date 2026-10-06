@@ -154,8 +154,26 @@ Phase 1 in progress.
   1-4, and on seed 5 the one table the read view's pipeline misses too.
   The gate holds both readings at 0 over 2 000 documents.
 
-Next: link reference and footnote definitions as blocks — a footnote
-definition as a **container in the scanner** (decided 2026-10-05).
+- **Footnote definitions** (`71e640e4`): a container in the scanner, as
+  the package reads one (the table below). `LineState.footnote` holds it
+  around every other container, and whether its last line was blank;
+  `FootnoteSyntax` reads its opening and its end with the package's own
+  block patterns; `Block.footnote` marks its blocks. Opened at the note's
+  margin only: inside an item or a quote the package leaves a definition
+  where it stands, a footnote's `li` in the middle of the note, which no
+  one wants drawn. The tree has a `FootnoteNode`. The read view and live
+  draw a definition's blocks with the footnotes, as before; its blank
+  lines stay the note's spacing.
+- **The harness** cites the footnote first in the reference's document
+  (an uncited one is dropped) and reads a footnote's `li` as `F`. New
+  forms `[^f]: W`, `[^f]:`. Left out, counted: the package throwing (a
+  cited footnote ending with a list, ~400 per 40 000) and a definition
+  inside a container (~700). Seeds 1-6: 0 differing documents for the
+  tree; the read view's pipeline has one on seed 4 (`- - w` / `\t* w` /
+  `\t\t---`, its tab limit, not a footnote).
+
+Next: link reference definitions as leaves — they cannot interrupt a
+paragraph, so they are a paragraph's leading lines (table below).
 
 ### Footnote and link reference definitions: what is known
 
