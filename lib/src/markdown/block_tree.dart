@@ -51,6 +51,31 @@ final class BlockTree {
     ]);
   }
 
+  /// The node of [block], one of the blocks the scanner made of [buffer]
+  /// — a whole note — read as the tree reads it: a quote's or an item's
+  /// inside scanned again, a leaf mapped to the note's lines.
+  ///
+  /// What a surface that draws a block at a time takes from the tree: a
+  /// block's own node, without the note's. What is not in it is what the
+  /// tree hangs across blocks — the later blocks of an item, a construct
+  /// an item's marker line opened and the lines after it go on with —
+  /// which are nodes of their own blocks.
+  static BlockNode ofBlock(
+    Block block,
+    SourceBuffer buffer, {
+    bool appSyntax = true,
+  }) {
+    final tree = BlockTree._(appSyntax: appSyntax);
+    final (local, starts) = _contentOf(block, buffer, _inNote);
+    return block.kind == BlockKind.listItem
+        ? tree._item(block, local, starts)
+        : tree._node(block, local, starts);
+  }
+
+  /// Where line [line] of a note starts: at its own start.
+  static _Origin _inNote(int line) =>
+      (line: line, column: 0, leftOver: 0, lazy: false);
+
   /// The content of each quote built, by its outermost node: a block that
   /// goes on with the quote is read again with it.
   final Map<QuoteNode, _Quoted> _quoted = Map<QuoteNode, _Quoted>.identity();
@@ -65,6 +90,7 @@ final class BlockTree {
       lazy: [for (final origin in origins) origin.lazy],
       appSyntax: appSyntax,
     );
+    _Origin origin(int line) => origins[line];
     final note = <BlockNode>[];
     // The footnote definition open where the scan is: the items in it are
     // its own.
@@ -91,7 +117,7 @@ final class BlockTree {
         roots = note;
         open.clear();
       }
-      final (local, starts) = _contentOf(block, buffer, origins);
+      final (local, starts) = _contentOf(block, buffer, origin);
       if (block.kind == BlockKind.listItem) {
         final parents = block.listDepth.clamp(0, open.length);
         open.length = parents;
@@ -108,7 +134,7 @@ final class BlockTree {
       }
       open.length = (block.listDepth + 1).clamp(0, open.length);
       final into = open.isEmpty ? roots : open.last.children;
-      if (!_continues(into, block, buffer, origins, local, starts)) {
+      if (!_continues(into, block, buffer, origin, local, starts)) {
         into.add(_node(block, local, starts));
       }
     }
@@ -124,7 +150,7 @@ final class BlockTree {
     List<BlockNode> into,
     Block block,
     SourceBuffer buffer,
-    List<_Origin> origins,
+    _Origin Function(int line) origins,
     List<String> local,
     List<_Origin> starts,
   ) {
@@ -211,7 +237,7 @@ final class BlockTree {
   static (List<String>, List<_Origin>) _contentOf(
     Block block,
     SourceBuffer buffer,
-    List<_Origin> origins, [
+    _Origin Function(int line) origins, [
     int? quoteDepth,
   ]) {
     final first = buffer.lineAt(block.startLine);
@@ -236,7 +262,7 @@ final class BlockTree {
               BlockParser.itemPrefixLength(block, text),
             );
       local.add(text.substring(prefix));
-      final origin = origins[line];
+      final origin = origins(line);
       // A quote's line without its `>` is the quote's lazily.
       final lazy =
           block.quoteDepth > 0 &&
