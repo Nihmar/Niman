@@ -200,6 +200,16 @@ void main() {
     expect(note.usesSvg, isTrue);
   });
 
+  test('a mermaid fence four spaces into a list item is a diagram', () {
+    final html = body(
+      '- item\n\n    ```mermaid\n    flowchart TD\n    A[Start] --> B\n'
+      '    ```\n',
+    );
+    expect(html, contains('<div class="diagram" data-mermaid="'));
+    expect(html, contains('Start'));
+    expect(html, isNot(contains('language-mermaid')));
+  });
+
   test('a mermaid fence that does not parse stays code (#530)', () {
     final note = NoteHtml(
       const NoteHtmlSource(
