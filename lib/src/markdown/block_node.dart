@@ -109,6 +109,7 @@ final class LeafNode extends BlockNode {
     this.headingLevel = 0,
     this.fenceInfo,
     this.definition = false,
+    this.leftOver = const <int>[],
   });
 
   /// What it is: never a quote or an item, which are containers.
@@ -126,6 +127,12 @@ final class LeafNode extends BlockNode {
   /// Whether the leaf is a link reference definition: a paragraph's lines
   /// that draw nothing, read for the note's links.
   final bool definition;
+
+  /// For each line, the columns of a tab its container's prefix ended
+  /// inside of, left over before the line's text: white space that is no
+  /// character of the line, which code keeps (`- foo` / `\t\tbar` is code
+  /// `  bar`). Empty when none has any.
+  final List<int> leftOver;
 
   @override
   int get line => lines.first.line;

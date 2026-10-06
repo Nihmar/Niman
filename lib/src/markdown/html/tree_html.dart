@@ -14,6 +14,7 @@ import 'package:niman/src/markdown/html/table_html.dart';
 import 'package:niman/src/markdown/inline/inline_html.dart';
 import 'package:niman/src/markdown/inline/inline_parser.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 
 /// Writes one note as HTML.
 final class TreeHtml {
@@ -249,7 +250,16 @@ final class TreeHtml {
         _write(CodeHtml.fenced(lines));
       case BlockKind.indentedCode:
         _cr();
-        _write(CodeHtml.indented(lines));
+        _write(
+          CodeHtml.indented(
+            lines,
+            starts: [
+              for (final span in leaf.lines)
+                LineSyntax.columnsTo(_lines[span.line], span.start),
+            ],
+            leftOver: leaf.leftOver,
+          ),
+        );
       case BlockKind.html:
         _cr();
         final html = lines.join('\n');

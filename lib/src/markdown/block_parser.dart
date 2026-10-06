@@ -304,19 +304,24 @@ final class BlockParser {
   /// How much of [line], a line of [block], the parse takes off: its quote
   /// marks, and up to [listStrip] spaces after them ([listStripOf]). A
   /// reader puts the parse's offsets back on the line by adding this.
-  static int linePrefixLength(Block block, String line, int listStrip) {
-    final quote = quotePrefixLength(
-      line,
-      block.quoteDepth,
-      itemPrefixLength(block, line),
-    );
+  static int linePrefixLength(Block block, String line, int listStrip) =>
+      linePrefix(block, line, listStrip).$1;
+
+  /// [linePrefixLength], and the columns of a tab it ended inside that are
+  /// left over before the text after it: what the text stands in, as
+  /// spaces that are no characters of the line (`- foo` / `\t\tbar`: the
+  /// item takes two of the first tab's four columns, and `bar` is code two
+  /// columns in).
+  static (int, int) linePrefix(Block block, String line, int listStrip) {
+    final (items, itemsLeft) = itemPrefix(block, line);
+    final (quote, quoteLeft) = quotePrefix(line, block.quoteDepth, items);
     var at = quote;
     while (at - quote < listStrip &&
         at < line.length &&
         LineSyntax.isSpace(line.codeUnitAt(at))) {
       at++;
     }
-    return at;
+    return (at, quote > items ? quoteLeft : itemsLeft);
   }
 
   /// How much of [line] its [depth] quote marks take — each `>` with the up
@@ -333,7 +338,14 @@ final class BlockParser {
   /// The three spaces are columns, a tab to the next stop of four, as the
   /// scanner reads them: `\t>` is four columns in, indented code and no
   /// quote mark.
-  static int quotePrefixLength(String line, int depth, [int start = 0]) {
+  static int quotePrefixLength(String line, int depth, [int start = 0]) =>
+      quotePrefix(line, depth, start).$1;
+
+  /// [quotePrefixLength], and the columns of the tab after the last `>`
+  /// left over: a `>` takes one column of white space after it, and a tab
+  /// there has more (`>\t\tfoo` is code two columns in).
+  static (int, int) quotePrefix(String line, int depth, [int start = 0]) {
+    var leftOver = 0;
     var from = start;
     var column = 0;
     for (var at = 0; at < start && at < line.length; at++) {
@@ -348,17 +360,21 @@ final class BlockParser {
         reached += width;
         at++;
       }
-      if (at >= line.length || line.codeUnitAt(at) != 0x3E) return from;
+      if (at >= line.length || line.codeUnitAt(at) != 0x3E) {
+        return (from, leftOver);
+      }
       at++;
       reached++;
+      leftOver = 0;
       if (at < line.length && LineSyntax.isSpace(line.codeUnitAt(at))) {
+        if (line.codeUnitAt(at) == 0x09) leftOver = 4 - reached % 4 - 1;
         reached += line.codeUnitAt(at) == 0x09 ? 4 - reached % 4 : 1;
         at++;
       }
       from = at;
       column = reached;
     }
-    return from;
+    return (from, leftOver);
   }
 
   /// How much of [line], a line of [block], the list items [block] stands
@@ -380,10 +396,15 @@ final class BlockParser {
   ///
   /// A footnote definition around them takes its part first
   /// ([footnotePrefixLength]).
-  static int itemPrefixLength(Block block, String line) {
+  static int itemPrefixLength(Block block, String line) =>
+      itemPrefix(block, line).$1;
+
+  /// [itemPrefixLength], and the columns of a tab the last item's indent
+  /// ended inside of, left over (`LineSyntax.dedent`).
+  static (int, int) itemPrefix(Block block, String line) {
     final footnote = footnotePrefixLength(block, line);
     final items = _itemsOf(block);
-    if (items == null) return footnote;
+    if (items == null) return (footnote, 0);
     // Each item takes its indent off as the parser does
     // (`LineSyntax.dedent`): a tab whole once the indent is reached in it,
     // its columns past the indent counting toward the next item's.
@@ -395,7 +416,7 @@ final class BlockParser {
         (rest, remaining) = LineSyntax.dedent(rest, indent);
       }
     }
-    return line.length - rest.length;
+    return (line.length - rest.length, remaining);
   }
 
   /// What, beside its kind, depths and text, decides what [contentText]

@@ -153,6 +153,12 @@ final class BlockTree {
                 ...(blank as LeafNode).lines,
               ..._spans(local, starts),
             ],
+            leftOver: [
+              ..._leftOverOf(code),
+              for (final blank in into.sublist(at + 1))
+                ..._leftOverOf(blank as LeafNode),
+              for (final start in starts) start.leftOver,
+            ],
           )
           ..removeRange(at + 1, into.length);
         return true;
@@ -186,9 +192,18 @@ final class BlockTree {
       lines: [...last.lines, ..._spans(local, starts)],
       headingLevel: last.headingLevel,
       fenceInfo: last.fenceInfo,
+      leftOver: [
+        ..._leftOverOf(last),
+        for (final start in starts) start.leftOver,
+      ],
     );
     return true;
   }
+
+  /// [leaf]'s left-over columns, one a line.
+  static List<int> _leftOverOf(LeafNode leaf) => leaf.leftOver.isEmpty
+      ? List<int>.filled(leaf.lines.length, 0)
+      : leaf.leftOver;
 
   /// [block]'s lines in the coordinates of the container it stands in, its
   /// quote marks off ([BlockParser.contentText]) — [quoteDepth] of them
@@ -204,8 +219,8 @@ final class BlockTree {
     final starts = <_Origin>[];
     for (var line = block.startLine; line < block.endLine; line++) {
       final text = buffer.lineAt(line);
-      final prefix = quoteDepth == null
-          ? BlockParser.linePrefixLength(
+      final (prefix, columns) = quoteDepth == null
+          ? BlockParser.linePrefix(
               block,
               text,
               BlockParser.listStripOf(
@@ -215,7 +230,7 @@ final class BlockTree {
                 text,
               ),
             )
-          : BlockParser.quotePrefixLength(
+          : BlockParser.quotePrefix(
               text,
               quoteDepth,
               BlockParser.itemPrefixLength(block, text),
@@ -229,7 +244,7 @@ final class BlockTree {
       starts.add((
         line: origin.line,
         column: origin.column + prefix,
-        leftOver: prefix == 0 ? origin.leftOver : 0,
+        leftOver: prefix == 0 ? origin.leftOver : columns,
         lazy: origin.lazy || lazy,
       ));
     }
@@ -248,6 +263,7 @@ final class BlockTree {
       headingLevel: block.headingLevel,
       fenceInfo: block.fenceInfo,
       definition: block.definition != 0,
+      leftOver: [for (final start in starts) start.leftOver],
     );
   }
 
@@ -281,7 +297,8 @@ final class BlockTree {
   ItemNode _item(Block block, List<String> local, List<_Origin> starts) {
     final first = local.first;
     final marker = LineSyntax.listMarkerOf(first)!;
-    final (indent, empty) = LineSyntax.itemIndent(first, marker);
+    final item = LineSyntax.itemContent(first, marker);
+    final indent = item.indent;
     final content = <String>[];
     final from = <_Origin>[];
     void add(int at, int cut, int leftOver, {bool lazy = false}) {
@@ -294,7 +311,7 @@ final class BlockTree {
       ));
     }
 
-    add(0, empty ? first.length : indent.clamp(0, first.length), 0);
+    add(0, item.at, item.leftOver);
     for (var at = 1; at < local.length; at++) {
       final text = local[at];
       final leftOver = starts[at].leftOver;
@@ -329,7 +346,12 @@ final class BlockTree {
     if (first is! LeafNode || first.kind != BlockKind.blank) return children;
     final rest = first.lines.sublist(1);
     return [
-      if (rest.isNotEmpty) LeafNode(kind: BlockKind.blank, lines: rest),
+      if (rest.isNotEmpty)
+        LeafNode(
+          kind: BlockKind.blank,
+          lines: rest,
+          leftOver: _leftOverOf(first).sublist(1),
+        ),
       ...children.skip(1),
     ];
   }

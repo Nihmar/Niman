@@ -207,15 +207,54 @@ abstract final class LineSyntax {
   /// the spaces after that up to three; four or more are the item's
   /// indented code, and count as one.
   static (int, bool) itemIndent(String text, (int, int, int) marker) {
+    final content = itemContent(text, marker);
+    return (content.indent, content.empty);
+  }
+
+  /// The item [marker] opens on [text], in columns — a tab to the next stop
+  /// of four: how far in its lines stand (`indent`), where its first line's
+  /// content starts (`at`, a character) and the columns of a tab before it
+  /// left over (`leftOver`), and whether the marker has nothing after it.
+  ///
+  /// One to four columns of white space after the marker are the item's;
+  /// five or more are one column and the content's indented code — which
+  /// may split a tab: `-\t\tfoo` is an item two columns in, its content
+  /// two columns of the first tab and the second.
+  static ({int indent, int at, int leftOver, bool empty}) itemContent(
+    String text,
+    (int, int, int) marker,
+  ) {
     final (start, width, _) = marker;
-    final base = start + width + 1;
-    var at = start + width + 1;
+    final end = start + width;
+    final markerEnd = columnsTo(text, end);
+    var column = markerEnd;
+    var at = end;
     while (at < text.length && isSpace(text.codeUnitAt(at))) {
+      column += text.codeUnitAt(at) == 0x09 ? 4 - column % 4 : 1;
       at++;
     }
-    if (at >= text.length) return (base, true);
-    final spaces = at - base;
-    return (spaces >= 4 ? base : at, false);
+    if (at >= text.length) {
+      return (indent: markerEnd + 1, at: text.length, leftOver: 0, empty: true);
+    }
+    if (column - markerEnd <= 4) {
+      return (indent: column, at: at, leftOver: 0, empty: false);
+    }
+    final tab = text.codeUnitAt(end) == 0x09;
+    return (
+      indent: markerEnd + 1,
+      at: end + 1,
+      leftOver: tab ? 4 - markerEnd % 4 - 1 : 0,
+      empty: false,
+    );
+  }
+
+  /// The columns [text] takes up to [end], a tab to the next stop of four.
+  static int columnsTo(String text, int end) {
+    var column = 0;
+    for (var at = 0; at < end && at < text.length; at++) {
+      column += text.codeUnitAt(at) == 0x09 ? 4 - column % 4 : 1;
+    }
+    return column;
   }
 
   /// What a quote line [text] holds inside its first `>`: past the marker
