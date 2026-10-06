@@ -164,11 +164,7 @@ counts (they may only go up).
 7. **Export on the tree** — done. `NoteHtml` renders with the writer
    and its hooks (callouts, code, math, diagrams, wikilinks, heading ids,
    picture targets); checked against the export tests.
-8. **`package:markdown` removed** from `pubspec.yaml`: nothing in `lib/`
-   imports it (`footnote_syntax.dart`'s block patterns and
-   `inline_syntaxes.dart` are what is left); `ExtensionMasker`'s `mask`,
-   which nothing in `lib/` calls, goes with its tests ported to our
-   parser; the random harness, the package's last user, retires.
+8. **`package:markdown` removed** from `pubspec.yaml` — done.
 
 ## Decisions
 
@@ -510,7 +506,43 @@ Left after phase 5: `ExtensionMasker`, `_sourceFormOf` and
   `cmark-gfm`'s, valid XHTML. The export tests pass unchanged but for
   the box's spelling.
 
-Next: phase 8 — `package:markdown` removed.
+### Phase 8 (done): `package:markdown` removed
+
+- **Footnote definitions** (`footnote_syntax.dart`) read as `cmark-gfm`
+  does, not by the package's patterns: four columns in, a tab among them;
+  a line short of that ends the definition when it opens a block that
+  interrupts a paragraph (`ContainerWalk.interruptsParagraph`, the one
+  rule the table's end asks too), and goes on with it lazily otherwise —
+  `2. b` under `[^n]: a` is the footnote's.
+- **The app's inline rules** are `AppSyntax`; the masker that set them
+  aside for the package goes, its tests read our parser
+  (`app_syntax_test.dart`), unchanged. The package's inline syntaxes go
+  (`inline_syntaxes.dart`); the perf test holds our parser to the bars
+  the package's parse set.
+- **The package's measures retire**: its conformance gate and allowlist,
+  the older CommonMark check, the random harness, `tool/markdown_spec.dart`.
+  `pubspec.yaml` has no `markdown`; nothing pulls it in.
+
+## Next: the reading where it still is the package's
+
+The random harness compared the scanner and the tree with the package's
+reading, and they agree with it outside the spec's examples, where it
+parts from `cmark`'s. Two of its hand-picked shapes, checked by hand
+against `cmark`'s algorithm, show it:
+
+- `> - w` / `    > w`: four spaces in, the second line opens no quote
+  (`>` may stand three in at most) and interrupts no paragraph — it is
+  the item's paragraph's lazy line, `w` / `> w`. The tree reads a quote
+  nested in the item, as the package did.
+- `> w` / `    w` / `    w`: both indented lines go on with the quote's
+  paragraph lazily; the tree makes the second code, as the package did —
+  the quote's last line is remembered as indented
+  (`ContainerWalk.lastOf`), where it was a paragraph's lazy line.
+
+The specs' examples hold none of these. So the next step is an oracle
+that is `cmark`, or as close: the random documents the harness made, read
+by a CommonMark implementation, and the tree held to it — the way the
+package's reading was held, with the reference changed.
 
 ### Decided: `$` as a currency sign (#547)
 

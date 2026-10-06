@@ -1,5 +1,11 @@
 # Block scanner: containers as CommonMark reads them (work in progress)
 
+> **Superseded, kept for its evidence.** The scanner was taken to
+> `package:markdown`'s reading here, the parser the read view drew with;
+> `docs/dev/block-tree.md` took it on to `cmark-gfm`'s and removed the
+> package (phase 8, 2026-10-06), and the differential harness this
+> document is built on went with it.
+
 Branch `fix/block-scanner-containers`, based on `f2efd5bc` (which itself sits
 on `main` at `72d15445`). The goal: `lib/src/markdown/block_scanner.dart`
 decides list items and quotes line by line as CommonMark does, proved by a
