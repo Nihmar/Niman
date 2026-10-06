@@ -19,6 +19,7 @@
 library;
 
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/export/export_footnote_syntax.dart';
 import 'package:niman/src/export/html_blocks.dart';
 import 'package:niman/src/export/html_spans.dart';
 import 'package:niman/src/export/html_text.dart';
@@ -134,6 +135,7 @@ final class NoteHtml {
       blockSyntaxes: const [
         md.HeaderWithIdSyntax(),
         md.SetextHeaderWithIdSyntax(),
+        ExportFootnoteSyntax(),
       ],
     );
     return document.parseLines(lines);

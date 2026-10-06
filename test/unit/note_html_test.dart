@@ -178,6 +178,25 @@ void main() {
     );
   });
 
+  test('a cited footnote that ends with a list is exported', () {
+    // The package appends a footnote's link back to its last block's
+    // children, and a list's are typed for its items: adding the link threw
+    // and the export failed.
+    const note = 'A claim[^1].\n\n[^1]: Two things:\n\n    - one\n    - two\n';
+    final html = body(note);
+    expect(html, contains('<li>one</li>'));
+    expect(html, contains('<li>two</li>'));
+    expect(html, contains('footnote-backref'));
+    // The link back stands after the list, not in it.
+    expect(
+      html.indexOf('footnote-backref'),
+      greaterThan(html.indexOf('</ul>')),
+    );
+    final targets = NoteHtml(const NoteHtmlSource(text: note, title: 't'))
+        .imageTargets();
+    expect(targets, isEmpty);
+  });
+
   test('the page is one file with its title and the fonts only if needed', () {
     final page = htmlPage(title: 'A <b>', body: '<p>x</p>');
     expect(page, startsWith('<!DOCTYPE html>'));
