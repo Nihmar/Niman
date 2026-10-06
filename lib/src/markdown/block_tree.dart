@@ -6,6 +6,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -52,11 +53,32 @@ final class BlockTree {
       buffer,
       leftOver: [for (final origin in origins) origin.leftOver],
     );
-    final roots = <BlockNode>[];
+    final note = <BlockNode>[];
+    // The footnote definition open where the scan is: the items in it are
+    // its own.
+    FootnoteNode? footnote;
+    var roots = note;
     // The items open where the scan is, outermost first: a block at list
     // depth `d` stands in the first `d + 1`.
     final open = <ItemNode>[];
     for (final block in scanner.index.blocks) {
+      if (block.footnote == Block.opensFootnote) {
+        final label = FootnoteSyntax.opening(buffer.lineAt(block.startLine))!
+            .$1;
+        final children = <BlockNode>[];
+        footnote = FootnoteNode(
+          line: origins[block.startLine].line,
+          label: label,
+          children: children,
+        );
+        note.add(footnote);
+        roots = footnote.children;
+        open.clear();
+      } else if (block.footnote == 0 && footnote != null) {
+        footnote = null;
+        roots = note;
+        open.clear();
+      }
       final (local, starts) = _contentOf(block, buffer, origins);
       if (block.kind == BlockKind.listItem) {
         final parents = block.listDepth.clamp(0, open.length);
@@ -78,7 +100,7 @@ final class BlockTree {
         into.add(_node(block, local, starts));
       }
     }
-    return roots;
+    return note;
   }
 
   /// Whether [block] goes on with the last node of [into], which it then

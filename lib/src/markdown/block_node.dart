@@ -34,6 +34,22 @@ final class QuoteNode extends BlockNode {
   final List<BlockNode> children;
 }
 
+/// A footnote definition: the blocks it holds, which the read view's
+/// parser takes out of the note to its footnotes.
+final class FootnoteNode extends BlockNode {
+  /// The definition of [label] on [line].
+  const new({required this.line, required this.label, required this.children});
+
+  @override
+  final int line;
+
+  /// The label it defines, without its brackets and caret.
+  final String label;
+
+  /// The blocks inside it.
+  final List<BlockNode> children;
+}
+
 /// A list: consecutive items with the same [ItemNode.delimiter].
 final class ListNode extends BlockNode {
   /// A list of [items], which the builder adds to.

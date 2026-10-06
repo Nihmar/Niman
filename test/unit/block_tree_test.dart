@@ -11,6 +11,8 @@ String _shape(String text, List<BlockNode> nodes) {
       spans.map((s) => lines[s.line].substring(s.start, s.end)).join('/');
   String of(BlockNode node) => switch (node) {
     QuoteNode(:final children) => 'Q[${children.map(of).join(' ')}]',
+    FootnoteNode(:final label, :final children) =>
+      'F$label[${children.map(of).join(' ')}]',
     ListNode(:final items, :final ordered, :final start) =>
       '${ordered ? 'ol$start' : 'ul'}[${items.map(of).join(' ')}]',
     ItemNode(:final delimiter, :final children) =>
@@ -75,6 +77,32 @@ void main() {
     expect(
       _treeOf('- > x\n\n  > y'),
       'ul[-[Q[paragraph"x"] blank"" Q[paragraph"y"]]]',
+    );
+  });
+
+  test('a footnote definition holds its indented and lazy lines', () {
+    expect(
+      _treeOf('[^n]: a\n    b\nc\n\n    d\n\ne'),
+      'Fn[paragraph"a/b/c" blank"" paragraph"d" blank""] paragraph"e"',
+    );
+  });
+
+  test('a footnote definition interrupts a paragraph and ends at a block', () {
+    expect(
+      _treeOf('p\n[^n]: a\n# h'),
+      'paragraph"p" Fn[paragraph"a"] heading"# h"',
+    );
+  });
+
+  test('a footnote definition ends the list before it', () {
+    expect(_treeOf('- i\n[^n]: a'), 'ul[-[paragraph"i"]] Fn[paragraph"a"]');
+  });
+
+  test('the blocks in a footnote are read past its four spaces', () {
+    expect(
+      // Four spaces for the footnote, two for the item, four for code.
+      _treeOf('[^n]:\n    - x\n\n          code'),
+      'Fn[blank"" ul[-[paragraph"x" blank"" indentedCode"    code"]]]',
     );
   });
 
