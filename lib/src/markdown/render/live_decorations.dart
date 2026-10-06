@@ -293,6 +293,22 @@ final class LineShape {
   );
 }
 
+/// The style a hidden marker is drawn with in `live`: invisible, and small
+/// enough that the room it takes is nothing a reader notices.
+///
+/// The marker is still *there* — still a character at its own offset — which
+/// is what keeps every text offset true; it is the room it takes that is
+/// given up, so a heading reads as a heading instead of starting with a gap
+/// the width of a hash.
+const TextStyle liveHiddenMarker = TextStyle(
+  color: Color(0x00000000),
+  fontSize: 0.01,
+  // Spacing is set in pixels, not in the size: an ambient letter spacing
+  // gave each hidden mark a quarter of a pixel back.
+  letterSpacing: 0,
+  wordSpacing: 0,
+);
+
 /// Where a list item's bullet, number or checkbox sits, in its paragraph's
 /// coordinates: the column one list level takes, one row tall, ending where
 /// the item's text begins — which is where the read view's column ends.
@@ -303,14 +319,19 @@ final class LineShape {
 /// The row is read off the item's first character of text, not off the
 /// marker: the marker is hidden, set in a hundredth of a size, and a caret
 /// at it stands on the baseline with next to no height — the bullets and the
-/// numbers were drawn that far below the text they belong to. An item with
-/// no text yet is one row, the paragraph's own height.
+/// numbers were drawn that far below the text they belong to. Nor off the
+/// marks the text opens with, hidden as the marker is: `- [x] **bold**`
+/// stood its box on the `**`, that far below its row. An item with no text
+/// yet is one row, the paragraph's own height.
 Rect liveItemSlot(RenderParagraph box, LineShape shape, MarkdownTheme theme) {
   final text = box.text.toPlainText(includeSemanticsLabels: false);
   final taskBox = shape.box;
-  final first = taskBox == null
+  var first = taskBox == null
       ? _pastSpaces(text, _pastMark(text, shape.marker ?? 0))
       : _pastSpaces(text, taskBox + 3);
+  while (first < text.length && _hidden(box.text, first)) {
+    first++;
+  }
   final position = TextPosition(offset: first);
   final right = box.getOffsetForCaret(position, Rect.zero).dx;
   final slot = theme.listIndentPerLevel;
@@ -327,6 +348,14 @@ Rect liveItemSlot(RenderParagraph box, LineShape shape, MarkdownTheme theme) {
 }
 
 bool _space(String text, int at) => text[at] == ' ' || text[at] == '\t';
+
+/// Whether the character at [at] of [text] is a hidden mark
+/// ([liveHiddenMarker]): a style may be the marker's with a selection's or a
+/// match's background over it, never another size.
+bool _hidden(InlineSpan text, int at) {
+  final span = text.getSpanForPosition(TextPosition(offset: at));
+  return span is TextSpan && span.style?.fontSize == liveHiddenMarker.fontSize;
+}
 
 /// Past the mark that starts at [from]: the characters up to a space.
 int _pastMark(String text, int from) {

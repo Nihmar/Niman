@@ -542,6 +542,31 @@ void main() {
     }
   });
 
+  testWidgets("a box sits on its text's row when the text opens with a mark", (
+    tester,
+  ) async {
+    // `- [x] **L W** …`: the `**` is hidden as the marker is, and the row
+    // read off it stood on the baseline with no height — the box was drawn
+    // below the words beside it (device screenshot 2026-10-06).
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n- [x] **L W** text\n- [ ] *it* text\n',
+    );
+    for (final (prefix, word) in [('- [x] **', 8), ('- [ ] *', 7)]) {
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
+      final slot = liveItemSlot(paragraph, _task, _theme);
+      final drawn = TextPosition(offset: word);
+      final top = paragraph.getOffsetForCaret(drawn, Rect.zero).dy;
+      final height = paragraph.getFullHeightForCaret(drawn);
+      expect(slot.top, closeTo(top, 0.5), reason: prefix);
+      expect(slot.height, closeTo(height, 0.5), reason: prefix);
+    }
+  });
+
   testWidgets("a task's box and text line up with a bullet's", (tester) async {
     // A task item has one more visible space than a bullet one, and its
     // text stood that much to the right (device screenshot 2026-09-23).
