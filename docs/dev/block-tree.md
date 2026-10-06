@@ -177,8 +177,25 @@ Phase 1 in progress.
   tree; the read view's pipeline has one on seed 4 (`- - w` / `\t* w` /
   `\t\t---`, its tab limit, not a footnote).
 
-Next: link reference definitions as leaves — they cannot interrupt a
-paragraph, so they are a paragraph's leading lines (table below).
+- **Link reference definitions**: read where no paragraph is open, by
+  `LinkDefinitionSyntax` — the package's `LinkParser` algorithm (its
+  file is not exported), asking for the lines after the first one at a
+  time, walked in their container, up to a line that would end a
+  paragraph. `LineState.definition` counts the lines the definition has
+  left; after it no paragraph is open, which is what the scanner read
+  wrong (`[r]: /u` / tab `code` is code, `[r]: /u` / `2) x` a list,
+  `[r]:` / `/u` one definition). `Block.definition` marks its block; the
+  tree's leaf carries it. Whether a line opens one depends on the lines
+  after it, the next one's next included (a table's head ends the
+  paragraph): `Block.reach` records how many, and an edit within reach
+  reads the block again from its start; the look back is bounded by the
+  farthest reach the scan has made. Harness forms `[r]: /u`, `[r]:`,
+  `/u "t"`: the tree went from 474 differing documents to 0 (seeds 1-6);
+  the rescan test, with definitions among its pieces, finds no
+  divergence (it found the next-line reach). The list fixture scans in
+  the time it did (113-122 ms against 108-115, the same host).
+
+Next: phase 2 — each leaf's inline text and the HTML writer.
 
 ### Footnote and link reference definitions: what is known
 
