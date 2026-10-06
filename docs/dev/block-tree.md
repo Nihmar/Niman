@@ -109,6 +109,12 @@ rescan test, and `test/perf/list_count_check_test.dart`.
 6. **The package for inlines only.** No `parseLines` left in `lib/`.
    The harness keeps the package as its oracle for structure for as long
    as the app reads as the package does.
+7. **The CommonMark spec** (asked for, 2026-10-06). The spec's examples
+   (`spec.json`, each a Markdown input and its HTML) run against the
+   tree's HTML writer: first measured, then each failure fixed or kept
+   as a decision with its reason. Where the spec and the package part —
+   the package's quirks, which the harness counts today — the spec wins,
+   and the harness's oracle becomes the spec's reading.
 
 ## Decisions
 
@@ -127,7 +133,6 @@ rescan test, and `test/perf/list_count_check_test.dart`.
 
 - Outline, links, frontmatter and spell check from the tree instead of
   the legacy tokenizer.
-- The spec's examples against the scanner (see Decisions).
 
 ## State
 
