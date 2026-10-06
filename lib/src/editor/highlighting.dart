@@ -938,7 +938,7 @@ final class _InlineScanner {
   static final RegExp _italicUnder = RegExp('_(?:[^_]|_(?:[^_]))+_');
 
   /// `#tag`: unicode letters and digits plus the `_`, `/` and `-` a tag has
-  /// always allowed — the same class `extension_masker` scans, so `#città`
+  /// always allowed — the same class `AppSyntax` reads, so `#città`
   /// is one tag here and one tag in the index.
   static final RegExp _tag = RegExp(r'#([\p{L}\p{N}_/-]+)', unicode: true);
 

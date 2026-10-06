@@ -24,8 +24,7 @@ import 'dart:io';
 const List<String> _tools = <String>[
   'tool/source_buffer_bench.dart',
   'tool/block_scanner_bench.dart',
-  'tool/extension_masker_bench.dart',
-  'tool/block_parser_bench.dart',
+  'tool/inline_bench.dart',
 ];
 
 Future<void> main(List<String> args) async {
