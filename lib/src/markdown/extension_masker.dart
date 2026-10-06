@@ -64,7 +64,13 @@ final class ExtensionMasker {
   /// The order is the priority order: the first that matches wins, which is why
   /// a code span hides everything inside it.
   ExtensionSpan? _spanAt(String text, int at) =>
-      _codeSpan(text, at) ??
+      _codeSpan(text, at) ?? extensionAt(text, at);
+
+  /// The app's own construct that starts exactly at [at] — display math,
+  /// inline math, a wikilink or an embed, a tag, in that order — or null:
+  /// what our inline parser reads as syntaxes of its own
+  /// (`docs/dev/block-tree.md`), the code spans being its own already.
+  ExtensionSpan? extensionAt(String text, int at) =>
       _displayMath(text, at) ??
       _inlineMath(text, at) ??
       _wikiLink(text, at) ??
@@ -125,14 +131,13 @@ final class ExtensionMasker {
 
   /// `$…$`, by the app's own predicate.
   ExtensionSpan? _inlineMath(String text, int at) {
-    if (text.codeUnitAt(at) != 0x24) return null;
-    final span = findInlineMath(text, at);
-    if (span == null || span.$1 != at) return null;
+    final end = inlineMathAt(text, at);
+    if (end == null) return null;
     return ExtensionSpan(
       kind: ExtensionKind.inlineMath,
       start: at,
-      end: span.$2,
-      text: text.substring(at, span.$2),
+      end: end,
+      text: text.substring(at, end),
     );
   }
 

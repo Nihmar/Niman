@@ -50,20 +50,33 @@ int displayMarkerStart(String line) {
 /// `\$` (escaped) and `$$` (display) are not math.
 (int, int)? findInlineMath(String line, int from) {
   for (var i = from; i < line.length; i++) {
-    if (line.codeUnitAt(i) != 0x24) continue;
-    if (i > 0 && line.codeUnitAt(i - 1) == 0x5C) continue;
-    // A price written after its number: `20$`.
-    if (i > 0 && _isDigit(line.codeUnitAt(i - 1))) continue;
-    final after = i + 1;
-    if (after >= line.length) continue;
-    if (line.codeUnitAt(after) == 0x24) continue;
-    for (var j = after; j < line.length; j++) {
-      if (line.codeUnitAt(j) != 0x24) continue;
-      if (j > 0 && line.codeUnitAt(j - 1) == 0x5C) continue;
-      // A price written before its number: `$10`.
-      if (j + 1 < line.length && _isDigit(line.codeUnitAt(j + 1))) continue;
-      return (i, j + 1);
-    }
+    final end = inlineMathAt(line, i);
+    if (end != null) return (i, end);
+  }
+  return null;
+}
+
+/// Whether the character at [at] in [line] may open inline math: a `$`
+/// not escaped, not right after a digit (a price written after its
+/// number, `20$`), and not the first of a `$$`.
+bool opensInlineMath(String line, int at) {
+  if (line.codeUnitAt(at) != 0x24) return false;
+  if (at > 0 && line.codeUnitAt(at - 1) == 0x5C) return false;
+  if (at > 0 && _isDigit(line.codeUnitAt(at - 1))) return false;
+  final after = at + 1;
+  return after < line.length && line.codeUnitAt(after) != 0x24;
+}
+
+/// The end of the inline-math span the `$` at [at] opens, or null: the
+/// first `$` after it that is not escaped and not right before a digit (a
+/// price written before its number, `$10`).
+int? inlineMathAt(String line, int at) {
+  if (!opensInlineMath(line, at)) return null;
+  for (var j = at + 1; j < line.length; j++) {
+    if (line.codeUnitAt(j) != 0x24) continue;
+    if (line.codeUnitAt(j - 1) == 0x5C) continue;
+    if (j + 1 < line.length && _isDigit(line.codeUnitAt(j + 1))) continue;
+    return j + 1;
   }
   return null;
 }
