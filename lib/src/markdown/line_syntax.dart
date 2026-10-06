@@ -391,35 +391,29 @@ abstract final class LineSyntax {
     return columns + remaining;
   }
 
-  /// [text] with [indent] columns of its leading whitespace taken off, the
-  /// way the read view's parser takes an item's indent off its lines
-  /// (`package:markdown`'s `dedent`): a tab is four columns wherever it
-  /// stands, and goes whole once the indent is reached in it, its columns
-  /// past the indent left over — the second of the pair, which counts
-  /// toward the next item's indent and nothing else. A tab short of the
-  /// indent goes too, and leaves nothing.
-  static (String, int) dedent(String text, int indent) {
-    var start = 0;
+  /// [text] with [indent] columns of its leading whitespace taken off, as
+  /// `cmark` takes an item's indent off its lines: a tab runs to the next
+  /// stop of four, and goes whole once the indent is reached in it, its
+  /// columns past the indent left over — the second of the pair, which
+  /// counts toward the next item's indent and the blocks inside it. A tab
+  /// short of the indent goes too, and leaves nothing.
+  ///
+  /// [leftOver] is what a tab an outer container took off left over before
+  /// [text]: those columns come off first, and [text] is untouched while
+  /// they cover the indent — `- - w` / tab tab `- w` is two tabs' columns
+  /// in, the inner item's text, not a third item. A tab that left columns
+  /// over ended on a stop, so [text]'s tabs run to stops counted from it.
+  static (String, int) dedent(String text, int indent, [int leftOver = 0]) {
+    if (leftOver >= indent) return (text, leftOver - indent);
+    final need = indent - leftOver;
     var columns = 0;
-    var remaining = 0;
-    var tab = false;
-    for (; start < text.length && start < indent; start++) {
+    for (var start = 0; start < text.length; start++) {
       final char = text.codeUnitAt(start);
-      if (char != 0x20 && char != 0x09) break;
-      final isTab = char == 0x09;
-      if (isTab) {
-        columns += 4;
-        tab = true;
-      } else {
-        columns += 1;
-      }
-      if (columns >= indent) {
-        if (tab) remaining = columns - indent;
-        if (columns == indent || isTab) start++;
-        return (text.substring(start), remaining);
-      }
+      if (char != 0x20 && char != 0x09) return (text.substring(start), 0);
+      columns += char == 0x09 ? 4 - columns % 4 : 1;
+      if (columns >= need) return (text.substring(start + 1), columns - need);
     }
-    return (text.substring(start), 0);
+    return ('', 0);
   }
 
   /// How many spaces [text] starts with.

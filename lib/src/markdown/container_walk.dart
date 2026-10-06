@@ -124,7 +124,7 @@ final class ContainerWalk {
           kept = at;
           break;
         }
-        (text, remaining) = LineSyntax.dedent(text, item.indent);
+        (text, remaining) = LineSyntax.dedent(text, item.indent, remaining);
         if (item.lastBlank) {
           (changed ??= [...open])[at] = (
             indent: item.indent,

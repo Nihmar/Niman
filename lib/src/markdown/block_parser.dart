@@ -185,7 +185,7 @@ abstract final class BlockParser {
       if (LineSyntax.columnsOf(rest, remaining) < indent) {
         return (line.length - rest.length, remaining, true);
       }
-      (rest, remaining) = LineSyntax.dedent(rest, indent);
+      (rest, remaining) = LineSyntax.dedent(rest, indent, remaining);
     }
     return (line.length - rest.length, remaining, false);
   }

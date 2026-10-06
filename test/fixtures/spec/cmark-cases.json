@@ -133,5 +133,20 @@
     "about": "a lazy line reaching an inner item's indent is still its text",
     "markdown": "  2) w\n      - w\n    > w\n",
     "html": "<ol start=\"2\">\n<li>w\n<ul>\n<li>w\n&gt; w</li>\n</ul>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a tab's columns an outer item left over count toward the inner item's indent first",
+    "markdown": "- - w\n\t\t- w\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>w\n- w</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "the inner item's code, past the columns a tab left over",
+    "markdown": "- - w\n\n\t\t|---|---|\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>\n<p>w</p>\n<pre><code>|---|---|\n</code></pre>\n</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a fence in an inner item keeps the columns a tab left over",
+    "markdown": "2) w\n\t- ```\n\t\tw\n",
+    "html": "<ol start=\"2\">\n<li>w\n<ul>\n<li>\n<pre><code>  w\n</code></pre>\n</li>\n</ul>\n</li>\n</ol>\n"
   }
 ]

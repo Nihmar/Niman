@@ -371,7 +371,7 @@ final class BlockTree {
         add(at, 0, leftOver, lazy: true);
         continue;
       }
-      final (rest, columns) = LineSyntax.dedent(text, indent);
+      final (rest, columns) = LineSyntax.dedent(text, indent, leftOver);
       add(at, text.length - rest.length, columns);
     }
     final (start, width, _) = marker;
