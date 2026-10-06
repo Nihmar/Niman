@@ -87,6 +87,9 @@ void main() {
     final cells = _inlines('| a | b\\|c |\n|---|---|');
     expect(cells.map((cell) => cell.text), ['a', 'b|c']);
     expect(_positions(cells[1]), ['0:6', '0:8', '0:9']);
+    // A construct over it covers the backslash too, which is a gap.
+    expect(cells[1].map.spans(0, 3), [(line: 0, start: 6, end: 10)]);
+    expect(cells[1].map.gaps(), [(line: 0, start: 7, end: 8)]);
   });
 
   test('every character of every example maps to itself', () {

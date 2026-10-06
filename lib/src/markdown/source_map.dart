@@ -31,7 +31,9 @@ final class SourceMap {
   }
 
   /// The pieces of the note `[start, end)` of the text covers, in order:
-  /// one per stretch it reaches, each on one line.
+  /// one per line it reaches. Two stretches on one line are one piece, over
+  /// what stands between them — a cell's `\` before its `|`: a construct
+  /// covers the characters its text was read from.
   List<({int line, int start, int end})> spans(int start, int end) {
     final out = <({int line, int start, int end})>[];
     for (var at = _first(start); at < _at.length && _at[at] < end; at++) {
@@ -40,14 +42,32 @@ final class SourceMap {
       final stretchEnd = from + _lengths[at];
       final b = end < stretchEnd ? end : stretchEnd;
       if (a >= b) continue;
-      out.add((
+      final piece = (
         line: _lines[at],
         start: _columns[at] + a - from,
         end: _columns[at] + b - from,
-      ));
+      );
+      if (out.isNotEmpty && out.last.line == piece.line) {
+        out.last = (line: piece.line, start: out.last.start, end: piece.end);
+      } else {
+        out.add(piece);
+      }
     }
     return out;
   }
+
+  /// What stands between two stretches of one line and is no character of
+  /// the text: a cell's `\` before its `|`, which the text reads as `|`.
+  List<({int line, int start, int end})> gaps() => [
+    for (var at = 1; at < _at.length; at++)
+      if (_lines[at] == _lines[at - 1] &&
+          _columns[at] > _columns[at - 1] + _lengths[at - 1])
+        (
+          line: _lines[at],
+          start: _columns[at - 1] + _lengths[at - 1],
+          end: _columns[at],
+        ),
+  ];
 
   /// Where offset [offset] of the text is in the note, or null for a
   /// character that is no line's: a line ending between two of a
