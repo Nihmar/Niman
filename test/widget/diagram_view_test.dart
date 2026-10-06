@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
 import 'package:niman/src/diagrams/diagram_painter.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -16,7 +16,7 @@ Future<void> _pump(WidgetTester tester, String document) async {
       home: Scaffold(
         body: MarkdownReadView(
           buffer: SourceBuffer.fromText(document),
-          parser: BlockParser(),
+          parser: ReadParser(),
           mathCache: MathCache(),
         ),
       ),
@@ -90,7 +90,7 @@ void main() {
                   'A[First step] --> B[Second step] --> C[Third step]'
                   ' --> D[Fourth step]\n```\n',
                 ),
-                parser: BlockParser(),
+                parser: ReadParser(),
                 mathCache: MathCache(),
               ),
             ),

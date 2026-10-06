@@ -33,7 +33,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -147,7 +147,7 @@ void main() {
             key: const Key('page'),
             child: MarkdownReadView(
               buffer: SourceBuffer.fromText(text),
-              parser: BlockParser(),
+              parser: ReadParser(),
               mathCache: cache,
               controller: controller,
               embedResolver: (_) async => null,

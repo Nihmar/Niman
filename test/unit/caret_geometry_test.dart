@@ -8,7 +8,6 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/caret_geometry.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
-import 'package:niman/src/markdown/render/visible_text.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// 16 px characters under the test font, with the strut the design's line
@@ -18,6 +17,9 @@ const StrutStyle _strut = StrutStyle(fontSize: 16, height: 1.2);
 
 /// A marker run styled the way `live` mode hides it (§8.6.0).
 const TextStyle _hiddenStyle = TextStyle(fontSize: 0, color: Color(0x00000000));
+
+/// The markers of `a **bold** word`: the two `**`.
+const List<(int, int)> _boldMarkers = [(2, 4), (8, 10)];
 
 /// The caret's full height for that strut, measured in
 /// `test/unit/caret_rectangle_test.dart`.
@@ -40,22 +42,21 @@ TextSpan _hiddenMarkers(String text, List<(int, int)> hidden) {
 /// The geometry of the first block of [document], laid out [maxWidth] wide and
 /// placed at document offset 0.
 ///
-/// With [hideMarkers] the block is laid out the way `live` mode lays it out —
-/// markers at zero size, `hiddenRangesOf` the ranges that vanish — and without
-/// it the way `source` mode does, which hides nothing at all.
+/// With [hidden] the block is laid out the way `live` mode lays it out —
+/// those ranges, its markers, at zero size — and without it the way
+/// `source` mode does, which hides nothing at all.
 CaretGeometry _geometry(
   String document, {
   SelectionModel selection = const SelectionModel.at(0),
   bool ownsTrailingEdge = false,
   double maxWidth = double.infinity,
-  bool hideMarkers = false,
+  List<(int, int)> hidden = const <(int, int)>[],
 }) {
   final buffer = SourceBuffer.fromText(document);
   final scanner = BlockScanner(buffer);
   final parsed = BlockParser().parse(scanner.index.blocks.first, buffer);
-  final hidden = hideMarkers ? hiddenRangesOf(parsed) : const <(int, int)>[];
   final painter = TextPainter(
-    text: hideMarkers
+    text: hidden.isNotEmpty
         ? _hiddenMarkers(parsed.text, hidden)
         : TextSpan(text: parsed.text, style: _body),
     textDirection: TextDirection.ltr,
@@ -173,7 +174,7 @@ void main() {
       Rect? at(int offset) => _geometry(
         source,
         selection: SelectionModel.at(offset),
-        hideMarkers: true,
+        hidden: _boldMarkers,
       ).caretRect();
       // 'a ' is 32 px, the marker adds nothing, and `b` follows at the same
       // place: the offsets inside and around it are one position.
@@ -186,7 +187,7 @@ void main() {
     });
 
     test('a tap never lands in one', () {
-      final geometry = _geometry(source, hideMarkers: true);
+      final geometry = _geometry(source, hidden: _boldMarkers);
       for (var x = 0.0; x <= 140; x += 4) {
         final at = geometry.offsetAt(Offset(x, 5));
         final inside = geometry.hidden.any((run) => at > run.$1 && at < run.$2);

@@ -11,7 +11,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/epub/epub_marks.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -37,7 +37,7 @@ final class EpubPaneState extends State<EpubPane> {
   final GlobalKey<MarkdownReadViewState> _readKey =
       GlobalKey<MarkdownReadViewState>();
   final ScrollController _scroll = ScrollController();
-  final BlockParser _parser = BlockParser();
+  final ReadParser _parser = ReadParser();
   final MathCache _mathCache = MathCache();
 
   /// The book, once read.

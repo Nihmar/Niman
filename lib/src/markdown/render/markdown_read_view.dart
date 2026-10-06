@@ -26,10 +26,10 @@ import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
-import 'package:niman/src/markdown/block_parser.dart';
-import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/code_piece_view.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
@@ -40,7 +40,6 @@ import 'package:niman/src/markdown/render/range_highlight.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
-import 'package:niman/src/markdown/render/visible_text.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -87,7 +86,7 @@ final class MarkdownReadView extends StatefulWidget {
   final SourceBuffer buffer;
 
   /// The block parser, owned by the caller so its cache outlives a rebuild.
-  final BlockParser parser;
+  final ReadParser parser;
 
   /// The math render cache, one per surface.
   final MathCache mathCache;
@@ -108,7 +107,7 @@ final class MarkdownReadView extends StatefulWidget {
   final void Function(String text, String? href)? onTapLink;
 
   /// Called when a wikilink is tapped.
-  final void Function(ExtensionSpan span)? onTapWikiLink;
+  final void Function(String inner)? onTapWikiLink;
 
   /// Resolves an embed's target to an absolute path, or null.
   final Future<String?> Function(String target)? embedResolver;
@@ -311,7 +310,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ReadSelection? get selection => _selection.selection;
 
   /// The block holding source [line]: its first line and its text
-  /// ([plainTextOf]); null when there is none there, or none drawn yet.
+  /// (`ReadBlock.plainText`); null when there is none there, or none drawn yet.
   ({int line, String text})? blockTextAt(int line) {
     final shown = _shown;
     final index = _blockIndexAt(line);
@@ -319,7 +318,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final block = _blocks[index];
     return (
       line: block.startLine,
-      text: plainTextOf(widget.parser.of(block, shown)),
+      text: widget.parser.of(block, shown).plainText,
     );
   }
 
@@ -944,9 +943,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         theme: _theme ?? _fallbackTheme,
       );
     }
-    final parsed = widget.parser.of(block, _shown!);
     final view = BlockView(
-      parsed: parsed,
+      read: widget.parser.of(block, _shown!),
       theme: _theme ?? _fallbackTheme,
       mathCache: widget.mathCache,
       availableWidth: availableWidth,
@@ -954,7 +952,6 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       onTapWikiLink: widget.onTapWikiLink,
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
-      scope: widget.parser.scope,
     );
     final marks = _marksIn(block);
     final tapMark = widget.onTapMark;

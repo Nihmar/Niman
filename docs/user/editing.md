@@ -266,6 +266,15 @@ yellow, the same in every theme), callouts, fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
+The read view reads a note as GitHub does — GitHub Flavored Markdown, as
+`cmark-gfm` reads it — with Niman's own syntax added to it: what is inside
+a quote or a list item is read as a note of its own, so a list in a quote
+is a list and a quote, a heading or a code block on an item's line is one
+in the item; a paragraph written under an item after a blank line stands
+at the item's indent; `- [ ]` with nothing after it is an empty task; a
+link's destination may sit on the line after its `[label]:`; `\*` and
+`&amp;` read as `*` and `&`; a footnote is cited by its number, raised.
+
 **Callouts**, as Obsidian writes them: a quote whose first line is
 `[!type]`, with a title of its own after it or the type's as its title.
 

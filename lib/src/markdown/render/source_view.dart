@@ -62,6 +62,7 @@ import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/note_references.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
@@ -362,7 +363,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   final LiveTables _tables = LiveTables();
 
   /// What the footnotes `live` ends the note with are parsed with.
-  final BlockParser _footnoteParser = BlockParser();
+  final ReadParser _footnoteParser = ReadParser();
 
   /// The formulas of those footnotes, for a surface given no math cache.
   final MathCache _footnoteMath = MathCache();

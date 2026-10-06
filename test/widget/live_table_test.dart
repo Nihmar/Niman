@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/live_table_grid.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
@@ -104,7 +104,7 @@ Future<void> _pumpReadView(WidgetTester tester, String note) async {
       home: Scaffold(
         body: MarkdownReadView(
           buffer: SourceBuffer.fromText(note),
-          parser: BlockParser(),
+          parser: ReadParser(),
           mathCache: MathCache(),
         ),
       ),

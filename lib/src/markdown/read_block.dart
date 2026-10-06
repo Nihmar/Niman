@@ -29,7 +29,10 @@ final class ReadInline {
   /// What a reader sees of it as plain text: a formula's tex, a
   /// wikilink's display text, an image's description, a line break a
   /// space.
-  String get plainText {
+  String get plainText => plainOf(nodes);
+
+  /// [nodes] as a reader sees them, as plain text ([plainText]).
+  static String plainOf(List<InlineNode> nodes) {
     final out = StringBuffer();
     final stack = <InlineNode>[...nodes.reversed];
     while (stack.isNotEmpty) {

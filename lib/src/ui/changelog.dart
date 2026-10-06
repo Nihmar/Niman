@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:niman/src/core/changelog.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -137,7 +137,7 @@ final class _ChangelogEntry extends StatefulWidget {
 
 final class _ChangelogEntryState extends State<_ChangelogEntry> {
   /// The block parser, shared by every section of this version.
-  final BlockParser _parser = BlockParser();
+  final ReadParser _parser = ReadParser();
 
   /// The version's formulas, typeset once.
   final MathCache _mathCache = MathCache();

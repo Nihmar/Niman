@@ -3,7 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -127,7 +127,7 @@ final class CheatsheetExample extends StatelessWidget {
     final markdown = markdownThemeOf(context);
     final scheme = Theme.of(context).colorScheme;
     final buffer = SourceBuffer.fromText(entry.source);
-    final parser = BlockParser();
+    final parser = ReadParser();
     final footnotes = parser.footnotesOf(buffer);
     return Container(
       key: Key('cheat-${entry.id}-shown'),
