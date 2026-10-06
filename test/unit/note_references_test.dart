@@ -27,6 +27,10 @@ void main() {
       '> > deep\n> > again [see](u) now\n',
       '- item\n  - nested\n    - deeper [[Target]]\n',
       '> quoted\r\n> on [[Target]]\r\n',
+      // Our parser's map: a cell, a callout's title, a footnote's body.
+      '| a | b |\n|---|---|\n| x | [[Target]] |\n',
+      '> [!note] On [see](u)\n> body\n',
+      'cited[^1]\n\n[^1]: see [[Target]]\n',
     ]) {
       for (final link in noteReferencesOf(text).links) {
         final written = text.substring(link.start, link.end);

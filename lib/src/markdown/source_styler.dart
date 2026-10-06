@@ -126,7 +126,7 @@ final class SourceStyler {
 
   /// The parser the references read their blocks with: the colours' own
   /// keeps a count a test reads, of the blocks drawn.
-  final BlockParser _referenceParser = BlockParser();
+  final ReadParser _referenceParser = ReadParser();
 
   /// The note's tags and links as of the buffer's revision, for its save
   /// to hand the index — or null when they are not kept (a short note,
