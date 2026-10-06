@@ -264,10 +264,12 @@ final class BlockTree {
             );
       local.add(text.substring(prefix));
       final origin = origins(line);
-      // A quote's line without its `>` is the quote's lazily.
+      // A quote's line without its `>` is the quote's lazily, and a line
+      // short of an item the block stands in is the item's.
       final lazy =
-          block.quoteDepth > 0 &&
-          prefix <= BlockParser.itemPrefixLength(block, text);
+          (block.quoteDepth > 0 &&
+              prefix <= BlockParser.itemPrefixLength(block, text)) ||
+          (quoteDepth == null && BlockParser.lazyInItems(block, text));
       starts.add((
         line: origin.line,
         column: origin.column + prefix,
@@ -363,7 +365,9 @@ final class BlockTree {
     for (var at = 1; at < local.length; at++) {
       final text = local[at];
       final leftOver = starts[at].leftOver;
-      if (LineSyntax.columnsOf(text, leftOver) < indent) {
+      // A line an outer item took lazily is this one's lazily too, however
+      // far in it stands: its indent was never the outer item's.
+      if (starts[at].lazy || LineSyntax.columnsOf(text, leftOver) < indent) {
         add(at, 0, leftOver, lazy: true);
         continue;
       }
