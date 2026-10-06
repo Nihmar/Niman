@@ -2899,4 +2899,23 @@ final class SlovenianStrings extends Strings {
       '„$filter” potrebuje število za svojo širino, in „$argument” to ni';
   @override
   String templateProblemUnknownFilter(String name) => 'neznan filter „$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Celoten zaslon';
+  @override
+  String get commandInsertDiagram => 'Vstavi diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Vstavi miselni vzorec';
+
+  @override
+  String get commandConvertListToMindMap => 'Pretvori seznam v miselni vzorec';
+  @override
+  String get toolMindMapSubtitle =>
+      'Zamenja seznam pri kazalki z miselnim vzorcem';
+
+  @override
+  String get toolMindMapNeedsList => 'Kazalka ni na seznamu';
 }

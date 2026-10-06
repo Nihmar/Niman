@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
@@ -21,6 +22,11 @@ import 'package:niman/src/preview/math_widget.dart';
 /// A display formula as `live` draws it: its lines, `[start, end)`, and its
 /// TeX.
 typedef LiveFormula = ({int start, int end, String tex});
+
+/// A Mermaid diagram as `live` draws it: its fence's lines, `[start, end)`,
+/// and the source between them (#530) — on its first line, the one it is
+/// drawn under, and null on the others, which only hide.
+typedef LiveDiagram = ({int start, int end, String? source});
 
 /// [line] — the formula's first line, its source hidden — with the formula
 /// typeset under it, centred as the read view centres it.
@@ -47,6 +53,36 @@ Widget liveFormulaUnder(
           maxWidth: maxWidth,
           tex: tex,
           style: mathStyleFor(theme.body),
+        ),
+      ),
+    ),
+  ],
+);
+
+/// [line] — the fence's first line, its source hidden — with the diagram
+/// drawn under it, as the read view draws it.
+///
+/// A tap on the diagram calls [onTapSource] with a line of the diagram's
+/// own source (1-based) — its first, or the one a parse error names — for
+/// the caret to go to, which shows the source again. [onPointerDown] hears
+/// a pointer going down on it before the note does.
+Widget liveDiagramUnder(
+  Widget line, {
+  required String source,
+  required MarkdownTheme theme,
+  required void Function(PointerDownEvent event) onPointerDown,
+  required void Function(int line) onTapSource,
+}) => Column(
+  crossAxisAlignment: CrossAxisAlignment.stretch,
+  children: <Widget>[
+    line,
+    Center(
+      child: Listener(
+        onPointerDown: onPointerDown,
+        child: BlockDiagramView(
+          source: source,
+          theme: theme,
+          onTapSource: onTapSource,
         ),
       ),
     ),

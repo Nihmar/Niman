@@ -2887,4 +2887,24 @@ final class BulgarianStrings extends Strings {
       '„$filter” иска число за ширината си, а „$argument” не е число';
   @override
   String templateProblemUnknownFilter(String name) => 'непознат филтър „$name”';
+  @override
+  String get diagramTitle => 'Диаграма';
+
+  @override
+  String get diagramFullScreen => 'Цял екран';
+  @override
+  String get commandInsertDiagram => 'Вмъкни диаграма (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Вмъкни интелектуална карта';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Превърни списъка в интелектуална карта';
+  @override
+  String get toolMindMapSubtitle =>
+      'Заменя списъка при курсора с интелектуална карта';
+
+  @override
+  String get toolMindMapNeedsList => 'Курсорът не е в списък';
 }

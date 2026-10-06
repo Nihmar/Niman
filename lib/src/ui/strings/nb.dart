@@ -2860,4 +2860,23 @@ final class NorwegianStrings extends Strings {
       '“$filter” trenger et tall for bredden, og “$argument” er ikke ett';
   @override
   String templateProblemUnknownFilter(String name) => 'ukjent filter “$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Fullskjerm';
+  @override
+  String get commandInsertDiagram => 'Sett inn diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Sett inn tankekart';
+
+  @override
+  String get commandConvertListToMindMap => 'Gjør listen om til tankekart';
+  @override
+  String get toolMindMapSubtitle =>
+      'Erstatter listen ved markøren med et tankekart';
+
+  @override
+  String get toolMindMapNeedsList => 'Markøren er ikke i en liste';
 }

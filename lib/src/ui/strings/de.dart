@@ -2944,4 +2944,23 @@ final class GermanStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'unbekannter Filter „$name“';
+  @override
+  String get diagramTitle => 'Diagramm';
+
+  @override
+  String get diagramFullScreen => 'Vollbild';
+  @override
+  String get commandInsertDiagram => 'Diagramm einfügen (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Mindmap einfügen';
+
+  @override
+  String get commandConvertListToMindMap => 'Liste in Mindmap umwandeln';
+  @override
+  String get toolMindMapSubtitle =>
+      'Ersetzt die Liste am Cursor durch eine Mindmap';
+
+  @override
+  String get toolMindMapNeedsList => 'Der Cursor steht nicht in einer Liste';
 }

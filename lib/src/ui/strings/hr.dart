@@ -2908,4 +2908,23 @@ final class CroatianStrings extends Strings {
       '„$filter” treba broj za svoju širinu, a „$argument” to nije';
   @override
   String templateProblemUnknownFilter(String name) => 'nepoznat filtar „$name”';
+  @override
+  String get diagramTitle => 'Dijagram';
+
+  @override
+  String get diagramFullScreen => 'Cijeli zaslon';
+  @override
+  String get commandInsertDiagram => 'Umetni dijagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Umetni mentalnu mapu';
+
+  @override
+  String get commandConvertListToMindMap => 'Pretvori popis u mentalnu mapu';
+  @override
+  String get toolMindMapSubtitle =>
+      'Zamjenjuje popis na pokazivaču mentalnom mapom';
+
+  @override
+  String get toolMindMapNeedsList => 'Pokazivač nije na popisu';
 }

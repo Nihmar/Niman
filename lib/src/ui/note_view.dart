@@ -22,6 +22,7 @@ import 'package:niman/src/editor/find_bar.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/editor/list_tally_edit.dart';
+import 'package:niman/src/editor/list_to_mindmap.dart' as mindmap;
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -40,6 +41,7 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
+import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -139,6 +141,7 @@ final class NoteView extends StatefulWidget {
     this.showWysiwyg = false,
     this.onWysiwygChanged,
     this.onEditorKindChanged,
+    this.onShowSource,
     this.libraryRoot,
     this.pickImagePath,
     this.importImage,
@@ -240,6 +243,11 @@ final class NoteView extends StatefulWidget {
   /// T-WYS-12); null hides the toggle, which is what a library with a
   /// single enabled editor passes.
   final ValueChanged<EditorKind>? onEditorKindChanged;
+
+  /// Asks the owner to show the editor in place of the read pane, for a tap
+  /// on a diagram there (#530): the switch is the owner's, as [showPreview]
+  /// is. Null leaves a diagram's tap alone.
+  final VoidCallback? onShowSource;
 
   /// The library root (T-M2-09): relative image links in the preview
   /// resolve under it, and inserted images are copied into
@@ -478,6 +486,61 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
+  @override
+  void convertListToMindMap() {
+    if (!canInsert) return;
+    final surface = _surface;
+    if (surface == null) return;
+    final map = _mindMapAtCaret();
+    if (map == null) {
+      // The palette offers the command anywhere: say why it did nothing.
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      final reason = SnackBar(content: Text(AppStrings.toolMindMapNeedsList));
+      messenger?.showSnackBar(reason);
+      return;
+    }
+    // Only the list's lines are replaced: one undo step, and the note is
+    // never copied whole to make it.
+    final buffer = surface.buffer;
+    final last = map.endLine - 1;
+    final terminator = buffer.terminatorAt(map.startLine);
+    surface.applyEdit(
+      map.fence.join(terminator.isEmpty ? '\n' : terminator),
+      const TextSelection.collapsed(offset: 0),
+      start: buffer.offsetOfLine(map.startLine),
+      end: buffer.offsetOfLine(last) + buffer.lineLengthAt(last),
+    );
+    _focus.requestFocus();
+  }
+
+  /// The mind map the list at the caret becomes, or null when the caret is
+  /// not in one — what the palette command converts and the Tools sheet
+  /// offers, read the same way for both.
+  mindmap.ListMindMap? _mindMapAtCaret() =>
+      _caretList<mindmap.ListMindMap?>(mindmap.listToMindMap);
+
+  /// [read] of the list at the caret, or null without a note: the caret's
+  /// line, and the pane's own scan when it draws this buffer — a scan as far
+  /// as the list otherwise.
+  T? _caretList<T>(
+    T Function({
+      required SourceBuffer buffer,
+      required int line,
+      Block? Function(int line)? blockAt,
+    })
+    read,
+  ) {
+    final surface = _surface;
+    if (surface == null) return null;
+    final buffer = surface.buffer;
+    final view = _sourceViewKey.currentState;
+    return read(
+      buffer: buffer,
+      line: buffer.lineOf(surface.selection.extent),
+      blockAt: identical(view?.widget.buffer, buffer) ? view?.blockAt : null,
+    );
+  }
+
   /// The unified note's revision the word count and the outline were last
   /// read at, or -1 before the first read. Comparing revisions is what says
   /// a note changed, where the statistics used to compare its whole text.
@@ -607,6 +670,10 @@ final class _NoteViewState extends State<NoteView>
   /// not on screen when the note changed (see [_refreshPreview]).
   bool _previewStale = false;
 
+  /// The note line a tap on a diagram in the read pane asked the editor to
+  /// open at (#530), taken when the editor comes back.
+  int? _sourceLineAsked;
+
   /// The note on the unified source surface: its buffer, its undo history and
   /// the door every command comes in through (the toolbar, an image, a
   /// spelling fix, a reload). One per open note, so the history survives the
@@ -680,6 +747,35 @@ final class _NoteViewState extends State<NoteView>
         _sourceViewKey.currentState?.showAnchor(anchor);
       }
     });
+  }
+
+  /// Puts the caret on the line a diagram's tap asked for, once the editor
+  /// is back in place of the read pane — after [_keepPlaceAcrossModes], whose
+  /// place it overrides: the tap named a line, the place was only kept.
+  void _openSourceAsked(NoteView oldWidget) {
+    final line = _sourceLineAsked;
+    if (line == null) return;
+    if (oldWidget.path != widget.path) {
+      _sourceLineAsked = null;
+      return;
+    }
+    if (!_previewIn(oldWidget) || _previewIn(widget)) return;
+    _sourceLineAsked = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _surface?.jumpToLine(line);
+      _focus.requestFocus();
+    });
+  }
+
+  /// A tap on a diagram in the read pane, or on its parse error: the
+  /// editor, its caret on [line] — the block's first line, or the one the
+  /// error names — as a tap on a table in `live` puts it in the table.
+  void _showSourceAt(int line) {
+    final show = widget.onShowSource;
+    if (show == null) return;
+    _sourceLineAsked = line;
+    show();
   }
 
   /// The mode the unified surface is built in: the WYSIWYG pane is `live`, the
@@ -787,6 +883,7 @@ final class _NoteViewState extends State<NoteView>
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
+    _openSourceAsked(oldWidget);
     if (oldWidget.path != widget.path) {
       // Another note's head is not this one's (#157): the panel opens closed
       // again, and the note on screen is taken at its head until it scrolls.
@@ -1477,6 +1574,7 @@ final class _NoteViewState extends State<NoteView>
     column: widget.noteColumn,
     knownScan: _editorScanOf,
     onToggleTask: _toggleTaskFromRead,
+    onTapDiagramSource: widget.onShowSource == null ? null : _showSourceAt,
   );
 
   /// The read pane with the frontmatter fields panel over it (#157), or the
@@ -2668,14 +2766,23 @@ final class _NoteViewState extends State<NoteView>
   Future<void> _openTools() async {
     final tool = await showEditorToolsSheet(
       context,
-      available: <EditorTool>{if (_hasListToCount) EditorTool.countList},
+      available: <EditorTool>{
+        if (_hasListToCount) EditorTool.countList,
+        if (_hasListAtCaret) EditorTool.mindMap,
+      },
     );
     if (!mounted || tool == null) return;
     switch (tool) {
       case EditorTool.countList:
         await _countList();
+      case EditorTool.mindMap:
+        convertListToMindMap();
     }
   }
+
+  /// Whether the caret stands in a list, so the mind-map tool can run.
+  /// One block read, not the conversion: the sheet only asks.
+  bool get _hasListAtCaret => _caretList(mindmap.hasListAt) ?? false;
 
   /// Whether the note has a list the count could run on.
   ///

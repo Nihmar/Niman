@@ -43,8 +43,10 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/render/callout_box.dart';
+import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/live_table_grid.dart';
@@ -71,6 +73,8 @@ final class BlockView extends StatelessWidget {
     this.embedResolver,
     this.embedImages,
     this.onToggleTask,
+    this.onTapDiagramSource,
+    this.printed = false,
     this.scope,
     this.quoteNesting = 0,
     super.key,
@@ -102,6 +106,15 @@ final class BlockView extends StatelessWidget {
   /// The math render cache, one per surface.
   final MathCache mathCache;
 
+  /// Called with a note line when a diagram — or its parse error — is tapped,
+  /// to show the block's source again (#530).
+  final void Function(int line)? onTapDiagramSource;
+
+  /// Whether the block is drawn on a page (an export) rather than on a
+  /// screen: a diagram carries no full-screen button there, which a page
+  /// cannot press and the raster fallback has no overlay to build.
+  final bool printed;
+
   /// How wide the pane is, so a display formula wider than it can be broken
   /// across lines instead of cut (#257). Null when the caller does not know —
   /// a test, an intrinsic pass — and the formula is drawn whole.
@@ -132,7 +145,7 @@ final class BlockView extends StatelessWidget {
       ),
       BlockKind.listItem => _listItem(context),
       BlockKind.quote => _quote(context),
-      BlockKind.fencedCode => _code(context, block.fenceInfo),
+      BlockKind.fencedCode => _fenced(context),
       BlockKind.indentedCode => _code(context, null),
       BlockKind.math => _blockMath(context),
       BlockKind.table => _table(context),
@@ -403,6 +416,33 @@ final class BlockView extends StatelessWidget {
           () => definitions,
         ),
     ];
+  }
+
+  /// A fenced block: a Mermaid diagram when its language says so, code
+  /// otherwise.
+  Widget _fenced(BuildContext context) {
+    final language = parsed.block.fenceInfo;
+    if (language != null && language.toLowerCase() == 'mermaid') {
+      return _diagram(context);
+    }
+    return _code(context, language);
+  }
+
+  /// A Mermaid fence drawn as a diagram, or as its source when it does not
+  /// parse (#530).
+  Widget _diagram(BuildContext context) {
+    final content = fenceBody(parsed.text.split('\n'))?.code;
+    if (content == null || content.trim().isEmpty) {
+      return _code(context, parsed.block.fenceInfo);
+    }
+    final tap = onTapDiagramSource;
+    final line = parsed.block.startLine;
+    return BlockDiagramView(
+      source: content,
+      theme: theme,
+      fullScreen: !printed,
+      onTapSource: tap == null ? null : (inner) => tap(line + inner),
+    );
   }
 
   /// A code block: a filled box of monospace lines, the fence taken out, the

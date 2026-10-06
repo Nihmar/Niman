@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
+import 'package:niman/src/diagrams/diagram_painter.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -142,6 +143,49 @@ void main() {
     // than one line of plain prose.
     expect(box.size.height, greaterThan(30));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a diagram is drawn on the page without its screen controls', (
+    tester,
+  ) async {
+    // The theme is the caller's, read where there is one.
+    late MarkdownTheme theme;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            theme = markdownThemeOf(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    // The raster fallback's own surroundings: a direction and a media query,
+    // no Material, no Overlay — what a full-screen button's tooltip needs.
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MarkdownExportView(
+            buffer: SourceBuffer.fromText(
+              '```mermaid\nflowchart TD\nA --> B\n```\n',
+            ),
+            parser: BlockParser(),
+            theme: theme,
+            mathCache: _syncCache(),
+            width: 400,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    final painters = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .where((paint) => paint.painter is DiagramPainter);
+    expect(painters, isNotEmpty);
+    expect(find.byType(IconButton), findsNothing);
   });
 
   testWidgets('an empty note records without failing', (tester) async {

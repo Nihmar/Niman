@@ -2905,4 +2905,22 @@ final class SerbianStrings extends Strings {
       '„$filter" треба број за своју ширину, а „$argument" то није';
   @override
   String templateProblemUnknownFilter(String name) => 'непознат филтер „$name"';
+  @override
+  String get diagramTitle => 'Дијаграм';
+
+  @override
+  String get diagramFullScreen => 'Цео екран';
+  @override
+  String get commandInsertDiagram => 'Убаци дијаграм (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Убаци мапу ума';
+
+  @override
+  String get commandConvertListToMindMap => 'Претвори листу у мапу ума';
+  @override
+  String get toolMindMapSubtitle => 'Замењује листу на курзору мапом ума';
+
+  @override
+  String get toolMindMapNeedsList => 'Курзор није у листи';
 }

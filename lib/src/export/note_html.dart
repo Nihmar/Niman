@@ -68,6 +68,7 @@ final class NoteHtml {
   final MathSvg _math;
   late final HtmlSpans _spans;
   final ExtensionMasker _masker = const ExtensionMasker();
+  bool _usedDiagram = false;
 
   /// What each token stands for; a block's has no plain text.
   final List<HtmlSpan> _pieces = <HtmlSpan>[];
@@ -78,9 +79,9 @@ final class NoteHtml {
   /// The `@font-face` rules the body's formulas need, or null.
   String? get fontFaces => _math.fontFaces;
 
-  /// Whether the body drew a formula as inline SVG; the EPUB package
-  /// declares the `svg` property for a chapter that did (E6).
-  bool get usesSvg => _math.usesSvg;
+  /// Whether the body drew a formula or a diagram as inline SVG; the EPUB
+  /// package declares the `svg` property for a chapter that did (E6).
+  bool get usesSvg => _math.usesSvg || _usedDiagram;
 
   String _render(String text) {
     final nodes = _parsed(text);
@@ -147,7 +148,7 @@ final class NoteHtml {
   }) => switch (kind) {
     BlockKind.frontmatter => const <String>[],
     BlockKind.blank || BlockKind.thematicBreak || BlockKind.indentedCode => raw,
-    BlockKind.fencedCode => _block(raw, rendered ? fencedCodeHtml(raw) : ''),
+    BlockKind.fencedCode => _fenced(raw, rendered: rendered),
     BlockKind.math => _block(
       raw,
       rendered ? mathBlockHtml(raw.join('\n'), _math) : '',
@@ -162,6 +163,18 @@ final class NoteHtml {
     BlockKind.listItem ||
     BlockKind.table => _masked(raw.join('\n'), rendered: rendered).split('\n'),
   };
+
+  /// A fenced block: a Mermaid diagram when it is one and parses, its code
+  /// otherwise (#530).
+  List<String> _fenced(List<String> raw, {required bool rendered}) {
+    if (!rendered) return _block(raw, '');
+    final diagram = mermaidBlockHtml(raw);
+    if (diagram != null) {
+      _usedDiagram = true;
+      return _block(raw, diagram);
+    }
+    return _block(raw, fencedCodeHtml(raw));
+  }
 
   /// A block drawn as [html], as a token on a line of its own at the
   /// block's indent — so a fence inside a list item stays inside it.

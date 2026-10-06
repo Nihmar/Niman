@@ -2832,4 +2832,22 @@ final class EstonianStrings extends Strings {
       '„$filter” vajab laiuse jaoks arvu ja „$argument” pole see';
   @override
   String templateProblemUnknownFilter(String name) => 'tundmatu filter „$name”';
+  @override
+  String get diagramTitle => 'Diagramm';
+
+  @override
+  String get diagramFullScreen => 'Täisekraan';
+  @override
+  String get commandInsertDiagram => 'Lisa diagramm (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Lisa mõttemap';
+
+  @override
+  String get commandConvertListToMindMap => 'Teisenda loend mõttemapiks';
+  @override
+  String get toolMindMapSubtitle => 'Asendab kursoril oleva loendi mõttemapiga';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursor ei ole loendis';
 }

@@ -2963,4 +2963,24 @@ final class FrenchStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtre inconnu « $name »';
+  @override
+  String get diagramTitle => 'Diagramme';
+
+  @override
+  String get diagramFullScreen => 'Plein écran';
+  @override
+  String get commandInsertDiagram => 'Insérer un diagramme (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Insérer une carte mentale';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Convertir la liste en carte mentale';
+  @override
+  String get toolMindMapSubtitle =>
+      'Remplace la liste au curseur par une carte mentale';
+
+  @override
+  String get toolMindMapNeedsList => "Le curseur n'est pas dans une liste";
 }

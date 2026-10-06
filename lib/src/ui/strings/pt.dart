@@ -2893,4 +2893,23 @@ final class PortugueseStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtro desconhecido “$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Tela cheia';
+  @override
+  String get commandInsertDiagram => 'Inserir diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Inserir mapa mental';
+
+  @override
+  String get commandConvertListToMindMap => 'Converter lista em mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Substitui a lista no cursor por um mapa mental';
+
+  @override
+  String get toolMindMapNeedsList => 'O cursor não está numa lista';
 }

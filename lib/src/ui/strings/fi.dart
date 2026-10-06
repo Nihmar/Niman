@@ -2894,4 +2894,23 @@ final class FinnishStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'tuntematon suodatin “$name”';
+  @override
+  String get diagramTitle => 'Kaavio';
+
+  @override
+  String get diagramFullScreen => 'Koko näyttö';
+  @override
+  String get commandInsertDiagram => 'Lisää kaavio (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Lisää miellekartta';
+
+  @override
+  String get commandConvertListToMindMap => 'Muunna luettelo miellekartaksi';
+  @override
+  String get toolMindMapSubtitle =>
+      'Korvaa kohdistimen luettelon miellekartalla';
+
+  @override
+  String get toolMindMapNeedsList => 'Kohdistin ei ole luettelossa';
 }

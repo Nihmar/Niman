@@ -184,4 +184,50 @@ void main() {
     expect(page, contains('<title>A &lt;b&gt;</title>'));
     expect(page, isNot(contains('@font-face')));
   });
+
+  test('a mermaid fence is an inline SVG diagram (#530)', () {
+    final note = NoteHtml(
+      const NoteHtmlSource(
+        text: 'Before\n\n```mermaid\nflowchart TD\nA[Start] --> B\n```\n',
+        title: 't',
+      ),
+    );
+    final html = note.body();
+    expect(html, contains('<div class="diagram" data-mermaid="'));
+    expect(html, contains('"><svg '));
+    expect(html, contains('Start'));
+    expect(html, isNot(contains('language-mermaid')));
+    expect(note.usesSvg, isTrue);
+  });
+
+  test('a mermaid fence that does not parse stays code (#530)', () {
+    final note = NoteHtml(
+      const NoteHtmlSource(
+        text: '```mermaid\nflowchart TD\nA -- B\n```\n',
+        title: 't',
+      ),
+    );
+    final html = note.body();
+    expect(html, contains('<pre class="code">'));
+    expect(html, isNot(contains('<svg')));
+    expect(note.usesSvg, isFalse);
+  });
+
+  test('a diagram keeps a light plate on a dark page (#530)', () {
+    // The SVG is drawn in the light palette: its dark lines would sit on
+    // the page's dark background, in the HTML and the EPUB alike.
+    final rule = RegExp(r'\.diagram svg \{[^}]*\}').firstMatch(pageStyle)!;
+    expect(rule.group(0), contains('background: #fff'));
+  });
+
+  test("a diagram's labels name a sans face, not the reader's (#530)", () {
+    // Its boxes are sized for a sans; an EPUB reader's serif runs over them.
+    final html = NoteHtml(
+      const NoteHtmlSource(
+        text: '```mermaid\nflowchart TD\nA[Start] --> B\n```\n',
+        title: 't',
+      ),
+    ).body();
+    expect(html, contains('font-family="system-ui, sans-serif"'));
+  });
 }

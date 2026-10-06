@@ -2971,4 +2971,23 @@ final class GreekStrings extends Strings {
       'αριθμός';
   @override
   String templateProblemUnknownFilter(String name) => 'άγνωστο φίλτρο «$name»';
+  @override
+  String get diagramTitle => 'Διάγραμμα';
+
+  @override
+  String get diagramFullScreen => 'Πλήρης οθόνη';
+  @override
+  String get commandInsertDiagram => 'Εισαγωγή διαγράμματος (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Εισαγωγή νοητικού χάρτη';
+
+  @override
+  String get commandConvertListToMindMap => 'Μετατροπή λίστας σε νοητικό χάρτη';
+  @override
+  String get toolMindMapSubtitle =>
+      'Αντικαθιστά τη λίστα στον δείκτη με νοητικό χάρτη';
+
+  @override
+  String get toolMindMapNeedsList => 'Ο δείκτης δεν βρίσκεται σε λίστα';
 }

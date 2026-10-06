@@ -7,6 +7,8 @@
 // ignore_for_file: missing_whitespace_between_adjacent_strings
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/epub/xhtml_markdown.dart';
+import 'package:niman/src/export/note_html.dart';
+import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/markdown/extension_masker.dart';
 
 void main() {
@@ -97,6 +99,17 @@ void main() {
 
     test('a rule', () {
       expect(markdown('<p>a</p><hr/><p>b</p>'), 'a\n\n---\n\nb');
+    });
+
+    test('an exported diagram reads back as its fence (#530)', () {
+      // The SVG is a drawing, and the source is what a note holds: the
+      // export carries it on the diagram's box, and it comes back whole.
+      const source = 'flowchart TD\nA["a & <b> \\"c\\""] --> B';
+      final body = NoteHtml(
+        const NoteHtmlSource(text: '```mermaid\n$source\n```\n', title: 't'),
+      ).body();
+      expect(body, contains('<svg '));
+      expect(markdown(body), '```mermaid\n$source\n```');
     });
 
     test('a table, its first row the header, short rows filled', () {

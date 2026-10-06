@@ -388,6 +388,79 @@ void main() {
       expect(_depths(scanner), <int>[0, 1, 0]);
     });
 
+    test("a line back at an item's content column is that item again", () {
+      // After a blank line, `  back in A` is indented past A's content column
+      // but not B's: it closes B and is A's second paragraph, not a line
+      // outside the list.
+      final scanner = BlockScanner(
+        SourceBuffer.fromText('- A\n  - B\n\n  back in A\n- C\n'),
+      );
+      final back = scanner.blockAt(3)!;
+      expect(back.kind, BlockKind.paragraph);
+      expect(back.listDepth, 0);
+      expect(scanner.blockAt(4)!.listDepth, 0);
+    });
+
+    test('a lazy line keeps every item open', () {
+      // Paragraph text written short of the item's column goes on with the
+      // paragraph, so the item it is in stays open: the marker after it is
+      // still that item's child.
+      final scanner = BlockScanner(
+        SourceBuffer.fromText('- A\n  - B\n  lazy\n    - C\n'),
+      );
+      expect(scanner.blockAt(3)!.kind, BlockKind.listItem);
+      expect(scanner.blockAt(3)!.listDepth, 2);
+    });
+
+    test("a fence in an item opens at the item's content column", () {
+      // B's content starts at column 4: its fence stands four spaces in,
+      // which outside a list would be too many for a fence.
+      final scanner = BlockScanner(
+        SourceBuffer.fromText(
+          '- A\n\n  more about A\n  - B\n\n    ```\n    code of B\n    ```\n',
+        ),
+      );
+      final fence = scanner.blockAt(5)!;
+      expect(fence.kind, BlockKind.fencedCode);
+      expect(fence.startLine, 5);
+      expect(fence.endLine, 8);
+      expect(fence.listDepth, 1);
+      expect(scanner.blockAt(8)!.kind, BlockKind.blank);
+    });
+
+    test('a fence in an item leaves the item open after it', () {
+      final scanner = BlockScanner(
+        SourceBuffer.fromText('- A\n\n  ```\n  code of A\n  ```\n  - B\n'),
+      );
+      final fence = scanner.blockAt(2)!;
+      expect(fence.kind, BlockKind.fencedCode);
+      expect(fence.listDepth, 0);
+      final b = scanner.blockAt(5)!;
+      expect(b.kind, BlockKind.listItem);
+      expect(b.listDepth, 1);
+    });
+
+    test('a display formula in an item leaves the item open after it', () {
+      final scanner = BlockScanner(
+        SourceBuffer.fromText('- A\n\n  \$\$\n  x\n  \$\$\n  - B\n'),
+      );
+      expect(scanner.blockAt(2)!.kind, BlockKind.math);
+      expect(scanner.blockAt(2)!.listDepth, 0);
+      expect(scanner.blockAt(5)!.listDepth, 1);
+    });
+
+    test('a marker line is not a lazy line of the quote above it', () {
+      final scanner = BlockScanner(
+        SourceBuffer.fromText('- A\n  > quote\n- B\n'),
+      );
+      expect(scanner.stateEntering(2).quoteDepth, 1);
+      final b = scanner.blockAt(2)!;
+      expect(b.kind, BlockKind.listItem);
+      expect(b.quoteDepth, 0);
+      expect(b.listDepth, 0);
+      expect(scanner.stateEntering(3).quoteDepth, 0);
+    });
+
     test('a growing ordered marker stays one level', () {
       // `9. ` and `10. ` start at the same column: same list, same depth,
       // however much their content columns differ.
@@ -674,6 +747,13 @@ void main() {
         '</div>',
         '2. two',
         '- [ ] t',
+        // Blocks at an item's content column, a level in and back out.
+        '    - deeper',
+        '  back',
+        '  ```',
+        '    ```',
+        r'  $$',
+        '  > q',
       ];
       final random = Random(20260923);
       String piece() => pieces[random.nextInt(pieces.length)];

@@ -2894,4 +2894,23 @@ final class ItalianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtro sconosciuto “$name”';
+  @override
+  String get diagramTitle => 'Diagramma';
+
+  @override
+  String get diagramFullScreen => 'Schermo intero';
+  @override
+  String get commandInsertDiagram => 'Inserisci diagramma (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Inserisci mappa mentale';
+
+  @override
+  String get commandConvertListToMindMap => 'Converti elenco in mappa mentale';
+  @override
+  String get toolMindMapSubtitle =>
+      'Sostituisce con una mappa mentale l’elenco in cui si trova il cursore';
+
+  @override
+  String get toolMindMapNeedsList => 'Il cursore non è in un elenco';
 }

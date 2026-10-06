@@ -2924,4 +2924,24 @@ final class CatalanStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtre desconegut “$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Pantalla completa';
+  @override
+  String get commandInsertDiagram => 'Insereix diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Insereix mapa mental';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Converteix la llista en mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Reemplaça la llista del cursor per un mapa mental';
+
+  @override
+  String get toolMindMapNeedsList => 'El cursor no és en una llista';
 }

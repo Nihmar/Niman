@@ -2883,4 +2883,23 @@ final class HungarianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'ismeretlen szűrő „$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Teljes képernyő';
+  @override
+  String get commandInsertDiagram => 'Diagram beszúrása (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Elmetérkép beszúrása';
+
+  @override
+  String get commandConvertListToMindMap => 'Lista átalakítása elmetérképpé';
+  @override
+  String get toolMindMapSubtitle =>
+      'A kurzornál lévő listát elmetérképre cseréli';
+
+  @override
+  String get toolMindMapNeedsList => 'A kurzor nincs listában';
 }

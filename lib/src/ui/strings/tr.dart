@@ -2838,4 +2838,23 @@ final class TurkishStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'bilinmeyen filtre “$name”';
+  @override
+  String get diagramTitle => 'Diyagram';
+
+  @override
+  String get diagramFullScreen => 'Tam ekran';
+  @override
+  String get commandInsertDiagram => 'Diyagram ekle (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Zihin haritası ekle';
+
+  @override
+  String get commandConvertListToMindMap => 'Listeyi zihin haritasına dönüştür';
+  @override
+  String get toolMindMapSubtitle =>
+      'İmleçteki listeyi zihin haritasıyla değiştirir';
+
+  @override
+  String get toolMindMapNeedsList => 'İmleç bir listede değil';
 }

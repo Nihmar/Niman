@@ -56,6 +56,7 @@ final class MarkdownReadView extends StatefulWidget {
     this.column = NoteColumn.off,
     this.onTapLink,
     this.onTapWikiLink,
+    this.onTapDiagramSource,
     this.embedResolver,
     this.knownScan,
     this.onToggleTask,
@@ -91,6 +92,10 @@ final class MarkdownReadView extends StatefulWidget {
 
   /// The math render cache, one per surface.
   final MathCache mathCache;
+
+  /// Called with a note line when a diagram or its parse error is tapped, to
+  /// show the source again (#530).
+  final void Function(int line)? onTapDiagramSource;
 
   /// The scroll controller, for the shell's tabs and its place keeping.
   final ScrollController? controller;
@@ -950,6 +955,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       availableWidth: availableWidth,
       onTapLink: widget.onTapLink,
       onTapWikiLink: widget.onTapWikiLink,
+      onTapDiagramSource: widget.onTapDiagramSource,
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
       scope: widget.parser.scope,

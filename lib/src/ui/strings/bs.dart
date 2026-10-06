@@ -2907,4 +2907,23 @@ final class BosnianStrings extends Strings {
       '"$filter" treba broj za svoju širinu, a "$argument" to nije';
   @override
   String templateProblemUnknownFilter(String name) => 'nepoznat filter "$name"';
+  @override
+  String get diagramTitle => 'Dijagram';
+
+  @override
+  String get diagramFullScreen => 'Cijeli ekran';
+  @override
+  String get commandInsertDiagram => 'Umetni dijagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Umetni mentalnu mapu';
+
+  @override
+  String get commandConvertListToMindMap => 'Pretvori listu u mentalnu mapu';
+  @override
+  String get toolMindMapSubtitle =>
+      'Zamjenjuje listu na kursoru mentalnom mapom';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursor nije u listi';
 }

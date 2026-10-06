@@ -454,6 +454,128 @@ one another; one written with a single space round each cell stays that
 way. A column's alignment (`:--`, `:-:`, `--:`) is drawn in both the read
 view and live mode.
 
+### Diagrams (Mermaid)
+
+A fenced block whose language is `mermaid` is drawn as a diagram, in the
+read view and in live mode alike:
+
+    ```mermaid
+    flowchart TD
+      A[Start] --> B{Ok?}
+      B -->|Yes| C[End]
+    ```
+
+Twenty-two kinds are drawn:
+
+- **Flowcharts** (`flowchart` or `graph`): all four directions, the node
+  shapes, subgraphs (nested too), every edge spelling and its label.
+- **Sequence diagrams** (`sequenceDiagram`): participants and their
+  aliases, every message arrow, notes, and the frames of `loop`, `alt`,
+  `opt`, `par`, `critical` and `break` with their sections.
+- **Pie charts** (`pie`): the slices clockwise from the top with their
+  shares, a legend (with each value under `showData`) and the title. Each
+  slice has a colour of its own, told apart by colour-blind readers too;
+  past eight slices the rest are gathered into "Other".
+- **Class diagrams** (`classDiagram`): classes in three compartments —
+  name and stereotype, attributes, methods — every UML relation with its
+  ends, cardinalities and label, notes and namespaces.
+- **State diagrams** (`stateDiagram`, `stateDiagram-v2`): states, the
+  start and end `[*]`, forks, joins and choices, composite states (nested
+  too) and notes.
+- **Entity-relationship diagrams** (`erDiagram`): entities with their
+  attributes and keys, and relationships ending in the crow's feet of
+  their cardinalities, solid or dashed, with their labels.
+- **C4 diagrams** (`C4Context`, `C4Container`, `C4Component`,
+  `C4Dynamic`, `C4Deployment`): people, systems, containers and
+  components — external ones, databases and queues too — as cards with
+  their technology and description, inside nested boundaries, and the
+  relationships between them; a relationship's direction (`Rel_U`,
+  `Rel_L`…) is left to the layout.
+- **Requirement diagrams** (`requirementDiagram`): requirements of every
+  kind and elements, each with its attributes (a long text wrapped), and
+  the relationships between them — `contains` with its circled cross, the
+  others dashed with an arrow.
+- **Gantt charts** (`gantt`): sections and their tasks on a time axis,
+  every way of writing a start and an end (dates, durations, `after`,
+  `until`), `done`, `active`, `crit` and milestones, the days `excludes`
+  leaves out, the `dateFormat` and the `axisFormat`.
+- **Timelines** (`timeline`): periods along a time line, their events
+  under them, sections in a colour each.
+- **User journeys** (`journey`): the tasks of each section with a face
+  that shows how each went, and dots for the actors who took part.
+- **Git graphs** (`gitGraph`): branches as lanes, commits with their ids,
+  tags and types, merges and cherry-picks, left to right or top to bottom.
+- **Kanban boards** (`kanban`): columns of cards, each with its ticket,
+  assignee and priority.
+- **Quadrant charts** (`quadrantChart`): four named quadrants, the axes'
+  ends, and points placed from 0 to 1 on each axis.
+- **XY charts** (`xychart-beta`): bars and lines over categories, the
+  values in round steps, upright or `horizontal`.
+- **Sankey diagrams** (`sankey-beta`): flows written as CSV, drawn as
+  bands as wide as their values between bars as tall as what passes
+  through them.
+- **Block diagrams** (`block-beta`): blocks in a grid of `columns`, as
+  wide as the columns they `span`, empty cells with `space`, groups
+  nesting a grid of their own, block arrows pointing any way, and edges
+  between blocks.
+- **Packet diagrams** (`packet-beta`): fields by their bits (`0-15`, `106`
+  or `+16`) in rows of 32, each with its first and last bit's numbers, a
+  field longer than its row going on in the next.
+- **Radar charts** (`radar-beta`): axes as spokes clockwise from the top,
+  curves with a value for each axis (in order or by axis id), rings as
+  circles or polygons, `min`, `max`, `ticks` and a legend.
+- **Treemaps** (`treemap-beta`): a tree written by indentation, each leaf
+  a rectangle as large as its value's share, each section holding its
+  nodes under its name; a leaf too small for its name is drawn without it.
+- **Architecture diagrams** (`architecture-beta`): services with their
+  icons (`cloud`, `database`, `disk`, `internet`, `server`; any other a
+  plain box), junctions and nested groups, set on a grid by the sides
+  their edges name (`db:L -- R:server` puts the server left of the
+  database), each edge at right angles from side to side with its
+  arrows and label.
+- **Mind maps** (`mindmap`), the tree drawn left to right.
+
+In any of them a label may write a character as an entity, as in Mermaid:
+`&amp;`, `&nbsp;`, `&#65;`, or Mermaid's own `#quot;` and `#58;`. They are
+written out after the line is read, so `#58;` puts a colon in a label
+where a plain `:` would end it.
+
+What only colours or animates a diagram — `classDef`, `style`, `rect`,
+activations, `autonumber`, C4's `UpdateElementStyle` and
+`UpdateLayoutConfig` — is read and drawn without, in the theme's own
+colours. ZenUML, a plugin Mermaid itself loads from outside, is left
+as source with a note saying so. While the caret is in the fence, live mode
+shows the source again; the read view opens it on a tap. A syntax error
+leaves the block as source, the offending line underlined and the
+message under it ("Line 4: expected \"-->\" after \"--\""), so the
+diagram is one edit away.
+
+    ```mermaid
+    sequenceDiagram
+      Alice->>Bob: Hello
+      alt is busy
+        Bob-->>Alice: Later
+      else
+        Bob-->>Alice: Hi!
+      end
+    ```
+
+The icon at the top right of a diagram opens it alone, to pinch and drag.
+An export carries the diagram as SVG: the HTML, the PDF and the EPUB show
+it, and outside Niman the block stays standard Mermaid.
+
+The engine is Niman's own, written in Dart and drawn on every platform;
+there is no browser and no script inside the app.
+
+### Mind map
+
+**Convert list to mind map** replaces the list at the cursor with a
+`mindmap` fence as one undo step, so Ctrl+Z brings the list back. It is
+in the command palette, and in the editor's Tools sheet on a phone. One
+outermost item becomes the root; several get a root to hang from. A
+paragraph or a code block an item holds joins that item's words, and the
+cursor may stand in one. The **Tools** section below lists the sheet.
+
 ## Tools
 
 The toolbar's **Tools** button opens the editor's extra tools. They are
@@ -516,8 +638,8 @@ reading it, too: flipping to the preview, back to
 the editor, or between source and live keeps the line at the top of the
 pane at its top, however differently the two draw what is above it.
 
-The rendered note shows Markdown, math, and fenced code coloured by the
-language its fence names.
+The rendered note shows Markdown, math, diagrams, and fenced code
+coloured by the language its fence names.
 
 Extras: word count, heading outline, heading folding.
 

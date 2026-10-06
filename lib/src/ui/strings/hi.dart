@@ -2831,4 +2831,22 @@ final class HindiStrings extends Strings {
       '«$filter» की चौड़ाई के लिए संख्या चाहिए, और «$argument» संख्या नहीं है';
   @override
   String templateProblemUnknownFilter(String name) => 'अज्ञात फ़िल्टर «$name»';
+  @override
+  String get diagramTitle => 'आरेख';
+
+  @override
+  String get diagramFullScreen => 'पूर्ण स्क्रीन';
+  @override
+  String get commandInsertDiagram => 'आरेख डालें (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'माइंड मैप डालें';
+
+  @override
+  String get commandConvertListToMindMap => 'सूची को माइंड मैप में बदलें';
+  @override
+  String get toolMindMapSubtitle => 'कर्सर पर सूची को माइंड मैप से बदलता है';
+
+  @override
+  String get toolMindMapNeedsList => 'कर्सर किसी सूची में नहीं है';
 }

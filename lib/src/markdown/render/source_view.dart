@@ -60,6 +60,7 @@ import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
+import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
@@ -382,9 +383,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   final Map<int, int?> _sectionEnds = <int, int?>{};
   int _sectionEndsRevision = -1;
 
-  /// A press on a fold arrow, so the pointer going down under it places no
-  /// caret.
-  bool _foldPress = false;
+  /// A press on a control `live` draws over the note — a fold arrow, a
+  /// diagram and its buttons — so the pointer going down under it places no
+  /// caret: the control answers the tap itself.
+  bool _controlPress = false;
 
   /// The keyboard, wired to the buffer this view draws.
   late SourceInput _input;
@@ -456,6 +458,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// something the scan already found — a list to count, so far. O(blocks):
   /// [SourceStyler.blocks] copies the list.
   List<Block>? get blocks => _styler?.blocks;
+
+  /// The block holding a line, as the scan behind the colours has it —
+  /// scanned up to the line when the scan still owes it — or null while
+  /// there is no scan. O(log blocks) a line, never the note read.
+  Block? Function(int line)? get blockAt => _styler?.blockOf;
 
   /// The note's blocks and definitions as of [MarkdownSourceView.buffer]'s
   /// revision, with what changed since the last hand-over, or null while
@@ -2069,8 +2076,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (event.kind != PointerDeviceKind.mouse) return;
       _hideTouch();
       _requestKeyboard();
-      if (_foldPress) {
-        _foldPress = false;
+      if (_controlPress) {
+        _controlPress = false;
         return;
       }
       if (event.buttons == kSecondaryMouseButton) {
@@ -2170,6 +2177,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _endDrag() {
     _dragAnchor = null;
     _input.holdSync = false;
+  }
+
+  /// A pointer went down on a diagram `live` draws (#530). A mouse's
+  /// primary button would place the caret under it as it goes down — in the
+  /// block, revealing its source and taking the diagram, and the button the
+  /// pointer is on, away before it is let go; the diagram answers the click
+  /// instead.
+  void _diagramDown(PointerDownEvent event) {
+    if (event.kind != PointerDeviceKind.mouse) return;
+    if (event.buttons != kPrimaryMouseButton) return;
+    _controlPress = true;
+  }
+
+  /// A tap on a diagram `live` draws, or on its parse error: the caret on
+  /// note line [line] — the block's first, or the one the error names — and
+  /// the block's source shown again (#530).
+  void _openDiagramLine(int line) {
+    if (line < 0 || line >= widget.buffer.lineCount) return;
+    _requestKeyboard();
+    placeCaret(widget.buffer.offsetOfLine(line));
   }
 
   /// Takes the focus, or — when the surface has it — opens the connection
@@ -2785,6 +2812,32 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return (start: block.startLine, end: block.endLine, tex: tex);
   }
 
+  /// The Mermaid block line [index] is part of, for `live` mode to draw in
+  /// its lines' place: its fence's lines, and on the first of them — the
+  /// one the diagram is drawn under — the source between them. Null for any
+  /// other line, and for a `mermaid` fence with no code.
+  ///
+  /// Every line of the block asks, every build: the block's text is read
+  /// for its first line alone, where reading it for each made a diagram of
+  /// k lines cost k² of them. The others only ask whether there is code,
+  /// which the first line of it answers.
+  LiveDiagram? _diagramOf(int index) {
+    final block = _styler?.blockOf(index);
+    if (block == null || block.kind != BlockKind.fencedCode) return null;
+    final info = block.fenceInfo;
+    if (info == null || info.toLowerCase() != 'mermaid') return null;
+    if (index != block.startLine) {
+      final lineAt = widget.buffer.lineAt;
+      if (!fenceHasCode(lineAt, block.startLine, block.endLine)) return null;
+      return (start: block.startLine, end: block.endLine, source: null);
+    }
+    final lines = BlockParser.blockText(block, widget.buffer).split('\n');
+    // The code as the read view and the export read it.
+    final code = fenceBody(lines)?.code;
+    if (code == null || code.trim().isEmpty) return null;
+    return (start: block.startLine, end: block.endLine, source: code);
+  }
+
   /// Moves the colours along [edit], already made to the buffer.
   void _styleEdited(SourceEdit edit) {
     _styler?.edited(edit);
@@ -3333,7 +3386,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 key: ValueKey<int>(index),
                                 fold: _foldMarkOf(index),
                                 onFold: () => toggleFold(index),
-                                onFoldDown: () => _foldPress = true,
+                                onFoldDown: () => _controlPress = true,
+                                onDiagramDown: _diagramDown,
+                                onDiagramLine: _openDiagramLine,
                                 paragraphKey: _keyFor(index),
                                 styled: styled,
                                 shape: widget.hideMarkers
@@ -3358,6 +3413,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                     ? _formulaOf(index)
                                     : null,
                                 mathCache: widget.mathCache,
+                                diagram: widget.hideMarkers
+                                    ? _diagramOf(index)
+                                    : null,
                                 tableRow:
                                     widget.hideMarkers &&
                                         block?.kind == BlockKind.table
@@ -4921,6 +4979,7 @@ final class _Line extends StatelessWidget {
     required this.embedResolver,
     required this.formula,
     required this.mathCache,
+    required this.diagram,
     required this.codeRuns,
     required this.definition,
     required this.tableRow,
@@ -4945,6 +5004,8 @@ final class _Line extends StatelessWidget {
     required this.fold,
     required this.onFold,
     required this.onFoldDown,
+    required this.onDiagramDown,
+    required this.onDiagramLine,
     required this.index,
     required this.spot,
     required this.caret,
@@ -4968,6 +5029,10 @@ final class _Line extends StatelessWidget {
   /// its lines while the caret is out of it.
   final LiveFormula? formula;
   final MathCache? mathCache;
+
+  /// The Mermaid block the line belongs to, which `live` draws in place of
+  /// its lines while the caret is out of it (#530).
+  final LiveDiagram? diagram;
 
   /// The colours of the line's code, as the read view colours its block;
   /// null for a line that is not code the read view colours.
@@ -5042,6 +5107,13 @@ final class _Line extends StatelessWidget {
 
   /// A pointer went down on the arrow (before the note hears it).
   final VoidCallback onFoldDown;
+
+  /// A pointer went down on the line's diagram (before the note hears it).
+  final void Function(PointerDownEvent event) onDiagramDown;
+
+  /// The line's diagram, or its parse error, was tapped: the note line to
+  /// put the caret on.
+  final void Function(int line) onDiagramLine;
 
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
@@ -5131,6 +5203,12 @@ final class _Line extends StatelessWidget {
         index != math.start) {
       return true;
     }
+    final drawing = diagram;
+    if (drawing != null &&
+        (at.line < drawing.start || at.line >= drawing.end) &&
+        index != drawing.start) {
+      return true;
+    }
     final defined = definition;
     if (defined != null && (at.line < defined.$1 || at.line >= defined.$2)) {
       return true;
@@ -5147,6 +5225,9 @@ final class _Line extends StatelessWidget {
         math != null &&
         mathCache != null &&
         (at.line < math.start || at.line >= math.end);
+    final drawing = diagram;
+    final drawn =
+        drawing != null && (at.line < drawing.start || at.line >= drawing.end);
     final defined = definition;
     final table = tableRow?.call(at);
     // A table's row stays on the grid under the caret, as the read view
@@ -5156,7 +5237,7 @@ final class _Line extends StatelessWidget {
     final folded =
         (defined != null && (at.line < defined.$1 || at.line >= defined.$2)) ||
         (table != null && table.delimiter);
-    final inline = typeset || folded
+    final inline = typeset || drawn || folded
         ? const <InlineFormula>[]
         : _inlineFormulas(run: mine ? (at.runStart, at.runEnd) : null);
     // A callout's mark (#279), where the caret is not: as wide as the icon
@@ -5167,7 +5248,7 @@ final class _Line extends StatelessWidget {
         ? callout
         : null;
     final concealed = <_Concealed>[
-      if (typeset || folded)
+      if (typeset || drawn || folded)
         (0, styled.text.length, _hiddenMarker, whole: false),
       if (hideMarkers && !mine)
         for (final picture in pictures)
@@ -5228,7 +5309,7 @@ final class _Line extends StatelessWidget {
       // its first one instead. Nor do definitions out of the caret's reach:
       // the read view does not draw them there, and ends the note with the
       // footnotes, as `live` does.
-      style: typeset || folded
+      style: typeset || drawn || folded
           ? _lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
           : _lineStyle(revealed: revealed),
       // A table row is at least a line of its text tall. A row of empty
@@ -5282,6 +5363,17 @@ final class _Line extends StatelessWidget {
         tex: math.tex,
         theme: theme,
         maxWidth: width,
+      );
+    }
+    if (drawn) {
+      if (index != drawing.start) return line;
+      return liveDiagramUnder(
+        line,
+        // The block's first line is the one that carries its source.
+        source: drawing.source!,
+        theme: theme,
+        onPointerDown: onDiagramDown,
+        onTapSource: (inner) => onDiagramLine(drawing.start + inner),
       );
     }
     final resolver = embedResolver;

@@ -225,6 +225,7 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
       libraryRoot: document.folder,
       kindMode: false,
       showPreview: view.preview,
+      onShowSource: () => setState(() => view.preview = false),
       showWysiwyg: view.wysiwyg,
       onEditorKindChanged: (kind) =>
           setState(() => view.wysiwyg = kind == EditorKind.wysiwyg),

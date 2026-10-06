@@ -2898,4 +2898,23 @@ final class AlbanianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtër i panjohur „$name"';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Ekran i plotë';
+  @override
+  String get commandInsertDiagram => 'Fut diagramë (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Fut hartë mendore';
+
+  @override
+  String get commandConvertListToMindMap => 'Shndërro listën në hartë mendore';
+  @override
+  String get toolMindMapSubtitle =>
+      'Zëvendëson listën te kursori me një hartë mendore';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursori nuk është në një listë';
 }

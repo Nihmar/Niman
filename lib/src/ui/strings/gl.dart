@@ -2895,4 +2895,23 @@ final class GalicianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtro descoñecido “$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Pantalla completa';
+  @override
+  String get commandInsertDiagram => 'Inserir diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Inserir mapa mental';
+
+  @override
+  String get commandConvertListToMindMap => 'Converter lista en mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Substitúe a lista no cursor por un mapa mental';
+
+  @override
+  String get toolMindMapNeedsList => 'O cursor non está nunha lista';
 }

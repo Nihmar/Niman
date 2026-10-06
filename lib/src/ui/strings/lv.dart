@@ -2873,4 +2873,23 @@ final class LatvianStrings extends Strings {
       '„$filter” platuma dēļ vajag skaitli, un „$argument” nav skaitlis';
   @override
   String templateProblemUnknownFilter(String name) => 'nezināms filtrs „$name”';
+  @override
+  String get diagramTitle => 'Diagramma';
+
+  @override
+  String get diagramFullScreen => 'Pilnekrāns';
+  @override
+  String get commandInsertDiagram => 'Ievietot diagrammu (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Ievietot prāta karti';
+
+  @override
+  String get commandConvertListToMindMap => 'Pārvērst sarakstu prāta kartē';
+  @override
+  String get toolMindMapSubtitle =>
+      'Aizstāj sarakstu pie kursora ar prāta karti';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursors nav sarakstā';
 }

@@ -2887,4 +2887,24 @@ final class SlovakStrings extends Strings {
       '„$filter” potrebuje číslo pre svoju šírku, a „$argument” ním nie je';
   @override
   String templateProblemUnknownFilter(String name) => 'neznámy filter „$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Celá obrazovka';
+  @override
+  String get commandInsertDiagram => 'Vložiť diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Vložiť myšlienkovú mapu';
+
+  @override
+  String get commandConvertListToMindMap =>
+      'Previesť zoznam na myšlienkovú mapu';
+  @override
+  String get toolMindMapSubtitle =>
+      'Nahradí zoznam na kurzore myšlienkovou mapou';
+
+  @override
+  String get toolMindMapNeedsList => 'Kurzor nie je v zozname';
 }

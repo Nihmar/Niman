@@ -2925,4 +2925,23 @@ final class RomanianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'filtru necunoscut “$name”';
+  @override
+  String get diagramTitle => 'Diagramă';
+
+  @override
+  String get diagramFullScreen => 'Ecran complet';
+  @override
+  String get commandInsertDiagram => 'Inserează diagramă (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Inserează hartă mentală';
+
+  @override
+  String get commandConvertListToMindMap => 'Transformă lista în hartă mentală';
+  @override
+  String get toolMindMapSubtitle =>
+      'Înlocuiește lista de la cursor cu o hartă mentală';
+
+  @override
+  String get toolMindMapNeedsList => 'Cursorul nu este într-o listă';
 }

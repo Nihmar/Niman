@@ -18,7 +18,10 @@ import 'package:niman/src/ui/strings.dart';
 /// A tool the editor's Tools sheet can offer.
 enum EditorTool {
   /// Count the values of a list into a checklist of totals.
-  countList(Icons.functions);
+  countList(Icons.functions),
+
+  /// Replace the list at the cursor with a mind map (#530).
+  mindMap(Icons.account_tree_outlined);
 
   new(this.icon);
 
@@ -32,11 +35,13 @@ enum EditorTool {
   /// to be rebuilt.
   String get label => switch (this) {
     EditorTool.countList => AppStrings.toolCountListTitle,
+    EditorTool.mindMap => AppStrings.commandConvertListToMindMap,
   };
 
   /// What the tool does, under its name.
   String get description => switch (this) {
     EditorTool.countList => AppStrings.toolCountListSubtitle,
+    EditorTool.mindMap => AppStrings.toolMindMapSubtitle,
   };
 
   /// Why the tool cannot run on this note right now.
@@ -47,5 +52,6 @@ enum EditorTool {
   /// rule).
   String get unavailableReason => switch (this) {
     EditorTool.countList => AppStrings.toolCountListNeedsList,
+    EditorTool.mindMap => AppStrings.toolMindMapNeedsList,
   };
 }

@@ -2929,4 +2929,22 @@ final class PolishStrings extends Strings {
       '„$filter” potrzebuje liczby jako szerokości, a „$argument” nią nie jest';
   @override
   String templateProblemUnknownFilter(String name) => 'nieznany filtr „$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Pełny ekran';
+  @override
+  String get commandInsertDiagram => 'Wstaw diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Wstaw mapę myśli';
+
+  @override
+  String get commandConvertListToMindMap => 'Przekształć listę w mapę myśli';
+  @override
+  String get toolMindMapSubtitle => 'Zastępuje listę pod kursorem mapą myśli';
+
+  @override
+  String get toolMindMapNeedsList => 'Kursor nie znajduje się na liście';
 }

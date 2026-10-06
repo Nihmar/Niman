@@ -2613,4 +2613,22 @@ final class JapaneseStrings extends Strings {
       '「$filter」 の幅には数が必要ですが、「$argument」 は数ではありません';
   @override
   String templateProblemUnknownFilter(String name) => '不明なフィルター 「$name」';
+  @override
+  String get diagramTitle => '図';
+
+  @override
+  String get diagramFullScreen => '全画面';
+  @override
+  String get commandInsertDiagram => '図を挿入（Mermaid）';
+
+  @override
+  String get commandInsertMindMap => 'マインドマップを挿入';
+
+  @override
+  String get commandConvertListToMindMap => 'リストをマインドマップに変換';
+  @override
+  String get toolMindMapSubtitle => 'カーソル位置のリストをマインドマップに置き換えます';
+
+  @override
+  String get toolMindMapNeedsList => 'カーソルがリストの中にありません';
 }

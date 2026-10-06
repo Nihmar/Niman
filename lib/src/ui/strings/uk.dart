@@ -2920,4 +2920,23 @@ final class UkrainianStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'невідомий фільтр „$name”';
+  @override
+  String get diagramTitle => 'Діаграма';
+
+  @override
+  String get diagramFullScreen => 'Повний екран';
+  @override
+  String get commandInsertDiagram => 'Вставити діаграму (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Вставити карту думок';
+
+  @override
+  String get commandConvertListToMindMap => 'Перетворити список на карту думок';
+  @override
+  String get toolMindMapSubtitle =>
+      'Замінює список під курсором на карту думок';
+
+  @override
+  String get toolMindMapNeedsList => 'Курсор не в списку';
 }

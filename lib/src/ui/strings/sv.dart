@@ -2884,4 +2884,23 @@ final class SwedishStrings extends Strings {
       '“$filter” behöver ett tal för sin bredd, och “$argument” är inget';
   @override
   String templateProblemUnknownFilter(String name) => 'okänt filter “$name”';
+  @override
+  String get diagramTitle => 'Diagram';
+
+  @override
+  String get diagramFullScreen => 'Helskärm';
+  @override
+  String get commandInsertDiagram => 'Infoga diagram (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Infoga tankekarta';
+
+  @override
+  String get commandConvertListToMindMap => 'Omvandla lista till tankekarta';
+  @override
+  String get toolMindMapSubtitle =>
+      'Ersätter listan vid markören med en tankekarta';
+
+  @override
+  String get toolMindMapNeedsList => 'Markören står inte i en lista';
 }

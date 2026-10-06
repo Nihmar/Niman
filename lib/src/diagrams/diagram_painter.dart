@@ -1,0 +1,79 @@
+/// The painter of a laid-out diagram (#530).
+library;
+
+import 'package:flutter/rendering.dart';
+import 'package:niman/src/diagrams/architecture_renderer.dart';
+import 'package:niman/src/diagrams/block_renderer.dart';
+import 'package:niman/src/diagrams/canvas_target.dart';
+import 'package:niman/src/diagrams/diagram_drawing.dart';
+import 'package:niman/src/diagrams/diagram_renderer.dart';
+import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/gantt_renderer.dart';
+import 'package:niman/src/diagrams/git_graph_renderer.dart';
+import 'package:niman/src/diagrams/journey_renderer.dart';
+import 'package:niman/src/diagrams/kanban_renderer.dart';
+import 'package:niman/src/diagrams/packet_renderer.dart';
+import 'package:niman/src/diagrams/pie_renderer.dart';
+import 'package:niman/src/diagrams/quadrant_renderer.dart';
+import 'package:niman/src/diagrams/radar_renderer.dart';
+import 'package:niman/src/diagrams/sankey_renderer.dart';
+import 'package:niman/src/diagrams/sequence_renderer.dart';
+import 'package:niman/src/diagrams/timeline_renderer.dart';
+import 'package:niman/src/diagrams/treemap_renderer.dart';
+import 'package:niman/src/diagrams/xy_chart_renderer.dart';
+
+/// Paints a [DiagramDrawing] with a [DiagramStyle], whatever its kind.
+final class DiagramPainter extends CustomPainter {
+  /// Creates the painter.
+  const new({required this.drawing, required this.style});
+
+  /// The drawing.
+  final DiagramDrawing drawing;
+
+  /// Its sizes and colours.
+  final DiagramStyle style;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final target = CanvasDiagramTarget(canvas, fontFamily: style.fontFamily);
+    switch (drawing) {
+      case FlowDrawing(:final layout):
+        DiagramRenderer(layout: layout, style: style).paint(target);
+      case SequenceDrawing(:final layout):
+        SequenceRenderer(layout: layout, style: style).paint(target);
+      case PieDrawing(:final layout):
+        PieRenderer(layout: layout, style: style).paint(target);
+      case GanttDrawing(:final layout):
+        GanttRenderer(layout: layout, style: style).paint(target);
+      case TimelineDrawing(:final layout):
+        TimelineRenderer(layout: layout, style: style).paint(target);
+      case JourneyDrawing(:final layout):
+        JourneyRenderer(layout: layout, style: style).paint(target);
+      case GitGraphDrawing(:final layout):
+        GitGraphRenderer(layout: layout, style: style).paint(target);
+      case BlockDrawing(:final layout):
+        BlockRenderer(layout: layout, style: style).paint(target);
+      case PacketDrawing(:final layout):
+        PacketRenderer(layout: layout, style: style).paint(target);
+      case RadarDrawing(:final layout):
+        RadarRenderer(layout: layout, style: style).paint(target);
+      case TreemapDrawing(:final layout):
+        TreemapRenderer(layout: layout, style: style).paint(target);
+      case ArchitectureDrawing(:final layout):
+        ArchitectureRenderer(layout: layout, style: style).paint(target);
+      case KanbanDrawing(:final layout):
+        KanbanRenderer(layout: layout, style: style).paint(target);
+      case QuadrantDrawing(:final layout):
+        QuadrantRenderer(layout: layout, style: style).paint(target);
+      case XyChartDrawing(:final layout):
+        XyChartRenderer(layout: layout, style: style).paint(target);
+      case SankeyDrawing(:final layout):
+        SankeyRenderer(layout: layout, style: style).paint(target);
+    }
+  }
+
+  @override
+  bool shouldRepaint(DiagramPainter oldDelegate) =>
+      !identical(oldDelegate.drawing, drawing) ||
+      oldDelegate.style.cacheKey != style.cacheKey;
+}

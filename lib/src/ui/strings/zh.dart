@@ -2529,4 +2529,22 @@ final class ChineseStrings extends Strings {
       '「$filter」 的宽度需要一个数字，而 「$argument」 不是数字';
   @override
   String templateProblemUnknownFilter(String name) => '未知过滤器「$name」';
+  @override
+  String get diagramTitle => '图表';
+
+  @override
+  String get diagramFullScreen => '全屏';
+  @override
+  String get commandInsertDiagram => '插入图表（Mermaid）';
+
+  @override
+  String get commandInsertMindMap => '插入思维导图';
+
+  @override
+  String get commandConvertListToMindMap => '将列表转换为思维导图';
+  @override
+  String get toolMindMapSubtitle => '将光标处的列表替换为思维导图';
+
+  @override
+  String get toolMindMapNeedsList => '光标不在列表中';
 }

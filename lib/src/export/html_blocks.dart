@@ -4,39 +4,49 @@
 library;
 
 import 'package:highlight/highlight.dart' show highlight;
+import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/diagram_svg.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/markdown/callout.dart';
+import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/math_text.dart' show displayTexOf;
 
-/// A fence's opening line: its indent, its run and its info string.
-final RegExp _opening = RegExp(r'^( {0,3})(`{3,}|~{3,})(.*)$');
+/// The face an exported diagram's labels are set in: the sans its boxes
+/// are measured for, where the reader's own face — often a serif in an
+/// EPUB reader — would run over them.
+const String _diagramFont = 'system-ui, sans-serif';
 
 /// A fenced code block's [lines], the fences included, as a coloured
 /// `<pre>`: coloured by the language its info string names, as the read
 /// view colours it, and plain when the grammar does not know it.
 String fencedCodeHtml(List<String> lines) {
-  final open = lines.isEmpty ? null : _opening.firstMatch(lines.first);
-  if (open == null) return _pre(lines.join('\n'), 'code');
-  final indent = open.group(1)!.length;
-  final fence = open.group(2)!;
-  final language = open.group(3)!.trim().split(RegExp(r'\s+')).first;
-  var body = lines.skip(1).toList();
-  final closing = RegExp(
-    '^ {0,3}${RegExp.escape(fence[0])}{${fence.length},}'
-    r'\s*$',
-  );
-  if (body.isNotEmpty && closing.hasMatch(body.last)) {
-    body = body.sublist(0, body.length - 1);
-  }
-  // The fence's own indent comes off every line of its code, as far as
-  // the line has it (CommonMark 4.5).
-  final code = [for (final line in body) _dedent(line, indent)].join('\n');
-  final coloured = _highlighted(code, language);
-  final cls = language.isEmpty ? 'hljs' : 'hljs language-$language';
+  final parts = fenceBody(lines);
+  if (parts == null) return _pre(lines.join('\n'), 'code');
+  final coloured = _highlighted(parts.code, parts.language);
+  final cls = parts.language.isEmpty
+      ? 'hljs'
+      : 'hljs language-${parts.language}';
   return '<pre class="code"><code class="${escapeAttribute(cls)}">'
-      '${coloured ?? escapeHtml(code)}</code></pre>';
+      '${coloured ?? escapeHtml(parts.code)}</code></pre>';
+}
+
+/// A `mermaid` fence's [lines] as an inline-SVG diagram, or null when it is
+/// not Mermaid or does not parse — for the caller to keep as code (#530).
+String? mermaidBlockHtml(
+  List<String> lines, {
+  DiagramStyle style = const DiagramStyle(fontFamily: _diagramFont),
+}) {
+  final parts = fenceBody(lines);
+  if (parts == null || parts.language.toLowerCase() != 'mermaid') return null;
+  final svg = diagramSvg(parts.code, style);
+  if (svg == null) return null;
+  // The source rides on the box, line breaks as references so an XML
+  // reader keeps them: the drawing is not what a note holds, and an EPUB
+  // read back into Niman gets its fence again.
+  final source = escapeAttribute(parts.code).replaceAll('\n', '&#10;');
+  return '<div class="diagram" data-mermaid="$source">$svg</div>';
 }
 
 /// A math block's [text], `$$` and all, as a centred formula; its source
@@ -81,29 +91,6 @@ String calloutHtml(Callout callout, String bodyHtml) {
 
 String _pre(String text, String cls) =>
     '<pre class="$cls"><code>${escapeHtml(text)}</code></pre>';
-
-String _dedent(String line, int indent) {
-  var column = 0;
-  var at = 0;
-  while (column < indent && at < line.length) {
-    final char = line.codeUnitAt(at);
-    if (char == 0x20) {
-      column++;
-      at++;
-    } else if (char == 0x09) {
-      // A tab advances to the next multiple of four, as CommonMark
-      // counts indentation.
-      column = (column ~/ 4 + 1) * 4;
-      at++;
-    } else {
-      break;
-    }
-  }
-  // A tab that reached past the fence's indent is partly that indent and
-  // partly code: the columns past it stay, as spaces.
-  final extra = column > indent ? column - indent : 0;
-  return '${' ' * extra}${line.substring(at)}';
-}
 
 /// [code] coloured by [language]'s grammar, or null when there is none.
 String? _highlighted(String code, String language) {

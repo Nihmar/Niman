@@ -2905,4 +2905,23 @@ final class BasqueStrings extends Strings {
   @override
   String templateProblemUnknownFilter(String name) =>
       'iragazki ezezaguna “$name”';
+  @override
+  String get diagramTitle => 'Diagrama';
+
+  @override
+  String get diagramFullScreen => 'Pantaila osoa';
+  @override
+  String get commandInsertDiagram => 'Txertatu diagrama (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Txertatu mapa mentala';
+
+  @override
+  String get commandConvertListToMindMap => 'Bihurtu zerrenda mapa mental';
+  @override
+  String get toolMindMapSubtitle =>
+      'Kurtsorean dagoen zerrenda mapa mental batekin ordezkatzen du';
+
+  @override
+  String get toolMindMapNeedsList => 'Kurtsorea ez dago zerrenda batean';
 }

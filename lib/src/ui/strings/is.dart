@@ -2872,4 +2872,23 @@ final class IcelandicStrings extends Strings {
       '„$filter" þarf tölu fyrir breiddina, og „$argument" er engin tala';
   @override
   String templateProblemUnknownFilter(String name) => 'óþekkt sía „$name"';
+  @override
+  String get diagramTitle => 'Skýringarmynd';
+
+  @override
+  String get diagramFullScreen => 'Skjár í fullri stærð';
+  @override
+  String get commandInsertDiagram => 'Setja inn skýringarmynd (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Setja inn hugarkort';
+
+  @override
+  String get commandConvertListToMindMap => 'Breyta lista í hugarkort';
+  @override
+  String get toolMindMapSubtitle =>
+      'Skiptir listanum við bendilinn út fyrir hugarkort';
+
+  @override
+  String get toolMindMapNeedsList => 'Bendillinn er ekki í lista';
 }

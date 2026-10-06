@@ -54,7 +54,8 @@ body {
 .note { max-width: 46rem; margin: 0 auto; overflow-wrap: break-word; }
 h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.6em 0 0.6em; }
 h1 { font-size: 1.9em; } h2 { font-size: 1.5em; } h3 { font-size: 1.25em; }
-p, ul, ol, table, pre, blockquote, .callout, .math-block { margin: 0 0 1em; }
+p, ul, ol, table, pre, blockquote, .callout, .math-block, .diagram {
+  margin: 0 0 1em; }
 a { color: var(--accent); }
 .wikilink { color: var(--accent); }
 a.wikilink { text-decoration: none; border-bottom: 1px solid currentColor; }
@@ -82,6 +83,9 @@ li.task-list-item input { margin: 0 0.5em 0 -1.4em; }
 svg.math { color: inherit; }
 .math-block { text-align: center; overflow-x: auto; }
 .math-block svg.math { display: inline-block; }
+.diagram { text-align: center; overflow-x: auto; }
+.diagram svg { display: inline-block; max-width: 100%; height: auto;
+  background: #fff; border-radius: 6px; }
 .callout { border-left: 4px solid var(--callout);
   background: color-mix(in srgb, var(--callout) 10%, transparent);
   border-radius: 4px; padding: 0.6em 1em; }
@@ -113,7 +117,8 @@ details.callout > summary { cursor: pointer; }
   :root { --text: #000; --bg: #fff; }
   body { padding: 0; font-size: 11pt; }
   .note { max-width: none; }
-  pre, blockquote, .callout, .math-block, table, img { break-inside: avoid; }
+  pre, blockquote, .callout, .math-block, .diagram, table, img {
+    break-inside: avoid; }
   h1, h2, h3, h4, h5, h6 { break-after: avoid; }
   a { color: inherit; }
 }

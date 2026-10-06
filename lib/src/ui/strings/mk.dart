@@ -2902,4 +2902,23 @@ final class MacedonianStrings extends Strings {
       '„$filter" бара број за својата ширина, а „$argument" не е број';
   @override
   String templateProblemUnknownFilter(String name) => 'непознат филтер „$name"';
+  @override
+  String get diagramTitle => 'Дијаграм';
+
+  @override
+  String get diagramFullScreen => 'Целосен екран';
+  @override
+  String get commandInsertDiagram => 'Вметни дијаграм (Mermaid)';
+
+  @override
+  String get commandInsertMindMap => 'Вметни ментална мапа';
+
+  @override
+  String get commandConvertListToMindMap => 'Претвори листа во ментална мапа';
+  @override
+  String get toolMindMapSubtitle =>
+      'Ја заменува листата на курсорот со ментална мапа';
+
+  @override
+  String get toolMindMapNeedsList => 'Курсорот не е во листа';
 }

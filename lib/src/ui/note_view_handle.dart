@@ -31,6 +31,10 @@ abstract interface class NoteViewHandle {
   /// it is one line, on lines of its own when it is more (#265).
   void insertAtCaret(String markdown);
 
+  /// Replaces the list at the caret with a `mindmap` fence, one undo step
+  /// (#530). Does nothing when the caret is not in a list.
+  void convertListToMindMap();
+
   /// Opens the find bar over the note, as Ctrl+F does with the editor
   /// focused; [replace] opens the replace row too. The screen that shows
   /// the note asks when the key was pressed with the focus anywhere else —
