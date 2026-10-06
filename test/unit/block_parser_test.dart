@@ -464,4 +464,34 @@ inline math $x$ and a #tag, all in one block.
       'plain: now',
     ]);
   });
+
+  group("the scope's definitions, as our inline parser reads them", () {
+    DocumentScope scopeOf(String text) =>
+        DocumentScope.scan(SourceBuffer.fromText(text), 0);
+
+    test('a definition over three lines, by its normalized label', () {
+      final scope = scopeOf('[Foo  Bar]:\n</a b>\n"the title"\n\ntext');
+      expect(scope.references, {
+        'FOO BAR': (destination: '/a b', title: 'the title'),
+      });
+    });
+
+    test('escapes and entities in a destination are read', () {
+      final scope = scopeOf(r'[a]: /x\_y&amp;z');
+      expect(scope.references['A']?.destination, '/x_y&z');
+    });
+
+    test('the first definition of a label wins', () {
+      final scope = scopeOf('[a]: /one\n[A]: /two');
+      expect(scope.references['A']?.destination, '/one');
+    });
+
+    test('a line that only starts like one is none', () {
+      expect(scopeOf('[a link](u) and text').references, isEmpty);
+    });
+
+    test('the footnotes defined, by their normalized label', () {
+      expect(scopeOf('[^Note]: body').footnoteKeys, {'NOTE'});
+    });
+  });
 }

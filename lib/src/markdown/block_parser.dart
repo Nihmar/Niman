@@ -26,9 +26,11 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/extension_masker.dart';
 import 'package:niman/src/markdown/footnote_syntax.dart';
+import 'package:niman/src/markdown/inline/link_references.dart';
 import 'package:niman/src/markdown/inline_syntaxes.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
+import 'package:niman/src/markdown/link_definition_syntax.dart';
 import 'package:niman/src/markdown/masked_block.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -804,6 +806,8 @@ final class DocumentScope {
   /// Wraps an already-scanned scope.
   const new({
     required this.links,
+    required this.references,
+    required this.footnoteKeys,
     required this.footnoteCounts,
     required this.footnoteLabels,
     required this.footnotes,
@@ -833,6 +837,7 @@ final class DocumentScope {
   /// instead of the note.
   factory ofLines(SourceBuffer source, int revision, Iterable<int> lines) {
     final links = <String, md.LinkReference>{};
+    final references = <String, LinkReference>{};
     final counts = <String, int>{};
     final bodies = <String, String>{};
     final labels = <String>[];
@@ -854,6 +859,7 @@ final class DocumentScope {
         if (body.isNotEmpty) bodies.putIfAbsent(label, () => body);
         continue;
       }
+      _readDefinition(source, at, references);
       final link = _linkDefinition.firstMatch(line);
       if (link == null) continue;
       final label = link.group(1)!.trim().toLowerCase();
@@ -877,11 +883,43 @@ final class DocumentScope {
     }
     return DocumentScope(
       links: links,
+      references: references,
+      footnoteKeys: {
+        for (final label in counts.keys) LinkReferences.normalize(label),
+      },
       footnoteCounts: counts,
       footnoteLabels: labels,
       footnotes: notes,
       source: source,
       revision: revision,
+    );
+  }
+
+  /// The definitions a paragraph opening on line [at] of [source] starts
+  /// with, read as `cmark` reads them into [into]: a destination or a
+  /// title on the lines after the label's, escapes and entities resolved.
+  ///
+  /// Read off the lines, not the blocks: a line in a fence that reads as a
+  /// definition is taken for one, as it was by the single-line pattern this
+  /// stands beside.
+  static void _readDefinition(
+    SourceBuffer source,
+    int at,
+    Map<String, LinkReference> into,
+  ) {
+    var next = at + 1;
+    final count = LinkDefinitionSyntax.linesOf(source.lineAt(at), () {
+      if (next >= source.lineCount) return null;
+      final line = source.lineAt(next++);
+      return line.trim().isEmpty ? null : line;
+    });
+    if (count == 0) return;
+    LinkReferences.parseInto(
+      [
+        for (var line = at; line < at + count; line++)
+          source.lineAt(line).trimLeft(),
+      ].join('\n'),
+      into,
     );
   }
 
@@ -951,6 +989,15 @@ final class DocumentScope {
   /// The link references, by label.
   final Map<String, md.LinkReference> links;
 
+  /// The link references as our inline parser looks them up: by their
+  /// normalized label ([LinkReferences.normalize]), the definitions over
+  /// more than one line among them.
+  final Map<String, LinkReference> references;
+
+  /// The footnote labels defined, normalized: what a `[^label]` is a
+  /// reference to.
+  final Set<String> footnoteKeys;
+
   /// How many times each footnote label is defined.
   final Map<String, int> footnoteCounts;
 
@@ -972,6 +1019,8 @@ final class DocumentScope {
   /// itself.
   DocumentScope on(SourceBuffer buffer, int revision) => DocumentScope(
     links: links,
+    references: references,
+    footnoteKeys: footnoteKeys,
     footnoteCounts: footnoteCounts,
     footnoteLabels: footnoteLabels,
     footnotes: footnotes,
