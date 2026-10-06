@@ -6,6 +6,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -294,10 +295,20 @@ final class BlockTree {
   }
 
   /// [depth] quotes around [lines], their content, scanned again.
+  ///
+  /// With the app's syntax, the innermost is a callout when its first line
+  /// says so, and its content is the lines after that one: a callout's
+  /// title is no paragraph its body could go on with (`> [!note]` /
+  /// `>     code` is code in the callout, as Obsidian reads it).
   QuoteNode _quote(int depth, List<String> lines, List<_Origin> starts) {
+    final callout = appSyntax ? Callout.of(lines.first) : null;
+    final from = callout == null ? 0 : 1;
     var node = QuoteNode(
       line: starts.first.line,
-      children: _build(lines.join('\n'), starts),
+      callout: callout,
+      children: from >= lines.length
+          ? <BlockNode>[]
+          : _build(lines.sublist(from).join('\n'), starts.sublist(from)),
     );
     for (var level = 1; level < depth; level++) {
       node = QuoteNode(line: starts.first.line, children: [node]);

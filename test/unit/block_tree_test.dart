@@ -12,7 +12,9 @@ String _shape(String text, List<BlockNode> nodes) {
   String spanned(List<SourceSpan> spans) =>
       spans.map((s) => lines[s.line].substring(s.start, s.end)).join('/');
   String of(BlockNode node) => switch (node) {
-    QuoteNode(:final children) => 'Q[${children.map(of).join(' ')}]',
+    QuoteNode(:final children, :final callout) =>
+      '${callout == null ? 'Q' : 'C:${callout.type}'}'
+          '[${children.map(of).join(' ')}]',
     FootnoteNode(:final label, :final children) =>
       'F$label[${children.map(of).join(' ')}]',
     ListNode(:final items, :final ordered, :final start) =>
@@ -177,6 +179,27 @@ void main() {
       expect((quote.children.single as LeafNode).lines, [
         (line: 4, start: 4, end: 5),
       ]);
+    });
+  });
+
+  group('a callout', () {
+    test('its title is its own, its body the lines after it', () {
+      expect(
+        _treeOf('> [!tip] Title\n>     code\n> text'),
+        'C:tip[indentedCode"    code" paragraph"text"]',
+      );
+    });
+
+    test('a callout with no body, and one inside a quote', () {
+      expect(_treeOf('> [!note]'), 'C:note[]');
+      expect(_treeOf('> > [!warning]- t\n> > x'), 'Q[C:warning[paragraph"x"]]');
+    });
+
+    test('without the app syntax it is a quote', () {
+      expect(
+        _shape('> [!tip] T', BlockTree.of('> [!tip] T', appSyntax: false)),
+        'Q[paragraph"[!tip] T"]',
+      );
     });
   });
 }

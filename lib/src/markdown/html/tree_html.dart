@@ -111,6 +111,19 @@ final class TreeHtml {
       final node = nodes[at];
       final mine = at == last ? tail : null;
       switch (node) {
+        case QuoteNode(:final children, :final callout?):
+          // The app's callout, until the export writes its own (phase 7):
+          // a quote, marked, its title a paragraph of its own.
+          _cr();
+          _write(
+            '<blockquote class="callout" '
+            'data-callout="${InlineHtml.escape(callout.type)}">\n'
+            '<p class="callout-title">${InlineHtml.escape(callout.title)}'
+            '</p>\n',
+          );
+          _blocks(children, tight: false);
+          _cr();
+          _write('</blockquote>\n');
         case QuoteNode(:final children):
           _cr();
           _write('<blockquote>\n');

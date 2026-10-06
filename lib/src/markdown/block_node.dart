@@ -8,6 +8,7 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/callout.dart';
 
 /// Where a piece of a line stands in the note: line `line`, from column
 /// `start` to `end`.
@@ -25,13 +26,17 @@ sealed class BlockNode {
 /// A block quote, one level: what is inside its marks.
 final class QuoteNode extends BlockNode {
   /// A quote starting on [line].
-  const new({required this.line, required this.children});
+  const new({required this.line, required this.children, this.callout});
 
   @override
   final int line;
 
-  /// The blocks inside it.
+  /// The blocks inside it: a callout's, the lines after its title.
   final List<BlockNode> children;
+
+  /// What its first line says when the quote is a callout (#279), the app's
+  /// own block syntax: `> [!type]` and a title. Null for a quote.
+  final Callout? callout;
 }
 
 /// A footnote definition: the blocks it holds, which the read view's
