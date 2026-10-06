@@ -233,8 +233,12 @@ final class LineRules {
     // content this is — is its paragraph's text, whatever it looks like: a
     // container takes one lazily only for an open paragraph, and only when
     // it opens no block (`ContainerWalk.startsBlock`). Read again, four
-    // columns past the containers it did reach, it looked like one.
-    if (content == null && (walk.lazy || lazyAt(line))) {
+    // columns past the containers it did reach, it looked like one. The
+    // app's display math is the exception: it interrupts a paragraph, so a
+    // lazy `$$` opens it where the line stands, as it always has.
+    if (content == null &&
+        (walk.lazy || lazyAt(line)) &&
+        !(appSyntax && isDisplayLine(text.trim()))) {
       return made(BlockKind.paragraph, openParagraph: true);
     }
     // Inside a block that runs to an end marker, every line is the block's.
