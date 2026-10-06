@@ -118,6 +118,34 @@ final class BlockTree {
   ) {
     final entering = block.entering;
     if (into.isEmpty || entering == null) return false;
+    // Indented code runs on over blank lines, which are its own: the
+    // scanner makes the code after them a block of its own, the code block
+    // is one.
+    if (block.kind == BlockKind.indentedCode && entering.indentedCode) {
+      var at = into.length - 1;
+      while (at >= 0 &&
+          into[at] is LeafNode &&
+          (into[at] as LeafNode).kind == BlockKind.blank) {
+        at--;
+      }
+      final code = at >= 0 ? into[at] : null;
+      if (code is LeafNode &&
+          code.kind == BlockKind.indentedCode &&
+          at < into.length - 1) {
+        into
+          ..[at] = LeafNode(
+            kind: BlockKind.indentedCode,
+            lines: [
+              ...code.lines,
+              for (final blank in into.sublist(at + 1))
+                ...(blank as LeafNode).lines,
+              ..._spans(local, starts),
+            ],
+          )
+          ..removeRange(at + 1, into.length);
+        return true;
+      }
+    }
     final last = into.last;
     if (last is QuoteNode && block.kind == BlockKind.quote) {
       final quoted = _quoted[last];
@@ -270,8 +298,22 @@ final class BlockTree {
       ),
       delimiter: first[start + width - 1],
       ordinal: block.listOrdinal,
-      children: _build(content.join('\n'), from),
+      children: _withoutEmptyMarkerLine(_build(content.join('\n'), from)),
     );
+  }
+
+  /// [children] of an item without the blank line its marker line makes
+  /// when nothing follows the marker: the item's content starts on the
+  /// line after, and that line is no blank line between two of its blocks
+  /// (`-` / `  foo` is a tight item).
+  static List<BlockNode> _withoutEmptyMarkerLine(List<BlockNode> children) {
+    final first = children.isEmpty ? null : children.first;
+    if (first is! LeafNode || first.kind != BlockKind.blank) return children;
+    final rest = first.lines.sublist(1);
+    return [
+      if (rest.isNotEmpty) LeafNode(kind: BlockKind.blank, lines: rest),
+      ...children.skip(1),
+    ];
   }
 
   /// Adds [item] to [into]: to the list its last block is, past blank
