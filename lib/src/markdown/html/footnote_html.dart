@@ -10,8 +10,15 @@ import 'package:niman/src/markdown/inline/link_references.dart';
 
 /// The footnotes cited so far, in citation order.
 final class FootnoteHtml {
-  /// Footnotes over [definitions], by normalized label.
-  new(this.definitions);
+  /// Footnotes over [definitions], by normalized label; [xhtml] gives the
+  /// attributes `cmark-gfm` writes bare a value, as XHTML has them.
+  new(this.definitions, {this.xhtml = false});
+
+  /// Whether attributes are written as XHTML has them.
+  final bool xhtml;
+
+  /// `cmark-gfm`'s bare attribute [name], as HTML or XHTML has it.
+  String _flag(String name) => xhtml ? '$name=""' : name;
 
   /// The note's footnote definitions: the first of each label.
   final Map<String, FootnoteNode> definitions;
@@ -37,7 +44,7 @@ final class FootnoteHtml {
     final number = cited.indexOf(key) + 1;
     final id = count == 1 ? 'fnref-$label' : 'fnref-$label-$count';
     return '<sup class="footnote-ref"><a href="#fn-$label" id="$id" '
-        'data-footnote-ref>$number</a></sup>';
+        '${_flag('data-footnote-ref')}>$number</a></sup>';
   }
 
   /// The links back from footnote [key] to each citation of it.
@@ -51,7 +58,8 @@ final class FootnoteHtml {
       final mark = count == 1 ? '↩' : '↩<sup class="footnote-ref">$count</sup>';
       out.add(
         '<a href="#fnref-$label$suffix" class="footnote-backref" '
-        'data-footnote-backref data-footnote-backref-idx="$index" '
+        '${_flag('data-footnote-backref')} '
+        'data-footnote-backref-idx="$index" '
         'aria-label="Back to reference $index">$mark</a>',
       );
     }

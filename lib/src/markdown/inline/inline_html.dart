@@ -4,13 +4,15 @@ library;
 
 import 'dart:convert';
 
+import 'package:niman/src/markdown/html/html_hooks.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
 
 /// Writes inline nodes as HTML.
 abstract final class InlineHtml {
   /// [nodes] as HTML into [out]; a footnote reference written by
   /// [footnote], or as its text when there is none; raw HTML through
-  /// GFM's tag filter unless [tagFilter] is off.
+  /// GFM's tag filter unless [tagFilter] is off; the app's constructs,
+  /// links and pictures as [hooks] draw them, where they do.
   ///
   /// Without recursion: emphasis and links nest as deep as a note writes
   /// them. The stack holds nodes still to write and the closing tags of
@@ -20,6 +22,7 @@ abstract final class InlineHtml {
     List<InlineNode> nodes, {
     String Function(FootnoteRefNode node)? footnote,
     bool tagFilter = true,
+    HtmlHooks? hooks,
   }) {
     final stack = <Object>[...nodes.reversed];
     void open(String tag, String close, List<InlineNode> children) {
@@ -54,20 +57,20 @@ abstract final class InlineHtml {
         case StyledNode(:final tag, :final children):
           open('<$tag>', '</$tag>', children);
         case MathNode() || WikiLinkNode() || TagNode():
-          // The app's own: written as its source until the export gives it
-          // a form of its own (docs/dev/block-tree.md, phase 7).
-          out.write(escape(source(item)));
+          // The app's own: as the page draws it, or as its source.
+          out.write(hooks?.inline(item) ?? escape(source(item)));
         case LinkNode(:final destination, :final title, :final children):
+          final target = hooks?.linkTarget(destination) ?? destination;
+          if (target.isEmpty && destination.isNotEmpty) {
+            open('<span>', '</span>', children);
+            continue;
+          }
           final titled = title == null ? '' : ' title="${escape(title)}"';
-          open(
-            '<a href="${escapeHref(destination)}"$titled>',
-            '</a>',
-            children,
-          );
+          open('<a href="${escapeHref(target)}"$titled>', '</a>', children);
         case ImageNode(:final destination, :final title, :final children):
           out
             ..write('<img src="')
-            ..write(escapeHref(destination))
+            ..write(escapeHref(hooks?.imageSource(destination) ?? destination))
             ..write('" alt="')
             ..write(escape(plain(children)))
             ..write('"');
@@ -79,7 +82,9 @@ abstract final class InlineHtml {
           }
           out.write(' />');
         case HtmlNode(:final html):
-          out.write(tagFilter ? filterTags(html) : html);
+          out.write(
+            hooks?.inline(item) ?? (tagFilter ? filterTags(html) : html),
+          );
         case SoftBreakNode():
           out.write('\n');
         case HardBreakNode():

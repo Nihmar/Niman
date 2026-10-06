@@ -9,6 +9,7 @@ import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_tree.dart';
 import 'package:niman/src/markdown/html/code_html.dart';
 import 'package:niman/src/markdown/html/footnote_html.dart';
+import 'package:niman/src/markdown/html/html_hooks.dart';
 import 'package:niman/src/markdown/html/leaf_text.dart';
 import 'package:niman/src/markdown/html/table_html.dart';
 import 'package:niman/src/markdown/inline/inline_html.dart';
@@ -25,9 +26,16 @@ final class TreeHtml {
   ///
   /// [appSyntax] off reads the blocks without the app's frontmatter and
   /// display math, as the specifications' examples are written.
-  new(this.source, {this.extensions = true, this.appSyntax = true})
-    : _body = _withoutLastBreak(source),
-      _lines = _withoutLastBreak(source).split('\n');
+  ///
+  /// [hooks] draw what a page draws its own way: the export's code, its
+  /// formulas, callouts and links.
+  new(
+    this.source, {
+    this.extensions = true,
+    this.appSyntax = true,
+    this.hooks = const HtmlHooks(),
+  }) : _body = _withoutLastBreak(source),
+       _lines = _withoutLastBreak(source).split('\n');
 
   /// The note.
   final String source;
@@ -37,6 +45,9 @@ final class TreeHtml {
 
   /// Whether the app's own block syntax is read.
   final bool appSyntax;
+
+  /// What a page draws its own way.
+  final HtmlHooks hooks;
 
   /// The note without the line break that ends its last line: it ends a
   /// line, and opens none — kept, it was an empty last line, inside a fence
@@ -49,11 +60,15 @@ final class TreeHtml {
       : text.endsWith('\n')
       ? text.substring(0, text.length - 1)
       : text;
-  final StringBuffer _out = StringBuffer();
+  StringBuffer _out = StringBuffer();
   int _last = 0x0A;
   final Map<String, LinkReference> _references = <String, LinkReference>{};
   final Map<String, FootnoteNode> _definitions = <String, FootnoteNode>{};
-  late final FootnoteHtml _footnotes = FootnoteHtml(_definitions);
+  late final Set<String> _footnoteKeys = _definitions.keys.toSet();
+  late final FootnoteHtml _footnotes = FootnoteHtml(
+    _definitions,
+    xhtml: hooks.xhtml,
+  );
 
   /// Each paragraph's inline text, the link reference definitions it
   /// starts with taken out.
@@ -66,6 +81,20 @@ final class TreeHtml {
     _blocks(tree, tight: false);
     _section();
     return _out.toString();
+  }
+
+  /// What [write] writes, apart from the page: a callout's body, for the
+  /// hooks to frame.
+  String _captured(void Function() write) {
+    final out = _out;
+    final last = _last;
+    _out = StringBuffer();
+    _last = 0x0A;
+    write();
+    final captured = _out.toString();
+    _out = out;
+    _last = last;
+    return captured;
   }
 
   void _write(String text) {
@@ -112,18 +141,33 @@ final class TreeHtml {
       final mine = at == last ? tail : null;
       switch (node) {
         case QuoteNode(:final children, :final callout?):
-          // The app's callout, until the export writes its own (phase 7):
-          // a quote, marked, its title a paragraph of its own.
+          final body = _captured(() => _blocks(children, tight: false));
+          final written = node.title;
+          final title = written == null
+              ? null
+              : _inlineHtml(
+                  LeafText.paragraph([
+                    _lines[written.line].substring(written.start, written.end),
+                  ]),
+                );
           _cr();
-          _write(
-            '<blockquote class="callout" '
-            'data-callout="${InlineHtml.escape(callout.type)}">\n'
-            '<p class="callout-title">${InlineHtml.escape(callout.title)}'
-            '</p>\n',
-          );
-          _blocks(children, tight: false);
-          _cr();
-          _write('</blockquote>\n');
+          final drawn = hooks.callout(callout, body, title);
+          if (drawn != null) {
+            _write(drawn);
+            _write('\n');
+          } else {
+            // The app's callout, where the page draws none of its own: a
+            // quote, marked, its title a paragraph of its own.
+            _write(
+              '<blockquote class="callout" '
+              'data-callout="${InlineHtml.escape(callout.type)}">\n'
+              '<p class="callout-title">'
+              '${title ?? InlineHtml.escape(callout.title)}</p>\n',
+            );
+            _write(body);
+            _cr();
+            _write('</blockquote>\n');
+          }
         case QuoteNode(:final children):
           _cr();
           _write('<blockquote>\n');
@@ -231,6 +275,13 @@ final class TreeHtml {
   /// Writes [leaf]; whether it took [tail].
   bool _leaf(LeafNode leaf, {required bool tight, String? tail}) {
     final lines = LeafText.linesOf(leaf, _lines);
+    final drawn = _isBlock(leaf.kind) ? hooks.leaf(leaf, lines) : null;
+    if (drawn != null) {
+      _cr();
+      _write(drawn);
+      _write('\n');
+      return false;
+    }
     switch (leaf.kind) {
       case BlockKind.paragraph || BlockKind.math:
         final text = leaf.kind == BlockKind.math
@@ -248,13 +299,15 @@ final class TreeHtml {
       case BlockKind.heading:
         final atx = lines.length == 1;
         final level = leaf.headingLevel;
+        final text = atx
+            ? LeafText.atxHeading(lines.single)
+            : LeafText.setextHeading(lines);
+        final id = hooks.headingId(text);
         _cr();
-        _write('<h$level>');
-        _inline(
-          atx
-              ? LeafText.atxHeading(lines.single)
-              : LeafText.setextHeading(lines),
+        _write(
+          id == null ? '<h$level>' : '<h$level id="${InlineHtml.escape(id)}">',
         );
+        _inline(text);
         _write('</h$level>\n');
       case BlockKind.thematicBreak:
         _cr();
@@ -293,11 +346,21 @@ final class TreeHtml {
     return false;
   }
 
-  void _inline(String text) {
+  void _inline(String text) => _write(_inlineHtml(text));
+
+  /// [text]'s inlines as HTML.
+  String _inlineHtml(String text) {
     final out = StringBuffer();
     _inlineInto(out, text);
-    _write(out.toString());
+    return out.toString();
   }
+
+  /// Whether a leaf of [kind] is a block a page may draw its own way.
+  static bool _isBlock(BlockKind kind) =>
+      kind == BlockKind.fencedCode ||
+      kind == BlockKind.indentedCode ||
+      kind == BlockKind.math ||
+      kind == BlockKind.html;
 
   /// [text]'s inlines, parsed and written into [out].
   void _inlineInto(StringBuffer out, String text) {
@@ -306,12 +369,13 @@ final class TreeHtml {
       InlineParser(
         text,
         references: _references,
-        footnotes: _definitions.keys.toSet(),
+        footnotes: _footnoteKeys,
         extendedAutolinks: extensions,
         appSyntax: appSyntax,
       ).parse(),
       footnote: _footnotes.reference,
       tagFilter: extensions,
+      hooks: hooks,
     );
   }
 
@@ -319,7 +383,10 @@ final class TreeHtml {
   void _section() {
     if (_footnotes.cited.isEmpty) return;
     _cr();
-    _write('<section class="footnotes" data-footnotes>\n<ol>\n');
+    _write(
+      '<section class="footnotes" '
+      'data-footnotes${hooks.xhtml ? '=""' : ''}>\n<ol>\n',
+    );
     for (var at = 0; at < _footnotes.cited.length; at++) {
       final key = _footnotes.cited[at];
       final definition = _definitions[key];
