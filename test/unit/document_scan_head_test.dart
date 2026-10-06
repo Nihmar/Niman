@@ -50,7 +50,7 @@ void main() {
       '${'filler\n\n' * 50}[b]: https://b.test\n',
     );
     final head = DocumentScan.head(withDefinitions, 5);
-    expect(head.scope.links.keys, ['a']);
+    expect(head.scope.references.keys, ['A']);
     expect(identical(head.scope.source, withDefinitions), isTrue);
   });
 }

@@ -581,7 +581,7 @@ final class SourceStyler {
     final raw = BlockParser.blockText(block, buffer);
     if (raw.length > _inlineLimit) return null;
     // The items' indents too: what the reading makes of a block in a list
-    // depends on them (`BlockParser.contentText`); and whether a table goes
+    // depends on them (`BlockParser.linePrefix`); and whether a table goes
     // on with one above, whose head it then has none of.
     final key =
         '${block.kind.index}:${block.quoteDepth}:'
@@ -797,10 +797,10 @@ final class SourceStyler {
   }
 
   static bool _sameDefinitions(DocumentScope a, DocumentScope b) {
-    if (a.links.length != b.links.length) return false;
+    if (a.references.length != b.references.length) return false;
     if (a.footnoteCounts.length != b.footnoteCounts.length) return false;
-    for (final entry in a.links.entries) {
-      final other = b.links[entry.key];
+    for (final entry in a.references.entries) {
+      final other = b.references[entry.key];
       if (other == null ||
           other.destination != entry.value.destination ||
           other.title != entry.value.title) {

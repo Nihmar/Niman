@@ -106,7 +106,7 @@ final class LiveQuoteContent {
 
   /// [line], a line of [quote], without its quote marks — counted from where
   /// the items the quote stands in leave the line, as the read view takes
-  /// them off ([BlockParser.contentText]).
+  /// them off ([BlockParser.linePrefix]).
   static String _unquoted(String line, Block quote) => line.substring(
     BlockParser.quotePrefixLength(
       line,

@@ -54,11 +54,11 @@ CaretGeometry _geometry(
 }) {
   final buffer = SourceBuffer.fromText(document);
   final scanner = BlockScanner(buffer);
-  final parsed = BlockParser().parse(scanner.index.blocks.first, buffer);
+  final text = BlockParser.blockText(scanner.index.blocks.first, buffer);
   final painter = TextPainter(
     text: hidden.isNotEmpty
-        ? _hiddenMarkers(parsed.text, hidden)
-        : TextSpan(text: parsed.text, style: _body),
+        ? _hiddenMarkers(text, hidden)
+        : TextSpan(text: text, style: _body),
     textDirection: TextDirection.ltr,
     strutStyle: _strut,
   )..layout(maxWidth: maxWidth);

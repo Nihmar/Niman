@@ -233,7 +233,7 @@ final class BlockTree {
       : leaf.leftOver;
 
   /// [block]'s lines in the coordinates of the container it stands in, its
-  /// quote marks off ([BlockParser.contentText]) — [quoteDepth] of them
+  /// quote marks off ([BlockParser.linePrefix]) — [quoteDepth] of them
   /// when given — and where each starts in the note.
   static (List<String>, List<_Origin>) _contentOf(
     Block block,

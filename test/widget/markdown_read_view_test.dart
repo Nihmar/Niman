@@ -705,7 +705,7 @@ void main() {
       await tester.pumpWidget(view(first, parser));
       await settle(tester);
       expect(parser.scope?.footnotes.single.body, 'a note');
-      expect(parser.scope?.links['ref']?.destination, 'https://x.test');
+      expect(parser.scope?.references['REF']?.destination, 'https://x.test');
 
       // An edit somewhere else: one line added at the head.
       final second = SourceBuffer.fromText(
@@ -719,7 +719,7 @@ void main() {
         'a note',
         reason: 'the same definitions, on the buffer that now holds them',
       );
-      expect(parser.scope?.links['ref']?.destination, 'https://x.test');
+      expect(parser.scope?.references['REF']?.destination, 'https://x.test');
       expect(parser.scope?.revision, second.revision);
 
       // A definition changed.

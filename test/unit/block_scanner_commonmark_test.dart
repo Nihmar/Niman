@@ -164,6 +164,25 @@ Map<String, Where> _scanner(List<String> lines) {
   return out;
 }
 
+/// [raw], the text of [block], in the coordinates of the container it
+/// stands in: each line without what [BlockParser.linePrefixLength] says
+/// its containers take off it — the reading the package's parse was given.
+String _contentText(Block block, String raw) {
+  final lines = raw.split('\n');
+  final first = lines.first;
+  for (var at = 0; at < lines.length; at++) {
+    final line = lines[at];
+    lines[at] = line.substring(
+      BlockParser.linePrefixLength(
+        block,
+        line,
+        BlockParser.listStripOf(block, first, at, line),
+      ),
+    );
+  }
+  return lines.join('\n');
+}
+
 /// Scans [text], whose containers outside it are [outer], into [out], the
 /// way the app draws it: a quote block's inside scanned again
 /// (`BlockView._quoteContent`), a block of inline content — a paragraph, a
@@ -180,14 +199,14 @@ void _scanInto(String text, String outer, Map<String, Where> out, int depth) {
       final path = at + 'L' * (block.listDepth + 1) + 'Q' * block.quoteDepth;
       // As deep as the read view reads quotes inside quotes.
       if (depth < 8) {
-        _scanInto(BlockParser.contentText(block, raw), path, out, depth + 1);
+        _scanInto(_contentText(block, raw), path, out, depth + 1);
       }
       continue;
     }
     switch (block.kind) {
       case BlockKind.paragraph || BlockKind.heading || BlockKind.listItem:
         // An item's own block parses as the item, `L` and all.
-        final content = BlockParser.contentText(block, raw);
+        final content = _contentText(block, raw);
         final items = block.kind == BlockKind.listItem
             ? block.listDepth
             : block.listDepth + 1;

@@ -353,7 +353,7 @@ void main() {
           'q${block.quoteDepth} l${block.listDepth} ${block.fenceInfo}';
       String blocks(List<Block> blocks) => blocks.map(block).join('\n');
       String scope(DocumentScope scope) => [
-        for (final entry in scope.links.entries)
+        for (final entry in scope.references.entries)
           '${entry.key}=${entry.value.destination}',
         '${scope.footnoteCounts}',
         '${scope.footnoteLabels}',
@@ -548,7 +548,7 @@ void main() {
     // footnote a run of indented lines ran on from: a definition created,
     // removed, its body extended, its body ended (#496).
     String scopeOf(DocumentScope scope) => [
-      for (final entry in scope.links.entries)
+      for (final entry in scope.references.entries)
         '${entry.key}=${entry.value.destination}',
       '${scope.footnoteCounts}',
       '${scope.footnoteLabels}',
