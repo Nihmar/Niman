@@ -19,11 +19,11 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// And whether the line is lazy — in a quote without its `>`, in an item
 /// short of its indent — at this level or any around it: a lazy line is
 /// no setext underline.
-typedef _Origin = ({int line, int column, int leftOver, bool lazy});
+typedef LineOrigin = ({int line, int column, int leftOver, bool lazy});
 
 /// A quote's content: how many quotes its first line opened, and the lines
 /// inside their marks, with where each starts.
-typedef _Quoted = ({int depth, List<String> lines, List<_Origin> starts});
+typedef _Quoted = ({int depth, List<String> lines, List<LineOrigin> starts});
 
 /// Builds the tree of a text from the scanner's blocks.
 ///
@@ -67,14 +67,14 @@ final class BlockTree {
     bool appSyntax = true,
   }) {
     final tree = BlockTree._(appSyntax: appSyntax);
-    final (local, starts) = _contentOf(block, buffer, _inNote);
+    final (local, starts) = contentOf(block, buffer, inNote);
     return block.kind == BlockKind.listItem
         ? tree._item(block, local, starts)
         : tree._node(block, local, starts);
   }
 
   /// Where line [line] of a note starts: at its own start.
-  static _Origin _inNote(int line) =>
+  static LineOrigin inNote(int line) =>
       (line: line, column: 0, leftOver: 0, lazy: false);
 
   /// The content of each quote built, by its outermost node: a block that
@@ -83,7 +83,7 @@ final class BlockTree {
 
   /// The blocks of [text], whose line `i` starts in the note at
   /// `origins[i]`.
-  List<BlockNode> _build(String text, List<_Origin> origins) {
+  List<BlockNode> _build(String text, List<LineOrigin> origins) {
     final buffer = SourceBuffer.fromText(text);
     final scanner = BlockScanner(
       buffer,
@@ -91,7 +91,7 @@ final class BlockTree {
       lazy: [for (final origin in origins) origin.lazy],
       appSyntax: appSyntax,
     );
-    _Origin origin(int line) => origins[line];
+    LineOrigin origin(int line) => origins[line];
     final note = <BlockNode>[];
     // The footnote definition open where the scan is: the items in it are
     // its own.
@@ -118,7 +118,7 @@ final class BlockTree {
         roots = note;
         open.clear();
       }
-      final (local, starts) = _contentOf(block, buffer, origin);
+      final (local, starts) = contentOf(block, buffer, origin);
       if (block.kind == BlockKind.listItem) {
         final parents = block.listDepth.clamp(0, open.length);
         open.length = parents;
@@ -151,9 +151,9 @@ final class BlockTree {
     List<BlockNode> into,
     Block block,
     SourceBuffer buffer,
-    _Origin Function(int line) origins,
+    LineOrigin Function(int line) origins,
     List<String> local,
-    List<_Origin> starts,
+    List<LineOrigin> starts,
   ) {
     final entering = block.entering;
     if (into.isEmpty || entering == null) return false;
@@ -196,7 +196,7 @@ final class BlockTree {
       final quoted = _quoted[last];
       if (quoted == null || entering.quoteDepth == 0) return false;
       // Inside the marks the quote has, not the ones this line has.
-      final (more, from) = _contentOf(block, buffer, origins, quoted.depth);
+      final (more, from) = contentOf(block, buffer, origins, quoted.depth);
       into.last = _quote(
         quoted.depth,
         [...quoted.lines, ...more],
@@ -235,15 +235,15 @@ final class BlockTree {
   /// [block]'s lines in the coordinates of the container it stands in, its
   /// quote marks off ([BlockParser.linePrefix]) — [quoteDepth] of them
   /// when given — and where each starts in the note.
-  static (List<String>, List<_Origin>) _contentOf(
+  static (List<String>, List<LineOrigin>) contentOf(
     Block block,
     SourceBuffer buffer,
-    _Origin Function(int line) origins, [
+    LineOrigin Function(int line) origins, [
     int? quoteDepth,
   ]) {
     final first = buffer.lineAt(block.startLine);
     final local = <String>[];
-    final starts = <_Origin>[];
+    final starts = <LineOrigin>[];
     for (var line = block.startLine; line < block.endLine; line++) {
       final text = buffer.lineAt(line);
       final (prefix, columns) = quoteDepth == null
@@ -280,7 +280,7 @@ final class BlockTree {
 
   /// The node of [block], not an item, over [local] lines starting at
   /// [starts].
-  BlockNode _node(Block block, List<String> local, List<_Origin> starts) {
+  BlockNode _node(Block block, List<String> local, List<LineOrigin> starts) {
     if (block.kind == BlockKind.quote) {
       return _quote(block.quoteDepth, local, starts);
     }
@@ -300,7 +300,7 @@ final class BlockTree {
   /// says so, and its content is the lines after that one: a callout's
   /// title is no paragraph its body could go on with (`> [!note]` /
   /// `>     code` is code in the callout, as Obsidian reads it).
-  QuoteNode _quote(int depth, List<String> lines, List<_Origin> starts) {
+  QuoteNode _quote(int depth, List<String> lines, List<LineOrigin> starts) {
     final callout = appSyntax ? Callout.of(lines.first) : null;
     final from = callout == null ? 0 : 1;
     final mark = callout == null ? 0 : Callout.markLength(lines.first);
@@ -328,26 +328,27 @@ final class BlockTree {
   }
 
   /// Where [local] lines starting at [starts] stand in the note.
-  static List<SourceSpan> _spans(List<String> local, List<_Origin> starts) => [
-    for (var at = 0; at < local.length; at++)
-      (
-        line: starts[at].line,
-        start: starts[at].column,
-        end: starts[at].column + local[at].length,
-      ),
-  ];
+  static List<SourceSpan> _spans(List<String> local, List<LineOrigin> starts) =>
+      [
+        for (var at = 0; at < local.length; at++)
+          (
+            line: starts[at].line,
+            start: starts[at].column,
+            end: starts[at].column + local[at].length,
+          ),
+      ];
 
   /// The item [block] opens, over [local] lines starting at [starts]: its
   /// marker, and its content — the marker line past the item's indent, the
   /// lines after it past that indent when they reach it and as they stand
   /// when they go on lazily — scanned again.
-  ItemNode _item(Block block, List<String> local, List<_Origin> starts) {
+  ItemNode _item(Block block, List<String> local, List<LineOrigin> starts) {
     final first = local.first;
     final marker = LineSyntax.listMarkerOf(first)!;
     final item = LineSyntax.itemContent(first, marker);
     final indent = item.indent;
     final content = <String>[];
-    final from = <_Origin>[];
+    final from = <LineOrigin>[];
     void add(int at, int cut, int leftOver, {bool lazy = false}) {
       content.add(local[at].substring(cut));
       from.add((
