@@ -313,8 +313,43 @@ Phase 1 in progress.
   package's) holds them in `tree_nonconforming.txt`, buckets `blocks`
   (phase 3) and `version`.
 
-Left in phase 2: the speed bar (the pathological inputs, the bench
-against the package's inline parser).
+- **Speed.** `inline_pathological_test.dart` runs `cmark`'s pathological
+  inputs at two sizes four times apart: all eighteen linear. Making them
+  so found five faults — text nodes joined two at a time (quadratic in a
+  run of delimiters), the code span's closing run searched again for
+  each opener (now `cmark`'s cache of runs), outer link brackets
+  deactivated one by one (now a count of links made), the 999-character
+  label limit not applied to a link text, and a run of `)` after a URL
+  counted again for each — and a sixth that was a crash: freezing,
+  autolinking and writing the inline tree recursed, and 20 000 levels of
+  nested emphasis overflowed the stack; all three walk with a stack of
+  their own now. `tool/inline_bench.dart`, same leaves, best of five:
+
+  | note | leaves | ours | package inline | app today |
+  |---|---:|---:|---:|---:|
+  | Geometria 1 (945 KB, a user's, by path) | 3 345 | 28 ms | 366 ms | 380 ms |
+  | fixture-200kb.md | 2 065 | 5 ms | 52 ms | 67 ms |
+  | fixture-1mb.md | 11 103 | 17 ms | 257 ms | 323 ms |
+  | worst-note.md | 1 420 | 50 ms | 609 ms | 573 ms |
+
+  ("app today": masked, then the package's whole parse of the block.)
+  `test/perf/inline_parser_perf_test.dart` holds ours to no slower than
+  the package on every run, the absolute bars behind `NIMAN_PERF`.
+
+Left in phase 2: nothing the plan names; the blocks are phase 3.
+
+### An open question: `$` as a currency sign
+
+`20$ + 0,10$/Kg` is read as a formula (` + 0,10`): the app's rule
+(`math_rule.dart`) opens on any `$`, a space after it included, because
+the notes write `$ x $`. `\$` keeps it text, but `live` shows the
+backslash (the parse it colours from loses the escape; our parser keeps
+it, and phase 5 hides it as it hides any mark). Measured on Geometria 1,
+13 004 formulas: 156 open with a space after the `$` (Pandoc's and
+Obsidian's rule would lose them), none opens right after a digit, none
+closes right before a letter or a digit. So "a `$` right after a digit
+does not open" reads prices as text and loses no formula there — to be
+decided.
 
 ### Footnote and link reference definitions: what is known
 
