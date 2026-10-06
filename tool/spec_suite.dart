@@ -18,7 +18,6 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:markdown/markdown.dart' as md;
 import 'package:path/path.dart' as p;
 
 /// One spec example: a Markdown input and the HTML it must produce.
@@ -44,23 +43,16 @@ final class SpecExample {
   final String html;
 }
 
-/// A named suite of examples, with the `markdown` extension set it is run with.
+/// A named suite of examples.
 final class SpecSuite {
   /// Creates a suite.
-  const new({
-    required this.name,
-    required this.examples,
-    required this.extensions,
-  });
+  const new({required this.name, required this.examples});
 
   /// The suite's identifier, `spec/version` ("gfm/0.29-gfm").
   final String name;
 
   /// Its examples.
   final List<SpecExample> examples;
-
-  /// The extension set the `markdown` package is run with.
-  final md.ExtensionSet extensions;
 
   /// The test name for an example: `spec/version/007 @2.2 Tabs`, so a failure
   /// names the suite, the example and its section at once.
@@ -80,23 +72,11 @@ final String specFixtureDirectory = p.join('test', 'fixtures', 'spec');
 
 /// Loads both suites from their committed fixtures.
 List<SpecSuite> loadSpecSuites() => <SpecSuite>[
-  _load(
-    name: commonMarkSuiteName,
-    file: 'commonmark-0.31.2.json',
-    extensions: md.ExtensionSet.commonMark,
-  ),
-  _load(
-    name: gfmSuiteName,
-    file: 'gfm-0.29-gfm.json',
-    extensions: md.ExtensionSet.gitHubFlavored,
-  ),
+  _load(name: commonMarkSuiteName, file: 'commonmark-0.31.2.json'),
+  _load(name: gfmSuiteName, file: 'gfm-0.29-gfm.json'),
 ];
 
-SpecSuite _load({
-  required String name,
-  required String file,
-  required md.ExtensionSet extensions,
-}) {
+SpecSuite _load({required String name, required String file}) {
   final path = p.join(specFixtureDirectory, file);
   final raw = File(path).readAsStringSync();
   final decoded = jsonDecode(raw) as List<dynamic>;
@@ -112,12 +92,8 @@ SpecSuite _load({
       ),
     );
   }
-  return SpecSuite(name: name, examples: examples, extensions: extensions);
+  return SpecSuite(name: name, examples: examples);
 }
-
-/// The `markdown` package's HTML for [example], against its suite's extensions.
-String renderExample(SpecSuite suite, SpecExample example) =>
-    md.markdownToHtml(example.markdown, extensionSet: suite.extensions);
 
 /// The name the extension tests are reported under.
 const String cmarkGfmExtensionsName = 'cmark-gfm/extensions';

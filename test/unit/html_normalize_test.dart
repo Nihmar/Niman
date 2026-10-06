@@ -54,7 +54,7 @@ void main() {
   // differ. Reproducing that state machine is not worth it, and the
   // disagreement cannot change a conformance verdict: that example's expected
   // HTML and the parser's output are the same string, so the normalizer is
-  // applied to itself and cancels. `markdown_conformance_test.dart` is where
+  // applied to itself and cancels. `tree_conformance_test.dart` is where
   // that shows up — as a pass, which is the assertion.
 }
 

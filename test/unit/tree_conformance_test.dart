@@ -3,7 +3,7 @@
 /// 0.31.2 and of `cmark-gfm`'s extension tests, written by `TreeHtml` and
 /// compared with the expected HTML under cmark's normalization.
 ///
-/// Both ways, as `markdown_conformance_test.dart` is for the package: an
+/// Both ways, as the package's gate was before it: an
 /// example outside `tree_nonconforming.txt` must pass, and one inside it
 /// must still fail — a fix cannot go unnoticed, nor a regression hide
 /// behind an old entry.
