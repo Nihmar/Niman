@@ -53,6 +53,11 @@ final class BlockRules {
           : 0,
       fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(read.text) : null,
       entering: _lines.entering(line),
+      footnote: read.footnote,
+      definition: read.definition == Block.opensDefinition
+          ? Block.opensDefinition
+          : 0,
+      reach: read.reach,
     );
   }
 
@@ -64,6 +69,16 @@ final class BlockRules {
   bool mergesInto(Block open, int end) {
     final read = _lines.read(end);
     final entering = _lines.entering(end);
+    // A footnote definition's line starts a block, and nothing goes on
+    // into it from outside or out of it.
+    if (read.footnote == Block.opensFootnote ||
+        (open.footnote == 0) != (read.footnote == 0)) {
+      return false;
+    }
+    // A link reference definition starts a block, and its lines are the
+    // ones its first line read.
+    if (read.definition == Block.opensDefinition) return false;
+    if (entering.definition > 0) return true;
     switch (open.kind) {
       case BlockKind.heading:
       case BlockKind.thematicBreak:
@@ -149,6 +164,8 @@ final class BlockRules {
   int underlineLevel(Block paragraph, int line) {
     final read = _lines.read(line);
     if (!read.carried || !_lines.entering(line).openParagraph) return 0;
+    // A lazy line of a quote or an item underlines nothing.
+    if (_lines.lazyAt(line)) return 0;
     // A table's head is tried first: a line over a delimiter row ends the
     // paragraph, whether or not it is a table.
     if (read.heads) return 0;

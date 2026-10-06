@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_column.dart';
-import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -32,7 +32,7 @@ Future<void> _pump(
           builder: (context) => read
               ? MarkdownReadView(
                   buffer: SourceBuffer.fromText(_note),
-                  parser: BlockParser(),
+                  parser: ReadParser(),
                   mathCache: MathCache(),
                   column: column,
                 )
@@ -80,7 +80,7 @@ Future<void> _pumpNote(
           builder: (context) => read
               ? MarkdownReadView(
                   buffer: SourceBuffer.fromText(note),
-                  parser: BlockParser(),
+                  parser: ReadParser(),
                   mathCache: MathCache(),
                 )
               : MarkdownSurface(

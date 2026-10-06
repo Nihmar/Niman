@@ -120,6 +120,82 @@ void main() {
     });
   });
 
+  group("our parser's nodes, each where the note has it (phase 6)", () {
+    test("an escape's backslash is syntax, what it escapes the text", () {
+      expect(_line(r'costs \$5 or \*so\*'), [
+        r'plain*[\]',
+        r'plain*[\]',
+        r'plain*[\]',
+      ]);
+    });
+
+    test("a footnote's citation: its label raised, its brackets syntax", () {
+      expect(_line('a claim[^src]\n\n[^src]: proof'), [
+        'link*[[^]',
+        'link[src]',
+        'link*[]]',
+      ]);
+    });
+
+    test('a reference link and an autolink have their syntax', () {
+      expect(_line('[t][r] <https://a.b>\n\n[r]: /u'), [
+        'link*[[]',
+        'link[t]',
+        'link*[][r]]',
+        'link*[<]',
+        'link[https://a.b]',
+        'link*[>]',
+      ]);
+    });
+
+    test('an underline has its tags', () {
+      expect(_line('<u>x</u>'), [
+        'underline*[<u>]',
+        'underline[x]',
+        'underline*[</u>]',
+      ]);
+    });
+
+    test("strong in emphasis: the outer one's marker outermost", () {
+      expect(_line('***x***'), [
+        'italic*[*]',
+        'bold*[**]',
+        'bold[x]',
+        'bold*[**]',
+        'italic*[*]',
+      ]);
+    });
+
+    test("a cell's escaped pipe in code is code's, its backslash syntax", () {
+      expect(_line('| `a\\|b` |\n|---|'), [
+        'codeInline*[`]',
+        'codeInline[a]',
+        r'plain*[\]',
+        'codeInline[|b]',
+        'codeInline*[`]',
+      ]);
+    });
+
+    test("a callout's written title is inline text", () {
+      expect(_line('> [!tip] Mind **this**'), [
+        'blockquote[>]',
+        'bold*[**]',
+        'bold[this]',
+        'bold*[**]',
+      ]);
+    });
+
+    test('a line of a paragraph in a quoted item, past its marks', () {
+      final styler = SourceBuffer.fromText('> - a\n>   *b*');
+      expect(_describe(SourceStyler(styler), 1), [
+        'blockquote[>]',
+        'italic*[*]',
+        'italic[b]',
+        'italic*[*]',
+      ]);
+    });
+  });
+
   group('structure from the block', () {
     test('a heading', () {
       expect(_line('## A **b**'), [
@@ -277,7 +353,7 @@ void main() {
           'q${block.quoteDepth} l${block.listDepth} ${block.fenceInfo}';
       String blocks(List<Block> blocks) => blocks.map(block).join('\n');
       String scope(DocumentScope scope) => [
-        for (final entry in scope.links.entries)
+        for (final entry in scope.references.entries)
           '${entry.key}=${entry.value.destination}',
         '${scope.footnoteCounts}',
         '${scope.footnoteLabels}',
@@ -472,7 +548,7 @@ void main() {
     // footnote a run of indented lines ran on from: a definition created,
     // removed, its body extended, its body ended (#496).
     String scopeOf(DocumentScope scope) => [
-      for (final entry in scope.links.entries)
+      for (final entry in scope.references.entries)
         '${entry.key}=${entry.value.destination}',
       '${scope.footnoteCounts}',
       '${scope.footnoteLabels}',

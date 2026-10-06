@@ -15,6 +15,7 @@ final class CalloutBox extends StatefulWidget {
     required this.callout,
     required this.theme,
     required this.body,
+    this.title,
     super.key,
   });
 
@@ -26,6 +27,10 @@ final class CalloutBox extends StatefulWidget {
 
   /// What the callout says, drawn as the quote's content is.
   final List<Widget> body;
+
+  /// The written title's spans in a style, when it has inline text of its
+  /// own to draw: `> [!tip] Mind **this**`. Null draws [Callout.title].
+  final List<InlineSpan> Function(TextStyle style)? title;
 
   @override
   State<CalloutBox> createState() => _CalloutBoxState();
@@ -62,7 +67,16 @@ final class _CalloutBoxState extends State<CalloutBox> {
       children: <Widget>[
         Icon(style.icon, size: size, color: style.color),
         SizedBox(width: size * 0.4),
-        Flexible(child: Text(callout.title, style: titleStyle)),
+        Flexible(
+          child: widget.title == null
+              ? Text(callout.title, style: titleStyle)
+              : Text.rich(
+                  TextSpan(
+                    children: widget.title!(titleStyle),
+                    style: titleStyle,
+                  ),
+                ),
+        ),
         if (folds) ...<Widget>[
           SizedBox(width: size * 0.2),
           Icon(

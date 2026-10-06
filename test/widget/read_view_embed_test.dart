@@ -12,7 +12,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart' show KatexOptions, renderToBox;
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -57,12 +57,12 @@ void main() {
         home: Scaffold(
           body: MarkdownReadView(
             buffer: SourceBuffer.fromText(data),
-            parser: BlockParser(),
+            parser: ReadParser(),
             mathCache: cache,
             embedResolver: resolve,
             onTapWikiLink: onWikiLink == null
                 ? null
-                : (span) => onWikiLink(span.text, null),
+                : (inner) => onWikiLink(inner, null),
           ),
         ),
       ),

@@ -24,8 +24,11 @@ import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/block_tree.dart';
+import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -66,6 +69,11 @@ const _forms = [
   '|---|---|',
   '<div>',
   '<!-- W -->',
+  '[^f]: W',
+  '[^f]:',
+  '[r]: /u',
+  '[r]:',
+  '/u "t"',
 ];
 
 /// What a line is indented with: mostly nothing, then spaces either side
@@ -77,23 +85,40 @@ const _tabs = ['', '', '', '\t', '\t', '\t\t'];
 final RegExp _token = RegExp(r'w\d+');
 final RegExp _heading = RegExp(r'^h[1-6]$');
 
-Map<String, Where> _reference(List<String> lines) {
+/// The text of an HTML block, as the package writes it: from a line break,
+/// then its line as it stood.
+final RegExp _htmlText = RegExp(r'^\n *<');
+
+/// What the parser makes of each word of [lines]: a whole note, its
+/// footnote [cited] so that the parser keeps the definition, or a block the
+/// read view hands it alone.
+Map<String, Where> _reference(List<String> lines, {bool cited = true}) {
   final doc = md.Document(
     encodeHtml: false,
     extensionSet: md.ExtensionSet.gitHubFlavored,
   );
-  final nodes = doc.parseLines(lines);
+  // The footnote is cited, or the parser drops its definition — first, so
+  // that nothing the document leaves open takes the citation.
+  final nodes = doc.parseLines(cited ? ['z[^f]', '', ...lines] : lines);
   final out = <String, Where>{};
   void walk(md.Node node, List<String> path) {
     if (node is md.Text) {
       for (final token in _token.allMatches(node.text)) {
         // An HTML block is a text node of its own, outside any paragraph,
         // and starts with its tag.
+        // A footnote's last block is wrapped in a paragraph for its link
+        // back, an HTML block too; the package's HTML block text starts
+        // with a line break.
         final html =
+            _htmlText.hasMatch(node.text) ||
             node.text.trimLeft().startsWith('<') &&
-            !path.any(
-              (t) => t == 'p' || t == 'td' || t == 'th' || _heading.hasMatch(t),
-            );
+                !path.any(
+                  (t) =>
+                      t == 'p' ||
+                      t == 'td' ||
+                      t == 'th' ||
+                      _heading.hasMatch(t),
+                );
         final kind = path.contains('pre')
             ? 'code'
             : path.contains('table')
@@ -107,13 +132,22 @@ Map<String, Where> _reference(List<String> lines) {
           kind: kind,
           path: [
             for (final tag in path)
-              if (tag == 'li') 'L' else if (tag == 'blockquote') 'Q',
+              if (tag == 'li')
+                'L'
+              else if (tag == 'blockquote')
+                'Q'
+              else if (tag == 'footnote')
+                'F',
           ].join(),
         );
       }
     } else if (node is md.Element) {
       for (final child in node.children ?? const <md.Node>[]) {
-        walk(child, [...path, node.tag]);
+        // A footnote's `li` is the footnote, not an item.
+        walk(child, [
+          ...path,
+          if (node.footnoteLabel != null) 'footnote' else node.tag,
+        ]);
       }
     }
   }
@@ -130,6 +164,25 @@ Map<String, Where> _scanner(List<String> lines) {
   return out;
 }
 
+/// [raw], the text of [block], in the coordinates of the container it
+/// stands in: each line without what [BlockParser.linePrefixLength] says
+/// its containers take off it — the reading the package's parse was given.
+String _contentText(Block block, String raw) {
+  final lines = raw.split('\n');
+  final first = lines.first;
+  for (var at = 0; at < lines.length; at++) {
+    final line = lines[at];
+    lines[at] = line.substring(
+      BlockParser.linePrefixLength(
+        block,
+        line,
+        BlockParser.listStripOf(block, first, at, line),
+      ),
+    );
+  }
+  return lines.join('\n');
+}
+
 /// Scans [text], whose containers outside it are [outer], into [out], the
 /// way the app draws it: a quote block's inside scanned again
 /// (`BlockView._quoteContent`), a block of inline content — a paragraph, a
@@ -140,25 +193,28 @@ void _scanInto(String text, String outer, Map<String, Where> out, int depth) {
   final buffer = SourceBuffer.fromText(text);
   for (final block in BlockScanner(buffer).index.blocks) {
     final raw = BlockParser.blockText(block, buffer);
+    // A footnote's blocks are drawn in the footnotes, not where they stand.
+    final at = block.footnote == 0 ? outer : '${outer}F';
     if (block.quoteDepth > 0) {
-      final path = outer + 'L' * (block.listDepth + 1) + 'Q' * block.quoteDepth;
+      final path = at + 'L' * (block.listDepth + 1) + 'Q' * block.quoteDepth;
       // As deep as the read view reads quotes inside quotes.
       if (depth < 8) {
-        _scanInto(BlockParser.contentText(block, raw), path, out, depth + 1);
+        _scanInto(_contentText(block, raw), path, out, depth + 1);
       }
       continue;
     }
     switch (block.kind) {
       case BlockKind.paragraph || BlockKind.heading || BlockKind.listItem:
         // An item's own block parses as the item, `L` and all.
-        final content = BlockParser.contentText(block, raw);
+        final content = _contentText(block, raw);
         final items = block.kind == BlockKind.listItem
             ? block.listDepth
             : block.listDepth + 1;
         for (final MapEntry(:key, :value) in _reference(
           content.split('\n'),
+          cited: false,
         ).entries) {
-          out[key] = (kind: value.kind, path: outer + 'L' * items + value.path);
+          out[key] = (kind: value.kind, path: at + 'L' * items + value.path);
         }
       case BlockKind.fencedCode ||
           BlockKind.indentedCode ||
@@ -173,7 +229,7 @@ void _scanInto(String text, String outer, Map<String, Where> out, int depth) {
           BlockKind.fencedCode || BlockKind.indentedCode => 'code',
           _ => block.kind.name,
         };
-        final path = outer + 'L' * (block.listDepth + 1);
+        final path = at + 'L' * (block.listDepth + 1);
         for (final token in _token.allMatches(raw)) {
           out[token.group(0)!] = (kind: kind, path: path);
         }
@@ -181,15 +237,98 @@ void _scanInto(String text, String outer, Map<String, Where> out, int depth) {
   }
 }
 
-String? _differs(List<String> lines) {
+/// What a reader of [lines] makes of each word: the reference, or one of
+/// the app's readings.
+typedef _Reader = Map<String, Where> Function(List<String> lines);
+
+/// The words of [lines] as the block tree reads them
+/// (`docs/dev/block-tree.md`): each leaf's kind, under the items and quotes
+/// the tree puts it in — the package parses nothing.
+Map<String, Where> _tree(List<String> lines) {
+  final out = <String, Where>{};
+  void walk(BlockNode node, String path) {
+    switch (node) {
+      case FootnoteNode(:final children):
+        for (final child in children) {
+          walk(child, '${path}F');
+        }
+      case QuoteNode(:final children):
+        for (final child in children) {
+          walk(child, '${path}Q');
+        }
+      case ListNode(:final items):
+        for (final item in items) {
+          walk(item, path);
+        }
+      case ItemNode(:final children):
+        for (final child in children) {
+          walk(child, '${path}L');
+        }
+      case LeafNode(:final definition) when definition:
+        // A definition gives the parser no text.
+        break;
+      case LeafNode(:final kind, lines: final spans):
+        final name = switch (kind) {
+          BlockKind.paragraph => 'text',
+          BlockKind.fencedCode || BlockKind.indentedCode => 'code',
+          _ => kind.name,
+        };
+        for (final span in spans) {
+          final text = lines[span.line].substring(span.start, span.end);
+          for (final token in _token.allMatches(text)) {
+            out[token.group(0)!] = (kind: name, path: path);
+          }
+        }
+    }
+  }
+
+  for (final node in BlockTree.of(lines.join('\n'))) {
+    walk(node, '');
+  }
+  return out;
+}
+
+String? _differs(List<String> lines, _Reader reader) {
   final want = _reference(lines);
-  final got = _scanner(lines);
+  final got = reader(lines);
   final diffs = [
     for (final token in got.keys)
       if (want[token] != got[token])
         '$token: want ${want[token]} got ${got[token]}',
   ];
   return diffs.isEmpty ? null : diffs.join('; ');
+}
+
+/// The app's readings the gate holds to the reference: the read view's
+/// pipeline, and the block tree that is to replace it.
+const List<(String, _Reader)> _readers = [
+  ('the read view', _scanner),
+  ('the block tree', _tree),
+];
+
+/// Whether a leaf in [nodes], [inside] an item, a quote or a definition,
+/// has a line that opens a footnote definition: one the scanner reads as
+/// text, and the parser as a definition left where it stands.
+bool _definesInside(List<BlockNode> nodes, List<String> lines, bool inside) {
+  for (final node in nodes) {
+    final found = switch (node) {
+      QuoteNode(:final children) ||
+      ItemNode(:final children) ||
+      FootnoteNode(:final children) => _definesInside(children, lines, true),
+      ListNode(:final items) => _definesInside(items, lines, inside),
+      LeafNode(lines: final spans) =>
+        inside &&
+            spans.any(
+              (span) =>
+                  FootnoteSyntax.opening(
+                    lines[span.line].substring(span.start),
+                  ) !=
+                  null,
+            ),
+    };
+    if (found) return true;
+  }
+  return false;
 }
 
 /// Whether the run asked for the report.
@@ -246,22 +385,40 @@ void main() {
     }
   });
 
-  test('the scanner reads a sample of documents as the parser does', () {
-    // The gate: two thousand documents, every one read alike but those the
-    // parser itself gets wrong (_quirkOf). The full report is behind
-    // NIMAN_SCANNER_DIFF.
-    final run = _run(2000, 1);
-    expect(
-      run.found.keys.take(5).toList(),
-      isEmpty,
-      reason: '${run.docs} of 2000 documents differ',
-    );
+  group('the block tree', () {
+    for (final (name, text) in _shapes) {
+      test(name, () {
+        var w = 0;
+        final lines = [
+          for (final line in text.split('\n'))
+            line.replaceAllMapped('w', (_) => 'w${w++}'),
+        ];
+        expect(_tree(lines), _reference(lines));
+      });
+    }
   });
 
+  for (final (what, reader) in _readers) {
+    test('$what reads a sample of documents as the parser does', () {
+      // The gate: two thousand documents, every one read alike but those
+      // the parser itself gets wrong (_quirkOf). The full report is behind
+      // NIMAN_SCANNER_DIFF.
+      final run = _run(2000, 1, reader);
+      expect(
+        run.found.keys.take(5).toList(),
+        isEmpty,
+        reason: '${run.docs} of 2000 documents differ',
+      );
+    });
+  }
+
   test('the scanner reads containers as CommonMark does', skip: !_asked, () {
+    // READER=tree reports on the block tree instead of the read view.
+    const which = String.fromEnvironment('READER', defaultValue: 'view');
     final run = _run(
       40000,
       int.parse(const String.fromEnvironment('SEED', defaultValue: '1')),
+      which == 'tree' ? _tree : _scanner,
     );
     final found = run.found;
     print(
@@ -301,6 +458,7 @@ void main() {
 ({int docs, Map<String, int> skipped, Map<String, String> found}) _run(
   int count,
   int seed,
+  _Reader reader,
 ) {
   final random = math.Random(seed);
   final found = <String, String>{};
@@ -314,7 +472,7 @@ void main() {
       skipped[quirk] = (skipped[quirk] ?? 0) + 1;
       continue;
     }
-    if (_differs(lines) == null) continue;
+    if (_differs(lines, reader) == null) continue;
     docs++;
     // Shrink: drop lines while it still differs.
     var small = lines;
@@ -324,7 +482,7 @@ void main() {
         final fewer = [...small]..removeAt(i);
         if (fewer.first.trim() != '---' &&
             _quirkOf(fewer) == null &&
-            _differs(fewer) != null) {
+            _differs(fewer, reader) != null) {
           small = fewer;
           changed = true;
           break;
@@ -332,7 +490,7 @@ void main() {
       }
     }
     final key = small.map((l) => l.replaceAll(_token, 'w')).join(r'\n');
-    found.putIfAbsent(key, () => _differs(small)!);
+    found.putIfAbsent(key, () => _differs(small, reader)!);
   }
   return (docs: docs, skipped: skipped, found: found);
 }
@@ -357,9 +515,11 @@ List<String> _document(math.Random random) {
 ///   setext underline and ends, but GFM's list syntax is tried before the
 ///   underline's, opens an empty item on it — and the paragraph's text is
 ///   gone from the output.
-/// * `===` in a quote's run of lines. A quote whose last line is lazy has
-///   its setext underlines turned off, so `===` there is text; the scanner
-///   reads the quote's content on its own, and heads it.
+/// * `===` in the run of lines of a quote or an item. A lazy line is no
+///   setext underline (the spec, and the tree since it knows lazy lines);
+///   the package heads a lazy `===` in an item all the same, and the read
+///   view's pipeline, reading a quote's content on its own, heads one in a
+///   quote. Where the package and the spec part, the spec wins.
 /// * Tabs and spaces indenting the lines of one list — the app's limit,
 ///   not the parser's. A tab an item's indent ends inside of leaves columns
 ///   of it to the item's text, which the text the read view hands the
@@ -367,8 +527,27 @@ List<String> _document(math.Random random) {
 ///   list indented with tabs alone, as Obsidian writes one, loses the same
 ///   columns on every line and reads alike ([_tabs]); mixed with spaces it
 ///   does not. The documents made here do not mix them.
+/// * The parser throws: a cited footnote whose last block is a list
+///   (`Document._appendBackref` takes its children for elements).
+/// * A footnote definition inside an item, a quote or another definition:
+///   the parser reads it there, and leaves it where it stands — a
+///   footnote's `li` in the middle of the note — where the scanner reads
+///   definitions at the note's margin only, the ones taken to the
+///   footnotes.
 String? _quirkOf(List<String> lines) {
-  var quoted = false;
+  final Map<String, Where> reference;
+  try {
+    reference = _reference(lines);
+  } on Object {
+    return 'the parser throws';
+  }
+  // A definition in an item, a quote or another definition stays where it
+  // is, a footnote's `li` in the middle of the note.
+  if (reference.values.any((where) => where.path.lastIndexOf('F') > 0) ||
+      _definesInside(BlockTree.of(lines.join('\n')), lines, false)) {
+    return 'a definition inside a container';
+  }
+  var contained = false;
   var listed = false;
   var tabs = false;
   var spaces = false;
@@ -376,14 +555,28 @@ String? _quirkOf(List<String> lines) {
     final raw = lines[at];
     final line = raw.trim();
     if (line.isEmpty) {
-      quoted = false;
+      contained = false;
       continue;
     }
     if (at > 0 && line == '-' && lines[at - 1].trim().isNotEmpty) {
       return 'a lone `-`';
     }
-    if (quoted && line.replaceAll('=', '').isEmpty) return '`===` in a quote';
-    if (raw.contains('>')) quoted = true;
+    if (contained && line.replaceAll('=', '').isEmpty) {
+      return '`===` in a quote or an item';
+    }
+    // `> - w` / `    ---`: no `>`, four columns in — neither code nor an
+    // underline can start there over a paragraph, so the line goes on with
+    // the paragraph lazily (cmark's `S_process_line`); the package heads
+    // the item's text with it.
+    if (contained &&
+        !raw.contains('>') &&
+        line.replaceAll('-', '').isEmpty &&
+        LineSyntax.columnsOf(raw) >= 4) {
+      return '`---` four columns in, lazily under a quote';
+    }
+    if (raw.contains('>') || LineSyntax.listMarkerOf(line) != null) {
+      contained = true;
+    }
     if (LineSyntax.listMarkerOf(line) != null) listed = true;
     final indent = raw.substring(0, raw.length - raw.trimLeft().length);
     if (listed && indent.contains('\t')) tabs = true;

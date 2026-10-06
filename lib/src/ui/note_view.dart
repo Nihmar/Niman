@@ -43,12 +43,12 @@ import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
-import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/note_references.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -607,7 +607,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// The unified engine's parser: one for the view's life, so its per-block
   /// cache survives a rebuild and invalidates itself when the text changes.
-  final BlockParser _unifiedParser = BlockParser();
+  final ReadParser _unifiedParser = ReadParser();
 
   /// The unified engine's buffer, rebuilt only when the text changes.
   ///
@@ -1523,12 +1523,11 @@ final class _NoteViewState extends State<NoteView>
     controller: _previewScroll,
     onTapLink: (text, href) =>
         unawaited(openHref(context, href ?? '', _linkTargets())),
-    onTapWikiLink: (span) => unawaited(
-      // The same rule the masker and the preview use, so a wikilink means one
-      // thing however it is drawn. `span.inner` is the `[[…]]` content: the
-      // brackets are the span's, and `parseWikiRef` reads the inside (#477
-      // needs the target it names).
-      openWiki(context, parseWikiRef(span.inner), _linkTargets()),
+    onTapWikiLink: (inner) => unawaited(
+      // The same rule the parser and the preview use, so a wikilink means one
+      // thing however it is drawn. `inner` is the `[[…]]` content, and
+      // `parseWikiRef` reads it (#477 needs the target it names).
+      openWiki(context, parseWikiRef(inner), _linkTargets()),
     ),
     embedResolver: _resolveEmbed,
     column: widget.noteColumn,

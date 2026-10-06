@@ -11,7 +11,9 @@ one file:
 
 - **Markdown** — the note as it stands, under its own name (`Notes/it.md`
   becomes `it.md`).
-- **HTML** — one self-contained page: the note as it reads, its pictures
+- **HTML** — one self-contained page: the note as it reads — read as the
+  app reads it, GitHub's Markdown and Niman's own, footnotes and callouts
+  included — its pictures
   inside it as `data:` URIs, its formulas drawn as SVG, and a style that
   follows the reader's light or dark system. Nothing else is needed to
   open it — a mail attachment or a USB stick is enough. The picture

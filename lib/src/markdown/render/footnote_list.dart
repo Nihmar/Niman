@@ -7,16 +7,15 @@
 /// which is why it is a section of its own, appended to the read view, built
 /// from the definitions `DocumentScope` scanned.
 ///
-/// Its text is the package's — `1. body ↩` — with the body drawn as the
-/// package draws it too: as prose, its inline syntax rendered.
+/// Its text is `cmark-gfm`'s — `1. body ↩` — with the body drawn as a
+/// note's blocks are: read by the tree and our inline parser.
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
-import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
 /// One footnote, drawn: its number, its body, and the way back.
@@ -55,7 +54,7 @@ final class FootnoteRow extends StatelessWidget {
   final MarkdownTheme theme;
 
   /// The parser its body is read with.
-  final BlockParser parser;
+  final ReadParser parser;
 
   /// The math render cache, one per surface.
   final MathCache mathCache;
@@ -82,16 +81,7 @@ final class FootnoteRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = footnote.body;
-    final parsed = parser.parseText(
-      Block(
-        kind: BlockKind.paragraph,
-        startLine: 0,
-        endLine: '\n'.allMatches(body).length + 1,
-      ),
-      body,
-      () => scope ?? DocumentScope.scan(SourceBuffer.fromText(body), 0),
-    );
+    final blocks = parser.ofText(footnote.body, scope: scope);
     final em = MediaQuery.textScalerOf(context).scale(theme.body.fontSize!);
     return Padding(
       padding: EdgeInsets.only(top: theme.blockSpacing * 0.5),
@@ -107,11 +97,16 @@ final class FootnoteRow extends StatelessWidget {
           ),
           Expanded(
             child: _tappable(
-              BlockView(
-                parsed: parsed,
-                theme: theme.quoted,
-                mathCache: mathCache,
-                scope: scope,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final block in blocks)
+                    BlockView(
+                      read: block,
+                      theme: theme.quoted,
+                      mathCache: mathCache,
+                    ),
+                ],
               ),
             ),
           ),
@@ -146,7 +141,7 @@ final class FootnoteRow extends StatelessWidget {
 Widget footnoteSliver({
   required List<Footnote> footnotes,
   required MarkdownTheme theme,
-  required BlockParser parser,
+  required ReadParser parser,
   required MathCache mathCache,
   DocumentScope? scope,
   void Function(Footnote footnote)? onTap,
@@ -202,7 +197,7 @@ final class FootnoteList extends StatelessWidget {
   });
 
   /// The parser the bodies are read with.
-  final BlockParser parser;
+  final ReadParser parser;
 
   /// The math render cache, one per surface.
   final MathCache mathCache;

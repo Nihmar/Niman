@@ -27,8 +27,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex/katex.dart' show boxSizePxPadded;
 import 'package:katex_dart/katex_dart.dart' show KatexOptions, renderToBox;
-import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -196,7 +196,7 @@ Future<(ScrollController, MathCache)> _pump(
       home: Scaffold(
         body: MarkdownReadView(
           buffer: SourceBuffer.fromText(document),
-          parser: BlockParser(),
+          parser: ReadParser(),
           mathCache: cache,
           controller: controller,
         ),
@@ -273,7 +273,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final buffer = SourceBuffer.fromText('# One\n\nTwo\n');
-    final parser = BlockParser();
+    final parser = ReadParser();
     final blocks = BlockScanner(buffer).index.blocks;
     final cache = _cache();
     await tester.pumpWidget(
@@ -290,7 +290,7 @@ void main() {
                       left: 0,
                       right: 0,
                       child: BlockView(
-                        parsed: parser.of(blocks[index], buffer),
+                        read: parser.of(blocks[index], buffer),
                         theme: theme,
                         mathCache: cache,
                       ),

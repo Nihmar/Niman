@@ -1,0 +1,17 @@
+# Examples the block tree and our inline parser do not match yet, each with
+# its bucket and reason (docs/dev/block-tree.md).
+#
+# Format: `<suite>/<example> <bucket>: <reason>`, the bucket one of:
+#
+#   blocks   the scanner reads the blocks otherwise than the spec: phase 3
+#   version  CommonMark 0.31.2 reads it otherwise than GFM 0.29, which is
+#            the reference (`cmark-gfm`); decided for GFM
+#
+# `flutter test` fails if an example outside this file fails, and fails again
+# if an example inside it starts passing, so the list cannot rot.
+#
+# Measured 2026-10-06 with `dart run tool/tree_spec.dart --ids`.
+
+commonmark/0.31.2/354 version: 0.31 counts symbols (`£`, `€`) as punctuation for flanking; 0.29 does not
+commonmark/0.31.2/625 version: 0.31 changed what an HTML comment is (`<!-->`, `--` inside)
+commonmark/0.31.2/626 version: 0.31 changed what an HTML comment is (`<!-->`, `--` inside)

@@ -60,7 +60,10 @@ same Markdown either way, and only how it is drawn differs. The read view
   cell to cell rather than onto the pipes, and Backspace or Delete stop at
   the cell's edge. Footnote and link definitions take no room
   where they are written: the note ends with its footnotes, as in the read
-  view, and a tap on one puts the caret in its definition. The read view is
+  view, and a tap on one puts the caret in its definition. A footnote
+  holds the lines that follow its own without a blank line, and the lines
+  indented four spaces under it, blank lines between them included — more
+  paragraphs, a list, code. The read view is
   the same page: a blank line is as tall in both, and flipping between
   them leaves the text where it was. Columns, bullets,
   checkboxes and numbers grow with the note text size. Display formulas (`$$…$$`) and inline ones
@@ -262,6 +265,19 @@ Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's
 yellow, the same in every theme), callouts, fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
+
+The read view reads a note as GitHub does — GitHub Flavored Markdown, as
+`cmark-gfm` reads it — with Niman's own syntax added to it: what is inside
+a quote or a list item is read as a note of its own, so a list in a quote
+is a list and a quote, a heading or a code block on an item's line is one
+in the item; a paragraph written under an item after a blank line stands
+at the item's indent; `- [ ]` with nothing after it is an empty task; a
+link's destination may sit on the line after its `[label]:`; `\*` and
+`&amp;` read as `*` and `&`; a footnote is cited by its number, raised.
+The WYSIWYG editor reads the note the same way: the backslash of an
+escape is hidden as any mark is (`\$5` shows `$5`), a footnote citation
+shows its label raised, and a callout's title is drawn with its own
+formatting, in both.
 
 **Callouts**, as Obsidian writes them: a quote whose first line is
 `[!type]`, with a title of its own after it or the type's as its title.

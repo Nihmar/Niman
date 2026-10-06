@@ -61,7 +61,9 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/fence_body.dart';
+import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_references.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
@@ -362,7 +364,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   final LiveTables _tables = LiveTables();
 
   /// What the footnotes `live` ends the note with are parsed with.
-  final BlockParser _footnoteParser = BlockParser();
+  final ReadParser _footnoteParser = ReadParser();
 
   /// The formulas of those footnotes, for a surface given no math cache.
   final MathCache _footnoteMath = MathCache();
@@ -3439,11 +3441,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                           : _fragmentKey(index, at)
                                     : null,
                                 pieceShift: _caretShift,
-                                definition:
-                                    widget.hideMarkers &&
-                                        block != null &&
-                                        (_styler?.definesOnly(block) ?? false)
-                                    ? (block.startLine, block.endLine)
+                                definition: widget.hideMarkers && block != null
+                                    ? _styler?.definitionRunOf(block)
                                     : null,
                                 codeRuns: !widget.hideMarkers
                                     ? null

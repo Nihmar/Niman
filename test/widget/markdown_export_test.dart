@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/diagrams/diagram_painter.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -48,7 +48,7 @@ Future<Size> _layout(WidgetTester tester, String document, double width) async {
           child: Builder(
             builder: (context) => MarkdownExportView(
               buffer: SourceBuffer.fromText(document),
-              parser: BlockParser(),
+              parser: ReadParser(),
               theme: markdownThemeOf(context),
               mathCache: _syncCache(),
               width: width,
@@ -171,7 +171,7 @@ void main() {
             buffer: SourceBuffer.fromText(
               '```mermaid\nflowchart TD\nA --> B\n```\n',
             ),
-            parser: BlockParser(),
+            parser: ReadParser(),
             theme: theme,
             mathCache: _syncCache(),
             width: 400,

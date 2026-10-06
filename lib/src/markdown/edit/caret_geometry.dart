@@ -25,8 +25,8 @@ final class CaretGeometry {
   /// The geometry of the block laid out as [painter], whose first character is
   /// document offset [sourceStart].
   ///
-  /// [hidden] are the block's own hidden ranges — `hiddenRangesOf` of the
-  /// parsed block — as offsets into its text. [ownsTrailingEdge] is true for
+  /// [hidden] are the block's own hidden ranges — its markers — as offsets
+  /// into its text. [ownsTrailingEdge] is true for
   /// the last block of the document, which is the one that draws the caret
   /// sitting at the very end: without it a caret at the end of the last
   /// block would belong to no block at all.

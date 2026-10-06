@@ -10,10 +10,10 @@
 /// * **the block** a line is in comes from the [BlockScanner] — kept current
 ///   by the edits, O(change) — and says what the line's structure is: a
 ///   fence, a heading, a quote's marks, a list item's marker;
-/// * **the inline runs** come from the [BlockParser]'s parse of that block,
-///   the read view's own, put back on the line through the quote marks the
-///   parse took off; each run already knows its markers from its text, so
-///   they come out as tokens of their own — what `live` mode hides.
+/// * **the inline constructs** come from the read view's own reading of that
+///   block ([ReadParser]: the tree, our inline parser), each node put back
+///   on its line through its leaf's map to the note, its markers apart from
+///   its text — what `live` mode hides ([LiveInlines]).
 ///
 /// A parse is kept by the block's *content*, not its position: a keystroke
 /// parses the block it landed in, and every other block on screen — moved
@@ -33,26 +33,17 @@ import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
-import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
+import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_reference_cache.dart';
 import 'package:niman/src/markdown/note_references.dart';
-import 'package:niman/src/markdown/parsed_block.dart';
+import 'package:niman/src/markdown/read_block.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
-import 'package:niman/src/markdown/style_run.dart';
-
-/// A picture on a line: where its source is, in the line's coordinates, what
-/// it points at, what stands in for it, and the source as written.
-typedef LinePicture = ({
-  int start,
-  int end,
-  String target,
-  String display,
-  String source,
-});
 
 /// A note's lines, coloured by the engine's reading of them.
 final class SourceStyler {
@@ -135,7 +126,7 @@ final class SourceStyler {
 
   /// The parser the references read their blocks with: the colours' own
   /// keeps a count a test reads, of the blocks drawn.
-  final BlockParser _referenceParser = BlockParser();
+  final ReadParser _referenceParser = ReadParser();
 
   /// The note's tags and links as of the buffer's revision, for its save
   /// to hand the index — or null when they are not kept (a short note,
@@ -164,11 +155,11 @@ final class SourceStyler {
 
   final BlockScanner _scanner;
   late DocumentScope _scope;
-  final BlockParser _parser = BlockParser();
+  final ReadParser _reader = ReadParser();
 
-  /// How many blocks have been parsed, for the test that proves a keystroke
-  /// parses the block it landed in rather than the screen.
-  int get parses => _parser.parseCount;
+  /// How many blocks have been read, for the test that proves a keystroke
+  /// reads the block it landed in rather than the screen.
+  int get parses => _reader.parseCount;
 
   /// How many blocks have had their text joined to find their parse, for
   /// the test that proves a frame made after an Enter re-joins none of the
@@ -217,8 +208,9 @@ final class SourceStyler {
   static const int _parseCacheSize = 4096;
 
   /// A block past this many characters is not inline-parsed: its lines get
-  /// their structure and nothing more. The parse is super-linear on some
-  /// shapes, and a pasted table of this size is one block.
+  /// their structure and nothing more. A block is read whole whenever it
+  /// changes, and a pasted table of this size is one block: a keystroke in
+  /// it would read more than a frame affords.
   static const int _inlineLimit = 64 * 1024;
 
   /// The note's footnotes, in the order they are cited: the section the
@@ -231,12 +223,43 @@ final class SourceStyler {
 
   /// Whether [block] is nothing but definitions — link references or
   /// footnotes — which the read view does not draw where they stand: a
-  /// paragraph whose parse gave nothing back. False for a block too long to
-  /// parse, which is drawn as it is.
+  /// block of a footnote definition, whatever its kind but blank — blank
+  /// lines are the note's spacing — or a paragraph whose parse gave nothing
+  /// back. False for a block too long to parse, which is drawn as it is.
   bool definesOnly(Block block) {
+    if (block.footnote != 0) return block.kind != BlockKind.blank;
     if (block.kind != BlockKind.paragraph) return false;
     final parsed = _parsedOf(block);
-    return parsed != null && parsed.parse.runs.isEmpty;
+    if (parsed == null) return false;
+    final read = parsed.read;
+    final node = read.node;
+    return node is LeafNode && (read.leaf(node).inline?.isEmpty ?? true);
+  }
+
+  /// The lines `[start, end)` of the run of definitions [block] is in, or
+  /// null when it is no definition ([definesOnly]): the blocks of
+  /// definitions next to it, no blank line between. A footnote definition
+  /// ends where a link reference starts, as the parser reads them, and the
+  /// caret in one of a run written together still shows the run.
+  (int, int)? definitionRunOf(Block block) {
+    if (!definesOnly(block)) return null;
+    var start = block.startLine;
+    var end = block.endLine;
+    for (
+      var before = blockOf(start - 1);
+      before != null && before.endLine == start && definesOnly(before);
+      before = blockOf(start - 1)
+    ) {
+      start = before.startLine;
+    }
+    for (
+      var after = blockOf(end);
+      after != null && after.startLine == end && definesOnly(after);
+      after = blockOf(end)
+    ) {
+      end = after.endLine;
+    }
+    return (start, end);
   }
 
   /// The line footnote [label]'s definition is on, or null when no line
@@ -359,77 +382,27 @@ final class SourceStyler {
   Block? blockOf(int line) => _scanner.blockAt(line);
 
   /// The pictures on line [line] — each `![[embed]]` and `![alt](src)` — in
-  /// the line's own coordinates, read off the parse its colours come from.
+  /// the line's own coordinates, read off the reading its colours come from.
   List<LinePicture> picturesOf(int line) {
     final block = _scanner.blockAt(line);
     if (block == null) return const <LinePicture>[];
     final parsed = _parsedOf(block);
     if (parsed == null) return const <LinePicture>[];
-    final index = line - block.startLine;
-    if (index < 0 || index >= parsed.lineStarts.length) {
-      return const <LinePicture>[];
-    }
-    final start = parsed.lineStarts[index];
-    final end = index + 1 < parsed.lineStarts.length
-        ? parsed.lineStarts[index + 1] - 1
-        : parsed.parse.text.length;
-    final prefix = _parsePrefix(block, line, buffer.lineAt(line));
-    final text = parsed.parse.text;
-    final out = <LinePicture>[];
-    for (final span in parsed.parse.extensions) {
-      if (span.kind != ExtensionKind.embed) continue;
-      if (span.start < start || span.end > end) continue;
-      final inner = span.inner;
-      final pipe = inner.indexOf('|');
-      final target = (pipe >= 0 ? inner.substring(0, pipe) : inner).trim();
-      final alias = pipe >= 0 ? inner.substring(pipe + 1).trim() : '';
-      out.add((
-        start: span.start - start + prefix,
-        end: span.end - start + prefix,
-        target: target,
-        display: alias.isEmpty ? target : alias,
-        source: span.text,
-      ));
-    }
-    for (final run in parsed.parse.runs) {
-      final href = run.href;
-      if (run.kind != StyleKind.image || href == null) continue;
-      if (run.start < start || run.end > end) continue;
-      out.add((
-        start: run.start - start + prefix,
-        end: run.end - start + prefix,
-        target: href,
-        display: text.substring(run.innerStart, run.innerEnd),
-        source: text.substring(run.start, run.end),
-      ));
-    }
-    out.sort((a, b) => a.start.compareTo(b.start));
-    return out;
+    return parsed.inlines.picturesOn(line - block.startLine);
   }
 
-  /// The target the link run covering local offset [start] of [line] resolved
-  /// to — the `href` the parse gave it, so a reference link (`[text][label]`,
-  /// whose own source spells no `](href)`) is followed from the editor as the
-  /// read view follows it — or null when no link run covers [start].
+  /// The target the link covering local offset [start] of [line] resolved
+  /// to — the destination the parse gave it, so a reference link
+  /// (`[text][label]`, whose own source spells no `](href)`) is followed
+  /// from the editor as the read view follows it — or null when no link
+  /// covers [start].
   String? linkHrefAt(int line, int start) {
     final block = _scanner.blockAt(line);
     if (block == null) return null;
     final parsed = _parsedOf(block);
     if (parsed == null) return null;
-    final index = line - block.startLine;
-    if (index < 0 || index >= parsed.lineStarts.length) return null;
-    final lineStart = parsed.lineStarts[index];
-    final lineEnd = index + 1 < parsed.lineStarts.length
-        ? parsed.lineStarts[index + 1] - 1
-        : parsed.parse.text.length;
-    final at =
-        start - _parsePrefix(block, line, buffer.lineAt(line)) + lineStart;
-    for (final run in parsed.parse.runs) {
-      final href = run.href;
-      if (run.kind != StyleKind.link || href == null) continue;
-      if (run.start < lineStart || run.end > lineEnd) continue;
-      if (at < run.start || at > run.end) continue;
-      return href;
+    for (final link in parsed.inlines.linksOn(line - block.startLine)) {
+      if (start >= link.start && start <= link.end) return link.href;
     }
     return null;
   }
@@ -439,7 +412,7 @@ final class SourceStyler {
     final block = _scanner.blockAt(line);
     if (block == null) return const <Token>[];
     final text = buffer.lineAt(line);
-    final tokens = <_Piece>[];
+    final tokens = <InlinePiece>[];
     switch (block.kind) {
       case BlockKind.fencedCode:
         return _fenceTokens(block, line, text);
@@ -469,31 +442,10 @@ final class SourceStyler {
     final structural = _structure(block, line, text, prefix, tokens);
     final parsed = _parsedOf(block);
     if (parsed != null) {
-      _inline(
-        parsed,
-        line - block.startLine,
-        _parsePrefix(block, line, text),
-        tokens,
-      );
+      tokens.addAll(parsed.inlines.piecesOn(line - block.startLine));
     }
     return _flatten(tokens, structural);
   }
-
-  /// How much of [text], a line of [block], its parse took off — the quote
-  /// marks, and a list item's indent or content column
-  /// ([BlockParser.linePrefixLength]) — so the parse's offsets land back on
-  /// line [line].
-  int _parsePrefix(Block block, int line, String text) =>
-      BlockParser.linePrefixLength(
-        block,
-        text,
-        BlockParser.listStripOf(
-          block,
-          buffer.lineAt(block.startLine),
-          line - block.startLine,
-          text,
-        ),
-      );
 
   // ----------------------------------------------------------------- structure
 
@@ -540,7 +492,7 @@ final class SourceStyler {
     int line,
     String text,
     int prefix,
-    List<_Piece> out,
+    List<InlinePiece> out,
   ) {
     // Every quote mark the line has, not only the block's: a quote that
     // opens at one level and goes a level deeper — `> a` then `> > b` — is one
@@ -550,7 +502,7 @@ final class SourceStyler {
     final marks = own > prefix ? own : prefix;
     for (var at = 0; at < marks; at++) {
       if (text.codeUnitAt(at) == 0x3E) {
-        out.add(_Piece(TokenKind.blockquote, at, at + 1, _structural));
+        out.add(InlinePiece(TokenKind.blockquote, at, at + 1, _structural));
       }
     }
     var from = marks;
@@ -562,7 +514,7 @@ final class SourceStyler {
     if (marker != null) {
       final (start, width, content) = marker;
       out.add(
-        _Piece(
+        InlinePiece(
           TokenKind.listMarker,
           prefix + start,
           prefix + start + width,
@@ -575,7 +527,7 @@ final class SourceStyler {
           _isBoxMark(text.codeUnitAt(from + 1)) &&
           text.codeUnitAt(from + 2) == 0x5D &&
           (from + 3 == text.length || _isSpace(text.codeUnitAt(from + 3)))) {
-        out.add(_Piece(TokenKind.taskBox, from, from + 3, _structural));
+        out.add(InlinePiece(TokenKind.taskBox, from, from + 3, _structural));
         from += 3;
       }
     }
@@ -591,7 +543,7 @@ final class SourceStyler {
       // up to three spaces from the margin, and the spaces are not marker.
       final (start, hashes) = heading;
       out.add(
-        _Piece(
+        InlinePiece(
           TokenKind.headingMarker,
           from + start,
           from + start + hashes,
@@ -628,16 +580,19 @@ final class SourceStyler {
     _blockTextReads++;
     final raw = BlockParser.blockText(block, buffer);
     if (raw.length > _inlineLimit) return null;
-    // The items' indents too: what the parse is given of a block in a list
-    // depends on them (`BlockParser.contentText`).
+    // The items' indents too: what the reading makes of a block in a list
+    // depends on them (`BlockParser.linePrefix`); and whether a table goes
+    // on with one above, whose head it then has none of.
     final key =
         '${block.kind.index}:${block.quoteDepth}:'
-        '${BlockParser.itemKeyOf(block)}|$raw';
+        '${BlockParser.itemKeyOf(block)}:'
+        '${block.entering?.table ?? false}|$raw';
     var parsed = _parses.remove(key);
     if (parsed == null || parsed.block.kind != block.kind) {
-      parsed = _Parsed(block, _parser.parseText(block, raw, () => _scope));
+      final read = _reader.read(block, buffer, scope: _scope);
+      parsed = _Parsed(block, read, LiveInlines.of(read, block.startLine));
     } else if (!identical(parsed.block, block)) {
-      parsed = _Parsed(block, parsed.parse);
+      parsed = _Parsed(block, parsed.read, parsed.inlines);
     }
     _parses[key] = parsed;
     if (_parses.length > _parseCacheSize) _parses.remove(_parses.keys.first);
@@ -645,111 +600,15 @@ final class SourceStyler {
     return parsed;
   }
 
-  /// The runs and the masked spans of [parsed] that fall on its line [index],
-  /// added to [out] in the line's coordinates.
-  static void _inline(_Parsed parsed, int index, int prefix, List<_Piece> out) {
-    final start = parsed.lineStarts[index];
-    final end = index + 1 < parsed.lineStarts.length
-        ? parsed.lineStarts[index + 1] - 1
-        : parsed.parse.text.length;
-    void add(
-      TokenKind kind,
-      int from,
-      int to,
-      int depth, {
-      bool marker = false,
-    }) {
-      final a = from < start ? start : from;
-      final b = to > end ? end : to;
-      if (a >= b) return;
-      out.add(
-        _Piece(
-          kind,
-          a - start + prefix,
-          b - start + prefix,
-          depth,
-          marker: marker,
-        ),
-      );
-    }
-
-    for (final run in parsed.parse.runs) {
-      final kind = _tokenKindOf(run.kind);
-      if (kind == null) continue;
-      if (run.end <= start || run.start >= end) continue;
-      add(kind, run.start, run.innerStart, run.depth, marker: true);
-      add(kind, run.innerStart, run.innerEnd, run.depth);
-      add(kind, run.innerEnd, run.end, run.depth, marker: true);
-    }
-    for (final span in parsed.parse.extensions) {
-      if (span.end <= start || span.start >= end) continue;
-      final kind = _extensionKindOf(span.kind);
-      final (open, close) = _extensionMarkers(span);
-      add(kind, span.start, span.start + open, _extension, marker: true);
-      add(kind, span.start + open, span.end - close, _extension);
-      add(kind, span.end - close, span.end, _extension, marker: true);
-    }
-  }
-
-  static TokenKind? _tokenKindOf(StyleKind kind) => switch (kind) {
-    StyleKind.emphasis => TokenKind.italic,
-    StyleKind.strong => TokenKind.bold,
-    StyleKind.strikethrough => TokenKind.strike,
-    StyleKind.highlight => TokenKind.highlight,
-    StyleKind.underline => TokenKind.underline,
-    StyleKind.superscript => TokenKind.superscript,
-    StyleKind.subscript => TokenKind.subscript,
-    StyleKind.code => TokenKind.codeInline,
-    StyleKind.link => TokenKind.link,
-    StyleKind.image => TokenKind.image,
-    StyleKind.plain || StyleKind.heading || StyleKind.hardBreak => null,
-  };
-
-  static TokenKind _extensionKindOf(ExtensionKind kind) => switch (kind) {
-    ExtensionKind.inlineMath => TokenKind.mathInline,
-    ExtensionKind.displayMath => TokenKind.mathInline,
-    ExtensionKind.wikilink || ExtensionKind.embed => TokenKind.wikilink,
-    ExtensionKind.tag => TokenKind.tag,
-    ExtensionKind.codeSpan => TokenKind.codeInline,
-  };
-
-  /// How many characters open and close [span]: its backticks, its dollars,
-  /// its brackets. A tag has none — its `#` is what makes it read as one.
-  static (int, int) _extensionMarkers(ExtensionSpan span) {
-    final text = span.text;
-    switch (span.kind) {
-      case ExtensionKind.codeSpan:
-        var ticks = 0;
-        while (ticks < text.length && text.codeUnitAt(ticks) == 0x60) {
-          ticks++;
-        }
-        return ticks * 2 <= text.length ? (ticks, ticks) : (0, 0);
-      case ExtensionKind.displayMath:
-        return (2, 2);
-      case ExtensionKind.inlineMath:
-        return text.length >= 2 ? (1, 1) : (0, 0);
-      case ExtensionKind.wikilink:
-        return (2, 2);
-      case ExtensionKind.embed:
-        return (3, 2);
-      case ExtensionKind.tag:
-        return (0, 0);
-    }
-  }
-
   // ------------------------------------------------------------------- flatten
 
   /// The depth a structural mark wins at: nothing inline overlaps one.
   static const int _structural = 1 << 20;
 
-  /// The depth a masked span wins at: the parser saw placeholders there, so
-  /// no run of its own is inside one, and the run around it is outside it.
-  static const int _extension = 1 << 16;
-
   /// [pieces], which may nest, as disjoint tokens: each stretch of the line
   /// takes the deepest piece over it. Inline pieces before [structural] are
   /// dropped — the parse sees no marks there.
-  static List<Token> _flatten(List<_Piece> pieces, int structural) {
+  static List<Token> _flatten(List<InlinePiece> pieces, int structural) {
     if (pieces.isEmpty) return const <Token>[];
     final cuts = <int>{};
     for (final piece in pieces) {
@@ -762,7 +621,7 @@ final class SourceStyler {
     for (var at = 0; at + 1 < points.length; at++) {
       final from = points[at];
       final to = points[at + 1];
-      _Piece? best;
+      InlinePiece? best;
       for (final piece in pieces) {
         if (piece.start > from || piece.end < to) continue;
         if (piece.depth < _structural && from < structural) continue;
@@ -800,12 +659,12 @@ final class SourceStyler {
   /// each kind once. A construct's markers are its own syntax and style
   /// nothing inside it, so a marker piece is none of them.
   static List<TokenKind> _outerOf(
-    List<_Piece> pieces,
-    _Piece inner,
+    List<InlinePiece> pieces,
+    InlinePiece inner,
     int from,
     int to,
   ) {
-    final around = <_Piece>[
+    final around = <InlinePiece>[
       for (final piece in pieces)
         if (!identical(piece, inner) &&
             !piece.marker &&
@@ -938,10 +797,10 @@ final class SourceStyler {
   }
 
   static bool _sameDefinitions(DocumentScope a, DocumentScope b) {
-    if (a.links.length != b.links.length) return false;
+    if (a.references.length != b.references.length) return false;
     if (a.footnoteCounts.length != b.footnoteCounts.length) return false;
-    for (final entry in a.links.entries) {
-      final other = b.links[entry.key];
+    for (final entry in a.references.entries) {
+      final other = b.references[entry.key];
       if (other == null ||
           other.destination != entry.value.destination ||
           other.title != entry.value.title) {
@@ -963,31 +822,12 @@ final class SourceStyler {
 /// leaves a footnote's body running, and that state at the run's end.
 typedef _Holdings = ({List<int> lines, List<bool> running, bool end});
 
-/// A block's parse, with where each of its lines starts in the parsed text.
+/// A block's reading, and its constructs line by line, counted from the
+/// block's first line: the same wherever the block moved to.
 final class _Parsed {
-  new(this.block, this.parse) : lineStarts = _lineStartsOf(parse.text);
+  new(this.block, this.read, this.inlines);
 
   final Block block;
-  final ParsedBlock parse;
-  final List<int> lineStarts;
-
-  static List<int> _lineStartsOf(String text) {
-    final starts = <int>[0];
-    for (var at = 0; at < text.length; at++) {
-      if (text.codeUnitAt(at) == 0x0A) starts.add(at + 1);
-    }
-    return starts;
-  }
-}
-
-/// A token before flattening: it may overlap others, and [depth] says which
-/// one a stretch of the line goes to.
-final class _Piece {
-  new(this.kind, this.start, this.end, this.depth, {this.marker = false});
-
-  final TokenKind kind;
-  final int start;
-  final int end;
-  final int depth;
-  final bool marker;
+  final ReadBlock read;
+  final LiveInlines inlines;
 }

@@ -118,3 +118,46 @@ SpecSuite _load({
 /// The `markdown` package's HTML for [example], against its suite's extensions.
 String renderExample(SpecSuite suite, SpecExample example) =>
     md.markdownToHtml(example.markdown, extensionSet: suite.extensions);
+
+/// The name the extension tests are reported under.
+const String cmarkGfmExtensionsName = 'cmark-gfm/extensions';
+
+/// `cmark-gfm`'s extension tests, from `test/fixtures/spec/`: the spec's
+/// `example` blocks, `→` standing for a tab on both sides.
+List<SpecExample> loadExtensionExamples() {
+  final lines = File(p.join(specFixtureDirectory, 'cmark-gfm-extensions.txt'))
+      .readAsLinesSync();
+  final fence = '`' * 32;
+  final examples = <SpecExample>[];
+  var section = 'extensions';
+  for (var at = 0; at < lines.length; at++) {
+    final line = lines[at];
+    if (line.startsWith('## ')) section = line.substring(3).trim();
+    if (line != '$fence example') continue;
+    final markdown = <String>[];
+    final html = <String>[];
+    var into = markdown;
+    for (at++; at < lines.length && lines[at] != fence; at++) {
+      if (identical(into, markdown) && lines[at] == '.') {
+        into = html;
+        continue;
+      }
+      into.add(lines[at].replaceAll('→', '\t'));
+    }
+    examples.add(
+      SpecExample(
+        number: examples.length + 1,
+        section: section,
+        markdown: markdown.isEmpty ? '' : '${markdown.join('\n')}\n',
+        html: html.isEmpty ? '' : '${html.join('\n')}\n',
+      ),
+    );
+  }
+  return examples;
+}
+
+/// Whether GFM's extensions are on for [example] of suite [name], as
+/// `cmark-gfm`'s runner turns them on: for its extension tests and the GFM
+/// spec's sections marked "(extension)"; the rest is plain CommonMark.
+bool extensionsFor(String name, SpecExample example) =>
+    name == cmarkGfmExtensionsName || example.section.contains('(extension)');

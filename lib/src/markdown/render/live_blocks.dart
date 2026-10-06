@@ -11,11 +11,11 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
-import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
 

@@ -1,5 +1,6 @@
-/// A line walked through the containers open around it — the list items,
-/// outermost first, and the quote inside them — the way `package:markdown`
+/// A line walked through the containers open around it — a footnote
+/// definition, the list items inside it, outermost first, and the quote
+/// inside them — the way `package:markdown`
 /// (the parser the read view draws with) hands each of them its lines.
 ///
 /// That parser does not keep CommonMark's container stack. A list gathers
@@ -13,6 +14,7 @@
 /// order makes each measure where its parent left the line.
 library;
 
+import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/html_block_syntax.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
@@ -28,23 +30,71 @@ final class ContainerWalk {
     this.quote,
     this.next,
     this.remaining,
+    this.footnote,
   );
 
   /// [raw], entered in [entering], walked through the items and the quote
   /// open around it; [next] is the line after it, which a table's head row
   /// is told by.
-  factory of(LineState entering, String raw, String? next) {
+  ///
+  /// [leftOver] is what a tab left of the line's indent before the text
+  /// being scanned began: a container's content read again — an item's,
+  /// whose indent ended inside a tab — hands each line on with it, as the
+  /// parser does (`BlockTree`).
+  factory of(LineState entering, String raw, String? next, [int leftOver = 0]) {
     final open = entering.listStack;
-    if (open.isEmpty && entering.quoteDepth == 0) {
-      return ContainerWalk._(open, false, raw, false, null, next, 0);
+    var footnote = entering.footnote;
+    var line = raw;
+    var below = next;
+    if (footnote != 0) {
+      // A footnote definition holds every other container. It takes a blank
+      // line, a line four spaces in — those four off — and, lazily, a line
+      // that would open no block; after a blank line, only the indented
+      // one. Any other line ends it, and everything open inside it, and is
+      // read at the margin.
+      if (LineSyntax.indentOf(line) == line.length) {
+        footnote = LineState.footnoteAfterBlank;
+      } else if (FootnoteSyntax.indented(line)) {
+        line = line.substring(FootnoteSyntax.indent);
+        footnote = LineState.footnoteOpen;
+      } else if (footnote == LineState.footnoteAfterBlank ||
+          FootnoteSyntax.ends(line)) {
+        return ContainerWalk._(
+          const <OpenItem>[],
+          true,
+          line,
+          false,
+          null,
+          next,
+          leftOver,
+          0,
+        );
+      } else {
+        footnote = LineState.footnoteOpen;
+      }
+      if (below != null && FootnoteSyntax.indented(below)) {
+        below = below.substring(FootnoteSyntax.indent);
+      }
     }
-    final blank = LineSyntax.indentOf(raw) == raw.length;
-    var text = raw;
+    if (open.isEmpty && entering.quoteDepth == 0) {
+      return ContainerWalk._(
+        open,
+        false,
+        line,
+        false,
+        null,
+        below,
+        leftOver,
+        footnote,
+      );
+    }
+    final blank = LineSyntax.indentOf(line) == line.length;
+    var text = line;
     // Columns a tab an item took off left over, which count toward the
     // next item's indent (`LineSyntax.dedent`).
-    var remaining = 0;
+    var remaining = leftOver;
     // The line after it, as each item in turn reads it.
-    var after = next;
+    var after = below;
     var lazy = false;
     var kept = open.length;
     List<OpenItem>? changed;
@@ -114,6 +164,7 @@ final class ContainerWalk {
       quote,
       after,
       remaining,
+      footnote,
     );
   }
 
@@ -122,9 +173,14 @@ final class ContainerWalk {
   /// item the line itself opens.
   final List<OpenItem> items;
 
-  /// Whether an item open before the line ends on it: the line is read in
-  /// the container around that item, with nothing open there.
+  /// Whether an item open before the line ends on it, or the footnote
+  /// definition: the line is read in the container around it, with nothing
+  /// open there.
   final bool closed;
+
+  /// The footnote definition the line stays in ([LineState.footnote]), 0
+  /// when none is open or the line ends it. Not one the line opens.
+  final int footnote;
 
   /// The line as the innermost of [items] reads it: each item's indent
   /// taken off where the line reached it.
@@ -160,10 +216,11 @@ final class ContainerWalk {
 
   /// Whether [text], short of an open item's indent, ends its list: a rule,
   /// a list marker, or a block that may interrupt a paragraph — a fence, a
-  /// heading, a quote, an HTML block (all but a lone tag) or a table's
-  /// head.
+  /// heading, a quote, an HTML block (all but a lone tag), a footnote
+  /// definition or a table's head.
   static bool _endsList(String text, String? next) {
     if (LineSyntax.isHr(text, 0)) return true;
+    if (FootnoteSyntax.opening(text) != null) return true;
     if (LineSyntax.listMarker(text) != null) return true;
     if (LineSyntax.fenceOpen(text) != null) return true;
     if (LineSyntax.headingLevel(text) > 0) return true;

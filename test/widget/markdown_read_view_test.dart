@@ -10,8 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/background_scan.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/code_piece_view.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -49,7 +50,7 @@ Future<MarkdownReadViewState> _pump(
   ScrollController? controller,
   NoteColumn column = NoteColumn.off,
 }) async {
-  final parser = BlockParser();
+  final parser = ReadParser();
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -363,7 +364,7 @@ void main() {
           home: Scaffold(
             body: MarkdownReadView(
               buffer: SourceBuffer.fromText(note),
-              parser: BlockParser(),
+              parser: ReadParser(),
               mathCache: _syncCache(),
               onToggleTask: onToggleTask,
             ),
@@ -552,7 +553,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     final buffer = SourceBuffer.fromText('# One\n\nfirst');
-    final parser = BlockParser();
+    final parser = ReadParser();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -616,7 +617,7 @@ void main() {
       }
     }
 
-    Widget view(SourceBuffer buffer, BlockParser parser) => MaterialApp(
+    Widget view(SourceBuffer buffer, ReadParser parser) => MaterialApp(
       home: Scaffold(
         body: MarkdownReadView(
           buffer: buffer,
@@ -631,7 +632,7 @@ void main() {
     ) async {
       // The pane stayed empty for the whole scan: 22 s on a phone for the
       // 247 MB note (device log, 2026-09-24).
-      final parser = BlockParser();
+      final parser = ReadParser();
       await tester.pumpWidget(
         view(SourceBuffer.fromText('${_note(20)}[^1]\n\n[^1]: a note'), parser),
       );
@@ -665,7 +666,7 @@ void main() {
       // so the pane's first scan is the empty page. Handed the note itself, it
       // kept that page — `_shown` was not null — instead of drawing the top of
       // the note, and the pane stayed blank until the whole scan landed.
-      final parser = BlockParser();
+      final parser = ReadParser();
       await tester.pumpWidget(view(SourceBuffer.empty(), parser));
       await tester.pump();
 
@@ -697,14 +698,14 @@ void main() {
       // Each revision comes as its own buffer, which is what the pane is
       // handed while a note is being edited: the live buffer is snapshotted
       // for the page ([SourceBuffer.snapshot]) rather than read in place.
-      final parser = BlockParser();
+      final parser = ReadParser();
       final first = SourceBuffer.fromText(
         '${_note(20)}[^1]\n\n[^1]: a note\n\n[ref]: https://x.test\n',
       );
       await tester.pumpWidget(view(first, parser));
       await settle(tester);
       expect(parser.scope?.footnotes.single.body, 'a note');
-      expect(parser.scope?.links['ref']?.destination, 'https://x.test');
+      expect(parser.scope?.references['REF']?.destination, 'https://x.test');
 
       // An edit somewhere else: one line added at the head.
       final second = SourceBuffer.fromText(
@@ -718,7 +719,7 @@ void main() {
         'a note',
         reason: 'the same definitions, on the buffer that now holds them',
       );
-      expect(parser.scope?.links['ref']?.destination, 'https://x.test');
+      expect(parser.scope?.references['REF']?.destination, 'https://x.test');
       expect(parser.scope?.revision, second.revision);
 
       // A definition changed.
@@ -735,7 +736,7 @@ void main() {
     ) async {
       // The editor keeps its own reading of the note current: the pane takes
       // it rather than scanning the note in an isolate again.
-      final parser = BlockParser();
+      final parser = ReadParser();
       final buffer = SourceBuffer.fromText('${_note(20)}[^1]\n\n[^1]: a note');
       final held = DocumentScan.of(buffer);
       var asked = 0;
@@ -770,7 +771,7 @@ void main() {
     ) async {
       // Estimating every block again forgot them, and on 2 M blocks cost
       // 100–200 ms; the editor's hand-over says which blocks are new.
-      final parser = BlockParser();
+      final parser = ReadParser();
       final live = SourceBuffer.fromText(_note(40));
       final styler = SourceStyler(live);
       Widget view() {
@@ -817,7 +818,7 @@ void main() {
     });
 
     testWidgets('a held scan of another revision is not taken', (tester) async {
-      final parser = BlockParser();
+      final parser = ReadParser();
       final buffer = SourceBuffer.fromText(_note(20));
       final stale = DocumentScan.of(buffer);
       buffer.replaceRange(0, 0, '# Now\n\n');
@@ -850,7 +851,7 @@ void main() {
       // The citations are the footnotes' order and numbering, and the key the
       // reuse is decided by read only the lines that open with `[`: a second
       // footnote cited in prose kept the scope that knew one.
-      final parser = BlockParser();
+      final parser = ReadParser();
       const definitions = '[^1]: one\n\n[^2]: two\n';
       await tester.pumpWidget(
         view(
@@ -873,7 +874,7 @@ void main() {
     testWidgets('the revision before stays on screen meanwhile', (
       tester,
     ) async {
-      final parser = BlockParser();
+      final parser = ReadParser();
       await tester.pumpWidget(view(SourceBuffer.fromText(_note(20)), parser));
       await settle(tester);
       await tester.pumpWidget(
@@ -895,7 +896,7 @@ void main() {
           home: Scaffold(
             body: MarkdownReadView(
               buffer: SourceBuffer.fromText(_note(200)),
-              parser: BlockParser(),
+              parser: ReadParser(),
               mathCache: _syncCache(),
               controller: controller,
             ),
@@ -1010,7 +1011,7 @@ void main() {
       addTearDown(tester.view.reset);
       const tex = 'x^2 + y^2 = z^2';
       final cache = _syncCache();
-      final parser = BlockParser();
+      final parser = ReadParser();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1243,7 +1244,7 @@ void main() {
           home: Scaffold(
             body: MarkdownReadView(
               buffer: SourceBuffer.fromText('\$\$$tex\$\$\n'),
-              parser: BlockParser(),
+              parser: ReadParser(),
               mathCache: cache,
             ),
           ),
@@ -1279,7 +1280,7 @@ void main() {
               // does the line that opens the second: the scanner read the run
               // as one block and the view drew one formula holding both texes.
               buffer: SourceBuffer.fromText('\$\$\na\n\$\$\n\$\$\nb\n\$\$\n'),
-              parser: BlockParser(),
+              parser: ReadParser(),
               mathCache: cache,
             ),
           ),
@@ -1315,7 +1316,7 @@ void main() {
           home: Scaffold(
             body: MarkdownReadView(
               buffer: SourceBuffer.fromText('\$\$\n$tex\n\$\$\n'),
-              parser: BlockParser(),
+              parser: ReadParser(),
               mathCache: cache,
             ),
           ),
@@ -1361,7 +1362,7 @@ void main() {
       final cache = MathCache(
         renderer: (tex, {required displayMode}) => throw StateError('bad tex'),
       );
-      final parser = BlockParser();
+      final parser = ReadParser();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

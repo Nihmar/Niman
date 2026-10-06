@@ -17,6 +17,7 @@ import 'package:niman/src/markdown/block_changes.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart' show BlockScanner;
 import 'package:niman/src/markdown/note_references.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// The references of each block of a note, in the block list's order.
@@ -79,7 +80,7 @@ final class NoteReferenceCache {
   NoteReferences? references(
     List<Block> blocks,
     SourceBuffer buffer,
-    BlockParser parser,
+    ReadParser parser,
     DocumentScope Function() scope,
   ) {
     final entries = _entries;
@@ -110,7 +111,7 @@ final class NoteReferenceCache {
     SourceBuffer buffer,
     DocumentScope scope,
   ) {
-    final parser = BlockParser();
+    final parser = ReadParser();
     return [
       for (final block in blocks)
         blockReferencesOf(block, buffer, parser, () => scope),

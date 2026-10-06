@@ -1,12 +1,13 @@
 /// What a quote's lines are *inside* the quote, for `live`.
 ///
-/// The read view reads a quote's content again as blocks of its own — its
-/// marks off each line — and draws each as any block is drawn: a heading at
-/// its size, a list's next lines under its item's text, a code block in its
-/// box (`BlockView._quote`). `live` saw one quote block and drew every line
-/// of it as quoted prose. Here the same content is scanned the same way, a
-/// quote at a time, so a line of a quote can say what block it is in there
-/// — and `live` draws it as that block, inside the quote's bar.
+/// The read view draws a quote's content as the tree reads it — its marks
+/// off each line, a callout's title apart — each block as any block is
+/// drawn: a heading at its size, a list's next lines under its item's text,
+/// a code block in its box (`BlockView`). `live` saw one quote block and
+/// drew every line of it as quoted prose. Here the same content is read
+/// the same way ([QuoteContent]), a quote at a time, so a line of a quote
+/// can say what block it is in there — and `live` draws it as that block,
+/// inside the quote's bar.
 ///
 /// A quote inside the quote is read again in turn, down to the block that
 /// is not a quote: that is the one a line is drawn as.
@@ -17,9 +18,8 @@
 library;
 
 import 'package:niman/src/markdown/block.dart';
-import 'package:niman/src/markdown/block_parser.dart';
-import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/callout.dart';
+import 'package:niman/src/markdown/quote_content.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// A line's block inside the quotes it is in: the block, the line's index
@@ -27,37 +27,33 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// the quote marks off them — which `block`'s lines index.
 typedef QuotedLine = ({Block block, int line, List<String> lines});
 
-/// A quote's content: its lines, marks off, and the blocks they make.
-typedef _Scanned = ({List<String> lines, List<Block> blocks});
-
 /// The quotes' contents scanned, by the quote's first line.
 final class LiveQuoteContent {
-  /// Each quote's content as blocks: its lines, marks off, and the blocks.
-  final Map<int, _Scanned> _quotes = <int, _Scanned>{};
+  /// Each quote's content, read.
+  final Map<int, QuoteContent> _quotes = <int, QuoteContent>{};
 
   SourceBuffer? _buffer;
   int _revision = -1;
 
   /// The block line [line] of [buffer] is in inside [quote], the quote it
   /// is a line of, with the line's index and text in that block's content;
-  /// null for a line of no quote, or one the content has no block for.
+  /// null for a line of no quote, a callout's title line, or one the
+  /// content has no block for.
   QuotedLine? of(int line, Block? quote, SourceBuffer buffer) {
     if (quote == null || quote.kind != BlockKind.quote) return null;
-    var scanned = _scannedOf(quote, buffer);
-    var local = line - quote.startLine;
+    var content = _contentOf(quote, buffer);
+    var local = line - quote.startLine - content.skipped;
     // Down through the quotes inside the quote, to the block that is not one.
     for (var depth = 0; depth < _maxDepth; depth++) {
-      final block = _blockAt(scanned.blocks, local);
+      if (local < 0) return null;
+      final block = content.blockAt(local);
       if (block == null) return null;
       if (block.kind != BlockKind.quote) {
-        return (block: block, line: local, lines: scanned.lines);
+        return (block: block, line: local, lines: content.lines);
       }
-      final inner = <String>[
-        for (var at = block.startLine; at < block.endLine; at++)
-          _unquoted(scanned.lines[at], block),
-      ];
-      local -= block.startLine;
-      scanned = _scan(inner);
+      final inner = content.inner(block);
+      local -= block.startLine + inner.skipped;
+      content = inner;
     }
     return null;
   }
@@ -66,52 +62,23 @@ final class LiveQuoteContent {
   /// null for a quote that is only a quote, and for anything else.
   Callout? calloutOf(Block? quote, SourceBuffer buffer) {
     if (quote == null || quote.kind != BlockKind.quote) return null;
-    final lines = _scannedOf(quote, buffer).lines;
-    return lines.isEmpty ? null : Callout.of(lines.first);
+    return _contentOf(quote, buffer).callout;
   }
 
-  /// [quote]'s content scanned, kept until the note changes.
-  _Scanned _scannedOf(Block quote, SourceBuffer buffer) {
+  /// [quote]'s content, read, kept until the note changes.
+  QuoteContent _contentOf(Block quote, SourceBuffer buffer) {
     if (!identical(buffer, _buffer) || buffer.revision != _revision) {
       _quotes.clear();
       _buffer = buffer;
       _revision = buffer.revision;
     }
-    return _quotes.putIfAbsent(quote.startLine, () {
-      final lines = <String>[
-        for (var at = quote.startLine; at < quote.endLine; at++)
-          _unquoted(buffer.lineAt(at), quote),
-      ];
-      return _scan(lines);
-    });
+    return _quotes.putIfAbsent(
+      quote.startLine,
+      () => QuoteContent.of(quote, buffer),
+    );
   }
 
   /// How many quotes inside one another are read again, as the read view
-  /// reads them (`BlockView._maxQuoteNesting`).
+  /// draws them (`BlockView._maxNesting`).
   static const int _maxDepth = 8;
-
-  /// [lines], scanned into blocks.
-  static _Scanned _scan(List<String> lines) => (
-    lines: lines,
-    blocks: BlockScanner(SourceBuffer.fromText(lines.join('\n'))).index.blocks,
-  );
-
-  /// The block of [blocks] line [line] is in, or null.
-  static Block? _blockAt(List<Block> blocks, int line) {
-    for (final block in blocks) {
-      if (line >= block.startLine && line < block.endLine) return block;
-    }
-    return null;
-  }
-
-  /// [line], a line of [quote], without its quote marks — counted from where
-  /// the items the quote stands in leave the line, as the read view takes
-  /// them off ([BlockParser.contentText]).
-  static String _unquoted(String line, Block quote) => line.substring(
-    BlockParser.quotePrefixLength(
-      line,
-      quote.quoteDepth,
-      BlockParser.itemPrefixLength(quote, line),
-    ),
-  );
 }

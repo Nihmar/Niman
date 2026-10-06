@@ -26,7 +26,7 @@ import 'package:flutter/rendering.dart';
 import 'package:niman/src/export/pdf_breaks.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_writer.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -90,7 +90,7 @@ Future<Uint8List> rasterPdf({
       key: key,
       child: MarkdownExportView(
         buffer: SourceBuffer.fromText(text),
-        parser: BlockParser(),
+        parser: ReadParser(),
         theme: theme,
         mathCache: mathCache,
         width: contentWidth,

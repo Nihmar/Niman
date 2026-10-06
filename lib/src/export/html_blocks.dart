@@ -64,14 +64,15 @@ String mathBlockHtml(String text, MathSvg math) {
 String htmlSourceHtml(String text) => _pre(text, 'html-source');
 
 /// A callout's frame around [bodyHtml], in its type's colour: a folding
-/// one as `<details>`, open as the note says it starts.
-String calloutHtml(Callout callout, String bodyHtml) {
+/// one as `<details>`, open as the note says it starts. [titleHtml] is its
+/// written title's inlines; null draws the title the type gives it.
+String calloutHtml(Callout callout, String bodyHtml, {String? titleHtml}) {
   final argb = calloutStyleOf(callout.type).color.toARGB32();
   final hex = (argb & 0xFFFFFF).toRadixString(16).padLeft(6, '0');
   final attrs =
       'data-callout="${escapeAttribute(callout.type)}" '
       'style="--callout:#$hex"';
-  final title = escapeHtml(callout.title);
+  final title = titleHtml ?? escapeHtml(callout.title);
   final body = bodyHtml.trim().isEmpty
       ? ''
       : '<div class="callout-body">$bodyHtml</div>';

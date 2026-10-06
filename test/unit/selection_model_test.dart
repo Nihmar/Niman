@@ -2,20 +2,7 @@
 // move them without a map: §8.6.0's atomic ranges, so a press crosses a hidden
 // `**` instead of stopping inside a marker the reader cannot see.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/markdown/block_parser.dart';
-import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
-import 'package:niman/src/markdown/render/visible_text.dart';
-import 'package:niman/src/markdown/source_buffer.dart';
-
-/// The hidden ranges of the first block of [document], as the renderer computes
-/// them — the same list `live` mode's caret has to step over.
-List<(int, int)> _hiddenRanges(String document) {
-  final buffer = SourceBuffer.fromText(document);
-  final scanner = BlockScanner(buffer);
-  final parsed = BlockParser().parse(scanner.index.blocks.first, buffer);
-  return hiddenRangesOf(parsed);
-}
 
 void main() {
   group('a selection in source offsets', () {
@@ -102,11 +89,11 @@ void main() {
     });
   });
 
-  group('the runs come from the renderer, not from a second rule', () {
+  group("a marker's run", () {
     test('a hidden `**` is one press wide', () {
       // `a **bold** word`: the two markers are the only hidden characters, and
       // the words either side are ordinary offsets to be walked one by one.
-      final runs = _hiddenRanges('a **bold** word');
+      const runs = [(2, 4), (8, 10)];
       expect(SelectionModel.snap(from: 1, to: 2, runs: runs), 2);
       expect(SelectionModel.snap(from: 2, to: 3, runs: runs), 4);
       expect(SelectionModel.snap(from: 4, to: 5, runs: runs), 5);
@@ -118,7 +105,7 @@ void main() {
       // falls strictly inside one and nothing needs stepping over — and the
       // code between them is text at its own offsets, which is what approach B
       // buys. Only a marker with an interior, like `**`, can trap a caret.
-      final runs = _hiddenRanges('a `code` word');
+      const runs = [(2, 3), (7, 8)];
       for (var to = 0; to <= 12; to++) {
         expect(SelectionModel.snap(from: to - 1, to: to, runs: runs), to);
         expect(SelectionModel.snap(from: to + 1, to: to, runs: runs), to);

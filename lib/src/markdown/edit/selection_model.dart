@@ -81,8 +81,7 @@ final class SelectionModel {
   /// returned unchanged, and with no direction to travel in the nearer edge
   /// wins, a tie going to the earlier one.
   ///
-  /// [runs] are half-open `(start, end)` source ranges, which is the shape
-  /// `hiddenRangesOf` reports a block's markers in.
+  /// [runs] are half-open `(start, end)` source ranges: a block's markers.
   static int snap({
     required int from,
     required int to,

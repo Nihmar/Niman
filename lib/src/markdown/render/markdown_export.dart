@@ -33,8 +33,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -59,7 +59,7 @@ final class MarkdownExportView extends StatelessWidget {
 
   /// The block parser, owned by the caller so its cache is shared with the
   /// read view that may have parsed some of the same blocks.
-  final BlockParser parser;
+  final ReadParser parser;
 
   /// The typography and metrics, the same ones the read view uses.
   final MarkdownTheme theme;
@@ -94,7 +94,7 @@ final class MarkdownExportView extends StatelessWidget {
           children: <Widget>[
             for (final block in blocks)
               BlockView(
-                parsed: parser.of(block, buffer),
+                read: parser.of(block, buffer),
                 theme: theme,
                 mathCache: mathCache,
                 embedImages: embedImages,

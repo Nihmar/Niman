@@ -36,7 +36,17 @@ final class BlockScanner {
   ///
   /// An edit's rescan reads at most [budget] lines past the edit before it
   /// leaves the rest to [advance] (see [edited]).
-  new(this.buffer, {this.budget = defaultBudget}) : _blocks = BlockList() {
+  ///
+  /// `leftOver` is, for a container's content read again, what a tab left
+  /// over before each of its lines (`ContainerWalk.of`); such a scan is
+  /// read once, never edited.
+  new(
+    this.buffer, {
+    this.budget = defaultBudget,
+    this._leftOver = const <int>[],
+    this._lazy = const <bool>[],
+    this.appSyntax = true,
+  }) : _blocks = BlockList() {
     _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
     // The changes are counted from the list a reader first takes.
     _changes
@@ -50,6 +60,9 @@ final class BlockScanner {
   /// The two must hold the same lines, which is the caller's to promise.
   new rebound(BlockScanner scanned, this.buffer)
     : budget = scanned.budget,
+      _leftOver = scanned._leftOver,
+      _lazy = scanned._lazy,
+      appSyntax = scanned.appSyntax,
       _blocks = BlockList.sharing((scanned..settle())._blocks) {
     _entering.addAll(scanned._entering);
     _lineCount = scanned._lineCount;
@@ -68,8 +81,24 @@ final class BlockScanner {
   /// The state entering each scanned line.
   final List<LineState> _entering = <LineState>[];
 
+  /// What a tab left over before each line, for a container's content.
+  final List<int> _leftOver;
+
+  /// Which lines are lazy, for a container's content read again
+  /// (`LineRules.lazyAt`).
+  final List<bool> _lazy;
+
+  /// Whether the app's own block syntax is read (`LineRules.appSyntax`).
+  final bool appSyntax;
+
   /// What the scan makes of each line, read against [_entering].
-  late final LineRules _rules = LineRules(buffer, _entering);
+  late final LineRules _rules = LineRules(
+    buffer,
+    _entering,
+    leftOver: _leftOver,
+    lazy: _lazy,
+    appSyntax: appSyntax,
+  );
 
   /// The blocks the scan makes of those lines.
   late final BlockRules _blockRules = BlockRules(_rules);
@@ -234,6 +263,7 @@ final class BlockScanner {
   /// stops there and leaves a [frontier]: the rest is what the edit changed,
   /// and [advance] carries on with it.
   void edited(SourceEdit edit) {
+    assert(_leftOver.isEmpty, "a container's content is not edited");
     final untouched = edit.firstUntouchedLine;
     if (edit.firstLine < _entering.length) {
       _replaceStates(
@@ -282,6 +312,26 @@ final class BlockScanner {
       start--;
       if (!TableLineSyntax.isDelimiter(_rules.lineText(start).trimLeft())) {
         break;
+      }
+    }
+    // Whether a line opens a link reference definition is read off the lines
+    // after it too ([Block.reach]): an edit on one of them may change what
+    // that line is, and the rebuild starts at its block. No reading reaches
+    // further than the farthest one made, which bounds the look back.
+    final farthest = _rules.farthestReach;
+    if (farthest > 0) {
+      for (
+        var at = _firstIndexWhere(0, (block) => block.endLine > start);
+        at >= 0;
+        at--
+      ) {
+        if (at >= tailStart) continue;
+        final block = _at(at);
+        if (block.startLine + farthest <= edit.firstLine) break;
+        if (block.startLine < start &&
+            block.startLine + block.reach > edit.firstLine) {
+          start = block.startLine;
+        }
       }
     }
     // An edit at or past a frontier lands on lines that are not current: the

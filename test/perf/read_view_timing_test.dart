@@ -37,7 +37,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
-import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -130,7 +130,7 @@ void main() {
           home: Scaffold(
             body: MarkdownReadView(
               buffer: SourceBuffer.fromText('# Warm up\n\nA paragraph.'),
-              parser: BlockParser(),
+              parser: ReadParser(),
               mathCache: _mathCache(),
             ),
           ),
@@ -142,7 +142,7 @@ void main() {
       // first frame of content.
       final controller = ScrollController();
       addTearDown(controller.dispose);
-      final parser = BlockParser();
+      final parser = ReadParser();
       late SourceBuffer buffer;
       final first = await _msUntil(tester, () async {
         buffer = SourceBuffer.fromText(markdown);

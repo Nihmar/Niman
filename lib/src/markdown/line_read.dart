@@ -18,6 +18,9 @@ final class LineRead {
     required this.carried,
     required this.exit,
     this.heads = false,
+    this.footnote = 0,
+    this.definition = 0,
+    this.reach = 0,
   });
 
   /// What the line is.
@@ -48,6 +51,18 @@ final class LineRead {
   /// have gone on with, and is no setext underline, whether or not its
   /// cells fit the table.
   final bool heads;
+
+  /// The footnote definition the line stands in: [Block.footnote]'s
+  /// values.
+  final int footnote;
+
+  /// Whether the line is a link reference definition's: [Block.definition]
+  /// when it opens one, 1 when it goes on with one, 0 otherwise.
+  final int definition;
+
+  /// How many lines, from this one, reading whether it opens a link
+  /// reference definition looked at ([Block.reach]); 0 when it did not.
+  final int reach;
 
   /// The line as its innermost item reads it ([ContainerWalk.text]), its
   /// leading tabs four columns each, as the parser's patterns count them.

@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
-import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -33,7 +33,7 @@ Widget _view(
 }) {
   final buffer = SourceBuffer.fromText(document);
   final scanner = BlockScanner(buffer);
-  final parser = BlockParser();
+  final parser = ReadParser();
   return MaterialApp(
     home: Scaffold(
       body: Builder(
@@ -50,7 +50,7 @@ Widget _view(
                   children: <Widget>[
                     for (final block in scanner.index.blocks)
                       BlockView(
-                        parsed: parser.of(block, buffer),
+                        read: parser.of(block, buffer),
                         theme: theme,
                         mathCache: cache,
                         embedResolver: resolve,
@@ -497,6 +497,130 @@ void main() {
     expect(screen, contains('the alias'));
     expect(screen, isNot(contains('[[')));
     expect(screen, isNot(contains(']]')));
+  });
+
+  group('drawn from the tree (docs/dev/block-tree.md, phase 5)', () {
+    testWidgets("a block after an item's own stands at the item's indent", (
+      tester,
+    ) async {
+      await tester.pumpWidget(_view('- a\n\n  later\n\nout', _syncCache()));
+      await tester.pump();
+      final later = tester.getTopLeft(find.textContaining('later')).dx;
+      final out = tester.getTopLeft(find.textContaining('out')).dx;
+      final context = tester.element(find.byType(Scaffold));
+      expect(later - out, markdownThemeOf(context).listIndentPerLevel);
+    });
+
+    testWidgets('a list inside a quote is a list', (tester) async {
+      await tester.pumpWidget(_view('> - one\n> - [x] two', _syncCache()));
+      await tester.pump();
+      expect(findBullet(), findsOneWidget);
+      expect(findCheckbox(ticked: true), findsOneWidget);
+      expect(_screenText(tester), isNot(contains('- ')));
+      expect(_screenText(tester), isNot(contains('[x]')));
+    });
+
+    testWidgets("a quote on an item's marker line is a quote in the item", (
+      tester,
+    ) async {
+      await tester.pumpWidget(_view('- > quoted', _syncCache()));
+      await tester.pump();
+      expect(findBullet(), findsOneWidget);
+      expect(_screenText(tester), contains('quoted'));
+      expect(_screenText(tester), isNot(contains('>')));
+    });
+
+    testWidgets('an empty task is a box', (tester) async {
+      await tester.pumpWidget(_view('- [ ]', _syncCache()));
+      await tester.pump();
+      expect(findCheckbox(ticked: false), findsOneWidget);
+      expect(_screenText(tester), isNot(contains('[ ]')));
+    });
+
+    testWidgets('escapes and character references read as what they mean', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _view(r'\*not stressed\* &amp; &copy;', _syncCache()),
+      );
+      await tester.pump();
+      expect(_screenText(tester), contains('*not stressed* & ©'));
+    });
+
+    testWidgets('stress inside strong is both', (tester) async {
+      await tester.pumpWidget(_view('**strong *both* strong**', _syncCache()));
+      await tester.pump();
+      final both = _styleOf(tester, 'both');
+      expect(both.fontWeight, FontWeight.w700);
+      expect(both.fontStyle, FontStyle.italic);
+    });
+
+    testWidgets('a footnote is cited by its number, raised', (tester) async {
+      await tester.pumpWidget(
+        _view('a claim[^src]\n\n[^src]: proof', _syncCache()),
+      );
+      await tester.pump();
+      final screen = _screenText(tester);
+      expect(screen, contains('a claim1'));
+      expect(screen, isNot(contains('[^src]')));
+      expect(
+        _styleOf(tester, '1').fontFeatures,
+        contains(const FontFeature.superscripts()),
+      );
+    });
+
+    testWidgets("a callout's written title is drawn as inline text", (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _view('> [!tip] Mind **this**\n> body', _syncCache()),
+      );
+      await tester.pump();
+      expect(_screenText(tester), contains('Mind this'));
+      expect(_screenText(tester), isNot(contains('**')));
+      expect(_styleOf(tester, 'this').fontWeight, FontWeight.w700);
+    });
+
+    testWidgets("a setext heading's underline is not on screen", (
+      tester,
+    ) async {
+      await tester.pumpWidget(_view('Title\n=====\n\nbody', _syncCache()));
+      await tester.pump();
+      expect(_screenText(tester), isNot(contains('==')));
+    });
+
+    testWidgets('a link defined over two lines is a link', (tester) async {
+      String? tapped;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                final buffer = SourceBuffer.fromText(
+                  'see [the docs]\n\n[the docs]:\n  https://example.com',
+                );
+                final parser = ReadParser();
+                return Column(
+                  children: [
+                    for (final block in BlockScanner(buffer).index.blocks)
+                      BlockView(
+                        read: parser.of(block, buffer),
+                        theme: markdownThemeOf(context),
+                        mathCache: _syncCache(),
+                        onTapLink: (text, href) => tapped = href,
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(_screenText(tester), isNot(contains('https://example.com')));
+      await tester.tapOnText(find.textRange.ofSubstring('the docs'));
+      expect(tapped, 'https://example.com');
+    });
   });
 }
 
