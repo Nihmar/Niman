@@ -1,0 +1,82 @@
+[
+  {
+    "about": "a quote takes indented lines lazily while its paragraph is open",
+    "markdown": "> a\n    b\n    c\n",
+    "html": "<blockquote>\n<p>a\nb\nc</p>\n</blockquote>\n"
+  },
+  {
+    "about": "no paragraph open in the quote, no lazy line",
+    "markdown": "> a\n>\n    b\n",
+    "html": "<blockquote>\n<p>a</p>\n</blockquote>\n<pre><code>b\n</code></pre>\n"
+  },
+  {
+    "about": "a lazy === is text, not an underline",
+    "markdown": "- - w\n===\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>w\n===</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a lazy tab-indented <div> is text",
+    "markdown": "- w\n\t<div>\n",
+    "html": "<ul>\n<li>w\n  <div>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a tab's columns past an item's indent count toward the next",
+    "markdown": "- - w\n\t---\n",
+    "html": "<ul>\n<li>\n<ul>\n<li>\n<h2>w</h2>\n</li>\n</ul>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a line short of a footnote that opens a list ends it",
+    "markdown": "[^n]: a\n2. b\n\nx[^n]\n",
+    "html": "<ol start=\"2\">\n<li>b</li>\n</ol>\n<p>x<sup class=\"footnote-ref\"><a href=\"#fn-n\" id=\"fnref-n\" data-footnote-ref>1</a></sup></p>\n<section class=\"footnotes\" data-footnotes>\n<ol>\n<li id=\"fn-n\">\n<p>a <a href=\"#fnref-n\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"1\" aria-label=\"Back to reference 1\">↩</a></p>\n</li>\n</ol>\n</section>\n"
+  },
+  {
+    "about": "a list marker interrupts an item's paragraph only as it would anywhere",
+    "markdown": "- a\n  2. b\n",
+    "html": "<ul>\n<li>a\n2. b</li>\n</ul>\n"
+  },
+  {
+    "about": "a table head needs as many cells as its delimiter row",
+    "markdown": "| a | b |\n|---|---|---|\n",
+    "html": "<p>| a | b |\n|---|---|---|</p>\n"
+  },
+  {
+    "about": "a table row ends at a line that opens a block",
+    "markdown": "| a |\n|---|\n> q\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n</table>\n<blockquote>\n<p>q</p>\n</blockquote>\n"
+  },
+  {
+    "about": "a lone - under a paragraph is a setext underline",
+    "markdown": "p\n-\n",
+    "html": "<h2>p</h2>\n"
+  },
+  {
+    "about": "after a definition a tab-indented line is paragraph text",
+    "markdown": "[r]: /u\n\tcode\n",
+    "html": "<p>code</p>\n"
+  },
+  {
+    "about": "after a definition 2) is paragraph text",
+    "markdown": "[r]: /u\n2) item\n",
+    "html": "<p>2) item</p>\n"
+  },
+  {
+    "about": "an underline under definitions alone is text",
+    "markdown": "[r]: /u\n===\n",
+    "html": "<p>===</p>\n"
+  },
+  {
+    "about": "another delimiter starts a list from its own number",
+    "markdown": "10. a\n2) b\n",
+    "html": "<ol start=\"10\">\n<li>a</li>\n</ol>\n<ol start=\"2\">\n<li>b</li>\n</ol>\n"
+  },
+  {
+    "about": "a fence in an ordered item keeps the columns a tab left over",
+    "markdown": "2) w\n\t~~~\n\t/u \"t\"\n",
+    "html": "<ol start=\"2\">\n<li>w\n<pre><code>/u &quot;t&quot;\n</code></pre>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a blank line before definitions still loosens the list",
+    "markdown": "- a\n- b\n\n  [ref]: /url\n- d\n",
+    "html": "<ul>\n<li>\n<p>a</p>\n</li>\n<li>\n<p>b</p>\n</li>\n<li>\n<p>d</p>\n</li>\n</ul>\n"
+  }
+]
