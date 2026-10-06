@@ -173,5 +173,30 @@
     "about": "a row three columns in is still a row",
     "markdown": "| a |\n|---|\n   b\n",
     "html": "<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>b</td>\n</tr>\n</tbody>\n</table>\n"
+  },
+  {
+    "about": "a lazy line heads no table",
+    "markdown": "* w\n| w | x |\n|---|---|\n",
+    "html": "<ul>\n<li>w\n| w | x |\n|---|---|</li>\n</ul>\n"
+  },
+  {
+    "about": "a lazy line in a quote in an item heads no table",
+    "markdown": "- > w\n| w | x |\n|---|---|\n",
+    "html": "<ul>\n<li>\n<blockquote>\n<p>w\n| w | x |\n|---|---|</p>\n</blockquote>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a delimiter row that fit no head leaves the paragraph tried",
+    "markdown": "w\n|---|---|\n  |---|---|\n",
+    "html": "<p>w\n|---|---|\n|---|---|</p>\n"
+  },
+  {
+    "about": "a paragraph is tried for a table once",
+    "markdown": "w\n|---|---|---|\nx | y\n|---|---|\n",
+    "html": "<p>w\n|---|---|---|\nx | y\n|---|---|</p>\n"
+  },
+  {
+    "about": "a blank line opens a paragraph that may head a table again",
+    "markdown": "w\n|---|---|---|\n\nx | y\n|---|---|\n",
+    "html": "<p>w\n|---|---|---|</p>\n<table>\n<thead>\n<tr>\n<th>x</th>\n<th>y</th>\n</tr>\n</thead>\n</table>\n"
   }
 ]

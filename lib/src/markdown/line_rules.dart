@@ -175,11 +175,20 @@ final class LineRules {
     // does not fit heads nothing, and is the paragraph's text, as
     // `cmark-gfm` reads it. One that ends the container is no row of this
     // line's. Four columns in, the line is code unless a paragraph goes on
-    // with it, which a head is taken off as its last line.
+    // with it, which a head is taken off as its last line. A lazy line
+    // heads nothing — it is its paragraph's text — and nor does a line of a
+    // paragraph a delimiter row has already gone on with, this one or one
+    // above it: `cmark-gfm` tries a paragraph for a table once.
     final indent = LineSyntax.indentOf(text);
+    final lazy = content == null && (walk.lazy || lazyAt(line));
+    final continuing = content == null && open.openParagraph;
+    final tried =
+        continuing && (open.tableTried || TableLineSyntax.isDelimiter(text));
     final heads =
+        !lazy &&
+        !tried &&
         indent < text.length &&
-        (indent < 4 || (content == null && open.openParagraph)) &&
+        (indent < 4 || continuing) &&
         TableLineSyntax.heads(text, next) &&
         _stays(line + 1, base, walk.footnote);
     LineRead made(
@@ -209,6 +218,8 @@ final class LineRules {
       definitionRead: definitionRead,
       reach: reach,
       definitionsOnly: definitionsOnly,
+      // A paragraph's line keeps what its paragraph was tried for.
+      tableTried: openParagraph && tried,
       quoteDepth: quoteDepth,
       quoteLast: quoteLast,
       fence: fence,
@@ -239,9 +250,7 @@ final class LineRules {
     // columns past the containers it did reach, it looked like one. The
     // app's display math is the exception: it interrupts a paragraph, so a
     // lazy `$$` opens it where the line stands, as it always has.
-    if (content == null &&
-        (walk.lazy || lazyAt(line)) &&
-        !(appSyntax && isDisplayLine(text.trim()))) {
+    if (lazy && !(appSyntax && isDisplayLine(text.trim()))) {
       return made(BlockKind.paragraph, openParagraph: true);
     }
     // Inside a block that runs to an end marker, every line is the block's.
@@ -547,6 +556,7 @@ final class LineRules {
     int definitionRead = 0,
     int reach = 0,
     bool definitionsOnly = false,
+    bool tableTried = false,
   }) {
     final stack = items ?? walk.items;
     return LineRead(
@@ -575,6 +585,7 @@ final class LineRules {
         table: table,
         openParagraph: openParagraph,
         definitionsOnly: definitionsOnly,
+        tableTried: tableTried,
       ),
     );
   }
@@ -597,6 +608,7 @@ final class LineRules {
     required bool table,
     required bool openParagraph,
     required bool definitionsOnly,
+    required bool tableTried,
   }) {
     // A line that leaves the scan outside every construct is the shared
     // state, not a new object equal to it. That is the common line of a long
@@ -615,7 +627,8 @@ final class LineRules {
         html == null &&
         !indentedCode &&
         !table &&
-        !definitionsOnly) {
+        !definitionsOnly &&
+        !tableTried) {
       return openParagraph ? LineState.paragraphOpen : LineState.initial;
     }
     // Inside a construct, a line that leaves the state as it found it — the
@@ -635,7 +648,8 @@ final class LineRules {
         state.indentedCode == indentedCode &&
         state.table == table &&
         state.openParagraph == openParagraph &&
-        state.definitionsOnly == definitionsOnly) {
+        state.definitionsOnly == definitionsOnly &&
+        state.tableTried == tableTried) {
       return state;
     }
     return LineState(
@@ -653,6 +667,7 @@ final class LineRules {
       footnote: footnote,
       definition: definition,
       definitionsOnly: definitionsOnly,
+      tableTried: tableTried,
     );
   }
 
@@ -672,5 +687,6 @@ final class LineRules {
     footnote: LineState.footnoteOpen,
     definition: state.definition,
     definitionsOnly: state.definitionsOnly,
+    tableTried: state.tableTried,
   );
 }

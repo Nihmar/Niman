@@ -110,6 +110,7 @@ final class LineState {
     this.footnote = 0,
     this.definition = 0,
     this.definitionsOnly = false,
+    this.tableTried = false,
   });
 
   /// [footnote] when a footnote definition is open.
@@ -217,6 +218,12 @@ final class LineState {
   /// definitions alone heads nothing: they leave no text to head.
   final bool definitionsOnly;
 
+  /// Whether a delimiter row went on with the paragraph open
+  /// ([openParagraph]) for want of a head that fit it. `cmark-gfm` tries a
+  /// paragraph for a table once: after that no line of it heads one
+  /// (`w` / `|---|---|---|` / `x | y` / `|---|---|` is all text).
+  final bool tableTried;
+
   /// Whether the line is anywhere a block-level construct can still start —
   /// outside every fence, math block, frontmatter, HTML block and indented
   /// code.
@@ -239,7 +246,8 @@ final class LineState {
       other.openParagraph == openParagraph &&
       other.footnote == footnote &&
       other.definition == definition &&
-      other.definitionsOnly == definitionsOnly;
+      other.definitionsOnly == definitionsOnly &&
+      other.tableTried == tableTried;
 
   /// Whether two stacks hold the same items: records compare by value, so a
   /// plain element-wise walk is the whole of it (the engine has no
@@ -269,6 +277,7 @@ final class LineState {
     footnote,
     definition,
     definitionsOnly,
+    tableTried,
   );
 
   @override
@@ -278,5 +287,6 @@ final class LineState {
       'quoteLast: $quoteLast, '
       'list: $listDepth at $listIndent, table: $table, '
       'paragraph: $openParagraph, footnote: $footnote, '
-      'definition: $definition, definitionsOnly: $definitionsOnly)';
+      'definition: $definition, definitionsOnly: $definitionsOnly, '
+      'tableTried: $tableTried)';
 }
