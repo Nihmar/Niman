@@ -163,12 +163,23 @@ void main() {
     });
 
     test('a digit-only span is math (the corpus uses number spans)', () {
-      final doc = HighlightDocument.fromText(r'$x$5');
-      final tokens = doc.lines.single.tokens;
-      expect(tokens, hasLength(1));
-      expect(tokens.single.kind, TokenKind.mathInline);
-      final doc2 = HighlightDocument.fromText(r'$1$');
+      final doc = HighlightDocument.fromText(r'$1$');
+      expect(doc.lines.single.tokens.single.kind, TokenKind.mathInline);
+      final doc2 = HighlightDocument.fromText(r'see $x$ 5');
       expect(doc2.lines.single.tokens.single.kind, TokenKind.mathInline);
+    });
+
+    test('a dollar touching a number from outside is a currency sign', () {
+      // `$x$5` was a span: a `$` right before a digit closes nothing now,
+      // so that `$5 and $10` is prose (math_rule.dart).
+      for (final text in [r'$x$5', r'20$ + 0,10$/Kg', r'costs $5 and $10']) {
+        expect(
+          HighlightDocument.fromText(text).lines.single.tokens
+              .where((token) => token.kind == TokenKind.mathInline),
+          isEmpty,
+          reason: text,
+        );
+      }
     });
   });
 

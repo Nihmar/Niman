@@ -64,7 +64,9 @@ same Markdown either way, and only how it is drawn differs. The read view
   the same page: a blank line is as tall in both, and flipping between
   them leaves the text where it was. Columns, bullets,
   checkboxes and numbers grow with the note text size. Display formulas (`$$…$$`) and inline ones
-  (`$…$`) are typeset, and
+  (`$…$`) are typeset — a `$` touching a number from outside is a
+  currency sign, not a formula's edge (`20$ + 0,10$/Kg`, `$5 and $10`),
+  and `\$` is always a dollar — and
   images and `![[embeds]]` are drawn under their line. Put the caret in a word
   and its syntax appears; put it in a formula block and the block's source
   appears — so everything stays editable as text.

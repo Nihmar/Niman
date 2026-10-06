@@ -46,6 +46,21 @@ void main() {
       expect(masked.spans, isEmpty);
     });
 
+    test('a dollar as a currency sign is not math', () {
+      // A `$` right after a digit opens nothing, and one right before a
+      // digit closes nothing: a price either side of its number. Measured
+      // on a 945 KB note of 13 004 formulas: none breaks either rule.
+      for (final text in <String>[
+        r'20$ + 0,10$/Kg x day',
+        r'costs $5 and $10',
+        r'5$ or 10$',
+      ]) {
+        expect(_masker.mask(text).spans, isEmpty, reason: text);
+      }
+      // A formula with digits at its edges is still one.
+      expect(_masker.mask(r'so $x = 1$ and $2y$').spans, hasLength(2));
+    });
+
     test('an unterminated dollar is not math', () {
       expect(_masker.mask(r'a $ and no close').spans, isEmpty);
     });
