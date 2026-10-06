@@ -6322,23 +6322,8 @@ enum _FoldMark {
   closed,
 }
 
-/// The style a hidden marker is drawn with: invisible, and small enough that
-/// the
-/// room it takes is nothing a reader notices.
-///
-/// The marker is still *there* — still a character at its own offset — which is
-/// what keeps every text offset true; it is the room it takes that is given up,
-/// so
-/// a heading reads as a heading instead of starting with a gap the width of a
-/// hash.
-const TextStyle _hiddenMarker = TextStyle(
-  color: Color(0x00000000),
-  fontSize: 0.01,
-  // Spacing is set in pixels, not in the size: an ambient letter spacing
-  // gave each hidden mark a quarter of a pixel back.
-  letterSpacing: 0,
-  wordSpacing: 0,
-);
+/// The style a hidden marker is drawn with ([liveHiddenMarker]).
+const TextStyle _hiddenMarker = liveHiddenMarker;
 
 /// Where the caret is, for the lines that draw it and the reveal that follows
 /// it: its line, and the run of non-whitespace it sits in on that line.
