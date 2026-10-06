@@ -49,6 +49,13 @@ abstract final class InlineScanners {
     return null;
   }
 
+  /// Where the open or closing tag at [at] (`<`) ends, or null: a tag name
+  /// and its attributes as the spec writes them — what an HTML block of
+  /// kind 7 starts with.
+  static int? tag(String text, int at) =>
+      _html[0].matchAsPrefix(text, at)?.end ??
+      _html[1].matchAsPrefix(text, at)?.end;
+
   /// The link label at [at] (`[`) — what is between its brackets, as
   /// written, and where it ends — or null: no unescaped bracket inside,
   /// at most 999 characters.

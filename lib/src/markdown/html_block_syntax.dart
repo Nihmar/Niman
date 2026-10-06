@@ -2,6 +2,7 @@
 /// kinds, read off the line's text).
 library;
 
+import 'package:niman/src/markdown/inline/inline_scanners.dart';
 import 'package:niman/src/markdown/line_state.dart';
 
 /// Where an HTML block starts and where it ends.
@@ -31,13 +32,33 @@ abstract final class HtmlBlockSyntax {
       return (HtmlBlockKind.declaration, null);
     }
     final name = _tagName(trimmed);
-    if (name != null && _blockTags.contains(name)) {
+    if (name != null && _blockTags.contains(name) && _endsName(trimmed)) {
       return (HtmlBlockKind.blockTag, null);
     }
-    if (name != null && _isCompleteTag(trimmed)) {
+    if (name != null && _isCompleteTag(trimmed, name)) {
       return (HtmlBlockKind.completeTag, null);
     }
     return null;
+  }
+
+  /// Whether the tag name at the start of [trimmed] is followed by what a
+  /// kind-6 tag allows: white space, the line's end, `>` or `/>` — not
+  /// `<div:…`.
+  static bool _endsName(String trimmed) {
+    var at = 1;
+    if (at < trimmed.length && trimmed.codeUnitAt(at) == 0x2F) at++;
+    while (at < trimmed.length &&
+        (_isAsciiLetter(trimmed.codeUnitAt(at)) ||
+            _isDigit(trimmed.codeUnitAt(at)))) {
+      at++;
+    }
+    if (at >= trimmed.length) return true;
+    final char = trimmed.codeUnitAt(at);
+    return _isSpaceOrEnd(char) ||
+        char == 0x3E ||
+        (char == 0x2F &&
+            at + 1 < trimmed.length &&
+            trimmed.codeUnitAt(at + 1) == 0x3E);
   }
 
   /// Whether the HTML block [state] opens on [text] also ends there: its end
@@ -92,13 +113,14 @@ abstract final class HtmlBlockSyntax {
     return trimmed.substring(start, at).toLowerCase();
   }
 
-  /// Whether the line is one complete tag and nothing else.
-  static bool _isCompleteTag(String trimmed) {
-    if (!trimmed.endsWith('>')) return false;
-    final name = _tagName(trimmed);
-    if (name == null) return false;
+  /// Whether the line is one complete open or closing tag, [name] not a
+  /// raw-text one, and nothing after it but white space: a tag as the
+  /// spec writes one (`InlineScanners.tag`, the inline parser's own rule)
+  /// — `<http://a.b>`, an autolink, is none, nor `<a h*#ref="hi">`.
+  static bool _isCompleteTag(String trimmed, String name) {
     if (_rawTextTags.contains(name)) return false;
-    return !trimmed.contains('<', 1);
+    final end = InlineScanners.tag(trimmed, 0);
+    return end != null && trimmed.substring(end).trim().isEmpty;
   }
 
   static bool _isSpaceOrEnd(int char) =>

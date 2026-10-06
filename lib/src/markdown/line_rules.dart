@@ -298,7 +298,9 @@ final class LineRules {
     }
     // Up to three spaces in, as every block's marker: four are code.
     final tag = indent <= 3 ? HtmlBlockSyntax.open(text) : null;
-    if (tag != null) {
+    // A lone complete tag (kind 7) cannot interrupt a paragraph: it goes
+    // on with it as text.
+    if (tag != null && !(tag.$1 == HtmlBlockKind.completeTag && paragraph)) {
       // A comment, a raw-text tag, a processing instruction, a declaration
       // or a CDATA section ends on the line with its end marker — which can
       // be the line it opens on. Left open, a one-line `<!-- note -->` made
