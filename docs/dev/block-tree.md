@@ -151,10 +151,12 @@ counts (they may only go up).
    tags, highlight, `<u>`/`<sup>`/`<sub>`, template placeholders, as
    syntaxes in the masking order (Decisions); each tested on its own,
    and the spec counts unchanged with them on.
-5. **The read view on the tree.** `ParsedBlock` from a leaf's inlines
-   and its segments; `BlockView` draws containers from the tree (quotes,
-   items, callouts, tables by cell) and leaves from their runs.
-   `ExtensionMasker`, `_sourceFormOf`, the search and `approximate` go.
+5. **The read view on the tree.** A block read from its node of the
+   tree and its leaves' inlines (`ReadBlock`, where `ParsedBlock` was);
+   `BlockView` draws containers from the tree (quotes, items, callouts,
+   tables by cell) and leaves from their nodes. `ExtensionMasker`,
+   `_sourceFormOf`, the search and `approximate` go when `live`, their
+   last reader, moves too (phase 6).
 6. **Live on the tree.** `SourceStyler` takes its runs from the tree,
    quotes included; `LiveQuoteContent` becomes the subtree.
 7. **Export on the tree.** `NoteHtml` renders with the writer plus its
@@ -400,20 +402,53 @@ fixture-1mb 18.5 against 323, the worst note 20.6 against 578 — faster
 than without it, the formulas being single nodes the emphasis algorithm
 never walks.
 
-Next: phase 5 — the read view on the tree.
+### Phase 5 (in progress): the read view on the tree
 
-### An open question: `$` as a currency sign
+The read view, the export's page and the footnotes' section (the read
+view's and `live`'s) draw from the tree and our parser; `live` still
+colours from `BlockParser` (phase 6).
 
-`20$ + 0,10$/Kg` is read as a formula (` + 0,10`): the app's rule
-(`math_rule.dart`) opens on any `$`, a space after it included, because
-the notes write `$ x $`. `\$` keeps it text, but `live` shows the
-backslash (the parse it colours from loses the escape; our parser keeps
-it, and phase 5 hides it as it hides any mark). Measured on Geometria 1,
-13 004 formulas: 156 open with a space after the `$` (Pandoc's and
-Obsidian's rule would lose them), none opens right after a digit, none
-closes right before a letter or a digit. So "a `$` right after a digit
-does not open" reads prices as text and loses no formula there — to be
-decided.
+- **A block's node** (`BlockTree.ofBlock`): the tree's reading of one of
+  the scanner's blocks, without the note's tree — the read view draws a
+  block at a time, virtualised by line, as before.
+- **`ReadParser` and `ReadBlock`** (`read_parser.dart`,
+  `read_block.dart`): a block read as the view draws it — its node, a
+  paragraph's or a heading's inline text read by our parser (the
+  definitions it starts with off, an item's task box off by `TaskBox`,
+  `cmark-gfm`'s rule: `- [ ]` alone is an empty task), a table's cells, a
+  code block's code (`CodeHtml.fenceParts`, `indentedCode`, shared with
+  the writer). Definitions come from the note's scope, which reads them
+  as `cmark` does now (`DocumentScope.references`); footnotes are
+  numbered as the section numbers them. Cached per revision.
+- **The view** (`block_view.dart` the containers, `leaf_view.dart` the
+  leaves, `inline_spans.dart` the inlines): a quote and a callout (now
+  the tree's: `QuoteNode.callout`, its body the lines after its title)
+  draw their blocks, an item its marker and its blocks, at any depth — a
+  list in a quote, a quote or a fence on an item's line. A block an item
+  holds after its own stands at the item's indent (it stood at the
+  margin). The inline spans come out flat, each with the style of every
+  construct around it: bold in italic is both (the innermost won), an
+  escape or a character reference reads as what it means, a footnote's
+  citation is its number raised. A setext heading's underline keeps its
+  row, empty (its `===` was drawn). `VisibleText`, which found the
+  markers back in the source, is gone.
+- The goldens move where the page did: the footnote's number, the
+  setext underlines. The Windows images are refreshed; the Linux ones
+  have to be, on Linux.
+- **Speed** (`read_view_timing_test.dart`, `NIMAN_PERF=1`, the same
+  host, before and after): text to first content 269–275 ms for
+  fixture-50kb against 316–325, 87–93 for fixture-200kb against 99–104;
+  the jump 100–111 against 121–127. The same blocks are read (95 and 86).
+
+Left in phase 5: `ExtensionMasker`, `_sourceFormOf` and `approximate`
+are `live`'s still (`BlockParser`), and go with it in phase 6.
+
+### Decided: `$` as a currency sign (#547)
+
+A `$` right after a digit does not open a formula (`20$ + 0,10$/Kg` is
+text), and one before a digit does not close one: measured on
+Geometria 1's 13 004 formulas, none opens right after a digit, none
+closes right before one.
 
 ### Footnote and link reference definitions: what is known
 
