@@ -4,10 +4,12 @@
 ///
 /// * inline math: a `$` (not preceded by `\`) opens unless the next char is
 ///   a `$` (display). Whitespace next to a delimiter is allowed (`$ x $`
-///   typesets) and digit-adjacent openers are math too: the real notes use
-///   `$1$`, `$2 \times 2$` everywhere (579 digit spans, no prose prices).
-///   A span closing guards only against `\$`; a `$5 and $10`-style prose
-///   price is the one documented edge (renders as a KaTeX error fallback).
+///   typesets) and digits inside are math too: the real notes use `$1$`,
+///   `$2 \times 2$` everywhere (579 digit spans). A `$` is a currency sign
+///   where it touches a number from outside: right after a digit it opens
+///   nothing (`20$ + 0,10$/Kg`), right before one it closes nothing
+///   (`$5 and $10`) — Pandoc's closing rule, and its mirror. Measured on a
+///   945 KB note of 13 004 formulas: none breaks either.
 /// * display math: a line starting (after optional indentation) with `$$`.
 ///   A line whose trimmed content is exactly `$$…$$` is single-line
 ///   display; otherwise the block runs until the next line starting with
@@ -50,17 +52,23 @@ int displayMarkerStart(String line) {
   for (var i = from; i < line.length; i++) {
     if (line.codeUnitAt(i) != 0x24) continue;
     if (i > 0 && line.codeUnitAt(i - 1) == 0x5C) continue;
+    // A price written after its number: `20$`.
+    if (i > 0 && _isDigit(line.codeUnitAt(i - 1))) continue;
     final after = i + 1;
     if (after >= line.length) continue;
     if (line.codeUnitAt(after) == 0x24) continue;
     for (var j = after; j < line.length; j++) {
       if (line.codeUnitAt(j) != 0x24) continue;
       if (j > 0 && line.codeUnitAt(j - 1) == 0x5C) continue;
+      // A price written before its number: `$10`.
+      if (j + 1 < line.length && _isDigit(line.codeUnitAt(j + 1))) continue;
       return (i, j + 1);
     }
   }
   return null;
 }
+
+bool _isDigit(int char) => char >= 0x30 && char <= 0x39;
 
 /// All inline-math spans in [line], in order.
 Iterable<(int, int)> allInlineMath(String line) sync* {
