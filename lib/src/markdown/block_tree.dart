@@ -303,9 +303,19 @@ final class BlockTree {
   QuoteNode _quote(int depth, List<String> lines, List<_Origin> starts) {
     final callout = appSyntax ? Callout.of(lines.first) : null;
     final from = callout == null ? 0 : 1;
+    final mark = callout == null ? 0 : Callout.markLength(lines.first);
+    final written =
+        callout != null && lines.first.substring(mark).trim().isNotEmpty;
     var node = QuoteNode(
       line: starts.first.line,
       callout: callout,
+      title: written
+          ? (
+              line: starts.first.line,
+              start: starts.first.column + mark,
+              end: starts.first.column + lines.first.length,
+            )
+          : null,
       children: from >= lines.length
           ? <BlockNode>[]
           : _build(lines.sublist(from).join('\n'), starts.sublist(from)),

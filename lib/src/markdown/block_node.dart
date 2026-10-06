@@ -26,7 +26,12 @@ sealed class BlockNode {
 /// A block quote, one level: what is inside its marks.
 final class QuoteNode extends BlockNode {
   /// A quote starting on [line].
-  const new({required this.line, required this.children, this.callout});
+  const new({
+    required this.line,
+    required this.children,
+    this.callout,
+    this.title,
+  });
 
   @override
   final int line;
@@ -37,6 +42,11 @@ final class QuoteNode extends BlockNode {
   /// What its first line says when the quote is a callout (#279), the app's
   /// own block syntax: `> [!type]` and a title. Null for a quote.
   final Callout? callout;
+
+  /// Where a callout's title is written, past its `[!type]` and its fold
+  /// sign: inline text, which the reading parses as a heading's. Null for a
+  /// callout titled by its type, and for a quote.
+  final SourceSpan? title;
 }
 
 /// A footnote definition: the blocks it holds, which the read view's

@@ -59,9 +59,11 @@ final class ReadParser {
     return _cache[key] = read(block, buffer);
   }
 
-  /// [block] of [buffer], read without consulting the cache.
-  ReadBlock read(Block block, SourceBuffer buffer) =>
-      _read(block, buffer, _scopeOf(buffer));
+  /// [block] of [buffer], read without consulting the cache, with
+  /// [scope]'s definitions — given by a reader that keeps them current
+  /// itself, as `live` does, line by line — or the note's.
+  ReadBlock read(Block block, SourceBuffer buffer, {DocumentScope? scope}) =>
+      _read(block, buffer, scope ?? _scopeOf(buffer));
 
   /// [text] — Markdown of its own, a footnote's body — its blocks read with
   /// [scope]'s definitions, or its own; the blank lines it ends with left
@@ -133,6 +135,8 @@ final class _Reader {
 
   final Map<LeafNode, ReadLeaf> _leaves = Map<LeafNode, ReadLeaf>.identity();
   final Map<ItemNode, bool> _tasks = Map<ItemNode, bool>.identity();
+  final Map<QuoteNode, ReadInline> _titles =
+      Map<QuoteNode, ReadInline>.identity();
 
   ReadBlock read() {
     final node = BlockTree.ofBlock(block, buffer);
@@ -142,6 +146,7 @@ final class _Reader {
       node: node,
       leaves: _leaves,
       tasks: _tasks,
+      titles: _titles,
       footnoteNumbers: numbers,
     );
   }
@@ -150,7 +155,13 @@ final class _Reader {
   /// [item] the item whose first block it is.
   void _visit(BlockNode node, {bool top = false, ItemNode? item}) {
     switch (node) {
-      case QuoteNode(:final children) || FootnoteNode(:final children):
+      case QuoteNode(:final children, :final title):
+        if (title != null) {
+          final (:text, :map) = LeafInline.paragraph([title], buffer.lineAt);
+          _titles[node] = _inline(text, map);
+        }
+        children.forEach(_visit);
+      case FootnoteNode(:final children):
         children.forEach(_visit);
       case ItemNode(:final children):
         for (var at = 0; at < children.length; at++) {

@@ -128,6 +128,7 @@ final class ReadBlock {
     required this.node,
     required this._leaves,
     required this._tasks,
+    required this._titles,
     required this.footnoteNumbers,
   });
 
@@ -139,6 +140,7 @@ final class ReadBlock {
 
   final Map<LeafNode, ReadLeaf> _leaves;
   final Map<ItemNode, bool> _tasks;
+  final Map<QuoteNode, ReadInline> _titles;
 
   /// The number each footnote is cited as, by its normalized label.
   final Map<String, int> footnoteNumbers;
@@ -149,6 +151,10 @@ final class ReadBlock {
   /// Whether [item] is a task, and ticked; null when it is not one.
   bool? taskOf(ItemNode item) => _tasks[item];
 
+  /// [quote]'s callout title, read, when one is written
+  /// ([QuoteNode.title]); null otherwise.
+  ReadInline? titleOf(QuoteNode quote) => _titles[quote];
+
   /// What a reader sees of the block as one line of plain text, for a
   /// passage quoted out of it (#284): its leaves' text, joined by a space.
   String get plainText {
@@ -156,7 +162,12 @@ final class ReadBlock {
     void add(BlockNode node) {
       switch (node) {
         case QuoteNode(:final children, :final callout):
-          if (callout != null) parts.add(callout.title);
+          final title = titleOf(node);
+          if (title != null) {
+            parts.add(title.plainText);
+          } else if (callout != null) {
+            parts.add(callout.title);
+          }
           children.forEach(add);
         case ItemNode(:final children) || FootnoteNode(:final children):
           children.forEach(add);

@@ -569,6 +569,18 @@ void main() {
       );
     });
 
+    testWidgets("a callout's written title is drawn as inline text", (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _view('> [!tip] Mind **this**\n> body', _syncCache()),
+      );
+      await tester.pump();
+      expect(_screenText(tester), contains('Mind this'));
+      expect(_screenText(tester), isNot(contains('**')));
+      expect(_styleOf(tester, 'this').fontWeight, FontWeight.w700);
+    });
+
     testWidgets("a setext heading's underline is not on screen", (
       tester,
     ) async {

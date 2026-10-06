@@ -191,7 +191,22 @@ final class _Drawer {
     if (nesting >= BlockView._maxNesting) return _column(children);
     final callout = quote.callout;
     if (callout != null) {
-      return CalloutBox(callout: callout, theme: theme, body: children);
+      final title = read.titleOf(quote);
+      return CalloutBox(
+        callout: callout,
+        theme: theme,
+        body: children,
+        title: title == null
+            ? null
+            : (style) => InlineSpans(
+                theme: theme,
+                base: style,
+                mathCache: view.mathCache,
+                taps: _taps,
+                availableWidth: inner,
+                footnoteNumbers: read.footnoteNumbers,
+              ).of(title),
+      );
     }
     // The bar is inside the quote's indent, as `live` draws it: a box adds
     // its border to its padding, and the text stood the bar's width further
