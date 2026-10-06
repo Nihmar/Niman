@@ -29,7 +29,6 @@ import 'dart:collection';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
-
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -37,6 +36,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/note_reference_cache.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
@@ -461,7 +461,11 @@ final class SourceStyler {
       case BlockKind.table:
         break;
     }
-    final prefix = BlockParser.quotePrefixLength(text, block.quoteDepth);
+    final prefix = BlockParser.quotePrefixLength(
+      text,
+      block.quoteDepth,
+      BlockParser.itemPrefixLength(block, text),
+    );
     final structural = _structure(block, line, text, prefix, tokens);
     final parsed = _parsedOf(block);
     if (parsed != null) {
@@ -487,6 +491,7 @@ final class SourceStyler {
           block,
           buffer.lineAt(block.startLine),
           line - block.startLine,
+          text,
         ),
       );
 
@@ -553,7 +558,7 @@ final class SourceStyler {
     final opensItem =
         (block.kind == BlockKind.listItem && line == block.startLine) ||
         block.kind == BlockKind.quote;
-    final marker = opensItem ? BlockScanner.listMarkerOf(rest) : null;
+    final marker = opensItem ? LineSyntax.listMarkerOf(rest) : null;
     if (marker != null) {
       final (start, width, content) = marker;
       out.add(
@@ -574,15 +579,26 @@ final class SourceStyler {
         from += 3;
       }
     }
-    final hashes = BlockScanner.headingLevelOf(
+    // A heading block is one the scanner decided; a quote's inside is not,
+    // and a `#` four spaces into it is code, not a heading.
+    final heading = LineSyntax.headingMarkerOf(
       from == 0 ? text : text.substring(from),
+      block.kind == BlockKind.quote ? 3 : null,
     );
-    if (hashes > 0 &&
+    if (heading != null &&
         (block.kind == BlockKind.heading || block.kind == BlockKind.quote)) {
+      // The `#`s where they stand: a heading may be indented, in an item or
+      // up to three spaces from the margin, and the spaces are not marker.
+      final (start, hashes) = heading;
       out.add(
-        _Piece(TokenKind.headingMarker, from, from + hashes, _structural),
+        _Piece(
+          TokenKind.headingMarker,
+          from + start,
+          from + start + hashes,
+          _structural,
+        ),
       );
-      from += hashes;
+      from += start + hashes;
     }
     return from;
   }
@@ -612,7 +628,11 @@ final class SourceStyler {
     _blockTextReads++;
     final raw = BlockParser.blockText(block, buffer);
     if (raw.length > _inlineLimit) return null;
-    final key = '${block.kind.index}:${block.quoteDepth}|$raw';
+    // The items' indents too: what the parse is given of a block in a list
+    // depends on them (`BlockParser.contentText`).
+    final key =
+        '${block.kind.index}:${block.quoteDepth}:'
+        '${BlockParser.itemKeyOf(block)}|$raw';
     var parsed = _parses.remove(key);
     if (parsed == null || parsed.block.kind != block.kind) {
       parsed = _Parsed(block, _parser.parseText(block, raw, () => _scope));

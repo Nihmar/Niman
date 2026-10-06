@@ -54,7 +54,7 @@ final class LiveQuoteContent {
       }
       final inner = <String>[
         for (var at = block.startLine; at < block.endLine; at++)
-          _unquoted(scanned.lines[at], block.quoteDepth),
+          _unquoted(scanned.lines[at], block),
       ];
       local -= block.startLine;
       scanned = _scan(inner);
@@ -80,7 +80,7 @@ final class LiveQuoteContent {
     return _quotes.putIfAbsent(quote.startLine, () {
       final lines = <String>[
         for (var at = quote.startLine; at < quote.endLine; at++)
-          _unquoted(buffer.lineAt(at), quote.quoteDepth),
+          _unquoted(buffer.lineAt(at), quote),
       ];
       return _scan(lines);
     });
@@ -104,7 +104,14 @@ final class LiveQuoteContent {
     return null;
   }
 
-  /// [line] without its first [depth] quote marks.
-  static String _unquoted(String line, int depth) =>
-      line.substring(BlockParser.quotePrefixLength(line, depth));
+  /// [line], a line of [quote], without its quote marks — counted from where
+  /// the items the quote stands in leave the line, as the read view takes
+  /// them off ([BlockParser.contentText]).
+  static String _unquoted(String line, Block quote) => line.substring(
+    BlockParser.quotePrefixLength(
+      line,
+      quote.quoteDepth,
+      BlockParser.itemPrefixLength(quote, line),
+    ),
+  );
 }

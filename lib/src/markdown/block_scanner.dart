@@ -17,14 +17,18 @@
 /// change, and `index` for the answer.
 library;
 
-import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_builder.dart';
 import 'package:niman/src/markdown/block_changes.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_list.dart';
+import 'package:niman/src/markdown/block_rules.dart';
+import 'package:niman/src/markdown/line_rules.dart';
 import 'package:niman/src/markdown/line_state.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
+import 'package:niman/src/markdown/table_line_syntax.dart';
 
 /// Reads a note's lines into blocks, and keeps up with edits.
 final class BlockScanner {
@@ -63,6 +67,12 @@ final class BlockScanner {
 
   /// The state entering each scanned line.
   final List<LineState> _entering = <LineState>[];
+
+  /// What the scan makes of each line, read against [_entering].
+  late final LineRules _rules = LineRules(buffer, _entering);
+
+  /// The blocks the scan makes of those lines.
+  late final BlockRules _blockRules = BlockRules(_rules);
 
   /// The blocks of the scanned prefix, in line order.
   ///
@@ -252,15 +262,26 @@ final class BlockScanner {
     // ([BlockList.shiftFrom]): everything below reads them where they are.
     _blocks.shiftFrom(tailStart, edit.lineDelta);
     var start = edit.firstLine;
-    // The line before the edit reads the edited line when it asks whether
-    // it heads a table (the delimiter row is the line under it), so it is
-    // not the line it was: the rebuild takes in its whole block. A setext
-    // underline asks nothing of the lines above it — it turns the paragraph
-    // the rebuild has open into a heading when it reaches it — so neither
-    // one typed nor one taken away sends the rebuild back.
-    if (start > 0 && start - 1 < buffer.lineCount) {
-      if (_hasPipe(_text(start - 1))) {
-        start = _blockHolding(start - 1)?.startLine ?? 0;
+    // The lines before the edit read it: a line heads a table — any line
+    // may, pipes or not — when the line under it is a delimiter row that
+    // stays in its container, which the line under that decides; and a
+    // setext underline heads its paragraph only over no delimiter row. So
+    // the rebuild starts a line back — two when that line is a delimiter
+    // row, which the line above it may head — and takes the block it lands
+    // in open, cut there, as at any line. It stops at a blank line, which
+    // reads nothing after it: a block after a blank line is not read again
+    // for an edit on its first line.
+    for (
+      var back = 0;
+      back < 2 &&
+          start > 0 &&
+          start - 1 < buffer.lineCount &&
+          _rules.lineText(start - 1).trim().isNotEmpty;
+      back++
+    ) {
+      start--;
+      if (!TableLineSyntax.isDelimiter(_rules.lineText(start).trimLeft())) {
+        break;
       }
     }
     // An edit at or past a frontier lands on lines that are not current: the
@@ -321,10 +342,10 @@ final class BlockScanner {
     // The block the line before the rebuild is in, cut at the rebuild: what a
     // fresh scan has open when it reaches the edited line.
     final open = start > 0 && headEnd < _blocks.length
-        ? _reopened(_at(headEnd), start)
+        ? _reopened(_at(headEnd), headEnd, start)
         : null;
-    final builder = _BlockBuilder(
-      this,
+    final builder = BlockBuilder(
+      _blockRules,
       open: open,
       before: _nonBlankBefore(headEnd),
     );
@@ -333,7 +354,7 @@ final class BlockScanner {
         : (settledFrom > start ? settledFrom : start) + budget;
 
     var line = start;
-    var state = start == 0 ? LineState.initial : _exitOf(start - 1);
+    var state = start == 0 ? LineState.initial : _rules.exitOf(start - 1);
     var keepFrom = -1;
     var converged = false;
     while (line < buffer.lineCount) {
@@ -355,7 +376,7 @@ final class BlockScanner {
       if (line >= stopAt) break;
       _setEntering(line, state);
       builder.add(line);
-      state = _exitOf(line);
+      state = _rules.exitOf(line);
       line++;
     }
     _scannedLineTotal += line - start;
@@ -371,7 +392,7 @@ final class BlockScanner {
       } else if (block.startLine >= line) {
         keepFrom = index;
       } else {
-        rebuilt.add(_cutFront(block, line, end));
+        rebuilt.add(block.cutFrom(line, end));
         keepFrom = index + 1;
       }
     }
@@ -442,19 +463,6 @@ final class BlockScanner {
     return (touched, block, end);
   }
 
-  /// [block] from [start] on, to [end]: what is left of a block a scan
-  /// stopped inside.
-  static Block _cutFront(Block block, int start, int end) => Block(
-    kind: block.kind,
-    startLine: start,
-    endLine: end,
-    quoteDepth: block.quoteDepth,
-    listDepth: block.listDepth,
-    listOrdinal: block.listOrdinal,
-    headingLevel: block.headingLevel,
-    fenceInfo: block.fenceInfo,
-  );
-
   /// Whether the rebuild can stop before [line] — whose entering state is
   /// the one it had, as is the line before it — and, when it can, the index
   /// of the first old block to keep; -1 when it cannot.
@@ -479,7 +487,7 @@ final class BlockScanner {
   /// rebuild's, so a kept list there would keep numbers that are not its own.
   int _convergesAt(
     int line,
-    _BlockBuilder builder,
+    BlockBuilder builder,
     int tailStart,
     int headEnd,
     SourceEdit? edit,
@@ -487,11 +495,16 @@ final class BlockScanner {
     final (index, old, oldEnd) = _hintAt(line, tailStart, headEnd, edit);
     if (old == null || old.kind == BlockKind.blank) return -1;
     final open = builder.open;
-    final goesOn = open != null && _mergesInto(open, line);
+    final goesOn = open != null && _blockRules.mergesInto(open, line);
     if (old.startLine == line) {
       if (goesOn) return -1;
       if (old.kind == BlockKind.listItem &&
-          _ordinalOf(line, old.listDepth, old.quoteDepth, builder.previous) !=
+          _blockRules.ordinalOf(
+                line,
+                old.listDepth,
+                old.quoteDepth,
+                builder.previous,
+              ) !=
               old.listOrdinal) {
         return -1;
       }
@@ -500,12 +513,17 @@ final class BlockScanner {
     if (!goesOn) return -1;
     if (!open.sameShape(old)) {
       // A heading that started above [line] is a setext one: an ATX
-      // heading is its own line alone.
+      // heading is its own line alone. Its open block is a paragraph, or an
+      // item whose first paragraph the underline heads.
       final setext =
-          open.kind == BlockKind.paragraph &&
-          old.kind == BlockKind.heading &&
+          (open.kind == BlockKind.paragraph ||
+              open.kind == BlockKind.listItem) &&
+          (old.kind == BlockKind.heading ||
+              (old.kind == BlockKind.listItem && old.headingLevel > 0)) &&
           open.quoteDepth == old.quoteDepth &&
-          open.listDepth == old.listDepth;
+          open.listDepth == old.listDepth &&
+          // An item's number counts the items after it on.
+          open.listOrdinal == old.listOrdinal;
       if (!setext) return -1;
       builder.headOpen(old.headingLevel);
     }
@@ -513,47 +531,24 @@ final class BlockScanner {
     return index + 1;
   }
 
-  /// [block] cut at [end] to be taken open again: a setext heading cut short
-  /// of its underline is the paragraph it was before the underline reached
-  /// it, and goes on as one.
-  static Block _reopened(Block block, int end) {
-    final cut = _cut(block, end);
-    if (block.kind != BlockKind.heading || end >= block.endLine) return cut;
-    return Block(
-      kind: BlockKind.paragraph,
-      startLine: cut.startLine,
-      endLine: cut.endLine,
-      quoteDepth: cut.quoteDepth,
-      listDepth: cut.listDepth,
-      entering: cut.entering,
-    );
+  /// [block], at index [index], cut at [end] to be taken open again: a
+  /// setext heading cut short of its underline is the block it was before
+  /// the underline reached it, and goes on as one. That is a paragraph, or
+  /// an item whose first paragraph the underline headed — so it is read
+  /// again from its first line, which the edit did not touch, rather than
+  /// assumed: taken for a paragraph, `- item` / `  ---` with its underline
+  /// gone was a paragraph to the rescan and an item to a fresh scan.
+  Block _reopened(Block block, int index, int end) {
+    final headed =
+        block.kind == BlockKind.heading ||
+        (block.kind == BlockKind.listItem && block.headingLevel > 0);
+    if (!headed || end >= block.endLine) {
+      return block.cutAt(end);
+    }
+    return _blockRules
+        .blockStarting(block.startLine, _nonBlankBefore(index))
+        .cutAt(end);
   }
-
-  /// [block], a paragraph, as the setext heading of [level] its underline
-  /// makes it.
-  static Block _headed(Block block, int level) => Block(
-    kind: BlockKind.heading,
-    startLine: block.startLine,
-    endLine: block.endLine,
-    quoteDepth: block.quoteDepth,
-    listDepth: block.listDepth,
-    headingLevel: level,
-    entering: block.entering,
-  );
-
-  /// [block] as it was before [end]: the run it covered up to a line inside
-  /// it, which is what an edit leaves of the block it landed in.
-  static Block _cut(Block block, int end) => Block(
-    kind: block.kind,
-    startLine: block.startLine,
-    endLine: end,
-    quoteDepth: block.quoteDepth,
-    listDepth: block.listDepth,
-    listOrdinal: block.listOrdinal,
-    headingLevel: block.headingLevel,
-    fenceInfo: block.fenceInfo,
-    entering: block.entering,
-  );
 
   /// The first block index at or after [fromIndex] whose `test` holds, or the
   /// list's length when none does.
@@ -633,10 +628,10 @@ final class BlockScanner {
     }
     if (state.table) return false;
     if (line == 0) return true;
-    final text = _text(line);
-    return _text(line - 1).trim().isEmpty &&
+    final text = _rules.lineText(line);
+    return _rules.lineText(line - 1).trim().isEmpty &&
         text.trim().isNotEmpty &&
-        _listMarker(text) == null;
+        LineSyntax.listMarker(text) == null;
   }
 
   /// The last block before index [end] that is not a blank run, or null.
@@ -648,887 +643,5 @@ final class BlockScanner {
       if (block.kind != BlockKind.blank) return block;
     }
     return null;
-  }
-
-  /// The block that starts on [line], one line long: the builder extends it.
-  ///
-  /// [previous] is the last non-blank block before it, which an ordered item
-  /// counts on from.
-  Block _blockStarting(int line, Block? previous) {
-    final kind = _kindOf(line);
-    final text = _text(line);
-    // The depth *on* the line, not the one entering it: a quote's first line
-    // has no depth before its own `>`, so taking the entering state left
-    // every quote block at depth 0 — which made the renderer draw it as an
-    // unnested quote and the parser read the `>` as text.
-    final quoteDepth = _quoteDepthAfter(line, text, _entering[line]);
-    // The depth *on* the line, like the quote's: the state entering a marker
-    // line describes the item before it, so a block that took its depth from
-    // there was drawn at the previous item's indent — siblings at different
-    // indents, the item after a sublist pushed right (device report,
-    // 2026-09-21).
-    final listStack = _listAfter(line, text, _entering[line]);
-    final listDepth = listStack.isEmpty ? -1 : listStack.length - 1;
-    return Block(
-      kind: kind,
-      startLine: line,
-      endLine: line + 1,
-      quoteDepth: quoteDepth,
-      listDepth: listDepth,
-      // An ordered list counts from its first item on, wherever the list
-      // starts; a list written `1. 1. 1.` renders 1, 2, 3, which is CommonMark
-      // and what the preview draws. The count lives here because this is where
-      // the *list* is still visible: a block knows only its own item.
-      listOrdinal: kind == BlockKind.listItem
-          ? _ordinalOf(line, listDepth, quoteDepth, previous)
-          : 0,
-      // An ATX heading's: a setext one starts as its paragraph, and is
-      // made a heading when its underline goes on with it.
-      headingLevel: kind == BlockKind.heading ? _headingLevel(text) : 0,
-      fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(line) : null,
-      entering: _entering[line],
-    );
-  }
-
-  /// Whether line [end] belongs to [open], the block the scan has open.
-  bool _mergesInto(Block open, int end) {
-    switch (open.kind) {
-      case BlockKind.heading:
-        // An ATX heading is its own line, and a setext one ends with its
-        // underline: nothing goes on with either.
-        return false;
-      case BlockKind.paragraph:
-        // A setext underline goes on with the paragraph it heads
-        // ([_underlineLevel]), which the builder then makes a heading.
-        return _kindOf(end) == BlockKind.paragraph ||
-            _underlineLevel(open, end) > 0;
-      case BlockKind.thematicBreak:
-        return false;
-      case BlockKind.listItem:
-        // A new marker starts a new item, and a blank line ends this one; a
-        // line with neither continues it, which keeps a wrapped item whole.
-        return _text(end).trim().isNotEmpty && _markerOn(end) == null;
-      case BlockKind.quote:
-        // A blank line ends the quoted run; a line that is still a quote line —
-        // with a marker or lazily without one — continues it.
-        return _kindOf(end) == BlockKind.quote;
-      case BlockKind.fencedCode:
-      case BlockKind.indentedCode:
-      case BlockKind.frontmatter:
-      case BlockKind.html:
-      case BlockKind.table:
-      case BlockKind.blank:
-        return _kindOf(end) == open.kind;
-      case BlockKind.math:
-        // A display block runs while it is open, and the state entering the
-        // line is the only thing that knows: the line that *closes* a block
-        // starts with `$$` as much as the line that opens one does. Asking
-        // the line instead of the state stitched two neighbouring formulas
-        // into one block whose tex was both of them (#252).
-        return _entering[end].math;
-    }
-  }
-
-  /// Whether [line] is display math — either form — rather than code.
-  ///
-  /// Two rules, both of them the preview's rather than the scanner's own:
-  ///
-  /// * **The shared rule says what a display line is** (`math_rule.dart`):
-  ///   a `$$…$$` that opens and closes on one line is a display block too.
-  ///   Keeping a private copy here is what made `$$x$$` a paragraph in the
-  ///   read view and a centered block in the preview (#252).
-  /// * **An indented `$$` line is code.** The preview's parser runs its
-  ///   indented-code syntax before the math one, so a `$$` line indented four
-  ///   spaces never opens a formula; display math is otherwise indent-blind.
-  bool _isDisplayLineAt(int line, String text, LineState state) =>
-      !_indentedCodeContinues(line, text, state) && isDisplayLine(text.trim());
-
-  /// What line [line] is.
-  BlockKind _kindOf(int line) {
-    final state = _entering[line];
-    final text = _text(line);
-    if (state.fence != null ||
-        _fenceOpen(text, _contentColumn(text, state)) != null) {
-      return BlockKind.fencedCode;
-    }
-    if (state.math || _isDisplayLineAt(line, text, state)) {
-      return BlockKind.math;
-    }
-    if (state.frontmatter || _opensFrontmatter(line, text)) {
-      return BlockKind.frontmatter;
-    }
-    if (state.html != null &&
-        !(text.trim().isEmpty &&
-            (state.html == HtmlBlockKind.blockTag ||
-                state.html == HtmlBlockKind.completeTag))) {
-      return BlockKind.html;
-    }
-    if (_htmlOpen(text) != null) return BlockKind.html;
-    if (text.trim().isEmpty) return BlockKind.blank;
-    if (_isTableRow(line)) return BlockKind.table;
-    // Not a setext heading, which no line is on its own: it is a paragraph
-    // whose underline goes on with it ([_underlineLevel]).
-    if (_hr.hasMatch(text)) return BlockKind.thematicBreak;
-    if (_headingLevel(text) > 0) return BlockKind.heading;
-    // Code while it is four spaces in: a line less than that ends the block.
-    if (_indentedCodeContinues(line, text, state)) {
-      return BlockKind.indentedCode;
-    }
-    // Containers, innermost first: a line with its own quote marker is a quote
-    // line, a line with a list marker starts an item, and a line with neither
-    // either continues the item it is indented into or the quote it is lazily
-    // part of.
-    if (_quoteDepth(text) > 0) return BlockKind.quote;
-    if (_listMarker(text, _markerReach(state)) != null) {
-      return BlockKind.listItem;
-    }
-    if (text.trim().isNotEmpty && state.listIndent >= 0) {
-      return BlockKind.paragraph;
-    }
-    if (text.trim().isNotEmpty && state.quoteDepth > 0) return BlockKind.quote;
-    return BlockKind.paragraph;
-  }
-
-  /// The state after line [line], given the state entering it.
-  LineState _exitOf(int line) {
-    final state = _entering[line];
-    final text = _text(line);
-    // A fence, a formula or an HTML block in a list item keeps the items it
-    // is in, and leaves them open when it ends: dropping them made the item
-    // after a fence a list of its own, one level up.
-    if (state.fence != null) {
-      return _isFenceClose(text, state.fence!, state.listIndent)
-          ? _inItems(state.listStack)
-          : state;
-    }
-    if (state.math) {
-      return _closesMath(text) ? _inItems(state.listStack) : state;
-    }
-    if (state.frontmatter) {
-      return _closesFrontmatter(text) ? LineState.initial : state;
-    }
-    if (state.html != null) {
-      return _closesHtml(text, state) ? _inItems(state.listStack) : state;
-    }
-    if (_opensFrontmatter(line, text)) {
-      return const LineState(frontmatter: true);
-    }
-    final fence = _fenceOpen(text, _contentColumn(text, state));
-    if (fence != null) {
-      return LineState(fence: fence, listStack: _listAfter(line, text, state));
-    }
-    // Only the multi-line form opens a state: a `$$…$$` written on one line
-    // is over on that line, and leaving the state open swallowed whatever
-    // followed it.
-    if (_isDisplayLineAt(line, text, state) && isDisplayOpen(text.trim())) {
-      return LineState(math: true, listStack: _listAfter(line, text, state));
-    }
-    final html = _htmlOpen(text);
-    if (html != null) {
-      final opened = LineState(
-        html: html.$1,
-        htmlClosing: html.$2,
-        listStack: _listAfter(line, text, state),
-      );
-      // A comment, a raw-text tag, a processing instruction, a declaration or
-      // a CDATA section ends on the line with its end marker — which can be
-      // the line it opens on. Left open, a one-line `<!-- note -->` made an
-      // HTML block of everything under it until the next `-->`: 1 656 lines
-      // of the worst-note fixture drawn as raw HTML, and their links unread.
-      if (!_closesOnItsOwnLine(text, opened)) return opened;
-    }
-    final quoteDepth = _quoteDepthAfter(line, text, state);
-    final listStack = _listAfter(line, text, state);
-    final table = _tableContinues(line, state);
-    final indentedCode = _indentedCodeContinues(line, text, state);
-    final openParagraph =
-        listStack.isNotEmpty &&
-        !table &&
-        !indentedCode &&
-        _isParagraphText(text, state);
-    // A line that leaves the scan outside every construct is the shared
-    // state, not a new object equal to it. That is the common line of a long
-    // note of prose, and a state apiece was 68 MB of the shell running the
-    // million-line fixture (#346: 281 MB held after that scan, 213 MB with
-    // the shared state, `ProcessInfo` RSS) — a million copies of one value,
-    // held for as long as the scan is. [LineState.initial] is what this would
-    // build, field for field, and everything that reads a state compares it
-    // by value, the scan's own convergence check included.
-    if (quoteDepth == 0 && listStack.isEmpty && !table && !indentedCode) {
-      return LineState.initial;
-    }
-    return LineState(
-      quoteDepth: quoteDepth,
-      listStack: listStack,
-      table: table,
-      indentedCode: indentedCode,
-      openParagraph: openParagraph,
-    );
-  }
-
-  /// The state of a line in [items] and in nothing else: the shared plain
-  /// state outside a list.
-  static LineState _inItems(List<({int marker, int content})> items) =>
-      items.isEmpty ? LineState.initial : LineState(listStack: items);
-
-  /// Whether [text], entered in [state], is a line of paragraph text: an
-  /// item's marker with text after it, or a line no other block takes.
-  static bool _isParagraphText(String text, LineState state) {
-    if (text.trim().isEmpty || _hr.hasMatch(text)) return false;
-    if (_headingLevel(text) > 0) return false;
-    final marker = _listMarker(text, _markerReach(state));
-    return marker == null || text.substring(marker.$3).trim().isNotEmpty;
-  }
-
-  /// The line's text, without a byte-order mark on the first line.
-  String _text(int line) {
-    final text = buffer.lineAt(line);
-    if (line == 0 && text.startsWith('\uFEFF')) return text.substring(1);
-    return text;
-  }
-
-  // ---------------------------------------------------------------- constructs
-
-  /// The list marker [text] opens with — its start, its width and where the
-  /// item's text begins — or null: the scanner's own rule, for a reader
-  /// that colours the marker of a line the scanner already took for an
-  /// item, which is why the marker's indent is not asked about.
-  static (int, int, int)? listMarkerOf(String text) =>
-      _listMarker(text, text.length);
-
-  /// How many `#` open a heading on [text], or 0.
-  static int headingLevelOf(String text) => _headingLevel(text);
-
-  /// How many `#` open a heading on [text], or 0.
-  static int _headingLevel(String text) {
-    var hashes = 0;
-    while (hashes < text.length && text.codeUnitAt(hashes) == 0x23) {
-      hashes++;
-    }
-    if (hashes >= 1 &&
-        hashes <= 6 &&
-        (hashes == text.length || _isSpace(text.codeUnitAt(hashes)))) {
-      return hashes;
-    }
-    return 0;
-  }
-
-  /// The level of the setext heading [line] makes of [paragraph], the
-  /// paragraph the scan has open, when it is its underline — or 0.
-  ///
-  /// A setext heading is a paragraph and the underline under it: the whole
-  /// paragraph is the heading's text, as CommonMark and the export's
-  /// `SetextHeaderWithIdSyntax` read it (#361). So what the line above is
-  /// is asked of the block, not of its text: a table row, a quote, a list
-  /// item's marker line are no paragraph, and none of them is headed.
-  ///
-  /// And the underline has to stand in the paragraph's own container,
-  /// because a paragraph continues lazily and an underline never does: in
-  /// a quote it would need its own `>` (and then the quote's reading heads
-  /// it), in a list item it has to be indented into the item.
-  int _underlineLevel(Block paragraph, int line) {
-    final state = _entering[line];
-    if (state.quoteDepth != 0 || state.listDepth != paragraph.listDepth) {
-      return 0;
-    }
-    final text = _text(line);
-    // In an item, the underline's up to three spaces are counted from the
-    // item's content column, which it has to reach.
-    final column = state.listIndent < 0 ? 0 : state.listIndent;
-    for (var at = 0; at < column; at++) {
-      if (at >= text.length || !_isSpace(text.codeUnitAt(at))) return 0;
-    }
-    return _setextLevel(text, column);
-  }
-
-  /// The setext heading level [text] is an underline for — 1 for `=`, 2 for
-  /// `-`, up to three spaces in from [from] and spaces after — or 0 when it
-  /// is not one.
-  static int _setextLevel(String text, [int from = 0]) {
-    var at = from;
-    while (at < from + 3 && at < text.length && _isSpace(text.codeUnitAt(at))) {
-      at++;
-    }
-    if (at >= text.length) return 0;
-    final char = text.codeUnitAt(at);
-    if (char != 0x3D && char != 0x2D) return 0;
-    var run = 0;
-    while (at + run < text.length && text.codeUnitAt(at + run) == char) {
-      run++;
-    }
-    for (var end = at + run; end < text.length; end++) {
-      if (!_isSpace(text.codeUnitAt(end))) return 0;
-    }
-    return char == 0x3D ? 1 : 2;
-  }
-
-  /// The fence a line opens, or null: up to three spaces in from [base], the
-  /// content column of the item the line is in ([_contentColumn]).
-  static FenceMarker? _fenceOpen(String text, [int base = 0]) {
-    var indent = 0;
-    while (indent < base + 3 &&
-        indent < text.length &&
-        _isSpace(text.codeUnitAt(indent))) {
-      indent++;
-    }
-    if (indent >= text.length) return null;
-    final char = text.codeUnitAt(indent);
-    if (char != 0x60 && char != 0x7E) return null;
-    var length = 0;
-    while (indent + length < text.length &&
-        text.codeUnitAt(indent + length) == char) {
-      length++;
-    }
-    if (length < 3) return null;
-    final rest = text.substring(indent + length);
-    // A backtick fence's info string may not contain a backtick.
-    if (char == 0x60 && rest.contains('`')) return null;
-    return FenceMarker(char: char, length: length, indent: indent);
-  }
-
-  /// Whether [text] closes [fence], opened in an item whose content starts at
-  /// [listIndent] (-1 outside a list): up to three spaces in from there.
-  static bool _isFenceClose(String text, FenceMarker fence, int listIndent) {
-    final reach = (listIndent < 0 ? 0 : listIndent) + 3;
-    var indent = 0;
-    while (indent < reach &&
-        indent < text.length &&
-        _isSpace(text.codeUnitAt(indent))) {
-      indent++;
-    }
-    var length = 0;
-    while (indent + length < text.length &&
-        text.codeUnitAt(indent + length) == fence.char) {
-      length++;
-    }
-    if (length < fence.length) return false;
-    return text.substring(indent + length).trim().isEmpty;
-  }
-
-  /// The fence's info string: the first word after the fence run, which is the
-  /// language a highlighter wants.
-  String? _fenceInfo(int line) {
-    final text = _text(line);
-    final fence = _fenceOpen(text, _contentColumn(text, _entering[line]));
-    if (fence == null) return null;
-    final rest = text.substring(fence.indent + fence.length).trim();
-    return rest.isEmpty ? null : rest.split(RegExp(r'\s+')).first;
-  }
-
-  /// Whether [text] closes a `$$` block.
-  static bool _closesMath(String text) => isDisplayClose(text.trim());
-
-  /// Whether line [line] opens the frontmatter block: only the first line can.
-  static bool _opensFrontmatter(int line, String text) =>
-      line == 0 && (text.trim() == '---' || text.trim() == '...');
-
-  /// Whether [text] closes the frontmatter.
-  static bool _closesFrontmatter(String text) {
-    final trimmed = text.trim();
-    return trimmed == '---' || trimmed == '...';
-  }
-
-  /// The HTML block a line opens, or null.
-  static (HtmlBlockKind, String?)? _htmlOpen(String text) {
-    final trimmed = text.trimLeft();
-    if (!trimmed.startsWith('<')) return null;
-    final lower = trimmed.toLowerCase();
-    for (final tag in _rawTextTags) {
-      if (lower.startsWith('<$tag') &&
-          (lower.length == tag.length + 1 ||
-              _isSpaceOrEnd(lower.codeUnitAt(tag.length + 1)) ||
-              lower.codeUnitAt(tag.length + 1) == 0x3E)) {
-        return (HtmlBlockKind.rawText, tag);
-      }
-    }
-    if (trimmed.startsWith('<!--')) return (HtmlBlockKind.comment, null);
-    if (trimmed.startsWith('<?')) {
-      return (HtmlBlockKind.processingInstruction, null);
-    }
-    if (trimmed.startsWith('<![CDATA[')) return (HtmlBlockKind.cdata, null);
-    if (trimmed.length > 2 &&
-        trimmed.startsWith('<!') &&
-        _isAsciiLetter(trimmed.codeUnitAt(2))) {
-      return (HtmlBlockKind.declaration, null);
-    }
-    final name = _tagName(trimmed);
-    if (name != null && _blockTags.contains(name)) {
-      return (HtmlBlockKind.blockTag, null);
-    }
-    if (name != null && _isCompleteTag(trimmed)) {
-      return (HtmlBlockKind.completeTag, null);
-    }
-    return null;
-  }
-
-  /// Whether the HTML block [state] opens on [text] also ends there: its end
-  /// marker after the opening one, for the kinds that end on a marker.
-  static bool _closesOnItsOwnLine(String text, LineState state) {
-    final trimmed = text.trimLeft();
-    final (from, marker) = switch (state.html!) {
-      HtmlBlockKind.rawText => (1, '</${state.htmlClosing}>'),
-      HtmlBlockKind.comment => (4, '-->'),
-      HtmlBlockKind.processingInstruction => (2, '?>'),
-      HtmlBlockKind.declaration => (2, '>'),
-      HtmlBlockKind.cdata => (9, ']]>'),
-      HtmlBlockKind.blockTag || HtmlBlockKind.completeTag => (0, ''),
-    };
-    if (marker.isEmpty) return false;
-    final rest = from > trimmed.length ? '' : trimmed.substring(from);
-    return state.html == HtmlBlockKind.rawText
-        ? rest.toLowerCase().contains(marker)
-        : rest.contains(marker);
-  }
-
-  /// Whether [text] closes the HTML block [state] opened.
-  static bool _closesHtml(String text, LineState state) {
-    switch (state.html!) {
-      case HtmlBlockKind.rawText:
-        return text.toLowerCase().contains('</${state.htmlClosing}>');
-      case HtmlBlockKind.comment:
-        return text.contains('-->');
-      case HtmlBlockKind.processingInstruction:
-        return text.contains('?>');
-      case HtmlBlockKind.declaration:
-        return text.contains('>');
-      case HtmlBlockKind.cdata:
-        return text.contains(']]>');
-      case HtmlBlockKind.blockTag:
-      case HtmlBlockKind.completeTag:
-        return text.trim().isEmpty;
-    }
-  }
-
-  /// The tag name a line starts with, lowercased, or null.
-  static String? _tagName(String trimmed) {
-    var at = 1;
-    if (at < trimmed.length && trimmed.codeUnitAt(at) == 0x2F) at++;
-    final start = at;
-    while (at < trimmed.length) {
-      final char = trimmed.codeUnitAt(at);
-      if (!_isAsciiLetter(char) && !_isDigit(char)) break;
-      at++;
-    }
-    if (at == start) return null;
-    return trimmed.substring(start, at).toLowerCase();
-  }
-
-  /// Whether the line is one complete tag and nothing else.
-  static bool _isCompleteTag(String trimmed) {
-    if (!trimmed.endsWith('>')) return false;
-    final name = _tagName(trimmed);
-    if (name == null) return false;
-    if (_rawTextTags.contains(name)) return false;
-    return !trimmed.contains('<', 1);
-  }
-
-  /// How deep in blockquotes a line sits, by its own markers.
-  static int _quoteDepth(String text) {
-    var at = 0;
-    var depth = 0;
-    while (at < text.length) {
-      var spaces = 0;
-      while (at + spaces < text.length &&
-          spaces < 3 &&
-          _isSpace(text.codeUnitAt(at + spaces))) {
-        spaces++;
-      }
-      if (at + spaces >= text.length || text.codeUnitAt(at + spaces) != 0x3E) {
-        break;
-      }
-      depth++;
-      at += spaces + 1;
-      if (at < text.length && _isSpace(text.codeUnitAt(at))) at++;
-    }
-    return depth;
-  }
-
-  /// The quote depth after [line], keeping a lazily continued paragraph in its
-  /// quote.
-  ///
-  /// Only paragraph text is lazy: a line that opens a block of its own — an
-  /// item's marker, a heading, a rule, a fence — is outside the quote.
-  static int _quoteDepthAfter(int line, String text, LineState state) {
-    final own = _quoteDepth(text);
-    if (own > 0) return own;
-    if (state.quoteDepth > 0 &&
-        text.trim().isNotEmpty &&
-        !_opensBlock(text, state)) {
-      return state.quoteDepth;
-    }
-    return 0;
-  }
-
-  /// Whether [text], entered in [state], opens a block that ends a paragraph
-  /// rather than going on with it.
-  static bool _opensBlock(String text, LineState state) =>
-      _listMarker(text, _markerReach(state)) != null ||
-      _headingLevel(text) > 0 ||
-      _hr.hasMatch(text) ||
-      _fenceOpen(text, _contentColumn(text, state)) != null;
-
-  /// Where the item starting at [line] sits in its list.
-  ///
-  /// A continuation of the list already in progress — the previous block was an
-  /// item at the same indent, and both are written as ordered items — keeps
-  /// counting. Anything else starts a list, and starts it at the number the
-  /// note wrote.
-  int _ordinalOf(int line, int listDepth, int quoteDepth, Block? previous) {
-    final written = _writtenOrdinal(_text(line));
-    // The same list is the same depth in the same quote: an item after a
-    // quote's list is a list of its own, not the quote's list counted on.
-    if (previous != null &&
-        previous.kind == BlockKind.listItem &&
-        previous.listDepth == listDepth &&
-        previous.quoteDepth == quoteDepth &&
-        previous.listOrdinal > 0 &&
-        written > 0) {
-      return previous.listOrdinal + 1;
-    }
-    return written;
-  }
-
-  /// The number an ordered marker was written with, or 0 for an unordered one.
-  static int _writtenOrdinal(String text) {
-    // Asked of a line already taken for an item: its indent is settled.
-    final marker = _listMarker(text, text.length);
-    if (marker == null) return 0;
-    final (start, width, _) = marker;
-    final slice = text.substring(start, start + width).trim();
-    final digits = int.tryParse(slice.replaceAll(RegExp('[^0-9]'), ''));
-    return digits ?? 0;
-  }
-
-  /// The list marker on [text], or null: its start, width and content indent.
-  ///
-  /// A marker may stand up to three spaces in from where a line starts its
-  /// text — the note's margin, or inside a list item the item's own content
-  /// column, which is [reach] minus those three ([_markerReach]). Counting
-  /// them from the margin alone took `    - c`, a third level, for the text
-  /// of the item above it: every list stopped at two levels.
-  static (int, int, int)? _listMarker(String text, [int reach = 3]) {
-    var at = 0;
-    while (at < reach && at < text.length && _isSpace(text.codeUnitAt(at))) {
-      at++;
-    }
-    if (at >= text.length) return null;
-    final char = text.codeUnitAt(at);
-    var width = 0;
-    if (char == 0x2D || char == 0x2B || char == 0x2A) {
-      width = 1;
-    } else if (_isDigit(char)) {
-      var digits = 0;
-      while (at + digits < text.length &&
-          digits < 9 &&
-          _isDigit(text.codeUnitAt(at + digits))) {
-        digits++;
-      }
-      if (digits == 0 || at + digits >= text.length) return null;
-      final delimiter = text.codeUnitAt(at + digits);
-      if (delimiter != 0x2E && delimiter != 0x29) return null;
-      width = digits + 1;
-    } else {
-      return null;
-    }
-    final after = at + width;
-    if (after >= text.length) return (at, width, after);
-    if (!_isSpace(text.codeUnitAt(after))) return null;
-    var padding = 0;
-    while (after + padding < text.length &&
-        padding < 4 &&
-        _isSpace(text.codeUnitAt(after + padding))) {
-      padding++;
-    }
-    if (padding == 0) padding = 1;
-    return (at, width, after + padding);
-  }
-
-  /// How far in a marker may stand on a line entering in [state]: three
-  /// spaces past the content column of the innermost open item, or past the
-  /// margin outside a list.
-  static int _markerReach(LineState state) =>
-      (state.listIndent < 0 ? 0 : state.listIndent) + 3;
-
-  /// The list marker on line [line], read with the reach the state entering
-  /// it gives ([_markerReach]).
-  (int, int, int)? _markerOn(int line) =>
-      _listMarker(_text(line), _markerReach(_entering[line]));
-
-  /// The open list items after line [line], whose text is [text], given
-  /// those entering it.
-  ///
-  /// A marker opens an item: it keeps every open item whose content column it
-  /// starts at or past, and closes the rest — an item written to the left of
-  /// an open one's content is outside it. What survives is its parents.
-  ///
-  /// Any other line is in the items whose content column it reaches, and
-  /// closes the rest — `  back in A` after a blank line under `  - B` is A's
-  /// text, not a line outside the list. Unless it is lazy: paragraph text
-  /// that goes on with the paragraph before it keeps every item open.
-  List<({int marker, int content})> _listAfter(
-    int line,
-    String text,
-    LineState state,
-  ) {
-    final marker = _listMarker(text, _markerReach(state));
-    if (marker != null) {
-      final (start, _, content) = marker;
-      final open = <({int marker, int content})>[];
-      for (final item in state.listStack) {
-        if (item.content > start) break;
-        open.add(item);
-      }
-      open.add((marker: start, content: content));
-      return open;
-    }
-    if (text.trim().isEmpty) return state.listStack;
-    if (state.listStack.isEmpty) return const <({int marker, int content})>[];
-    final indent = _indentOf(text);
-    if (indent >= state.listIndent) return state.listStack;
-    if (state.openParagraph && _kindOf(line) == BlockKind.paragraph) {
-      return state.listStack;
-    }
-    var reached = 0;
-    while (reached < state.listStack.length &&
-        state.listStack[reached].content <= indent) {
-      reached++;
-    }
-    return reached == 0
-        ? const <({int marker, int content})>[]
-        : state.listStack.sublist(0, reached);
-  }
-
-  /// How many spaces [text] starts with.
-  static int _indentOf(String text) => text.length - text.trimLeft().length;
-
-  /// The content column of the innermost item in [state] that [text] is
-  /// indented into, or 0 when it reaches none: where a block on the line
-  /// counts its own up-to-three spaces of indent from.
-  static int _contentColumn(String text, LineState state) {
-    final indent = _indentOf(text);
-    var column = 0;
-    for (final item in state.listStack) {
-      if (item.content > indent) break;
-      column = item.content;
-    }
-    return column;
-  }
-
-  /// Whether [line] is inside a GFM table.
-  bool _isTableRow(int line) {
-    final text = _text(line);
-    if (text.trim().isEmpty) return false;
-    if (_entering[line].table) return _hasPipe(text);
-    if (line + 1 >= buffer.lineCount) return false;
-    return _hasPipe(text) && _isDelimiterRow(_text(line + 1));
-  }
-
-  bool _tableContinues(int line, LineState state) {
-    final text = _text(line);
-    if (text.trim().isEmpty) return false;
-    if (state.table) return _hasPipe(text);
-    if (line + 1 >= buffer.lineCount) return false;
-    return _hasPipe(text) && _isDelimiterRow(_text(line + 1));
-  }
-
-  /// Whether [text] is a table's delimiter row: only `-`, `:`, `|` and spaces,
-  /// with at least one `-`.
-  static bool _isDelimiterRow(String text) {
-    final trimmed = text.trim();
-    if (!trimmed.contains('-') || !trimmed.contains('|')) return false;
-    if (!_hasPipe(trimmed)) return false;
-    for (final rune in trimmed.codeUnits) {
-      final ok = rune == 0x2D || rune == 0x3A || rune == 0x7C || _isSpace(rune);
-      if (!ok) return false;
-    }
-    return true;
-  }
-
-  static bool _hasPipe(String text) => text.contains('|');
-
-  /// Whether an indented code block opens: four spaces, after a blank line.
-  bool _opensIndentedCode(int line, String text) {
-    if (text.trim().isEmpty) return false;
-    if (text.length - text.trimLeft().length < 4) return false;
-    if (_entering[line].listIndent >= 0) return false;
-    if (line == 0) return false;
-    return _text(line - 1).trim().isEmpty;
-  }
-
-  /// Whether an indented code block runs on after [text].
-  bool _indentedCodeContinues(int line, String text, LineState state) {
-    if (!state.indentedCode) return _opensIndentedCode(line, text);
-    if (text.trim().isEmpty) return true;
-    return text.length - text.trimLeft().length >= 4;
-  }
-
-  static bool _isSpace(int char) => char == 0x20 || char == 0x09;
-
-  static bool _isSpaceOrEnd(int char) => _isSpace(char) || char == 0x0A;
-
-  static bool _isDigit(int char) => char >= 0x30 && char <= 0x39;
-
-  static bool _isAsciiLetter(int char) =>
-      (char >= 0x41 && char <= 0x5A) || (char >= 0x61 && char <= 0x7A);
-
-  static final RegExp _hr = RegExp(
-    r'^\s{0,3}((?:-{3,})|(?:\*{3,})|(?:_{3,}))\s*$',
-  );
-
-  /// The tags whose content runs to their own closing tag.
-  static const Set<String> _rawTextTags = <String>{
-    'pre',
-    'script',
-    'style',
-    'textarea',
-  };
-
-  /// The block-level tags of HTML block type 6, from the CommonMark spec.
-  static const Set<String> _blockTags = <String>{
-    'address',
-    'article',
-    'aside',
-    'base',
-    'basefont',
-    'blockquote',
-    'body',
-    'caption',
-    'center',
-    'col',
-    'colgroup',
-    'dd',
-    'details',
-    'dialog',
-    'dir',
-    'div',
-    'dl',
-    'dt',
-    'fieldset',
-    'figcaption',
-    'figure',
-    'footer',
-    'form',
-    'frame',
-    'frameset',
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
-    'head',
-    'header',
-    'hr',
-    'html',
-    'iframe',
-    'legend',
-    'li',
-    'link',
-    'main',
-    'menu',
-    'menuitem',
-    'nav',
-    'noframes',
-    'ol',
-    'optgroup',
-    'option',
-    'p',
-    'param',
-    'search',
-    'section',
-    'summary',
-    'table',
-    'tbody',
-    'td',
-    'tfoot',
-    'th',
-    'thead',
-    'title',
-    'tr',
-    'track',
-    'ul',
-  };
-}
-
-/// Blocks built line by line, as a scan reaches each line.
-///
-/// A block is a run of lines: the first line says what it is, and each line
-/// after it either goes on with it or starts the next one. Built as the scan
-/// goes rather than after it, so the scan can ask at any line which block is
-/// open — which is what deciding that it has converged needs.
-final class _BlockBuilder {
-  new(this._scanner, {Block? open, this._before})
-    : _open = open,
-      openEnd = open?.endLine ?? 0;
-
-  final BlockScanner _scanner;
-  final List<Block> _blocks = <Block>[];
-
-  /// The block the next line may go on with. Its own end is not kept up:
-  /// the run is [openEnd], and the block is cut there when it closes — a
-  /// block a line would be an allocation per line of the note.
-  Block? _open;
-
-  /// Where the open block runs to: one past the last line added to it, or
-  /// wherever the scan found the old block it turned out to be ending.
-  int openEnd;
-
-  /// The last non-blank block before the ones built here.
-  final Block? _before;
-
-  /// The block the next line may go on with (its end is not its end).
-  Block? get open => _open;
-
-  /// The last non-blank block before the next line: what an item starting
-  /// there would count on from.
-  Block? get previous {
-    final open = _open;
-    if (open != null && open.kind != BlockKind.blank) return open;
-    for (var at = _blocks.length - 1; at >= 0; at--) {
-      if (_blocks[at].kind != BlockKind.blank) return _blocks[at];
-    }
-    return _before;
-  }
-
-  /// Adds [line], whose entering state is recorded.
-  void add(int line) {
-    final open = _open;
-    if (open != null) {
-      // A paragraph that takes its underline is a setext heading from its
-      // first line on, and ends there.
-      final level = open.kind == BlockKind.paragraph
-          ? _scanner._underlineLevel(open, line)
-          : 0;
-      if (level > 0) headOpen(level);
-      if (level > 0 || _scanner._mergesInto(open, line)) {
-        openEnd = line + 1;
-        return;
-      }
-    }
-    final before = previous;
-    _close();
-    _open = _scanner._blockStarting(line, before);
-    openEnd = line + 1;
-  }
-
-  /// Makes the open paragraph the setext heading of [level] its underline
-  /// makes it.
-  void headOpen(int level) {
-    _open = BlockScanner._headed(_open!, level);
-  }
-
-  /// The blocks built, the open one closed.
-  List<Block> finish() {
-    _close();
-    return _blocks;
-  }
-
-  void _close() {
-    final open = _open;
-    if (open == null) return;
-    _blocks.add(
-      open.endLine == openEnd ? open : BlockScanner._cut(open, openEnd),
-    );
-    _open = null;
   }
 }

@@ -388,6 +388,33 @@ void main() {
       expect(_depths(scanner), <int>[0, 1, 0]);
     });
 
+    test('an item goes on with paragraph text only', () {
+      // A line that opens a block of its own ends the item's text: the
+      // item took any line without a marker, `# Heading` under a list
+      // included, and drew it as the item's words.
+      for (final (line, kind, depth) in [
+        ('# Heading', BlockKind.heading, -1),
+        ('> quoted', BlockKind.quote, -1),
+        ('```', BlockKind.fencedCode, -1),
+        ('---', BlockKind.thematicBreak, -1),
+        ('  > quoted in the item', BlockKind.quote, 0),
+        ('  ```', BlockKind.fencedCode, 0),
+      ]) {
+        final scanner = BlockScanner(SourceBuffer.fromText('- item\n$line\n'));
+        expect(scanner.blockAt(0)!.endLine, 1, reason: line);
+        final after = scanner.blockAt(1)!;
+        expect((after.kind, after.listDepth), (kind, depth), reason: line);
+      }
+      // Paragraph text goes on, indented into the item or lazily.
+      for (final line in ['  wrapped', 'lazy']) {
+        final scanner = BlockScanner(SourceBuffer.fromText('- item\n$line\n'));
+        expect(scanner.blockAt(1)!.startLine, 0, reason: line);
+      }
+      // After a rule, the list is over.
+      final scanner = BlockScanner(SourceBuffer.fromText('- a\n---\nafter\n'));
+      expect(scanner.blockAt(2)!.listDepth, -1);
+    });
+
     test("a line back at an item's content column is that item again", () {
       // After a blank line, `  back in A` is indented past A's content column
       // but not B's: it closes B and is A's second paragraph, not a line
@@ -590,10 +617,13 @@ void main() {
       );
       expect(scanner.index.blocks.length, 1);
       for (var line = 1; line < scanner.buffer.lineCount; line++) {
+        // A plain line of prose is the second shared state, [LineState.
+        // paragraphOpen]: nothing is open but the paragraph it goes on
+        // with, so no state is a copy per line (#346).
         expect(
-          identical(scanner.stateEntering(line), LineState.initial),
+          identical(scanner.stateEntering(line), LineState.paragraphOpen),
           isTrue,
-          reason: 'the state entering line $line is a copy of the plain one',
+          reason: 'the state entering line $line is the shared plain one',
         );
       }
     });
@@ -642,6 +672,64 @@ void main() {
   });
 
   group('incremental rescanning', () {
+    test('an item that loses its underline is an item again', () {
+      // `- item` / `  ---` is an item whose text is a setext heading. An
+      // edit that takes the underline away reopens the heading cut short of
+      // it — and what it was before the underline reached it is the item,
+      // not a paragraph: the rescan answered `paragraph` where a fresh scan
+      // answers `listItem`. Its underline back, the rescan stops on the old
+      // heading and must take it as the item's.
+      for (final (text, line, replacement) in <(String, int, String)>[
+        ('- item\n  ---', 1, ''),
+        ('1. item\n   ===\n2. next', 1, 'more'),
+        ('- item\n  more', 1, '  ---'),
+        ('- a\n\n- item\n  ---\n\n- b', 3, ''),
+      ]) {
+        final buffer = SourceBuffer.fromText(text);
+        final scanner = BlockScanner(buffer);
+        final at = buffer.offsetOfLine(line);
+        scanner.edited(
+          buffer.replaceRange(at, at + buffer.lineAt(line).length, replacement),
+        );
+        final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+        expect(
+          _described(scanner),
+          _described(fresh),
+          reason:
+              'line $line of ${text.replaceAll('\n', r'\n')} made '
+              '"$replacement"',
+        );
+      }
+    });
+
+    test('what the line before a line was is in the state it enters', () {
+      // Lazy text after an item's heading stays in the item; after a blank
+      // line it does not. The two lines leave the same items open, so if
+      // the difference is not in the state, a rescan that turns the blank
+      // into the heading stops on the line after it and keeps its old block.
+      for (final (text, line, replacement) in <(String, int, String)>[
+        ('- a\n\n w', 1, '  # h'),
+        ('- a\n  # h\n w', 1, ''),
+        ('- a\n  ```\n  x\n\n w\n  ```', 3, '  y'),
+        ('- a\n  ```\n  x\n  y\n w\n  ```', 3, ''),
+      ]) {
+        final buffer = SourceBuffer.fromText(text);
+        final scanner = BlockScanner(buffer);
+        final at = buffer.offsetOfLine(line);
+        scanner.edited(
+          buffer.replaceRange(at, at + buffer.lineAt(line).length, replacement),
+        );
+        final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+        expect(
+          _described(scanner),
+          _described(fresh),
+          reason:
+              'line $line of ${text.replaceAll('\n', r'\n')} made '
+              '"$replacement"',
+        );
+      }
+    });
+
     test(
       'an edit at the top, the middle and the end agrees with a fresh scan',
       () {

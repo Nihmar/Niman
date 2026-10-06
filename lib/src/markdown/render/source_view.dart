@@ -338,7 +338,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     String? label;
     if (title) {
       final text = widget.buffer.lineAt(index);
-      final prefix = BlockParser.quotePrefixLength(text, block.quoteDepth);
+      final prefix = BlockParser.quotePrefixLength(
+        text,
+        block.quoteDepth,
+        BlockParser.itemPrefixLength(block, text),
+      );
       final rest = text.substring(prefix);
       markStart = prefix + rest.length - rest.trimLeft().length;
       markEnd = prefix + Callout.markLength(rest);
@@ -5615,7 +5619,11 @@ final class _Line extends StatelessWidget {
       // block, the block's indent: the spaces past them are the code's.
       final text = styled.text;
       final marks = shape.quoteDepth > 0
-          ? BlockParser.quotePrefixLength(text, shape.quoteDepth)
+          ? BlockParser.quotePrefixLength(
+              text,
+              shape.quoteDepth,
+              shape.quoteIndent,
+            )
           : 0;
       return shape.codeIndented
           ? marks + _codeIndentEnd(text.substring(marks))
@@ -6007,7 +6015,11 @@ final class _Line extends StatelessWidget {
   }) {
     final text = styled.text;
     final spans = <InlineSpan>[];
-    final marks = BlockParser.quotePrefixLength(text, shape.quoteDepth);
+    final marks = BlockParser.quotePrefixLength(
+      text,
+      shape.quoteDepth,
+      shape.quoteIndent,
+    );
     var at = 0;
     if (!revealed) {
       final hidden = shape.codeFence ? text.length : _prefixEnd;

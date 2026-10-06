@@ -232,7 +232,7 @@ final class _SourceOffsets {
       final prefix = BlockParser.linePrefixLength(
         block,
         lines[at],
-        BlockParser.listStripOf(block, lines.first, at),
+        BlockParser.listStripOf(block, lines.first, at, lines[at]),
       );
       _contentStarts.add(content);
       _sourceStarts.add(buffer.offsetOfLine(block.startLine + at) + prefix);

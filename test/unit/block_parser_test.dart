@@ -191,6 +191,42 @@ void main() {
     });
   });
 
+  group('a block in a list item, given to the parse alone', () {
+    // The parse reads the block without the item around it, so the item's
+    // content column is taken off its lines first: left on, four spaces of
+    // it read as an indented code block.
+    String text(String document, int index) =>
+        _parse(document, index: index).text;
+
+    test('a quote in an item has its marks taken off past the item', () {
+      // `    > b` is a quote in the item (content at 2): its `>` stands two
+      // spaces past the item, more than three from the margin.
+      expect(text('- a\n    > b', 1), 'b');
+      expect(text('  1. a\n       > b\n       > c', 1), 'b\nc');
+    });
+
+    test('a paragraph and a heading deep in an item lose its indent', () {
+      expect(text('- A\n  - B\n\n    para of B', 3), 'para of B');
+      // Three spaces past the item's content: still a heading to the parse.
+      expect(text('- a\n\n     # deep', 2), '   # deep');
+    });
+
+    test('a lazy line keeps what the item did not take', () {
+      // `    ---` is four spaces into an item of five: the item's lazily,
+      // so it stands as it is — the quote's paragraph goes on, and is not
+      // headed by an underline.
+      expect(text('   - w\n      > w\n    ---', 1), 'w\n    ---');
+      // Lazy for the outer item, reaching the inner one: the inner one's
+      // indent comes off, the outer one's does not.
+      expect(text('  2) w\n      - w\n    > w', 2), 'w');
+    });
+
+    test('a block outside every item keeps its text', () {
+      expect(text('    code', 0), '    code');
+      expect(text('> a\n    > b', 0), 'a\n    > b');
+    });
+  });
+
   group('nesting is a depth', () {
     test('emphasis inside strong', () {
       final parsed = _parse('**a *b* c**');
@@ -387,10 +423,20 @@ inline math $x$ and a #tag, all in one block.
       final prefix = BlockParser.linePrefixLength(
         block,
         lines[index],
-        BlockParser.listStripOf(block, lines.first, index),
+        BlockParser.listStripOf(block, lines.first, index, lines[index]),
       );
       expect(lines[index].substring(prefix), text);
     }
+  });
+
+  test("an item's line far past its content keeps what the parse takes", () {
+    // `      # w` is four spaces past the item's content: a paragraph's line
+    // to the note. The parse reads the block as the item and takes two
+    // spaces off itself; taking the content column here too left `  # w`,
+    // a heading.
+    final parsed = _parse('+ w\n      # w');
+    expect(parsed.text, '+ w\n      # w');
+    expect(_run(parsed, StyleKind.heading), isNull);
   });
 
   test('a quotation mark is placed, and so is what follows it', () {

@@ -117,6 +117,16 @@ void main() {
       'B more about B',
       'C',
     ]);
+    // A fence in a nested item is that item's too.
+    const fenced = '- A\n  - B\n\n    ```\n    code of B\n    ```\n- C\n';
+    final code = _convert(fenced, 'code of')!;
+    expect((code.startLine, code.endLine), (0, 7));
+    expect(_parse(code).nodes.map((n) => n.label), [
+      'root',
+      'A',
+      'B code of B',
+      'C',
+    ]);
   });
 
   test('asking whether a line has a list answers as converting it does', () {

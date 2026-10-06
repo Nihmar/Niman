@@ -607,31 +607,42 @@ final class HighlightDocument {
   /// Block context is the caller's to rule out first. [_lineTokens] and
   /// [_headingIn] share this, so the highlight and the outline cannot
   /// disagree about what counts as a heading.
-  static int _headingHashes(String text) {
+  /// Where the `#`s of an ATX heading on [text] start and how many there
+  /// are, or null: up to three spaces in, as CommonMark and the block
+  /// scanner read it (`LineSyntax.headingMarkerOf`).
+  static (int, int)? _headingHashes(String text) {
+    var at = 0;
+    while (at < 3 && at < text.length && _isSpaceChar(text.codeUnitAt(at))) {
+      at++;
+    }
     var hashes = 0;
-    while (hashes < text.length && text.codeUnitAt(hashes) == 0x23) {
+    while (at + hashes < text.length && text.codeUnitAt(at + hashes) == 0x23) {
       hashes++;
     }
     if (hashes >= 1 &&
         hashes <= 6 &&
-        (hashes == text.length || _isSpaceChar(text.codeUnitAt(hashes)))) {
-      return hashes;
+        (at + hashes == text.length ||
+            _isSpaceChar(text.codeUnitAt(at + hashes)))) {
+      return (at, hashes);
     }
-    return 0;
+    return null;
   }
 
-  /// The heading level on [text] entered in [inState], or 0.
+  /// The heading on [text] entered in [inState] — where its `#`s start and
+  /// how many — or null.
   ///
   /// Mirrors the order of [_lineTokens]'s early returns — fence content, a
   /// fence line, math, frontmatter, a horizontal rule — because a line that
   /// stops there never reaches the heading branch there either.
-  static int _headingIn(String text, _State inState, int lineIndex) {
-    if (inState.fence != null) return 0;
-    if (_fenceOpen(text) != null) return 0;
+  static (int, int)? _headingIn(String text, _State inState, int lineIndex) {
+    if (inState.fence != null) return null;
+    if (_fenceOpen(text) != null) return null;
     final trimmed = text.trim();
-    if (inState.inMath || trimmed.startsWith(r'$$')) return 0;
-    if (inState.inFrontmatter || (lineIndex == 0 && trimmed == '---')) return 0;
-    if (_hr.hasMatch(text)) return 0;
+    if (inState.inMath || trimmed.startsWith(r'$$')) return null;
+    if (inState.inFrontmatter || (lineIndex == 0 && trimmed == '---')) {
+      return null;
+    }
+    if (_hr.hasMatch(text)) return null;
     return _headingHashes(text);
   }
 
@@ -651,8 +662,11 @@ final class HighlightDocument {
     var state = _State.initial;
     for (var i = 0; i < raw.length; i++) {
       final line = raw[i];
-      final level = _headingIn(line, state, i);
-      if (level > 0) onHeading(i, level, line.substring(level).trim());
+      final heading = _headingIn(line, state, i);
+      if (heading != null) {
+        final (start, level) = heading;
+        onHeading(i, level, line.substring(start + level).trim());
+      }
       state = _stateAfter(line, state, i);
     }
   }
@@ -711,10 +725,11 @@ final class HighlightDocument {
     }
 
     // Heading: `#`..`######` followed by whitespace or end of line.
-    final hashes = _headingHashes(text);
-    if (hashes > 0) {
-      tokens.add(Token(TokenKind.headingMarker, 0, hashes));
-      _InlineScanner.scan(tokens, text, hashes);
+    final heading = _headingHashes(text);
+    if (heading != null) {
+      final (start, hashes) = heading;
+      tokens.add(Token(TokenKind.headingMarker, start, start + hashes));
+      _InlineScanner.scan(tokens, text, start + hashes);
       return tokens;
     }
 

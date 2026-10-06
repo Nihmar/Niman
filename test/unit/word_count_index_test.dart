@@ -123,6 +123,8 @@ void main() {
       '- # in a list item\n\n# top\n',
       '    # indented four\n\n# top\n',
       '   # three spaces\n\n# top\n',
+      '  ## two spaces ##\n\n# top\n',
+      '- item\n\n  # in the item\n',
       'Setext\n======\n\n# top\n',
     ];
     for (final text in cases) {

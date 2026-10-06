@@ -24,9 +24,10 @@ library;
 import 'package:markdown/markdown.dart' as md;
 import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/block.dart';
-import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_masker.dart';
 import 'package:niman/src/markdown/inline_syntaxes.dart';
+import 'package:niman/src/markdown/line_state.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/masked_block.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -234,37 +235,54 @@ final class BlockParser {
 
   /// [raw], the text of [block], as the parse reads it: each line without
   /// what [linePrefixLength] says the parse takes off it.
+  ///
+  /// A block the scanner made is handed over in the coordinates of the
+  /// container it stands in — the items around it taken off each line as
+  /// those items take them ([itemPrefixLength]), and its quote marks — so
+  /// the parse, reading the block alone, decides what the note's parse
+  /// would: which line an item takes by its indent and which lazily, what
+  /// is a heading, what a rule. An item's own block keeps its marker where
+  /// it stands, at most three spaces into its parent: the parse reads it as
+  /// the item it is, and takes the item's indent off its lines itself.
   static String contentText(Block block, String raw) {
-    if (block.quoteDepth <= 0 && block.kind != BlockKind.listItem) return raw;
-    final lines = raw.split('\n');
     if (block.quoteDepth <= 0 &&
-        lines.length == 1 &&
-        listIndentOf(block, lines.first) == 0) {
+        _itemsOf(block) == null &&
+        block.kind != BlockKind.listItem) {
       return raw;
     }
+    final lines = raw.split('\n');
     final first = lines.first;
     for (var at = 0; at < lines.length; at++) {
       final line = lines[at];
       lines[at] = line.substring(
-        linePrefixLength(block, line, listStripOf(block, first, at)),
+        linePrefixLength(block, line, listStripOf(block, first, at, line)),
       );
     }
     return lines.join('\n');
   }
 
-  /// How many spaces past its quote marks the parse takes off line [index]
-  /// of [block], whose first line is [firstLine]: on the item's own line the
-  /// indent its marker stands at ([listIndentOf]), and on the lines after it
-  /// the item's content column — the spaces the package itself reads an
-  /// item's next lines without. Left on, a text node of two lines was not
-  /// found in the source, the run was guessed, and the read view drew the
-  /// item's `- ` as text. 0 for any other block.
-  static int listStripOf(Block block, String firstLine, int index) {
-    if (block.kind != BlockKind.listItem) return 0;
-    if (index == 0) return listIndentOf(block, firstLine);
+  /// How many spaces past its quote marks and its parent items the parse
+  /// takes off [line], line [index] of [block], whose first line is
+  /// [firstLine]: none for a block the scanner made ([contentText]), and 0
+  /// for any block that is not an item's.
+  ///
+  /// A block built without the scanner's state cannot be read in its
+  /// parent's coordinates, and an item three levels down stands four spaces
+  /// in — which alone is an indented code block. Its marker's indent comes
+  /// off its own line ([listIndentOf]), and the item's content column off
+  /// the lines after it, the spaces the parse reads them without.
+  static int listStripOf(
+    Block block,
+    String firstLine,
+    int index,
+    String line,
+  ) {
+    if (block.kind != BlockKind.listItem || _inParent(block)) return 0;
+    final indent = listIndentOf(block, firstLine);
+    if (index == 0) return indent;
     final from = quotePrefixLength(firstLine, block.quoteDepth);
-    final marker = BlockScanner.listMarkerOf(firstLine.substring(from));
-    return marker?.$3 ?? listIndentOf(block, firstLine);
+    final marker = LineSyntax.listMarkerOf(firstLine.substring(from));
+    return marker?.$3 ?? indent;
   }
 
   /// The indent a list item's marker stands at, past its quote marks, on the
@@ -274,7 +292,8 @@ final class BlockParser {
     if (block.kind != BlockKind.listItem) return 0;
     final from = quotePrefixLength(firstLine, block.quoteDepth);
     var at = from;
-    while (at < firstLine.length && firstLine.codeUnitAt(at) == 0x20) {
+    while (at < firstLine.length &&
+        LineSyntax.isSpace(firstLine.codeUnitAt(at))) {
       at++;
     }
     return at - from;
@@ -284,11 +303,15 @@ final class BlockParser {
   /// marks, and up to [listStrip] spaces after them ([listStripOf]). A
   /// reader puts the parse's offsets back on the line by adding this.
   static int linePrefixLength(Block block, String line, int listStrip) {
-    final quote = quotePrefixLength(line, block.quoteDepth);
+    final quote = quotePrefixLength(
+      line,
+      block.quoteDepth,
+      itemPrefixLength(block, line),
+    );
     var at = quote;
     while (at - quote < listStrip &&
         at < line.length &&
-        line.codeUnitAt(at) == 0x20) {
+        LineSyntax.isSpace(line.codeUnitAt(at))) {
       at++;
     }
     return at;
@@ -298,19 +321,113 @@ final class BlockParser {
   /// to three spaces before it and the one after — as far as the line has
   /// them: what the parse takes off a quote's lines, so a reader can put the
   /// parse's offsets back on the line.
-  static int quotePrefixLength(String line, int depth) {
-    var from = 0;
+  ///
+  /// Counted from [start]: a block in a list item stands where its items
+  /// leave the line ([itemPrefixLength]), and its quote marks are three
+  /// spaces in from *there*. Counted from the margin, `- a` / `    > b` — a
+  /// quote in the item — kept its `>`, and its inside was read as indented
+  /// code.
+  ///
+  /// The three spaces are columns, a tab to the next stop of four, as the
+  /// scanner reads them: `\t>` is four columns in, indented code and no
+  /// quote mark.
+  static int quotePrefixLength(String line, int depth, [int start = 0]) {
+    var from = start;
+    var column = 0;
+    for (var at = 0; at < start && at < line.length; at++) {
+      column += line.codeUnitAt(at) == 0x09 ? 4 - column % 4 : 1;
+    }
     for (var level = 0; level < depth; level++) {
       var at = from;
-      while (at < line.length && at - from < 3 && line.codeUnitAt(at) == 0x20) {
+      var reached = column;
+      while (at < line.length && LineSyntax.isSpace(line.codeUnitAt(at))) {
+        final width = line.codeUnitAt(at) == 0x09 ? 4 - reached % 4 : 1;
+        if (reached + width - column > 3) break;
+        reached += width;
         at++;
       }
       if (at >= line.length || line.codeUnitAt(at) != 0x3E) return from;
       at++;
-      if (at < line.length && line.codeUnitAt(at) == 0x20) at++;
+      reached++;
+      if (at < line.length && LineSyntax.isSpace(line.codeUnitAt(at))) {
+        reached += line.codeUnitAt(at) == 0x09 ? 4 - reached % 4 : 1;
+        at++;
+      }
       from = at;
+      column = reached;
     }
     return from;
+  }
+
+  /// How much of [line], a line of [block], the list items [block] stands
+  /// in take off it before the block's own text: what the parse — given the
+  /// block alone — must not read as indent. A paragraph four spaces into
+  /// `- a` / `  - b` is the second item's text, and four spaces of it were
+  /// an indented code block to the parse.
+  ///
+  /// Each item, outermost first, takes its indent off a line that reaches
+  /// it; a line that does not is that item's lazily, and the item leaves it
+  /// as it stands for the items inside it — which may still take theirs, as
+  /// `package:markdown`, the read view's parser, reads it. Taking the whole
+  /// column off every line made `    ---`, a lazy line four spaces into an
+  /// item of five, the underline of a heading.
+  ///
+  /// An item's own block is read in its parent, so its parents' indents
+  /// come off it and not its own. 0 for a block in no item, and for a block
+  /// the scanner did not make, which carries no state.
+  static int itemPrefixLength(Block block, String line) {
+    final items = _itemsOf(block);
+    if (items == null) return 0;
+    // Each item takes its indent off as the parser does
+    // (`LineSyntax.dedent`): a tab whole once the indent is reached in it,
+    // its columns past the indent counting toward the next item's.
+    var rest = line;
+    var remaining = 0;
+    for (var level = 0; level < _levelsOf(block); level++) {
+      final indent = items[level].indent;
+      if (LineSyntax.columnsOf(rest, remaining) >= indent) {
+        (rest, remaining) = LineSyntax.dedent(rest, indent);
+      }
+    }
+    return line.length - rest.length;
+  }
+
+  /// What, beside its kind, depths and text, decides what [contentText]
+  /// makes of [block]: the indents of the items it stands in — empty for a
+  /// block in none. A cache of parses keyed without it handed a block the
+  /// parse of the same text in another item, offsets and all.
+  static String itemKeyOf(Block block) {
+    final items = _itemsOf(block);
+    if (items == null) return '';
+    final indents = StringBuffer();
+    for (var level = 0; level < _levelsOf(block); level++) {
+      indents
+        ..write(items[level].indent)
+        ..write(',');
+    }
+    return indents.toString();
+  }
+
+  /// The items [block] is read inside ([_levelsOf]), from the state
+  /// entering it, or null for a block in none and a block built by hand.
+  static List<OpenItem>? _itemsOf(Block block) {
+    final levels = _levelsOf(block);
+    if (levels <= 0) return null;
+    final items = block.entering?.listStack;
+    if (items == null || items.length < levels) return null;
+    return items;
+  }
+
+  /// How many of the items [block] stands in it is read inside: all of
+  /// them, but for an item's own block, which is read in its parent.
+  static int _levelsOf(Block block) =>
+      block.kind == BlockKind.listItem ? block.listDepth : block.listDepth + 1;
+
+  /// Whether [block] carries the scanner's state for the items around it,
+  /// so it can be read in its container's coordinates.
+  static bool _inParent(Block block) {
+    final items = block.entering?.listStack;
+    return items != null && items.length >= _levelsOf(block);
   }
 
   /// The block's own text, its lines joined with `\n`.
@@ -607,7 +724,9 @@ final class _Walk {
       from = match.end;
     }
     pattern.write(RegExp.escape(text.substring(from)));
-    return RegExp(pattern.toString());
+    // A line of the node may stand further in in the source than the parse
+    // hands it back: an item's lines lose the item's indent to the parse.
+    return RegExp(pattern.toString().replaceAll('\n', '\n[ \t]*'));
   }
 
   /// The characters the parser escapes, and how it writes each.

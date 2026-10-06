@@ -11,6 +11,17 @@ void main() {
       expect(line.tokens, [const Token(TokenKind.headingMarker, 0, 2)]);
     });
 
+    test('a heading up to three spaces in, marked where its `#`s are', () {
+      expect(HighlightDocument.fromText('   ## Title').lines.single.tokens, [
+        const Token(TokenKind.headingMarker, 3, 5),
+      ]);
+      expect(
+        HighlightDocument.fromText('    # code').lines.single.tokens
+            .map((t) => t.kind),
+        isNot(contains(TokenKind.headingMarker)),
+      );
+    });
+
     test('heading with inline math and bold', () {
       final doc = HighlightDocument.fromText(r'# H **b** $x$');
       final line = doc.lines.single;
