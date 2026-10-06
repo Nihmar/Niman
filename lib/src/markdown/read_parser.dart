@@ -9,13 +9,13 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/block_tree.dart';
 import 'package:niman/src/markdown/html/code_html.dart';
-import 'package:niman/src/markdown/html/leaf_text.dart';
-import 'package:niman/src/markdown/html/table_html.dart';
 import 'package:niman/src/markdown/inline/inline_parser.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
+import 'package:niman/src/markdown/leaf_inline.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/source_map.dart';
 import 'package:niman/src/markdown/table/markdown_table.dart';
 import 'package:niman/src/markdown/task_box.dart';
 
@@ -171,30 +171,29 @@ final class _Reader {
     final entering = top ? block.entering : null;
     switch (node.kind) {
       case BlockKind.paragraph:
-        var text = LeafText.paragraph(lines);
+        var (:text, :map) = LeafInline.paragraph(node.lines, buffer.lineAt);
         if (text.startsWith('[')) {
-          text = text.substring(
-            LinkReferences.parseInto(text, <String, LinkReference>{}),
+          final rest = LinkReferences.parseInto(
+            text,
+            <String, LinkReference>{},
           );
+          text = text.substring(rest);
+          map = map.from(rest);
         }
         if (item != null) {
           final task = TaskBox.of(text);
           if (task != null) {
             _tasks[item] = task.checked;
             text = text.substring(task.length);
+            map = map.from(task.length);
           }
         }
-        return ReadLeaf(node: node, lines: lines, inline: _inline(text));
+        return ReadLeaf(node: node, lines: lines, inline: _inline(text, map));
       case BlockKind.heading:
-        return ReadLeaf(
-          node: node,
-          lines: lines,
-          inline: _inline(
-            lines.length == 1
-                ? LeafText.atxHeading(lines.single)
-                : LeafText.setextHeading(lines),
-          ),
-        );
+        final (:text, :map) = lines.length == 1
+            ? LeafInline.atxHeading(node.lines.single, buffer.lineAt)
+            : LeafInline.setextHeading(node.lines, buffer.lineAt);
+        return ReadLeaf(node: node, lines: lines, inline: _inline(text, map));
       case BlockKind.table:
         return _table(node, lines, continued: entering?.table ?? false);
       case BlockKind.fencedCode:
@@ -252,12 +251,15 @@ final class _Reader {
   }) {
     final head = continued || lines.length < 2
         ? null
-        : TableHtml.cellsOf(lines.first);
-    final body = head == null ? lines : lines.skip(2);
+        : LeafInline.cells(node.lines.first, buffer.lineAt);
+    final body = head == null ? node.lines : node.lines.skip(2);
     final columns = head?.length;
-    List<ReadInline> row(List<String> cells) => [
+    List<ReadInline> row(List<MappedText> cells) => [
       for (var at = 0; at < (columns ?? cells.length); at++)
-        _inline(at < cells.length ? cells[at] : ''),
+        if (at < cells.length)
+          _inline(cells[at].text, cells[at].map)
+        else
+          _inline('', SourceMap()),
     ];
     return ReadLeaf(
       node: node,
@@ -268,13 +270,14 @@ final class _Reader {
           : MarkdownTable.alignsOf(lines[1]),
       rows: [
         if (head != null) row(head),
-        for (final line in body) row(TableHtml.cellsOf(line)),
+        for (final span in body) row(LeafInline.cells(span, buffer.lineAt)),
       ],
     );
   }
 
-  ReadInline _inline(String text) => ReadInline(
+  ReadInline _inline(String text, SourceMap map) => ReadInline(
     text: text,
+    map: map,
     nodes: text.isEmpty
         ? const []
         : InlineParser(

@@ -9,16 +9,22 @@ import 'package:niman/src/links/parser.dart' show wikiDisplayText;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
+import 'package:niman/src/markdown/source_map.dart';
 import 'package:niman/src/markdown/table/markdown_table.dart';
 
-/// A piece of inline text, read: what it says and its nodes.
-@immutable
+/// A piece of inline text, read: what it says, its nodes, and where it
+/// stands in the note.
 final class ReadInline {
-  /// [text] read into [nodes].
-  const new({required this.text, required this.nodes});
+  /// [text] read into [nodes], [map] its way back to the note.
+  new({required this.text, required this.nodes, SourceMap? map})
+    : map = map ?? SourceMap();
 
   /// The text, as the inline parser was given it.
   final String text;
+
+  /// Where each piece of [text] stands in the note: the nodes' offsets put
+  /// back on its lines.
+  final SourceMap map;
 
   /// Its nodes, each over its range of [text].
   final List<InlineNode> nodes;
