@@ -338,6 +338,38 @@ Phase 1 in progress.
 
 Left in phase 2: nothing the plan names; the blocks are phase 3.
 
+### Phase 3 (in progress): the blocks to the spec
+
+GFM **674 / 677** (the package: 662), CommonMark 0.31.2 **643 / 652**
+(the package: 645), `cmark-gfm`'s extensions 30 / 30. What it took:
+
+- HTML blocks: kind 7 is one whole tag as the spec writes it
+  (`InlineScanners.tag`, the inline parser's own rule) — an autolink
+  alone on its line was one — and interrupts no paragraph; kind 6's name
+  ends where the spec says.
+- GFM's extensions only where `cmark-gfm` turns them on: extended
+  autolinks and the tag filter for its extension tests and the spec's
+  "(extension)" sections; `TreeHtml(extensions:)`, on in the app.
+- The app's block syntax (frontmatter, `$$`) off for the specs' examples:
+  `appSyntax`, through scanner, tree and writer; on in the app.
+- The writer: a note's last line break opens no line; a list is loose
+  when a blank line ends a block of an item before another, a sublist's
+  included.
+- The tree: indented code runs over its blank lines; an empty item's
+  marker line is no blank line between its blocks.
+- Lazy lines underline nothing, in a quote or an item: the tree hands
+  each line's laziness to the scan of a container's content, as it hands
+  a tab's columns. The package heads a lazy `===` in an item, and a lazy
+  `    ---` under a quote, which cmark adds to the paragraph: there the
+  spec wins, and the random harness leaves them out, counted. The tree
+  reads 0 of 40 000 documents otherwise on seeds 1-5.
+
+Left: the three tab examples (GFM 5-7) — a tab a container's prefix
+ends inside of, whose columns past it the content has to keep: `- foo`
+/ blank / `\t\tbar` is code `  bar`. The scanner keeps those columns
+while it walks a line (`ContainerWalk.remaining`) but a leaf's text and
+an item's indent after its marker drop them.
+
 ### An open question: `$` as a currency sign
 
 `20$ + 0,10$/Kg` is read as a formula (` + 0,10`): the app's rule
