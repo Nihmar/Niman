@@ -372,7 +372,35 @@ took:
   leaves keep it (`LeafNode.leftOver`), and the writer counts code's four
   columns from where the content starts, tabs to their stops.
 
-Next: phase 4 — the app's extensions as syntaxes of our parser.
+### Phase 4 (done): the app's syntax in our parser
+
+`InlineParser(appSyntax:)`, on in the app, off for the specs' examples:
+
+- **Math, wikilinks and embeds, tags**: `ExtensionMasker.extensionAt`,
+  the masker's own rules in its order, asked where a `$`, `[[`, `![[` or
+  `#` stands; each an atomic node (`MathNode`, `WikiLinkNode`,
+  `TagNode`). Reading left to right gives the masker's priority for
+  free — a code span, an autolink or raw HTML read first holds what
+  looks like math — and more: math inside an HTML attribute is no math
+  now. `math_rule.dart` reads a span from a position
+  (`inlineMathAt`), and a `$` or `$$` that found no closing one to the
+  end is not scanned for again: `$1 $2 $3…` was quadratic.
+- **`==highlight==`**: a delimiter run of exactly two, matched with a run
+  of the same length, as `~` is — so it nests with emphasis, which the
+  package's regular expression did not.
+- **`<u>`, `<sup>`, `<sub>`**: raw HTML paired among siblings on one
+  line, as the app has always read them (`StyleTags`), the inside parsed.
+- The templates' `{{…}}` placeholders are no syntax of a note's inlines:
+  the template checker reads them.
+
+Tested by `inline_app_syntax_test.dart`; the pathological inputs grow by
+seven of the app's, all linear. The bench, ours with the app's syntax:
+Geometria 1 17.5 ms against the app's 382 (masked, the package's parse),
+fixture-1mb 18.5 against 323, the worst note 20.6 against 578 — faster
+than without it, the formulas being single nodes the emphasis algorithm
+never walks.
+
+Next: phase 5 — the read view on the tree.
 
 ### An open question: `$` as a currency sign
 
