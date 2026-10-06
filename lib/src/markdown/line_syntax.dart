@@ -281,20 +281,15 @@ abstract final class LineSyntax {
 
   /// Whether the marker [marker] on [text] may interrupt an open paragraph:
   /// an empty item (a marker with only spaces after it) never does; an
-  /// ordered one only if it starts at 1, unless the paragraph is in a list
-  /// item ([inItem]), where any marker starts a list.
-  static bool markerInterrupts(
-    (int, int, int) marker,
-    String text, {
-    bool inItem = false,
-  }) {
+  /// ordered one only if it starts at 1 — in a list item as much as
+  /// outside one, as `cmark` reads it.
+  static bool markerInterrupts((int, int, int) marker, String text) {
     final (start, width, _) = marker;
     var at = start + width;
     while (at < text.length && isSpace(text.codeUnitAt(at))) {
       at++;
     }
     if (at >= text.length) return false;
-    if (inItem) return true;
     final char = text.codeUnitAt(start);
     if (isDigit(char)) return width == 2 && char == 0x31;
     return true;
@@ -309,6 +304,17 @@ abstract final class LineSyntax {
     final slice = text.substring(start, start + width).trim();
     final digits = int.tryParse(slice.replaceAll(RegExp('[^0-9]'), ''));
     return digits ?? 0;
+  }
+
+  /// The character an item's marker on [text] ends with — `-`, `+`, `*`,
+  /// or `.` or `)` after a number — or null for a line that opens none:
+  /// what keeps items one list.
+  static String? writtenDelimiter(String text) {
+    final marker = listMarker(text, text.length);
+    if (marker == null) return null;
+    final (start, width, _) = marker;
+    final marked = text.substring(start, start + width).trimRight();
+    return marked.substring(marked.length - 1);
   }
 
   /// Whether [text] from [from] on is a thematic break, as the read view's

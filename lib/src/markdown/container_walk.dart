@@ -30,8 +30,9 @@ final class ContainerWalk {
     this.quote,
     this.next,
     this.remaining,
-    this.footnote,
-  );
+    this.footnote, {
+    this.quoteLazy = false,
+  });
 
   /// [raw], entered in [entering], walked through the items and the quote
   /// open around it; [next] is the line after it, which a table's head row
@@ -59,7 +60,8 @@ final class ContainerWalk {
         (line, carried) = FootnoteSyntax.content(line);
         footnote = LineState.footnoteOpen;
       } else if (footnote == LineState.footnoteAfterBlank ||
-          interruptsParagraph(LineSyntax.expandIndent(line), next)) {
+          !paragraphOpen(entering) ||
+          startsBlock(LineSyntax.expandIndent(line))) {
         return ContainerWalk._(
           const <OpenItem>[],
           true,
@@ -134,10 +136,14 @@ final class ContainerWalk {
         after = _reach(after, item.indent);
         continue;
       }
-      // Short of it: a rule, a marker or a block that may interrupt ends the
-      // list, and so does anything after a blank line. Anything else is the
-      // item's lazily, read as it stands.
-      if (item.lastBlank || _endsList(LineSyntax.expandIndent(text), after)) {
+      // Short of it: the item's lazily, read as it stands, when a paragraph
+      // is open at the innermost and the line opens no block — any marker
+      // of a list, an empty one or one not at 1 included, `cmark`'s
+      // container being the list there, not the paragraph. Anything else
+      // ends the item.
+      if (item.lastBlank ||
+          !paragraphOpen(entering) ||
+          startsBlock(LineSyntax.expandIndent(text))) {
         kept = at;
         break;
       }
@@ -148,13 +154,15 @@ final class ContainerWalk {
         ? (changed ?? open).sublist(0, kept)
         : changed ?? open;
     String? quote;
+    var quoteLazy = false;
     if (kept == open.length && entering.quoteDepth > 0) {
       // A block's marker stands up to three spaces in; a tab is four.
       final columns = LineSyntax.expandIndent(text);
       if (LineSyntax.quoteDepth(columns) > 0) {
         quote = LineSyntax.quoteChild(text);
-      } else if (_quoteTakesLazily(columns, entering.quoteLast, after)) {
+      } else if (_quoteTakesLazily(columns, entering.quoteLast)) {
         quote = text;
+        quoteLazy = true;
       }
     }
     return ContainerWalk._(
@@ -166,6 +174,7 @@ final class ContainerWalk {
       after,
       remaining,
       footnote,
+      quoteLazy: quoteLazy,
     );
   }
 
@@ -215,39 +224,55 @@ final class ContainerWalk {
   /// by its `>` or lazily; null when no quote is open or the line leaves it.
   final String? quote;
 
-  /// Whether [text], short of an open item's indent, ends its list: a rule,
-  /// a list marker, or a block that may interrupt a paragraph — a fence, a
-  /// heading, a quote, an HTML block (all but a lone tag), a footnote
-  /// definition or a table's head.
-  static bool _endsList(String text, String? next) {
+  /// Whether the quote took the line lazily, without a `>`: a line of the
+  /// paragraph open in it, whatever it looks like.
+  final bool quoteLazy;
+
+  /// Whether [text], a line short of a container it is under, opens a block
+  /// of its own — and so is no lazy line of a paragraph open in the
+  /// container: a quote, a heading, a fence, an HTML block of any kind, a
+  /// rule, a footnote definition, or a list item, empty or not at 1 too.
+  ///
+  /// What `cmark` tries on such a line, where the container it reached is
+  /// the one above the paragraph — so nothing is asked whether it may
+  /// interrupt a paragraph. Indented code is not tried (a lazy line may be
+  /// one), nor a table's head or a link reference definition, which only a
+  /// paragraph's lines make.
+  static bool startsBlock(String text) {
+    if (LineSyntax.indentOf(text) > 3) return false;
+    if (LineSyntax.quoteDepth(text) > 0) return true;
+    if (LineSyntax.headingLevel(text) > 0) return true;
+    if (LineSyntax.fenceOpen(text) != null) return true;
+    if (HtmlBlockSyntax.open(text) != null) return true;
     if (LineSyntax.isHr(text, 0)) return true;
     if (FootnoteSyntax.opening(text) != null) return true;
-    if (LineSyntax.listMarker(text) != null) return true;
-    if (LineSyntax.fenceOpen(text) != null) return true;
-    if (LineSyntax.headingLevel(text) > 0) return true;
-    if (LineSyntax.quoteDepth(text) > 0) return true;
-    if (LineSyntax.indentOf(text) <= 3) {
-      final html = HtmlBlockSyntax.open(text);
-      if (html != null && html.$1 != HtmlBlockKind.completeTag) return true;
-    }
-    // A table's head: the parser tries it on any line whose next is a
-    // delimiter row, and it may end a block whether or not the head fits.
-    return next != null && TableLineSyntax.isDelimiter(next);
+    return LineSyntax.listMarker(text) != null;
   }
 
-  /// Whether [text] would open a block that interrupts a paragraph — the
-  /// head of a table ([next] its delimiter row), a fence, an HTML block
-  /// (all but a lone tag), a heading, a quote, a rule, a footnote
-  /// definition, or a list marker that may ([LineSyntax.markerInterrupts];
-  /// any one in an item, [inItem]): what ends a table's rows, and a
-  /// footnote definition a line short of its indent does not go on with
-  /// lazily, as `cmark-gfm` reads a container's lazy line.
-  static bool interruptsParagraph(
-    String text,
-    String? next, {
-    bool inItem = false,
-  }) {
-    if (next != null && TableLineSyntax.isDelimiter(next)) return true;
+  /// Whether a paragraph is open at the innermost of the containers
+  /// [state] enters a line in — inside its quote, when one is innermost:
+  /// what a lazy line goes on with.
+  static bool paragraphOpen(LineState state) => state.quoteDepth > 0
+      ? _quoteParagraphOpen(state.quoteLast)
+      : state.openParagraph;
+
+  /// Whether a quote whose last line inside was [last] has a paragraph open.
+  static bool _quoteParagraphOpen(int last) =>
+      last &
+          (LineState.lastBlank |
+              LineState.lastFence |
+              LineState.lastIndented |
+              LineState.lastClosed) ==
+      0;
+
+  /// Whether [text] would open a block that interrupts a paragraph open in
+  /// its own container — the head of a table ([next] its delimiter row,
+  /// as many columns as its cells), a fence, an HTML block (all but a lone
+  /// tag), a heading, a quote, a rule, a footnote definition, or a list
+  /// marker that may ([LineSyntax.markerInterrupts]): where a link
+  /// reference definition's lines end, they being a paragraph's.
+  static bool interruptsParagraph(String text, String? next) {
+    if (TableLineSyntax.heads(text, next)) return true;
     if (LineSyntax.fenceOpen(text) != null) return true;
     if (LineSyntax.indentOf(text) <= 3) {
       final html = HtmlBlockSyntax.open(text);
@@ -258,32 +283,22 @@ final class ContainerWalk {
     if (LineSyntax.isHr(text, 0)) return true;
     if (FootnoteSyntax.opening(text) != null) return true;
     final marker = LineSyntax.listMarker(text);
-    return marker != null &&
-        LineSyntax.markerInterrupts(marker, text, inItem: inItem);
+    return marker != null && LineSyntax.markerInterrupts(marker, text);
   }
 
-  /// Whether the open quote takes [text], a line without a `>`, lazily: the
-  /// first block it could start is a paragraph and the quote's last line
-  /// ([last], [LineState.quoteLast]) was neither blank nor a fence, or it
-  /// is indented code and that line was not indented; [next] heading a
-  /// table makes it a table's head instead.
-  static bool _quoteTakesLazily(String text, int last, String? next) {
-    if (LineSyntax.indentOf(text) == text.length) return false;
-    // A table's head is tried first, a paragraph's line after it.
-    if (next != null && TableLineSyntax.isDelimiter(next)) return false;
-    if (LineSyntax.fenceOpen(text) != null) return false;
-    final indent = LineSyntax.indentOf(text);
-    if (indent <= 3 && HtmlBlockSyntax.open(text) != null) return false;
-    if (LineSyntax.headingLevel(text) > 0) return false;
-    if (indent >= 4) return last & LineState.lastIndented == 0;
-    if (LineSyntax.isHr(text, 0)) return false;
-    if (LineSyntax.listMarker(text) != null) return false;
-    if (LineSyntax.startsLinkReference(text)) return false;
-    return last & (LineState.lastBlank | LineState.lastFence) == 0;
-  }
+  /// Whether the open quote takes [text], a line without a `>`, lazily: a
+  /// paragraph is open in it, by its last line ([last],
+  /// [LineState.quoteLast]), and the line opens no block ([startsBlock]).
+  static bool _quoteTakesLazily(String text, int last) =>
+      LineSyntax.indentOf(text) < text.length &&
+      _quoteParagraphOpen(last) &&
+      !startsBlock(text);
 
-  /// The bits of [LineState.quoteLast] for [child], a line inside a quote.
-  static int lastOf(String child) {
+  /// The bits of [LineState.quoteLast] for [child], a line inside a quote
+  /// whose last line had [previous]: blank, a fence, indented code — four
+  /// columns in where no paragraph is open, which a paragraph's line is
+  /// not — or a block that closes at once, a heading or a rule.
+  static int lastOf(String child, [int previous = LineState.lastBlank]) {
     final indent = LineSyntax.columnsOf(child);
     // Four spaces and nothing else are blank and indented both.
     if (LineSyntax.indentOf(child) == child.length) {
@@ -291,11 +306,14 @@ final class ContainerWalk {
           ? LineState.lastBlank | LineState.lastIndented
           : LineState.lastBlank;
     }
-    var bits = 0;
-    if (indent >= 4) bits |= LineState.lastIndented;
-    if (LineSyntax.fenceOpen(LineSyntax.expandIndent(child)) != null) {
-      bits |= LineState.lastFence;
+    final columns = LineSyntax.expandIndent(child);
+    if (indent >= 4) {
+      return _quoteParagraphOpen(previous) ? 0 : LineState.lastIndented;
     }
-    return bits;
+    if (LineSyntax.fenceOpen(columns) != null) return LineState.lastFence;
+    if (LineSyntax.headingLevel(columns) > 0 || LineSyntax.isHr(columns, 0)) {
+      return LineState.lastClosed;
+    }
+    return 0;
   }
 }

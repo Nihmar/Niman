@@ -48,6 +48,11 @@ void main() {
 
   test('an ordered list starts at the number it was written with', () {
     expect(_treeOf('3. a\n4. b'), 'ol3[.[paragraph"a"] .[paragraph"b"]]');
+    // Another delimiter is another list, from its own number.
+    expect(
+      _treeOf('10. a\n2) b'),
+      'ol10[.[paragraph"a"]] ol2[)[paragraph"b"]]',
+    );
   });
 
   test('a sublist on the marker line holds the blocks after it', () {
@@ -105,12 +110,16 @@ void main() {
     expect(_treeOf('[^n]: a\n\n\tb'), 'Fn[paragraph"a" blank"" paragraph"b"]');
   });
 
-  test('a line that interrupts no paragraph goes on with the footnote', () {
-    // An ordered marker past 1 cannot interrupt a paragraph: the line is
-    // the footnote's lazily, as `cmark-gfm` reads it. A bullet can, and
-    // ends it.
-    expect(_treeOf('[^n]: a\n2. b'), 'Fn[paragraph"a/2. b"]');
+  test('a line short of the footnote goes on with it only lazily', () {
+    // A paragraph's line goes on with it; one that opens a block of its
+    // own ends the footnote — `2. b` too, which could not interrupt the
+    // paragraph inside it: the container reached is the note's, as
+    // `cmark-gfm` reads it.
+    expect(_treeOf('[^n]: a\nb'), 'Fn[paragraph"a/b"]');
+    expect(_treeOf('[^n]: a\n2. b'), 'Fn[paragraph"a"] ol2[.[paragraph"b"]]');
     expect(_treeOf('[^n]: a\n- b'), 'Fn[paragraph"a"] ul[-[paragraph"b"]]');
+    // No paragraph open in it, no lazy line.
+    expect(_treeOf('[^n]:\nb'), 'Fn[blank""] paragraph"b"');
   });
 
   test('a footnote definition interrupts a paragraph and ends at a block', () {
@@ -132,17 +141,17 @@ void main() {
     );
   });
 
-  test('a link definition leaves no paragraph open behind it', () {
-    // After the definition, a tab-indented line is code and `2)` opens a
-    // list, as neither could after paragraph text.
-    expect(
-      _treeOf('[r]: /u\n\tcode'),
-      'paragraph"[r]: /u" indentedCode"\tcode"',
-    );
+  test("a link definition is its paragraph's text until it closes", () {
+    // After the definition a tab-indented line and `2)` go on with the
+    // paragraph, as after paragraph text: `cmark` takes definitions off a
+    // paragraph when it closes. The text after them is a block of its own.
+    expect(_treeOf('[r]: /u\n\tcode'), 'paragraph"[r]: /u" paragraph"\tcode"');
     expect(
       _treeOf('[r]: /u\n2) item'),
-      'paragraph"[r]: /u" ol2[)[paragraph"item"]]',
+      'paragraph"[r]: /u" paragraph"2) item"',
     );
+    // Definitions alone leave no text an underline could head.
+    expect(_treeOf('[r]: /u\n==='), 'paragraph"[r]: /u" paragraph"==="');
     final nodes = BlockTree.of('[r]:\n/u\n"t"\ntext');
     expect((nodes.first as LeafNode).definition, isTrue);
     expect((nodes.first as LeafNode).lines, hasLength(3));

@@ -68,9 +68,14 @@ void main() {
       expect(_walk('> ```\nb').quote, isNull);
     });
 
-    test('takes one indented line, and leaves at the second', () {
+    test('takes indented lines lazily while its paragraph is open', () {
+      // `cmark` reads every one of them as the paragraph's; the package
+      // left at the second.
       expect(_walk('> a\n    b').quote, '    b');
-      expect(_walk('> a\n    b\n    c').quote, isNull);
+      expect(_walk('> a\n    b\n    c').quote, '    c');
+      // After a blank line, or a heading, no paragraph is open.
+      expect(_walk('> a\n>\n    b').quote, isNull);
+      expect(_walk('> # h\nb').quote, isNull);
     });
 
     test('in an item, reads the line the item leaves', () {
@@ -85,5 +90,9 @@ void main() {
     expect(ContainerWalk.lastOf('```'), LineState.lastFence);
     expect(ContainerWalk.lastOf('    code'), LineState.lastIndented);
     expect(ContainerWalk.lastOf('text'), 0);
+    // Four columns in under an open paragraph are the paragraph's.
+    expect(ContainerWalk.lastOf('    more', 0), 0);
+    expect(ContainerWalk.lastOf('# h'), LineState.lastClosed);
+    expect(ContainerWalk.lastOf('---'), LineState.lastClosed);
   });
 }

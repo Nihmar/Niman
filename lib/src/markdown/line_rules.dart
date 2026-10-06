@@ -133,7 +133,10 @@ final class LineRules {
         walk,
         carried: false,
         quoteDepth: state.quoteDepth,
-        quoteLast: ContainerWalk.lastOf(quoted),
+        // A lazy line is the paragraph's, whatever it looks like.
+        quoteLast: walk.quoteLazy
+            ? 0
+            : ContainerWalk.lastOf(quoted, state.quoteLast),
       );
     }
     // What was open in the line's container goes on only while the
@@ -168,12 +171,13 @@ final class LineRules {
     final text = LineSyntax.expandIndent(content ?? walk.text);
     final base = within ?? walk.items;
     // A table's head: the next line is a delimiter row in the same
-    // container. The parser looks for it among that container's lines only;
-    // one that ends the container is no row of this line's.
+    // container, with as many columns as the line has cells — a row that
+    // does not fit heads nothing, and is the paragraph's text, as
+    // `cmark-gfm` reads it. One that ends the container is no row of this
+    // line's.
     final heads =
         LineSyntax.indentOf(text) < text.length &&
-        next != null &&
-        TableLineSyntax.isDelimiter(next) &&
+        TableLineSyntax.heads(text, next) &&
         _stays(line + 1, base, walk.footnote);
     LineRead made(
       BlockKind kind, {
@@ -191,6 +195,7 @@ final class LineRules {
       int definition = 0,
       int definitionRead = 0,
       int reach = 0,
+      bool definitionsOnly = false,
     }) => _made(
       kind,
       state,
@@ -200,6 +205,7 @@ final class LineRules {
       definition: definition,
       definitionRead: definitionRead,
       reach: reach,
+      definitionsOnly: definitionsOnly,
       quoteDepth: quoteDepth,
       quoteLast: quoteLast,
       fence: fence,
@@ -219,6 +225,8 @@ final class LineRules {
         BlockKind.paragraph,
         definition: open.definition - 1,
         definitionRead: 1,
+        openParagraph: true,
+        definitionsOnly: true,
       );
     }
     // Inside a block that runs to an end marker, every line is the block's.
@@ -269,16 +277,13 @@ final class LineRules {
       return made(BlockKind.indentedCode, indentedCode: true);
     }
     // A table, as GFM reads one: its rows run on until a line that would
-    // start a block of its own. A line whose next is a delimiter row is a
-    // head, tried before anything but a fence — and before a paragraph goes
-    // on: it ends the paragraph even when its cells do not fit the
-    // delimiter's columns, and is then read as if nothing were open.
-    if (open.table && !blank && !_endsTableRow(text, next, base.isNotEmpty)) {
+    // start a block of its own. A line heading one is tried before anything
+    // but a fence — and before a paragraph goes on: the paragraph's lines
+    // above it stay a paragraph.
+    if (open.table && !blank && !_endsTableRow(text)) {
       return made(BlockKind.table, table: true);
     }
-    if (heads && TableLineSyntax.heads(text, next)) {
-      return made(BlockKind.table, table: true);
-    }
+    if (heads) return made(BlockKind.table, table: true);
     // A footnote definition, at the note's margin only — in an item or a
     // quote the parser leaves it where it stands. It interrupts a
     // paragraph; what follows its label is its first line, read inside it
@@ -309,6 +314,8 @@ final class LineRules {
       );
     }
     final paragraph = open.openParagraph && !heads;
+    // A paragraph of definitions alone has no text an underline could head.
+    final headable = paragraph && !open.definitionsOnly;
     final code = open.indentedCode
         ? blank || indent >= 4
         : !blank && indent >= 4 && !paragraph;
@@ -360,13 +367,15 @@ final class LineRules {
       // An ordered list not starting at 1, or an empty item, goes on with an
       // open paragraph lazily — a marker in an item starts a list whatever
       // its number.
-      if (paragraph &&
-          !LineSyntax.markerInterrupts(
-            marker,
-            text,
-            inItem: items.isNotEmpty,
-          )) {
-        return made(BlockKind.paragraph, openParagraph: true);
+      if (paragraph && !LineSyntax.markerInterrupts(marker, text)) {
+        // A lone `-` under paragraph text is its setext underline, not an
+        // empty item: the paragraph ends on it.
+        final underline =
+            headable &&
+            carried &&
+            !lazyAt(line) &&
+            LineSyntax.setextLevel(text) > 0;
+        return made(BlockKind.paragraph, openParagraph: !underline);
       }
       final (marked, empty) = LineSyntax.itemIndent(text, marker);
       // The columns a tab left over count toward the item's indent, as they
@@ -412,10 +421,12 @@ final class LineRules {
         reach: inner.reach,
       );
     }
-    // A link reference definition, where no paragraph is open: the lines
-    // the package's parser reads one off — this one and those after it in
-    // the same container, up to a line that would end a paragraph.
-    if (!paragraph && LinkDefinitionSyntax.opens(text)) {
+    // A link reference definition, where no paragraph is open or one of
+    // definitions alone is: the lines it is read off — this one and those
+    // after it in the same container, up to a line that would end a
+    // paragraph.
+    if ((!paragraph || open.definitionsOnly) &&
+        LinkDefinitionSyntax.opens(text)) {
       var examined = line;
       String? more() {
         final at = examined + 1;
@@ -430,7 +441,7 @@ final class LineRules {
         if (walked.closed) return null;
         final columns = LineSyntax.expandIndent(walked.text);
         if (LineSyntax.indentOf(columns) == columns.length ||
-            _endsTableRow(columns, walked.next, base.isNotEmpty)) {
+            ContainerWalk.interruptsParagraph(columns, walked.next)) {
           return null;
         }
         return walked.text;
@@ -447,16 +458,21 @@ final class LineRules {
           definition: lines - 1,
           definitionRead: Block.opensDefinition,
           reach: reach,
+          openParagraph: true,
+          definitionsOnly: true,
         );
       }
       final underline =
-          carried && !lazyAt(line) && LineSyntax.setextLevel(text) > 0;
+          headable &&
+          carried &&
+          !lazyAt(line) &&
+          LineSyntax.setextLevel(text) > 0;
       return made(BlockKind.paragraph, openParagraph: !underline, reach: reach);
     }
     // A setext underline heads the paragraph above it and ends it.
     final underline =
         carried &&
-        paragraph &&
+        headable &&
         !lazyAt(line) &&
         LineSyntax.setextLevel(text) > 0;
     return made(BlockKind.paragraph, openParagraph: !underline);
@@ -476,11 +492,10 @@ final class LineRules {
   }
 
   /// Whether [text], following a table's rows, ends the table: a line that
-  /// would start a block of its own, one that interrupts a paragraph
-  /// ([ContainerWalk.interruptsParagraph]). Anything else is a row, pipes
-  /// or not.
-  static bool _endsTableRow(String text, String? next, bool inItem) =>
-      ContainerWalk.interruptsParagraph(text, next, inItem: inItem);
+  /// starts a block of its own ([ContainerWalk.startsBlock]) — any list
+  /// marker among them, `10.` too, as `cmark-gfm` reads a table's end.
+  /// Anything else is a row, pipes or not.
+  static bool _endsTableRow(String text) => ContainerWalk.startsBlock(text);
 
   /// The read of a line of [kind], entered in [state] and walked as [walk],
   /// leaving [items] (the walk's when null) and the rest.
@@ -504,6 +519,7 @@ final class LineRules {
     int definition = 0,
     int definitionRead = 0,
     int reach = 0,
+    bool definitionsOnly = false,
   }) {
     final stack = items ?? walk.items;
     return LineRead(
@@ -531,6 +547,7 @@ final class LineRules {
         indentedCode: indentedCode,
         table: table,
         openParagraph: openParagraph,
+        definitionsOnly: definitionsOnly,
       ),
     );
   }
@@ -552,6 +569,7 @@ final class LineRules {
     required bool indentedCode,
     required bool table,
     required bool openParagraph,
+    required bool definitionsOnly,
   }) {
     // A line that leaves the scan outside every construct is the shared
     // state, not a new object equal to it. That is the common line of a long
@@ -569,7 +587,8 @@ final class LineRules {
         !frontmatter &&
         html == null &&
         !indentedCode &&
-        !table) {
+        !table &&
+        !definitionsOnly) {
       return openParagraph ? LineState.paragraphOpen : LineState.initial;
     }
     // Inside a construct, a line that leaves the state as it found it — the
@@ -588,7 +607,8 @@ final class LineRules {
         state.htmlClosing == htmlClosing &&
         state.indentedCode == indentedCode &&
         state.table == table &&
-        state.openParagraph == openParagraph) {
+        state.openParagraph == openParagraph &&
+        state.definitionsOnly == definitionsOnly) {
       return state;
     }
     return LineState(
@@ -605,6 +625,7 @@ final class LineRules {
       openParagraph: openParagraph,
       footnote: footnote,
       definition: definition,
+      definitionsOnly: definitionsOnly,
     );
   }
 
@@ -623,5 +644,6 @@ final class LineRules {
     openParagraph: state.openParagraph,
     footnote: LineState.footnoteOpen,
     definition: state.definition,
+    definitionsOnly: state.definitionsOnly,
   );
 }
