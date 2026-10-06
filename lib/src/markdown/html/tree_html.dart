@@ -20,14 +20,27 @@ final class TreeHtml {
   /// A writer of [source], GFM's [extensions] on — extended autolinks and
   /// the tag filter — as in the app; off for the spec's examples of plain
   /// CommonMark, as `cmark-gfm` runs them.
-  new(this.source, {this.extensions = true}) : _lines = source.split('\n');
+  new(this.source, {this.extensions = true})
+    : _body = _withoutLastBreak(source),
+      _lines = _withoutLastBreak(source).split('\n');
 
   /// The note.
   final String source;
 
   /// Whether GFM's extensions are on.
   final bool extensions;
+
+  /// The note without the line break that ends its last line: it ends a
+  /// line, and opens none — kept, it was an empty last line, inside a fence
+  /// left open to the end.
+  final String _body;
   final List<String> _lines;
+
+  static String _withoutLastBreak(String text) => text.endsWith('\r\n')
+      ? text.substring(0, text.length - 2)
+      : text.endsWith('\n')
+      ? text.substring(0, text.length - 1)
+      : text;
   final StringBuffer _out = StringBuffer();
   int _last = 0x0A;
   final Map<String, LinkReference> _references = <String, LinkReference>{};
@@ -40,7 +53,7 @@ final class TreeHtml {
 
   /// The note as HTML.
   String render() {
-    final tree = BlockTree.of(source);
+    final tree = BlockTree.of(_body);
     _collect(tree);
     _blocks(tree, tight: false);
     _section();
@@ -171,11 +184,10 @@ final class TreeHtml {
       final children = list.items[at].children;
       var blank = false;
       for (final child in children) {
-        if (_blank(child)) {
-          blank = true;
-        } else if (blank) {
-          return false;
-        }
+        if (blank && !_blank(child)) return false;
+        // A blank line at the end of a block — a sublist's last item's
+        // own — stands between it and the next one as much.
+        blank = _blank(child) || _endsBlank(child);
       }
       if (at < list.items.length - 1 && _endsBlank(list.items[at])) {
         return false;

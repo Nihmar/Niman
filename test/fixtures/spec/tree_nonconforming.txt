@@ -22,11 +22,6 @@ commonmark/0.31.2/98 blocks: setext reading
 commonmark/0.31.2/110 blocks: indented code
 commonmark/0.31.2/111 blocks: indented code
 commonmark/0.31.2/112 blocks: indented code
-commonmark/0.31.2/126 blocks: fences
-commonmark/0.31.2/127 blocks: fences
-commonmark/0.31.2/137 blocks: fences
-commonmark/0.31.2/139 blocks: fences
-commonmark/0.31.2/237 blocks: quotes
 commonmark/0.31.2/264 blocks: list items
 commonmark/0.31.2/278 blocks: list items
 commonmark/0.31.2/279 blocks: list items
@@ -34,7 +29,6 @@ commonmark/0.31.2/281 blocks: list items
 commonmark/0.31.2/282 blocks: list items
 commonmark/0.31.2/283 blocks: list items
 commonmark/0.31.2/289 blocks: list items
-commonmark/0.31.2/325 blocks: lists
 commonmark/0.31.2/354 version: 0.31 counts symbols (`£`, `€`) as punctuation for flanking; 0.29 does not
 commonmark/0.31.2/625 version: 0.31 changed what an HTML comment is (`<!-->`, `--` inside)
 commonmark/0.31.2/626 version: 0.31 changed what an HTML comment is (`<!-->`, `--` inside)
@@ -48,11 +42,6 @@ gfm/0.29-gfm/68 blocks: setext reading
 gfm/0.29-gfm/80 blocks: indented code
 gfm/0.29-gfm/81 blocks: indented code
 gfm/0.29-gfm/82 blocks: indented code
-gfm/0.29-gfm/96 blocks: fences
-gfm/0.29-gfm/97 blocks: fences
-gfm/0.29-gfm/107 blocks: fences
-gfm/0.29-gfm/109 blocks: fences
-gfm/0.29-gfm/215 blocks: quotes
 gfm/0.29-gfm/242 blocks: list items
 gfm/0.29-gfm/256 blocks: list items
 gfm/0.29-gfm/257 blocks: list items
@@ -60,4 +49,3 @@ gfm/0.29-gfm/259 blocks: list items
 gfm/0.29-gfm/260 blocks: list items
 gfm/0.29-gfm/261 blocks: list items
 gfm/0.29-gfm/267 blocks: list items
-gfm/0.29-gfm/305 blocks: lists
