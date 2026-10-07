@@ -304,9 +304,11 @@ final class _NoteTreeState extends State<NoteTree> {
       // The hairline sits directly under the heading — aligned with the
       // editor toolbar's divider across the pane boundary — with the
       // breathing room kept below it, so the block keeps its metrics.
-      return const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [Divider(height: 1), SizedBox(height: 8)],
+      return const TreeDropShield(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [Divider(height: 1), SizedBox(height: 8)],
+        ),
       );
     }
     final note = pinned[index - 1];
@@ -323,6 +325,8 @@ final class _NoteTreeState extends State<NoteTree> {
       onLongPress: widget.onLongPress,
       onSecondaryTapDown: widget.onSecondaryTapDown,
       onMiddleClick: widget.onOpenInNewTab,
+      // A drop here goes into the note's folder, as on its tree row (#574).
+      onMove: widget.onMove,
       icon: Icons.push_pin_outlined,
     );
   }
@@ -342,23 +346,25 @@ final class _NoteTreeState extends State<NoteTree> {
     final style = theme.textTheme.labelMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
-    return SizedBox(
-      height: editorToolbarHeight,
-      child: InkWell(
-        key: const Key('pinned-heading'),
-        onTap: () => _togglePinned(collapsed: !_collapsed),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 12, right: 16),
-          child: Row(
-            children: [
-              Icon(
-                _collapsed ? Icons.chevron_right : Icons.expand_more,
-                size: 16,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 4),
-              Text(AppStrings.pinnedSectionCount(count), style: style),
-            ],
+    return TreeDropShield(
+      child: SizedBox(
+        height: editorToolbarHeight,
+        child: InkWell(
+          key: const Key('pinned-heading'),
+          onTap: () => _togglePinned(collapsed: !_collapsed),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12, right: 16),
+            child: Row(
+              children: [
+                Icon(
+                  _collapsed ? Icons.chevron_right : Icons.expand_more,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text(AppStrings.pinnedSectionCount(count), style: style),
+              ],
+            ),
           ),
         ),
       ),

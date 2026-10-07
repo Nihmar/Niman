@@ -27,15 +27,20 @@ void main() {
     expect(treeDropMoves('docs', 'other'), isTrue);
   });
 
-  /// The tree over a root note, a folder `docs` holding `inner.md`, and an
-  /// empty folder `other`, both open; every drop recorded.
-  Future<List<String>> pump(WidgetTester tester) async {
+  /// The tree over a root note, a folder `docs` holding `inner.md` — pinned
+  /// when [pinned] — and an empty folder `other`, both open; every drop
+  /// recorded.
+  Future<List<String>> pump(WidgetTester tester, {bool pinned = false}) async {
     final moves = <String>[];
     await session.open('/lib', create: false);
     await session.createFolder(parentPath: '', name: 'docs');
     await session.createFolder(parentPath: '', name: 'other');
     await session.createNote(parentPath: '', name: 'nota', content: 'x');
-    await session.createNote(parentPath: 'docs', name: 'inner', content: 'y');
+    await session.createNote(
+      parentPath: 'docs',
+      name: 'inner',
+      content: pinned ? '---\npinned: true\n---\ny' : 'y',
+    );
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -54,8 +59,8 @@ void main() {
     return moves;
   }
 
-  Future<void> dragMouse(WidgetTester tester, String from, Offset to) async {
-    final start = tester.getCenter(find.text(from));
+  Future<void> dragMouse(WidgetTester tester, Object from, Offset to) async {
+    final start = tester.getCenter(from is Finder ? from : find.text('$from'));
     final mouse = await tester.startGesture(
       start,
       kind: PointerDeviceKind.mouse,
@@ -92,6 +97,23 @@ void main() {
     await dragMouse(tester, 'docs', inner);
     await dragMouse(tester, 'inner.md', docs);
     expect(moves, isEmpty);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets('the pinned block: a row into its folder, the rest nowhere', (
+    tester,
+  ) async {
+    // #574: a drop on the pinned block fell through to the root.
+    final moves = await pump(tester, pinned: true);
+    final row = tester.getCenter(find.byKey(const Key('pinned-docs/inner.md')));
+    final heading = tester.getCenter(find.byKey(const Key('pinned-heading')));
+    final divider = tester.getCenter(find.byType(Divider));
+    // The tree's own row of the pinned note, under the block.
+    final inner = find.text('inner.md').last;
+    await dragMouse(tester, inner, heading);
+    await dragMouse(tester, inner, divider);
+    expect(moves, isEmpty);
+    await dragMouse(tester, 'nota.md', row);
+    expect(moves, ['nota.md -> docs']);
   }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
   testWidgets('by touch: held, then dragged; held still, the menu', (
