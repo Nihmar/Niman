@@ -1914,6 +1914,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _lastClickAt = position;
     switch (_clicks) {
       case 1:
+        // A Shift+click extended the selection as it went down.
+        if (!finger && HardwareKeyboard.instance.isShiftPressed) break;
         // A click on a table's room puts the caret in the nearer cell.
         placeCaret(_inCell(offset, 0));
       case 2:
@@ -2097,8 +2099,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       final offset = offsetAt(event.position);
       if (offset == null) return;
       if (_openLinkAt(offset)) return;
-      _dragAnchor = offset;
-      placeCaret(offset);
+      // Shift+click extends the selection from its anchor to the click, and
+      // a drag from there goes on extending it (#546).
+      if (HardwareKeyboard.instance.isShiftPressed) {
+        _dragAnchor = _selection.anchor;
+        _moveCaretTo(offset, extend: true);
+      } else {
+        _dragAnchor = offset;
+        placeCaret(offset);
+      }
       // The platform needs the selection the drag ends with, not every one on
       // the way: a whole note per mouse move is what a drag must not cost.
       _input.holdSync = true;
