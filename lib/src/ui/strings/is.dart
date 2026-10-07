@@ -3052,4 +3052,12 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Afrita';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'bls. $page: $lines línur misstu stað sinn á skönnuninni. '
+      'Athugasemdir þar eiga við alla síðuna.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Greina bls. $page aftur';
 }

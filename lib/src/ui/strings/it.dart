@@ -3076,4 +3076,12 @@ final class ItalianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Copia';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines righe hanno perso la posizione sulla '
+      'scansione. Lì le annotazioni si legano alla pagina intera.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Riconosci di nuovo p. $page';
 }

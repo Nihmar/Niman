@@ -6,6 +6,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_job.dart';
+import 'package:niman/src/ocr/ocr_language.dart';
 import 'package:niman/src/ocr/ocr_page_source.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ocr/ocr_sidecar.dart';
@@ -90,10 +91,22 @@ final class ShellOcrFlow {
       page: page,
     );
     if (request == null) return;
+    _enqueue(path, request.languages, request.pages);
+  }
+
+  /// Reads [page] of [path] (library-relative) again in [languages],
+  /// asking nothing: its lines lost their places on the scan (#596).
+  void recognizeAgain(String path, int page, List<OcrLanguage> languages) =>
+      _enqueue(path, languages, [page]);
+
+  void _enqueue(String path, List<OcrLanguage> languages, List<int>? pages) {
+    final root = controller.root;
+    final ops = controller.ops;
+    if (root == null || ops == null) return;
     queue.enqueue(
       path: path,
-      languages: request.languages,
-      pages: request.pages,
+      languages: languages,
+      pages: pages,
       writer: (
         root: root,
         ops: ops,

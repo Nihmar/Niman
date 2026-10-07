@@ -63,6 +63,7 @@ Recognized words <!-- ocr 0.100 0.100 0.500 0.130 -->
     ops: library,
     recognize: (path, {page, pageCount}) {},
     openNote: opened.add,
+    recognizeAgain: (path, page, languages) {},
   );
 
   Future<void> show(WidgetTester tester, {required double width}) async {

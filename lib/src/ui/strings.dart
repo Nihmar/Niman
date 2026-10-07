@@ -1646,4 +1646,10 @@ final class AppStrings {
   static String get ocrShowText => _s.ocrShowText;
   static String get ocrHideText => _s.ocrHideText;
   static String get ocrCopyText => _s.ocrCopyText;
+
+  // Recognized lines on the scan (#596).
+
+  static String ocrLostPlaces(int page, int lines) =>
+      _s.ocrLostPlaces(page, lines);
+  static String ocrRecognizeAgain(int page) => _s.ocrRecognizeAgain(page);
 }

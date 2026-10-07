@@ -3087,4 +3087,12 @@ final class CroatianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopiraj';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'str. $page: retci bez mjesta na skenu: $lines. Bilješke se '
+      'ondje vežu uz cijelu stranicu.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Ponovno prepoznaj str. $page';
 }

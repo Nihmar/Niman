@@ -3019,4 +3019,12 @@ final class TurkishStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopyala';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: $lines satır taramadaki yerini kaybetti. Oradaki '
+      'notlar tüm sayfaya bağlanır.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'S. $page yeniden tanı';
 }

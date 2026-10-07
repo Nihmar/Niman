@@ -2786,4 +2786,11 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get ocrCopyText => 'コピー';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '$page ページ：$lines 行がスキャン上の位置を失いました。そこの注釈はページ全体に付きます。';
+
+  @override
+  String ocrRecognizeAgain(int page) => '$page ページを再認識';
 }

@@ -3077,4 +3077,12 @@ final class GalicianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Copiar';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines liñas perderon o seu lugar no escaneo. Alí '
+      'as anotacións van á páxina enteira.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Recoñecer de novo a p. $page';
 }

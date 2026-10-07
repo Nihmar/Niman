@@ -3080,4 +3080,12 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopjo';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'f. $page: $lines rreshta humbën vendin në skanim. Shënimet '
+      'aty lidhen me gjithë faqen.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Njih sërish f. $page';
 }

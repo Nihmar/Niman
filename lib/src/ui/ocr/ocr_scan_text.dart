@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/ocr/ocr_job.dart';
+import 'package:niman/src/ocr/ocr_placed_lines.dart';
 import 'package:niman/src/ocr/ocr_sidecar_finder.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
+import 'package:niman/src/ui/ocr/ocr_lines_scope.dart';
 import 'package:niman/src/ui/ocr/ocr_text_pane.dart';
 import 'package:niman/src/ui/ocr/ocr_text_toggle.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -40,6 +42,8 @@ final class OcrScanText extends StatefulWidget {
 
 final class _OcrScanTextState extends State<OcrScanText> {
   ({String path, String text})? _sidecar;
+  OcrPlacedLines? _lines;
+  final ValueNotifier<OcrPlacedLine?> _selected = ValueNotifier(null);
   bool _shown = true;
   bool _textSide = false;
   int? _loadedFor;
@@ -69,6 +73,7 @@ final class _OcrScanTextState extends State<OcrScanText> {
   @override
   void dispose() {
     widget.actions.queue.removeListener(_onQueue);
+    _selected.dispose();
     super.dispose();
   }
 
@@ -85,18 +90,35 @@ final class _OcrScanTextState extends State<OcrScanText> {
     final path = widget.path;
     final found = await findOcrSidecar(widget.actions.ops, _relative);
     if (!mounted || path != widget.path) return;
-    setState(() => _sidecar = found);
+    _selected.value = null;
+    setState(() {
+      _sidecar = found;
+      _lines = found == null ? null : readOcrPlacedLines(found.text);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final sidecar = _sidecar;
-    if (sidecar == null) return widget.scan;
+    final lines = _lines;
+    if (sidecar == null || lines == null) return widget.scan;
+    final languages = lines.languages;
     final text = OcrTextPane(
       path: sidecar.path,
       text: sidecar.text,
       onOpenAsNote: () => widget.actions.openNote(sidecar.path),
+      onRecognizeAgain: languages.isEmpty
+          ? null
+          : (page) => widget.actions.recognizeAgain(_relative, page, languages),
     );
+    return OcrLinesScope(
+      lines: lines,
+      selected: _selected,
+      child: _layout(text),
+    );
+  }
+
+  Widget _layout(Widget text) {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= OcrScanText.besideWidth) {

@@ -3092,4 +3092,12 @@ final class DutchStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopiëren';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines regels zijn hun plaats op de scan kwijt. '
+      'Aantekeningen daar horen bij de hele pagina.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'P. $page opnieuw herkennen';
 }

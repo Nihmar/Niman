@@ -3065,4 +3065,12 @@ final class SwedishStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopiera';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: $lines rader har tappat sin plats på skanningen. '
+      'Anteckningar där gäller hela sidan.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Känn igen s. $page igen';
 }

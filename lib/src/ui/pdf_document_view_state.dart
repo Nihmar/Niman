@@ -4,8 +4,10 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark.dart';
+import 'package:niman/src/ocr/ocr_placed_lines.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_tracker.dart';
 import 'package:niman/src/ui/annotation_mark_chooser.dart';
@@ -13,6 +15,8 @@ import 'package:niman/src/ui/attachment_bar.dart';
 import 'package:niman/src/ui/attachment_unreadable.dart';
 import 'package:niman/src/ui/file_marks.dart';
 import 'package:niman/src/ui/ocr/ocr_file_controls.dart';
+import 'package:niman/src/ui/ocr/ocr_line_layer.dart';
+import 'package:niman/src/ui/ocr/ocr_lines_scope.dart';
 import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:niman/src/ui/pdf_mark_layer.dart';
 import 'package:niman/src/ui/place_link_button.dart';
@@ -179,6 +183,62 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
     return (page: place?.page ?? 1, count: _controller.pageCount);
   }
 
+  /// A recognized line picked on the scan (#596): selected on both sides,
+  /// then annotated, copied, or linked to — its page, since a scan has no
+  /// characters to point at.
+  Future<void> _lineMenu(
+    BuildContext context,
+    OcrPlacedLine line,
+    Offset at,
+  ) async {
+    OcrLinesScope.maybeOf(context)?.selected = line;
+    final key = widget.positions?.keyOf(widget.path);
+    final place = PdfLocation(page: line.page);
+    final choice = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(at.dx, at.dy, at.dx, at.dy),
+      items: [
+        if (_annotates)
+          PopupMenuItem(
+            key: const Key('ocr-line-annotate'),
+            value: 'annotate',
+            child: Text(AppStrings.annotateAction),
+          ),
+        PopupMenuItem(
+          key: const Key('ocr-line-copy'),
+          value: 'copy',
+          child: Text(AppStrings.ocrCopyText),
+        ),
+        if (key != null)
+          PopupMenuItem(
+            key: const Key('ocr-line-link'),
+            value: 'link',
+            child: Text(AppStrings.copyPlaceLink),
+          ),
+      ],
+    );
+    if (!mounted) return;
+    switch (choice) {
+      case 'annotate' when key != null:
+        widget.onAnnotate?.call(
+          Annotation(
+            path: key,
+            place: place,
+            label: _label(line.page),
+            quote: line.text,
+          ),
+        );
+      case 'copy':
+        await Clipboard.setData(ClipboardData(text: line.text));
+      case 'link' when key != null && context.mounted:
+        await copyPlaceLink(context, (
+          path: key,
+          place: place,
+          label: _label(line.page),
+        ), widget.linkType);
+    }
+  }
+
   /// Whether a passage or a page can be annotated: the PDF is in a
   /// library, and someone writes annotations.
   bool get _annotates => widget.onAnnotate != null && widget.positions != null;
@@ -258,13 +318,21 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
                 .surfaceContainerLowest,
             onViewerReady: (document, controller) =>
                 unawaited(_place(controller)),
-            pageOverlaysBuilder: (context, pageRect, page) => _layer.overlays(
-              context,
-              pageRect,
-              page,
-              _marks?.marks ?? const [],
-              onTap: _openMarks,
-            ),
+            pageOverlaysBuilder: (context, pageRect, page) => [
+              ..._layer.overlays(
+                context,
+                pageRect,
+                page,
+                _marks?.marks ?? const [],
+                onTap: _openMarks,
+              ),
+              ...ocrLineOverlays(
+                context,
+                pageRect,
+                page.pageNumber,
+                onPick: (line, at) => unawaited(_lineMenu(context, line, at)),
+              ),
+            ],
             errorBannerBuilder: (context, error, stack, documentRef) =>
                 const AttachmentUnreadable(),
             textSelectionParams: PdfTextSelectionParams(

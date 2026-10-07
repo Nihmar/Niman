@@ -3082,4 +3082,12 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Копирај';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'стр. $page: редови без место на скенот: $lines. Белешките '
+      'таму се врзуваат за целата страница.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Повторно препознај стр. $page';
 }

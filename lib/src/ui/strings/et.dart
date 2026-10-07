@@ -3011,4 +3011,12 @@ final class EstonianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopeeri';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'lk $page: $lines rida kaotas oma koha skannil. Märkused seal '
+      'kehtivad kogu lehe kohta.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Tuvasta lk $page uuesti';
 }

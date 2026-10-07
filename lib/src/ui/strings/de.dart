@@ -3126,4 +3126,12 @@ final class GermanStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopieren';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'S. $page: $lines Zeilen haben ihren Platz auf dem Scan '
+      'verloren. Anmerkungen dort gelten der ganzen Seite.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'S. $page erneut erkennen';
 }

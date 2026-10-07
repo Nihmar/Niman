@@ -3010,4 +3010,12 @@ final class HindiStrings extends Strings {
 
   @override
   String get ocrCopyText => 'कॉपी करें';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'पन्ना $page: $lines पंक्तियों ने स्कैन पर अपनी जगह खो दी। '
+      'वहाँ की टिप्पणियाँ पूरे पन्ने से जुड़ेंगी।';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'पन्ना $page फिर से पहचानें';
 }

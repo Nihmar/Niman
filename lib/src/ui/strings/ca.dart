@@ -3109,4 +3109,12 @@ final class CatalanStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Copia';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      "p. $page: $lines línies han perdut el lloc a l'escaneig. "
+      "Allà les anotacions s'apliquen a tota la pàgina.";
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Reconeix de nou la p. $page';
 }

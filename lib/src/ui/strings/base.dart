@@ -1579,4 +1579,12 @@ abstract base class Strings {
 
   /// Copies the recognized text.
   String get ocrCopyText;
+
+  // Recognized lines on the scan (#596).
+
+  /// Lines a hand edit left without their place on the scan (#596).
+  String ocrLostPlaces(int page, int lines);
+
+  /// Reads that page again.
+  String ocrRecognizeAgain(int page);
 }

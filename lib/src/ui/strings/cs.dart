@@ -3059,4 +3059,12 @@ final class CzechStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopírovat';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: řádky bez místa na skenu: $lines. Poznámky se tam '
+      'vážou k celé stránce.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Znovu rozpoznat s. $page';
 }

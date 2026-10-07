@@ -3148,4 +3148,12 @@ final class FrenchStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Copier';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page : $lines lignes ont perdu leur place sur le scan. '
+      'Les annotations y portent sur toute la page.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Reconnaître à nouveau la p. $page';
 }

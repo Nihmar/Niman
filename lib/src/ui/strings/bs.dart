@@ -3086,4 +3086,12 @@ final class BosnianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopiraj';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'str. $page: redovi bez mjesta na skenu: $lines. Bilješke se '
+      'tu vežu za cijelu stranicu.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Ponovo prepoznaj str. $page';
 }

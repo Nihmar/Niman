@@ -3086,4 +3086,12 @@ final class BasqueStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopiatu';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '$page. orria: $lines lerrok eskaneatzean zuten lekua galdu '
+      'dute. Han oharrak orri osoari lotzen zaizkio.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Ezagutu berriro $page. orria';
 }

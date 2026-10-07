@@ -3156,4 +3156,12 @@ final class GreekStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Αντιγραφή';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'σελ. $page: γραμμές χωρίς θέση στη σάρωση: $lines. Οι '
+      'σημειώσεις εκεί αφορούν όλη τη σελίδα.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Νέα αναγνώριση σελ. $page';
 }

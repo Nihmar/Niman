@@ -2293,6 +2293,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ops: ops,
       recognize: _recognize,
       openNote: _openRecognizedText,
+      recognizeAgain: (path, page, languages) =>
+          _ocrFlow.recognizeAgain(path, page, languages),
     );
   }
 

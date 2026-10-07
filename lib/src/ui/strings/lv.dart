@@ -3054,4 +3054,12 @@ final class LatvianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopēt';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '$page. lp.: $lines rindas zaudēja vietu skenējumā. Piezīmes '
+      'tur attiecas uz visu lapu.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Atpazīt $page. lp. vēlreiz';
 }

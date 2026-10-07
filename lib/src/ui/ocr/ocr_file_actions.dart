@@ -1,4 +1,5 @@
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ocr/ocr_language.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/attachment_view.dart' show pictureExtensions;
 import 'package:path/path.dart' as p;
@@ -14,6 +15,7 @@ final class OcrFileActions {
     required this.ops,
     required this.recognize,
     required this.openNote,
+    required this.recognizeAgain,
   });
 
   /// The recognition jobs.
@@ -27,6 +29,12 @@ final class OcrFileActions {
 
   /// Opens a note (the sidecar, as a note).
   final void Function(String path) openNote;
+
+  /// Reads `page` of the file at `path` (library-relative) again in
+  /// `languages`, asking nothing: the sidecar's lines there lost their
+  /// places (#596).
+  final void Function(String path, int page, List<OcrLanguage> languages)
+  recognizeAgain;
 
   /// Recognizes a file (library-relative): a PDF with its page count and
   /// the page read, or a picture.

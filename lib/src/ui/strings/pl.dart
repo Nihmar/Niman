@@ -3109,4 +3109,12 @@ final class PolishStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopiuj';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: wiersze bez miejsca na skanie: $lines. Adnotacje '
+      'odnoszą się tam do całej strony.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Rozpoznaj ponownie s. $page';
 }
