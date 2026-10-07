@@ -39,7 +39,7 @@ elf_link="-Wl,--gc-sections -Wl,--version-script=$work/exports.map -Wl,--exclude
 
 common=(-DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
   -DCMAKE_INSTALL_PREFIX="$work/prefix" -DCMAKE_PREFIX_PATH="$work/prefix"
-  -DCMAKE_FIND_ROOT_PATH="$work/prefix")
+  -DCMAKE_FIND_ROOT_PATH="$work/prefix" -DSW_BUILD=OFF)
 # Leptonica's warnings go to stderr, which is the app's own.
 lepton_flags="$gc_flags -DNO_CONSOLE_IO"
 generator=(-G Ninja)
