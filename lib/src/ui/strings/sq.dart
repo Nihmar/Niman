@@ -2173,26 +2173,22 @@ final class AlbanianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Më i sakti, kërkon shumë memorie';
   @override
-  String get transcriptionModelDownload => 'Shkarko';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Të fshihet modeli $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Lirohen $size. Modelin mund ta shkarkoni sërish më vonë.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Shkarkimi dështoi. Kontrolloni lidhjen dhe provoni sërish.';
   @override
   String get actionRetry => 'Provo sërish';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Lidhja u ndërpre, po provohet sërish…';
+  String get downloadRetrying => 'Lidhja u ndërpre, po provohet sërish…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Në pauzë te $progress';
+  String downloadPaused(String progress) => 'Në pauzë te $progress';
   @override
   String get actionResume => 'Vazhdo';
   @override

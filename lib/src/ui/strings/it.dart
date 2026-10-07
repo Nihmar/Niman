@@ -2173,26 +2173,22 @@ final class ItalianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Il più preciso, richiede molta memoria';
   @override
-  String get transcriptionModelDownload => 'Scarica';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Eliminare il modello $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Libera $size. Potrai scaricare di nuovo il modello in seguito.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Download non riuscito. Controlla la connessione e riprova.';
   @override
   String get actionRetry => 'Riprova';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Connessione persa, nuovo tentativo…';
+  String get downloadRetrying => 'Connessione persa, nuovo tentativo…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'In pausa a $progress';
+  String downloadPaused(String progress) => 'In pausa a $progress';
   @override
   String get actionResume => 'Riprendi';
   @override

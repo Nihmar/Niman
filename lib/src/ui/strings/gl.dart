@@ -2169,26 +2169,22 @@ final class GalicianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'O máis preciso, precisa moita memoria';
   @override
-  String get transcriptionModelDownload => 'Descargar';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Eliminar o modelo $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Libera $size. Podes volver descargar o modelo máis adiante.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Non se puido descargar. Comproba a conexión e téntao de novo.';
   @override
   String get actionRetry => 'Tentar de novo';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Perdeuse a conexión, tentando de novo…';
+  String get downloadRetrying => 'Perdeuse a conexión, tentando de novo…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'En pausa en $progress';
+  String downloadPaused(String progress) => 'En pausa en $progress';
   @override
   String get actionResume => 'Retomar';
   @override

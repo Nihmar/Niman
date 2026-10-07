@@ -2166,26 +2166,22 @@ final class BelarusianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Найдакладнейшая, патрабуе шмат памяці';
   @override
-  String get transcriptionModelDownload => 'Спампаваць';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Выдаліць мадэль $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Вызваліцца $size. Вы зможаце спампаваць мадэль зноў пазней.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Не ўдалося спампаваць. Праверце злучэнне і паспрабуйце яшчэ раз.';
   @override
   String get actionRetry => 'Паспрабаваць яшчэ раз';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Злучэнне страчана, паўторная спроба…';
+  String get downloadRetrying => 'Злучэнне страчана, паўторная спроба…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Прыпынена на $progress';
+  String downloadPaused(String progress) => 'Прыпынена на $progress';
   @override
   String get actionResume => 'Працягнуць';
   @override

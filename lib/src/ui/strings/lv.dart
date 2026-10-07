@@ -2153,25 +2153,23 @@ final class LatvianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Visprecīzākais, vajag daudz atmiņas';
   @override
-  String get transcriptionModelDownload => 'Lejupielādēt';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Vai dzēst modeli $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Tiks atbrīvoti $size. Modeli vēlāk varēsiet lejupielādēt atkārtoti.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Lejupielāde neizdevās. Pārbaudiet savienojumu un mēģiniet vēlreiz.';
   @override
   String get actionRetry => 'Mēģināt vēlreiz';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
+  String get downloadRetrying =>
       'Savienojums pārtrūka, notiek atkārtots mēģinājums…';
   @override
-  String transcriptionModelInterrupted(String progress) => 'Pauzēts: $progress';
+  String downloadPaused(String progress) => 'Pauzēts: $progress';
   @override
   String get actionResume => 'Turpināt';
   @override

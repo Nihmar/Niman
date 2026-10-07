@@ -2152,26 +2152,22 @@ final class SlovakStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Najpresnejší, potrebuje veľa pamäte';
   @override
-  String get transcriptionModelDownload => 'Stiahnuť';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Odstrániť model $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Uvoľní sa $size. Model si môžete neskôr stiahnuť znova.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Stiahnutie zlyhalo. Skontrolujte pripojenie a skúste to znova.';
   @override
   String get actionRetry => 'Skúsiť znova';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Pripojenie sa prerušilo, skúša sa znova…';
+  String get downloadRetrying => 'Pripojenie sa prerušilo, skúša sa znova…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pozastavené na $progress';
+  String downloadPaused(String progress) => 'Pozastavené na $progress';
   @override
   String get actionResume => 'Pokračovať';
   @override

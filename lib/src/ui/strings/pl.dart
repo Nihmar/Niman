@@ -2186,24 +2186,21 @@ final class PolishStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Najdokładniejszy, wymaga dużo pamięci';
   @override
-  String get transcriptionModelDownload => 'Pobierz';
-  @override
   String transcriptionModelDeleteTitle(String model) => 'Usunąć model $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Zwolni to $size. Model możesz później pobrać ponownie.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Nie udało się pobrać. Sprawdź połączenie i spróbuj ponownie.';
   @override
   String get actionRetry => 'Spróbuj ponownie';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Utracono połączenie, ponawianie…';
+  String get downloadRetrying => 'Utracono połączenie, ponawianie…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Wstrzymano przy $progress';
+  String downloadPaused(String progress) => 'Wstrzymano przy $progress';
   @override
   String get actionResume => 'Wznów';
   @override

@@ -1089,13 +1089,12 @@ abstract base class Strings {
   String get transcriptionModelHintSmall;
   String get transcriptionModelHintMedium;
   String get transcriptionModelHintLarge;
-  String get transcriptionModelDownload;
   String transcriptionModelDeleteTitle(String model);
   String transcriptionModelDeleteBody(String size);
-  String get transcriptionModelFailed;
+  String get downloadFailed;
   String get actionRetry;
-  String get transcriptionModelRetrying;
-  String transcriptionModelInterrupted(String progress);
+  String get downloadRetrying;
+  String downloadPaused(String progress);
   String get actionResume;
   String get audioTranscribe;
   String get audioTranscribeUnsupported;

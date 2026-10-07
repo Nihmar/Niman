@@ -2170,26 +2170,22 @@ final class UkrainianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       "Найточніша, потребує багато пам'яті";
   @override
-  String get transcriptionModelDownload => 'Завантажити';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Видалити модель $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Звільниться $size. Ви зможете завантажити модель знову пізніше.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       "Не вдалося завантажити. Перевірте з'єднання і спробуйте ще раз.";
   @override
   String get actionRetry => 'Спробувати ще раз';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      "З'єднання втрачено, повторна спроба…";
+  String get downloadRetrying => "З'єднання втрачено, повторна спроба…";
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Призупинено на $progress';
+  String downloadPaused(String progress) => 'Призупинено на $progress';
   @override
   String get actionResume => 'Продовжити';
   @override

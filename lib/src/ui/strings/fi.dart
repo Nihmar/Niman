@@ -2166,26 +2166,22 @@ final class FinnishStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Tarkin, vaatii paljon muistia';
   @override
-  String get transcriptionModelDownload => 'Lataa';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Poistetaanko malli $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Tämä vapauttaa $size. Voit ladata mallin myöhemmin uudelleen.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Lataus epäonnistui. Tarkista yhteys ja yritä uudelleen.';
   @override
   String get actionRetry => 'Yritä uudelleen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Yhteys katkesi, yritetään uudelleen…';
+  String get downloadRetrying => 'Yhteys katkesi, yritetään uudelleen…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Keskeytetty: $progress';
+  String downloadPaused(String progress) => 'Keskeytetty: $progress';
   @override
   String get actionResume => 'Jatka';
   @override

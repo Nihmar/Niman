@@ -2182,25 +2182,22 @@ final class RomanianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Cel mai precis, are nevoie de multă memorie';
   @override
-  String get transcriptionModelDownload => 'Descarcă';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Ștergi modelul $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Se eliberează $size. Poți descărca modelul din nou mai târziu.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Descărcarea a eșuat. Verifică conexiunea și încearcă din nou.';
   @override
   String get actionRetry => 'Încearcă din nou';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Conexiune pierdută, se reîncearcă…';
+  String get downloadRetrying => 'Conexiune pierdută, se reîncearcă…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Întrerupt la $progress';
+  String downloadPaused(String progress) => 'Întrerupt la $progress';
   @override
   String get actionResume => 'Reia';
   @override

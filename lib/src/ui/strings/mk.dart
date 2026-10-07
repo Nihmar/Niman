@@ -2172,8 +2172,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Најпрецизен, бара многу меморија';
   @override
-  String get transcriptionModelDownload => 'Преземи';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Да се избрише моделот $model?';
   @override
@@ -2181,17 +2179,16 @@ final class MacedonianStrings extends Strings {
       'Ќе се ослободат $size. Моделот можете повторно да го преземете '
       'подоцна.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Преземањето не успеа. Проверете ја врската и обидете се повторно.';
   @override
   String get actionRetry => 'Обиди се повторно';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Врската е прекината, нов обид…';
+  String get downloadRetrying => 'Врската е прекината, нов обид…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Паузирано на $progress';
+  String downloadPaused(String progress) => 'Паузирано на $progress';
   @override
   String get actionResume => 'Продолжи';
   @override

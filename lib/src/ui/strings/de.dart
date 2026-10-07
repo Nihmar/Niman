@@ -2200,26 +2200,22 @@ final class GermanStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Am genauesten, braucht viel Arbeitsspeicher';
   @override
-  String get transcriptionModelDownload => 'Herunterladen';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Modell $model löschen?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Das gibt $size frei. Du kannst das Modell später erneut herunterladen.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Download fehlgeschlagen. Prüfe die Verbindung und versuche es erneut.';
   @override
   String get actionRetry => 'Erneut versuchen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Verbindung unterbrochen, neuer Versuch…';
+  String get downloadRetrying => 'Verbindung unterbrochen, neuer Versuch…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pausiert bei $progress';
+  String downloadPaused(String progress) => 'Pausiert bei $progress';
   @override
   String get actionResume => 'Fortsetzen';
   @override

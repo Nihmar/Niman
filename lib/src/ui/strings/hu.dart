@@ -2165,26 +2165,22 @@ final class HungarianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'A legpontosabb, sok memóriát igényel';
   @override
-  String get transcriptionModelDownload => 'Letöltés';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Törlöd a(z) $model modellt?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Ezzel $size szabadul fel. A modellt később újra letöltheted.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'A letöltés sikertelen. Ellenőrizd a kapcsolatot, és próbáld újra.';
   @override
   String get actionRetry => 'Újra';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Megszakadt a kapcsolat, újrapróbálkozás…';
+  String get downloadRetrying => 'Megszakadt a kapcsolat, újrapróbálkozás…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Szüneteltetve: $progress';
+  String downloadPaused(String progress) => 'Szüneteltetve: $progress';
   @override
   String get actionResume => 'Folytatás';
   @override

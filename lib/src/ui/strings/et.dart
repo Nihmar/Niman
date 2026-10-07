@@ -2127,26 +2127,22 @@ final class EstonianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Kõige täpsem, vajab palju mälu';
   @override
-  String get transcriptionModelDownload => 'Laadi alla';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Kas kustutada mudel $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'See vabastab $size. Saad mudeli hiljem uuesti alla laadida.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Allalaadimine ebaõnnestus. Kontrolli ühendust ja proovi uuesti.';
   @override
   String get actionRetry => 'Proovi uuesti';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Ühendus katkes, proovitakse uuesti…';
+  String get downloadRetrying => 'Ühendus katkes, proovitakse uuesti…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Peatatud: $progress';
+  String downloadPaused(String progress) => 'Peatatud: $progress';
   @override
   String get actionResume => 'Jätka';
   @override

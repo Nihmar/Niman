@@ -1299,16 +1299,14 @@ final class AppStrings {
   static String get transcriptionModelsFooter => _s.transcriptionModelsFooter;
   static String get transcriptionModelDefault => _s.transcriptionModelDefault;
   static String get transcriptionModelSlow => _s.transcriptionModelSlow;
-  static String get transcriptionModelDownload => _s.transcriptionModelDownload;
   static String transcriptionModelDeleteTitle(String model) =>
       _s.transcriptionModelDeleteTitle(model);
   static String transcriptionModelDeleteBody(String size) =>
       _s.transcriptionModelDeleteBody(size);
-  static String get transcriptionModelFailed => _s.transcriptionModelFailed;
+  static String get downloadFailed => _s.downloadFailed;
   static String get actionRetry => _s.actionRetry;
-  static String get transcriptionModelRetrying => _s.transcriptionModelRetrying;
-  static String transcriptionModelInterrupted(String progress) =>
-      _s.transcriptionModelInterrupted(progress);
+  static String get downloadRetrying => _s.downloadRetrying;
+  static String downloadPaused(String progress) => _s.downloadPaused(progress);
   static String get actionResume => _s.actionResume;
   static String get audioTranscribe => _s.audioTranscribe;
   static String get audioTranscribeUnsupported => _s.audioTranscribeUnsupported;

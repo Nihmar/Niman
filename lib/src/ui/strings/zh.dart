@@ -1955,21 +1955,19 @@ final class ChineseStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => '最准确，需要大量内存';
   @override
-  String get transcriptionModelDownload => '下载';
-  @override
   String transcriptionModelDeleteTitle(String model) => '删除 $model 模型？';
   @override
   String transcriptionModelDeleteBody(String size) => '将释放 $size。之后可以重新下载该模型。';
   @override
-  String get transcriptionModelFailed => '下载失败。请检查网络连接后重试。';
+  String get downloadFailed => '下载失败。请检查网络连接后重试。';
   @override
   String get actionRetry => '重试';
   @override
   String get decimalSeparator => '.';
   @override
-  String get transcriptionModelRetrying => '连接中断，正在重试…';
+  String get downloadRetrying => '连接中断，正在重试…';
   @override
-  String transcriptionModelInterrupted(String progress) => '已暂停：$progress';
+  String downloadPaused(String progress) => '已暂停：$progress';
   @override
   String get actionResume => '继续';
   @override

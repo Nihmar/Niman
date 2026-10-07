@@ -2168,26 +2168,22 @@ final class BasqueStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Zehatzena, memoria asko behar du';
   @override
-  String get transcriptionModelDownload => 'Deskargatu';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       '$model eredua ezabatu?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       '$size askatuko dira. Eredua geroago berriro deskarga dezakezu.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Ezin izan da deskargatu. Egiaztatu konexioa eta saiatu berriro.';
   @override
   String get actionRetry => 'Saiatu berriro';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Konexioa galdu da, berriro saiatzen…';
+  String get downloadRetrying => 'Konexioa galdu da, berriro saiatzen…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pausatuta: $progress';
+  String downloadPaused(String progress) => 'Pausatuta: $progress';
   @override
   String get actionResume => 'Jarraitu';
   @override

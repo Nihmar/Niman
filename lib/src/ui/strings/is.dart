@@ -2150,24 +2150,21 @@ final class IcelandicStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Nákvæmast, þarf mikið minni';
   @override
-  String get transcriptionModelDownload => 'Sækja';
-  @override
   String transcriptionModelDeleteTitle(String model) => 'Eyða líkaninu $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Þetta losar $size. Þú getur sótt líkanið aftur seinna.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Niðurhal mistókst. Athugaðu tenginguna og reyndu aftur.';
   @override
   String get actionRetry => 'Reyna aftur';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Tengingin rofnaði, reynt aftur…';
+  String get downloadRetrying => 'Tengingin rofnaði, reynt aftur…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Í bið við $progress';
+  String downloadPaused(String progress) => 'Í bið við $progress';
   @override
   String get actionResume => 'Halda áfram';
   @override

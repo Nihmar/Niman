@@ -2172,25 +2172,22 @@ final class BulgarianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Най-точен, изисква много памет';
   @override
-  String get transcriptionModelDownload => 'Изтегляне';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Да се изтрие ли моделът $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Ще се освободят $size. Можете да изтеглите модела отново по-късно.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Изтеглянето не бе успешно. Проверете връзката и опитайте отново.';
   @override
   String get actionRetry => 'Опитай отново';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Връзката прекъсна, нов опит…';
+  String get downloadRetrying => 'Връзката прекъсна, нов опит…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'На пауза при $progress';
+  String downloadPaused(String progress) => 'На пауза при $progress';
   @override
   String get actionResume => 'Продължи';
   @override

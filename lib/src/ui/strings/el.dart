@@ -2225,8 +2225,6 @@ final class GreekStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Το πιο ακριβές, χρειάζεται πολλή μνήμη';
   @override
-  String get transcriptionModelDownload => 'Λήψη';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Διαγραφή του μοντέλου $model;';
   @override
@@ -2234,17 +2232,16 @@ final class GreekStrings extends Strings {
       'Θα ελευθερωθούν $size. Μπορείτε να κατεβάσετε ξανά το μοντέλο '
       'αργότερα.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Η λήψη απέτυχε. Ελέγξτε τη σύνδεση και δοκιμάστε ξανά.';
   @override
   String get actionRetry => 'Δοκιμή ξανά';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Η σύνδεση χάθηκε, νέα προσπάθεια…';
+  String get downloadRetrying => 'Η σύνδεση χάθηκε, νέα προσπάθεια…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Σε παύση στο $progress';
+  String downloadPaused(String progress) => 'Σε παύση στο $progress';
   @override
   String get actionResume => 'Συνέχιση';
   @override

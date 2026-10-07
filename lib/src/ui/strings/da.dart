@@ -2144,25 +2144,21 @@ final class DanishStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Mest præcis, kræver meget hukommelse';
   @override
-  String get transcriptionModelDownload => 'Download';
-  @override
   String transcriptionModelDeleteTitle(String model) => 'Slet modellen $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Det frigør $size. Du kan downloade modellen igen senere.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Download mislykkedes. Tjek forbindelsen, og prøv igen.';
   @override
   String get actionRetry => 'Prøv igen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Forbindelsen blev afbrudt, prøver igen…';
+  String get downloadRetrying => 'Forbindelsen blev afbrudt, prøver igen…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Sat på pause ved $progress';
+  String downloadPaused(String progress) => 'Sat på pause ved $progress';
   @override
   String get actionResume => 'Genoptag';
   @override

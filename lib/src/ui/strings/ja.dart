@@ -2006,22 +2006,20 @@ final class JapaneseStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => '最も正確、大量のメモリが必要';
   @override
-  String get transcriptionModelDownload => 'ダウンロード';
-  @override
   String transcriptionModelDeleteTitle(String model) => '$model モデルを削除しますか？';
   @override
   String transcriptionModelDeleteBody(String size) =>
       '$size が解放されます。モデルは後でもう一度ダウンロードできます。';
   @override
-  String get transcriptionModelFailed => 'ダウンロードに失敗しました。接続を確認してもう一度お試しください。';
+  String get downloadFailed => 'ダウンロードに失敗しました。接続を確認してもう一度お試しください。';
   @override
   String get actionRetry => '再試行';
   @override
   String get decimalSeparator => '.';
   @override
-  String get transcriptionModelRetrying => '接続が切れました。再試行しています…';
+  String get downloadRetrying => '接続が切れました。再試行しています…';
   @override
-  String transcriptionModelInterrupted(String progress) => '一時停止中：$progress';
+  String downloadPaused(String progress) => '一時停止中：$progress';
   @override
   String get actionResume => '再開';
   @override

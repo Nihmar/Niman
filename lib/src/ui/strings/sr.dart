@@ -2169,26 +2169,22 @@ final class SerbianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Најтачнији, треба много меморије';
   @override
-  String get transcriptionModelDownload => 'Преузми';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Избрисати модел $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Ослобађа се $size. Модел можете касније поново да преузмете.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Преузимање није успело. Проверите везу и покушајте поново.';
   @override
   String get actionRetry => 'Покушај поново';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Веза је прекинута, поновни покушај…';
+  String get downloadRetrying => 'Веза је прекинута, поновни покушај…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Паузирано на $progress';
+  String downloadPaused(String progress) => 'Паузирано на $progress';
   @override
   String get actionResume => 'Настави';
   @override

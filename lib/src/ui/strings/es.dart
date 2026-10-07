@@ -2186,25 +2186,22 @@ final class SpanishStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'El más preciso, necesita mucha memoria';
   @override
-  String get transcriptionModelDownload => 'Descargar';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       '¿Eliminar el modelo $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Libera $size. Puedes volver a descargar el modelo más adelante.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'No se pudo descargar. Comprueba la conexión y vuelve a intentarlo.';
   @override
   String get actionRetry => 'Reintentar';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Conexión perdida, reintentando…';
+  String get downloadRetrying => 'Conexión perdida, reintentando…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'En pausa en $progress';
+  String downloadPaused(String progress) => 'En pausa en $progress';
   @override
   String get actionResume => 'Reanudar';
   @override

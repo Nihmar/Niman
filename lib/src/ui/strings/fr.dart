@@ -2214,26 +2214,22 @@ final class FrenchStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Le plus précis, demande beaucoup de mémoire';
   @override
-  String get transcriptionModelDownload => 'Télécharger';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Supprimer le modèle $model ?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Cela libère $size. Vous pourrez retélécharger le modèle plus tard.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Échec du téléchargement. Vérifiez la connexion et réessayez.';
   @override
   String get actionRetry => 'Réessayer';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Connexion perdue, nouvelle tentative…';
+  String get downloadRetrying => 'Connexion perdue, nouvelle tentative…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'En pause à $progress';
+  String downloadPaused(String progress) => 'En pause à $progress';
   @override
   String get actionResume => 'Reprendre';
   @override

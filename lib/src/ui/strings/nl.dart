@@ -2180,26 +2180,22 @@ final class DutchStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Nauwkeurigst, heeft veel geheugen nodig';
   @override
-  String get transcriptionModelDownload => 'Downloaden';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Model $model verwijderen?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Dit maakt $size vrij. Je kunt het model later opnieuw downloaden.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Downloaden mislukt. Controleer de verbinding en probeer het opnieuw.';
   @override
   String get actionRetry => 'Opnieuw proberen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Verbinding verbroken, nieuwe poging…';
+  String get downloadRetrying => 'Verbinding verbroken, nieuwe poging…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Gepauzeerd bij $progress';
+  String downloadPaused(String progress) => 'Gepauzeerd bij $progress';
   @override
   String get actionResume => 'Hervatten';
   @override

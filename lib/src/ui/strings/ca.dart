@@ -2189,26 +2189,23 @@ final class CatalanStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'El més precís, necessita molta memòria';
   @override
-  String get transcriptionModelDownload => 'Baixa';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Vols suprimir el model $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Allibera $size. Pots tornar a baixar el model més endavant.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       "No s'ha pogut baixar. Comprova la connexió i torna-ho a provar.";
   @override
   String get actionRetry => 'Torna-ho a provar';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
+  String get downloadRetrying =>
       "S'ha perdut la connexió, s'està tornant a provar…";
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'En pausa a $progress';
+  String downloadPaused(String progress) => 'En pausa a $progress';
   @override
   String get actionResume => 'Reprèn';
   @override

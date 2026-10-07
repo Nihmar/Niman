@@ -2163,26 +2163,22 @@ final class CroatianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Najtočniji, treba puno memorije';
   @override
-  String get transcriptionModelDownload => 'Preuzmi';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Izbrisati model $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Oslobodit će se $size. Model možeš kasnije ponovno preuzeti.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Preuzimanje nije uspjelo. Provjeri vezu i pokušaj ponovno.';
   @override
   String get actionRetry => 'Pokušaj ponovno';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Veza je prekinuta, ponovni pokušaj…';
+  String get downloadRetrying => 'Veza je prekinuta, ponovni pokušaj…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pauzirano na $progress';
+  String downloadPaused(String progress) => 'Pauzirano na $progress';
   @override
   String get actionResume => 'Nastavi';
   @override

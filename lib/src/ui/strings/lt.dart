@@ -2163,25 +2163,22 @@ final class LithuanianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Tiksliausias, reikia daug atminties';
   @override
-  String get transcriptionModelDownload => 'Atsisiųsti';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Ištrinti modelį $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Bus atlaisvinta $size. Modelį vėliau galėsite atsisiųsti iš naujo.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Atsisiųsti nepavyko. Patikrinkite ryšį ir bandykite dar kartą.';
   @override
   String get actionRetry => 'Bandyti dar kartą';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Ryšys nutrūko, bandoma dar kartą…';
+  String get downloadRetrying => 'Ryšys nutrūko, bandoma dar kartą…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pristabdyta: $progress';
+  String downloadPaused(String progress) => 'Pristabdyta: $progress';
   @override
   String get actionResume => 'Tęsti';
   @override

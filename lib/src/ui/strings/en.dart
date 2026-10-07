@@ -2131,25 +2131,22 @@ final class EnglishStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Most accurate, needs a lot of memory';
   @override
-  String get transcriptionModelDownload => 'Download';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Delete the $model model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'This frees $size. You can download the model again later.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Download failed. Check the connection and try again.';
   @override
   String get actionRetry => 'Retry';
   @override
   String get decimalSeparator => '.';
   @override
-  String get transcriptionModelRetrying => 'Connection lost, trying again…';
+  String get downloadRetrying => 'Connection lost, trying again…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Paused at $progress';
+  String downloadPaused(String progress) => 'Paused at $progress';
   @override
   String get actionResume => 'Resume';
   @override

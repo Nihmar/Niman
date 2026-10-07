@@ -2160,25 +2160,22 @@ final class SwedishStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Mest exakt, kräver mycket minne';
   @override
-  String get transcriptionModelDownload => 'Ladda ned';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Ta bort modellen $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Det frigör $size. Du kan ladda ned modellen igen senare.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Nedladdningen misslyckades. Kontrollera anslutningen och försök igen.';
   @override
   String get actionRetry => 'Försök igen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Anslutningen bröts, försöker igen…';
+  String get downloadRetrying => 'Anslutningen bröts, försöker igen…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pausad vid $progress';
+  String downloadPaused(String progress) => 'Pausad vid $progress';
   @override
   String get actionResume => 'Återuppta';
   @override

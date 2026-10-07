@@ -2152,26 +2152,22 @@ final class SlovenianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Najnatančnejši, potrebuje veliko pomnilnika';
   @override
-  String get transcriptionModelDownload => 'Prenesi';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Želite izbrisati model $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Sprostilo se bo $size. Model lahko pozneje znova prenesete.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Prenos ni uspel. Preverite povezavo in poskusite znova.';
   @override
   String get actionRetry => 'Poskusi znova';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Povezava je prekinjena, ponovni poskus…';
+  String get downloadRetrying => 'Povezava je prekinjena, ponovni poskus…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Začasno ustavljeno pri $progress';
+  String downloadPaused(String progress) => 'Začasno ustavljeno pri $progress';
   @override
   String get actionResume => 'Nadaljuj';
   @override

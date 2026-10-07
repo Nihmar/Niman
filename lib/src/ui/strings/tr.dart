@@ -2132,25 +2132,22 @@ final class TurkishStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'En doğru, çok bellek gerektirir';
   @override
-  String get transcriptionModelDownload => 'İndir';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       '$model modeli silinsin mi?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Bu işlem $size yer açar. Modeli daha sonra yeniden indirebilirsiniz.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'İndirme başarısız oldu. Bağlantınızı kontrol edip yeniden deneyin.';
   @override
   String get actionRetry => 'Yeniden dene';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Bağlantı koptu, yeniden deneniyor…';
+  String get downloadRetrying => 'Bağlantı koptu, yeniden deneniyor…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      '$progress noktasında duraklatıldı';
+  String downloadPaused(String progress) => '$progress noktasında duraklatıldı';
   @override
   String get actionResume => 'Devam et';
   @override

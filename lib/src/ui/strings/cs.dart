@@ -2146,25 +2146,21 @@ final class CzechStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Nejpřesnější, potřebuje hodně paměti';
   @override
-  String get transcriptionModelDownload => 'Stáhnout';
-  @override
   String transcriptionModelDeleteTitle(String model) => 'Smazat model $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Uvolní se $size. Model si můžete později stáhnout znovu.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Stažení se nezdařilo. Zkontrolujte připojení a zkuste to znovu.';
   @override
   String get actionRetry => 'Zkusit znovu';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Připojení se přerušilo, zkouší se znovu…';
+  String get downloadRetrying => 'Připojení se přerušilo, zkouší se znovu…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pozastaveno na $progress';
+  String downloadPaused(String progress) => 'Pozastaveno na $progress';
   @override
   String get actionResume => 'Pokračovat';
   @override

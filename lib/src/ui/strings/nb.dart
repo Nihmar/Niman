@@ -2138,26 +2138,22 @@ final class NorwegianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Mest nøyaktig, trenger mye minne';
   @override
-  String get transcriptionModelDownload => 'Last ned';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Slette modellen $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Dette frigjør $size. Du kan laste ned modellen igjen senere.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Nedlastingen mislyktes. Sjekk tilkoblingen og prøv igjen.';
   @override
   String get actionRetry => 'Prøv igjen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Tilkoblingen ble brutt, prøver igjen…';
+  String get downloadRetrying => 'Tilkoblingen ble brutt, prøver igjen…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Satt på pause ved $progress';
+  String downloadPaused(String progress) => 'Satt på pause ved $progress';
   @override
   String get actionResume => 'Fortsett';
   @override

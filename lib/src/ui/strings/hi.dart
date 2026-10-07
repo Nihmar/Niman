@@ -2121,25 +2121,21 @@ final class HindiStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'सबसे सटीक, बहुत मेमोरी चाहिए';
   @override
-  String get transcriptionModelDownload => 'डाउनलोड करें';
-  @override
   String transcriptionModelDeleteTitle(String model) => '$model मॉडल हटाएँ?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'इससे $size खाली होगा। आप बाद में मॉडल फिर से डाउनलोड कर सकते हैं।';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'डाउनलोड नहीं हो सका। कनेक्शन जाँचें और फिर से कोशिश करें।';
   @override
   String get actionRetry => 'फिर से कोशिश करें';
   @override
   String get decimalSeparator => '.';
   @override
-  String get transcriptionModelRetrying =>
-      'कनेक्शन टूट गया, फिर से कोशिश हो रही है…';
+  String get downloadRetrying => 'कनेक्शन टूट गया, फिर से कोशिश हो रही है…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      '$progress पर रुका हुआ';
+  String downloadPaused(String progress) => '$progress पर रुका हुआ';
   @override
   String get actionResume => 'फिर शुरू करें';
   @override
