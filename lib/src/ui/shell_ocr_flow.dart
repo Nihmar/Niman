@@ -64,8 +64,12 @@ final class ShellOcrFlow {
     final root = controller.root;
     final ops = controller.ops;
     if (root == null || ops == null) return;
-    await installation.load();
-    if (!context.mounted) return;
+    // The provider loads at creation: only a press that beats it waits.
+    // The job scans the downloads again itself (#610).
+    if (!installation.loaded) {
+      await installation.load();
+      if (!context.mounted) return;
+    }
     if (installation.unavailable) {
       ScaffoldMessenger.of(
         context,
