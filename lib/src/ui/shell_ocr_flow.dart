@@ -154,6 +154,8 @@ final class ShellOcrFlow {
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            // An action would keep it up until it is dismissed by hand (#508).
+            persist: false,
             content: Text(message),
             action: SnackBarAction(
               label: AppStrings.ocrOpenText,
