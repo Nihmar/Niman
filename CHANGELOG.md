@@ -6,6 +6,45 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.1.6] - 2026-10-07
+
+Diagrams, drawn in the app.
+
+A ` ```mermaid ` block is now drawn in the read view and in live, by an
+engine written in Dart — no web view, the same picture on Android, Linux
+and Windows. Underneath, a note is read by a Markdown parser of Niman's
+own, held to the one GitHub uses: lists, quotes, tables and footnotes read
+the same in the editor, the read view, the index and the export. Around
+them, zoom for the note's text, notes and folders that move by dragging,
+and a round of fixes to the caret and the keyboard.
+
+### Added
+- **Mermaid diagrams and mind maps** (#530): flowchart, mind map, sequence, pie, class, state, entity-relationship, Gantt, timeline, user journey, git graph, kanban, quadrant chart, xy chart, Sankey, block, packet, radar, treemap, requirement, C4 and architecture. A click on a diagram in live shows its source; in the read view a tap leaves the view as it is, and the full-screen button opens it. A diagram that cannot be read shows its source. Diagrams travel to HTML and EPUB as pictures
+- **Convert list to mind map**, in the command palette and the editor's Tools sheet
+- **Zoom the note's text** (#538): `Ctrl+=`, `Ctrl+-` and `Ctrl+0` on the desktop (on every keyboard layout and on the numpad, #577), *Zoom in* / *Zoom out* / *Reset zoom* in the palette, and a pinch with two fingers or on a trackpad. It moves the note text size in Settings, so the size is kept
+- **Drag a note or a folder in the tree to move it** (#567): with the mouse straight away, on Android after a long press. A drop on a folder moves into it, on a note into the note's folder, below the rows into the library root; links follow, as with *Move*
+- **A code block's copy button**, in the read view and in live (#541)
+- **First day of the week** in Settings → Appearance (#566): the system's — its region's, not its language's (#578) — or Monday, Saturday or Sunday for the library. Every calendar follows it
+- **A Markdown rule that joins an item's wrapped lines** (#549): a list item's paragraph written over several lines is tidied onto one; a hard break stays a break, and prose outside a list is never reflowed
+
+### Changed
+- **A note is read as GitHub reads it**: one parser for the editor, the read view, the index and the export, held to cmark-gfm. Lists, quotes, tables, tabs, footnotes and lazy lines that used to read one way in the editor and another in the read view now agree
+- **A `$` touching a number is a currency sign**, not the edge of a formula: `20$ + 0,10$/Kg` stays prose, as does `$5 and $10`
+- **The column width reads as a percentage** in Settings → Editor: 100% is the shipped column, from 70% to 200% in steps of 5%. The settings file still stores pixels, so a width set before keeps its place
+- **Large notes export and index faster**: footnotes are numbered by lookup (#582), and a heading no longer costs a whole parse (#581)
+
+### Fixed
+- **The note takes the keys back** when its window, or the app, comes back from another one (#539)
+- **Android: Select all selects the whole note** (#540)
+- **A mouse click lands where it went down**, in typewriter mode too (#544)
+- **Shift+click extends the selection** to the click (#546)
+- **Home goes to a list item's content first**, then to the line's start (#545)
+- **Home and Ctrl+arrows treat `#`, `-`, `*` and `>` as text inside a code block** (#579)
+- **Ctrl+Left at a line's head, and Ctrl+Right at its end, keep to the line** (#528)
+- **A drop on a pinned row no longer moves the item to the library root** (#574)
+- **A live task's box sits on its row** when the text opens with a mark
+- **A closed library never reopens its settings file** behind it
+
 ## [0.1.5] - 2026-10-01
 
 A rename takes what pointed at it.
