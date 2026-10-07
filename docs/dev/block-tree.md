@@ -622,3 +622,35 @@ its own in `LineState`, or `OpenItem` with an indent of four and a flag
 — every user of `listStack` / `listDepth` decides which); the consumers
 that find definitions by line today (`DocumentScope`, `footnote_list`,
 `source_styler`, `note_html`).
+
+### Held to `cmark-gfm` itself: where it stands (2026-10-07)
+
+`uv run --with cmarkgfm dart run tool/cmark_harness.dart 3000 <seed>`,
+seeds 1-3: 26 documents of 2 000 differed on seed 1 before, about 15 of
+3 000 a seed after. Fixed, each kept in `cmark-cases.json`:
+
+- a footnote definition in an item past its first line is one — read
+  again at the item's margin by the tree, never a link reference — and
+  counts toward the list's looseness;
+- a footnote cited only in a definition's body is drawn, and footnotes
+  are numbered by their citations in the note's order, definitions
+  included (the writer writes each body where it stands);
+- an item opened empty keeps its content past a blank line, a blank line
+  reaching its indent is its own, and blank lines before an item's first
+  block loosen nothing;
+- a list does not count on across a footnote definition's edge, and one
+  on a definition's own line starts at its number;
+- one to three spaces alone end a footnote definition (`cmark-gfm` asks
+  the line's first character);
+- a fence's indent counts a tab its item took part of as one character.
+
+Left, all rare by construction:
+
+- **A footnote definition inside a footnote definition, or inside an
+  item and followed by more lines** (`[^f]: w` / `    [^g]:`, `- w` /
+  `    [^f]:` / `  - x`): the scanner keeps one definition, at the
+  margin; nesting needs it as a container of the item stack.
+- **`[r]: /u` / `| a | b |` / `|---|---|`**: `cmark-gfm` leaves the
+  definition as paragraph text, unresolved, when the paragraph heads a
+  table — a fault of its table extension, not followed: the definition
+  works here.

@@ -198,5 +198,70 @@
     "about": "a blank line opens a paragraph that may head a table again",
     "markdown": "w\n|---|---|---|\n\nx | y\n|---|---|\n",
     "html": "<p>w\n|---|---|---|</p>\n<table>\n<thead>\n<tr>\n<th>x</th>\n<th>y</th>\n</tr>\n</thead>\n</table>\n"
+  },
+  {
+    "about": "a footnote definition in an item past its first line",
+    "markdown": "- a\n\n  [^f]: w\n\nx[^f]\n",
+    "html": "<ul>\n<li>\n<p>a</p>\n</li>\n</ul>\n<p>x<sup class=\"footnote-ref\"><a href=\"#fn-f\" id=\"fnref-f\" data-footnote-ref>1</a></sup></p>\n<section class=\"footnotes\" data-footnotes>\n<ol>\n<li id=\"fn-f\">\n<p>w <a href=\"#fnref-f\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"1\" aria-label=\"Back to reference 1\">↩</a></p>\n</li>\n</ol>\n</section>\n"
+  },
+  {
+    "about": "a footnote definition's label is no link reference's",
+    "markdown": "x[^f]\n\n- y\n\n  [^f]: w\n  more\n",
+    "html": "<p>x<sup class=\"footnote-ref\"><a href=\"#fn-f\" id=\"fnref-f\" data-footnote-ref>1</a></sup></p>\n<ul>\n<li>\n<p>y</p>\n</li>\n</ul>\n<section class=\"footnotes\" data-footnotes>\n<ol>\n<li id=\"fn-f\">\n<p>w\nmore <a href=\"#fnref-f\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"1\" aria-label=\"Back to reference 1\">↩</a></p>\n</li>\n</ol>\n</section>\n"
+  },
+  {
+    "about": "a footnote definition in an item counts toward its looseness",
+    "markdown": "1. w\n      \n      [^f]: w\n",
+    "html": "<ol>\n<li>\n<p>w</p>\n</li>\n</ol>\n"
+  },
+  {
+    "about": "a footnote cited only in its own body",
+    "markdown": "[^f]: w\n    w[^f]\n",
+    "html": "<section class=\"footnotes\" data-footnotes>\n<ol>\n<li id=\"fn-f\">\n<p>w\nw<sup class=\"footnote-ref\"><a href=\"#fn-f\" id=\"fnref-f\" data-footnote-ref>1</a></sup> <a href=\"#fnref-f\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"1\" aria-label=\"Back to reference 1\">↩</a></p>\n</li>\n</ol>\n</section>\n"
+  },
+  {
+    "about": "footnotes numbered by their citations in the note's order, definitions included",
+    "markdown": "[^a]: see[^b]\n[^b]: x\n\ntext[^a]\n",
+    "html": "<p>text<sup class=\"footnote-ref\"><a href=\"#fn-a\" id=\"fnref-a\" data-footnote-ref>2</a></sup></p>\n<section class=\"footnotes\" data-footnotes>\n<ol>\n<li id=\"fn-b\">\n<p>x <a href=\"#fnref-b\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"1\" aria-label=\"Back to reference 1\">↩</a></p>\n</li>\n<li id=\"fn-a\">\n<p>see<sup class=\"footnote-ref\"><a href=\"#fn-b\" id=\"fnref-b\" data-footnote-ref>1</a></sup> <a href=\"#fnref-a\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"2\" aria-label=\"Back to reference 2\">↩</a></p>\n</li>\n</ol>\n</section>\n"
+  },
+  {
+    "about": "an item opened empty goes on past a blank line once it has content",
+    "markdown": "-\n   w\n\n   x\n",
+    "html": "<ul>\n<li>\n<p>w</p>\n<p>x</p>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a blank line reaching an empty item's indent is the item's",
+    "markdown": "-\n  \n  x\n",
+    "html": "<ul>\n<li>x</li>\n</ul>\n"
+  },
+  {
+    "about": "an empty footnote definition ends the list before it",
+    "markdown": "2) w\n[^f]:\n  2) w\n",
+    "html": "<ol start=\"2\">\n<li>w</li>\n</ol>\n<ol start=\"2\">\n<li>w</li>\n</ol>\n"
+  },
+  {
+    "about": "a list in a footnote definition is not counted on outside it",
+    "markdown": "[^f]: w\n\t1. w\n10. w\n",
+    "html": "<ol start=\"10\">\n<li>w</li>\n</ol>\n"
+  },
+  {
+    "about": "an ordered list on a definition's own line starts at its number",
+    "markdown": "[^f]: 3) a\n    3) b\n\nx[^f]\n",
+    "html": "<p>x<sup class=\"footnote-ref\"><a href=\"#fn-f\" id=\"fnref-f\" data-footnote-ref>1</a></sup></p>\n<section class=\"footnotes\" data-footnotes>\n<ol>\n<li id=\"fn-f\">\n<ol start=\"3\">\n<li>a</li>\n<li>b</li>\n</ol>\n<a href=\"#fnref-f\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"1\" aria-label=\"Back to reference 1\">↩</a>\n</li>\n</ol>\n</section>\n"
+  },
+  {
+    "about": "one to three spaces alone end a footnote definition",
+    "markdown": "[^f]: a\n  \n    b\n\nx[^f]\n",
+    "html": "<pre><code>b\n</code></pre>\n<p>x<sup class=\"footnote-ref\"><a href=\"#fn-f\" id=\"fnref-f\" data-footnote-ref>1</a></sup></p>\n<section class=\"footnotes\" data-footnotes>\n<ol>\n<li id=\"fn-f\">\n<p>a <a href=\"#fnref-f\" class=\"footnote-backref\" data-footnote-backref data-footnote-backref-idx=\"1\" aria-label=\"Back to reference 1\">↩</a></p>\n</li>\n</ol>\n</section>\n"
+  },
+  {
+    "about": "a fence's indent counts a tab its item took part of as one",
+    "markdown": "- item\n\t```\n\tcode\n\t```\n",
+    "html": "<ul>\n<li>item\n<pre><code> code\n</code></pre>\n</li>\n</ul>\n"
+  },
+  {
+    "about": "a blank line short of an item is the item's to its end",
+    "markdown": "   - ```\n   \n",
+    "html": "<ul>\n<li>\n<pre><code>\n</code></pre>\n</li>\n</ul>\n"
   }
 ]

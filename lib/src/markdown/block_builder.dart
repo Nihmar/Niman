@@ -37,15 +37,19 @@ final class BlockBuilder {
   Block? get open => _open;
 
   /// The last non-blank block before the next line: what an item starting
-  /// there would count on from.
+  /// there would count on from. An empty footnote definition is blank, and
+  /// still one: the list after it is another.
   Block? get previous {
     final open = _open;
-    if (open != null && open.kind != BlockKind.blank) return open;
+    if (open != null && _counts(open)) return open;
     for (var at = _blocks.length - 1; at >= 0; at--) {
-      if (_blocks[at].kind != BlockKind.blank) return _blocks[at];
+      if (_counts(_blocks[at])) return _blocks[at];
     }
     return _before;
   }
+
+  static bool _counts(Block block) =>
+      block.kind != BlockKind.blank || block.footnote == Block.opensFootnote;
 
   /// Adds [line], whose entering state is recorded.
   void add(int line) {

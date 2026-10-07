@@ -456,9 +456,11 @@ final class LineRules {
     // A link reference definition, where no paragraph is open or one of
     // definitions alone is: the lines it is read off — this one and those
     // after it in the same container, up to a line that would end a
-    // paragraph.
+    // paragraph. A footnote definition's label is never a link's, even
+    // where it opens none (in an item, read again at its margin).
     if ((!paragraph || open.definitionsOnly) &&
-        LinkDefinitionSyntax.opens(text)) {
+        LinkDefinitionSyntax.opens(text) &&
+        FootnoteSyntax.opening(text) == null) {
       var examined = line;
       String? more() {
         final at = examined + 1;
