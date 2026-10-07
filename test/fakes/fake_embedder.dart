@@ -297,6 +297,25 @@ final class FakeEmbedder {
     await _action('TextInputAction.newline');
   }
 
+  /// Selects everything the platform holds, as Android's own Select all
+  /// does (the keyboard's, the selection's action mode): its copy, which is
+  /// a window of a long note, not the note.
+  Future<void> selectAllOfCopy() async {
+    selection = TextSelection(baseOffset: 0, extentOffset: text.length);
+    await _send(<Map<String, dynamic>>[
+      <String, dynamic>{
+        'oldText': text,
+        'deltaStart': -1,
+        'deltaEnd': -1,
+        'deltaText': '',
+        'selectionBase': 0,
+        'selectionExtent': text.length,
+        'composingBase': -1,
+        'composingExtent': -1,
+      },
+    ]);
+  }
+
   /// Presses Backspace.
   ///
   /// On the desktop the key is the framework's or nobody's; on Android the

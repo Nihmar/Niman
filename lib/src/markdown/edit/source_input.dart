@@ -495,7 +495,11 @@ final class SourceInput implements DeltaTextInputClient {
         (start, end) = (wide.start, wide.end);
       }
       if (delta is TextEditingDeltaNonTextUpdate) {
-        _reportSelection(_caretOf(delta.selection, origin));
+        _reportSelection(
+          _selectsAll(delta)
+              ? SelectionModel(anchor: 0, extent: buffer.length)
+              : _caretOf(delta.selection, origin),
+        );
       } else if (from < 0 || end < start || end > buffer.length) {
         _log.warning('edit $start..$end outside the note (${buffer.length})');
         known = false;
@@ -514,6 +518,20 @@ final class SourceInput implements DeltaTextInputClient {
       if (known) value = delta.apply(value);
     }
     _platformNowHas(known ? value : null);
+  }
+
+  /// Whether [delta] selects all the platform holds of a note it holds a
+  /// window of: the platform's own Select all — Android's, from the keyboard
+  /// or the selection's menu — which knows only its copy, and means the
+  /// note (#540). No selection the platform makes otherwise spans its whole
+  /// copy: the handles are the app's.
+  bool _selectsAll(TextEditingDelta delta) {
+    final length = delta.oldText.length;
+    final selection = delta.selection;
+    return length > 0 &&
+        length < buffer.length &&
+        selection.start == 0 &&
+        selection.end == length;
   }
 
   /// Whether [delta] is part of a composition, which an IME may still
