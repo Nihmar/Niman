@@ -2,6 +2,7 @@
 // the legacy editor's #70 and #69): the row being written keeps to the middle
 // and is lit, and Zen draws a thicker caret.
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
@@ -114,6 +115,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(_caretShare(tester, state), closeTo(0.5, 0.06));
     expect(_rowLit(tester), isTrue);
+  });
+
+  both('a click lands where it went down, whatever scrolls under it', (
+    tester,
+    mode,
+  ) async {
+    // #544: the press put the caret on the row above and glided it to the
+    // middle, and the release, read again under the pointer, landed a row
+    // further up. The glide is played here by hand while the button is down:
+    // the test's pointer holds the scroll still.
+    final state = await _pump(
+      tester,
+      typewriter: true,
+      live: mode == _Mode.live,
+    );
+    state.focusNode.requestFocus();
+    await tester.pump();
+    for (var line = 0; line < 30; line++) {
+      state.moveCaretVertically(1);
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+    final above = Offset(40, state.caretRect!.center.dy - _theme.lineHeight);
+    final mouse = await tester.startGesture(
+      above,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    final scroll = tester.state<ScrollableState>(find.byType(Scrollable).first);
+    scroll.position.jumpTo(scroll.position.pixels - _theme.lineHeight);
+    await tester.pump();
+    await mouse.up();
+    await tester.pumpAndSettle();
+    expect(state.widget.buffer.lineOf(state.selection.extent), 29);
   });
 
   both('the last line can reach the middle too', (tester, mode) async {
