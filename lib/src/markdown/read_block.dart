@@ -47,6 +47,8 @@ final class ReadInline {
           out.write(text);
         case CodeNode(:final code):
           out.write(code);
+        case HtmlNode(:final html) when html.startsWith('<!--'):
+          break;
         case HtmlNode(:final html):
           out.write(html);
         case SoftBreakNode() || HardBreakNode():

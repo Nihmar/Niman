@@ -98,6 +98,11 @@ final class InlineSpans {
           spans.add(_text(text, style, frame.link));
         case CodeNode(:final code):
           spans.add(_text(code, style.and(code: true), frame.link));
+        // A comment is the writer's, not the reader's: nothing shows, as
+        // in any Markdown renderer (#595 keeps a line's place on a scan
+        // in one).
+        case HtmlNode(:final html) when html.startsWith('<!--'):
+          break;
         case HtmlNode(:final html):
           spans.add(_text(html, style, frame.link));
         case SoftBreakNode() || HardBreakNode():
