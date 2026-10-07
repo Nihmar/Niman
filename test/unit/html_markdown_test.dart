@@ -6,16 +6,16 @@
 // of the book: its literals run on without one.
 // ignore_for_file: missing_whitespace_between_adjacent_strings
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/epub/xhtml_markdown.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/markdown/from_html/html_markdown.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
 import 'package:niman/src/markdown/inline/inline_parser.dart';
 
 void main() {
   final pictures = <String>[];
   final links = <String>[];
-  final converter = XhtmlMarkdown(
+  final converter = HtmlMarkdown(
     picture: (src) {
       if (src.startsWith('missing')) return null;
       pictures.add(src);
@@ -32,7 +32,7 @@ void main() {
     links.clear();
   });
 
-  ChapterMarkdown convert(String body) => converter.convert(
+  MarkdownWithAnchors convert(String body) => converter.convert(
     '<?xml version="1.0" encoding="utf-8"?>'
     '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>T</title>'
     '<style>p { color: red }</style></head><body>$body</body></html>',

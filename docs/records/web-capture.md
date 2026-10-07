@@ -20,7 +20,8 @@ The constraint that shapes the rest: **no new pub dependency.**
   reader. The port keeps upstream's algorithm and names, so a diff against a
   new upstream release stays readable.
 - **The conversion** to Markdown is `XhtmlMarkdown`
-  (`lib/src/epub/xhtml_markdown.dart`), moved to `lib/src/markdown/html/`
+  (`lib/src/epub/xhtml_markdown.dart`), moved to
+  `lib/src/markdown/from_html/` (`markdown/html/` is the writer the other way)
   and grown for the web.
 - **HTTP** is `dart:io`'s `HttpClient`, as the sync and the updates use it.
 - **The clipboard's HTML** is read by Niman's own native code on each
