@@ -68,6 +68,7 @@ import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
+import 'package:niman/src/markdown/render/focus_return.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_code_colors.dart';
@@ -661,8 +662,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // A window hidden to the tray draws nothing (#512): the caret blink is
     // its own frame source and stops while it is off screen.
     WindowVisibility.shown.addListener(_onWindowShown);
-    _appState = WidgetsBinding.instance.lifecycleState;
-    _lifecycle = AppLifecycleListener(onStateChange: _lifecycleChanged);
+    _focusReturn.start();
     _scheduleCaret();
     final scroll = widget.surface?.takePendingScroll();
     if (scroll != null) {
@@ -912,7 +912,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     WindowVisibility.shown.removeListener(_onWindowShown);
-    _lifecycle.dispose();
+    _focusReturn.dispose();
     _blink?.cancel();
     _scanSlice?.cancel();
     _typewriter.dispose();
@@ -3143,55 +3143,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// is hidden and starts over when it is back (#512).
   void _onWindowShown() => _restartBlink();
 
-  /// The app's comings and goings ([_lifecycleChanged]).
-  late final AppLifecycleListener _lifecycle;
-
-  /// The app's state as last heard, and whether this note had the keys when
-  /// the app stopped being the one in front.
-  AppLifecycleState? _appState;
-  bool _focusedWhenLeft = false;
-
-  /// A note that had the keys when another app came to the front has them
-  /// again when this one comes back (#539): on Windows, typing did nothing
-  /// until a click on the note. The connection is opened anew, whatever the
-  /// platform did with it meanwhile. Desktop only: on a phone that would
-  /// raise the keyboard nobody asked for.
-  void _lifecycleChanged(AppLifecycleState state) {
-    final was = _appState;
-    _appState = state;
-    // What the keys' road looks like at each step, for the report a device
-    // that still loses them sends (#539).
-    _log.info(
-      'app ${was?.name} -> ${state.name}: focus ${_focus.hasFocus}, '
-      'connection ${_input.isAttached}',
-    );
-    if (was == AppLifecycleState.resumed && state != was) {
-      _focusedWhenLeft = _focus.hasFocus;
-      return;
-    }
-    if (state != AppLifecycleState.resumed || !_focusedWhenLeft) return;
-    _focusedWhenLeft = false;
-    if (!mounted || !_desktop) return;
-    final primary = FocusManager.instance.primaryFocus;
-    // Something else took the keys meanwhile: it keeps them.
-    if (!_focus.hasFocus && primary != null && primary is! FocusScopeNode) {
-      return;
-    }
-    if (_focus.hasFocus) {
-      _input
-        ..detach()
-        ..attach(viewId: View.of(context).viewId);
-    } else {
-      _focus.requestFocus();
-    }
-  }
-
-  static bool get _desktop => switch (defaultTargetPlatform) {
-    TargetPlatform.linux ||
-    TargetPlatform.windows ||
-    TargetPlatform.macOS => true,
-    _ => false,
-  };
+  /// The keys given back to the note when its window comes back to the
+  /// front (#539).
+  late final FocusReturn _focusReturn = FocusReturn(
+    focus: () => _focus,
+    restore: () {
+      if (!mounted) return;
+      if (_focus.hasFocus) {
+        // The focus came back on its own: the connection may not have.
+        _input
+          ..detach()
+          ..attach(viewId: View.of(context).viewId);
+      } else {
+        _focus.requestFocus();
+      }
+    },
+  );
 
   /// Whether the caret is blinking right now, for the test that holds the
   /// blink to the window's visibility (#512).
@@ -3330,6 +3297,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         autofocus: widget.autofocus,
         onKeyEvent: _menuKey,
         onFocusChange: (hasFocus) {
+          _focusReturn.focusChanged(hasFocus: hasFocus);
           // Only the focused note blinks (#512): an editor the keys are not
           // going to keeps its caret, steady, and draws no frame for it.
           _restartBlink();

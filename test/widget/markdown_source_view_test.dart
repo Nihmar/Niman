@@ -7,6 +7,8 @@
 // rather
 // than from a metric computed beside it, and only the viewport's lines are
 // built.
+import 'dart:ui' show ViewFocusDirection, ViewFocusEvent, ViewFocusState;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1242,22 +1244,68 @@ void main() {
     );
   });
 
-  testWidgets('back from another app, the note has the keys again', (
-    tester,
-  ) async {
-    // #539: on Windows, typing did nothing after switching back until a
-    // click on the note.
-    final state = await pump(tester, 'una riga\n');
-    await tester.tapAt(const Offset(6, 16), kind: PointerDeviceKind.mouse);
-    await tester.pump();
-    expect(state.focusNode.hasFocus, isTrue);
-    expect(tester.testTextInput.hasAnyClients, isTrue);
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    // The platform let the connection go while the app was away.
-    tester.testTextInput.closeConnection();
-    await tester.pump();
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pump();
-    expect(tester.testTextInput.hasAnyClients, isTrue);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+  for (final platform in [TargetPlatform.linux, TargetPlatform.windows]) {
+    testWidgets('back from another window, the note has the keys again', (
+      tester,
+    ) async {
+      // #539, as the log showed it: the focus left the note with the
+      // window, parked on the root, and as the window came back another
+      // control took it — here the button above the note — so Flutter did
+      // not put it back where it was.
+      final other = FocusNode(debugLabel: 'other');
+      addTearDown(other.dispose);
+      tester.view.physicalSize = const Size(500, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                TextButton(
+                  focusNode: other,
+                  onPressed: () {},
+                  child: const Text('first'),
+                ),
+                Expanded(
+                  child: MarkdownSourceView(
+                    buffer: SourceBuffer.fromText('una riga\n'),
+                    theme: _theme,
+                    showLineNumbers: false,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final state = tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      );
+      state.focusNode.requestFocus();
+      await tester.pump();
+      expect(state.focusNode.hasFocus, isTrue);
+      final viewId = tester.view.viewId;
+      void window(ViewFocusState focus) =>
+          tester.binding.handleViewFocusChanged(
+            ViewFocusEvent(
+              viewId: viewId,
+              state: focus,
+              direction: ViewFocusDirection.forward,
+            ),
+          );
+      window(ViewFocusState.unfocused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      expect(state.focusNode.hasFocus, isFalse);
+      window(ViewFocusState.focused);
+      other.requestFocus();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+      expect(state.focusNode.hasFocus, isTrue);
+      expect(tester.testTextInput.hasAnyClients, isTrue);
+    }, variant: TargetPlatformVariant.only(platform));
+  }
 }
