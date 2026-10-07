@@ -3039,6 +3039,10 @@ final class SerbianStrings extends Strings {
       'је проналази као сваку белешку.';
 
   @override
+  String get ocrPdfHasText =>
+      'Овај PDF већ садржи текст: можда га не треба препознавати.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Прво преузимање од $size';
 
   @override

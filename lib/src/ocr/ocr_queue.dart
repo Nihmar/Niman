@@ -76,6 +76,9 @@ final class OcrQueue extends ChangeNotifier {
   final StreamController<OcrJob> _finished = StreamController.broadcast();
   OcrJob? _running;
   OcrRecognizer? _recognizer;
+
+  /// Completed by [cancel] while the running job waits on its downloads.
+  Completer<void>? _stop;
   bool _disposed = false;
   int _nextId = 1;
 
@@ -123,13 +126,15 @@ final class OcrQueue extends ChangeNotifier {
   }
 
   /// Stops [job]: a waiting one leaves the queue, a running one stops at
-  /// the end of its page and writes nothing.
+  /// the end of its page and writes nothing — or, still downloading,
+  /// at once, cancelling the downloads it started.
   void cancel(OcrJob job) {
     if (job.finished) return;
     _log.info('cancel $job');
     if (identical(job, _running)) {
       job.phase = OcrJobPhase.cancelled;
       _recognizer?.close();
+      if (_stop case final stop? when !stop.isCompleted) stop.complete();
     } else {
       _finish(job, OcrJobPhase.cancelled);
     }
@@ -163,10 +168,25 @@ final class OcrQueue extends ChangeNotifier {
     final clock = Stopwatch()..start();
     final writer = _writers.remove(job.id)!;
     try {
+      // A file deleted since the last scan is downloaded again (#606),
+      // here rather than on the press, where it would hold the sheet.
+      await installation.rescan();
       final missing = installation.missingFor(job.languages);
       if (missing.isNotEmpty) {
+        // A download already running was started elsewhere (the settings
+        // page): a cancel of this job leaves it going.
+        final started = [
+          for (final item in missing)
+            if (installation.stateOf(item) is! Downloading) item,
+        ];
         _set(job, OcrJobPhase.downloading);
-        await installation.downloadAll(missing);
+        final stop = _stop = Completer<void>();
+        await Future.any([installation.downloadAll(missing), stop.future]);
+        _stop = null;
+        if (job.phase == OcrJobPhase.cancelled) {
+          await Future.wait(started.map(installation.cancel));
+          return _end(job);
+        }
         final failed = [
           for (final item in missing)
             if (installation.stateOf(item) is! Downloaded) item.id,
@@ -269,7 +289,16 @@ final class OcrQueue extends ChangeNotifier {
       }
       final existing = await ops.readNote(path);
       if (!isOcrSidecarOf(existing, fileName)) continue;
-      await ops.saveNote(path, mergeOcrSidecar(existing, read, paged: paged));
+      await ops.saveNote(
+        path,
+        mergeOcrSidecar(
+          existing,
+          read,
+          paged: paged,
+          languages: job.languageCodes,
+          date: _now(),
+        ),
+      );
       return path;
     }
     throw StateError('no free sidecar name for ${job.path}');

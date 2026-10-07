@@ -2656,6 +2656,9 @@ final class ChineseStrings extends Strings {
   String get ocrSavedAsHint => '文件旁的一篇笔记，每页一节。搜索可以像找其他笔记一样找到它。';
 
   @override
+  String get ocrPdfHasText => '此 PDF 已包含文本，可能无需识别。';
+
+  @override
   String ocrNeedsDownload(String size) => '首先需要下载 $size';
 
   @override

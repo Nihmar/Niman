@@ -3062,6 +3062,10 @@ final class RomanianStrings extends Strings {
       'găsește ca pe orice notă.';
 
   @override
+  String get ocrPdfHasText =>
+      'Acest PDF conține deja text: poate nu trebuie recunoscut.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Mai întâi, o descărcare de $size';
 
   @override

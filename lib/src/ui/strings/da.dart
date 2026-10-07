@@ -2997,6 +2997,11 @@ final class DanishStrings extends Strings {
       'finder den som alle noter.';
 
   @override
+  String get ocrPdfHasText =>
+      'Denne PDF indeholder allerede tekst: den behøver måske ikke at '
+      'blive genkendt.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Først en download på $size';
 
   @override

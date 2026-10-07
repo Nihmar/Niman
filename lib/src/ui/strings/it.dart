@@ -3032,6 +3032,10 @@ final class ItalianStrings extends Strings {
       'la trova come ogni nota.';
 
   @override
+  String get ocrPdfHasText =>
+      'Questo PDF contiene già del testo: forse non serve riconoscerlo.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Prima, un download di $size';
 
   @override

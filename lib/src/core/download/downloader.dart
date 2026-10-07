@@ -67,18 +67,37 @@ final class Downloader<T extends Downloadable> {
 
   final DownloadStarter _start;
   final Map<String, FileDownload> _running = {};
+  final Map<String, Future<void>> _downloads = {};
   final Set<String> _cancelled = {};
+
+  /// The retry waits running now, by item id.
+  final Map<String, Completer<void>> _waits = {};
   bool _closed = false;
 
   /// Whether [item] has a download attempt running right now.
   bool isRunning(T item) => _running.containsKey(item.id);
 
   /// Downloads [item], resuming a partial file, retrying on connection
-  /// problems.
+  /// problems; while [item] is already downloading, answers that download
+  /// rather than starting a second one, so a caller that needs the file
+  /// (a recognition waiting on a language the settings page started)
+  /// waits for it to land.
   Future<void> download(T item) async {
-    // Downloading covers the moment the isolate is still spawning: a
-    // second tap must not start a second download.
-    if (state(item) case Downloading() || Downloaded()) return;
+    if (state(item) is Downloaded) return;
+    if (_downloads[item.id] case final running?) {
+      await running;
+      return;
+    }
+    final running = _downloads[item.id] = _download(item);
+    try {
+      await running;
+    } finally {
+      // What it removes is `running`, awaited above.
+      unawaited(_downloads.remove(item.id));
+    }
+  }
+
+  Future<void> _download(T item) async {
     _cancelled.remove(item.id);
     final clock = Stopwatch()..start();
     final kept = switch (state(item)) {
@@ -125,7 +144,12 @@ final class Downloader<T extends Downloadable> {
           Downloading(received: received, total: total, retrying: true),
         );
       }
-      await Future<void>.delayed(wait);
+      // A cancel wakes the wait rather than letting it run out.
+      final wake = _waits[item.id] = Completer<void>();
+      final timer = Timer(wait, wake.complete);
+      await wake.future;
+      timer.cancel();
+      _waits.remove(item.id);
       if (_cancelled.remove(item.id) || _closed) {
         if (!_closed) {
           await DownloadFiles.deletePart(await files.pathOf(item));
@@ -175,6 +199,12 @@ final class Downloader<T extends Downloadable> {
       return DownloadException('could not start: $error');
     }
     _running[item.id] = download;
+    // Cancelled while it was connecting: nothing was running to stop.
+    if (_closed) {
+      download.stop();
+    } else if (_cancelled.contains(item.id)) {
+      unawaited(download.cancel());
+    }
     try {
       final bytes = await download.done;
       final seconds = attemptClock.elapsedMilliseconds / 1000;
@@ -222,7 +252,13 @@ final class Downloader<T extends Downloadable> {
     switch (state(item)) {
       case Downloading():
         _cancelled.add(item.id);
+        if (_waits[item.id] case final wake? when !wake.isCompleted) {
+          wake.complete();
+        }
         await _running[item.id]?.cancel();
+        // Over once the download has wound down and said so: a caller
+        // reads NotDownloaded, not a state the cancel is still undoing.
+        await _downloads[item.id];
       case DownloadFailed(resumable: true):
         await DownloadFiles.deletePart(await files.pathOf(item));
         setState(item, const NotDownloaded());
@@ -239,5 +275,8 @@ final class Downloader<T extends Downloadable> {
       download.stop();
     }
     _running.clear();
+    for (final wake in _waits.values) {
+      if (!wake.isCompleted) wake.complete();
+    }
   }
 }

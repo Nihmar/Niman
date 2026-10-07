@@ -3020,6 +3020,11 @@ final class SwedishStrings extends Strings {
       'hittar den som alla anteckningar.';
 
   @override
+  String get ocrPdfHasText =>
+      'Den här PDF:en innehåller redan text: den behöver kanske inte '
+      'kännas igen.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Först en nedladdning på $size';
 
   @override

@@ -64,8 +64,12 @@ final class ShellOcrFlow {
     final root = controller.root;
     final ops = controller.ops;
     if (root == null || ops == null) return;
-    await installation.load();
-    if (!context.mounted) return;
+    // The provider loads at creation: only a press that beats it waits.
+    // The job scans the downloads again itself (#610).
+    if (!installation.loaded) {
+      await installation.load();
+      if (!context.mounted) return;
+    }
     if (installation.unavailable) {
       ScaffoldMessenger.of(
         context,
@@ -73,11 +77,19 @@ final class ShellOcrFlow {
       return;
     }
     var count = pageCount;
-    if (count == null && p.extension(path).toLowerCase() == '.pdf') {
+    var hasText = false;
+    if (p.extension(path).toLowerCase() == '.pdf') {
       try {
         final pages = await OcrPdfPages.open(p.join(root, path));
-        count = pages.count;
-        await pages.close();
+        try {
+          count ??= pages.count;
+          // The page on screen: a PDF made from text says so (#611).
+          if (count > 0) {
+            hasText = await pages.hasText((page ?? 1).clamp(1, count));
+          }
+        } finally {
+          await pages.close();
+        }
       } on Object {
         // The sheet offers every page; the job says if the file is bad.
       }
@@ -89,6 +101,7 @@ final class ShellOcrFlow {
       path: path,
       pageCount: count,
       page: page,
+      hasText: hasText,
     );
     if (request == null) return;
     _enqueue(path, request.languages, request.pages);
@@ -141,6 +154,8 @@ final class ShellOcrFlow {
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            // An action would keep it up until it is dismissed by hand (#508).
+            persist: false,
             content: Text(message),
             action: SnackBarAction(
               label: AppStrings.ocrOpenText,

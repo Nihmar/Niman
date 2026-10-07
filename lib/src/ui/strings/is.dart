@@ -3008,6 +3008,10 @@ final class IcelandicStrings extends Strings {
       'finnur hann eins og alla minnispunkta.';
 
   @override
+  String get ocrPdfHasText =>
+      'Þetta PDF inniheldur þegar texta: kannski þarf ekki að greina hann.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Fyrst niðurhal upp á $size';
 
   @override

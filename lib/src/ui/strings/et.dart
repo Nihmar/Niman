@@ -2967,6 +2967,10 @@ final class EstonianStrings extends Strings {
       'selle nagu iga märkme.';
 
   @override
+  String get ocrPdfHasText =>
+      'See PDF sisaldab juba teksti: seda ei pruugi olla vaja tuvastada.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Kõigepealt $size allalaadimist';
 
   @override

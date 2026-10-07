@@ -4,6 +4,8 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/download/download_state.dart';
+import 'package:niman/src/core/download/file_download.dart';
 import 'package:niman/src/ocr/ocr_engine_locator.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_job.dart';
@@ -11,6 +13,7 @@ import 'package:niman/src/ocr/ocr_language.dart';
 import 'package:niman/src/ocr/ocr_line.dart';
 import 'package:niman/src/ocr/ocr_page_source.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
+import 'package:niman/src/ocr/ocr_sidecar.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
@@ -128,6 +131,115 @@ void main() {
     expect(text, contains('## p. 3\n\npage 3 <!-- ocr'));
   });
 
+  test(
+    'a language deleted since the scan is downloaded again (#606)',
+    () async {
+      final asked = <String>[];
+      installation.dispose();
+      installation = OcrInstallation(
+        directory: () async => dir.path,
+        build: null,
+        findInstalled: () async => system,
+        probe: (_) async => '5.5.3',
+        retryDelays: const [],
+        startDownload:
+            ({
+              required uri,
+              required target,
+              required onProgress,
+              sha256,
+              onHeaders,
+            }) async {
+              asked.add(p.basename(target));
+              throw const SocketException('offline');
+            },
+      );
+      await installation.load();
+      expect(installation.missingFor([ita]), isEmpty);
+      File(p.join(dir.path, ita.file(OcrQuality.fast)!.fileName)).deleteSync();
+      final q = queue();
+      final done = finished(q);
+      final job = q.enqueue(
+        path: 'scan.pdf',
+        languages: [ita],
+        writer: writer(),
+      );
+      await done;
+      expect(asked, [p.basename(ita.file(OcrQuality.fast)!.fileName)]);
+      expect(job.phase, OcrJobPhase.failed);
+      expect(job.error, contains('not downloaded'));
+    },
+  );
+
+  test('a cancel while downloading stops at once, and only what it started '
+      '(#605)', () async {
+    // A server that never answers: a download runs until cancelled.
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    server.listen((_) {});
+    addTearDown(() => server.close(force: true));
+    installation.dispose();
+    installation = OcrInstallation(
+      directory: () async => dir.path,
+      build: null,
+      findInstalled: () async => system,
+      probe: (_) async => '5.5.3',
+      startDownload:
+          ({
+            required uri,
+            required target,
+            required onProgress,
+            sha256,
+            onHeaders,
+          }) => FileDownload.start(
+            uri: Uri.parse('http://127.0.0.1:${server.port}/f'),
+            target: target,
+            onProgress: onProgress,
+            onHeaders: onHeaders,
+          ),
+    );
+    await installation.load();
+    final deu = ocrLanguageByCode('deu')!.file(OcrQuality.fast)!;
+    final fra = ocrLanguageByCode('fra')!.file(OcrQuality.fast)!;
+    // The reader started this one from the settings page.
+    final fromSettings = installation.download(fra);
+    expect(installation.stateOf(fra), isA<Downloading>());
+
+    final q = queue(count: 1);
+    final downloading = Completer<void>();
+    q.addListener(() {
+      if (q.running?.phase == OcrJobPhase.downloading &&
+          !downloading.isCompleted) {
+        downloading.complete();
+      }
+    });
+    var done = finished(q);
+    final job = q.enqueue(
+      path: 'scan.pdf',
+      languages: [deu.language, fra.language],
+      writer: writer(),
+    );
+    await downloading.future;
+    q.cancel(job);
+    expect(await done, same(job));
+    expect(job.phase, OcrJobPhase.cancelled);
+    expect(installation.stateOf(deu), isA<NotDownloaded>());
+    expect(installation.stateOf(fra), isA<Downloading>());
+
+    // The queue is free: the next job runs.
+    done = finished(q);
+    final next = q.enqueue(
+      path: 'other.pdf',
+      languages: [ita],
+      writer: writer(),
+    );
+    expect(await done, same(next));
+    expect(next.phase, OcrJobPhase.done);
+
+    await installation.cancel(fra);
+    await fromSettings;
+    expect(installation.stateOf(fra), isA<NotDownloaded>());
+  }, timeout: const Timeout(Duration(seconds: 30)));
+
   test('a page read again is merged into the sidecar', () async {
     final q = queue();
     var done = finished(q);
@@ -150,6 +262,22 @@ void main() {
     final merged = await library.readNote('scan.ocr.md');
     expect(merged, contains('PAGE ONE'));
     expect(merged, contains('page 2'));
+  });
+
+  test('a name a note cannot hold is merged on the next run (#604)', () async {
+    final q = queue(count: 2);
+    for (final name in ['Scan 10:30.pdf', 'say "hi".pdf']) {
+      for (var run = 0; run < 3; run++) {
+        final done = finished(q);
+        final job = q.enqueue(path: name, languages: [ita], writer: writer());
+        await done;
+        expect(job.phase, OcrJobPhase.done, reason: '$name, run $run');
+        expect(job.sidecar, '${ocrSidecarName(name)}.md');
+      }
+    }
+    expect(await library.find('Scan 1030.ocr 2.md'), isNull);
+    expect(await library.find('Scan 1030.pdf.ocr.md'), isNull);
+    expect(await library.find('say hi.pdf.ocr.md'), isNull);
   });
 
   test("another file's sidecar of the same stem is left alone", () async {

@@ -3057,6 +3057,10 @@ final class SpanishStrings extends Strings {
       'búsqueda la encuentra como cualquier nota.';
 
   @override
+  String get ocrPdfHasText =>
+      'Este PDF ya contiene texto: quizá no haga falta reconocerlo.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Primero, una descarga de $size';
 
   @override

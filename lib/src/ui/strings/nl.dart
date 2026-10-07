@@ -3048,6 +3048,10 @@ final class DutchStrings extends Strings {
       'vindt haar zoals elke notitie.';
 
   @override
+  String get ocrPdfHasText =>
+      'Deze pdf bevat al tekst: herkennen is misschien niet nodig.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Eerst een download van $size';
 
   @override

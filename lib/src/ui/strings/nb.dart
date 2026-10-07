@@ -2996,6 +2996,11 @@ final class NorwegianStrings extends Strings {
       'det som alle notater.';
 
   @override
+  String get ocrPdfHasText =>
+      'Denne PDF-en inneholder allerede tekst: den trenger kanskje ikke '
+      'å gjenkjennes.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Først en nedlasting på $size';
 
   @override

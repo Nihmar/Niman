@@ -81,10 +81,16 @@ Second page <!-- ocr 0.100 0.200 0.900 0.230 -->
       },
     );
     final corrected = first.replaceFirst('one <!--', 'ONE, by hand <!--');
-    final merged = mergeOcrSidecar(corrected, {
-      2: [line('two again', 0.1, paragraph: true)],
-      4: [line('four', 0.1, paragraph: true)],
-    }, paged: true);
+    final merged = mergeOcrSidecar(
+      corrected,
+      {
+        2: [line('two again', 0.1, paragraph: true)],
+        4: [line('four', 0.1, paragraph: true)],
+      },
+      paged: true,
+      languages: 'ita',
+      date: date,
+    );
     expect(merged, contains('ONE, by hand'));
     expect(merged, contains('two again'));
     expect(merged, isNot(contains('\ntwo <!--')));
@@ -106,12 +112,86 @@ Second page <!-- ocr 0.100 0.200 0.900 0.230 -->
         1: [line('old', 0.1, paragraph: true)],
       },
     ).replaceFirst('language: ita', 'language: ita\ntags: [work]');
-    final merged = mergeOcrSidecar(first, {
-      1: [line('new', 0.1, paragraph: true)],
-    }, paged: false);
+    final merged = mergeOcrSidecar(
+      first,
+      {
+        1: [line('new', 0.1, paragraph: true)],
+      },
+      paged: false,
+      languages: 'ita',
+      date: date,
+    );
     expect(merged, contains('tags: [work]'));
     expect(merged, contains('new <!-- ocr'));
     expect(merged, isNot(contains('old')));
+  });
+
+  test('a merge stamps the latest language and date, nothing else', () {
+    for (final paged in [true, false]) {
+      final first =
+          ocrSidecarText(
+            fileName: paged ? 'scan.pdf' : 'board.jpg',
+            languages: 'eng',
+            date: DateTime(2026, 10, 2),
+            paged: paged,
+            pages: {
+              1: [line('one', 0.1, paragraph: true)],
+            },
+          ).replaceFirst(
+            'recognized:',
+            'tags:\n  - work\naliases: [x]\nrecognized:',
+          );
+      final merged = mergeOcrSidecar(
+        first,
+        {
+          1: [line('again', 0.1, paragraph: true)],
+        },
+        paged: paged,
+        languages: 'ita+eng',
+        date: DateTime(2026, 10, 7),
+      );
+      expect(merged, contains('\nlanguage: ita+eng\n'), reason: '$paged');
+      expect(merged, contains('\nrecognized: 2026-10-07\n'), reason: '$paged');
+      expect(merged, isNot(contains('eng\nlanguage')));
+      expect(merged, isNot(contains('2026-10-02')));
+      expect(merged, contains('tags:\n  - work\naliases: [x]\n'));
+      expect('language:'.allMatches(merged), hasLength(1));
+    }
+  });
+
+  test('a merge replaces a listed value and adds a missing key', () {
+    const existing =
+        '---\n'
+        'ocr: "[[scan.pdf]]"\n'
+        'language:\n'
+        '- eng\n'
+        '- deu\n'
+        'title: Scan\n'
+        '---\n'
+        '\n'
+        '## p. 1\n'
+        '\n'
+        'old\n';
+    final merged = mergeOcrSidecar(
+      existing,
+      {
+        1: [line('new', 0.1, paragraph: true)],
+      },
+      paged: true,
+      languages: 'ita',
+      date: date,
+    );
+    expect(
+      merged,
+      startsWith(
+        '---\n'
+        'ocr: "[[scan.pdf]]"\n'
+        'language: ita\n'
+        'title: Scan\n'
+        'recognized: 2026-10-07\n'
+        '---\n\n## p. 1\n\nnew <!-- ocr',
+      ),
+    );
   });
 
   test('a page with no text keeps its heading', () {
@@ -165,5 +245,26 @@ Second page <!-- ocr 0.100 0.200 0.900 0.230 -->
     );
     expect(isOcrSidecarOf(text, 'scan.pdf'), isTrue);
     expect(isOcrSidecarOf(text, 'scan.jpg'), isFalse);
+  });
+
+  test('a name a note cannot hold: named and known as written (#604)', () {
+    // A note's name loses `: * ? " < > | \`: the sidecar is looked up
+    // under the name createNote gives it.
+    expect(ocrSidecarNames('Scan 10:30.pdf'), [
+      'Scan 1030.ocr',
+      'Scan 1030.pdf.ocr',
+    ]);
+    expect(ocrSidecarName('a "b" c.png'), 'a b c.ocr');
+    for (final name in ['Scan 10:30.pdf', 'a "b" c.png', r'back\slash.pdf']) {
+      final text = ocrSidecarText(
+        fileName: name,
+        languages: 'eng',
+        date: date,
+        paged: true,
+        pages: const {},
+      );
+      expect(isOcrSidecarOf(text, name), isTrue, reason: name);
+      expect(isOcrSidecarOf(text, 'other.pdf'), isFalse, reason: name);
+    }
   });
 }

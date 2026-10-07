@@ -110,6 +110,11 @@ final class OcrLanguageFile implements Downloadable {
   String toString() => id;
 }
 
+/// The catalog by native name, as every language list shows it.
+final List<OcrLanguage> ocrLanguagesByName = List.unmodifiable(
+  <OcrLanguage>[...ocrLanguages]..sort((a, b) => a.native.compareTo(b.native)),
+);
+
 /// The language with [code], or null.
 OcrLanguage? ocrLanguageByCode(String? code) {
   for (final language in ocrLanguages) {

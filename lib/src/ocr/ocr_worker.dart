@@ -19,9 +19,10 @@ final class OcrWorker {
   new _(
     this._isolate,
     this._requests,
+    this._repliesPort,
     this._replies,
     this._exitPort,
-    this._exit,
+    this._exited,
   );
 
   /// Starts a worker reading [languages] (`ita+eng`) from the models in
@@ -48,7 +49,15 @@ final class OcrWorker {
     ]);
     switch (first) {
       case final SendPort requests:
-        return OcrWorker._(isolate, requests, stream, exit, exited);
+        return OcrWorker._(
+          isolate,
+          requests,
+          replies,
+          stream,
+          exit,
+          // The exit, or [close] shutting the port before it arrives.
+          exited.first.then<void>((_) {}, onError: (Object _) {}),
+        );
       case ('error', final String reason):
         replies.close();
         exit.close();
@@ -60,9 +69,13 @@ final class OcrWorker {
 
   final Isolate _isolate;
   final SendPort _requests;
+  final ReceivePort _repliesPort;
   final Stream<Object?> _replies;
   final ReceivePort _exitPort;
-  final Stream<Object?> _exit;
+
+  /// Completes when the isolate exits: the one future every page waits
+  /// on, rather than a listener on the exit port per page.
+  final Future<void> _exited;
   int _next = 0;
   bool _closed = false;
 
@@ -75,16 +88,25 @@ final class OcrWorker {
         (final int to, _) => to == id,
         _ => false,
       },
+      // [close] shut the port first.
+      orElse: () => (id, 'the worker stopped'),
     );
+    // An asynchronous completer, not Future.any's synchronous one: [close]
+    // ends both waits synchronously, and the page must not answer inside
+    // it, before its caller has had a chance to listen.
+    final answer = Completer<Object?>();
+    void settle(Object? message) {
+      if (!answer.isCompleted) answer.complete(message);
+    }
+
+    unawaited(reply.then(settle));
+    unawaited(_exited.then((_) => settle((id, 'the worker stopped'))));
     _requests.send((id, page));
-    final answer = await Future.any([
-      reply,
-      _exit.first.then((_) => (id, 'the worker stopped')),
-    ]);
-    return switch (answer) {
+    final message = await answer.future;
+    return switch (message) {
       (_, final List<OcrLine> lines) => lines,
       (_, final String reason) => throw TesseractException(reason),
-      _ => throw StateError('unexpected reply $answer'),
+      _ => throw StateError('unexpected reply $message'),
     };
   }
 
@@ -93,6 +115,7 @@ final class OcrWorker {
     if (_closed) return;
     _closed = true;
     _isolate.kill(priority: Isolate.immediate);
+    _repliesPort.close();
     _exitPort.close();
   }
 }

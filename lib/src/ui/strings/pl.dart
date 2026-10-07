@@ -3065,6 +3065,10 @@ final class PolishStrings extends Strings {
       'znajdzie ją jak każdą notatkę.';
 
   @override
+  String get ocrPdfHasText =>
+      'Ten PDF zawiera już tekst: być może nie trzeba go rozpoznawać.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Najpierw pobieranie: $size';
 
   @override

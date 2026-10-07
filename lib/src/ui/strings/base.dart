@@ -1533,6 +1533,9 @@ abstract base class Strings {
   /// What the sidecar is.
   String get ocrSavedAsHint;
 
+  /// A PDF that already carries text, so it may not need recognizing.
+  String get ocrPdfHasText;
+
   /// What a first recognition downloads.
   String ocrNeedsDownload(String size);
 

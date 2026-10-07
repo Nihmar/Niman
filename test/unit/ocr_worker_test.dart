@@ -32,6 +32,26 @@ void main() {
     }
   }, skip: skip);
 
+  test('closing the worker answers the page in flight', () async {
+    final worker = await OcrWorker.start(
+      engine: liveOcrEngine!,
+      datapath: liveTessdata!,
+      languages: 'eng',
+    );
+    final page = await renderOcrPage(['Never read']);
+    final pending = worker.recognize((
+      data: TransferableTypedData.fromList([page.rgba]),
+      width: page.width,
+      height: page.height,
+      bgra: false,
+      ppi: 300,
+    ));
+    // Both ports close here: the reply and the exit can no longer come,
+    // and the page answers rather than waiting forever (#608).
+    worker.close();
+    await expectLater(pending, throwsA(isA<TesseractException>()));
+  }, skip: skip);
+
   test('languages that do not load fail the start', () async {
     await expectLater(
       OcrWorker.start(

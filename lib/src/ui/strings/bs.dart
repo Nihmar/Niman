@@ -3042,6 +3042,10 @@ final class BosnianStrings extends Strings {
       'Pretraga je pronalazi kao svaku bilješku.';
 
   @override
+  String get ocrPdfHasText =>
+      'Ovaj PDF već sadrži tekst: možda ga ne treba prepoznavati.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Prvo preuzimanje od $size';
 
   @override

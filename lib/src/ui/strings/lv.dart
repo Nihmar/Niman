@@ -3010,6 +3010,10 @@ final class LatvianStrings extends Strings {
       'to atrod kā jebkuru piezīmi.';
 
   @override
+  String get ocrPdfHasText =>
+      'Šajā PDF jau ir teksts: iespējams, to nav jāatpazīst.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Vispirms lejupielāde $size';
 
   @override

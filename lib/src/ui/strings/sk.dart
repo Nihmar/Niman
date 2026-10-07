@@ -3024,6 +3024,10 @@ final class SlovakStrings extends Strings {
       'ju nájde ako každú poznámku.';
 
   @override
+  String get ocrPdfHasText =>
+      'Toto PDF už obsahuje text: možno ho netreba rozpoznávať.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Najprv stiahnutie $size';
 
   @override

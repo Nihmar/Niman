@@ -25,6 +25,7 @@
 /// becomes a tag.
 library;
 
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/markdown/text_escape.dart';
 import 'package:niman/src/ocr/ocr_line.dart';
 import 'package:path/path.dart' as p;
@@ -33,9 +34,10 @@ import 'package:path/path.dart' as p;
 const String ocrSidecarKey = 'ocr';
 
 /// The sidecar's note name for the file [fileName], without `.md`:
-/// the file's name without its extension, then `.ocr`.
+/// the file's name without its extension, then `.ocr` — as a note is
+/// named ([sanitizeName]), so `Scan 10:30.pdf` gets `Scan 1030.ocr`.
 String ocrSidecarName(String fileName) =>
-    '${p.basenameWithoutExtension(fileName)}.ocr';
+    _noteName('${p.posix.basenameWithoutExtension(fileName)}.ocr');
 
 /// The whole sidecar of the file [fileName], read in [languages]
 /// (`ita+eng`) on [date]: [pages] by page number, each under its heading
@@ -47,16 +49,11 @@ String ocrSidecarText({
   required Map<int, List<OcrLine>> pages,
   required bool paged,
 }) {
-  final day =
-      '${date.year.toString().padLeft(4, '0')}-'
-      '${date.month.toString().padLeft(2, '0')}-'
-      '${date.day.toString().padLeft(2, '0')}';
-  final name = fileName.replaceAll(r'\', r'\\').replaceAll('"', r'\"');
   final head =
       '---\n'
-      '$ocrSidecarKey: "[[$name]]"\n'
-      'language: $languages\n'
-      'recognized: $day\n'
+      '$ocrSidecarKey: ${_link(fileName)}\n'
+      '$_languageKey: $languages\n'
+      '$_recognizedKey: ${_day(date)}\n'
       '---\n';
   return _join(head, pages, paged: paged);
 }
@@ -65,12 +62,19 @@ String ocrSidecarText({
 /// order, and every other section kept as it is — a page recognized
 /// again leaves the corrections made by hand on the others. A picture's
 /// sidecar ([paged] false) keeps its frontmatter and takes the new text.
+/// Either way the frontmatter's `language:` and `recognized:` become
+/// this recognition's, [languages] on [date], and every other key stays.
 String mergeOcrSidecar(
   String existing,
   Map<int, List<OcrLine>> pages, {
   required bool paged,
+  required String languages,
+  required DateTime date,
 }) {
-  final text = existing.replaceAll('\r\n', '\n');
+  final text = _restamped(existing.replaceAll('\r\n', '\n'), {
+    _languageKey: languages,
+    _recognizedKey: _day(date),
+  });
   if (!paged) return _join(_frontmatterOf(text), pages, paged: false);
   final headings = _pageHeading.allMatches(text).toList();
   final head = headings.isEmpty
@@ -97,16 +101,30 @@ String mergeOcrSidecar(
 
 /// The names a sidecar of the file [fileName] may have, without `.md`:
 /// the stem's, then — when another file of that stem owns it — the full
-/// name's.
+/// name's; each as a note is named, so a re-run finds the note the first
+/// run created.
 List<String> ocrSidecarNames(String fileName) => [
   ocrSidecarName(fileName),
-  '${p.basename(fileName)}.ocr',
+  _noteName('${p.posix.basename(fileName)}.ocr'),
 ];
 
 /// Whether [sidecarText] is the sidecar of the file [fileName]: its
-/// frontmatter links to it.
+/// frontmatter links to it, as [ocrSidecarText] writes the link.
 bool isOcrSidecarOf(String sidecarText, String fileName) =>
-    sidecarText.contains('[[${p.basename(fileName)}]]');
+    sidecarText.contains(_wikilink(fileName));
+
+/// The frontmatter's link to the file [fileName], a quoted YAML string.
+String _link(String fileName) => '"${_wikilink(fileName)}"';
+
+/// The wikilink to the file [fileName], its `\` and `"` escaped as the
+/// quoted string it stands in holds them.
+String _wikilink(String fileName) {
+  final name = p.posix.basename(fileName);
+  return '[[${name.replaceAll(r'\', r'\\').replaceAll('"', r'\"')}]]';
+}
+
+/// [name] as `createNote` names the note.
+String _noteName(String name) => sanitizeName(name, fallback: defaultNoteName);
 
 /// The recognized text of [sidecarText] as plain text, for a clipboard:
 /// no frontmatter, no page headings, no position comments, no escapes.
@@ -173,6 +191,43 @@ String _body(List<OcrLine> lines) {
 }
 
 String _f(double fraction) => fraction.clamp(0, 1).toStringAsFixed(3);
+
+const String _languageKey = 'language';
+const String _recognizedKey = 'recognized';
+
+/// [date] as `2026-10-07`.
+String _day(DateTime date) =>
+    '${date.year.toString().padLeft(4, '0')}-'
+    '${date.month.toString().padLeft(2, '0')}-'
+    '${date.day.toString().padLeft(2, '0')}';
+
+/// [text] with each of [values]' top-level keys in its frontmatter set to
+/// its value — a key's indented or listed continuation lines replaced
+/// with it, a missing key added at the end; [text] as it is when it has
+/// no frontmatter.
+String _restamped(String text, Map<String, String> values) {
+  final front = _frontmatterOf(text);
+  if (front.isEmpty) return text;
+  final lines = front.split('\n');
+  var close = lines.indexWhere((line) => line.startsWith('---'), 1);
+  for (final MapEntry(:key, :value) in values.entries) {
+    final at = lines.indexWhere((line) => line.startsWith('$key:'), 1);
+    if (at < 0 || at >= close) {
+      lines.insert(close++, '$key: $value');
+      continue;
+    }
+    var end = at + 1;
+    while (end < close && _continuation.hasMatch(lines[end])) {
+      end++;
+    }
+    lines.replaceRange(at, end, ['$key: $value']);
+    close -= end - at - 1;
+  }
+  return lines.join('\n') + text.substring(front.length);
+}
+
+/// A line that belongs to the key above it: indented, or a list item.
+final RegExp _continuation = RegExp(r'^([ \t]|- |-$)');
 
 /// The frontmatter block at the start of [text], or nothing.
 String _frontmatterOf(String text) {

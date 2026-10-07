@@ -3035,6 +3035,10 @@ final class SlovenianStrings extends Strings {
       'najde kot vsak zapisek.';
 
   @override
+  String get ocrPdfHasText =>
+      'Ta PDF že vsebuje besedilo: morda ga ni treba prepoznati.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Najprej prenos $size';
 
   @override

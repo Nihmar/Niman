@@ -2973,6 +2973,10 @@ final class EnglishStrings extends Strings {
       'it like any note.';
 
   @override
+  String get ocrPdfHasText =>
+      'This PDF already has text in it: it may not need recognizing.';
+
+  @override
   String ocrNeedsDownload(String size) => 'First, a download of $size';
 
   @override

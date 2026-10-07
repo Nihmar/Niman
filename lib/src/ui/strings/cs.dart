@@ -3015,6 +3015,10 @@ final class CzechStrings extends Strings {
       'najde jako každou poznámku.';
 
   @override
+  String get ocrPdfHasText =>
+      'Toto PDF už obsahuje text: možná ho není třeba rozpoznávat.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Nejprve stažení $size';
 
   @override

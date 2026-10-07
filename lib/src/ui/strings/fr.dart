@@ -3102,6 +3102,11 @@ final class FrenchStrings extends Strings {
       'recherche la trouve comme toute note.';
 
   @override
+  String get ocrPdfHasText =>
+      'Ce PDF contient déjà du texte, il n’a peut-être pas besoin d’être '
+      'reconnu.';
+
+  @override
   String ocrNeedsDownload(String size) => "D'abord, un téléchargement de $size";
 
   @override

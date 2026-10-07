@@ -3032,6 +3032,10 @@ final class GalicianStrings extends Strings {
       'busca atópaa coma calquera nota.';
 
   @override
+  String get ocrPdfHasText =>
+      'Este PDF xa contén texto: quizais non faga falta recoñecelo.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Primeiro, unha descarga de $size';
 
   @override

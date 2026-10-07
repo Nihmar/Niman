@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ocr/ocr_engine_locator.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
+import 'package:niman/src/ocr/ocr_job.dart';
 import 'package:niman/src/ocr/ocr_language.dart';
 import 'package:niman/src/ocr/ocr_line.dart';
 import 'package:niman/src/ocr/ocr_page_source.dart';
@@ -54,6 +55,7 @@ void main() {
     WidgetTester tester, {
     int? pageCount,
     int? page,
+    bool hasText = false,
     Future<void> Function()? choose,
   }) async {
     tester.view.physicalSize = const Size(1000, 1400);
@@ -71,6 +73,7 @@ void main() {
                 path: 'Contratti/scan.pdf',
                 pageCount: pageCount,
                 page: page,
+                hasText: hasText,
               ),
             ),
             child: const Text('go'),
@@ -101,6 +104,7 @@ void main() {
         // English is on the device: nothing to download first.
         expect(find.byKey(const Key('recognize-download')), findsNothing);
         expect(find.text(AppStrings.ocrRecognizeAction), findsWidgets);
+        expect(find.byKey(const Key('recognize-has-text')), findsNothing);
       },
     );
     expect(request!.languages, [eng]);
@@ -141,6 +145,22 @@ void main() {
       },
     );
     expect(request!.pages, [3, 4]);
+  });
+
+  testWidgets('a PDF that already has text says so (#611)', (tester) async {
+    await load(tester);
+    final request = await ask(
+      tester,
+      pageCount: 4,
+      page: 1,
+      hasText: true,
+      choose: () async {
+        expect(find.byKey(const Key('recognize-has-text')), findsOne);
+        expect(find.text(AppStrings.ocrPdfHasText), findsOne);
+      },
+    );
+    // Said, not refused: the reader may still want it read.
+    expect(request!.languages, [eng]);
   });
 
   testWidgets('a picture asks no pages', (tester) async {
@@ -201,7 +221,12 @@ void main() {
         after: (_) {},
       ),
     );
-    await tester.pump();
+    // The job scans the downloads first, on a real isolate (#606): let its
+    // reply in, then run what it completes, until the pages start.
+    for (var i = 0; i < 500 && job.phase != OcrJobPhase.recognizing; i++) {
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+    }
     await tester.pump();
     expect(find.text(AppStrings.ocrRecognizing(1, 3)), findsNWidgets(2));
     expect(find.byKey(const Key('ocr-strip')), findsOne);

@@ -3031,6 +3031,10 @@ final class FinnishStrings extends Strings {
       'Haku löytää sen kuten minkä tahansa muistiinpanon.';
 
   @override
+  String get ocrPdfHasText =>
+      'Tässä PDF:ssä on jo tekstiä: sitä ei ehkä tarvitse tunnistaa.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Ensin $size latausta';
 
   @override
