@@ -6,23 +6,23 @@
 ///
 /// The supported grammar is Mermaid's own where it matters for a note:
 /// directions, the node shapes, subgraphs, the edge spellings and their
-/// labels, and the look `style` gives a node or a subgraph. Any other
-/// directive is skipped; an unsupported shape or edge is reported,
-/// never silently mis-drawn.
+/// labels, and the look `style`, `classDef`, `class` and `:::` give a
+/// node or a subgraph. Any other directive is skipped; an unsupported
+/// shape or edge is reported, never silently mis-drawn.
 library;
 
 import 'package:niman/src/diagrams/flow_cursor.dart';
 import 'package:niman/src/diagrams/flow_edge_scanner.dart';
+import 'package:niman/src/diagrams/flow_looks.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
-import 'package:niman/src/diagrams/flow_node_style.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_lines.dart';
 
 /// Parses a flowchart body (the fence's content, header included).
 Flowchart parseFlowchart(String source) => _FlowParser(source).parse();
 
-/// The keywords that open a directive: `style` is drawn, the rest a note
-/// draws nothing for and skips. Mermaid's own spelling, case and all:
+/// The keywords that open a directive: the looks are drawn, the rest a
+/// note draws nothing for and skips. Mermaid's own spelling, case and all:
 /// `Class` or `link` is a node.
 const Set<String> _directives = {
   'classDef',
@@ -49,8 +49,8 @@ final class _FlowParser {
   /// The ids written with a shape (`A[Text]`), not only mentioned bare.
   final Set<String> _shaped = {};
 
-  /// The look each `style` statement gave a node or a subgraph, by id.
-  final Map<String, FlowNodeStyle> _styles = {};
+  /// The looks `style`, `classDef`, `class` and `:::` give.
+  final FlowLooks _looks = FlowLooks();
 
   /// Runs the parse and returns the chart.
   Flowchart parse() {
@@ -109,7 +109,7 @@ final class _FlowParser {
       nodes: List.unmodifiable([
         for (final node in _nodes)
           if (!isBox(node.id))
-            if (_styles[node.id] case final style?)
+            if (_looks.node(node.id) case final style?)
               FlowNode(
                 id: node.id,
                 label: node.label,
@@ -131,7 +131,7 @@ final class _FlowParser {
             ),
             direction: subgraph.direction,
             parent: subgraph.parent,
-            style: _styles[subgraph.id],
+            style: _looks.subgraph(subgraph.id),
           ),
       ]),
     );
@@ -160,7 +160,16 @@ final class _FlowParser {
       return;
     }
     if (_isDirective(line)) {
-      if (word == 'style') _style(line, number);
+      final keyword = _firstWord(line);
+      final rest = line.substring(keyword.length);
+      switch (keyword) {
+        case 'style':
+          _looks.style(rest, number);
+        case 'classDef':
+          _looks.classDef(rest, number);
+        case 'class':
+          _looks.assign(rest, number);
+      }
       return;
     }
     _chain(line, number);
@@ -209,22 +218,6 @@ final class _FlowParser {
         parent: build.parent,
       ),
     );
-  }
-
-  /// `style <id> fill:…,stroke:…`: the look of one node or subgraph,
-  /// written before it or after it.
-  void _style(String line, int number) {
-    final rest = line.substring('style'.length).trim();
-    final space = rest.indexOf(RegExp(r'\s'));
-    if (space < 0) {
-      throw MermaidParseException(
-        number,
-        'expected the properties after "style $rest"',
-      );
-    }
-    final id = rest.substring(0, space);
-    final style = FlowNodeStyle.parse(rest.substring(space + 1));
-    _styles[id] = _styles[id]?.overlaid(style) ?? style;
   }
 
   // -- nodes and edges ---------------------------------------------------
@@ -289,15 +282,21 @@ final class _FlowParser {
     final open = cursor.peek;
     if (open == '[' || open == '(' || open == '{' || open == '>') {
       final shaped = cursor.readShape(number);
-      cursor.skipClass();
+      _readClass(cursor, id);
       _shaped.add(id);
       return _declare(id, shaped.shape, shaped.label);
     }
-    cursor.skipClass();
+    _readClass(cursor, id);
     // A bare mention names a node; it does not redraw one already given a
     // shape and a label (`B{Decide}` then `B --> C`).
     if (_byId.containsKey(id)) return _mention(id);
     return _declare(id, FlowNodeShape.rect, null);
+  }
+
+  /// Gives [id] the class of a `:::class` at [cursor], if one is there.
+  void _readClass(FlowCursor cursor, String id) {
+    final name = cursor.readClass();
+    if (name != null) _looks.add(id, name);
   }
 
   /// Puts [id] in every subgraph open around the statement naming it: a

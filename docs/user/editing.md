@@ -497,11 +497,14 @@ Twenty-two kinds are drawn:
   shapes (the double circle `(((…)))` too), subgraphs (nested too, and
   joined by their names — `A --> S` or `S1 --> S2` reaches the box), every
   edge spelling and its label, the invisible link `~~~`, which places
-  its nodes and draws nothing, and `style` on a node or a subgraph
-  (`style B fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#000`):
-  its fill, outline, outline width and text colour, the colour written
-  as `#rgb`, `#rrggbb`, `rgb(…)` or a common name. A fill with no `color`
-  gets black or white text, whichever reads on it.
+  its nodes and draws nothing, and the look of a node or a subgraph —
+  its fill, outline, outline width and text colour — given by `style`
+  (`style B fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#000`) or
+  by a class: `classDef warn fill:#fef3c7`, then `class B,C warn` or
+  `B:::warn`, and `classDef default` for every node. A `style` wins over
+  a class, and a class given later over one given earlier. A colour is
+  written as `#rgb`, `#rrggbb`, `rgb(…)` or a common name; a fill with no
+  `color` gets black or white text, whichever reads on it.
 - **Sequence diagrams** (`sequenceDiagram`): participants and their
   aliases, every message arrow, notes, and the frames of `loop`, `alt`,
   `opt`, `par`, `critical` and `break` with their sections.
@@ -573,11 +576,11 @@ In any of them a label may write a character as an entity, as in Mermaid:
 written out after the line is read, so `#58;` puts a colon in a label
 where a plain `:` would end it.
 
-What only colours or animates a diagram — `classDef`, `rect`,
-activations, `autonumber`, C4's `UpdateElementStyle` and
-`UpdateLayoutConfig` — is read and drawn without, in the theme's own
-colours; a flowchart's `style` is the one drawn. ZenUML, a plugin Mermaid itself loads from outside, is left
-as source with a note saying so. While the caret is in the fence, live mode
+What only colours or animates a diagram — `rect`, activations,
+`autonumber`, C4's `UpdateElementStyle` and `UpdateLayoutConfig`, and
+`style` or `classDef` anywhere but in a flowchart — is read and drawn
+without, in the theme's own colours. ZenUML, a plugin Mermaid itself
+loads from outside, is left as source with a note saying so. While the caret is in the fence, live mode
 shows the source again; a tap in the read view leaves it a diagram, and the
 read view where it is. A syntax error
 leaves the block as source, the offending line underlined and the

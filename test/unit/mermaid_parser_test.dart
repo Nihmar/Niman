@@ -191,7 +191,7 @@ void main() {
     );
   });
 
-  test('comments and directives are skipped', () {
+  test('comments are skipped, and directives name no node', () {
     final chart = _chart(
       'flowchart TD\n'
       '%% a comment\n'
@@ -303,7 +303,7 @@ void main() {
     expect(chart.edges.single.label, 'yes');
   });
 
-  test('a node may carry a :::class, drawn without it', () {
+  test('a node may carry a :::class, not part of its id', () {
     final chart = _chart(
       'flowchart TD\nA:::warn --> B[Box]:::ok-class\nB:::x-->C',
     );

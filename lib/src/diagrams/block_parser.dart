@@ -224,9 +224,11 @@ final class _BlockParser {
     } else if (open == '[' || open == '(' || open == '{' || open == '>') {
       (:shape, :label) = cursor.readShape(number);
     }
-    cursor.skipClass();
+    // A block's `:::class` is read past: the block diagram draws in the
+    // theme's colours.
+    cursor.readClass();
     final span = cursor.peek == ':' ? _readSpan(cursor) : null;
-    cursor.skipClass();
+    cursor.readClass();
     return _Ref(id, shape, label, arrow, span);
   }
 

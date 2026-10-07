@@ -115,4 +115,68 @@ void main() {
     expect(svg, contains('stroke-width="3"'));
     expect(svg, contains('fill="#e0f2fe"'));
   });
+
+  test('a classDef styles the nodes given its class, however given', () {
+    final chart = _chart(
+      'flowchart TD\nA:::warn --> B\nB --> C\nclass B,C ok\n'
+      'classDef warn fill:#fef3c7,stroke:#d97706\n'
+      'classDef ok,done fill:#dcfce7',
+    );
+    FlowNodeStyle? look(String id) =>
+        chart.nodes.firstWhere((n) => n.id == id).style;
+    expect(look('A')!.fill, const Color(0xFFFEF3C7));
+    expect(look('A')!.stroke, const Color(0xFFD97706));
+    expect(look('B')!.fill, const Color(0xFFDCFCE7));
+    expect(look('C')!.fill, const Color(0xFFDCFCE7));
+  });
+
+  test('a style wins over a class, a later class over an earlier one', () {
+    final chart = _chart(
+      'flowchart TD\nA:::one --> B\nclass A two\nstyle A stroke:#000\n'
+      'classDef one fill:#111111,stroke:#222222,color:#333333\n'
+      'classDef two fill:#444444',
+    );
+    final a = chart.nodes.firstWhere((n) => n.id == 'A').style!;
+    expect(a.fill, const Color(0xFF444444));
+    expect(a.stroke, const Color(0xFF000000));
+    expect(a.color, const Color(0xFF333333));
+  });
+
+  test('the class default lies under every node, not under a subgraph', () {
+    final chart = _chart(
+      'flowchart TD\nsubgraph S\nA --> B:::hot\nend\n'
+      'classDef default fill:#eeeeee,stroke:#999999\nclassDef hot fill:#f00',
+    );
+    FlowNodeStyle? look(String id) =>
+        chart.nodes.firstWhere((n) => n.id == id).style;
+    expect(look('A')!.fill, const Color(0xFFEEEEEE));
+    expect(look('B')!.fill, const Color(0xFFFF0000));
+    expect(look('B')!.stroke, const Color(0xFF999999));
+    expect(chart.subgraphs.single.style, isNull);
+  });
+
+  test('a class statement styles a subgraph', () {
+    final chart = _chart(
+      'flowchart TD\nsubgraph S\nA\nend\n'
+      'class S box\nclassDef box fill:#e0f2fe',
+    );
+    expect(chart.subgraphs.single.style!.fill, const Color(0xFFE0F2FE));
+  });
+
+  test('an unknown class leaves a node to the theme', () {
+    final chart = _chart('flowchart TD\nA:::nowhere --> B\nclass B missing');
+    expect(chart.nodes.map((n) => n.style), [isNull, isNull]);
+  });
+
+  test('a classDef or class with nothing to give is an error on its line', () {
+    for (final source in [
+      'flowchart TD\nA --> B\nclassDef warn',
+      'flowchart TD\nA --> B\nclass A',
+    ]) {
+      expect(
+        () => _chart(source),
+        throwsA(isA<MermaidParseException>().having((e) => e.line, 'line', 3)),
+      );
+    }
+  });
 }
