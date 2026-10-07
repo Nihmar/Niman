@@ -158,4 +158,30 @@ void main() {
       expect(noteScaler.scale(10), closeTo(24, 1e-9));
     });
   });
+
+  testWidgets('a note on screen follows its size at once', (tester) async {
+    // #538: a pinch zoomed the note only once it was opened again — the
+    // app root rebuilt, the pane's unchanged widgets did not.
+    await tester.pumpWidget(
+      AppTextScaleScope(
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: _NoteSize(),
+        ),
+      ),
+    );
+    expect(find.text('10.0'), findsOneWidget);
+    AppTextScales.note = 1.5;
+    await tester.pump();
+    expect(find.text('15.0'), findsOneWidget);
+  });
+}
+
+/// What a note pane reads: 10 at the note's size.
+final class _NoteSize extends StatelessWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context) =>
+      Text('${noteTextScalerOf(context).scale(10)}');
 }

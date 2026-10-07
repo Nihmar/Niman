@@ -87,20 +87,22 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
         // the OS accessibility setting still counts; the note text does
         // not come through here — the note pane carries the note scale in
         // a MediaQuery of its own.
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: ComposedTextScaler(
-              MediaQuery.textScalerOf(context),
-              AppTextScales.ui,
+        builder: (context, child) => AppTextScaleScope(
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: ComposedTextScaler(
+                MediaQuery.textScalerOf(context),
+                AppTextScales.ui,
+              ),
             ),
-          ),
-          // Files and folders dropped anywhere on the window (#75), over
-          // whichever screen is up.
-          child: Consumer(
-            builder: (context, ref, _) => AppDropTarget(
-              requests: ref.watch(launchRequestsProvider),
-              drops: ref.watch(dropTargetServiceProvider),
-              child: child ?? const SizedBox.shrink(),
+            // Files and folders dropped anywhere on the window (#75), over
+            // whichever screen is up.
+            child: Consumer(
+              builder: (context, ref, _) => AppDropTarget(
+                requests: ref.watch(launchRequestsProvider),
+                drops: ref.watch(dropTargetServiceProvider),
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         ),

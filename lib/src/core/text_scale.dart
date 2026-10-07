@@ -84,8 +84,23 @@ TextScaler platformTextScalerOf(BuildContext context) {
 
 /// The scaler note text is read at: the platform's, times the note
 /// slider.
-TextScaler noteTextScalerOf(BuildContext context) =>
-    ComposedTextScaler(platformTextScalerOf(context), AppTextScales.note);
+///
+/// Reading it makes [context] rebuild when the note's size changes
+/// ([AppTextScaleScope]): a pinch or a zoom key reaches the note on
+/// screen at once, not the next time it is opened.
+TextScaler noteTextScalerOf(BuildContext context) {
+  context.dependOnInheritedWidgetOfExactType<AppTextScaleScope>();
+  return ComposedTextScaler(platformTextScalerOf(context), AppTextScales.note);
+}
+
+/// Rebuilds whatever read [noteTextScalerOf] below it when either text
+/// size changes ([AppTextScales.revision]). The app root's own rebuild
+/// does not reach a pane whose widgets are unchanged.
+final class AppTextScaleScope extends InheritedNotifier<ValueNotifier<int>> {
+  /// Watches the text sizes for [child].
+  new({required super.child, super.key})
+    : super(notifier: AppTextScales.revision);
+}
 
 /// A [TextScaler] that scales on top of another one.
 ///
