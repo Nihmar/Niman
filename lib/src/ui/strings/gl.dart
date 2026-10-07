@@ -597,6 +597,10 @@ final class GalicianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Copiado';
   @override
+  String get copyCode => 'Copiar o código';
+  @override
+  String get codeCopied => 'Código copiado';
+  @override
   String get cheatsheetInsert => 'Inserir na nota';
   @override
   String get cheatHeadings => 'Títulos';

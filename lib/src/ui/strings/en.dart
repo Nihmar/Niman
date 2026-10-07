@@ -589,6 +589,10 @@ final class EnglishStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Copied';
   @override
+  String get copyCode => 'Copy code';
+  @override
+  String get codeCopied => 'Code copied';
+  @override
   String get cheatsheetInsert => 'Insert in the note';
   @override
   String get cheatHeadings => 'Headings';

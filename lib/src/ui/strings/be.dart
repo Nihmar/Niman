@@ -593,6 +593,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Скапіявана';
   @override
+  String get copyCode => 'Скапіяваць код';
+  @override
+  String get codeCopied => 'Код скапіяваны';
+  @override
   String get cheatsheetInsert => 'Уставіць у нататку';
   @override
   String get cheatHeadings => 'Загалоўкі';

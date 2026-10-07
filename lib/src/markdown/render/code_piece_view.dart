@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/code_highlight.dart';
@@ -26,8 +27,13 @@ final class CodePieceView extends StatelessWidget {
     required this.first,
     required this.last,
     required this.theme,
+    this.whole,
     super.key,
   });
+
+  /// The whole block's lines, `[start, end)`, which its copy button copies
+  /// (#541); null draws no button.
+  final ({int start, int end})? whole;
 
   /// The note.
   final SourceBuffer buffer;
@@ -52,7 +58,7 @@ final class CodePieceView extends StatelessWidget {
     // The fences' rows, as the whole block has them (`LeafView._code`).
     final fenced = block.kind == BlockKind.fencedCode;
     final row = MediaQuery.textScalerOf(context).scale(theme.lineHeight);
-    return Container(
+    final box = Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: theme.codeBackground,
@@ -79,23 +85,37 @@ final class CodePieceView extends StatelessWidget {
               style: theme.code,
             ),
     );
+    final range = whole;
+    if (range == null) return box;
+    // Every piece has the button, which copies the whole block.
+    return CodeCopyFrame(
+      code: () => _code(range.start, range.end, opens: true, ends: true),
+      child: box,
+    );
   }
 
   /// Whether the block ends on its closing fence: the note may never close
   /// it.
-  bool get _closed {
-    final closing = buffer.lineAt(block.endLine - 1).trim();
+  bool get _closed => _closes(block.endLine);
+
+  bool _closes(int end) {
+    final closing = buffer.lineAt(end - 1).trim();
     return closing.startsWith('```') || closing.startsWith('~~~');
   }
 
   /// The piece's code: its lines, without a fence line, without an indented
   /// block's four spaces.
-  String _text() {
+  String _text() =>
+      _code(block.startLine, block.endLine, opens: first, ends: last);
+
+  /// The code of lines `[start, end)`: [opens] when they start with the
+  /// block's opening fence, [ends] when they end where the block does.
+  String _code(int start, int end, {required bool opens, required bool ends}) {
     final fenced = block.kind == BlockKind.fencedCode;
-    var from = block.startLine;
-    var to = block.endLine;
-    if (fenced && first) from++;
-    if (fenced && last && _closed) to--;
+    var from = start;
+    var to = end;
+    if (fenced && opens) from++;
+    if (fenced && ends && _closes(end)) to--;
     final lines = <String>[];
     for (var at = from; at < to; at++) {
       final line = buffer.lineAt(at);

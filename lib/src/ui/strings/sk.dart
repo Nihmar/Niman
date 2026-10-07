@@ -595,6 +595,10 @@ final class SlovakStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Skopírované';
   @override
+  String get copyCode => 'Kopírovať kód';
+  @override
+  String get codeCopied => 'Kód skopírovaný';
+  @override
   String get cheatsheetInsert => 'Vložiť do poznámky';
   @override
   String get cheatHeadings => 'Nadpisy';

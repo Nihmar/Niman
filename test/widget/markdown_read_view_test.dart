@@ -302,7 +302,8 @@ void main() {
                 matching: find.byType(RichText),
               ),
             )
-            .single
+            // The code's text; its copy button's icon comes after it.
+            .first
             .text
             .toPlainText();
         expect(text, startsWith('var line0 = 0;'), reason: 'the fence is out');
@@ -335,7 +336,7 @@ void main() {
                 matching: find.byType(RichText),
               ),
             )
-            .single
+            .first
             .text
             .toPlainText();
         expect(text, endsWith('var line4999 = 4999;'), reason: 'fence out');

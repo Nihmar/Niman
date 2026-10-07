@@ -439,6 +439,8 @@ final class AppStrings {
   static String get cheatsheetTitle => _s.cheatsheetTitle;
   static String get cheatsheetCopy => _s.cheatsheetCopy;
   static String get cheatsheetCopied => _s.cheatsheetCopied;
+  static String get copyCode => _s.copyCode;
+  static String get codeCopied => _s.codeCopied;
   static String get cheatsheetInsert => _s.cheatsheetInsert;
   static String get cheatHeadings => _s.cheatHeadings;
   static String get cheatEmphasis => _s.cheatEmphasis;

@@ -588,6 +588,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopiert';
   @override
+  String get copyCode => 'Kopier kode';
+  @override
+  String get codeCopied => 'Kode kopiert';
+  @override
   String get cheatsheetInsert => 'Sett inn i notatet';
   @override
   String get cheatHeadings => 'Overskrifter';

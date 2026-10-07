@@ -597,6 +597,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopirano';
   @override
+  String get copyCode => 'Kopiraj kodo';
+  @override
+  String get codeCopied => 'Koda kopirana';
+  @override
   String get cheatsheetInsert => 'Vstavi v zapisek';
   @override
   String get cheatHeadings => 'Naslovi';

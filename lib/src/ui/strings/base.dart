@@ -296,6 +296,8 @@ abstract base class Strings {
   String get cheatsheetTitle;
   String get cheatsheetCopy;
   String get cheatsheetCopied;
+  String get copyCode;
+  String get codeCopied;
   String get cheatsheetInsert;
   String get cheatHeadings;
   String get cheatEmphasis;

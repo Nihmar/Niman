@@ -628,9 +628,10 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// Which entries of the block list are pieces of a longer code block, and
   /// where in it: the first carries the opening fence, the last the closing
-  /// one.
-  final Map<int, ({bool first, bool last})> _pieces =
-      <int, ({bool first, bool last})>{};
+  /// one; and the whole block's lines, which each piece's copy button
+  /// copies (#541).
+  final Map<int, ({bool first, bool last, int start, int end})> _pieces =
+      <int, ({bool first, bool last, int start, int end})>{};
 
   /// [blocks] with every code block longer than twice [pieceLines] cut into
   /// pieces of that many lines, each an entry of its own.
@@ -650,6 +651,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         _pieces[out.length] = (
           first: at == block.startLine,
           last: end == block.endLine,
+          start: block.startLine,
+          end: block.endLine,
         );
         out.add(
           Block(
@@ -941,6 +944,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         first: piece.first,
         last: piece.last,
         theme: _theme ?? _fallbackTheme,
+        whole: (start: piece.start, end: piece.end),
       );
     }
     final view = BlockView(

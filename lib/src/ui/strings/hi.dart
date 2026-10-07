@@ -580,6 +580,10 @@ final class HindiStrings extends Strings {
   @override
   String get cheatsheetCopied => 'कॉपी हो गया';
   @override
+  String get copyCode => 'कोड कॉपी करें';
+  @override
+  String get codeCopied => 'कोड कॉपी हो गया';
+  @override
   String get cheatsheetInsert => 'नोट में डालें';
   @override
   String get cheatHeadings => 'शीर्षक';

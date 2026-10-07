@@ -591,6 +591,10 @@ final class FinnishStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopioitu';
   @override
+  String get copyCode => 'Kopioi koodi';
+  @override
+  String get codeCopied => 'Koodi kopioitu';
+  @override
   String get cheatsheetInsert => 'Lisää muistiinpanoon';
   @override
   String get cheatHeadings => 'Otsikot';

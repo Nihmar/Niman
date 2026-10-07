@@ -596,6 +596,10 @@ final class BosnianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopirano';
   @override
+  String get copyCode => 'Kopiraj kod';
+  @override
+  String get codeCopied => 'Kod kopiran';
+  @override
   String get cheatsheetInsert => 'Umetni u bilješku';
   @override
   String get cheatHeadings => 'Naslovi';

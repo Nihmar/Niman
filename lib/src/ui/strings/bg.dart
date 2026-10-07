@@ -595,6 +595,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Копирано';
   @override
+  String get copyCode => 'Копиране на кода';
+  @override
+  String get codeCopied => 'Кодът е копиран';
+  @override
   String get cheatsheetInsert => 'Вмъкни в бележката';
   @override
   String get cheatHeadings => 'Заглавия';

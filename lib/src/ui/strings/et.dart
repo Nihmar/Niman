@@ -584,6 +584,10 @@ final class EstonianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopeeritud';
   @override
+  String get copyCode => 'Kopeeri kood';
+  @override
+  String get codeCopied => 'Kood kopeeritud';
+  @override
   String get cheatsheetInsert => 'Lisa märkmesse';
   @override
   String get cheatHeadings => 'Pealkirjad';

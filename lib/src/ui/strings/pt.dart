@@ -593,6 +593,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Copiado';
   @override
+  String get copyCode => 'Copiar código';
+  @override
+  String get codeCopied => 'Código copiado';
+  @override
   String get cheatsheetInsert => 'Inserir na nota';
   @override
   String get cheatHeadings => 'Títulos';
