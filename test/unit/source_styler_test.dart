@@ -69,9 +69,20 @@ void main() {
         'mathInline[x]',
         r'mathInline*[$]',
       ]);
-      expect(_line('a [[N|b]] c'), [
+      expect(_line('a [[N]] c'), [
         'wikilink*[[[]',
-        'wikilink[N|b]',
+        'wikilink[N]',
+        'wikilink*[]]]',
+      ]);
+      // An alias is the text, its target syntax: `live` shows the alias.
+      expect(_line('a [[N|b]] c'), [
+        'wikilink*[[[N|]',
+        'wikilink[b]',
+        'wikilink*[]]]',
+      ]);
+      expect(_line('a [[N|]] c'), [
+        'wikilink*[[[]',
+        'wikilink[N|]',
         'wikilink*[]]]',
       ]);
       expect(_line('a #tag b'), ['tag[#tag]']);

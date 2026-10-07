@@ -40,7 +40,8 @@ same Markdown either way, and only how it is drawn differs. The read view
   are set at their size; bold, italic,
   strikethrough, `==highlight==`, underline (`<u>`) and superscript (`<sup>`) are drawn as
   such, and so is a format inside another (`<u>**x**</u>` is bold and
-  underlined); list items get their bullet, number or checkbox — a click or a
+  underlined); a wikilink with an alias, `[[note|alias]]`, shows its alias,
+  coloured and underlined, as the read view does; list items get their bullet, number or checkbox — a click or a
   tap on the checkbox ticks it, one undo step, without moving the caret (in
   the read view too, where the tick is saved like any edit). With **Tick
   nested checkboxes** on (Settings → Editor, per library, on by default),
