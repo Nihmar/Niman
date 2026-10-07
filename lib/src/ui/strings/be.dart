@@ -3025,4 +3025,58 @@ final class BelarusianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Вызваліцца $size. Файл спампуецца зноў, калі ён спатрэбіцца '
       'для распазнавання тэксту.';
+
+  @override
+  String get ocrRecognizeAction => 'Распазнаць тэкст';
+
+  @override
+  String get ocrPagesTitle => 'Старонкі';
+
+  @override
+  String ocrPagesAll(int count) => 'Усе $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Гэта старонка ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Ад';
+
+  @override
+  String get ocrPagesTo => 'да';
+
+  @override
+  String get ocrSavedAs => 'Будзе захавана як';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Нататка побач з файлам, па раздзеле на старонку. Пошук '
+      'знаходзіць яе, як любую нататку.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Спачатку спампоўка $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Толькі раз: потым працуе афлайн.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Спампаваць і распазнаць';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Распазнаванне с. $page з $total';
+
+  @override
+  String get ocrPreparing => 'Спампоўваецца патрэбнае для распазнавання…';
+
+  @override
+  String ocrRecognized(int words) => 'Тэкст распазнаны · слоў: $words';
+
+  @override
+  String get ocrOpenText => 'Адкрыць тэкст';
+
+  @override
+  String get ocrFailed => 'Не ўдалося распазнаць тэкст';
+
+  @override
+  String get commandNeedOcrFile => 'Патрэбны PDF або выява на экране';
 }

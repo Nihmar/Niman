@@ -2939,4 +2939,58 @@ final class EstonianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'See vabastab $size. Fail laaditakse uuesti alla, kui '
       'tekstituvastus seda vajab.';
+
+  @override
+  String get ocrRecognizeAction => 'Tuvasta tekst';
+
+  @override
+  String get ocrPagesTitle => 'Lehed';
+
+  @override
+  String ocrPagesAll(int count) => 'Kõik $count';
+
+  @override
+  String ocrPagesThis(int page) => 'See leht ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Alates';
+
+  @override
+  String get ocrPagesTo => 'kuni';
+
+  @override
+  String get ocrSavedAs => 'Salvestatakse nimega';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Märge faili kõrval, iga lehe jaoks üks jaotis. Otsing leiab '
+      'selle nagu iga märkme.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Kõigepealt $size allalaadimist';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Ainult üks kord: siis töötab võrguühenduseta.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Laadi alla ja tuvasta';
+
+  @override
+  String ocrRecognizing(int page, int total) => 'Tuvastan lk $page / $total';
+
+  @override
+  String get ocrPreparing => 'Laadin alla, mida tekstituvastus vajab…';
+
+  @override
+  String ocrRecognized(int words) => 'Tekst tuvastatud · $words sõna';
+
+  @override
+  String get ocrOpenText => 'Ava tekst';
+
+  @override
+  String get ocrFailed => 'Tekstituvastus nurjus';
+
+  @override
+  String get commandNeedOcrFile => 'Vajab ekraanile PDF-i või pilti';
 }

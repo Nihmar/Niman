@@ -15,6 +15,7 @@ import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/note_memento.dart';
@@ -48,6 +49,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.templateFolder,
     this.linksFollowed = 0,
     this.onAnnotate,
+    this.ocr,
     this.marks,
     this.zen = false,
     this.typewriter = false,
@@ -191,6 +193,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// Annotates a place of a book or a PDF in its companion note (#284).
   final void Function(Annotation annotation)? onAnnotate;
 
+  /// Recognizes a PDF's or a picture's text (#594); null offers none.
+  final OcrFileActions? ocr;
+
   /// Where the library's books and PDFs were annotated (#285).
   final AnnotationMarkSource? marks;
 
@@ -256,6 +261,7 @@ final class ShellDetailPane extends StatelessWidget {
           reloadToken: linksFollowed,
           linkType: linkType,
           onAnnotate: onAnnotate,
+          ocr: ocr,
           marks: marks,
         )
       : _noteView(root, tab);

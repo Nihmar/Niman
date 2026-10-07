@@ -1506,4 +1506,57 @@ abstract base class Strings {
 
   /// What deleting an OCR file frees.
   String ocrDeleteBody(String size);
+
+  // Recognize text (#594).
+
+  /// The command, and the dialog that asks how (#594).
+  String get ocrRecognizeAction;
+
+  /// The dialog's pages choice.
+  String get ocrPagesTitle;
+
+  /// Every page of the PDF.
+  String ocrPagesAll(int count);
+
+  /// The page on screen.
+  String ocrPagesThis(int page);
+
+  /// A range of pages: its first.
+  String get ocrPagesFrom;
+
+  /// A range of pages: its last.
+  String get ocrPagesTo;
+
+  /// Where the text goes.
+  String get ocrSavedAs;
+
+  /// What the sidecar is.
+  String get ocrSavedAsHint;
+
+  /// What a first recognition downloads.
+  String ocrNeedsDownload(String size);
+
+  /// That the download happens once.
+  String get ocrNeedsDownloadHint;
+
+  /// Recognizes after the download it needs.
+  String get ocrDownloadAndRecognize;
+
+  /// The progress of a recognition.
+  String ocrRecognizing(int page, int total);
+
+  /// A recognition fetching its engine or languages.
+  String get ocrPreparing;
+
+  /// A recognition finished.
+  String ocrRecognized(int words);
+
+  /// Opens the recognized text.
+  String get ocrOpenText;
+
+  /// A recognition that failed.
+  String get ocrFailed;
+
+  /// Why the Recognize text command is off.
+  String get commandNeedOcrFile;
 }

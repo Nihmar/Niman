@@ -44,6 +44,10 @@ enum CommandNeed {
 
   /// The note on screen is a journal entry (#7).
   journalEntry,
+
+  /// A PDF or a picture is on screen, and text recognition is there to
+  /// read it (#594).
+  ocrFile,
 }
 
 /// What [command] waits on; empty for one that can always run.
@@ -75,6 +79,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.journalPrevious ||
   AppCommand.journalNext => const {CommandNeed.journalEntry},
   AppCommand.zenMode => const {CommandNeed.zenRoom},
+  AppCommand.recognizeText => const {CommandNeed.ocrFile},
   AppCommand.openFile => const {CommandNeed.desktop},
   AppCommand.openPalette ||
   AppCommand.goToNote ||
@@ -114,4 +119,5 @@ String commandNeedLabel(CommandNeed need) => switch (need) {
   CommandNeed.previewToggle => AppStrings.commandNeedPreview,
   CommandNeed.twoEditors => AppStrings.commandNeedTwoEditors,
   CommandNeed.journalEntry => AppStrings.commandNeedJournalEntry,
+  CommandNeed.ocrFile => AppStrings.commandNeedOcrFile,
 };

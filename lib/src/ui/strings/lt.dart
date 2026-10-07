@@ -3027,4 +3027,58 @@ final class LithuanianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Bus atlaisvinta $size. Failas bus atsisiųstas iš naujo, kai '
       'jo prireiks teksto atpažinimui.';
+
+  @override
+  String get ocrRecognizeAction => 'Atpažinti tekstą';
+
+  @override
+  String get ocrPagesTitle => 'Puslapiai';
+
+  @override
+  String ocrPagesAll(int count) => 'Visi $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Šis puslapis ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Nuo';
+
+  @override
+  String get ocrPagesTo => 'iki';
+
+  @override
+  String get ocrSavedAs => 'Bus įrašyta kaip';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Užrašas šalia failo, po skyrių kiekvienam puslapiui. Paieška '
+      'jį randa kaip bet kurį užrašą.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Pirmiausia atsisiųsti $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Tik kartą: vėliau veikia neprisijungus.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Atsisiųsti ir atpažinti';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Atpažįstamas $page psl. iš $total';
+
+  @override
+  String get ocrPreparing => 'Atsisiunčiama, ko reikia atpažinimui…';
+
+  @override
+  String ocrRecognized(int words) => 'Tekstas atpažintas · žodžių: $words';
+
+  @override
+  String get ocrOpenText => 'Atverti tekstą';
+
+  @override
+  String get ocrFailed => 'Teksto atpažinti nepavyko';
+
+  @override
+  String get commandNeedOcrFile => 'Reikia PDF arba paveikslėlio ekrane';
 }

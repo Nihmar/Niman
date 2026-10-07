@@ -11,6 +11,7 @@ import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/pdf_document_view_state.dart';
 
 export 'package:niman/src/ui/pdf_document_view_state.dart'
@@ -44,6 +45,7 @@ final class PdfDocumentView extends StatefulWidget {
     this.reloadToken = 0,
     this.onAnnotate,
     this.marks,
+    this.ocr,
     super.key,
   });
 
@@ -76,6 +78,9 @@ final class PdfDocumentView extends StatefulWidget {
   /// pages a companion note points at are marked, and a tap opens the
   /// note. Null marks nothing.
   final AnnotationMarkSource? marks;
+
+  /// Recognizes the PDF's text (#594); null offers none.
+  final OcrFileActions? ocr;
 
   @override
   State<PdfDocumentView> createState() => PdfDocumentViewState();

@@ -2980,4 +2980,58 @@ final class IcelandicStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Þetta losar $size. Skráin er sótt aftur þegar '
       'textagreiningin þarf á henni að halda.';
+
+  @override
+  String get ocrRecognizeAction => 'Greina texta';
+
+  @override
+  String get ocrPagesTitle => 'Síður';
+
+  @override
+  String ocrPagesAll(int count) => 'Allar $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Þessi síða ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Frá';
+
+  @override
+  String get ocrPagesTo => 'til';
+
+  @override
+  String get ocrSavedAs => 'Vistað sem';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Minnispunktur við hlið skrárinnar, einn hluti á síðu. Leitin '
+      'finnur hann eins og alla minnispunkta.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Fyrst niðurhal upp á $size';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Aðeins einu sinni: svo virkar það án nettengingar.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Sækja og greina';
+
+  @override
+  String ocrRecognizing(int page, int total) => 'Greini bls. $page af $total';
+
+  @override
+  String get ocrPreparing => 'Sæki það sem textagreiningin þarf…';
+
+  @override
+  String ocrRecognized(int words) => 'Texti greindur · $words orð';
+
+  @override
+  String get ocrOpenText => 'Opna texta';
+
+  @override
+  String get ocrFailed => 'Textagreining mistókst';
+
+  @override
+  String get commandNeedOcrFile => 'Þarf PDF eða mynd á skjánum';
 }

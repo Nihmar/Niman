@@ -3074,4 +3074,60 @@ final class FrenchStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Cela libère $size. Le fichier sera de nouveau téléchargé '
       'quand la reconnaissance de texte en aura besoin.';
+
+  @override
+  String get ocrRecognizeAction => 'Reconnaître le texte';
+
+  @override
+  String get ocrPagesTitle => 'Pages';
+
+  @override
+  String ocrPagesAll(int count) => 'Toutes les $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Cette page ($page)';
+
+  @override
+  String get ocrPagesFrom => 'De';
+
+  @override
+  String get ocrPagesTo => 'à';
+
+  @override
+  String get ocrSavedAs => 'Enregistré sous';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Une note à côté du fichier, une section par page. La '
+      'recherche la trouve comme toute note.';
+
+  @override
+  String ocrNeedsDownload(String size) => "D'abord, un téléchargement de $size";
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Une seule fois : ensuite, tout fonctionne hors ligne.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Télécharger et reconnaître';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Reconnaissance p. $page sur $total';
+
+  @override
+  String get ocrPreparing =>
+      "Téléchargement de ce qu'il faut à la reconnaissance…";
+
+  @override
+  String ocrRecognized(int words) => 'Texte reconnu · $words mots';
+
+  @override
+  String get ocrOpenText => 'Ouvrir le texte';
+
+  @override
+  String get ocrFailed => 'La reconnaissance du texte a échoué';
+
+  @override
+  String get commandNeedOcrFile => "Il faut un PDF ou une image à l'écran";
 }

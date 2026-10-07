@@ -2992,4 +2992,59 @@ final class HungarianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       '$size szabadul fel. A fájl újra letöltődik, amikor a '
       'szövegfelismerésnek szüksége lesz rá.';
+
+  @override
+  String get ocrRecognizeAction => 'Szöveg felismerése';
+
+  @override
+  String get ocrPagesTitle => 'Oldalak';
+
+  @override
+  String ocrPagesAll(int count) => 'Mind a(z) $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Ez az oldal ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Ettől';
+
+  @override
+  String get ocrPagesTo => 'eddig';
+
+  @override
+  String get ocrSavedAs => 'Mentés ezen a néven';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Jegyzet a fájl mellett, oldalanként egy szakasz. A keresés '
+      'megtalálja, mint bármely jegyzetet.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Előbb $size letöltése';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Csak egyszer: utána offline is működik.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Letöltés és felismerés';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Felismerés: $page. oldal / $total';
+
+  @override
+  String get ocrPreparing =>
+      'A szövegfelismeréshez szükséges fájlok letöltése…';
+
+  @override
+  String ocrRecognized(int words) => 'Szöveg felismerve · $words szó';
+
+  @override
+  String get ocrOpenText => 'Szöveg megnyitása';
+
+  @override
+  String get ocrFailed => 'A szövegfelismerés nem sikerült';
+
+  @override
+  String get commandNeedOcrFile => 'PDF vagy kép kell a képernyőn';
 }

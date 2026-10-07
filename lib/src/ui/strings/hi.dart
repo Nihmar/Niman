@@ -2937,4 +2937,59 @@ final class HindiStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'इससे $size खाली होगा। पाठ पहचान को ज़रूरत पड़ने पर यह फिर से '
       'डाउनलोड होगी।';
+
+  @override
+  String get ocrRecognizeAction => 'पाठ पहचानें';
+
+  @override
+  String get ocrPagesTitle => 'पन्ने';
+
+  @override
+  String ocrPagesAll(int count) => 'सभी $count';
+
+  @override
+  String ocrPagesThis(int page) => 'यह पन्ना ($page)';
+
+  @override
+  String get ocrPagesFrom => 'से';
+
+  @override
+  String get ocrPagesTo => 'तक';
+
+  @override
+  String get ocrSavedAs => 'इस रूप में सहेजा जाएगा';
+
+  @override
+  String get ocrSavedAsHint =>
+      'फ़ाइल के पास एक नोट, हर पन्ने का एक खंड। खोज इसे किसी भी नोट '
+      'की तरह ढूँढती है।';
+
+  @override
+  String ocrNeedsDownload(String size) => 'पहले $size का डाउनलोड';
+
+  @override
+  String get ocrNeedsDownloadHint => 'सिर्फ़ एक बार: उसके बाद ऑफ़लाइन चलता है।';
+
+  @override
+  String get ocrDownloadAndRecognize => 'डाउनलोड करें और पहचानें';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'पन्ना $page / $total पहचाना जा रहा है';
+
+  @override
+  String get ocrPreparing =>
+      'पाठ पहचान के लिए ज़रूरी फ़ाइलें डाउनलोड हो रही हैं…';
+
+  @override
+  String ocrRecognized(int words) => 'पाठ पहचाना गया · $words शब्द';
+
+  @override
+  String get ocrOpenText => 'पाठ खोलें';
+
+  @override
+  String get ocrFailed => 'पाठ पहचान विफल रही';
+
+  @override
+  String get commandNeedOcrFile => 'स्क्रीन पर PDF या चित्र चाहिए';
 }

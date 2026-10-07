@@ -2987,4 +2987,58 @@ final class CzechStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Uvolní se $size. Soubor se znovu stáhne, až ho rozpoznávání '
       'textu bude potřebovat.';
+
+  @override
+  String get ocrRecognizeAction => 'Rozpoznat text';
+
+  @override
+  String get ocrPagesTitle => 'Stránky';
+
+  @override
+  String ocrPagesAll(int count) => 'Všech $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Tato stránka ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Od';
+
+  @override
+  String get ocrPagesTo => 'do';
+
+  @override
+  String get ocrSavedAs => 'Uloží se jako';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Poznámka vedle souboru, jedna sekce na stránku. Hledání ji '
+      'najde jako každou poznámku.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Nejprve stažení $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Jen jednou: pak funguje offline.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Stáhnout a rozpoznat';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Rozpoznávání s. $page z $total';
+
+  @override
+  String get ocrPreparing => 'Stahuje se, co rozpoznávání potřebuje…';
+
+  @override
+  String ocrRecognized(int words) => 'Text rozpoznán · slov: $words';
+
+  @override
+  String get ocrOpenText => 'Otevřít text';
+
+  @override
+  String get ocrFailed => 'Rozpoznávání textu selhalo';
+
+  @override
+  String get commandNeedOcrFile => 'Vyžaduje PDF nebo obrázek na obrazovce';
 }

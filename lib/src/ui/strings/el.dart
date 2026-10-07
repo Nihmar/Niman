@@ -3083,4 +3083,59 @@ final class GreekStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Θα ελευθερωθούν $size. Θα κατέβει ξανά όταν το χρειαστεί η '
       'αναγνώριση κειμένου.';
+
+  @override
+  String get ocrRecognizeAction => 'Αναγνώριση κειμένου';
+
+  @override
+  String get ocrPagesTitle => 'Σελίδες';
+
+  @override
+  String ocrPagesAll(int count) => 'Όλες ($count)';
+
+  @override
+  String ocrPagesThis(int page) => 'Αυτή η σελίδα ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Από';
+
+  @override
+  String get ocrPagesTo => 'έως';
+
+  @override
+  String get ocrSavedAs => 'Αποθηκεύεται ως';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Μια σημείωση δίπλα στο αρχείο, μία ενότητα ανά σελίδα. Η '
+      'αναζήτηση τη βρίσκει όπως κάθε σημείωση.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Πρώτα μια λήψη $size';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Μόνο μία φορά: μετά λειτουργεί εκτός σύνδεσης.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Λήψη και αναγνώριση';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Αναγνώριση σελ. $page από $total';
+
+  @override
+  String get ocrPreparing => 'Λήψη όσων χρειάζεται η αναγνώριση…';
+
+  @override
+  String ocrRecognized(int words) => 'Το κείμενο αναγνωρίστηκε · $words λέξεις';
+
+  @override
+  String get ocrOpenText => 'Άνοιγμα κειμένου';
+
+  @override
+  String get ocrFailed => 'Η αναγνώριση κειμένου απέτυχε';
+
+  @override
+  String get commandNeedOcrFile => 'Χρειάζεται PDF ή εικόνα στην οθόνη';
 }
