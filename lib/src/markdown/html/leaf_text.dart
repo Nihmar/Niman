@@ -16,10 +16,20 @@ abstract final class LeafText {
   /// prefix ended inside of written as spaces: the code's own (`- ```` /
   /// tab `w` is the code `  w`), or the opening fence's indent, which comes
   /// off the code after (`CodeHtml.fenceParts`).
-  static List<String> withLeftOver(LeafNode leaf, List<String> lines) => [
+  ///
+  /// [opening] says the first line is the opening fence: `cmark-gfm`
+  /// measures its indent in characters past where the container left the
+  /// line, so a tab the container took part of counts one, whatever
+  /// columns it has left (`- w` / tab ```` ``` ```` / tab `w` is the code
+  /// ` w`).
+  static List<String> withLeftOver(
+    LeafNode leaf,
+    List<String> lines, {
+    bool opening = true,
+  }) => [
     for (var at = 0; at < lines.length; at++)
       if (at < leaf.leftOver.length && leaf.leftOver[at] > 0)
-        '${' ' * leaf.leftOver[at]}${lines[at]}'
+        '${' ' * (at == 0 && opening ? 1 : leaf.leftOver[at])}${lines[at]}'
       else
         lines[at],
   ];

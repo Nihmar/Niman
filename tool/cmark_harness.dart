@@ -2,15 +2,16 @@
 /// (`docs/dev/block-tree.md`, "Next"): the specs' examples cannot reach
 /// every shape containers make, and where they do not, the reading was
 /// the package's. Each document is written by `TreeHtml` and by
-/// `cmark-gfm` (`tool/cmark_render.py`, `pip install cmarkgfm`), the two
+/// `cmark-gfm` (`tool/cmark_render.py`, its binding through `uv`), the two
 /// compared normalized as the spec's runner compares them; a document
 /// that differs is shrunk to the fewest lines that still do, and the
 /// differences are reported by their shape, words blanked.
 ///
-/// Usage: `dart run tool/cmark_harness.dart [count] [seed]` — 2 000
-/// documents from seed 1 by default. `--cases` prints each shape's
-/// smallest document with `cmark-gfm`'s HTML, as JSON, for the fixture
-/// the gate reads (`test/fixtures/spec/cmark-cases.json`).
+/// Usage: `dart run tool/cmark_harness.dart [count] [seed]`, under
+/// `uv run --with cmarkgfm` (which puts the binding's `python` first on
+/// the path) — 2 000 documents from seed 1 by default. `--cases` prints
+/// each shape's smallest document with `cmark-gfm`'s HTML, as JSON, for
+/// the fixture the gate reads (`test/fixtures/spec/cmark-cases.json`).
 library;
 
 // A command-line report: printing is its output.

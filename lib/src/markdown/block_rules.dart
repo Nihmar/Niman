@@ -4,6 +4,7 @@
 library;
 
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/line_read.dart';
 import 'package:niman/src/markdown/line_rules.dart';
 import 'package:niman/src/markdown/line_state.dart';
@@ -41,7 +42,13 @@ final class BlockRules {
       // and what the preview draws. The count lives here because this is where
       // the *list* is still visible: a block knows only its own item.
       listOrdinal: kind == BlockKind.listItem
-          ? ordinalOf(line, listDepth, read.quoteDepth, previous)
+          ? ordinalOf(
+              line,
+              listDepth,
+              read.quoteDepth,
+              previous,
+              footnote: read.footnote,
+            )
           : 0,
       // An ATX heading's: a setext one starts as its paragraph, and is
       // made a heading when its underline goes on with it. Read past the
@@ -188,22 +195,42 @@ final class BlockRules {
   /// delimiter — keeps counting. Anything else starts a list, and starts it
   /// at the number the note wrote: `10.` then `2)` are two lists, the second
   /// from 2, as `cmark` reads them.
-  int ordinalOf(int line, int listDepth, int quoteDepth, Block? previous) {
-    final text = _lines.lineText(line);
+  int ordinalOf(
+    int line,
+    int listDepth,
+    int quoteDepth,
+    Block? previous, {
+    int footnote = 0,
+  }) {
+    final text = _itemText(line, footnote);
     final written = LineSyntax.writtenOrdinal(text);
-    // The same list is the same depth in the same quote: an item after a
-    // quote's list is a list of its own, not the quote's list counted on.
+    // The same list is the same depth in the same quote and the same
+    // footnote definition: an item after a quote's list is a list of its
+    // own, not the quote's list counted on.
     if (previous != null &&
         previous.kind == BlockKind.listItem &&
         previous.listDepth == listDepth &&
         previous.quoteDepth == quoteDepth &&
+        (previous.footnote == 0) == (footnote == 0) &&
+        footnote != Block.opensFootnote &&
         previous.listOrdinal > 0 &&
         written > 0 &&
-        LineSyntax.writtenDelimiter(_lines.lineText(previous.startLine)) ==
+        LineSyntax.writtenDelimiter(
+              _itemText(previous.startLine, previous.footnote),
+            ) ==
             LineSyntax.writtenDelimiter(text)) {
       return previous.listOrdinal + 1;
     }
     return written;
+  }
+
+  /// Line [line], an item's, from its marker: an item on a footnote
+  /// definition's own line is written after its label.
+  String _itemText(int line, int footnote) {
+    final whole = _lines.lineText(line);
+    return footnote == Block.opensFootnote
+        ? whole.substring(FootnoteSyntax.opening(whole)?.$2 ?? 0)
+        : whole;
   }
 
   /// The fence's info string on [text], the line as its container reads

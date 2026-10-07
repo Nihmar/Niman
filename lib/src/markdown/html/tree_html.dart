@@ -70,6 +70,17 @@ final class TreeHtml {
     xhtml: hooks.xhtml,
   );
 
+  /// Each footnote definition's body, written where it stands, so that the
+  /// citations in it count in the note's order, as `cmark-gfm` counts them
+  /// — cited or not, by itself or by another — its links back left as
+  /// [_backrefs] until the citations are all counted.
+  final Map<FootnoteNode, String> _bodies =
+      Map<FootnoteNode, String>.identity();
+
+  /// Where a footnote's links back go in its body: its last U+0000, the
+  /// body's tail.
+  static const String _backrefs = '\u0000';
+
   /// Each paragraph's inline text, the link reference definitions it
   /// starts with taken out.
   final Map<LeafNode, String> _paragraphs = Map<LeafNode, String>.identity();
@@ -178,8 +189,10 @@ final class TreeHtml {
           _list(node);
         case ItemNode():
           _item(node, tight: tight);
-        case FootnoteNode():
-          break;
+        case FootnoteNode(:final children):
+          _bodies[node] = _captured(
+            () => _blocks(children, tight: false, tail: _backrefs),
+          );
         case LeafNode():
           if (!_leaf(node, tight: tight, tail: mine) && mine != null) {
             _write(mine);
@@ -247,12 +260,19 @@ final class TreeHtml {
   /// of definitions, being none.
   bool _tight(ListNode list) {
     for (var at = 0; at < list.items.length; at++) {
+      // A blank line before the item's first block stands between none.
+      var started = false;
       var blank = false;
       for (final child in _kept(list.items[at].children)) {
-        if (blank && !_blank(child)) return false;
+        if (_blank(child)) {
+          blank = started;
+          continue;
+        }
+        if (blank) return false;
+        started = true;
         // A blank line at the end of a block — a sublist's last item's
         // own — stands between it and the next one as much.
-        blank = _blank(child) || _endsBlank(child);
+        blank = _endsBlank(child);
       }
       if (at < list.items.length - 1 && _endsBlank(list.items[at])) {
         return false;
@@ -265,9 +285,12 @@ final class TreeHtml {
       node is LeafNode && node.kind == BlockKind.blank;
 
   /// [children] as `cmark` keeps them: a block that writes nothing is
-  /// taken off, its blank lines left standing where it was.
-  Iterable<BlockNode> _kept(List<BlockNode> children) =>
-      children.where((child) => _blank(child) || _draws(child));
+  /// taken off, its blank lines left standing where it was — but for a
+  /// footnote definition, moved to the end only after the lists are told
+  /// tight or loose.
+  Iterable<BlockNode> _kept(List<BlockNode> children) => children.where(
+    (child) => _blank(child) || child is FootnoteNode || _draws(child),
+  );
 
   bool _endsBlank(BlockNode node) => switch (node) {
     LeafNode() => node.kind == BlockKind.blank,
@@ -406,11 +429,9 @@ final class TreeHtml {
       final definition = _definitions[key];
       if (definition == null) continue;
       _write('<li id="fn-${_footnotes.idOf(key)}">\n');
-      _blocks(
-        definition.children,
-        tight: false,
-        tail: _footnotes.backrefs(key),
-      );
+      final body = _bodies[definition]!;
+      final tail = body.lastIndexOf(_backrefs);
+      _write(body.replaceRange(tail, tail + 1, _footnotes.backrefs(key)));
       _cr();
       _write('</li>\n');
     }

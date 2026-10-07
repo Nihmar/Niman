@@ -4,9 +4,9 @@ The fixture holds documents where our reading once parted from cmark-gfm's
 (found by tool/cmark_harness.dart), each with the HTML cmark-gfm writes for
 it, which test/unit/cmark_cases_test.dart holds `TreeHtml` to with no Python
 around. A case is added by its `markdown` and `about`; this fills in, or
-refreshes, every case's `html` (`pip install cmarkgfm`).
+refreshes, every case's `html`.
 
-Usage: python tool/cmark_cases.py
+Usage: uv run --with cmarkgfm python tool/cmark_cases.py
 """
 
 import json

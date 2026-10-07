@@ -135,6 +135,15 @@ final class BlockTree {
       }
       open.length = (block.listDepth + 1).clamp(0, open.length);
       final into = open.isEmpty ? roots : open.last.children;
+      // The scanner opens a footnote definition at the margin only: one
+      // standing in an item past its first line is read again at the
+      // item's margin, as the item's marker line is.
+      if (open.isNotEmpty &&
+          block.kind == BlockKind.paragraph &&
+          FootnoteSyntax.opening(local.first) != null) {
+        into.addAll(_build(local.join('\n'), starts));
+        continue;
+      }
       if (!_continues(into, block, buffer, origin, local, starts)) {
         into.add(_node(block, local, starts));
       }

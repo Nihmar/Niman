@@ -53,13 +53,17 @@ final class ContainerWalk {
       // line, a line four columns in — those four off — and, lazily, a line
       // that goes on with its paragraph, opening no block that interrupts
       // one; after a blank line, only the indented one. Any other line ends
-      // it, and everything open inside it, and is read at the margin.
-      if (LineSyntax.indentOf(line) == line.length) {
+      // it, and everything open inside it, and is read at the margin. A
+      // blank line is one only empty or four columns in: `cmark-gfm` asks
+      // the line's first character, so one to three spaces alone end it.
+      final blank = LineSyntax.indentOf(line) == line.length;
+      if (blank && (line.isEmpty || FootnoteSyntax.indented(line))) {
         footnote = LineState.footnoteAfterBlank;
-      } else if (FootnoteSyntax.indented(line)) {
+      } else if (!blank && FootnoteSyntax.indented(line)) {
         (line, carried) = FootnoteSyntax.content(line);
         footnote = LineState.footnoteOpen;
-      } else if (footnote == LineState.footnoteAfterBlank ||
+      } else if (blank ||
+          footnote == LineState.footnoteAfterBlank ||
           !paragraphOpen(entering) ||
           startsBlock(LineSyntax.expandIndent(line))) {
         return ContainerWalk._(
@@ -104,13 +108,16 @@ final class ContainerWalk {
     for (var at = 0; at < open.length; at++) {
       final item = open[at];
       if (blank) {
-        // A blank line is every item's, and the last one each took.
+        // A blank line is every item's, and the last one each took. One
+        // short of an item's indent counts against an item with no content
+        // yet; one that reaches it is the item's as any line is.
         final blanks = item.blanks;
         if (!item.lastBlank || blanks != null) {
+          final short = LineSyntax.columnsOf(text, remaining) < item.content;
           (changed ??= [...open])[at] = (
             indent: item.indent,
             content: item.content,
-            blanks: blanks == null ? null : blanks + 1,
+            blanks: blanks == null || !short ? blanks : blanks + 1,
             lastBlank: true,
           );
         }
@@ -125,11 +132,12 @@ final class ContainerWalk {
           break;
         }
         (text, remaining) = LineSyntax.dedent(text, item.indent, remaining);
-        if (item.lastBlank) {
+        // Its first content: no blank line counts against it from here.
+        if (item.lastBlank || item.blanks != null) {
           (changed ??= [...open])[at] = (
             indent: item.indent,
             content: item.content,
-            blanks: item.blanks,
+            blanks: null,
             lastBlank: false,
           );
         }

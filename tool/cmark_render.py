@@ -1,7 +1,7 @@
 """Renders Markdown with cmark-gfm itself, for tool/cmark_harness.dart.
 
 The reference our reading is held to (docs/dev/block-tree.md): GitHub's
-cmark-gfm, through its Python binding (`pip install cmarkgfm`), with the
+cmark-gfm, through its Python binding (`uv run --with cmarkgfm`), with the
 extensions GitHub runs — tables, strikethrough, autolinks, the tag filter,
 task lists — and footnotes.
 

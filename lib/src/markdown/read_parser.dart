@@ -211,7 +211,7 @@ final class _Reader {
       case BlockKind.fencedCode:
         final fence = entering?.fence;
         final parts = CodeHtml.fenceParts(
-          LeafText.withLeftOver(node, lines),
+          LeafText.withLeftOver(node, lines, opening: fence == null),
           open: fence == null ? null : (fence.char, fence.length, fence.indent),
         );
         return ReadLeaf(

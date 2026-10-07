@@ -183,6 +183,10 @@ abstract final class BlockParser {
     for (var level = 0; level < _levelsOf(block); level++) {
       final indent = items[level].indent;
       if (LineSyntax.columnsOf(rest, remaining) < indent) {
+        // A blank line short of it is the item's all the same, to its end.
+        if (LineSyntax.indentOf(rest) == rest.length) {
+          return (line.length, 0, false);
+        }
         return (line.length - rest.length, remaining, true);
       }
       (rest, remaining) = LineSyntax.dedent(rest, indent, remaining);

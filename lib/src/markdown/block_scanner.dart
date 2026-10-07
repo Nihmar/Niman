@@ -554,6 +554,7 @@ final class BlockScanner {
                 old.listDepth,
                 old.quoteDepth,
                 builder.previous,
+                footnote: old.footnote,
               ) !=
               old.listOrdinal) {
         return -1;
