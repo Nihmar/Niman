@@ -34,7 +34,9 @@ everywhere; PDF goes through each platform's own printer (below).
   written.
 - **Text recognition:** the engine (64-bit ARM, or x86-64 for an
   emulator) is a 2.3–2.7 MB download, loaded from the app's private
-  storage; nothing ships in the APK (see
+  storage; nothing ships in the APK. A recognition pauses when Android
+  freezes the app in the background and goes on when you come back; the
+  strip under the top bar follows it on any note (see
   [text recognition](text-recognition.md)).
 
 ## Linux

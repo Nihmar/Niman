@@ -134,7 +134,67 @@ the app-wide state: what is on disk (scanned, not stored), the engine, the
 settings, and `missingFor(languages)` — what a recognition still has to
 download, which phase 2's dialog shows before it starts.
 
-## Build impact
+## Recognize text — phase 2 (#594)
+
+### The pipeline
+
+`OcrQueue` (`ocr_queue.dart`, `ocrQueueProvider`) is app-wide and runs
+one job at a time; closing the file does not stop it.
+
+1. **What is missing** (`OcrInstallation.missingFor`) is downloaded
+   first — the engine, a language — through the same downloader.
+2. **Pages**: a PDF is opened with pdfrx and each page rendered at
+   300 DPI (`ocr_page_source.dart`), its longest side capped at 4200 px
+   (a poster would otherwise be hundreds of MB of pixels); white under
+   it, BGRA. A picture is decoded by the engine's codecs
+   (`ImageDescriptor`), RGBA, as one page. Both travel as
+   `TransferableTypedData`.
+3. **Recognition**: an `OcrWorker` isolate per job opens the engine,
+   loads the languages once (`ita+eng`) and reads page after page; it
+   turns the pixels into 8-bit luminance itself, a quarter of what
+   Tesseract would copy. Every Tesseract call blocks, so nothing of it
+   runs on the UI isolate.
+4. **The sidecar** (`ocr_sidecar.dart`) is written through the library's
+   own operations: `createNote` for a new one (atomic write, FTS5 index,
+   sync hint), `readNote` + `saveNote` to merge into an existing one (its
+   history keeps the hand corrections). The open notes are saved first,
+   so an editor holding the sidecar does not write its copy back over it.
+
+Measured here on a 2-page image-only PDF (A4 at 200 DPI) with the
+distribution's 5.5.3 and the English model: **423 ms** for the job, worker
+start and model load included; a picture **109 ms**.
+
+### Decisions
+
+- **The position comment ends its line** (`text <!-- ocr l t r b -->`),
+  where #532 drew it under: one source line is one recognized line — so a
+  line joined or split by hand is seen at once (#596) — and a paragraph's
+  lines still read as one paragraph in any preview. Fractions with three
+  decimals: a thousandth of an A4 page is a fifth of a millimetre.
+- **Escaped like a PDF's quoted text** (`markdown/text_escape.dart`): a
+  `#`, a `[[`, a `<!--` on a scan stay words.
+- **Merged by page**: recognizing pages again replaces only their
+  `## p. N` sections, in page order. The frontmatter is kept as it is
+  (the `recognized:` date stays the first one).
+- **Name**: `<stem>.ocr.md` beside the file; when that note belongs to
+  another file of the same stem (`scan.pdf`, `scan.jpg`), `<name>.ocr.md`.
+  The `ocr:` link names the file only: the move rewrite skips frontmatter
+  (as it does for `annotates:`), and a name-only link still resolves after
+  the two move together.
+- **Cancel** kills the worker isolate; a kill lands between two Dart
+  instructions, so the page being read finishes first, and nothing is
+  written. A job pauses with the app when Android freezes it, and goes on
+  in the foreground; no foreground service.
+- **Done**: a snackbar with Open text; when the app is not in front, also
+  a notification, through the plugin the reminders initialize (initializing
+  it again would take their taps) on its own Android channel, its payload
+  `ocr:<sidecar>` routed by the shell's tap listener.
+- **Not done here**: the pages done are not marked on the scan yet — that
+  needs the line overlay of #596; the tree's ring on a file being read
+  waits for the tree work of #595; a PDF that already has a text layer is
+  not detected.
+
+
 
 Measured on the beta builds of this host, before (`cfc7d0a0`) and after
 phase 1 (`93ec9091`):
