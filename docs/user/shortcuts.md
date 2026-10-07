@@ -65,7 +65,9 @@ Moving and selecting in the source editor, on Windows and Linux:
 - `Home` / `End` — start and end of the line, `Shift` to select; `Home` stops
   first where the text starts, past the indentation and any list marker,
   task box, quote mark or heading hashes, and a second press goes to the
-  very start of the line
+  very start of the line; in a code block, a math block, HTML or the
+  frontmatter a `#`, `-` or `>` is text, so only the indentation is skipped
+  — there and for `Ctrl+←` / `Ctrl+→` alike
 - `Ctrl+Home` / `Ctrl+End` — start and end of the note
 - `Tab` / `Shift+Tab` — indent and outdent the line; in a table in live
   mode, the next and the previous cell instead

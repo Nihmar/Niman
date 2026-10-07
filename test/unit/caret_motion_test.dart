@@ -3,7 +3,9 @@
 // no device, no widget, no keyboard.
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -346,5 +348,49 @@ void main() {
       reason: 'the caret moves and the selection collapses to it',
     );
     expect(selected.isCollapsed, isTrue);
+  });
+
+  test('in a verbatim block a # or a - is text, not a marker (#579)', () {
+    /// The caret [at] over [text] moved by [motion], the blocks known as
+    /// the editor knows them.
+    int moved(String text, int at, CaretMotion motion) {
+      final buffer = SourceBuffer.fromText(text);
+      final index = BlockScanner(buffer).index;
+      return moveCaret(
+        SelectionModel.at(at),
+        motion,
+        buffer: buffer,
+        verbatimQuotes: (line) => verbatimQuotesOf(index.blockAt(line)),
+      ).extent;
+    }
+
+    const fence = 'x\n```bash\n  # install deps\n* ptr\n> prompt\n```\n';
+    final comment = fence.indexOf('# install');
+    // Home: past the indentation, not the hashes; then the line's start.
+    expect(moved(fence, comment + 4, CaretMotion.lineTextStart), comment);
+    expect(
+      moved(fence, comment, CaretMotion.lineTextStart),
+      fence.indexOf('  # install'),
+    );
+    // Ctrl+Left after `# ` is the word motion — back over the punctuation
+    // to the word before, as on any text — not the line above's end.
+    expect(
+      moved(fence, comment + 2, CaretMotion.wordLeft),
+      fence.indexOf('bash'),
+    );
+    // Ctrl+Right from the line above lands on the `*`, the `>`.
+    final ptr = fence.indexOf('* ptr');
+    expect(moved(fence, ptr - 1, CaretMotion.wordRight), ptr);
+    expect(
+      moved(fence, fence.indexOf('> prompt') - 1, CaretMotion.wordRight),
+      fence.indexOf('> prompt'),
+    );
+    // A fence inside a list item: past the item's indentation, no further.
+    const listed = '- a\n\n  ```\n  # not a heading\n  ```\n';
+    final hash = listed.indexOf('# not');
+    expect(moved(listed, hash + 6, CaretMotion.lineTextStart), hash);
+    // Outside a fence, the markers are still skipped.
+    const list = '- item\n';
+    expect(moved(list, 6, CaretMotion.lineTextStart), 2);
   });
 }

@@ -56,6 +56,7 @@ import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
+import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
@@ -1170,6 +1171,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return true;
   }
 
+  /// The quote marks before a verbatim line's text, null for a line with
+  /// syntax of its own (#579). O(log blocks) a line.
+  int? _verbatimQuotes(int line) => verbatimQuotesOf(blockAt?.call(line));
+
   /// Moves the caret by [motion], the logical motions the key table calls.
   void moveCaretBy(CaretMotion motion, {bool extend = false}) {
     var next = moveCaret(
@@ -1177,6 +1182,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       motion,
       buffer: widget.buffer,
       extend: extend,
+      verbatimQuotes: _verbatimQuotes,
     );
     final into = switch (motion) {
       CaretMotion.characterLeft || CaretMotion.wordLeft => -1,
@@ -1451,7 +1457,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     }
     final other = _withinCell(
       selection.extent,
-      moveCaret(selection, motion, buffer: widget.buffer).extent,
+      moveCaret(
+        selection,
+        motion,
+        buffer: widget.buffer,
+        verbatimQuotes: _verbatimQuotes,
+      ).extent,
     );
     if (other == selection.extent) return;
     final start = math.min(other, selection.extent);
