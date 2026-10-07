@@ -3076,4 +3076,12 @@ final class FinnishStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopioi';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: $lines riviä menetti paikkansa skannauksessa. '
+      'Merkinnät liittyvät siellä koko sivuun.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Tunnista s. $page uudelleen';
 }

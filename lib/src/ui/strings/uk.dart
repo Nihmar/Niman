@@ -3100,4 +3100,12 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Копіювати';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'с. $page: рядків без місця на скані: $lines. Примітки там '
+      'стосуються всієї сторінки.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Розпізнати с. $page знову';
 }

@@ -3017,4 +3017,12 @@ final class EnglishStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Copy';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines lines lost their place on the scan. '
+      'Annotations there attach to the whole page.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Recognize p. $page again';
 }

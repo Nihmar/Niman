@@ -3041,4 +3041,12 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopier';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: $lines linjer har mistet plassen sin på '
+      'skanningen. Merknader der gjelder hele siden.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Gjenkjenn s. $page på nytt';
 }

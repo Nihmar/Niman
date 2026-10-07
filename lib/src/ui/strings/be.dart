@@ -3097,4 +3097,12 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Капіяваць';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'с. $page: радкоў без месца на скане: $lines. Заўвагі там '
+      'тычацца ўсёй старонкі.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Распазнаць с. $page зноў';
 }

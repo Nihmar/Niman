@@ -3079,4 +3079,12 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopiraj';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'str. $page: vrstice brez mesta na skeniranju: $lines. Opombe '
+      'tam veljajo za vso stran.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Znova prepoznaj str. $page';
 }

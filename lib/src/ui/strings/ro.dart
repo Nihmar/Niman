@@ -3107,4 +3107,12 @@ final class RomanianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Copiază';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines rânduri și-au pierdut locul pe scanare. '
+      'Acolo adnotările se leagă de toată pagina.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Recunoaște din nou p. $page';
 }

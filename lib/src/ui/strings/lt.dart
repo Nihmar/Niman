@@ -3099,4 +3099,12 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopijuoti';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '$page psl.: $lines eil. prarado vietą skenuotame vaizde. '
+      'Pastabos ten taikomos visam puslapiui.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Atpažinti $page psl. iš naujo';
 }

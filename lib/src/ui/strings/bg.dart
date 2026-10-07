@@ -3070,4 +3070,12 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Копирай';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'стр. $page: редове без място на сканирането: $lines. '
+      'Бележките там се отнасят до цялата страница.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Разпознай отново стр. $page';
 }

@@ -2699,4 +2699,11 @@ final class ChineseStrings extends Strings {
 
   @override
   String get ocrCopyText => '复制';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '第 $page 页：$lines 行在扫描件上失去了位置。那里的批注将对应整页。';
+
+  @override
+  String ocrRecognizeAgain(int page) => '重新识别第 $page 页';
 }

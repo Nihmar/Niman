@@ -3083,4 +3083,12 @@ final class SerbianStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Копирај';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'стр. $page: редови без места на скену: $lines. Белешке се ту '
+      'везују за целу страницу.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Поново препознај стр. $page';
 }

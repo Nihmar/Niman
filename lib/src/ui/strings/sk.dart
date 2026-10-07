@@ -3068,4 +3068,12 @@ final class SlovakStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Kopírovať';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: riadky bez miesta na skene: $lines. Poznámky sa '
+      'tam viažu k celej strane.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Znova rozpoznať s. $page';
 }

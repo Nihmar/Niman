@@ -3102,4 +3102,12 @@ final class SpanishStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Copiar';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines líneas perdieron su lugar en el escaneo. '
+      'Ahí las anotaciones se refieren a toda la página.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Reconocer de nuevo la p. $page';
 }

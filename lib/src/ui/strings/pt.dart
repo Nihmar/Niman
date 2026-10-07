@@ -3074,4 +3074,12 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get ocrCopyText => 'Copiar';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines linhas perderam o lugar na digitalização. '
+      'Ali as anotações valem para a página inteira.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Reconhecer a p. $page de novo';
 }
