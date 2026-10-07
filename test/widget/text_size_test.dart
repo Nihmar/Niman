@@ -78,8 +78,13 @@ void main() {
       await tester.tap(find.backButton());
       await tester.pumpAndSettle();
       await openArea(tester, const Key('settings-area-editor'));
-      expect(find.byKey(const Key('note-text-scale-setting')), findsOneWidget);
-      expect(find.text('100%'), findsNWidgets(1));
+      final noteRow = find.byKey(const Key('note-text-scale-setting'));
+      expect(noteRow, findsOneWidget);
+      // Scoped to its row: the column width reads in percent as well.
+      expect(
+        find.descendant(of: noteRow, matching: find.text('100%')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('the interface slider is remembered, and only it moves', (
