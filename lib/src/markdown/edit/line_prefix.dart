@@ -11,9 +11,26 @@
 /// `+`, `*`) or one to nine digits and a `.` or `)`, then at least one space.
 /// The marker's own indent is not asked about, exactly as
 /// `LineSyntax.listMarkerOf` does not.
+///
+/// A line of a verbatim block — code, math, HTML, frontmatter — carries no
+/// syntax of its own: a `# install` in a shell fence is a comment, not a
+/// heading (#579). The line's block says so ([verbatimQuotesOf]); there only
+/// the quote marks the block sits in and the indentation come before the text.
 library;
 
+import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+
+/// How many quote marks a line of [block] carries before its verbatim text, or
+/// null when [block] — or no block, unknown — is not verbatim.
+int? verbatimQuotesOf(Block? block) => switch (block?.kind) {
+  BlockKind.fencedCode ||
+  BlockKind.indentedCode ||
+  BlockKind.math ||
+  BlockKind.html ||
+  BlockKind.frontmatter => block!.quoteDepth,
+  _ => null,
+};
 
 /// The offset where [line]'s own text begins, past the syntax before it.
 ///
@@ -21,11 +38,14 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// and stops at the indentation: this is where the *content* starts, so a caret
 /// anywhere among the marker — `  - [ ] |La` — counts as the head of the line.
 /// An empty or marker-only line answers its own end.
-int lineBodyStart(SourceBuffer buffer, int line) {
+///
+/// With [verbatim] the line is a verbatim block's, inside that many quotes
+/// ([verbatimQuotesOf]): past them and the indentation is its text.
+int lineBodyStart(SourceBuffer buffer, int line, {int? verbatim}) {
   final text = buffer.lineAt(line);
   var at = 0;
   // Quote marks, each up to three spaces in, so `> > x` nests like `>> x`.
-  while (true) {
+  for (var quotes = 0; verbatim == null || quotes < verbatim; quotes++) {
     final mark = _quoteMark(text, at);
     if (mark < 0) break;
     at = mark;
@@ -34,6 +54,7 @@ int lineBodyStart(SourceBuffer buffer, int line) {
   while (at < text.length && _isLineSpace(text.codeUnitAt(at))) {
     at++;
   }
+  if (verbatim != null) return buffer.offsetOfLine(line) + at;
   final start = at;
   // A heading's hashes, or a list marker and its task box.
   final hashes = _headingHashes(text, start);

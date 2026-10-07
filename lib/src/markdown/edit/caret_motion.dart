@@ -184,21 +184,25 @@ bool _isBlank(int char) =>
 /// With [extend] the anchor stays where it was, which is what shift does;
 /// without
 /// it the new position becomes both ends. The result is always inside the note:
-/// a motion off either end stops at it.
+/// a motion off either end stops at it. [verbatimQuotes] says which lines are a
+/// verbatim block's, where a `#` or a `-` is text ([verbatimQuotesOf]).
 SelectionModel moveCaret(
   SelectionModel selection,
   CaretMotion motion, {
   required SourceBuffer buffer,
   bool extend = false,
+  int? Function(int line)? verbatimQuotes,
 }) {
   final from = selection.extent;
+  int body(int line) =>
+      lineBodyStart(buffer, line, verbatim: verbatimQuotes?.call(line));
   final to = switch (motion) {
     CaretMotion.characterLeft => _characterLeft(buffer, from),
     CaretMotion.characterRight => _characterRight(buffer, from),
-    CaretMotion.wordLeft => _wordLeft(buffer, from),
-    CaretMotion.wordRight => _wordRight(buffer, from),
+    CaretMotion.wordLeft => _wordLeft(buffer, from, body),
+    CaretMotion.wordRight => _wordRight(buffer, from, body),
     CaretMotion.lineStart => buffer.offsetOfLine(buffer.lineOf(from)),
-    CaretMotion.lineTextStart => _textStart(buffer, from),
+    CaretMotion.lineTextStart => _textStart(buffer, from, body),
     CaretMotion.lineEnd => _lineEnd(buffer, from),
     CaretMotion.documentStart => 0,
     CaretMotion.documentEnd => buffer.length,
@@ -232,9 +236,9 @@ int _characterRight(SourceBuffer buffer, int at) {
 ///
 /// Mid-line it is the word motion, unchanged: back over punctuation and
 /// space, then over the word itself.
-int _wordLeft(SourceBuffer buffer, int at) {
+int _wordLeft(SourceBuffer buffer, int at, int Function(int line) body) {
   final line = buffer.lineOf(at);
-  if (line > 0 && at <= lineBodyStart(buffer, line)) {
+  if (line > 0 && at <= body(line)) {
     final above = line - 1;
     return buffer.offsetOfLine(above) + buffer.lineLengthAt(above);
   }
@@ -259,10 +263,10 @@ int _wordLeft(SourceBuffer buffer, int at) {
 /// Mid-line it is the word motion, unchanged: past punctuation and space, then
 /// to the end of the word — which is where the *next* press starts from, as
 /// editors do.
-int _wordRight(SourceBuffer buffer, int at) {
+int _wordRight(SourceBuffer buffer, int at, int Function(int line) body) {
   final line = buffer.lineOf(at);
   if (line + 1 < buffer.lineCount && at >= _lineEnd(buffer, at)) {
-    return lineBodyStart(buffer, line + 1);
+    return body(line + 1);
   }
   var index = at;
   while (index < buffer.length && !_wordChar(_firstUnit(buffer, index))) {
@@ -284,10 +288,10 @@ int _lineEnd(SourceBuffer buffer, int at) {
 /// any marker ([lineBodyStart]) — an item's content, not its bullet — or,
 /// when the caret is there already, the start of the line, so that both
 /// are a key away (#545).
-int _textStart(SourceBuffer buffer, int at) {
+int _textStart(SourceBuffer buffer, int at, int Function(int line) body) {
   final line = buffer.lineOf(at);
-  final body = lineBodyStart(buffer, line);
-  return at == body ? buffer.offsetOfLine(line) : body;
+  final start = body(line);
+  return at == start ? buffer.offsetOfLine(line) : start;
 }
 
 /// How far either side of the caret a grapheme cluster is looked for.
