@@ -4473,6 +4473,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             _showRowMenuAt(note, details.globalPosition),
         onBackgroundSecondaryTapUp: (details) =>
             unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
+        onMove: (path, folder) => unawaited(_rowActions.moveTo(path, folder)),
       ),
     );
   }

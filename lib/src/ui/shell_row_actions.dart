@@ -193,12 +193,17 @@ final class ShellRowActions {
       ops: controller.ops!,
     );
     if (target == null) return;
-    await guard(() async {
-      await saveOpen();
-      final row = await controller.ops!.move(sel, target);
-      onMoved(sel, row.path);
-    });
+    await moveTo(sel, target);
   }
+
+  /// Moves [path] into [target] — a folder's path, `''` for the root — as
+  /// [move] does once its dialog answers: what a drop in the tree runs
+  /// (#567).
+  Future<void> moveTo(String path, String target) => guard(() async {
+    await saveOpen();
+    final row = await controller.ops!.move(path, target);
+    onMoved(path, row.path);
+  });
 
   /// Deletes [path] after asking, into the trash or for good depending on
   /// the library's trash setting — which is also what the question says.
