@@ -7,6 +7,7 @@ import 'package:niman/src/core/download/download_files.dart';
 import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/core/download/downloader.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/resume_observer.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
 import 'package:niman/src/transcription/transcription_settings_store.dart';
@@ -202,7 +203,7 @@ final transcriptionModelsProvider = Provider<TranscriptionModels>((ref) {
   final models = TranscriptionModels(directory: WhisperController.getModelDir);
   unawaited(models.load());
   // Back in the foreground: pick up the downloads the freeze cut off.
-  final observer = _ResumeObserver(() => unawaited(models.resumeInterrupted()));
+  final observer = ResumeObserver(() => unawaited(models.resumeInterrupted()));
   WidgetsBinding.instance.addObserver(observer);
   ref.onDispose(() {
     WidgetsBinding.instance.removeObserver(observer);
@@ -210,19 +211,3 @@ final transcriptionModelsProvider = Provider<TranscriptionModels>((ref) {
   });
   return models;
 });
-
-/// Calls [onResume] whenever the app returns to the foreground.
-///
-/// A plain observer rather than `AppLifecycleListener`, which asserts on
-/// the order of lifecycle states and so fails on the shortcuts platforms
-/// and tests take (paused straight to resumed).
-final class _ResumeObserver with WidgetsBindingObserver {
-  new(this.onResume);
-
-  final VoidCallback onResume;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) onResume();
-  }
-}
