@@ -375,6 +375,14 @@ final class HungarianStrings extends Strings {
   String get languageSubtitle => 'Az alkalmazás saját szövegének nyelve';
   @override
   String get languageSystem => 'Rendszer';
+  @override
+  String get weekStartTitle => 'A hét első napja';
+  @override
+  String get weekStartSubtitle =>
+      'Melyik nappal kezdik a naptárak a hetet. Alapértelmezés szerint a '
+      'rendszeré; az itt választott nap a könyvtár minden eszközén érvényes.';
+  @override
+  String get weekStartSystem => 'Rendszer';
 
   // List note kind (T-TK-02).
   @override

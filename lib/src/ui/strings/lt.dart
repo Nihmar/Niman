@@ -373,6 +373,15 @@ final class LithuanianStrings extends Strings {
   String get languageSubtitle => 'Pati programos teksto kalba';
   @override
   String get languageSystem => 'Sistema';
+  @override
+  String get weekStartTitle => 'Pirmoji savaitės diena';
+  @override
+  String get weekStartSubtitle =>
+      'Nuo kurios dienos kalendoriai pradeda savaitę. Pagal numatytuosius '
+      'sistemos; čia pasirinkta diena galioja visuose bibliotekos '
+      'įrenginiuose.';
+  @override
+  String get weekStartSystem => 'Sistema';
 
   // List note kind (T-TK-02).
   @override

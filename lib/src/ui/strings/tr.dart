@@ -367,6 +367,14 @@ final class TurkishStrings extends Strings {
   String get languageSubtitle => 'Uygulamanın kendisinin yazı dili';
   @override
   String get languageSystem => 'Sistem';
+  @override
+  String get weekStartTitle => 'Haftanın ilk günü';
+  @override
+  String get weekStartSubtitle =>
+      'Takvimlerin haftaya hangi günle başladığı. Varsayılan olarak sistemin; '
+      'burada seçilen gün kitaplığın her cihazında geçerlidir.';
+  @override
+  String get weekStartSystem => 'Sistem';
 
   // List note kind (T-TK-02).
   @override

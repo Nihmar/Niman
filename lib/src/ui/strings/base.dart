@@ -179,6 +179,9 @@ abstract base class Strings {
   String get languageTitle;
   String get languageSubtitle;
   String get languageSystem;
+  String get weekStartTitle;
+  String get weekStartSubtitle;
+  String get weekStartSystem;
 
   // List note kind (T-TK-02).
   String get listAddHint;

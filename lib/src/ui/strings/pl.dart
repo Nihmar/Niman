@@ -379,6 +379,14 @@ final class PolishStrings extends Strings {
   String get languageSubtitle => 'Język właściwego tekstu aplikacji';
   @override
   String get languageSystem => 'System';
+  @override
+  String get weekStartTitle => 'Pierwszy dzień tygodnia';
+  @override
+  String get weekStartSubtitle =>
+      'Od którego dnia kalendarze zaczynają tydzień. Domyślnie systemowy; '
+      'dzień wybrany tutaj obowiązuje na każdym urządzeniu biblioteki.';
+  @override
+  String get weekStartSystem => 'System';
 
   // List note kind (T-TK-02).
   @override

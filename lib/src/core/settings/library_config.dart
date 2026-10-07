@@ -15,6 +15,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultAttachmentsFolder,
         defaultListFolder,
         defaultTemplateFolder;
+import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
@@ -371,6 +372,7 @@ final class LibraryConfig {
     this.lintRulesOff = const <String>{},
     this.treeSort = TreeSort.nameAsc,
     this.linkType = LinkType.wikilink,
+    this.weekStart = WeekStart.system,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.indentWidth = defaultIndentWidth,
     this.editorToolbar = '',
@@ -451,6 +453,7 @@ final class LibraryConfig {
         'markdown' => LinkType.markdown,
         _ => LinkType.wikilink,
       },
+      weekStart: WeekStart.fromName(json['weekStart']),
       missingNoteLocation: switch (json['missingNoteLocation']) {
         'libraryRoot' => MissingNoteLocation.libraryRoot,
         _ => MissingNoteLocation.currentFolder,
@@ -587,6 +590,10 @@ final class LibraryConfig {
   /// What the editor's link button inserts (default a wikilink).
   final LinkType linkType;
 
+  /// The day the calendars start the week on (#566): the system's by
+  /// default; a library sets one for every device it is opened on.
+  final WeekStart weekStart;
+
   /// Where a note created from a dead link lands (default the folder of
   /// the note the link was clicked in, issue #78).
   final MissingNoteLocation missingNoteLocation;
@@ -675,6 +682,7 @@ final class LibraryConfig {
     Set<String>? lintRulesOff,
     TreeSort? treeSort,
     LinkType? linkType,
+    WeekStart? weekStart,
     MissingNoteLocation? missingNoteLocation,
     int? indentWidth,
     String? editorToolbar,
@@ -715,6 +723,7 @@ final class LibraryConfig {
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
       treeSort: treeSort ?? this.treeSort,
       linkType: linkType ?? this.linkType,
+      weekStart: weekStart ?? this.weekStart,
       missingNoteLocation: missingNoteLocation ?? this.missingNoteLocation,
       indentWidth: indentWidth ?? this.indentWidth,
       editorToolbar: editorToolbar ?? this.editorToolbar,
@@ -829,6 +838,7 @@ final class LibraryConfig {
     'lintRulesOff',
     'treeSort',
     'linkType',
+    'weekStart',
     'missingNoteLocation',
     'indentWidth',
     'editorToolbar',
@@ -885,6 +895,7 @@ final class LibraryConfig {
       'frontmatterPanel': frontmatterPanel,
       'treeSort': treeSort.name,
       'linkType': linkType.name,
+      'weekStart': weekStart.name,
       'missingNoteLocation': missingNoteLocation.name,
       'indentWidth': indentWidth,
       'editorToolbar': editorToolbar,
@@ -989,6 +1000,7 @@ final class LibraryConfig {
         lintRulesOff.containsAll(other.lintRulesOff) &&
         treeSort == other.treeSort &&
         linkType == other.linkType &&
+        weekStart == other.weekStart &&
         missingNoteLocation == other.missingNoteLocation &&
         indentWidth == other.indentWidth &&
         editorToolbar == other.editorToolbar &&

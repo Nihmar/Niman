@@ -376,6 +376,14 @@ final class CroatianStrings extends Strings {
   String get languageSubtitle => 'Jezik vlastitog teksta aplikacije';
   @override
   String get languageSystem => 'Sustav';
+  @override
+  String get weekStartTitle => 'Prvi dan u tjednu';
+  @override
+  String get weekStartSubtitle =>
+      'Kojim danom kalendari počinju tjedan. Zadano sustavni; dan odabran '
+      'ovdje vrijedi na svakom uređaju knjižnice.';
+  @override
+  String get weekStartSystem => 'Sustav';
 
   // List note kind (T-TK-02).
   @override

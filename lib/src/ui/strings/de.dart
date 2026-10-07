@@ -378,6 +378,14 @@ final class GermanStrings extends Strings {
   String get languageSubtitle => 'Die Sprache der App-eigenen Texte';
   @override
   String get languageSystem => 'System';
+  @override
+  String get weekStartTitle => 'Erster Wochentag';
+  @override
+  String get weekStartSubtitle =>
+      'Mit welchem Tag die Kalender die Woche beginnen. Standardmäßig der des '
+      'Systems; ein hier gewählter Tag gilt auf jedem Gerät der Bibliothek.';
+  @override
+  String get weekStartSystem => 'System';
 
   // List note kind (T-TK-02).
   @override

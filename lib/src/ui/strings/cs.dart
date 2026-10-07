@@ -374,6 +374,14 @@ final class CzechStrings extends Strings {
   String get languageSubtitle => 'Jazyk samotného textu aplikace';
   @override
   String get languageSystem => 'Systém';
+  @override
+  String get weekStartTitle => 'První den v týdnu';
+  @override
+  String get weekStartSubtitle =>
+      'Kterým dnem kalendáře začínají týden. Ve výchozím stavu podle systému; '
+      'zde zvolený den platí na všech zařízeních knihovny.';
+  @override
+  String get weekStartSystem => 'Systém';
 
   // List note kind (T-TK-02).
   @override

@@ -381,6 +381,15 @@ final class FrenchStrings extends Strings {
   String get languageSubtitle => 'La langue des textes de l’app';
   @override
   String get languageSystem => 'Système';
+  @override
+  String get weekStartTitle => 'Premier jour de la semaine';
+  @override
+  String get weekStartSubtitle =>
+      'Le jour où les calendriers commencent la semaine. Celui du système par '
+      'défaut ; un jour choisi ici vaut sur chaque appareil de la '
+      'bibliothèque.';
+  @override
+  String get weekStartSystem => 'Système';
 
   // List note kind (T-TK-02).
   @override

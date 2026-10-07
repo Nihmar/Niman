@@ -27,6 +27,7 @@ import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/dao.dart';
@@ -593,6 +594,7 @@ final class LibraryController implements LibrarySession {
     // before the ready bump, so nothing paints at the wrong size first.
     final settings = await config.config;
     AppTextScales.apply(ui: settings.uiTextScale, note: settings.noteTextScale);
+    AppWeekStart.choice = settings.weekStart;
     await _publishEpubLook(settings.epubLook);
     _phase = LibraryPhase.ready;
     currentRootPath = abs;
@@ -1289,6 +1291,18 @@ final class LibraryController implements LibrarySession {
     AppTextScales.note = clamped;
   }
 
+  /// The day the library's calendars start the week on (#566).
+  @override
+  Future<WeekStart> get weekStart async => (await _library).weekStart;
+
+  /// Sets (and persists) the first day of the week, and puts it on screen.
+  @override
+  Future<void> setWeekStart(WeekStart start) async {
+    _log.info('first day of the week set to ${start.name}');
+    await _editLibrary((c) => c.copyWith(weekStart: start));
+    AppWeekStart.choice = start;
+  }
+
   /// The source editor's face (issue #259).
   @override
   Future<SourceFont> get sourceFont async => (await _library).sourceFont;
@@ -1520,6 +1534,7 @@ final class LibraryController implements LibrarySession {
     // The text sizes belonged to the library that just went away; the
     // home screen is nobody's library and reads at the shipped sizes.
     AppTextScales.reset();
+    AppWeekStart.choice = WeekStart.system;
     EpubLooks.reset();
     // Nulled before the awaits: a caller that races us must not find a
     // half-closed database.

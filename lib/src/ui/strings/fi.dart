@@ -374,6 +374,14 @@ final class FinnishStrings extends Strings {
   String get languageSubtitle => 'Itse sovelluksen tekstin kieli';
   @override
   String get languageSystem => 'Järjestelmä';
+  @override
+  String get weekStartTitle => 'Viikon ensimmäinen päivä';
+  @override
+  String get weekStartSubtitle =>
+      'Mistä kalenterit aloittavat viikon. Oletuksena järjestelmän; tässä '
+      'valittu päivä pätee kirjaston kaikilla laitteilla.';
+  @override
+  String get weekStartSystem => 'Järjestelmä';
 
   // List note kind (T-TK-02).
   @override

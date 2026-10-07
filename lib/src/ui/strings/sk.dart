@@ -376,6 +376,14 @@ final class SlovakStrings extends Strings {
   String get languageSubtitle => 'Jazyk vlastného textu aplikácie';
   @override
   String get languageSystem => 'Systém';
+  @override
+  String get weekStartTitle => 'Prvý deň v týždni';
+  @override
+  String get weekStartSubtitle =>
+      'Ktorým dňom kalendáre začínajú týždeň. Predvolene podľa systému; tu '
+      'zvolený deň platí na všetkých zariadeniach knižnice.';
+  @override
+  String get weekStartSystem => 'Systém';
 
   // List note kind (T-TK-02).
   @override

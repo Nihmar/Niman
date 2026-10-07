@@ -384,6 +384,15 @@ final class GreekStrings extends Strings {
   String get languageSubtitle => 'Γλώσσα του κειμένου της ίδιας της εφαρμογής';
   @override
   String get languageSystem => 'Σύστημα';
+  @override
+  String get weekStartTitle => 'Πρώτη ημέρα της εβδομάδας';
+  @override
+  String get weekStartSubtitle =>
+      'Από ποια ημέρα ξεκινούν την εβδομάδα τα ημερολόγια. Του συστήματος από '
+      'προεπιλογή· μια ημέρα που επιλέγεται εδώ ισχύει σε κάθε συσκευή της '
+      'βιβλιοθήκης.';
+  @override
+  String get weekStartSystem => 'Σύστημα';
 
   // List note kind (T-TK-02).
   @override

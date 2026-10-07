@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
@@ -35,6 +36,7 @@ final class SettingsAppearanceScreen extends StatefulWidget {
 final class _SettingsAppearanceScreenState
     extends State<SettingsAppearanceScreen> {
   AppLanguage _language = AppLanguage.system;
+  WeekStart _weekStart = WeekStart.system;
   double _uiTextScale = defaultTextScale;
   EpubLook _epubLook = const EpubLook();
   bool _closeToTray = true;
@@ -56,12 +58,14 @@ final class _SettingsAppearanceScreenState
   Future<void> _load() async {
     final controller = widget.controller;
     final language = await controller.language;
+    final weekStart = await controller.weekStart;
     final uiTextScale = await controller.uiTextScale;
     final epubLook = await controller.epubLook;
     final closeToTray = await controller.closeToTray;
     if (!mounted) return;
     setState(() {
       _language = language;
+      _weekStart = weekStart;
       _uiTextScale = uiTextScale;
       _epubLook = epubLook;
       _closeToTray = closeToTray;
@@ -96,6 +100,24 @@ final class _SettingsAppearanceScreenState
       ],
     );
     if (language != null) await _setLanguage(language);
+  }
+
+  /// Asks which day the calendars start the week on (#566).
+  Future<void> _chooseWeekStart() async {
+    final start = await showSettingsChoice<WeekStart>(
+      context,
+      dialogKey: const Key('week-start-dialog'),
+      title: AppStrings.weekStartTitle,
+      subtitle: AppStrings.weekStartSubtitle,
+      current: _weekStart,
+      options: [
+        for (final start in WeekStart.values)
+          SettingsOption(start, AppStrings.weekStartName(start)),
+      ],
+    );
+    if (start == null) return;
+    await widget.controller.setWeekStart(start);
+    if (mounted) setState(() => _weekStart = start);
   }
 
   /// Asks how large the interface text should be.
@@ -147,6 +169,15 @@ final class _SettingsAppearanceScreenState
               subtitle: AppStrings.languageSubtitle,
               value: AppStrings.languageName(_language),
               onTap: () => unawaited(_chooseLanguage()),
+            ),
+          ),
+          HighlightRow(
+            key: SettingsKeys.weekStart,
+            child: SettingsValueRow(
+              title: AppStrings.weekStartTitle,
+              subtitle: AppStrings.weekStartSubtitle,
+              value: AppStrings.weekStartName(_weekStart),
+              onTap: () => unawaited(_chooseWeekStart()),
             ),
           ),
           HighlightRow(

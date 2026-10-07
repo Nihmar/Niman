@@ -372,6 +372,14 @@ final class BasqueStrings extends Strings {
   String get languageSubtitle => 'Aplikazioaren testuaren hizkuntza';
   @override
   String get languageSystem => 'Sistema';
+  @override
+  String get weekStartTitle => 'Asteko lehen eguna';
+  @override
+  String get weekStartSubtitle =>
+      'Egutegiek astea zein egunetan hasten duten. Sistemarena lehenespenez; '
+      'hemen aukeratutako eguna liburutegiaren gailu guztietan aplikatzen da.';
+  @override
+  String get weekStartSystem => 'Sistema';
 
   // List note kind (T-TK-02).
   @override

@@ -378,6 +378,14 @@ final class DutchStrings extends Strings {
   String get languageSubtitle => 'De taal van de tekst van de app zelf';
   @override
   String get languageSystem => 'Systeem';
+  @override
+  String get weekStartTitle => 'Eerste dag van de week';
+  @override
+  String get weekStartSubtitle =>
+      "Waar de agenda's de week beginnen. Standaard die van het systeem; een "
+      'hier gekozen dag geldt op elk apparaat van de bibliotheek.';
+  @override
+  String get weekStartSystem => 'Systeem';
 
   // List note kind (T-TK-02).
   @override

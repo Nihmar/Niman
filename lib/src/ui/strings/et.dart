@@ -368,6 +368,14 @@ final class EstonianStrings extends Strings {
   String get languageSubtitle => 'Rakenduse enda teksti keel';
   @override
   String get languageSystem => 'Süsteem';
+  @override
+  String get weekStartTitle => 'Nädala esimene päev';
+  @override
+  String get weekStartSubtitle =>
+      'Millest kalendrid nädalat alustavad. Vaikimisi süsteemi oma; siin '
+      'valitud päev kehtib kogu teegi seadmetes.';
+  @override
+  String get weekStartSystem => 'Süsteem';
 
   // List note kind (T-TK-02).
   @override

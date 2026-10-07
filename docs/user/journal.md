@@ -44,6 +44,11 @@ A month with a dot under each day that has an entry, today ringed, a
 their first words. In the side panel the day is the entry on screen's,
 or today; on the phone's screen, the day picked.
 
+The week starts on the system's first day — the one its region uses,
+whatever language the app speaks — or on the day the library sets in
+**Settings → Appearance → First day of the week**; the task date panel
+and the date picker follow the same day.
+
 - **Desktop** (a window wide enough for the side panel): the *Journal*
   pane of the side panel, beside the note. Clicking a day opens its
   entry (or offers to make it).

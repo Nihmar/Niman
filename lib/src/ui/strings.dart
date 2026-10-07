@@ -7,6 +7,7 @@ library;
 // ignore_for_file: public_member_api_docs
 
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/ui/strings/base.dart';
 import 'package:niman/src/ui/strings/be.dart';
@@ -289,6 +290,24 @@ final class AppStrings {
   /// How a language reads as in the language picker: in its own language,
   /// because someone who landed in the wrong one has to be able to find
   /// their way back.
+  static String get weekStartTitle => _s.weekStartTitle;
+  static String get weekStartSubtitle => _s.weekStartSubtitle;
+
+  /// [start] as the settings row names it: a weekday in the app's language,
+  /// and for the system's choice the day it stands for (#566).
+  static String weekStartName(WeekStart start) {
+    String day(int materialIndex) =>
+        weekdayName(materialIndex, AppLanguages.resolved.id);
+
+    return switch (start) {
+      WeekStart.system =>
+        '${_s.weekStartSystem} (${day(systemFirstDayIndex())})',
+      WeekStart.monday => day(1),
+      WeekStart.saturday => day(6),
+      WeekStart.sunday => day(0),
+    };
+  }
+
   static String languageName(AppLanguage language) => switch (language) {
     AppLanguage.system => _s.languageSystem,
     AppLanguage.english => 'English',

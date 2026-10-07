@@ -374,6 +374,14 @@ final class UkrainianStrings extends Strings {
   String get languageSubtitle => 'Мова самої програми';
   @override
   String get languageSystem => 'Система';
+  @override
+  String get weekStartTitle => 'Перший день тижня';
+  @override
+  String get weekStartSubtitle =>
+      'З якого дня календарі починають тиждень. Типово системний; день, '
+      'вибраний тут, діє на кожному пристрої бібліотеки.';
+  @override
+  String get weekStartSystem => 'Система';
 
   // List note kind (T-TK-02).
   @override

@@ -346,6 +346,13 @@ final class JapaneseStrings extends Strings {
   String get languageSubtitle => 'アプリ自身のテキストの言語';
   @override
   String get languageSystem => 'システム';
+  @override
+  String get weekStartTitle => '週の始まり';
+  @override
+  String get weekStartSubtitle =>
+      'カレンダーが週を始める曜日。既定はシステムの設定。ここで選んだ曜日はライブラリのすべてのデバイスで使われます。';
+  @override
+  String get weekStartSystem => 'システム';
 
   // List note kind (T-TK-02).
   @override

@@ -374,6 +374,14 @@ final class EnglishStrings extends Strings {
   String get languageSubtitle => 'The language of the app’s own text';
   @override
   String get languageSystem => 'System';
+  @override
+  String get weekStartTitle => 'First day of the week';
+  @override
+  String get weekStartSubtitle =>
+      "Where the calendars start the week. The system's by default; a day "
+      'chosen here holds on every device of the library.';
+  @override
+  String get weekStartSystem => 'System';
 
   // List note kind (T-TK-02).
   @override
