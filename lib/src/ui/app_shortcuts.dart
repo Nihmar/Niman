@@ -404,6 +404,21 @@ String keyName(LogicalKeyboardKey key) {
   return key.keyLabel;
 }
 
+/// The keys a command runs on besides its listed one, while that one is
+/// the shipped key (#577): the zoom's `+` as each layout types it — its
+/// own key on Italian and German keyboards, Shift and `=` on a US one —
+/// and the numpad's `+` and `-`.
+const Map<AppCommand, List<SingleActivator>> _alsoShipped = {
+  AppCommand.zoomIn: [
+    SingleActivator(LogicalKeyboardKey.add, control: true),
+    SingleActivator(LogicalKeyboardKey.equal, control: true, shift: true),
+    SingleActivator(LogicalKeyboardKey.numpadAdd, control: true),
+  ],
+  AppCommand.zoomOut: [
+    SingleActivator(LogicalKeyboardKey.numpadSubtract, control: true),
+  ],
+};
+
 /// The `CallbackShortcuts` bindings: one activator per command with a
 /// handler. A command left out of [handlers] is simply not bound, so the
 /// shell installs a subset without the registry drifting.
@@ -411,11 +426,18 @@ Map<ShortcutActivator, VoidCallback> appShortcutBindings(
   Map<AppCommand, VoidCallback> handlers,
 ) {
   final bindings = <ShortcutActivator, VoidCallback>{};
+  final map = AppKeyMap.current.value;
   // The keys in force: the shipped ones, changed where the user changed
   // them (#159).
-  for (final shortcut in AppKeyMap.current.value.shortcuts) {
+  for (final shortcut in map.shortcuts) {
     final handler = handlers[shortcut.command];
-    if (handler != null) bindings[shortcut.activation] = handler;
+    if (handler == null) continue;
+    bindings[shortcut.activation] = handler;
+    if (map.isChanged(shortcut.command)) continue;
+    for (final keys
+        in _alsoShipped[shortcut.command] ?? const <SingleActivator>[]) {
+      bindings[keys] = handler;
+    }
   }
   return bindings;
 }

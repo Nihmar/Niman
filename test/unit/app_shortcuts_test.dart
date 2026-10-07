@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/editor_shortcuts.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 
 void main() {
@@ -106,5 +107,35 @@ void main() {
         LogicalKeyboardKey.keyN,
       ),
     );
+  });
+
+  test('zoom in on the + of every layout, and the numpad (#577)', () {
+    /// The keys bound to zoom in and out, as `trigger/shift`.
+    Set<String> zoomKeys() {
+      final bindings = appShortcutBindings({
+        AppCommand.zoomIn: () {},
+        AppCommand.zoomOut: () {},
+      });
+      return {
+        for (final keys in bindings.keys.cast<SingleActivator>())
+          '${keys.trigger.keyLabel}${keys.shift ? '+shift' : ''}',
+      };
+    }
+
+    expect(zoomKeys(), {
+      // Its listed key, the `+` key of Italian and German keyboards, the
+      // US Ctrl++, the numpad's.
+      '=', '+', '=+shift', 'Numpad Add',
+      '-', 'Numpad Subtract',
+    });
+    // A key the user chose is the only one.
+    addTearDown(() => AppKeyMap.current.value = KeyMap.defaults);
+    AppKeyMap.current.value = const KeyMap({
+      AppCommand.zoomIn: SingleActivator(
+        LogicalKeyboardKey.keyZ,
+        control: true,
+      ),
+    });
+    expect(zoomKeys(), {'Z', '-', 'Numpad Subtract'});
   });
 }
