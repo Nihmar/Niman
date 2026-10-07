@@ -1212,4 +1212,23 @@ void main() {
       reason: 'the line a jump names is on screen',
     );
   });
+
+  testWidgets('back from another app, the note has the keys again', (
+    tester,
+  ) async {
+    // #539: on Windows, typing did nothing after switching back until a
+    // click on the note.
+    final state = await pump(tester, 'una riga\n');
+    await tester.tapAt(const Offset(6, 16), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    expect(state.focusNode.hasFocus, isTrue);
+    expect(tester.testTextInput.hasAnyClients, isTrue);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    // The platform let the connection go while the app was away.
+    tester.testTextInput.closeConnection();
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(tester.testTextInput.hasAnyClients, isTrue);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 }
