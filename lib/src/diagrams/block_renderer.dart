@@ -43,6 +43,7 @@ final class BlockRenderer {
       );
     }
     for (final edge in layout.edges) {
+      if (edge.edge.style == FlowEdgeStyle.invisible) continue;
       target.line(
         edge.start,
         edge.end,

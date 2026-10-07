@@ -37,6 +37,26 @@ void main() {
     expect(RegExp('<polygon[^>]* stroke=').hasMatch(svg), isTrue);
   });
 
+  test('a double circle is two rings around its label', () {
+    final single = diagramSvg('flowchart TD\nA((Once))', _style)!;
+    final double = diagramSvg('flowchart TD\nA(((Twice)))', _style)!;
+    int rings(String svg) => '<polygon'.allMatches(svg).length;
+    expect(rings(double), rings(single) + 1);
+    expect(double, contains('Twice'));
+  });
+
+  test('an invisible link places its nodes and draws nothing', () {
+    final linked = diagramSvg('flowchart LR\nA ~~~ B', _style)!;
+    final apart = diagramSvg('flowchart LR\nA\nB', _style)!;
+    final drawn = diagramSvg('flowchart LR\nA --- B', _style)!;
+    expect('<path'.allMatches(linked).length, 0);
+    expect('<path'.allMatches(drawn).length, greaterThan(0));
+    // Laid out as the drawn link is: side by side, not as two loose nodes.
+    String box(String svg) => RegExp('viewBox="[^"]*"').firstMatch(svg)![0]!;
+    expect(box(linked), box(drawn));
+    expect(apart, isNotNull);
+  });
+
   test('a mind map becomes a standalone SVG (#530)', () {
     final svg = diagramSvg('mindmap\nroot((Central))\n  A\n  B\n', _style);
     expect(svg, isNotNull);

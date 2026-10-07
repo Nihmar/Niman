@@ -3,7 +3,8 @@
 ///
 /// Mermaid writes an edge as an optional tail cap, a run of `-`, `=` or a
 /// dotted `-.-`, and an optional head cap — and a longer run is a longer
-/// link (`--->`, `===>`, `-..->`), drawn here like a short one. A label is
+/// link (`--->`, `===>`, `-..->`), drawn here like a short one; `~~~` is an
+/// invisible link, which places its nodes and draws nothing. A label is
 /// written in pipes after the edge (`-->|yes|`) or inside it, between an
 /// opening and a closing run (`-- yes -->`, `== yes ==>`, `-. yes .->`).
 library;
@@ -19,6 +20,9 @@ typedef FlowEdgeScan = ({
   FlowEdgeEnd endCap,
   String? label,
 });
+
+/// An invisible link: three tildes or more.
+final RegExp _invisible = RegExp('~{3,}');
 
 /// An unlabelled edge: tail cap, run, head cap.
 final RegExp _plain = RegExp(r'([<xo])?(-{2,}|={2,}|-\.+-)([>xo])?');
@@ -43,6 +47,16 @@ const List<(String, List<String>)> _dangling = [
 /// null when there is none. A run that opens an edge and is not closed is
 /// a [MermaidParseException] naming the spellings that would close it.
 FlowEdgeScan? scanFlowEdge(String source, int position, int line) {
+  final invisible = _invisible.matchAsPrefix(source, position);
+  if (invisible != null) {
+    return (
+      end: invisible.end,
+      style: FlowEdgeStyle.invisible,
+      start: FlowEdgeEnd.none,
+      endCap: FlowEdgeEnd.none,
+      label: null,
+    );
+  }
   final plain = _plainAt(source, position);
   if (plain != null) return plain;
   final labelled = _labelled.matchAsPrefix(source, position);

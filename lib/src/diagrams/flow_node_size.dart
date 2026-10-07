@@ -10,6 +10,9 @@ import 'package:niman/src/diagrams/diagram_metrics.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 
+/// How far inside a double circle's ring its inner circle is drawn.
+const double doubleCircleGap = 5;
+
 /// The size of [node]'s box, its label already broken into [lines].
 Size flowNodeSize(FlowNode node, List<String> lines, DiagramStyle style) {
   switch (node.shape) {
@@ -39,6 +42,11 @@ Size flowNodeSize(FlowNode node, List<String> lines, DiagramStyle style) {
   switch (node.shape) {
     case FlowNodeShape.circle:
       final diameter = math.max(width, height) * 1.3;
+      width = diameter;
+      height = diameter;
+    case FlowNodeShape.doubleCircle:
+      // The circle, and room for the ring around it.
+      final diameter = math.max(width, height) * 1.3 + 2 * doubleCircleGap;
       width = diameter;
       height = diameter;
     case FlowNodeShape.diamond:
