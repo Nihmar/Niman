@@ -201,6 +201,11 @@ final class FakeWebDavServer {
   Duration? trickleNextGet;
   static const _tricklePieces = 6;
 
+  /// Set, a PUT whose body is longer is not answered: the connection is
+  /// closed under it, as nginx past its `client_max_body_size` leaves a
+  /// client that is still sending (#617). Every other request is answered.
+  int? maxPutBytes;
+
   final Map<String, int> _failPuts = {};
 
   /// The next PUT to [path] answers [status] (once).
@@ -383,6 +388,10 @@ final class FakeWebDavServer {
         await _propfind(request, path, headers);
       case 'GET':
         await _get(request, path);
+      case 'PUT'
+          when maxPutBytes != null && request.contentLength > maxPutBytes!:
+        final socket = await response.detachSocket(writeHeaders: false);
+        socket.destroy();
       case 'PUT':
         await _put(request, path, headers);
       case 'MKCOL':

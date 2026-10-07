@@ -941,8 +941,67 @@ void main() {
       expect(remoteText('a.md'), 'a2');
     });
 
+    test('an upload the server drops fails alone while it answers the rest '
+        '(#617)', () async {
+      a.write('a.md', 'a');
+      await a.sync();
+      // Past its limit the server closes the connection under the PUT,
+      // and answers every other request.
+      server.maxPutBytes = 1000;
+      a
+        ..write('big.md', 'x' * 5000)
+        ..write('b.md', 'b');
+      final report = await a.sync();
+      expect(report.aborted, isNull, reason: report.summary());
+      expect(report.failures.single.path, 'big.md');
+      expect(
+        report.failures.single.error,
+        allOf(
+          contains('PUT big.md'),
+          contains('may limit the size of uploads'),
+        ),
+      );
+      expect(remoteText('b.md'), 'b');
+      expect(
+        (await a.store.destination(a.path))!.lastError,
+        contains('big.md'),
+      );
+
+      // The limit raised, the next run sends it.
+      server.maxPutBytes = null;
+      final retry = await a.sync();
+      expect(retry.clean, isTrue, reason: retry.summary());
+      expect(remoteText('big.md'), 'x' * 5000);
+    });
+
+    test('an upload that answers 413 says why', () async {
+      a.write('big.md', 'x' * 5000);
+      server.failPutsTo('big.md', 413);
+      final report = await a.sync();
+      expect(report.aborted, isNull, reason: report.summary());
+      expect(
+        report.failures.single.error,
+        allOf(contains('413'), contains('may limit the size of uploads')),
+      );
+    });
+
+    test('a dropped request with the server gone too stops the run as '
+        'offline', () async {
+      a.write('a.md', 'a');
+      await a.sync();
+      server.maxPutBytes = 1000;
+      a.write('big.md', 'x' * 5000);
+      // The PUT is dropped, and the check after it is not answered either.
+      server.beforeAnswer = (request) {
+        if (request.method == 'PUT') server.failNext(503, count: 3, after: 1);
+      };
+      final report = await a.sync();
+      expect(report.aborted, SyncAbort.offline, reason: report.summary());
+      expect(report.abortDetail, contains('PUT big.md'));
+    });
+
     test(
-      'a download whose body stalls fails the run, and records it',
+      'a download whose body stalls fails that file, and records it',
       () async {
         // The connection cannot be detached, so dropping the socket is not
         // what releases the temp file's sink: the client's own copy of the
@@ -962,13 +1021,10 @@ void main() {
 
         final report = await stalled.sync();
 
-        expect(
-          report.aborted,
-          SyncAbort.offline,
-          reason:
-              'a stalled body is the retryable failure the run backs '
-              'off on: ${report.summary()}',
-        );
+        // The server still answers: the stall fails that file alone, and
+        // the run goes on (#617).
+        expect(report.aborted, isNull, reason: report.summary());
+        expect(report.failures.single.path, 'Remote.md');
         expect(
           (await stalled.store.destination(stalled.path))!.lastError,
           isNotNull,
@@ -985,7 +1041,7 @@ void main() {
       },
     );
 
-    test('a download whose body stalls on a plain HttpClient fails the run '
+    test('a download whose body stalls on a plain HttpClient fails that file '
         'and drops the connection (#495)', () async {
       final stalled = await _Device.create(
         'stalled',
@@ -999,7 +1055,8 @@ void main() {
 
       final report = await stalled.sync();
 
-      expect(report.aborted, SyncAbort.offline, reason: report.summary());
+      expect(report.aborted, isNull, reason: report.summary());
+      expect(report.failures.single.path, 'Remote.md');
       expect(
         (await stalled.store.destination(stalled.path))!.lastError,
         isNotNull,
