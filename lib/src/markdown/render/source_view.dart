@@ -1897,9 +1897,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// survive
   /// the caret moving between taps — which is exactly what happens.
   void _tapUp(Offset position) {
-    final offset = offsetAt(position);
-    if (offset == null) return;
     final finger = _lastPointerKind != PointerDeviceKind.mouse;
+    final offset = (finger ? null : _pressOffset) ?? offsetAt(position);
+    _pressOffset = null;
+    if (offset == null) return;
     final now = DateTime.now();
     final last = _lastClick;
     final lastAt = _lastClickAt;
@@ -2064,6 +2065,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The offset a mouse drag started from, or null when no drag is running.
   int? _dragAnchor;
 
+  /// Where a mouse press put the caret, for the click it ends as to keep:
+  /// typewriter mode scrolls the caret's row to the middle as the button
+  /// goes down, and the release, read again where the pointer is, landed
+  /// a row further on (#544).
+  int? _pressOffset;
+
   /// [child] with mouse dragging selecting text.
   ///
   /// Mouse only, deliberately: on a phone a vertical drag on the text *scrolls*
@@ -2081,6 +2088,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     },
     onPointerDown: (event) {
       _lastPointerKind = event.kind;
+      _pressOffset = null;
       // A mouse asks for the keyboard as it goes down, which is where a click
       // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
       // only scrolls the note does not bring the keyboard up.
@@ -2099,7 +2107,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // A press on a task box ticks it when it is let go (`_tapUp`): it
       // neither places a caret nor starts a selection.
       if (_taskBoxAt(event.position) != null) return;
-      final offset = offsetAt(event.position);
+      final offset = _pressOffset = offsetAt(event.position);
       if (offset == null) return;
       if (_openLinkAt(offset)) return;
       // Shift+click extends the selection from its anchor to the click, and
