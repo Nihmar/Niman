@@ -11,6 +11,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:niman/src/diagrams/flow_box_edges.dart';
 import 'package:niman/src/diagrams/flow_clusters.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 
@@ -30,13 +31,14 @@ List<List<String>> flowLayers(Flowchart chart) {
   final out = <String, List<String>>{for (final id in ids) id: []};
   final incoming = <String, List<String>>{for (final id in ids) id: []};
   final seen = <(String, String)>{};
-  for (final edge in chart.edges) {
-    if (edge.from == edge.to || !seen.add((edge.from, edge.to))) continue;
-    if (beside[edge.from] == edge.to || beside[edge.to] == edge.from) {
-      continue;
-    }
-    out[edge.from]!.add(edge.to);
-    incoming[edge.to]!.add(edge.from);
+  for (final (:from, :to, edge: _) in flowRankedEdges(
+    chart,
+    flowBoxMembers(chart),
+  )) {
+    if (from == to || !seen.add((from, to))) continue;
+    if (beside[from] == to || beside[to] == from) continue;
+    out[from]!.add(to);
+    incoming[to]!.add(from);
   }
   final rank = _ranks(ids, out);
   beside.forEach((note, target) => rank[note] = rank[target]!);

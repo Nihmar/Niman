@@ -12,6 +12,8 @@
 /// direction.
 library;
 
+import 'package:niman/src/diagrams/flow_node_style.dart';
+
 /// The direction a flowchart is laid out in.
 enum FlowDirection {
   /// Top to bottom (`TD`, `TB`): ranks run downwards.
@@ -190,6 +192,7 @@ final class FlowNode {
     required this.label,
     required this.shape,
     this.sections = const [],
+    this.style,
   });
 
   /// The identifier that edges refer to it by.
@@ -209,6 +212,9 @@ final class FlowNode {
   /// its name, what goes under it (a technology, a description). Empty for
   /// a node whose text is its [label] alone.
   final List<List<String>> sections;
+
+  /// The look a `style` statement gave it, or null for the theme's.
+  final FlowNodeStyle? style;
 
   /// Every line of a stacked node's [sections], top to bottom.
   List<String> get stackedLines => [for (final section in sections) ...section];
@@ -265,6 +271,7 @@ final class FlowSubgraph {
     required this.nodeIds,
     this.direction,
     this.parent,
+    this.style,
   });
 
   /// The identifier written after `subgraph`.
@@ -281,6 +288,9 @@ final class FlowSubgraph {
 
   /// The id of the subgraph it is written inside, or null at the top.
   final String? parent;
+
+  /// The look a `style` statement gave its box, or null for the theme's.
+  final FlowNodeStyle? style;
 }
 
 /// A parsed flowchart.
