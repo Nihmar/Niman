@@ -3036,6 +3036,10 @@ final class AlbanianStrings extends Strings {
       'gjen si çdo shënim.';
 
   @override
+  String get ocrPdfHasText =>
+      'Ky PDF përmban tashmë tekst: ndoshta nuk ka nevojë të njihet.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Së pari, një shkarkim prej $size';
 
   @override

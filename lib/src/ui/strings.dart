@@ -1627,6 +1627,7 @@ final class AppStrings {
   static String get ocrPagesTo => _s.ocrPagesTo;
   static String get ocrSavedAs => _s.ocrSavedAs;
   static String get ocrSavedAsHint => _s.ocrSavedAsHint;
+  static String get ocrPdfHasText => _s.ocrPdfHasText;
   static String ocrNeedsDownload(String size) => _s.ocrNeedsDownload(size);
   static String get ocrNeedsDownloadHint => _s.ocrNeedsDownloadHint;
   static String get ocrDownloadAndRecognize => _s.ocrDownloadAndRecognize;

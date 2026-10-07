@@ -2965,6 +2965,10 @@ final class HindiStrings extends Strings {
       'की तरह ढूँढती है।';
 
   @override
+  String get ocrPdfHasText =>
+      'इस PDF में पहले से टेक्स्ट है: शायद इसे पहचानने की ज़रूरत नहीं है।';
+
+  @override
   String ocrNeedsDownload(String size) => 'पहले $size का डाउनलोड';
 
   @override

@@ -2743,6 +2743,9 @@ final class JapaneseStrings extends Strings {
   String get ocrSavedAsHint => 'ファイルの隣のノート。ページごとに 1 セクション。ほかのノートと同じく検索できます。';
 
   @override
+  String get ocrPdfHasText => 'この PDF にはすでにテキストがあります。認識する必要はないかもしれません。';
+
+  @override
   String ocrNeedsDownload(String size) => 'まず $size のダウンロードが必要です';
 
   @override

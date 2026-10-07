@@ -3055,6 +3055,10 @@ final class LithuanianStrings extends Strings {
       'jį randa kaip bet kurį užrašą.';
 
   @override
+  String get ocrPdfHasText =>
+      'Šiame PDF jau yra teksto: galbūt jo atpažinti nereikia.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Pirmiausia atsisiųsti $size';
 
   @override

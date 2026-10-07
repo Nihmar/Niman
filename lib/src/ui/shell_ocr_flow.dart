@@ -77,11 +77,19 @@ final class ShellOcrFlow {
       return;
     }
     var count = pageCount;
-    if (count == null && p.extension(path).toLowerCase() == '.pdf') {
+    var hasText = false;
+    if (p.extension(path).toLowerCase() == '.pdf') {
       try {
         final pages = await OcrPdfPages.open(p.join(root, path));
-        count = pages.count;
-        await pages.close();
+        try {
+          count ??= pages.count;
+          // The page on screen: a PDF made from text says so (#611).
+          if (count > 0) {
+            hasText = await pages.hasText((page ?? 1).clamp(1, count));
+          }
+        } finally {
+          await pages.close();
+        }
       } on Object {
         // The sheet offers every page; the job says if the file is bad.
       }
@@ -93,6 +101,7 @@ final class ShellOcrFlow {
       path: path,
       pageCount: count,
       page: page,
+      hasText: hasText,
     );
     if (request == null) return;
     _enqueue(path, request.languages, request.pages);

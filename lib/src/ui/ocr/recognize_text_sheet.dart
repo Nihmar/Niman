@@ -21,19 +21,22 @@ import 'package:path/path.dart' as p;
 typedef OcrRequest = ({List<OcrLanguage> languages, List<int>? pages});
 
 /// Asks how to recognize [path] (library-relative), a PDF of [pageCount]
-/// pages on [page], or a picture (both null); null when cancelled.
+/// pages on [page], or a picture (both null); null when cancelled. A PDF
+/// that [hasText] already says so: it may not need recognizing.
 Future<OcrRequest?> showRecognizeTextSheet(
   BuildContext context, {
   required OcrInstallation installation,
   required String path,
   int? pageCount,
   int? page,
+  bool hasText = false,
 }) {
   final body = _RecognizeForm(
     installation: installation,
     path: path,
     pageCount: pageCount,
     page: page,
+    hasText: hasText,
   );
   if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
     return showDialog<OcrRequest>(
@@ -64,12 +67,14 @@ final class _RecognizeForm extends StatefulWidget {
     required this.path,
     required this.pageCount,
     required this.page,
+    required this.hasText,
   });
 
   final OcrInstallation installation;
   final String path;
   final int? pageCount;
   final int? page;
+  final bool hasText;
 
   @override
   State<_RecognizeForm> createState() => _RecognizeFormState();
@@ -140,6 +145,10 @@ final class _RecognizeFormState extends State<_RecognizeForm> {
               ),
             ],
           ),
+          if (widget.hasText) ...[
+            const SizedBox(height: 12),
+            _HasText(text: AppStrings.ocrPdfHasText),
+          ],
           const SizedBox(height: 16),
           DropdownButtonFormField<OcrLanguage>(
             key: const Key('recognize-language'),
@@ -279,6 +288,27 @@ final class _RecognizeFormState extends State<_RecognizeForm> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// A PDF that already carries text: said before anything is chosen.
+final class _HasText extends StatelessWidget {
+  const new({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      key: const Key('recognize-has-text'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.info_outline, size: 18, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
+        Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+      ],
     );
   }
 }

@@ -3038,6 +3038,10 @@ final class MacedonianStrings extends Strings {
       'Пребарувањето ја наоѓа како секоја белешка.';
 
   @override
+  String get ocrPdfHasText =>
+      'Овој PDF веќе содржи текст: можеби не треба да се препознава.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Прво, преземање од $size';
 
   @override

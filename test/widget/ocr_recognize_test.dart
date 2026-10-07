@@ -55,6 +55,7 @@ void main() {
     WidgetTester tester, {
     int? pageCount,
     int? page,
+    bool hasText = false,
     Future<void> Function()? choose,
   }) async {
     tester.view.physicalSize = const Size(1000, 1400);
@@ -72,6 +73,7 @@ void main() {
                 path: 'Contratti/scan.pdf',
                 pageCount: pageCount,
                 page: page,
+                hasText: hasText,
               ),
             ),
             child: const Text('go'),
@@ -102,6 +104,7 @@ void main() {
         // English is on the device: nothing to download first.
         expect(find.byKey(const Key('recognize-download')), findsNothing);
         expect(find.text(AppStrings.ocrRecognizeAction), findsWidgets);
+        expect(find.byKey(const Key('recognize-has-text')), findsNothing);
       },
     );
     expect(request!.languages, [eng]);
@@ -142,6 +145,22 @@ void main() {
       },
     );
     expect(request!.pages, [3, 4]);
+  });
+
+  testWidgets('a PDF that already has text says so (#611)', (tester) async {
+    await load(tester);
+    final request = await ask(
+      tester,
+      pageCount: 4,
+      page: 1,
+      hasText: true,
+      choose: () async {
+        expect(find.byKey(const Key('recognize-has-text')), findsOne);
+        expect(find.text(AppStrings.ocrPdfHasText), findsOne);
+      },
+    );
+    // Said, not refused: the reader may still want it read.
+    expect(request!.languages, [eng]);
   });
 
   testWidgets('a picture asks no pages', (tester) async {

@@ -3111,6 +3111,10 @@ final class GreekStrings extends Strings {
       'αναζήτηση τη βρίσκει όπως κάθε σημείωση.';
 
   @override
+  String get ocrPdfHasText =>
+      'Αυτό το PDF περιέχει ήδη κείμενο: ίσως δεν χρειάζεται αναγνώριση.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Πρώτα μια λήψη $size';
 
   @override

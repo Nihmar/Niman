@@ -3056,6 +3056,10 @@ final class UkrainianStrings extends Strings {
       'знаходить її, як будь-яку нотатку.';
 
   @override
+  String get ocrPdfHasText =>
+      'Цей PDF уже містить текст: можливо, розпізнавати його не потрібно.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Спершу завантаження $size';
 
   @override

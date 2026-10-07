@@ -3082,6 +3082,11 @@ final class GermanStrings extends Strings {
       'Suche findet sie wie jede Notiz.';
 
   @override
+  String get ocrPdfHasText =>
+      'Dieses PDF enthält bereits Text: Es muss vielleicht nicht erkannt '
+      'werden.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Zuerst ein Download von $size';
 
   @override

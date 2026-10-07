@@ -3026,6 +3026,10 @@ final class BulgarianStrings extends Strings {
       'намира като всяка бележка.';
 
   @override
+  String get ocrPdfHasText =>
+      'Този PDF вече съдържа текст: може би не е нужно да се разпознава.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Първо изтегляне от $size';
 
   @override

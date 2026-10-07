@@ -3064,6 +3064,10 @@ final class CatalanStrings extends Strings {
       'cerca la troba com qualsevol nota.';
 
   @override
+  String get ocrPdfHasText =>
+      'Aquest PDF ja conté text: potser no cal reconèixer-lo.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Primer, una baixada de $size';
 
   @override

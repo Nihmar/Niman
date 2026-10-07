@@ -3020,6 +3020,10 @@ final class HungarianStrings extends Strings {
       'megtalálja, mint bármely jegyzetet.';
 
   @override
+  String get ocrPdfHasText =>
+      'Ez a PDF már tartalmaz szöveget: lehet, hogy nem kell felismerni.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Előbb $size letöltése';
 
   @override

@@ -3043,6 +3043,10 @@ final class BasqueStrings extends Strings {
       'Bilaketak beste edozein ohar bezala aurkitzen du.';
 
   @override
+  String get ocrPdfHasText =>
+      'PDF honek testua du jada: agian ez da ezagutu behar.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Lehenik, $size-ko deskarga';
 
   @override

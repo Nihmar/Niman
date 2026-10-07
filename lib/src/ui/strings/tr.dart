@@ -2974,6 +2974,10 @@ final class TurkishStrings extends Strings {
       'onu her not gibi bulur.';
 
   @override
+  String get ocrPdfHasText =>
+      'Bu PDF zaten metin içeriyor: tanınması gerekmeyebilir.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Önce $size indirme';
 
   @override

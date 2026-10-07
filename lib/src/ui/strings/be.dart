@@ -3053,6 +3053,10 @@ final class BelarusianStrings extends Strings {
       'знаходзіць яе, як любую нататку.';
 
   @override
+  String get ocrPdfHasText =>
+      'Гэты PDF ужо змяшчае тэкст: магчыма, распазнаваць яго не трэба.';
+
+  @override
   String ocrNeedsDownload(String size) => 'Спачатку спампоўка $size';
 
   @override
