@@ -66,6 +66,12 @@ Full guides live in [`docs/`](docs/):
   strikethrough, `==highlight==`, callouts (`> [!note]`), fenced code
   blocks with syntax highlighting.
 - **Math** with `$…$` and `$$…$$` (KaTeX).
+- **Diagrams**: a `mermaid` fence is drawn as its diagram, in the read view
+  and in live mode — flowcharts, sequence, class, state, ER, C4,
+  requirement, Gantt, timeline, user journey, git graph, kanban, quadrant,
+  XY, Sankey, block, packet, radar, treemap, architecture diagrams, pie
+  charts and mind maps — by an engine of Niman's own in Dart, on every
+  platform, and exported as SVG. A list turns into a mind map in one step.
 - **One Markdown surface, three modes.** The source editor, the live
   (WYSIWYG) editor and the read view are one widget of Niman's own: the
   note on disk is the same text whichever you write in, and switching

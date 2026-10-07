@@ -12,8 +12,8 @@ title: Niman
 Start with [getting started](docs/user/getting-started.md), or pick the guide
 you need:
 
-- [Editing](docs/user/editing.md) — Markdown, math, images, spellcheck, the
-  read view.
+- [Editing](docs/user/editing.md) — Markdown, math, Mermaid diagrams, images,
+  spellcheck, the read view.
 - [List notes and shopping lists](docs/user/lists.md) — checklists with
   quantities.
 - [Organization](docs/user/organization.md) — trash, history, frontmatter and

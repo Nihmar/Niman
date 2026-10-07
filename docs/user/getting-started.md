@@ -66,7 +66,8 @@ any step; nothing of it is left in your library.
 
 ## Next
 
-- [Editing](editing.md) — Markdown, math, images, spellcheck, the read view.
+- [Editing](editing.md) — Markdown, math, Mermaid diagrams, images,
+  spellcheck, the read view.
 - [List notes and shopping lists](lists.md) — checklists, quantities, and
   the ⋮ switch between the two.
 - [Organization](organization.md) — trash, history, templates, tags — and
