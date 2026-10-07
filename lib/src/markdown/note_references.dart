@@ -19,6 +19,7 @@ library;
 
 import 'package:niman/src/frontmatter/parser.dart' show normalizeTag;
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/markdown/app_syntax.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -105,7 +106,9 @@ BlockReferences blockReferencesOf(
   if (!_hasInlineText(block.kind)) return noBlockReferences;
   final raw = BlockParser.blockText(block, buffer);
   final bracket = raw.contains('[');
-  if (!bracket && !raw.contains('#')) return noBlockReferences;
+  // Without a `[` only a tag can be in it — and a heading's own hashes are
+  // none: every heading was parsed whole for nothing (#581).
+  if (!bracket && !AppSyntax.mayHoldTag(raw)) return noBlockReferences;
   // A tag needs no definition: without a `[` the note's are not asked for.
   final read = parser.read(
     block,

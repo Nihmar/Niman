@@ -137,9 +137,18 @@ abstract final class AppSyntax {
     return _word.hasMatch(text.substring(start, at));
   }
 
+  /// Whether [text] has a `#` a tag could start at — one followed by a
+  /// tag's character — so a reader after tags may skip parsing text that
+  /// has none: a heading's own hashes are followed by a space (#581).
+  static bool mayHoldTag(String text) => _tagStart.hasMatch(text);
+
   /// The characters a tag is made of: a unicode letter or digit, or `_`, `/`
   /// or `-`. The editor's `#tag` pattern is the same class.
-  static final RegExp _tagBody = RegExp(r'[\p{L}\p{N}_/-]+', unicode: true);
+  static const String _tagChars = r'[\p{L}\p{N}_/-]';
+
+  static final RegExp _tagBody = RegExp('$_tagChars+', unicode: true);
+
+  static final RegExp _tagStart = RegExp('#$_tagChars', unicode: true);
 
   /// Whether a character is a word character: a letter, a digit or `_`.
   static final RegExp _word = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
