@@ -431,9 +431,9 @@ final class _RowTile extends StatelessWidget {
     final middle = onMiddleClick;
     final move = onMove;
     final longPress = onLongPress == null ? null : () => onLongPress!(note);
-    // By touch the hold drags the row, and a hold that does not move is the
-    // long press: the drag gives it back.
-    final held = move != null && TreeRowDrag.holdToDrag;
+    // A hold drags the row, and a hold that does not move is the long
+    // press: the drag gives it back.
+    final held = move != null;
     Widget row = InkWell(
       onTap: () => onSelect(note),
       onLongPress: held ? null : longPress,

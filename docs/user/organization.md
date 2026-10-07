@@ -163,9 +163,10 @@ same way the folder settings ask for a folder — and, like them, it has a
 exist yet without leaving the dialog. A folder is never offered itself
 or anything inside it as a target.
 
-Or drag the row: with the mouse on the desktop, or on a phone by holding
-the row and then moving the finger (held and let go without moving, the
-hold opens the row's menu as before). Let go on a folder and it moves into
+Or drag the row: with the mouse it moves as soon as it is pulled; by
+touch — a phone, or a desktop's touchscreen — hold the row and then move
+the finger, so a swipe still scrolls the tree (held and let go without
+moving, the hold opens the row's menu as before). Let go on a folder and it moves into
 that folder; on a note — pinned rows included — into that note's folder;
 on the empty space below the rows, into the library root. The pinned
 block's heading takes no drop. The row under the pointer lights up where

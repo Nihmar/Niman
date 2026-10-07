@@ -8,9 +8,11 @@
 /// already is, does nothing, and the row under it does not light up.
 library;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show kTouchSlop;
+import 'dart:async';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
@@ -72,12 +74,6 @@ final class TreeRowDrag extends StatefulWidget {
   /// The row as drawn.
   final Widget child;
 
-  /// Whether rows are held before they drag: the touch platforms'.
-  static bool get holdToDrag => switch (defaultTargetPlatform) {
-    TargetPlatform.android || TargetPlatform.iOS => true,
-    _ => false,
-  };
-
   @override
   State<TreeRowDrag> createState() => _TreeRowDragState();
 }
@@ -91,7 +87,7 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
 
   TreeDrag get _data => _drag?.path == note.path
       ? _drag!
-      : _drag = TreeDrag(note.path, held: TreeRowDrag.holdToDrag);
+      : _drag = TreeDrag(note.path, held: true);
 
   /// The folder a drop on this row moves into.
   String get _folder => note.isDir ? note.path : parentOf(note.path);
@@ -130,16 +126,11 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
     final feedback = _TreeDragFeedback(note: note);
     final child = widget.child;
     final dimmed = Opacity(opacity: 0.4, child: child);
-    if (!TreeRowDrag.holdToDrag) {
-      return Draggable<TreeDrag>(
-        data: _data,
-        feedback: feedback,
-        childWhenDragging: dimmed,
-        child: child,
-      );
-    }
     final drag = _data;
-    return LongPressDraggable<TreeDrag>(
+    // The pointer chooses, not the platform (#575): a mouse drags the row
+    // as it is pulled, anything else holds it first — a finger on a
+    // desktop's touchscreen still scrolls the tree.
+    final hold = _HoldDraggable(
       data: drag,
       feedback: feedback,
       childWhenDragging: dimmed,
@@ -152,7 +143,59 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
       },
       child: child,
     );
+    return _MouseDraggable(
+      data: TreeDrag(note.path, held: false),
+      feedback: feedback,
+      childWhenDragging: dimmed,
+      child: hold,
+    );
   }
+}
+
+/// A row dragged by the mouse, as soon as it is pulled; no other pointer.
+final class _MouseDraggable extends Draggable<TreeDrag> {
+  const new({
+    required super.data,
+    required super.feedback,
+    required super.childWhenDragging,
+    required super.child,
+  });
+
+  @override
+  MultiDragGestureRecognizer createRecognizer(
+    GestureMultiDragStartCallback onStart,
+  ) => ImmediateMultiDragGestureRecognizer(
+    supportedDevices: const {PointerDeviceKind.mouse},
+  )..onStart = onStart;
+}
+
+/// A row held, then dragged: by every pointer but the mouse.
+final class _HoldDraggable extends LongPressDraggable<TreeDrag> {
+  const new({
+    required super.data,
+    required super.feedback,
+    required super.childWhenDragging,
+    required super.onDragUpdate,
+    required super.onDragEnd,
+    required super.child,
+  });
+
+  @override
+  DelayedMultiDragGestureRecognizer createRecognizer(
+    GestureMultiDragStartCallback onStart,
+  ) =>
+      DelayedMultiDragGestureRecognizer(
+          delay: delay,
+          supportedDevices: {
+            for (final kind in PointerDeviceKind.values)
+              if (kind != PointerDeviceKind.mouse) kind,
+          },
+        )
+        ..onStart = (position) {
+          final drag = onStart(position);
+          if (drag != null) unawaited(HapticFeedback.selectionClick());
+          return drag;
+        };
 }
 
 /// The tree's empty space as a place to drop: into the library's root.

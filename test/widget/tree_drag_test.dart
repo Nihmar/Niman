@@ -9,6 +9,13 @@ import 'package:niman/src/ui/tree_drag.dart';
 
 import '../fakes/fake_library_session.dart';
 
+/// The pointer chooses how a row drags, not the platform (#575): a mouse
+/// on Android, a finger on Linux, the same as everywhere.
+const anyPlatform = TargetPlatformVariant({
+  TargetPlatform.android,
+  TargetPlatform.linux,
+});
+
 void main() {
   late FakeLibrarySession session;
 
@@ -86,7 +93,7 @@ void main() {
     await dragMouse(tester, 'nota.md', inner);
     await dragMouse(tester, 'inner.md', below);
     expect(moves, ['nota.md -> other', 'nota.md -> docs', 'docs/inner.md -> ']);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+  }, variant: anyPlatform);
 
   testWidgets('a folder never into itself, nor anything where it is', (
     tester,
@@ -175,5 +182,5 @@ void main() {
     await tester.pumpAndSettle();
     expect(moves, ['nota.md -> other']);
     expect(menus, ['nota.md', 'nota.md']);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  }, variant: anyPlatform);
 }
