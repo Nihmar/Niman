@@ -600,6 +600,35 @@ void main() {
     expect(selection.end, greaterThan(0));
   });
 
+  testWidgets('Shift+click extends the selection to the click', (tester) async {
+    // #546: a Shift+click moved the caret and selected nothing.
+    final buffer = SourceBuffer.fromText('una riga di testo\n');
+    final carets = <SelectionModel>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            onSelection: carets.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tapAt(const Offset(6, 16), kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 1));
+    expect(carets.last, const SelectionModel.at(0));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.tapAt(const Offset(120, 16), kind: PointerDeviceKind.mouse);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    final selection = carets.last;
+    expect(selection.anchor, 0, reason: 'from where the caret was');
+    expect(selection.extent, greaterThan(0), reason: 'to the click');
+  });
+
   testWidgets('Ctrl+A selects the whole note', (tester) async {
     final buffer = SourceBuffer.fromText('una\ndue\ntre\n');
     final carets = <SelectionModel>[];

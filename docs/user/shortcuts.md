@@ -80,6 +80,9 @@ Editor find/replace follows the familiar bindings:
 
 Links: `Ctrl+click` a link in the source editor to follow it.
 
+Selecting with the mouse: drag over the text, or `Shift+click` to select
+from the caret to the click (a drag after it goes on extending).
+
 ## Changing a shortcut
 
 In the palette itself, `Alt+P` pins or unpins the selected command;
