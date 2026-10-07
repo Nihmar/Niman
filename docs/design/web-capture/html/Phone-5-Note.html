@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, the captured note</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0}
+.sub{font-size:13px;color:#A6A29A}
+.txt{font-family:Literata,serif;font-size:16px;line-height:1.7;color:#E8E3DA;margin:0 0 14px}
+.chip{height:28px;padding:0 10px;border-radius:14px;background:#2E4A55;color:#BFE3EC;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:64px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none">
+    <button class="ibtn" aria-label="Back"><svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Offline-first, ten years later</div>
+      <div class="sub" style="font-size:12px">Reading / Articles</div>
+    </div>
+    <button class="ibtn" aria-label="More"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+  </div>
+
+  <div style="flex:1;padding:6px 20px;overflow:hidden">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+      <span class="chip" style="background:#2C3A5C;color:#C9D6F4"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>app.example.com</span>
+      <span class="chip">#web</span><span class="chip">#sync</span>
+    </div>
+    <div class="sub" style="margin-bottom:14px">Dana Ortiz · captured 7 Oct 2026</div>
+    <p class="txt">When we started, a phone without signal was an edge case. Today it is the case we design for first, and the queue of changes waiting to be sent is the product itself.</p>
+    <div style="height:170px;border-radius:12px;background:#2C3037;display:flex;align-items:center;justify-content:center;color:#6B7079;gap:8px;margin:0 0 6px;font-size:13px">
+      <svg class="ico" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l5-5 4 4 2-2 5 5"/><circle cx="15" cy="9" r="1.5"/></svg>assets/3f9a…c1.png
+    </div>
+    <p class="sub" style="font-family:Literata,serif;font-style:italic;margin:0 0 16px">The queue view, first sketch.</p>
+    <h2 style="font:600 20px Literata,serif;margin:0 0 10px">The queue is the product</h2>
+    <p class="txt">Every change waits in order, and the order is what the user trusts. A conflict is two orders that met.</p>
+  </div>
+
+  <div style="height:56px;display:flex;align-items:center;justify-content:space-around;border-top:1px solid #2C3037;flex:none;color:#D9D4CB">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>
+    <svg class="ico" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+    <svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>
+  </div>
+</div>
+</body>
+</html>

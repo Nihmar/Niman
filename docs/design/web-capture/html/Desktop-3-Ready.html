@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capture dialog, ready to save</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#A6A29A}
+.sel{height:40px;padding:0 12px;border:1px solid #4A4F59;border-radius:10px;display:flex;align-items:center;gap:8px;color:#F2EDE5;background:#23262B;box-sizing:border-box}
+.chip{height:26px;padding:0 6px 0 10px;border-radius:13px;background:#2E4A55;color:#BFE3EC;display:flex;align-items:center;gap:4px;font-size:13px}
+.card{background:#23262B;border-radius:14px;padding:12px 14px}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.7;color:#D9D4CB}
+.txt{font-family:Literata,serif;font-size:16px;line-height:1.75;color:#E8E3DA;margin:0 0 14px}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+
+  <aside style="width:264px;flex:none;border-right:1px solid #2C3037;display:flex;flex-direction:column;padding:12px 8px;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px 12px">
+      <div style="width:22px;height:22px;border-radius:6px;background:#587CD3;font:600 13px Literata,serif;display:flex;align-items:center;justify-content:center">N</div>
+      <div style="font-weight:600">Notes</div>
+    </div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Meetings</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Projects</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Reading</div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Articles</div>
+    <div class="tree" style="background:#2C3037;color:#F2EDE5"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Sync screen.md</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>assets</div>
+  </aside>
+
+  <main style="flex:1;display:flex;flex-direction:column;min-width:0;background:#23262B">
+    <div style="height:42px;display:flex;align-items:flex-end;gap:2px;padding:0 8px;background:#1B1D21">
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;background:#23262B;border-radius:10px 10px 0 0;font-size:13px">Sync screen</div>
+    </div>
+    <div style="flex:1;padding:44px 0;display:flex;justify-content:center">
+      <div style="width:680px">
+        <h1 style="font:600 28px Literata,serif;margin:0 0 18px">Sync screen</h1>
+        <p class="txt">What the sync screen has to answer at a glance: is everything sent, and if not, what is waiting and why.</p>
+      </div>
+    </div>
+  </main>
+
+  <div style="position:absolute;inset:0;background:rgba(10,11,13,.55);display:flex;align-items:center;justify-content:center">
+    <div role="dialog" aria-label="Capture web page" style="width:760px;background:#2C3037;border-radius:24px;padding:24px 28px 20px;box-shadow:0 18px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+      <div style="display:flex;align-items:center;gap:12px">
+        <svg class="ico" viewBox="0 0 24 24" style="width:24px;height:24px;color:#587CD3"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.2 3.5 5 3.5 8s-1 5.8-3.5 8M12 4c-2.5 2.2-3.5 5-3.5 8s1 5.8 3.5 8"/></svg>
+        <div style="font-size:20px;font-weight:600;flex:1">Capture web page</div>
+        <div class="sub" style="display:flex;align-items:center;gap:6px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>Read after running the page in Edge</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:78px 1fr;gap:10px 14px;align-items:center">
+        <div class="lab">Title</div>
+        <div class="sel">Offline-first, ten years later</div>
+        <div class="lab">Folder</div>
+        <div class="sel"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M3 6h6l2 2h10v11H3z"/></svg><span style="flex:1">Reading / Articles</span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="lab">Tags</div>
+        <div class="sel" style="gap:6px">
+          <span class="chip">#web<svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M7 7l10 10M17 7L7 17"/></svg></span>
+          <span class="chip">#sync<svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M7 7l10 10M17 7L7 17"/></svg></span>
+          <span class="sub" style="margin-left:4px">Add a tag</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:12px">
+        <div class="card" style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px"><div class="lab" style="flex:1">Preview</div><div class="sub">1,842 words · 9 min</div></div>
+          <div style="font:600 18px Literata,serif">Offline-first, ten years later</div>
+          <div class="sub">Dana Ortiz · 2 October 2026</div>
+          <p style="font-family:Literata,serif;font-size:14px;line-height:1.65;color:#D9D4CB;margin:0">When we started, a phone without signal was an edge case. Today it is the case we design for first, and the queue of changes waiting to be sent is the product itself…</p>
+          <div style="display:flex;gap:6px;margin-top:2px">
+            <div style="width:62px;height:42px;border-radius:6px;background:#363B44"></div>
+            <div style="width:62px;height:42px;border-radius:6px;background:#363B44"></div>
+            <div style="width:62px;height:42px;border-radius:6px;background:#363B44"></div>
+            <div style="width:62px;height:42px;border-radius:6px;background:#363B44;display:flex;align-items:center;justify-content:center" class="sub">+4</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;margin-top:2px"><input type="checkbox" checked style="accent-color:#587CD3;margin:0">Download the 7 images to <span style="color:#D9D4CB;font-family:'IBM Plex Mono',monospace;font-size:12.5px">assets/</span></label>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="card">
+            <div class="lab" style="margin-bottom:6px">Frontmatter</div>
+            <div class="mono" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">source: https://app.example.com/blog/offline-first</div>
+            <div class="mono">captured: 2026-10-07<br>author: Dana Ortiz<br>tags: [web, sync]</div>
+          </div>
+          <div class="card">
+            <div class="lab" style="margin-bottom:6px">Removed</div>
+            <div style="font-size:13.5px;line-height:1.75;color:#D9D4CB">14 scripts and 3 styles<br>The navigation menu<br>A cookie banner<br>Footer and related posts · 410 words</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button style="height:40px;padding:0 18px;border:0;border-radius:20px;background:transparent;color:#A9C0F0;font:500 14px 'IBM Plex Sans',sans-serif">Cancel</button>
+        <button style="height:40px;padding:0 20px;border:0;border-radius:20px;background:#587CD3;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif">Save note</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A link dropped on the window</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+.sub{font-size:13px;color:#A6A29A}
+.txt{font-family:Literata,serif;font-size:16px;line-height:1.75;color:#E8E3DA;margin:0 0 14px}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+
+  <aside style="width:264px;flex:none;border-right:1px solid #2C3037;display:flex;flex-direction:column;padding:12px 8px;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px 12px">
+      <div style="width:22px;height:22px;border-radius:6px;background:#587CD3;font:600 13px Literata,serif;display:flex;align-items:center;justify-content:center">N</div>
+      <div style="font-weight:600">Notes</div>
+    </div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Meetings</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Projects</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Reading</div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Articles</div>
+    <div class="tree" style="background:#2C3037;color:#F2EDE5"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Sync screen.md</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>assets</div>
+  </aside>
+
+  <main style="flex:1;display:flex;flex-direction:column;min-width:0;background:#23262B;position:relative">
+    <div style="height:42px;display:flex;align-items:flex-end;gap:2px;padding:0 8px;background:#1B1D21">
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;background:#23262B;border-radius:10px 10px 0 0;font-size:13px">Sync screen</div>
+    </div>
+    <div style="flex:1;padding:44px 0;display:flex;justify-content:center">
+      <div style="width:680px">
+        <h1 style="font:600 28px Literata,serif;margin:0 0 18px">Sync screen</h1>
+        <p class="txt">What the sync screen has to answer at a glance: is everything sent, and if not, what is waiting and why.</p>
+        <p class="txt">Reading list for the conflicts part, before the design review on Thursday.</p>
+      </div>
+    </div>
+
+    <div style="position:absolute;inset:54px 16px 16px;border:2px dashed #587CD3;border-radius:20px;background:rgba(35,38,43,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+      <div style="width:64px;height:64px;border-radius:32px;background:#2C3A5C;display:flex;align-items:center;justify-content:center">
+        <svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;color:#A9C0F0"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.2 3.5 5 3.5 8s-1 5.8-3.5 8M12 4c-2.5 2.2-3.5 5-3.5 8s1 5.8 3.5 8"/></svg>
+      </div>
+      <div style="font-size:20px;font-weight:600">Drop to capture this page</div>
+      <div class="sub" style="font-size:14px">app.example.com/blog/offline-first</div>
+      <div class="sub" style="margin-top:6px">The capture dialog opens with it. A Markdown file dropped here still opens as a note.</div>
+    </div>
+
+    <div style="position:absolute;left:640px;top:330px;display:flex;align-items:center;gap:8px;background:#363B44;border:1px solid #4A4F59;border-radius:8px;padding:6px 10px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.4)">
+      <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#7CA0E6"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>
+      Offline-first, ten years later
+    </div>
+  </main>
+</div>
+</body>
+</html>
