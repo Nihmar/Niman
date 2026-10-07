@@ -129,6 +129,13 @@ final class FlowCursor {
       return (shape: FlowNodeShape.rect, label: _readUntil(']', number, '"["'));
     }
     if (open == '(') {
+      if (source.startsWith('(((', position)) {
+        position += 3;
+        return (
+          shape: FlowNodeShape.doubleCircle,
+          label: _readUntil(')))', number, '"((("'),
+        );
+      }
       if (source.startsWith('((', position)) {
         position += 2;
         return (

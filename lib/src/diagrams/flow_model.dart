@@ -73,6 +73,9 @@ enum FlowNodeShape {
   /// `id((text))`, a circle.
   circle,
 
+  /// `id(((text)))`, a double circle: a ring around a circle.
+  doubleCircle,
+
   /// `id{text}`, a diamond.
   diamond,
 
@@ -126,7 +129,11 @@ enum FlowEdgeStyle {
   dotted,
 
   /// A thick line (`==>`, `===`).
-  thick;
+  thick,
+
+  /// An invisible link (`~~~`): it places its nodes as an edge does, and
+  /// draws nothing.
+  invisible;
 
   /// The line's thickness in logical pixels.
   double get width => this == FlowEdgeStyle.thick ? 3.5 : 2;

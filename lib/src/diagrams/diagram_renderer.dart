@@ -61,6 +61,7 @@ final class DiagramRenderer {
 
   void _edges(DiagramTarget target) {
     for (final edge in layout.edges) {
+      if (edge.edge.style == FlowEdgeStyle.invisible) continue;
       target.cubic(
         edge.start,
         edge.control1,
@@ -89,6 +90,7 @@ final class DiagramRenderer {
 
   void _edgeLabels(DiagramTarget target) {
     for (final edge in layout.edges) {
+      if (edge.edge.style == FlowEdgeStyle.invisible) continue;
       final label = edge.label;
       final box = edge.labelBox;
       if (label == null || box == null) continue;
@@ -180,6 +182,16 @@ final class DiagramRenderer {
       stroke: style.palette.nodeStroke,
       strokeWidth: style.nodeStrokeWidth,
     );
+    if (node.node.shape == FlowNodeShape.doubleCircle) {
+      target.polygon(
+        DiagramShapes.polygonFor(
+          FlowNodeShape.circle,
+          node.rect.deflate(doubleCircleGap),
+        ),
+        stroke: style.palette.nodeStroke,
+        strokeWidth: style.nodeStrokeWidth,
+      );
+    }
     if (node.node.shape == FlowNodeShape.subroutine) {
       for (final (a, b) in DiagramShapes.subroutineBars(node.rect)) {
         target.line(

@@ -38,6 +38,7 @@ abstract final class DiagramShapes {
       case FlowNodeShape.stadium:
         return _stadium(rect);
       case FlowNodeShape.circle:
+      case FlowNodeShape.doubleCircle:
         return _ellipse(cx, cy, rect.width / 2, rect.height / 2);
       case FlowNodeShape.diamond:
         return [

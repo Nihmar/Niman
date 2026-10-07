@@ -103,6 +103,23 @@ void main() {
     expect(chart.edges[5].end, FlowEdgeEnd.none);
   });
 
+  test('a double circle and an invisible link are read', () {
+    final chart = _chart(
+      'flowchart LR\n'
+      'A(((Twice))) ~~~ B\n'
+      'B ~~~~ C((Once))',
+    );
+    expect(_node(chart, 'A').shape, FlowNodeShape.doubleCircle);
+    expect(_node(chart, 'A').label, 'Twice');
+    expect(_node(chart, 'C').shape, FlowNodeShape.circle);
+    expect(chart.edges.map((edge) => edge.style), [
+      FlowEdgeStyle.invisible,
+      FlowEdgeStyle.invisible,
+    ]);
+    expect(chart.edges.first.end, FlowEdgeEnd.none);
+    expect(chart.edges.first.label, isNull);
+  });
+
   test('labels are read inline and in pipes', () {
     final chart = _chart(
       'flowchart TD\n'
