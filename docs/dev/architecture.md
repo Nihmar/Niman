@@ -10,7 +10,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 
 | Module | Contents |
 |--------|----------|
-| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, share-in (`share_in.dart`), the first-run state (`welcome.dart`), single instance, the tray, the changelog parser |
+| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, share-in (`share_in.dart`), the first-run state (`welcome.dart`), single instance, the tray, the changelog parser, running a program with a timeout (`process_run.dart`) |
 | `update/` | The GitHub-Releases update check, its scheduler and the download of the next build |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image/audio import, Markdown import |
 | `import/` | Bringing a Notion export into the library (#25): the zip walk, page ids off the names, links rewritten, assets kept |

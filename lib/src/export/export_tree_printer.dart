@@ -6,6 +6,7 @@ library;
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:niman/src/core/process_run.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
 import 'package:path/path.dart' as p;

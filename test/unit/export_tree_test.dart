@@ -6,9 +6,9 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/process_run.dart';
 import 'package:niman/src/export/export_tree.dart';
 import 'package:niman/src/export/export_tree_pages.dart';
-import 'package:niman/src/export/pdf_printer.dart';
 import 'package:path/path.dart' as p;
 
 /// The engine's stand-in for a folder's PDF run: writes the page itself as
@@ -18,6 +18,7 @@ Future<ProcessAnswer> _printPage(
   String exe,
   List<String> args, {
   Duration? timeout,
+  int? outputLimit,
 }) async {
   final pdf = args
       .firstWhere((arg) => arg.startsWith('--print-to-pdf='))
