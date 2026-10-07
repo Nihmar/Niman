@@ -163,6 +163,15 @@ same way the folder settings ask for a folder — and, like them, it has a
 exist yet without leaving the dialog. A folder is never offered itself
 or anything inside it as a target.
 
+Or drag the row: with the mouse on the desktop, or on a phone by holding
+the row and then moving the finger (held and let go without moving, the
+hold opens the row's menu as before). Let go on a folder and it moves into
+that folder; on a note, into that note's folder; on the empty space below
+the rows, into the library root. The row under the pointer lights up where
+a drop would move something — a folder dropped on itself or inside itself,
+or anything dropped where it already is, stays put. It is the same move as
+the menu's: links follow, open notes are saved first.
+
 ## Opening a note outside Niman
 
 A note is also a file, and sometimes you want it where Niman is not: to

@@ -9,6 +9,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree_drag.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
@@ -46,9 +47,14 @@ final class NoteTree extends StatefulWidget {
     this.onSecondaryTapDown,
     this.onOpenInNewTab,
     this.onBackgroundSecondaryTapUp,
+    this.onMove,
     this.nameDesc = false,
     super.key,
   });
+
+  /// Moves a dragged row's note or folder into the folder it was dropped
+  /// on (#567); null leaves the rows where they are.
+  final TreeMove? onMove;
 
   /// The session providing the index and the change-event stream.
   final LibrarySession controller;
@@ -260,7 +266,7 @@ final class _NoteTreeState extends State<NoteTree> {
             final header = rows.pinned.isEmpty
                 ? 0
                 : (_collapsed ? 2 : rows.pinned.length + 2);
-            return ListView.builder(
+            final list = ListView.builder(
               key: const Key('note-tree-list'),
               itemCount: header + rows.tree.length,
               itemBuilder: (context, index) {
@@ -276,9 +282,14 @@ final class _NoteTreeState extends State<NoteTree> {
                   onLongPress: widget.onLongPress,
                   onSecondaryTapDown: widget.onSecondaryTapDown,
                   onMiddleClick: widget.onOpenInNewTab,
+                  onMove: widget.onMove,
                 );
               },
             );
+            final move = widget.onMove;
+            return move == null
+                ? list
+                : TreeRootDrop(onMove: move, child: list);
           },
         );
       },
@@ -383,9 +394,13 @@ final class _RowTile extends StatelessWidget {
     this.onLongPress,
     this.onSecondaryTapDown,
     this.onMiddleClick,
+    this.onMove,
     this.icon,
     super.key,
   });
+
+  /// Moves this row by dragging it, and takes drops (#567).
+  final TreeMove? onMove;
 
   final Note note;
   final int depth;
@@ -408,9 +423,14 @@ final class _RowTile extends StatelessWidget {
     final theme = Theme.of(context);
     final metrics = TreeRowMetrics.of(context);
     final middle = onMiddleClick;
-    final row = InkWell(
+    final move = onMove;
+    final longPress = onLongPress == null ? null : () => onLongPress!(note);
+    // By touch the hold drags the row, and a hold that does not move is the
+    // long press: the drag gives it back.
+    final held = move != null && TreeRowDrag.holdToDrag;
+    Widget row = InkWell(
       onTap: () => onSelect(note),
-      onLongPress: onLongPress == null ? null : () => onLongPress!(note),
+      onLongPress: held ? null : longPress,
       onSecondaryTapDown: onSecondaryTapDown == null
           ? null
           : (details) => onSecondaryTapDown!(note, details),
@@ -464,6 +484,14 @@ final class _RowTile extends StatelessWidget {
         ),
       ),
     );
+    if (move != null) {
+      row = TreeRowDrag(
+        note: note,
+        onMove: move,
+        onLongPress: longPress,
+        child: row,
+      );
+    }
     if (middle == null || note.isDir) return row;
     return Listener(
       onPointerDown: (event) {
