@@ -269,7 +269,16 @@ final class OcrQueue extends ChangeNotifier {
       }
       final existing = await ops.readNote(path);
       if (!isOcrSidecarOf(existing, fileName)) continue;
-      await ops.saveNote(path, mergeOcrSidecar(existing, read, paged: paged));
+      await ops.saveNote(
+        path,
+        mergeOcrSidecar(
+          existing,
+          read,
+          paged: paged,
+          languages: job.languageCodes,
+          date: _now(),
+        ),
+      );
       return path;
     }
     throw StateError('no free sidecar name for ${job.path}');
