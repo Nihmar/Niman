@@ -40,6 +40,7 @@ final class ShellRowActions {
     required this.onOpenBeside,
     required this.onExport,
     required this.onExportFolder,
+    this.onRecognize,
   });
 
   /// The open library's session.
@@ -87,6 +88,9 @@ final class ShellRowActions {
   /// Writes the folder at `path` out as one zip (#24).
   final Future<void> Function(String path) onExportFolder;
 
+  /// Recognizes the text of the file at `path` (#594); null offers none.
+  final void Function(String path)? onRecognize;
+
   /// Runs [action] for [note], creating in [here] where the action makes
   /// something new. A null action (the menu was dismissed) does nothing.
   Future<void> run(
@@ -120,6 +124,8 @@ final class ShellRowActions {
         await onExport(note.path);
       case 'exportfolder':
         await onExportFolder(note.path);
+      case 'recognize':
+        onRecognize?.call(note.path);
       case 'newtab':
         onOpenInNewTab(note.path);
       case 'beside':

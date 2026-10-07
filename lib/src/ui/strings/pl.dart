@@ -3037,4 +3037,58 @@ final class PolishStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Zwolni to $size. Plik zostanie pobrany ponownie, gdy '
       'rozpoznawanie tekstu będzie go potrzebować.';
+
+  @override
+  String get ocrRecognizeAction => 'Rozpoznaj tekst';
+
+  @override
+  String get ocrPagesTitle => 'Strony';
+
+  @override
+  String ocrPagesAll(int count) => 'Wszystkie ($count)';
+
+  @override
+  String ocrPagesThis(int page) => 'Ta strona ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Od';
+
+  @override
+  String get ocrPagesTo => 'do';
+
+  @override
+  String get ocrSavedAs => 'Zapisane jako';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Notatka obok pliku, jedna sekcja na stronę. Wyszukiwanie '
+      'znajdzie ją jak każdą notatkę.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Najpierw pobieranie: $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Tylko raz: potem działa offline.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Pobierz i rozpoznaj';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Rozpoznawanie s. $page z $total';
+
+  @override
+  String get ocrPreparing => 'Pobieranie tego, czego potrzebuje rozpoznawanie…';
+
+  @override
+  String ocrRecognized(int words) => 'Tekst rozpoznany · słów: $words';
+
+  @override
+  String get ocrOpenText => 'Otwórz tekst';
+
+  @override
+  String get ocrFailed => 'Rozpoznawanie tekstu nie powiodło się';
+
+  @override
+  String get commandNeedOcrFile => 'Wymaga pliku PDF lub obrazu na ekranie';
 }

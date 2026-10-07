@@ -2946,4 +2946,59 @@ final class TurkishStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Bu, $size yer açar. Metin tanıma gerektiğinde yeniden '
       'indirilir.';
+
+  @override
+  String get ocrRecognizeAction => 'Metni tanı';
+
+  @override
+  String get ocrPagesTitle => 'Sayfalar';
+
+  @override
+  String ocrPagesAll(int count) => 'Tümü ($count)';
+
+  @override
+  String ocrPagesThis(int page) => 'Bu sayfa ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Şuradan';
+
+  @override
+  String get ocrPagesTo => 'şuraya';
+
+  @override
+  String get ocrSavedAs => 'Şu adla kaydedilir';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Dosyanın yanında bir not, her sayfa için bir bölüm. Arama '
+      'onu her not gibi bulur.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Önce $size indirme';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Yalnızca bir kez: sonra çevrimdışı çalışır.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'İndir ve tanı';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Sayfa $page / $total tanınıyor';
+
+  @override
+  String get ocrPreparing => 'Metin tanımanın ihtiyacı olanlar indiriliyor…';
+
+  @override
+  String ocrRecognized(int words) => 'Metin tanındı · $words sözcük';
+
+  @override
+  String get ocrOpenText => 'Metni aç';
+
+  @override
+  String get ocrFailed => 'Metin tanıma başarısız oldu';
+
+  @override
+  String get commandNeedOcrFile => 'Ekranda bir PDF ya da görsel gerekir';
 }

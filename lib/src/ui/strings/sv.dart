@@ -2992,4 +2992,59 @@ final class SwedishStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Det frigör $size. Filen laddas ned igen när '
       'textigenkänningen behöver den.';
+
+  @override
+  String get ocrRecognizeAction => 'Känn igen text';
+
+  @override
+  String get ocrPagesTitle => 'Sidor';
+
+  @override
+  String ocrPagesAll(int count) => 'Alla $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Den här sidan ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Från';
+
+  @override
+  String get ocrPagesTo => 'till';
+
+  @override
+  String get ocrSavedAs => 'Sparas som';
+
+  @override
+  String get ocrSavedAsHint =>
+      'En anteckning bredvid filen, ett avsnitt per sida. Sökningen '
+      'hittar den som alla anteckningar.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Först en nedladdning på $size';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Bara en gång: sedan fungerar det offline.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Ladda ned och känn igen';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Känner igen s. $page av $total';
+
+  @override
+  String get ocrPreparing => 'Laddar ned det som textigenkänningen behöver…';
+
+  @override
+  String ocrRecognized(int words) => 'Text igenkänd · $words ord';
+
+  @override
+  String get ocrOpenText => 'Öppna texten';
+
+  @override
+  String get ocrFailed => 'Textigenkänningen misslyckades';
+
+  @override
+  String get commandNeedOcrFile => 'Kräver en PDF eller en bild på skärmen';
 }

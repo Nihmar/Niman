@@ -3004,4 +3004,59 @@ final class GalicianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Isto libera $size. Volverá descargarse cando o recoñecemento '
       'de texto o precise.';
+
+  @override
+  String get ocrRecognizeAction => 'Recoñecer o texto';
+
+  @override
+  String get ocrPagesTitle => 'Páxinas';
+
+  @override
+  String ocrPagesAll(int count) => 'As $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Esta páxina ($page)';
+
+  @override
+  String get ocrPagesFrom => 'De';
+
+  @override
+  String get ocrPagesTo => 'a';
+
+  @override
+  String get ocrSavedAs => 'Gardarase como';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Unha nota ao carón do ficheiro, unha sección por páxina. A '
+      'busca atópaa coma calquera nota.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Primeiro, unha descarga de $size';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Só unha vez: despois funciona sen conexión.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Descargar e recoñecer';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Recoñecendo p. $page de $total';
+
+  @override
+  String get ocrPreparing => 'Descargando o que precisa o recoñecemento…';
+
+  @override
+  String ocrRecognized(int words) => 'Texto recoñecido · $words palabras';
+
+  @override
+  String get ocrOpenText => 'Abrir o texto';
+
+  @override
+  String get ocrFailed => 'Fallou o recoñecemento de texto';
+
+  @override
+  String get commandNeedOcrFile => 'Precisa un PDF ou unha imaxe na pantalla';
 }

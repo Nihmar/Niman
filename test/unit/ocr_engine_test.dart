@@ -1,25 +1,10 @@
 import 'dart:ffi';
-import 'dart:io';
-import 'dart:ui' as ui;
 
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ocr/ocr_engine_locator.dart';
 import 'package:niman/src/ocr/tesseract.dart';
-import 'package:path/path.dart' as p;
 
-/// The engine and the English model, where this machine has them: the
-/// distribution's (CI installs tesseract-ocr), or the library named by
-/// `NIMAN_OCR_ENGINE` (a build of scripts/ocr-engine.sh). A bare machine
-/// skips the live tests.
-final String? _engine =
-    Platform.environment['NIMAN_OCR_ENGINE'] ?? findInstalledOcrEngine()?.name;
-
-final String? _tessdata = [
-  '/usr/share/tessdata',
-  '/usr/share/tesseract-ocr/5/tessdata',
-  '/usr/share/tesseract-ocr/4.00/tessdata',
-].where((dir) => File(p.join(dir, 'eng.traineddata')).existsSync()).firstOrNull;
+import '../fakes/ocr_page.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -54,19 +39,19 @@ void main() {
   test(
     'reads a rendered page into lines with their places',
     () async {
-      final page = await _render([
+      final page = await renderOcrPage([
         'Il contratto scade il 28 febbraio.',
         '',
         'Second paragraph, first line',
       ]);
       final tesseract = Tesseract.open(
-        openOcrEngine(_engine!)!,
-        datapath: _tessdata!,
+        openOcrEngine(liveOcrEngine!)!,
+        datapath: liveTessdata!,
         languages: 'eng',
       );
       addTearDown(tesseract.dispose);
       final lines = tesseract.recognize(
-        page.gray,
+        grayOf(page.rgba),
         width: page.width,
         height: page.height,
       );
@@ -80,46 +65,8 @@ void main() {
       expect(first.right, lessThanOrEqualTo(1));
       expect(first.bottom, greaterThan(first.top));
     },
-    skip: _engine == null || _tessdata == null
+    skip: liveOcrEngine == null || liveTessdata == null
         ? 'no Tesseract engine or English model on this machine'
         : false,
   );
-}
-
-/// [lines] in Literata at 300 DPI on a white page, as 8-bit gray.
-Future<({Uint8List gray, int width, int height})> _render(
-  List<String> lines,
-) async {
-  final font = File(
-    p.join('assets', 'fonts', 'literata', 'Literata-Regular.ttf'),
-  ).readAsBytesSync();
-  await (FontLoader(
-    'OcrLiterata',
-  )..addFont(Future.value(ByteData.sublistView(font)))).load();
-  const width = 1600;
-  const height = 600;
-  final recorder = ui.PictureRecorder();
-  final canvas = ui.Canvas(recorder)
-    ..drawRect(
-      const ui.Rect.fromLTWH(0, 0, width + 0.0, height + 0.0),
-      ui.Paint()..color = const ui.Color(0xFFFFFFFF),
-    );
-  final builder =
-      ui.ParagraphBuilder(
-          ui.ParagraphStyle(fontFamily: 'OcrLiterata', fontSize: 56),
-        )
-        ..pushStyle(ui.TextStyle(color: const ui.Color(0xFF000000)))
-        ..addText(lines.join('\n'));
-  canvas.drawParagraph(
-    builder.build()..layout(const ui.ParagraphConstraints(width: width - 160)),
-    const ui.Offset(80, 60),
-  );
-  final image = await recorder.endRecording().toImage(width, height);
-  final rgba = (await image.toByteData())!.buffer.asUint8List();
-  final gray = Uint8List(width * height);
-  for (var i = 0; i < gray.length; i++) {
-    gray[i] =
-        (rgba[i * 4] * 77 + rgba[i * 4 + 1] * 150 + rgba[i * 4 + 2] * 29) >> 8;
-  }
-  return (gray: gray, width: width, height: height);
 }

@@ -3028,4 +3028,58 @@ final class UkrainianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Звільниться $size. Файл завантажиться знову, коли він '
       'знадобиться для розпізнавання тексту.';
+
+  @override
+  String get ocrRecognizeAction => 'Розпізнати текст';
+
+  @override
+  String get ocrPagesTitle => 'Сторінки';
+
+  @override
+  String ocrPagesAll(int count) => 'Усі $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Ця сторінка ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Від';
+
+  @override
+  String get ocrPagesTo => 'до';
+
+  @override
+  String get ocrSavedAs => 'Буде збережено як';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Нотатка поруч із файлом, по розділу на сторінку. Пошук '
+      'знаходить її, як будь-яку нотатку.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Спершу завантаження $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Лише раз: далі працює офлайн.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Завантажити й розпізнати';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Розпізнавання с. $page з $total';
+
+  @override
+  String get ocrPreparing => 'Завантаження потрібного для розпізнавання…';
+
+  @override
+  String ocrRecognized(int words) => 'Текст розпізнано · слів: $words';
+
+  @override
+  String get ocrOpenText => 'Відкрити текст';
+
+  @override
+  String get ocrFailed => 'Не вдалося розпізнати текст';
+
+  @override
+  String get commandNeedOcrFile => 'Потрібен PDF або зображення на екрані';
 }

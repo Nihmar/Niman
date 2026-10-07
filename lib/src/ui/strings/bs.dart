@@ -3014,4 +3014,58 @@ final class BosnianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Oslobodit će se $size. Datoteka će se ponovo preuzeti kad je '
       'prepoznavanje teksta zatreba.';
+
+  @override
+  String get ocrRecognizeAction => 'Prepoznaj tekst';
+
+  @override
+  String get ocrPagesTitle => 'Stranice';
+
+  @override
+  String ocrPagesAll(int count) => 'Sve ($count)';
+
+  @override
+  String ocrPagesThis(int page) => 'Ova stranica ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Od';
+
+  @override
+  String get ocrPagesTo => 'do';
+
+  @override
+  String get ocrSavedAs => 'Sprema se kao';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Bilješka pored datoteke, jedan odjeljak po stranici. '
+      'Pretraga je pronalazi kao svaku bilješku.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Prvo preuzimanje od $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Samo jednom: zatim radi bez mreže.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Preuzmi i prepoznaj';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Prepoznavanje str. $page od $total';
+
+  @override
+  String get ocrPreparing => 'Preuzima se ono što treba prepoznavanju…';
+
+  @override
+  String ocrRecognized(int words) => 'Tekst prepoznat · riječi: $words';
+
+  @override
+  String get ocrOpenText => 'Otvori tekst';
+
+  @override
+  String get ocrFailed => 'Prepoznavanje teksta nije uspjelo';
+
+  @override
+  String get commandNeedOcrFile => 'Potreban je PDF ili slika na ekranu';
 }

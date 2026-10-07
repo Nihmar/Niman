@@ -21,6 +21,8 @@ import 'package:niman/src/ui/attachment_bar.dart';
 import 'package:niman/src/ui/attachment_unreadable.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
+import 'package:niman/src/ui/ocr/ocr_file_controls.dart';
 import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:path/path.dart' as p;
 
@@ -58,6 +60,7 @@ final class AttachmentView extends StatelessWidget {
     this.linkType = LinkType.wikilink,
     this.onAnnotate,
     this.marks,
+    this.ocr,
     super.key,
   });
 
@@ -96,6 +99,9 @@ final class AttachmentView extends StatelessWidget {
   /// nothing.
   final AnnotationMarkSource? marks;
 
+  /// Recognizes a PDF's or a picture's text (#594); null offers none.
+  final OcrFileActions? ocr;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
   bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
@@ -131,11 +137,19 @@ final class AttachmentView extends StatelessWidget {
               reloadToken: reloadToken,
               onAnnotate: onAnnotate,
               marks: marks,
+              ocr: ocr,
             )
           : Column(
               children: [
                 Expanded(child: _picture(context)),
-                AttachmentBar(path: path, launcher: launcher),
+                AttachmentBar(
+                  path: path,
+                  launcher: launcher,
+                  actions: [
+                    if (ocr case final ocr?)
+                      OcrFileControls(actions: ocr, path: path),
+                  ],
+                ),
               ],
             ),
     );

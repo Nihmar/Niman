@@ -13,6 +13,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -31,6 +32,7 @@ Future<String?> showRowMenuSheet(
   BuildContext context, {
   required Note note,
   required bool isQuickNote,
+  bool offersRecognize = false,
 }) {
   return showActionSheet<String>(
     context,
@@ -41,6 +43,7 @@ Future<String?> showRowMenuSheet(
         for (final (index, group) in rowMenuGroups(
           note,
           isQuickNote: isQuickNote,
+          offersRecognize: offersRecognize,
         ).indexed) ...[
           if (index > 0) const Divider(height: 1, indent: 16, endIndent: 16),
           for (final entry in group)
@@ -70,6 +73,7 @@ Future<String?> showRowMenuAt(
   required bool isQuickNote,
   required Offset position,
   bool offersNewTab = false,
+  bool offersRecognize = false,
 }) {
   return _showEntriesAt(
     context,
@@ -78,6 +82,7 @@ Future<String?> showRowMenuAt(
       note,
       isQuickNote: isQuickNote,
       offersNewTab: offersNewTab,
+      offersRecognize: offersRecognize,
     ),
   );
 }
@@ -258,6 +263,7 @@ List<List<RowMenuEntry>> rowMenuGroups(
   Note note, {
   required bool isQuickNote,
   bool offersNewTab = false,
+  bool offersRecognize = false,
 }) {
   // "Here" is the folder the row is, or the folder the note sits in —
   // two different places, and on a note the word was doing the reader no
@@ -348,6 +354,15 @@ List<List<RowMenuEntry>> rowMenuGroups(
             ? AppStrings.exportFolderTitle
             : AppStrings.exportTitle,
         value: note.isDir ? 'exportfolder' : 'export',
+        destructive: false,
+      ),
+    // A scan or a picture: its text into a note beside it (#594).
+    if (!note.isDir && offersRecognize && isRecognizableFile(note.name))
+      (
+        key: const Key('menu-recognize'),
+        icon: Icons.document_scanner_outlined,
+        label: AppStrings.ocrRecognizeAction,
+        value: 'recognize',
         destructive: false,
       ),
     if (!note.isDir && offersNewTab)

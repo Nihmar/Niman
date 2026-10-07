@@ -35,6 +35,9 @@ enum NoteMenuAction {
   /// Browse and restore past versions.
   history,
 
+  /// Recognize a PDF's or a picture's text into a note beside it (#594).
+  recognizeText,
+
   /// Rename the note.
   rename,
 
@@ -65,6 +68,7 @@ final class NoteMenuButton extends StatelessWidget {
     this.typewriter = false,
     this.palette = false,
     this.textNote = true,
+    this.recognize = false,
     this.kindSwitch,
     super.key,
   });
@@ -75,6 +79,10 @@ final class NoteMenuButton extends StatelessWidget {
   /// Which way the kind entry reads, or null when the note is neither a
   /// list nor a shopping list (there is nothing to turn).
   final NoteKindSwitch? kindSwitch;
+
+  /// Whether the file on screen is a PDF or a picture whose text can be
+  /// recognized (#594).
+  final bool recognize;
 
   /// Whether typewriter mode is on.
   final bool typewriter;
@@ -143,6 +151,12 @@ final class NoteMenuButton extends StatelessWidget {
             AppStrings.noteHistoryTitle,
           ),
         ],
+        if (recognize)
+          _item(
+            NoteMenuAction.recognizeText,
+            Icons.document_scanner_outlined,
+            AppStrings.ocrRecognizeAction,
+          ),
         _item(
           NoteMenuAction.rename,
           Icons.edit_outlined,

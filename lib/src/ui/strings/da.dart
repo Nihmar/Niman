@@ -2969,4 +2969,58 @@ final class DanishStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Det frigør $size. Filen downloades igen, når '
       'tekstgenkendelsen skal bruge den.';
+
+  @override
+  String get ocrRecognizeAction => 'Genkend tekst';
+
+  @override
+  String get ocrPagesTitle => 'Sider';
+
+  @override
+  String ocrPagesAll(int count) => 'Alle $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Denne side ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Fra';
+
+  @override
+  String get ocrPagesTo => 'til';
+
+  @override
+  String get ocrSavedAs => 'Gemmes som';
+
+  @override
+  String get ocrSavedAsHint =>
+      'En note ved siden af filen, ét afsnit pr. side. Søgningen '
+      'finder den som alle noter.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Først en download på $size';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Kun én gang: derefter virker det offline.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Download og genkend';
+
+  @override
+  String ocrRecognizing(int page, int total) => 'Genkender s. $page af $total';
+
+  @override
+  String get ocrPreparing => 'Downloader det, tekstgenkendelsen skal bruge…';
+
+  @override
+  String ocrRecognized(int words) => 'Tekst genkendt · $words ord';
+
+  @override
+  String get ocrOpenText => 'Åbn teksten';
+
+  @override
+  String get ocrFailed => 'Tekstgenkendelsen mislykkedes';
+
+  @override
+  String get commandNeedOcrFile => 'Kræver en PDF eller et billede på skærmen';
 }

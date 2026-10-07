@@ -3020,4 +3020,58 @@ final class DutchStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Dit maakt $size vrij. Het bestand wordt opnieuw gedownload '
       'als tekstherkenning het nodig heeft.';
+
+  @override
+  String get ocrRecognizeAction => 'Tekst herkennen';
+
+  @override
+  String get ocrPagesTitle => "Pagina's";
+
+  @override
+  String ocrPagesAll(int count) => 'Alle $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Deze pagina ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Van';
+
+  @override
+  String get ocrPagesTo => 'tot';
+
+  @override
+  String get ocrSavedAs => 'Opgeslagen als';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Een notitie naast het bestand, één sectie per pagina. Zoeken '
+      'vindt haar zoals elke notitie.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Eerst een download van $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Eén keer: daarna werkt het offline.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Downloaden en herkennen';
+
+  @override
+  String ocrRecognizing(int page, int total) => 'Herkennen p. $page van $total';
+
+  @override
+  String get ocrPreparing => 'Downloaden wat tekstherkenning nodig heeft…';
+
+  @override
+  String ocrRecognized(int words) => 'Tekst herkend · $words woorden';
+
+  @override
+  String get ocrOpenText => 'Tekst openen';
+
+  @override
+  String get ocrFailed => 'Tekstherkenning mislukt';
+
+  @override
+  String get commandNeedOcrFile =>
+      'Vraagt om een pdf of afbeelding op het scherm';
 }

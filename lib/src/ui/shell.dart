@@ -48,6 +48,9 @@ import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_installation_provider.dart';
+import 'package:niman/src/ocr/ocr_job.dart';
+import 'package:niman/src/ocr/ocr_queue.dart';
+import 'package:niman/src/ocr/ocr_queue_provider.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -89,6 +92,9 @@ import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/note_zoom_pinch.dart';
+import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
+import 'package:niman/src/ui/ocr/ocr_job_status.dart';
+import 'package:niman/src/ui/ocr/ocr_notifier.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outline_panel.dart';
@@ -111,6 +117,7 @@ import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
+import 'package:niman/src/ui/shell_ocr_flow.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_row_menu.dart';
@@ -336,6 +343,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                     spellCheck: ref.read(spellCheckProvider),
                     transcription: ref.read(transcriptionModelsProvider),
                     ocr: ref.read(ocrInstallationProvider),
+                    ocrQueue: ref.read(ocrQueueProvider),
                     openNotes: ref.read(openAudioNotesProvider),
                     shortcuts: ref.read(shortcutServiceProvider),
                     shareIn: ref.read(shareInServiceProvider),
@@ -410,6 +418,7 @@ final class _LibraryShell extends ConsumerStatefulWidget {
     required this.window,
     this.transcription,
     this.ocr,
+    this.ocrQueue,
     this.openNotes,
   });
 
@@ -425,6 +434,9 @@ final class _LibraryShell extends ConsumerStatefulWidget {
 
   /// What is installed for text recognition; null hides its area.
   final OcrInstallation? ocr;
+
+  /// The text recognition jobs (#594); null offers no Recognize text.
+  final OcrQueue? ocrQueue;
 
   /// The OS reminder service (notification taps open the Todo tab).
   final ReminderService reminders;
@@ -808,6 +820,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onHistory: _openHistory,
     onExport: _exportNote,
     onExportFolder: (path) => _exportFolder(path, library: false),
+    onRecognize: _recognize,
   );
 
   /// Note creation from the library's templates (#51, T-M4-07): the flow
@@ -819,8 +832,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Opens and makes journal entries (#7).
   late final JournalFlow _journalFlow;
 
-  /// Notification taps while running: a todo tap opens the Todo tab.
+  /// Notification taps while running: a todo tap opens the Todo tab, a
+  /// recognition's opens its text.
   StreamSubscription<String?>? _reminderTaps;
+
+  /// Recognitions as they finish (#594).
+  StreamSubscription<OcrJob>? _ocrFinished;
   StreamSubscription<ShortcutAction>? _shortcutTaps;
 
   /// What other apps share in while the shell is up (#40).
@@ -1109,10 +1126,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
     final view = _phoneNoteView(controller, selectedPath);
     final above = _journalHeader(selectedPath, compact: true);
-    if (above == null) return view;
+    final queue = widget.ocrQueue;
+    if (above == null && queue == null) return view;
     return Column(
       children: [
-        above,
+        // A recognition under way, wherever the reader went meanwhile.
+        if (queue != null) OcrJobStatus(queue: queue, except: selectedPath),
+        ?above,
         Expanded(child: view),
       ],
     );
@@ -1137,6 +1157,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           linkType: _editorSettings.linkType,
           onAnnotate: _annotate,
           marks: _annotations,
+          ocr: _ocrActions,
         ),
       );
     }
@@ -1543,7 +1564,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (payload == todoReminderPayload && mounted) {
         const AppLogger(name: 'todo').debug('todo tap: opening the todo list');
         _openTodo();
+      } else if (payload != null &&
+          payload.startsWith(ocrNotificationPrefix) &&
+          mounted) {
+        _openRecognizedText(payload.substring(ocrNotificationPrefix.length));
       }
+    });
+    _ocrFinished = widget.ocrQueue?.finished.listen((job) {
+      if (!mounted) return;
+      _ocrFlow?.finished(
+        context,
+        job,
+        inFront:
+            WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
+      );
     });
     _homeWidgets.start();
     _workspace.controller.addListener(_onWorkspaceChanged);
@@ -1641,6 +1675,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _noteHideTimer?.cancel();
     unawaited(_homeWidgets.dispose());
     unawaited(_reminderTaps?.cancel());
+    unawaited(_ocrFinished?.cancel());
     unawaited(_shortcutTaps?.cancel());
     unawaited(_shareTaps?.cancel());
     unawaited(_libraryEvents?.cancel());
@@ -1701,6 +1736,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final payload = await widget.reminders.consumeLaunchPayload();
     if (payload == todoReminderPayload && mounted) {
       _openTodo();
+    } else if (payload != null &&
+        payload.startsWith(ocrNotificationPrefix) &&
+        mounted) {
+      _openRecognizedText(payload.substring(ocrNotificationPrefix.length));
     }
   }
 
@@ -2223,6 +2262,42 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void _annotate(Annotation annotation) =>
       unawaited(_annotations.annotate(context, annotation));
 
+  /// Recognizes a PDF's or a picture's text into a sidecar (#594).
+  late final ShellOcrFlow? _ocrFlow = switch ((widget.ocr, widget.ocrQueue)) {
+    (final installation?, final queue?) => ShellOcrFlow(
+      controller: widget.controller,
+      unsaved: widget.unsavedTracker,
+      installation: installation,
+      queue: queue,
+      // The sidecar may be the note on screen, or in the tree.
+      onWritten: () {
+        widget.controller.notify();
+        if (mounted) setState(() => _noteReloadToken++);
+      },
+      onOpen: _openRecognizedText,
+    ),
+    _ => null,
+  };
+
+  /// The file views' Recognize text, or null without OCR or a library.
+  OcrFileActions? get _ocrActions {
+    final queue = widget.ocrQueue;
+    final root = widget.controller.root;
+    if (_ocrFlow == null || queue == null || root == null) return null;
+    return OcrFileActions(queue: queue, root: root, recognize: _recognize);
+  }
+
+  /// Asks how to recognize [path] (library-relative) and queues it.
+  void _recognize(String path, {int? page, int? pageCount}) {
+    final flow = _ocrFlow;
+    if (flow == null) return;
+    unawaited(flow.recognize(context, path, page: page, pageCount: pageCount));
+  }
+
+  /// Opens the note at [path] (a recognized text).
+  void _openRecognizedText(String path) =>
+      _onTemplateNoteFiled(path: path, preview: false, caret: null);
+
   /// Opens a note the template flow just filed (#51): preview per its
   /// `open` directive, caret per its `{{cursor}}`. The state the flow
   /// cannot know is set here, not in the flow.
@@ -2274,6 +2349,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       context,
       note: note,
       isQuickNote: isQuickNote,
+      offersRecognize: _ocrFlow != null,
     );
     if (!mounted) return;
     await _rowActions.run(context, action, note, here);
@@ -2296,6 +2372,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       isQuickNote: isQuickNote,
       position: position,
       offersNewTab: _wide,
+      offersRecognize: _ocrFlow != null,
     );
     _treeMenuLog.debug('row menu closed: "${note.path}" -> $action');
     if (!mounted) return;
@@ -2321,6 +2398,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget _noteMenu() => NoteMenuButton(
     typewriter: _editorSettings.typewriter,
     textNote: !_shownIsAttachment,
+    recognize:
+        _ocrFlow != null &&
+        _shownIsAttachment &&
+        isRecognizableFile(_selected ?? ''),
     // The phone has no key for the palette (#206); the wide layout has.
     palette: !_wide,
     kindSwitch: switch (_noteKind) {
@@ -2340,6 +2421,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.export => _exportNote(path),
         NoteMenuAction.cheatsheet => _openCheatsheet(),
         NoteMenuAction.history => _openHistory(path),
+        NoteMenuAction.recognizeText => Future<void>.sync(
+          () => _recognize(path),
+        ),
         NoteMenuAction.kindSwitch => Future<void>.sync(_switchNoteKind),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
@@ -2784,11 +2868,25 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         // and remounts every body, defeating the keep-alive. Only its
         // currentIndex changes here; [bodies] are the same instances across
         // a switch, so no body re-inflates.
-        body: TabBodyStack(
-          currentIndex: tab.index,
-          retainLayout: <int>{ShellTab.search.index},
-          children: bodies,
-        ),
+        body: switch (widget.ocrQueue) {
+          final queue? => Column(
+            children: [
+              OcrJobStatus(queue: queue),
+              Expanded(
+                child: TabBodyStack(
+                  currentIndex: tab.index,
+                  retainLayout: <int>{ShellTab.search.index},
+                  children: bodies,
+                ),
+              ),
+            ],
+          ),
+          null => TabBodyStack(
+            currentIndex: tab.index,
+            retainLayout: <int>{ShellTab.search.index},
+            children: bodies,
+          ),
+        },
         floatingActionButton: _tabFab(),
         bottomNavigationBar: switch (controller.sync) {
           final sync? when tab == ShellTab.files => Column(
@@ -2988,6 +3086,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.previewToggle => _previewToggleVisible,
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
+    CommandNeed.ocrFile =>
+      _ocrFlow != null &&
+          _shownIsAttachment &&
+          isRecognizableFile(_shownNote ?? ''),
   };
 
   /// The day of the journal entry on screen, or null when the note on
@@ -3042,6 +3144,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _panelNote?.insertAtCaret(mermaidMindMapTemplate),
       AppCommand.convertListToMindMap: () => _panelNote?.convertListToMindMap(),
       AppCommand.exportNote: () => unawaited(_exportShownNote()),
+      AppCommand.recognizeText: () {
+        if (_shownNote case final path?) _recognize(path);
+      },
       AppCommand.exportLibrary: () =>
           unawaited(_exportFolder('', library: true)),
       AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
@@ -4244,6 +4349,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             reloadToken: _noteReloadToken,
             linksFollowed: _linksFollowed,
             onAnnotate: _annotate,
+            ocr: _ocrActions,
             marks: _annotations,
             saveNote: _noteSaver(controller),
             saveNoteStream: _noteStreamSaver(controller),
