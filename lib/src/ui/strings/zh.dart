@@ -556,6 +556,10 @@ final class ChineseStrings extends Strings {
   @override
   String get cheatsheetCopied => '已复制';
   @override
+  String get copyCode => '复制代码';
+  @override
+  String get codeCopied => '代码已复制';
+  @override
   String get cheatsheetInsert => '插入到笔记';
   @override
   String get cheatHeadings => '标题';

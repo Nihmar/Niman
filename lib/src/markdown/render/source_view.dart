@@ -66,6 +66,7 @@ import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
+import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
@@ -572,6 +573,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// on the desktop, the caret's on a phone.
   final OverlayPortalController _tableOverlay = OverlayPortalController();
 
+  /// The copy buttons of the code blocks on screen in `live` (#541).
+  final OverlayPortalController _codeOverlay = OverlayPortalController();
+
   /// The first line of the table under the mouse, or null.
   final ValueNotifier<int?> _tableHover = ValueNotifier<int?>(null);
 
@@ -633,6 +637,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (!mounted) return;
       _tableOverlay.show();
       _hintOverlay.show();
+      _codeOverlay.show();
       // The first check, off the build: the problem marks are on the note the
       // frame after it opens, and nothing waited for them (#316).
       _refreshHint();
@@ -3619,7 +3624,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             child: OverlayPortal(
               controller: _suggestOverlay,
               overlayChildBuilder: _suggestOverlayChild,
-              child: note,
+              child: OverlayPortal(
+                // The code blocks' copy buttons ride the scroll, under all
+                // of the above.
+                controller: _codeOverlay,
+                overlayChildBuilder: (context) => ListenableBuilder(
+                  listenable: Listenable.merge([_scroll, _caretSpot]),
+                  builder: (context, _) => _codeCopies(context),
+                ),
+                child: note,
+              ),
             ),
           ),
         ),
@@ -3759,6 +3773,78 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// The handles of the table in play, in the overlay's coordinates.
+  /// The copy buttons of the fenced code blocks on screen in `live` (#541):
+  /// each at the top right of its block's part in view, so a block taller
+  /// than the pane has its button wherever it is scrolled to. A diagram's
+  /// fence has none: it is drawn as the diagram.
+  Widget _codeCopies(BuildContext overlayContext) {
+    const nothing = SizedBox.shrink();
+    final styler = _styler;
+    final note = _noteBox;
+    final overlay = Overlay.of(overlayContext).context.findRenderObject();
+    if (!widget.hideMarkers ||
+        styler == null ||
+        note == null ||
+        overlay is! RenderBox ||
+        !overlay.hasSize ||
+        !_scroll.hasClients ||
+        _heights.length == 0) {
+      return nothing;
+    }
+    // The pane's top and bottom, in the rows' coordinates.
+    final top = _scroll.offset - widget.padding.top;
+    final bottom = top + note.size.height;
+    final row = _heights.indexAt(math.max(0, top));
+    if (row == null) return nothing;
+    final buttons = <Widget>[];
+    for (var line = _folds.lineOf(row); line < lineCount;) {
+      final block = styler.blockOf(line);
+      if (block == null) {
+        line++;
+        continue;
+      }
+      final start = _heights.offsetOf(_folds.rowOf(block.startLine));
+      if (start >= bottom) break;
+      final info = block.fenceInfo?.toLowerCase();
+      if (block.kind == BlockKind.fencedCode && info != 'mermaid') {
+        final last = _folds.rowOf(block.endLine - 1);
+        final end = _heights.offsetOf(last) + _heights.extentFor(last);
+        final y =
+            math.min(
+              math.max(start, top),
+              end - codeCopySize - 2 * codeCopyMargin,
+            ) +
+            codeCopyMargin;
+        if (y >= start && y - top + codeCopySize <= note.size.height) {
+          final at = overlay.globalToLocal(
+            note.localToGlobal(
+              Offset(
+                note.size.width - _rightInset - codeCopySize - codeCopyMargin,
+                y - top,
+              ),
+            ),
+          );
+          buttons.add(
+            Positioned(
+              left: at.dx,
+              top: at.dy,
+              child: CodeCopyButton(
+                key: ValueKey<int>(block.startLine),
+                code: () =>
+                    fenceBody(
+                      BlockParser.blockText(block, widget.buffer).split('\n'),
+                    )?.code ??
+                    '',
+              ),
+            ),
+          );
+        }
+      }
+      line = math.max(block.endLine, line + 1);
+    }
+    return Stack(children: buttons);
+  }
+
   Widget _tableHandles(BuildContext overlayContext) {
     final block = _tableInPlay;
     final grid = block == null ? null : _tableGrid(block);

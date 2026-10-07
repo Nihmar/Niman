@@ -594,6 +594,10 @@ final class SwedishStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopierat';
   @override
+  String get copyCode => 'Kopiera kod';
+  @override
+  String get codeCopied => 'Kod kopierad';
+  @override
   String get cheatsheetInsert => 'Infoga i anteckningen';
   @override
   String get cheatHeadings => 'Rubriker';

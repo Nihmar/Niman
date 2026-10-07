@@ -601,6 +601,10 @@ final class RomanianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Copiat';
   @override
+  String get copyCode => 'Copiază codul';
+  @override
+  String get codeCopied => 'Cod copiat';
+  @override
   String get cheatsheetInsert => 'Inserează în notă';
   @override
   String get cheatHeadings => 'Titluri';

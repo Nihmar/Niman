@@ -585,6 +585,10 @@ final class TurkishStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopyalandı';
   @override
+  String get copyCode => 'Kodu kopyala';
+  @override
+  String get codeCopied => 'Kod kopyalandı';
+  @override
   String get cheatsheetInsert => 'Nota ekle';
   @override
   String get cheatHeadings => 'Başlıklar';

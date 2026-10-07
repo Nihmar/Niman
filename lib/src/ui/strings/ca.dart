@@ -598,6 +598,10 @@ final class CatalanStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Copiat';
   @override
+  String get copyCode => 'Copia el codi';
+  @override
+  String get codeCopied => 'Codi copiat';
+  @override
   String get cheatsheetInsert => 'Insereix a la nota';
   @override
   String get cheatHeadings => 'Títols';

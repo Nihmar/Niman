@@ -590,6 +590,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Afritað';
   @override
+  String get copyCode => 'Afrita kóða';
+  @override
+  String get codeCopied => 'Kóði afritaður';
+  @override
   String get cheatsheetInsert => 'Setja inn í minnismiðann';
   @override
   String get cheatHeadings => 'Fyrirsagnir';

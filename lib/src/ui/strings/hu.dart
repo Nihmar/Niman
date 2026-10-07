@@ -591,6 +591,10 @@ final class HungarianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Másolva';
   @override
+  String get copyCode => 'Kód másolása';
+  @override
+  String get codeCopied => 'Kód másolva';
+  @override
   String get cheatsheetInsert => 'Beszúrás a jegyzetbe';
   @override
   String get cheatHeadings => 'Címsorok';

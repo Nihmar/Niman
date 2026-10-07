@@ -593,6 +593,10 @@ final class CroatianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopirano';
   @override
+  String get copyCode => 'Kopiraj kôd';
+  @override
+  String get codeCopied => 'Kôd kopiran';
+  @override
   String get cheatsheetInsert => 'Umetni u bilješku';
   @override
   String get cheatHeadings => 'Naslovi';

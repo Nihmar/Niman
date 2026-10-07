@@ -589,6 +589,10 @@ final class BasqueStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopiatuta';
   @override
+  String get copyCode => 'Kopiatu kodea';
+  @override
+  String get codeCopied => 'Kodea kopiatuta';
+  @override
   String get cheatsheetInsert => 'Txertatu oharrean';
   @override
   String get cheatHeadings => 'Izenburuak';
