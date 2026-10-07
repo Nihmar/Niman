@@ -148,6 +148,16 @@ void main() {
     expect(File(p.join(dir.path, build.fileName)).existsSync(), isFalse);
   });
 
+  test('a download already running is waited for, not skipped', () async {
+    final ocr = installation(engineBuild: build);
+    await ocr.load();
+    final first = ocr.download(build);
+    expect(ocr.stateOf(build), isA<Downloading>());
+    await ocr.downloadAll([build]);
+    expect(ocr.stateOf(build), isA<Downloaded>());
+    await first;
+  });
+
   test('an engine this device will not load is thrown away', () async {
     String? probed;
     final ocr = installation(

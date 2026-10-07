@@ -67,6 +67,7 @@ final class Downloader<T extends Downloadable> {
 
   final DownloadStarter _start;
   final Map<String, FileDownload> _running = {};
+  final Map<String, Future<void>> _downloads = {};
   final Set<String> _cancelled = {};
   bool _closed = false;
 
@@ -74,11 +75,26 @@ final class Downloader<T extends Downloadable> {
   bool isRunning(T item) => _running.containsKey(item.id);
 
   /// Downloads [item], resuming a partial file, retrying on connection
-  /// problems.
+  /// problems; while [item] is already downloading, answers that download
+  /// rather than starting a second one, so a caller that needs the file
+  /// (a recognition waiting on a language the settings page started)
+  /// waits for it to land.
   Future<void> download(T item) async {
-    // Downloading covers the moment the isolate is still spawning: a
-    // second tap must not start a second download.
-    if (state(item) case Downloading() || Downloaded()) return;
+    if (state(item) is Downloaded) return;
+    if (_downloads[item.id] case final running?) {
+      await running;
+      return;
+    }
+    final running = _downloads[item.id] = _download(item);
+    try {
+      await running;
+    } finally {
+      // What it removes is `running`, awaited above.
+      unawaited(_downloads.remove(item.id));
+    }
+  }
+
+  Future<void> _download(T item) async {
     _cancelled.remove(item.id);
     final clock = Stopwatch()..start();
     final kept = switch (state(item)) {
