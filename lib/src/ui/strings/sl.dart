@@ -102,9 +102,7 @@ final class SlovenianStrings extends Strings {
   String get noteColumnWidthTitle => 'Širina stolpca';
   @override
   String get noteColumnWidthSubtitle =>
-      'Kako širok je stolpec zapiska, v slikovnih pikah';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Kako širok je stolpec zapiska; 100% je privzeto';
   @override
   String get keyboardOnOpenTitle => 'Tipkovnica ob odpiranju';
   @override

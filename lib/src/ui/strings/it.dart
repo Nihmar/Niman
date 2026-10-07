@@ -99,9 +99,7 @@ final class ItalianStrings extends Strings {
   String get noteColumnWidthTitle => 'Larghezza della colonna';
   @override
   String get noteColumnWidthSubtitle =>
-      'Quanto è larga la colonna della nota, in pixel';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Quanto è larga la colonna della nota; 100% è il predefinito';
   @override
   String get keyboardOnOpenTitle => 'Tastiera all’apertura';
   @override

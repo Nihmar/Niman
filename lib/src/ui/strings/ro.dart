@@ -101,9 +101,7 @@ final class RomanianStrings extends Strings {
   String get noteColumnWidthTitle => 'Lățimea coloanei';
   @override
   String get noteColumnWidthSubtitle =>
-      'Cât de lată este coloana notei, în pixeli';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Cât de lată este coloana notei; 100% este implicită';
   @override
   String get keyboardOnOpenTitle => 'Tastatura la deschidere';
   @override

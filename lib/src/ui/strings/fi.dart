@@ -97,9 +97,7 @@ final class FinnishStrings extends Strings {
   String get noteColumnWidthTitle => 'Palstan leveys';
   @override
   String get noteColumnWidthSubtitle =>
-      'Kuinka leveä muistiinpanon palsta on, pikseleinä';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Kuinka leveä muistiinpanon palsta on; 100% on oletus';
   @override
   String get keyboardOnOpenTitle => 'Näppäimistö avattaessa';
   @override

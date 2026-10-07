@@ -100,9 +100,7 @@ final class SerbianStrings extends Strings {
   String get noteColumnWidthTitle => 'Ширина колоне';
   @override
   String get noteColumnWidthSubtitle =>
-      'Колико је широка колона белешке, у пикселима';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Колико је широка колона белешке; 100% је подразумевана';
   @override
   String get keyboardOnOpenTitle => 'Тастатура при отварању';
   @override

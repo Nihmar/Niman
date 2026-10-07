@@ -94,9 +94,7 @@ final class BasqueStrings extends Strings {
   String get noteColumnWidthTitle => 'Zutabearen zabalera';
   @override
   String get noteColumnWidthSubtitle =>
-      'Oharraren zutabearen zabalera, pixeletan';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Oharraren zutabearen zabalera; 100% lehenetsia da';
   @override
   String get keyboardOnOpenTitle => 'Teklategia irekitzean';
   @override

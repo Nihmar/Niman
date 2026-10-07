@@ -95,9 +95,7 @@ final class AlbanianStrings extends Strings {
   String get noteColumnWidthTitle => 'Gjerësia e kolonës';
   @override
   String get noteColumnWidthSubtitle =>
-      'Sa e gjerë është kolona e shënimit, në piksel';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Sa e gjerë është kolona e shënimit; 100% është parazgjedhja';
   @override
   String get keyboardOnOpenTitle => 'Tastatura te hapja';
   @override

@@ -215,12 +215,16 @@ double normalizeDockWidth(Object? raw) {
 /// The note column's width in a fresh library, in logical pixels (#171):
 /// about 80 characters of prose at the shipped text size, the measure
 /// the preview already read at.
+///
+/// It is also the 100% the settings show: the file stores pixels, the
+/// screen shows a share of this, so nobody has to guess what 700 px reads
+/// like.
 const double defaultNoteColumnWidth = 700;
 
-/// The narrowest accepted note column.
-const double minNoteColumnWidth = 480;
+/// The narrowest accepted note column: 70% of the default.
+const double minNoteColumnWidth = 490;
 
-/// The widest accepted note column.
+/// The widest accepted note column: 200% of the default.
 const double maxNoteColumnWidth = 1400;
 
 /// Reads a `noteColumnWidth` out of the settings file, clamped into range

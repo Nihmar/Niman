@@ -99,9 +99,7 @@ final class CatalanStrings extends Strings {
   String get noteColumnWidthTitle => 'Amplada de la columna';
   @override
   String get noteColumnWidthSubtitle =>
-      'L’amplada de la columna de la nota, en píxels';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'L’amplada de la columna de la nota; 100% és la predeterminada';
   @override
   String get keyboardOnOpenTitle => 'Teclat en obrir';
   @override

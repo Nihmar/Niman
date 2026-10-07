@@ -97,9 +97,7 @@ final class LatvianStrings extends Strings {
   String get noteColumnWidthTitle => 'Kolonnas platums';
   @override
   String get noteColumnWidthSubtitle =>
-      'Cik plata ir piezīmes kolonna, pikseļos';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Cik plata ir piezīmes kolonna; 100% ir noklusējums';
   @override
   String get keyboardOnOpenTitle => 'Tastatūra atverot';
   @override

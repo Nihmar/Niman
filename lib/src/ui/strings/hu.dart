@@ -95,9 +95,7 @@ final class HungarianStrings extends Strings {
   String get noteColumnWidthTitle => 'Oszlopszélesség';
   @override
   String get noteColumnWidthSubtitle =>
-      'Milyen széles a jegyzet oszlopa, pixelben';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Milyen széles a jegyzet oszlopa; a 100% az alapértelmezett';
   @override
   String get keyboardOnOpenTitle => 'Billentyűzet megnyitáskor';
   @override

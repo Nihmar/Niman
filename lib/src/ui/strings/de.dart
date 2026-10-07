@@ -98,9 +98,7 @@ final class GermanStrings extends Strings {
   String get noteColumnWidthTitle => 'Spaltenbreite';
   @override
   String get noteColumnWidthSubtitle =>
-      'Wie breit die Spalte der Notiz ist, in Pixeln';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Wie breit die Spalte der Notiz ist; 100% ist der Standard';
   @override
   String get keyboardOnOpenTitle => 'Tastatur beim Öffnen';
   @override

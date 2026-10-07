@@ -99,9 +99,7 @@ final class SlovakStrings extends Strings {
   String get noteColumnWidthTitle => 'Šírka stĺpca';
   @override
   String get noteColumnWidthSubtitle =>
-      'Aký široký je stĺpec poznámky, v pixeloch';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Aký široký je stĺpec poznámky; 100% je predvolená';
   @override
   String get keyboardOnOpenTitle => 'Klávesnica pri otvorení';
   @override

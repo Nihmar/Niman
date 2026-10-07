@@ -91,9 +91,7 @@ final class HindiStrings extends Strings {
   String get noteColumnWidthTitle => 'कॉलम की चौड़ाई';
   @override
   String get noteColumnWidthSubtitle =>
-      'नोट का कॉलम कितना चौड़ा है, पिक्सेल में';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'नोट का कॉलम कितना चौड़ा है; 100% डिफ़ॉल्ट है';
   @override
   String get keyboardOnOpenTitle => 'खोलने पर कीबोर्ड';
   @override

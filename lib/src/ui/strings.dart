@@ -7,6 +7,7 @@ library;
 // ignore_for_file: public_member_api_docs
 
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/ui/strings/base.dart';
@@ -130,8 +131,11 @@ final class AppStrings {
   static String get readableLineLengthSubtitle => _s.readableLineLengthSubtitle;
   static String get noteColumnWidthTitle => _s.noteColumnWidthTitle;
   static String get noteColumnWidthSubtitle => _s.noteColumnWidthSubtitle;
-  static String noteColumnWidthValue(int pixels) =>
-      _s.noteColumnWidthValue(pixels);
+
+  /// A note column [width] as a row's value, e.g. "120%": a share of the
+  /// default column, the way the text sizes read.
+  static String noteColumnWidthValue(double width) =>
+      '${(width / defaultNoteColumnWidth * 100).round()}%';
   static String get keyboardOnOpenTitle => _s.keyboardOnOpenTitle;
   static String get keyboardOnOpenSubtitle => _s.keyboardOnOpenSubtitle;
   static String get editorKindSource => _s.editorKindSource;

@@ -98,9 +98,7 @@ final class PortugueseStrings extends Strings {
   String get noteColumnWidthTitle => 'Largura da coluna';
   @override
   String get noteColumnWidthSubtitle =>
-      'A largura da coluna da nota, em píxeis';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'A largura da coluna da nota; 100% é a predefinida';
   @override
   String get keyboardOnOpenTitle => 'Teclado ao abrir';
   @override

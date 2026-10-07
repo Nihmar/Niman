@@ -94,9 +94,7 @@ final class TurkishStrings extends Strings {
   String get noteColumnWidthTitle => 'Sütun genişliği';
   @override
   String get noteColumnWidthSubtitle =>
-      'Not sütununun genişliği, piksel cinsinden';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Not sütununun genişliği; varsayılan 100%';
   @override
   String get keyboardOnOpenTitle => 'Açılışta klavye';
   @override

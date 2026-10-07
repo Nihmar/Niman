@@ -99,9 +99,7 @@ final class FrenchStrings extends Strings {
   String get noteColumnWidthTitle => 'Largeur de la colonne';
   @override
   String get noteColumnWidthSubtitle =>
-      'La largeur de la colonne de la note, en pixels';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'La largeur de la colonne de la note ; 100% est la valeur par défaut';
   @override
   String get keyboardOnOpenTitle => 'Clavier à l’ouverture';
   @override
