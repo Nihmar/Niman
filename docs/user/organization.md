@@ -163,16 +163,19 @@ same way the folder settings ask for a folder — and, like them, it has a
 exist yet without leaving the dialog. A folder is never offered itself
 or anything inside it as a target.
 
-Or drag the row: with the mouse it moves as soon as it is pulled; by
-touch — a phone, or a desktop's touchscreen — hold the row and then move
-the finger, so a swipe still scrolls the tree (held and let go without
-moving, the hold opens the row's menu as before). Let go on a folder and it moves into
-that folder; on a note — pinned rows included — into that note's folder;
-on the empty space below the rows, into the library root. The pinned
-block's heading takes no drop. The row under the pointer lights up where
-a drop would move something — a folder dropped on itself or inside itself,
-or anything dropped where it already is, stays put. It is the same move as
-the menu's: links follow, open notes are saved first.
+Or drag the row: with the mouse it moves as soon as it is pulled; by touch
+— a phone, or a desktop's touchscreen — hold the row and then move the
+finger, so a swipe still scrolls the tree (held and let go without moving,
+the hold opens the row's menu as before). Let go on a folder and it moves
+into that folder; on a note — pinned rows included — into that note's
+folder; on the empty space below the rows — the tree always ends on some —
+into the library root. Held near the tree's top or bottom edge, a drag
+scrolls the tree, so a folder out of sight, or the root below a long tree,
+is still in reach. The pinned block's heading takes no drop. The row under
+the pointer lights up where a drop would move something — a folder dropped
+on itself or inside itself, or anything dropped where it already is, stays
+put. It is the same move as the menu's: links follow, open notes are saved
+first.
 
 ## Opening a note outside Niman
 

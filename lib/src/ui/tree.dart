@@ -10,6 +10,7 @@ import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_drag.dart';
+import 'package:niman/src/ui/tree_root_drop.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
@@ -102,6 +103,9 @@ final class NoteTree extends StatefulWidget {
 }
 
 final class _NoteTreeState extends State<NoteTree> {
+  /// The tree's scroll: a drag held at an edge runs it (#580).
+  final _scroll = ScrollController();
+
   /// The rows currently being shown, and the inputs they were built from.
   ///
   /// The flatten runs one `children` query per expanded level, so it must
@@ -137,6 +141,7 @@ final class _NoteTreeState extends State<NoteTree> {
   @override
   void dispose() {
     const AppLogger(name: 'tree.ui').debug('dispose');
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -266,8 +271,18 @@ final class _NoteTreeState extends State<NoteTree> {
             final header = rows.pinned.isEmpty
                 ? 0
                 : (_collapsed ? 2 : rows.pinned.length + 2);
+            final move = widget.onMove;
             final list = ListView.builder(
               key: const Key('note-tree-list'),
+              controller: _scroll,
+              // Rows that can be moved end on room to drop into the root,
+              // however long the tree (#580).
+              padding: move == null
+                  ? null
+                  : MediaQuery.paddingOf(context).copyWith(left: 0, right: 0) +
+                        EdgeInsets.only(
+                          bottom: TreeRowMetrics.of(context).height * 2,
+                        ),
               itemCount: header + rows.tree.length,
               itemBuilder: (context, index) {
                 if (index < header) return _pinnedItem(rows.pinned, index);
@@ -286,10 +301,9 @@ final class _NoteTreeState extends State<NoteTree> {
                 );
               },
             );
-            final move = widget.onMove;
             return move == null
                 ? list
-                : TreeRootDrop(onMove: move, child: list);
+                : TreeRootDrop(onMove: move, scroll: _scroll, child: list);
           },
         );
       },

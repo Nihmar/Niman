@@ -183,4 +183,72 @@ void main() {
     expect(moves, ['nota.md -> other']);
     expect(menus, ['nota.md', 'nota.md']);
   }, variant: anyPlatform);
+
+  testWidgets(
+    'a tree longer than its pane: the edges scroll, the end is the root',
+    (tester) async {
+      // #580: every pixel was a row, and the rows below the pane were out of
+      // reach — the root too.
+      final moves = <String>[];
+      await session.open('/lib', create: false);
+      await session.createFolder(parentPath: '', name: 'docs');
+      await session.createFolder(parentPath: '', name: 'zzz');
+      for (var i = 0; i < 30; i++) {
+        await session.createNote(parentPath: 'docs', name: 'n$i');
+      }
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 300,
+              child: NoteTree(
+                controller: session,
+                selectedPath: null,
+                expanded: const <String>{'docs'},
+                onToggle: (_) {},
+                onSelect: (_) {},
+                onMove: (path, folder) => moves.add('$path -> $folder'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final list = tester.getRect(find.byType(ListView));
+      expect(find.text('zzz'), findsNothing, reason: 'below the pane');
+
+      // Held at the bottom edge, the tree scrolls to the folder below.
+      final finger = await tester.startGesture(
+        tester.getCenter(find.text('n0.md')),
+        kind: PointerDeviceKind.mouse,
+      );
+      await finger.moveTo(list.bottomCenter - const Offset(0, 4));
+      await tester.pump();
+      for (var frame = 0; frame < 120; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(find.text('zzz'), findsOneWidget);
+      await finger.moveTo(tester.getCenter(find.text('zzz')));
+      await tester.pump();
+      await finger.up();
+      await tester.pumpAndSettle();
+      expect(moves, ['docs/n0.md -> zzz']);
+
+      // Held at the bottom edge again, down to the end: the room below the
+      // last row is the root.
+      final again = await tester.startGesture(
+        tester.getCenter(find.text('n9.md')),
+        kind: PointerDeviceKind.mouse,
+      );
+      await again.moveTo(list.bottomCenter - const Offset(0, 4));
+      await tester.pump();
+      for (var frame = 0; frame < 120; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await again.up();
+      await tester.pumpAndSettle();
+      expect(moves.last, 'docs/n9.md -> ');
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.linux),
+  );
 }
