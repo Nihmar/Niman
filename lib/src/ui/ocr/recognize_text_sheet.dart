@@ -12,7 +12,6 @@ import 'package:niman/src/core/settings/library_settings.dart'
 import 'package:niman/src/ocr/ocr_engine_build.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_language.dart';
-import 'package:niman/src/ocr/ocr_language_catalog.dart';
 import 'package:niman/src/ocr/ocr_sidecar.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -85,9 +84,6 @@ final class _RecognizeFormState extends State<_RecognizeForm> {
     text: '${widget.pageCount ?? 1}',
   );
 
-  static final List<OcrLanguage> _byName = [...ocrLanguages]
-    ..sort((a, b) => a.native.compareTo(b.native));
-
   @override
   void dispose() {
     _from.dispose();
@@ -155,7 +151,7 @@ final class _RecognizeFormState extends State<_RecognizeForm> {
               border: const OutlineInputBorder(),
             ),
             items: [
-              for (final language in _byName)
+              for (final language in ocrLanguagesByName)
                 DropdownMenuItem(value: language, child: Text(language.native)),
             ],
             onChanged: (language) => setState(() {
@@ -176,7 +172,7 @@ final class _RecognizeFormState extends State<_RecognizeForm> {
             ),
             items: [
               DropdownMenuItem(value: '', child: Text(AppStrings.ocrAlsoNone)),
-              for (final language in _byName)
+              for (final language in ocrLanguagesByName)
                 if (language != _language)
                   DropdownMenuItem(
                     value: language.code,

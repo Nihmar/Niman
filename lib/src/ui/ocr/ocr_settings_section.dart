@@ -5,7 +5,6 @@ import 'package:niman/src/ocr/ocr_engine_build.dart';
 import 'package:niman/src/ocr/ocr_engine_locator.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_language.dart';
-import 'package:niman/src/ocr/ocr_language_catalog.dart';
 import 'package:niman/src/ui/download_tile.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
@@ -117,7 +116,7 @@ final class OcrSettingsSection extends StatelessWidget {
       title: AppStrings.ocrLanguageTitle,
       current: installation.defaultLanguage(),
       options: [
-        for (final language in _byName)
+        for (final language in ocrLanguagesByName)
           SettingsOption(language, language.native),
       ],
     );
@@ -133,7 +132,7 @@ final class OcrSettingsSection extends StatelessWidget {
       current: installation.alsoLanguage()?.code ?? '',
       options: [
         SettingsOption('', AppStrings.ocrAlsoNone),
-        for (final language in _byName)
+        for (final language in ocrLanguagesByName)
           if (language != installation.defaultLanguage())
             SettingsOption(language.code, language.native),
       ],
@@ -141,10 +140,6 @@ final class OcrSettingsSection extends StatelessWidget {
     if (choice != null) await installation.setAlso(ocrLanguageByCode(choice));
   }
 }
-
-/// The catalog by native name.
-final List<OcrLanguage> _byName = [...ocrLanguages]
-  ..sort((a, b) => a.native.compareTo(b.native));
 
 /// What [quality] is called.
 String ocrQualityLabel(OcrQuality quality) => switch (quality) {
