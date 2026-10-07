@@ -409,6 +409,19 @@ void main() {
     await controller.dispose();
   });
 
+  test('a disposed controller never reopens the settings file', () async {
+    // A rescan still running when the controller was let go closed the
+    // library after it — and reopened the settings file to do it, which
+    // came back while the test's folder was being deleted.
+    final controller = makeController();
+    await controller.open(root.path, create: false);
+    await controller.close();
+    await controller.dispose();
+    final settings = File(p.join(tmp.path, 'niman.db'))..deleteSync();
+    await expectLater(controller.appDatabase, throwsStateError);
+    expect(settings.existsSync(), isFalse);
+  });
+
   test('treeSort persists and flips the children order', () async {
     final first = makeController();
     await first.open(root.path, create: false);

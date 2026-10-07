@@ -256,7 +256,18 @@ final class LibraryController implements LibrarySession {
   /// Unlike the index it does not belong to a library: it holds the
   /// resume pointer, the language and the rest, and it is read before any
   /// library is open.
-  Future<AppDatabase> get appDatabase => _appDatabase ??= appDbFactory();
+  Future<AppDatabase> get appDatabase {
+    // Disposed, the controller opens nothing again: a late caller — a
+    // rescan still running when the app or a test let it go — reopened the
+    // settings file it had closed, and held it open from then on.
+    if (_disposed) {
+      return Future.error(StateError('the library controller is disposed'));
+    }
+    return _appDatabase ??= appDbFactory();
+  }
+
+  /// Whether [dispose] has run.
+  bool _disposed = false;
 
   /// The cached search source; the background-isolate worker connection is
   /// created once per open library and reused (see [searchSource]).
@@ -1481,6 +1492,7 @@ final class LibraryController implements LibrarySession {
     _updateScheduler?.stop();
     _updateScheduler = null;
     await close();
+    _disposed = true;
     if (!_events.isClosed) {
       await _events.close();
     }
@@ -1738,6 +1750,9 @@ final class LibraryController implements LibrarySession {
       _log.info('periodic rescan complete');
     } on Object catch (error) {
       _log.error('rescan failed: $error');
+      // A rescan outliving its library — closed, switched, or the whole
+      // controller disposed — has nothing left to close.
+      if (_disposed || _root != abs) return;
       if (!Directory(abs).existsSync()) {
         await close();
         _lastError = 'The library folder is no longer available.';
