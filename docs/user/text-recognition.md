@@ -5,9 +5,8 @@ whiteboard, a receipt, a book page — and write it into a note next to the
 file, so search finds it. It runs on the device: nothing is sent anywhere.
 
 The work is tracked in [#532](https://github.com/Nihmar/Niman/issues/532)
-and lands in steps: the engine and its languages, **Recognize text** and
-the text beside its scan are here; selecting the recognized lines on the
-scan ([#596](https://github.com/Nihmar/Niman/issues/596)) comes next.
+and landed in four steps: the engine and its languages, **Recognize
+text**, the text beside its scan, and the recognized lines on the scan.
 
 ## Recognize text
 
@@ -56,6 +55,27 @@ A file with a recognized text shows it with the scan:
   being read wears a small ring with its progress.
 
 The pane reads the text again when a recognition rewrites it.
+
+## The lines on the scan
+
+On a PDF with a recognized text, each recognized line is a target on the
+page: tap or click one and it is selected — tinted on the scan, marked in
+the **Text** pane, which scrolls to it — with a menu:
+
+- **Annotate** — an annotation in the PDF's companion note, quoting the
+  line, on its page (a scan has no characters to point at, so the place is
+  the page);
+- **Copy** — the line's text;
+- **Copy link to this place** — a link to its page.
+
+A line keeps its place through the comment at its end. Join two lines or
+split one by hand and they lose it: the **Text** pane says so at its top
+("p. 2: 2 lines lost their place on the scan…"), annotations there go to
+the whole page, and **Recognize p. 2 again** reads that page alone, in the
+text's languages, replacing only its section.
+
+Pictures show their text beside them, but their lines are not targets on
+the picture.
 
 ## The text note
 

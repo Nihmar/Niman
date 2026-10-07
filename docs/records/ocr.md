@@ -189,9 +189,9 @@ start and model load included; a picture **109 ms**.
   a notification, through the plugin the reminders initialize (initializing
   it again would take their taps) on its own Android channel, its payload
   `ocr:<sidecar>` routed by the shell's tap listener.
-- **Not done here**: the pages done are not marked on the scan yet — that
-  needs the line overlay of #596 — and a PDF that already has a text layer
-  is not detected. The tree's ring came with #595.
+- **Not done here**: the pages done are not marked on the scan while a
+  job runs, and a PDF that already has a text layer is not detected. The
+  tree's ring came with #595, the line overlay with #596.
 
 ## The text beside its scan — phase 3 (#595)
 
@@ -221,6 +221,36 @@ start and model load included; a picture **109 ms**.
   the app in front (`showOcrResultSheet`): the words, the plain text
   (`ocrSidecarPlainText` drops the frontmatter, the headings, the comments
   and the escapes), Copy, Open text. A PDF keeps the snackbar.
+
+## The lines on the scan — phase 4 (#596)
+
+- **`readOcrPlacedLines`** reads a sidecar back: each content line with
+  exactly one `<!-- ocr l t r b -->` is a placed line (page from the last
+  `## p. N`, box, its index in the text, and its characters in its
+  paragraph's drawn text — escapes resolved, comment gone, a soft break
+  one character); a line with none or two counts as lost on its page. The
+  frontmatter's `language:` gives the languages to read a page again in.
+- **`OcrLinesScope`** (an `InheritedNotifier` over the selected line) is
+  put above the scan and the Text pane by `OcrScanText`, so the two share
+  the lines and the selection without a callback between them.
+- **On the scan**: `ocrLineOverlays` adds a target per line to pdfrx's
+  `pageOverlaysBuilder`, next to the annotation marks; invisible until
+  picked, then tinted and bordered. A pick opens Annotate · Copy · Copy
+  link (`showMenu` at the tap). Annotate and the link name the **page**
+  (`PdfLocation(page:)`): a scan has no text layer for `chars=`, and a new
+  location kind for a box was not worth a link format of its own; the
+  quote carries the line.
+- **In the Text pane**: the line is a `BlockMark` of its source line and
+  character range, so the read view tints the line alone inside its
+  paragraph, and `jumpToLine` brings it into view once per selection.
+- **Lost places**: a notice per page at the top of the pane, and
+  **Recognize p. N again** queues that page alone in the sidecar's
+  languages without the dialog (`ShellOcrFlow.recognizeAgain`); the merge
+  replaces only its section.
+- **Not done**: a picture's lines are not targets on the picture (its
+  fitted rectangle inside the zoomable viewer would need its decoded size,
+  and a picture has no annotation place); the pages already read are not
+  tinted on the scan while a job runs.
 
 ## Build impact
 
