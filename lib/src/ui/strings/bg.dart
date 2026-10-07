@@ -1698,6 +1698,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get zenMode => 'Режим „Дзен“';
   @override
+  String get zoomIn => 'Увеличаване';
+  @override
+  String get zoomOut => 'Намаляване';
+  @override
+  String get zoomReset => 'Нулиране на мащаба';
+  @override
   String get zenModeEnter => 'Влез в режим „Дзен“';
   @override
   String get zenModeLeave => 'Излез от режим „Дзен“';

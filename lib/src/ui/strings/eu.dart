@@ -1691,6 +1691,12 @@ final class BasqueStrings extends Strings {
   @override
   String get zenMode => 'Zen modua';
   @override
+  String get zoomIn => 'Handiagotu';
+  @override
+  String get zoomOut => 'Txikiagotu';
+  @override
+  String get zoomReset => 'Berrezarri zooma';
+  @override
   String get zenModeEnter => 'Sartu zen moduan';
   @override
   String get zenModeLeave => 'Irten zen modutik';

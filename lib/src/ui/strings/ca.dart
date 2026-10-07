@@ -1716,6 +1716,12 @@ final class CatalanStrings extends Strings {
   @override
   String get zenMode => 'Mode zen';
   @override
+  String get zoomIn => 'Amplia';
+  @override
+  String get zoomOut => 'Redueix';
+  @override
+  String get zoomReset => 'Restableix el zoom';
+  @override
   String get zenModeEnter => 'Entra al mode zen';
   @override
   String get zenModeLeave => 'Surt del mode zen';

@@ -1682,6 +1682,12 @@ final class CroatianStrings extends Strings {
   @override
   String get zenMode => 'Zen način';
   @override
+  String get zoomIn => 'Povećaj';
+  @override
+  String get zoomOut => 'Smanji';
+  @override
+  String get zoomReset => 'Vrati veličinu';
+  @override
   String get zenModeEnter => 'Uđi u zen način';
   @override
   String get zenModeLeave => 'Izađi iz zen načina';

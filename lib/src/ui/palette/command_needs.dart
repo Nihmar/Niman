@@ -86,6 +86,9 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.journalToday ||
   AppCommand.journalCalendar ||
   AppCommand.typewriterMode ||
+  AppCommand.zoomIn ||
+  AppCommand.zoomOut ||
+  AppCommand.zoomReset ||
   AppCommand.markdownCheatsheet ||
   AppCommand.welcomeTour ||
   AppCommand.welcomeDeck ||

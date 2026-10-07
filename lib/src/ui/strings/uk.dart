@@ -1689,6 +1689,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get zenMode => 'Режим дзен';
   @override
+  String get zoomIn => 'Збільшити';
+  @override
+  String get zoomOut => 'Зменшити';
+  @override
+  String get zoomReset => 'Скинути масштаб';
+  @override
   String get zenModeEnter => 'Увійти в режим дзен';
   @override
   String get zenModeLeave => 'Вийти з режиму дзен';

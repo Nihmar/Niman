@@ -1699,6 +1699,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get zenMode => 'Зен режим';
   @override
+  String get zoomIn => 'Зголеми';
+  @override
+  String get zoomOut => 'Намали';
+  @override
+  String get zoomReset => 'Врати ја големината';
+  @override
   String get zenModeEnter => 'Влези во зен режим';
   @override
   String get zenModeLeave => 'Излези од зен режим';

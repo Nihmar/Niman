@@ -1670,6 +1670,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get zenMode => 'Zen-modus';
   @override
+  String get zoomIn => 'Zoom inn';
+  @override
+  String get zoomOut => 'Zoom ut';
+  @override
+  String get zoomReset => 'Tilbakestill zoom';
+  @override
   String get zenModeEnter => 'Gå til zen-modus';
   @override
   String get zenModeLeave => 'Gå ut av zen-modus';

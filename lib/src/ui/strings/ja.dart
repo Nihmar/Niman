@@ -1573,6 +1573,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get zenMode => 'Zen モード';
   @override
+  String get zoomIn => '拡大';
+  @override
+  String get zoomOut => '縮小';
+  @override
+  String get zoomReset => 'ズームをリセット';
+  @override
   String get zenModeEnter => 'Zen モードに入る';
   @override
   String get zenModeLeave => 'Zen モードを終了';

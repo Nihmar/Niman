@@ -1683,6 +1683,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get zenMode => 'Zen režimas';
   @override
+  String get zoomIn => 'Didinti';
+  @override
+  String get zoomOut => 'Mažinti';
+  @override
+  String get zoomReset => 'Atkurti mastelį';
+  @override
   String get zenModeEnter => 'Įjungti zen režimą';
   @override
   String get zenModeLeave => 'Išeiti iš zen režimo';

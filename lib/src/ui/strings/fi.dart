@@ -1694,6 +1694,12 @@ final class FinnishStrings extends Strings {
   @override
   String get zenMode => 'Zen-tila';
   @override
+  String get zoomIn => 'Lähennä';
+  @override
+  String get zoomOut => 'Loitonna';
+  @override
+  String get zoomReset => 'Palauta zoomaus';
+  @override
   String get zenModeEnter => 'Siirry zen-tilaan';
   @override
   String get zenModeLeave => 'Poistu zen-tilasta';

@@ -1691,6 +1691,12 @@ final class HungarianStrings extends Strings {
   @override
   String get zenMode => 'Zen mód';
   @override
+  String get zoomIn => 'Nagyítás';
+  @override
+  String get zoomOut => 'Kicsinyítés';
+  @override
+  String get zoomReset => 'Nagyítás visszaállítása';
+  @override
   String get zenModeEnter => 'Zen mód bekapcsolása';
   @override
   String get zenModeLeave => 'Kilépés a zen módból';

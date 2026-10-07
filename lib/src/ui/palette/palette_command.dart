@@ -61,6 +61,9 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.splitRight ||
   AppCommand.splitDown ||
   AppCommand.zenMode ||
+  AppCommand.zoomIn ||
+  AppCommand.zoomOut ||
+  AppCommand.zoomReset ||
   AppCommand.nextTab ||
   AppCommand.previousTab => PaletteGroup.view,
   AppCommand.reindexLibrary ||

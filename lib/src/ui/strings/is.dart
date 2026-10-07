@@ -1682,6 +1682,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get zenMode => 'Zen-hamur';
   @override
+  String get zoomIn => 'Auka aðdrátt';
+  @override
+  String get zoomOut => 'Minnka aðdrátt';
+  @override
+  String get zoomReset => 'Endurstilla aðdrátt';
+  @override
   String get zenModeEnter => 'Fara í zen-ham';
   @override
   String get zenModeLeave => 'Hætta í zen-ham';

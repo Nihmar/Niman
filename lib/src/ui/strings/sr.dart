@@ -1686,6 +1686,12 @@ final class SerbianStrings extends Strings {
   @override
   String get zenMode => 'Зен режим';
   @override
+  String get zoomIn => 'Uvećaj';
+  @override
+  String get zoomOut => 'Umanji';
+  @override
+  String get zoomReset => 'Vrati veličinu';
+  @override
   String get zenModeEnter => 'Уђи у зен режим';
   @override
   String get zenModeLeave => 'Изађи из зен режима';

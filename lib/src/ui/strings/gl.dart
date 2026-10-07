@@ -1699,6 +1699,12 @@ final class GalicianStrings extends Strings {
   @override
   String get zenMode => 'Modo zen';
   @override
+  String get zoomIn => 'Ampliar';
+  @override
+  String get zoomOut => 'Reducir';
+  @override
+  String get zoomReset => 'Restablecer o zoom';
+  @override
   String get zenModeEnter => 'Entrar no modo zen';
   @override
   String get zenModeLeave => 'Saír do modo zen';

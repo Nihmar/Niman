@@ -1711,6 +1711,12 @@ final class GermanStrings extends Strings {
   @override
   String get zenMode => 'Zen-Modus';
   @override
+  String get zoomIn => 'Vergrößern';
+  @override
+  String get zoomOut => 'Verkleinern';
+  @override
+  String get zoomReset => 'Zoom zurücksetzen';
+  @override
   String get zenModeEnter => 'Zen-Modus starten';
   @override
   String get zenModeLeave => 'Zen-Modus verlassen';

@@ -847,6 +847,9 @@ abstract base class Strings {
   String get lintRuleFenceLanguage;
   String get typewriterSubtitle;
   String get zenMode;
+  String get zoomIn;
+  String get zoomOut;
+  String get zoomReset;
   String get zenModeEnter;
   String get zenModeLeave;
   String get keySpace;

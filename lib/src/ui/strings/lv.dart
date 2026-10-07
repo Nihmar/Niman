@@ -1678,6 +1678,12 @@ final class LatvianStrings extends Strings {
   @override
   String get zenMode => 'Zen režīms';
   @override
+  String get zoomIn => 'Tuvināt';
+  @override
+  String get zoomOut => 'Tālināt';
+  @override
+  String get zoomReset => 'Atiestatīt tālummaiņu';
+  @override
   String get zenModeEnter => 'Ieslēgt zen režīmu';
   @override
   String get zenModeLeave => 'Iziet no zen režīma';

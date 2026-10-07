@@ -1684,6 +1684,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get zenMode => 'Рэжым дзэн';
   @override
+  String get zoomIn => 'Павялічыць';
+  @override
+  String get zoomOut => 'Паменшыць';
+  @override
+  String get zoomReset => 'Скінуць маштаб';
+  @override
   String get zenModeEnter => 'Увайсці ў рэжым дзэн';
   @override
   String get zenModeLeave => 'Выйсці з рэжыму дзэн';

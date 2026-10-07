@@ -1696,6 +1696,12 @@ final class RomanianStrings extends Strings {
   @override
   String get zenMode => 'Mod zen';
   @override
+  String get zoomIn => 'Mărește';
+  @override
+  String get zoomOut => 'Micșorează';
+  @override
+  String get zoomReset => 'Resetează zoomul';
+  @override
   String get zenModeEnter => 'Intră în modul zen';
   @override
   String get zenModeLeave => 'Ieși din modul zen';

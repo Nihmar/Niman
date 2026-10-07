@@ -1688,6 +1688,12 @@ final class SwedishStrings extends Strings {
   @override
   String get zenMode => 'Zenläge';
   @override
+  String get zoomIn => 'Zooma in';
+  @override
+  String get zoomOut => 'Zooma ut';
+  @override
+  String get zoomReset => 'Återställ zoom';
+  @override
   String get zenModeEnter => 'Gå till zenläge';
   @override
   String get zenModeLeave => 'Lämna zenläge';

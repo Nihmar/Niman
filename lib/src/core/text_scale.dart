@@ -53,6 +53,17 @@ final class AppTextScales {
     AppTextScales.note = note;
   }
 
+  /// How far one zoom step moves the note's scale (#538).
+  static const double zoomStep = 0.1;
+
+  /// The note scale [steps] zoom steps from [from], on the steps' grid and
+  /// in range; zero steps is the shipped size.
+  static double zoomed(double from, int steps) {
+    if (steps == 0) return defaultTextScale;
+    final grid = (from / zoomStep).round() + steps;
+    return normalizeTextScale(grid * zoomStep);
+  }
+
   /// Puts both back to the shipped sizes: no library is open, so no
   /// library's answer applies.
   static void reset() => apply(ui: defaultTextScale, note: defaultTextScale);

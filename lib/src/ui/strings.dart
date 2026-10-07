@@ -1040,6 +1040,9 @@ final class AppStrings {
   static String get lintRuleFenceLanguage => _s.lintRuleFenceLanguage;
   static String get typewriterSubtitle => _s.typewriterSubtitle;
   static String get zenMode => _s.zenMode;
+  static String get zoomIn => _s.zoomIn;
+  static String get zoomOut => _s.zoomOut;
+  static String get zoomReset => _s.zoomReset;
   static String get zenModeEnter => _s.zenModeEnter;
   static String get zenModeLeave => _s.zenModeLeave;
   static String get keySpace => _s.keySpace;

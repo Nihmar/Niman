@@ -1705,6 +1705,12 @@ final class ItalianStrings extends Strings {
   @override
   String get zenMode => 'Modalità Zen';
   @override
+  String get zoomIn => 'Ingrandisci il testo';
+  @override
+  String get zoomOut => 'Riduci il testo';
+  @override
+  String get zoomReset => 'Ripristina la dimensione del testo';
+  @override
   String get zenModeEnter => 'Entra in modalità Zen';
   @override
   String get zenModeLeave => 'Esci dalla modalità Zen';

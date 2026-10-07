@@ -1715,6 +1715,12 @@ final class SpanishStrings extends Strings {
   @override
   String get zenMode => 'Modo zen';
   @override
+  String get zoomIn => 'Acercar';
+  @override
+  String get zoomOut => 'Alejar';
+  @override
+  String get zoomReset => 'Restablecer el zoom';
+  @override
   String get zenModeEnter => 'Entrar en modo zen';
   @override
   String get zenModeLeave => 'Salir del modo zen';
