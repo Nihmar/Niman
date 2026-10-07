@@ -599,6 +599,10 @@ final class FrenchStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Copié';
   @override
+  String get copyCode => 'Copier le code';
+  @override
+  String get codeCopied => 'Code copié';
+  @override
   String get cheatsheetInsert => 'Insérer dans la note';
   @override
   String get cheatHeadings => 'Titres';

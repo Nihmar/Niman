@@ -588,6 +588,10 @@ final class DanishStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopieret';
   @override
+  String get copyCode => 'Kopiér kode';
+  @override
+  String get codeCopied => 'Kode kopieret';
+  @override
   String get cheatsheetInsert => 'Indsæt i noten';
   @override
   String get cheatHeadings => 'Overskrifter';

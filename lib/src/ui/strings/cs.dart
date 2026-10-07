@@ -594,6 +594,10 @@ final class CzechStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Zkopírováno';
   @override
+  String get copyCode => 'Kopírovat kód';
+  @override
+  String get codeCopied => 'Kód zkopírován';
+  @override
   String get cheatsheetInsert => 'Vložit do poznámky';
   @override
   String get cheatHeadings => 'Nadpisy';

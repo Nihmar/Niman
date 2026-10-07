@@ -595,6 +595,10 @@ final class DutchStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Gekopieerd';
   @override
+  String get copyCode => 'Code kopiëren';
+  @override
+  String get codeCopied => 'Code gekopieerd';
+  @override
   String get cheatsheetInsert => 'In de notitie invoegen';
   @override
   String get cheatHeadings => 'Koppen';

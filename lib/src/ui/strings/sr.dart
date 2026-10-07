@@ -595,6 +595,10 @@ final class SerbianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Копирано';
   @override
+  String get copyCode => 'Kopiraj kod';
+  @override
+  String get codeCopied => 'Kod je kopiran';
+  @override
   String get cheatsheetInsert => 'Уметни у белешку';
   @override
   String get cheatHeadings => 'Наслови';

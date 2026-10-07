@@ -598,6 +598,10 @@ final class SpanishStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Copiado';
   @override
+  String get copyCode => 'Copiar el código';
+  @override
+  String get codeCopied => 'Código copiado';
+  @override
   String get cheatsheetInsert => 'Insertar en la nota';
   @override
   String get cheatHeadings => 'Encabezados';

@@ -595,6 +595,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Скопійовано';
   @override
+  String get copyCode => 'Копіювати код';
+  @override
+  String get codeCopied => 'Код скопійовано';
+  @override
   String get cheatsheetInsert => 'Вставити в нотатку';
   @override
   String get cheatHeadings => 'Заголовки';

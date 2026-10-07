@@ -263,7 +263,10 @@ the HTML is used when the clipboard carries it.
 
 Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's
 yellow, the same in every theme), callouts, fenced code blocks with
-syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
+syntax highlighting — and, in the read view and in live mode, a **copy**
+button at a code block's top right that puts its code on the clipboard;
+down a block taller than the screen it stays at the top of the part you
+see. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
 The read view reads a note as GitHub does — GitHub Flavored Markdown, as

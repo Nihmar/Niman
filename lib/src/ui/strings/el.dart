@@ -603,6 +603,10 @@ final class GreekStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Αντιγράφηκε';
   @override
+  String get copyCode => 'Αντιγραφή κώδικα';
+  @override
+  String get codeCopied => 'Ο κώδικας αντιγράφηκε';
+  @override
   String get cheatsheetInsert => 'Εισαγωγή στη σημείωση';
   @override
   String get cheatHeadings => 'Επικεφαλίδες';

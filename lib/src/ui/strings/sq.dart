@@ -590,6 +590,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'U kopjua';
   @override
+  String get copyCode => 'Kopjo kodin';
+  @override
+  String get codeCopied => 'Kodi u kopjua';
+  @override
   String get cheatsheetInsert => 'Fut në shënim';
   @override
   String get cheatHeadings => 'Titujt';

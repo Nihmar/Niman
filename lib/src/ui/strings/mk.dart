@@ -598,6 +598,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Копирано';
   @override
+  String get copyCode => 'Копирај код';
+  @override
+  String get codeCopied => 'Кодот е копиран';
+  @override
   String get cheatsheetInsert => 'Вметни во белешката';
   @override
   String get cheatHeadings => 'Наслови';

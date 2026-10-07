@@ -595,6 +595,10 @@ final class GermanStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Kopiert';
   @override
+  String get copyCode => 'Code kopieren';
+  @override
+  String get codeCopied => 'Code kopiert';
+  @override
   String get cheatsheetInsert => 'In die Notiz einfügen';
   @override
   String get cheatHeadings => 'Überschriften';

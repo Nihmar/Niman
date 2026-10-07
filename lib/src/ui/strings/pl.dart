@@ -601,6 +601,10 @@ final class PolishStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Skopiowano';
   @override
+  String get copyCode => 'Kopiuj kod';
+  @override
+  String get codeCopied => 'Skopiowano kod';
+  @override
   String get cheatsheetInsert => 'Wstaw do notatki';
   @override
   String get cheatHeadings => 'Nagłówki';

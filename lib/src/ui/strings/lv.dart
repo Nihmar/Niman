@@ -591,6 +591,10 @@ final class LatvianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Nokopēts';
   @override
+  String get copyCode => 'Kopēt kodu';
+  @override
+  String get codeCopied => 'Kods nokopēts';
+  @override
   String get cheatsheetInsert => 'Ievietot piezīmē';
   @override
   String get cheatHeadings => 'Virsraksti';

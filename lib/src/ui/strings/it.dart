@@ -598,6 +598,10 @@ final class ItalianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Copiato';
   @override
+  String get copyCode => 'Copia il codice';
+  @override
+  String get codeCopied => 'Codice copiato';
+  @override
   String get cheatsheetInsert => 'Inserisci nella nota';
   @override
   String get cheatHeadings => 'Titoli';

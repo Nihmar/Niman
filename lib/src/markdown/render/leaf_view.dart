@@ -20,6 +20,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/read_block.dart';
+import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/inline_spans.dart';
 import 'package:niman/src/markdown/render/live_table_grid.dart';
@@ -167,7 +168,7 @@ final class LeafView extends StatelessWidget {
     final top = !fenced || opened ? round : Radius.zero;
     final bottom = !fenced || closed ? round : Radius.zero;
     final text = leaf.code.join('\n');
-    return Container(
+    final box = Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: theme.codeBackground,
@@ -199,6 +200,9 @@ final class LeafView extends StatelessWidget {
               style: theme.code,
             ),
     );
+    // A button copies the code (#541); a printed page has nothing to press.
+    if (printed || leaf.code.isEmpty) return box;
+    return CodeCopyFrame(code: () => text, child: box);
   }
 
   /// An HTML block: its source, as written, in a code block's box — a row

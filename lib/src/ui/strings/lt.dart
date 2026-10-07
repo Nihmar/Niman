@@ -595,6 +595,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get cheatsheetCopied => 'Nukopijuota';
   @override
+  String get copyCode => 'Kopijuoti kodą';
+  @override
+  String get codeCopied => 'Kodas nukopijuotas';
+  @override
   String get cheatsheetInsert => 'Įterpti į užrašą';
   @override
   String get cheatHeadings => 'Antraštės';

@@ -557,6 +557,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get cheatsheetCopied => 'コピーしました';
   @override
+  String get copyCode => 'コードをコピー';
+  @override
+  String get codeCopied => 'コードをコピーしました';
+  @override
   String get cheatsheetInsert => 'ノートに挿入';
   @override
   String get cheatHeadings => '見出し';
