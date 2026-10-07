@@ -81,6 +81,28 @@ void main() {
     expect(find.textContaining('![[img.png]]'), findsNothing);
   });
 
+  testWidgets('a picture whose target has no extension draws by its file', (
+    tester,
+  ) async {
+    // An EPUB's pictures: `epub-picture:N`, resolved to `<dir>/N.png`.
+    final cover = File('${temp.path}${Platform.pathSeparator}0.png')
+      ..writeAsBytesSync(base64Decode(_onePxPng));
+    for (final source in ['![](epub-picture:0)', '![Cover](epub-picture:0)']) {
+      await pump(
+        tester,
+        '$source\n\nText.\n',
+        resolve: (target) async =>
+            target == 'epub-picture:0' ? cover.path : null,
+      );
+      expect(find.byType(Image), findsOneWidget, reason: source);
+      expect(
+        find.textContaining('epub-picture', findRichText: true),
+        findsNothing,
+        reason: source,
+      );
+    }
+  });
+
   testWidgets("a binary embed renders the note's own text", (tester) async {
     await pump(
       tester,
