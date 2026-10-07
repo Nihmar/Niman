@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone settings, Text recognition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0}
+.row{display:flex;align-items:center;gap:12px;padding:8px 6px 8px 16px;min-height:52px}
+.sec{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#A6A29A;margin:20px 20px 6px}
+.card{background:#2C3037;border-radius:16px;overflow:hidden;margin:0 12px}
+.sub{font-size:13px;color:#A6A29A}
+.div{border-bottom:1px solid #23262B}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column">
+  <div style="height:64px;display:flex;align-items:center;gap:4px;padding:0 6px;flex:none">
+    <button class="ibtn" aria-label="Back" style="color:#F2EDE5"><svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div style="font-size:20px;font-weight:500">Text recognition</div>
+  </div>
+  <div style="flex:1;overflow:hidden">
+    <p class="sub" style="margin:0 20px 2px;font-size:14px;line-height:1.5">Reads scanned PDFs and images into a note next to them, on this phone. Engine and languages download once, when first needed.</p>
+
+    <div class="sec">Engine</div>
+    <div class="card">
+      <div class="row">
+        <svg class="ico" viewBox="0 0 24 24" style="color:#587CD3"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
+        <div style="flex:1">Tesseract 5.5<div class="sub">Not downloaded · 1.8 MB</div></div>
+        <button class="ibtn" aria-label="Download the engine" style="color:#A9C0F0"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
+      </div>
+    </div>
+
+    <div class="sec">Quality</div>
+    <div class="card" style="padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;border:1px solid #4A4F59;border-radius:22px;overflow:hidden">
+        <button style="flex:1;height:44px;border:0;background:#3A4A6E;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M5 12l5 5 9-10"/></svg>Fast</button>
+        <button style="flex:1;height:44px;border:0;border-left:1px solid #4A4F59;background:transparent;color:#D9D4CB;font:500 14px 'IBM Plex Sans',sans-serif">Best</button>
+      </div>
+      <div class="sub" style="line-height:1.5">Fast: 1–4 MB a language, quick on a phone. Best: 10–15 MB, better on hard scans, slower.</div>
+    </div>
+
+    <div class="sec">Default language</div>
+    <div class="card">
+      <div class="row div"><div style="flex:1">Language</div><div style="display:flex;align-items:center;gap:4px;color:#D9D4CB;padding-right:10px">Italian<svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 9l6 6 6-6"/></svg></div></div>
+      <div class="row"><div style="flex:1">Also</div><div style="display:flex;align-items:center;gap:4px;color:#A6A29A;padding-right:10px">None<svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 9l6 6 6-6"/></svg></div></div>
+    </div>
+
+    <div class="sec">On this phone · 2.6 MB</div>
+    <div class="card">
+      <div class="row"><div style="flex:1">Italian<div class="sub">Fast · 2.6 MB · default</div></div><button class="ibtn" aria-label="Delete Italian"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button></div>
+    </div>
+
+    <div class="sec">Other languages</div>
+    <div class="card">
+      <label class="row div" style="color:#A6A29A;gap:10px"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input placeholder="Search 120 languages" style="flex:1;background:transparent;border:0;color:#F2EDE5;font:15px 'IBM Plex Sans',sans-serif;outline:none"></label>
+      <div class="row div"><div style="flex:1">English<div class="sub">3.9 MB</div></div><button class="ibtn" aria-label="Download English"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button></div>
+      <div class="row"><div style="flex:1">French<div class="sub">1.1 MB</div></div><button class="ibtn" aria-label="Download French"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

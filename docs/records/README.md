@@ -26,4 +26,5 @@ comments (`docs/records/<name>.md`).
 | [sync.md](sync.md) | Note history and WebDAV sync: the decisions, settled before the code |
 | [index-reconcile.md](index-reconcile.md) | The index scan, a directory at a time with bounded memory (#302) |
 | [transcription.md](transcription.md) | On-device speech-to-text with `whisper_ggml` |
+| [ocr.md](ocr.md) | Text recognition with Tesseract, engine and languages downloaded on demand (#532) |
 | [review-v0.1.3.md](review-v0.1.3.md) | Code review of everything merged after v0.1.3: what was fixed, what is open |

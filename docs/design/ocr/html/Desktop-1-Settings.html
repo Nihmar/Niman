@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings, Text recognition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:36px;height:36px;border-radius:18px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0}
+.row{display:flex;align-items:center;gap:14px;padding:10px 16px;min-height:44px}
+.sec{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#A6A29A;margin:22px 16px 6px}
+.card{background:#2C3037;border-radius:14px;overflow:hidden}
+.sub{font-size:13px;color:#A6A29A}
+.btn{height:36px;padding:0 16px;border-radius:18px;border:1px solid #4A4F59;background:transparent;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;gap:8px}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden">
+
+  <aside style="width:264px;flex:none;background:#1B1D21;border-right:1px solid #2C3037;display:flex;flex-direction:column;padding:12px 8px;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px 12px">
+      <div style="width:22px;height:22px;border-radius:6px;background:#587CD3;color:#F2EDE5;font:600 13px Literata,serif;display:flex;align-items:center;justify-content:center">N</div>
+      <div style="font-weight:600">Studio</div>
+      <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Clienti</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Contratti</div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Contratto 2019 (scan).pdf</div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Rinnovo 2024.md</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Riunioni</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>assets</div>
+  </aside>
+
+  <main style="flex:1;display:flex;flex-direction:column;min-width:0;background:#23262B">
+    <div style="height:42px;display:flex;align-items:flex-end;gap:2px;padding:0 8px;background:#1B1D21">
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;gap:8px;color:#A6A29A;font-size:13px">Rinnovo 2024</div>
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;gap:8px;background:#23262B;border-radius:10px 10px 0 0;font-size:13px">Settings
+        <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px;color:#A6A29A"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    </div>
+
+    <div style="flex:1;display:flex;min-height:0">
+      <nav style="width:248px;flex:none;padding:16px 8px;display:flex;flex-direction:column;gap:2px;border-right:1px solid #2C3037">
+        <div class="sub" style="padding:4px 12px 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">App</div>
+        <div class="tree" style="height:36px">Appearance</div>
+        <div class="tree" style="height:36px">Editor</div>
+        <div class="tree" style="height:36px">Spell check</div>
+        <div class="tree" style="height:36px">Transcription</div>
+        <div class="tree" style="height:36px;background:#363B44;color:#F2EDE5;font-weight:500">
+          <svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#587CD3"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg>Text recognition</div>
+        <div class="tree" style="height:36px">Sync</div>
+        <div class="tree" style="height:36px">About</div>
+      </nav>
+
+      <section style="flex:1;overflow:hidden;padding:24px 40px">
+        <div style="max-width:680px">
+          <h1 style="margin:0 0 6px;font-size:22px;font-weight:600">Text recognition</h1>
+          <p class="sub" style="margin:0 0 4px;font-size:14px;line-height:1.5">Reads the text of scanned PDFs and images into a note next to them. It runs on this device; the engine and each language are downloaded once, when first needed.</p>
+
+          <div class="sec">Engine</div>
+          <div class="card">
+            <div class="row">
+              <svg class="ico" viewBox="0 0 24 24" style="color:#587CD3"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
+              <div style="flex:1">
+                <div>Tesseract 5.5</div>
+                <div class="sub">Downloaded · 1.9 MB</div>
+              </div>
+              <button class="ibtn" aria-label="Delete the engine"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+            </div>
+          </div>
+
+          <div class="sec">Quality</div>
+          <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;border:1px solid #4A4F59;border-radius:20px;overflow:hidden;width:max-content">
+              <button style="height:36px;padding:0 18px;border:0;background:#3A4A6E;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;gap:6px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M5 12l5 5 9-10"/></svg>Fast</button>
+              <button style="height:36px;padding:0 18px;border:0;border-left:1px solid #4A4F59;background:transparent;color:#D9D4CB;font:500 13px 'IBM Plex Sans',sans-serif">Best</button>
+            </div>
+            <div class="sub" style="line-height:1.5">Fast: 1–4 MB per language, quick on any device. Best: 10–15 MB per language, better on hard scans, two or three times slower. Each quality keeps its own languages.</div>
+          </div>
+
+          <div class="sec">Default language</div>
+          <div class="card">
+            <div class="row" style="border-bottom:1px solid #23262B">
+              <div style="flex:1">Language</div>
+              <div style="display:flex;align-items:center;gap:6px;color:#D9D4CB">Italian<svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 9l6 6 6-6"/></svg></div>
+            </div>
+            <div class="row">
+              <div style="flex:1">Also<div class="sub">For pages that mix two languages</div></div>
+              <div style="display:flex;align-items:center;gap:6px;color:#D9D4CB">English<svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 9l6 6 6-6"/></svg></div>
+            </div>
+          </div>
+
+          <div class="sec">On this device · 6.5 MB</div>
+          <div class="card">
+            <div class="row" style="border-bottom:1px solid #23262B">
+              <div style="flex:1">Italian<div class="sub">Fast · 2.6 MB · default</div></div>
+              <button class="ibtn" aria-label="Delete Italian"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+            </div>
+            <div class="row" style="border-bottom:1px solid #23262B">
+              <div style="flex:1">English<div class="sub">Fast · 3.9 MB</div></div>
+              <button class="ibtn" aria-label="Delete English"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+            </div>
+            <div class="row">
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px">German<div class="sub">Fast · 0.7 of 1.5 MB</div>
+                <div style="height:4px;border-radius:2px;background:#4A4F59;overflow:hidden"><div style="width:47%;height:4px;background:#587CD3"></div></div></div>
+              <button class="ibtn" aria-label="Cancel the download"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside style="width:300px;flex:none;padding:24px 24px 24px 0">
+        <div class="sec" style="margin-top:58px">Other languages</div>
+        <label style="display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:20px;background:#2C3037;color:#A6A29A;margin-bottom:8px">
+          <svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+          <input placeholder="Search 120 languages" style="flex:1;background:transparent;border:0;color:#F2EDE5;font:14px 'IBM Plex Sans',sans-serif;outline:none">
+        </label>
+        <div class="card">
+          <div class="row" style="border-bottom:1px solid #23262B"><div style="flex:1">French<div class="sub">1.1 MB</div></div><button class="ibtn" aria-label="Download French"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button></div>
+          <div class="row" style="border-bottom:1px solid #23262B"><div style="flex:1">Spanish<div class="sub">2.2 MB</div></div><button class="ibtn" aria-label="Download Spanish"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button></div>
+          <div class="row" style="border-bottom:1px solid #23262B"><div style="flex:1">Latin<div class="sub">1.9 MB</div></div><button class="ibtn" aria-label="Download Latin"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button></div>
+          <div class="row" style="border-bottom:1px solid #23262B"><div style="flex:1">Greek, Ancient<div class="sub">2.0 MB</div></div><button class="ibtn" aria-label="Download Ancient Greek"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button></div>
+          <div class="row"><div style="flex:1">Portuguese<div class="sub">1.9 MB</div></div><button class="ibtn" aria-label="Download Portuguese"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>

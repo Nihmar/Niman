@@ -32,6 +32,10 @@ everywhere; PDF goes through each platform's own printer (below).
   back to drawing the note page by page, pictures included; that PDF is
   a picture and cannot be selected, and the app says so when the file is
   written.
+- **Text recognition:** the engine (64-bit ARM, or x86-64 for an
+  emulator) is a 2.3–2.7 MB download, loaded from the app's private
+  storage; nothing ships in the APK (see
+  [text recognition](text-recognition.md)).
 
 ## Linux
 
@@ -93,6 +97,9 @@ everywhere; PDF goes through each platform's own printer (below).
   is drawn as pictures of its pages — pictures included, but not
   selectable — and the export asks before it starts, because a long note
   is minutes of drawing; a folder's PDF zip is not offered.
+- **Text recognition:** the distribution's Tesseract (4.1 or later) when
+  it is installed, with no download; otherwise a 2.9 MB engine built for
+  glibc 2.34 and later (see [text recognition](text-recognition.md)).
 
 ## Windows
 
@@ -140,6 +147,9 @@ everywhere; PDF goes through each platform's own printer (below).
   App Paths key or its install folder. A note falls back to being drawn
   as page pictures where Edge is missing — asking before it starts, as
   on Linux — and a folder's PDF zip is not offered then.
+- **Text recognition:** a 3.9 MB engine downloaded into the app folder,
+  with the C runtime built in, so nothing else needs installing (see
+  [text recognition](text-recognition.md)).
 
 ## Density
 
