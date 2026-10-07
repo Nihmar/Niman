@@ -69,6 +69,18 @@ Future<MarkdownReadViewState> _pump(
 }
 
 void main() {
+  testWidgets('an inline comment shows nothing; another tag shows', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      'Recognized words <!-- ocr 0.1 0.1 0.5 0.13 --> and <b>bold</b>\n',
+    );
+    expect(find.textContaining('Recognized words'), findsOne);
+    expect(find.textContaining('<!--'), findsNothing);
+    expect(find.textContaining('<b>'), findsOne);
+  });
+
   testWidgets('the keys move the page: arrows, page keys, Home and End', (
     tester,
   ) async {

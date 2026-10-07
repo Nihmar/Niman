@@ -3050,4 +3050,30 @@ final class SlovakStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Vyžaduje PDF alebo obrázok na obrazovke';
+
+  @override
+  String get ocrTextTitle => 'Text';
+
+  @override
+  String get ocrScanTitle => 'Sken';
+
+  @override
+  String get ocrOpenAsNote => 'Otvoriť ako poznámku';
+
+  @override
+  String get ocrShowText => 'Zobraziť text';
+
+  @override
+  String get ocrHideText => 'Skryť text';
+
+  @override
+  String get ocrCopyText => 'Kopírovať';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: riadky bez miesta na skene: $lines. Poznámky sa '
+      'tam viažu k celej strane.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Znova rozpoznať s. $page';
 }

@@ -95,6 +95,43 @@ String mergeOcrSidecar(
       '${[for (final page in ordered) sections[page]].join('\n\n')}\n';
 }
 
+/// The names a sidecar of the file [fileName] may have, without `.md`:
+/// the stem's, then — when another file of that stem owns it — the full
+/// name's.
+List<String> ocrSidecarNames(String fileName) => [
+  ocrSidecarName(fileName),
+  '${p.basename(fileName)}.ocr',
+];
+
+/// Whether [sidecarText] is the sidecar of the file [fileName]: its
+/// frontmatter links to it.
+bool isOcrSidecarOf(String sidecarText, String fileName) =>
+    sidecarText.contains('[[${p.basename(fileName)}]]');
+
+/// The recognized text of [sidecarText] as plain text, for a clipboard:
+/// no frontmatter, no page headings, no position comments, no escapes.
+String ocrSidecarPlainText(String sidecarText) {
+  final text = sidecarText.replaceAll('\r\n', '\n');
+  final body = text.substring(_frontmatterOf(text).length);
+  return body
+      .split('\n')
+      .where((line) => !_pageHeading.hasMatch(line))
+      .map(
+        (line) => line
+            .replaceAll(_position, '')
+            .replaceAllMapped(_escape, (m) => m.group(1)!),
+      )
+      .join('\n')
+      .replaceAll(RegExp('\n{3,}'), '\n\n')
+      .trim();
+}
+
+/// A line's position comment, with the space before it.
+final RegExp _position = RegExp(' ?<!-- ocr [0-9. ]+-->');
+
+/// A backslash escape: the character it keeps from being syntax.
+final RegExp _escape = RegExp(r'\\([\\`*_\[\]<>#$|~=^&!.)+-])');
+
 /// How many words [pages] hold.
 int ocrWordCount(Map<int, List<OcrLine>> pages) => [
   for (final lines in pages.values)

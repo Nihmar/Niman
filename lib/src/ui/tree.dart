@@ -6,18 +6,25 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/marquee_text.dart';
+import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
+import 'package:niman/src/ui/ocr/ocr_tree_order.dart';
+import 'package:niman/src/ui/ocr/ocr_tree_ring.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_drag.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
 final class _Row {
-  const new({required this.note, required this.depth});
+  const new({required this.note, required this.depth, this.sidecar = false});
 
   final Note note;
   final int depth;
+
+  /// A text recognition sidecar shown under its file (#595).
+  final bool sidecar;
 }
 
 /// What the tree renders: the pinned notes, then the folder tree.
@@ -49,8 +56,13 @@ final class NoteTree extends StatefulWidget {
     this.onBackgroundSecondaryTapUp,
     this.onMove,
     this.nameDesc = false,
+    this.ocrQueue,
     super.key,
   });
+
+  /// The text recognition jobs: a file being read wears a ring (#595);
+  /// null shows none.
+  final OcrQueue? ocrQueue;
 
   /// Moves a dragged row's note or folder into the folder it was dropped
   /// on (#567); null leaves the rows where they are.
@@ -220,8 +232,10 @@ final class _NoteTreeState extends State<NoteTree> {
     List<_Row> out,
   ) {
     final children = nodesByParent[parentId] ?? const [];
-    for (final note in children) {
-      out.add(_Row(note: note, depth: depth));
+    for (final (note, sidecar) in nestOcrSidecars(children, (n) => n.name)) {
+      out.add(
+        _Row(note: note, depth: sidecar ? depth + 1 : depth, sidecar: sidecar),
+      );
       if (note.isDir && widget.expanded.contains(note.path)) {
         _walkSync(note.id, depth + 1, nodesByParent, out);
       }
@@ -275,6 +289,8 @@ final class _NoteTreeState extends State<NoteTree> {
                 return _RowTile(
                   note: row.note,
                   depth: row.depth,
+                  sidecar: row.sidecar,
+                  ocrQueue: widget.ocrQueue,
                   isExpanded: widget.expanded.contains(row.note.path),
                   selected: row.note.path == widget.selectedPath,
                   onSelect: widget.onSelect,
@@ -402,11 +418,20 @@ final class _RowTile extends StatelessWidget {
     this.onMiddleClick,
     this.onMove,
     this.icon,
+    this.sidecar = false,
+    this.ocrQueue,
     super.key,
   });
 
   /// Moves this row by dragging it, and takes drops (#567).
   final TreeMove? onMove;
+
+  /// A text recognition sidecar under its file: dimmed, with the scan's
+  /// icon (#595).
+  final bool sidecar;
+
+  /// The recognition jobs, for the ring on a file being read.
+  final OcrQueue? ocrQueue;
 
   final Note note;
   final int depth;
@@ -468,14 +493,28 @@ final class _RowTile extends StatelessWidget {
             else
               SizedBox(
                 width: metrics.leading,
-                child: Icon(icon ?? fileIconFor(note.name), size: 16),
+                child: Icon(
+                  icon ??
+                      (sidecar
+                          ? Icons.document_scanner_outlined
+                          : fileIconFor(note.name)),
+                  size: sidecar ? 14 : 16,
+                  color: sidecar ? theme.colorScheme.onSurfaceVariant : null,
+                ),
               ),
             Expanded(
               child: MarqueeText(
                 text: displayNameOf(note),
-                style: theme.textTheme.bodyMedium,
+                style: sidecar
+                    ? theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      )
+                    : theme.textTheme.bodyMedium,
               ),
             ),
+            if (ocrQueue case final queue?
+                when !note.isDir && isRecognizableFile(note.name))
+              OcrTreeRing(queue: queue, path: note.path),
             if (note.date case final DateTime date)
               Padding(
                 padding: const EdgeInsets.only(left: 8, right: 12),

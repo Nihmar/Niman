@@ -3058,4 +3058,30 @@ final class ItalianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => "Serve un PDF o un'immagine sullo schermo";
+
+  @override
+  String get ocrTextTitle => 'Testo';
+
+  @override
+  String get ocrScanTitle => 'Scansione';
+
+  @override
+  String get ocrOpenAsNote => 'Apri come nota';
+
+  @override
+  String get ocrShowText => 'Mostra il testo';
+
+  @override
+  String get ocrHideText => 'Nascondi il testo';
+
+  @override
+  String get ocrCopyText => 'Copia';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines righe hanno perso la posizione sulla '
+      'scansione. Lì le annotazioni si legano alla pagina intera.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Riconosci di nuovo p. $page';
 }

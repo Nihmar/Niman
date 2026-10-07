@@ -1637,4 +1637,19 @@ final class AppStrings {
   static String get ocrOpenText => _s.ocrOpenText;
   static String get ocrFailed => _s.ocrFailed;
   static String get commandNeedOcrFile => _s.commandNeedOcrFile;
+
+  // The scan and its text (#595).
+
+  static String get ocrTextTitle => _s.ocrTextTitle;
+  static String get ocrScanTitle => _s.ocrScanTitle;
+  static String get ocrOpenAsNote => _s.ocrOpenAsNote;
+  static String get ocrShowText => _s.ocrShowText;
+  static String get ocrHideText => _s.ocrHideText;
+  static String get ocrCopyText => _s.ocrCopyText;
+
+  // Recognized lines on the scan (#596).
+
+  static String ocrLostPlaces(int page, int lines) =>
+      _s.ocrLostPlaces(page, lines);
+  static String ocrRecognizeAgain(int page) => _s.ocrRecognizeAgain(page);
 }

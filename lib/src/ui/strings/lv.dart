@@ -3036,4 +3036,30 @@ final class LatvianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Ekrānā jābūt PDF vai attēlam';
+
+  @override
+  String get ocrTextTitle => 'Teksts';
+
+  @override
+  String get ocrScanTitle => 'Skenējums';
+
+  @override
+  String get ocrOpenAsNote => 'Atvērt kā piezīmi';
+
+  @override
+  String get ocrShowText => 'Rādīt tekstu';
+
+  @override
+  String get ocrHideText => 'Paslēpt tekstu';
+
+  @override
+  String get ocrCopyText => 'Kopēt';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '$page. lp.: $lines rindas zaudēja vietu skenējumā. Piezīmes '
+      'tur attiecas uz visu lapu.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Atpazīt $page. lp. vēlreiz';
 }

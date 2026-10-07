@@ -3052,4 +3052,30 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Нужен е PDF или изображение на екрана';
+
+  @override
+  String get ocrTextTitle => 'Текст';
+
+  @override
+  String get ocrScanTitle => 'Сканиране';
+
+  @override
+  String get ocrOpenAsNote => 'Отвори като бележка';
+
+  @override
+  String get ocrShowText => 'Покажи текста';
+
+  @override
+  String get ocrHideText => 'Скрий текста';
+
+  @override
+  String get ocrCopyText => 'Копирай';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'стр. $page: редове без място на сканирането: $lines. '
+      'Бележките там се отнасят до цялата страница.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Разпознай отново стр. $page';
 }

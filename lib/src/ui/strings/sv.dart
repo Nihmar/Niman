@@ -3047,4 +3047,30 @@ final class SwedishStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Kräver en PDF eller en bild på skärmen';
+
+  @override
+  String get ocrTextTitle => 'Text';
+
+  @override
+  String get ocrScanTitle => 'Skanning';
+
+  @override
+  String get ocrOpenAsNote => 'Öppna som anteckning';
+
+  @override
+  String get ocrShowText => 'Visa texten';
+
+  @override
+  String get ocrHideText => 'Dölj texten';
+
+  @override
+  String get ocrCopyText => 'Kopiera';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: $lines rader har tappat sin plats på skanningen. '
+      'Anteckningar där gäller hela sidan.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Känn igen s. $page igen';
 }

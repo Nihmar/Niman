@@ -3069,4 +3069,30 @@ final class CroatianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Treba PDF ili slika na zaslonu';
+
+  @override
+  String get ocrTextTitle => 'Tekst';
+
+  @override
+  String get ocrScanTitle => 'Sken';
+
+  @override
+  String get ocrOpenAsNote => 'Otvori kao bilješku';
+
+  @override
+  String get ocrShowText => 'Prikaži tekst';
+
+  @override
+  String get ocrHideText => 'Sakrij tekst';
+
+  @override
+  String get ocrCopyText => 'Kopiraj';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'str. $page: retci bez mjesta na skenu: $lines. Bilješke se '
+      'ondje vežu uz cijelu stranicu.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Ponovno prepoznaj str. $page';
 }

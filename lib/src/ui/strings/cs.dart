@@ -3041,4 +3041,30 @@ final class CzechStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Vyžaduje PDF nebo obrázek na obrazovce';
+
+  @override
+  String get ocrTextTitle => 'Text';
+
+  @override
+  String get ocrScanTitle => 'Sken';
+
+  @override
+  String get ocrOpenAsNote => 'Otevřít jako poznámku';
+
+  @override
+  String get ocrShowText => 'Zobrazit text';
+
+  @override
+  String get ocrHideText => 'Skrýt text';
+
+  @override
+  String get ocrCopyText => 'Kopírovat';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: řádky bez místa na skenu: $lines. Poznámky se tam '
+      'vážou k celé stránce.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Znovu rozpoznat s. $page';
 }

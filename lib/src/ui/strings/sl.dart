@@ -3061,4 +3061,30 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Potreben je PDF ali slika na zaslonu';
+
+  @override
+  String get ocrTextTitle => 'Besedilo';
+
+  @override
+  String get ocrScanTitle => 'Skeniranje';
+
+  @override
+  String get ocrOpenAsNote => 'Odpri kot zapisek';
+
+  @override
+  String get ocrShowText => 'Pokaži besedilo';
+
+  @override
+  String get ocrHideText => 'Skrij besedilo';
+
+  @override
+  String get ocrCopyText => 'Kopiraj';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'str. $page: vrstice brez mesta na skeniranju: $lines. Opombe '
+      'tam veljajo za vso stran.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Znova prepoznaj str. $page';
 }

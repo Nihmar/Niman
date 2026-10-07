@@ -3034,4 +3034,30 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Þarf PDF eða mynd á skjánum';
+
+  @override
+  String get ocrTextTitle => 'Texti';
+
+  @override
+  String get ocrScanTitle => 'Skönnun';
+
+  @override
+  String get ocrOpenAsNote => 'Opna sem minnispunkt';
+
+  @override
+  String get ocrShowText => 'Sýna texta';
+
+  @override
+  String get ocrHideText => 'Fela texta';
+
+  @override
+  String get ocrCopyText => 'Afrita';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'bls. $page: $lines línur misstu stað sinn á skönnuninni. '
+      'Athugasemdir þar eiga við alla síðuna.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Greina bls. $page aftur';
 }

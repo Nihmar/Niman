@@ -251,7 +251,7 @@ final class OcrQueue extends ChangeNotifier {
     await writer.before();
     // The stem's sidecar, unless another file of that stem already owns
     // it (`scan.pdf` and `scan.jpg`): then the full name's.
-    for (final name in [ocrSidecarName(fileName), '$fileName.ocr']) {
+    for (final name in ocrSidecarNames(fileName)) {
       final path = p.posix.join(parent, '$name.md');
       if (await ops.find(path) == null) {
         final note = await ops.createNote(
@@ -268,7 +268,7 @@ final class OcrQueue extends ChangeNotifier {
         return note.path;
       }
       final existing = await ops.readNote(path);
-      if (!existing.contains('[[$fileName]]')) continue;
+      if (!isOcrSidecarOf(existing, fileName)) continue;
       await ops.saveNote(path, mergeOcrSidecar(existing, read, paged: paged));
       return path;
     }

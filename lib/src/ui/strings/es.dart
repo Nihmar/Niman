@@ -3084,4 +3084,30 @@ final class SpanishStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Necesita un PDF o una imagen en pantalla';
+
+  @override
+  String get ocrTextTitle => 'Texto';
+
+  @override
+  String get ocrScanTitle => 'Escaneo';
+
+  @override
+  String get ocrOpenAsNote => 'Abrir como nota';
+
+  @override
+  String get ocrShowText => 'Mostrar el texto';
+
+  @override
+  String get ocrHideText => 'Ocultar el texto';
+
+  @override
+  String get ocrCopyText => 'Copiar';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines líneas perdieron su lugar en el escaneo. '
+      'Ahí las anotaciones se refieren a toda la página.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Reconocer de nuevo la p. $page';
 }

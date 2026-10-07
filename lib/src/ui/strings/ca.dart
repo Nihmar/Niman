@@ -3091,4 +3091,30 @@ final class CatalanStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Cal un PDF o una imatge a la pantalla';
+
+  @override
+  String get ocrTextTitle => 'Text';
+
+  @override
+  String get ocrScanTitle => 'Escaneig';
+
+  @override
+  String get ocrOpenAsNote => 'Obre com a nota';
+
+  @override
+  String get ocrShowText => 'Mostra el text';
+
+  @override
+  String get ocrHideText => 'Amaga el text';
+
+  @override
+  String get ocrCopyText => 'Copia';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      "p. $page: $lines línies han perdut el lloc a l'escaneig. "
+      "Allà les anotacions s'apliquen a tota la pàgina.";
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Reconeix de nou la p. $page';
 }

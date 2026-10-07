@@ -2283,8 +2283,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   OcrFileActions? get _ocrActions {
     final queue = widget.ocrQueue;
     final root = widget.controller.root;
-    if (_ocrFlow == null || queue == null || root == null) return null;
-    return OcrFileActions(queue: queue, root: root, recognize: _recognize);
+    final ops = widget.controller.ops;
+    if (_ocrFlow == null || queue == null || root == null || ops == null) {
+      return null;
+    }
+    return OcrFileActions(
+      queue: queue,
+      root: root,
+      ops: ops,
+      recognize: _recognize,
+      openNote: _openRecognizedText,
+      recognizeAgain: (path, page, languages) =>
+          _ocrFlow.recognizeAgain(path, page, languages),
+    );
   }
 
   /// Asks how to recognize [path] (library-relative) and queues it.
@@ -4597,6 +4608,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     return TourTarget(
       id: TourTargets.tree,
       child: NoteTree(
+        ocrQueue: widget.ocrQueue,
         controller: controller,
         nameDesc: _editorSettings.treeSort == TreeSort.nameDesc,
         selectedPath: _selected,

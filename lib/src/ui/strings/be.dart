@@ -3079,4 +3079,30 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Патрэбны PDF або выява на экране';
+
+  @override
+  String get ocrTextTitle => 'Тэкст';
+
+  @override
+  String get ocrScanTitle => 'Скан';
+
+  @override
+  String get ocrOpenAsNote => 'Адкрыць як нататку';
+
+  @override
+  String get ocrShowText => 'Паказаць тэкст';
+
+  @override
+  String get ocrHideText => 'Схаваць тэкст';
+
+  @override
+  String get ocrCopyText => 'Капіяваць';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'с. $page: радкоў без месца на скане: $lines. Заўвагі там '
+      'тычацца ўсёй старонкі.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Распазнаць с. $page зноў';
 }

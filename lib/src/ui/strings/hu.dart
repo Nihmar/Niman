@@ -3047,4 +3047,30 @@ final class HungarianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'PDF vagy kép kell a képernyőn';
+
+  @override
+  String get ocrTextTitle => 'Szöveg';
+
+  @override
+  String get ocrScanTitle => 'Szkennelés';
+
+  @override
+  String get ocrOpenAsNote => 'Megnyitás jegyzetként';
+
+  @override
+  String get ocrShowText => 'Szöveg megjelenítése';
+
+  @override
+  String get ocrHideText => 'Szöveg elrejtése';
+
+  @override
+  String get ocrCopyText => 'Másolás';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '$page. o.: $lines sor elvesztette a helyét a szkennen. Az '
+      'ottani jegyzetek az egész oldalhoz kötődnek.';
+
+  @override
+  String ocrRecognizeAgain(int page) => '$page. oldal újbóli felismerése';
 }

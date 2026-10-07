@@ -2999,4 +2999,30 @@ final class EnglishStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Needs a PDF or a picture on screen';
+
+  @override
+  String get ocrTextTitle => 'Text';
+
+  @override
+  String get ocrScanTitle => 'Scan';
+
+  @override
+  String get ocrOpenAsNote => 'Open as a note';
+
+  @override
+  String get ocrShowText => 'Show the text';
+
+  @override
+  String get ocrHideText => 'Hide the text';
+
+  @override
+  String get ocrCopyText => 'Copy';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'p. $page: $lines lines lost their place on the scan. '
+      'Annotations there attach to the whole page.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Recognize p. $page again';
 }

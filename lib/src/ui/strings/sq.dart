@@ -3062,4 +3062,30 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Kërkon një PDF ose një figurë në ekran';
+
+  @override
+  String get ocrTextTitle => 'Teksti';
+
+  @override
+  String get ocrScanTitle => 'Skanimi';
+
+  @override
+  String get ocrOpenAsNote => 'Hap si shënim';
+
+  @override
+  String get ocrShowText => 'Shfaq tekstin';
+
+  @override
+  String get ocrHideText => 'Fshih tekstin';
+
+  @override
+  String get ocrCopyText => 'Kopjo';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'f. $page: $lines rreshta humbën vendin në skanim. Shënimet '
+      'aty lidhen me gjithë faqen.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Njih sërish f. $page';
 }

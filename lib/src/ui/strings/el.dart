@@ -3138,4 +3138,30 @@ final class GreekStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Χρειάζεται PDF ή εικόνα στην οθόνη';
+
+  @override
+  String get ocrTextTitle => 'Κείμενο';
+
+  @override
+  String get ocrScanTitle => 'Σάρωση';
+
+  @override
+  String get ocrOpenAsNote => 'Άνοιγμα ως σημείωση';
+
+  @override
+  String get ocrShowText => 'Εμφάνιση κειμένου';
+
+  @override
+  String get ocrHideText => 'Απόκρυψη κειμένου';
+
+  @override
+  String get ocrCopyText => 'Αντιγραφή';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'σελ. $page: γραμμές χωρίς θέση στη σάρωση: $lines. Οι '
+      'σημειώσεις εκεί αφορούν όλη τη σελίδα.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Νέα αναγνώριση σελ. $page';
 }

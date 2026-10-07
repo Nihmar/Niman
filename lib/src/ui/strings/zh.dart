@@ -2681,4 +2681,29 @@ final class ChineseStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => '需要屏幕上有 PDF 或图片';
+
+  @override
+  String get ocrTextTitle => '文字';
+
+  @override
+  String get ocrScanTitle => '扫描件';
+
+  @override
+  String get ocrOpenAsNote => '作为笔记打开';
+
+  @override
+  String get ocrShowText => '显示文字';
+
+  @override
+  String get ocrHideText => '隐藏文字';
+
+  @override
+  String get ocrCopyText => '复制';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '第 $page 页：$lines 行在扫描件上失去了位置。那里的批注将对应整页。';
+
+  @override
+  String ocrRecognizeAgain(int page) => '重新识别第 $page 页';
 }

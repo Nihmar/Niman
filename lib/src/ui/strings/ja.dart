@@ -2768,4 +2768,29 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => '画面に PDF か画像が必要です';
+
+  @override
+  String get ocrTextTitle => 'テキスト';
+
+  @override
+  String get ocrScanTitle => 'スキャン';
+
+  @override
+  String get ocrOpenAsNote => 'ノートとして開く';
+
+  @override
+  String get ocrShowText => 'テキストを表示';
+
+  @override
+  String get ocrHideText => 'テキストを隠す';
+
+  @override
+  String get ocrCopyText => 'コピー';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      '$page ページ：$lines 行がスキャン上の位置を失いました。そこの注釈はページ全体に付きます。';
+
+  @override
+  String ocrRecognizeAgain(int page) => '$page ページを再認識';
 }

@@ -2993,4 +2993,30 @@ final class EstonianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Vajab ekraanile PDF-i või pilti';
+
+  @override
+  String get ocrTextTitle => 'Tekst';
+
+  @override
+  String get ocrScanTitle => 'Skann';
+
+  @override
+  String get ocrOpenAsNote => 'Ava märkmena';
+
+  @override
+  String get ocrShowText => 'Näita teksti';
+
+  @override
+  String get ocrHideText => 'Peida tekst';
+
+  @override
+  String get ocrCopyText => 'Kopeeri';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      'lk $page: $lines rida kaotas oma koha skannil. Märkused seal '
+      'kehtivad kogu lehe kohta.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Tuvasta lk $page uuesti';
 }

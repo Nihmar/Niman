@@ -3023,4 +3023,30 @@ final class DanishStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Kræver en PDF eller et billede på skærmen';
+
+  @override
+  String get ocrTextTitle => 'Tekst';
+
+  @override
+  String get ocrScanTitle => 'Scanning';
+
+  @override
+  String get ocrOpenAsNote => 'Åbn som note';
+
+  @override
+  String get ocrShowText => 'Vis teksten';
+
+  @override
+  String get ocrHideText => 'Skjul teksten';
+
+  @override
+  String get ocrCopyText => 'Kopiér';
+
+  @override
+  String ocrLostPlaces(int page, int lines) =>
+      's. $page: $lines linjer har mistet deres plads på '
+      'scanningen. Noter der gælder hele siden.';
+
+  @override
+  String ocrRecognizeAgain(int page) => 'Genkend s. $page igen';
 }
