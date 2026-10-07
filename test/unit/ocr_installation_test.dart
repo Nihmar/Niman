@@ -104,6 +104,22 @@ void main() {
     expect(ocr.datapath(OcrQuality.best), p.join(dir.path, 'best'));
   });
 
+  test('a file deleted outside the app is missing again (#606)', () async {
+    put(itaFast.fileName);
+    put(build.fileName);
+    final ocr = installation(engineBuild: build);
+    await ocr.load();
+    expect(ocr.missingFor([ita]), isEmpty);
+    File(p.join(dir.path, itaFast.fileName)).deleteSync();
+    File(p.join(dir.path, build.fileName)).deleteSync();
+    await ocr.rescan();
+    expect(ocr.stateOf(itaFast), isA<NotDownloaded>());
+    expect(ocr.missingFor([ita]), [build, itaFast]);
+    put(itaFast.fileName);
+    await ocr.load();
+    expect(ocr.missingFor([ita]), [build]);
+  });
+
   test('the engine: on the device, downloaded, to download, or none', () async {
     const system = (
       name: 'libtesseract.so.5',

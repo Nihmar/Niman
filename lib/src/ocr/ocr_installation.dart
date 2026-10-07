@@ -81,6 +81,7 @@ final class OcrInstallation extends ChangeNotifier {
   OcrEngineLibrary? _installed;
   String? _dir;
   Future<void>? _loading;
+  Future<void>? _rescanning;
   bool _loaded = false;
   bool _disposed = false;
 
@@ -178,18 +179,7 @@ final class OcrInstallation extends ChangeNotifier {
     if (_disposed) return;
     _dir = dir;
     _settings = settings;
-    for (final MapEntry(key: id, value: bytes) in scan.installed.entries) {
-      if (_states[id] is! Downloading) _states[id] = Downloaded(bytes);
-    }
-    for (final MapEntry(key: id, value: bytes) in scan.partial.entries) {
-      if (_states[id] is Downloading) continue;
-      // A download cut off by the app closing: resumable from here.
-      _states[id] = DownloadFailed(
-        'interrupted',
-        received: bytes,
-        total: _catalog[id]?.bytes ?? 0,
-      );
-    }
+    _apply(scan);
     _loaded = true;
     final found = switch ((_installed, engine)) {
       ((:final source, :final version, name: _)?, _) =>
@@ -203,6 +193,54 @@ final class OcrInstallation extends ChangeNotifier {
       '$settings',
     );
     notifyListeners();
+  }
+
+  /// Scans the downloads again, nothing else: a file deleted since [load]
+  /// (a storage cleanup, a sync tool, a hand) is missing again, so the
+  /// recognition that needs it downloads it rather than failing to open
+  /// it. Before the first [load], loads; concurrent calls share one run.
+  Future<void> rescan() {
+    if (_loading case final loading?) return loading;
+    if (_dir == null) return load();
+    return _rescanning ??= _rescan().whenComplete(() {
+      _rescanning = null;
+    });
+  }
+
+  Future<void> _rescan() async {
+    final DownloadScan scan;
+    try {
+      scan = await _files.scan();
+    } on Object catch (error) {
+      _log.warning('rescan failed: $error');
+      return;
+    }
+    if (_disposed) return;
+    _apply(scan);
+    notifyListeners();
+  }
+
+  /// Sets every catalog item's state from [scan]: on disk, cut off
+  /// part-way, or not there — a file gone since the last scan included.
+  /// A download running keeps its state, and so does an earlier failure
+  /// that left nothing on disk.
+  void _apply(DownloadScan scan) {
+    for (final item in _catalog.values) {
+      if (stateOf(item) is Downloading) continue;
+      final bytes = scan.installed[item.id];
+      final partial = scan.partial[item.id];
+      _states[item.id] = switch ((bytes, partial)) {
+        (final int bytes, _) => Downloaded(bytes),
+        // A download cut off by the app closing: resumable from here.
+        (_, final int partial) => DownloadFailed(
+          'interrupted',
+          received: partial,
+          total: item.bytes,
+        ),
+        _ when _states[item.id] is DownloadFailed => _states[item.id]!,
+        _ => const NotDownloaded(),
+      };
+    }
   }
 
   Future<OcrSettings> _readSettings() async {

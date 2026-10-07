@@ -129,6 +129,46 @@ void main() {
     expect(text, contains('## p. 3\n\npage 3 <!-- ocr'));
   });
 
+  test(
+    'a language deleted since the scan is downloaded again (#606)',
+    () async {
+      final asked = <String>[];
+      installation.dispose();
+      installation = OcrInstallation(
+        directory: () async => dir.path,
+        build: null,
+        findInstalled: () async => system,
+        probe: (_) async => '5.5.3',
+        retryDelays: const [],
+        startDownload:
+            ({
+              required uri,
+              required target,
+              required onProgress,
+              sha256,
+              onHeaders,
+            }) async {
+              asked.add(p.basename(target));
+              throw const SocketException('offline');
+            },
+      );
+      await installation.load();
+      expect(installation.missingFor([ita]), isEmpty);
+      File(p.join(dir.path, ita.file(OcrQuality.fast)!.fileName)).deleteSync();
+      final q = queue();
+      final done = finished(q);
+      final job = q.enqueue(
+        path: 'scan.pdf',
+        languages: [ita],
+        writer: writer(),
+      );
+      await done;
+      expect(asked, [p.basename(ita.file(OcrQuality.fast)!.fileName)]);
+      expect(job.phase, OcrJobPhase.failed);
+      expect(job.error, contains('not downloaded'));
+    },
+  );
+
   test('a page read again is merged into the sidecar', () async {
     final q = queue();
     var done = finished(q);

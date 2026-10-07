@@ -163,6 +163,9 @@ final class OcrQueue extends ChangeNotifier {
     final clock = Stopwatch()..start();
     final writer = _writers.remove(job.id)!;
     try {
+      // A file deleted since the last scan is downloaded again (#606),
+      // here rather than on the press, where it would hold the sheet.
+      await installation.rescan();
       final missing = installation.missingFor(job.languages);
       if (missing.isNotEmpty) {
         _set(job, OcrJobPhase.downloading);
