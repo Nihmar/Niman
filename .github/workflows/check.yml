@@ -35,6 +35,9 @@ jobs:
       # Windows: without the library and the two dictionaries the live
       # cases in test/unit/spell_check_test.dart skip, and the engine
       # goes unexercised everywhere but a laptop (issue #363).
+      # tesseract-ocr is the distribution's OCR engine, with its English
+      # model: the live case of test/unit/ocr_engine_test.dart reads a
+      # rendered page through it, the path a Linux install takes (#593).
       - name: Install build and test dependencies
         run: |
           sudo apt-get update
@@ -42,7 +45,7 @@ jobs:
             libgtk-3-dev liblzma-dev libstdc++-13-dev \
             libayatana-appindicator3-dev libsecret-1-dev libjsoncpp-dev \
             libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev xvfb \
-            hunspell hunspell-en-us hunspell-it
+            hunspell hunspell-en-us hunspell-it tesseract-ocr tesseract-ocr-eng
 
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:

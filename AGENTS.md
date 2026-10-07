@@ -33,7 +33,10 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - CI (`.github/workflows/check.yml`) runs that gate + analyze + `flutter test` +
   the integration files on every PR, and installs `hunspell`, `hunspell-en-us`
   and `hunspell-it` so the live cases of `test/unit/spell_check_test.dart` check
-  real words there instead of skipping. Run checks locally too:
+  real words there instead of skipping, and `tesseract-ocr` + `tesseract-ocr-eng`
+  for the live case of `test/unit/ocr_engine_test.dart` (`NIMAN_OCR_ENGINE=<path>`
+  runs it against a build of `scripts/ocr-engine.sh` instead). Run checks
+  locally too:
   - Linux: `./scripts/niman.sh check` (logs: `/tmp/niman/niman-check.log`),
     plus `./scripts/niman.sh integration` for `integration_test/`
   - Windows: `scripts\niman.bat check` (logs: `%TEMP%\niman\`),
