@@ -372,6 +372,14 @@ final class IcelandicStrings extends Strings {
   String get languageSubtitle => 'Tungumál texta forritsins sjálfs';
   @override
   String get languageSystem => 'Kerfi';
+  @override
+  String get weekStartTitle => 'Fyrsti dagur vikunnar';
+  @override
+  String get weekStartSubtitle =>
+      'Hvar dagatölin hefja vikuna. Kerfisins sjálfgefið; dagur valinn hér '
+      'gildir á öllum tækjum safnsins.';
+  @override
+  String get weekStartSystem => 'Kerfi';
 
   // List note kind (T-TK-02).
   @override

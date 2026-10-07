@@ -380,6 +380,14 @@ final class RomanianStrings extends Strings {
   String get languageSubtitle => 'Limba propriului text al aplicației';
   @override
   String get languageSystem => 'Sistem';
+  @override
+  String get weekStartTitle => 'Prima zi a săptămânii';
+  @override
+  String get weekStartSubtitle =>
+      'Ziua cu care calendarele încep săptămâna. Implicit cea a sistemului; o '
+      'zi aleasă aici se aplică pe fiecare dispozitiv al bibliotecii.';
+  @override
+  String get weekStartSystem => 'Sistem';
 
   // List note kind (T-TK-02).
   @override

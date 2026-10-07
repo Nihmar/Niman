@@ -379,6 +379,14 @@ final class BulgarianStrings extends Strings {
   String get languageSubtitle => 'Език на самата програма';
   @override
   String get languageSystem => 'Система';
+  @override
+  String get weekStartTitle => 'Първи ден от седмицата';
+  @override
+  String get weekStartSubtitle =>
+      'С кой ден календарите започват седмицата. По подразбиране този на '
+      'системата; избраният тук ден важи на всяко устройство на библиотеката.';
+  @override
+  String get weekStartSystem => 'Система';
 
   // List note kind (T-TK-02).
   @override

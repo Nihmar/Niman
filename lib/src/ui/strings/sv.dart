@@ -377,6 +377,14 @@ final class SwedishStrings extends Strings {
   String get languageSubtitle => 'Språket på appens egen text';
   @override
   String get languageSystem => 'System';
+  @override
+  String get weekStartTitle => 'Veckans första dag';
+  @override
+  String get weekStartSubtitle =>
+      'Där kalendrarna börjar veckan. Systemets som standard; en dag som '
+      'väljs här gäller på alla bibliotekets enheter.';
+  @override
+  String get weekStartSystem => 'System';
 
   // List note kind (T-TK-02).
   @override

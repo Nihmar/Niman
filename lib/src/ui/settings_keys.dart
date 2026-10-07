@@ -21,6 +21,7 @@ import 'package:flutter/widgets.dart';
 abstract final class SettingsKeys {
   // Appearance.
   static const language = Key('language-choice');
+  static const weekStart = Key('week-start-setting');
   static const uiTextScale = Key('ui-text-scale-setting');
   static const closeToTray = Key('close-to-tray-setting');
   static const epubLook = Key('epub-look-setting');

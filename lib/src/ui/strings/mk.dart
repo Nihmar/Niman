@@ -378,6 +378,14 @@ final class MacedonianStrings extends Strings {
   String get languageSubtitle => 'Јазик на текстот на самата апликација';
   @override
   String get languageSystem => 'Систем';
+  @override
+  String get weekStartTitle => 'Прв ден од неделата';
+  @override
+  String get weekStartSubtitle =>
+      'Со кој ден календарите ја почнуваат неделата. Стандардно системскиот; '
+      'денот избран тука важи на секој уред на библиотеката.';
+  @override
+  String get weekStartSystem => 'Систем';
 
   // List note kind (T-TK-02).
   @override

@@ -346,6 +346,12 @@ final class ChineseStrings extends Strings {
   String get languageSubtitle => '应用自身文字的语言';
   @override
   String get languageSystem => '跟随系统';
+  @override
+  String get weekStartTitle => '每周第一天';
+  @override
+  String get weekStartSubtitle => '日历每周从哪一天开始。默认跟随系统；在此选择的日期适用于该资料库的所有设备。';
+  @override
+  String get weekStartSystem => '系统';
 
   // List note kind (T-TK-02).
   @override

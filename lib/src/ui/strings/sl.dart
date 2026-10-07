@@ -377,6 +377,14 @@ final class SlovenianStrings extends Strings {
   String get languageSubtitle => 'Jezik lastnega besedila aplikacije';
   @override
   String get languageSystem => 'Sistem';
+  @override
+  String get weekStartTitle => 'Prvi dan v tednu';
+  @override
+  String get weekStartSubtitle =>
+      'S katerim dnem koledarji začnejo teden. Privzeto sistemski; tu izbrani '
+      'dan velja na vseh napravah knjižnice.';
+  @override
+  String get weekStartSystem => 'Sistem';
 
   // List note kind (T-TK-02).
   @override

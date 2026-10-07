@@ -374,6 +374,15 @@ final class AlbanianStrings extends Strings {
   String get languageSubtitle => 'Gjuha e tekstit të vetë aplikacionit';
   @override
   String get languageSystem => 'Sistemi';
+  @override
+  String get weekStartTitle => 'Dita e parë e javës';
+  @override
+  String get weekStartSubtitle =>
+      'Nga cila ditë e nisin javën kalendarët. Ajo e sistemit si '
+      'parazgjedhje; një ditë e zgjedhur këtu vlen në çdo pajisje të '
+      'bibliotekës.';
+  @override
+  String get weekStartSystem => 'Sistemi';
 
   // List note kind (T-TK-02).
   @override

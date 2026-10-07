@@ -10,6 +10,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
@@ -157,6 +158,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     // As the real session does: the library's text sizes go on screen
     // with it (T-M6-12).
     AppTextScales.apply(ui: _config.uiTextScale, note: _config.noteTextScale);
+    AppWeekStart.choice = _config.weekStart;
     _phase = LibraryPhase.ready;
     _bump();
   }
@@ -169,6 +171,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _root = null;
     _phase = LibraryPhase.none;
     AppTextScales.reset();
+    AppWeekStart.choice = WeekStart.system;
     EpubLooks.reset();
     _bump();
   }
@@ -625,6 +628,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     final clamped = normalizeTextScale(scale);
     _config = _config.copyWith(noteTextScale: clamped);
     AppTextScales.note = clamped;
+  }
+
+  @override
+  Future<WeekStart> get weekStart async => _config.weekStart;
+
+  @override
+  Future<void> setWeekStart(WeekStart start) async {
+    _config = _config.copyWith(weekStart: start);
+    AppWeekStart.choice = start;
   }
 
   @override

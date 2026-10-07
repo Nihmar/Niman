@@ -373,6 +373,14 @@ final class DanishStrings extends Strings {
   String get languageSubtitle => 'Sproget på appens egen tekst';
   @override
   String get languageSystem => 'System';
+  @override
+  String get weekStartTitle => 'Ugens første dag';
+  @override
+  String get weekStartSubtitle =>
+      'Hvor kalenderne starter ugen. Systemets som standard; en dag valgt her '
+      'gælder på alle bibliotekets enheder.';
+  @override
+  String get weekStartSystem => 'System';
 
   // List note kind (T-TK-02).
   @override

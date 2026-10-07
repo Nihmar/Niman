@@ -372,6 +372,14 @@ final class BelarusianStrings extends Strings {
   String get languageSubtitle => 'Мова самой праграмы';
   @override
   String get languageSystem => 'Сістэма';
+  @override
+  String get weekStartTitle => 'Першы дзень тыдня';
+  @override
+  String get weekStartSubtitle =>
+      'З якога дня календары пачынаюць тыдзень. Па змаўчанні сістэмны; дзень, '
+      'абраны тут, дзейнічае на кожнай прыладзе бібліятэкі.';
+  @override
+  String get weekStartSystem => 'Сістэма';
 
   // List note kind (T-TK-02).
   @override

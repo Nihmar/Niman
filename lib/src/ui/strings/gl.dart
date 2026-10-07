@@ -380,6 +380,14 @@ final class GalicianStrings extends Strings {
   String get languageSubtitle => 'O idioma do propio texto da app';
   @override
   String get languageSystem => 'Sistema';
+  @override
+  String get weekStartTitle => 'Primeiro día da semana';
+  @override
+  String get weekStartSubtitle =>
+      'Onde os calendarios comezan a semana. O do sistema por defecto; un día '
+      'escollido aquí vale en cada dispositivo da biblioteca.';
+  @override
+  String get weekStartSystem => 'Sistema';
 
   // List note kind (T-TK-02).
   @override

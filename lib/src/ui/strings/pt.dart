@@ -377,6 +377,14 @@ final class PortugueseStrings extends Strings {
   String get languageSubtitle => 'O idioma dos próprios textos do app';
   @override
   String get languageSystem => 'Sistema';
+  @override
+  String get weekStartTitle => 'Primeiro dia da semana';
+  @override
+  String get weekStartSubtitle =>
+      'Onde os calendários começam a semana. O do sistema por omissão; um dia '
+      'escolhido aqui vale em todos os dispositivos da biblioteca.';
+  @override
+  String get weekStartSystem => 'Sistema';
 
   // List note kind (T-TK-02).
   @override

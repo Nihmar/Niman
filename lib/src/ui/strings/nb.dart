@@ -372,6 +372,14 @@ final class NorwegianStrings extends Strings {
   String get languageSubtitle => 'Språket i appens egen tekst';
   @override
   String get languageSystem => 'System';
+  @override
+  String get weekStartTitle => 'Ukens første dag';
+  @override
+  String get weekStartSubtitle =>
+      'Hvor kalenderne starter uken. Systemets som standard; en dag valgt her '
+      'gjelder på alle bibliotekets enheter.';
+  @override
+  String get weekStartSystem => 'System';
 
   // List note kind (T-TK-02).
   @override

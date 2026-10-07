@@ -370,6 +370,14 @@ final class LatvianStrings extends Strings {
   String get languageSubtitle => 'Pašas programmas teksta valoda';
   @override
   String get languageSystem => 'Sistēma';
+  @override
+  String get weekStartTitle => 'Nedēļas pirmā diena';
+  @override
+  String get weekStartSubtitle =>
+      'No kuras dienas kalendāri sāk nedēļu. Pēc noklusējuma sistēmas; šeit '
+      'izvēlētā diena attiecas uz visām bibliotēkas ierīcēm.';
+  @override
+  String get weekStartSystem => 'Sistēma';
 
   // List note kind (T-TK-02).
   @override

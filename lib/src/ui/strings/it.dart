@@ -381,6 +381,15 @@ final class ItalianStrings extends Strings {
   String get languageSubtitle => 'La lingua dei testi dell’app';
   @override
   String get languageSystem => 'Sistema';
+  @override
+  String get weekStartTitle => 'Primo giorno della settimana';
+  @override
+  String get weekStartSubtitle =>
+      'Da dove i calendari iniziano la settimana. Quello di sistema per '
+      'impostazione predefinita; un giorno scelto qui vale su ogni '
+      'dispositivo della libreria.';
+  @override
+  String get weekStartSystem => 'Sistema';
 
   // List note kind (T-TK-02).
   @override

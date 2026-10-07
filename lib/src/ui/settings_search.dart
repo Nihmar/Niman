@@ -114,6 +114,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushAppearance(SettingsKeys.language),
     ),
     SettingsSearchEntry(
+      title: AppStrings.weekStartTitle,
+      area: appearance,
+      rowKey: SettingsKeys.weekStart,
+      value: () async => AppStrings.weekStartName(await controller.weekStart),
+      areaId: SettingsAreaId.appearance,
+      open: () => pushAppearance(SettingsKeys.weekStart),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.themeBrightnessTitle,
       area: themes,
       rowKey: SettingsKeys.brightness,

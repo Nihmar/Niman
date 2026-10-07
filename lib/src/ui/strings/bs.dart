@@ -378,6 +378,14 @@ final class BosnianStrings extends Strings {
   String get languageSubtitle => 'Jezik teksta same aplikacije';
   @override
   String get languageSystem => 'Sistem';
+  @override
+  String get weekStartTitle => 'Prvi dan u sedmici';
+  @override
+  String get weekStartSubtitle =>
+      'Kojim danom kalendari počinju sedmicu. Zadano sistemski; dan odabran '
+      'ovdje važi na svakom uređaju biblioteke.';
+  @override
+  String get weekStartSystem => 'Sistem';
 
   // List note kind (T-TK-02).
   @override

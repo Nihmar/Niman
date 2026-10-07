@@ -6,6 +6,7 @@ import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
@@ -570,6 +571,13 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the note text size.
   Future<void> setNoteTextScale(double scale);
+
+  /// The day the library's calendars start the week on (default the
+  /// system's, #566).
+  Future<WeekStart> get weekStart;
+
+  /// Sets (and persists) the first day of the week.
+  Future<void> setWeekStart(WeekStart start);
 
   /// The face the source editor is set in
   /// (default [defaultSourceFont], issue #259). Only the source pane's own

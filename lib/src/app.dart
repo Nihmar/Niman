@@ -11,6 +11,7 @@ import 'package:niman/src/core/drop_in.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/text_scale.dart';
+import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/ui/changelog.dart';
 import 'package:niman/src/ui/close_guard.dart';
 import 'package:niman/src/ui/drop_target.dart';
@@ -18,6 +19,7 @@ import 'package:niman/src/ui/shell.dart';
 import 'package:niman/src/ui/theme/device_colors.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/ui/week_start_localizations.dart';
 import 'package:niman/src/ui/window_controller.dart';
 
 /// Root widget of the Niman application.
@@ -63,6 +65,7 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
     AppLanguages.system = AppLanguages.fromLocales(
       WidgetsBinding.instance.platformDispatcher.locales,
     );
+    AppWeekStart.systemChanged();
   }
 
   @override
@@ -72,6 +75,7 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
         AppLanguages.revision,
         AppTextScales.revision,
         AppThemes.revision,
+        AppWeekStart.revision,
       ]),
       builder: (context, _) => MaterialApp(
         title: isTestingBuild ? 'Niman (testing)' : 'Niman',
@@ -104,8 +108,9 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
         supportedLocales: [
           for (final language in AppLanguages.supported) Locale(language.id),
         ],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
+        localizationsDelegates: [
+          // Flutter's, the week starting on the day in force (#566).
+          WeekStartMaterialLocalizations.current(),
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],

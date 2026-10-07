@@ -365,6 +365,14 @@ final class HindiStrings extends Strings {
   String get languageSubtitle => 'ऐप के अपने टेक्स्ट की भाषा';
   @override
   String get languageSystem => 'सिस्टम';
+  @override
+  String get weekStartTitle => 'सप्ताह का पहला दिन';
+  @override
+  String get weekStartSubtitle =>
+      'कैलेंडर सप्ताह किस दिन से शुरू करते हैं। डिफ़ॉल्ट रूप से सिस्टम का; '
+      'यहाँ चुना गया दिन लाइब्रेरी के हर डिवाइस पर लागू होता है।';
+  @override
+  String get weekStartSystem => 'सिस्टम';
 
   // List note kind (T-TK-02).
   @override

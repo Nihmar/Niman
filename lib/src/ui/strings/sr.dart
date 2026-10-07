@@ -377,6 +377,14 @@ final class SerbianStrings extends Strings {
   String get languageSubtitle => 'Језик текста саме апликације';
   @override
   String get languageSystem => 'Систем';
+  @override
+  String get weekStartTitle => 'Prvi dan u nedelji';
+  @override
+  String get weekStartSubtitle =>
+      'Kojim danom kalendari počinju nedelju. Podrazumevano sistemski; dan '
+      'izabran ovde važi na svakom uređaju biblioteke.';
+  @override
+  String get weekStartSystem => 'Sistem';
 
   // List note kind (T-TK-02).
   @override

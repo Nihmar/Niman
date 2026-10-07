@@ -381,6 +381,14 @@ final class CatalanStrings extends Strings {
   String get languageSubtitle => 'L’idioma del propi text de l’app';
   @override
   String get languageSystem => 'Sistema';
+  @override
+  String get weekStartTitle => 'Primer dia de la setmana';
+  @override
+  String get weekStartSubtitle =>
+      'On els calendaris comencen la setmana. El del sistema per defecte; un '
+      'dia triat aquí val a cada dispositiu de la biblioteca.';
+  @override
+  String get weekStartSystem => 'Sistema';
 
   // List note kind (T-TK-02).
   @override
