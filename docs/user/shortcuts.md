@@ -31,8 +31,10 @@ shortcuts lists them and lets you change them:
   stays in the middle (see [editing](editing.md#typewriter-mode))
 - `Ctrl/⌘+=` / `Ctrl/⌘+-` — zoom the note's text in and out, `Ctrl/⌘+0`
   back to its normal size: the library's note text size (Settings →
-  Appearance), in the editor and the preview alike; on a phone, *Zoom in*,
-  *Zoom out* and *Reset zoom* are in the command palette
+  Appearance), in the editor and the preview alike; on a phone, pinch the
+  note with two fingers — spread them to zoom in, bring them together to
+  zoom out — or use *Zoom in*, *Zoom out* and *Reset zoom* in the command
+  palette; a laptop's trackpad pinches the same way
 - `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs (on a
   wide window Settings opens as a floating window)
 

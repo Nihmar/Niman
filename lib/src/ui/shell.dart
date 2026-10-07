@@ -86,6 +86,7 @@ import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
+import 'package:niman/src/ui/note_zoom_pinch.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outline_panel.dart';
@@ -1134,59 +1135,75 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     }
     return TourTarget(
       id: TourTargets.note,
-      child: NoteView(
-        key: _phoneNoteKey,
-        path: p.join(controller.root ?? '', selectedPath),
-        // One editor on the phone: switching notes hands the one going in
-        // its memento, and the one going out hands in its own (#23).
-        initialMemento: _workspace.value.tabs
-            .where((tab) => tab.path == selectedPath)
-            .firstOrNull
-            ?.memento,
-        onMemento: (path, memento) {
-          final root = controller.root;
-          if (root != null) _workspace.remember(relPath(path, root), memento);
-        },
-        onEditedNoteClosed: _tidyClosedNote,
-        showLineNumbers: _editorSettings.lineNumbers,
-        typewriter: _editorSettings.typewriter,
-        cascadeChecklist: _editorSettings.cascadeChecklist,
-        frontmatterPanel: _editorSettings.frontmatterPanel,
-        // No switch in the phone's status row: it has no room left for one.
-        // Settings and the Search tab's commands reach it there.
-        noteColumn: _editorSettings.noteColumn,
-        autofocusEditor: _editorSettings.autofocusEditor,
-        linkType: _editorSettings.linkType,
-        missingNoteLocation: _editorSettings.missingNoteLocation,
-        attachmentsFolder: _editorSettings.attachmentsFolder,
-        templateFolder: _editorSettings.templateFolder,
-        indentWidth: _editorSettings.indentWidth,
-        sourceFont: _editorSettings.sourceFont,
-        toolbarLayout: _editorSettings.toolbarLayout,
-        showPreview: _notePreview,
-        showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
-        // A single enabled editor has nowhere to switch to: the note hides
-        // its switch instead of offering a dead toggle.
-        onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
-            ? _setEditorKind
-            : null,
-        libraryRoot: controller.root,
-        linkSource: _linkSource,
-        wikilinkSuggester: _wikilinkSuggester,
-        onOpenNote: _openNoteFromLink,
-        initialAnchor: _pendingAnchor,
-        initialCaretOffset: _pendingCaretOffset,
-        kindMode: !_kindRawMode,
-        onNoteKindChanged: _onNoteKindChanged,
-        unsavedTracker: widget.unsavedTracker,
-        spellCheck: widget.spellCheck,
-        reloadToken: _noteReloadToken,
-        saveNote: _noteSaver(controller),
-        saveNoteStream: _noteStreamSaver(controller),
-        createMissingNote: _missingNoteCreator(controller),
+      child: _pinchToZoom(
+        NoteView(
+          key: _phoneNoteKey,
+          path: p.join(controller.root ?? '', selectedPath),
+          // One editor on the phone: switching notes hands the one going in
+          // its memento, and the one going out hands in its own (#23).
+          initialMemento: _workspace.value.tabs
+              .where((tab) => tab.path == selectedPath)
+              .firstOrNull
+              ?.memento,
+          onMemento: (path, memento) {
+            final root = controller.root;
+            if (root != null) _workspace.remember(relPath(path, root), memento);
+          },
+          onEditedNoteClosed: _tidyClosedNote,
+          showLineNumbers: _editorSettings.lineNumbers,
+          typewriter: _editorSettings.typewriter,
+          cascadeChecklist: _editorSettings.cascadeChecklist,
+          frontmatterPanel: _editorSettings.frontmatterPanel,
+          // No switch in the phone's status row: it has no room left for one.
+          // Settings and the Search tab's commands reach it there.
+          noteColumn: _editorSettings.noteColumn,
+          autofocusEditor: _editorSettings.autofocusEditor,
+          linkType: _editorSettings.linkType,
+          missingNoteLocation: _editorSettings.missingNoteLocation,
+          attachmentsFolder: _editorSettings.attachmentsFolder,
+          templateFolder: _editorSettings.templateFolder,
+          indentWidth: _editorSettings.indentWidth,
+          sourceFont: _editorSettings.sourceFont,
+          toolbarLayout: _editorSettings.toolbarLayout,
+          showPreview: _notePreview,
+          showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
+          // A single enabled editor has nowhere to switch to: the note hides
+          // its switch instead of offering a dead toggle.
+          onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
+              ? _setEditorKind
+              : null,
+          libraryRoot: controller.root,
+          linkSource: _linkSource,
+          wikilinkSuggester: _wikilinkSuggester,
+          onOpenNote: _openNoteFromLink,
+          initialAnchor: _pendingAnchor,
+          initialCaretOffset: _pendingCaretOffset,
+          kindMode: !_kindRawMode,
+          onNoteKindChanged: _onNoteKindChanged,
+          unsavedTracker: widget.unsavedTracker,
+          spellCheck: widget.spellCheck,
+          reloadToken: _noteReloadToken,
+          saveNote: _noteSaver(controller),
+          saveNoteStream: _noteStreamSaver(controller),
+          createMissingNote: _missingNoteCreator(controller),
+        ),
       ),
     );
   }
+
+  /// [note] with its text zoomed by a pinch (#538): each step shown at
+  /// once, and the size kept for the library when the fingers lift.
+  Widget _pinchToZoom(Widget note) => NoteZoomPinch(
+    scale: () => AppTextScales.note,
+    onZoom: (scale, {required done}) {
+      if (done) {
+        unawaited(widget.controller.setNoteTextScale(scale));
+      } else {
+        AppTextScales.note = scale;
+      }
+    },
+    child: note,
+  );
 
   /// The dead-link note-creation path (issue #78): an empty note through
   /// the library's own creation path; null while no library is ready,
@@ -4172,57 +4189,59 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         pane: pane,
         isSplit: _workspace.value.isSplit,
         onDrop: (drag, kind) => _dropTabOnPane(drag, pane, kind),
-        child: ShellDetailPane(
-          root: controller.root,
-          tabs: _deck(pane),
-          onMemento: _workspace.remember,
-          zen: _inZen,
-          typewriter: _editorSettings.typewriter,
-          cascadeChecklist: _editorSettings.cascadeChecklist,
-          frontmatterPanel: _editorSettings.frontmatterPanel,
-          onToggleTypewriter: _toggleTypewriter,
-          onLoaded: _workspace.noteLoaded,
-          onEditedNoteClosed: _tidyClosedNote,
-          showLineNumbers: _editorSettings.lineNumbers,
-          noteColumn: _editorSettings.noteColumn,
-          // The kind toggles and ⋮ sit at the end of the note's
-          // one row of chrome (#173); there is no header above.
-          barActions: [
-            ..._kindActions,
-            if (_dockRoom) _dockToggle(),
-            _noteMenu(),
-          ],
-          autofocusEditor: _editorSettings.autofocusEditor,
-          linkType: _editorSettings.linkType,
-          missingNoteLocation: _editorSettings.missingNoteLocation,
-          attachmentsFolder: _editorSettings.attachmentsFolder,
-          templateFolder: _editorSettings.templateFolder,
-          indentWidth: _editorSettings.indentWidth,
-          sourceFont: _editorSettings.sourceFont,
-          toolbarLayout: _editorSettings.toolbarLayout,
-          // A single enabled editor has nowhere to switch to:
-          // the note hides its switch instead of offering a
-          // dead toggle.
-          onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
-              ? _setEditorKind
-              : null,
-          linkSource: _linkSource,
-          wikilinkSuggester: _wikilinkSuggester,
-          onOpenNote: _openNoteFromLink,
-          kindMode: !_kindRawMode,
-          onNoteKindChanged: _onNoteKindChanged,
-          unsavedTracker: widget.unsavedTracker,
-          spellCheck: widget.spellCheck,
-          reloadToken: _noteReloadToken,
-          linksFollowed: _linksFollowed,
-          onAnnotate: _annotate,
-          marks: _annotations,
-          saveNote: _noteSaver(controller),
-          saveNoteStream: _noteStreamSaver(controller),
-          createMissingNote: _missingNoteCreator(controller),
-          statusActions: _statusActionsFor(pane),
-          header: _journalHeader,
-          onEditEpubLook: () => _editEpubLook(controller),
+        child: _pinchToZoom(
+          ShellDetailPane(
+            root: controller.root,
+            tabs: _deck(pane),
+            onMemento: _workspace.remember,
+            zen: _inZen,
+            typewriter: _editorSettings.typewriter,
+            cascadeChecklist: _editorSettings.cascadeChecklist,
+            frontmatterPanel: _editorSettings.frontmatterPanel,
+            onToggleTypewriter: _toggleTypewriter,
+            onLoaded: _workspace.noteLoaded,
+            onEditedNoteClosed: _tidyClosedNote,
+            showLineNumbers: _editorSettings.lineNumbers,
+            noteColumn: _editorSettings.noteColumn,
+            // The kind toggles and ⋮ sit at the end of the note's
+            // one row of chrome (#173); there is no header above.
+            barActions: [
+              ..._kindActions,
+              if (_dockRoom) _dockToggle(),
+              _noteMenu(),
+            ],
+            autofocusEditor: _editorSettings.autofocusEditor,
+            linkType: _editorSettings.linkType,
+            missingNoteLocation: _editorSettings.missingNoteLocation,
+            attachmentsFolder: _editorSettings.attachmentsFolder,
+            templateFolder: _editorSettings.templateFolder,
+            indentWidth: _editorSettings.indentWidth,
+            sourceFont: _editorSettings.sourceFont,
+            toolbarLayout: _editorSettings.toolbarLayout,
+            // A single enabled editor has nowhere to switch to:
+            // the note hides its switch instead of offering a
+            // dead toggle.
+            onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
+                ? _setEditorKind
+                : null,
+            linkSource: _linkSource,
+            wikilinkSuggester: _wikilinkSuggester,
+            onOpenNote: _openNoteFromLink,
+            kindMode: !_kindRawMode,
+            onNoteKindChanged: _onNoteKindChanged,
+            unsavedTracker: widget.unsavedTracker,
+            spellCheck: widget.spellCheck,
+            reloadToken: _noteReloadToken,
+            linksFollowed: _linksFollowed,
+            onAnnotate: _annotate,
+            marks: _annotations,
+            saveNote: _noteSaver(controller),
+            saveNoteStream: _noteStreamSaver(controller),
+            createMissingNote: _missingNoteCreator(controller),
+            statusActions: _statusActionsFor(pane),
+            header: _journalHeader,
+            onEditEpubLook: () => _editEpubLook(controller),
+          ),
         ),
       ),
     );
