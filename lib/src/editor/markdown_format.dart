@@ -19,7 +19,8 @@
 /// What it does:
 ///
 /// * a line that continues a list item is indented to that item's text,
-///   so the item stays one item;
+///   so the item stays one item — or, with [LintRule.joinWrappedItems],
+///   joined to the line above, the item's paragraph on one line (#549);
 /// * a heading gets exactly one space after its hashes (`#Title`, which
 ///   is a paragraph and not a heading at all, is left alone: tidying is
 ///   not the place to change what a line means);
@@ -43,6 +44,7 @@
 library;
 
 import 'package:niman/src/lint/fence_fixes.dart';
+import 'package:niman/src/lint/item_unwrap.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/lint/list_fixes.dart';
 import 'package:niman/src/markdown/block.dart';
@@ -61,8 +63,11 @@ final RegExp _heading = RegExp(r'^(\s{0,3})(#{1,6})[ \t]*(\S.*)?$');
 String formatMarkdown(String source, {Set<LintRule>? rules}) {
   final on = rules ?? LintRule.all;
   if (source.trim().isEmpty) return source.isEmpty ? source : _newline;
+  final text = on.contains(LintRule.joinWrappedItems)
+      ? joinWrappedItems(source)
+      : source;
   final out = <String>[];
-  for (final block in _units(source)) {
+  for (final block in _units(text)) {
     // Frontmatter, fences, tables, math, HTML: kept verbatim. The one
     // exception is the trailing blank lines a block carries, which the
     // joining below decides instead.

@@ -1697,6 +1697,8 @@ final class ItalianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Linguaggio del blocco di codice';
   @override
+  String get lintRuleJoinWrappedItems => 'Unisci gli elementi di elenco a capo';
+  @override
   String get tidyOnCloseTitle => 'Sistema il Markdown alla chiusura';
   @override
   String get tidyOnCloseSubtitle =>

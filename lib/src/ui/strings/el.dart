@@ -1729,6 +1729,8 @@ final class GreekStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Γλώσσα μπλοκ κώδικα';
   @override
+  String get lintRuleJoinWrappedItems => 'Ένωση αναδιπλωμένων στοιχείων λίστας';
+  @override
   String get tidyOnCloseTitle => 'Τακτοποίηση του Markdown στο κλείσιμο';
   @override
   String get tidyOnCloseSubtitle =>

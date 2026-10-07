@@ -25,7 +25,11 @@ enum LintRule {
 
   /// A fence's language is the first word of its info string, not Pandoc's
   /// `{.lang}` class.
-  fenceLanguage('fence-language');
+  fenceLanguage('fence-language'),
+
+  /// A list item's text wrapped over several lines is written on one
+  /// (#549).
+  joinWrappedItems('join-wrapped-items');
 
   new(this.id);
 

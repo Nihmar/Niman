@@ -1668,6 +1668,8 @@ final class CzechStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Jazyk bloku kódu';
   @override
+  String get lintRuleJoinWrappedItems => 'Spojit zalomené položky seznamu';
+  @override
   String get tidyOnCloseTitle => 'Uklidit Markdown při zavření';
   @override
   String get tidyOnCloseSubtitle =>

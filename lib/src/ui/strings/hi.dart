@@ -1648,6 +1648,8 @@ final class HindiStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'कोड ब्लॉक की भाषा';
   @override
+  String get lintRuleJoinWrappedItems => 'टूटी हुई सूची प्रविष्टियाँ जोड़ें';
+  @override
   String get tidyOnCloseTitle => 'बंद करते समय मार्कडाउन व्यवस्थित करें';
   @override
   String get tidyOnCloseSubtitle =>

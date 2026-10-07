@@ -23,8 +23,7 @@ const String _untidy =
     '2. the second\n';
 
 const String _tidy =
-    '1. an item that runs on\n'
-    '   and wraps without any indent\n'
+    '1. an item that runs on and wraps without any indent\n'
     '2. the second\n';
 
 void main() {

@@ -1696,6 +1696,8 @@ final class DutchStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Taal van het codeblok';
   @override
+  String get lintRuleJoinWrappedItems => 'Afgebroken lijstitems samenvoegen';
+  @override
   String get tidyOnCloseTitle => 'Markdown opruimen bij sluiten';
   @override
   String get tidyOnCloseSubtitle =>

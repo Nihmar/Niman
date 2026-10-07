@@ -1655,6 +1655,8 @@ final class EstonianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Koodiploki keel';
   @override
+  String get lintRuleJoinWrappedItems => 'Ühenda murtud loendi üksused';
+  @override
   String get tidyOnCloseTitle => 'Korrasta Markdown sulgemisel';
   @override
   String get tidyOnCloseSubtitle =>

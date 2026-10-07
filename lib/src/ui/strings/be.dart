@@ -1676,6 +1676,9 @@ final class BelarusianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Мова блока коду';
   @override
+  String get lintRuleJoinWrappedItems =>
+      'Аб’ядноўваць перанесеныя элементы спісу';
+  @override
   String get tidyOnCloseTitle => 'Упарадкоўваць Markdown пры закрыцці';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1691,6 +1691,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Јазик на кодот';
   @override
+  String get lintRuleJoinWrappedItems => 'Спој прекршени ставки од листа';
+  @override
   String get tidyOnCloseTitle => 'Средување на Markdown при затворање';
   @override
   String get tidyOnCloseSubtitle =>

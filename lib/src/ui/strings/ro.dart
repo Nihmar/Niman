@@ -1688,6 +1688,8 @@ final class RomanianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Limbajul blocului de cod';
   @override
+  String get lintRuleJoinWrappedItems => 'Unește elementele de listă rupte';
+  @override
   String get tidyOnCloseTitle => 'Aranjează Markdown-ul la închidere';
   @override
   String get tidyOnCloseSubtitle =>

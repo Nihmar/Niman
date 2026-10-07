@@ -1040,6 +1040,7 @@ final class AppStrings {
   static String get lintRuleListSpacing => _s.lintRuleListSpacing;
   static String get lintRuleClosingFence => _s.lintRuleClosingFence;
   static String get lintRuleFenceLanguage => _s.lintRuleFenceLanguage;
+  static String get lintRuleJoinWrappedItems => _s.lintRuleJoinWrappedItems;
   static String get typewriterSubtitle => _s.typewriterSubtitle;
   static String get zenMode => _s.zenMode;
   static String get zenModeEnter => _s.zenModeEnter;

@@ -1674,6 +1674,8 @@ final class CroatianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Jezik koda';
   @override
+  String get lintRuleJoinWrappedItems => 'Spoji prelomljene stavke popisa';
+  @override
   String get tidyOnCloseTitle => 'Posloži Markdown pri zatvaranju';
   @override
   String get tidyOnCloseSubtitle =>

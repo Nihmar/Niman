@@ -1674,6 +1674,8 @@ final class SlovakStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Jazyk bloku kódu';
   @override
+  String get lintRuleJoinWrappedItems => 'Spojiť zalomené položky zoznamu';
+  @override
   String get tidyOnCloseTitle => 'Upratať Markdown pri zatvorení';
   @override
   String get tidyOnCloseSubtitle =>

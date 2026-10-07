@@ -1703,6 +1703,9 @@ final class GermanStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Zaunsprache';
   @override
+  String get lintRuleJoinWrappedItems =>
+      'Umbrochene Listeneinträge zusammenführen';
+  @override
   String get tidyOnCloseTitle => 'Markdown beim Schließen aufräumen';
   @override
   String get tidyOnCloseSubtitle =>

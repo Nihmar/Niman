@@ -1661,6 +1661,8 @@ final class TurkishStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Kod bloğu dili';
   @override
+  String get lintRuleJoinWrappedItems => 'Bölünmüş liste öğelerini birleştir';
+  @override
   String get tidyOnCloseTitle => 'Kapatırken Markdown’ı düzenle';
   @override
   String get tidyOnCloseSubtitle =>
