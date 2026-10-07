@@ -1299,16 +1299,14 @@ final class AppStrings {
   static String get transcriptionModelsFooter => _s.transcriptionModelsFooter;
   static String get transcriptionModelDefault => _s.transcriptionModelDefault;
   static String get transcriptionModelSlow => _s.transcriptionModelSlow;
-  static String get transcriptionModelDownload => _s.transcriptionModelDownload;
   static String transcriptionModelDeleteTitle(String model) =>
       _s.transcriptionModelDeleteTitle(model);
   static String transcriptionModelDeleteBody(String size) =>
       _s.transcriptionModelDeleteBody(size);
-  static String get transcriptionModelFailed => _s.transcriptionModelFailed;
+  static String get downloadFailed => _s.downloadFailed;
   static String get actionRetry => _s.actionRetry;
-  static String get transcriptionModelRetrying => _s.transcriptionModelRetrying;
-  static String transcriptionModelInterrupted(String progress) =>
-      _s.transcriptionModelInterrupted(progress);
+  static String get downloadRetrying => _s.downloadRetrying;
+  static String downloadPaused(String progress) => _s.downloadPaused(progress);
   static String get actionResume => _s.actionResume;
   static String get audioTranscribe => _s.audioTranscribe;
   static String get audioTranscribeUnsupported => _s.audioTranscribeUnsupported;
@@ -1591,4 +1589,31 @@ final class AppStrings {
 
   static String get cascadeChecklistTitle => _s.cascadeChecklistTitle;
   static String get cascadeChecklistSubtitle => _s.cascadeChecklistSubtitle;
+
+  // Text recognition (#593).
+
+  static String ocrEngineName(String version) => _s.ocrEngineName(version);
+  static String get settingsSectionTextRecognition =>
+      _s.settingsSectionTextRecognition;
+  static String get ocrIntro => _s.ocrIntro;
+  static String get ocrEngineTitle => _s.ocrEngineTitle;
+  static String get ocrEngineSystem => _s.ocrEngineSystem;
+  static String get ocrEngineBundled => _s.ocrEngineBundled;
+  static String get ocrEngineUnavailable => _s.ocrEngineUnavailable;
+  static String get ocrEngineDeleteTitle => _s.ocrEngineDeleteTitle;
+  static String get ocrQualityTitle => _s.ocrQualityTitle;
+  static String get ocrQualityFast => _s.ocrQualityFast;
+  static String get ocrQualityBest => _s.ocrQualityBest;
+  static String get ocrQualityHint => _s.ocrQualityHint;
+  static String get ocrLanguageTitle => _s.ocrLanguageTitle;
+  static String get ocrAlsoTitle => _s.ocrAlsoTitle;
+  static String get ocrAlsoSubtitle => _s.ocrAlsoSubtitle;
+  static String get ocrAlsoNone => _s.ocrAlsoNone;
+  static String ocrOnDevice(String size) => _s.ocrOnDevice(size);
+  static String get ocrOtherLanguages => _s.ocrOtherLanguages;
+  static String ocrSearchLanguages(int count) => _s.ocrSearchLanguages(count);
+  static String get ocrLanguageDefault => _s.ocrLanguageDefault;
+  static String ocrLanguageDeleteTitle(String language) =>
+      _s.ocrLanguageDeleteTitle(language);
+  static String ocrDeleteBody(String size) => _s.ocrDeleteBody(size);
 }

@@ -95,6 +95,11 @@ abstract final class SettingsKeys {
   static const transcriptionModel = Key('transcription-model-setting');
   static const transcriptionLanguage = Key('transcription-language-setting');
 
+  // Text recognition.
+  static const ocrQuality = Key('ocr-quality-setting');
+  static const ocrLanguage = Key('ocr-language-setting');
+  static const ocrAlso = Key('ocr-also-setting');
+
   // Maintenance: actions rather than settings, searchable all the same.
   static const reindex = Key('reindex-setting');
   static const rebuildIndex = Key('rebuild-index-setting');

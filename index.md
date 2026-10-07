@@ -22,6 +22,8 @@ you need:
   Markdown, HTML, PDF or EPUB.
 - [Journal](docs/user/journal.md) — one note per day, with a calendar.
 - [Search](docs/user/search.md) — full-text search, field and tag search.
+- [Text recognition](docs/user/text-recognition.md) — the text of a scanned
+  PDF or a picture, on the device, with what it downloads.
 - [Links](docs/user/links.md) — wikilinks and Markdown links, between notes
   and into a PDF or a book.
 - [Templates](docs/user/templates.md) — placeholders, filters and prompts.

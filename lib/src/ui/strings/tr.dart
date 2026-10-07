@@ -2132,25 +2132,22 @@ final class TurkishStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'En doğru, çok bellek gerektirir';
   @override
-  String get transcriptionModelDownload => 'İndir';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       '$model modeli silinsin mi?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Bu işlem $size yer açar. Modeli daha sonra yeniden indirebilirsiniz.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'İndirme başarısız oldu. Bağlantınızı kontrol edip yeniden deneyin.';
   @override
   String get actionRetry => 'Yeniden dene';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Bağlantı koptu, yeniden deneniyor…';
+  String get downloadRetrying => 'Bağlantı koptu, yeniden deneniyor…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      '$progress noktasında duraklatıldı';
+  String downloadPaused(String progress) => '$progress noktasında duraklatıldı';
   @override
   String get actionResume => 'Devam et';
   @override
@@ -2875,4 +2872,78 @@ final class TurkishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'İmleç bir listede değil';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Metin tanıma';
+
+  @override
+  String get ocrIntro =>
+      'Taranmış PDF’lerin ve görsellerin metnini yanlarındaki bir '
+      'nota okur. Her şey bu cihazda çalışır: motor ve her dil, ilk '
+      'gerektiğinde bir kez indirilir.';
+
+  @override
+  String get ocrEngineTitle => 'Motor';
+
+  @override
+  String get ocrEngineSystem => 'Sistem kitaplığı';
+
+  @override
+  String get ocrEngineBundled => 'Uygulamaya dahil';
+
+  @override
+  String get ocrEngineUnavailable => 'Bu cihaz için motor yok';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Motor silinsin mi?';
+
+  @override
+  String get ocrQualityTitle => 'Kalite';
+
+  @override
+  String get ocrQualityFast => 'Hızlı';
+
+  @override
+  String get ocrQualityBest => 'En iyi';
+
+  @override
+  String get ocrQualityHint =>
+      'Hızlı: dil başına 1–4 MB, her cihazda çabuk. En iyi: dil '
+      'başına 10–15 MB, zor taramalarda daha iyi, iki üç kat daha '
+      'yavaş. Her kalitenin kendi dilleri vardır.';
+
+  @override
+  String get ocrLanguageTitle => 'Varsayılan dil';
+
+  @override
+  String get ocrAlsoTitle => 'Ayrıca';
+
+  @override
+  String get ocrAlsoSubtitle => 'İki dilin karıştığı sayfalar için';
+
+  @override
+  String get ocrAlsoNone => 'Yok';
+
+  @override
+  String ocrOnDevice(String size) => 'Bu cihazda · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Diğer diller';
+
+  @override
+  String ocrSearchLanguages(int count) => '$count dil içinde ara';
+
+  @override
+  String get ocrLanguageDefault => 'Varsayılan';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => '$language silinsin mi?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Bu, $size yer açar. Metin tanıma gerektiğinde yeniden '
+      'indirilir.';
 }

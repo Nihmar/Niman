@@ -2225,8 +2225,6 @@ final class GreekStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Το πιο ακριβές, χρειάζεται πολλή μνήμη';
   @override
-  String get transcriptionModelDownload => 'Λήψη';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Διαγραφή του μοντέλου $model;';
   @override
@@ -2234,17 +2232,16 @@ final class GreekStrings extends Strings {
       'Θα ελευθερωθούν $size. Μπορείτε να κατεβάσετε ξανά το μοντέλο '
       'αργότερα.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Η λήψη απέτυχε. Ελέγξτε τη σύνδεση και δοκιμάστε ξανά.';
   @override
   String get actionRetry => 'Δοκιμή ξανά';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Η σύνδεση χάθηκε, νέα προσπάθεια…';
+  String get downloadRetrying => 'Η σύνδεση χάθηκε, νέα προσπάθεια…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Σε παύση στο $progress';
+  String downloadPaused(String progress) => 'Σε παύση στο $progress';
   @override
   String get actionResume => 'Συνέχιση';
   @override
@@ -3009,4 +3006,81 @@ final class GreekStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Ο δείκτης δεν βρίσκεται σε λίστα';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Αναγνώριση κειμένου';
+
+  @override
+  String get ocrIntro =>
+      'Διαβάζει το κείμενο σαρωμένων PDF και εικόνων σε μια '
+      'σημείωση δίπλα τους. Όλα εκτελούνται σε αυτή τη συσκευή: η '
+      'μηχανή και κάθε γλώσσα κατεβαίνουν μία φορά, όταν χρειαστούν '
+      'για πρώτη φορά.';
+
+  @override
+  String get ocrEngineTitle => 'Μηχανή';
+
+  @override
+  String get ocrEngineSystem => 'Βιβλιοθήκη συστήματος';
+
+  @override
+  String get ocrEngineBundled => 'Περιλαμβάνεται στην εφαρμογή';
+
+  @override
+  String get ocrEngineUnavailable => 'Δεν υπάρχει μηχανή για αυτή τη συσκευή';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Διαγραφή της μηχανής;';
+
+  @override
+  String get ocrQualityTitle => 'Ποιότητα';
+
+  @override
+  String get ocrQualityFast => 'Γρήγορη';
+
+  @override
+  String get ocrQualityBest => 'Βέλτιστη';
+
+  @override
+  String get ocrQualityHint =>
+      'Γρήγορη: 1–4 MB ανά γλώσσα, γρήγορη σε κάθε συσκευή. '
+      'Βέλτιστη: 10–15 MB ανά γλώσσα, καλύτερη σε δύσκολες '
+      'σαρώσεις, δύο έως τρεις φορές πιο αργή. Κάθε ποιότητα έχει '
+      'τις δικές της γλώσσες.';
+
+  @override
+  String get ocrLanguageTitle => 'Προεπιλεγμένη γλώσσα';
+
+  @override
+  String get ocrAlsoTitle => 'Επίσης';
+
+  @override
+  String get ocrAlsoSubtitle => 'Για σελίδες που αναμειγνύουν δύο γλώσσες';
+
+  @override
+  String get ocrAlsoNone => 'Καμία';
+
+  @override
+  String ocrOnDevice(String size) => 'Σε αυτή τη συσκευή · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Άλλες γλώσσες';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Αναζήτηση σε $count γλώσσες';
+
+  @override
+  String get ocrLanguageDefault => 'Προεπιλογή';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) =>
+      'Διαγραφή της γλώσσας $language;';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Θα ελευθερωθούν $size. Θα κατέβει ξανά όταν το χρειαστεί η '
+      'αναγνώριση κειμένου.';
 }

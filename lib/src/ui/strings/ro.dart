@@ -2182,25 +2182,22 @@ final class RomanianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Cel mai precis, are nevoie de multă memorie';
   @override
-  String get transcriptionModelDownload => 'Descarcă';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Ștergi modelul $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Se eliberează $size. Poți descărca modelul din nou mai târziu.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Descărcarea a eșuat. Verifică conexiunea și încearcă din nou.';
   @override
   String get actionRetry => 'Încearcă din nou';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Conexiune pierdută, se reîncearcă…';
+  String get downloadRetrying => 'Conexiune pierdută, se reîncearcă…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Întrerupt la $progress';
+  String downloadPaused(String progress) => 'Întrerupt la $progress';
   @override
   String get actionResume => 'Reia';
   @override
@@ -2962,4 +2959,79 @@ final class RomanianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Cursorul nu este într-o listă';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Recunoașterea textului';
+
+  @override
+  String get ocrIntro =>
+      'Citește textul PDF-urilor scanate și al imaginilor într-o '
+      'notă de lângă ele. Totul rulează pe acest dispozitiv: '
+      'motorul și fiecare limbă se descarcă o singură dată, când e '
+      'nevoie de ele prima oară.';
+
+  @override
+  String get ocrEngineTitle => 'Motor';
+
+  @override
+  String get ocrEngineSystem => 'Bibliotecă de sistem';
+
+  @override
+  String get ocrEngineBundled => 'Inclus în aplicație';
+
+  @override
+  String get ocrEngineUnavailable => 'Niciun motor pentru acest dispozitiv';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Ștergi motorul?';
+
+  @override
+  String get ocrQualityTitle => 'Calitate';
+
+  @override
+  String get ocrQualityFast => 'Rapidă';
+
+  @override
+  String get ocrQualityBest => 'Cea mai bună';
+
+  @override
+  String get ocrQualityHint =>
+      'Rapidă: 1–4 MB pe limbă, vioaie pe orice dispozitiv. Cea mai '
+      'bună: 10–15 MB pe limbă, mai precisă pe scanări dificile, de '
+      'două-trei ori mai lentă. Fiecare calitate are limbile ei.';
+
+  @override
+  String get ocrLanguageTitle => 'Limba implicită';
+
+  @override
+  String get ocrAlsoTitle => 'De asemenea';
+
+  @override
+  String get ocrAlsoSubtitle => 'Pentru pagini care amestecă două limbi';
+
+  @override
+  String get ocrAlsoNone => 'Niciuna';
+
+  @override
+  String ocrOnDevice(String size) => 'Pe acest dispozitiv · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Alte limbi';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Caută printre $count limbi';
+
+  @override
+  String get ocrLanguageDefault => 'Implicită';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Ștergi $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Se eliberează $size. Fișierul se descarcă din nou când '
+      'recunoașterea textului are nevoie de el.';
 }

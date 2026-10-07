@@ -1,0 +1,79 @@
+name: ocr-engine
+
+# The OCR engine the app downloads on demand (issue #593): pushing a tag
+# ocr-engine-N builds scripts/ocr-engine.sh for every target and publishes
+# the libraries on that tag's release, as a PRERELEASE: the updater asks
+# /releases/latest, which never answers with a prerelease, and release.yml
+# only runs on v* tags. The app pins each file's URL, size and SHA-256
+# (lib/src/ocr/ocr_engine_build.dart), so a new engine is a new tag and
+# an app release that points at it.
+on:
+  push:
+    tags:
+      - 'ocr-engine-*'
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # 22.04: an older glibc, so the library loads on older distros.
+          - { target: linux-x64, os: ubuntu-22.04 }
+          - { target: android-arm64-v8a, os: ubuntu-22.04 }
+          - { target: android-x86_64, os: ubuntu-22.04 }
+          - { target: windows-x64, os: windows-2022 }
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Ninja
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -q && sudo apt-get install -y -q ninja-build
+
+      - name: Build
+        run: |
+          export ANDROID_NDK_HOME="${ANDROID_NDK_LATEST_HOME:-}"
+          OCR_ENGINE_WORK="$RUNNER_TEMP/ocr-engine" \
+            scripts/ocr-engine.sh "${{ matrix.target }}" dist
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ocr-${{ matrix.target }}
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum niman-ocr-* | tee SHA256SUMS
+          wc -c niman-ocr-*
+
+      - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          name: OCR engine ${{ github.ref_name }}
+          prerelease: true
+          make_latest: false
+          body: >-
+            Tesseract and Leptonica, built by scripts/ocr-engine.sh for the
+            app's on-demand OCR download. Not an app release.
+          files: |
+            dist/niman-ocr-*
+            dist/SHA256SUMS
+            dist/licenses/*

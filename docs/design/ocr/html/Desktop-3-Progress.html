@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recognizing in the background</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;family=Libre+Caslon+Text&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:36px;height:36px;border-radius:18px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+.sub{font-size:13px;color:#A6A29A}
+.scan{font-family:'Libre Caslon Text',serif;color:#2B2A27;font-size:11.5px;line-height:1.55}
+.done{background:rgba(88,124,211,.16);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+
+  <aside style="width:264px;flex:none;border-right:1px solid #2C3037;display:flex;flex-direction:column;padding:12px 8px;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px 12px">
+      <div style="width:22px;height:22px;border-radius:6px;background:#587CD3;font:600 13px Literata,serif;display:flex;align-items:center;justify-content:center">N</div>
+      <div style="font-weight:600">Studio</div>
+    </div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Clienti</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Contratti</div>
+    <div class="tree" style="padding-left:30px;background:#2C3037;color:#F2EDE5"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span style="flex:1">Contratto 2019 (scan).pdf</span>
+      <svg viewBox="0 0 20 20" style="width:16px;height:16px;flex:none" aria-label="Recognizing, 62%"><circle cx="10" cy="10" r="7" fill="none" stroke="#4A4F59" stroke-width="2.5"/><circle cx="10" cy="10" r="7" fill="none" stroke="#587CD3" stroke-width="2.5" stroke-dasharray="27.3 44" transform="rotate(-90 10 10)"/></svg></div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Rinnovo 2024.md</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Riunioni</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>assets</div>
+  </aside>
+
+  <main style="flex:1;display:flex;flex-direction:column;min-width:0;background:#23262B">
+    <div style="height:42px;display:flex;align-items:flex-end;gap:2px;padding:0 8px;background:#1B1D21">
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;background:#23262B;border-radius:10px 10px 0 0;font-size:13px">Contratto 2019 (scan).pdf</div>
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;color:#A6A29A;font-size:13px">Rinnovo 2024</div>
+    </div>
+    <div style="flex:1;display:flex;justify-content:center;gap:28px;padding:28px 0;background:#1F2226;overflow:hidden">
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div class="scan" style="width:300px;height:424px;background:#EFEBE2;box-shadow:0 2px 14px rgba(0,0,0,.45);padding:34px 32px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;font-size:7.5px;transform:rotate(-0.6deg)">
+          <div style="text-align:center;font-size:10px;letter-spacing:.08em"><span class="done">CONTRATTO DI LOCAZIONE</span></div>
+          <p style="margin:6px 0 0"><span class="done">Con la presente scrittura privata, da valere ad ogni effetto di legge, tra il Sig. [LOCATORE], di seguito denominato «locatore», e la Sig.ra [CONDUTTORE], di seguito denominata «conduttrice», si conviene e si stipula quanto segue.</span></p>
+          <p style="margin:0"><span class="done"><b>Art. 1 — Oggetto.</b> Il locatore concede in locazione alla conduttrice l'unità immobiliare sita in [INDIRIZZO], composta da tre vani e accessori, non arredata.</span></p>
+          <p style="margin:0"><span class="done"><b>Art. 2 — Durata.</b> Il contratto è stipulato per la durata di anni tre, dal 1° marzo 2019 al 28 febbraio 2022.</span></p>
+        </div>
+        <div class="sub" style="display:flex;align-items:center;gap:6px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#8FBF7F"><path d="M5 12l5 5 9-10"/></svg>p. 2 · recognized</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div class="scan" style="width:300px;height:424px;background:#EFEBE2;box-shadow:0 2px 14px rgba(0,0,0,.45);padding:34px 32px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;font-size:7.5px;position:relative;overflow:hidden;transform:rotate(0.4deg)">
+          <p style="margin:0"><b>Art. 5 — Spese.</b> Sono a carico della conduttrice le spese relative al servizio di pulizia, al funzionamento e all'ordinaria manutenzione dell'ascensore, alla fornitura dell'acqua e dell'energia elettrica.</p>
+          <p style="margin:0"><b>Art. 6 — Uso.</b> L'immobile è destinato esclusivamente ad abitazione della conduttrice e delle persone con lei conviventi; è vietata la sublocazione anche parziale.</p>
+          <p style="margin:0"><b>Art. 7 — Recesso.</b> La conduttrice può recedere in qualsiasi momento dal contratto dandone avviso al locatore con lettera raccomandata almeno sei mesi prima.</p>
+          <div style="position:absolute;left:0;right:0;top:120px;height:3px;background:#587CD3;opacity:.55;box-shadow:0 0 18px 6px rgba(88,124,211,.35)"></div>
+        </div>
+        <div class="sub">p. 3 · recognizing…</div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #2C3037;position:relative">
+      <div style="position:absolute;left:0;top:-1px;height:2px;width:62%;background:#587CD3"></div>
+      <div style="height:48px;display:flex;align-items:center;gap:4px;padding:0 12px">
+        <div style="flex:1;font-size:13px;color:#D9D4CB">Contratto 2019 (scan).pdf</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#F2EDE5;margin-right:6px">
+          <svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#587CD3"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg>
+          Recognizing p. 3 of 4
+          <span class="sub">·</span>
+          <button style="height:30px;padding:0 12px;border:0;border-radius:15px;background:transparent;color:#A9C0F0;font:500 13px 'IBM Plex Sans',sans-serif">Cancel</button>
+        </div>
+        <button class="ibtn" aria-label="Copy link to this place"><svg class="ico" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg></button>
+        <button class="ibtn" aria-label="Annotate"><svg class="ico" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button>
+        <button class="ibtn" aria-label="Recognize text" disabled style="opacity:.4"><svg class="ico" viewBox="0 0 24 24"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg></button>
+        <button class="ibtn" aria-label="Open in the default app"><svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></button>
+      </div>
+    </div>
+  </main>
+
+  <div style="position:absolute;right:20px;top:58px;width:340px;background:#363B44;border-radius:14px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;gap:12px">
+    <div style="width:32px;height:32px;border-radius:8px;background:#587CD3;font:600 16px Literata,serif;display:flex;align-items:center;justify-content:center;flex:none">N</div>
+    <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+      <div style="font-size:13px;font-weight:600">Text recognized</div>
+      <div style="font-size:13px;color:#D9D4CB;line-height:1.45">Contratto 2019 (scan) · 4 pages · 1,284 words</div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button style="height:30px;padding:0 12px;border:0;border-radius:15px;background:#587CD3;color:#F2EDE5;font:500 12.5px 'IBM Plex Sans',sans-serif">Open text</button>
+        <button style="height:30px;padding:0 12px;border:0;border-radius:15px;background:transparent;color:#A9C0F0;font:500 12.5px 'IBM Plex Sans',sans-serif">Dismiss</button>
+      </div>
+    </div>
+    <div class="sub" style="font-size:11px;align-self:flex-start">later</div>
+  </div>
+</div>
+</body>
+</html>

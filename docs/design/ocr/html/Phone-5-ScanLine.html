@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, a line selected on the scan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Libre+Caslon+Text&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0}
+.sub{font-size:13px;color:#A6A29A}
+.scan{font-family:'Libre Caslon Text',serif;color:#2B2A27;font-size:9.5px;line-height:1.6}
+.mi{height:44px;padding:0 12px;border:0;background:transparent;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;gap:6px;border-radius:10px}
+.hd{position:absolute;width:12px;height:12px;border-radius:0 6px 6px 6px;background:#587CD3}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column">
+  <div style="height:64px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none">
+    <button class="ibtn" aria-label="Back"><svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div style="flex:1;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Contratto 2019 (scan)</div>
+    <button class="ibtn" aria-label="More"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+  </div>
+  <div style="padding:0 16px 10px;flex:none">
+    <div role="tablist" style="display:flex;border:1px solid #4A4F59;border-radius:22px;overflow:hidden">
+      <button role="tab" aria-selected="true" style="flex:1;height:40px;border:0;background:#3A4A6E;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M5 12l5 5 9-10"/></svg>Scan</button>
+      <button role="tab" style="flex:1;height:40px;border:0;border-left:1px solid #4A4F59;background:transparent;color:#D9D4CB;font:500 14px 'IBM Plex Sans',sans-serif">Text</button>
+    </div>
+  </div>
+  <div style="flex:1;background:#1F2226;display:flex;justify-content:center;padding-top:14px;overflow:hidden">
+    <div class="scan" style="width:360px;height:510px;background:#EFEBE2;padding:30px 26px;box-sizing:border-box;display:flex;flex-direction:column;gap:7px;position:relative">
+      <div style="text-align:center;font-size:12px;letter-spacing:.08em">CONTRATTO DI LOCAZIONE</div>
+      <p style="margin:4px 0 0">Con la presente scrittura privata, da valere ad ogni effetto di legge, tra il Sig. [LOCATORE], di seguito denominato «locatore», e la Sig.ra [CONDUTTORE] si conviene e si stipula quanto segue.</p>
+      <p style="margin:0"><b>Art. 1 — Oggetto.</b> Il locatore concede in locazione alla conduttrice l'unità immobiliare sita in [INDIRIZZO], composta da tre vani e accessori, non arredata.</p>
+      <p style="margin:0;position:relative"><b>Art. 2 — Durata.</b> Il contratto è stipulato per la durata di anni tre, <span style="background:rgba(88,124,211,.32);border-radius:2px">dal 1° marzo 2019 al 28 febbraio 2022, e alla prima scadenza</span> si proroga di diritto per due anni.</p>
+      <p style="margin:0"><b>Art. 3 — Canone.</b> Il canone annuo di locazione è convenuto in euro [IMPORTO], <span style="background:rgba(216,165,107,.32);border-radius:2px">da corrispondersi in dodici rate mensili anticipate</span> entro il giorno 5 di ciascun mese.</p>
+      <p style="margin:0"><b>Art. 4 — Deposito.</b> A garanzia degli obblighi assunti la conduttrice versa un deposito cauzionale pari a tre mensilità.</p>
+      <div style="position:absolute;left:14px;right:14px;top:140px;display:flex;justify-content:space-between;background:#363B44;border-radius:14px;padding:2px;box-shadow:0 8px 24px rgba(0,0,0,.45)">
+        <button class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Annotate</button>
+        <button class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg>Copy</button>
+        <button class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>Copy link</button>
+      </div>
+    </div>
+  </div>
+  <div style="height:56px;display:flex;align-items:center;padding:0 8px;border-top:1px solid #2C3037;flex:none">
+    <div class="sub" style="flex:1;padding-left:8px">p. 2 of 4 · 1 line selected</div>
+    <button class="ibtn" aria-label="Copy link to this place"><svg class="ico" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg></button>
+    <button class="ibtn" aria-label="Annotate"><svg class="ico" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button>
+    <button class="ibtn" aria-label="Recognize text"><svg class="ico" viewBox="0 0 24 24"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg></button>
+  </div>
+</div>
+</body>
+</html>

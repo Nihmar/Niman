@@ -2166,26 +2166,22 @@ final class FinnishStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Tarkin, vaatii paljon muistia';
   @override
-  String get transcriptionModelDownload => 'Lataa';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Poistetaanko malli $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Tämä vapauttaa $size. Voit ladata mallin myöhemmin uudelleen.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Lataus epäonnistui. Tarkista yhteys ja yritä uudelleen.';
   @override
   String get actionRetry => 'Yritä uudelleen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Yhteys katkesi, yritetään uudelleen…';
+  String get downloadRetrying => 'Yhteys katkesi, yritetään uudelleen…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Keskeytetty: $progress';
+  String downloadPaused(String progress) => 'Keskeytetty: $progress';
   @override
   String get actionResume => 'Jatka';
   @override
@@ -2931,4 +2927,80 @@ final class FinnishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kohdistin ei ole luettelossa';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Tekstintunnistus';
+
+  @override
+  String get ocrIntro =>
+      'Lukee skannattujen PDF-tiedostojen ja kuvien tekstin niiden '
+      'viereen tulevaan muistiinpanoon. Kaikki tapahtuu tällä '
+      'laitteella: moottori ja jokainen kieli ladataan kerran, kun '
+      'niitä ensimmäisen kerran tarvitaan.';
+
+  @override
+  String get ocrEngineTitle => 'Moottori';
+
+  @override
+  String get ocrEngineSystem => 'Järjestelmän kirjasto';
+
+  @override
+  String get ocrEngineBundled => 'Sisältyy sovellukseen';
+
+  @override
+  String get ocrEngineUnavailable => 'Tälle laitteelle ei ole moottoria';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Poistetaanko moottori?';
+
+  @override
+  String get ocrQualityTitle => 'Laatu';
+
+  @override
+  String get ocrQualityFast => 'Nopea';
+
+  @override
+  String get ocrQualityBest => 'Paras';
+
+  @override
+  String get ocrQualityHint =>
+      'Nopea: 1–4 Mt kieltä kohden, ripeä millä tahansa laitteella. '
+      'Paras: 10–15 Mt kieltä kohden, parempi vaikeissa '
+      'skannauksissa, kahdesta kolmeen kertaa hitaampi. Kullakin '
+      'laadulla on omat kielensä.';
+
+  @override
+  String get ocrLanguageTitle => 'Oletuskieli';
+
+  @override
+  String get ocrAlsoTitle => 'Myös';
+
+  @override
+  String get ocrAlsoSubtitle => 'Sivuille, joilla on kahta kieltä sekaisin';
+
+  @override
+  String get ocrAlsoNone => 'Ei mitään';
+
+  @override
+  String ocrOnDevice(String size) => 'Tällä laitteella · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Muut kielet';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Hae $count kielestä';
+
+  @override
+  String get ocrLanguageDefault => 'Oletus';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Poistetaanko $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Tämä vapauttaa $size. Tiedosto ladataan uudelleen, kun '
+      'tekstintunnistus tarvitsee sitä.';
 }

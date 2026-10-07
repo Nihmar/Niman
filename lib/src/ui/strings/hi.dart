@@ -2121,25 +2121,21 @@ final class HindiStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'सबसे सटीक, बहुत मेमोरी चाहिए';
   @override
-  String get transcriptionModelDownload => 'डाउनलोड करें';
-  @override
   String transcriptionModelDeleteTitle(String model) => '$model मॉडल हटाएँ?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'इससे $size खाली होगा। आप बाद में मॉडल फिर से डाउनलोड कर सकते हैं।';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'डाउनलोड नहीं हो सका। कनेक्शन जाँचें और फिर से कोशिश करें।';
   @override
   String get actionRetry => 'फिर से कोशिश करें';
   @override
   String get decimalSeparator => '.';
   @override
-  String get transcriptionModelRetrying =>
-      'कनेक्शन टूट गया, फिर से कोशिश हो रही है…';
+  String get downloadRetrying => 'कनेक्शन टूट गया, फिर से कोशिश हो रही है…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      '$progress पर रुका हुआ';
+  String downloadPaused(String progress) => '$progress पर रुका हुआ';
   @override
   String get actionResume => 'फिर शुरू करें';
   @override
@@ -2867,4 +2863,78 @@ final class HindiStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'कर्सर किसी सूची में नहीं है';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'पाठ पहचान';
+
+  @override
+  String get ocrIntro =>
+      'स्कैन किए गए PDF और छवियों का पाठ पढ़कर उनके पास एक नोट में '
+      'लिखता है। यह इसी डिवाइस पर चलता है: इंजन और हर भाषा पहली बार '
+      'ज़रूरत पड़ने पर एक बार डाउनलोड होती है।';
+
+  @override
+  String get ocrEngineTitle => 'इंजन';
+
+  @override
+  String get ocrEngineSystem => 'सिस्टम लाइब्रेरी';
+
+  @override
+  String get ocrEngineBundled => 'ऐप में शामिल';
+
+  @override
+  String get ocrEngineUnavailable => 'इस डिवाइस के लिए कोई इंजन नहीं';
+
+  @override
+  String get ocrEngineDeleteTitle => 'इंजन हटाएँ?';
+
+  @override
+  String get ocrQualityTitle => 'गुणवत्ता';
+
+  @override
+  String get ocrQualityFast => 'तेज़';
+
+  @override
+  String get ocrQualityBest => 'सर्वोत्तम';
+
+  @override
+  String get ocrQualityHint =>
+      'तेज़: हर भाषा 1–4 MB, किसी भी डिवाइस पर जल्दी। सर्वोत्तम: हर '
+      'भाषा 10–15 MB, कठिन स्कैन पर बेहतर, दो से तीन गुना धीमी। हर '
+      'गुणवत्ता की अपनी भाषाएँ होती हैं।';
+
+  @override
+  String get ocrLanguageTitle => 'डिफ़ॉल्ट भाषा';
+
+  @override
+  String get ocrAlsoTitle => 'साथ में';
+
+  @override
+  String get ocrAlsoSubtitle => 'दो भाषाओं वाले पन्नों के लिए';
+
+  @override
+  String get ocrAlsoNone => 'कोई नहीं';
+
+  @override
+  String ocrOnDevice(String size) => 'इस डिवाइस पर · $size';
+
+  @override
+  String get ocrOtherLanguages => 'अन्य भाषाएँ';
+
+  @override
+  String ocrSearchLanguages(int count) => '$count भाषाओं में खोजें';
+
+  @override
+  String get ocrLanguageDefault => 'डिफ़ॉल्ट';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => '$language हटाएँ?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'इससे $size खाली होगा। पाठ पहचान को ज़रूरत पड़ने पर यह फिर से '
+      'डाउनलोड होगी।';
 }

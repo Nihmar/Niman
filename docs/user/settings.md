@@ -11,8 +11,8 @@ library.
 ## The Settings screen
 
 Settings is split into areas, grouped by what they change: **App**
-(appearance, themes, editor, keyboard shortcuts, commands, updates,
-diagnostics),
+(appearance, themes, editor, keyboard shortcuts, commands, text
+recognition, updates, diagnostics),
 the open **Library** (folders, journal, trash and history, sync, transcription,
 reminders), and **Maintenance** (re-index, rebuild the index, switch or
 close the library; in the settings window only the first two, since the

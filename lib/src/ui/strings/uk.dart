@@ -2170,26 +2170,22 @@ final class UkrainianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       "Найточніша, потребує багато пам'яті";
   @override
-  String get transcriptionModelDownload => 'Завантажити';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Видалити модель $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Звільниться $size. Ви зможете завантажити модель знову пізніше.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       "Не вдалося завантажити. Перевірте з'єднання і спробуйте ще раз.";
   @override
   String get actionRetry => 'Спробувати ще раз';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      "З'єднання втрачено, повторна спроба…";
+  String get downloadRetrying => "З'єднання втрачено, повторна спроба…";
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Призупинено на $progress';
+  String downloadPaused(String progress) => 'Призупинено на $progress';
   @override
   String get actionResume => 'Продовжити';
   @override
@@ -2958,4 +2954,78 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курсор не в списку';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Розпізнавання тексту';
+
+  @override
+  String get ocrIntro =>
+      'Читає текст сканованих PDF і зображень у нотатку поруч із '
+      'ними. Усе працює на цьому пристрої: рушій і кожна мова '
+      'завантажуються один раз, коли вперше знадобляться.';
+
+  @override
+  String get ocrEngineTitle => 'Рушій';
+
+  @override
+  String get ocrEngineSystem => 'Системна бібліотека';
+
+  @override
+  String get ocrEngineBundled => 'Вбудований у застосунок';
+
+  @override
+  String get ocrEngineUnavailable => 'Для цього пристрою немає рушія';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Видалити рушій?';
+
+  @override
+  String get ocrQualityTitle => 'Якість';
+
+  @override
+  String get ocrQualityFast => 'Швидка';
+
+  @override
+  String get ocrQualityBest => 'Найкраща';
+
+  @override
+  String get ocrQualityHint =>
+      'Швидка: 1–4 МБ на мову, жвава на будь-якому пристрої. '
+      'Найкраща: 10–15 МБ на мову, краща на складних сканах, у '
+      'два-три рази повільніша. Кожна якість має власні мови.';
+
+  @override
+  String get ocrLanguageTitle => 'Мова за замовчуванням';
+
+  @override
+  String get ocrAlsoTitle => 'Також';
+
+  @override
+  String get ocrAlsoSubtitle => 'Для сторінок, де змішано дві мови';
+
+  @override
+  String get ocrAlsoNone => 'Немає';
+
+  @override
+  String ocrOnDevice(String size) => 'На цьому пристрої · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Інші мови';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Пошук серед $count мов';
+
+  @override
+  String get ocrLanguageDefault => 'За замовчуванням';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Видалити $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Звільниться $size. Файл завантажиться знову, коли він '
+      'знадобиться для розпізнавання тексту.';
 }

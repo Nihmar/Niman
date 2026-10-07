@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:niman/src/transcription/model_files.dart';
+import 'package:niman/src/core/download/download_files.dart';
+import 'package:niman/src/core/files.dart';
 
-/// A model download running in its own isolate.
+/// A download running in its own isolate: a transcription model, the OCR
+/// engine, an OCR language.
 ///
 /// The weights are 75 MB to 3 GB. Streaming them on the UI isolate would
 /// push every chunk through the heap the frames are built from, so the
@@ -12,25 +14,28 @@ import 'package:niman/src/transcription/model_files.dart';
 /// reports progress back a few times a second.
 ///
 /// The file is written as `<target>.part` and renamed to [target] only
-/// when the byte count matches the announced size: a finished name is
-/// always a whole model ([ModelFiles] relies on it). A failure keeps the
+/// when the byte count matches the announced size, and the SHA-256 the
+/// catalog pins when it pins one: a finished name is always a whole,
+/// genuine file ([DownloadFiles] relies on it). A failure keeps the
 /// partial file, and the next download of the same target resumes it
 /// with an HTTP `Range` request: Android freezes an app that leaves the
 /// foreground, which drops the connection, and starting a 466 MB model
 /// over each time would never finish.
-final class ModelDownload {
+final class FileDownload {
   new _(this._isolate, this._port, this._exit, this.target);
 
   /// Starts downloading [uri] into [target], resuming a partial file.
   ///
-  /// [onHeaders] gets the model's full size (null when the server sends
+  /// [onHeaders] gets the file's full size (null when the server sends
   /// none), the time to the first response and the byte offset it
   /// resumed from; [onProgress] the bytes on disk so far, throttled to
-  /// about [progressInterval].
-  static Future<ModelDownload> start({
+  /// about [progressInterval]. With [sha256] the finished file must hash
+  /// to it, or it is deleted and the download fails for good.
+  static Future<FileDownload> start({
     required Uri uri,
     required String target,
     required void Function(int received) onProgress,
+    String? sha256,
     void Function(int? total, int elapsedMs, int resumedFrom)? onHeaders,
     Duration progressInterval = const Duration(milliseconds: 250),
     Duration stallTimeout = const Duration(seconds: 30),
@@ -45,11 +50,12 @@ final class ModelDownload {
         target,
         progressInterval.inMilliseconds,
         stallTimeout.inMilliseconds,
+        sha256,
       ),
       onExit: exit.sendPort,
-      debugName: 'model-download',
+      debugName: 'file-download',
     );
-    final download = ModelDownload._(isolate, port, exit, target);
+    final download = FileDownload._(isolate, port, exit, target);
     // A cancel before anyone awaits [done] must not surface as an
     // unhandled error; later listeners still receive it.
     download._done.future.ignore();
@@ -63,7 +69,7 @@ final class ModelDownload {
           download._finish(bytes: bytes);
         case ('error', final String reason, final bool transient):
           download._finish(
-            error: ModelDownloadException(reason, transient: transient),
+            error: DownloadException(reason, transient: transient),
           );
       }
     });
@@ -71,8 +77,8 @@ final class ModelDownload {
       // The isolate ended without reporting: killed, or crashed hard.
       download._finish(
         error: download._cancelled
-            ? const ModelDownloadCancelled()
-            : const ModelDownloadException(
+            ? const DownloadCancelled()
+            : const DownloadException(
                 'download stopped unexpectedly',
                 transient: true,
               ),
@@ -85,14 +91,14 @@ final class ModelDownload {
   final ReceivePort _port;
   final ReceivePort _exit;
 
-  /// Where the finished model lands.
+  /// Where the finished file lands.
   final String target;
 
   final Completer<int> _done = Completer<int>();
   bool _cancelled = false;
 
-  /// Completes with the model's size once it is in place; fails with
-  /// [ModelDownloadException], or [ModelDownloadCancelled] after [cancel].
+  /// Completes with the file's size once it is in place; fails with
+  /// [DownloadException], or [DownloadCancelled] after [cancel].
   Future<int> get done => _done.future;
 
   /// Stops the download and removes its partial file: unlike a failure, a
@@ -100,7 +106,7 @@ final class ModelDownload {
   Future<void> cancel() async {
     if (_done.isCompleted) return;
     stop();
-    await ModelFiles.deletePart(target);
+    await DownloadFiles.deletePart(target);
   }
 
   /// Stops the download and keeps its partial file for a later resume
@@ -109,7 +115,7 @@ final class ModelDownload {
     if (_done.isCompleted) return;
     _cancelled = true;
     _isolate.kill(priority: Isolate.immediate);
-    _finish(error: const ModelDownloadCancelled());
+    _finish(error: const DownloadCancelled());
   }
 
   void _finish({int? bytes, Object? error}) {
@@ -125,7 +131,7 @@ final class ModelDownload {
 }
 
 /// A download that failed; [reason] is short and safe to log.
-final class ModelDownloadException implements Exception {
+final class DownloadException implements Exception {
   /// Creates the failure with [reason].
   const new(this.reason, {this.transient = false});
 
@@ -138,26 +144,34 @@ final class ModelDownloadException implements Exception {
 
   @override
   String toString() =>
-      'ModelDownloadException: $reason${transient ? ' (transient)' : ''}';
+      'DownloadException: $reason${transient ? ' (transient)' : ''}';
 }
 
-/// A download stopped by [ModelDownload.cancel].
-final class ModelDownloadCancelled implements Exception {
+/// A download stopped by [FileDownload.cancel].
+final class DownloadCancelled implements Exception {
   /// Creates the cancellation.
   const new();
 
   @override
-  String toString() => 'ModelDownloadCancelled';
+  String toString() => 'DownloadCancelled';
 }
 
 final class _Request {
-  const new(this.port, this.uri, this.target, this.progressMs, this.stallMs);
+  const new(
+    this.port,
+    this.uri,
+    this.target,
+    this.progressMs,
+    this.stallMs,
+    this.sha256,
+  );
 
   final SendPort port;
   final String uri;
   final String target;
   final int progressMs;
   final int stallMs;
+  final String? sha256;
 }
 
 Future<void> _run(_Request request) async {
@@ -165,7 +179,7 @@ Future<void> _run(_Request request) async {
   final stall = Duration(milliseconds: request.stallMs);
   final clock = Stopwatch()..start();
   final client = HttpClient()..connectionTimeout = stall;
-  final part = File('${request.target}${ModelFiles.partSuffix}');
+  final part = File('${request.target}${DownloadFiles.partSuffix}');
   IOSink? sink;
   try {
     final existing = part.existsSync() ? part.lengthSync() : 0;
@@ -190,7 +204,7 @@ Future<void> _run(_Request request) async {
       total = response.contentLength < 0 ? null : response.contentLength;
     } else {
       if (status == HttpStatus.requestedRangeNotSatisfiable) {
-        // The partial file does not fit the model any more.
+        // The partial file does not fit the file any more.
         await part.delete();
       }
       await response.drain<void>();
@@ -238,6 +252,16 @@ Future<void> _run(_Request request) async {
       await part.delete();
       port.send(('error', 'too long: $received of $total bytes', true));
       return;
+    }
+    final expected = request.sha256;
+    if (expected != null) {
+      final actual = await hashFileSha256(part);
+      if (actual != expected) {
+        // Not a resume candidate: the bytes on disk are the wrong ones.
+        await part.delete();
+        port.send(('error', 'sha256 mismatch: got $actual', false));
+        return;
+      }
     }
     await part.rename(request.target);
     port.send(('done', received));

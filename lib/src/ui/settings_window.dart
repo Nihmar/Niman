@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/floating_window.dart';
@@ -24,6 +25,7 @@ Route<void> settingsWindowRoute(
   required LibrarySession controller,
   EditorSpellCheck? spellCheck,
   TranscriptionModels? transcription,
+  OcrInstallation? ocr,
   SettingsTarget? target,
 }) {
   return floatingWindowRoute(
@@ -34,6 +36,7 @@ Route<void> settingsWindowRoute(
       controller: controller,
       spellCheck: spellCheck,
       transcription: transcription,
+      ocr: ocr,
       libraryRows: false,
       target: target,
     ),

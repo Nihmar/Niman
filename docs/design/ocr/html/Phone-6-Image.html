@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, image recognized</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;family=Kalam:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0}
+.sub{font-size:13px;color:#A6A29A}
+.wb{font-family:Kalam,cursive;color:#1F3B8C;font-size:17px;line-height:1.35}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:64px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none">
+    <button class="ibtn" aria-label="Back"><svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div style="flex:1;font-size:17px;font-weight:500">Lavagna 12-03.jpg</div>
+    <button class="ibtn" aria-label="More"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+  </div>
+  <div style="flex:1;background:#141518;display:flex;align-items:flex-start;justify-content:center;padding-top:30px">
+    <div class="wb" style="width:350px;height:250px;background:#F4F5F2;border:6px solid #B9BCC0;border-radius:4px;padding:16px 20px;box-sizing:border-box;transform:rotate(-1.2deg);display:flex;flex-direction:column;gap:2px">
+      <div style="font-weight:700;font-size:21px;color:#B3261E">Sprint 14 — priorità</div>
+      <div>1. Login con SSO</div>
+      <div>2. Export PDF → bug margini</div>
+      <div>3. Notifiche Android</div>
+      <div style="color:#1E6B3A">→ demo venerdì ore 15</div>
+    </div>
+  </div>
+  <div style="height:56px;display:flex;align-items:center;padding:0 8px;border-top:1px solid #2C3037;flex:none">
+    <div class="sub" style="flex:1;padding-left:8px">assets</div>
+    <button class="ibtn" aria-label="Recognize text" style="background:#363B44;color:#F2EDE5"><svg class="ico" viewBox="0 0 24 24"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg></button>
+  </div>
+
+  <div style="position:absolute;inset:0;background:rgba(10,11,13,.45);display:flex;flex-direction:column;justify-content:flex-end">
+    <div role="dialog" aria-label="Text recognized" style="background:#2C3037;border-radius:28px 28px 0 0;padding:10px 20px 24px;display:flex;flex-direction:column;gap:14px">
+      <div style="width:36px;height:4px;border-radius:2px;background:#4A4F59;align-self:center"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg class="ico" viewBox="0 0 24 24" style="color:#8FBF7F"><path d="M5 12l5 5 9-10"/></svg>
+        <div style="font-size:19px;font-weight:600">Text recognized</div>
+        <div class="sub" style="margin-left:auto">23 words</div>
+      </div>
+      <div style="background:#23262B;border-radius:14px;padding:14px 16px;font-family:Literata,serif;font-size:15px;line-height:1.6;color:#E8E3DA">
+        <div style="font-weight:600">Sprint 14 — priorità</div>
+        <div>1. Login con SSO</div>
+        <div>2. Export PDF → bug margini</div>
+        <div>3. Notifiche Android</div>
+        <div>→ demo venerdì ore 15</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>
+        <div class="sub" style="font-size:13.5px">Saved as assets/Lavagna 12-03.ocr.md</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button style="flex:1;height:48px;border:1px solid #4A4F59;border-radius:24px;background:transparent;color:#F2EDE5;font:500 15px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg>Copy</button>
+        <button style="flex:1;height:48px;border:0;border-radius:24px;background:#587CD3;color:#F2EDE5;font:500 15px 'IBM Plex Sans',sans-serif">Open text</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/transcription/model_state.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_job.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
@@ -148,9 +148,9 @@ final class AudioTranscriptionFlow {
     final chosen = transcriptionModelById(models.settings.modelId);
     if (chosen != null) {
       switch (models.stateOf(chosen)) {
-        case ModelDownloading():
+        case Downloading():
           return chosen;
-        case ModelFailed(resumable: true):
+        case DownloadFailed(resumable: true):
           unawaited(models.download(chosen));
           return chosen;
         case _:
@@ -181,8 +181,8 @@ final class AudioTranscriptionFlow {
     switch (job.phase) {
       case TranscriptionPhase.waitingForModel:
         final fraction = switch (models.stateOf(job.model)) {
-          ModelDownloading(:final fraction) => fraction,
-          ModelFailed(:final fraction) => fraction,
+          Downloading(:final fraction) => fraction,
+          DownloadFailed(:final fraction) => fraction,
           _ => null,
         };
         return AudioTranscriptionStrip(

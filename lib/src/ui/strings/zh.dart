@@ -1955,21 +1955,19 @@ final class ChineseStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => '最准确，需要大量内存';
   @override
-  String get transcriptionModelDownload => '下载';
-  @override
   String transcriptionModelDeleteTitle(String model) => '删除 $model 模型？';
   @override
   String transcriptionModelDeleteBody(String size) => '将释放 $size。之后可以重新下载该模型。';
   @override
-  String get transcriptionModelFailed => '下载失败。请检查网络连接后重试。';
+  String get downloadFailed => '下载失败。请检查网络连接后重试。';
   @override
   String get actionRetry => '重试';
   @override
   String get decimalSeparator => '.';
   @override
-  String get transcriptionModelRetrying => '连接中断，正在重试…';
+  String get downloadRetrying => '连接中断，正在重试…';
   @override
-  String transcriptionModelInterrupted(String progress) => '已暂停：$progress';
+  String downloadPaused(String progress) => '已暂停：$progress';
   @override
   String get actionResume => '继续';
   @override
@@ -2563,4 +2561,73 @@ final class ChineseStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => '光标不在列表中';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => '文字识别';
+
+  @override
+  String get ocrIntro =>
+      '将扫描的 PDF 和图片中的文字识别到旁边的一篇笔记中。全部在本设备上运行：引擎和每种语言只在首次需要时下载一次。';
+
+  @override
+  String get ocrEngineTitle => '引擎';
+
+  @override
+  String get ocrEngineSystem => '系统库';
+
+  @override
+  String get ocrEngineBundled => '已包含在应用中';
+
+  @override
+  String get ocrEngineUnavailable => '此设备没有可用的引擎';
+
+  @override
+  String get ocrEngineDeleteTitle => '删除引擎？';
+
+  @override
+  String get ocrQualityTitle => '质量';
+
+  @override
+  String get ocrQualityFast => '快速';
+
+  @override
+  String get ocrQualityBest => '最佳';
+
+  @override
+  String get ocrQualityHint =>
+      '快速：每种语言 1–4 MB，在任何设备上都很快。最佳：每种语言 10–15 '
+      'MB，对难以识别的扫描件更准确，但慢两到三倍。每种质量各有自己的语言文件。';
+
+  @override
+  String get ocrLanguageTitle => '默认语言';
+
+  @override
+  String get ocrAlsoTitle => '另加';
+
+  @override
+  String get ocrAlsoSubtitle => '用于混合两种语言的页面';
+
+  @override
+  String get ocrAlsoNone => '无';
+
+  @override
+  String ocrOnDevice(String size) => '本设备上 · $size';
+
+  @override
+  String get ocrOtherLanguages => '其他语言';
+
+  @override
+  String ocrSearchLanguages(int count) => '搜索 $count 种语言';
+
+  @override
+  String get ocrLanguageDefault => '默认';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => '删除 $language？';
+
+  @override
+  String ocrDeleteBody(String size) => '这将释放 $size。文字识别需要时会重新下载。';
 }

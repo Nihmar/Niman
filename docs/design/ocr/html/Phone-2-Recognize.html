@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, Recognize text sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;family=Libre+Caslon+Text&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#A6A29A}
+.sel{height:48px;padding:0 14px;border:1px solid #4A4F59;border-radius:12px;display:flex;align-items:center;gap:8px;background:#23262B}
+.chip{height:40px;padding:0 14px;border-radius:20px;border:1px solid #4A4F59;display:flex;align-items:center;gap:6px;font-size:14px}
+.scan{font-family:'Libre Caslon Text',serif;color:#2B2A27;font-size:8px;line-height:1.55}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:64px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none">
+    <button class="ibtn" aria-label="Back"><svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div style="flex:1;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Contratto 2019 (scan)</div>
+    <button class="ibtn" aria-label="More"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+  </div>
+  <div style="flex:1;background:#1F2226;display:flex;justify-content:center;padding-top:14px">
+    <div class="scan" style="width:340px;height:480px;background:#EFEBE2;padding:30px 28px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px">
+      <div style="text-align:center;font-size:11px;letter-spacing:.08em">CONTRATTO DI LOCAZIONE</div>
+      <p style="margin:4px 0 0">Con la presente scrittura privata, da valere ad ogni effetto di legge, tra il Sig. [LOCATORE] e la Sig.ra [CONDUTTORE] si conviene e si stipula quanto segue.</p>
+      <p style="margin:0"><b>Art. 1 — Oggetto.</b> Il locatore concede in locazione alla conduttrice l'unità immobiliare sita in [INDIRIZZO].</p>
+      <p style="margin:0"><b>Art. 2 — Durata.</b> Il contratto è stipulato per la durata di anni tre, dal 1° marzo 2019 al 28 febbraio 2022.</p>
+    </div>
+  </div>
+  <div style="height:56px;display:flex;align-items:center;padding:0 8px;border-top:1px solid #2C3037;flex:none">
+    <div style="flex:1;font-size:13px;color:#A6A29A;padding-left:8px">p. 2 of 4</div>
+    <button class="ibtn" aria-label="Copy link to this place"><svg class="ico" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg></button>
+    <button class="ibtn" aria-label="Annotate"><svg class="ico" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button>
+    <button class="ibtn" aria-label="Recognize text"><svg class="ico" viewBox="0 0 24 24"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg></button>
+  </div>
+
+  <div style="position:absolute;inset:0;background:rgba(10,11,13,.55);display:flex;flex-direction:column;justify-content:flex-end">
+    <div role="dialog" aria-label="Recognize text" style="background:#2C3037;border-radius:28px 28px 0 0;padding:10px 20px 24px;display:flex;flex-direction:column;gap:16px">
+      <div style="width:36px;height:4px;border-radius:2px;background:#4A4F59;align-self:center"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg class="ico" viewBox="0 0 24 24" style="color:#587CD3"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg>
+        <div style="font-size:20px;font-weight:600">Recognize text</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="lab">Language</div>
+        <div class="sel">Italian<span class="sub" style="flex:1">· default</span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="sel"><span class="sub">Also</span><span style="flex:1">English</span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <fieldset style="border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px">
+        <legend class="lab" style="padding:0;margin-bottom:8px">Pages</legend>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <label class="chip" style="background:#3A4A6E;border-color:#3A4A6E"><input type="radio" name="pp" checked style="accent-color:#587CD3;margin:0">All 4</label>
+          <label class="chip"><input type="radio" name="pp" style="accent-color:#587CD3;margin:0">This page</label>
+          <label class="chip"><input type="radio" name="pp" style="accent-color:#587CD3;margin:0">From…to</label>
+        </div>
+      </fieldset>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A;margin-top:2px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>
+        <div style="font-size:14px;line-height:1.45">Saved as <b style="font-weight:500">Contratto 2019 (scan).ocr.md</b><div class="sub">next to the PDF, in Contratti</div></div>
+      </div>
+      <div style="background:#23262B;border-radius:14px;padding:12px 14px;display:flex;gap:10px">
+        <svg class="ico" viewBox="0 0 24 24" style="color:#D8A56B;width:20px;height:20px"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+        <div style="font-size:14px;line-height:1.45">First, a download of 8.3 MB<div class="sub">Engine 1.8 MB · Italian 2.6 MB · English 3.9 MB</div></div>
+      </div>
+      <button style="height:48px;border:0;border-radius:24px;background:#587CD3;color:#F2EDE5;font:500 15px 'IBM Plex Sans',sans-serif">Download and recognize</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

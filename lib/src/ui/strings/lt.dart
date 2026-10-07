@@ -2163,25 +2163,22 @@ final class LithuanianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Tiksliausias, reikia daug atminties';
   @override
-  String get transcriptionModelDownload => 'Atsisiųsti';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Ištrinti modelį $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Bus atlaisvinta $size. Modelį vėliau galėsite atsisiųsti iš naujo.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Atsisiųsti nepavyko. Patikrinkite ryšį ir bandykite dar kartą.';
   @override
   String get actionRetry => 'Bandyti dar kartą';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Ryšys nutrūko, bandoma dar kartą…';
+  String get downloadRetrying => 'Ryšys nutrūko, bandoma dar kartą…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pristabdyta: $progress';
+  String downloadPaused(String progress) => 'Pristabdyta: $progress';
   @override
   String get actionResume => 'Tęsti';
   @override
@@ -2955,4 +2952,79 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Žymeklis nėra sąraše';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Teksto atpažinimas';
+
+  @override
+  String get ocrIntro =>
+      'Nuskaito nuskenuotų PDF ir paveikslėlių tekstą į šalia '
+      'esantį užrašą. Viskas vyksta šiame įrenginyje: variklis ir '
+      'kiekviena kalba atsisiunčiami vieną kartą, kai prireikia '
+      'pirmą kartą.';
+
+  @override
+  String get ocrEngineTitle => 'Variklis';
+
+  @override
+  String get ocrEngineSystem => 'Sistemos biblioteka';
+
+  @override
+  String get ocrEngineBundled => 'Įtrauktas į programėlę';
+
+  @override
+  String get ocrEngineUnavailable => 'Šiam įrenginiui variklio nėra';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Ištrinti variklį?';
+
+  @override
+  String get ocrQualityTitle => 'Kokybė';
+
+  @override
+  String get ocrQualityFast => 'Greita';
+
+  @override
+  String get ocrQualityBest => 'Geriausia';
+
+  @override
+  String get ocrQualityHint =>
+      'Greita: 1–4 MB kalbai, sparti bet kuriame įrenginyje. '
+      'Geriausia: 10–15 MB kalbai, geresnė sudėtingiems skenams, '
+      'du–tris kartus lėtesnė. Kiekviena kokybė turi savo kalbas.';
+
+  @override
+  String get ocrLanguageTitle => 'Numatytoji kalba';
+
+  @override
+  String get ocrAlsoTitle => 'Taip pat';
+
+  @override
+  String get ocrAlsoSubtitle => 'Puslapiams, kuriuose maišosi dvi kalbos';
+
+  @override
+  String get ocrAlsoNone => 'Nėra';
+
+  @override
+  String ocrOnDevice(String size) => 'Šiame įrenginyje · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Kitos kalbos';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Ieškoti tarp $count kalbų';
+
+  @override
+  String get ocrLanguageDefault => 'Numatytoji';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Ištrinti $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Bus atlaisvinta $size. Failas bus atsisiųstas iš naujo, kai '
+      'jo prireiks teksto atpažinimui.';
 }

@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/transcription/clip_preparation.dart';
-import 'package:niman/src/transcription/model_state.dart';
 import 'package:niman/src/transcription/speech_transcriber.dart';
 import 'package:niman/src/transcription/transcription_job.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
@@ -100,7 +100,7 @@ final class TranscriptionQueue extends ChangeNotifier {
       language: language,
       placement: placement,
       originalDescription: originalDescription,
-      phase: models.stateOf(model) is ModelInstalled
+      phase: models.stateOf(model) is Downloaded
           ? TranscriptionPhase.queued
           : TranscriptionPhase.waitingForModel,
     );
@@ -184,16 +184,16 @@ final class TranscriptionQueue extends ChangeNotifier {
     for (final job in _jobs) {
       if (job.phase != TranscriptionPhase.waitingForModel) continue;
       switch (models.stateOf(job.model)) {
-        case ModelInstalled():
+        case Downloaded():
           job.phase = TranscriptionPhase.queued;
           changed = true;
-        case ModelAbsent() || ModelFailed(resumable: false):
+        case NotDownloaded() || DownloadFailed(resumable: false):
           job
             ..phase = TranscriptionPhase.failed
             ..error = 'model ${job.model.id} is not downloaded';
           _log.warning('$job: ${job.error}');
           changed = true;
-        case ModelDownloading() || ModelFailed(resumable: true):
+        case Downloading() || DownloadFailed(resumable: true):
           // Still coming (a paused download resumes with the app).
           break;
       }

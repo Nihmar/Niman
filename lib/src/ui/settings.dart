@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
@@ -32,6 +33,7 @@ final class SettingsBody extends StatefulWidget {
     this.onClosed,
     this.spellCheck,
     this.transcription,
+    this.ocr,
     this.navigation,
     this.libraryRows = true,
     this.target,
@@ -55,6 +57,9 @@ final class SettingsBody extends StatefulWidget {
 
   /// The installation's transcription models; null hides their section.
   final TranscriptionModels? transcription;
+
+  /// What is installed for text recognition; null hides its area.
+  final OcrInstallation? ocr;
 
   /// The desktop's two columns (issue #172): when given, this body is the
   /// left column — the areas select rather than open, and the search
@@ -163,6 +168,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
       settingsSearchEntries(
         controller: controller,
         transcription: widget.transcription,
+        ocr: widget.ocr,
         spellCheck: widget.spellCheck,
         libraryName: _libraryName ?? '',
         context: context,
@@ -213,6 +219,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     controller: widget.controller,
     spellCheck: widget.spellCheck,
     transcription: widget.transcription,
+    ocr: widget.ocr,
     keyboardAttached: _keyboard.attached,
     version: _version,
     openArea: _openArea,

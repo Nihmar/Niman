@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/transcription/model_state.dart';
+import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/settings_rows.dart';
@@ -52,11 +52,11 @@ final class _TranscriptionModelsScreenState
           final available = <TranscriptionModel>[];
           for (final model in models.models) {
             switch (models.stateOf(model)) {
-              case ModelInstalled():
+              case Downloaded():
                 installed.add(model);
-              case ModelDownloading() || ModelFailed(resumable: true):
+              case Downloading() || DownloadFailed(resumable: true):
                 downloading.add(model);
-              case ModelAbsent() || ModelFailed():
+              case NotDownloaded() || DownloadFailed():
                 available.add(model);
             }
           }

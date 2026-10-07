@@ -2200,26 +2200,22 @@ final class GermanStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Am genauesten, braucht viel Arbeitsspeicher';
   @override
-  String get transcriptionModelDownload => 'Herunterladen';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Modell $model löschen?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Das gibt $size frei. Du kannst das Modell später erneut herunterladen.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Download fehlgeschlagen. Prüfe die Verbindung und versuche es erneut.';
   @override
   String get actionRetry => 'Erneut versuchen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Verbindung unterbrochen, neuer Versuch…';
+  String get downloadRetrying => 'Verbindung unterbrochen, neuer Versuch…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pausiert bei $progress';
+  String downloadPaused(String progress) => 'Pausiert bei $progress';
   @override
   String get actionResume => 'Fortsetzen';
   @override
@@ -2982,4 +2978,80 @@ final class GermanStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Der Cursor steht nicht in einer Liste';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Texterkennung';
+
+  @override
+  String get ocrIntro =>
+      'Liest den Text gescannter PDFs und Bilder in eine Notiz '
+      'daneben. Alles läuft auf diesem Gerät: Die Engine und jede '
+      'Sprache werden einmal heruntergeladen, wenn sie zum ersten '
+      'Mal gebraucht werden.';
+
+  @override
+  String get ocrEngineTitle => 'Engine';
+
+  @override
+  String get ocrEngineSystem => 'Systembibliothek';
+
+  @override
+  String get ocrEngineBundled => 'In der App enthalten';
+
+  @override
+  String get ocrEngineUnavailable => 'Keine Engine für dieses Gerät';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Engine löschen?';
+
+  @override
+  String get ocrQualityTitle => 'Qualität';
+
+  @override
+  String get ocrQualityFast => 'Schnell';
+
+  @override
+  String get ocrQualityBest => 'Beste';
+
+  @override
+  String get ocrQualityHint =>
+      'Schnell: 1–4 MB pro Sprache, flott auf jedem Gerät. Beste: '
+      '10–15 MB pro Sprache, besser bei schwierigen Scans, zwei- '
+      'bis dreimal langsamer. Jede Qualität hat ihre eigenen '
+      'Sprachen.';
+
+  @override
+  String get ocrLanguageTitle => 'Standardsprache';
+
+  @override
+  String get ocrAlsoTitle => 'Zusätzlich';
+
+  @override
+  String get ocrAlsoSubtitle => 'Für Seiten, die zwei Sprachen mischen';
+
+  @override
+  String get ocrAlsoNone => 'Keine';
+
+  @override
+  String ocrOnDevice(String size) => 'Auf diesem Gerät · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Weitere Sprachen';
+
+  @override
+  String ocrSearchLanguages(int count) => '$count Sprachen durchsuchen';
+
+  @override
+  String get ocrLanguageDefault => 'Standard';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => '$language löschen?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Das gibt $size frei. Die Datei wird erneut heruntergeladen, '
+      'wenn die Texterkennung sie braucht.';
 }

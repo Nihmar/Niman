@@ -2169,26 +2169,22 @@ final class SerbianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Најтачнији, треба много меморије';
   @override
-  String get transcriptionModelDownload => 'Преузми';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Избрисати модел $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Ослобађа се $size. Модел можете касније поново да преузмете.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Преузимање није успело. Проверите везу и покушајте поново.';
   @override
   String get actionRetry => 'Покушај поново';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Веза је прекинута, поновни покушај…';
+  String get downloadRetrying => 'Веза је прекинута, поновни покушај…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Паузирано на $progress';
+  String downloadPaused(String progress) => 'Паузирано на $progress';
   @override
   String get actionResume => 'Настави';
   @override
@@ -2941,4 +2937,78 @@ final class SerbianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курзор није у листи';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Препознавање текста';
+
+  @override
+  String get ocrIntro =>
+      'Чита текст скенираних PDF-ова и слика у белешку поред њих. '
+      'Све ради на овом уређају: механизам и сваки језик преузимају '
+      'се једном, када први пут затребају.';
+
+  @override
+  String get ocrEngineTitle => 'Механизам';
+
+  @override
+  String get ocrEngineSystem => 'Системска библиотека';
+
+  @override
+  String get ocrEngineBundled => 'Укључен у апликацију';
+
+  @override
+  String get ocrEngineUnavailable => 'Нема механизма за овај уређај';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Избрисати механизам?';
+
+  @override
+  String get ocrQualityTitle => 'Квалитет';
+
+  @override
+  String get ocrQualityFast => 'Брзи';
+
+  @override
+  String get ocrQualityBest => 'Најбољи';
+
+  @override
+  String get ocrQualityHint =>
+      'Брзи: 1–4 MB по језику, брз на сваком уређају. Најбољи: '
+      '10–15 MB по језику, бољи на тешким скеновима, два до три '
+      'пута спорији. Сваки квалитет има своје језике.';
+
+  @override
+  String get ocrLanguageTitle => 'Подразумевани језик';
+
+  @override
+  String get ocrAlsoTitle => 'Такође';
+
+  @override
+  String get ocrAlsoSubtitle => 'За странице на којима се мешају два језика';
+
+  @override
+  String get ocrAlsoNone => 'Ниједан';
+
+  @override
+  String ocrOnDevice(String size) => 'На овом уређају · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Остали језици';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Претражи $count језика';
+
+  @override
+  String get ocrLanguageDefault => 'Подразумевани';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Избрисати $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Ослобађа се $size. Датотека ће се поново преузети када је '
+      'препознавање текста затреба.';
 }

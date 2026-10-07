@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recognize text dialog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;family=Libre+Caslon+Text&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:36px;height:36px;border-radius:18px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#A6A29A}
+.sel{height:40px;padding:0 12px;border:1px solid #4A4F59;border-radius:10px;display:flex;align-items:center;gap:8px;color:#F2EDE5;background:#23262B}
+.scan{font-family:'Libre Caslon Text',serif;color:#2B2A27;font-size:11.5px;line-height:1.55}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+
+  <aside style="width:264px;flex:none;border-right:1px solid #2C3037;display:flex;flex-direction:column;padding:12px 8px;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px 12px">
+      <div style="width:22px;height:22px;border-radius:6px;background:#587CD3;font:600 13px Literata,serif;display:flex;align-items:center;justify-content:center">N</div>
+      <div style="font-weight:600">Studio</div>
+    </div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Clienti</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Contratti</div>
+    <div class="tree" style="padding-left:30px;background:#2C3037;color:#F2EDE5"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Contratto 2019 (scan).pdf</div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Rinnovo 2024.md</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Riunioni</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>assets</div>
+  </aside>
+
+  <main style="flex:1;display:flex;flex-direction:column;min-width:0;background:#23262B">
+    <div style="height:42px;display:flex;align-items:flex-end;gap:2px;padding:0 8px;background:#1B1D21">
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;background:#23262B;border-radius:10px 10px 0 0;font-size:13px">Contratto 2019 (scan).pdf</div>
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;color:#A6A29A;font-size:13px">Rinnovo 2024</div>
+    </div>
+    <div style="flex:1;display:flex;justify-content:center;padding:28px 0;background:#1F2226;overflow:hidden">
+      <div class="scan" style="width:470px;height:665px;background:#EFEBE2;box-shadow:0 2px 14px rgba(0,0,0,.45);padding:56px 54px;box-sizing:border-box;transform:rotate(-0.6deg);display:flex;flex-direction:column;gap:10px">
+        <div style="text-align:center;font-size:15px;letter-spacing:.08em">CONTRATTO DI LOCAZIONE</div>
+        <div style="text-align:center;font-size:11px">ad uso abitativo — art. 2, comma 3, L. 431/1998</div>
+        <p style="margin:8px 0 0">Con la presente scrittura privata, da valere ad ogni effetto di legge, tra il Sig. [LOCATORE], di seguito denominato «locatore», e la Sig.ra [CONDUTTORE], di seguito denominata «conduttrice», si conviene e si stipula quanto segue.</p>
+        <p style="margin:0"><b>Art. 1 — Oggetto.</b> Il locatore concede in locazione alla conduttrice l'unità immobiliare sita in [INDIRIZZO], composta da tre vani e accessori, non arredata.</p>
+        <p style="margin:0"><b>Art. 2 — Durata.</b> Il contratto è stipulato per la durata di anni tre, dal 1° marzo 2019 al 28 febbraio 2022, e alla prima scadenza si proroga di diritto per due anni.</p>
+        <p style="margin:0"><b>Art. 3 — Canone.</b> Il canone annuo di locazione è convenuto in euro [IMPORTO], da corrispondersi in dodici rate mensili anticipate entro il giorno 5 di ciascun mese.</p>
+        <p style="margin:0"><b>Art. 4 — Deposito.</b> A garanzia degli obblighi assunti la conduttrice versa un deposito cauzionale pari a tre mensilità, produttivo di interessi legali.</p>
+      </div>
+    </div>
+    <div style="height:48px;display:flex;align-items:center;gap:4px;padding:0 12px;border-top:1px solid #2C3037">
+      <div style="flex:1;font-size:13px;color:#D9D4CB">Contratto 2019 (scan).pdf <span class="sub">· p. 2 of 4</span></div>
+      <button class="ibtn" aria-label="Copy link to this place"><svg class="ico" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg></button>
+      <button class="ibtn" aria-label="Annotate"><svg class="ico" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button>
+      <button class="ibtn" aria-label="Recognize text" style="color:#F2EDE5;background:#363B44"><svg class="ico" viewBox="0 0 24 24"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg></button>
+      <button class="ibtn" aria-label="Open in the default app"><svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></button>
+    </div>
+  </main>
+
+  <div style="position:absolute;inset:0;background:rgba(10,11,13,.55);display:flex;align-items:center;justify-content:center">
+    <div role="dialog" aria-label="Recognize text" style="width:520px;background:#2C3037;border-radius:24px;padding:26px 28px 22px;box-shadow:0 18px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <svg class="ico" viewBox="0 0 24 24" style="width:24px;height:24px;color:#587CD3"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg>
+        <div style="font-size:20px;font-weight:600">Recognize text</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="lab">Language</div>
+        <div style="display:flex;gap:10px">
+          <div class="sel" style="flex:1">Italian<span class="sub" style="flex:1">· default</span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="sel" style="flex:1"><span class="sub">Also</span><span style="flex:1">English</span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
+      </div>
+
+      <fieldset style="border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px">
+        <legend class="lab" style="padding:0;margin-bottom:8px">Pages</legend>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="height:36px;padding:0 14px;border-radius:18px;background:#3A4A6E;display:flex;align-items:center;gap:6px;font-size:13px"><input type="radio" name="pg" checked style="accent-color:#587CD3;margin:0">All 4</label>
+          <label style="height:36px;padding:0 14px;border-radius:18px;border:1px solid #4A4F59;display:flex;align-items:center;gap:6px;font-size:13px"><input type="radio" name="pg" style="accent-color:#587CD3;margin:0">This page (2)</label>
+          <label style="height:36px;padding:0 10px 0 14px;border-radius:18px;border:1px solid #4A4F59;display:flex;align-items:center;gap:6px;font-size:13px"><input type="radio" name="pg" style="accent-color:#587CD3;margin:0">From
+            <input value="1" aria-label="First page" style="width:28px;height:24px;border-radius:6px;border:1px solid #4A4F59;background:#23262B;color:#F2EDE5;text-align:center;font:13px 'IBM Plex Sans',sans-serif">to
+            <input value="4" aria-label="Last page" style="width:28px;height:24px;border-radius:6px;border:1px solid #4A4F59;background:#23262B;color:#F2EDE5;text-align:center;font:13px 'IBM Plex Sans',sans-serif"></label>
+        </div>
+      </fieldset>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="lab">Saved as</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13.5px">
+          <svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>
+          <span>Contratti / <b style="font-weight:500">Contratto 2019 (scan).ocr.md</b></span>
+        </div>
+        <div class="sub">A note next to the PDF, one section per page. Search finds it like any note.</div>
+      </div>
+
+      <div style="background:#23262B;border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start">
+        <svg class="ico" viewBox="0 0 24 24" style="color:#D8A56B;margin-top:1px"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="font-size:13.5px">First, a download of 8.4 MB</div>
+          <div class="sub" style="line-height:1.5">Engine 1.9 MB · Italian 2.6 MB · English 3.9 MB. Once only: then it works offline.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:2px">
+        <button style="height:40px;padding:0 18px;border:0;border-radius:20px;background:transparent;color:#A9C0F0;font:500 14px 'IBM Plex Sans',sans-serif">Cancel</button>
+        <button style="height:40px;padding:0 20px;border:0;border-radius:20px;background:#587CD3;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif">Download and recognize</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

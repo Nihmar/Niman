@@ -2160,25 +2160,22 @@ final class SwedishStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Mest exakt, kräver mycket minne';
   @override
-  String get transcriptionModelDownload => 'Ladda ned';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Ta bort modellen $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Det frigör $size. Du kan ladda ned modellen igen senare.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Nedladdningen misslyckades. Kontrollera anslutningen och försök igen.';
   @override
   String get actionRetry => 'Försök igen';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying => 'Anslutningen bröts, försöker igen…';
+  String get downloadRetrying => 'Anslutningen bröts, försöker igen…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pausad vid $progress';
+  String downloadPaused(String progress) => 'Pausad vid $progress';
   @override
   String get actionResume => 'Återuppta';
   @override
@@ -2921,4 +2918,78 @@ final class SwedishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Markören står inte i en lista';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Textigenkänning';
+
+  @override
+  String get ocrIntro =>
+      'Läser texten i skannade PDF:er och bilder till en anteckning '
+      'bredvid dem. Allt körs på den här enheten: motorn och varje '
+      'språk laddas ned en gång, första gången de behövs.';
+
+  @override
+  String get ocrEngineTitle => 'Motor';
+
+  @override
+  String get ocrEngineSystem => 'Systembibliotek';
+
+  @override
+  String get ocrEngineBundled => 'Ingår i appen';
+
+  @override
+  String get ocrEngineUnavailable => 'Ingen motor för den här enheten';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Ta bort motorn?';
+
+  @override
+  String get ocrQualityTitle => 'Kvalitet';
+
+  @override
+  String get ocrQualityFast => 'Snabb';
+
+  @override
+  String get ocrQualityBest => 'Bäst';
+
+  @override
+  String get ocrQualityHint =>
+      'Snabb: 1–4 MB per språk, kvick på alla enheter. Bäst: 10–15 '
+      'MB per språk, bättre på svåra skanningar, två till tre '
+      'gånger långsammare. Varje kvalitet har sina egna språk.';
+
+  @override
+  String get ocrLanguageTitle => 'Standardspråk';
+
+  @override
+  String get ocrAlsoTitle => 'Även';
+
+  @override
+  String get ocrAlsoSubtitle => 'För sidor som blandar två språk';
+
+  @override
+  String get ocrAlsoNone => 'Inget';
+
+  @override
+  String ocrOnDevice(String size) => 'På den här enheten · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Andra språk';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Sök bland $count språk';
+
+  @override
+  String get ocrLanguageDefault => 'Standard';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Ta bort $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Det frigör $size. Filen laddas ned igen när '
+      'textigenkänningen behöver den.';
 }

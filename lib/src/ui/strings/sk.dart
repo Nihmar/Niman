@@ -2152,26 +2152,22 @@ final class SlovakStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Najpresnejší, potrebuje veľa pamäte';
   @override
-  String get transcriptionModelDownload => 'Stiahnuť';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Odstrániť model $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Uvoľní sa $size. Model si môžete neskôr stiahnuť znova.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Stiahnutie zlyhalo. Skontrolujte pripojenie a skúste to znova.';
   @override
   String get actionRetry => 'Skúsiť znova';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Pripojenie sa prerušilo, skúša sa znova…';
+  String get downloadRetrying => 'Pripojenie sa prerušilo, skúša sa znova…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Pozastavené na $progress';
+  String downloadPaused(String progress) => 'Pozastavené na $progress';
   @override
   String get actionResume => 'Pokračovať';
   @override
@@ -2925,4 +2921,79 @@ final class SlovakStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kurzor nie je v zozname';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Rozpoznávanie textu';
+
+  @override
+  String get ocrIntro =>
+      'Prečíta text naskenovaných PDF a obrázkov do poznámky vedľa '
+      'nich. Všetko beží v tomto zariadení: jadro a každý jazyk sa '
+      'stiahnu raz, keď sú prvýkrát potrebné.';
+
+  @override
+  String get ocrEngineTitle => 'Jadro';
+
+  @override
+  String get ocrEngineSystem => 'Systémová knižnica';
+
+  @override
+  String get ocrEngineBundled => 'Súčasť aplikácie';
+
+  @override
+  String get ocrEngineUnavailable =>
+      'Pre toto zariadenie nie je k dispozícii žiadne jadro';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Odstrániť jadro?';
+
+  @override
+  String get ocrQualityTitle => 'Kvalita';
+
+  @override
+  String get ocrQualityFast => 'Rýchla';
+
+  @override
+  String get ocrQualityBest => 'Najlepšia';
+
+  @override
+  String get ocrQualityHint =>
+      'Rýchla: 1–4 MB na jazyk, svižná na každom zariadení. '
+      'Najlepšia: 10–15 MB na jazyk, lepšia pri náročných skenoch, '
+      'dva- až trikrát pomalšia. Každá kvalita má vlastné jazyky.';
+
+  @override
+  String get ocrLanguageTitle => 'Predvolený jazyk';
+
+  @override
+  String get ocrAlsoTitle => 'Aj';
+
+  @override
+  String get ocrAlsoSubtitle => 'Pre stránky, kde sa miešajú dva jazyky';
+
+  @override
+  String get ocrAlsoNone => 'Žiadny';
+
+  @override
+  String ocrOnDevice(String size) => 'V tomto zariadení · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Ďalšie jazyky';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Hľadať medzi $count jazykmi';
+
+  @override
+  String get ocrLanguageDefault => 'Predvolený';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Odstrániť $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Uvoľní sa $size. Súbor sa znova stiahne, keď ho '
+      'rozpoznávanie textu bude potrebovať.';
 }

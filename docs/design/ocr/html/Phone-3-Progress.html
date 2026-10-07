@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, recognition strip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0}
+.sub{font-size:13px;color:#A6A29A}
+.txt{font-family:Literata,serif;font-size:16px;line-height:1.7;color:#E8E3DA;margin:0 0 14px}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:64px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none">
+    <button class="ibtn" aria-label="Back"><svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div style="flex:1;font-size:17px;font-weight:500">Rinnovo 2024</div>
+    <button class="ibtn" aria-label="More"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+  </div>
+
+  <div style="background:#2C3037;flex:none;position:relative">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 6px 8px 16px;min-height:44px">
+      <svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#587CD3"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Recognizing p. 3 of 4</div>
+        <div class="sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Contratto 2019 (scan).pdf</div>
+      </div>
+      <button style="height:44px;padding:0 14px;border:0;border-radius:22px;background:transparent;color:#A9C0F0;font:500 14px 'IBM Plex Sans',sans-serif">Cancel</button>
+    </div>
+    <div style="height:3px;background:#363B44"><div style="width:62%;height:3px;background:#587CD3"></div></div>
+  </div>
+
+  <div style="flex:1;padding:18px 20px;overflow:hidden">
+    <h1 style="font:600 24px Literata,serif;margin:0 0 14px">Rinnovo 2024</h1>
+    <p class="txt">Il contratto scade il 28 febbraio: per il rinnovo serve la data esatta di decorrenza e l'importo del canone dell'ultimo anno.</p>
+    <p class="txt">Da controllare nel <span style="color:#587CD3">[[Contratto 2019 (scan).pdf]]</span>: art. 2 (durata) e art. 3 (canone).</p>
+    <p class="txt">- [ ] chiamare l'agenzia<br>- [ ] preparare la raccomandata</p>
+  </div>
+
+  <div style="margin:0 12px 18px;background:#1B1D21;border:1px solid #363B44;border-radius:20px;padding:12px 14px;display:flex;gap:12px;flex:none">
+    <div style="width:28px;height:28px;border-radius:14px;background:#587CD3;font:600 14px Literata,serif;display:flex;align-items:center;justify-content:center;flex:none">N</div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+      <div class="sub" style="font-size:12px">Niman · Text recognition · when it ends</div>
+      <div style="font-size:14px;font-weight:600">Text recognized</div>
+      <div style="font-size:13.5px;color:#D9D4CB">Contratto 2019 (scan) · 4 pages · 1,284 words</div>
+      <div style="display:flex;gap:16px;margin-top:6px;font-size:13.5px;font-weight:500;color:#A9C0F0"><span>Open text</span><span>Open scan</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

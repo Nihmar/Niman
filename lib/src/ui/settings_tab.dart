@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/settings.dart';
@@ -23,6 +24,7 @@ final class SettingsTab extends StatefulWidget {
     this.unsaved,
     this.spellCheck,
     this.transcription,
+    this.ocr,
     this.libraryRows = true,
     this.target,
     super.key,
@@ -41,6 +43,9 @@ final class SettingsTab extends StatefulWidget {
 
   /// The installation's transcription models; null hides their section.
   final TranscriptionModels? transcription;
+
+  /// What is installed for text recognition; null hides its area.
+  final OcrInstallation? ocr;
 
   /// Whether Settings offers Switch library and Close library; the
   /// settings window leaves them to the library window (#203).
@@ -75,6 +80,7 @@ final class _SettingsTabState extends State<SettingsTab> {
             unsaved: widget.unsaved,
             spellCheck: widget.spellCheck,
             transcription: widget.transcription,
+            ocr: widget.ocr,
             libraryRows: widget.libraryRows,
             target: widget.target,
           );
@@ -88,6 +94,7 @@ final class _SettingsTabState extends State<SettingsTab> {
                 unsaved: widget.unsaved,
                 spellCheck: widget.spellCheck,
                 transcription: widget.transcription,
+                ocr: widget.ocr,
                 navigation: _navigation,
                 libraryRows: widget.libraryRows,
                 target: widget.target,
@@ -101,6 +108,7 @@ final class _SettingsTabState extends State<SettingsTab> {
                   controller: widget.controller,
                   spellCheck: widget.spellCheck,
                   transcription: widget.transcription,
+                  ocr: widget.ocr,
                   keyboardAttached: true,
                   openArea: (area, row) =>
                       _navigation.select(area, highlight: row),

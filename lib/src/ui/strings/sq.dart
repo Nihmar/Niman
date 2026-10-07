@@ -2173,26 +2173,22 @@ final class AlbanianStrings extends Strings {
   @override
   String get transcriptionModelHintLarge => 'Më i sakti, kërkon shumë memorie';
   @override
-  String get transcriptionModelDownload => 'Shkarko';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Të fshihet modeli $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Lirohen $size. Modelin mund ta shkarkoni sërish më vonë.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Shkarkimi dështoi. Kontrolloni lidhjen dhe provoni sërish.';
   @override
   String get actionRetry => 'Provo sërish';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
-      'Lidhja u ndërpre, po provohet sërish…';
+  String get downloadRetrying => 'Lidhja u ndërpre, po provohet sërish…';
   @override
-  String transcriptionModelInterrupted(String progress) =>
-      'Në pauzë te $progress';
+  String downloadPaused(String progress) => 'Në pauzë te $progress';
   @override
   String get actionResume => 'Vazhdo';
   @override
@@ -2936,4 +2932,80 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kursori nuk është në një listë';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Njohja e tekstit';
+
+  @override
+  String get ocrIntro =>
+      'Lexon tekstin e PDF-ve të skanuara dhe të imazheve në një '
+      'shënim pranë tyre. Gjithçka punon në këtë pajisje: motori '
+      'dhe çdo gjuhë shkarkohen një herë, kur nevojiten për herë të '
+      'parë.';
+
+  @override
+  String get ocrEngineTitle => 'Motori';
+
+  @override
+  String get ocrEngineSystem => 'Biblioteka e sistemit';
+
+  @override
+  String get ocrEngineBundled => 'Përfshirë në aplikacion';
+
+  @override
+  String get ocrEngineUnavailable => 'Nuk ka motor për këtë pajisje';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Të fshihet motori?';
+
+  @override
+  String get ocrQualityTitle => 'Cilësia';
+
+  @override
+  String get ocrQualityFast => 'E shpejtë';
+
+  @override
+  String get ocrQualityBest => 'Më e mira';
+
+  @override
+  String get ocrQualityHint =>
+      'E shpejtë: 1–4 MB për gjuhë, e shkathët në çdo pajisje. Më e '
+      'mira: 10–15 MB për gjuhë, më e saktë në skanime të vështira, '
+      'dy deri në tre herë më e ngadaltë. Çdo cilësi ka gjuhët e '
+      'veta.';
+
+  @override
+  String get ocrLanguageTitle => 'Gjuha e parazgjedhur';
+
+  @override
+  String get ocrAlsoTitle => 'Gjithashtu';
+
+  @override
+  String get ocrAlsoSubtitle => 'Për faqe që përziejnë dy gjuhë';
+
+  @override
+  String get ocrAlsoNone => 'Asnjë';
+
+  @override
+  String ocrOnDevice(String size) => 'Në këtë pajisje · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Gjuhë të tjera';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Kërko mes $count gjuhëve';
+
+  @override
+  String get ocrLanguageDefault => 'E parazgjedhur';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Të fshihet $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Kjo liron $size. Skedari shkarkohet përsëri kur njohja e '
+      'tekstit ka nevojë për të.';
 }

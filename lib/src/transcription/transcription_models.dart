@@ -3,17 +3,17 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/download/download_files.dart';
+import 'package:niman/src/core/download/download_state.dart';
+import 'package:niman/src/core/download/downloader.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/transcription/model_downloader.dart';
-import 'package:niman/src/transcription/model_files.dart';
-import 'package:niman/src/transcription/model_state.dart';
+import 'package:niman/src/core/resume_observer.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
 import 'package:niman/src/transcription/transcription_settings_store.dart';
 import 'package:whisper_ggml/whisper_ggml.dart';
 
-export 'package:niman/src/transcription/model_downloader.dart'
-    show ModelDownloadStarter;
+export 'package:niman/src/core/download/downloader.dart' show DownloadStarter;
 
 /// The transcription models of this installation: what is downloaded,
 /// what is downloading, and the default model and language.
@@ -21,37 +21,38 @@ export 'package:niman/src/transcription/model_downloader.dart'
 /// App-wide and long-lived ([transcriptionModelsProvider]): a download
 /// keeps running when its page closes, and the settings rows and the
 /// audio note read the same state. The downloads themselves, with their
-/// retries and resumes, run in [ModelDownloader].
+/// retries and resumes, run in [Downloader].
 final class TranscriptionModels extends ChangeNotifier {
   /// Models kept in the directory [directory] resolves to.
   new({
     required Future<String> Function() directory,
     bool? phone,
-    ModelDownloadStarter? startDownload,
-    List<Duration> retryDelays = ModelDownloader.defaultRetryDelays,
-  }) : _files = ModelFiles(directory),
+    DownloadStarter? startDownload,
+    List<Duration> retryDelays = Downloader.defaultRetryDelays,
+  }) : _files = DownloadFiles(directory, transcriptionModels, log: _log),
        _store = TranscriptionSettingsStore(directory),
        phone = phone ?? Platform.isAndroid {
-    _downloader = ModelDownloader(
+    _downloader = Downloader<TranscriptionModel>(
       files: _files,
       state: stateOf,
       setState: _set,
       onInstalled: (model) async {
         if (defaultModel == null) await setDefault(model);
       },
+      log: _log,
       start: startDownload,
       retryDelays: retryDelays,
     );
   }
 
-  final ModelFiles _files;
+  final DownloadFiles _files;
   final TranscriptionSettingsStore _store;
-  late final ModelDownloader _downloader;
+  late final Downloader<TranscriptionModel> _downloader;
 
   /// Whether this is a phone: fewer models, and "slow" warnings.
   final bool phone;
 
-  final Map<String, ModelState> _states = {};
+  final Map<String, DownloadState> _states = {};
   TranscriptionSettings _settings = const TranscriptionSettings();
   Future<void>? _loading;
   bool _disposed = false;
@@ -68,25 +69,25 @@ final class TranscriptionModels extends ChangeNotifier {
   TranscriptionSettings get settings => _settings;
 
   /// [model]'s state.
-  ModelState stateOf(TranscriptionModel model) =>
-      _states[model.id] ?? const ModelAbsent();
+  DownloadState stateOf(TranscriptionModel model) =>
+      _states[model.id] ?? const NotDownloaded();
 
   /// The downloaded models, smallest first.
   List<TranscriptionModel> get installed => [
     for (final model in models)
-      if (stateOf(model) is ModelInstalled) model,
+      if (stateOf(model) is Downloaded) model,
   ];
 
   /// Bytes taken by the downloaded models.
   int get installedBytes => [
     for (final model in models)
-      if (stateOf(model) case ModelInstalled(:final bytes)) bytes,
+      if (stateOf(model) case Downloaded(:final bytes)) bytes,
   ].fold(0, (sum, bytes) => sum + bytes);
 
   /// The default model, when it is chosen and downloaded.
   TranscriptionModel? get defaultModel {
     final model = transcriptionModelById(_settings.modelId);
-    return model != null && stateOf(model) is ModelInstalled ? model : null;
+    return model != null && stateOf(model) is Downloaded ? model : null;
   }
 
   /// Reads the settings and scans the model directory; concurrent calls
@@ -98,7 +99,7 @@ final class TranscriptionModels extends ChangeNotifier {
   Future<void> _load() async {
     final clock = Stopwatch()..start();
     final TranscriptionSettings settings;
-    final ModelScan scan;
+    final DownloadScan scan;
     try {
       settings = await _store.load();
       scan = await _files.scan();
@@ -115,19 +116,19 @@ final class TranscriptionModels extends ChangeNotifier {
     if (_disposed) return;
     _settings = settings;
     for (final model in transcriptionModels) {
-      if (stateOf(model) is ModelDownloading) continue;
+      if (stateOf(model) is Downloading) continue;
       final bytes = scan.installed[model.id];
       final partial = scan.partial[model.id];
       _states[model.id] = switch ((bytes, partial)) {
-        (final int bytes, _) => ModelInstalled(bytes),
+        (final int bytes, _) => Downloaded(bytes),
         // A download cut off by the app closing: resumable from here.
-        (_, final int partial) => ModelFailed(
+        (_, final int partial) => DownloadFailed(
           'interrupted',
           received: partial,
           total: model.bytes,
         ),
-        _ when _states[model.id] is ModelFailed => _states[model.id]!,
-        _ => const ModelAbsent(),
+        _ when _states[model.id] is DownloadFailed => _states[model.id]!,
+        _ => const NotDownloaded(),
       };
     }
     _loaded = true;
@@ -157,7 +158,7 @@ final class TranscriptionModels extends ChangeNotifier {
   Future<void> delete(TranscriptionModel model) async {
     await cancel(model);
     await _files.delete(model);
-    _set(model, const ModelAbsent());
+    _set(model, const NotDownloaded());
     if (_settings.modelId == model.id) {
       final next = installed.isEmpty ? null : installed.first;
       await _save(_settings.withModel(next?.id));
@@ -180,7 +181,7 @@ final class TranscriptionModels extends ChangeNotifier {
     await _store.save(settings);
   }
 
-  void _set(TranscriptionModel model, ModelState state) {
+  void _set(TranscriptionModel model, DownloadState state) {
     if (_disposed) return;
     _states[model.id] = state;
     notifyListeners();
@@ -202,7 +203,7 @@ final transcriptionModelsProvider = Provider<TranscriptionModels>((ref) {
   final models = TranscriptionModels(directory: WhisperController.getModelDir);
   unawaited(models.load());
   // Back in the foreground: pick up the downloads the freeze cut off.
-  final observer = _ResumeObserver(() => unawaited(models.resumeInterrupted()));
+  final observer = ResumeObserver(() => unawaited(models.resumeInterrupted()));
   WidgetsBinding.instance.addObserver(observer);
   ref.onDispose(() {
     WidgetsBinding.instance.removeObserver(observer);
@@ -210,19 +211,3 @@ final transcriptionModelsProvider = Provider<TranscriptionModels>((ref) {
   });
   return models;
 });
-
-/// Calls [onResume] whenever the app returns to the foreground.
-///
-/// A plain observer rather than `AppLifecycleListener`, which asserts on
-/// the order of lifecycle states and so fails on the shortcuts platforms
-/// and tests take (paused straight to resumed).
-final class _ResumeObserver with WidgetsBindingObserver {
-  new(this.onResume);
-
-  final VoidCallback onResume;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) onResume();
-  }
-}

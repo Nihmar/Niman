@@ -2153,25 +2153,23 @@ final class LatvianStrings extends Strings {
   String get transcriptionModelHintLarge =>
       'Visprecīzākais, vajag daudz atmiņas';
   @override
-  String get transcriptionModelDownload => 'Lejupielādēt';
-  @override
   String transcriptionModelDeleteTitle(String model) =>
       'Vai dzēst modeli $model?';
   @override
   String transcriptionModelDeleteBody(String size) =>
       'Tiks atbrīvoti $size. Modeli vēlāk varēsiet lejupielādēt atkārtoti.';
   @override
-  String get transcriptionModelFailed =>
+  String get downloadFailed =>
       'Lejupielāde neizdevās. Pārbaudiet savienojumu un mēģiniet vēlreiz.';
   @override
   String get actionRetry => 'Mēģināt vēlreiz';
   @override
   String get decimalSeparator => ',';
   @override
-  String get transcriptionModelRetrying =>
+  String get downloadRetrying =>
       'Savienojums pārtrūka, notiek atkārtots mēģinājums…';
   @override
-  String transcriptionModelInterrupted(String progress) => 'Pauzēts: $progress';
+  String downloadPaused(String progress) => 'Pauzēts: $progress';
   @override
   String get actionResume => 'Turpināt';
   @override
@@ -2910,4 +2908,78 @@ final class LatvianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kursors nav sarakstā';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Teksta atpazīšana';
+
+  @override
+  String get ocrIntro =>
+      'Nolasa skenētu PDF un attēlu tekstu piezīmē blakus tiem. '
+      'Viss darbojas šajā ierīcē: dzinējs un katra valoda tiek '
+      'lejupielādēti vienreiz, kad pirmo reizi vajadzīgi.';
+
+  @override
+  String get ocrEngineTitle => 'Dzinējs';
+
+  @override
+  String get ocrEngineSystem => 'Sistēmas bibliotēka';
+
+  @override
+  String get ocrEngineBundled => 'Iekļauts lietotnē';
+
+  @override
+  String get ocrEngineUnavailable => 'Šai ierīcei nav dzinēja';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Vai dzēst dzinēju?';
+
+  @override
+  String get ocrQualityTitle => 'Kvalitāte';
+
+  @override
+  String get ocrQualityFast => 'Ātrā';
+
+  @override
+  String get ocrQualityBest => 'Labākā';
+
+  @override
+  String get ocrQualityHint =>
+      'Ātrā: 1–4 MB katrai valodai, žigla jebkurā ierīcē. Labākā: '
+      '10–15 MB katrai valodai, labāka grūtiem skenējumiem, divas '
+      'līdz trīs reizes lēnāka. Katrai kvalitātei ir savas valodas.';
+
+  @override
+  String get ocrLanguageTitle => 'Noklusējuma valoda';
+
+  @override
+  String get ocrAlsoTitle => 'Arī';
+
+  @override
+  String get ocrAlsoSubtitle => 'Lapām, kurās jaucas divas valodas';
+
+  @override
+  String get ocrAlsoNone => 'Nav';
+
+  @override
+  String ocrOnDevice(String size) => 'Šajā ierīcē · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Citas valodas';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Meklēt starp $count valodām';
+
+  @override
+  String get ocrLanguageDefault => 'Noklusējums';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Vai dzēst $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Tiks atbrīvoti $size. Fails tiks lejupielādēts vēlreiz, kad '
+      'tas būs vajadzīgs teksta atpazīšanai.';
 }

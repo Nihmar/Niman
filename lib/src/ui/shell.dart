@@ -46,6 +46,8 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/ocr/ocr_installation.dart';
+import 'package:niman/src/ocr/ocr_installation_provider.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -333,6 +335,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                     reminders: ref.read(reminderServiceProvider),
                     spellCheck: ref.read(spellCheckProvider),
                     transcription: ref.read(transcriptionModelsProvider),
+                    ocr: ref.read(ocrInstallationProvider),
                     openNotes: ref.read(openAudioNotesProvider),
                     shortcuts: ref.read(shortcutServiceProvider),
                     shareIn: ref.read(shareInServiceProvider),
@@ -406,6 +409,7 @@ final class _LibraryShell extends ConsumerStatefulWidget {
     required this.tray,
     required this.window,
     this.transcription,
+    this.ocr,
     this.openNotes,
   });
 
@@ -418,6 +422,9 @@ final class _LibraryShell extends ConsumerStatefulWidget {
   /// The installation's transcription models (settings section); null
   /// hides it.
   final TranscriptionModels? transcription;
+
+  /// What is installed for text recognition; null hides its area.
+  final OcrInstallation? ocr;
 
   /// The OS reminder service (notification taps open the Todo tab).
   final ReminderService reminders;
@@ -2857,6 +2864,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       controller: widget.controller,
       spellCheck: widget.spellCheck,
       transcription: widget.transcription,
+      ocr: widget.ocr,
     ),
   );
 
@@ -3838,6 +3846,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       for (final entry in settingsSearchEntries(
         controller: widget.controller,
         transcription: widget.transcription,
+        ocr: widget.ocr,
         spellCheck: widget.spellCheck,
         libraryName: p.basename(root),
         context: context,
@@ -3871,6 +3880,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             controller: widget.controller,
             spellCheck: widget.spellCheck,
             transcription: widget.transcription,
+            ocr: widget.ocr,
             target: target,
           ),
         ),
@@ -4431,6 +4441,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unsaved: widget.unsavedTracker,
         spellCheck: widget.spellCheck,
         transcription: widget.transcription,
+        ocr: widget.ocr,
         target: _settingsTarget,
       ),
     };
