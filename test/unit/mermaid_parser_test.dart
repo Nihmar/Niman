@@ -336,4 +336,21 @@ void main() {
     expect(chart.subgraphs.first.parent, 'outer');
     expect(chart.subgraphs.last.parent, isNull);
   });
+
+  test('an edge naming a subgraph joins its box, not a node of that name', () {
+    final chart = _chart(
+      'flowchart TD\nA --> S1\nsubgraph S1\nB --> C\nend\nS1 --> S2\n'
+      'subgraph S2\nD\nend',
+    );
+    expect(chart.nodes.map((n) => n.id), ['A', 'B', 'C', 'D']);
+    expect(chart.subgraphs.first.nodeIds, ['B', 'C']);
+    expect(chart.edges.first.to, 'S1');
+    expect(chart.edges.last.from, 'S1');
+    expect(chart.edges.last.to, 'S2');
+  });
+
+  test('a node given a shape keeps the name a subgraph shares', () {
+    final chart = _chart('flowchart TD\nS[Start] --> B\nsubgraph S\nB\nend');
+    expect(_node(chart, 'S').label, 'Start');
+  });
 }

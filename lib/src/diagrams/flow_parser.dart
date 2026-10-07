@@ -43,6 +43,9 @@ final class _FlowParser {
   final List<_SubgraphBuild> _stack = [];
   int? _subgraphStartLine;
 
+  /// The ids written with a shape (`A[Text]`), not only mentioned bare.
+  final Set<String> _shaped = {};
+
   /// Runs the parse and returns the chart.
   Flowchart parse() {
     final lines = source.split('\n');
@@ -84,11 +87,33 @@ final class _FlowParser {
     if (_stack.isNotEmpty) {
       throw MermaidParseException(_subgraphStartLine ?? 1, 'missing "end"');
     }
+    // An id only ever mentioned bare that names a subgraph with nodes is
+    // that subgraph, as in Mermaid (`A --> S`, `S1 --> S2`): its edges join
+    // the box, and no node of that name is drawn. Mentioned before the
+    // subgraph was written, it was taken for a node — one the layout then
+    // pushed out of every box, which spread the chart thousands of pixels
+    // wide.
+    final boxes = {
+      for (final subgraph in _subgraphs)
+        if (subgraph.nodeIds.isNotEmpty) subgraph.id,
+    };
+    bool isBox(String id) => boxes.contains(id) && !_shaped.contains(id);
     return Flowchart(
       direction: direction ?? FlowDirection.topDown,
-      nodes: List.unmodifiable(_nodes),
+      nodes: List.unmodifiable(_nodes.where((node) => !isBox(node.id))),
       edges: List.unmodifiable(_edges),
-      subgraphs: List.unmodifiable(_subgraphs),
+      subgraphs: List.unmodifiable([
+        for (final subgraph in _subgraphs)
+          FlowSubgraph(
+            id: subgraph.id,
+            title: subgraph.title,
+            nodeIds: List.unmodifiable(
+              subgraph.nodeIds.where((id) => !isBox(id)),
+            ),
+            direction: subgraph.direction,
+            parent: subgraph.parent,
+          ),
+      ]),
     );
   }
 
@@ -226,6 +251,7 @@ final class _FlowParser {
     if (open == '[' || open == '(' || open == '{' || open == '>') {
       final shaped = cursor.readShape(number);
       cursor.skipClass();
+      _shaped.add(id);
       return _declare(id, shaped.shape, shaped.label);
     }
     cursor.skipClass();

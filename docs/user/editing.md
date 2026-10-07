@@ -494,7 +494,8 @@ read view and in live mode alike:
 Twenty-two kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
-  shapes (the double circle `(((…)))` too), subgraphs (nested too), every
+  shapes (the double circle `(((…)))` too), subgraphs (nested too, and
+  joined by their names — `A --> S` or `S1 --> S2` reaches the box), every
   edge spelling and its label, and the invisible link `~~~`, which places
   its nodes and draws nothing.
 - **Sequence diagrams** (`sequenceDiagram`): participants and their
