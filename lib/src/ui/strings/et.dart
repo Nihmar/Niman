@@ -95,9 +95,8 @@ final class EstonianStrings extends Strings {
   @override
   String get noteColumnWidthTitle => 'Veeru laius';
   @override
-  String get noteColumnWidthSubtitle => 'Kui lai on märkme veerg, pikslites';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+  String get noteColumnWidthSubtitle =>
+      'Kui lai on märkme veerg; 100% on vaikimisi';
   @override
   String get keyboardOnOpenTitle => 'Klaviatuur avamisel';
   @override

@@ -99,9 +99,7 @@ final class MacedonianStrings extends Strings {
   String get noteColumnWidthTitle => 'Ширина на колоната';
   @override
   String get noteColumnWidthSubtitle =>
-      'Колку е широка колоната на белешката, во пиксели';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Колку е широка колоната на белешката; 100% е стандардната';
   @override
   String get keyboardOnOpenTitle => 'Тастатура при отворање';
   @override

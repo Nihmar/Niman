@@ -98,9 +98,7 @@ final class GalicianStrings extends Strings {
   String get noteColumnWidthTitle => 'Ancho da columna';
   @override
   String get noteColumnWidthSubtitle =>
-      'Canto mide de ancho a columna da nota, en píxeles';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Canto mide de ancho a columna da nota; 100% é o predeterminado';
   @override
   String get keyboardOnOpenTitle => 'Teclado ao abrir';
   @override

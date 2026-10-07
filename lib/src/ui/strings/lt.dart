@@ -100,9 +100,7 @@ final class LithuanianStrings extends Strings {
   String get noteColumnWidthTitle => 'Stulpelio plotis';
   @override
   String get noteColumnWidthSubtitle =>
-      'Koks platus užrašo stulpelis, pikseliais';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Koks platus užrašo stulpelis; 100% – numatytasis';
   @override
   String get keyboardOnOpenTitle => 'Klaviatūra atidarant';
   @override

@@ -214,9 +214,8 @@ List<SettingsSearchEntry> settingsSearchEntries({
       title: AppStrings.noteColumnWidthTitle,
       area: editor,
       rowKey: SettingsKeys.noteColumnWidth,
-      value: () async => AppStrings.noteColumnWidthValue(
-        (await controller.noteColumnWidth).round(),
-      ),
+      value: () async =>
+          AppStrings.noteColumnWidthValue(await controller.noteColumnWidth),
       open: () => pushEditor(SettingsKeys.noteColumnWidth),
     ),
     SettingsSearchEntry(

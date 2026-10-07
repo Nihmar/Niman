@@ -100,9 +100,7 @@ final class BosnianStrings extends Strings {
   String get noteColumnWidthTitle => 'Širina kolone';
   @override
   String get noteColumnWidthSubtitle =>
-      'Koliko je široka kolona bilješke, u pikselima';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Koliko je široka kolona bilješke; 100% je zadana';
   @override
   String get keyboardOnOpenTitle => 'Tastatura pri otvaranju';
   @override

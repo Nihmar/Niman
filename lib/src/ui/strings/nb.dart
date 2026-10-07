@@ -96,9 +96,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get noteColumnWidthTitle => 'Kolonnebredde';
   @override
-  String get noteColumnWidthSubtitle => 'Hvor bred notatkolonnen er, i piksler';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+  String get noteColumnWidthSubtitle =>
+      'Hvor bred notatkolonnen er; 100% er standard';
   @override
   String get keyboardOnOpenTitle => 'Tastatur ved åpning';
   @override

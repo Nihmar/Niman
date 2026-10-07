@@ -99,9 +99,7 @@ final class PolishStrings extends Strings {
   String get noteColumnWidthTitle => 'Szerokość kolumny';
   @override
   String get noteColumnWidthSubtitle =>
-      'Jak szeroka jest kolumna notatki, w pikselach';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Jak szeroka jest kolumna notatki; 100% to domyślna';
   @override
   String get keyboardOnOpenTitle => 'Klawiatura po otwarciu';
   @override

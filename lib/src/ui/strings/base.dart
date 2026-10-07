@@ -41,7 +41,6 @@ abstract base class Strings {
   String get readableLineLengthSubtitle;
   String get noteColumnWidthTitle;
   String get noteColumnWidthSubtitle;
-  String noteColumnWidthValue(int pixels);
   String get keyboardOnOpenTitle;
   String get keyboardOnOpenSubtitle;
   String get editorKindSource;

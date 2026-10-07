@@ -66,9 +66,13 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
       .round();
 
-  /// Steps of 20 px between the narrowest and the widest note column.
+  /// Steps of 5% of the default column between the narrowest and the
+  /// widest: the bounds are whole multiples of it, so every stop reads as
+  /// a round percentage.
   static final int _columnWidthSteps =
-      ((maxNoteColumnWidth - minNoteColumnWidth) / 20).round();
+      ((maxNoteColumnWidth - minNoteColumnWidth) /
+              (defaultNoteColumnWidth * 0.05))
+          .round();
 
   @override
   void initState() {
@@ -263,7 +267,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       min: minNoteColumnWidth,
       max: maxNoteColumnWidth,
       divisions: _columnWidthSteps,
-      format: (value) => AppStrings.noteColumnWidthValue(value.round()),
+      format: AppStrings.noteColumnWidthValue,
     );
     if (width == null) return;
     final controller = widget.controller;
@@ -586,7 +590,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             child: SettingsValueRow(
               title: AppStrings.noteColumnWidthTitle,
               subtitle: AppStrings.noteColumnWidthSubtitle,
-              value: AppStrings.noteColumnWidthValue(_noteColumnWidth.round()),
+              value: AppStrings.noteColumnWidthValue(_noteColumnWidth),
               enabled: _readableLineLength,
               onTap: () => unawaited(_chooseNoteColumnWidth()),
             ),

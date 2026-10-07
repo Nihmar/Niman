@@ -99,9 +99,7 @@ final class BulgarianStrings extends Strings {
   String get noteColumnWidthTitle => 'Ширина на колоната';
   @override
   String get noteColumnWidthSubtitle =>
-      'Колко широка е колоната на бележката, в пиксели';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Колко широка е колоната на бележката; 100% е стандартната';
   @override
   String get keyboardOnOpenTitle => 'Клавиатура при отваряне';
   @override

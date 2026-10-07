@@ -96,9 +96,7 @@ final class EnglishStrings extends Strings {
   String get noteColumnWidthTitle => 'Column width';
   @override
   String get noteColumnWidthSubtitle =>
-      'How wide the note column is, in pixels';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'How wide the note column is; 100% is the default';
   @override
   String get keyboardOnOpenTitle => 'Keyboard on open';
   @override

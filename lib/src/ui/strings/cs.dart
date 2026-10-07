@@ -99,9 +99,7 @@ final class CzechStrings extends Strings {
   String get noteColumnWidthTitle => 'Šířka sloupce';
   @override
   String get noteColumnWidthSubtitle =>
-      'Jak široký je sloupec poznámky, v pixelech';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Jak široký je sloupec poznámky; 100% je výchozí';
   @override
   String get keyboardOnOpenTitle => 'Klávesnice při otevření';
   @override

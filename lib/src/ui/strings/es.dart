@@ -98,9 +98,7 @@ final class SpanishStrings extends Strings {
   String get noteColumnWidthTitle => 'Ancho de la columna';
   @override
   String get noteColumnWidthSubtitle =>
-      'Cuánto mide de ancho la columna de la nota, en píxeles';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Cuánto mide de ancho la columna de la nota; 100% es el predeterminado';
   @override
   String get keyboardOnOpenTitle => 'Teclado al abrir';
   @override

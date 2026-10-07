@@ -96,7 +96,7 @@ leave the file at its next write.
 | `pinnedCollapsed` | false | Tree's pinned section rolled up |
 | `lineNumbers` | true | Editor row-number column |
 | `readableLineLength` | true | Keep a note's text in a centred column |
-| `noteColumnWidth` | 700 | That column's text width, px (480–1400, clamped) |
+| `noteColumnWidth` | 700 | That column's text width, px (490–1400, clamped); Settings shows it as a share of 700 px (70%–200%) |
 | `typewriter` | false | Keep the line being written in the middle of the editor |
 | `editorAutofocus` | false | Raise the keyboard on note open |
 | `editorToolbar` | "" (= shipped) | Arranged toolbar layout |

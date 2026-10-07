@@ -99,9 +99,7 @@ final class GreekStrings extends Strings {
   String get noteColumnWidthTitle => 'Πλάτος στήλης';
   @override
   String get noteColumnWidthSubtitle =>
-      'Πόσο φαρδιά είναι η στήλη της σημείωσης, σε pixel';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Πόσο φαρδιά είναι η στήλη της σημείωσης· 100% είναι η προεπιλογή';
   @override
   String get keyboardOnOpenTitle => 'Πληκτρολόγιο στο άνοιγμα';
   @override

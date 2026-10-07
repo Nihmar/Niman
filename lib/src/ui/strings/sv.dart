@@ -98,9 +98,7 @@ final class SwedishStrings extends Strings {
   String get noteColumnWidthTitle => 'Kolumnbredd';
   @override
   String get noteColumnWidthSubtitle =>
-      'Hur bred anteckningens kolumn är, i pixlar';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Hur bred anteckningens kolumn är; 100% är standard';
   @override
   String get keyboardOnOpenTitle => 'Tangentbord vid öppning';
   @override

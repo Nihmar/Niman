@@ -168,8 +168,10 @@ again brings them back, and a phone never inherits a desktop's tabs.
 A note's text keeps to a centred column instead of running the full
 width of the window: on a wide screen a line of prose stays a line you
 can read. It is on by default, and **Settings → Editor** turns it off
-(*Readable line length*) or sets how wide the text runs (*Column width*,
-700 px unless changed, anything from 480 to 1400).
+(*Readable line length*) or sets how wide the text runs
+(*Column width*, 100% unless changed, anything from 70% to 200% in steps
+of 5%). 100% is 700 px, about 80 characters of prose at the default text
+size.
 
 The same column holds in both editors and in the preview, so switching
 editors does not move the text sideways. The source editor's row

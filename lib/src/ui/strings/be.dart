@@ -97,9 +97,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get noteColumnWidthTitle => 'Шырыня калонкі';
   @override
-  String get noteColumnWidthSubtitle => 'Шырыня калонкі нататкі ў пікселях';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+  String get noteColumnWidthSubtitle =>
+      'Шырыня калонкі нататкі; 100% — прадвызначаная';
   @override
   String get keyboardOnOpenTitle => 'Клавіятура пры адкрыцці';
   @override

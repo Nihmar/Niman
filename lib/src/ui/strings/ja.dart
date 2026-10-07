@@ -88,9 +88,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get noteColumnWidthTitle => '列の幅';
   @override
-  String get noteColumnWidthSubtitle => 'ノートの列の幅（ピクセル）';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+  String get noteColumnWidthSubtitle => 'ノートの列の幅（100% が既定）';
   @override
   String get keyboardOnOpenTitle => '開いたときのキーボード';
   @override

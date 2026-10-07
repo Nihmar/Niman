@@ -96,9 +96,7 @@ final class IcelandicStrings extends Strings {
   String get noteColumnWidthTitle => 'Breidd dálks';
   @override
   String get noteColumnWidthSubtitle =>
-      'Hversu breiður dálkur minnispunktsins er, í dílum';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Hversu breiður dálkur minnispunktsins er; 100% er sjálfgefið';
   @override
   String get keyboardOnOpenTitle => 'Lyklaborð við opnun';
   @override

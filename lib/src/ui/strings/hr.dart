@@ -100,9 +100,7 @@ final class CroatianStrings extends Strings {
   String get noteColumnWidthTitle => 'Širina stupca';
   @override
   String get noteColumnWidthSubtitle =>
-      'Koliko je širok stupac bilješke, u pikselima';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Koliko je širok stupac bilješke; 100% je zadano';
   @override
   String get keyboardOnOpenTitle => 'Tipkovnica pri otvaranju';
   @override

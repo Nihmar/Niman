@@ -99,9 +99,7 @@ final class UkrainianStrings extends Strings {
   @override
   String get noteColumnWidthTitle => 'Ширина колонки';
   @override
-  String get noteColumnWidthSubtitle => 'Ширина колонки нотатки в пікселях';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+  String get noteColumnWidthSubtitle => 'Ширина колонки нотатки; 100% — типова';
   @override
   String get keyboardOnOpenTitle => 'Клавіатура при відкритті';
   @override

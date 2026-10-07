@@ -88,9 +88,7 @@ final class ChineseStrings extends Strings {
   @override
   String get noteColumnWidthTitle => '栏宽';
   @override
-  String get noteColumnWidthSubtitle => '笔记栏的宽度（像素）';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+  String get noteColumnWidthSubtitle => '笔记栏的宽度（100% 为默认）';
   @override
   String get keyboardOnOpenTitle => '打开时弹出键盘';
   @override

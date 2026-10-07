@@ -98,9 +98,7 @@ final class DutchStrings extends Strings {
   String get noteColumnWidthTitle => 'Kolombreedte';
   @override
   String get noteColumnWidthSubtitle =>
-      'Hoe breed de kolom van de notitie is, in pixels';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+      'Hoe breed de kolom van de notitie is; 100% is de standaard';
   @override
   String get keyboardOnOpenTitle => 'Toetsenbord bij openen';
   @override

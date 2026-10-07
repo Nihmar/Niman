@@ -97,9 +97,8 @@ final class DanishStrings extends Strings {
   @override
   String get noteColumnWidthTitle => 'Kolonnebredde';
   @override
-  String get noteColumnWidthSubtitle => 'Hvor bred notens kolonne er, i pixels';
-  @override
-  String noteColumnWidthValue(int pixels) => '$pixels px';
+  String get noteColumnWidthSubtitle =>
+      'Hvor bred notens kolonne er; 100% er standard';
   @override
   String get keyboardOnOpenTitle => 'Tastatur ved åbning';
   @override
