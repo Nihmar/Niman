@@ -246,4 +246,25 @@ Second page <!-- ocr 0.100 0.200 0.900 0.230 -->
     expect(isOcrSidecarOf(text, 'scan.pdf'), isTrue);
     expect(isOcrSidecarOf(text, 'scan.jpg'), isFalse);
   });
+
+  test('a name a note cannot hold: named and known as written (#604)', () {
+    // A note's name loses `: * ? " < > | \`: the sidecar is looked up
+    // under the name createNote gives it.
+    expect(ocrSidecarNames('Scan 10:30.pdf'), [
+      'Scan 1030.ocr',
+      'Scan 1030.pdf.ocr',
+    ]);
+    expect(ocrSidecarName('a "b" c.png'), 'a b c.ocr');
+    for (final name in ['Scan 10:30.pdf', 'a "b" c.png', r'back\slash.pdf']) {
+      final text = ocrSidecarText(
+        fileName: name,
+        languages: 'eng',
+        date: date,
+        paged: true,
+        pages: const {},
+      );
+      expect(isOcrSidecarOf(text, name), isTrue, reason: name);
+      expect(isOcrSidecarOf(text, 'other.pdf'), isFalse, reason: name);
+    }
+  });
 }

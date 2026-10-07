@@ -25,6 +25,7 @@
 /// becomes a tag.
 library;
 
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/markdown/text_escape.dart';
 import 'package:niman/src/ocr/ocr_line.dart';
 import 'package:path/path.dart' as p;
@@ -33,9 +34,10 @@ import 'package:path/path.dart' as p;
 const String ocrSidecarKey = 'ocr';
 
 /// The sidecar's note name for the file [fileName], without `.md`:
-/// the file's name without its extension, then `.ocr`.
+/// the file's name without its extension, then `.ocr` — as a note is
+/// named ([sanitizeName]), so `Scan 10:30.pdf` gets `Scan 1030.ocr`.
 String ocrSidecarName(String fileName) =>
-    '${p.basenameWithoutExtension(fileName)}.ocr';
+    _noteName('${p.posix.basenameWithoutExtension(fileName)}.ocr');
 
 /// The whole sidecar of the file [fileName], read in [languages]
 /// (`ita+eng`) on [date]: [pages] by page number, each under its heading
@@ -47,10 +49,9 @@ String ocrSidecarText({
   required Map<int, List<OcrLine>> pages,
   required bool paged,
 }) {
-  final name = fileName.replaceAll(r'\', r'\\').replaceAll('"', r'\"');
   final head =
       '---\n'
-      '$ocrSidecarKey: "[[$name]]"\n'
+      '$ocrSidecarKey: ${_link(fileName)}\n'
       '$_languageKey: $languages\n'
       '$_recognizedKey: ${_day(date)}\n'
       '---\n';
@@ -100,16 +101,30 @@ String mergeOcrSidecar(
 
 /// The names a sidecar of the file [fileName] may have, without `.md`:
 /// the stem's, then — when another file of that stem owns it — the full
-/// name's.
+/// name's; each as a note is named, so a re-run finds the note the first
+/// run created.
 List<String> ocrSidecarNames(String fileName) => [
   ocrSidecarName(fileName),
-  '${p.basename(fileName)}.ocr',
+  _noteName('${p.posix.basename(fileName)}.ocr'),
 ];
 
 /// Whether [sidecarText] is the sidecar of the file [fileName]: its
-/// frontmatter links to it.
+/// frontmatter links to it, as [ocrSidecarText] writes the link.
 bool isOcrSidecarOf(String sidecarText, String fileName) =>
-    sidecarText.contains('[[${p.basename(fileName)}]]');
+    sidecarText.contains(_wikilink(fileName));
+
+/// The frontmatter's link to the file [fileName], a quoted YAML string.
+String _link(String fileName) => '"${_wikilink(fileName)}"';
+
+/// The wikilink to the file [fileName], its `\` and `"` escaped as the
+/// quoted string it stands in holds them.
+String _wikilink(String fileName) {
+  final name = p.posix.basename(fileName);
+  return '[[${name.replaceAll(r'\', r'\\').replaceAll('"', r'\"')}]]';
+}
+
+/// [name] as `createNote` names the note.
+String _noteName(String name) => sanitizeName(name, fallback: defaultNoteName);
 
 /// The recognized text of [sidecarText] as plain text, for a clipboard:
 /// no frontmatter, no page headings, no position comments, no escapes.

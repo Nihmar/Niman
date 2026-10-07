@@ -11,6 +11,7 @@ import 'package:niman/src/ocr/ocr_language.dart';
 import 'package:niman/src/ocr/ocr_line.dart';
 import 'package:niman/src/ocr/ocr_page_source.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
+import 'package:niman/src/ocr/ocr_sidecar.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
@@ -150,6 +151,22 @@ void main() {
     final merged = await library.readNote('scan.ocr.md');
     expect(merged, contains('PAGE ONE'));
     expect(merged, contains('page 2'));
+  });
+
+  test('a name a note cannot hold is merged on the next run (#604)', () async {
+    final q = queue(count: 2);
+    for (final name in ['Scan 10:30.pdf', 'say "hi".pdf']) {
+      for (var run = 0; run < 3; run++) {
+        final done = finished(q);
+        final job = q.enqueue(path: name, languages: [ita], writer: writer());
+        await done;
+        expect(job.phase, OcrJobPhase.done, reason: '$name, run $run');
+        expect(job.sidecar, '${ocrSidecarName(name)}.md');
+      }
+    }
+    expect(await library.find('Scan 1030.ocr 2.md'), isNull);
+    expect(await library.find('Scan 1030.pdf.ocr.md'), isNull);
+    expect(await library.find('say hi.pdf.ocr.md'), isNull);
   });
 
   test("another file's sidecar of the same stem is left alone", () async {
