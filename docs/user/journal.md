@@ -45,7 +45,9 @@ their first words. In the side panel the day is the entry on screen's,
 or today; on the phone's screen, the day picked.
 
 The week starts on the system's first day — the one its region uses,
-whatever language the app speaks — or on the day the library sets in
+whatever language the app or the system speaks (English set for Germany
+starts on Monday; on Windows, the first day the region settings name) —
+or on the day the library sets in
 **Settings → Appearance → First day of the week**; the task date panel
 and the date picker follow the same day.
 

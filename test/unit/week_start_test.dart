@@ -17,6 +17,14 @@ void main() {
     expect(first('en_US'), 0, reason: 'Sunday');
     expect(first('en-US'), 0);
     expect(first('ar_EG'), 6, reason: 'Saturday');
+    // #578: the region, even one intl has no symbols for under the
+    // language — `en` alone starts on Sunday.
+    expect(first('en_DE.UTF-8'), 1);
+    expect(first('en_SE'), 1);
+    expect(first('en_DK'), 1);
+    expect(first('pt_BR'), 0);
+    expect(first('zh_Hant_TW'), 0, reason: 'past the script');
+    expect(first('dv_MV'), 5, reason: 'Friday');
     // A locale with no region answers its language's day.
     expect(first('de'), 1);
     // The C locale names no region: the platform's is read.
