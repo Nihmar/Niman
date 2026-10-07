@@ -186,6 +186,21 @@ void main() {
     expect(_moved(text, text.length, CaretMotion.lineEnd), text.length);
   });
 
+  test("Home goes to an item's content, then to the line's start", () {
+    // #545: the bullet, the box and the spaces before them are no text.
+    const text = 'intro\n  - [ ] compito\n> 1. citato';
+    final item = text.indexOf('compito');
+    expect(_moved(text, item + 4, CaretMotion.lineTextStart), item);
+    expect(
+      _moved(text, item, CaretMotion.lineTextStart),
+      6,
+      reason: 'from the content, a second Home goes to the line start',
+    );
+    expect(_moved(text, 8, CaretMotion.lineTextStart), item);
+    final quoted = text.indexOf('citato');
+    expect(_moved(text, text.length, CaretMotion.lineTextStart), quoted);
+  });
+
   test('a double click selects the word under the offset', () {
     const text = 'due parole, snake_case_name fine';
     expect(wordRangeAt(text, 5), (4, 10), reason: 'inside `parole`');

@@ -39,7 +39,9 @@ enum CaretMotion {
   /// The end of the caret's line.
   lineEnd,
 
-  /// The start of the caret's line, past its indentation.
+  /// The start of the caret's line's text, past its indentation and any
+  /// marker — a list item's, its task box, a quote's, a heading's — or,
+  /// from there, the start of the line (#545).
   lineTextStart,
 
   /// The start of the note.
@@ -278,16 +280,14 @@ int _lineEnd(SourceBuffer buffer, int at) {
   return buffer.offsetOfLine(line) + buffer.lineLengthAt(line);
 }
 
-/// The start of the line's text, past its indentation.
+/// Where Home goes: the start of the line's text, past its indentation and
+/// any marker ([lineBodyStart]) — an item's content, not its bullet — or,
+/// when the caret is there already, the start of the line, so that both
+/// are a key away (#545).
 int _textStart(SourceBuffer buffer, int at) {
   final line = buffer.lineOf(at);
-  final start = buffer.offsetOfLine(line);
-  final text = buffer.lineAt(line);
-  var index = 0;
-  while (index < text.length && (text[index] == ' ' || text[index] == '\t')) {
-    index++;
-  }
-  return start + index;
+  final body = lineBodyStart(buffer, line);
+  return at == body ? buffer.offsetOfLine(line) : body;
 }
 
 /// How far either side of the caret a grapheme cluster is looked for.
