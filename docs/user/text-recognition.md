@@ -5,10 +5,9 @@ whiteboard, a receipt, a book page — and write it into a note next to the
 file, so search finds it. It runs on the device: nothing is sent anywhere.
 
 The work is tracked in [#532](https://github.com/Nihmar/Niman/issues/532)
-and lands in steps: the engine and its languages, and **Recognize text**,
-are here; the Text pane beside the scan ([#595](https://github.com/Nihmar/Niman/issues/595))
-and selecting the recognized lines on the scan ([#596](https://github.com/Nihmar/Niman/issues/596))
-come next.
+and lands in steps: the engine and its languages, **Recognize text** and
+the text beside its scan are here; selecting the recognized lines on the
+scan ([#596](https://github.com/Nihmar/Niman/issues/596)) comes next.
 
 ## Recognize text
 
@@ -39,6 +38,25 @@ recognized · N words** with **Open text**; if you had left Niman, a
 notification says it instead, and a tap opens the text. A cancel takes
 effect at the end of the page being read, and writes nothing.
 
+## The scan and its text
+
+A file with a recognized text shows it with the scan:
+
+- **On a wide window** the **Text** pane sits beside the scan, named after
+  the text note, with a button that opens it as a note. The row under the
+  file shows and hides it (filled while it is shown). The text is
+  selectable; the place comments are not shown.
+- **On a phone**, or in a narrow pane, a **Scan | Text** switch sits at the
+  top of the file: the scan stays where you left it while you read.
+- **On a phone, a picture's** text comes up as soon as it is read, in a
+  sheet with **Copy** — a receipt or a whiteboard is usually wanted right
+  away — and **Open text**.
+- **In the tree** the text note sits under its file, indented and dimmed,
+  so a folder of scans does not fill up with a second row each. A file
+  being read wears a small ring with its progress.
+
+The pane reads the text again when a recognition rewrites it.
+
 ## The text note
 
 The text goes into a note next to the file, named after it:
@@ -62,8 +80,8 @@ Il contratto scade il 28 febbraio. <!-- ocr 0.093 0.193 0.660 0.215 -->
 - One `## p. N` section per page of a PDF; a picture is one page, with no
   heading.
 - Each line ends in a comment holding where it is on the page. Comments
-  are invisible in every preview, in Niman or anywhere else; they are how
-  a line will be found again on the scan.
+  are invisible in every preview, in Niman's read view and anywhere else;
+  they are how a line will be found again on the scan.
 - What the scan reads as Markdown stays words: a `#` on a receipt is
   written `\#`, never a tag.
 - Recognizing pages again replaces only their sections: your corrections
