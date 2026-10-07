@@ -62,4 +62,34 @@ void main() {
     expect(joining.end.dy, moreOrLessEquals(box['F2']!.top));
     expect(_intruders(chart, layout), isEmpty);
   });
+
+  // Subgraphs side by side with a node among them: pushing the node out of
+  // one box widened the next, box after box, and the chart came out over
+  // 3 000 px wide for nine nodes.
+  test('a node among subgraphs side by side is placed once, clear of all', () {
+    final chart = (parseMermaid(
+      'flowchart TD\nsubgraph A\na1 --> a2\nend\n'
+      'subgraph B\nb1 --> b2\nb2 --> b3\nb3 --> b4\nend\nX\n'
+      'subgraph C\nc1 --> c2\nc2 --> c3\nend\na2 --> X\nX --> c3',
+    ) as MermaidFlowchart).chart;
+    final layout = layoutFlowchart(chart, const DiagramStyle());
+    expect(_intruders(chart, layout), isEmpty);
+    // No box lies on another: the three stand side by side.
+    final boxes = [for (final s in layout.subgraphs) s.rect];
+    for (var i = 0; i < boxes.length; i++) {
+      for (var j = i + 1; j < boxes.length; j++) {
+        expect(boxes[i].overlaps(boxes[j]), isFalse);
+      }
+    }
+    // And no wider than every node in one row, with its gaps and boxes.
+    const style = DiagramStyle();
+    final row = layout.nodes.fold<double>(
+      0,
+      (sum, node) => sum + node.rect.width + style.nodeGap,
+    );
+    expect(
+      layout.size.width,
+      lessThan(row + boxes.length * 2 * style.subgraphPadding),
+    );
+  });
 }
