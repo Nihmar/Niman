@@ -20,6 +20,7 @@ final ocrInstallationProvider = Provider<OcrInstallation>((ref) {
     build: ocrEngineBuildFor(),
     // Opening a library is disk I/O, and a slow one on a phone.
     findInstalled: () => Isolate.run(findInstalledOcrEngine),
+    probe: (path) => Isolate.run(() => openOcrEngine(path)?.versionString()),
   );
   unawaited(installation.load());
   // Back in the foreground: pick up the downloads the freeze cut off.

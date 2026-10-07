@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/download/download_files.dart';
@@ -29,11 +30,14 @@ final class OcrInstallation extends ChangeNotifier {
   ///
   /// [build] is the engine this process would download (none where no
   /// build is published); `findInstalled` looks for one already on the
-  /// device, on a worker isolate in the app.
+  /// device, on a worker isolate in the app; `probe` opens a freshly
+  /// downloaded engine and answers its version, or null when this device
+  /// will not load it.
   new({
     required Future<String> Function() directory,
     required this.build,
     required this._findInstalled,
+    required this._probe,
     DownloadStarter? startDownload,
     List<Duration> retryDelays = Downloader.defaultRetryDelays,
   }) : _directory = directory,
@@ -49,7 +53,7 @@ final class OcrInstallation extends ChangeNotifier {
       files: _files,
       state: stateOf,
       setState: _set,
-      onInstalled: (_) async {},
+      onInstalled: _verify,
       log: _log,
       start: startDownload,
       retryDelays: retryDelays,
@@ -64,6 +68,7 @@ final class OcrInstallation extends ChangeNotifier {
 
   final Future<String> Function() _directory;
   final Future<OcrEngineLibrary?> Function() _findInstalled;
+  final Future<String?> Function(String path) _probe;
   final JsonFile _settingsFile;
 
   /// Everything this device may download, by id.
@@ -224,13 +229,37 @@ final class OcrInstallation extends ChangeNotifier {
   /// Stops [item]'s download and discards its partial file.
   Future<void> cancel(Downloadable item) => _downloader.cancel(item);
 
+  /// Opens the engine as soon as it lands: a library this device refuses
+  /// is found here, from the settings page, rather than by the first
+  /// recognition. Languages need no check: their SHA-256 already passed.
+  Future<void> _verify(Downloadable item) async {
+    final build = this.build;
+    final dir = _dir;
+    if (build == null || item != build || dir == null) return;
+    final path = p.join(dir, build.fileName);
+    final version = await _probe(path);
+    if (version != null) {
+      _log.info('engine ${build.target} loads: Tesseract $version');
+      return;
+    }
+    _log.warning('engine ${build.target} does not load on this device');
+    await _files.delete(build);
+    _set(build, const DownloadFailed('does not load on this device'));
+  }
+
   /// Deletes [item]'s file.
   ///
-  /// The downloaded engine is deleted only while no recognition has loaded
-  /// it: Windows locks a loaded library until the process exits.
+  /// Windows locks a library this process has loaded (the check after the
+  /// download does) until the app exits: that delete fails, the engine
+  /// stays listed, and the next launch can delete it.
   Future<void> delete(Downloadable item) async {
     await cancel(item);
-    await _files.delete(item);
+    try {
+      await _files.delete(item);
+    } on FileSystemException catch (error) {
+      _log.warning('${item.id} not deleted: ${error.osError ?? error}');
+      return;
+    }
     _set(item, const NotDownloaded());
   }
 

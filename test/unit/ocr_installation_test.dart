@@ -52,11 +52,13 @@ void main() {
   OcrInstallation installation({
     OcrEngineBuild? engineBuild,
     OcrEngineLibrary? installed,
+    Future<String?> Function(String path)? probe,
   }) {
     final result = OcrInstallation(
       directory: () async => dir.path,
       build: engineBuild,
       findInstalled: () async => installed,
+      probe: probe ?? (_) async => '5.5.3',
       retryDelays: const [],
       // Every file comes from the local server, whatever its catalog URL.
       startDownload:
@@ -144,6 +146,26 @@ void main() {
     await ocr.delete(build);
     expect(ocr.stateOf(build), isA<NotDownloaded>());
     expect(File(p.join(dir.path, build.fileName)).existsSync(), isFalse);
+  });
+
+  test('an engine this device will not load is thrown away', () async {
+    String? probed;
+    final ocr = installation(
+      engineBuild: build,
+      probe: (path) async {
+        probed = path;
+        return null;
+      },
+    );
+    await ocr.load();
+    await ocr.download(build);
+    expect(probed, p.join(dir.path, build.fileName));
+    expect(
+      ocr.stateOf(build),
+      isA<DownloadFailed>().having((s) => s.resumable, 'resumable', isFalse),
+    );
+    expect(File(p.join(dir.path, build.fileName)).existsSync(), isFalse);
+    expect(ocr.engine, isNull);
   });
 
   test('a download that does not match its SHA-256 fails for good', () async {

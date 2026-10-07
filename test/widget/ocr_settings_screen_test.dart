@@ -49,6 +49,7 @@ void main() {
         directory: () async => dir.path,
         build: build,
         findInstalled: () async => installed,
+        probe: (_) async => '5.5.3',
       );
       await ocr.load();
     });
