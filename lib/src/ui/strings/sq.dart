@@ -1702,6 +1702,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get zenMode => 'Mënyra zen';
   @override
+  String get zoomIn => 'Zmadho';
+  @override
+  String get zoomOut => 'Zvogëlo';
+  @override
+  String get zoomReset => 'Rivendos zmadhimin';
+  @override
   String get zenModeEnter => 'Hyr në mënyrën zen';
   @override
   String get zenModeLeave => 'Dil nga mënyra zen';

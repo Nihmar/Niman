@@ -1682,6 +1682,12 @@ final class CzechStrings extends Strings {
   @override
   String get zenMode => 'Režim zen';
   @override
+  String get zoomIn => 'Přiblížit';
+  @override
+  String get zoomOut => 'Oddálit';
+  @override
+  String get zoomReset => 'Obnovit přiblížení';
+  @override
   String get zenModeEnter => 'Přejít do režimu zen';
   @override
   String get zenModeLeave => 'Opustit režim zen';

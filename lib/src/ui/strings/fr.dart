@@ -1730,6 +1730,12 @@ final class FrenchStrings extends Strings {
   @override
   String get zenMode => 'Mode zen';
   @override
+  String get zoomIn => 'Zoom avant';
+  @override
+  String get zoomOut => 'Zoom arrière';
+  @override
+  String get zoomReset => 'Réinitialiser le zoom';
+  @override
   String get zenModeEnter => 'Passer en mode zen';
   @override
   String get zenModeLeave => 'Quitter le mode zen';

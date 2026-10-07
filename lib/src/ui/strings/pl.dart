@@ -1711,6 +1711,12 @@ final class PolishStrings extends Strings {
   @override
   String get zenMode => 'Tryb zen';
   @override
+  String get zoomIn => 'Powiększ';
+  @override
+  String get zoomOut => 'Pomniejsz';
+  @override
+  String get zoomReset => 'Resetuj powiększenie';
+  @override
   String get zenModeEnter => 'Włącz tryb zen';
   @override
   String get zenModeLeave => 'Wyjdź z trybu zen';

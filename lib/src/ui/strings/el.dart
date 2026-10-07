@@ -1743,6 +1743,12 @@ final class GreekStrings extends Strings {
   @override
   String get zenMode => 'Λειτουργία Ζεν';
   @override
+  String get zoomIn => 'Μεγέθυνση';
+  @override
+  String get zoomOut => 'Σμίκρυνση';
+  @override
+  String get zoomReset => 'Επαναφορά μεγέθυνσης';
+  @override
   String get zenModeEnter => 'Είσοδος σε λειτουργία Ζεν';
   @override
   String get zenModeLeave => 'Έξοδος από τη λειτουργία Ζεν';

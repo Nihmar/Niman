@@ -1675,6 +1675,12 @@ final class TurkishStrings extends Strings {
   @override
   String get zenMode => 'Zen modu';
   @override
+  String get zoomIn => 'Yakınlaştır';
+  @override
+  String get zoomOut => 'Uzaklaştır';
+  @override
+  String get zoomReset => 'Yakınlaştırmayı sıfırla';
+  @override
   String get zenModeEnter => 'Zen moduna gir';
   @override
   String get zenModeLeave => 'Zen modundan çık';

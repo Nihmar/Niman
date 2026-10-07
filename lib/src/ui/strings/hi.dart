@@ -1662,6 +1662,12 @@ final class HindiStrings extends Strings {
   @override
   String get zenMode => 'ज़ेन मोड';
   @override
+  String get zoomIn => 'ज़ूम इन';
+  @override
+  String get zoomOut => 'ज़ूम आउट';
+  @override
+  String get zoomReset => 'ज़ूम रीसेट करें';
+  @override
   String get zenModeEnter => 'ज़ेन मोड में जाएँ';
   @override
   String get zenModeLeave => 'ज़ेन मोड से बाहर निकलें';

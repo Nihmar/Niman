@@ -1700,6 +1700,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get zenMode => 'Modo zen';
   @override
+  String get zoomIn => 'Aumentar zoom';
+  @override
+  String get zoomOut => 'Diminuir zoom';
+  @override
+  String get zoomReset => 'Repor zoom';
+  @override
   String get zenModeEnter => 'Entrar no modo zen';
   @override
   String get zenModeLeave => 'Sair do modo zen';

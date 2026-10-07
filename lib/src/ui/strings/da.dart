@@ -1683,6 +1683,12 @@ final class DanishStrings extends Strings {
   @override
   String get zenMode => 'Zen-tilstand';
   @override
+  String get zoomIn => 'Zoom ind';
+  @override
+  String get zoomOut => 'Zoom ud';
+  @override
+  String get zoomReset => 'Nulstil zoom';
+  @override
   String get zenModeEnter => 'Gå i zen-tilstand';
   @override
   String get zenModeLeave => 'Forlad zen-tilstand';

@@ -1674,6 +1674,12 @@ final class EnglishStrings extends Strings {
   @override
   String get zenMode => 'Zen mode';
   @override
+  String get zoomIn => 'Zoom in';
+  @override
+  String get zoomOut => 'Zoom out';
+  @override
+  String get zoomReset => 'Reset zoom';
+  @override
   String get zenModeEnter => 'Enter Zen mode';
   @override
   String get zenModeLeave => 'Leave Zen mode';

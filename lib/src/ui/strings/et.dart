@@ -1669,6 +1669,12 @@ final class EstonianStrings extends Strings {
   @override
   String get zenMode => 'Zen-režiim';
   @override
+  String get zoomIn => 'Suurenda';
+  @override
+  String get zoomOut => 'Vähenda';
+  @override
+  String get zoomReset => 'Lähtesta suum';
+  @override
   String get zenModeEnter => 'Lülitu zen-režiimi';
   @override
   String get zenModeLeave => 'Välju zen-režiimist';

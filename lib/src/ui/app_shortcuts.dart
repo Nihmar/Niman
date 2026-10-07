@@ -71,6 +71,15 @@ enum AppCommand {
   /// Switch typewriter mode (#70): the line being written in the middle.
   typewriterMode,
 
+  /// The note's text a step larger (#538), in the editor and the preview.
+  zoomIn,
+
+  /// The note's text a step smaller (#538).
+  zoomOut,
+
+  /// The note's text back to its shipped size (#538).
+  zoomReset,
+
   /// Tidy the note's Markdown (#227).
   formatNote,
 
@@ -232,6 +241,19 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       AppCommand.typewriterMode,
       SingleActivator(LogicalKeyboardKey.keyT, control: true, shift: true),
     ),
+    // The browsers' keys for the page's zoom, here the note's (#538).
+    AppShortcut(
+      AppCommand.zoomIn,
+      SingleActivator(LogicalKeyboardKey.equal, control: true),
+    ),
+    AppShortcut(
+      AppCommand.zoomOut,
+      SingleActivator(LogicalKeyboardKey.minus, control: true),
+    ),
+    AppShortcut(
+      AppCommand.zoomReset,
+      SingleActivator(LogicalKeyboardKey.digit0, control: true),
+    ),
     AppShortcut(
       AppCommand.openPalette,
       SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true),
@@ -287,6 +309,9 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.splitDown => AppStrings.splitDown,
   AppCommand.zenMode => AppStrings.zenMode,
   AppCommand.typewriterMode => AppStrings.typewriterTitle,
+  AppCommand.zoomIn => AppStrings.zoomIn,
+  AppCommand.zoomOut => AppStrings.zoomOut,
+  AppCommand.zoomReset => AppStrings.zoomReset,
   AppCommand.formatNote => AppStrings.formatNoteTitle,
   AppCommand.insertDiagram => AppStrings.commandInsertDiagram,
   AppCommand.insertMindMap => AppStrings.commandInsertMindMap,

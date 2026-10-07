@@ -29,6 +29,10 @@ shortcuts lists them and lets you change them:
   leaves it (see [editing](editing.md#zen-mode))
 - `Ctrl/⌘+Shift+T` — typewriter mode on or off: the line being written
   stays in the middle (see [editing](editing.md#typewriter-mode))
+- `Ctrl/⌘+=` / `Ctrl/⌘+-` — zoom the note's text in and out, `Ctrl/⌘+0`
+  back to its normal size: the library's note text size (Settings →
+  Appearance), in the editor and the preview alike; on a phone, *Zoom in*,
+  *Zoom out* and *Reset zoom* are in the command palette
 - `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs (on a
   wide window Settings opens as a floating window)
 

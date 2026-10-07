@@ -1692,6 +1692,12 @@ final class BosnianStrings extends Strings {
   @override
   String get zenMode => 'Zen način';
   @override
+  String get zoomIn => 'Uvećaj';
+  @override
+  String get zoomOut => 'Umanji';
+  @override
+  String get zoomReset => 'Vrati veličinu';
+  @override
   String get zenModeEnter => 'Uđi u Zen način';
   @override
   String get zenModeLeave => 'Izađi iz Zen načina';

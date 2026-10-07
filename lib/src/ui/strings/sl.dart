@@ -1683,6 +1683,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get zenMode => 'Način zen';
   @override
+  String get zoomIn => 'Povečaj';
+  @override
+  String get zoomOut => 'Pomanjšaj';
+  @override
+  String get zoomReset => 'Ponastavi povečavo';
+  @override
   String get zenModeEnter => 'Vstopi v način zen';
   @override
   String get zenModeLeave => 'Zapusti način zen';

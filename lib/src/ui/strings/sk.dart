@@ -1688,6 +1688,12 @@ final class SlovakStrings extends Strings {
   @override
   String get zenMode => 'Režim zen';
   @override
+  String get zoomIn => 'Priblížiť';
+  @override
+  String get zoomOut => 'Oddialiť';
+  @override
+  String get zoomReset => 'Obnoviť priblíženie';
+  @override
   String get zenModeEnter => 'Prejsť do režimu zen';
   @override
   String get zenModeLeave => 'Opustiť režim zen';

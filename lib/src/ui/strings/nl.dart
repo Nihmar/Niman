@@ -1710,6 +1710,12 @@ final class DutchStrings extends Strings {
   @override
   String get zenMode => 'Zen-modus';
   @override
+  String get zoomIn => 'Inzoomen';
+  @override
+  String get zoomOut => 'Uitzoomen';
+  @override
+  String get zoomReset => 'Zoom herstellen';
+  @override
   String get zenModeEnter => 'Zen-modus openen';
   @override
   String get zenModeLeave => 'Zen-modus verlaten';

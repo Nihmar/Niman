@@ -3007,6 +3007,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // Not among what Zen leaves out: in Zen the status row and its
       // switch are hidden, and this is the way to it (#70).
       AppCommand.typewriterMode: _toggleTypewriter,
+      AppCommand.zoomIn: () => unawaited(_zoomNote(1)),
+      AppCommand.zoomOut: () => unawaited(_zoomNote(-1)),
+      AppCommand.zoomReset: () => unawaited(_zoomNote(0)),
       AppCommand.formatNote: () => unawaited(_formatNote()),
       AppCommand.insertDiagram: () =>
           _panelNote?.insertAtCaret(mermaidDiagramTemplate),
@@ -3187,6 +3190,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onInsert: note == null || !note.canInsert ? null : note.insertAtCaret,
     );
   }
+
+  /// The note's text [steps] zoom steps larger (smaller when negative), or
+  /// back to its shipped size at zero (#538): the library's note text size,
+  /// as the settings' slider sets it, in the editor and the preview alike.
+  Future<void> _zoomNote(int steps) => widget.controller.setNoteTextScale(
+    AppTextScales.zoomed(AppTextScales.note, steps),
+  );
 
   Future<void> _formatNote() async {
     final path = _shownNote;

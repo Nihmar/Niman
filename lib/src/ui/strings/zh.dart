@@ -1541,6 +1541,12 @@ final class ChineseStrings extends Strings {
   @override
   String get zenMode => '禅模式';
   @override
+  String get zoomIn => '放大';
+  @override
+  String get zoomOut => '缩小';
+  @override
+  String get zoomReset => '重置缩放';
+  @override
   String get zenModeEnter => '进入禅模式';
   @override
   String get zenModeLeave => '退出禅模式';
