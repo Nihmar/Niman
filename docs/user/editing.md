@@ -324,9 +324,11 @@ text is that item's child, one at the same column is its sibling.
 Markdown* in the palette — puts a note's own text in order without
 changing what it says:
 
-- a line that continues a list item is indented to that item's text, so
-  a wrapped item stays one item (this is what makes such a note read
-  right in the WYSIWYG, where it used to break the numbering);
+- a list item wrapped over several lines is written back on one, its
+  lines joined with a space (a line ending in a hard break keeps it, and
+  an item's second paragraph stays a paragraph of its own); with that
+  rule off, a line that continues an item is indented to the item's text
+  instead, so a wrapped item stays one item;
 - a heading gets one space after its hashes;
 - runs of blank lines become one, and the trailing ones go;
 - spaces left at the end of a line go, except the ones that mean a line
@@ -346,7 +348,8 @@ changing what it says:
   punctuation included: `c++`, `c#` and `objective-c` are names;
 - the note ends with a single newline.
 
-It never reflows your prose, and never touches what it cannot read:
+It never reflows your prose outside a list, and never touches what it
+cannot read:
 tables, math, frontmatter and HTML come back byte for byte, and so does
 the code inside a fence — only its two fence lines are read. Tidying
 twice changes nothing the second time. The note is saved first, so what

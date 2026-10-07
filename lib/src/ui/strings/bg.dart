@@ -1686,6 +1686,9 @@ final class BulgarianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Език на кода';
   @override
+  String get lintRuleJoinWrappedItems =>
+      'Обединяване на пренесени елементи от списък';
+  @override
   String get tidyOnCloseTitle => 'Подреждане на Markdown при затваряне';
   @override
   String get tidyOnCloseSubtitle =>

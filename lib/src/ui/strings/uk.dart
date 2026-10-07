@@ -1677,6 +1677,9 @@ final class UkrainianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Мова блоку коду';
   @override
+  String get lintRuleJoinWrappedItems =>
+      'Об’єднувати перенесені елементи списку';
+  @override
   String get tidyOnCloseTitle => 'Упорядковувати Markdown під час закриття';
   @override
   String get tidyOnCloseSubtitle =>

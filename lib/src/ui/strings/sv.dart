@@ -1676,6 +1676,8 @@ final class SwedishStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Språk i kodblock';
   @override
+  String get lintRuleJoinWrappedItems => 'Slå ihop radbrutna listpunkter';
+  @override
   String get tidyOnCloseTitle => 'Städa upp i Markdown vid stängning';
   @override
   String get tidyOnCloseSubtitle =>

@@ -6,12 +6,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 
-/// Formats [source], and asserts the second pass changes nothing.
-String tidy(String source) {
-  final once = formatMarkdown(source);
-  expect(formatMarkdown(once), once, reason: 'formatting is idempotent');
+/// Formats [source] by [rules], and asserts the second pass changes
+/// nothing.
+String tidy(String source, {Set<LintRule>? rules}) {
+  final once = formatMarkdown(source, rules: rules);
+  expect(
+    formatMarkdown(once, rules: rules),
+    once,
+    reason: 'formatting is idempotent',
+  );
   return once;
 }
+
+/// Every rule but the one joining an item's wrapped lines (#549): what
+/// the tidying makes of a wrapped item it leaves wrapped.
+final Set<LintRule> _keepWraps = {...LintRule.all}
+  ..remove(LintRule.joinWrappedItems);
 
 void main() {
   test('a wrapped list item is indented to its own text', () {
@@ -20,6 +30,7 @@ void main() {
         '1. the first item, which runs on\n'
         'and wraps without any indent\n'
         '2. the second\n',
+        rules: _keepWraps,
       ),
       '1. the first item, which runs on\n'
       '   and wraps without any indent\n'
@@ -29,9 +40,39 @@ void main() {
 
   test('a bullet wraps to its own column, nested ones kept', () {
     expect(
-      tidy('- one that runs on\nand wraps\n  - nested\n'),
+      tidy('- one that runs on\nand wraps\n  - nested\n', rules: _keepWraps),
       '- one that runs on\n  and wraps\n  - nested\n',
     );
+  });
+
+  test('an item wrapped over several lines is written on one', () {
+    // #549, as reported.
+    expect(
+      tidy(
+        '- [ ] **L W** Scorciatoie: cambia una scorciatoia, premi i\n'
+        '      nuovi tasti: funziona **subito**, anche **dentro entrambi gli\n'
+        '      editor**. --> non ha funzionato\n',
+      ),
+      '- [ ] **L W** Scorciatoie: cambia una scorciatoia, premi i nuovi '
+      'tasti: funziona **subito**, anche **dentro entrambi gli editor**. '
+      '--> non ha funzionato\n',
+    );
+    expect(
+      tidy('1. runs on\nlazily\n   - nested\n     wraps too\n'),
+      '1. runs on lazily\n   - nested wraps too\n',
+    );
+    // A quote's marks go with the line they were on.
+    expect(tidy('> - quoted\n>   wrap\n'), '> - quoted wrap\n');
+    // A hard break stays a break; a second paragraph stays one.
+    const kept = '- broken  \n  here\n\n  second\n  paragraph\n';
+    expect(
+      tidy(kept, rules: _keepWraps),
+      '- broken  \n  here\n\n  second\n  paragraph\n',
+    );
+    expect(tidy(kept), '- broken  \n  here\n\n  second paragraph\n');
+    expect(tidy('- slash\\\n  here\n'), '- slash\\\n  here\n');
+    // Prose outside a list is never reflowed.
+    expect(tidy('one\ntwo\n\n- a\n  b\n'), 'one\ntwo\n\n- a b\n');
   });
 
   test('a paragraph is never reflowed', () {
@@ -117,7 +158,10 @@ void main() {
 
   test('a task list keeps its ticks and its wrapped lines', () {
     expect(
-      tidy('- [ ] a task that runs on\nand wraps\n- [x] done\n'),
+      tidy(
+        '- [ ] a task that runs on\nand wraps\n- [x] done\n',
+        rules: _keepWraps,
+      ),
       '- [ ] a task that runs on\n  and wraps\n- [x] done\n',
     );
   });
@@ -154,7 +198,7 @@ void main() {
 
   test('one space after the marker, and the item moves with it', () {
     expect(
-      tidy('-   item\n    continuazione\n-   altro\n'),
+      tidy('-   item\n    continuazione\n-   altro\n', rules: _keepWraps),
       '- item\n  continuazione\n- altro\n',
     );
     // A sublist indented to the old column follows the new one.
@@ -254,8 +298,7 @@ Una relazione è un insieme di coppie ordinate.
 - una relazione `R` su un insieme `A`
   - riflessiva
 - [x] ogni elemento è in relazione con sé stesso
-- [x] la relazione è simmetrica
-  vale per ogni coppia
+- [x] la relazione è simmetrica vale per ogni coppia
 - [ ] la relazione è transitiva
 
 ```dart title="esempio"

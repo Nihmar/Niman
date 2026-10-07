@@ -1712,6 +1712,8 @@ final class FrenchStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Langage du bloc de code';
   @override
+  String get lintRuleJoinWrappedItems => 'Joindre les éléments de liste coupés';
+  @override
   String get tidyOnCloseTitle => 'Ranger le Markdown à la fermeture';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1683,6 +1683,8 @@ final class FinnishStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Koodilohkon kieli';
   @override
+  String get lintRuleJoinWrappedItems => 'Yhdistä rivitetyt luettelon kohdat';
+  @override
   String get tidyOnCloseTitle => 'Siivoa Markdown suljettaessa';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1665,6 +1665,8 @@ final class DanishStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Sprog i kodeblok';
   @override
+  String get lintRuleJoinWrappedItems => 'Saml ombrudte listepunkter';
+  @override
   String get tidyOnCloseTitle => 'Ryd op i Markdown ved lukning';
   @override
   String get tidyOnCloseSubtitle =>

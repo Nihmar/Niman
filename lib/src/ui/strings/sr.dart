@@ -1676,6 +1676,8 @@ final class SerbianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Језик кода';
   @override
+  String get lintRuleJoinWrappedItems => 'Spoji prelomljene stavke liste';
+  @override
   String get tidyOnCloseTitle => 'Сложи Markdown при затварању';
   @override
   String get tidyOnCloseSubtitle =>

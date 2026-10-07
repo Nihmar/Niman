@@ -1563,6 +1563,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'コードブロックの言語';
   @override
+  String get lintRuleJoinWrappedItems => '折り返したリスト項目を1行にまとめる';
+  @override
   String get tidyOnCloseTitle => '閉じるときに Markdown を整える';
   @override
   String get tidyOnCloseSubtitle =>

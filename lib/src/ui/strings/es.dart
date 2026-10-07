@@ -1703,6 +1703,8 @@ final class SpanishStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Lenguaje del bloque de código';
   @override
+  String get lintRuleJoinWrappedItems => 'Unir elementos de lista partidos';
+  @override
   String get tidyOnCloseTitle => 'Ordenar el Markdown al cerrar';
   @override
   String get tidyOnCloseSubtitle =>

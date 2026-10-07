@@ -1704,6 +1704,8 @@ final class CatalanStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Llengua del bloc de codi';
   @override
+  String get lintRuleJoinWrappedItems => 'Uneix els elements de llista partits';
+  @override
   String get tidyOnCloseTitle => 'Endreça el Markdown en tancar';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1679,6 +1679,8 @@ final class HungarianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Kódblokk nyelve';
   @override
+  String get lintRuleJoinWrappedItems => 'Tördelt listaelemek összevonása';
+  @override
   String get tidyOnCloseTitle => 'Markdown rendbetétele bezáráskor';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1679,6 +1679,9 @@ final class BasqueStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Kode-blokearen hizkuntza';
   @override
+  String get lintRuleJoinWrappedItems =>
+      'Lerro anitzeko zerrenda-elementuak batu';
+  @override
   String get tidyOnCloseTitle => 'Markdown txukundu ixtean';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1671,6 +1671,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Kodo bloko kalba';
   @override
+  String get lintRuleJoinWrappedItems => 'Sujungti perkeltus sąrašo elementus';
+  @override
   String get tidyOnCloseTitle => 'Sutvarkyti Markdown uždarant';
   @override
   String get tidyOnCloseSubtitle =>

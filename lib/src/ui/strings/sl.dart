@@ -1665,6 +1665,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Jezik bloka kode';
   @override
+  String get lintRuleJoinWrappedItems => 'Združi prelomljene elemente seznama';
+  @override
   String get tidyOnCloseTitle => 'Pospravi Markdown ob zaprtju';
   @override
   String get tidyOnCloseSubtitle =>

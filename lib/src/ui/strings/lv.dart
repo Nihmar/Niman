@@ -1667,6 +1667,8 @@ final class LatvianStrings extends Strings {
   @override
   String get lintRuleFenceLanguage => 'Koda bloka valoda';
   @override
+  String get lintRuleJoinWrappedItems => 'Apvienot pārnestus saraksta vienumus';
+  @override
   String get tidyOnCloseTitle => 'Sakārtot Markdown, aizverot';
   @override
   String get tidyOnCloseSubtitle =>
