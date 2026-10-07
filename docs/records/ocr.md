@@ -174,24 +174,38 @@ start and model load included; a picture **109 ms**.
 - **Escaped like a PDF's quoted text** (`markdown/text_escape.dart`): a
   `#`, a `[[`, a `<!--` on a scan stay words.
 - **Merged by page**: recognizing pages again replaces only their
-  `## p. N` sections, in page order. The frontmatter is kept as it is
-  (the `recognized:` date stays the first one).
+  `## p. N` sections, in page order. The frontmatter is kept, except
+  `language:` and `recognized:`, which take the latest recognition's
+  (#609).
 - **Name**: `<stem>.ocr.md` beside the file; when that note belongs to
   another file of the same stem (`scan.pdf`, `scan.jpg`), `<name>.ocr.md`.
+  Both pass through `sanitizeName`, as `createNote` does, so a re-run
+  looks the note up under the name it was given (`Scan 10:30.pdf` →
+  `Scan 1030.ocr.md`), and ownership is checked against the link as the
+  frontmatter escapes it (#604).
   The `ocr:` link names the file only: the move rewrite skips frontmatter
   (as it does for `annotates:`), and a name-only link still resolves after
   the two move together.
 - **Cancel** kills the worker isolate; a kill lands between two Dart
   instructions, so the page being read finishes first, and nothing is
-  written. A job pauses with the app when Android freezes it, and goes on
+  written. During the download phase the job stops waiting at once and
+  cancels the downloads it started, not one the settings page started
+  (#605).
+- **What is on disk**: the provider loads at creation, and a press of
+  Recognize text loads only when nothing has; the job scans the
+  downloads again before it checks what is missing, so a file deleted
+  outside the app is downloaded again rather than failing to open
+  (#606, #610). A job pauses with the app when Android freezes it, and goes on
   in the foreground; no foreground service.
 - **Done**: a snackbar with Open text; when the app is not in front, also
   a notification, through the plugin the reminders initialize (initializing
   it again would take their taps) on its own Android channel, its payload
   `ocr:<sidecar>` routed by the shell's tap listener.
+- **A PDF with text**: the sheet says so when the page on screen
+  already carries text (`OcrPdfPages.hasText`), and still lets the
+  reader go ahead (#611).
 - **Not done here**: the pages done are not marked on the scan while a
-  job runs, and a PDF that already has a text layer is not detected. The
-  tree's ring came with #595, the line overlay with #596.
+  job runs. The tree's ring came with #595, the line overlay with #596.
 
 ## The text beside its scan — phase 3 (#595)
 

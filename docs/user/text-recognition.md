@@ -28,6 +28,9 @@ It asks:
 - It says where the text goes, and, the first time, what it has to
   download first (the engine, a language) and how much: **Download and
   recognize** does both.
+- A PDF whose page already has text in it — made on a computer rather
+  than scanned — says so: it may not need recognizing, and you can still
+  go ahead.
 
 The file can be closed while it is read, page after page. On the
 desktop the row under the file says **Recognizing p. 3 of 4** with
@@ -35,7 +38,9 @@ desktop the row under the file says **Recognizing p. 3 of 4** with
 note you open meanwhile. When it is done a message says **Text
 recognized · N words** with **Open text**; if you had left Niman, a
 notification says it instead, and a tap opens the text. A cancel takes
-effect at the end of the page being read, and writes nothing.
+effect at the end of the page being read, and writes nothing; while the
+engine or a language is still downloading it takes effect at once, and
+stops those downloads (not one you started in Settings).
 
 ## The scan and its text
 
@@ -106,7 +111,10 @@ Il contratto scade il 28 febbraio. <!-- ocr 0.093 0.193 0.660 0.215 -->
   written `\#`, never a tag.
 - Recognizing pages again replaces only their sections: your corrections
   on the other pages stay. A picture's note is replaced under its
-  frontmatter.
+  frontmatter. `language:` and `recognized:` become the latest
+  recognition's; anything else you added to the frontmatter stays.
+- The note's name is the file's as a note can hold it: `Scan 10:30.pdf`
+  gets `Scan 1030.ocr.md`, and a later recognition finds it again.
 - The link names the file only, so the note keeps pointing at it when the
   two move together.
 
