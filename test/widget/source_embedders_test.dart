@@ -479,6 +479,36 @@ void main() {
             rig.agree('x');
           });
 
+          testWidgets('select all and backspace empties the note', (
+            tester,
+          ) async {
+            final rig = _Rig(tester, profile, mode, note);
+            await rig.pump();
+            await rig.tapAt(0, 1);
+            view(tester).selectAll();
+            await tester.pump();
+            await rig.platform.backspace();
+            rig.agree('');
+          });
+
+          testWidgets("the platform's select all is the note's", (
+            tester,
+          ) async {
+            // #540: Android selected all of its window of a long note, and
+            // deleting it left the rest of the note.
+            final rig = _Rig(tester, profile, mode, note);
+            await rig.pump();
+            await rig.tapAt(0, 1);
+            view(tester).placeCaret(lineStart(rig.buffer, 1500));
+            await tester.pump();
+            await rig.platform.selectAllOfCopy();
+            await tester.pump();
+            expect(view(tester).selection.start, 0);
+            expect(view(tester).selection.end, rig.buffer.length);
+            await rig.platform.backspace();
+            rig.agree('');
+          });
+
           testWidgets('a keystroke built on the window before a move', (
             tester,
           ) async {
