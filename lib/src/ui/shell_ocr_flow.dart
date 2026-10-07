@@ -1,12 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show wideBreakpoint;
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_job.dart';
 import 'package:niman/src/ocr/ocr_page_source.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
+import 'package:niman/src/ocr/ocr_sidecar.dart';
 import 'package:niman/src/ui/ocr/ocr_notifier.dart';
+import 'package:niman/src/ui/ocr/ocr_result_sheet.dart';
 import 'package:niman/src/ui/ocr/recognize_text_sheet.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -99,11 +103,18 @@ final class ShellOcrFlow {
     );
   }
 
-  /// Says [job] is over: in a snackbar while [inFront], else in a
-  /// notification (a failure only in the app).
+  /// Says [job] is over: in a snackbar while [inFront] — on a phone, a
+  /// picture's text in a sheet of its own — else in a notification (a
+  /// failure only in the app).
   void finished(BuildContext context, OcrJob job, {required bool inFront}) {
     final sidecar = job.sidecar;
     switch (job.phase) {
+      case OcrJobPhase.done
+          when sidecar != null &&
+              inFront &&
+              p.extension(job.path).toLowerCase() != '.pdf' &&
+              MediaQuery.sizeOf(context).width < wideBreakpoint:
+        unawaited(_showPicture(context, job, sidecar));
       case OcrJobPhase.done when sidecar != null:
         final message = AppStrings.ocrRecognized(job.words);
         if (!inFront) {
@@ -131,5 +142,23 @@ final class ShellOcrFlow {
         break;
     }
     queue.dismiss(job);
+  }
+
+  Future<void> _showPicture(
+    BuildContext context,
+    OcrJob job,
+    String sidecar,
+  ) async {
+    final ops = controller.ops;
+    if (ops == null) return;
+    final text = ocrSidecarPlainText(await ops.readNote(sidecar));
+    if (!context.mounted) return;
+    await showOcrResultSheet(
+      context,
+      words: job.words,
+      savedAs: sidecar,
+      text: text,
+      onOpen: () => onOpen(sidecar),
+    );
   }
 }

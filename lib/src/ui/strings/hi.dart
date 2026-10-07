@@ -2992,4 +2992,22 @@ final class HindiStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'स्क्रीन पर PDF या चित्र चाहिए';
+
+  @override
+  String get ocrTextTitle => 'पाठ';
+
+  @override
+  String get ocrScanTitle => 'स्कैन';
+
+  @override
+  String get ocrOpenAsNote => 'नोट के रूप में खोलें';
+
+  @override
+  String get ocrShowText => 'पाठ दिखाएँ';
+
+  @override
+  String get ocrHideText => 'पाठ छिपाएँ';
+
+  @override
+  String get ocrCopyText => 'कॉपी करें';
 }

@@ -3064,4 +3064,22 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Потребен е PDF или слика на екранот';
+
+  @override
+  String get ocrTextTitle => 'Текст';
+
+  @override
+  String get ocrScanTitle => 'Скен';
+
+  @override
+  String get ocrOpenAsNote => 'Отвори како белешка';
+
+  @override
+  String get ocrShowText => 'Прикажи го текстот';
+
+  @override
+  String get ocrHideText => 'Скриј го текстот';
+
+  @override
+  String get ocrCopyText => 'Копирај';
 }

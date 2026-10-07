@@ -23,6 +23,7 @@ import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/ocr/ocr_file_controls.dart';
+import 'package:niman/src/ui/ocr/ocr_scan_text.dart';
 import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:path/path.dart' as p;
 
@@ -127,33 +128,42 @@ final class AttachmentView extends StatelessWidget {
     return ColoredBox(
       color: theme.colorScheme.surfaceContainerLowest,
       // A PDF brings its own row, with the link to its page.
-      child: _isPdf
-          ? PdfDocumentView(
-              path: path,
-              launcher: launcher,
-              linkType: linkType,
-              positions: positions,
-              anchor: anchor,
-              reloadToken: reloadToken,
-              onAnnotate: onAnnotate,
-              marks: marks,
-              ocr: ocr,
-            )
-          : Column(
-              children: [
-                Expanded(child: _picture(context)),
-                AttachmentBar(
-                  path: path,
-                  launcher: launcher,
-                  actions: [
-                    if (ocr case final ocr?)
-                      OcrFileControls(actions: ocr, path: path),
-                  ],
-                ),
-              ],
-            ),
+      child: _withText(
+        _isPdf
+            ? PdfDocumentView(
+                path: path,
+                launcher: launcher,
+                linkType: linkType,
+                positions: positions,
+                anchor: anchor,
+                reloadToken: reloadToken,
+                onAnnotate: onAnnotate,
+                marks: marks,
+                ocr: ocr,
+              )
+            : Column(
+                children: [
+                  Expanded(child: _picture(context)),
+                  AttachmentBar(
+                    path: path,
+                    launcher: launcher,
+                    actions: [
+                      if (ocr case final ocr?)
+                        OcrFileControls(actions: ocr, path: path),
+                    ],
+                  ),
+                ],
+              ),
+      ),
     );
   }
+
+  /// [view] with its recognized text beside it, or under a switch, when
+  /// the file has one (#595).
+  Widget _withText(Widget view) => switch (ocr) {
+    final ocr? => OcrScanText(actions: ocr, path: path, scan: view),
+    null => view,
+  };
 
   /// A picture at the size the pane allows, a pinch or a wheel away from
   /// its pixels.

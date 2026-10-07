@@ -3023,4 +3023,22 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Krever en PDF eller et bilde på skjermen';
+
+  @override
+  String get ocrTextTitle => 'Tekst';
+
+  @override
+  String get ocrScanTitle => 'Skanning';
+
+  @override
+  String get ocrOpenAsNote => 'Åpne som notat';
+
+  @override
+  String get ocrShowText => 'Vis teksten';
+
+  @override
+  String get ocrHideText => 'Skjul teksten';
+
+  @override
+  String get ocrCopyText => 'Kopier';
 }

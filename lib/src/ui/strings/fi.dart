@@ -3058,4 +3058,22 @@ final class FinnishStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Vaatii PDF:n tai kuvan näytölle';
+
+  @override
+  String get ocrTextTitle => 'Teksti';
+
+  @override
+  String get ocrScanTitle => 'Skannaus';
+
+  @override
+  String get ocrOpenAsNote => 'Avaa muistiinpanona';
+
+  @override
+  String get ocrShowText => 'Näytä teksti';
+
+  @override
+  String get ocrHideText => 'Piilota teksti';
+
+  @override
+  String get ocrCopyText => 'Kopioi';
 }

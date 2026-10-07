@@ -3068,4 +3068,22 @@ final class BosnianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Potreban je PDF ili slika na ekranu';
+
+  @override
+  String get ocrTextTitle => 'Tekst';
+
+  @override
+  String get ocrScanTitle => 'Sken';
+
+  @override
+  String get ocrOpenAsNote => 'Otvori kao bilješku';
+
+  @override
+  String get ocrShowText => 'Prikaži tekst';
+
+  @override
+  String get ocrHideText => 'Sakrij tekst';
+
+  @override
+  String get ocrCopyText => 'Kopiraj';
 }

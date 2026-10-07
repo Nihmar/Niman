@@ -3001,4 +3001,22 @@ final class TurkishStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Ekranda bir PDF ya da görsel gerekir';
+
+  @override
+  String get ocrTextTitle => 'Metin';
+
+  @override
+  String get ocrScanTitle => 'Tarama';
+
+  @override
+  String get ocrOpenAsNote => 'Not olarak aç';
+
+  @override
+  String get ocrShowText => 'Metni göster';
+
+  @override
+  String get ocrHideText => 'Metni gizle';
+
+  @override
+  String get ocrCopyText => 'Kopyala';
 }

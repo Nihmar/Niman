@@ -3108,4 +3108,22 @@ final class GermanStrings extends Strings {
   @override
   String get commandNeedOcrFile =>
       'Braucht ein PDF oder ein Bild auf dem Bildschirm';
+
+  @override
+  String get ocrTextTitle => 'Text';
+
+  @override
+  String get ocrScanTitle => 'Scan';
+
+  @override
+  String get ocrOpenAsNote => 'Als Notiz öffnen';
+
+  @override
+  String get ocrShowText => 'Text anzeigen';
+
+  @override
+  String get ocrHideText => 'Text ausblenden';
+
+  @override
+  String get ocrCopyText => 'Kopieren';
 }

@@ -190,9 +190,37 @@ start and model load included; a picture **109 ms**.
   it again would take their taps) on its own Android channel, its payload
   `ocr:<sidecar>` routed by the shell's tap listener.
 - **Not done here**: the pages done are not marked on the scan yet — that
-  needs the line overlay of #596; the tree's ring on a file being read
-  waits for the tree work of #595; a PDF that already has a text layer is
-  not detected.
+  needs the line overlay of #596 — and a PDF that already has a text layer
+  is not detected. The tree's ring came with #595.
+
+## The text beside its scan — phase 3 (#595)
+
+- **`OcrScanText`** wraps a PDF's or a picture's view when the file has a
+  sidecar (`findOcrSidecar`: the note under one of the two sidecar names
+  whose frontmatter links to the file). From 720 px of pane up, the
+  **Text** pane (`OcrTextPane`, a `MarkdownReadView` over the sidecar,
+  selectable) sits beside the scan at 40% of the width (280–460 px), shown
+  and hidden by the file bar's button through `OcrTextToggle`; below, a
+  **Scan | Text** `SegmentedButton` over an `IndexedStack`, so the PDF
+  keeps its page while the text is read. The pane reads the sidecar again
+  when a job of its file reaches done.
+- **The read view hid nothing**: it drew inline raw HTML as text, the
+  position comments included. An inline `<!-- … -->` now renders nothing
+  and leaves the plain text too (`fix(read)`, a commit of its own): what
+  every Markdown renderer does, and what a writer's note-to-self wanted
+  anyway. Other inline tags still show, and HTML blocks still show as code.
+- **The tree** (`nestOcrSidecars`): while a folder's rows are flattened,
+  each `<stem>.ocr.md` moves right under the PDF or picture of that stem
+  (`<name>.ocr.md` under the file of that full name), one level in,
+  dimmed, with the scan's icon. Told by the name alone, so the tree reads
+  nothing more; O(n) per folder, over rows it already holds. A sidecar
+  with no such file beside it stays where it sorts.
+- **The ring**: `OcrTreeRing`, on a recognizable file's row, listens to
+  the queue and shows the job's fraction while it runs.
+- **On a phone a picture's text** comes in a sheet when its job ends with
+  the app in front (`showOcrResultSheet`): the words, the plain text
+  (`ocrSidecarPlainText` drops the frontmatter, the headings, the comments
+  and the escapes), Copy, Open text. A PDF keeps the snackbar.
 
 ## Build impact
 

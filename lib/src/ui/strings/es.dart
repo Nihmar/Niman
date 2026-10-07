@@ -3084,4 +3084,22 @@ final class SpanishStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Necesita un PDF o una imagen en pantalla';
+
+  @override
+  String get ocrTextTitle => 'Texto';
+
+  @override
+  String get ocrScanTitle => 'Escaneo';
+
+  @override
+  String get ocrOpenAsNote => 'Abrir como nota';
+
+  @override
+  String get ocrShowText => 'Mostrar el texto';
+
+  @override
+  String get ocrHideText => 'Ocultar el texto';
+
+  @override
+  String get ocrCopyText => 'Copiar';
 }

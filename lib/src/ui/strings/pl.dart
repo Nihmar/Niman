@@ -3091,4 +3091,22 @@ final class PolishStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Wymaga pliku PDF lub obrazu na ekranie';
+
+  @override
+  String get ocrTextTitle => 'Tekst';
+
+  @override
+  String get ocrScanTitle => 'Skan';
+
+  @override
+  String get ocrOpenAsNote => 'Otwórz jako notatkę';
+
+  @override
+  String get ocrShowText => 'Pokaż tekst';
+
+  @override
+  String get ocrHideText => 'Ukryj tekst';
+
+  @override
+  String get ocrCopyText => 'Kopiuj';
 }

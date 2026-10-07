@@ -1559,4 +1559,24 @@ abstract base class Strings {
 
   /// Why the Recognize text command is off.
   String get commandNeedOcrFile;
+
+  // The scan and its text (#595).
+
+  /// The pane, or the switch side, showing the recognized text (#595).
+  String get ocrTextTitle;
+
+  /// The switch side showing the scan.
+  String get ocrScanTitle;
+
+  /// Opens the recognized text as a note.
+  String get ocrOpenAsNote;
+
+  /// Shows the Text pane beside the scan.
+  String get ocrShowText;
+
+  /// Hides the Text pane.
+  String get ocrHideText;
+
+  /// Copies the recognized text.
+  String get ocrCopyText;
 }

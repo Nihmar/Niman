@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/ocr/ocr_job_status.dart';
+import 'package:niman/src/ui/ocr/ocr_text_toggle.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The file bar's part of text recognition: its job's progress while one
@@ -28,10 +29,22 @@ final class OcrFileControls extends StatelessWidget {
       builder: (context, _) {
         final job = actions.queue.jobFor(relative);
         final busy = job != null && !job.finished;
+        final text = OcrTextToggle.maybeOf(context);
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             OcrJobStatus(queue: actions.queue, path: relative),
+            // Filled while the pane is shown: the outline says it is off.
+            if (text != null)
+              IconButton(
+                key: const Key('ocr-text-toggle'),
+                tooltip: text.shown
+                    ? AppStrings.ocrHideText
+                    : AppStrings.ocrShowText,
+                icon: Icon(text.shown ? Icons.article : Icons.article_outlined),
+                visualDensity: VisualDensity.compact,
+                onPressed: text.toggle,
+              ),
             IconButton(
               key: const Key('recognize-button'),
               tooltip: AppStrings.ocrRecognizeAction,

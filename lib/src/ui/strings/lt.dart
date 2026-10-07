@@ -3081,4 +3081,22 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Reikia PDF arba paveikslėlio ekrane';
+
+  @override
+  String get ocrTextTitle => 'Tekstas';
+
+  @override
+  String get ocrScanTitle => 'Skenas';
+
+  @override
+  String get ocrOpenAsNote => 'Atverti kaip užrašą';
+
+  @override
+  String get ocrShowText => 'Rodyti tekstą';
+
+  @override
+  String get ocrHideText => 'Slėpti tekstą';
+
+  @override
+  String get ocrCopyText => 'Kopijuoti';
 }
