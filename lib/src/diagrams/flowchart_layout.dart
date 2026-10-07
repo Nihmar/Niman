@@ -13,6 +13,7 @@ import 'package:flutter/painting.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/diagram_metrics.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/flow_box_edges.dart';
 import 'package:niman/src/diagrams/flow_clusters.dart';
 import 'package:niman/src/diagrams/flow_edge_route.dart';
 import 'package:niman/src/diagrams/flow_label_clearance.dart';
@@ -57,6 +58,7 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
   }
 
   final layers = flowLayers(chart);
+  final held = flowBoxMembers(chart);
 
   // Main-axis (y) positions, one band per rank.
   final rankMain = List<double>.filled(layers.length, 0);
@@ -67,7 +69,7 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     }
     rankMain[r] = tallest;
   }
-  final gaps = _rankGaps(chart, layers, style, across: across);
+  final gaps = _rankGaps(chart, layers, held, style, across: across);
   final rankTop = List<double>.filled(layers.length, 0);
   var cursor = 0.0;
   for (var r = 0; r < layers.length; r++) {
@@ -98,17 +100,36 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     }
   }
   clearSubgraphBoxes(chart, layers, rects, style);
+  final subgraphs = flowSubgraphBoxes(chart, rects, style);
+  // Where an edge's ends are: a node, or the box of a subgraph it names.
+  final ends = {
+    for (final box in subgraphs) box.subgraph.id: box.rect,
+    ...rects,
+  };
 
   final rankOf = <String, int>{
     for (var r = 0; r < layers.length; r++)
       for (final id in layers[r]) id: r,
   };
+  // The ranks a node or a subgraph's box spans, first and last.
+  (int, int)? span(String id) {
+    final rank = rankOf[id];
+    if (rank != null) return (rank, rank);
+    final ranks = [
+      for (final member in held[id] ?? const <String>{}) ?rankOf[member],
+    ];
+    if (ranks.isEmpty) return null;
+    return (ranks.reduce(math.min), ranks.reduce(math.max));
+  }
+
   // The nodes of the ranks an edge passes, which it bends round.
   Iterable<Rect> passing(FlowEdge edge) {
-    final from = rankOf[edge.from];
-    final to = rankOf[edge.to];
+    final from = span(edge.from);
+    final to = span(edge.to);
     if (from == null || to == null || from == to) return const [];
-    final (first, last) = to > from ? (from + 1, to - 1) : (to, from);
+    final (first, last) = to.$1 > from.$2
+        ? (from.$2 + 1, to.$1 - 1)
+        : (math.min(from.$1, to.$1), math.max(from.$2, to.$2));
     return [
       for (var r = first; r <= last; r++)
         for (final id in layers[r]) rects[id]!,
@@ -120,14 +141,14 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
   // the shared side it should be put.
   final draft = [
     for (final edge in chart.edges)
-      routeFlowEdge(edge, rects, style, across: across, passing: passing(edge)),
+      routeFlowEdge(edge, ends, style, across: across, passing: passing(edge)),
   ];
   final ports = _ports(chart.edges, rankOf, rects, draft);
   final edges = [
     for (var i = 0; i < chart.edges.length; i++)
       routeFlowEdge(
         chart.edges[i],
-        rects,
+        ends,
         style,
         across: across,
         passing: passing(chart.edges[i]),
@@ -135,7 +156,6 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
         endX: ports.ends[i],
       ),
   ];
-  final subgraphs = flowSubgraphBoxes(chart, rects, style);
 
   // The drawing's own bounds, then the direction's turn.
   var minX = 0.0;
@@ -196,13 +216,17 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
 
 /// The gap below each rank: the style's, or more where an edge to the next
 /// rank carries a label, end texts or caps that need the room — a label
-/// on a short edge sat on its caps and on the texts at its ends. A
-/// labelled edge into or out of a subgraph also crosses its box's padding
-/// and title band in the gap: room for those too, so the label fits
-/// wholly in the box or wholly out of it rather than across its outline.
+/// on a short edge sat on its caps and on the texts at its ends. An edge
+/// into or out of a subgraph also crosses its box's padding and title band
+/// in the gap: room for those too, so a label fits wholly in the box or
+/// wholly out of it rather than across its outline, and a bare edge keeps
+/// the style's gap past them — with the style's alone, the box of a
+/// subgraph an edge led into reached up to the node it came from. [held]
+/// is every node each subgraph's box holds ([flowBoxMembers]).
 List<double> _rankGaps(
   Flowchart chart,
   List<List<String>> layers,
+  Map<String, Set<String>> held,
   DiagramStyle style, {
   required bool across,
 }) {
@@ -227,32 +251,52 @@ List<double> _rankGaps(
     return math.max(cap.isMarked ? _capRoom : 0, room);
   }
 
-  final members = [
-    for (final subgraph in chart.subgraphs) subgraph.nodeIds.toSet(),
-  ];
+  final members = held.values;
   // What a box's outline takes in the gap: its padding and its title band
   // (`flowSubgraphBoxes`).
-  final outline = style.subgraphPadding + line + 8;
+  final band = line + 8;
+  final outline = style.subgraphPadding + band;
+  // What a box takes on the side an edge enters it by, and on the side it
+  // leaves it by: the band lies at the canonical top of a chart drawn down,
+  // at the bottom of one drawn up, and across the ranks of one drawn across.
+  final entry =
+      style.subgraphPadding +
+      (chart.direction == FlowDirection.topDown ? band : 0);
+  final exit =
+      style.subgraphPadding +
+      (chart.direction == FlowDirection.bottomUp ? band : 0);
 
   final gaps = List<double>.filled(layers.length, style.rankGap);
-  for (final edge in chart.edges) {
-    final r = rank[edge.from];
-    if (r == null || rank[edge.to] != r + 1) continue;
+  for (final (:edge, :from, :to) in flowRankedEdges(chart, held)) {
+    final r = rank[from];
+    if (r == null || rank[to] != r + 1) continue;
     final label = reach(edge.label);
     final ends = math.max(
       end(edge.start, edge.startLabel),
       end(edge.end, edge.endLabel),
     );
-    // The label sits halfway: clear of the larger end on both sides.
-    final need = label == 0
-        ? end(edge.start, edge.startLabel) + end(edge.end, edge.endLabel)
-        : 2 * ends + label + style.edgeLabelPadding.vertical + 4;
-    final crossed = label == 0
-        ? 0
-        : members
-              .where((m) => m.contains(edge.from) != m.contains(edge.to))
-              .length;
-    gaps[r] = math.max(gaps[r], need + crossed * outline);
+    final exits = members
+        .where((m) => m.contains(from) && !m.contains(to))
+        .length;
+    final entries = members
+        .where((m) => m.contains(to) && !m.contains(from))
+        .length;
+    final double need;
+    if (label == 0) {
+      final caps =
+          end(edge.start, edge.startLabel) + end(edge.end, edge.endLabel);
+      final crossing = exits * exit + entries * entry;
+      need = crossing == 0 ? caps : crossing + math.max(caps, style.rankGap);
+    } else {
+      // The label sits halfway: clear of the larger end on both sides.
+      need =
+          2 * ends +
+          label +
+          style.edgeLabelPadding.vertical +
+          4 +
+          (exits + entries) * outline;
+    }
+    gaps[r] = math.max(gaps[r], need);
   }
   return gaps;
 }

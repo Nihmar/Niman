@@ -50,14 +50,16 @@ final class FlowCursor {
     return source.substring(start, position);
   }
 
-  /// Steps over a node's `:::class` shorthand: a class is a colour a note's
-  /// diagram is drawn without, like a `classDef`.
-  void skipClass() {
-    if (!source.startsWith(':::', position)) return;
+  /// Reads a node's `:::class` shorthand and returns the class's name, or
+  /// null when none starts here.
+  String? readClass() {
+    if (!source.startsWith(':::', position)) return null;
     position += 3;
+    final start = position;
     while (!atEnd && !_classEnds) {
       position++;
     }
+    return source.substring(start, position);
   }
 
   /// Whether a `:::class` name ends at [position]: at a space, a `&`, or

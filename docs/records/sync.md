@@ -539,7 +539,13 @@ one runs joins it and gets the same report, saying that it joined.
    agreed content, kept as a new `sync` version when none has it
    (`NoteHistory.pinSyncBase`).
 7. **Errors:** 401/403 and a lost connection stop the run; any other
-   failure fails that path only and the run goes on. The outcome goes to
+   failure fails that path only and the run goes on. A connection lost
+   on one path is checked first with a `PROPFIND` of the destination:
+   when the server answers it, only that request was dropped — a server
+   or proxy refusing a body past its size limit resets it (nginx's
+   `client_max_body_size` is 1 MB unless set) — and the path fails
+   alone, an upload's error giving its size and the likely limit; so
+   does a 413 (#617). The outcome goes to
    `sync_destinations.last_error` (cleared by a clean run) and comes back
    as a `SyncReport`: counts per action, conflicts, failures, skipped
    paths, or why it stopped.

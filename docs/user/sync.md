@@ -74,6 +74,13 @@ minutes, and right away when the network comes back. The panel shows how
 many changes are waiting and when the next try is; **Try again** goes
 now.
 
+A single file the server refuses does not hold up the others: it is
+listed among the failed ones, and the rest syncs. A large attachment
+whose upload fails while everything else goes through usually means the
+server limits the size of uploads — on a server behind nginx
+(OpenMediaVault's WebDAV, for one) that is `client_max_body_size`, 1 MB
+unless it is set: `client_max_body_size 0;` lifts it.
+
 Some problems need you, and automatic syncing pauses until you act: a
 rejected password (update it), a missing folder on the server (fix the
 address), or a sync that would remove many files (tap **Sync now** to

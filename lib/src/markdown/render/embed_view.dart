@@ -122,7 +122,9 @@ final class EmbedViewState extends State<EmbedView> {
     final image = widget.image;
     if (image != null) return _picture(context, image);
     final path = _path;
-    if (path == null || !EmbedView.imageExtensions.hasMatch(widget.target)) {
+    // The file the target resolved to says whether it is a picture: an
+    // EPUB's `epub-picture:0` has no extension, its `…/0.png` does.
+    if (path == null || !EmbedView.imageExtensions.hasMatch(path)) {
       return _placeholder(context);
     }
     return AspectImage(

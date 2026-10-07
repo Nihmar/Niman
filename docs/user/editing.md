@@ -40,7 +40,8 @@ same Markdown either way, and only how it is drawn differs. The read view
   are set at their size; bold, italic,
   strikethrough, `==highlight==`, underline (`<u>`) and superscript (`<sup>`) are drawn as
   such, and so is a format inside another (`<u>**x**</u>` is bold and
-  underlined); list items get their bullet, number or checkbox — a click or a
+  underlined); a wikilink with an alias, `[[note|alias]]`, shows its alias,
+  coloured and underlined, as the read view does; list items get their bullet, number or checkbox — a click or a
   tap on the checkbox ticks it, one undo step, without moving the caret (in
   the read view too, where the tick is saved like any edit). With **Tick
   nested checkboxes** on (Settings → Editor, per library, on by default),
@@ -494,9 +495,17 @@ read view and in live mode alike:
 Twenty-two kinds are drawn:
 
 - **Flowcharts** (`flowchart` or `graph`): all four directions, the node
-  shapes (the double circle `(((…)))` too), subgraphs (nested too), every
-  edge spelling and its label, and the invisible link `~~~`, which places
-  its nodes and draws nothing.
+  shapes (the double circle `(((…)))` too), subgraphs (nested too, and
+  joined by their names — `A --> S` or `S1 --> S2` reaches the box), every
+  edge spelling and its label, the invisible link `~~~`, which places
+  its nodes and draws nothing, and the look of a node or a subgraph —
+  its fill, outline, outline width and text colour — given by `style`
+  (`style B fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#000`) or
+  by a class: `classDef warn fill:#fef3c7`, then `class B,C warn` or
+  `B:::warn`, and `classDef default` for every node. A `style` wins over
+  a class, and a class given later over one given earlier. A colour is
+  written as `#rgb`, `#rrggbb`, `rgb(…)` or a common name; a fill with no
+  `color` gets black or white text, whichever reads on it.
 - **Sequence diagrams** (`sequenceDiagram`): participants and their
   aliases, every message arrow, notes, and the frames of `loop`, `alt`,
   `opt`, `par`, `critical` and `break` with their sections.
@@ -568,11 +577,11 @@ In any of them a label may write a character as an entity, as in Mermaid:
 written out after the line is read, so `#58;` puts a colon in a label
 where a plain `:` would end it.
 
-What only colours or animates a diagram — `classDef`, `style`, `rect`,
-activations, `autonumber`, C4's `UpdateElementStyle` and
-`UpdateLayoutConfig` — is read and drawn without, in the theme's own
-colours. ZenUML, a plugin Mermaid itself loads from outside, is left
-as source with a note saying so. While the caret is in the fence, live mode
+What only colours or animates a diagram — `rect`, activations,
+`autonumber`, C4's `UpdateElementStyle` and `UpdateLayoutConfig`, and
+`style` or `classDef` anywhere but in a flowchart — is read and drawn
+without, in the theme's own colours. ZenUML, a plugin Mermaid itself
+loads from outside, is left as source with a note saying so. While the caret is in the fence, live mode
 shows the source again; a tap in the read view leaves it a diagram, and the
 read view where it is. A syntax error
 leaves the block as source, the offending line underlined and the

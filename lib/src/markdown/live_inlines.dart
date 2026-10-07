@@ -208,10 +208,11 @@ final class LiveInlines {
             depth,
           );
         case WikiLinkNode(:final inner, :final embed):
+          final open = node.start + (embed ? 3 : 2);
           construct(
             TokenKind.wikilink,
             node,
-            node.start + (embed ? 3 : 2),
+            embed ? open : _aliasStart(text, open, node.end - 2),
             node.end - 2,
             depth,
           );
@@ -275,6 +276,16 @@ final class LiveInlines {
     }
     final open = node.start + 1;
     return (open, node.children.isEmpty ? open : node.children.last.end);
+  }
+
+  /// Where a wikilink's text starts: past its `|` when it has an alias,
+  /// so `live` shows `[[target|alias]]` as its alias, as the read view
+  /// does; at [open] otherwise. The first `|` splits, as `parseWikiRef`
+  /// reads it.
+  static int _aliasStart(String text, int open, int close) {
+    final pipe = text.indexOf('|', open);
+    if (pipe < 0 || pipe >= close) return open;
+    return text.substring(pipe + 1, close).trim().isEmpty ? open : pipe + 1;
   }
 
   /// How many [char]s [text] has at [at].

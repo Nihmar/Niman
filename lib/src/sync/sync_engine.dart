@@ -731,17 +731,63 @@ final class SyncEngine {
       } on WebDavAuthFailure {
         rethrow;
       } on WebDavRetryable catch (e) {
-        if (e.status == null) rethrow; // the network: everything will fail
+        // No answer at all: the network, and everything will fail — unless
+        // the server still answers, and dropped this one request (#617).
+        if (e.status == null && !await _serverAnswers(client)) rethrow;
         _noteRetryAfter(report, e.retryAfter);
-        _failed(report, decision, e.message);
+        _failed(
+          report,
+          decision,
+          e.status == null ? _refused(context, decision, e.message) : e.message,
+        );
       } on WebDavFailure catch (e) {
-        _failed(report, decision, e.message);
+        _failed(
+          report,
+          decision,
+          e.status == 413 ? _refused(context, decision, e.message) : e.message,
+        );
       } on FileSystemException catch (e) {
         _failed(report, decision, 'local: ${e.message}');
       } on _StepFailure catch (e) {
         _failed(report, decision, e.message);
       }
     }
+  }
+
+  /// Whether the server answers a `PROPFIND` of the destination: after a
+  /// request lost its connection, what tells a network that is down from
+  /// a server that dropped that one request (#617).
+  Future<bool> _serverAnswers(WebDavClient client) async {
+    try {
+      await client.propfind('', depth: 0, collection: true);
+      _log.info('apply: the server still answers, one request was dropped');
+      return true;
+    } on Object catch (e) {
+      _log.info('apply: the server does not answer either ($e)');
+      return false;
+    }
+  }
+
+  /// [error] for a request the server refused while answering others: an
+  /// upload says its size, the usual reason — a server or proxy limit on
+  /// the size of a request (nginx's `client_max_body_size` is 1 MB unless
+  /// set), met with a reset or a 413 (#617).
+  static String _refused(
+    _RunContext context,
+    SyncDecision decision,
+    String error,
+  ) {
+    final size = context.local[decision.path]?.size;
+    if (decision.kind != SyncActionKind.upload || size == null) {
+      return '$error (the server answers other requests)';
+    }
+    return '$error (the server refused an upload of ${_megabytes(size)}: '
+        'it may limit the size of uploads)';
+  }
+
+  static String _megabytes(int bytes) {
+    final mb = bytes / (1024 * 1024);
+    return '${mb < 10 ? mb.toStringAsFixed(1) : mb.round()} MB';
   }
 
   void _failed(SyncReport report, SyncDecision decision, String error) {

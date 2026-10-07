@@ -41,6 +41,26 @@ void main() {
     expect(find.byKey(const Key('diagram-full-screen')), findsOneWidget);
   });
 
+  testWidgets("the full screen button keeps the block's top right corner", (
+    tester,
+  ) async {
+    // On a narrow diagram it sat on the diagram's own corner, mid-page.
+    await _pump(tester, '```mermaid\nflowchart TD\nA --> B\n```\n');
+    final block = tester.getRect(find.byType(BlockDiagramView));
+    final button = tester.getRect(find.byKey(const Key('diagram-full-screen')));
+    final diagram = tester.getRect(
+      find
+          .descendant(
+            of: find.byType(BlockDiagramView),
+            matching: find.byType(CustomPaint),
+          )
+          .first,
+    );
+    expect(diagram.width, lessThan(block.width / 2));
+    expect(diagram.center.dx, moreOrLessEquals(block.center.dx));
+    expect(button.right, moreOrLessEquals(block.right));
+  });
+
   testWidgets('a fence in a list item is drawn from its code, the indent off', (
     tester,
   ) async {
