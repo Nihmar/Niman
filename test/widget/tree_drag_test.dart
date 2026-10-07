@@ -159,5 +159,21 @@ void main() {
     await tester.longPress(find.text('nota.md'));
     await tester.pumpAndSettle();
     expect(menus, ['nota.md']);
+    // #576: held by the row's edge, drifted a few pixels onto the next row
+    // and let go — still the long press, and no move.
+    final row = tester.getRect(
+      find.ancestor(
+        of: find.text('nota.md'),
+        matching: find.byType(TreeRowDrag),
+      ),
+    );
+    final edge = await tester.startGesture(row.topCenter + const Offset(0, 3));
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    await edge.moveBy(const Offset(0, -8));
+    await tester.pump();
+    await edge.up();
+    await tester.pumpAndSettle();
+    expect(moves, ['nota.md -> other']);
+    expect(menus, ['nota.md', 'nota.md']);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }

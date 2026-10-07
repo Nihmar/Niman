@@ -18,6 +18,28 @@ import 'package:niman/src/ui/tree_row_metrics.dart';
 /// Moves the item at path into the folder named second, `''` the root.
 typedef TreeMove = void Function(String path, String folder);
 
+/// A row on the move: its path, and how far a hold has carried it.
+///
+/// A touch hold let go within the slop is the long press, never a drop —
+/// even over the next row, a few pixels away (#576) — so every target asks
+/// [moved] before it runs anything.
+final class TreeDrag {
+  /// [path] dragged; [held] when a hold started it.
+  new(this.path, {required this.held});
+
+  /// The row's note or folder.
+  final String path;
+
+  /// Whether a touch hold started it.
+  final bool held;
+
+  /// How far it has gone since.
+  double travelled = 0;
+
+  /// Whether a drop of it runs: a mouse's always, a hold's once it moved.
+  bool get moved => !held || travelled >= kTouchSlop;
+}
+
 /// Whether [path] dropped into [folder] moves anything: not into itself,
 /// not under itself, not where it already is.
 bool treeDropMoves(String path, String folder) =>
@@ -61,11 +83,15 @@ final class TreeRowDrag extends StatefulWidget {
 }
 
 final class _TreeRowDragState extends State<TreeRowDrag> {
-  /// How far a touch drag has gone: kept across the rebuilds the drag
-  /// itself causes, as the row under it lights up and goes dark.
-  double _travelled = 0;
+  /// The drag this row starts: kept across the rebuilds the drag itself
+  /// causes, as the row under it lights up and goes dark.
+  TreeDrag? _drag;
 
   Note get note => widget.note;
+
+  TreeDrag get _data => _drag?.path == note.path
+      ? _drag!
+      : _drag = TreeDrag(note.path, held: TreeRowDrag.holdToDrag);
 
   /// The folder a drop on this row moves into.
   String get _folder => note.isDir ? note.path : parentOf(note.path);
@@ -73,20 +99,21 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
   @override
   Widget build(BuildContext context) {
     final folder = _folder;
-    return DragTarget<String>(
+    return DragTarget<TreeDrag>(
       // The row claims every drop over it, even one it will not run: let
       // through, it would reach the tree's root and move there.
       onWillAcceptWithDetails: (_) => true,
       onAcceptWithDetails: (details) {
-        if (treeDropMoves(details.data, folder)) {
-          widget.onMove(details.data, folder);
+        final drag = details.data;
+        if (drag.moved && treeDropMoves(drag.path, folder)) {
+          widget.onMove(drag.path, folder);
         }
       },
       builder: (context, candidates, _) {
         final lit =
             candidates.isNotEmpty &&
             candidates.first != null &&
-            treeDropMoves(candidates.first!, folder);
+            treeDropMoves(candidates.first!.path, folder);
         return DecoratedBox(
           decoration: BoxDecoration(
             color: lit
@@ -104,23 +131,24 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
     final child = widget.child;
     final dimmed = Opacity(opacity: 0.4, child: child);
     if (!TreeRowDrag.holdToDrag) {
-      return Draggable<String>(
-        data: note.path,
+      return Draggable<TreeDrag>(
+        data: _data,
         feedback: feedback,
         childWhenDragging: dimmed,
         child: child,
       );
     }
-    return LongPressDraggable<String>(
-      data: note.path,
+    final drag = _data;
+    return LongPressDraggable<TreeDrag>(
+      data: drag,
       feedback: feedback,
       childWhenDragging: dimmed,
-      onDragStarted: () => _travelled = 0,
-      onDragUpdate: (details) => _travelled += details.delta.distance,
-      // Let go where it was held — over its own row, which claims the drop
-      // and moves nothing — the hold was a long press.
+      onDragUpdate: (details) => drag.travelled += details.delta.distance,
+      // Let go where it was held — no target ran it — the hold was a long
+      // press. The next hold starts from nothing.
       onDragEnd: (_) {
-        if (_travelled < kTouchSlop) widget.onLongPress?.call();
+        _drag = null;
+        if (!drag.moved) widget.onLongPress?.call();
       },
       child: child,
     );
@@ -139,9 +167,11 @@ final class TreeRootDrop extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => DragTarget<String>(
-    onWillAcceptWithDetails: (details) => treeDropMoves(details.data, ''),
-    onAcceptWithDetails: (details) => onMove(details.data, ''),
+  Widget build(BuildContext context) => DragTarget<TreeDrag>(
+    onWillAcceptWithDetails: (details) => treeDropMoves(details.data.path, ''),
+    onAcceptWithDetails: (details) {
+      if (details.data.moved) onMove(details.data.path, '');
+    },
     builder: (context, candidates, _) => child,
   );
 }
@@ -157,7 +187,7 @@ final class TreeDropShield extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => DragTarget<String>(
+  Widget build(BuildContext context) => DragTarget<TreeDrag>(
     onWillAcceptWithDetails: (_) => true,
     builder: (context, candidates, _) => child,
   );
