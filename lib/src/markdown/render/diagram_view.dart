@@ -78,27 +78,27 @@ final class BlockDiagramView extends StatelessWidget {
         ),
       ),
     );
+    // The button keeps the block's top right corner, wherever the diagram
+    // stands: on the diagram's own, a narrow one put it mid-page.
     return Padding(
       padding: EdgeInsets.symmetric(vertical: theme.blockSpacing / 2),
-      child: Center(
-        child: Stack(
-          children: [
-            canvas,
-            if (fullScreen)
-              Positioned(
-                top: 0,
-                right: 0,
-                child: IconButton(
-                  key: const Key('diagram-full-screen'),
-                  tooltip: AppStrings.diagramFullScreen,
-                  iconSize: 20,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.fullscreen),
-                  onPressed: () => _openFullScreen(context, drawing, style),
-                ),
+      child: Stack(
+        children: [
+          Center(child: canvas),
+          if (fullScreen)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                key: const Key('diagram-full-screen'),
+                tooltip: AppStrings.diagramFullScreen,
+                iconSize: 20,
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.fullscreen),
+                onPressed: () => _openFullScreen(context, drawing, style),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

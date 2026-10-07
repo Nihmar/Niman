@@ -76,14 +76,12 @@ Widget liveDiagramUnder(
   crossAxisAlignment: CrossAxisAlignment.stretch,
   children: <Widget>[
     line,
-    Center(
-      child: Listener(
-        onPointerDown: onPointerDown,
-        child: BlockDiagramView(
-          source: source,
-          theme: theme,
-          onTapSource: onTapSource,
-        ),
+    Listener(
+      onPointerDown: onPointerDown,
+      child: BlockDiagramView(
+        source: source,
+        theme: theme,
+        onTapSource: onTapSource,
       ),
     ),
   ],
