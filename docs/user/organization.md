@@ -166,8 +166,9 @@ or anything inside it as a target.
 Or drag the row: with the mouse on the desktop, or on a phone by holding
 the row and then moving the finger (held and let go without moving, the
 hold opens the row's menu as before). Let go on a folder and it moves into
-that folder; on a note, into that note's folder; on the empty space below
-the rows, into the library root. The row under the pointer lights up where
+that folder; on a note — pinned rows included — into that note's folder;
+on the empty space below the rows, into the library root. The pinned
+block's heading takes no drop. The row under the pointer lights up where
 a drop would move something — a folder dropped on itself or inside itself,
 or anything dropped where it already is, stays put. It is the same move as
 the menu's: links follow, open notes are saved first.

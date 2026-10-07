@@ -146,6 +146,23 @@ final class TreeRootDrop extends StatelessWidget {
   );
 }
 
+/// A part of the tree that is no place to drop — the pinned block's heading
+/// and divider: it claims a drop over it and runs none, so the drop does not
+/// fall through to the root (#574).
+final class TreeDropShield extends StatelessWidget {
+  /// Makes [child] take no drop.
+  const new({required this.child, super.key});
+
+  /// The part shielded.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => DragTarget<String>(
+    onWillAcceptWithDetails: (_) => true,
+    builder: (context, candidates, _) => child,
+  );
+}
+
 /// What follows the pointer: the row's icon and name on a card.
 final class _TreeDragFeedback extends StatelessWidget {
   const new({required this.note});
