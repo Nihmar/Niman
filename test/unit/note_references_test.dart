@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/markdown/app_syntax.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
 
@@ -157,5 +158,15 @@ void main() {
         expect(extra, startsWith('md '), reason: '${file.path}: $extra');
       }
     }
+  });
+
+  test("a heading's own hashes are no tag; a tag in it still is (#581)", () {
+    expect(AppSyntax.mayHoldTag('## Section ##'), isFalse);
+    expect(AppSyntax.mayHoldTag('# C# notes'), isFalse);
+    expect(AppSyntax.mayHoldTag('# Plan #città'), isTrue);
+    expect(AppSyntax.mayHoldTag('#/a'), isTrue);
+    expect(noteReferencesOf('# Plan #città\n\n## C# notes ##\n').tags, [
+      'città',
+    ]);
   });
 }
