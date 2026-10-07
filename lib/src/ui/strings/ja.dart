@@ -2717,4 +2717,55 @@ final class JapaneseStrings extends Strings {
   @override
   String ocrDeleteBody(String size) =>
       '$size が解放されます。文字認識で必要になったときに再びダウンロードされます。';
+
+  @override
+  String get ocrRecognizeAction => '文字を認識';
+
+  @override
+  String get ocrPagesTitle => 'ページ';
+
+  @override
+  String ocrPagesAll(int count) => '全 $count ページ';
+
+  @override
+  String ocrPagesThis(int page) => 'このページ（$page）';
+
+  @override
+  String get ocrPagesFrom => 'から';
+
+  @override
+  String get ocrPagesTo => 'まで';
+
+  @override
+  String get ocrSavedAs => '保存先';
+
+  @override
+  String get ocrSavedAsHint => 'ファイルの隣のノート。ページごとに 1 セクション。ほかのノートと同じく検索できます。';
+
+  @override
+  String ocrNeedsDownload(String size) => 'まず $size のダウンロードが必要です';
+
+  @override
+  String get ocrNeedsDownloadHint => '一度だけ：その後はオフラインで動作します。';
+
+  @override
+  String get ocrDownloadAndRecognize => 'ダウンロードして認識';
+
+  @override
+  String ocrRecognizing(int page, int total) => '認識中 $page / $total ページ';
+
+  @override
+  String get ocrPreparing => '文字認識に必要なファイルをダウンロード中…';
+
+  @override
+  String ocrRecognized(int words) => '文字を認識しました · $words 語';
+
+  @override
+  String get ocrOpenText => 'テキストを開く';
+
+  @override
+  String get ocrFailed => '文字認識に失敗しました';
+
+  @override
+  String get commandNeedOcrFile => '画面に PDF か画像が必要です';
 }

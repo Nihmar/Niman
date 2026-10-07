@@ -2630,4 +2630,55 @@ final class ChineseStrings extends Strings {
 
   @override
   String ocrDeleteBody(String size) => '这将释放 $size。文字识别需要时会重新下载。';
+
+  @override
+  String get ocrRecognizeAction => '识别文字';
+
+  @override
+  String get ocrPagesTitle => '页面';
+
+  @override
+  String ocrPagesAll(int count) => '全部 $count 页';
+
+  @override
+  String ocrPagesThis(int page) => '本页（第 $page 页）';
+
+  @override
+  String get ocrPagesFrom => '从';
+
+  @override
+  String get ocrPagesTo => '到';
+
+  @override
+  String get ocrSavedAs => '保存为';
+
+  @override
+  String get ocrSavedAsHint => '文件旁的一篇笔记，每页一节。搜索可以像找其他笔记一样找到它。';
+
+  @override
+  String ocrNeedsDownload(String size) => '首先需要下载 $size';
+
+  @override
+  String get ocrNeedsDownloadHint => '只需一次：之后可离线使用。';
+
+  @override
+  String get ocrDownloadAndRecognize => '下载并识别';
+
+  @override
+  String ocrRecognizing(int page, int total) => '正在识别第 $page 页，共 $total 页';
+
+  @override
+  String get ocrPreparing => '正在下载识别所需的文件…';
+
+  @override
+  String ocrRecognized(int words) => '文字已识别 · $words 个词';
+
+  @override
+  String get ocrOpenText => '打开文字';
+
+  @override
+  String get ocrFailed => '文字识别失败';
+
+  @override
+  String get commandNeedOcrFile => '需要屏幕上有 PDF 或图片';
 }

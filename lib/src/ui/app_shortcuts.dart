@@ -95,6 +95,9 @@ enum AppCommand {
   /// Write the note on screen out as a file (#24).
   exportNote,
 
+  /// Recognize the text of the PDF or picture on screen (#594).
+  recognizeText,
+
   /// Write the whole library out as one zip (#24).
   exportLibrary,
 
@@ -317,6 +320,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.insertMindMap => AppStrings.commandInsertMindMap,
   AppCommand.convertListToMindMap => AppStrings.commandConvertListToMindMap,
   AppCommand.exportNote => AppStrings.exportTitle,
+  AppCommand.recognizeText => AppStrings.ocrRecognizeAction,
   AppCommand.exportLibrary => AppStrings.exportLibraryTitle,
   AppCommand.markdownCheatsheet => AppStrings.cheatsheetTitle,
   AppCommand.welcomeTour => AppStrings.welcomeTourCommand,

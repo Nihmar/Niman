@@ -12,6 +12,7 @@ import 'package:niman/src/ui/annotation_mark_chooser.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
 import 'package:niman/src/ui/attachment_unreadable.dart';
 import 'package:niman/src/ui/file_marks.dart';
+import 'package:niman/src/ui/ocr/ocr_file_controls.dart';
 import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:niman/src/ui/pdf_mark_layer.dart';
 import 'package:niman/src/ui/place_link_button.dart';
@@ -168,6 +169,16 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
     return (path: path, place: place, label: _label(place.page));
   }
 
+  /// The page on screen and the page count, once laid out.
+  ({int page, int count})? _pages() {
+    if (!_controller.isReady) return null;
+    final place = pdfLocationAt(
+      _controller.layout.pageLayouts,
+      _controller.visibleRect.top,
+    );
+    return (page: place?.page ?? 1, count: _controller.pageCount);
+  }
+
   /// Whether a passage or a page can be annotated: the PDF is in a
   /// library, and someone writes annotations.
   bool get _annotates => widget.onAnnotate != null && widget.positions != null;
@@ -278,6 +289,8 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
             visualDensity: VisualDensity.compact,
             onPressed: _ready && _annotates ? _annotateHere : null,
           ),
+          if (widget.ocr case final ocr?)
+            OcrFileControls(actions: ocr, path: widget.path, pages: _pages),
         ],
       ),
     ],

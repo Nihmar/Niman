@@ -3007,4 +3007,58 @@ final class SlovenianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'S tem se sprosti $size. Datoteka se znova prenese, ko jo '
       'prepoznavanje besedila potrebuje.';
+
+  @override
+  String get ocrRecognizeAction => 'Prepoznaj besedilo';
+
+  @override
+  String get ocrPagesTitle => 'Strani';
+
+  @override
+  String ocrPagesAll(int count) => 'Vseh $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Ta stran ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Od';
+
+  @override
+  String get ocrPagesTo => 'do';
+
+  @override
+  String get ocrSavedAs => 'Shranjeno kot';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Zapisek poleg datoteke, en razdelek na stran. Iskanje ga '
+      'najde kot vsak zapisek.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Najprej prenos $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Samo enkrat: potem deluje brez povezave.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Prenesi in prepoznaj';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Prepoznavanje str. $page od $total';
+
+  @override
+  String get ocrPreparing => 'Prenašanje tega, kar potrebuje prepoznavanje…';
+
+  @override
+  String ocrRecognized(int words) => 'Besedilo prepoznano · besed: $words';
+
+  @override
+  String get ocrOpenText => 'Odpri besedilo';
+
+  @override
+  String get ocrFailed => 'Prepoznavanje besedila ni uspelo';
+
+  @override
+  String get commandNeedOcrFile => 'Potreben je PDF ali slika na zaslonu';
 }

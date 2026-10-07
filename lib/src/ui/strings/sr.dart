@@ -3011,4 +3011,58 @@ final class SerbianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Ослобађа се $size. Датотека ће се поново преузети када је '
       'препознавање текста затреба.';
+
+  @override
+  String get ocrRecognizeAction => 'Препознај текст';
+
+  @override
+  String get ocrPagesTitle => 'Странице';
+
+  @override
+  String ocrPagesAll(int count) => 'Све ($count)';
+
+  @override
+  String ocrPagesThis(int page) => 'Ова страница ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Од';
+
+  @override
+  String get ocrPagesTo => 'до';
+
+  @override
+  String get ocrSavedAs => 'Чува се као';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Белешка поред датотеке, један одељак по страници. Претрага '
+      'је проналази као сваку белешку.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Прво преузимање од $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Само једном: затим ради без мреже.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Преузми и препознај';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Препознавање стр. $page од $total';
+
+  @override
+  String get ocrPreparing => 'Преузима се оно што треба препознавању…';
+
+  @override
+  String ocrRecognized(int words) => 'Текст препознат · речи: $words';
+
+  @override
+  String get ocrOpenText => 'Отвори текст';
+
+  @override
+  String get ocrFailed => 'Препознавање текста није успело';
+
+  @override
+  String get commandNeedOcrFile => 'Потребан је PDF или слика на екрану';
 }

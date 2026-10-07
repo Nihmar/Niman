@@ -2945,4 +2945,58 @@ final class EnglishStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'This frees $size. It is downloaded again when text '
       'recognition needs it.';
+
+  @override
+  String get ocrRecognizeAction => 'Recognize text';
+
+  @override
+  String get ocrPagesTitle => 'Pages';
+
+  @override
+  String ocrPagesAll(int count) => 'All $count';
+
+  @override
+  String ocrPagesThis(int page) => 'This page ($page)';
+
+  @override
+  String get ocrPagesFrom => 'From';
+
+  @override
+  String get ocrPagesTo => 'to';
+
+  @override
+  String get ocrSavedAs => 'Saved as';
+
+  @override
+  String get ocrSavedAsHint =>
+      'A note next to the file, one section per page. Search finds '
+      'it like any note.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'First, a download of $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Once only: then it works offline.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Download and recognize';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Recognizing p. $page of $total';
+
+  @override
+  String get ocrPreparing => 'Downloading what recognition needs…';
+
+  @override
+  String ocrRecognized(int words) => 'Text recognized · $words words';
+
+  @override
+  String get ocrOpenText => 'Open text';
+
+  @override
+  String get ocrFailed => 'Text recognition failed';
+
+  @override
+  String get commandNeedOcrFile => 'Needs a PDF or a picture on screen';
 }

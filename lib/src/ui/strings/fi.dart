@@ -3003,4 +3003,59 @@ final class FinnishStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Tämä vapauttaa $size. Tiedosto ladataan uudelleen, kun '
       'tekstintunnistus tarvitsee sitä.';
+
+  @override
+  String get ocrRecognizeAction => 'Tunnista teksti';
+
+  @override
+  String get ocrPagesTitle => 'Sivut';
+
+  @override
+  String ocrPagesAll(int count) => 'Kaikki $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Tämä sivu ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Alkaen';
+
+  @override
+  String get ocrPagesTo => 'asti';
+
+  @override
+  String get ocrSavedAs => 'Tallennetaan nimellä';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Muistiinpano tiedoston vieressä, yksi osio sivua kohden. '
+      'Haku löytää sen kuten minkä tahansa muistiinpanon.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Ensin $size latausta';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Vain kerran: sen jälkeen toimii ilman verkkoa.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Lataa ja tunnista';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Tunnistetaan sivua $page/$total';
+
+  @override
+  String get ocrPreparing => 'Ladataan, mitä tekstintunnistus tarvitsee…';
+
+  @override
+  String ocrRecognized(int words) => 'Teksti tunnistettu · $words sanaa';
+
+  @override
+  String get ocrOpenText => 'Avaa teksti';
+
+  @override
+  String get ocrFailed => 'Tekstintunnistus epäonnistui';
+
+  @override
+  String get commandNeedOcrFile => 'Vaatii PDF:n tai kuvan näytölle';
 }

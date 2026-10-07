@@ -2982,4 +2982,58 @@ final class LatvianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Tiks atbrīvoti $size. Fails tiks lejupielādēts vēlreiz, kad '
       'tas būs vajadzīgs teksta atpazīšanai.';
+
+  @override
+  String get ocrRecognizeAction => 'Atpazīt tekstu';
+
+  @override
+  String get ocrPagesTitle => 'Lapas';
+
+  @override
+  String ocrPagesAll(int count) => 'Visas $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Šī lapa ($page)';
+
+  @override
+  String get ocrPagesFrom => 'No';
+
+  @override
+  String get ocrPagesTo => 'līdz';
+
+  @override
+  String get ocrSavedAs => 'Tiks saglabāts kā';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Piezīme blakus failam, viena sadaļa katrai lapai. Meklēšana '
+      'to atrod kā jebkuru piezīmi.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Vispirms lejupielāde $size';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Tikai vienreiz: pēc tam darbojas bezsaistē.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Lejupielādēt un atpazīt';
+
+  @override
+  String ocrRecognizing(int page, int total) => 'Atpazīst lp. $page no $total';
+
+  @override
+  String get ocrPreparing => 'Lejupielādē to, kas vajadzīgs atpazīšanai…';
+
+  @override
+  String ocrRecognized(int words) => 'Teksts atpazīts · vārdi: $words';
+
+  @override
+  String get ocrOpenText => 'Atvērt tekstu';
+
+  @override
+  String get ocrFailed => 'Teksta atpazīšana neizdevās';
+
+  @override
+  String get commandNeedOcrFile => 'Ekrānā jābūt PDF vai attēlam';
 }

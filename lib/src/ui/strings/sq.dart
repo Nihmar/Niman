@@ -3008,4 +3008,58 @@ final class AlbanianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Kjo liron $size. Skedari shkarkohet përsëri kur njohja e '
       'tekstit ka nevojë për të.';
+
+  @override
+  String get ocrRecognizeAction => 'Njih tekstin';
+
+  @override
+  String get ocrPagesTitle => 'Faqet';
+
+  @override
+  String ocrPagesAll(int count) => 'Të gjitha $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Kjo faqe ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Nga';
+
+  @override
+  String get ocrPagesTo => 'deri';
+
+  @override
+  String get ocrSavedAs => 'Ruhet si';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Një shënim pranë skedarit, një seksion për faqe. Kërkimi e '
+      'gjen si çdo shënim.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Së pari, një shkarkim prej $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Vetëm një herë: pastaj punon pa lidhje.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Shkarko dhe njih';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Po njihet faqja $page nga $total';
+
+  @override
+  String get ocrPreparing => 'Po shkarkohet ajo që i duhet njohjes…';
+
+  @override
+  String ocrRecognized(int words) => 'Teksti u njoh · $words fjalë';
+
+  @override
+  String get ocrOpenText => 'Hap tekstin';
+
+  @override
+  String get ocrFailed => 'Njohja e tekstit dështoi';
+
+  @override
+  String get commandNeedOcrFile => 'Kërkon një PDF ose një figurë në ekran';
 }

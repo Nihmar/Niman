@@ -1616,4 +1616,25 @@ final class AppStrings {
   static String ocrLanguageDeleteTitle(String language) =>
       _s.ocrLanguageDeleteTitle(language);
   static String ocrDeleteBody(String size) => _s.ocrDeleteBody(size);
+
+  // Recognize text (#594).
+
+  static String get ocrRecognizeAction => _s.ocrRecognizeAction;
+  static String get ocrPagesTitle => _s.ocrPagesTitle;
+  static String ocrPagesAll(int count) => _s.ocrPagesAll(count);
+  static String ocrPagesThis(int page) => _s.ocrPagesThis(page);
+  static String get ocrPagesFrom => _s.ocrPagesFrom;
+  static String get ocrPagesTo => _s.ocrPagesTo;
+  static String get ocrSavedAs => _s.ocrSavedAs;
+  static String get ocrSavedAsHint => _s.ocrSavedAsHint;
+  static String ocrNeedsDownload(String size) => _s.ocrNeedsDownload(size);
+  static String get ocrNeedsDownloadHint => _s.ocrNeedsDownloadHint;
+  static String get ocrDownloadAndRecognize => _s.ocrDownloadAndRecognize;
+  static String ocrRecognizing(int page, int total) =>
+      _s.ocrRecognizing(page, total);
+  static String get ocrPreparing => _s.ocrPreparing;
+  static String ocrRecognized(int words) => _s.ocrRecognized(words);
+  static String get ocrOpenText => _s.ocrOpenText;
+  static String get ocrFailed => _s.ocrFailed;
+  static String get commandNeedOcrFile => _s.commandNeedOcrFile;
 }

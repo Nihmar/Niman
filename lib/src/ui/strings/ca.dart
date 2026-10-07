@@ -3036,4 +3036,59 @@ final class CatalanStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Això allibera $size. Es tornarà a baixar quan el '
       'reconeixement de text el necessiti.';
+
+  @override
+  String get ocrRecognizeAction => 'Reconeix el text';
+
+  @override
+  String get ocrPagesTitle => 'Pàgines';
+
+  @override
+  String ocrPagesAll(int count) => 'Totes les $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Aquesta pàgina ($page)';
+
+  @override
+  String get ocrPagesFrom => 'De';
+
+  @override
+  String get ocrPagesTo => 'a';
+
+  @override
+  String get ocrSavedAs => 'Es desarà com a';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Una nota al costat del fitxer, una secció per pàgina. La '
+      'cerca la troba com qualsevol nota.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Primer, una baixada de $size';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'Només un cop: després funciona sense connexió.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Baixa i reconeix';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Reconeixent p. $page de $total';
+
+  @override
+  String get ocrPreparing => 'Baixant el que necessita el reconeixement…';
+
+  @override
+  String ocrRecognized(int words) => 'Text reconegut · $words paraules';
+
+  @override
+  String get ocrOpenText => 'Obre el text';
+
+  @override
+  String get ocrFailed => 'El reconeixement de text ha fallat';
+
+  @override
+  String get commandNeedOcrFile => 'Cal un PDF o una imatge a la pantalla';
 }

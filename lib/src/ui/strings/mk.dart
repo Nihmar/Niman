@@ -3010,4 +3010,58 @@ final class MacedonianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Ќе се ослободат $size. Датотеката повторно ќе се преземе '
       'кога препознавањето текст ќе ја побара.';
+
+  @override
+  String get ocrRecognizeAction => 'Препознај текст';
+
+  @override
+  String get ocrPagesTitle => 'Страници';
+
+  @override
+  String ocrPagesAll(int count) => 'Сите ($count)';
+
+  @override
+  String ocrPagesThis(int page) => 'Оваа страница ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Од';
+
+  @override
+  String get ocrPagesTo => 'до';
+
+  @override
+  String get ocrSavedAs => 'Се зачувува како';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Белешка до датотеката, по еден дел за страница. '
+      'Пребарувањето ја наоѓа како секоја белешка.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Прво, преземање од $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Само еднаш: потоа работи без мрежа.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Преземи и препознај';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Препознавање стр. $page од $total';
+
+  @override
+  String get ocrPreparing => 'Се презема она што му треба на препознавањето…';
+
+  @override
+  String ocrRecognized(int words) => 'Текстот е препознаен · зборови: $words';
+
+  @override
+  String get ocrOpenText => 'Отвори го текстот';
+
+  @override
+  String get ocrFailed => 'Препознавањето текст не успеа';
+
+  @override
+  String get commandNeedOcrFile => 'Потребен е PDF или слика на екранот';
 }

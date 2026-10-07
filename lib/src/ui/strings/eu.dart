@@ -3015,4 +3015,57 @@ final class BasqueStrings extends Strings {
   String ocrDeleteBody(String size) =>
       '$size askatuko dira. Testu-ezagutzak behar duenean berriro '
       'deskargatuko da.';
+
+  @override
+  String get ocrRecognizeAction => 'Ezagutu testua';
+
+  @override
+  String get ocrPagesTitle => 'Orriak';
+
+  @override
+  String ocrPagesAll(int count) => '$count guztiak';
+
+  @override
+  String ocrPagesThis(int page) => 'Orri hau ($page)';
+
+  @override
+  String get ocrPagesFrom => 'Hemendik';
+
+  @override
+  String get ocrPagesTo => 'hona';
+
+  @override
+  String get ocrSavedAs => 'Honela gordeko da';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Fitxategiaren ondoko oharra, orri bakoitzeko atal bat. '
+      'Bilaketak beste edozein ohar bezala aurkitzen du.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Lehenik, $size-ko deskarga';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Behin bakarrik: gero lineaz kanpo dabil.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Deskargatu eta ezagutu';
+
+  @override
+  String ocrRecognizing(int page, int total) => '$page/$total orria ezagutzen';
+
+  @override
+  String get ocrPreparing => 'Testu-ezagutzak behar duena deskargatzen…';
+
+  @override
+  String ocrRecognized(int words) => 'Testua ezagutu da · $words hitz';
+
+  @override
+  String get ocrOpenText => 'Ireki testua';
+
+  @override
+  String get ocrFailed => 'Testu-ezagutzak huts egin du';
+
+  @override
+  String get commandNeedOcrFile => 'PDF bat edo irudi bat behar da pantailan';
 }

@@ -2998,4 +2998,58 @@ final class BulgarianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Ще се освободят $size. Файлът ще бъде изтеглен отново, '
       'когато разпознаването на текст има нужда от него.';
+
+  @override
+  String get ocrRecognizeAction => 'Разпознай текста';
+
+  @override
+  String get ocrPagesTitle => 'Страници';
+
+  @override
+  String ocrPagesAll(int count) => 'Всички $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Тази страница ($page)';
+
+  @override
+  String get ocrPagesFrom => 'От';
+
+  @override
+  String get ocrPagesTo => 'до';
+
+  @override
+  String get ocrSavedAs => 'Ще се запише като';
+
+  @override
+  String get ocrSavedAsHint =>
+      'Бележка до файла, по един раздел за страница. Търсенето я '
+      'намира като всяка бележка.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Първо изтегляне от $size';
+
+  @override
+  String get ocrNeedsDownloadHint => 'Само веднъж: после работи офлайн.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Изтегли и разпознай';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Разпознаване на стр. $page от $total';
+
+  @override
+  String get ocrPreparing => 'Изтегля се нужното за разпознаването…';
+
+  @override
+  String ocrRecognized(int words) => 'Текстът е разпознат · думи: $words';
+
+  @override
+  String get ocrOpenText => 'Отвори текста';
+
+  @override
+  String get ocrFailed => 'Разпознаването на текст не успя';
+
+  @override
+  String get commandNeedOcrFile => 'Нужен е PDF или изображение на екрана';
 }

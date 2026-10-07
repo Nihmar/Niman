@@ -3034,4 +3034,59 @@ final class RomanianStrings extends Strings {
   String ocrDeleteBody(String size) =>
       'Se eliberează $size. Fișierul se descarcă din nou când '
       'recunoașterea textului are nevoie de el.';
+
+  @override
+  String get ocrRecognizeAction => 'Recunoaște textul';
+
+  @override
+  String get ocrPagesTitle => 'Pagini';
+
+  @override
+  String ocrPagesAll(int count) => 'Toate cele $count';
+
+  @override
+  String ocrPagesThis(int page) => 'Pagina aceasta ($page)';
+
+  @override
+  String get ocrPagesFrom => 'De la';
+
+  @override
+  String get ocrPagesTo => 'la';
+
+  @override
+  String get ocrSavedAs => 'Se salvează ca';
+
+  @override
+  String get ocrSavedAsHint =>
+      'O notă lângă fișier, o secțiune pe pagină. Căutarea o '
+      'găsește ca pe orice notă.';
+
+  @override
+  String ocrNeedsDownload(String size) => 'Mai întâi, o descărcare de $size';
+
+  @override
+  String get ocrNeedsDownloadHint =>
+      'O singură dată: apoi funcționează offline.';
+
+  @override
+  String get ocrDownloadAndRecognize => 'Descarcă și recunoaște';
+
+  @override
+  String ocrRecognizing(int page, int total) =>
+      'Recunoaștere p. $page din $total';
+
+  @override
+  String get ocrPreparing => 'Se descarcă ce îi trebuie recunoașterii…';
+
+  @override
+  String ocrRecognized(int words) => 'Text recunoscut · $words cuvinte';
+
+  @override
+  String get ocrOpenText => 'Deschide textul';
+
+  @override
+  String get ocrFailed => 'Recunoașterea textului a eșuat';
+
+  @override
+  String get commandNeedOcrFile => 'Necesită un PDF sau o imagine pe ecran';
 }
