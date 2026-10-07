@@ -194,7 +194,7 @@ start and model load included; a picture **109 ms**.
   waits for the tree work of #595; a PDF that already has a text layer is
   not detected.
 
-
+## Build impact
 
 Measured on the beta builds of this host, before (`cfc7d0a0`) and after
 phase 1 (`93ec9091`):
