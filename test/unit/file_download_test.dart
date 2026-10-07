@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/transcription/model_download.dart';
-import 'package:niman/src/transcription/model_files.dart';
+import 'package:niman/src/core/download/download_files.dart';
+import 'package:niman/src/core/download/file_download.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -13,7 +14,7 @@ void main() {
   late Future<void> Function(HttpRequest request) handler;
 
   setUp(() async {
-    dir = await Directory.systemTemp.createTemp('niman_model_download_');
+    dir = await Directory.systemTemp.createTemp('niman_file_download_');
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0)
       ..listen((request) => unawaited(handler(request)));
   });
@@ -47,7 +48,7 @@ void main() {
     };
     int? announced;
     final progress = <int>[];
-    final download = await ModelDownload.start(
+    final download = await FileDownload.start(
       uri: url(),
       target: target(),
       onHeaders: (total, _, _) => announced = total,
@@ -58,7 +59,7 @@ void main() {
     expect(announced, payload.length);
     expect(progress.last, payload.length);
     expect(await File(target()).readAsBytes(), payload);
-    expect(File('${target()}${ModelFiles.partSuffix}').existsSync(), false);
+    expect(File('${target()}${DownloadFiles.partSuffix}').existsSync(), false);
   });
 
   test('a cut-off download resumes from its partial file', () async {
@@ -82,12 +83,12 @@ void main() {
       await request.response.close();
     };
     // What a download cut off at 120 kB leaves behind.
-    final part = File('${target()}${ModelFiles.partSuffix}');
+    final part = File('${target()}${DownloadFiles.partSuffix}');
     await part.parent.create(recursive: true);
     await part.writeAsBytes(payload.sublist(0, 120000));
 
     int? resumedFrom;
-    final download = await ModelDownload.start(
+    final download = await FileDownload.start(
       uri: url(),
       target: target(),
       onHeaders: (_, _, from) => resumedFrom = from,
@@ -115,7 +116,7 @@ void main() {
       await socket.flush();
       socket.destroy();
     });
-    final download = await ModelDownload.start(
+    final download = await FileDownload.start(
       uri: Uri.parse('http://127.0.0.1:${raw.port}/ggml-tiny.bin'),
       target: target(),
       onProgress: (_) {},
@@ -123,15 +124,11 @@ void main() {
     await expectLater(
       download.done,
       throwsA(
-        isA<ModelDownloadException>().having(
-          (e) => e.transient,
-          'transient',
-          true,
-        ),
+        isA<DownloadException>().having((e) => e.transient, 'transient', true),
       ),
     );
     expect(File(target()).existsSync(), false);
-    expect(File('${target()}${ModelFiles.partSuffix}').lengthSync(), 1000);
+    expect(File('${target()}${DownloadFiles.partSuffix}').lengthSync(), 1000);
   });
 
   test('an HTTP error fails with the status', () async {
@@ -139,7 +136,7 @@ void main() {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();
     };
-    final download = await ModelDownload.start(
+    final download = await FileDownload.start(
       uri: url(),
       target: target(),
       onProgress: (_) {},
@@ -147,13 +144,52 @@ void main() {
     await expectLater(
       download.done,
       throwsA(
-        isA<ModelDownloadException>().having(
+        isA<DownloadException>().having(
           (e) => (e.reason, e.transient),
           'reason, transient',
           ('HTTP 404', false),
         ),
       ),
     );
+  });
+
+  Future<void> servePayload(HttpRequest request) async {
+    request.response.contentLength = payload.length;
+    request.response.add(payload);
+    await request.response.close();
+  }
+
+  test('a file matching its pinned sha256 lands', () async {
+    handler = servePayload;
+    final download = await FileDownload.start(
+      uri: url(),
+      target: target(),
+      onProgress: (_) {},
+      sha256: sha256.convert(payload).toString(),
+    );
+    expect(await download.done, payload.length);
+    expect(await File(target()).readAsBytes(), payload);
+  });
+
+  test('a file not matching its pinned sha256 fails for good and is '
+      'removed', () async {
+    handler = servePayload;
+    final download = await FileDownload.start(
+      uri: url(),
+      target: target(),
+      onProgress: (_) {},
+      sha256: sha256.convert([1, 2, 3]).toString(),
+    );
+    await expectLater(
+      download.done,
+      throwsA(
+        isA<DownloadException>()
+            .having((e) => e.reason, 'reason', startsWith('sha256 mismatch'))
+            .having((e) => e.transient, 'transient', false),
+      ),
+    );
+    expect(File(target()).existsSync(), false);
+    expect(File('${target()}${DownloadFiles.partSuffix}').existsSync(), false);
   });
 
   test('cancel stops the download and removes the partial file', () async {
@@ -165,7 +201,7 @@ void main() {
       await Future<void>.delayed(const Duration(seconds: 20));
     };
     final headers = Completer<void>();
-    final download = await ModelDownload.start(
+    final download = await FileDownload.start(
       uri: url(),
       target: target(),
       onHeaders: (_, _, _) => headers.complete(),
@@ -173,8 +209,8 @@ void main() {
     );
     await headers.future;
     await download.cancel();
-    await expectLater(download.done, throwsA(isA<ModelDownloadCancelled>()));
+    await expectLater(download.done, throwsA(isA<DownloadCancelled>()));
     expect(File(target()).existsSync(), false);
-    expect(File('${target()}${ModelFiles.partSuffix}').existsSync(), false);
+    expect(File('${target()}${DownloadFiles.partSuffix}').existsSync(), false);
   });
 }

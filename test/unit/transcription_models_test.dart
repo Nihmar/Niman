@@ -4,9 +4,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/transcription/model_download.dart';
-import 'package:niman/src/transcription/model_files.dart';
-import 'package:niman/src/transcription/model_state.dart';
+import 'package:niman/src/core/download/download_files.dart';
+import 'package:niman/src/core/download/download_state.dart';
+import 'package:niman/src/core/download/file_download.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
@@ -122,15 +122,20 @@ void main() {
       Duration(milliseconds: 20),
     ],
     startDownload:
-        ({required uri, required target, required onProgress, onHeaders}) =>
-            ModelDownload.start(
-              uri: Uri.parse(
-                'http://127.0.0.1:${server.port}/${p.basename(target)}',
-              ),
-              target: target,
-              onProgress: onProgress,
-              onHeaders: onHeaders,
-            ),
+        ({
+          required uri,
+          required target,
+          required onProgress,
+          sha256,
+          onHeaders,
+        }) => FileDownload.start(
+          uri: Uri.parse(
+            'http://127.0.0.1:${server.port}/${p.basename(target)}',
+          ),
+          target: target,
+          onProgress: onProgress,
+          onHeaders: onHeaders,
+        ),
   );
 
   Future<void> install(TranscriptionModel model, {int bytes = 10}) =>
@@ -138,7 +143,7 @@ void main() {
           .writeAsBytes(List.filled(bytes, 1));
 
   File partOf(TranscriptionModel model) =>
-      File(p.join(dir.path, '${model.fileName}${ModelFiles.partSuffix}'));
+      File(p.join(dir.path, '${model.fileName}${DownloadFiles.partSuffix}'));
 
   test('phones are not offered large-v3', () {
     expect(models(phone: true).models.map((m) => m.id), [
@@ -164,10 +169,10 @@ void main() {
     expect(controller.installedBytes, 42);
     expect(controller.defaultModel, base);
     expect(controller.settings.language, 'it');
-    expect(controller.stateOf(tiny), isA<ModelAbsent>());
+    expect(controller.stateOf(tiny), isA<NotDownloaded>());
     expect(
       controller.stateOf(small),
-      isA<ModelFailed>().having((s) => s.received, 'received', 4),
+      isA<DownloadFailed>().having((s) => s.received, 'received', 4),
     );
     // Kept for the resume, not cleaned up.
     expect(partOf(small).existsSync(), true);
@@ -177,13 +182,13 @@ void main() {
     final controller = models();
     addTearDown(controller.dispose);
     await controller.load();
-    final states = <ModelState>[];
+    final states = <DownloadState>[];
     controller.addListener(() => states.add(controller.stateOf(tiny)));
 
     await controller.download(tiny);
 
-    expect(states.first, isA<ModelDownloading>());
-    expect(controller.stateOf(tiny), isA<ModelInstalled>());
+    expect(states.first, isA<Downloading>());
+    expect(controller.stateOf(tiny), isA<Downloaded>());
     expect(await File(p.join(dir.path, tiny.fileName)).readAsBytes(), payload);
     expect(controller.defaultModel, tiny);
     // Persisted, not only in memory.
@@ -215,14 +220,14 @@ void main() {
     await controller.load();
     var retrying = false;
     controller.addListener(() {
-      if (controller.stateOf(base) case ModelDownloading(retrying: true)) {
+      if (controller.stateOf(base) case Downloading(retrying: true)) {
         retrying = true;
       }
     });
 
     await controller.download(base);
 
-    expect(controller.stateOf(base), isA<ModelInstalled>());
+    expect(controller.stateOf(base), isA<Downloaded>());
     expect(retrying, true);
     expect(server.ranges, [null, 'range: bytes=7000-', 'range: bytes=14000-']);
     expect(await File(p.join(dir.path, base.fileName)).readAsBytes(), payload);
@@ -240,7 +245,7 @@ void main() {
 
     expect(
       controller.stateOf(small),
-      isA<ModelFailed>()
+      isA<DownloadFailed>()
           .having((s) => s.resumable, 'resumable', true)
           .having((s) => s.received, 'received', 12000),
     );
@@ -248,7 +253,7 @@ void main() {
 
     // Back in the foreground.
     await controller.resumeInterrupted();
-    expect(controller.stateOf(small), isA<ModelInstalled>());
+    expect(controller.stateOf(small), isA<Downloaded>());
     expect(await File(p.join(dir.path, small.fileName)).readAsBytes(), payload);
   });
 
@@ -261,21 +266,26 @@ void main() {
       phone: false,
       retryDelays: const [Duration(seconds: 5)],
       startDownload:
-          ({required uri, required target, required onProgress, onHeaders}) =>
-              ModelDownload.start(
-                uri: Uri.parse(
-                  'http://127.0.0.1:${server.port}/${p.basename(target)}',
-                ),
-                target: target,
-                onProgress: onProgress,
-                onHeaders: onHeaders,
-              ),
+          ({
+            required uri,
+            required target,
+            required onProgress,
+            sha256,
+            onHeaders,
+          }) => FileDownload.start(
+            uri: Uri.parse(
+              'http://127.0.0.1:${server.port}/${p.basename(target)}',
+            ),
+            target: target,
+            onProgress: onProgress,
+            onHeaders: onHeaders,
+          ),
     );
     addTearDown(controller.dispose);
     await controller.load();
     final waiting = Completer<void>();
     controller.addListener(() {
-      if (controller.stateOf(tiny) case ModelDownloading(retrying: true)) {
+      if (controller.stateOf(tiny) case Downloading(retrying: true)) {
         if (!waiting.isCompleted) waiting.complete();
       }
     });
@@ -285,7 +295,7 @@ void main() {
     await controller.cancel(tiny);
     await running;
 
-    expect(controller.stateOf(tiny), isA<ModelAbsent>());
+    expect(controller.stateOf(tiny), isA<NotDownloaded>());
     expect(partOf(tiny).existsSync(), false);
   });
 
@@ -299,7 +309,7 @@ void main() {
 
     expect(
       controller.stateOf(small),
-      isA<ModelFailed>()
+      isA<DownloadFailed>()
           .having((s) => s.reason, 'reason', 'HTTP 404')
           .having((s) => s.resumable, 'resumable', false),
     );
@@ -328,6 +338,6 @@ void main() {
   test('the model file name is the one whisper_ggml loads', () {
     expect(tiny.fileName, 'ggml-tiny.bin');
     expect(transcriptionModelById('large-v3')!.fileName, 'ggml-large-v3.bin');
-    expect(ModelFiles.partSuffix, '.part');
+    expect(DownloadFiles.partSuffix, '.part');
   });
 }

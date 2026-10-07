@@ -1,10 +1,10 @@
-/// Where one transcription model stands on this device.
-sealed class ModelState {
+/// Where one downloadable file stands on this device.
+sealed class DownloadState {
   const new();
 }
 
 /// Not on disk and not downloading.
-final class ModelAbsent extends ModelState {
+final class NotDownloaded extends DownloadState {
   /// The absent state.
   const new();
 }
@@ -12,7 +12,7 @@ final class ModelAbsent extends ModelState {
 /// Downloading: [received] of [total] bytes (the catalog size until the
 /// response announces its own). [retrying] is true while waiting to try
 /// again after the connection dropped.
-final class ModelDownloading extends ModelState {
+final class Downloading extends DownloadState {
   /// A download at [received] of [total] bytes.
   const new({
     required this.received,
@@ -34,17 +34,17 @@ final class ModelDownloading extends ModelState {
 }
 
 /// On disk, [bytes] long.
-final class ModelInstalled extends ModelState {
-  /// An installed model of [bytes].
+final class Downloaded extends DownloadState {
+  /// An installed file of [bytes].
   const new(this.bytes);
 
-  /// The model file's size.
+  /// The file's size.
   final int bytes;
 }
 
 /// The download stopped: failed with [reason], or cut off with
 /// [received] of [total] bytes kept for resuming.
-final class ModelFailed extends ModelState {
+final class DownloadFailed extends DownloadState {
   /// A stopped download.
   const new(this.reason, {this.received = 0, this.total = 0});
 
@@ -54,10 +54,10 @@ final class ModelFailed extends ModelState {
   /// Bytes kept in the partial file (0 when there is nothing to resume).
   final int received;
 
-  /// The model's size, when known.
+  /// The file's size, when known.
   final int total;
 
-  /// Whether a download of this model resumes rather than starts over.
+  /// Whether a download of this file resumes rather than starts over.
   bool get resumable => received > 0;
 
   /// Progress kept, in 0..1.

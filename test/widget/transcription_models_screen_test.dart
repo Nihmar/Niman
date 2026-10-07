@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/transcription/model_state.dart';
+import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
@@ -77,7 +77,7 @@ void main() {
     await tester.tap(find.byKey(const Key('transcription-delete-confirm')));
     // The delete runs in an isolate: give it real time, and pump so its
     // result reaches the test's zone.
-    for (var i = 0; i < 100 && models.stateOf(base) is ModelInstalled; i++) {
+    for (var i = 0; i < 100 && models.stateOf(base) is Downloaded; i++) {
       await real(
         tester,
         () => Future<void>.delayed(const Duration(milliseconds: 20)),
@@ -86,7 +86,7 @@ void main() {
     }
     await tester.pumpAndSettle();
 
-    expect(models.stateOf(base), isA<ModelAbsent>());
+    expect(models.stateOf(base), isA<NotDownloaded>());
     expect(File(p.join(dir.path, base.fileName)).existsSync(), false);
     expect(find.byKey(const Key('transcription-download-base')), findsOne);
   });

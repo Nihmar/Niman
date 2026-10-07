@@ -1,3 +1,4 @@
+import 'package:niman/src/core/download/downloadable.dart';
 import 'package:whisper_ggml/whisper_ggml.dart';
 
 /// One speech-to-text model the app offers (docs/records/transcription.md).
@@ -6,7 +7,7 @@ import 'package:whisper_ggml/whisper_ggml.dart';
 /// page lists, how big the download is, and where it goes on disk. Only
 /// the multilingual models are offered; the `.en` and diarization
 /// variants stay out of the list.
-final class TranscriptionModel {
+final class TranscriptionModel implements Downloadable {
   /// Describes [whisper], whose ggml file is [bytes] long.
   const new(
     this.whisper, {
@@ -20,6 +21,7 @@ final class TranscriptionModel {
 
   /// The size of the published ggml file, for the list and the storage
   /// summary before a download reports its own `Content-Length`.
+  @override
   final int bytes;
 
   /// Whether Android offers it; large-v3 needs more memory than a phone
@@ -30,15 +32,23 @@ final class TranscriptionModel {
   final bool slowOnPhones;
 
   /// The stable id stored in the settings file (`tiny`, `large-v3`, …).
+  @override
   String get id => whisper.modelName;
 
   /// The file name the package loads the model from. `whisper_ggml`
   /// resolves `<model dir>/ggml-<name>.bin` itself (`WhisperController.
   /// getPath`), so downloads have to land exactly there.
+  @override
   String get fileName => 'ggml-${whisper.modelName}.bin';
 
   /// Where the weights are published.
+  @override
   Uri get uri => whisper.modelUri;
+
+  /// None pinned: Hugging Face serves the weights, and the size check
+  /// already catches a cut-off file.
+  @override
+  String? get sha256 => null;
 
   @override
   String toString() => id;

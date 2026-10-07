@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/transcription/model_state.dart';
+import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One model on the models page; what it shows and offers follows the
-/// model's [ModelState].
+/// model's [DownloadState].
 final class TranscriptionModelRow extends StatelessWidget {
   /// Creates the row for [model].
   const new({required this.model, required this.models, super.key});
@@ -25,22 +25,22 @@ final class TranscriptionModelRow extends StatelessWidget {
     final state = models.stateOf(model);
     final isDefault = models.defaultModel == model;
     final size = AppStrings.byteSize(switch (state) {
-      ModelInstalled(:final bytes) => bytes,
+      Downloaded(:final bytes) => bytes,
       _ => model.bytes,
     });
 
     final leading = switch (state) {
-      ModelInstalled() => Icon(
+      Downloaded() => Icon(
         isDefault ? Icons.radio_button_checked : Icons.radio_button_unchecked,
         color: isDefault ? colors.primary : null,
       ),
-      ModelDownloading(:final fraction) => SizedBox.square(
+      Downloading(:final fraction) => SizedBox.square(
         dimension: 22,
         child: CircularProgressIndicator(value: fraction, strokeWidth: 2.5),
       ),
-      ModelFailed(resumable: true) => const Icon(Icons.pause_circle_outline),
-      ModelFailed() => Icon(Icons.error_outline, color: colors.error),
-      ModelAbsent() => const Icon(Icons.cloud_download_outlined),
+      DownloadFailed(resumable: true) => const Icon(Icons.pause_circle_outline),
+      DownloadFailed() => Icon(Icons.error_outline, color: colors.error),
+      NotDownloaded() => const Icon(Icons.cloud_download_outlined),
     };
 
     String progress(int received, int total, double fraction) =>
@@ -49,7 +49,7 @@ final class TranscriptionModelRow extends StatelessWidget {
     const figures = TextStyle(fontFeatures: [FontFeature.tabularFigures()]);
 
     final subtitle = switch (state) {
-      ModelDownloading(
+      Downloading(
         :final received,
         :final total,
         :final fraction,
@@ -69,7 +69,7 @@ final class TranscriptionModelRow extends StatelessWidget {
             LinearProgressIndicator(value: fraction),
           ],
         ),
-      ModelFailed(
+      DownloadFailed(
         resumable: true,
         :final received,
         :final total,
@@ -81,7 +81,7 @@ final class TranscriptionModelRow extends StatelessWidget {
           ),
           style: figures,
         ),
-      ModelFailed() => Text(
+      DownloadFailed() => Text(
         AppStrings.transcriptionModelFailed,
         style: TextStyle(color: colors.error),
       ),
@@ -89,19 +89,19 @@ final class TranscriptionModelRow extends StatelessWidget {
     };
 
     final trailing = switch (state) {
-      ModelInstalled() => IconButton(
+      Downloaded() => IconButton(
         key: Key('transcription-delete-${model.id}'),
         tooltip: AppStrings.actionDelete,
         icon: const Icon(Icons.delete_outline),
         onPressed: () => unawaited(_confirmDelete(context, size)),
       ),
-      ModelDownloading() => IconButton(
+      Downloading() => IconButton(
         key: Key('transcription-cancel-${model.id}'),
         tooltip: AppStrings.actionCancel,
         icon: const Icon(Icons.close),
         onPressed: () => unawaited(models.cancel(model)),
       ),
-      ModelFailed(:final resumable) => Row(
+      DownloadFailed(:final resumable) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (resumable)
@@ -120,7 +120,7 @@ final class TranscriptionModelRow extends StatelessWidget {
           ),
         ],
       ),
-      ModelAbsent() => IconButton(
+      NotDownloaded() => IconButton(
         key: Key('transcription-download-${model.id}'),
         tooltip: AppStrings.transcriptionModelDownload,
         icon: const Icon(Icons.download),
@@ -149,7 +149,7 @@ final class TranscriptionModelRow extends StatelessWidget {
       ),
       subtitle: subtitle,
       trailing: trailing,
-      onTap: state is ModelInstalled && !isDefault
+      onTap: state is Downloaded && !isDefault
           ? () => unawaited(models.setDefault(model))
           : null,
     );

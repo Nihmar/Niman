@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/transcription/model_download.dart';
-import 'package:niman/src/transcription/model_state.dart';
+import 'package:niman/src/core/download/download_state.dart';
+import 'package:niman/src/core/download/file_download.dart';
 import 'package:niman/src/transcription/speech_transcriber.dart';
 import 'package:niman/src/transcription/transcription_job.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
@@ -202,13 +202,18 @@ void main() {
       directory: () async => dir.path,
       phone: false,
       startDownload:
-          ({required uri, required target, required onProgress, onHeaders}) =>
-              ModelDownload.start(
-                uri: Uri.parse('http://127.0.0.1:${server.port}/m.bin'),
-                target: target,
-                onProgress: onProgress,
-                onHeaders: onHeaders,
-              ),
+          ({
+            required uri,
+            required target,
+            required onProgress,
+            sha256,
+            onHeaders,
+          }) => FileDownload.start(
+            uri: Uri.parse('http://127.0.0.1:${server.port}/m.bin'),
+            target: target,
+            onProgress: onProgress,
+            onHeaders: onHeaders,
+          ),
     );
     await downloading.load();
     addTearDown(downloading.dispose);
@@ -245,7 +250,7 @@ void main() {
     expect(job.error, contains('not downloaded'));
     expect(
       models.stateOf(transcriptionModelById('medium')!),
-      isA<ModelAbsent>(),
+      isA<NotDownloaded>(),
     );
   });
 
