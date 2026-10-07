@@ -3056,4 +3056,22 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Precisa de um PDF ou uma imagem na tela';
+
+  @override
+  String get ocrTextTitle => 'Texto';
+
+  @override
+  String get ocrScanTitle => 'Digitalização';
+
+  @override
+  String get ocrOpenAsNote => 'Abrir como nota';
+
+  @override
+  String get ocrShowText => 'Mostrar o texto';
+
+  @override
+  String get ocrHideText => 'Ocultar o texto';
+
+  @override
+  String get ocrCopyText => 'Copiar';
 }

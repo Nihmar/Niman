@@ -3058,4 +3058,22 @@ final class ItalianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => "Serve un PDF o un'immagine sullo schermo";
+
+  @override
+  String get ocrTextTitle => 'Testo';
+
+  @override
+  String get ocrScanTitle => 'Scansione';
+
+  @override
+  String get ocrOpenAsNote => 'Apri come nota';
+
+  @override
+  String get ocrShowText => 'Mostra il testo';
+
+  @override
+  String get ocrHideText => 'Nascondi il testo';
+
+  @override
+  String get ocrCopyText => 'Copia';
 }

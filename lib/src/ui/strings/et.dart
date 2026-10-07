@@ -2993,4 +2993,22 @@ final class EstonianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Vajab ekraanile PDF-i või pilti';
+
+  @override
+  String get ocrTextTitle => 'Tekst';
+
+  @override
+  String get ocrScanTitle => 'Skann';
+
+  @override
+  String get ocrOpenAsNote => 'Ava märkmena';
+
+  @override
+  String get ocrShowText => 'Näita teksti';
+
+  @override
+  String get ocrHideText => 'Peida tekst';
+
+  @override
+  String get ocrCopyText => 'Kopeeri';
 }

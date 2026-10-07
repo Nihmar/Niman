@@ -3065,4 +3065,22 @@ final class SerbianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Потребан је PDF или слика на екрану';
+
+  @override
+  String get ocrTextTitle => 'Текст';
+
+  @override
+  String get ocrScanTitle => 'Скен';
+
+  @override
+  String get ocrOpenAsNote => 'Отвори као белешку';
+
+  @override
+  String get ocrShowText => 'Прикажи текст';
+
+  @override
+  String get ocrHideText => 'Сакриј текст';
+
+  @override
+  String get ocrCopyText => 'Копирај';
 }

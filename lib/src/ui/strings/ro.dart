@@ -3089,4 +3089,22 @@ final class RomanianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Necesită un PDF sau o imagine pe ecran';
+
+  @override
+  String get ocrTextTitle => 'Text';
+
+  @override
+  String get ocrScanTitle => 'Scanare';
+
+  @override
+  String get ocrOpenAsNote => 'Deschide ca notă';
+
+  @override
+  String get ocrShowText => 'Arată textul';
+
+  @override
+  String get ocrHideText => 'Ascunde textul';
+
+  @override
+  String get ocrCopyText => 'Copiază';
 }

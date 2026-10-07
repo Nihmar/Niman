@@ -3074,4 +3074,22 @@ final class DutchStrings extends Strings {
   @override
   String get commandNeedOcrFile =>
       'Vraagt om een pdf of afbeelding op het scherm';
+
+  @override
+  String get ocrTextTitle => 'Tekst';
+
+  @override
+  String get ocrScanTitle => 'Scan';
+
+  @override
+  String get ocrOpenAsNote => 'Openen als notitie';
+
+  @override
+  String get ocrShowText => 'Tekst tonen';
+
+  @override
+  String get ocrHideText => 'Tekst verbergen';
+
+  @override
+  String get ocrCopyText => 'Kopiëren';
 }

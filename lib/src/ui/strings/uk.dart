@@ -3082,4 +3082,22 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Потрібен PDF або зображення на екрані';
+
+  @override
+  String get ocrTextTitle => 'Текст';
+
+  @override
+  String get ocrScanTitle => 'Скан';
+
+  @override
+  String get ocrOpenAsNote => 'Відкрити як нотатку';
+
+  @override
+  String get ocrShowText => 'Показати текст';
+
+  @override
+  String get ocrHideText => 'Сховати текст';
+
+  @override
+  String get ocrCopyText => 'Копіювати';
 }

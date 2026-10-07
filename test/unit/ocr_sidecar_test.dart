@@ -139,4 +139,31 @@ Second page <!-- ocr 0.100 0.200 0.900 0.230 -->
       4,
     );
   });
+
+  test('the plain text: no frontmatter, headings, positions or escapes', () {
+    final text = ocrSidecarText(
+      fileName: 's.pdf',
+      languages: 'eng',
+      date: date,
+      paged: true,
+      pages: {
+        1: [line('# Total: 3!', 0.1, paragraph: true), line('goes on', 0.2)],
+        2: [line('- second [x]', 0.1, paragraph: true)],
+      },
+    );
+    expect(ocrSidecarPlainText(text), '# Total: 3!\ngoes on\n\n- second [x]');
+  });
+
+  test('a sidecar is known by the link to its file', () {
+    expect(ocrSidecarNames('scan.pdf'), ['scan.ocr', 'scan.pdf.ocr']);
+    final text = ocrSidecarText(
+      fileName: 'scan.pdf',
+      languages: 'eng',
+      date: date,
+      paged: true,
+      pages: const {},
+    );
+    expect(isOcrSidecarOf(text, 'scan.pdf'), isTrue);
+    expect(isOcrSidecarOf(text, 'scan.jpg'), isFalse);
+  });
 }

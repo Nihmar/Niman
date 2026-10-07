@@ -3068,4 +3068,22 @@ final class BasqueStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'PDF bat edo irudi bat behar da pantailan';
+
+  @override
+  String get ocrTextTitle => 'Testua';
+
+  @override
+  String get ocrScanTitle => 'Eskaneatzea';
+
+  @override
+  String get ocrOpenAsNote => 'Ireki ohar gisa';
+
+  @override
+  String get ocrShowText => 'Erakutsi testua';
+
+  @override
+  String get ocrHideText => 'Ezkutatu testua';
+
+  @override
+  String get ocrCopyText => 'Kopiatu';
 }

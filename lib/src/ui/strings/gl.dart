@@ -3059,4 +3059,22 @@ final class GalicianStrings extends Strings {
 
   @override
   String get commandNeedOcrFile => 'Precisa un PDF ou unha imaxe na pantalla';
+
+  @override
+  String get ocrTextTitle => 'Texto';
+
+  @override
+  String get ocrScanTitle => 'Escaneo';
+
+  @override
+  String get ocrOpenAsNote => 'Abrir como nota';
+
+  @override
+  String get ocrShowText => 'Amosar o texto';
+
+  @override
+  String get ocrHideText => 'Agochar o texto';
+
+  @override
+  String get ocrCopyText => 'Copiar';
 }

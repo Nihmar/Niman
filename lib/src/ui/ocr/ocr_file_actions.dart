@@ -1,3 +1,4 @@
+import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/attachment_view.dart' show pictureExtensions;
 import 'package:path/path.dart' as p;
@@ -7,13 +8,25 @@ import 'package:path/path.dart' as p;
 /// how and queues the job.
 final class OcrFileActions {
   /// The actions over [queue], for the library at [root].
-  const new({required this.queue, required this.root, required this.recognize});
+  const new({
+    required this.queue,
+    required this.root,
+    required this.ops,
+    required this.recognize,
+    required this.openNote,
+  });
 
   /// The recognition jobs.
   final OcrQueue queue;
 
   /// The library's root, absolute.
   final String root;
+
+  /// The library's operations, which read a file's sidecar (#595).
+  final NoteOperations ops;
+
+  /// Opens a note (the sidecar, as a note).
+  final void Function(String path) openNote;
 
   /// Recognizes a file (library-relative): a PDF with its page count and
   /// the page read, or a picture.
