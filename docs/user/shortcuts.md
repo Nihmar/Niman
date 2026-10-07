@@ -30,7 +30,10 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Shift+T` — typewriter mode on or off: the line being written
   stays in the middle (see [editing](editing.md#typewriter-mode))
 - `Ctrl/⌘+=` / `Ctrl/⌘+-` — zoom the note's text in and out, `Ctrl/⌘+0`
-  back to its normal size: the library's note text size (Settings →
+  back to its normal size; zoom in also runs on `Ctrl/⌘` and the `+` key
+  however the keyboard types it (its own key on an Italian or German
+  layout, `Shift+=` on a US one), and both on the numpad's `+` and `-`,
+  while the zoom keys are the shipped ones: the library's note text size (Settings →
   Appearance), in the editor and the preview alike; on a phone, pinch the
   note with two fingers — spread them to zoom in, bring them together to
   zoom out — or use *Zoom in*, *Zoom out* and *Reset zoom* in the command
