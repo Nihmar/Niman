@@ -91,15 +91,22 @@ final class OcrWorker {
       // [close] shut the port first.
       orElse: () => (id, 'the worker stopped'),
     );
+    // An asynchronous completer, not Future.any's synchronous one: [close]
+    // ends both waits synchronously, and the page must not answer inside
+    // it, before its caller has had a chance to listen.
+    final answer = Completer<Object?>();
+    void settle(Object? message) {
+      if (!answer.isCompleted) answer.complete(message);
+    }
+
+    unawaited(reply.then(settle));
+    unawaited(_exited.then((_) => settle((id, 'the worker stopped'))));
     _requests.send((id, page));
-    final answer = await Future.any([
-      reply,
-      _exited.then((_) => (id, 'the worker stopped')),
-    ]);
-    return switch (answer) {
+    final message = await answer.future;
+    return switch (message) {
       (_, final List<OcrLine> lines) => lines,
       (_, final String reason) => throw TesseractException(reason),
-      _ => throw StateError('unexpected reply $answer'),
+      _ => throw StateError('unexpected reply $message'),
     };
   }
 
