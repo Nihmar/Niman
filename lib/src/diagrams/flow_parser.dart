@@ -6,21 +6,24 @@
 ///
 /// The supported grammar is Mermaid's own where it matters for a note:
 /// directions, the node shapes, subgraphs, the edge spellings and their
-/// labels. A directive is skipped; an unsupported shape or edge is reported,
+/// labels, and the look `style` gives a node or a subgraph. Any other
+/// directive is skipped; an unsupported shape or edge is reported,
 /// never silently mis-drawn.
 library;
 
 import 'package:niman/src/diagrams/flow_cursor.dart';
 import 'package:niman/src/diagrams/flow_edge_scanner.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
+import 'package:niman/src/diagrams/flow_node_style.dart';
 import 'package:niman/src/diagrams/mermaid_error.dart';
 import 'package:niman/src/diagrams/mermaid_lines.dart';
 
 /// Parses a flowchart body (the fence's content, header included).
 Flowchart parseFlowchart(String source) => _FlowParser(source).parse();
 
-/// The keywords that open a directive a note draws nothing for; skipped.
-/// Mermaid's own spelling, case and all: `Class` or `link` is a node.
+/// The keywords that open a directive: `style` is drawn, the rest a note
+/// draws nothing for and skips. Mermaid's own spelling, case and all:
+/// `Class` or `link` is a node.
 const Set<String> _directives = {
   'classDef',
   'class',
@@ -45,6 +48,9 @@ final class _FlowParser {
 
   /// The ids written with a shape (`A[Text]`), not only mentioned bare.
   final Set<String> _shaped = {};
+
+  /// The look each `style` statement gave a node or a subgraph, by id.
+  final Map<String, FlowNodeStyle> _styles = {};
 
   /// Runs the parse and returns the chart.
   Flowchart parse() {
@@ -100,7 +106,20 @@ final class _FlowParser {
     bool isBox(String id) => boxes.contains(id) && !_shaped.contains(id);
     return Flowchart(
       direction: direction ?? FlowDirection.topDown,
-      nodes: List.unmodifiable(_nodes.where((node) => !isBox(node.id))),
+      nodes: List.unmodifiable([
+        for (final node in _nodes)
+          if (!isBox(node.id))
+            if (_styles[node.id] case final style?)
+              FlowNode(
+                id: node.id,
+                label: node.label,
+                shape: node.shape,
+                sections: node.sections,
+                style: style,
+              )
+            else
+              node,
+      ]),
       edges: List.unmodifiable(_edges),
       subgraphs: List.unmodifiable([
         for (final subgraph in _subgraphs)
@@ -112,6 +131,7 @@ final class _FlowParser {
             ),
             direction: subgraph.direction,
             parent: subgraph.parent,
+            style: _styles[subgraph.id],
           ),
       ]),
     );
@@ -139,7 +159,10 @@ final class _FlowParser {
       if (_stack.isNotEmpty) _stack.last.direction = dir;
       return;
     }
-    if (_isDirective(line)) return;
+    if (_isDirective(line)) {
+      if (word == 'style') _style(line, number);
+      return;
+    }
     _chain(line, number);
   }
 
@@ -186,6 +209,22 @@ final class _FlowParser {
         parent: build.parent,
       ),
     );
+  }
+
+  /// `style <id> fill:…,stroke:…`: the look of one node or subgraph,
+  /// written before it or after it.
+  void _style(String line, int number) {
+    final rest = line.substring('style'.length).trim();
+    final space = rest.indexOf(RegExp(r'\s'));
+    if (space < 0) {
+      throw MermaidParseException(
+        number,
+        'expected the properties after "style $rest"',
+      );
+    }
+    final id = rest.substring(0, space);
+    final style = FlowNodeStyle.parse(rest.substring(space + 1));
+    _styles[id] = _styles[id]?.overlaid(style) ?? style;
   }
 
   // -- nodes and edges ---------------------------------------------------

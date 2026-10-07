@@ -38,6 +38,7 @@ final class DiagramRenderer {
 
   void _subgraphs(DiagramTarget target) {
     for (final sub in layout.subgraphs) {
+      final own = sub.subgraph.style;
       target
         ..polygon(
           DiagramShapes.polygonFor(
@@ -45,13 +46,14 @@ final class DiagramRenderer {
             sub.rect,
             radius: style.cornerRadius,
           ),
-          fill: style.palette.subgraphFill,
-          stroke: style.palette.subgraphStroke,
+          fill: own?.fill ?? style.palette.subgraphFill,
+          stroke: own?.stroke ?? style.palette.subgraphStroke,
+          strokeWidth: own?.strokeWidth ?? 1,
         )
         ..text(
           [sub.title],
           sub.titleRect,
-          color: style.palette.subgraphTitle,
+          color: own?.textColor ?? style.palette.subgraphTitle,
           fontSize: style.fontSize,
           alignLeft: true,
           weight: FontWeight.w600,
@@ -174,13 +176,18 @@ final class DiagramRenderer {
     }
   }
 
-  /// A flowchart's own node: its outline and its label.
+  /// A flowchart's own node: its outline and its label, in the look a
+  /// `style` statement gave it where it gave one.
   void _box(DiagramTarget target, LaidOutNode node) {
+    final own = node.node.style;
+    final stroke = own?.stroke ?? style.palette.nodeStroke;
+    final strokeWidth = own?.strokeWidth ?? style.nodeStrokeWidth;
+    final text = own?.textColor ?? style.palette.nodeText;
     target.polygon(
       _outline(node),
-      fill: style.palette.nodeFill,
-      stroke: style.palette.nodeStroke,
-      strokeWidth: style.nodeStrokeWidth,
+      fill: own?.fill ?? style.palette.nodeFill,
+      stroke: stroke,
+      strokeWidth: strokeWidth,
     );
     if (node.node.shape == FlowNodeShape.doubleCircle) {
       target.polygon(
@@ -188,32 +195,27 @@ final class DiagramRenderer {
           FlowNodeShape.circle,
           node.rect.deflate(doubleCircleGap),
         ),
-        stroke: style.palette.nodeStroke,
-        strokeWidth: style.nodeStrokeWidth,
+        stroke: stroke,
+        strokeWidth: strokeWidth,
       );
     }
     if (node.node.shape == FlowNodeShape.subroutine) {
       for (final (a, b) in DiagramShapes.subroutineBars(node.rect)) {
-        target.line(
-          a,
-          b,
-          color: style.palette.nodeStroke,
-          strokeWidth: style.nodeStrokeWidth,
-        );
+        target.line(a, b, color: stroke, strokeWidth: strokeWidth);
       }
     }
-    if (node.node.sections.isNotEmpty) return _card(target, node);
+    if (node.node.sections.isNotEmpty) return _card(target, node, text);
     target.text(
       layout.lines[node.node.id] ?? [node.node.label],
       node.rect,
-      color: style.palette.nodeText,
+      color: text,
       fontSize: style.fontSize,
     );
   }
 
   /// A card's sections stacked and centred in its box, the middle one —
   /// the name — bold.
-  void _card(DiagramTarget target, LaidOutNode node) {
+  void _card(DiagramTarget target, LaidOutNode node, Color color) {
     final sections = node.node.sections;
     final line = style.fontSize * style.lineHeight;
     final total = node.node.stackedLines.length * line;
@@ -224,7 +226,7 @@ final class DiagramRenderer {
         target.text(
           sections[i],
           Rect.fromLTWH(node.rect.left, y, node.rect.width, height),
-          color: style.palette.nodeText,
+          color: color,
           fontSize: style.fontSize,
           weight: i == 1 ? FontWeight.w600 : FontWeight.normal,
         );
@@ -237,11 +239,14 @@ final class DiagramRenderer {
   /// its members from the left.
   void _classBox(DiagramTarget target, LaidOutNode node) {
     final rect = node.rect;
+    final own = node.node.style;
+    final stroke = own?.stroke ?? style.palette.nodeStroke;
+    final strokeWidth = own?.strokeWidth ?? style.nodeStrokeWidth;
     target.polygon(
       _outline(node),
-      fill: style.palette.nodeFill,
-      stroke: style.palette.nodeStroke,
-      strokeWidth: style.nodeStrokeWidth,
+      fill: own?.fill ?? style.palette.nodeFill,
+      stroke: stroke,
+      strokeWidth: strokeWidth,
     );
     final heights = classSectionHeights(node.node, style);
     final inset = style.nodePadding.left;
@@ -252,8 +257,8 @@ final class DiagramRenderer {
         target.line(
           Offset(rect.left, y),
           Offset(rect.right, y),
-          color: style.palette.nodeStroke,
-          strokeWidth: style.nodeStrokeWidth,
+          color: stroke,
+          strokeWidth: strokeWidth,
         );
       }
       if (section.isNotEmpty) {
@@ -267,7 +272,7 @@ final class DiagramRenderer {
                   rect.width - 2 * inset,
                   heights[i],
                 ),
-          color: style.palette.nodeText,
+          color: own?.textColor ?? style.palette.nodeText,
           fontSize: style.fontSize,
           alignLeft: i > 0,
           weight: i == 0 ? FontWeight.w600 : FontWeight.normal,
