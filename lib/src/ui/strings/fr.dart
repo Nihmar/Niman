@@ -2998,4 +2998,80 @@ final class FrenchStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => "Le curseur n'est pas dans une liste";
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Reconnaissance de texte';
+
+  @override
+  String get ocrIntro =>
+      'Lit le texte des PDF numérisés et des images dans une note '
+      'placée à côté. Tout se fait sur cet appareil : le moteur et '
+      'chaque langue sont téléchargés une seule fois, au premier '
+      'besoin.';
+
+  @override
+  String get ocrEngineTitle => 'Moteur';
+
+  @override
+  String get ocrEngineSystem => 'Bibliothèque du système';
+
+  @override
+  String get ocrEngineBundled => "Inclus dans l'app";
+
+  @override
+  String get ocrEngineUnavailable => 'Aucun moteur pour cet appareil';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Supprimer le moteur ?';
+
+  @override
+  String get ocrQualityTitle => 'Qualité';
+
+  @override
+  String get ocrQualityFast => 'Rapide';
+
+  @override
+  String get ocrQualityBest => 'Meilleure';
+
+  @override
+  String get ocrQualityHint =>
+      'Rapide : 1–4 Mo par langue, vive sur tout appareil. '
+      'Meilleure : 10–15 Mo par langue, plus fiable sur les '
+      'numérisations difficiles, deux à trois fois plus lente. '
+      'Chaque qualité a ses propres langues.';
+
+  @override
+  String get ocrLanguageTitle => 'Langue par défaut';
+
+  @override
+  String get ocrAlsoTitle => 'Aussi';
+
+  @override
+  String get ocrAlsoSubtitle => 'Pour les pages qui mêlent deux langues';
+
+  @override
+  String get ocrAlsoNone => 'Aucune';
+
+  @override
+  String ocrOnDevice(String size) => 'Sur cet appareil · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Autres langues';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Rechercher parmi $count langues';
+
+  @override
+  String get ocrLanguageDefault => 'Par défaut';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Supprimer $language ?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Cela libère $size. Le fichier sera de nouveau téléchargé '
+      'quand la reconnaissance de texte en aura besoin.';
 }

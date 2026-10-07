@@ -2906,4 +2906,78 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Bendillinn er ekki í lista';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Textagreining';
+
+  @override
+  String get ocrIntro =>
+      'Les texta skannaðra PDF-skjala og mynda inn í minnispunkt '
+      'við hliðina á þeim. Allt keyrir á þessu tæki: vélin og hvert '
+      'tungumál er sótt einu sinni, þegar þess er fyrst þörf.';
+
+  @override
+  String get ocrEngineTitle => 'Vél';
+
+  @override
+  String get ocrEngineSystem => 'Kerfissafn';
+
+  @override
+  String get ocrEngineBundled => 'Innifalin í forritinu';
+
+  @override
+  String get ocrEngineUnavailable => 'Engin vél fyrir þetta tæki';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Eyða vélinni?';
+
+  @override
+  String get ocrQualityTitle => 'Gæði';
+
+  @override
+  String get ocrQualityFast => 'Hröð';
+
+  @override
+  String get ocrQualityBest => 'Best';
+
+  @override
+  String get ocrQualityHint =>
+      'Hröð: 1–4 MB á tungumál, snögg á hvaða tæki sem er. Best: '
+      '10–15 MB á tungumál, betri á erfiðum skönnunum, tvisvar til '
+      'þrisvar sinnum hægari. Hver gæði hafa sín eigin tungumál.';
+
+  @override
+  String get ocrLanguageTitle => 'Sjálfgefið tungumál';
+
+  @override
+  String get ocrAlsoTitle => 'Einnig';
+
+  @override
+  String get ocrAlsoSubtitle => 'Fyrir síður þar sem tvö tungumál blandast';
+
+  @override
+  String get ocrAlsoNone => 'Ekkert';
+
+  @override
+  String ocrOnDevice(String size) => 'Á þessu tæki · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Önnur tungumál';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Leita í $count tungumálum';
+
+  @override
+  String get ocrLanguageDefault => 'Sjálfgefið';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Eyða $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Þetta losar $size. Skráin er sótt aftur þegar '
+      'textagreiningin þarf á henni að halda.';
 }

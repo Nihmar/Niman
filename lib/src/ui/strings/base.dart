@@ -1438,4 +1438,72 @@ abstract base class Strings {
 
   /// A filter name the engine does not answer.
   String templateProblemUnknownFilter(String name);
+
+  // Text recognition (#593).
+
+  /// The engine and its version.
+  String ocrEngineName(String version);
+
+  /// The Text recognition area (#593).
+  String get settingsSectionTextRecognition;
+
+  /// What text recognition does, atop its settings.
+  String get ocrIntro;
+
+  /// The engine section.
+  String get ocrEngineTitle;
+
+  /// The engine row's state: the distribution's library.
+  String get ocrEngineSystem;
+
+  /// The engine row's state: shipped in the package.
+  String get ocrEngineBundled;
+
+  /// The engine row's state: no build for this device.
+  String get ocrEngineUnavailable;
+
+  /// Asks before deleting the downloaded engine.
+  String get ocrEngineDeleteTitle;
+
+  /// The models’ quality setting.
+  String get ocrQualityTitle;
+
+  /// tessdata_fast.
+  String get ocrQualityFast;
+
+  /// tessdata_best.
+  String get ocrQualityBest;
+
+  /// What the two qualities trade.
+  String get ocrQualityHint;
+
+  /// The default recognition language.
+  String get ocrLanguageTitle;
+
+  /// The second language read with the default.
+  String get ocrAlsoTitle;
+
+  /// What "Also" is for.
+  String get ocrAlsoSubtitle;
+
+  /// No second language.
+  String get ocrAlsoNone;
+
+  /// The downloaded languages’ heading, with their size.
+  String ocrOnDevice(String size);
+
+  /// The heading of the languages to download.
+  String get ocrOtherLanguages;
+
+  /// The language search field’s hint.
+  String ocrSearchLanguages(int count);
+
+  /// The badge on the default language.
+  String get ocrLanguageDefault;
+
+  /// Asks before deleting a language.
+  String ocrLanguageDeleteTitle(String language);
+
+  /// What deleting an OCR file frees.
+  String ocrDeleteBody(String size);
 }

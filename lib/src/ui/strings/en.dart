@@ -2871,4 +2871,78 @@ final class EnglishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'The cursor is not in a list';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Text recognition';
+
+  @override
+  String get ocrIntro =>
+      'Reads the text of scanned PDFs and images into a note next '
+      'to them. It runs on this device: the engine and each '
+      'language are downloaded once, when first needed.';
+
+  @override
+  String get ocrEngineTitle => 'Engine';
+
+  @override
+  String get ocrEngineSystem => 'System library';
+
+  @override
+  String get ocrEngineBundled => 'Included in the app';
+
+  @override
+  String get ocrEngineUnavailable => 'No engine for this device';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Delete the engine?';
+
+  @override
+  String get ocrQualityTitle => 'Quality';
+
+  @override
+  String get ocrQualityFast => 'Fast';
+
+  @override
+  String get ocrQualityBest => 'Best';
+
+  @override
+  String get ocrQualityHint =>
+      'Fast: 1–4 MB per language, quick on any device. Best: 10–15 '
+      'MB per language, better on hard scans, two or three times '
+      'slower. Each quality keeps its own languages.';
+
+  @override
+  String get ocrLanguageTitle => 'Default language';
+
+  @override
+  String get ocrAlsoTitle => 'Also';
+
+  @override
+  String get ocrAlsoSubtitle => 'For pages that mix two languages';
+
+  @override
+  String get ocrAlsoNone => 'None';
+
+  @override
+  String ocrOnDevice(String size) => 'On this device · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Other languages';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Search $count languages';
+
+  @override
+  String get ocrLanguageDefault => 'Default';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Delete $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'This frees $size. It is downloaded again when text '
+      'recognition needs it.';
 }

@@ -2865,4 +2865,78 @@ final class EstonianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kursor ei ole loendis';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Tekstituvastus';
+
+  @override
+  String get ocrIntro =>
+      'Loeb skannitud PDF-ide ja piltide teksti nende kõrvale '
+      'märkmesse. Kõik toimub selles seadmes: mootor ja iga keel '
+      'laaditakse alla üks kord, kui neid esimest korda vaja läheb.';
+
+  @override
+  String get ocrEngineTitle => 'Mootor';
+
+  @override
+  String get ocrEngineSystem => 'Süsteemi teek';
+
+  @override
+  String get ocrEngineBundled => 'Rakendusega kaasas';
+
+  @override
+  String get ocrEngineUnavailable => 'Selle seadme jaoks pole mootorit';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Kas kustutada mootor?';
+
+  @override
+  String get ocrQualityTitle => 'Kvaliteet';
+
+  @override
+  String get ocrQualityFast => 'Kiire';
+
+  @override
+  String get ocrQualityBest => 'Parim';
+
+  @override
+  String get ocrQualityHint =>
+      'Kiire: 1–4 MB keele kohta, nobe igas seadmes. Parim: 10–15 '
+      'MB keele kohta, parem keeruliste skannide puhul, kaks kuni '
+      'kolm korda aeglasem. Igal kvaliteedil on oma keeled.';
+
+  @override
+  String get ocrLanguageTitle => 'Vaikekeel';
+
+  @override
+  String get ocrAlsoTitle => 'Lisaks';
+
+  @override
+  String get ocrAlsoSubtitle => 'Lehtedele, kus on segamini kaks keelt';
+
+  @override
+  String get ocrAlsoNone => 'Puudub';
+
+  @override
+  String ocrOnDevice(String size) => 'Selles seadmes · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Muud keeled';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Otsi $count keele seast';
+
+  @override
+  String get ocrLanguageDefault => 'Vaikimisi';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Kas kustutada $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'See vabastab $size. Fail laaditakse uuesti alla, kui '
+      'tekstituvastus seda vajab.';
 }

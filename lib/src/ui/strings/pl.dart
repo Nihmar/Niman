@@ -2962,4 +2962,79 @@ final class PolishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kursor nie znajduje się na liście';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Rozpoznawanie tekstu';
+
+  @override
+  String get ocrIntro =>
+      'Odczytuje tekst zeskanowanych plików PDF i obrazów do '
+      'notatki obok nich. Wszystko działa na tym urządzeniu: silnik '
+      'i każdy język pobierane są raz, gdy są potrzebne po raz '
+      'pierwszy.';
+
+  @override
+  String get ocrEngineTitle => 'Silnik';
+
+  @override
+  String get ocrEngineSystem => 'Biblioteka systemowa';
+
+  @override
+  String get ocrEngineBundled => 'Wbudowany w aplikację';
+
+  @override
+  String get ocrEngineUnavailable => 'Brak silnika dla tego urządzenia';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Usunąć silnik?';
+
+  @override
+  String get ocrQualityTitle => 'Jakość';
+
+  @override
+  String get ocrQualityFast => 'Szybka';
+
+  @override
+  String get ocrQualityBest => 'Najlepsza';
+
+  @override
+  String get ocrQualityHint =>
+      'Szybka: 1–4 MB na język, sprawna na każdym urządzeniu. '
+      'Najlepsza: 10–15 MB na język, lepsza przy trudnych skanach, '
+      'dwa–trzy razy wolniejsza. Każda jakość ma własne języki.';
+
+  @override
+  String get ocrLanguageTitle => 'Domyślny język';
+
+  @override
+  String get ocrAlsoTitle => 'Także';
+
+  @override
+  String get ocrAlsoSubtitle => 'Dla stron, na których mieszają się dwa języki';
+
+  @override
+  String get ocrAlsoNone => 'Brak';
+
+  @override
+  String ocrOnDevice(String size) => 'Na tym urządzeniu · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Inne języki';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Szukaj wśród $count języków';
+
+  @override
+  String get ocrLanguageDefault => 'Domyślny';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Usunąć $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Zwolni to $size. Plik zostanie pobrany ponownie, gdy '
+      'rozpoznawanie tekstu będzie go potrzebować.';
 }

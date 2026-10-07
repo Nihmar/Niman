@@ -2978,4 +2978,80 @@ final class GermanStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Der Cursor steht nicht in einer Liste';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Texterkennung';
+
+  @override
+  String get ocrIntro =>
+      'Liest den Text gescannter PDFs und Bilder in eine Notiz '
+      'daneben. Alles läuft auf diesem Gerät: Die Engine und jede '
+      'Sprache werden einmal heruntergeladen, wenn sie zum ersten '
+      'Mal gebraucht werden.';
+
+  @override
+  String get ocrEngineTitle => 'Engine';
+
+  @override
+  String get ocrEngineSystem => 'Systembibliothek';
+
+  @override
+  String get ocrEngineBundled => 'In der App enthalten';
+
+  @override
+  String get ocrEngineUnavailable => 'Keine Engine für dieses Gerät';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Engine löschen?';
+
+  @override
+  String get ocrQualityTitle => 'Qualität';
+
+  @override
+  String get ocrQualityFast => 'Schnell';
+
+  @override
+  String get ocrQualityBest => 'Beste';
+
+  @override
+  String get ocrQualityHint =>
+      'Schnell: 1–4 MB pro Sprache, flott auf jedem Gerät. Beste: '
+      '10–15 MB pro Sprache, besser bei schwierigen Scans, zwei- '
+      'bis dreimal langsamer. Jede Qualität hat ihre eigenen '
+      'Sprachen.';
+
+  @override
+  String get ocrLanguageTitle => 'Standardsprache';
+
+  @override
+  String get ocrAlsoTitle => 'Zusätzlich';
+
+  @override
+  String get ocrAlsoSubtitle => 'Für Seiten, die zwei Sprachen mischen';
+
+  @override
+  String get ocrAlsoNone => 'Keine';
+
+  @override
+  String ocrOnDevice(String size) => 'Auf diesem Gerät · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Weitere Sprachen';
+
+  @override
+  String ocrSearchLanguages(int count) => '$count Sprachen durchsuchen';
+
+  @override
+  String get ocrLanguageDefault => 'Standard';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => '$language löschen?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Das gibt $size frei. Die Datei wird erneut heruntergeladen, '
+      'wenn die Texterkennung sie braucht.';
 }

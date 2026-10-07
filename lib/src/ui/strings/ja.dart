@@ -2646,4 +2646,75 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'カーソルがリストの中にありません';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => '文字認識';
+
+  @override
+  String get ocrIntro =>
+      'スキャンした PDF や画像の文字を読み取り、隣のノートに書き出します。すべてこの'
+      'デバイス上で動作し、エンジンと各言語は最初に必要になったときに一度だけダウンロードされます。';
+
+  @override
+  String get ocrEngineTitle => 'エンジン';
+
+  @override
+  String get ocrEngineSystem => 'システムライブラリ';
+
+  @override
+  String get ocrEngineBundled => 'アプリに同梱';
+
+  @override
+  String get ocrEngineUnavailable => 'このデバイス用のエンジンはありません';
+
+  @override
+  String get ocrEngineDeleteTitle => 'エンジンを削除しますか？';
+
+  @override
+  String get ocrQualityTitle => '品質';
+
+  @override
+  String get ocrQualityFast => '高速';
+
+  @override
+  String get ocrQualityBest => '最高';
+
+  @override
+  String get ocrQualityHint =>
+      '高速：1 言語あたり 1–4 MB、どのデバイスでも速い。最高：1 言語あたり 10–15 '
+      'MB、読み取りにくいスキャンに強いが 2～3 倍遅い。品質ごとに言語ファイルは別です。';
+
+  @override
+  String get ocrLanguageTitle => '既定の言語';
+
+  @override
+  String get ocrAlsoTitle => '追加';
+
+  @override
+  String get ocrAlsoSubtitle => '2 つの言語が混ざったページ用';
+
+  @override
+  String get ocrAlsoNone => 'なし';
+
+  @override
+  String ocrOnDevice(String size) => 'このデバイス上 · $size';
+
+  @override
+  String get ocrOtherLanguages => 'その他の言語';
+
+  @override
+  String ocrSearchLanguages(int count) => '$count 言語を検索';
+
+  @override
+  String get ocrLanguageDefault => '既定';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => '$language を削除しますか？';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      '$size が解放されます。文字認識で必要になったときに再びダウンロードされます。';
 }

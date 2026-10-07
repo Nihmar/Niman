@@ -2916,4 +2916,80 @@ final class HungarianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'A kurzor nincs listában';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Szövegfelismerés';
+
+  @override
+  String get ocrIntro =>
+      'Beolvassa a szkennelt PDF-ek és képek szövegét egy mellettük '
+      'lévő jegyzetbe. Minden ezen az eszközön fut: a motor és '
+      'minden nyelv egyszer töltődik le, amikor először szükség van '
+      'rá.';
+
+  @override
+  String get ocrEngineTitle => 'Motor';
+
+  @override
+  String get ocrEngineSystem => 'Rendszerkönyvtár';
+
+  @override
+  String get ocrEngineBundled => 'Az alkalmazás része';
+
+  @override
+  String get ocrEngineUnavailable => 'Ehhez az eszközhöz nincs motor';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Törlöd a motort?';
+
+  @override
+  String get ocrQualityTitle => 'Minőség';
+
+  @override
+  String get ocrQualityFast => 'Gyors';
+
+  @override
+  String get ocrQualityBest => 'Legjobb';
+
+  @override
+  String get ocrQualityHint =>
+      'Gyors: nyelvenként 1–4 MB, bármely eszközön fürge. Legjobb: '
+      'nyelvenként 10–15 MB, jobb a nehéz szkenneken, két-háromszor '
+      'lassabb. Minden minőségnek saját nyelvei vannak.';
+
+  @override
+  String get ocrLanguageTitle => 'Alapértelmezett nyelv';
+
+  @override
+  String get ocrAlsoTitle => 'Ezen kívül';
+
+  @override
+  String get ocrAlsoSubtitle => 'Két nyelvet keverő oldalakhoz';
+
+  @override
+  String get ocrAlsoNone => 'Nincs';
+
+  @override
+  String ocrOnDevice(String size) => 'Ezen az eszközön · $size';
+
+  @override
+  String get ocrOtherLanguages => 'További nyelvek';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Keresés $count nyelv között';
+
+  @override
+  String get ocrLanguageDefault => 'Alapértelmezett';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) =>
+      'Törlöd a(z) $language nyelvet?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      '$size szabadul fel. A fájl újra letöltődik, amikor a '
+      'szövegfelismerésnek szüksége lesz rá.';
 }

@@ -2894,4 +2894,78 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Markøren er ikke i en liste';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Tekstgjenkjenning';
+
+  @override
+  String get ocrIntro =>
+      'Leser teksten i skannede PDF-er og bilder inn i et notat ved '
+      'siden av dem. Alt kjører på denne enheten: motoren og hvert '
+      'språk lastes ned én gang, første gang de trengs.';
+
+  @override
+  String get ocrEngineTitle => 'Motor';
+
+  @override
+  String get ocrEngineSystem => 'Systembibliotek';
+
+  @override
+  String get ocrEngineBundled => 'Inkludert i appen';
+
+  @override
+  String get ocrEngineUnavailable => 'Ingen motor for denne enheten';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Slette motoren?';
+
+  @override
+  String get ocrQualityTitle => 'Kvalitet';
+
+  @override
+  String get ocrQualityFast => 'Rask';
+
+  @override
+  String get ocrQualityBest => 'Best';
+
+  @override
+  String get ocrQualityHint =>
+      'Rask: 1–4 MB per språk, kjapp på alle enheter. Best: 10–15 '
+      'MB per språk, bedre på vanskelige skanninger, to til tre '
+      'ganger tregere. Hver kvalitet har sine egne språk.';
+
+  @override
+  String get ocrLanguageTitle => 'Standardspråk';
+
+  @override
+  String get ocrAlsoTitle => 'Også';
+
+  @override
+  String get ocrAlsoSubtitle => 'For sider som blander to språk';
+
+  @override
+  String get ocrAlsoNone => 'Ingen';
+
+  @override
+  String ocrOnDevice(String size) => 'På denne enheten · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Andre språk';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Søk blant $count språk';
+
+  @override
+  String get ocrLanguageDefault => 'Standard';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Slette $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Dette frigjør $size. Filen lastes ned igjen når '
+      'tekstgjenkjenningen trenger den.';
 }

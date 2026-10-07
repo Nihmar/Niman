@@ -2923,4 +2923,79 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курсорът не е в списък';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Разпознаване на текст';
+
+  @override
+  String get ocrIntro =>
+      'Чете текста от сканирани PDF файлове и изображения в бележка '
+      'до тях. Всичко работи на това устройство: механизмът и всеки '
+      'език се изтеглят веднъж, когато потрябват за първи път.';
+
+  @override
+  String get ocrEngineTitle => 'Механизъм';
+
+  @override
+  String get ocrEngineSystem => 'Системна библиотека';
+
+  @override
+  String get ocrEngineBundled => 'Включен в приложението';
+
+  @override
+  String get ocrEngineUnavailable => 'Няма механизъм за това устройство';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Да се изтрие ли механизмът?';
+
+  @override
+  String get ocrQualityTitle => 'Качество';
+
+  @override
+  String get ocrQualityFast => 'Бързо';
+
+  @override
+  String get ocrQualityBest => 'Най-добро';
+
+  @override
+  String get ocrQualityHint =>
+      'Бързо: 1–4 MB на език, пъргаво на всяко устройство. '
+      'Най-добро: 10–15 MB на език, по-точно при трудни сканирания, '
+      'два до три пъти по-бавно. Всяко качество има свои езици.';
+
+  @override
+  String get ocrLanguageTitle => 'Език по подразбиране';
+
+  @override
+  String get ocrAlsoTitle => 'Също';
+
+  @override
+  String get ocrAlsoSubtitle => 'За страници, в които се смесват два езика';
+
+  @override
+  String get ocrAlsoNone => 'Няма';
+
+  @override
+  String ocrOnDevice(String size) => 'На това устройство · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Други езици';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Търсене сред $count езика';
+
+  @override
+  String get ocrLanguageDefault => 'По подразбиране';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) =>
+      'Да се изтрие ли $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Ще се освободят $size. Файлът ще бъде изтеглен отново, '
+      'когато разпознаването на текст има нужда от него.';
 }

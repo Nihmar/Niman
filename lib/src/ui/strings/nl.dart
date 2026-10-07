@@ -2945,4 +2945,79 @@ final class DutchStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'De cursor staat niet in een lijst';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Tekstherkenning';
+
+  @override
+  String get ocrIntro =>
+      'Leest de tekst van gescande pdf’s en afbeeldingen in een '
+      'notitie ernaast. Alles gebeurt op dit apparaat: de engine en '
+      'elke taal worden één keer gedownload, wanneer ze voor het '
+      'eerst nodig zijn.';
+
+  @override
+  String get ocrEngineTitle => 'Engine';
+
+  @override
+  String get ocrEngineSystem => 'Systeembibliotheek';
+
+  @override
+  String get ocrEngineBundled => 'Inbegrepen in de app';
+
+  @override
+  String get ocrEngineUnavailable => 'Geen engine voor dit apparaat';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Engine verwijderen?';
+
+  @override
+  String get ocrQualityTitle => 'Kwaliteit';
+
+  @override
+  String get ocrQualityFast => 'Snel';
+
+  @override
+  String get ocrQualityBest => 'Beste';
+
+  @override
+  String get ocrQualityHint =>
+      'Snel: 1–4 MB per taal, vlot op elk apparaat. Beste: 10–15 MB '
+      'per taal, beter bij lastige scans, twee tot drie keer '
+      'trager. Elke kwaliteit heeft eigen talen.';
+
+  @override
+  String get ocrLanguageTitle => 'Standaardtaal';
+
+  @override
+  String get ocrAlsoTitle => 'Ook';
+
+  @override
+  String get ocrAlsoSubtitle => "Voor pagina's met twee talen door elkaar";
+
+  @override
+  String get ocrAlsoNone => 'Geen';
+
+  @override
+  String ocrOnDevice(String size) => 'Op dit apparaat · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Andere talen';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Zoeken in $count talen';
+
+  @override
+  String get ocrLanguageDefault => 'Standaard';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => '$language verwijderen?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Dit maakt $size vrij. Het bestand wordt opnieuw gedownload '
+      'als tekstherkenning het nodig heeft.';
 }

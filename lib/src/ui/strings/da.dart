@@ -2895,4 +2895,78 @@ final class DanishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Markøren er ikke i en liste';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Tekstgenkendelse';
+
+  @override
+  String get ocrIntro =>
+      'Læser teksten i scannede PDF’er og billeder ind i en note '
+      'ved siden af dem. Alt kører på denne enhed: motoren og hvert '
+      'sprog downloades én gang, første gang de skal bruges.';
+
+  @override
+  String get ocrEngineTitle => 'Motor';
+
+  @override
+  String get ocrEngineSystem => 'Systembibliotek';
+
+  @override
+  String get ocrEngineBundled => 'Indbygget i appen';
+
+  @override
+  String get ocrEngineUnavailable => 'Ingen motor til denne enhed';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Slet motoren?';
+
+  @override
+  String get ocrQualityTitle => 'Kvalitet';
+
+  @override
+  String get ocrQualityFast => 'Hurtig';
+
+  @override
+  String get ocrQualityBest => 'Bedst';
+
+  @override
+  String get ocrQualityHint =>
+      'Hurtig: 1–4 MB pr. sprog, kvik på alle enheder. Bedst: 10–15 '
+      'MB pr. sprog, bedre til svære scanninger, to til tre gange '
+      'langsommere. Hver kvalitet har sine egne sprog.';
+
+  @override
+  String get ocrLanguageTitle => 'Standardsprog';
+
+  @override
+  String get ocrAlsoTitle => 'Også';
+
+  @override
+  String get ocrAlsoSubtitle => 'Til sider, der blander to sprog';
+
+  @override
+  String get ocrAlsoNone => 'Intet';
+
+  @override
+  String ocrOnDevice(String size) => 'På denne enhed · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Andre sprog';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Søg blandt $count sprog';
+
+  @override
+  String get ocrLanguageDefault => 'Standard';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Slet $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Det frigør $size. Filen downloades igen, når '
+      'tekstgenkendelsen skal bruge den.';
 }

@@ -2936,4 +2936,78 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курсорот не е во листа';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Препознавање текст';
+
+  @override
+  String get ocrIntro =>
+      'Го чита текстот од скенирани PDF-документи и слики во '
+      'белешка до нив. Сè работи на овој уред: механизмот и секој '
+      'јазик се преземаат еднаш, кога првпат ќе затребаат.';
+
+  @override
+  String get ocrEngineTitle => 'Механизам';
+
+  @override
+  String get ocrEngineSystem => 'Системска библиотека';
+
+  @override
+  String get ocrEngineBundled => 'Вклучен во апликацијата';
+
+  @override
+  String get ocrEngineUnavailable => 'Нема механизам за овој уред';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Да се избрише механизмот?';
+
+  @override
+  String get ocrQualityTitle => 'Квалитет';
+
+  @override
+  String get ocrQualityFast => 'Брз';
+
+  @override
+  String get ocrQualityBest => 'Најдобар';
+
+  @override
+  String get ocrQualityHint =>
+      'Брз: 1–4 MB по јазик, брз на секој уред. Најдобар: 10–15 MB '
+      'по јазик, подобар кај тешки скенирања, два до три пати '
+      'побавен. Секој квалитет има свои јазици.';
+
+  @override
+  String get ocrLanguageTitle => 'Стандарден јазик';
+
+  @override
+  String get ocrAlsoTitle => 'Исто така';
+
+  @override
+  String get ocrAlsoSubtitle => 'За страници што мешаат два јазика';
+
+  @override
+  String get ocrAlsoNone => 'Ниту еден';
+
+  @override
+  String ocrOnDevice(String size) => 'На овој уред · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Други јазици';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Пребарај меѓу $count јазици';
+
+  @override
+  String get ocrLanguageDefault => 'Стандарден';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Да се избрише $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Ќе се ослободат $size. Датотеката повторно ќе се преземе '
+      'кога препознавањето текст ќе ја побара.';
 }

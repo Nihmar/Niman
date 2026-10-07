@@ -8,12 +8,14 @@ import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/lint/lint_rule.dart';
+import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
+import 'package:niman/src/ui/ocr/ocr_settings_section.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
@@ -77,6 +79,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   required void Function(SettingsAreaId area, Key rowKey) openArea,
   bool keyboardAttached = true,
   bool libraryRows = true,
+  OcrInstallation? ocr,
 }) {
   void push(Widget screen) =>
       Navigator.of(context)
@@ -514,6 +517,35 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () =>
           openArea(SettingsAreaId.reminders, SettingsKeys.reminderShowTokens),
     ),
+    if (ocr case final ocr?) ...[
+      SettingsSearchEntry(
+        title: AppStrings.ocrQualityTitle,
+        area: AppStrings.settingsSectionTextRecognition,
+        rowKey: SettingsKeys.ocrQuality,
+        value: () async => ocrQualityLabel(ocr.settings.quality),
+        areaId: SettingsAreaId.textRecognition,
+        open: () =>
+            openArea(SettingsAreaId.textRecognition, SettingsKeys.ocrQuality),
+      ),
+      SettingsSearchEntry(
+        title: AppStrings.ocrLanguageTitle,
+        area: AppStrings.settingsSectionTextRecognition,
+        rowKey: SettingsKeys.ocrLanguage,
+        value: () async => ocr.defaultLanguage().native,
+        areaId: SettingsAreaId.textRecognition,
+        open: () =>
+            openArea(SettingsAreaId.textRecognition, SettingsKeys.ocrLanguage),
+      ),
+      SettingsSearchEntry(
+        title: AppStrings.ocrAlsoTitle,
+        area: AppStrings.settingsSectionTextRecognition,
+        rowKey: SettingsKeys.ocrAlso,
+        value: () async => ocr.alsoLanguage()?.native ?? AppStrings.ocrAlsoNone,
+        areaId: SettingsAreaId.textRecognition,
+        open: () =>
+            openArea(SettingsAreaId.textRecognition, SettingsKeys.ocrAlso),
+      ),
+    ],
     if (transcription case final models?) ...[
       SettingsSearchEntry(
         title: AppStrings.transcriptionModelTitle,

@@ -2940,4 +2940,78 @@ final class BosnianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kursor nije u listi';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Prepoznavanje teksta';
+
+  @override
+  String get ocrIntro =>
+      'Čita tekst skeniranih PDF-ova i slika u bilješku pored njih. '
+      'Sve radi na ovom uređaju: mehanizam i svaki jezik preuzimaju '
+      'se jednom, kad prvi put zatrebaju.';
+
+  @override
+  String get ocrEngineTitle => 'Mehanizam';
+
+  @override
+  String get ocrEngineSystem => 'Sistemska biblioteka';
+
+  @override
+  String get ocrEngineBundled => 'Uključen u aplikaciju';
+
+  @override
+  String get ocrEngineUnavailable => 'Nema mehanizma za ovaj uređaj';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Izbrisati mehanizam?';
+
+  @override
+  String get ocrQualityTitle => 'Kvalitet';
+
+  @override
+  String get ocrQualityFast => 'Brzi';
+
+  @override
+  String get ocrQualityBest => 'Najbolji';
+
+  @override
+  String get ocrQualityHint =>
+      'Brzi: 1–4 MB po jeziku, brz na svakom uređaju. Najbolji: '
+      '10–15 MB po jeziku, bolji na teškim skenovima, dva do tri '
+      'puta sporiji. Svaki kvalitet ima svoje jezike.';
+
+  @override
+  String get ocrLanguageTitle => 'Zadani jezik';
+
+  @override
+  String get ocrAlsoTitle => 'Također';
+
+  @override
+  String get ocrAlsoSubtitle => 'Za stranice na kojima se miješaju dva jezika';
+
+  @override
+  String get ocrAlsoNone => 'Nijedan';
+
+  @override
+  String ocrOnDevice(String size) => 'Na ovom uređaju · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Ostali jezici';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Pretraži $count jezika';
+
+  @override
+  String get ocrLanguageDefault => 'Zadani';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Izbrisati $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Oslobodit će se $size. Datoteka će se ponovo preuzeti kad je '
+      'prepoznavanje teksta zatreba.';
 }

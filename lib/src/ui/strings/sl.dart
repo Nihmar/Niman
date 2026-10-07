@@ -2932,4 +2932,79 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kazalka ni na seznamu';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Prepoznavanje besedila';
+
+  @override
+  String get ocrIntro =>
+      'Prebere besedilo optično prebranih PDF-jev in slik v zapisek '
+      'poleg njih. Vse teče na tej napravi: pogon in vsi jeziki se '
+      'prenesejo enkrat, ko so prvič potrebni.';
+
+  @override
+  String get ocrEngineTitle => 'Pogon';
+
+  @override
+  String get ocrEngineSystem => 'Sistemska knjižnica';
+
+  @override
+  String get ocrEngineBundled => 'Vključen v aplikacijo';
+
+  @override
+  String get ocrEngineUnavailable => 'Za to napravo ni pogona';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Želite izbrisati pogon?';
+
+  @override
+  String get ocrQualityTitle => 'Kakovost';
+
+  @override
+  String get ocrQualityFast => 'Hitra';
+
+  @override
+  String get ocrQualityBest => 'Najboljša';
+
+  @override
+  String get ocrQualityHint =>
+      'Hitra: 1–4 MB na jezik, hitra na vsaki napravi. Najboljša: '
+      '10–15 MB na jezik, boljša pri zahtevnih skeniranjih, dva- do '
+      'trikrat počasnejša. Vsaka kakovost ima svoje jezike.';
+
+  @override
+  String get ocrLanguageTitle => 'Privzeti jezik';
+
+  @override
+  String get ocrAlsoTitle => 'Tudi';
+
+  @override
+  String get ocrAlsoSubtitle => 'Za strani, ki mešajo dva jezika';
+
+  @override
+  String get ocrAlsoNone => 'Brez';
+
+  @override
+  String ocrOnDevice(String size) => 'Na tej napravi · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Drugi jeziki';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Iskanje med $count jeziki';
+
+  @override
+  String get ocrLanguageDefault => 'Privzeto';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) =>
+      'Želite izbrisati $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'S tem se sprosti $size. Datoteka se znova prenese, ko jo '
+      'prepoznavanje besedila potrebuje.';
 }

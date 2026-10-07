@@ -2941,4 +2941,78 @@ final class CroatianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Pokazivač nije na popisu';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Prepoznavanje teksta';
+
+  @override
+  String get ocrIntro =>
+      'Čita tekst skeniranih PDF-ova i slika u bilješku pokraj '
+      'njih. Sve radi na ovom uređaju: pogon i svaki jezik '
+      'preuzimaju se jednom, kad prvi put zatrebaju.';
+
+  @override
+  String get ocrEngineTitle => 'Pogon';
+
+  @override
+  String get ocrEngineSystem => 'Biblioteka sustava';
+
+  @override
+  String get ocrEngineBundled => 'Uključen u aplikaciju';
+
+  @override
+  String get ocrEngineUnavailable => 'Nema pogona za ovaj uređaj';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Izbrisati pogon?';
+
+  @override
+  String get ocrQualityTitle => 'Kvaliteta';
+
+  @override
+  String get ocrQualityFast => 'Brza';
+
+  @override
+  String get ocrQualityBest => 'Najbolja';
+
+  @override
+  String get ocrQualityHint =>
+      'Brza: 1–4 MB po jeziku, hitra na svakom uređaju. Najbolja: '
+      '10–15 MB po jeziku, bolja na teškim skenovima, dva do tri '
+      'puta sporija. Svaka kvaliteta ima svoje jezike.';
+
+  @override
+  String get ocrLanguageTitle => 'Zadani jezik';
+
+  @override
+  String get ocrAlsoTitle => 'Također';
+
+  @override
+  String get ocrAlsoSubtitle => 'Za stranice na kojima se miješaju dva jezika';
+
+  @override
+  String get ocrAlsoNone => 'Nijedan';
+
+  @override
+  String ocrOnDevice(String size) => 'Na ovom uređaju · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Ostali jezici';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Pretraži $count jezika';
+
+  @override
+  String get ocrLanguageDefault => 'Zadani';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Izbrisati $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Oslobodit će se $size. Datoteka će se ponovno preuzeti kad '
+      'je prepoznavanje teksta zatreba.';
 }

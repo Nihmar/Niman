@@ -2939,4 +2939,80 @@ final class BasqueStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kurtsorea ez dago zerrenda batean';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Testu-ezagutza';
+
+  @override
+  String get ocrIntro =>
+      'Eskaneatutako PDFen eta irudien testua irakurri eta ondoko '
+      'ohar batean idazten du. Gailu honetan exekutatzen da: '
+      'motorra eta hizkuntza bakoitza behin deskargatzen dira, '
+      'lehen aldiz behar direnean.';
+
+  @override
+  String get ocrEngineTitle => 'Motorra';
+
+  @override
+  String get ocrEngineSystem => 'Sistemaren liburutegia';
+
+  @override
+  String get ocrEngineBundled => 'Aplikazioan sartua';
+
+  @override
+  String get ocrEngineUnavailable => 'Ez dago motorrik gailu honetarako';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Motorra ezabatu?';
+
+  @override
+  String get ocrQualityTitle => 'Kalitatea';
+
+  @override
+  String get ocrQualityFast => 'Azkarra';
+
+  @override
+  String get ocrQualityBest => 'Onena';
+
+  @override
+  String get ocrQualityHint =>
+      'Azkarra: 1–4 MB hizkuntzako, edozein gailutan bizkorra. '
+      'Onena: 10–15 MB hizkuntzako, hobea eskaneatze zailetan, '
+      'bizpahiru aldiz motelagoa. Kalitate bakoitzak bere '
+      'hizkuntzak ditu.';
+
+  @override
+  String get ocrLanguageTitle => 'Hizkuntza lehenetsia';
+
+  @override
+  String get ocrAlsoTitle => 'Baita ere';
+
+  @override
+  String get ocrAlsoSubtitle => 'Bi hizkuntza nahasten dituzten orrietarako';
+
+  @override
+  String get ocrAlsoNone => 'Bat ere ez';
+
+  @override
+  String ocrOnDevice(String size) => 'Gailu honetan · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Beste hizkuntza batzuk';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Bilatu $count hizkuntzatan';
+
+  @override
+  String get ocrLanguageDefault => 'Lehenetsia';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => '$language ezabatu?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      '$size askatuko dira. Testu-ezagutzak behar duenean berriro '
+      'deskargatuko da.';
 }

@@ -9,10 +9,13 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/journal/settings_journal.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
+import 'package:niman/src/ui/ocr/ocr_settings_section.dart';
+import 'package:niman/src/ui/ocr/settings_text_recognition.dart';
 import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_diagnostics.dart';
@@ -65,6 +68,9 @@ enum SettingsAreaId {
 
   /// The voice-note models.
   transcription,
+
+  /// Text recognition: the OCR engine and languages (#593).
+  textRecognition,
 
   /// Reminder notifications.
   reminders,
@@ -148,6 +154,7 @@ List<SettingsArea> settingsAreas({
   required EditorSpellCheck? spellCheck,
   required TranscriptionModels? transcription,
   required bool keyboardAttached,
+  OcrInstallation? ocr,
   String? version,
   void Function(SettingsAreaId area, Key? row)? openArea,
 }) {
@@ -221,6 +228,24 @@ List<SettingsArea> settingsAreas({
               ),
       ),
     ),
+    // App-wide, like the engine and the languages it lists.
+    if (ocr != null)
+      SettingsArea(
+        id: SettingsAreaId.textRecognition,
+        group: SettingsGroup.app,
+        rowKey: const Key('settings-area-text-recognition'),
+        listenable: ocr,
+        icon: () => Icons.document_scanner_outlined,
+        title: AppStrings.settingsSectionTextRecognition,
+        subtitle: () =>
+            '${ocr.defaultLanguage().native} · '
+            '${ocrQualityLabel(ocr.settings.quality)}',
+        build: (highlight) => SettingsTextRecognitionScreen(
+          controller: controller,
+          installation: ocr,
+          highlight: highlight,
+        ),
+      ),
     if (!isTestingBuild)
       SettingsArea(
         id: SettingsAreaId.updates,

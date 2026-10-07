@@ -2951,4 +2951,78 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курсор не ў спісе';
+
+  @override
+  String ocrEngineName(String version) => 'Tesseract $version';
+
+  @override
+  String get settingsSectionTextRecognition => 'Распазнаванне тэксту';
+
+  @override
+  String get ocrIntro =>
+      'Чытае тэкст сканаваных PDF і выяў у нататку побач з імі. Усё '
+      'працуе на гэтай прыладзе: рухавік і кожная мова '
+      'спампоўваюцца адзін раз, калі ўпершыню спатрэбяцца.';
+
+  @override
+  String get ocrEngineTitle => 'Рухавік';
+
+  @override
+  String get ocrEngineSystem => 'Сістэмная бібліятэка';
+
+  @override
+  String get ocrEngineBundled => 'Убудаваны ў праграму';
+
+  @override
+  String get ocrEngineUnavailable => 'Для гэтай прылады няма рухавіка';
+
+  @override
+  String get ocrEngineDeleteTitle => 'Выдаліць рухавік?';
+
+  @override
+  String get ocrQualityTitle => 'Якасць';
+
+  @override
+  String get ocrQualityFast => 'Хуткая';
+
+  @override
+  String get ocrQualityBest => 'Найлепшая';
+
+  @override
+  String get ocrQualityHint =>
+      'Хуткая: 1–4 МБ на мову, спрытная на любой прыладзе. '
+      'Найлепшая: 10–15 МБ на мову, лепшая на складаных сканах, у '
+      'два-тры разы павольнейшая. Кожная якасць мае свае мовы.';
+
+  @override
+  String get ocrLanguageTitle => 'Мова па змаўчанні';
+
+  @override
+  String get ocrAlsoTitle => 'Таксама';
+
+  @override
+  String get ocrAlsoSubtitle => 'Для старонак, дзе змешаны дзве мовы';
+
+  @override
+  String get ocrAlsoNone => 'Няма';
+
+  @override
+  String ocrOnDevice(String size) => 'На гэтай прыладзе · $size';
+
+  @override
+  String get ocrOtherLanguages => 'Іншыя мовы';
+
+  @override
+  String ocrSearchLanguages(int count) => 'Пошук сярод $count моў';
+
+  @override
+  String get ocrLanguageDefault => 'Па змаўчанні';
+
+  @override
+  String ocrLanguageDeleteTitle(String language) => 'Выдаліць $language?';
+
+  @override
+  String ocrDeleteBody(String size) =>
+      'Вызваліцца $size. Файл спампуецца зноў, калі ён спатрэбіцца '
+      'для распазнавання тэксту.';
 }
