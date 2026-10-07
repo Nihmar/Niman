@@ -127,6 +127,7 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
     final child = widget.child;
     final dimmed = Opacity(opacity: 0.4, child: child);
     final drag = _data;
+    void started() => const TreeDragStarted().dispatch(context);
     // The pointer chooses, not the platform (#575): a mouse drags the row
     // as it is pulled, anything else holds it first — a finger on a
     // desktop's touchscreen still scrolls the tree.
@@ -134,6 +135,7 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
       data: drag,
       feedback: feedback,
       childWhenDragging: dimmed,
+      onDragStarted: started,
       onDragUpdate: (details) => drag.travelled += details.delta.distance,
       // Let go where it was held — no target ran it — the hold was a long
       // press. The next hold starts from nothing.
@@ -147,6 +149,7 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
       data: TreeDrag(note.path, held: false),
       feedback: feedback,
       childWhenDragging: dimmed,
+      onDragStarted: started,
       child: hold,
     );
   }
@@ -158,6 +161,7 @@ final class _MouseDraggable extends Draggable<TreeDrag> {
     required super.data,
     required super.feedback,
     required super.childWhenDragging,
+    required super.onDragStarted,
     required super.child,
   });
 
@@ -175,6 +179,7 @@ final class _HoldDraggable extends LongPressDraggable<TreeDrag> {
     required super.data,
     required super.feedback,
     required super.childWhenDragging,
+    required super.onDragStarted,
     required super.onDragUpdate,
     required super.onDragEnd,
     required super.child,
@@ -198,25 +203,11 @@ final class _HoldDraggable extends LongPressDraggable<TreeDrag> {
         };
 }
 
-/// The tree's empty space as a place to drop: into the library's root.
-final class TreeRootDrop extends StatelessWidget {
-  /// Makes [child], the tree, take a drop into the root by [onMove].
-  const new({required this.onMove, required this.child, super.key});
-
-  /// Runs a drop.
-  final TreeMove onMove;
-
-  /// The tree.
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => DragTarget<TreeDrag>(
-    onWillAcceptWithDetails: (details) => treeDropMoves(details.data.path, ''),
-    onAcceptWithDetails: (details) {
-      if (details.data.moved) onMove(details.data.path, '');
-    },
-    builder: (context, candidates, _) => child,
-  );
+/// A row's drag has begun: the tree scrolls when it is held at its edges
+/// (`TreeRootDrop`).
+final class TreeDragStarted extends Notification {
+  /// The notice.
+  const new();
 }
 
 /// A part of the tree that is no place to drop — the pinned block's heading
