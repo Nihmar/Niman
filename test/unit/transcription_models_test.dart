@@ -257,47 +257,52 @@ void main() {
     expect(await File(p.join(dir.path, small.fileName)).readAsBytes(), payload);
   });
 
-  test('cancel while waiting to retry discards the partial file', () async {
-    server
-      ..cuts = 100
-      ..cutAfter = 2000;
-    final controller = TranscriptionModels(
-      directory: () async => dir.path,
-      phone: false,
-      retryDelays: const [Duration(seconds: 5)],
-      startDownload:
-          ({
-            required uri,
-            required target,
-            required onProgress,
-            sha256,
-            onHeaders,
-          }) => FileDownload.start(
-            uri: Uri.parse(
-              'http://127.0.0.1:${server.port}/${p.basename(target)}',
+  test(
+    'cancel while waiting to retry stops it at once, partial file gone',
+    () async {
+      server
+        ..cuts = 100
+        ..cutAfter = 2000;
+      final controller = TranscriptionModels(
+        directory: () async => dir.path,
+        phone: false,
+        // A wait no test outlasts: only the cancel can end it (#605).
+        retryDelays: const [Duration(hours: 1)],
+        startDownload:
+            ({
+              required uri,
+              required target,
+              required onProgress,
+              sha256,
+              onHeaders,
+            }) => FileDownload.start(
+              uri: Uri.parse(
+                'http://127.0.0.1:${server.port}/${p.basename(target)}',
+              ),
+              target: target,
+              onProgress: onProgress,
+              onHeaders: onHeaders,
             ),
-            target: target,
-            onProgress: onProgress,
-            onHeaders: onHeaders,
-          ),
-    );
-    addTearDown(controller.dispose);
-    await controller.load();
-    final waiting = Completer<void>();
-    controller.addListener(() {
-      if (controller.stateOf(tiny) case Downloading(retrying: true)) {
-        if (!waiting.isCompleted) waiting.complete();
-      }
-    });
+      );
+      addTearDown(controller.dispose);
+      await controller.load();
+      final waiting = Completer<void>();
+      controller.addListener(() {
+        if (controller.stateOf(tiny) case Downloading(retrying: true)) {
+          if (!waiting.isCompleted) waiting.complete();
+        }
+      });
 
-    final running = controller.download(tiny);
-    await waiting.future;
-    await controller.cancel(tiny);
-    await running;
+      final running = controller.download(tiny);
+      await waiting.future;
+      await controller.cancel(tiny);
+      await running;
 
-    expect(controller.stateOf(tiny), isA<NotDownloaded>());
-    expect(partOf(tiny).existsSync(), false);
-  });
+      expect(controller.stateOf(tiny), isA<NotDownloaded>());
+      expect(partOf(tiny).existsSync(), false);
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
 
   test('a missing file fails at once, with nothing kept', () async {
     server.missing = true;
