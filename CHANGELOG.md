@@ -6,6 +6,35 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.1.7] - 2026-10-07
+
+Text from a scan.
+
+Niman reads the text of a scanned PDF or a picture — a contract, a
+whiteboard, a receipt, a book page — on the device, and writes it into a
+note next to the file, so search finds the scan by its words. The text sits
+beside its scan, and each recognized line is a place on the page you can
+annotate. Around it, flowcharts that draw their subgraphs and styles, an
+EPUB's cover back, and a sync that one refused file no longer stops.
+
+### Added
+- **Recognize text** in a scanned PDF or a picture (#532): from the row under the file, its ⋮ menu, the tree's context menu or the command palette. You choose the language, a second one, and for a PDF all pages, the one on screen or a range; a PDF that already has text says so. It runs in the background, one file at a time, with its progress under the file and a strip on a phone, and ends in a message with **Open text** (a notification when you are elsewhere). Nothing is sent anywhere
+- **The text note**, `<name>.ocr.md` beside the file: a real note, one section per page, that search indexes and you correct by hand. Recognizing pages again replaces only theirs, and keeps your corrections on the others
+- **The text beside its scan**: a **Text** pane on a wide window, a **Scan | Text** switch on a phone, a picture's text in a sheet with **Copy** as soon as it is read on a phone. In the tree the text note sits under its file, and a file being read wears a ring with its progress
+- **The recognized lines on the scan**: tap or click a line on the PDF to select it, then **Annotate**, **Copy** or **Copy link to this place**. Lines joined or split by hand say they lost their place, and **Recognize p. N again** reads that page alone
+- **Settings › Text recognition**: the engine, Fast or Best models, the default language and a second one, and the languages on the device, with 123 more to download. The engine and the languages are downloaded the first time they are needed, each checked against a pinned SHA-256; nothing ships in the package
+- **Flowcharts draw `style`, `classDef`, `class` and `:::`** (#598): fill, outline and text colour of nodes and subgraphs
+
+### Changed
+- **The sync goes on past a file the server refuses** (#617): an upload the server drops while it answers the rest — typically past a size limit, nginx's `client_max_body_size` — fails that file alone, listed with its size and the likely reason, instead of stopping every run as offline
+
+### Fixed
+- **An EPUB's cover and pictures show again**, instead of `![](epub-picture:0)` (#616)
+- **Flowcharts whose edges name a subgraph** join its box and stack, instead of spreading into a strip thousands of pixels wide (#598); the full-screen button keeps the block's corner
+- **A wikilink's alias shows in live mode**, as in the read view (#613)
+- **An inline HTML comment shows nothing** in the read view
+- **Text recognition**: a job waits for a language the settings page is downloading (#603); a re-run finds its note when the file's name holds `:` or `"` (#604); a cancel during the download frees the queue at once (#605); a language deleted outside the app is downloaded again (#606); the language and date of a text note follow the latest recognition (#609); the Recognize text sheet opens without rescanning every file (#610); the "Text recognized" message goes away on its own
+
 ## [0.1.6] - 2026-10-07
 
 Diagrams, drawn in the app.
