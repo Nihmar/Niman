@@ -32,16 +32,21 @@ final class FootnoteHtml {
   /// The label each was first cited with, as written.
   final Map<String, String> _written = <String, String>{};
 
+  /// Each label's number, its place in [cited] from one: a lookup, where
+  /// `cited.indexOf` per citation made a note's export quadratic (#582).
+  final Map<String, int> _numbers = <String, int>{};
+
   /// A reference, written: its number, and an id that is its own.
   String reference(FootnoteRefNode node) {
     final key = LinkReferences.normalize(node.label);
     if (!_counts.containsKey(key)) {
       cited.add(key);
       _written[key] = node.label;
+      _numbers[key] = cited.length;
     }
     final count = _counts[key] = (_counts[key] ?? 0) + 1;
     final label = InlineHtml.escapeHref(_written[key]!);
-    final number = cited.indexOf(key) + 1;
+    final number = _numbers[key]!;
     final id = count == 1 ? 'fnref-$label' : 'fnref-$label-$count';
     return '<sup class="footnote-ref"><a href="#fn-$label" id="$id" '
         '${_flag('data-footnote-ref')}>$number</a></sup>';
@@ -50,7 +55,7 @@ final class FootnoteHtml {
   /// The links back from footnote [key] to each citation of it.
   String backrefs(String key) {
     final label = InlineHtml.escapeHref(_written[key]!);
-    final number = cited.indexOf(key) + 1;
+    final number = _numbers[key]!;
     final out = <String>[];
     for (var count = 1; count <= (_counts[key] ?? 0); count++) {
       final suffix = count == 1 ? '' : '-$count';
