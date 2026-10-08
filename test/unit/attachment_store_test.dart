@@ -1,10 +1,11 @@
-// T-M2-09: image import — content-addressed copy into the library that the
-// preview resolves (relative link under the library root).
+// The attachments folder: T-M2-09's image import — a content-addressed copy
+// into the library that the preview resolves (relative link under the
+// library root) — and the bytes a web capture downloads (#531).
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/library/image_import.dart';
+import 'package:niman/src/library/attachment_store.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -73,5 +74,27 @@ void main() {
     expect(File(p.join(dir.path, relative)).existsSync(), isTrue);
 
     await dir.delete(recursive: true);
+  });
+
+  test('downloaded bytes land under their hash, once', () async {
+    final dir = await Directory.systemTemp.createTemp('niman_bytes_');
+    addTearDown(() => dir.delete(recursive: true));
+    const bytes = [4, 5, 6];
+    final relative = await storeAttachmentBytes(
+      libraryRoot: dir.path,
+      bytes: bytes,
+      extension: '.webp',
+      attachmentsFolder: 'files',
+    );
+    expect(relative, 'files/${sha256.convert(bytes)}.webp');
+    expect(File(p.join(dir.path, relative)).readAsBytesSync(), bytes);
+    final again = await storeAttachmentBytes(
+      libraryRoot: dir.path,
+      bytes: bytes,
+      extension: '.webp',
+      attachmentsFolder: 'files',
+    );
+    expect(again, relative);
+    expect(Directory(p.join(dir.path, 'files')).listSync(), hasLength(1));
   });
 }

@@ -1,10 +1,11 @@
-/// A chapter of an EPUB, from its XHTML to the Markdown the read view draws.
+/// HTML to the Markdown the read view draws: an EPUB's chapter, the pages
+/// Niman captures.
 ///
-/// The book is set in the app's own typography: what is kept is its
+/// The page is set in the app's own typography: what is kept is its
 /// structure — headings, paragraphs, emphasis, lists, quotes, code, tables,
 /// pictures, links — and its CSS is not read at all. Every character of the
-/// book's text is escaped where Markdown or the app's own extensions would
-/// read it as syntax (`#tag`, `$math$`, `[[link]]`, `*`, `|`…), so a book is
+/// page's text is escaped where Markdown or the app's own extensions would
+/// read it as syntax (`#tag`, `$math$`, `[[link]]`, `*`, `|`…), so a page is
 /// only ever the words it has.
 library;
 
@@ -12,29 +13,41 @@ import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html;
 import 'package:niman/src/markdown/text_escape.dart';
 
-/// What a chapter came to: its Markdown, and where in it each element
-/// with an `id` begins — as a line of the Markdown — for the links that
-/// point into the chapter.
-typedef ChapterMarkdown = ({String markdown, Map<String, int> anchors});
+/// What a page came to: its Markdown, and where in it each element with
+/// an `id` begins — as a line of the Markdown — for the links that point
+/// into the page.
+typedef MarkdownWithAnchors = ({String markdown, Map<String, int> anchors});
 
-/// Converts one chapter's XHTML.
+/// A picture as a Markdown image: `![alt](target)`.
+String markdownImage(String target, String alt) => '![$alt]($target)';
+
+/// Converts a page's HTML (or XHTML).
 ///
-/// [picture] names a picture by its `src` as the chapter wrote it, for
-/// the Markdown image to point at (the reader resolves the name); null
-/// leaves the picture out. [link] does the same for a link's `href`.
-final class XhtmlMarkdown {
-  /// A converter with the book's own ways to name pictures and links.
-  const new({required this.picture, required this.link});
+/// [picture] names a picture by its `src` as the page wrote it, for the
+/// Markdown image to point at (the caller resolves the name); null leaves
+/// the picture out. [link] does the same for a link's `href`. [embed]
+/// writes the picture's name and its escaped alt text as the note embeds
+/// it: a Markdown image unless the caller says otherwise.
+final class HtmlMarkdown {
+  /// A converter with the caller's own ways to name pictures and links.
+  const new({
+    required this.picture,
+    required this.link,
+    this.embed = markdownImage,
+  });
 
   /// The name a picture's `src` is written under, or null to leave it out.
   final String? Function(String src) picture;
 
+  /// How a picture, named, is written into the note.
+  final String Function(String target, String alt) embed;
+
   /// The target a link's `href` is written under.
   final String Function(String href) link;
 
-  /// The Markdown of the chapter [xhtml].
-  ChapterMarkdown convert(String xhtml) {
-    final document = html.parse(xhtml);
+  /// The Markdown of the page [source].
+  MarkdownWithAnchors convert(String source) {
+    final document = html.parse(source);
     final body = document.body ?? document.documentElement;
     final out = _Blocks();
     if (body != null) _blocks(body, out, const _Context());
@@ -188,15 +201,36 @@ final class XhtmlMarkdown {
         ? element.querySelector('image')
         : element;
     if (img == null) return null;
-    final src =
-        img.attributes['src'] ??
-        _attribute(img, 'xlink:href') ??
-        img.attributes['href'];
-    if (src == null || src.isEmpty) return null;
+    final src = [
+      img.attributes['src'],
+      _attribute(img, 'xlink:href'),
+      img.attributes['href'],
+      largestOfSrcset(img.attributes['srcset'] ?? ''),
+    ].firstWhere((src) => src != null && src.isNotEmpty, orElse: () => null);
+    if (src == null) return null;
     final name = picture(src);
     if (name == null) return null;
     final alt = escapeMarkdownText(_collapse(img.attributes['alt'] ?? ''));
-    return '![$alt]($name)';
+    return embed(name, alt);
+  }
+
+  /// The largest picture a `srcset` offers — the widest, else the densest;
+  /// the first when none says — or null when it offers none.
+  static String? largestOfSrcset(String srcset) {
+    String? best;
+    var bestSize = -1.0;
+    for (final candidate in srcset.split(RegExp(r',\s+|,$'))) {
+      final parts = candidate.trim().split(RegExp(r'\s+'));
+      if (parts.first.isEmpty) continue;
+      final descriptor = parts.length > 1 ? parts[1] : '1x';
+      final size =
+          double.tryParse(descriptor.substring(0, descriptor.length - 1)) ?? 1;
+      if (size > bestSize) {
+        best = parts.first;
+        bestSize = size;
+      }
+    }
+    return best;
   }
 
   /// The TeX a formula's SVG carries in its `aria-label`, as the app's own
@@ -334,7 +368,7 @@ final class _Context {
   }
 }
 
-/// The chapter's blocks as they come, with the line each one starts on.
+/// The page's blocks as they come, with the line each one starts on.
 final class _Blocks {
   final StringBuffer _out = StringBuffer();
   int _line = 0;

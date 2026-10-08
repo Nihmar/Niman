@@ -5,7 +5,7 @@
 /// (the OPF), whose manifest lists the book's files and whose spine says
 /// the order its chapters are read in; the table of contents is the EPUB 3
 /// navigation document or the EPUB 2 NCX. Every chapter is converted
-/// ([XhtmlMarkdown]) and the chapters are joined in spine order, a rule
+/// ([HtmlMarkdown]) and the chapters are joined in spine order, a rule
 /// between them. What the reader needs besides the text comes with it:
 /// the table of contents and the book's own links, as lines of that text,
 /// and the pictures, extracted to a folder of the app's cache.
@@ -19,7 +19,7 @@ import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html;
-import 'package:niman/src/epub/xhtml_markdown.dart';
+import 'package:niman/src/markdown/from_html/html_markdown.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
@@ -196,7 +196,7 @@ EpubDocument readEpub(String path, String pictureDir) {
       firstTex ??= match.group(1);
     }
     mathMl += _mathMl.allMatches(chapterText).length;
-    final converted = XhtmlMarkdown(
+    final converted = HtmlMarkdown(
       picture: (src) {
         final resolved = _resolve(dir, src);
         if (book.file(resolved) == null) return null;

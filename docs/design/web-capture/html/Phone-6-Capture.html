@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, capture from inside Niman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#A6A29A}
+.row{display:flex;align-items:center;gap:12px;height:48px;padding:0 12px;font-size:15px;color:#D9D4CB}
+.line{display:flex;align-items:center;gap:14px;min-height:52px;border-top:1px solid #363B44;font-size:15px}
+.chip{height:28px;padding:0 10px;border-radius:14px;background:#2E4A55;color:#BFE3EC;display:inline-flex;align-items:center;font-size:13px}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:64px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none">
+    <button class="ibtn" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div style="flex:1;font-size:17px;font-weight:500">Notes</div>
+    <button class="ibtn" aria-label="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></button>
+  </div>
+  <div style="padding:0 8px">
+    <div class="row"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A"><path d="M3 6h6l2 2h10v11H3z"/></svg>Meetings</div>
+    <div class="row"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A"><path d="M3 6h6l2 2h10v11H3z"/></svg>Projects</div>
+    <div class="row"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A"><path d="M3 6h6l2 2h10v11H3z"/></svg>Reading</div>
+  </div>
+
+  <div style="position:absolute;inset:0;background:rgba(10,11,13,.55);display:flex;flex-direction:column;justify-content:flex-end">
+    <div role="dialog" aria-label="Capture web page" style="background:#2C3037;border-radius:28px 28px 0 0;padding:10px 20px 22px;display:flex;flex-direction:column;gap:14px">
+      <div style="width:36px;height:4px;border-radius:2px;background:#4A4F59;align-self:center"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg class="ico" viewBox="0 0 24 24" style="color:#587CD3"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.2 3.5 5 3.5 8s-1 5.8-3.5 8M12 4c-2.5 2.2-3.5 5-3.5 8s1 5.8 3.5 8"/></svg>
+        <div style="font-size:20px;font-weight:600">Capture web page</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="lab">Page</div>
+        <div style="height:48px;padding:0 14px;border:1px solid #587CD3;border-radius:14px;display:flex;align-items:center;gap:10px;background:#23262B;font-size:14px">
+          <svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>
+          <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">https://app.example.com/blog/offline-first</span>
+        </div>
+        <div class="sub">Pasted from the clipboard · Offline-first, ten years later</div>
+      </div>
+      <div>
+        <div class="line"><svg class="ico" viewBox="0 0 24 24" style="color:#A6A29A"><path d="M3 6h6l2 2h10v11H3z"/></svg><span style="flex:1">Reading / Articles</span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#6B7079"><path d="M9 6l6 6-6 6"/></svg></div>
+        <div class="line"><svg class="ico" viewBox="0 0 24 24" style="color:#A6A29A"><path d="M3 12V4h8l9 9-8 8z"/><circle cx="7.5" cy="8" r="1.2"/></svg><span style="flex:1;display:flex;gap:6px"><span class="chip">#web</span></span><span style="color:#A9C0F0;font-size:14px">Add</span></div>
+        <div class="line"><svg class="ico" viewBox="0 0 24 24" style="color:#A6A29A"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l5-5 4 4 2-2 5 5"/><circle cx="15" cy="9" r="1.5"/></svg><span style="flex:1">Download 7 images<div class="sub">to assets/</div></span>
+          <span style="width:52px;height:32px;border-radius:16px;background:#587CD3;position:relative;flex:none"><span style="position:absolute;right:4px;top:4px;width:24px;height:24px;border-radius:12px;background:#F2EDE5"></span></span>
+        </div>
+      </div>
+      <button style="height:48px;border:0;border-radius:24px;background:#587CD3;color:#F2EDE5;font:500 15px 'IBM Plex Sans',sans-serif">Save</button>
+      <div class="sub" style="text-align:center;margin-top:-4px">Reached from New ▸ Capture web page, the same sheet a share opens.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

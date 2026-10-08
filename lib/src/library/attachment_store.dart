@@ -1,3 +1,10 @@
+/// The library's attachments folder, where a file's content names it: its
+/// SHA-256, so the same picture is never there twice. A picked picture is
+/// copied in ([importImageToLibrary]), a downloaded one written in
+/// ([storeAttachmentBytes]) — under a hidden temporary name first, so the
+/// index and a sync never see half a file under its final one.
+library;
+
 import 'dart:io';
 import 'dart:isolate';
 
@@ -44,6 +51,35 @@ Future<String> importImageToLibrary({
 
 const _log = AppLogger(name: 'image');
 
+/// Writes [bytes] into `<libraryRoot>/<attachmentsFolder>/`, named by their
+/// SHA-256 and [extension] (`.png`, or ''), and returns the library-relative
+/// path; a file already there with that content is kept as it is. The
+/// writing is asynchronous: call it off the UI isolate, as the capture does
+/// for a page's pictures (#531).
+Future<String> storeAttachmentBytes({
+  required String libraryRoot,
+  required List<int> bytes,
+  required String extension,
+  String attachmentsFolder = defaultAttachmentsFolder,
+}) async {
+  final digest = sha256.convert(bytes).toString();
+  final assets = Directory(p.join(libraryRoot, attachmentsFolder));
+  await assets.create(recursive: true);
+  final target = File(p.join(assets.path, '$digest$extension'));
+  final relative = '$attachmentsFolder/$digest$extension';
+  if (target.existsSync()) return relative;
+  final temp = File(_tempName(assets.path, digest, extension));
+  await temp.writeAsBytes(bytes, flush: true);
+  await temp.rename(target.path);
+  return relative;
+}
+
+/// A hidden name in [folder] for a file on its way to `<digest><extension>`.
+String _tempName(String folder, String digest, String extension) => p.join(
+  folder,
+  '.$digest$extension.niman-tmp-${DateTime.now().microsecondsSinceEpoch}',
+);
+
 /// What [_copyIntoLibrary] did, for the main isolate to log.
 typedef _Imported = ({
   String relative,
@@ -81,10 +117,7 @@ Future<_Imported> _copyIntoLibrary(
   final copyClock = Stopwatch()..start();
   // Into a hidden temp name first, so the index and a sync never see a
   // half-copied image under its final name.
-  final temp = p.join(
-    assets.path,
-    '.$digest$extension.niman-tmp-${DateTime.now().microsecondsSinceEpoch}',
-  );
+  final temp = _tempName(assets.path, digest, extension);
   await source.copy(temp);
   await File(temp).rename(target.path);
   return (

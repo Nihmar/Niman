@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, paste as Markdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0}
+.sub{font-size:13px;color:#A6A29A}
+.txt{font-family:Literata,serif;font-size:16px;line-height:1.7;color:#E8E3DA;margin:0 0 12px}
+.menu{display:flex;align-items:center;gap:12px;height:48px;padding:0 16px;font-size:15px}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:64px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none">
+    <button class="ibtn" aria-label="Back"><svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div style="flex:1;font-size:17px;font-weight:500">Sync screen</div>
+    <button class="ibtn" aria-label="More"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+  </div>
+
+  <div style="flex:1;padding:6px 20px;overflow:hidden">
+    <p class="txt">What the sync screen has to answer at a glance: is everything sent, and if not, what is waiting and why.</p>
+    <p class="txt" style="margin-bottom:6px">On conflicts:</p>
+    <div style="background:rgba(88,124,211,.13);border-radius:8px;margin:0 -8px;padding:6px 8px">
+      <div style="border-left:3px solid #4A4F59;padding-left:12px;margin-bottom:8px">
+        <p class="txt" style="margin:0;color:#C9C4BB"><b style="font-weight:600;color:#E8E3DA">Conflicts</b> should read as a <i>choice</i>, not an error.</p>
+      </div>
+      <ul style="font-family:Literata,serif;font-size:16px;line-height:1.7;color:#E8E3DA;margin:0;padding-left:22px">
+        <li>Show both versions side by side</li>
+        <li>Keep the time of each change visible</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="position:absolute;right:12px;bottom:128px;width:250px;background:#363B44;border-radius:16px;padding:6px 0;box-shadow:0 10px 30px rgba(0,0,0,.45)">
+    <div class="menu"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A"><path d="M9 3h6v3H9z"/><path d="M15 4.5h3V21H6V4.5h3"/></svg>Paste</div>
+    <div class="menu" style="background:#3E4450"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A9C0F0"><path d="M9 3h6v3H9z"/><path d="M15 4.5h3V21H6V4.5h3"/><path d="M9 11v5M9 11l1.5 2 1.5-2v5M15 11v5M13.5 14.5L15 16l1.5-1.5"/></svg>Paste as Markdown</div>
+    <div class="menu"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A"><path d="M4 7h16M4 12h10M4 17h7"/></svg>Insert table</div>
+  </div>
+
+  <div style="height:56px;display:flex;align-items:center;justify-content:space-around;border-top:1px solid #2C3037;flex:none;color:#D9D4CB">
+    <span style="font:600 16px 'IBM Plex Sans',sans-serif">B</span>
+    <span style="font:italic 16px Literata,serif">I</span>
+    <svg class="ico" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h9"/></svg>
+    <svg class="ico" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>
+    <svg class="ico" viewBox="0 0 24 24" style="color:#A9C0F0"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.6-.4-.4-2.6z"/></svg>
+  </div>
+
+  <div style="position:absolute;left:12px;right:12px;bottom:68px;height:48px;background:#E8E3DA;color:#23262B;border-radius:12px;display:flex;align-items:center;padding:0 6px 0 16px;font-size:14px">
+    <span style="flex:1">Pasted as Markdown</span>
+    <button style="height:36px;padding:0 14px;border:0;border-radius:18px;background:transparent;color:#4762BE;font:500 14px 'IBM Plex Sans',sans-serif">Undo</button>
+  </div>
+</div>
+</body>
+</html>

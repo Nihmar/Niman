@@ -27,4 +27,5 @@ comments (`docs/records/<name>.md`).
 | [index-reconcile.md](index-reconcile.md) | The index scan, a directory at a time with bounded memory (#302) |
 | [transcription.md](transcription.md) | On-device speech-to-text with `whisper_ggml` |
 | [ocr.md](ocr.md) | Text recognition with Tesseract, engine and languages downloaded on demand (#532) |
+| [web-capture.md](web-capture.md) | Capturing a web page or a selection as Markdown, with a Dart port of Readability (#531) |
 | [review-v0.1.3.md](review-v0.1.3.md) | Code review of everything merged after v0.1.3: what was fixed, what is open |

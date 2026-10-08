@@ -32,7 +32,7 @@ import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
-import 'package:niman/src/library/image_import.dart';
+import 'package:niman/src/library/attachment_store.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/embed_path.dart';

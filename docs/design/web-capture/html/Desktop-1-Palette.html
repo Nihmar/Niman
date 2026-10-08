@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command palette, capture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+.sub{font-size:13px;color:#A6A29A}
+.txt{font-family:Literata,serif;font-size:16px;line-height:1.75;color:#E8E3DA;margin:0 0 14px}
+.row{display:flex;align-items:center;gap:12px;height:40px;padding:0 14px;border-radius:10px;font-size:14px}
+.key{font-size:12px;color:#A6A29A;border:1px solid #4A4F59;border-radius:6px;padding:1px 6px}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+
+  <aside style="width:264px;flex:none;border-right:1px solid #2C3037;display:flex;flex-direction:column;padding:12px 8px;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px 12px">
+      <div style="width:22px;height:22px;border-radius:6px;background:#587CD3;font:600 13px Literata,serif;display:flex;align-items:center;justify-content:center">N</div>
+      <div style="font-weight:600">Notes</div>
+    </div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Meetings</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Projects</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Reading</div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Articles</div>
+    <div class="tree" style="background:#2C3037;color:#F2EDE5"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Sync screen.md</div>
+    <div class="tree"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>assets</div>
+  </aside>
+
+  <main style="flex:1;display:flex;flex-direction:column;min-width:0;background:#23262B">
+    <div style="height:42px;display:flex;align-items:flex-end;gap:2px;padding:0 8px;background:#1B1D21">
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;background:#23262B;border-radius:10px 10px 0 0;font-size:13px">Sync screen</div>
+    </div>
+    <div style="flex:1;padding:44px 0;display:flex;justify-content:center">
+      <div style="width:680px">
+        <h1 style="font:600 28px Literata,serif;margin:0 0 18px">Sync screen</h1>
+        <p class="txt">What the sync screen has to answer at a glance: is everything sent, and if not, what is waiting and why.</p>
+        <p class="txt">Reading list for the conflicts part, before the design review on Thursday.</p>
+      </div>
+    </div>
+  </main>
+
+  <div style="position:absolute;inset:0;background:rgba(10,11,13,.45);display:flex;justify-content:center;align-items:flex-start;padding-top:96px;box-sizing:border-box">
+    <div role="dialog" aria-label="Command palette" style="width:600px;background:#2C3037;border-radius:18px;box-shadow:0 18px 60px rgba(0,0,0,.5);overflow:hidden">
+      <div style="height:52px;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid #363B44">
+        <svg class="ico" viewBox="0 0 24 24" style="color:#A6A29A"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+        <div style="flex:1;font-size:15px">capture<span style="display:inline-block;width:1px;height:18px;background:#F2EDE5;vertical-align:-3px;margin-left:1px"></span></div>
+        <div class="sub">2 commands</div>
+      </div>
+      <div style="padding:8px">
+        <div class="row" style="background:#363B44">
+          <svg class="ico" viewBox="0 0 24 24" style="color:#587CD3"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.2 3.5 5 3.5 8s-1 5.8-3.5 8M12 4c-2.5 2.2-3.5 5-3.5 8s1 5.8 3.5 8"/></svg>
+          <div style="flex:1"><span class="sub" style="font-size:14px">Note:</span> Capture web page…</div>
+          <span class="key">Ctrl</span><span class="key">Alt</span><span class="key">W</span>
+        </div>
+        <div class="row">
+          <svg class="ico" viewBox="0 0 24 24" style="color:#A6A29A"><path d="M9 3h6v3H9z"/><path d="M15 4.5h3V21H6V4.5h3"/><path d="M9 11v5M9 11l1.5 2 1.5-2v5M15 11v5M13.5 14.5L15 16l1.5-1.5"/></svg>
+          <div style="flex:1"><span class="sub" style="font-size:14px">Editor:</span> Paste as Markdown</div>
+          <span class="key">Ctrl</span><span class="key">Shift</span><span class="key">V</span>
+        </div>
+      </div>
+      <div style="padding:10px 18px 14px;border-top:1px solid #363B44" class="sub">Capture saves a page as a note, its pictures in <span style="color:#D9D4CB">assets/</span>. A link pasted or dropped on the window does the same.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -34,6 +34,19 @@ void main() {
     expect(out, '[[Note]], [[Other/Note]], [x](Other/Note.md)');
   });
 
+  test('a link written between angle brackets follows, and keeps them', () {
+    // CommonMark lets a destination with spaces stand between `<` and `>`;
+    // the brackets were read as part of the path, and the link never
+    // followed its note.
+    final out = rewriteMovedLinks(
+      '[x](<Docs/Old note.md>) and ![p](<Docs/Old note.md>)',
+      from: 'root.md',
+      moves: LinkMoves({'Docs/Old note.md': 'Docs/New note.md'}),
+    );
+    // Encoded, as the rewriter writes every Markdown path.
+    expect(out, '[x](<Docs/New%20note.md>) and ![p](<Docs/New%20note.md>)');
+  });
+
   test('a renamed folder follows in every link into its subtree', () {
     const source =
         '[[Docs/Note]], [[Docs/Sub/Deep#H]], [x](Docs/pic.png), '

@@ -1,0 +1,2 @@
+# Pages where html5lib (package:html) and jsdom build different trees,
+# one per line: "<page>: <why>". The list only shrinks.

@@ -77,11 +77,13 @@ String rewriteMovedLinks(
         :final text,
         :final href,
         :final embed,
+        :final angled,
       ):
         final rewritten = _markdownHref(href, from, here, moves);
         if (rewritten != null) {
           final bang = embed ? '!' : '';
-          replacements.add((start, end, '$bang[$text]($rewritten)'));
+          final target = angled ? '<$rewritten>' : rewritten;
+          replacements.add((start, end, '$bang[$text]($target)'));
         }
     }
   }

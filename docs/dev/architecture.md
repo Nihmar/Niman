@@ -10,7 +10,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 
 | Module | Contents |
 |--------|----------|
-| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, share-in (`share_in.dart`), the first-run state (`welcome.dart`), single instance, the tray, the changelog parser |
+| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, share-in (`share_in.dart`), the first-run state (`welcome.dart`), single instance, the tray, the changelog parser, running a program with a timeout (`process_run.dart`) |
 | `update/` | The GitHub-Releases update check, its scheduler and the download of the next build |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image/audio import, Markdown import |
 | `import/` | Bringing a Notion export into the library (#25): the zip walk, page ids off the names, links rewritten, assets kept |
@@ -19,6 +19,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `journal/` | The journal's day pattern, settings and calendar summaries (see [journal](../user/journal.md)) |
 | `reading/` | Where each PDF and each book was left, kept in `.niman/reading.json` |
 | `annotations/` | A file's companion notes, the annotation model and its marks — see [annotations.md](../records/annotations.md) |
+| `capture/` | Capturing a web page as a note (#531): the download and its charsets (`fetch/`), a Dart port of Mozilla's Readability.js (`readability/`, held to upstream's test pages), the pictures into the attachments folder, the note — see [web-capture.md](../records/web-capture.md) |
 | `epub/` | Reading an EPUB into Markdown, its table of contents, its look and its marks — see [epub-reader.md](../records/epub-reader.md) |
 | `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](../records/sync.md) |
 | `diff/` | Myers line diff with its hunk summary, and the three-way merge over them, shared by history rollback and sync conflicts |
@@ -26,7 +27,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `sync/` | Sync state store (`sync_destinations`, `sync_items`, `sync_ops`), secure password store, pure reconcile, the engine (full and quick runs), the trigger scheduler and network monitor, and `LibrarySyncService` for the UI |
 | `ui/sync/` | WebDAV settings screen (with the trigger options), status icon and panel (with the queue), first-sync and mass-deletion dialogs, conflict screen (merge by region, or whole copies) |
 | `db/` | `AppDatabase` (app settings, migration chain) + `IndexDatabase` (one per library, schema 1, no migrations — delete to rebuild); the indexer facade, the full scan that reconciles one directory at a time with bounded memory (#302), the tree materialization and the content store |
-| `markdown/` | The one Markdown surface ([unified-surface.md](../records/unified-surface.md)): `SourceBuffer`, the block scanner and parser (over the `markdown` AST), the styler, the surface controller, and under `render/` the source view (modes `source` and `live`, the WYSIWYG) and the read view (the preview); `edit/` holds selection, caret motion, input, history and find |
+| `markdown/` | The one Markdown surface ([unified-surface.md](../records/unified-surface.md)): `SourceBuffer`, the block scanner and parser (over the `markdown` AST), the styler, the surface controller, and under `render/` the source view (modes `source` and `live`, the WYSIWYG) and the read view (the preview); `edit/` holds selection, caret motion, input, history and find; `from_html/` turns HTML into Markdown (an EPUB's chapters, captured pages) |
 | `editor/` | What the surface is driven by: the incremental tokenizer (`highlighting.dart`), the Markdown commands (`md_editing.dart`), toolbar and its layout, context menu, find bar, outline, word count, list tally, typewriter and note column |
 | `preview/` | KaTeX math (typesetting, cache, rasterizing), code highlight, image aspect — what the surface draws with |
 | `links/` | Wikilink/Markdown-link parse + resolve (single parse rule shared by editor, preview, indexer) |
