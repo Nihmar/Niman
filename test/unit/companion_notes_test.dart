@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/annotations/annotation_mark.dart';
 import 'package:niman/src/annotations/companion_notes.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -298,6 +299,31 @@ void main() {
           '\nWorth a second look.\n\n> Passage 5.',
         ),
       );
+    });
+
+    test('its link is rewritten in any case and order (#642)', () async {
+      await write(highlight(4, HighlightColour.green));
+      final path = (await companions.of('Books/Dune.pdf')).single;
+      Future<void> relink(String from, String to) =>
+          ops.saveNote(path, read(path).replaceFirst(from, to));
+      Future<List<AnnotationMark>> marks() =>
+          companions.marksOf('Books/Dune.pdf');
+
+      await relink('highlight=green', 'highlight=Green');
+      await companions.recolour((await marks()).single, HighlightColour.blue);
+      expect((await marks()).single.highlight, HighlightColour.blue);
+
+      await relink(
+        '#page=4&chars=0-9&highlight=blue',
+        '#highlight=blue&page=4&chars=0-9',
+      );
+      await companions.annotateHighlight(
+        (await marks()).single,
+        label: 'p. 4',
+        comment: 'Noted.',
+      );
+      expect((await marks()).single.highlight, isNull);
+      expect(read(path), contains('[[Books/Dune.pdf#page=4&chars=0-9|p. 4]]'));
     });
 
     test('a note edited since is not changed blindly', () async {
