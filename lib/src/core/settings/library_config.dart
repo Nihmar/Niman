@@ -17,6 +17,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultHighlightColour,
         defaultListFolder,
         defaultTemplateFolder;
+import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/journal/journal_settings.dart';
@@ -399,6 +400,8 @@ final class LibraryConfig {
     this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
     this.journal = const JournalSettings(),
     this.epubLook = const EpubLook(),
+    this.navigation,
+    this.deviceNavigation,
     this.extra = const {},
   });
 
@@ -504,6 +507,12 @@ final class LibraryConfig {
       enabledEditors: _enabledEditorsFrom(json['enabledEditors']),
       journal: JournalSettings.fromJson(json),
       epubLook: EpubLook.fromJson(json),
+      navigation: json['navigation'] == null
+          ? null
+          : NavigationLayout.fromJson(json['navigation']),
+      deviceNavigation: json['deviceNavigation'] == null
+          ? null
+          : NavigationLayout.fromJson(json['deviceNavigation']),
       extra: extra,
     );
   }
@@ -683,6 +692,18 @@ final class LibraryConfig {
   /// How the library's books look (#280).
   final EpubLook epubLook;
 
+  /// The navigation's order and hidden destinations (#536), as the
+  /// library keeps them for every device; null is the defaults.
+  final NavigationLayout? navigation;
+
+  /// This device's own navigation ([deviceKeys]), set by *Only on this
+  /// device*; while it is there it wins over [navigation].
+  final NavigationLayout? deviceNavigation;
+
+  /// The navigation this device shows.
+  NavigationLayout get navigationLayout =>
+      deviceNavigation ?? navigation ?? const NavigationLayout();
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -727,6 +748,9 @@ final class LibraryConfig {
     Set<EditorKind>? enabledEditors,
     JournalSettings? journal,
     EpubLook? epubLook,
+    NavigationLayout? navigation,
+    NavigationLayout? deviceNavigation,
+    bool clearDeviceNavigation = false,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -770,6 +794,10 @@ final class LibraryConfig {
       enabledEditors: enabledEditors ?? this.enabledEditors,
       journal: journal ?? this.journal,
       epubLook: epubLook ?? this.epubLook,
+      navigation: navigation ?? this.navigation,
+      deviceNavigation: clearDeviceNavigation
+          ? null
+          : deviceNavigation ?? this.deviceNavigation,
       extra: extra,
     );
   }
@@ -816,6 +844,7 @@ final class LibraryConfig {
     'dockWidth',
     'editorKind',
     'enabledEditors',
+    'deviceNavigation',
     ...EpubLook.keys,
   };
 
@@ -895,6 +924,8 @@ final class LibraryConfig {
     // the app now, and a file that still carries the key must not have it
     // handed back as an unknown one to preserve forever.
     'previewEnabled',
+    'navigation',
+    'deviceNavigation',
     ...JournalSettings.keys,
     ...EpubLook.keys,
   };
@@ -957,6 +988,10 @@ final class LibraryConfig {
     }
     if (spellDictionaries.isNotEmpty) {
       json['spellDictionaries'] = spellDictionaries;
+    }
+    if (navigation case final layout?) json['navigation'] = layout.toJson();
+    if (deviceNavigation case final layout?) {
+      json['deviceNavigation'] = layout.toJson();
     }
     if (lintRulesOff.isNotEmpty) {
       // Canonical order, so the file does not churn on a set rebuilt
@@ -1055,6 +1090,8 @@ final class LibraryConfig {
         enabledEditors.containsAll(other.enabledEditors) &&
         journal == other.journal &&
         epubLook == other.epubLook &&
+        navigation == other.navigation &&
+        deviceNavigation == other.deviceNavigation &&
         _deepEquals(extra, other.extra);
   }
 
