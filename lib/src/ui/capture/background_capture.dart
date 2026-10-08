@@ -77,6 +77,8 @@ final class BackgroundCapture {
 
   /// Captures the page [reading] reads into [target], as [chosen]; the
   /// task is the capture's from here on, and is disposed when it is done.
+  /// Completes once [CaptureNotifier.begin] has, the capture still to
+  /// come.
   Future<void> add(
     CaptureReadingTask reading, {
     required CaptureTarget target,
