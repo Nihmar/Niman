@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
-import 'package:niman/src/ui/kinds/slides/slides_parts.dart';
+import 'package:niman/src/ui/kinds/slides/slide_stage.dart';
+import 'package:niman/src/ui/kinds/slides/slides_timer_card.dart';
+import 'package:niman/src/ui/kinds/slides/speaker_notes.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The presenter view (#534): the slide on screen, the next one, the
@@ -78,13 +80,6 @@ final class _SlidesPresenterViewState extends State<SlidesPresenterView> {
     super.dispose();
   }
 
-  static String _clock(Duration time) {
-    String two(int n) => n.toString().padLeft(2, '0');
-    final hours = time.inHours;
-    final rest = '${two(time.inMinutes % 60)}:${two(time.inSeconds % 60)}';
-    return hours > 0 ? '$hours:$rest' : rest;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -93,7 +88,6 @@ final class _SlidesPresenterViewState extends State<SlidesPresenterView> {
     final index = widget.index;
     final slide = widget.slides[index];
     final next = index + 1 < count ? widget.slides[index + 1] : null;
-    final now = TimeOfDay.now();
     final label = theme.textTheme.labelMedium?.copyWith(
       color: scheme.onSurfaceVariant,
       letterSpacing: 0.6,
@@ -186,7 +180,13 @@ final class _SlidesPresenterViewState extends State<SlidesPresenterView> {
                         else
                           _framed(context, next, current: false),
                         const SizedBox(height: 26),
-                        _timer(context, label, now),
+                        SlidesTimerCard(
+                          elapsed: widget.elapsed(),
+                          paused: widget.paused,
+                          onPause: widget.onPause,
+                          onRestart: widget.onRestart,
+                          label: label,
+                        ),
                         const Spacer(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -235,67 +235,4 @@ final class _SlidesPresenterViewState extends State<SlidesPresenterView> {
           ),
         ),
       );
-
-  Widget _timer(BuildContext context, TextStyle? label, TimeOfDay now) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(AppStrings.slidesElapsed.toUpperCase(), style: label),
-            Row(
-              children: [
-                Text(
-                  _clock(widget.elapsed()),
-                  key: const Key('slides-elapsed'),
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-                const Spacer(),
-                IconButton.outlined(
-                  tooltip: widget.paused
-                      ? AppStrings.slidesPresent
-                      : AppStrings.slidesPause,
-                  onPressed: widget.onPause,
-                  icon: Icon(
-                    widget.paused ? Icons.play_arrow_outlined : Icons.pause,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                IconButton.outlined(
-                  tooltip: AppStrings.slidesRestart,
-                  onPressed: widget.onRestart,
-                  icon: const Icon(Icons.restart_alt),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Icon(
-                  Icons.schedule_outlined,
-                  size: 14,
-                  color: scheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  now.format(context),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

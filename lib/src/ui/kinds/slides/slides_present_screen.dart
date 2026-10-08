@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
+import 'package:niman/src/ui/kinds/slides/slides_alone_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_overview.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
-import 'package:niman/src/ui/kinds/slides/slides_present_bar.dart';
 import 'package:niman/src/ui/kinds/slides/slides_presenter_view.dart';
-import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/kinds/slides/talk_clock.dart';
 
 /// A deck presented (#534): the slide alone on the whole screen, or the
 /// presenter view, one switch away from each other.
@@ -60,12 +59,7 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
   Timer? _barTimer;
   Timer? _hintTimer;
   bool _leaving = false;
-
-  /// When the timer started, null until the first move; the time it had
-  /// counted before a pause.
-  DateTime? _started;
-  Duration _counted = Duration.zero;
-  bool _paused = false;
+  final TalkClock _clock = TalkClock();
 
   int get _count => widget.slides.length;
   int get _index => widget.place.value.clamp(0, _count - 1);
@@ -94,8 +88,7 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
   }
 
   void _go(int index) {
-    // The talk's clock starts on its first move, not on opening.
-    if (_started == null && !_paused) _started = DateTime.now();
+    _clock.moved();
     widget.place.value = index.clamp(0, _count - 1);
     if (_hint) setState(() => _hint = false);
   }
@@ -106,30 +99,9 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
     Navigator.of(context).pop();
   }
 
-  /// The time the talk has run.
-  Duration get elapsed {
-    final started = _started;
-    return _counted +
-        (started == null ? Duration.zero : DateTime.now().difference(started));
-  }
+  void _togglePause() => setState(_clock.togglePause);
 
-  void _togglePause() => setState(() {
-    final started = _started;
-    if (started != null) {
-      _counted += DateTime.now().difference(started);
-      _started = null;
-      _paused = true;
-    } else {
-      _started = DateTime.now();
-      _paused = false;
-    }
-  });
-
-  void _restartClock() => setState(() {
-    _counted = Duration.zero;
-    _started = null;
-    _paused = false;
-  });
+  void _restartClock() => setState(_clock.restart);
 
   void _openOverview() => setState(() {
     _overview = true;
@@ -249,8 +221,8 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
         slides: widget.slides,
         index: _index,
         resolveEmbed: widget.resolveEmbed,
-        elapsed: () => elapsed,
-        paused: _paused,
+        elapsed: () => _clock.elapsed,
+        paused: _clock.paused,
         onGo: _go,
         onOverview: _openOverview,
         onSlideOnly: () => setState(() => _presenter = false),
@@ -259,129 +231,27 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
         onRestart: _restartClock,
       );
     } else {
-      body = _slideAlone(context);
+      body = SlidesAloneView(
+        slide: widget.slides[_index],
+        index: _index,
+        count: _count,
+        resolveEmbed: widget.resolveEmbed,
+        black: _black,
+        bar: _bar,
+        touch: widget.touch,
+        hint: _hint,
+        onTapUp: _tap,
+        onGo: _go,
+        onExit: _exit,
+        onPoke: _poke,
+        onOverview: _openOverview,
+        onNotes: () => setState(() => _presenter = true),
+      );
     }
     return Focus(
       autofocus: true,
       onKeyEvent: _onKey,
       child: Material(color: Colors.black, child: body),
-    );
-  }
-
-  Widget _slideAlone(BuildContext context) {
-    final slide = widget.slides[_index];
-    return MouseRegion(
-      cursor: _bar ? MouseCursor.defer : SystemMouseCursors.none,
-      onHover: (_) => _poke(),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              key: const Key('slides-present'),
-              behavior: HitTestBehavior.opaque,
-              onTapUp: _tap,
-              onHorizontalDragEnd: (details) {
-                final speed = details.primaryVelocity ?? 0;
-                if (speed < -300) _go(_index + 1);
-                if (speed > 300) _go(_index - 1);
-              },
-              onVerticalDragEnd: (details) {
-                if ((details.primaryVelocity ?? 0) > 300) _exit();
-              },
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: SlideFrame(
-                    key: ValueKey(_index),
-                    markdown: slide.markdown,
-                    resolveEmbed: widget.resolveEmbed,
-                    live: false,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (_black)
-            const Positioned.fill(
-              child: IgnorePointer(
-                child: ColoredBox(
-                  key: Key('slides-black'),
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          if (widget.touch)
-            Positioned(
-              right: 14,
-              bottom: 10,
-              child: Text(
-                '${_index + 1} / $_count',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.45),
-                ),
-              ),
-            )
-          else
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 22,
-              child: IgnorePointer(
-                ignoring: !_bar,
-                child: AnimatedOpacity(
-                  opacity: _bar ? 1 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Center(
-                    child: SlidesPresentBar(
-                      index: _index,
-                      count: _count,
-                      onPrevious: () => _go(_index - 1),
-                      onNext: () => _go(_index + 1),
-                      onOverview: _openOverview,
-                      onNotes: () => setState(() => _presenter = true),
-                      onExit: _exit,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          if (_hint) const Positioned.fill(child: _TapHint()),
-        ],
-      ),
-    );
-  }
-}
-
-/// Where to tap, over the slide when a phone starts presenting.
-final class _TapHint extends StatelessWidget {
-  const new();
-
-  @override
-  Widget build(BuildContext context) {
-    const style = TextStyle(color: Colors.white, fontSize: 13);
-    Widget zone(IconData icon, String label) => Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white),
-          const SizedBox(height: 6),
-          Text(label, style: style, textAlign: TextAlign.center),
-        ],
-      ),
-    );
-    return IgnorePointer(
-      child: ColoredBox(
-        key: const Key('slides-tap-hint'),
-        color: Colors.black.withValues(alpha: 0.6),
-        child: Row(
-          children: [
-            zone(Icons.chevron_left, AppStrings.slidesPrevious),
-            zone(Icons.arrow_downward, AppStrings.slidesSwipeToExit),
-            zone(Icons.chevron_right, AppStrings.slidesNext),
-          ],
-        ),
-      ),
     );
   }
 }

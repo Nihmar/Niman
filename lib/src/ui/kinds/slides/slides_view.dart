@@ -1,16 +1,19 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show wideBreakpoint;
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/ui/kinds/slides/slide_dots.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
-import 'package:niman/src/ui/kinds/slides/slides_parts.dart';
+import 'package:niman/src/ui/kinds/slides/slide_stage.dart';
+import 'package:niman/src/ui/kinds/slides/slide_thumbnail.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
+import 'package:niman/src/ui/kinds/slides/slides_wide_layout.dart';
+import 'package:niman/src/ui/kinds/slides/speaker_notes.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The slides kind's body (#534): the slide on screen large, its speaker
@@ -38,8 +41,6 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
   late ValueNotifier<int> _place = slidePlaceOf(_path);
   late final PageController _pages = PageController(initialPage: _index);
   final ScrollController _strip = ScrollController();
-
-  static const double _thumbGap = 10;
 
   int get _index => _place.value.clamp(0, _slides.length - 1);
 
@@ -88,7 +89,7 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
     if (_strip.hasClients) {
       final position = _strip.position;
       final target =
-          index * (slideThumbWidth + _thumbGap) -
+          index * (slideThumbWidth + SlidesWideLayout.thumbGap) -
           (position.viewportDimension - slideThumbWidth) / 2;
       _strip.animateTo(
         target.clamp(0, position.maxScrollExtent),
@@ -173,85 +174,15 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
     return Focus(
       autofocus: wide,
       onKeyEvent: _onKey,
-      child: wide ? _wide(context) : _narrow(context),
-    );
-  }
-
-  Widget _wide(BuildContext context) {
-    final slide = _slides[_index];
-    final notes = slide.notes;
-    final scheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
-            child: LayoutBuilder(
-              builder: (context, box) {
-                // A pane shorter than the notes gives them all of it, the
-                // slide none, rather than a negative size.
-                final notesHeight = math.min<double>(120, box.maxHeight);
-                final room = box.maxHeight - (notes == null ? 0 : notesHeight);
-                final width = math.min(box.maxWidth, room * 16 / 9);
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: width,
-                      height: width * 9 / 16,
-                      child: SlideStage(child: _frame(slide)),
-                    ),
-                    if (notes != null)
-                      SizedBox(
-                        width: width,
-                        height: notesHeight,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: SpeakerNotes(notes: notes),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-        Divider(height: 1, color: scheme.outlineVariant),
-        SizedBox(
-          height: 116,
-          child: Row(
-            children: [
-              Expanded(
-                child: ListView.separated(
-                  key: const Key('slides-strip'),
-                  controller: _strip,
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  itemCount: _slides.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: _thumbGap),
-                  itemBuilder: (context, index) => SlideThumbnail(
-                    key: Key('slide-thumb-$index'),
-                    number: index + 1,
-                    selected: index == _index,
-                    onTap: () => _go(index),
-                    child: _frame(_slides[index], live: false),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Text(
-                  '${_index + 1} / ${_slides.length}',
-                  style: TextStyle(color: scheme.onSurfaceVariant),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+      child: wide
+          ? SlidesWideLayout(
+              slides: _slides,
+              index: _index,
+              strip: _strip,
+              frame: _frame,
+              onGo: _go,
+            )
+          : _narrow(context),
     );
   }
 

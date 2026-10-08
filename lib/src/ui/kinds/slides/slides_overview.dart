@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
-import 'package:niman/src/ui/kinds/slides/slides_parts.dart';
+import 'package:niman/src/ui/kinds/slides/slide_stage.dart';
 
 /// Every slide of the deck in a grid, one ringed (#534): pick one to go
 /// there. Presenting and the presenter view both open it.
