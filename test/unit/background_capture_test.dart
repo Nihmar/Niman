@@ -46,12 +46,16 @@ final class _Notifier implements CaptureNotifier {
   results = [];
   String? cancel;
 
+  /// What [begin] waits for, when set: the platform's round trip.
+  Completer<void>? started;
+
   @override
   Future<void> begin({
     required String title,
     String? body,
     String? cancel,
   }) async {
+    await started?.future;
     said.add('begin $title');
     this.cancel = cancel;
   }
@@ -226,6 +230,27 @@ void main() {
       expect(notifier.results.single.body, 'The page did not answer in time.');
       expect(notifier.said.last, 'end');
     });
+  });
+
+  test('a capture is added once its service has started (#638)', () async {
+    // The app goes to the back when add completes: Android starts no
+    // foreground service after that.
+    notifier.started = Completer<void>();
+    var added = false;
+    unawaited(
+      BackgroundCapture(notifier: notifier)
+          .add(
+            reading(() async => _reading()),
+            target: target(),
+            chosen: chosen,
+          )
+          .then((_) => added = true),
+    );
+    await pumpEventQueue();
+    expect(added, isFalse);
+    notifier.started!.complete();
+    await pumpEventQueue();
+    expect(added, isTrue);
   });
 
   test('captures shared one after another run one at a time', () async {

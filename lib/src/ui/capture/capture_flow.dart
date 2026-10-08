@@ -145,9 +145,9 @@ final class CaptureFlow {
       case null:
         return;
       case CapturePageChosen(:final reading, :final chosen):
-        unawaited(
-          services.background.add(reading, target: target, chosen: chosen),
-        );
+        // Awaited for the service it starts: Android starts none once the
+        // app has gone to the back (#638). The capture runs on its own.
+        await services.background.add(reading, target: target, chosen: chosen);
       case CaptureQuoteChosen():
         await _keepQuote(chosen);
     }
