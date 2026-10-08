@@ -1664,6 +1664,8 @@ final class EstonianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Ühenda murtud loendi üksused';
   @override
+  String get lintRuleJoinParagraphLines => 'Ühenda murtud lõigud';
+  @override
   String get tidyOnCloseTitle => 'Korrasta Markdown sulgemisel';
   @override
   String get tidyOnCloseSubtitle =>

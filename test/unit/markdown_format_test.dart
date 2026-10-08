@@ -1,7 +1,8 @@
 // #227: tidying a note's Markdown. The wrapped list item is what this is
 // for; everything else it touches is a line's whitespace. Fences,
 // tables, math, frontmatter and HTML pass through untouched, prose is
-// never reflowed, and formatting twice changes nothing.
+// never rewrapped (its lines are joined: `tidy_paragraph_join_test.dart`),
+// and formatting twice changes nothing.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/lint/lint_rule.dart';
@@ -22,6 +23,10 @@ String tidy(String source, {Set<LintRule>? rules}) {
 /// the tidying makes of a wrapped item it leaves wrapped.
 final Set<LintRule> _keepWraps = {...LintRule.all}
   ..remove(LintRule.joinWrappedItems);
+
+/// Every rule but the one joining a paragraph's lines outside a list.
+final Set<LintRule> _keepParagraphs = {...LintRule.all}
+  ..remove(LintRule.joinParagraphLines);
 
 void main() {
   test('a wrapped list item is indented to its own text', () {
@@ -71,13 +76,16 @@ void main() {
     );
     expect(tidy(kept), '- broken  \n  here\n\n  second paragraph\n');
     expect(tidy('- slash\\\n  here\n'), '- slash\\\n  here\n');
-    // Prose outside a list is never reflowed.
-    expect(tidy('one\ntwo\n\n- a\n  b\n'), 'one\ntwo\n\n- a b\n');
+    // Prose outside a list is the other rule's to join.
+    expect(
+      tidy('one\ntwo\n\n- a\n  b\n', rules: _keepParagraphs),
+      'one\ntwo\n\n- a b\n',
+    );
   });
 
-  test('a paragraph is never reflowed', () {
+  test('with its rule off, a paragraph keeps its lines', () {
     const note = 'A line.\nAnother line of the same paragraph.\n';
-    expect(tidy(note), note);
+    expect(tidy(note, rules: _keepParagraphs), note);
   });
 
   test('headings get one space after their hashes', () {
@@ -98,7 +106,7 @@ void main() {
     );
     expect(
       tidy('#primo #secondo\nand a wrapped line\n'),
-      '#primo #secondo\nand a wrapped line\n',
+      '#primo #secondo and a wrapped line\n',
     );
     // In a list item it is text like any other.
     expect(

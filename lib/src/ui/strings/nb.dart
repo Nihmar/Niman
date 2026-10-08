@@ -1671,6 +1671,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Slå sammen ombrutte listepunkter';
   @override
+  String get lintRuleJoinParagraphLines => 'Slå sammen ombrutte avsnitt';
+  @override
   String get tidyOnCloseTitle => 'Rydd opp i Markdown ved lukking';
   @override
   String get tidyOnCloseSubtitle =>

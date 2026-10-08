@@ -1682,6 +1682,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Sameina línubrotna listaliði';
   @override
+  String get lintRuleJoinParagraphLines => 'Sameina línubrotnar málsgreinar';
+  @override
   String get tidyOnCloseTitle => 'Taka til í Markdown við lokun';
   @override
   String get tidyOnCloseSubtitle =>

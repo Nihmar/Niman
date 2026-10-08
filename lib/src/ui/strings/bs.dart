@@ -1687,6 +1687,8 @@ final class BosnianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Spoji prelomljene stavke liste';
   @override
+  String get lintRuleJoinParagraphLines => 'Spoji prelomljene pasuse';
+  @override
   String get tidyOnCloseTitle => 'Posloži Markdown pri zatvaranju';
   @override
   String get tidyOnCloseSubtitle =>

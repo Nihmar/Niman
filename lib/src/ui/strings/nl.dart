@@ -1704,6 +1704,8 @@ final class DutchStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Afgebroken lijstitems samenvoegen';
   @override
+  String get lintRuleJoinParagraphLines => 'Afgebroken alinea’s samenvoegen';
+  @override
   String get tidyOnCloseTitle => 'Markdown opruimen bij sluiten';
   @override
   String get tidyOnCloseSubtitle =>

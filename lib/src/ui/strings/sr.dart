@@ -1688,6 +1688,8 @@ final class SerbianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Spoji prelomljene stavke liste';
   @override
+  String get lintRuleJoinParagraphLines => 'Spoji prelomljene pasuse';
+  @override
   String get tidyOnCloseTitle => 'Сложи Markdown при затварању';
   @override
   String get tidyOnCloseSubtitle =>

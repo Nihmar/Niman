@@ -1695,6 +1695,8 @@ final class FinnishStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Yhdistä rivitetyt luettelon kohdat';
   @override
+  String get lintRuleJoinParagraphLines => 'Yhdistä rivitetyt kappaleet';
+  @override
   String get tidyOnCloseTitle => 'Siivoa Markdown suljettaessa';
   @override
   String get tidyOnCloseSubtitle =>

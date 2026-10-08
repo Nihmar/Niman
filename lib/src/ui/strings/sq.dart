@@ -1697,6 +1697,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Bashko elementet e listës të ndara';
   @override
+  String get lintRuleJoinParagraphLines => 'Bashko paragrafët e ndarë';
+  @override
   String get tidyOnCloseTitle => 'Rregullo Markdown-in në mbyllje';
   @override
   String get tidyOnCloseSubtitle =>

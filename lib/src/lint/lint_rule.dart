@@ -29,7 +29,11 @@ enum LintRule {
 
   /// A list item's text wrapped over several lines is written on one
   /// (#549).
-  joinWrappedItems('join-wrapped-items');
+  joinWrappedItems('join-wrapped-items'),
+
+  /// A paragraph outside a list — a note's own, a quote's, a footnote's —
+  /// wrapped over several lines is written on one.
+  joinParagraphLines('join-paragraph-lines');
 
   new(this.id);
 

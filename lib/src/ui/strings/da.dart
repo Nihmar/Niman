@@ -1678,6 +1678,8 @@ final class DanishStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Saml ombrudte listepunkter';
   @override
+  String get lintRuleJoinParagraphLines => 'Saml ombrudte afsnit';
+  @override
   String get tidyOnCloseTitle => 'Ryd op i Markdown ved lukning';
   @override
   String get tidyOnCloseSubtitle =>

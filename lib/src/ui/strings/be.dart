@@ -1686,6 +1686,8 @@ final class BelarusianStrings extends Strings {
   String get lintRuleJoinWrappedItems =>
       'Аб’ядноўваць перанесеныя элементы спісу';
   @override
+  String get lintRuleJoinParagraphLines => 'Аб’ядноўваць перанесеныя абзацы';
+  @override
   String get tidyOnCloseTitle => 'Упарадкоўваць Markdown пры закрыцці';
   @override
   String get tidyOnCloseSubtitle =>

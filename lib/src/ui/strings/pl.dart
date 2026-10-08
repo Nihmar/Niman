@@ -1705,6 +1705,8 @@ final class PolishStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Scalaj zawinięte elementy listy';
   @override
+  String get lintRuleJoinParagraphLines => 'Scalaj zawinięte akapity';
+  @override
   String get tidyOnCloseTitle => 'Porządkuj Markdown przy zamykaniu';
   @override
   String get tidyOnCloseSubtitle =>

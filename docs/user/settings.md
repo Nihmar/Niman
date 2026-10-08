@@ -66,7 +66,7 @@ sync) in `.niman/settings.json`.
 | `tidyOnClose` | true | Tidy the Markdown of a note closed after an edit (**Settings → Editor → Tidy the Markdown on close**); notes over 4 MB are left as they are |
 | `cascadeChecklist` | true | Ticking a checklist item ticks the tasks nested under it (**Settings → Editor → Tick nested checkboxes**); clearing a parent leaves its children as they are |
 | `frontmatterPanel` | true | Whether a note's frontmatter is drawn as the properties panel above it (**Settings → Editor → Properties panel**): closed until it is opened, away while the note is scrolled past its head. Off, a note is its own text everywhere (see [frontmatter](organization.md)) |
-| `lintRulesOff` | [] (= all rules) | The #72 rules turned off, by id (`tight-lists`, `task-marker`, `list-spacing`, `closing-fence`, `fence-language`, `join-wrapped-items`), chosen in **Settings → Editor → Markdown rules**; a rule added in a later build runs unless it is turned off |
+| `lintRulesOff` | [] (= all rules) | The #72 rules turned off, by id (`tight-lists`, `task-marker`, `list-spacing`, `closing-fence`, `fence-language`, `join-wrapped-items`, `join-paragraph-lines`), chosen in **Settings → Editor → Markdown rules**; a rule added in a later build runs unless it is turned off |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
 | `journalFolder` | `Journal` | Where the [journal](journal.md)'s entries go (empty = the root) |

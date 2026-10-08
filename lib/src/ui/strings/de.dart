@@ -1712,6 +1712,8 @@ final class GermanStrings extends Strings {
   String get lintRuleJoinWrappedItems =>
       'Umbrochene Listeneinträge zusammenführen';
   @override
+  String get lintRuleJoinParagraphLines => 'Umbrochene Absätze zusammenführen';
+  @override
   String get tidyOnCloseTitle => 'Markdown beim Schließen aufräumen';
   @override
   String get tidyOnCloseSubtitle =>
