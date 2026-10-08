@@ -2891,7 +2891,7 @@ final class IcelandicStrings extends Strings {
   String get diagramTitle => 'Skýringarmynd';
 
   @override
-  String get diagramFullScreen => 'Skjár í fullri stærð';
+  String get fullScreen => 'Skjár í fullri stærð';
   @override
   String get commandInsertDiagram => 'Setja inn skýringarmynd (Mermaid)';
 

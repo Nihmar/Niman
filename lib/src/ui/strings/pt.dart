@@ -2911,7 +2911,7 @@ final class PortugueseStrings extends Strings {
   String get diagramTitle => 'Diagrama';
 
   @override
-  String get diagramFullScreen => 'Tela cheia';
+  String get fullScreen => 'Tela cheia';
   @override
   String get commandInsertDiagram => 'Inserir diagrama (Mermaid)';
 

@@ -1158,6 +1158,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           onAnnotate: _annotate,
           marks: _annotations,
           ocr: _ocrActions,
+          fullScreen: _epubFullScreen,
         ),
       );
     }
@@ -1585,6 +1586,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
     _zen.addListener(_onZenChanged);
+    _epubFullScreen.addListener(_onEpubFullScreen);
     unawaited(_workspace.load());
     _libraryEvents = widget.controller.events.listen((_) {
       _homeWidgets.pushNotes();
@@ -1669,6 +1671,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _zen.removeListener(_onZenChanged);
     unawaited(_zen.leave());
     _zen.dispose();
+    _epubFullScreen.dispose();
     _tabsListenable.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -2814,8 +2817,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// Closes the full-screen note: returns to the tab it was opened from,
-  /// with its tree/body visible (the note stays highlighted).
+  /// with its tree/body visible (the note stays highlighted). A book read
+  /// in full screen (#621) only leaves full screen: Back steps out of it
+  /// first.
   void _closeFullScreenNote() {
+    if (_epubFullScreen.value != null) {
+      _epubFullScreen.value = null;
+      return;
+    }
     setState(() {
       _tab = _noteFromTab;
       _visitedTabs.add(_noteFromTab);
@@ -4154,9 +4163,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           tasksChanged: _todoController,
           onOpenTasks: _openTodo,
           focusDay: _shownJournalDay,
+          onEntryMenu: (day, position) =>
+              unawaited(_showJournalEntryMenuAt(day, position)),
         ),
       },
     );
+  }
+
+  /// A recent journal entry's right-click menu (#619): the tree's own,
+  /// for the entry's note — a new tab and beside among its actions.
+  Future<void> _showJournalEntryMenuAt(DateTime day, Offset position) async {
+    final note = await widget.controller.ops?.find(_journal.entryPath(day));
+    if (note == null || !mounted) return;
+    await _showRowMenuAt(note, position);
   }
 
   /// The open tasks due on [day], as the task list reads them: what the
@@ -4368,6 +4387,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             statusActions: _statusActionsFor(pane),
             header: _journalHeader,
             onEditEpubLook: () => _editEpubLook(controller),
+            epubFullScreen: _epubFullScreen,
           ),
         ),
       ),
@@ -4375,6 +4395,24 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     return _workspace.value.panes[pane].activeTab == null
         ? listener
         : TourTarget(id: TourTargets.note, child: listener);
+  }
+
+  /// Which book is read in full screen (#621): its pane, or null.
+  final ValueNotifier<Object?> _epubFullScreen = ValueNotifier<Object?>(null);
+
+  /// Takes the screen for the book read in full screen, or gives it back:
+  /// the window on the desktops, the system bars on Android.
+  void _onEpubFullScreen() {
+    final on = _epubFullScreen.value != null;
+    if (Platform.isAndroid) {
+      unawaited(
+        SystemChrome.setEnabledSystemUIMode(
+          on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
+        ),
+      );
+    } else {
+      unawaited(widget.window.setFullScreen(on: on));
+    }
   }
 
   /// Opens the sheet that sets how the books look (#280).

@@ -2880,7 +2880,7 @@ final class DanishStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Fuld skærm';
+  String get fullScreen => 'Fuld skærm';
   @override
   String get commandInsertDiagram => 'Indsæt diagram (Mermaid)';
 

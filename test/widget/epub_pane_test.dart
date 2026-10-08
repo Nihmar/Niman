@@ -46,8 +46,10 @@ void main() {
     int reloadToken = 0,
     void Function(Annotation annotation)? onAnnotate,
     AnnotationMarkSource? marks,
+    ValueNotifier<Object?>? fullScreen,
   }) => MaterialApp(
     home: Scaffold(
+      appBar: AppBar(title: const Text('chrome')),
       body: EpubPane(
         path: path,
         cacheDir: () async => p.join(dir.path, 'cache'),
@@ -57,6 +59,7 @@ void main() {
         reloadToken: reloadToken,
         onAnnotate: onAnnotate,
         marks: marks,
+        fullScreen: fullScreen,
       ),
     ),
   );
@@ -69,6 +72,7 @@ void main() {
     String? anchor,
     void Function(Annotation annotation)? onAnnotate,
     AnnotationMarkSource? marks,
+    ValueNotifier<Object?>? fullScreen,
   }) async {
     // Real time: the book is read on an isolate, which fake time never
     // lets finish.
@@ -81,6 +85,7 @@ void main() {
           anchor: anchor,
           onAnnotate: onAnnotate,
           marks: marks,
+          fullScreen: fullScreen,
         ),
       );
       final state = tester.state<EpubPaneState>(find.byType(EpubPane));
@@ -129,6 +134,80 @@ void main() {
     expect(find.text('It begins.'), findsOneWidget);
     expect(find.text('novel.epub'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
+  });
+
+  group('full screen (#621)', () {
+    late ValueNotifier<Object?> fullScreen;
+    setUp(() => fullScreen = ValueNotifier<Object?>(null));
+    tearDown(() => fullScreen.dispose());
+
+    Rect book(WidgetTester tester) =>
+        tester.getRect(find.byType(MarkdownReadView));
+
+    testWidgets('the book covers the window, the same book, and Esc leaves', (
+      tester,
+    ) async {
+      await pump(tester, twoChapters(), fullScreen: fullScreen);
+      final view = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(book(tester).top, greaterThan(0), reason: 'under the app bar');
+      await tester.tap(find.byKey(const Key('epub-full-screen-button')));
+      await tester.pumpAndSettle();
+      final state = tester.state<EpubPaneState>(find.byType(EpubPane));
+      expect(fullScreen.value, same(state), reason: 'the shell is told');
+      expect(state.fullScreen, isTrue);
+      expect(book(tester).top, 0, reason: 'over the app bar');
+      expect(
+        tester.state<MarkdownReadViewState>(find.byType(MarkdownReadView)),
+        same(view),
+        reason: 'moved, not read again: it keeps its place',
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(fullScreen.value, isNull);
+      expect(book(tester).top, greaterThan(0));
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('its sheets open over the book, not under it', (tester) async {
+      await pump(tester, twoChapters(), fullScreen: fullScreen);
+      await tester.tap(find.byKey(const Key('epub-full-screen-button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('epub-contents-button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('The end'));
+      await tester.pumpAndSettle();
+      expect(find.text('The end.'), findsOneWidget);
+      expect(fullScreen.value, isNotNull, reason: 'still in full screen');
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets("the shell's Back leaves, and a book closed takes it along", (
+      tester,
+    ) async {
+      await pump(tester, twoChapters(), fullScreen: fullScreen);
+      await tester.tap(find.byKey(const Key('epub-full-screen-button')));
+      await tester.pumpAndSettle();
+      fullScreen.value = null;
+      await tester.pumpAndSettle();
+      expect(book(tester).top, greaterThan(0));
+      await tester.tap(find.byKey(const Key('epub-full-screen-button')));
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox());
+      expect(fullScreen.value, isNull);
+    });
+
+    testWidgets('without the shell, the button is there, disabled', (
+      tester,
+    ) async {
+      await pump(tester, twoChapters());
+      final button = tester.widget<IconButton>(
+        find.byKey(const Key('epub-full-screen-button')),
+      );
+      expect(button.onPressed, isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
   });
 
   testWidgets('the contents sheet jumps to the entry picked', (tester) async {

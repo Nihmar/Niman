@@ -2923,7 +2923,7 @@ final class SerbianStrings extends Strings {
   String get diagramTitle => 'Дијаграм';
 
   @override
-  String get diagramFullScreen => 'Цео екран';
+  String get fullScreen => 'Цео екран';
   @override
   String get commandInsertDiagram => 'Убаци дијаграм (Mermaid)';
 

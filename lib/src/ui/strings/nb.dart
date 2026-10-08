@@ -2879,7 +2879,7 @@ final class NorwegianStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Fullskjerm';
+  String get fullScreen => 'Fullskjerm';
   @override
   String get commandInsertDiagram => 'Sett inn diagram (Mermaid)';
 

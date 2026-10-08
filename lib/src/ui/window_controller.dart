@@ -71,6 +71,10 @@ abstract interface class WindowController {
   /// mode (#69) must know whether the maximizing was its own to undo.
   Future<bool> isMaximized();
 
+  /// Puts the window in full screen, or takes it out: a book read over
+  /// the whole screen (#621).
+  Future<void> setFullScreen({required bool on});
+
   /// Releases the platform side.
   Future<void> dispose();
 }
@@ -167,6 +171,9 @@ final class WindowManagerController implements WindowController {
 
   @override
   Future<bool> isMaximized() => _manager.isMaximized();
+
+  @override
+  Future<void> setFullScreen({required bool on}) => _manager.setFullScreen(on);
 
   @override
   Future<void> setPreventClose({required bool prevent}) {
@@ -279,6 +286,9 @@ final class NoopWindowController implements WindowController {
 
   @override
   Future<bool> isMaximized() async => false;
+
+  @override
+  Future<void> setFullScreen({required bool on}) async {}
 
   @override
   Future<void> dispose() async {

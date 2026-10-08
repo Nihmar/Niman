@@ -2938,7 +2938,7 @@ final class SpanishStrings extends Strings {
   String get diagramTitle => 'Diagrama';
 
   @override
-  String get diagramFullScreen => 'Pantalla completa';
+  String get fullScreen => 'Pantalla completa';
   @override
   String get commandInsertDiagram => 'Insertar diagrama (Mermaid)';
 

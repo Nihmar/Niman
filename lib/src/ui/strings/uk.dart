@@ -2939,7 +2939,7 @@ final class UkrainianStrings extends Strings {
   String get diagramTitle => 'Діаграма';
 
   @override
-  String get diagramFullScreen => 'Повний екран';
+  String get fullScreen => 'Повний екран';
   @override
   String get commandInsertDiagram => 'Вставити діаграму (Mermaid)';
 

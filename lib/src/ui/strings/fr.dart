@@ -2982,7 +2982,7 @@ final class FrenchStrings extends Strings {
   String get diagramTitle => 'Diagramme';
 
   @override
-  String get diagramFullScreen => 'Plein écran';
+  String get fullScreen => 'Plein écran';
   @override
   String get commandInsertDiagram => 'Insérer un diagramme (Mermaid)';
 

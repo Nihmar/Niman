@@ -534,6 +534,58 @@ void main() {
     );
   });
 
+  testWidgets('down from a wrapped line moves at a text size off 100 %', (
+    tester,
+  ) async {
+    // At 125 % the rows' edges are fractions: the caret at the soft wrap
+    // was drawn on the row before, and Down landed there again (#620).
+    tester.view.physicalSize = const Size(500, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final long = '- ${List.filled(30, 'parola').join(' ')}';
+    final buffer = SourceBuffer.fromText('$long\nseconda\n');
+    final carets = <SelectionModel>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: const TextScaler.linear(1.25)),
+              child: MarkdownSourceView(
+                buffer: buffer,
+                theme: _theme,
+                showLineNumbers: false,
+                onSelection: carets.add,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    // The caret's rectangle is measured after a frame: the pumps between
+    // placing and moving are the point, so no cascade.
+    // ignore: cascade_invocations
+    state.placeCaret(0);
+    await tester.pump();
+    await tester.pump();
+    final before = state.caretRect!.top;
+    state.moveCaretVertically(1);
+    await tester.pump();
+    await tester.pump();
+    expect(carets.last.extent, greaterThan(0));
+    expect(state.caretRect!.top, greaterThan(before), reason: 'a row lower');
+    final second = carets.last.extent;
+    state.moveCaretVertically(1);
+    await tester.pump();
+    await tester.pump();
+    expect(carets.last.extent, greaterThan(second), reason: 'and on again');
+  });
+
   testWidgets('down at the last row of a line crosses into the next', (
     tester,
   ) async {

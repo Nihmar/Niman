@@ -2930,7 +2930,7 @@ final class DutchStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Volledig scherm';
+  String get fullScreen => 'Volledig scherm';
   @override
   String get commandInsertDiagram => 'Diagram invoegen (Mermaid)';
 

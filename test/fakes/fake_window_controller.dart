@@ -82,6 +82,12 @@ final class FakeWindowController implements WindowController {
   @override
   Future<bool> isMaximized() async => maximized.value;
 
+  /// Whether the window was last put in full screen.
+  bool fullScreen = false;
+
+  @override
+  Future<void> setFullScreen({required bool on}) async => fullScreen = on;
+
   @override
   Future<void> dispose() async {}
 }
