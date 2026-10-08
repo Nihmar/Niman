@@ -69,6 +69,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.createMissingNote,
     this.header,
     this.onEditEpubLook,
+    this.onEpubTextScale,
     this.epubFullScreen,
     super.key,
   });
@@ -79,6 +80,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Opens the sheet that sets how the books look (#280).
   final VoidCallback? onEditEpubLook;
+
+  /// Keeps the books' text size a pinch or a zoom key reached (#538).
+  final ValueChanged<double>? onEpubTextScale;
 
   /// Which book is read in full screen (#621).
   final ValueNotifier<Object?>? epubFullScreen;
@@ -265,6 +269,7 @@ final class ShellDetailPane extends StatelessWidget {
           path: p.join(root, tab.path),
           column: noteColumn,
           onEditEpubLook: onEditEpubLook,
+          onEpubTextScale: onEpubTextScale,
           positions: ReadingPositions(root),
           anchor: tab.anchor,
           reloadToken: linksFollowed,

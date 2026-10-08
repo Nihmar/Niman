@@ -25,6 +25,7 @@ import 'package:niman/src/ui/epub_contents_sheet.dart';
 import 'package:niman/src/ui/epub_links.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/epub_places.dart';
+import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/epub_theme.dart';
 import 'package:niman/src/ui/file_marks.dart';
 import 'package:niman/src/ui/highlight_menu.dart';
@@ -284,6 +285,19 @@ final class EpubPaneState extends State<EpubPane> {
       ),
   ];
 
+  /// The zoom of the books' text, while the pane has a size to keep.
+  EpubTextZoom? get _zoom => switch (widget.onTextScale) {
+    final keep? => EpubTextZoom(keep),
+    null => null,
+  };
+
+  /// [child] with the zoom keys bound over it: the pane in its place, and
+  /// the focus the full screen takes, which the pane sits under.
+  Widget _zoomKeys(Widget child) => switch (_zoom) {
+    final zoom? => CallbackShortcuts(bindings: zoom.bindings, child: child),
+    null => child,
+  };
+
   @override
   Widget build(BuildContext context) {
     final pane = KeyedSubtree(
@@ -302,16 +316,18 @@ final class EpubPaneState extends State<EpubPane> {
       overlayLocation: OverlayChildLocation.rootOverlay,
       overlayChildBuilder: (context) => Positioned.fill(
         // Esc leaves, as it leaves Zen.
-        child: Actions(
-          actions: <Type, Action<Intent>>{
-            DismissIntent: CallbackAction<DismissIntent>(
-              onInvoke: (_) => _toggleFullScreen(),
-            ),
-          },
-          child: Focus(focusNode: _fullScreenFocus, child: pane),
+        child: _zoomKeys(
+          Actions(
+            actions: <Type, Action<Intent>>{
+              DismissIntent: CallbackAction<DismissIntent>(
+                onInvoke: (_) => _toggleFullScreen(),
+              ),
+            },
+            child: Focus(focusNode: _fullScreenFocus, child: pane),
+          ),
         ),
       ),
-      child: _fullScreen ? const SizedBox.expand() : pane,
+      child: _fullScreen ? const SizedBox.expand() : _zoomKeys(pane),
     );
   }
 
@@ -367,8 +383,17 @@ final class EpubPaneState extends State<EpubPane> {
   }
 
   /// The book, at the books' text size rather than the interface one, as
-  /// a note's read view is at the note's.
+  /// a note's read view is at the note's, zoomed by a pinch as a note is.
   Widget _book(
+    BuildContext context,
+    EpubDocument document,
+    SourceBuffer buffer,
+  ) {
+    final book = _read(context, document, buffer);
+    return _zoom?.pinch(book) ?? book;
+  }
+
+  Widget _read(
     BuildContext context,
     EpubDocument document,
     SourceBuffer buffer,

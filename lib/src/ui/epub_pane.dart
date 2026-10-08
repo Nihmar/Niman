@@ -9,7 +9,8 @@
 /// ([ReadingPositions]), or where the link it was opened by points
 /// ([BookLocation.fromFragment]). Its paragraphs are annotated in a
 /// companion note (#284), and marked where they were (#285). It can be
-/// read over the whole screen (#621).
+/// read over the whole screen (#621). Its text zooms as a note's does, by
+/// a pinch or the zoom keys, on the books' size (`EpubTextZoom`).
 library;
 
 import 'dart:async';
@@ -43,6 +44,7 @@ final class EpubPane extends StatefulWidget {
     this.column = NoteColumn.off,
     this.cacheDir = _epubCacheDir,
     this.onEditLook,
+    this.onTextScale,
     this.positions,
     this.anchor,
     this.reloadToken = 0,
@@ -69,6 +71,10 @@ final class EpubPane extends StatefulWidget {
   /// Opens the sheet that sets how the books look; null leaves its button
   /// on the row, disabled.
   final VoidCallback? onEditLook;
+
+  /// Keeps the books' text size a pinch or a zoom key reached (#538), the
+  /// size the look sheet sets; null leaves the text unzoomed by either.
+  final ValueChanged<double>? onTextScale;
 
   /// Where the library keeps its reading positions; null keeps none, and
   /// the book opens at its start.

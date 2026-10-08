@@ -81,6 +81,7 @@ import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
+import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/island.dart';
@@ -1179,6 +1180,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           path: p.join(controller.root ?? '', selectedPath),
           column: _editorSettings.noteColumn,
           onEditEpubLook: () => _editEpubLook(controller),
+          onEpubTextScale: (scale) =>
+              unawaited(keepEpubTextScale(controller, scale)),
           positions: switch (controller.root) {
             final root? => ReadingPositions(root),
             null => null,
@@ -1253,8 +1256,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// [note] with its text zoomed by a pinch (#538): each step shown at
-  /// once, and the size kept for the library when the fingers lift.
-  Widget _pinchToZoom(Widget note) => TextZoomPinch(
+  /// once, and the size kept for the library when the fingers lift. Off
+  /// while [enabled] is false: over a book, which zooms its own text.
+  Widget _pinchToZoom(Widget note, {bool enabled = true}) => TextZoomPinch(
+    enabled: enabled,
     scale: () => AppTextScales.note,
     onZoom: (scale, {required done}) {
       if (done) {
@@ -3435,9 +3440,18 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The note's text [steps] zoom steps larger (smaller when negative), or
   /// back to its shipped size at zero (#538): the library's note text size,
   /// as the settings' slider sets it, in the editor and the preview alike.
-  Future<void> _zoomNote(int steps) => widget.controller.setNoteTextScale(
-    AppTextScales.zoomed(AppTextScales.note, steps),
-  );
+  /// A book on screen zooms its own text instead, the books' text size.
+  Future<void> _zoomNote(int steps) async {
+    final controller = widget.controller;
+    if (isBook(_shownNote ?? '')) {
+      EpubTextZoom((scale) => unawaited(keepEpubTextScale(controller, scale)))
+          .zoom(steps);
+      return;
+    }
+    await controller.setNoteTextScale(
+      AppTextScales.zoomed(AppTextScales.note, steps),
+    );
+  }
 
   /// Pastes the clipboard's HTML into [note] as Markdown (#531).
   void _pasteAsMarkdown(NoteViewHandle note) => unawaited(
@@ -4460,6 +4474,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         isSplit: _workspace.value.isSplit,
         onDrop: (drag, kind) => _dropTabOnPane(drag, pane, kind),
         child: _pinchToZoom(
+          enabled: !isBook(_workspace.value.panes[pane].activeTab?.path ?? ''),
           ShellDetailPane(
             root: controller.root,
             tabs: _deck(pane),
@@ -4513,6 +4528,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             statusActions: _statusActionsFor(pane),
             header: _journalHeader,
             onEditEpubLook: () => _editEpubLook(controller),
+            onEpubTextScale: (scale) =>
+                unawaited(keepEpubTextScale(controller, scale)),
             epubFullScreen: _epubFullScreen,
           ),
         ),

@@ -23,8 +23,13 @@ final class TextZoomPinch extends StatefulWidget {
     required this.scale,
     required this.onZoom,
     required this.child,
+    this.enabled = true,
     super.key,
   });
+
+  /// Whether a pinch zooms: off over a pane whose text zooms by a pinch
+  /// of its own, a book in the note pane, so one pinch is one zoom.
+  final bool enabled;
 
   /// The text size now.
   final double Function() scale;
@@ -96,7 +101,7 @@ final class _TextZoomPinchState extends State<TextZoomPinch> {
   /// A step the size reached, told once.
   void _show(double scale) {
     final snapped = TextZoomPinch.snap(scale);
-    if (snapped == _shown) return;
+    if (!widget.enabled || snapped == _shown) return;
     _shown = snapped;
     widget.onZoom(snapped, done: false);
   }
