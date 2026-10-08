@@ -20,6 +20,7 @@ class MainActivity : FlutterActivity() {
     private val shortcuts = ShortcutsBridge(this)
     private val widgets = WidgetBridge(this)
     private val pdf = PdfBridge(this)
+    private val pageReader = PageReaderBridge(this)
     private val shares = ShareBridge(this)
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -27,6 +28,7 @@ class MainActivity : FlutterActivity() {
         shortcuts.attach(flutterEngine.dartExecutor.binaryMessenger)
         widgets.attach(flutterEngine.dartExecutor.binaryMessenger)
         pdf.attach(flutterEngine.dartExecutor.binaryMessenger)
+        pageReader.attach(flutterEngine.dartExecutor.binaryMessenger)
         shares.attach(flutterEngine.dartExecutor.binaryMessenger)
         // Cold start: this runs while Dart is still booting, so the
         // launching intent's action waits until Dart asks for it.
@@ -79,6 +81,7 @@ class MainActivity : FlutterActivity() {
         shortcuts.detach()
         widgets.detach()
         pdf.detach()
+        pageReader.detach()
         shares.detach()
         super.cleanUpFlutterEngine(flutterEngine)
     }
