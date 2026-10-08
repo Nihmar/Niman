@@ -128,6 +128,29 @@ void main() {
     expect(find.text('1 / 1'), findsOneWidget);
   });
 
+  testWidgets("a renamed note shows the new path's slide, swipe and count", (
+    tester,
+  ) async {
+    slidePlaceOf('old.md').value = 1;
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: _Host('old.md')),
+      const Size(390, 844),
+    );
+    expect(find.text('say beta'), findsOneWidget);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SlidesNoteView(text: _deck, host: _Host('new.md')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('1 / 2'), findsOneWidget);
+    expect(_text('Alpha'), findsWidgets);
+    expect(_text('Beta'), findsNothing);
+  });
+
   testWidgets('a pane shorter than the notes lays out, the slide at nothing', (
     tester,
   ) async {

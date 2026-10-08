@@ -58,6 +58,9 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
       _place.removeListener(_placeMoved);
       _path = widget.host.notePath;
       _place = slidePlaceOf(_path)..addListener(_placeMoved);
+      // The swipe and the row still show the old path's slide; they move
+      // once this frame is built, not in the middle of it.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _placeMoved());
     }
   }
 
