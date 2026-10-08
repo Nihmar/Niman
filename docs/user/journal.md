@@ -53,7 +53,9 @@ and the date picker follow the same day.
 
 - **Desktop** (a window wide enough for the side panel): the *Journal*
   pane of the side panel, beside the note. Clicking a day opens its
-  entry (or offers to make it).
+  entry (or offers to make it). Right-clicking one of the latest
+  entries opens the same menu as its row in the file tree: open it in
+  a new tab or beside the note, rename it, move it, and the rest.
 - **Phone**: the calendar icon in the Files bar opens the Journal
   screen. Tap a day to pick it; its card opens the entry or makes it.
 - Everywhere: the day in the strip over an entry, or *Journal: Show the
