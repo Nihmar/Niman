@@ -3296,4 +3296,14 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopjo';
+
+  @override
+  String get pasteAsMarkdown => 'Ngjit si Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'U ngjit si Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'U ngjit si Markdown · me lidhjen te $host';
 }

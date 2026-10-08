@@ -131,6 +131,17 @@ counted outside the port, so the port stays what the oracle checks.
   source-URL targets; Android reads `ClipData.getHtmlText()`, which has no
   source URL. Undo puts the plain text in its place.
 
+  Settled while building it (PR 4): CF_HTML is converted from `StartHTML`
+  to `EndHTML` — the context, so list items keep their list — and the
+  fragment alone only when there is none. The page is linked by a last
+  paragraph `— [label](<url>)`, as a captured quote is, the label being a
+  `<title>` the copy carries, else the host. Pictures stay remote links:
+  a paste downloads nothing, and one with no web address (`data:`,
+  `blob:`, a relative address with no page) is left out. On Linux the page
+  is Chromium's `chromium/x-source-url` or Firefox's
+  `text/x-moz-url-priv`, and the bytes are decoded in Dart, UTF-16 when
+  Firefox wrote them so.
+
 ## Delivery
 
 One PR at a time, each branched from main once the one before is merged:

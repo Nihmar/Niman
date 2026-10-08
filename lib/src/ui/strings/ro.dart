@@ -3325,4 +3325,14 @@ final class RomanianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Copiază';
+
+  @override
+  String get pasteAsMarkdown => 'Lipește ca Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Lipit ca Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Lipit ca Markdown · cu linkul către $host';
 }

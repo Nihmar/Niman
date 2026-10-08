@@ -67,6 +67,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.insertDiagram ||
   AppCommand.insertMindMap ||
   AppCommand.convertListToMindMap ||
+  AppCommand.pasteAsMarkdown ||
   AppCommand.exportNote ||
   AppCommand.noteHistory => const {CommandNeed.textNote},
   AppCommand.closeTab ||

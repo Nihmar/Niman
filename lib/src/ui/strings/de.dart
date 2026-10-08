@@ -3347,4 +3347,14 @@ final class GermanStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopieren';
+
+  @override
+  String get pasteAsMarkdown => 'Als Markdown einfügen';
+
+  @override
+  String get pastedAsMarkdown => 'Als Markdown eingefügt';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Als Markdown eingefügt · mit dem Link zu $host';
 }

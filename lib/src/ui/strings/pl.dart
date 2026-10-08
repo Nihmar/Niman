@@ -3325,4 +3325,14 @@ final class PolishStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopiuj';
+
+  @override
+  String get pasteAsMarkdown => 'Wklej jako Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Wklejono jako Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Wklejono jako Markdown · z linkiem do $host';
 }

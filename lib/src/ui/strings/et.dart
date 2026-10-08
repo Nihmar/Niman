@@ -3223,4 +3223,14 @@ final class EstonianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopeeri';
+
+  @override
+  String get pasteAsMarkdown => 'Kleebi Markdownina';
+
+  @override
+  String get pastedAsMarkdown => 'Kleebitud Markdownina';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Kleebitud Markdownina · lingiga lehele $host';
 }

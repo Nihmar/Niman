@@ -1780,4 +1780,14 @@ abstract base class Strings {
 
   /// A highlight's action: copies its passage.
   String get highlightCopy;
+
+  /// Paste as Markdown (#531): the clipboard's HTML pasted as Markdown —
+  /// the command, and the editor menu's entry.
+  String get pasteAsMarkdown;
+
+  /// Said once the clipboard's HTML is pasted as Markdown, with Undo.
+  String get pastedAsMarkdown;
+
+  /// The same, when the paste links to the page at [host].
+  String pastedAsMarkdownWithLink(String host);
 }

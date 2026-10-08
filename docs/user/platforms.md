@@ -42,6 +42,11 @@ everywhere; PDF goes through each platform's own printer (below).
   foreground service and its notification; a page with too little text is
   run in a hidden WebView of the app's own (see
   [web capture](web-capture.md)).
+- **Paste as Markdown:** in the editor's menu. Android's clipboard holds
+  the HTML a browser copies but not the page it came from, so the paste
+  is not linked to its page, and links written relative to it stay as
+  the page wrote them (see
+  [web capture](web-capture.md#paste-as-markdown)).
 
 ## Linux
 
@@ -110,6 +115,10 @@ everywhere; PDF goes through each platform's own printer (below).
   same Chromium-family browser, with a throwaway profile. Without one, such
   a page is saved as its title, description and picture, under a notice
   to open the link (see [web capture](web-capture.md)).
+- **Paste as Markdown:** the clipboard's HTML is read through GTK, on X11
+  and Wayland alike; the page it came from is the one Chromium-family
+  browsers and Firefox name beside it (see
+  [web capture](web-capture.md#paste-as-markdown)).
 
 ## Windows
 
@@ -162,6 +171,9 @@ everywhere; PDF goes through each platform's own printer (below).
   [text recognition](text-recognition.md)).
 - **Web capture:** a page with too little text is run headless in Edge,
   with a throwaway profile (see [web capture](web-capture.md)).
+- **Paste as Markdown:** the clipboard's `HTML Format`, which the
+  browsers write with the page it came from (see
+  [web capture](web-capture.md#paste-as-markdown)).
 
 ## Density
 

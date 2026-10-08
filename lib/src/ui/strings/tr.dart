@@ -3236,4 +3236,14 @@ final class TurkishStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopyala';
+
+  @override
+  String get pasteAsMarkdown => 'Markdown olarak yapıştır';
+
+  @override
+  String get pastedAsMarkdown => 'Markdown olarak yapıştırıldı';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Markdown olarak yapıştırıldı · $host bağlantısıyla';
 }

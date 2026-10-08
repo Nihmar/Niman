@@ -162,6 +162,7 @@ final class NoteView extends StatefulWidget {
     this.onLoaded,
     this.kindMode = true,
     this.onNoteKindChanged,
+    this.onPasteAsMarkdown,
     this.toolbarTop = false,
     this.zen = false,
     this.typewriter = false,
@@ -344,6 +345,10 @@ final class NoteView extends StatefulWidget {
   /// plain note); the shell shows the kind toggle for known kinds.
   final void Function(String? type)? onNoteKindChanged;
 
+  /// Paste as Markdown from the editor's menu (#531), run by the shell on
+  /// this note; null leaves the entry out.
+  final ValueChanged<NoteViewHandle>? onPasteAsMarkdown;
+
   /// Whether the formatting toolbar sits above the editor (desktop)
   /// instead of below it (phone, where it extends the keyboard).
   final bool toolbarTop;
@@ -478,6 +483,36 @@ final class _NoteViewState extends State<NoteView>
       // A block keeps a blank line from the lines either side.
       context: 1,
     );
+  }
+
+  @override
+  PastedText? pasteText(String text) {
+    final surface = _surface;
+    if (!canInsert || surface == null) return null;
+    final buffer = surface.buffer;
+    final at = surface.selection.clampTo(buffer.length);
+    final before = buffer.length;
+    surface.replaceSelection(text);
+    // What the note stored, which a Windows clipboard's `\r\n` pasted into
+    // an LF note is shorter than.
+    final stored = buffer.length - before + (at.end - at.start);
+    _focus.requestFocus();
+    return (
+      start: at.start,
+      text: buffer.substring(at.start, at.start + stored),
+    );
+  }
+
+  @override
+  void replacePasted(PastedText pasted, String text) {
+    final surface = _surface;
+    if (surface == null) return;
+    final buffer = surface.buffer;
+    final end = pasted.start + pasted.text.length;
+    if (end > buffer.length) return;
+    if (buffer.substring(pasted.start, end) != pasted.text) return;
+    surface.replaceRange(pasted.start, end, text);
+    _focus.requestFocus();
   }
 
   @override
@@ -2653,6 +2688,10 @@ final class _NoteViewState extends State<NoteView>
       run: _runCommand,
       onImage: _insertImage,
       onFootnote: _insertFootnote,
+      onPasteMarkdown: switch (widget.onPasteAsMarkdown) {
+        final paste? => () => paste(this),
+        null => null,
+      },
     );
   }
 

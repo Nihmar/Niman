@@ -3283,4 +3283,14 @@ final class SlovakStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopírovať';
+
+  @override
+  String get pasteAsMarkdown => 'Vložiť ako Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Vložené ako Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Vložené ako Markdown · s odkazom na $host';
 }

@@ -3295,4 +3295,14 @@ final class GalicianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Copiar';
+
+  @override
+  String get pasteAsMarkdown => 'Pegar como Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Pegado como Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Pegado como Markdown · coa ligazón a $host';
 }

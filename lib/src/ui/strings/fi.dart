@@ -3291,4 +3291,14 @@ final class FinnishStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopioi';
+
+  @override
+  String get pasteAsMarkdown => 'Liitä Markdownina';
+
+  @override
+  String get pastedAsMarkdown => 'Liitetty Markdownina';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Liitetty Markdownina · linkki sivulle $host';
 }

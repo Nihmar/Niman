@@ -3267,4 +3267,14 @@ final class LatvianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopēt';
+
+  @override
+  String get pasteAsMarkdown => 'Ielīmēt kā Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Ielīmēts kā Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Ielīmēts kā Markdown · ar saiti uz $host';
 }

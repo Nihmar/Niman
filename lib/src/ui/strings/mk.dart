@@ -3300,4 +3300,14 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Копирај';
+
+  @override
+  String get pasteAsMarkdown => 'Залепи како Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Залепено како Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Залепено како Markdown · со врска до $host';
 }

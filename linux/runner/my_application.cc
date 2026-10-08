@@ -5,6 +5,7 @@
 #include <gdk/gdkx.h>
 #endif
 
+#include "clipboard_html.h"
 #include "flutter/generated_plugin_registrant.h"
 
 struct _MyApplication {
@@ -14,6 +15,8 @@ struct _MyApplication {
   // or imports what it names.
   FlMethodChannel* drop_channel;
   gboolean drag_over;
+  // The clipboard's HTML for Paste as Markdown (#531).
+  FlMethodChannel* clipboard_channel;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
@@ -203,6 +206,11 @@ static void my_application_activate(GApplication* application) {
   g_signal_connect(view, "drag-data-received", G_CALLBACK(drop_data_received),
                    self);
 
+  // What a browser copied, as HTML with its page, for Paste as Markdown
+  // (#531): read through GTK's clipboard, X11 and Wayland alike.
+  self->clipboard_channel = clipboard_html_channel_new(
+      fl_engine_get_binary_messenger(fl_view_get_engine(view)));
+
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
 
@@ -252,6 +260,10 @@ static void my_application_dispose(GObject* object) {
   if (self->drop_channel != nullptr) {
     g_object_unref(self->drop_channel);
     self->drop_channel = nullptr;
+  }
+  if (self->clipboard_channel != nullptr) {
+    g_object_unref(self->clipboard_channel);
+    self->clipboard_channel = nullptr;
   }
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }

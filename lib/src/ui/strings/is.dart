@@ -3267,4 +3267,14 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get highlightCopy => 'Afrita';
+
+  @override
+  String get pasteAsMarkdown => 'Líma sem Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Límt sem Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Límt sem Markdown · með tengli á $host';
 }

@@ -3295,4 +3295,14 @@ final class ItalianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Copia';
+
+  @override
+  String get pasteAsMarkdown => 'Incolla come Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Incollato come Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Incollato come Markdown · con il link a $host';
 }

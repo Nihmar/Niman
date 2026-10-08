@@ -3258,4 +3258,14 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopier';
+
+  @override
+  String get pasteAsMarkdown => 'Lim inn som Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Limt inn som Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Limt inn som Markdown · med lenke til $host';
 }

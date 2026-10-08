@@ -2,8 +2,10 @@
 
 Niman can save a web page — or a passage of one — as a note: the article
 in clean Markdown, without the menu, the banners and the footer around
-it, and its pictures in the library's attachments folder. The work is
-tracked in [#531](https://github.com/Nihmar/Niman/issues/531).
+it, and its pictures in the library's attachments folder. A passage
+copied in the browser can also be [pasted as Markdown](#paste-as-markdown)
+into the note being written. The work is tracked in
+[#531](https://github.com/Nihmar/Niman/issues/531).
 
 ## On the desktop
 
@@ -95,6 +97,48 @@ A quote is written as a passage quoted from a book or a PDF:
 > — [Offline-first, ten years later](<https://app.example.com/blog/offline-first>)
 ```
 
+## Paste as Markdown
+
+A passage copied in the browser can go into the note as Markdown rather
+than as plain text: its headings, emphasis, lists, quotes, tables, links
+and pictures kept, the page's styling left behind.
+
+- **Desktop**: `Ctrl/⌘+Shift+V` in the editor, or **Editor: Paste as
+  Markdown** in the command palette. `Ctrl/⌘+V` still pastes the plain
+  text.
+- **Phone**: **Paste as Markdown** in the editor's menu, under Paste.
+
+It goes where the cursor is, in place of the selection, as a paste does.
+When the browser said which page it was copied from, the paste ends in a
+line linking to it — the page's title when the copy carries one, its
+address's host otherwise — and links and pictures written relative to the
+page are made absolute:
+
+```markdown
+**Conflicts** should read as a *choice*, not an error.
+
+- Show both versions side by side
+
+- Keep the time of each change visible
+
+— [app.example.com](<https://app.example.com/blog/offline-first>)
+```
+
+A message says **Pasted as Markdown · with the link to app.example.com**,
+with **Undo**: it puts the clipboard's plain text in the paste's place,
+as `Ctrl/⌘+V` would have — as long as that part of the note has not been
+changed since.
+
+- **Pictures** stay on the web: the note points at them, nothing is
+  downloaded. One that is not on the web — drawn into the page itself, or
+  a relative address with no page to resolve it — is left out.
+- **No HTML on the clipboard** — text copied from a text editor, a
+  terminal — and the plain text is pasted, with nothing to undo.
+- **The page it came from** is known on Windows and Linux, where the
+  browsers put it on the clipboard beside the HTML (Chromium-family
+  browsers and Firefox both do). Android's clipboard does not carry it,
+  so on a phone the paste is not linked to its page.
+
 ## When the page has too little text
 
 Some pages build their text with scripts, and the download alone holds a
@@ -121,5 +165,3 @@ open the link.
 - Pages in UTF-8, UTF-16, Latin-1 or Windows-1252 are read as
   downloaded; any other charset is read through the browser, which
   decodes it.
-- **Paste as Markdown** — a selection copied from the browser pasted as
-  Markdown — is the next step of #531 and not here yet.

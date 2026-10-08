@@ -1723,4 +1723,8 @@ final class AppStrings {
   static String get highlightBlue => _s.highlightBlue;
   static String get highlightPink => _s.highlightPink;
   static String get highlightCopy => _s.highlightCopy;
+  static String get pasteAsMarkdown => _s.pasteAsMarkdown;
+  static String get pastedAsMarkdown => _s.pastedAsMarkdown;
+  static String pastedAsMarkdownWithLink(String host) =>
+      _s.pastedAsMarkdownWithLink(host);
 }

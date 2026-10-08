@@ -3283,4 +3283,14 @@ final class SwedishStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopiera';
+
+  @override
+  String get pasteAsMarkdown => 'Klistra in som Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Inklistrat som Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Inklistrat som Markdown · med länk till $host';
 }

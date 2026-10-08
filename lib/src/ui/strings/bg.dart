@@ -3287,4 +3287,14 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Копирай';
+
+  @override
+  String get pasteAsMarkdown => 'Поставяне като Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Поставено като Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Поставено като Markdown · с връзка към $host';
 }

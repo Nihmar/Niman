@@ -3281,4 +3281,14 @@ final class HungarianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Másolás';
+
+  @override
+  String get pasteAsMarkdown => 'Beillesztés Markdownként';
+
+  @override
+  String get pastedAsMarkdown => 'Beillesztve Markdownként';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Beillesztve Markdownként · hivatkozással ide: $host';
 }

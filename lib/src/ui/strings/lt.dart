@@ -3314,4 +3314,14 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopijuoti';
+
+  @override
+  String get pasteAsMarkdown => 'Įklijuoti kaip Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Įklijuota kaip Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Įklijuota kaip Markdown · su nuoroda į $host';
 }

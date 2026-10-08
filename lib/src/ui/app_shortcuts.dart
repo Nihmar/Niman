@@ -95,6 +95,9 @@ enum AppCommand {
   /// Turn the list at the caret into a mind map (#530).
   convertListToMindMap,
 
+  /// Paste the clipboard's HTML as Markdown at the caret (#531).
+  pasteAsMarkdown,
+
   /// Write the note on screen out as a file (#24).
   exportNote,
 
@@ -245,6 +248,12 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       AppCommand.captureWebPage,
       SingleActivator(LogicalKeyboardKey.keyW, control: true, alt: true),
     ),
+    // Paste with Shift: the editor's own Ctrl+V pastes the plain text, and
+    // binds nothing with Shift (#531).
+    AppShortcut(
+      AppCommand.pasteAsMarkdown,
+      SingleActivator(LogicalKeyboardKey.keyV, control: true, shift: true),
+    ),
     // F11, the key that means fullscreen elsewhere: the issue's
     // Ctrl+Shift+Z is redo in both editors.
     AppShortcut(AppCommand.zenMode, SingleActivator(LogicalKeyboardKey.f11)),
@@ -328,6 +337,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.insertDiagram => AppStrings.commandInsertDiagram,
   AppCommand.insertMindMap => AppStrings.commandInsertMindMap,
   AppCommand.convertListToMindMap => AppStrings.commandConvertListToMindMap,
+  AppCommand.pasteAsMarkdown => AppStrings.pasteAsMarkdown,
   AppCommand.exportNote => AppStrings.exportTitle,
   AppCommand.recognizeText => AppStrings.ocrRecognizeAction,
   AppCommand.exportLibrary => AppStrings.exportLibraryTitle,

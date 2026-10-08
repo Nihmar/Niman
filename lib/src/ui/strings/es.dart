@@ -3322,4 +3322,14 @@ final class SpanishStrings extends Strings {
 
   @override
   String get highlightCopy => 'Copiar';
+
+  @override
+  String get pasteAsMarkdown => 'Pegar como Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Pegado como Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Pegado como Markdown · con el enlace a $host';
 }

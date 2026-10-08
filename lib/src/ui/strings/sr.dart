@@ -3295,4 +3295,14 @@ final class SerbianStrings extends Strings {
 
   @override
   String get highlightCopy => 'Копирај';
+
+  @override
+  String get pasteAsMarkdown => 'Налепи као Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Налепљено као Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Налепљено као Markdown · са везом ка $host';
 }

@@ -3257,4 +3257,14 @@ final class DanishStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopiér';
+
+  @override
+  String get pasteAsMarkdown => 'Indsæt som Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Indsat som Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Indsat som Markdown · med link til $host';
 }

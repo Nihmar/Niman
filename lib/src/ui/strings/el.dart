@@ -3379,4 +3379,14 @@ final class GreekStrings extends Strings {
 
   @override
   String get highlightCopy => 'Αντιγραφή';
+
+  @override
+  String get pasteAsMarkdown => 'Επικόλληση ως Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Επικολλήθηκε ως Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Επικολλήθηκε ως Markdown · με τον σύνδεσμο προς $host';
 }

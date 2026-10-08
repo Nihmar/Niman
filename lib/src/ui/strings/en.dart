@@ -3233,4 +3233,14 @@ final class EnglishStrings extends Strings {
 
   @override
   String get highlightCopy => 'Copy';
+
+  @override
+  String get pasteAsMarkdown => 'Paste as Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Pasted as Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Pasted as Markdown · with the link to $host';
 }

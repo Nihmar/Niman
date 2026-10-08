@@ -269,7 +269,10 @@ heading keeps its `#`, bold keeps its `**`. Pasting Markdown into the
 WYSIWYG editor brings the structure back rather than the characters.
 
 Pasting a styled page from a browser still arrives as formatted text —
-the HTML is used when the clipboard carries it.
+the HTML is used when the clipboard carries it. In the source editor,
+**Paste as Markdown** (`Ctrl/⌘+Shift+V`, or the editor's menu) turns a
+browser's copy into Markdown, linked to the page it came from (see
+[web capture](web-capture.md#paste-as-markdown)).
 
 ## Markdown support
 
@@ -433,6 +436,9 @@ Obsidian's is:
 
 - the spelling's suggestions for a misspelled word, and a table's
   **Row ›**, **Column ›** and sorts on a table's cell, first;
+- **Paste as Markdown**: what was copied from a web page, as Markdown
+  linked to its page (see
+  [web capture](web-capture.md#paste-as-markdown));
 - **Add link** (`[[…]]`) and **Add external link** (`[…](https://)`);
 - **Format ›** — bold, italic, strikethrough, highlight, underline, superscript,
   subscript, code — **Paragraph ›** — headings 1 to 6, **Body** (the

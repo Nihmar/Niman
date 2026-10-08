@@ -3305,4 +3305,14 @@ final class BasqueStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopiatu';
+
+  @override
+  String get pasteAsMarkdown => 'Itsatsi Markdown gisa';
+
+  @override
+  String get pastedAsMarkdown => 'Markdown gisa itsatsita';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Markdown gisa itsatsita · $host gunerako estekarekin';
 }

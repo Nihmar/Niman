@@ -3311,4 +3311,14 @@ final class DutchStrings extends Strings {
 
   @override
   String get highlightCopy => 'Kopiëren';
+
+  @override
+  String get pasteAsMarkdown => 'Plakken als Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Geplakt als Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Geplakt als Markdown · met de link naar $host';
 }
