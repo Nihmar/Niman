@@ -43,7 +43,16 @@ final class FileMarks extends ChangeNotifier {
   int _loads = 0;
   bool _disposed = false;
 
+  /// Asks the marks again now, without waiting for the notes to rest: a
+  /// change the pane itself made — a highlight written, recoloured or
+  /// removed — is shown as soon as it is on disk.
+  Future<void> refresh() {
+    _timer?.cancel();
+    return _load();
+  }
+
   Future<void> _load() async {
+    if (_disposed) return;
     final load = ++_loads;
     try {
       final marks = await source.marksOf(path);

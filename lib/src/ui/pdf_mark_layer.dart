@@ -5,9 +5,10 @@
 /// opens the annotation, or asks which when marks share the words.
 ///
 /// A passage is where its link says, `chars=120-180` of the page's text:
-/// its rectangles come from that text, read once per marked page when the
-/// marks change. A passage whose page no longer has those characters, and
-/// a mark on a page annotated whole, are pinned instead.
+/// its rectangles come from that text, read once per marked page of the
+/// document and kept — a highlight recoloured is drawn again at once, not
+/// after its page is read anew. A passage whose page no longer has those
+/// characters, and a mark on a page annotated whole, are pinned instead.
 library;
 
 import 'dart:math' as math;
@@ -37,11 +38,19 @@ final class PdfMarkLayer {
   /// Each passage mark's rectangles, in its page's coordinates.
   final Map<AnnotationMark, List<PdfRect>> _rects = {};
 
-  /// Reads where [marks]' passages are in [document]; the pages' text is
-  /// read once each.
+  /// The text of the pages read so far, of [_document].
+  final Map<int, PdfPageText> _texts = {};
+  PdfDocument? _document;
+
+  /// Reads where [marks]' passages are in [document]; each page's text is
+  /// read once for as long as the document is the same.
   Future<void> load(PdfDocument document, List<AnnotationMark> marks) async {
+    if (!identical(document, _document)) {
+      _document = document;
+      _texts.clear();
+    }
     final rects = <AnnotationMark, List<PdfRect>>{};
-    final texts = <int, PdfPageText>{};
+    final texts = _texts;
     for (final mark in marks) {
       if (mark.place case PdfLocation(:final page, chars: final chars?)
           when page <= document.pages.length) {

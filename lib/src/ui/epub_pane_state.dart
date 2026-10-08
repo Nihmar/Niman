@@ -229,6 +229,7 @@ final class EpubPaneState extends State<EpubPane> {
     final key = widget.positions?.keyOf(widget.path);
     if (source == null || marks == null || key == null) return;
     final here = epubMarksBetween(document, marks, start, end);
+    final following = _marks;
     unawaited(
       openAnnotationMarks(
         context,
@@ -236,7 +237,7 @@ final class EpubPaneState extends State<EpubPane> {
         source,
         path: key,
         linkType: widget.linkType,
-      ),
+      ).then((_) => following?.refresh()),
     );
   }
 
@@ -263,7 +264,14 @@ final class EpubPaneState extends State<EpubPane> {
           final source = widget.marks;
           final annotation = _places.selectionAnnotation(selection);
           if (source == null || annotation == null) return;
-          unawaited(highlightPassage(context, source, annotation));
+          final following = _marks;
+          unawaited(
+            highlightPassage(
+              context,
+              source,
+              annotation,
+            ).then((_) => following?.refresh()),
+          );
         },
       ),
     if (widget.positions != null && widget.onAnnotate != null)
