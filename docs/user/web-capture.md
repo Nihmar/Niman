@@ -11,7 +11,7 @@ into the note being written. The work is tracked in
 
 Three ways in, all to the same dialog:
 
-- **Capture web page** in the command palette, or `Ctrl/⌘+Alt+W`. When
+- **Capture web page** in the command palette, or `Ctrl/⌘+Shift+W`. When
   the clipboard holds a web address, the dialog starts on it.
 - **A link pasted** where no text field takes the paste — the tree, the
   read view. A link pasted into the editor or a field stays a paste.

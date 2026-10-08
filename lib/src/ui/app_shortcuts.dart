@@ -243,10 +243,11 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       AppCommand.toggleDock,
       SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true),
     ),
-    // W for web: the capture's own key (#531).
+    // W for web: the capture's own key (#531). With Shift, not Alt: see
+    // the journal's keys above (#637).
     AppShortcut(
       AppCommand.captureWebPage,
-      SingleActivator(LogicalKeyboardKey.keyW, control: true, alt: true),
+      SingleActivator(LogicalKeyboardKey.keyW, control: true, shift: true),
     ),
     // Paste with Shift: the editor's own Ctrl+V pastes the plain text, and
     // binds nothing with Shift (#531).
