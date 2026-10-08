@@ -3112,4 +3112,122 @@ final class UkrainianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Розпізнати с. $page знову';
+
+  @override
+  String get captureWebPage => 'Зберегти вебсторінку';
+
+  @override
+  String get capturePageField => 'Сторінка';
+
+  @override
+  String get captureFromClipboard => 'Узято з буфера обміну.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Вебадреса починається з http:// або https://.';
+
+  @override
+  String get captureRead => 'Прочитати';
+
+  @override
+  String get captureDownloading => 'Завантаження…';
+
+  @override
+  String captureDownloaded(String size) => 'Завантажено · $size';
+
+  @override
+  String captureFewWords(int words) => 'Знайдено лише слів: $words';
+
+  @override
+  String get captureRunningBrowser => 'Сторінка запускається в браузері…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Браузер працює приховано, з власним профілем, який потім видаляється: '
+      'ваш браузер і його входи не зачіпаються.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Прочитано після запуску сторінки в браузері';
+
+  @override
+  String get captureNoArticle =>
+      'Статтю не знайдено: нотатка збереже назву, опис і посилання.';
+
+  @override
+  String get captureTitleField => 'Назва';
+
+  @override
+  String get captureFolderField => 'Тека';
+
+  @override
+  String get captureAddTag => 'Додати мітку';
+
+  @override
+  String get capturePreview => 'Попередній перегляд';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      'Слів: $words · $minutes хв';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Завантажити зображення ($count) до $folder/';
+
+  @override
+  String get captureRemoved => 'Вилучено';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Скриптів: $scripts, стилів: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Меню навігації';
+
+  @override
+  String get captureRemovedBanner => 'Банер про файли cookie';
+
+  @override
+  String captureRemovedAround(int words) => 'Решта сторінки · слів: $words';
+
+  @override
+  String get captureSaveNote => 'Зберегти нотатку';
+
+  @override
+  String get captureSaving => 'Збереження…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman не зміг прочитати цю сторінку: вона показує текст лише після '
+      'входу або скрипту, який не вдалося запустити. [Відкрийте '
+      'посилання](<$url>), щоб прочитати її.';
+
+  @override
+  String get captureFailScheme => 'Зберегти можна лише сторінки http і https.';
+
+  @override
+  String get captureFailRedirects => 'Сторінка переспрямовує забагато разів.';
+
+  @override
+  String get captureFailTimeout => 'Сторінка не відповіла вчасно.';
+
+  @override
+  String get captureFailTooLarge => 'Сторінка більша за 10 МБ.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Це не вебсторінка: файл, PDF або зображення.';
+
+  @override
+  String captureFailStatus(String code) => 'Сайт відповів помилкою ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      "Не вдалося дістатися до сторінки: перевірте з'єднання.";
+
+  @override
+  String get captureDropHint => 'Відпустіть, щоб зберегти цю сторінку';
+
+  @override
+  String get captureDropDetail => 'З нею відкриється вікно збереження.';
 }

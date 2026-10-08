@@ -3022,4 +3022,122 @@ final class HindiStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'पन्ना $page फिर से पहचानें';
+
+  @override
+  String get captureWebPage => 'वेब पेज सहेजें';
+
+  @override
+  String get capturePageField => 'पेज';
+
+  @override
+  String get captureFromClipboard => 'क्लिपबोर्ड से लिया गया।';
+
+  @override
+  String get captureInvalidUrl =>
+      'वेब पता http:// या https:// से शुरू होता है।';
+
+  @override
+  String get captureRead => 'पढ़ें';
+
+  @override
+  String get captureDownloading => 'डाउनलोड हो रहा है…';
+
+  @override
+  String captureDownloaded(String size) => 'डाउनलोड हुआ · $size';
+
+  @override
+  String captureFewWords(int words) => 'केवल $words शब्द मिले';
+
+  @override
+  String get captureRunningBrowser => 'पेज ब्राउज़र में चलाया जा रहा है…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'ब्राउज़र छिपकर चलता है, अपनी एक अलग प्रोफ़ाइल के साथ जो बाद में हटा '
+      'दी जाती है: आपका ब्राउज़र और उसके साइन-इन नहीं छुए जाते।';
+
+  @override
+  String get captureReadInBrowser =>
+      'पेज को ब्राउज़र में चलाने के बाद पढ़ा गया';
+
+  @override
+  String get captureNoArticle =>
+      'कोई लेख नहीं मिला: नोट में शीर्षक, विवरण और लिंक रहेंगे।';
+
+  @override
+  String get captureTitleField => 'शीर्षक';
+
+  @override
+  String get captureFolderField => 'फ़ोल्डर';
+
+  @override
+  String get captureAddTag => 'टैग जोड़ें';
+
+  @override
+  String get capturePreview => 'पूर्वावलोकन';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words शब्द · $minutes मिनट';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      '$count चित्र $folder/ में डाउनलोड करें';
+
+  @override
+  String get captureRemoved => 'हटाया गया';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts स्क्रिप्ट और $styles स्टाइल';
+
+  @override
+  String get captureRemovedMenu => 'नेविगेशन मेनू';
+
+  @override
+  String get captureRemovedBanner => 'एक कुकी बैनर';
+
+  @override
+  String captureRemovedAround(int words) => 'पेज का बाकी हिस्सा · $words शब्द';
+
+  @override
+  String get captureSaveNote => 'नोट सहेजें';
+
+  @override
+  String get captureSaving => 'सहेजा जा रहा है…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman यह पेज नहीं पढ़ सका: यह अपना टेक्स्ट केवल साइन-इन के बाद या ऐसी '
+      'स्क्रिप्ट के बाद दिखाता है जिसे चलाया नहीं जा सका। इसे पढ़ने के लिए '
+      '[लिंक खोलें](<$url>)।';
+
+  @override
+  String get captureFailScheme => 'केवल http और https पेज सहेजे जा सकते हैं।';
+
+  @override
+  String get captureFailRedirects => 'पेज बहुत बार रीडायरेक्ट करता है।';
+
+  @override
+  String get captureFailTimeout => 'पेज ने समय पर जवाब नहीं दिया।';
+
+  @override
+  String get captureFailTooLarge => 'पेज 10 MB से बड़ा है।';
+
+  @override
+  String get captureFailNotHtml =>
+      'यह वेब पेज नहीं है: कोई फ़ाइल, PDF या चित्र है।';
+
+  @override
+  String captureFailStatus(String code) =>
+      'साइट ने त्रुटि के साथ जवाब दिया ($code)।';
+
+  @override
+  String get captureFailNetwork => 'पेज तक नहीं पहुँचा जा सका: कनेक्शन जाँचें।';
+
+  @override
+  String get captureDropHint => 'यह पेज सहेजने के लिए छोड़ें';
+
+  @override
+  String get captureDropDetail => 'इसके साथ सहेजने वाला संवाद खुलेगा।';
 }

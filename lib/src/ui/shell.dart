@@ -68,6 +68,7 @@ import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/attachment_view.dart';
+import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
@@ -749,6 +750,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     createParent: () => _createParent,
     guard: _guard,
     onCreated: _onItemCreated,
+  );
+
+  /// Web pages captured as notes (#531).
+  late final CaptureFlow _captureFlow = CaptureFlow(
+    controller: widget.controller,
+    createParent: () => _createParent,
+    attachmentsFolder: () => _editorSettings.attachmentsFolder,
+    linkType: () => _editorSettings.linkType,
+    onCaptured: (path) => _openNoteFromLink(path, null),
   );
 
   /// Opens what a create just made: a note takes the screen, a folder
@@ -3135,6 +3145,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.openPalette: () => unawaited(_openPalette()),
       AppCommand.goToNote: () => unawaited(_openPalette(notesOnly: true)),
       AppCommand.newNote: () => unawaited(_createFlow.createNote(context)),
+      AppCommand.captureWebPage: () => unawaited(_captureFlow.capture(context)),
       AppCommand.newListNote: () =>
           unawaited(_createFlow.createListNote(context)),
       AppCommand.newAudioNote: () =>

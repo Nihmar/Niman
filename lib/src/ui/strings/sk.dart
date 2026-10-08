@@ -3080,4 +3080,122 @@ final class SlovakStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Znova rozpoznať s. $page';
+
+  @override
+  String get captureWebPage => 'Uložiť webovú stránku';
+
+  @override
+  String get capturePageField => 'Stránka';
+
+  @override
+  String get captureFromClipboard => 'Prevzaté zo schránky.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Webová adresa začína http:// alebo https://.';
+
+  @override
+  String get captureRead => 'Načítať';
+
+  @override
+  String get captureDownloading => 'Sťahovanie…';
+
+  @override
+  String captureDownloaded(String size) => 'Stiahnuté · $size';
+
+  @override
+  String captureFewWords(int words) => 'Nájdených iba slov: $words';
+
+  @override
+  String get captureRunningBrowser => 'Stránka sa spúšťa v prehliadači…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Prehliadač beží skryto s vlastným profilom, ktorý sa potom vymaže: '
+      'váš prehliadač a jeho prihlásenia zostanú nedotknuté.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Načítané po spustení stránky v prehliadači';
+
+  @override
+  String get captureNoArticle =>
+      'Článok sa nenašiel: poznámka si ponechá názov, popis a odkaz.';
+
+  @override
+  String get captureTitleField => 'Názov';
+
+  @override
+  String get captureFolderField => 'Priečinok';
+
+  @override
+  String get captureAddTag => 'Pridať značku';
+
+  @override
+  String get capturePreview => 'Náhľad';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      'Slov: $words · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Stiahnuť obrázky ($count) do $folder/';
+
+  @override
+  String get captureRemoved => 'Odstránené';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Skripty: $scripts, štýly: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Navigačná ponuka';
+
+  @override
+  String get captureRemovedBanner => 'Lišta o súboroch cookie';
+
+  @override
+  String captureRemovedAround(int words) => 'Zvyšok stránky · slov: $words';
+
+  @override
+  String get captureSaveNote => 'Uložiť poznámku';
+
+  @override
+  String get captureSaving => 'Ukladá sa…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman túto stránku nedokázal prečítať: text ukazuje až po prihlásení '
+      'alebo skripte, ktorý sa nepodarilo spustiť. [Otvorte odkaz](<$url>) a '
+      'prečítajte si ju.';
+
+  @override
+  String get captureFailScheme => 'Uložiť možno iba stránky http a https.';
+
+  @override
+  String get captureFailRedirects => 'Stránka presmerúva príliš veľakrát.';
+
+  @override
+  String get captureFailTimeout => 'Stránka neodpovedala včas.';
+
+  @override
+  String get captureFailTooLarge => 'Stránka je väčšia ako 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Toto nie je webová stránka: súbor, PDF alebo obrázok.';
+
+  @override
+  String captureFailStatus(String code) => 'Web odpovedal chybou ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Stránka nie je dostupná: skontrolujte pripojenie.';
+
+  @override
+  String get captureDropHint => 'Pustite na uloženie tejto stránky';
+
+  @override
+  String get captureDropDetail => 'Otvorí sa s ňou okno uloženia.';
 }

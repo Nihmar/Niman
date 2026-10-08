@@ -40,6 +40,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.newListNote ||
   AppCommand.newAudioNote ||
   AppCommand.newTodo ||
+  AppCommand.captureWebPage ||
   AppCommand.quickNote ||
   AppCommand.renameNote ||
   AppCommand.moveNote ||
@@ -91,6 +92,7 @@ bool paletteAsks(AppCommand command) => switch (command) {
   AppCommand.newNote ||
   AppCommand.newListNote ||
   AppCommand.newTodo ||
+  AppCommand.captureWebPage ||
   AppCommand.renameNote ||
   AppCommand.moveNote ||
   AppCommand.deleteNote ||

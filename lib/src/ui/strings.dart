@@ -1653,4 +1653,44 @@ final class AppStrings {
   static String ocrLostPlaces(int page, int lines) =>
       _s.ocrLostPlaces(page, lines);
   static String ocrRecognizeAgain(int page) => _s.ocrRecognizeAgain(page);
+  static String get captureWebPage => _s.captureWebPage;
+  static String get capturePageField => _s.capturePageField;
+  static String get captureFromClipboard => _s.captureFromClipboard;
+  static String get captureInvalidUrl => _s.captureInvalidUrl;
+  static String get captureRead => _s.captureRead;
+  static String get captureDownloading => _s.captureDownloading;
+  static String captureDownloaded(String size) => _s.captureDownloaded(size);
+  static String captureFewWords(int words) => _s.captureFewWords(words);
+  static String get captureRunningBrowser => _s.captureRunningBrowser;
+  static String get captureBrowserPrivacy => _s.captureBrowserPrivacy;
+  static String get captureReadInBrowser => _s.captureReadInBrowser;
+  static String get captureNoArticle => _s.captureNoArticle;
+  static String get captureTitleField => _s.captureTitleField;
+  static String get captureFolderField => _s.captureFolderField;
+  static String get captureAddTag => _s.captureAddTag;
+  static String get capturePreview => _s.capturePreview;
+  static String captureWordsMinutes(int words, int minutes) =>
+      _s.captureWordsMinutes(words, minutes);
+  static String captureDownloadPictures(int count, String folder) =>
+      _s.captureDownloadPictures(count, folder);
+  static String get captureRemoved => _s.captureRemoved;
+  static String captureRemovedCode(int scripts, int styles) =>
+      _s.captureRemovedCode(scripts, styles);
+  static String get captureRemovedMenu => _s.captureRemovedMenu;
+  static String get captureRemovedBanner => _s.captureRemovedBanner;
+  static String captureRemovedAround(int words) =>
+      _s.captureRemovedAround(words);
+  static String get captureSaveNote => _s.captureSaveNote;
+  static String get captureSaving => _s.captureSaving;
+  static String captureUnreadableNotice(String url) =>
+      _s.captureUnreadableNotice(url);
+  static String get captureFailScheme => _s.captureFailScheme;
+  static String get captureFailRedirects => _s.captureFailRedirects;
+  static String get captureFailTimeout => _s.captureFailTimeout;
+  static String get captureFailTooLarge => _s.captureFailTooLarge;
+  static String get captureFailNotHtml => _s.captureFailNotHtml;
+  static String captureFailStatus(String code) => _s.captureFailStatus(code);
+  static String get captureFailNetwork => _s.captureFailNetwork;
+  static String get captureDropHint => _s.captureDropHint;
+  static String get captureDropDetail => _s.captureDropDetail;
 }

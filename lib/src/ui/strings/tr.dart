@@ -3031,4 +3031,125 @@ final class TurkishStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'S. $page yeniden tanı';
+
+  @override
+  String get captureWebPage => 'Web sayfasını kaydet';
+
+  @override
+  String get capturePageField => 'Sayfa';
+
+  @override
+  String get captureFromClipboard => 'Panodan alındı.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Bir web adresi http:// ya da https:// ile başlar.';
+
+  @override
+  String get captureRead => 'Oku';
+
+  @override
+  String get captureDownloading => 'İndiriliyor…';
+
+  @override
+  String captureDownloaded(String size) => 'İndirildi · $size';
+
+  @override
+  String captureFewWords(int words) => 'Yalnızca $words sözcük bulundu';
+
+  @override
+  String get captureRunningBrowser => 'Sayfa bir tarayıcıda çalıştırılıyor…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Tarayıcı, sonradan silinen kendine ait bir profille gizli çalışır: '
+      'sizin tarayıcınıza ve oturumlarına dokunulmaz.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Sayfa bir tarayıcıda çalıştırıldıktan sonra okundu';
+
+  @override
+  String get captureNoArticle =>
+      'Makale bulunamadı: not başlığı, açıklamayı ve bağlantıyı korur.';
+
+  @override
+  String get captureTitleField => 'Başlık';
+
+  @override
+  String get captureFolderField => 'Klasör';
+
+  @override
+  String get captureAddTag => 'Etiket ekle';
+
+  @override
+  String get capturePreview => 'Önizleme';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words sözcük · $minutes dk';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      '$count görseli $folder/ klasörüne indir';
+
+  @override
+  String get captureRemoved => 'Kaldırılanlar';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts betik ve $styles stil';
+
+  @override
+  String get captureRemovedMenu => 'Gezinme menüsü';
+
+  @override
+  String get captureRemovedBanner => 'Bir çerez afişi';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'Sayfanın geri kalanı · $words sözcük';
+
+  @override
+  String get captureSaveNote => 'Notu kaydet';
+
+  @override
+  String get captureSaving => 'Kaydediliyor…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman bu sayfayı okuyamadı: sayfa metnini yalnızca bir oturum açma '
+      'işleminden ya da çalıştırılamayan bir betikten sonra gösteriyor. '
+      'Okumak için [bağlantıyı açın](<$url>).';
+
+  @override
+  String get captureFailScheme =>
+      'Yalnızca http ve https sayfaları kaydedilebilir.';
+
+  @override
+  String get captureFailRedirects => 'Sayfa çok fazla kez yönlendiriyor.';
+
+  @override
+  String get captureFailTimeout => 'Sayfa zamanında yanıt vermedi.';
+
+  @override
+  String get captureFailTooLarge => "Sayfa 10 MB'tan büyük.";
+
+  @override
+  String get captureFailNotHtml =>
+      'Bu bir web sayfası değil: bir dosya, PDF ya da görsel.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Site bir hatayla yanıt verdi ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Sayfaya ulaşılamadı: bağlantıyı denetleyin.';
+
+  @override
+  String get captureDropHint => 'Bu sayfayı kaydetmek için bırakın';
+
+  @override
+  String get captureDropDetail => 'Kaydetme penceresi onunla açılır.';
 }

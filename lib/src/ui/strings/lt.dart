@@ -3111,4 +3111,123 @@ final class LithuanianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Atpažinti $page psl. iš naujo';
+
+  @override
+  String get captureWebPage => 'Išsaugoti tinklalapį';
+
+  @override
+  String get capturePageField => 'Puslapis';
+
+  @override
+  String get captureFromClipboard => 'Paimta iš iškarpinės.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Žiniatinklio adresas prasideda http:// arba https://.';
+
+  @override
+  String get captureRead => 'Skaityti';
+
+  @override
+  String get captureDownloading => 'Atsisiunčiama…';
+
+  @override
+  String captureDownloaded(String size) => 'Atsisiųsta · $size';
+
+  @override
+  String captureFewWords(int words) => 'Rasta tik žodžių: $words';
+
+  @override
+  String get captureRunningBrowser => 'Puslapis paleidžiamas naršyklėje…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Naršyklė veikia paslėpta, su savo profiliu, kuris vėliau ištrinamas: '
+      'jūsų naršyklė ir jos prisijungimai neliečiami.';
+
+  @override
+  String get captureReadInBrowser => 'Perskaityta paleidus puslapį naršyklėje';
+
+  @override
+  String get captureNoArticle =>
+      'Straipsnis nerastas: pastaba išsaugo pavadinimą, aprašymą ir nuorodą.';
+
+  @override
+  String get captureTitleField => 'Pavadinimas';
+
+  @override
+  String get captureFolderField => 'Aplankas';
+
+  @override
+  String get captureAddTag => 'Pridėti žymą';
+
+  @override
+  String get capturePreview => 'Peržiūra';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      'Žodžių: $words · $minutes min.';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Atsisiųsti paveikslėlius ($count) į $folder/';
+
+  @override
+  String get captureRemoved => 'Pašalinta';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Scenarijų: $scripts, stilių: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Naršymo meniu';
+
+  @override
+  String get captureRemovedBanner => 'Slapukų reklamjuostė';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'Likusi puslapio dalis · žodžių: $words';
+
+  @override
+  String get captureSaveNote => 'Išsaugoti pastabą';
+
+  @override
+  String get captureSaving => 'Išsaugoma…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman nepavyko perskaityti šio puslapio: tekstą jis rodo tik '
+      'prisijungus arba paleidus scenarijų, kurio nepavyko paleisti. '
+      '[Atidarykite nuorodą](<$url>), kad jį perskaitytumėte.';
+
+  @override
+  String get captureFailScheme =>
+      'Išsaugoti galima tik http ir https puslapius.';
+
+  @override
+  String get captureFailRedirects => 'Puslapis peradresuoja per daug kartų.';
+
+  @override
+  String get captureFailTimeout => 'Puslapis neatsakė laiku.';
+
+  @override
+  String get captureFailTooLarge => 'Puslapis didesnis nei 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Tai ne tinklalapis: failas, PDF ar paveikslėlis.';
+
+  @override
+  String captureFailStatus(String code) => 'Svetainė atsakė klaida ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Puslapio pasiekti nepavyko: patikrinkite ryšį.';
+
+  @override
+  String get captureDropHint => 'Paleiskite, kad išsaugotumėte šį puslapį';
+
+  @override
+  String get captureDropDetail => 'Su juo atsidarys išsaugojimo langas.';
 }

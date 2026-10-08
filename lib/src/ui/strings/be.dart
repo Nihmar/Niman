@@ -3109,4 +3109,124 @@ final class BelarusianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Распазнаць с. $page зноў';
+
+  @override
+  String get captureWebPage => 'Захаваць вэб-старонку';
+
+  @override
+  String get capturePageField => 'Старонка';
+
+  @override
+  String get captureFromClipboard => 'Узята з буфера абмену.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Вэб-адрас пачынаецца з http:// або https://.';
+
+  @override
+  String get captureRead => 'Прачытаць';
+
+  @override
+  String get captureDownloading => 'Спампоўванне…';
+
+  @override
+  String captureDownloaded(String size) => 'Спампавана · $size';
+
+  @override
+  String captureFewWords(int words) => 'Знойдзена толькі слоў: $words';
+
+  @override
+  String get captureRunningBrowser => 'Старонка запускаецца ў браўзеры…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Браўзер працуе схавана, з уласным профілем, які потым выдаляецца: ваш '
+      'браўзер і яго ўваходы не закранаюцца.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Прачытана пасля запуску старонкі ў браўзеры';
+
+  @override
+  String get captureNoArticle =>
+      'Артыкул не знойдзены: заўвага захавае назву, апісанне і спасылку.';
+
+  @override
+  String get captureTitleField => 'Назва';
+
+  @override
+  String get captureFolderField => 'Папка';
+
+  @override
+  String get captureAddTag => 'Дадаць мэтку';
+
+  @override
+  String get capturePreview => 'Папярэдні прагляд';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      'Слоў: $words · $minutes хв';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Спампаваць выявы ($count) у $folder/';
+
+  @override
+  String get captureRemoved => 'Выдалена';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Скрыптаў: $scripts, стыляў: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Меню навігацыі';
+
+  @override
+  String get captureRemovedBanner => 'Банер пра кукі';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'Астатняя частка старонкі · слоў: $words';
+
+  @override
+  String get captureSaveNote => 'Захаваць заўвагу';
+
+  @override
+  String get captureSaving => 'Захаванне…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman не змог прачытаць гэтую старонку: яна паказвае тэкст толькі '
+      'пасля ўваходу або скрыпту, які не ўдалося запусціць. [Адкрыйце '
+      'спасылку](<$url>), каб прачытаць яе.';
+
+  @override
+  String get captureFailScheme =>
+      'Захаваць можна толькі старонкі http і https.';
+
+  @override
+  String get captureFailRedirects =>
+      'Старонка перанакіроўвае занадта шмат разоў.';
+
+  @override
+  String get captureFailTimeout => 'Старонка не адказала своечасова.';
+
+  @override
+  String get captureFailTooLarge => 'Старонка большая за 10 МБ.';
+
+  @override
+  String get captureFailNotHtml => 'Гэта не вэб-старонка: файл, PDF або выява.';
+
+  @override
+  String captureFailStatus(String code) => 'Сайт адказаў памылкай ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Не ўдалося дабрацца да старонкі: праверце злучэнне.';
+
+  @override
+  String get captureDropHint => 'Адпусціце, каб захаваць гэтую старонку';
+
+  @override
+  String get captureDropDetail => 'З ёй адкрыецца акно захавання.';
 }

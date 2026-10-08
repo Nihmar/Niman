@@ -3114,4 +3114,126 @@ final class SpanishStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Reconocer de nuevo la p. $page';
+
+  @override
+  String get captureWebPage => 'Capturar página web';
+
+  @override
+  String get capturePageField => 'Página';
+
+  @override
+  String get captureFromClipboard => 'Tomada del portapapeles.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Una dirección web empieza por http:// o https://.';
+
+  @override
+  String get captureRead => 'Leer';
+
+  @override
+  String get captureDownloading => 'Descargando…';
+
+  @override
+  String captureDownloaded(String size) => 'Descargada · $size';
+
+  @override
+  String captureFewWords(int words) => 'Solo se encontraron $words palabras';
+
+  @override
+  String get captureRunningBrowser => 'Ejecutando la página en un navegador…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'El navegador se ejecuta oculto, con un perfil propio que se borra '
+      'después: tu navegador y sus sesiones no se tocan.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Leída tras ejecutar la página en un navegador';
+
+  @override
+  String get captureNoArticle =>
+      'No se encontró ningún artículo: la nota conserva el título, la '
+      'descripción y el enlace.';
+
+  @override
+  String get captureTitleField => 'Título';
+
+  @override
+  String get captureFolderField => 'Carpeta';
+
+  @override
+  String get captureAddTag => 'Añadir una etiqueta';
+
+  @override
+  String get capturePreview => 'Vista previa';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words palabras · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Descargar las $count imágenes en $folder/';
+
+  @override
+  String get captureRemoved => 'Eliminado';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts scripts y $styles estilos';
+
+  @override
+  String get captureRemovedMenu => 'El menú de navegación';
+
+  @override
+  String get captureRemovedBanner => 'Un aviso de cookies';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'El resto de la página · $words palabras';
+
+  @override
+  String get captureSaveNote => 'Guardar nota';
+
+  @override
+  String get captureSaving => 'Guardando…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman no pudo leer esta página: solo muestra su texto tras iniciar '
+      'sesión o con un script que no pudo ejecutar. [Abre el enlace](<$url>) '
+      'para leerla.';
+
+  @override
+  String get captureFailScheme =>
+      'Solo se pueden capturar páginas http y https.';
+
+  @override
+  String get captureFailRedirects => 'La página redirige demasiadas veces.';
+
+  @override
+  String get captureFailTimeout => 'La página no respondió a tiempo.';
+
+  @override
+  String get captureFailTooLarge => 'La página ocupa más de 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Esto no es una página web: es un archivo, un PDF o una imagen.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'El sitio respondió con un error ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'No se pudo acceder a la página: comprueba la conexión.';
+
+  @override
+  String get captureDropHint => 'Suelta para capturar esta página';
+
+  @override
+  String get captureDropDetail => 'Se abre el diálogo de captura con ella.';
 }

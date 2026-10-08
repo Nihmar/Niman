@@ -3098,4 +3098,122 @@ final class BosnianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Ponovo prepoznaj str. $page';
+
+  @override
+  String get captureWebPage => 'Sačuvaj web stranicu';
+
+  @override
+  String get capturePageField => 'Stranica';
+
+  @override
+  String get captureFromClipboard => 'Preuzeto iz međuspremnika.';
+
+  @override
+  String get captureInvalidUrl => 'Web adresa počinje s http:// ili https://.';
+
+  @override
+  String get captureRead => 'Pročitaj';
+
+  @override
+  String get captureDownloading => 'Preuzimanje…';
+
+  @override
+  String captureDownloaded(String size) => 'Preuzeto · $size';
+
+  @override
+  String captureFewWords(int words) => 'Pronađeno samo riječi: $words';
+
+  @override
+  String get captureRunningBrowser => 'Stranica se pokreće u pregledniku…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Preglednik radi skriveno, s vlastitim profilom koji se poslije briše: '
+      'vaš preglednik i njegove prijave ostaju netaknuti.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Pročitano nakon pokretanja stranice u pregledniku';
+
+  @override
+  String get captureNoArticle =>
+      'Članak nije pronađen: bilješka zadržava naslov, opis i vezu.';
+
+  @override
+  String get captureTitleField => 'Naslov';
+
+  @override
+  String get captureFolderField => 'Mapa';
+
+  @override
+  String get captureAddTag => 'Dodaj oznaku';
+
+  @override
+  String get capturePreview => 'Pregled';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      'Riječi: $words · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Preuzmi slike ($count) u $folder/';
+
+  @override
+  String get captureRemoved => 'Uklonjeno';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Skripti: $scripts, stilovi: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Navigacijski meni';
+
+  @override
+  String get captureRemovedBanner => 'Baner za kolačiće';
+
+  @override
+  String captureRemovedAround(int words) => 'Ostatak stranice · riječi: $words';
+
+  @override
+  String get captureSaveNote => 'Sačuvaj bilješku';
+
+  @override
+  String get captureSaving => 'Spremanje…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman nije mogao pročitati ovu stranicu: tekst prikazuje tek nakon '
+      'prijave ili skripte koju nije mogao pokrenuti. [Otvorite '
+      'vezu](<$url>) da je pročitate.';
+
+  @override
+  String get captureFailScheme =>
+      'Mogu se sačuvati samo http i https stranice.';
+
+  @override
+  String get captureFailRedirects => 'Stranica preusmjerava previše puta.';
+
+  @override
+  String get captureFailTimeout => 'Stranica nije odgovorila na vrijeme.';
+
+  @override
+  String get captureFailTooLarge => 'Stranica je veća od 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Ovo nije web stranica: datoteka, PDF ili slika.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Stranica je odgovorila greškom ($code).';
+
+  @override
+  String get captureFailNetwork => 'Stranica nije dostupna: provjerite vezu.';
+
+  @override
+  String get captureDropHint => 'Ispustite da sačuvate ovu stranicu';
+
+  @override
+  String get captureDropDetail => 'S njom se otvara prozor za spremanje.';
 }

@@ -3054,4 +3054,123 @@ final class NorwegianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Gjenkjenn s. $page på nytt';
+
+  @override
+  String get captureWebPage => 'Lagre nettside';
+
+  @override
+  String get capturePageField => 'Side';
+
+  @override
+  String get captureFromClipboard => 'Hentet fra utklippstavlen.';
+
+  @override
+  String get captureInvalidUrl =>
+      'En nettadresse begynner med http:// eller https://.';
+
+  @override
+  String get captureRead => 'Les';
+
+  @override
+  String get captureDownloading => 'Laster ned…';
+
+  @override
+  String captureDownloaded(String size) => 'Lastet ned · $size';
+
+  @override
+  String captureFewWords(int words) => 'Bare $words ord funnet';
+
+  @override
+  String get captureRunningBrowser => 'Siden kjøres i en nettleser…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Nettleseren kjører skjult, med en egen profil som slettes etterpå: '
+      'nettleseren din og innloggingene der røres ikke.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Lest etter at siden ble kjørt i en nettleser';
+
+  @override
+  String get captureNoArticle =>
+      'Ingen artikkel funnet: notatet beholder tittelen, beskrivelsen og '
+      'lenken.';
+
+  @override
+  String get captureTitleField => 'Tittel';
+
+  @override
+  String get captureFolderField => 'Mappe';
+
+  @override
+  String get captureAddTag => 'Legg til en tagg';
+
+  @override
+  String get capturePreview => 'Forhåndsvisning';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words ord · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Last ned de $count bildene til $folder/';
+
+  @override
+  String get captureRemoved => 'Fjernet';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts skript og $styles stiler';
+
+  @override
+  String get captureRemovedMenu => 'Navigasjonsmenyen';
+
+  @override
+  String get captureRemovedBanner => 'Et informasjonskapselbanner';
+
+  @override
+  String captureRemovedAround(int words) => 'Resten av siden · $words ord';
+
+  @override
+  String get captureSaveNote => 'Lagre notat';
+
+  @override
+  String get captureSaving => 'Lagrer…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman kunne ikke lese denne siden: den viser teksten bare etter en '
+      'innlogging eller et skript som ikke kunne kjøres. [Åpne '
+      'lenken](<$url>) for å lese den.';
+
+  @override
+  String get captureFailScheme => 'Bare http- og https-sider kan lagres.';
+
+  @override
+  String get captureFailRedirects => 'Siden videresender for mange ganger.';
+
+  @override
+  String get captureFailTimeout => 'Siden svarte ikke i tide.';
+
+  @override
+  String get captureFailTooLarge => 'Siden er større enn 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Dette er ikke en nettside: en fil, en PDF eller et bilde.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Nettstedet svarte med en feil ($code).';
+
+  @override
+  String get captureFailNetwork => 'Siden kunne ikke nås: sjekk tilkoblingen.';
+
+  @override
+  String get captureDropHint => 'Slipp for å lagre denne siden';
+
+  @override
+  String get captureDropDetail => 'Lagringsvinduet åpnes med den.';
 }

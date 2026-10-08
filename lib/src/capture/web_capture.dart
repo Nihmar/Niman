@@ -35,8 +35,14 @@ enum CaptureStage {
 typedef CaptureProgress = ({CaptureStage stage, int bytes, int words});
 
 /// A page read, ready to save: what it was read to, how many bytes the
-/// download had, and whether a browser had to run it.
-typedef WebReading = ({PageReading page, int bytes, bool ranBrowser});
+/// download had, whether a browser had to run it, and the addresses of
+/// the pictures its note would show.
+typedef WebReading = ({
+  PageReading page,
+  int bytes,
+  bool ranBrowser,
+  List<String> pictures,
+});
 
 /// Reads the page at [url]. [browser] runs a page with too little text
 /// ([findPageBrowser]); null reads it as downloaded. [onProgress] hears
@@ -52,14 +58,21 @@ Future<WebReading> readWebPage(
   final first = await Isolate.run(() async {
     final fetched = await fetchPage(url, limits: limits);
     final text = decodePage(fetched.bytes, contentType: fetched.contentType);
+    final page = readPage(text, fetched.url);
     return (
-      page: readPage(text, fetched.url),
+      page: page,
       bytes: fetched.bytes.length,
       words: text == null ? 0 : _textWords(text),
+      pictures: picturesOf(page),
     );
   });
   if (first.page.readable || browser == null) {
-    return (page: first.page, bytes: first.bytes, ranBrowser: false);
+    return (
+      page: first.page,
+      bytes: first.bytes,
+      ranBrowser: false,
+      pictures: first.pictures,
+    );
   }
   onProgress?.call((
     stage: CaptureStage.runningBrowser,
@@ -69,12 +82,25 @@ Future<WebReading> readWebPage(
   final pageUrl = first.page.url;
   final dom = await browser.read(pageUrl);
   if (dom != null) {
-    final again = await Isolate.run(() => readPage(dom, pageUrl));
-    if (again.readable) {
-      return (page: again, bytes: first.bytes, ranBrowser: true);
+    final again = await Isolate.run(() {
+      final page = readPage(dom, pageUrl);
+      return (page: page, pictures: picturesOf(page));
+    });
+    if (again.page.readable) {
+      return (
+        page: again.page,
+        bytes: first.bytes,
+        ranBrowser: true,
+        pictures: again.pictures,
+      );
     }
   }
-  return (page: first.page, bytes: first.bytes, ranBrowser: false);
+  return (
+    page: first.page,
+    bytes: first.bytes,
+    ranBrowser: false,
+    pictures: first.pictures,
+  );
 }
 
 /// The words a page's text shows, its markup left out: what "only 40

@@ -3094,4 +3094,125 @@ final class MacedonianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Повторно препознај стр. $page';
+
+  @override
+  String get captureWebPage => 'Зачувај веб-страница';
+
+  @override
+  String get capturePageField => 'Страница';
+
+  @override
+  String get captureFromClipboard => 'Земено од таблата со исечоци.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Веб-адресата започнува со http:// или https://.';
+
+  @override
+  String get captureRead => 'Прочитај';
+
+  @override
+  String get captureDownloading => 'Се презема…';
+
+  @override
+  String captureDownloaded(String size) => 'Преземено · $size';
+
+  @override
+  String captureFewWords(int words) => 'Пронајдени се само $words зборови';
+
+  @override
+  String get captureRunningBrowser => 'Страницата се извршува во прелистувач…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Прелистувачот работи скриено, со сопствен профил што потоа се брише: '
+      'вашиот прелистувач и неговите најавувања не се допираат.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Прочитано откако страницата се изврши во прелистувач';
+
+  @override
+  String get captureNoArticle =>
+      'Не е пронајдена статија: белешката ги задржува насловот, описот и '
+      'врската.';
+
+  @override
+  String get captureTitleField => 'Наслов';
+
+  @override
+  String get captureFolderField => 'Папка';
+
+  @override
+  String get captureAddTag => 'Додај ознака';
+
+  @override
+  String get capturePreview => 'Преглед';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words зборови · $minutes мин';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Преземи ги сликите ($count) во $folder/';
+
+  @override
+  String get captureRemoved => 'Отстрането';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Скрипти: $scripts, стилови: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Навигациското мени';
+
+  @override
+  String get captureRemovedBanner => 'Банер за колачиња';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'Остатокот од страницата · $words зборови';
+
+  @override
+  String get captureSaveNote => 'Зачувај белешка';
+
+  @override
+  String get captureSaving => 'Се зачувува…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman не можеше да ја прочита оваа страница: го прикажува текстот '
+      'само по најавување или скрипта што не можеше да се изврши. [Отворете '
+      'ја врската](<$url>) за да ја прочитате.';
+
+  @override
+  String get captureFailScheme =>
+      'Може да се зачуваат само http и https страници.';
+
+  @override
+  String get captureFailRedirects => 'Страницата пренасочува премногу пати.';
+
+  @override
+  String get captureFailTimeout => 'Страницата не одговори навреме.';
+
+  @override
+  String get captureFailTooLarge => 'Страницата е поголема од 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Ова не е веб-страница: датотека, PDF или слика.';
+
+  @override
+  String captureFailStatus(String code) => 'Сајтот одговори со грешка ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Страницата не е достапна: проверете ја врската.';
+
+  @override
+  String get captureDropHint => 'Пуштете за да ја зачувате оваа страница';
+
+  @override
+  String get captureDropDetail => 'Со неа се отвора прозорецот за зачувување.';
 }

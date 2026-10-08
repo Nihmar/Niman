@@ -3064,4 +3064,122 @@ final class IcelandicStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Greina bls. $page aftur';
+
+  @override
+  String get captureWebPage => 'Vista vefsíðu';
+
+  @override
+  String get capturePageField => 'Síða';
+
+  @override
+  String get captureFromClipboard => 'Tekið af klippiborðinu.';
+
+  @override
+  String get captureInvalidUrl => 'Vefslóð byrjar á http:// eða https://.';
+
+  @override
+  String get captureRead => 'Lesa';
+
+  @override
+  String get captureDownloading => 'Sæki…';
+
+  @override
+  String captureDownloaded(String size) => 'Sótt · $size';
+
+  @override
+  String captureFewWords(int words) => 'Aðeins $words orð fundust';
+
+  @override
+  String get captureRunningBrowser => 'Síðan keyrð í vafra…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Vafrinn keyrir falinn, með eigin prófíl sem er eytt á eftir: vafrinn '
+      'þinn og innskráningar hans eru ósnertar.';
+
+  @override
+  String get captureReadInBrowser => 'Lesið eftir að síðan var keyrð í vafra';
+
+  @override
+  String get captureNoArticle =>
+      'Engin grein fannst: minnisblaðið heldur titlinum, lýsingunni og '
+      'tenglinum.';
+
+  @override
+  String get captureTitleField => 'Titill';
+
+  @override
+  String get captureFolderField => 'Mappa';
+
+  @override
+  String get captureAddTag => 'Bæta við merki';
+
+  @override
+  String get capturePreview => 'Forskoðun';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words orð · $minutes mín.';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Sækja myndirnar ($count) í $folder/';
+
+  @override
+  String get captureRemoved => 'Fjarlægt';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts skriftur og $styles stílar';
+
+  @override
+  String get captureRemovedMenu => 'Leiðsagnarvalmyndin';
+
+  @override
+  String get captureRemovedBanner => 'Vafrakökuborði';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'Afgangurinn af síðunni · $words orð';
+
+  @override
+  String get captureSaveNote => 'Vista minnisblað';
+
+  @override
+  String get captureSaving => 'Vista…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman gat ekki lesið þessa síðu: hún sýnir textann aðeins eftir '
+      'innskráningu eða skriftu sem ekki tókst að keyra. [Opnaðu '
+      'tengilinn](<$url>) til að lesa hana.';
+
+  @override
+  String get captureFailScheme =>
+      'Aðeins er hægt að vista http- og https-síður.';
+
+  @override
+  String get captureFailRedirects => 'Síðan vísar áfram of oft.';
+
+  @override
+  String get captureFailTimeout => 'Síðan svaraði ekki í tæka tíð.';
+
+  @override
+  String get captureFailTooLarge => 'Síðan er stærri en 10 MB.';
+
+  @override
+  String get captureFailNotHtml => 'Þetta er ekki vefsíða: skrá, PDF eða mynd.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Vefsvæðið svaraði með villu ($code).';
+
+  @override
+  String get captureFailNetwork => 'Ekki náðist í síðuna: athugaðu tenginguna.';
+
+  @override
+  String get captureDropHint => 'Slepptu til að vista þessa síðu';
+
+  @override
+  String get captureDropDetail => 'Vistunarglugginn opnast með henni.';
 }

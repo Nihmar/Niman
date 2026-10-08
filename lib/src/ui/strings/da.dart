@@ -3054,4 +3054,122 @@ final class DanishStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Genkend s. $page igen';
+
+  @override
+  String get captureWebPage => 'Gem webside';
+
+  @override
+  String get capturePageField => 'Side';
+
+  @override
+  String get captureFromClipboard => 'Hentet fra udklipsholderen.';
+
+  @override
+  String get captureInvalidUrl =>
+      'En webadresse begynder med http:// eller https://.';
+
+  @override
+  String get captureRead => 'Læs';
+
+  @override
+  String get captureDownloading => 'Henter…';
+
+  @override
+  String captureDownloaded(String size) => 'Hentet · $size';
+
+  @override
+  String captureFewWords(int words) => 'Kun $words ord fundet';
+
+  @override
+  String get captureRunningBrowser => 'Siden køres i en browser…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Browseren kører skjult med sin egen profil, som slettes bagefter: din '
+      'browser og dens logins røres ikke.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Læst efter at siden blev kørt i en browser';
+
+  @override
+  String get captureNoArticle =>
+      'Ingen artikel fundet: noten beholder titlen, beskrivelsen og linket.';
+
+  @override
+  String get captureTitleField => 'Titel';
+
+  @override
+  String get captureFolderField => 'Mappe';
+
+  @override
+  String get captureAddTag => 'Tilføj et tag';
+
+  @override
+  String get capturePreview => 'Forhåndsvisning';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words ord · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Hent de $count billeder til $folder/';
+
+  @override
+  String get captureRemoved => 'Fjernet';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts scripts og $styles stilarter';
+
+  @override
+  String get captureRemovedMenu => 'Navigationsmenuen';
+
+  @override
+  String get captureRemovedBanner => 'Et cookiebanner';
+
+  @override
+  String captureRemovedAround(int words) => 'Resten af siden · $words ord';
+
+  @override
+  String get captureSaveNote => 'Gem note';
+
+  @override
+  String get captureSaving => 'Gemmer…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman kunne ikke læse denne side: den viser kun sin tekst efter et '
+      'login eller et script, der ikke kunne køres. [Åbn linket](<$url>) for '
+      'at læse den.';
+
+  @override
+  String get captureFailScheme => 'Kun http- og https-sider kan gemmes.';
+
+  @override
+  String get captureFailRedirects => 'Siden omdirigerer for mange gange.';
+
+  @override
+  String get captureFailTimeout => 'Siden svarede ikke i tide.';
+
+  @override
+  String get captureFailTooLarge => 'Siden er større end 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Det er ikke en webside: en fil, en PDF eller et billede.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Webstedet svarede med en fejl ($code).';
+
+  @override
+  String get captureFailNetwork => 'Siden kunne ikke nås: tjek forbindelsen.';
+
+  @override
+  String get captureDropHint => 'Slip for at gemme denne side';
+
+  @override
+  String get captureDropDetail => 'Gem-vinduet åbner med den.';
 }

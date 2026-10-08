@@ -3088,4 +3088,121 @@ final class FinnishStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Tunnista s. $page uudelleen';
+
+  @override
+  String get captureWebPage => 'Tallenna verkkosivu';
+
+  @override
+  String get capturePageField => 'Sivu';
+
+  @override
+  String get captureFromClipboard => 'Otettu leikepöydältä.';
+
+  @override
+  String get captureInvalidUrl => 'Verkko-osoite alkaa http:// tai https://.';
+
+  @override
+  String get captureRead => 'Lue';
+
+  @override
+  String get captureDownloading => 'Ladataan…';
+
+  @override
+  String captureDownloaded(String size) => 'Ladattu · $size';
+
+  @override
+  String captureFewWords(int words) => 'Löytyi vain $words sanaa';
+
+  @override
+  String get captureRunningBrowser => 'Sivua ajetaan selaimessa…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Selain toimii piilossa omalla profiilillaan, joka poistetaan '
+      'jälkeenpäin: selaimeesi ja sen kirjautumisiin ei kosketa.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Luettu sen jälkeen, kun sivu ajettiin selaimessa';
+
+  @override
+  String get captureNoArticle =>
+      'Artikkelia ei löytynyt: muistiinpanoon jäävät otsikko, kuvaus ja '
+      'linkki.';
+
+  @override
+  String get captureTitleField => 'Otsikko';
+
+  @override
+  String get captureFolderField => 'Kansio';
+
+  @override
+  String get captureAddTag => 'Lisää tunniste';
+
+  @override
+  String get capturePreview => 'Esikatselu';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words sanaa · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Lataa $count kuvaa kansioon $folder/';
+
+  @override
+  String get captureRemoved => 'Poistettu';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts skriptiä ja $styles tyyliä';
+
+  @override
+  String get captureRemovedMenu => 'Navigointivalikko';
+
+  @override
+  String get captureRemovedBanner => 'Evästebanneri';
+
+  @override
+  String captureRemovedAround(int words) => 'Muu sivu · $words sanaa';
+
+  @override
+  String get captureSaveNote => 'Tallenna muistiinpano';
+
+  @override
+  String get captureSaving => 'Tallennetaan…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman ei voinut lukea tätä sivua: se näyttää tekstinsä vasta '
+      'kirjautumisen tai sellaisen skriptin jälkeen, jota ei voitu ajaa. '
+      '[Avaa linkki](<$url>) lukeaksesi sen.';
+
+  @override
+  String get captureFailScheme => 'Vain http- ja https-sivuja voi tallentaa.';
+
+  @override
+  String get captureFailRedirects => 'Sivu ohjaa eteenpäin liian monta kertaa.';
+
+  @override
+  String get captureFailTimeout => 'Sivu ei vastannut ajoissa.';
+
+  @override
+  String get captureFailTooLarge => 'Sivu on suurempi kuin 10 Mt.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Tämä ei ole verkkosivu: tiedosto, PDF tai kuva.';
+
+  @override
+  String captureFailStatus(String code) => 'Sivusto vastasi virheellä ($code).';
+
+  @override
+  String get captureFailNetwork => 'Sivulle ei päästy: tarkista yhteys.';
+
+  @override
+  String get captureDropHint => 'Pudota tallentaaksesi tämän sivun';
+
+  @override
+  String get captureDropDetail => 'Tallennusikkuna avautuu sen kanssa.';
 }
