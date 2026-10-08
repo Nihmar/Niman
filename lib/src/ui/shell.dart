@@ -572,24 +572,65 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// editor settings; null until the first read.
   NavigationLayout? _navigation;
 
+  /// The tabs the bar and the rail show, in order: placed once per
+  /// layout, not on every frame and every tab switch that asks.
+  List<ShellTab> _shownTabs = [
+    for (final d in visibleDestinations(const NavigationLayout())) d.tab,
+  ];
+
   /// The destinations the bar and the rail show.
-  List<ShellDestination> get _destinations =>
-      visibleDestinations(_navigation ?? const NavigationLayout());
+  List<ShellDestination> get _destinations {
+    final all = {for (final d in shellDestinations()) d.tab: d};
+    return [for (final tab in _shownTabs) all[tab]!];
+  }
 
   /// Whether [tab] has a place in the bar and the rail.
-  bool _shown(ShellTab tab) => _destinations.any((d) => d.tab == tab);
+  bool _shown(ShellTab tab) => _shownTabs.contains(tab);
+
+  /// The tab the shell starts on and falls back to: the first shown that
+  /// is a place of its own — not the quick note, a note rather than a
+  /// place, nor Settings on a wide window, where it floats (#202). Files
+  /// when there is none, which a wide window shows with nothing selected.
+  ShellTab get _homeTab {
+    for (final tab in _shownTabs) {
+      if (tab == ShellTab.quickNote) continue;
+      if (tab == ShellTab.settings && _wide) continue;
+      return tab;
+    }
+    return ShellTab.files;
+  }
+
+  /// Takes [layout] as the navigation (#536). A tab it hides from under
+  /// the user — Files at the start, or the tab on screen when another
+  /// device hides it — gives way to [_homeTab]; a note on screen stays,
+  /// and its back lands there. A hidden tab opened on purpose stays.
+  void _setNavigation(NavigationLayout layout) {
+    final wasShown = _shown(_tab);
+    setState(() {
+      _navigation = layout;
+      _shownTabs = [for (final d in visibleDestinations(layout)) d.tab];
+    });
+    if (!wasShown || _shown(_tab)) return;
+    final home = _homeTab;
+    _hiddenTabReturn = home;
+    if (!_treeVisible) {
+      if (!_shown(_noteFromTab)) _noteFromTab = home;
+      return;
+    }
+    _selectShellTab(home);
+  }
 
   /// The tab a hidden one was opened from (the palette, a widget, a
   /// reminder): its back arrow returns there.
   ShellTab _hiddenTabReturn = ShellTab.files;
 
   /// Leaves the hidden tab on screen for the one it was opened from, or
-  /// the first shown when that one has been hidden since.
+  /// the home tab when that one has been hidden since: as a tap on it,
+  /// so the quick note comes back as a note, not as its empty tab.
   void _leaveHiddenTab() {
-    final back = _shown(_hiddenTabReturn)
-        ? _hiddenTabReturn
-        : _destinations.first.tab;
-    _selectShellTab(back);
+    _onDestinationSelected(
+      _shown(_hiddenTabReturn) ? _hiddenTabReturn : _homeTab,
+    );
   }
 
   /// Every tab visited so far: bodies mount on first visit and stay
@@ -671,8 +712,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // shell-wide rebuild re-running every mounted body's build (12-24 ms of
     // `build` per switch in the device log). A fullscreen note to close, a
     // first mount, or the open FAB all still fall to the full setState.
+    // A hidden tab on either side of the switch changes the back key's
+    // meaning (#536), which only a rebuild hands the layout.
     final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
-    if (narrow && _treeVisible && !_fabExpanded && _visitedTabs.contains(tab)) {
+    if (narrow &&
+        _treeVisible &&
+        !_fabExpanded &&
+        _visitedTabs.contains(tab) &&
+        _shown(_tab) &&
+        _shown(tab)) {
       _noteClosed();
       _tab = tab;
     } else {
@@ -2014,14 +2062,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (navigation != null) {
       final layout =
           navigation.device ?? navigation.library ?? const NavigationLayout();
-      if (layout != _navigation) {
-        final first = _navigation == null;
-        setState(() => _navigation = layout);
-        // The start tab is the first shown: Files, unless it was hidden.
-        if (first && _tab == ShellTab.files && !_shown(ShellTab.files)) {
-          _selectShellTab(_destinations.first.tab);
-        }
-      }
+      if (layout != _navigation) _setNavigation(layout);
     }
     if (journal != null && journal != _journal) {
       setState(() => _journal = journal);
@@ -2202,9 +2243,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Opens the quick note at [path]; back returns to the tab it was
   /// opened from: the tile sits in every tab, not in Files (issue #73,
   /// item 1). The chooser flow arrives here from the quick note tab
-  /// itself, and Files is its home. A stale setting (the note was moved,
-  /// renamed, or deleted) is cleared so the tab returns to its empty
-  /// state.
+  /// itself, and the home tab is its home. A stale setting (the note was
+  /// moved, renamed, or deleted) is cleared so the tab returns to its
+  /// empty state.
   Future<void> _openQuickNote(String path) async {
     // Closes the keyboard before the transition (issue #4): opening the
     // overlay over a live IME rips focus mid-fade while adjustResize
@@ -2238,8 +2279,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       }
       if (!mounted) return;
       // Read the origin before the switch below: the chooser flow arrives
-      // here from the quick note tab itself, and Files is its home.
-      final fromTab = _tab == ShellTab.quickNote ? ShellTab.files : _tab;
+      // here from the quick note tab itself, and the home tab is its home;
+      // a hidden tab is a page, not a place to come back to (#536).
+      final fromTab = _tab == ShellTab.quickNote || !_shown(_tab)
+          ? _homeTab
+          : _tab;
       setState(() {
         _tab = ShellTab.quickNote;
         _visitedTabs.add(ShellTab.quickNote);

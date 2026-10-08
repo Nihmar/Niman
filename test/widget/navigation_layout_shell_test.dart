@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 
@@ -107,6 +108,57 @@ void main() {
     await settle(tester);
     expect(find.byType(NavigationBar), findsOne);
     expect(find.byType(TodoTab), findsNothing);
+  });
+
+  testWidgets('phone: back follows a switch to and from a visited hidden tab', (
+    tester,
+  ) async {
+    // Both tabs mounted already, so neither switch below needs a first
+    // build: the back key must still learn the tab is a page, and stop
+    // being one after it.
+    bool canPop() => tester
+        .widget<PopScope<Object?>>(
+          find
+              .descendant(
+                of: find.byType(NarrowShellLayout),
+                matching: find.byWidgetPredicate((w) => w is PopScope),
+              )
+              .first,
+        )
+        .canPop;
+    await open(tester, const Size(390, 844));
+    await tester.tap(find.byKey(const Key('tab-search')));
+    await settle(tester);
+    await goToTodo(tester);
+    await tester.tap(find.byKey(const Key('hidden-tab-back')));
+    await settle(tester);
+    expect(canPop(), isTrue);
+
+    await goToTodo(tester);
+    expect(canPop(), isFalse);
+    await tester.binding.handlePopRoute();
+    await settle(tester);
+    expect(find.byType(TodoTab), findsNothing);
+    expect(canPop(), isTrue);
+  });
+
+  testWidgets('phone: with Files hidden, the shell starts on the first shown', (
+    tester,
+  ) async {
+    await controller.setNavigation(
+      const NavigationLayout(
+        order: ['quicknote', 'files', 'todo', 'search', 'settings'],
+        hidden: {'files'},
+      ),
+      onDevice: false,
+    );
+    await open(tester, const Size(390, 844));
+
+    expect(find.byKey(const Key('hidden-tab-back')), findsNothing);
+    expect(
+      tester.widget<ShellTabBar>(find.byType(ShellTabBar)).current,
+      ShellTab.todo,
+    );
   });
 
   testWidgets('wide: the rail follows, Settings stays at the foot', (
