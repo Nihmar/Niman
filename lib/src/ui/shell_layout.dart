@@ -299,6 +299,9 @@ final class WideShellLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // The base the parts float on as islands: the title bar's and the
+      // rail's color, so the chrome reads as one ground around them.
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       // Under the Scaffold, whose own Esc (the drawer's, off without one)
       // would otherwise be the nearest and keep the key (#69).
       body: Actions(
@@ -343,7 +346,10 @@ final class WideShellLayout extends StatelessWidget {
                             onSwitchLibrary: props.onSwitchLibrary,
                           ),
                         ),
-                        const VerticalDivider(width: 1),
+                        // No line: the rail is part of the base the
+                        // islands sit on. The pixel stays, counted where
+                        // the shell works out where the tabs start.
+                        const SizedBox(width: 1),
                       ],
                       Expanded(
                         child: Stack(

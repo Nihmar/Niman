@@ -83,6 +83,13 @@ same Markdown either way, and only how it is drawn differs. The read view
 On the desktop the notes you have open are tabs in the title bar,
 starting where the file tree ends.
 
+On a wide window the tree, the notes and the side panel are each a
+rounded island on the color of the title bar and the rail, with a thin
+margin of it around and between them; the margin between two islands is
+what drags to make one wider. Split panes share one island, divided by
+their own line. The other places of the rail (tasks, search) are an
+island each too. A phone keeps its screens edge to edge.
+
 A name too long for its room — a tree row, a tab, the window title, or
 the phone's note bar — does not stop at an ellipsis: it scrolls itself to
 reveal the rest, rests a moment, and comes back. A system set to reduce
@@ -191,7 +198,9 @@ count.
 On Linux and Windows, `F11` (or *View: Enter Zen mode* in the command
 palette) leaves the note and nothing else: the rail, the tree, the
 tabs, the side panel, the note's toolbar row, its status row and the
-row numbers all go. A thin bar at the top keeps the note's name, the
+row numbers all go, and the note fills the window edge to edge, its
+island's margin and rounded corners with them. A thin bar at the top
+keeps the note's name, the
 button that leaves Zen, and the window's own buttons, so the window can
 still be moved and found in the taskbar. The caret is a little thicker,
 now that nothing frames it.
