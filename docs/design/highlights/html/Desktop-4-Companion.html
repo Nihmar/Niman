@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The companion note</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+.sub{font-size:13px;color:#A6A29A}
+.book{font-family:Literata,serif;font-size:17px;line-height:1.8;color:#E8E3DA;margin:0 0 16px}
+.pdf{font-family:Georgia,serif;font-size:14px;line-height:1.65;color:#222;margin:0 0 12px}
+.fm{font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;color:#6B7079}
+/* The four highlighter colours, see-through so the text keeps its own. */
+.hy{background:rgba(255,214,10,.30)} .hg{background:rgba(76,208,125,.30)}
+.hb{background:rgba(79,163,255,.30)} .hp{background:rgba(255,111,174,.30)}
+.py{background:rgba(255,214,10,.45)} .pg{background:rgba(76,208,125,.40)}
+.pb{background:rgba(79,163,255,.35)} .pp{background:rgba(255,111,174,.35)}
+/* An annotation keeps today's tint, and gains a dotted underline: a note is behind it. */
+.ann{background:rgba(255,214,10,.30);border-bottom:2px dotted #D8A56B}
+.pann{background:rgba(255,214,10,.45);border-bottom:2px dotted #B26A25}
+.sel{background:rgba(88,124,211,.55);color:#fff}
+.menu{position:absolute;background:#2C3037;border:1px solid #4A4F59;border-radius:10px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px;font-size:14px;color:#F2EDE5}
+.mi{display:flex;align-items:center;gap:10px;height:34px;padding:0 12px;border-radius:6px}
+.mi.on{background:#363B44}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid transparent;box-sizing:border-box}
+.sw.cur{border-color:#F2EDE5;box-shadow:0 0 0 2px #2C3037 inset}
+.note{position:absolute;font-size:12.5px;line-height:1.5;color:#A6A29A;max-width:300px}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+  <aside style="width:264px;flex:none;border-right:1px solid #2C3037;display:flex;flex-direction:column;padding:12px 8px;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px 12px">
+      <div style="width:22px;height:22px;border-radius:6px;background:#587CD3;font:600 13px Literata,serif;display:flex;align-items:center;justify-content:center">N</div>
+      <div style="font-weight:600">Notes</div>
+    </div>
+    <div class="tree" style="padding-left:10px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Reading</div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Books</div>
+    <div class="tree" style="padding-left:50px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Dune.epub</div>
+    <div class="tree" style="padding-left:50px;background:#2C3037;color:#F2EDE5"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Dune - annotations.md</div>
+    <div class="tree" style="padding-left:30px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 6h6l2 2h10v11H3z"/></svg>Papers</div>
+    <div class="tree" style="padding-left:50px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Local-first software.pdf</div>
+    <div class="tree" style="padding-left:50px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Local-first software - annotations.md</div>
+  </aside>
+  <main style="flex:1;display:flex;flex-direction:column;min-width:0;background:#23262B;position:relative">
+    <div style="height:42px;display:flex;align-items:flex-end;gap:2px;padding:0 8px;background:#1B1D21">
+      <div style="height:34px;padding:0 14px;display:flex;align-items:center;background:#23262B;border-radius:10px 10px 0 0;font-size:13px">Dune - annotations</div>
+    </div>
+    <div style="flex:1;padding:32px 0;display:flex;justify-content:center;position:relative">
+      <div style="width:560px;margin-right:300px">
+        <div class="fm">---<br>annotates: "[[Reading/Books/Dune.epub]]"<br>---</div>
+        <h1 style="font:600 28px Literata,serif;margin:14px 0 14px">Dune - annotations</h1>
+        <div style="border-left:3px solid #FFD60A;padding:2px 0 2px 16px;margin:0 0 14px"><p class="book" style="margin:0;font-size:16px">I must not fear. Fear is the mind-killer. Fear is the little-death that brings total obliteration.</p><div class="sub">&mdash; <a href="#">Chapter 3</a></div></div>
+        <div style="border-left:3px solid #4FA3FF;padding:2px 0 2px 16px;margin:0 0 22px"><p class="book" style="margin:0;font-size:16px">I will permit it to pass over me and through me.</p><div class="sub">&mdash; <a href="#">Chapter 3</a></div></div>
+        <h2 style="font:600 20px Literata,serif;margin:0 0 10px">Litany against fear</h2>
+        <div style="border-left:3px solid #4A4F59;padding:2px 0 2px 16px;margin:0 0 10px"><p class="book" style="margin:0;font-size:16px">Where the fear has gone there will be nothing. Only I will remain.</p><div class="sub">&mdash; <a href="#">Chapter 3</a></div></div>
+        <p class="book" style="font-size:16px">The litany is said, not felt: the point is the order of the words.</p>
+        <div style="border-left:3px solid #FF6FAE;padding:2px 0 2px 16px;margin:0 0 14px"><p class="book" style="margin:0;font-size:16px">"A duke's son must know about poisons," she said.</p><div class="sub">&mdash; <a href="#">Chapter 3</a></div></div>
+      </div>
+      <div style="position:absolute;right:24px;top:40px;width:250px;background:#2C3037;border-radius:12px;padding:12px 14px" class="fm">
+        <div class="sub" style="font-family:'IBM Plex Sans';margin-bottom:6px">The blue one, as written on disk</div>
+        &gt; I will permit it to pass<br>&gt; over me and through me.<br>&gt; &mdash; [[Dune.epub#chapter=<br>&nbsp;&nbsp;ch03&amp;line=4&amp;chars=<br>&nbsp;&nbsp;19-66&amp;<span style="color:#4FA3FF">highlight=blue</span>|<br>&nbsp;&nbsp;Chapter 3]]
+      </div>
+      <div class="note" style="left:40px;top:660px;max-width:680px">A highlight is a quote with its link and nothing else &mdash; no heading, no comment &mdash; in the same companion note annotations use (#284), in the order made. Its colour rides in the link (<code>highlight=blue</code>), so the note is the only record: it syncs, and a rebuilt index draws it again. The quote's bar wears the colour; deleting the quote here removes the highlight.</div>
+    </div>
+    <div style="height:40px;display:flex;align-items:center;gap:14px;padding:0 14px;border-top:1px solid #2C3037" class="sub"><span>Live</span><span style="flex:1"></span><span>96 words</span><span>Saved</span></div>
+  </main>
+</div>
+</body>
+</html>
