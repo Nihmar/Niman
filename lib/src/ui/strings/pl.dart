@@ -3576,4 +3576,76 @@ final class PolishStrings extends Strings {
   String get homeColumnHint =>
       'Przeciągnij uchwyt, aby zmienić kolejność. Przełącznik pokazuje lub '
       'ukrywa kafelek na każdym urządzeniu.';
+
+  @override
+  String get homeActionAdd => 'Dodaj akcję';
+
+  @override
+  String get homeActionAsk => 'Pytaj';
+
+  @override
+  String get homeActionAskHint => 'Pytane po naciśnięciu przycisku';
+
+  @override
+  String get homeActionCaptureFolder => 'Folder przechwyceń';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Edytuj akcję';
+
+  @override
+  String get homeActionFieldAdd => 'Dodaj pole';
+
+  @override
+  String get homeActionFieldKey => 'Klucz frontmattera';
+
+  @override
+  String get homeActionFields => 'Pola';
+
+  @override
+  String get homeActionFixed => 'Stałe';
+
+  @override
+  String get homeActionFixedHint => 'Tekst lub {{date}}';
+
+  @override
+  String get homeActionFolder => 'Folder';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Robi';
+
+  @override
+  String get homeActionKindOpenNote => 'Otwórz notatkę';
+
+  @override
+  String get homeActionLabel => 'Etykieta';
+
+  @override
+  String get homeActionNoNote => 'Nie wybrano notatki';
+
+  @override
+  String get homeActionNote => 'Notatka';
+
+  @override
+  String get homeActionNoTemplate => 'Brak: pusta notatka';
+
+  @override
+  String get homeActionNoteName => 'Nazwa';
+
+  @override
+  String get homeActionOpenAfter => 'Otwórz po utworzeniu';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Szablon';
+
+  @override
+  String homeActionMissing(String path) => '$path nie ma już w bibliotece';
 }

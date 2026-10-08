@@ -1808,4 +1808,29 @@ final class AppStrings {
   static String get homeSearchQueryHint => _s.homeSearchQueryHint;
   static String get homeGridHint => _s.homeGridHint;
   static String get homeColumnHint => _s.homeColumnHint;
+  // Home (#535): its actions, their editor and what breaks them.
+  static String get homeActionAdd => _s.homeActionAdd;
+  static String get homeActionAsk => _s.homeActionAsk;
+  static String get homeActionAskHint => _s.homeActionAskHint;
+  static String get homeActionCaptureFolder => _s.homeActionCaptureFolder;
+  static String get homeActionContext => _s.homeActionContext;
+  static String get homeActionEdit => _s.homeActionEdit;
+  static String get homeActionFieldAdd => _s.homeActionFieldAdd;
+  static String get homeActionFieldKey => _s.homeActionFieldKey;
+  static String get homeActionFields => _s.homeActionFields;
+  static String get homeActionFixed => _s.homeActionFixed;
+  static String get homeActionFixedHint => _s.homeActionFixedHint;
+  static String get homeActionFolder => _s.homeActionFolder;
+  static String get homeActionIcon => _s.homeActionIcon;
+  static String get homeActionKind => _s.homeActionKind;
+  static String get homeActionKindOpenNote => _s.homeActionKindOpenNote;
+  static String get homeActionLabel => _s.homeActionLabel;
+  static String get homeActionNoNote => _s.homeActionNoNote;
+  static String get homeActionNote => _s.homeActionNote;
+  static String get homeActionNoTemplate => _s.homeActionNoTemplate;
+  static String get homeActionNoteName => _s.homeActionNoteName;
+  static String get homeActionOpenAfter => _s.homeActionOpenAfter;
+  static String get homeActionProject => _s.homeActionProject;
+  static String get homeActionTemplate => _s.homeActionTemplate;
+  static String homeActionMissing(String path) => _s.homeActionMissing(path);
 }

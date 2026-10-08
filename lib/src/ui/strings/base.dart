@@ -1879,4 +1879,30 @@ abstract base class Strings {
   String get homeSearchQueryHint;
   String get homeGridHint;
   String get homeColumnHint;
+
+  // Home (#535): its actions, their editor and what breaks them.
+  String get homeActionAdd;
+  String get homeActionAsk;
+  String get homeActionAskHint;
+  String get homeActionCaptureFolder;
+  String get homeActionContext;
+  String get homeActionEdit;
+  String get homeActionFieldAdd;
+  String get homeActionFieldKey;
+  String get homeActionFields;
+  String get homeActionFixed;
+  String get homeActionFixedHint;
+  String get homeActionFolder;
+  String get homeActionIcon;
+  String get homeActionKind;
+  String get homeActionKindOpenNote;
+  String get homeActionLabel;
+  String get homeActionNoNote;
+  String get homeActionNote;
+  String get homeActionNoTemplate;
+  String get homeActionNoteName;
+  String get homeActionOpenAfter;
+  String get homeActionProject;
+  String get homeActionTemplate;
+  String homeActionMissing(String path);
 }

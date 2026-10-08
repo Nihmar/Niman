@@ -3545,4 +3545,76 @@ final class ItalianStrings extends Strings {
   String get homeColumnHint =>
       'Trascina una maniglia per riordinare. Un interruttore mostra o '
       'nasconde un riquadro su ogni dispositivo.';
+
+  @override
+  String get homeActionAdd => 'Aggiungi azione';
+
+  @override
+  String get homeActionAsk => 'Chiedi';
+
+  @override
+  String get homeActionAskHint => 'Chiesto quando si preme il pulsante';
+
+  @override
+  String get homeActionCaptureFolder => 'La cartella delle catture';
+
+  @override
+  String get homeActionContext => 'Contesto';
+
+  @override
+  String get homeActionEdit => 'Modifica azione';
+
+  @override
+  String get homeActionFieldAdd => 'Aggiungi campo';
+
+  @override
+  String get homeActionFieldKey => 'Chiave del frontmatter';
+
+  @override
+  String get homeActionFields => 'Campi';
+
+  @override
+  String get homeActionFixed => 'Fisso';
+
+  @override
+  String get homeActionFixedHint => 'Testo, oppure {{date}}';
+
+  @override
+  String get homeActionFolder => 'Cartella';
+
+  @override
+  String get homeActionIcon => 'Icona';
+
+  @override
+  String get homeActionKind => 'Fa';
+
+  @override
+  String get homeActionKindOpenNote => 'Apri una nota';
+
+  @override
+  String get homeActionLabel => 'Etichetta';
+
+  @override
+  String get homeActionNoNote => 'Nessuna nota scelta';
+
+  @override
+  String get homeActionNote => 'Nota';
+
+  @override
+  String get homeActionNoTemplate => 'Nessuno: una nota vuota';
+
+  @override
+  String get homeActionNoteName => 'Nome';
+
+  @override
+  String get homeActionOpenAfter => 'Apri dopo la creazione';
+
+  @override
+  String get homeActionProject => 'Progetto';
+
+  @override
+  String get homeActionTemplate => 'Modello';
+
+  @override
+  String homeActionMissing(String path) => '$path non è più nella libreria';
 }

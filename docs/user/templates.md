@@ -4,6 +4,10 @@ Templates live in the library's `templateFolder` (default `Templates`).
 Creating a note from a template substitutes `{{placeholders}}` and merges
 the template's frontmatter into the new note.
 
+A [Home](home.md#actions) action can make notes from a template with
+some of its questions answered in advance: a fixed value named like a
+question answers it, and the form asks only the rest.
+
 ## Commands in the editor
 
 In a note under the template folder, the editor gives every `{{…}}` the

@@ -3474,4 +3474,76 @@ final class HindiStrings extends Strings {
   String get homeColumnHint =>
       'क्रम बदलने के लिए हैंडल खींचें। स्विच हर डिवाइस पर टाइल दिखाता या '
       'छिपाता है।';
+
+  @override
+  String get homeActionAdd => 'क्रिया जोड़ें';
+
+  @override
+  String get homeActionAsk => 'पूछें';
+
+  @override
+  String get homeActionAskHint => 'बटन दबाने पर पूछा जाता है';
+
+  @override
+  String get homeActionCaptureFolder => 'कैप्चर फ़ोल्डर';
+
+  @override
+  String get homeActionContext => 'संदर्भ';
+
+  @override
+  String get homeActionEdit => 'क्रिया संपादित करें';
+
+  @override
+  String get homeActionFieldAdd => 'फ़ील्ड जोड़ें';
+
+  @override
+  String get homeActionFieldKey => 'फ्रंटमैटर कुंजी';
+
+  @override
+  String get homeActionFields => 'फ़ील्ड';
+
+  @override
+  String get homeActionFixed => 'स्थिर';
+
+  @override
+  String get homeActionFixedHint => 'पाठ, या {{date}}';
+
+  @override
+  String get homeActionFolder => 'फ़ोल्डर';
+
+  @override
+  String get homeActionIcon => 'आइकन';
+
+  @override
+  String get homeActionKind => 'करता है';
+
+  @override
+  String get homeActionKindOpenNote => 'नोट खोलें';
+
+  @override
+  String get homeActionLabel => 'लेबल';
+
+  @override
+  String get homeActionNoNote => 'कोई नोट नहीं चुना';
+
+  @override
+  String get homeActionNote => 'नोट';
+
+  @override
+  String get homeActionNoTemplate => 'कोई नहीं: खाली नोट';
+
+  @override
+  String get homeActionNoteName => 'नाम';
+
+  @override
+  String get homeActionOpenAfter => 'बनाने के बाद खोलें';
+
+  @override
+  String get homeActionProject => 'प्रोजेक्ट';
+
+  @override
+  String get homeActionTemplate => 'टेम्पलेट';
+
+  @override
+  String homeActionMissing(String path) => '$path अब लाइब्रेरी में नहीं है';
 }

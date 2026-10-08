@@ -3565,4 +3565,76 @@ final class UkrainianStrings extends Strings {
   String get homeColumnHint =>
       'Перетягніть ручку, щоб змінити порядок. Перемикач показує або '
       'приховує плитку на всіх пристроях.';
+
+  @override
+  String get homeActionAdd => 'Додати дію';
+
+  @override
+  String get homeActionAsk => 'Питати';
+
+  @override
+  String get homeActionAskHint => 'Запитується під час натискання кнопки';
+
+  @override
+  String get homeActionCaptureFolder => 'Тека для захоплень';
+
+  @override
+  String get homeActionContext => 'Контекст';
+
+  @override
+  String get homeActionEdit => 'Редагувати дію';
+
+  @override
+  String get homeActionFieldAdd => 'Додати поле';
+
+  @override
+  String get homeActionFieldKey => 'Ключ frontmatter';
+
+  @override
+  String get homeActionFields => 'Поля';
+
+  @override
+  String get homeActionFixed => 'Фіксоване';
+
+  @override
+  String get homeActionFixedHint => 'Текст або {{date}}';
+
+  @override
+  String get homeActionFolder => 'Тека';
+
+  @override
+  String get homeActionIcon => 'Значок';
+
+  @override
+  String get homeActionKind => 'Робить';
+
+  @override
+  String get homeActionKindOpenNote => 'Відкрити нотатку';
+
+  @override
+  String get homeActionLabel => 'Підпис';
+
+  @override
+  String get homeActionNoNote => 'Нотатку не вибрано';
+
+  @override
+  String get homeActionNote => 'Нотатка';
+
+  @override
+  String get homeActionNoTemplate => 'Немає: порожня нотатка';
+
+  @override
+  String get homeActionNoteName => 'Назва';
+
+  @override
+  String get homeActionOpenAfter => 'Відкрити після створення';
+
+  @override
+  String get homeActionProject => 'Проєкт';
+
+  @override
+  String get homeActionTemplate => 'Шаблон';
+
+  @override
+  String homeActionMissing(String path) => '$path більше немає в бібліотеці';
 }

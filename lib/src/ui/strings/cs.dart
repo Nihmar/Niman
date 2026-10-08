@@ -3522,4 +3522,76 @@ final class CzechStrings extends Strings {
   String get homeColumnHint =>
       'Přetažením úchytu změníte pořadí. Přepínač zobrazí nebo skryje '
       'dlaždici na všech zařízeních.';
+
+  @override
+  String get homeActionAdd => 'Přidat akci';
+
+  @override
+  String get homeActionAsk => 'Zeptat se';
+
+  @override
+  String get homeActionAskHint => 'Zeptá se při stisknutí tlačítka';
+
+  @override
+  String get homeActionCaptureFolder => 'Složka pro záchyty';
+
+  @override
+  String get homeActionContext => 'Kontext';
+
+  @override
+  String get homeActionEdit => 'Upravit akci';
+
+  @override
+  String get homeActionFieldAdd => 'Přidat pole';
+
+  @override
+  String get homeActionFieldKey => 'Klíč frontmatteru';
+
+  @override
+  String get homeActionFields => 'Pole';
+
+  @override
+  String get homeActionFixed => 'Pevné';
+
+  @override
+  String get homeActionFixedHint => 'Text nebo {{date}}';
+
+  @override
+  String get homeActionFolder => 'Složka';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Dělá';
+
+  @override
+  String get homeActionKindOpenNote => 'Otevřít poznámku';
+
+  @override
+  String get homeActionLabel => 'Popisek';
+
+  @override
+  String get homeActionNoNote => 'Není vybrána žádná poznámka';
+
+  @override
+  String get homeActionNote => 'Poznámka';
+
+  @override
+  String get homeActionNoTemplate => 'Žádná: prázdná poznámka';
+
+  @override
+  String get homeActionNoteName => 'Název';
+
+  @override
+  String get homeActionOpenAfter => 'Po vytvoření otevřít';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Šablona';
+
+  @override
+  String homeActionMissing(String path) => '$path už v knihovně není';
 }

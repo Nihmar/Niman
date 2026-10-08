@@ -3598,4 +3598,77 @@ final class GermanStrings extends Strings {
   String get homeColumnHint =>
       'Ziehe einen Griff, um die Reihenfolge zu ändern. Ein Schalter blendet '
       'eine Kachel auf jedem Gerät ein oder aus.';
+
+  @override
+  String get homeActionAdd => 'Aktion hinzufügen';
+
+  @override
+  String get homeActionAsk => 'Fragen';
+
+  @override
+  String get homeActionAskHint => 'Wird beim Drücken gefragt';
+
+  @override
+  String get homeActionCaptureFolder => 'Der Ordner für Aufnahmen';
+
+  @override
+  String get homeActionContext => 'Kontext';
+
+  @override
+  String get homeActionEdit => 'Aktion bearbeiten';
+
+  @override
+  String get homeActionFieldAdd => 'Feld hinzufügen';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-Schlüssel';
+
+  @override
+  String get homeActionFields => 'Felder';
+
+  @override
+  String get homeActionFixed => 'Fest';
+
+  @override
+  String get homeActionFixedHint => 'Text oder {{date}}';
+
+  @override
+  String get homeActionFolder => 'Ordner';
+
+  @override
+  String get homeActionIcon => 'Symbol';
+
+  @override
+  String get homeActionKind => 'Macht';
+
+  @override
+  String get homeActionKindOpenNote => 'Eine Notiz öffnen';
+
+  @override
+  String get homeActionLabel => 'Beschriftung';
+
+  @override
+  String get homeActionNoNote => 'Keine Notiz gewählt';
+
+  @override
+  String get homeActionNote => 'Notiz';
+
+  @override
+  String get homeActionNoTemplate => 'Keine: eine leere Notiz';
+
+  @override
+  String get homeActionNoteName => 'Name';
+
+  @override
+  String get homeActionOpenAfter => 'Nach dem Erstellen öffnen';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Vorlage';
+
+  @override
+  String homeActionMissing(String path) =>
+      '$path ist nicht mehr in der Bibliothek';
 }

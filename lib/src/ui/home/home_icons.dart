@@ -46,6 +46,15 @@ IconData homeActionIcon(HomeAction action) =>
     homeActionIcons[action.icon] ??
     homeActionIcons[defaultActionIcon(action.kind)]!;
 
+/// What a kind of action does, as the editor names it.
+String homeActionKindName(HomeActionKind kind) => switch (kind) {
+  HomeActionKind.newNote => AppStrings.shortcutNewNote,
+  HomeActionKind.addTask => AppStrings.todoAddTooltip,
+  HomeActionKind.openNote => AppStrings.homeActionKindOpenNote,
+  HomeActionKind.journal => AppStrings.journalToday,
+  HomeActionKind.capture => AppStrings.captureWebPage,
+};
+
 /// [action]'s label: its own, or what its kind does.
 String homeActionLabel(HomeAction action) {
   if (action.label.isNotEmpty) return action.label;

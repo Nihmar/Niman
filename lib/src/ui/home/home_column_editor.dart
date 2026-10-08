@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/home/home_tile.dart';
+import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/home/home_edit_dialogs.dart';
 import 'package:niman/src/ui/home/home_editing.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
@@ -14,21 +15,28 @@ import 'package:niman/src/ui/home/home_scope_switch.dart';
 import 'package:niman/src/ui/home/home_tile_settings.dart';
 import 'package:niman/src/ui/strings.dart';
 
-/// Opens the editor of [editing]'s Home as a page.
-Future<void> openHomeColumnEditor(BuildContext context, HomeEditing editing) =>
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => HomeColumnEditor(editing: editing),
-      ),
-    );
+/// Opens the editor of [editing]'s Home, in [controller]'s library, as a
+/// page.
+Future<void> openHomeColumnEditor(
+  BuildContext context,
+  HomeEditing editing,
+  LibrarySession controller,
+) => Navigator.of(context).push(
+  MaterialPageRoute<void>(
+    builder: (_) => HomeColumnEditor(editing: editing, controller: controller),
+  ),
+);
 
 /// The list of tiles, as a page.
 final class HomeColumnEditor extends StatelessWidget {
-  /// Edits [editing]'s Home.
-  const new({required this.editing, super.key});
+  /// Edits [editing]'s Home in [controller]'s library.
+  const new({required this.editing, required this.controller, super.key});
 
   /// The Home being edited.
   final HomeEditing editing;
+
+  /// The open library, for the tiles' settings.
+  final LibrarySession controller;
 
   void _reorder(List<HomeTile> tiles, int from, int to) {
     final ids = [for (final t in tiles) t.id];
@@ -113,8 +121,14 @@ final class HomeColumnEditor extends StatelessWidget {
                       IconButton(
                         key: Key('home-settings-${tile.id}'),
                         tooltip: AppStrings.homeTileSettings,
-                        onPressed: () =>
-                            unawaited(openTileSettings(context, editing, tile)),
+                        onPressed: () => unawaited(
+                          openTileSettings(
+                            context,
+                            editing,
+                            tile,
+                            controller: controller,
+                          ),
+                        ),
                         icon: const Icon(Icons.tune),
                       ),
                     Switch(

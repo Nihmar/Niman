@@ -39,6 +39,7 @@ import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
 import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -88,6 +89,7 @@ import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/home/action_runner.dart';
 import 'package:niman/src/ui/home/home_host.dart';
+import 'package:niman/src/ui/home/home_note_action.dart';
 import 'package:niman/src/ui/home/home_screen.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
@@ -4953,21 +4955,45 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Runs the Home's actions through the shell's own flows (#535).
   late final HomeActionRunner _homeActions = HomeActionRunner(
-    newNote: (context, action) async {
-      final folder = action.folder ?? '';
-      if (folder.isNotEmpty) {
-        await _guard(() async {
-          await widget.controller.ops?.ensureFolder(folder);
-        });
-      }
-      if (!context.mounted) return;
-      await _createFlow.createNote(context, parent: folder);
-    },
-    addTask: (_) => _addTodo(),
+    newNote: (context, action) => makeHomeNote(
+      context,
+      action,
+      controller: widget.controller,
+      templates: _templateFlow,
+    ),
+    addTask: _addHomeTask,
     openNote: _openSearchNote,
     openJournal: _journalFlow.openToday,
-    capture: (context, _) => _captureFlow.capture(context),
+    capture: (context, action) =>
+        _captureFlow.capture(context, folder: action.folder),
+    missing: widget.controller.missingPaths,
+    tell: (message) =>
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message))),
   );
+
+  /// Adds a task from a Home action: its project and context are written
+  /// in, the caret before them.
+  Future<void> _addHomeTask(HomeAction action) async {
+    final snapshot = _todoController.snapshot;
+    final line = await showTodoTaskDialog(
+      context,
+      today: DateTime.now(),
+      text: [
+        '',
+        if (action.project case final project? when project.isNotEmpty)
+          '+$project',
+        if (action.context case final where? when where.isNotEmpty) '@$where',
+      ].join(' '),
+      knownTokens: snapshot == null
+          ? const <String>{}
+          : snapshotTokens(snapshot),
+      health: widget.reminders.health.value,
+      onOpenReminderSettings: widget.reminders.openHealthSettings,
+    );
+    if (line == null || !mounted) return;
+    await _guard(() => _todoController.add(line));
+  }
 
   /// The desktop tree's controls at the base of its column (T-PP-22):
   /// creation, the trash and the sort order — the app-bar actions the

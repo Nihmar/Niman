@@ -3548,4 +3548,76 @@ final class AlbanianStrings extends Strings {
   String get homeColumnHint =>
       'Tërhiqni një dorezë për të rirenditur. Një çelës shfaq ose fsheh një '
       'pllakë në çdo pajisje.';
+
+  @override
+  String get homeActionAdd => 'Shto veprim';
+
+  @override
+  String get homeActionAsk => 'Pyet';
+
+  @override
+  String get homeActionAskHint => 'Pyetet kur shtypet butoni';
+
+  @override
+  String get homeActionCaptureFolder => 'Dosja e kapjeve';
+
+  @override
+  String get homeActionContext => 'Konteksti';
+
+  @override
+  String get homeActionEdit => 'Ndrysho veprimin';
+
+  @override
+  String get homeActionFieldAdd => 'Shto fushë';
+
+  @override
+  String get homeActionFieldKey => 'Çelësi i frontmatter';
+
+  @override
+  String get homeActionFields => 'Fushat';
+
+  @override
+  String get homeActionFixed => 'Fiks';
+
+  @override
+  String get homeActionFixedHint => 'Tekst, ose {{date}}';
+
+  @override
+  String get homeActionFolder => 'Dosja';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Bën';
+
+  @override
+  String get homeActionKindOpenNote => 'Hap një shënim';
+
+  @override
+  String get homeActionLabel => 'Etiketa';
+
+  @override
+  String get homeActionNoNote => 'Asnjë shënim i zgjedhur';
+
+  @override
+  String get homeActionNote => 'Shënim';
+
+  @override
+  String get homeActionNoTemplate => 'Asnjë: një shënim bosh';
+
+  @override
+  String get homeActionNoteName => 'Emri';
+
+  @override
+  String get homeActionOpenAfter => 'Hape pas krijimit';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Shabllon';
+
+  @override
+  String homeActionMissing(String path) => '$path nuk është më në bibliotekë';
 }

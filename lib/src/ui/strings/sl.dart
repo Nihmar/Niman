@@ -3545,4 +3545,76 @@ final class SlovenianStrings extends Strings {
   String get homeColumnHint =>
       'Povlecite ročico, da spremenite vrstni red. Stikalo prikaže ali '
       'skrije ploščico na vseh napravah.';
+
+  @override
+  String get homeActionAdd => 'Dodaj dejanje';
+
+  @override
+  String get homeActionAsk => 'Vprašaj';
+
+  @override
+  String get homeActionAskHint => 'Vpraša ob pritisku na gumb';
+
+  @override
+  String get homeActionCaptureFolder => 'Mapa za zajeme';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Uredi dejanje';
+
+  @override
+  String get homeActionFieldAdd => 'Dodaj polje';
+
+  @override
+  String get homeActionFieldKey => 'Ključ frontmatterja';
+
+  @override
+  String get homeActionFields => 'Polja';
+
+  @override
+  String get homeActionFixed => 'Fiksno';
+
+  @override
+  String get homeActionFixedHint => 'Besedilo ali {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mapa';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Naredi';
+
+  @override
+  String get homeActionKindOpenNote => 'Odpri zapisek';
+
+  @override
+  String get homeActionLabel => 'Oznaka';
+
+  @override
+  String get homeActionNoNote => 'Ni izbranega zapiska';
+
+  @override
+  String get homeActionNote => 'Zapisek';
+
+  @override
+  String get homeActionNoTemplate => 'Brez: prazen zapisek';
+
+  @override
+  String get homeActionNoteName => 'Ime';
+
+  @override
+  String get homeActionOpenAfter => 'Odpri po ustvarjanju';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Predloga';
+
+  @override
+  String homeActionMissing(String path) => '$path ni več v knjižnici';
 }

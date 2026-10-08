@@ -20,7 +20,7 @@ the shape follows the room on screen, not the system.
 ## Tiles
 
 - **Actions** — buttons that run something the app already does, with
-  what it needs set in advance.
+  what it needs set in advance (see [actions](#actions)).
 - **Today's journal** — the first lines of today's [journal](journal.md)
   entry; a tap opens it. With no entry yet, *Write today's entry* makes
   it.
@@ -43,6 +43,45 @@ nothing. While the Home is on screen, a change in the library shows in
 its tiles; a change made while you were elsewhere is there when you come
 back.
 
+## Actions
+
+An **Actions** tile is a row of buttons, each one something the app
+already does with what it needs set in advance:
+
+- **New note** — from a [template](templates.md) or empty, in a folder,
+  its name and frontmatter fields filled.
+- **Add task** — the task dialog, its `+project` and `@context` already
+  written in.
+- **Open a note**.
+- **Today's entry** — the [journal](journal.md)'s.
+- **Capture web page** — into a folder of its own instead of the capture
+  folder (see [web capture](web-capture.md)).
+
+Every value of a new note is **Fixed** or **Ask**:
+
+- A fixed value is written as it is, after the template commands in it
+  run: `{{date}} Meeting` is today's meeting. It may ask a question of
+  its own: `{{ask:Topic}}`.
+- An asked value is a question when the button is pressed. Under its
+  box sit the values the library already holds for that frontmatter key,
+  most used first: a tap writes one in, or adds it after a comma.
+- A field named like one of the template's own questions (`Topic` for
+  `{{ask:Topic}}`) answers that question; any other fills the frontmatter
+  key of that name.
+
+All the questions come in one form — a dialog on a wide window, a sheet
+on a phone — and with nothing to ask, the note is made at once. *Open
+after creating* decides whether it opens. A button that asks something
+says so with `…`.
+
+An action keeps the template, folder or note it names by path: a rename
+or a move follows it. One whose template or note is gone is marked on its
+button, and pressed it says what is missing; restoring the note from the
+trash mends it. A folder that is gone is simply made again.
+
+To set the buttons, **Edit home** and the tile's ⚙: drag to reorder, the
+bin to remove, a tap to edit one, *Add action* for another.
+
 ## Editing the Home
 
 On a wide window, **Edit home** at the top right turns the grid into its
@@ -60,12 +99,13 @@ editor, with the tiles to add on the right:
 - **Add tiles** lists every kind; one a Home shows once is offered only
   while it has none. A Home can hold several *Actions* and *Saved search*
   tiles.
-- **⚙** on a saved search sets its name and its query.
+- **⚙** on a saved search sets its name and its query; on an actions
+  tile, its buttons.
 - **Reset** puts the default Home back, after asking.
 
 On a phone, the ✎ beside the date opens the same Home as a list: a handle
 to drag each tile up or down, a switch to show or hide it, ⚙ for a saved
-search's settings, and the tiles to add at the foot. Every change is kept
+search's or an actions tile's settings, and the tiles to add at the foot. Every change is kept
 as you make it.
 
 A tile hidden here is hidden on every device. A phone that should show

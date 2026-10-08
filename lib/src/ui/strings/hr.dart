@@ -3551,4 +3551,76 @@ final class CroatianStrings extends Strings {
   String get homeColumnHint =>
       'Povucite ručicu za promjenu redoslijeda. Prekidač prikazuje ili '
       'skriva pločicu na svakom uređaju.';
+
+  @override
+  String get homeActionAdd => 'Dodaj radnju';
+
+  @override
+  String get homeActionAsk => 'Pitaj';
+
+  @override
+  String get homeActionAskHint => 'Pita se kad se pritisne gumb';
+
+  @override
+  String get homeActionCaptureFolder => 'Mapa za snimke';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Uredi radnju';
+
+  @override
+  String get homeActionFieldAdd => 'Dodaj polje';
+
+  @override
+  String get homeActionFieldKey => 'Ključ frontmattera';
+
+  @override
+  String get homeActionFields => 'Polja';
+
+  @override
+  String get homeActionFixed => 'Fiksno';
+
+  @override
+  String get homeActionFixedHint => 'Tekst ili {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mapa';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Radi';
+
+  @override
+  String get homeActionKindOpenNote => 'Otvori bilješku';
+
+  @override
+  String get homeActionLabel => 'Oznaka';
+
+  @override
+  String get homeActionNoNote => 'Nije odabrana bilješka';
+
+  @override
+  String get homeActionNote => 'Bilješka';
+
+  @override
+  String get homeActionNoTemplate => 'Nijedan: prazna bilješka';
+
+  @override
+  String get homeActionNoteName => 'Naziv';
+
+  @override
+  String get homeActionOpenAfter => 'Otvori nakon stvaranja';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Predložak';
+
+  @override
+  String homeActionMissing(String path) => '$path više nije u knjižnici';
 }

@@ -44,6 +44,7 @@ final class TemplateField {
     this.hint = '',
     this.choices = const [],
     this.title,
+    this.suggestions = const [],
   });
 
   /// What the field is called; also the key its answer is stored under.
@@ -64,6 +65,11 @@ final class TemplateField {
 
   /// The options of a choice field, in the order the template wrote them.
   final List<String> choices;
+
+  /// Values a text field offers under it, most likely first: what the
+  /// library already holds for the frontmatter key a Home action asks
+  /// for (#535). A template's own questions offer none.
+  final List<String> suggestions;
 
   /// What the form offers before the user touches anything: the hint for
   /// a text field, the first option for a choice.

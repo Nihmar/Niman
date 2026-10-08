@@ -14,6 +14,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/home/home_tile.dart';
 import 'package:niman/src/home/home_tile_move.dart';
+import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/home/home_add_panel.dart';
 import 'package:niman/src/ui/home/home_editing.dart';
 import 'package:niman/src/ui/home/home_grid.dart';
@@ -23,11 +24,20 @@ import 'package:niman/src/ui/strings.dart';
 
 /// The grid in edit mode, with the add panel at its side.
 final class HomeGridEditor extends StatefulWidget {
-  /// Edits [editing]'s layout; [tile] draws a tile's content.
-  const new({required this.editing, required this.tile, super.key});
+  /// Edits [editing]'s layout in [controller]'s library; [tile] draws a
+  /// tile's content.
+  const new({
+    required this.editing,
+    required this.controller,
+    required this.tile,
+    super.key,
+  });
 
   /// The Home being edited.
   final HomeEditing editing;
+
+  /// The open library, for the tiles' settings.
+  final LibrarySession controller;
 
   /// Draws one tile.
   final Widget Function(HomeTile tile, {bool fit}) tile;
@@ -171,7 +181,12 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
                           ),
                           onSettings: hasTileSettings(t)
                               ? () => unawaited(
-                                  openTileSettings(context, _editing, t),
+                                  openTileSettings(
+                                    context,
+                                    _editing,
+                                    t,
+                                    controller: widget.controller,
+                                  ),
                                 )
                               : null,
                         ),

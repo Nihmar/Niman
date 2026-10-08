@@ -3582,4 +3582,76 @@ final class CatalanStrings extends Strings {
   String get homeColumnHint =>
       'Arrossega una nansa per reordenar. Un interruptor mostra o amaga una '
       'rajola a tots els dispositius.';
+
+  @override
+  String get homeActionAdd => 'Afegeix una acció';
+
+  @override
+  String get homeActionAsk => 'Pregunta';
+
+  @override
+  String get homeActionAskHint => 'Es pregunta en prémer el botó';
+
+  @override
+  String get homeActionCaptureFolder => 'La carpeta de captures';
+
+  @override
+  String get homeActionContext => 'Context';
+
+  @override
+  String get homeActionEdit => "Edita l'acció";
+
+  @override
+  String get homeActionFieldAdd => 'Afegeix un camp';
+
+  @override
+  String get homeActionFieldKey => 'Clau del frontmatter';
+
+  @override
+  String get homeActionFields => 'Camps';
+
+  @override
+  String get homeActionFixed => 'Fix';
+
+  @override
+  String get homeActionFixedHint => 'Text, o {{date}}';
+
+  @override
+  String get homeActionFolder => 'Carpeta';
+
+  @override
+  String get homeActionIcon => 'Icona';
+
+  @override
+  String get homeActionKind => 'Fa';
+
+  @override
+  String get homeActionKindOpenNote => 'Obre una nota';
+
+  @override
+  String get homeActionLabel => 'Etiqueta';
+
+  @override
+  String get homeActionNoNote => "No s'ha triat cap nota";
+
+  @override
+  String get homeActionNote => 'Nota';
+
+  @override
+  String get homeActionNoTemplate => 'Cap: una nota buida';
+
+  @override
+  String get homeActionNoteName => 'Nom';
+
+  @override
+  String get homeActionOpenAfter => 'Obre després de crear';
+
+  @override
+  String get homeActionProject => 'Projecte';
+
+  @override
+  String get homeActionTemplate => 'Plantilla';
+
+  @override
+  String homeActionMissing(String path) => '$path ja no és a la biblioteca';
 }

@@ -3540,4 +3540,76 @@ final class BulgarianStrings extends Strings {
   String get homeColumnHint =>
       'Плъзнете дръжката, за да пренаредите. Превключвателят показва или '
       'скрива плочката на всяко устройство.';
+
+  @override
+  String get homeActionAdd => 'Добавяне на действие';
+
+  @override
+  String get homeActionAsk => 'Питане';
+
+  @override
+  String get homeActionAskHint => 'Пита се при натискане на бутона';
+
+  @override
+  String get homeActionCaptureFolder => 'Папката за запазени страници';
+
+  @override
+  String get homeActionContext => 'Контекст';
+
+  @override
+  String get homeActionEdit => 'Редактиране на действието';
+
+  @override
+  String get homeActionFieldAdd => 'Добавяне на поле';
+
+  @override
+  String get homeActionFieldKey => 'Ключ на frontmatter';
+
+  @override
+  String get homeActionFields => 'Полета';
+
+  @override
+  String get homeActionFixed => 'Фиксирано';
+
+  @override
+  String get homeActionFixedHint => 'Текст или {{date}}';
+
+  @override
+  String get homeActionFolder => 'Папка';
+
+  @override
+  String get homeActionIcon => 'Икона';
+
+  @override
+  String get homeActionKind => 'Прави';
+
+  @override
+  String get homeActionKindOpenNote => 'Отваряне на бележка';
+
+  @override
+  String get homeActionLabel => 'Етикет';
+
+  @override
+  String get homeActionNoNote => 'Не е избрана бележка';
+
+  @override
+  String get homeActionNote => 'Бележка';
+
+  @override
+  String get homeActionNoTemplate => 'Няма: празна бележка';
+
+  @override
+  String get homeActionNoteName => 'Име';
+
+  @override
+  String get homeActionOpenAfter => 'Отваряне след създаване';
+
+  @override
+  String get homeActionProject => 'Проект';
+
+  @override
+  String get homeActionTemplate => 'Шаблон';
+
+  @override
+  String homeActionMissing(String path) => '$path вече не е в библиотеката';
 }

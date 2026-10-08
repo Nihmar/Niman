@@ -120,7 +120,7 @@ final class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _editColumn(HomeEditing home) async {
-    await openHomeColumnEditor(context, home);
+    await openHomeColumnEditor(context, home, widget.host.controller);
     if (mounted) unawaited(home.load());
   }
 
@@ -156,7 +156,11 @@ final class _HomeScreenState extends State<HomeScreen> {
               else
                 _ColumnHeader(onEdit: () => unawaited(_editColumn(home))),
               if (editing)
-                HomeGridEditor(editing: home, tile: tile)
+                HomeGridEditor(
+                  editing: home,
+                  controller: widget.host.controller,
+                  tile: tile,
+                )
               else if (wide)
                 HomeGrid(layout: layout.settled(), tile: tile)
               else

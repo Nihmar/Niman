@@ -3488,4 +3488,76 @@ final class TurkishStrings extends Strings {
   String get homeColumnHint =>
       'Sıralamak için bir tutamacı sürükleyin. Bir anahtar, kutucuğu her '
       'cihazda gösterir veya gizler.';
+
+  @override
+  String get homeActionAdd => 'Eylem ekle';
+
+  @override
+  String get homeActionAsk => 'Sor';
+
+  @override
+  String get homeActionAskHint => 'Düğmeye basınca sorulur';
+
+  @override
+  String get homeActionCaptureFolder => 'Yakalama klasörü';
+
+  @override
+  String get homeActionContext => 'Bağlam';
+
+  @override
+  String get homeActionEdit => 'Eylemi düzenle';
+
+  @override
+  String get homeActionFieldAdd => 'Alan ekle';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter anahtarı';
+
+  @override
+  String get homeActionFields => 'Alanlar';
+
+  @override
+  String get homeActionFixed => 'Sabit';
+
+  @override
+  String get homeActionFixedHint => 'Metin ya da {{date}}';
+
+  @override
+  String get homeActionFolder => 'Klasör';
+
+  @override
+  String get homeActionIcon => 'Simge';
+
+  @override
+  String get homeActionKind => 'Yapar';
+
+  @override
+  String get homeActionKindOpenNote => 'Bir not aç';
+
+  @override
+  String get homeActionLabel => 'Etiket';
+
+  @override
+  String get homeActionNoNote => 'Not seçilmedi';
+
+  @override
+  String get homeActionNote => 'Not';
+
+  @override
+  String get homeActionNoTemplate => 'Yok: boş bir not';
+
+  @override
+  String get homeActionNoteName => 'Ad';
+
+  @override
+  String get homeActionOpenAfter => 'Oluşturduktan sonra aç';
+
+  @override
+  String get homeActionProject => 'Proje';
+
+  @override
+  String get homeActionTemplate => 'Şablon';
+
+  @override
+  String homeActionMissing(String path) => '$path artık kitaplıkta değil';
 }

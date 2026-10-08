@@ -3517,4 +3517,76 @@ final class LatvianStrings extends Strings {
   String get homeColumnHint =>
       'Velciet turi, lai mainītu secību. Slēdzis rāda vai paslēpj flīzi '
       'visās ierīcēs.';
+
+  @override
+  String get homeActionAdd => 'Pievienot darbību';
+
+  @override
+  String get homeActionAsk => 'Jautāt';
+
+  @override
+  String get homeActionAskHint => 'Jautā, nospiežot pogu';
+
+  @override
+  String get homeActionCaptureFolder => 'Saglabāto lapu mape';
+
+  @override
+  String get homeActionContext => 'Konteksts';
+
+  @override
+  String get homeActionEdit => 'Rediģēt darbību';
+
+  @override
+  String get homeActionFieldAdd => 'Pievienot lauku';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter atslēga';
+
+  @override
+  String get homeActionFields => 'Lauki';
+
+  @override
+  String get homeActionFixed => 'Fiksēta';
+
+  @override
+  String get homeActionFixedHint => 'Teksts vai {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mape';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Dara';
+
+  @override
+  String get homeActionKindOpenNote => 'Atvērt piezīmi';
+
+  @override
+  String get homeActionLabel => 'Etiķete';
+
+  @override
+  String get homeActionNoNote => 'Piezīme nav izvēlēta';
+
+  @override
+  String get homeActionNote => 'Piezīme';
+
+  @override
+  String get homeActionNoTemplate => 'Nav: tukša piezīme';
+
+  @override
+  String get homeActionNoteName => 'Nosaukums';
+
+  @override
+  String get homeActionOpenAfter => 'Atvērt pēc izveides';
+
+  @override
+  String get homeActionProject => 'Projekts';
+
+  @override
+  String get homeActionTemplate => 'Veidne';
+
+  @override
+  String homeActionMissing(String path) => '$path vairs nav bibliotēkā';
 }
