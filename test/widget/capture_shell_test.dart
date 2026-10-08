@@ -1,4 +1,4 @@
-// The ways to a capture on the desktop (#531): Ctrl+Alt+W opens the dialog,
+// The ways to a capture on the desktop (#531): Ctrl+Shift+W opens the dialog,
 // on the clipboard's address when it holds one, and a link pasted where
 // nothing else takes a paste opens it on that link — while a paste into a
 // text field stays a paste.
@@ -76,14 +76,14 @@ void main() {
       .controller!
       .text;
 
-  testWidgets('Ctrl+Alt+W opens the dialog, empty without an address', (
+  testWidgets('Ctrl+Shift+W opens the dialog, empty without an address', (
     tester,
   ) async {
     clipboard = 'just some words';
     await pumpShell(tester);
     await keys(tester, [
       LogicalKeyboardKey.controlLeft,
-      LogicalKeyboardKey.altLeft,
+      LogicalKeyboardKey.shiftLeft,
       LogicalKeyboardKey.keyW,
     ]);
     expect(find.byKey(const Key('capture-dialog')), findsOne);

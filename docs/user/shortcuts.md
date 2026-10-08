@@ -15,7 +15,7 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Shift+A` — new voice note
 - `Ctrl/⌘+T` — new todo
 - `Ctrl/⌘+Q` — quick note
-- `Ctrl/⌘+Alt+W` — capture a web page as a note, the clipboard's address
+- `Ctrl/⌘+Shift+W` — capture a web page as a note, the clipboard's address
   when it holds one (see [web capture](web-capture.md))
 - `Ctrl/⌘+Shift+V` — paste as Markdown: what was copied from a web page
   goes into the note as Markdown, linked to its page (see
