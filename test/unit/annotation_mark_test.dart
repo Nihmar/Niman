@@ -2,6 +2,7 @@
 // file, each with the annotation — the section — it belongs to.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/annotations/annotation_mark.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/reading/book_location.dart';
 
 void main() {
@@ -66,5 +67,64 @@ void main() {
 
   test('a link to a heading, or to no place, is no mark', () {
     expect(annotationLinksIn('[[Note#Heading]] [x](a.md) [[a.pdf]]'), isEmpty);
+  });
+
+  group('a highlight (#626)', () {
+    const highlights =
+        '## Dune, p. 3\n'
+        '\n'
+        '> A passage.\n'
+        '> — [[Books/Dune.pdf#page=3&chars=4-9|Dune, p. 3]]\n'
+        '\n'
+        'A comment.\n'
+        '\n'
+        r'> The spice \#must'
+        '\n'
+        '> flow.\n'
+        '> — [[Books/Dune.pdf#page=4&chars=0-20&highlight=blue|Dune, p. 4]]\n'
+        '\n'
+        '[Dune, p. 5](Books/Dune.pdf#page=5&highlight=pink)\n';
+
+    test('is its own quote, under whatever heading it falls', () {
+      final links = annotationLinksIn(highlights);
+      expect(
+        [for (final l in links) l.highlight],
+        [null, HighlightColour.blue, HighlightColour.pink],
+      );
+      final blue = links[1];
+      expect(blue.title, isNull);
+      expect(
+        blue.place,
+        const PdfLocation(page: 4, chars: (start: 0, end: 20)),
+      );
+      expect(blue.quote, 'The spice #must flow.');
+      expect(
+        highlights.substring(blue.offset, blue.end),
+        r'> The spice \#must'
+        '\n'
+        '> flow.\n'
+        '> — [[Books/Dune.pdf#page=4&chars=0-20&highlight=blue|Dune, p. 4]]\n',
+      );
+    });
+
+    test('a link on a line of its own is its own quote', () {
+      final pink = annotationLinksIn(highlights).last;
+      expect(highlights.substring(pink.offset, pink.end), endsWith('pink)\n'));
+      expect(pink.quote, isEmpty);
+    });
+
+    test('an annotation has no colour, no end, no quote', () {
+      final first = annotationLinksIn(highlights).first;
+      expect(first.end, isNull);
+      expect(first.quote, isEmpty);
+      expect(first.title, 'Dune, p. 3');
+    });
+
+    test('a colour the app does not know is an annotation', () {
+      final link = annotationLinksIn(
+        '[[Books/Dune.pdf#page=4&highlight=mauve]]\n',
+      ).single;
+      expect(link.highlight, isNull);
+    });
   });
 }
