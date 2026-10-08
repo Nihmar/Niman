@@ -50,6 +50,15 @@ void main() {
         build: build,
         findInstalled: () async => installed,
         probe: (_) async => '5.5.3',
+        // No network here: a download starts, then fails for good.
+        retryDelays: const [],
+        startDownload: ({
+          required uri,
+          required target,
+          required onProgress,
+          sha256,
+          onHeaders,
+        }) async => throw const SocketException('offline'),
       );
       await ocr.load();
     });
@@ -109,6 +118,55 @@ void main() {
     expect(find.byKey(const Key('ocr-download-fast/fra')), findsNothing);
     // The languages on the device stay listed whatever the search.
     expect(find.byKey(const Key('ocr-delete-fast/ita')), findsOne);
+  });
+
+  testWidgets('emptying the search lists every language again', (tester) async {
+    await open(tester, installed: system);
+    final search = find.byKey(const Key('ocr-language-search'));
+    await tester.enterText(search, 'germ');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ocr-download-fast/fra')), findsNothing);
+
+    await tester.enterText(search, '');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ocr-download-fast/deu')), findsOne);
+    expect(find.byKey(const Key('ocr-download-fast/fra')), findsOne);
+  });
+
+  testWidgets('a download started from a search keeps the search', (
+    tester,
+  ) async {
+    await open(tester, installed: system);
+    final search = find.byKey(const Key('ocr-language-search'));
+    await tester.enterText(search, 'deutsch');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ocr-download-fast/deu_latf')), findsOne);
+
+    // German joins those on the device, above the search.
+    final deu = ocrLanguageByCode('deu')!.file(OcrQuality.fast)!;
+    await tester.tap(find.byKey(const Key('ocr-download-fast/deu')));
+    for (var i = 0; i < 100 && ocr.stateOf(deu) is! DownloadFailed; i++) {
+      await real(
+        tester,
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+    expect(ocr.stateOf(deu), isA<DownloadFailed>());
+
+    // The field still reads what the list is filtered by.
+    expect(
+      find.descendant(of: search, matching: find.text('deutsch')),
+      findsOne,
+    );
+    expect(find.byKey(const Key('ocr-download-fast/deu_latf')), findsOne);
+    expect(find.byKey(const Key('ocr-download-fast/fra')), findsNothing);
+
+    // And emptying it brings every language back.
+    await tester.enterText(search, '');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ocr-download-fast/fra')), findsOne);
   });
 
   testWidgets('an engine to download, or none for this device', (tester) async {
