@@ -3057,4 +3057,88 @@ final class ChineseStrings extends Strings {
 
   @override
   String get homeRandomAnother => '换一条';
+
+  @override
+  String get homeEdit => '编辑主页';
+
+  @override
+  String get homeEditDone => '完成';
+
+  @override
+  String get homeReset => '重置';
+
+  @override
+  String get homeResetTitle => '要重置主页吗？';
+
+  @override
+  String get homeResetBody => '所有磁贴都会恢复为默认主页。';
+
+  @override
+  String get homeUseLibraryTitle => '要使用资料库的主页吗？';
+
+  @override
+  String get homeUseLibraryBody => '此设备自己的主页将被丢弃，这里会重新显示资料库的主页。';
+
+  @override
+  String get homeUseLibraryConfirm => '丢弃';
+
+  @override
+  String get homeAddTiles => '添加磁贴';
+
+  @override
+  String get homeHiddenTiles => '已隐藏';
+
+  @override
+  String get homeTileOnHome => '已在主页';
+
+  @override
+  String get homeTileHide => '隐藏';
+
+  @override
+  String get homeTileShow => '显示';
+
+  @override
+  String get homeTileMove => '移动和调整大小';
+
+  @override
+  String get homeMoveLeft => '左移';
+
+  @override
+  String get homeMoveRight => '右移';
+
+  @override
+  String get homeMoveUp => '上移';
+
+  @override
+  String get homeMoveDown => '下移';
+
+  @override
+  String get homeWider => '加宽';
+
+  @override
+  String get homeNarrower => '变窄';
+
+  @override
+  String get homeTaller => '加高';
+
+  @override
+  String get homeShorter => '降低';
+
+  @override
+  String get homeTileSettings => '磁贴设置';
+
+  @override
+  String get homeSearchName => '名称';
+
+  @override
+  String get homeSearchQuery => '查询';
+
+  @override
+  String get homeSearchQueryHint => '词语，或 键 = 值';
+
+  @override
+  String get homeGridHint => '拖动磁贴可移动它，拖动它的角可调整大小。';
+
+  @override
+  String get homeColumnHint => '拖动手柄可重新排序。开关会在所有设备上显示或隐藏磁贴。';
 }

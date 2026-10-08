@@ -3394,4 +3394,92 @@ final class EnglishStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Another one';
+
+  @override
+  String get homeEdit => 'Edit home';
+
+  @override
+  String get homeEditDone => 'Done';
+
+  @override
+  String get homeReset => 'Reset';
+
+  @override
+  String get homeResetTitle => 'Reset the Home?';
+
+  @override
+  String get homeResetBody => 'Every tile goes back to the default Home.';
+
+  @override
+  String get homeUseLibraryTitle => "Use the library's Home?";
+
+  @override
+  String get homeUseLibraryBody =>
+      "This device's own Home is discarded, and the library's shows here "
+      'again.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Discard';
+
+  @override
+  String get homeAddTiles => 'Add tiles';
+
+  @override
+  String get homeHiddenTiles => 'Hidden';
+
+  @override
+  String get homeTileOnHome => 'On the Home';
+
+  @override
+  String get homeTileHide => 'Hide';
+
+  @override
+  String get homeTileShow => 'Show';
+
+  @override
+  String get homeTileMove => 'Move and size';
+
+  @override
+  String get homeMoveLeft => 'Move left';
+
+  @override
+  String get homeMoveRight => 'Move right';
+
+  @override
+  String get homeMoveUp => 'Move up';
+
+  @override
+  String get homeMoveDown => 'Move down';
+
+  @override
+  String get homeWider => 'Wider';
+
+  @override
+  String get homeNarrower => 'Narrower';
+
+  @override
+  String get homeTaller => 'Taller';
+
+  @override
+  String get homeShorter => 'Shorter';
+
+  @override
+  String get homeTileSettings => 'Tile settings';
+
+  @override
+  String get homeSearchName => 'Name';
+
+  @override
+  String get homeSearchQuery => 'Query';
+
+  @override
+  String get homeSearchQueryHint => 'Words, or key = value';
+
+  @override
+  String get homeGridHint => 'Drag a tile to move it, its corner to resize it.';
+
+  @override
+  String get homeColumnHint =>
+      'Drag a handle to reorder. A switch shows or hides a tile on every '
+      'device.';
 }

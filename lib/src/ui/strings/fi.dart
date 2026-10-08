@@ -3452,4 +3452,92 @@ final class FinnishStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Toinen';
+
+  @override
+  String get homeEdit => 'Muokkaa kotia';
+
+  @override
+  String get homeEditDone => 'Valmis';
+
+  @override
+  String get homeReset => 'Palauta';
+
+  @override
+  String get homeResetTitle => 'Palautetaanko koti?';
+
+  @override
+  String get homeResetBody => 'Kaikki ruudut palaavat oletuskotiin.';
+
+  @override
+  String get homeUseLibraryTitle => 'Käytetäänkö kirjaston kotia?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Tämän laitteen oma koti hylätään, ja kirjaston koti näkyy taas tässä.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Hylkää';
+
+  @override
+  String get homeAddTiles => 'Lisää ruutuja';
+
+  @override
+  String get homeHiddenTiles => 'Piilotetut';
+
+  @override
+  String get homeTileOnHome => 'Kodissa';
+
+  @override
+  String get homeTileHide => 'Piilota';
+
+  @override
+  String get homeTileShow => 'Näytä';
+
+  @override
+  String get homeTileMove => 'Siirrä ja muuta kokoa';
+
+  @override
+  String get homeMoveLeft => 'Siirrä vasemmalle';
+
+  @override
+  String get homeMoveRight => 'Siirrä oikealle';
+
+  @override
+  String get homeMoveUp => 'Siirrä ylös';
+
+  @override
+  String get homeMoveDown => 'Siirrä alas';
+
+  @override
+  String get homeWider => 'Leveämpi';
+
+  @override
+  String get homeNarrower => 'Kapeampi';
+
+  @override
+  String get homeTaller => 'Korkeampi';
+
+  @override
+  String get homeShorter => 'Matalampi';
+
+  @override
+  String get homeTileSettings => 'Ruudun asetukset';
+
+  @override
+  String get homeSearchName => 'Nimi';
+
+  @override
+  String get homeSearchQuery => 'Haku';
+
+  @override
+  String get homeSearchQueryHint => 'Sanoja tai avain = arvo';
+
+  @override
+  String get homeGridHint =>
+      'Siirrä ruutua vetämällä, muuta kokoa vetämällä sen kulmasta.';
+
+  @override
+  String get homeColumnHint =>
+      'Järjestä vetämällä kahvasta. Kytkin näyttää tai piilottaa ruudun '
+      'kaikilla laitteilla.';
 }

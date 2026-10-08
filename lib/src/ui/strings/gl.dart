@@ -3456,4 +3456,95 @@ final class GalicianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Outra';
+
+  @override
+  String get homeEdit => 'Editar inicio';
+
+  @override
+  String get homeEditDone => 'Feito';
+
+  @override
+  String get homeReset => 'Restablecer';
+
+  @override
+  String get homeResetTitle => 'Restablecer o inicio?';
+
+  @override
+  String get homeResetBody =>
+      'Todos os mosaicos volven ao inicio predeterminado.';
+
+  @override
+  String get homeUseLibraryTitle => 'Usar o inicio da biblioteca?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Descártase o inicio propio deste dispositivo e aquí volve aparecer o '
+      'da biblioteca.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Descartar';
+
+  @override
+  String get homeAddTiles => 'Engadir mosaicos';
+
+  @override
+  String get homeHiddenTiles => 'Agochados';
+
+  @override
+  String get homeTileOnHome => 'No inicio';
+
+  @override
+  String get homeTileHide => 'Agochar';
+
+  @override
+  String get homeTileShow => 'Amosar';
+
+  @override
+  String get homeTileMove => 'Mover e cambiar o tamaño';
+
+  @override
+  String get homeMoveLeft => 'Mover á esquerda';
+
+  @override
+  String get homeMoveRight => 'Mover á dereita';
+
+  @override
+  String get homeMoveUp => 'Mover arriba';
+
+  @override
+  String get homeMoveDown => 'Mover abaixo';
+
+  @override
+  String get homeWider => 'Máis ancho';
+
+  @override
+  String get homeNarrower => 'Máis estreito';
+
+  @override
+  String get homeTaller => 'Máis alto';
+
+  @override
+  String get homeShorter => 'Máis baixo';
+
+  @override
+  String get homeTileSettings => 'Axustes do mosaico';
+
+  @override
+  String get homeSearchName => 'Nome';
+
+  @override
+  String get homeSearchQuery => 'Consulta';
+
+  @override
+  String get homeSearchQueryHint => 'Palabras, ou clave = valor';
+
+  @override
+  String get homeGridHint =>
+      'Arrastra un mosaico para movelo, e a súa esquina para cambiar o '
+      'tamaño.';
+
+  @override
+  String get homeColumnHint =>
+      'Arrastra un asa para reordenar. Un interruptor amosa ou agocha un '
+      'mosaico en todos os dispositivos.';
 }

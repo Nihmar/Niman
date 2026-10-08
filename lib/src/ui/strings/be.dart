@@ -3475,4 +3475,93 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Іншая';
+
+  @override
+  String get homeEdit => 'Змяніць галоўную';
+
+  @override
+  String get homeEditDone => 'Гатова';
+
+  @override
+  String get homeReset => 'Скінуць';
+
+  @override
+  String get homeResetTitle => 'Скінуць галоўную?';
+
+  @override
+  String get homeResetBody => 'Усе пліткі вернуцца да галоўнай па змаўчанні.';
+
+  @override
+  String get homeUseLibraryTitle => 'Ужываць галоўную бібліятэкі?';
+
+  @override
+  String get homeUseLibraryBody =>
+      "Уласная галоўная гэтай прылады будзе адкінута, і тут зноў з'явіцца "
+      'галоўная бібліятэкі.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Адкінуць';
+
+  @override
+  String get homeAddTiles => 'Дадаць пліткі';
+
+  @override
+  String get homeHiddenTiles => 'Схаваныя';
+
+  @override
+  String get homeTileOnHome => 'На галоўнай';
+
+  @override
+  String get homeTileHide => 'Схаваць';
+
+  @override
+  String get homeTileShow => 'Паказаць';
+
+  @override
+  String get homeTileMove => 'Перамясціць і змяніць памер';
+
+  @override
+  String get homeMoveLeft => 'Улева';
+
+  @override
+  String get homeMoveRight => 'Управа';
+
+  @override
+  String get homeMoveUp => 'Уверх';
+
+  @override
+  String get homeMoveDown => 'Уніз';
+
+  @override
+  String get homeWider => 'Шырэй';
+
+  @override
+  String get homeNarrower => 'Вузей';
+
+  @override
+  String get homeTaller => 'Вышэй';
+
+  @override
+  String get homeShorter => 'Ніжэй';
+
+  @override
+  String get homeTileSettings => 'Налады пліткі';
+
+  @override
+  String get homeSearchName => 'Назва';
+
+  @override
+  String get homeSearchQuery => 'Запыт';
+
+  @override
+  String get homeSearchQueryHint => 'Словы або ключ = значэнне';
+
+  @override
+  String get homeGridHint =>
+      'Цягніце плітку, каб перамясціць яе, і яе вугал, каб змяніць памер.';
+
+  @override
+  String get homeColumnHint =>
+      'Цягніце за ручку, каб змяніць парадак. Пераключальнік паказвае ці '
+      'хавае плітку на ўсіх прыладах.';
 }

@@ -3444,4 +3444,94 @@ final class SlovakStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Iná';
+
+  @override
+  String get homeEdit => 'Upraviť domov';
+
+  @override
+  String get homeEditDone => 'Hotovo';
+
+  @override
+  String get homeReset => 'Obnoviť';
+
+  @override
+  String get homeResetTitle => 'Obnoviť domov?';
+
+  @override
+  String get homeResetBody => 'Všetky dlaždice sa vrátia na predvolený domov.';
+
+  @override
+  String get homeUseLibraryTitle => 'Použiť domov knižnice?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Vlastný domov tohto zariadenia sa zahodí a znova sa zobrazí domov '
+      'knižnice.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Zahodiť';
+
+  @override
+  String get homeAddTiles => 'Pridať dlaždice';
+
+  @override
+  String get homeHiddenTiles => 'Skryté';
+
+  @override
+  String get homeTileOnHome => 'Na domove';
+
+  @override
+  String get homeTileHide => 'Skryť';
+
+  @override
+  String get homeTileShow => 'Zobraziť';
+
+  @override
+  String get homeTileMove => 'Presunúť a zmeniť veľkosť';
+
+  @override
+  String get homeMoveLeft => 'Posunúť doľava';
+
+  @override
+  String get homeMoveRight => 'Posunúť doprava';
+
+  @override
+  String get homeMoveUp => 'Posunúť nahor';
+
+  @override
+  String get homeMoveDown => 'Posunúť nadol';
+
+  @override
+  String get homeWider => 'Širší';
+
+  @override
+  String get homeNarrower => 'Užší';
+
+  @override
+  String get homeTaller => 'Vyšší';
+
+  @override
+  String get homeShorter => 'Nižší';
+
+  @override
+  String get homeTileSettings => 'Nastavenia dlaždice';
+
+  @override
+  String get homeSearchName => 'Názov';
+
+  @override
+  String get homeSearchQuery => 'Dopyt';
+
+  @override
+  String get homeSearchQueryHint => 'Slová alebo kľúč = hodnota';
+
+  @override
+  String get homeGridHint =>
+      'Potiahnutím dlaždicu presuniete, potiahnutím za roh zmeníte jej '
+      'veľkosť.';
+
+  @override
+  String get homeColumnHint =>
+      'Potiahnutím úchytu zmeníte poradie. Prepínač zobrazí alebo skryje '
+      'dlaždicu na všetkých zariadeniach.';
 }

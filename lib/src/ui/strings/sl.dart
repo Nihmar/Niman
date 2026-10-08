@@ -3455,4 +3455,94 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Drugo';
+
+  @override
+  String get homeEdit => 'Uredi domov';
+
+  @override
+  String get homeEditDone => 'Končano';
+
+  @override
+  String get homeReset => 'Ponastavi';
+
+  @override
+  String get homeResetTitle => 'Ponastavim domov?';
+
+  @override
+  String get homeResetBody => 'Vse ploščice se vrnejo na privzeti domov.';
+
+  @override
+  String get homeUseLibraryTitle => 'Uporabim domov knjižnice?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Lastni domov te naprave se zavrže, tukaj pa se znova prikaže domov '
+      'knjižnice.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Zavrzi';
+
+  @override
+  String get homeAddTiles => 'Dodaj ploščice';
+
+  @override
+  String get homeHiddenTiles => 'Skrito';
+
+  @override
+  String get homeTileOnHome => 'Na domovu';
+
+  @override
+  String get homeTileHide => 'Skrij';
+
+  @override
+  String get homeTileShow => 'Prikaži';
+
+  @override
+  String get homeTileMove => 'Premakni in spremeni velikost';
+
+  @override
+  String get homeMoveLeft => 'Premakni levo';
+
+  @override
+  String get homeMoveRight => 'Premakni desno';
+
+  @override
+  String get homeMoveUp => 'Premakni gor';
+
+  @override
+  String get homeMoveDown => 'Premakni dol';
+
+  @override
+  String get homeWider => 'Širše';
+
+  @override
+  String get homeNarrower => 'Ožje';
+
+  @override
+  String get homeTaller => 'Višje';
+
+  @override
+  String get homeShorter => 'Nižje';
+
+  @override
+  String get homeTileSettings => 'Nastavitve ploščice';
+
+  @override
+  String get homeSearchName => 'Ime';
+
+  @override
+  String get homeSearchQuery => 'Poizvedba';
+
+  @override
+  String get homeSearchQueryHint => 'Besede ali ključ = vrednost';
+
+  @override
+  String get homeGridHint =>
+      'Povlecite ploščico, da jo premaknete, in njen kot, da ji spremenite '
+      'velikost.';
+
+  @override
+  String get homeColumnHint =>
+      'Povlecite ročico, da spremenite vrstni red. Stikalo prikaže ali '
+      'skrije ploščico na vseh napravah.';
 }

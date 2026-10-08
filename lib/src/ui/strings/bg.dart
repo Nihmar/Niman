@@ -3448,4 +3448,96 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Друга';
+
+  @override
+  String get homeEdit => 'Редактиране на началото';
+
+  @override
+  String get homeEditDone => 'Готово';
+
+  @override
+  String get homeReset => 'Нулиране';
+
+  @override
+  String get homeResetTitle => 'Да се нулира ли началото?';
+
+  @override
+  String get homeResetBody =>
+      'Всички плочки се връщат към началото по подразбиране.';
+
+  @override
+  String get homeUseLibraryTitle =>
+      'Да се използва ли началото на библиотеката?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Собственото начало на това устройство се изхвърля и тук отново се '
+      'показва това на библиотеката.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Изхвърляне';
+
+  @override
+  String get homeAddTiles => 'Добавяне на плочки';
+
+  @override
+  String get homeHiddenTiles => 'Скрити';
+
+  @override
+  String get homeTileOnHome => 'В началото';
+
+  @override
+  String get homeTileHide => 'Скриване';
+
+  @override
+  String get homeTileShow => 'Показване';
+
+  @override
+  String get homeTileMove => 'Преместване и размер';
+
+  @override
+  String get homeMoveLeft => 'Наляво';
+
+  @override
+  String get homeMoveRight => 'Надясно';
+
+  @override
+  String get homeMoveUp => 'Нагоре';
+
+  @override
+  String get homeMoveDown => 'Надолу';
+
+  @override
+  String get homeWider => 'По-широко';
+
+  @override
+  String get homeNarrower => 'По-тясно';
+
+  @override
+  String get homeTaller => 'По-високо';
+
+  @override
+  String get homeShorter => 'По-ниско';
+
+  @override
+  String get homeTileSettings => 'Настройки на плочката';
+
+  @override
+  String get homeSearchName => 'Име';
+
+  @override
+  String get homeSearchQuery => 'Заявка';
+
+  @override
+  String get homeSearchQueryHint => 'Думи или ключ = стойност';
+
+  @override
+  String get homeGridHint =>
+      'Плъзнете плочка, за да я преместите, и ъгъла ѝ, за да промените '
+      'размера.';
+
+  @override
+  String get homeColumnHint =>
+      'Плъзнете дръжката, за да пренаредите. Превключвателят показва или '
+      'скрива плочката на всяко устройство.';
 }

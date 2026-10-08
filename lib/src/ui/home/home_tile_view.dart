@@ -66,6 +66,8 @@ final class HomeTileView extends StatelessWidget {
           revision: revision,
         ),
         HomeTileKind.search => SearchTile(
+          // A new query is a new load, not the old one's results.
+          key: ValueKey(tile.query),
           host: host,
           revision: revision,
           query: tile.query,

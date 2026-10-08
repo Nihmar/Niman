@@ -3486,4 +3486,95 @@ final class RomanianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Alta';
+
+  @override
+  String get homeEdit => 'Editează acasă';
+
+  @override
+  String get homeEditDone => 'Gata';
+
+  @override
+  String get homeReset => 'Resetează';
+
+  @override
+  String get homeResetTitle => 'Resetezi pagina de pornire?';
+
+  @override
+  String get homeResetBody =>
+      'Toate plăcile revin la pagina de pornire implicită.';
+
+  @override
+  String get homeUseLibraryTitle =>
+      'Folosești pagina de pornire a bibliotecii?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Pagina de pornire proprie a acestui dispozitiv se renunță, iar aici '
+      'apare din nou cea a bibliotecii.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Renunță';
+
+  @override
+  String get homeAddTiles => 'Adaugă plăci';
+
+  @override
+  String get homeHiddenTiles => 'Ascunse';
+
+  @override
+  String get homeTileOnHome => 'Pe pagina de pornire';
+
+  @override
+  String get homeTileHide => 'Ascunde';
+
+  @override
+  String get homeTileShow => 'Afișează';
+
+  @override
+  String get homeTileMove => 'Mută și redimensionează';
+
+  @override
+  String get homeMoveLeft => 'Mută la stânga';
+
+  @override
+  String get homeMoveRight => 'Mută la dreapta';
+
+  @override
+  String get homeMoveUp => 'Mută în sus';
+
+  @override
+  String get homeMoveDown => 'Mută în jos';
+
+  @override
+  String get homeWider => 'Mai lat';
+
+  @override
+  String get homeNarrower => 'Mai îngust';
+
+  @override
+  String get homeTaller => 'Mai înalt';
+
+  @override
+  String get homeShorter => 'Mai scund';
+
+  @override
+  String get homeTileSettings => 'Setările plăcii';
+
+  @override
+  String get homeSearchName => 'Nume';
+
+  @override
+  String get homeSearchQuery => 'Căutare';
+
+  @override
+  String get homeSearchQueryHint => 'Cuvinte sau cheie = valoare';
+
+  @override
+  String get homeGridHint =>
+      'Trage o placă pentru a o muta, iar colțul ei pentru a o redimensiona.';
+
+  @override
+  String get homeColumnHint =>
+      'Trage un mâner pentru a reordona. Un comutator afișează sau ascunde o '
+      'placă pe fiecare dispozitiv.';
 }

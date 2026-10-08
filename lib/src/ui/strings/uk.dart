@@ -3476,4 +3476,93 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Інша';
+
+  @override
+  String get homeEdit => 'Редагувати головну';
+
+  @override
+  String get homeEditDone => 'Готово';
+
+  @override
+  String get homeReset => 'Скинути';
+
+  @override
+  String get homeResetTitle => 'Скинути головну?';
+
+  @override
+  String get homeResetBody => 'Усі плитки повертаються до типової головної.';
+
+  @override
+  String get homeUseLibraryTitle => 'Використовувати головну бібліотеки?';
+
+  @override
+  String get homeUseLibraryBody =>
+      "Власну головну цього пристрою буде відкинуто, і тут знову з'явиться "
+      'головна бібліотеки.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Відкинути';
+
+  @override
+  String get homeAddTiles => 'Додати плитки';
+
+  @override
+  String get homeHiddenTiles => 'Приховані';
+
+  @override
+  String get homeTileOnHome => 'На головній';
+
+  @override
+  String get homeTileHide => 'Приховати';
+
+  @override
+  String get homeTileShow => 'Показати';
+
+  @override
+  String get homeTileMove => 'Перемістити й змінити розмір';
+
+  @override
+  String get homeMoveLeft => 'Посунути ліворуч';
+
+  @override
+  String get homeMoveRight => 'Посунути праворуч';
+
+  @override
+  String get homeMoveUp => 'Посунути вгору';
+
+  @override
+  String get homeMoveDown => 'Посунути вниз';
+
+  @override
+  String get homeWider => 'Ширше';
+
+  @override
+  String get homeNarrower => 'Вужче';
+
+  @override
+  String get homeTaller => 'Вище';
+
+  @override
+  String get homeShorter => 'Нижче';
+
+  @override
+  String get homeTileSettings => 'Налаштування плитки';
+
+  @override
+  String get homeSearchName => 'Назва';
+
+  @override
+  String get homeSearchQuery => 'Запит';
+
+  @override
+  String get homeSearchQueryHint => 'Слова або ключ = значення';
+
+  @override
+  String get homeGridHint =>
+      'Перетягніть плитку, щоб перемістити її, а її кут — щоб змінити розмір.';
+
+  @override
+  String get homeColumnHint =>
+      'Перетягніть ручку, щоб змінити порядок. Перемикач показує або '
+      'приховує плитку на всіх пристроях.';
 }

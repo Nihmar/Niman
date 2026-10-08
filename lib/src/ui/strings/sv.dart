@@ -3444,4 +3444,92 @@ final class SwedishStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'En annan';
+
+  @override
+  String get homeEdit => 'Redigera hem';
+
+  @override
+  String get homeEditDone => 'Klar';
+
+  @override
+  String get homeReset => 'Återställ';
+
+  @override
+  String get homeResetTitle => 'Återställa hem?';
+
+  @override
+  String get homeResetBody => 'Alla rutor går tillbaka till standardhemmet.';
+
+  @override
+  String get homeUseLibraryTitle => 'Använda bibliotekets hem?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Den här enhetens eget hem kastas, och bibliotekets visas här igen.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Kasta';
+
+  @override
+  String get homeAddTiles => 'Lägg till rutor';
+
+  @override
+  String get homeHiddenTiles => 'Dolda';
+
+  @override
+  String get homeTileOnHome => 'På hem';
+
+  @override
+  String get homeTileHide => 'Dölj';
+
+  @override
+  String get homeTileShow => 'Visa';
+
+  @override
+  String get homeTileMove => 'Flytta och ändra storlek';
+
+  @override
+  String get homeMoveLeft => 'Flytta vänster';
+
+  @override
+  String get homeMoveRight => 'Flytta höger';
+
+  @override
+  String get homeMoveUp => 'Flytta upp';
+
+  @override
+  String get homeMoveDown => 'Flytta ned';
+
+  @override
+  String get homeWider => 'Bredare';
+
+  @override
+  String get homeNarrower => 'Smalare';
+
+  @override
+  String get homeTaller => 'Högre';
+
+  @override
+  String get homeShorter => 'Lägre';
+
+  @override
+  String get homeTileSettings => 'Ruteinställningar';
+
+  @override
+  String get homeSearchName => 'Namn';
+
+  @override
+  String get homeSearchQuery => 'Sökning';
+
+  @override
+  String get homeSearchQueryHint => 'Ord, eller nyckel = värde';
+
+  @override
+  String get homeGridHint =>
+      'Dra en ruta för att flytta den, och dess hörn för att ändra storlek.';
+
+  @override
+  String get homeColumnHint =>
+      'Dra i ett handtag för att ändra ordningen. En brytare visar eller '
+      'döljer en ruta på alla enheter.';
 }

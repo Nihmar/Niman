@@ -3385,4 +3385,93 @@ final class HindiStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'दूसरा';
+
+  @override
+  String get homeEdit => 'होम संपादित करें';
+
+  @override
+  String get homeEditDone => 'हो गया';
+
+  @override
+  String get homeReset => 'रीसेट करें';
+
+  @override
+  String get homeResetTitle => 'होम रीसेट करें?';
+
+  @override
+  String get homeResetBody => 'सभी टाइल डिफ़ॉल्ट होम पर लौट जाती हैं।';
+
+  @override
+  String get homeUseLibraryTitle => 'लाइब्रेरी का होम इस्तेमाल करें?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'इस डिवाइस का अपना होम हटा दिया जाएगा, और यहाँ फिर से लाइब्रेरी का होम '
+      'दिखेगा।';
+
+  @override
+  String get homeUseLibraryConfirm => 'हटाएँ';
+
+  @override
+  String get homeAddTiles => 'टाइल जोड़ें';
+
+  @override
+  String get homeHiddenTiles => 'छिपी हुई';
+
+  @override
+  String get homeTileOnHome => 'होम पर';
+
+  @override
+  String get homeTileHide => 'छिपाएँ';
+
+  @override
+  String get homeTileShow => 'दिखाएँ';
+
+  @override
+  String get homeTileMove => 'खिसकाएँ और आकार बदलें';
+
+  @override
+  String get homeMoveLeft => 'बाएँ खिसकाएँ';
+
+  @override
+  String get homeMoveRight => 'दाएँ खिसकाएँ';
+
+  @override
+  String get homeMoveUp => 'ऊपर खिसकाएँ';
+
+  @override
+  String get homeMoveDown => 'नीचे खिसकाएँ';
+
+  @override
+  String get homeWider => 'चौड़ा';
+
+  @override
+  String get homeNarrower => 'संकरा';
+
+  @override
+  String get homeTaller => 'लंबा';
+
+  @override
+  String get homeShorter => 'छोटा';
+
+  @override
+  String get homeTileSettings => 'टाइल सेटिंग्स';
+
+  @override
+  String get homeSearchName => 'नाम';
+
+  @override
+  String get homeSearchQuery => 'खोज';
+
+  @override
+  String get homeSearchQueryHint => 'शब्द, या कुंजी = मान';
+
+  @override
+  String get homeGridHint =>
+      'टाइल को खिसकाने के लिए खींचें, और आकार बदलने के लिए उसका कोना खींचें।';
+
+  @override
+  String get homeColumnHint =>
+      'क्रम बदलने के लिए हैंडल खींचें। स्विच हर डिवाइस पर टाइल दिखाता या '
+      'छिपाता है।';
 }

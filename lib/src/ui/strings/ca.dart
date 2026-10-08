@@ -3492,4 +3492,94 @@ final class CatalanStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Una altra';
+
+  @override
+  String get homeEdit => "Edita l'inici";
+
+  @override
+  String get homeEditDone => 'Fet';
+
+  @override
+  String get homeReset => 'Restableix';
+
+  @override
+  String get homeResetTitle => "Vols restablir l'inici?";
+
+  @override
+  String get homeResetBody => "Totes les rajoles tornen a l'inici per defecte.";
+
+  @override
+  String get homeUseLibraryTitle => "Vols fer servir l'inici de la biblioteca?";
+
+  @override
+  String get homeUseLibraryBody =>
+      "Es descarta l'inici propi d'aquest dispositiu i aquí torna a "
+      'aparèixer el de la biblioteca.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Descarta';
+
+  @override
+  String get homeAddTiles => 'Afegeix rajoles';
+
+  @override
+  String get homeHiddenTiles => 'Amagades';
+
+  @override
+  String get homeTileOnHome => "A l'inici";
+
+  @override
+  String get homeTileHide => 'Amaga';
+
+  @override
+  String get homeTileShow => 'Mostra';
+
+  @override
+  String get homeTileMove => 'Mou i canvia la mida';
+
+  @override
+  String get homeMoveLeft => "Mou a l'esquerra";
+
+  @override
+  String get homeMoveRight => 'Mou a la dreta';
+
+  @override
+  String get homeMoveUp => 'Mou amunt';
+
+  @override
+  String get homeMoveDown => 'Mou avall';
+
+  @override
+  String get homeWider => 'Més ample';
+
+  @override
+  String get homeNarrower => 'Més estret';
+
+  @override
+  String get homeTaller => 'Més alt';
+
+  @override
+  String get homeShorter => 'Més baix';
+
+  @override
+  String get homeTileSettings => 'Configuració de la rajola';
+
+  @override
+  String get homeSearchName => 'Nom';
+
+  @override
+  String get homeSearchQuery => 'Consulta';
+
+  @override
+  String get homeSearchQueryHint => 'Paraules, o clau = valor';
+
+  @override
+  String get homeGridHint =>
+      'Arrossega una rajola per moure-la, i la cantonada per canviar-ne la '
+      'mida.';
+
+  @override
+  String get homeColumnHint =>
+      'Arrossega una nansa per reordenar. Un interruptor mostra o amaga una '
+      'rajola a tots els dispositius.';
 }

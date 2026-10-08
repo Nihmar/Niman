@@ -3486,4 +3486,94 @@ final class PolishStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Inna';
+
+  @override
+  String get homeEdit => 'Edytuj start';
+
+  @override
+  String get homeEditDone => 'Gotowe';
+
+  @override
+  String get homeReset => 'Przywróć';
+
+  @override
+  String get homeResetTitle => 'Przywrócić start?';
+
+  @override
+  String get homeResetBody => 'Wszystkie kafelki wracają do domyślnego startu.';
+
+  @override
+  String get homeUseLibraryTitle => 'Użyć startu biblioteki?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Własny start tego urządzenia zostanie odrzucony, a tu znów pojawi się '
+      'start biblioteki.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Odrzuć';
+
+  @override
+  String get homeAddTiles => 'Dodaj kafelki';
+
+  @override
+  String get homeHiddenTiles => 'Ukryte';
+
+  @override
+  String get homeTileOnHome => 'Na starcie';
+
+  @override
+  String get homeTileHide => 'Ukryj';
+
+  @override
+  String get homeTileShow => 'Pokaż';
+
+  @override
+  String get homeTileMove => 'Przenieś i zmień rozmiar';
+
+  @override
+  String get homeMoveLeft => 'Przesuń w lewo';
+
+  @override
+  String get homeMoveRight => 'Przesuń w prawo';
+
+  @override
+  String get homeMoveUp => 'Przesuń w górę';
+
+  @override
+  String get homeMoveDown => 'Przesuń w dół';
+
+  @override
+  String get homeWider => 'Szerszy';
+
+  @override
+  String get homeNarrower => 'Węższy';
+
+  @override
+  String get homeTaller => 'Wyższy';
+
+  @override
+  String get homeShorter => 'Niższy';
+
+  @override
+  String get homeTileSettings => 'Ustawienia kafelka';
+
+  @override
+  String get homeSearchName => 'Nazwa';
+
+  @override
+  String get homeSearchQuery => 'Zapytanie';
+
+  @override
+  String get homeSearchQueryHint => 'Słowa lub klucz = wartość';
+
+  @override
+  String get homeGridHint =>
+      'Przeciągnij kafelek, aby go przenieść, a jego róg, aby zmienić '
+      'rozmiar.';
+
+  @override
+  String get homeColumnHint =>
+      'Przeciągnij uchwyt, aby zmienić kolejność. Przełącznik pokazuje lub '
+      'ukrywa kafelek na każdym urządzeniu.';
 }

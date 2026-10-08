@@ -3508,4 +3508,94 @@ final class GermanStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Eine andere';
+
+  @override
+  String get homeEdit => 'Start bearbeiten';
+
+  @override
+  String get homeEditDone => 'Fertig';
+
+  @override
+  String get homeReset => 'Zurücksetzen';
+
+  @override
+  String get homeResetTitle => 'Start zurücksetzen?';
+
+  @override
+  String get homeResetBody => 'Alle Kacheln kehren zum Standard-Start zurück.';
+
+  @override
+  String get homeUseLibraryTitle => 'Den Start der Bibliothek verwenden?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Der eigene Start dieses Geräts wird verworfen, und der der Bibliothek '
+      'erscheint wieder.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Verwerfen';
+
+  @override
+  String get homeAddTiles => 'Kacheln hinzufügen';
+
+  @override
+  String get homeHiddenTiles => 'Ausgeblendet';
+
+  @override
+  String get homeTileOnHome => 'Auf dem Start';
+
+  @override
+  String get homeTileHide => 'Ausblenden';
+
+  @override
+  String get homeTileShow => 'Einblenden';
+
+  @override
+  String get homeTileMove => 'Verschieben und Größe';
+
+  @override
+  String get homeMoveLeft => 'Nach links';
+
+  @override
+  String get homeMoveRight => 'Nach rechts';
+
+  @override
+  String get homeMoveUp => 'Nach oben';
+
+  @override
+  String get homeMoveDown => 'Nach unten';
+
+  @override
+  String get homeWider => 'Breiter';
+
+  @override
+  String get homeNarrower => 'Schmaler';
+
+  @override
+  String get homeTaller => 'Höher';
+
+  @override
+  String get homeShorter => 'Niedriger';
+
+  @override
+  String get homeTileSettings => 'Kachel-Einstellungen';
+
+  @override
+  String get homeSearchName => 'Name';
+
+  @override
+  String get homeSearchQuery => 'Suche';
+
+  @override
+  String get homeSearchQueryHint => 'Wörter oder Schlüssel = Wert';
+
+  @override
+  String get homeGridHint =>
+      'Ziehe eine Kachel, um sie zu verschieben, und ihre Ecke, um die Größe '
+      'zu ändern.';
+
+  @override
+  String get homeColumnHint =>
+      'Ziehe einen Griff, um die Reihenfolge zu ändern. Ein Schalter blendet '
+      'eine Kachel auf jedem Gerät ein oder aus.';
 }
