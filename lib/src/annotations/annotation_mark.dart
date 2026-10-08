@@ -127,11 +127,7 @@ List<AnnotationLink> annotationLinksIn(String text) {
         fragment = ref.heading;
         markdown = false;
         label = ref.alias;
-      case MarkdownLink(href: final written):
-        // `<Books/My Book.pdf#page=3>`, the form that allows spaces.
-        final href = written.startsWith('<') && written.endsWith('>')
-            ? written.substring(1, written.length - 1)
-            : written;
+      case MarkdownLink(:final href):
         final hash = href.indexOf('#');
         if (hash == -1) continue;
         target = percentDecoded(href.substring(0, hash));
