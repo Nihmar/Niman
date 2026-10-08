@@ -3251,4 +3251,21 @@ final class TurkishStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Markdown olarak yapıştırıldı · $host bağlantısıyla';
+
+  @override
+  String get settingsAreaNavigation => 'Gezinme';
+
+  @override
+  String get navigationIntro =>
+      'Gezinmenin sırası ve gösterdiği hedefler. Gizlenen bir hedef komut '
+      'paletinde kalır.';
+
+  @override
+  String get navigationScopeLibrary => 'Bu kitaplık';
+
+  @override
+  String get navigationScopeDevice => 'Yalnızca bu cihazda';
+
+  @override
+  String get navigationAlwaysShown => 'Her zaman gösterilir';
 }

@@ -3298,4 +3298,21 @@ final class SlovakStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Vložené ako Markdown · s odkazom na $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigácia';
+
+  @override
+  String get navigationIntro =>
+      'Poradie navigácie a ciele, ktoré zobrazuje. Skrytý cieľ zostáva v '
+      'palete príkazov.';
+
+  @override
+  String get navigationScopeLibrary => 'Táto knižnica';
+
+  @override
+  String get navigationScopeDevice => 'Len na tomto zariadení';
+
+  @override
+  String get navigationAlwaysShown => 'Vždy zobrazené';
 }

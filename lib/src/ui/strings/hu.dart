@@ -3296,4 +3296,21 @@ final class HungarianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Beillesztve Markdownként · hivatkozással ide: $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigáció';
+
+  @override
+  String get navigationIntro =>
+      'A navigáció sorrendje és a megjelenített célok. Egy elrejtett cél a '
+      'parancspalettán marad.';
+
+  @override
+  String get navigationScopeLibrary => 'Ez a könyvtár';
+
+  @override
+  String get navigationScopeDevice => 'Csak ezen az eszközön';
+
+  @override
+  String get navigationAlwaysShown => 'Mindig látható';
 }

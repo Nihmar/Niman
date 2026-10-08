@@ -3310,4 +3310,21 @@ final class GalicianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Pegado como Markdown · coa ligazón a $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navegación';
+
+  @override
+  String get navigationIntro =>
+      'A orde da navegación e os destinos que mostra. Un oculto segue na '
+      'paleta de comandos.';
+
+  @override
+  String get navigationScopeLibrary => 'Esta biblioteca';
+
+  @override
+  String get navigationScopeDevice => 'Só neste dispositivo';
+
+  @override
+  String get navigationAlwaysShown => 'Sempre visible';
 }

@@ -3314,4 +3314,21 @@ final class BosnianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Zalijepljeno kao Markdown · s vezom na $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigacija';
+
+  @override
+  String get navigationIntro =>
+      'Redoslijed navigacije i odredišta koja prikazuje. Skriveno odredište '
+      'ostaje u paleti komandi.';
+
+  @override
+  String get navigationScopeLibrary => 'Ova biblioteka';
+
+  @override
+  String get navigationScopeDevice => 'Samo na ovom uređaju';
+
+  @override
+  String get navigationAlwaysShown => 'Uvijek prikazano';
 }

@@ -3329,4 +3329,21 @@ final class LithuanianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Įklijuota kaip Markdown · su nuoroda į $host';
+
+  @override
+  String get settingsAreaNavigation => 'Naršymas';
+
+  @override
+  String get navigationIntro =>
+      'Naršymo tvarka ir rodomos paskirties vietos. Paslėpta lieka komandų '
+      'paletėje.';
+
+  @override
+  String get navigationScopeLibrary => 'Ši biblioteka';
+
+  @override
+  String get navigationScopeDevice => 'Tik šiame įrenginyje';
+
+  @override
+  String get navigationAlwaysShown => 'Visada rodoma';
 }

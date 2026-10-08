@@ -3003,4 +3003,19 @@ final class JapaneseStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Markdown として貼り付けました · $host へのリンク付き';
+
+  @override
+  String get settingsAreaNavigation => 'ナビゲーション';
+
+  @override
+  String get navigationIntro => 'ナビゲーションの並び順と表示する項目。非表示にした項目もコマンドパレットから開けます。';
+
+  @override
+  String get navigationScopeLibrary => 'このライブラリ';
+
+  @override
+  String get navigationScopeDevice => 'このデバイスのみ';
+
+  @override
+  String get navigationAlwaysShown => '常に表示';
 }

@@ -3326,4 +3326,21 @@ final class DutchStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Geplakt als Markdown · met de link naar $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigatie';
+
+  @override
+  String get navigationIntro =>
+      'De volgorde van de navigatie en de bestemmingen die ze toont. Een '
+      'verborgen bestemming blijft in het opdrachtenpalet.';
+
+  @override
+  String get navigationScopeLibrary => 'Deze bibliotheek';
+
+  @override
+  String get navigationScopeDevice => 'Alleen op dit apparaat';
+
+  @override
+  String get navigationAlwaysShown => 'Altijd zichtbaar';
 }

@@ -2913,4 +2913,19 @@ final class ChineseStrings extends Strings {
 
   @override
   String pastedAsMarkdownWithLink(String host) => '已粘贴为 Markdown · 附 $host 的链接';
+
+  @override
+  String get settingsAreaNavigation => '导航';
+
+  @override
+  String get navigationIntro => '导航的顺序以及显示的目标。隐藏的目标仍可在命令面板中找到。';
+
+  @override
+  String get navigationScopeLibrary => '此资料库';
+
+  @override
+  String get navigationScopeDevice => '仅限此设备';
+
+  @override
+  String get navigationAlwaysShown => '始终显示';
 }

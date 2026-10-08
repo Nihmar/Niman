@@ -3320,4 +3320,21 @@ final class BasqueStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Markdown gisa itsatsita · $host gunerako estekarekin';
+
+  @override
+  String get settingsAreaNavigation => 'Nabigazioa';
+
+  @override
+  String get navigationIntro =>
+      'Nabigazioaren ordena eta erakusten dituen helmugak. Ezkutatutako bat '
+      'komando-paletan geratzen da.';
+
+  @override
+  String get navigationScopeLibrary => 'Liburutegi hau';
+
+  @override
+  String get navigationScopeDevice => 'Gailu honetan soilik';
+
+  @override
+  String get navigationAlwaysShown => 'Beti ikusgai';
 }

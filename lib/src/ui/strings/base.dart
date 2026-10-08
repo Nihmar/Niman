@@ -1794,4 +1794,12 @@ abstract base class Strings {
 
   /// The same, when the paste links to the page at [host].
   String pastedAsMarkdownWithLink(String host);
+
+  /// Settings → Navigation (#536): the area, its intro, the two homes of
+  /// the layout, and what the locked destination says.
+  String get settingsAreaNavigation;
+  String get navigationIntro;
+  String get navigationScopeLibrary;
+  String get navigationScopeDevice;
+  String get navigationAlwaysShown;
 }

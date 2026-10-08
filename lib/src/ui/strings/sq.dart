@@ -3311,4 +3311,21 @@ final class AlbanianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'U ngjit si Markdown · me lidhjen te $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigimi';
+
+  @override
+  String get navigationIntro =>
+      'Renditja e navigimit dhe destinacionet që shfaq. Një i fshehur mbetet '
+      'në paletën e komandave.';
+
+  @override
+  String get navigationScopeLibrary => 'Kjo bibliotekë';
+
+  @override
+  String get navigationScopeDevice => 'Vetëm në këtë pajisje';
+
+  @override
+  String get navigationAlwaysShown => 'Gjithmonë i dukshëm';
 }

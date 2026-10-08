@@ -1729,4 +1729,9 @@ final class AppStrings {
   static String get pastedAsMarkdown => _s.pastedAsMarkdown;
   static String pastedAsMarkdownWithLink(String host) =>
       _s.pastedAsMarkdownWithLink(host);
+  static String get settingsAreaNavigation => _s.settingsAreaNavigation;
+  static String get navigationIntro => _s.navigationIntro;
+  static String get navigationScopeLibrary => _s.navigationScopeLibrary;
+  static String get navigationScopeDevice => _s.navigationScopeDevice;
+  static String get navigationAlwaysShown => _s.navigationAlwaysShown;
 }

@@ -3330,4 +3330,21 @@ final class UkrainianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Вставлено як Markdown · з посиланням на $host';
+
+  @override
+  String get settingsAreaNavigation => 'Навігація';
+
+  @override
+  String get navigationIntro =>
+      'Порядок навігації та пункти, які вона показує. Прихований пункт '
+      'лишається в палітрі команд.';
+
+  @override
+  String get navigationScopeLibrary => 'Ця бібліотека';
+
+  @override
+  String get navigationScopeDevice => 'Лише на цьому пристрої';
+
+  @override
+  String get navigationAlwaysShown => 'Завжди показано';
 }

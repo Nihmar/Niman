@@ -3340,4 +3340,21 @@ final class RomanianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Lipit ca Markdown · cu linkul către $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigare';
+
+  @override
+  String get navigationIntro =>
+      'Ordinea navigării și destinațiile pe care le arată. Una ascunsă rămâne '
+      'în paleta de comenzi.';
+
+  @override
+  String get navigationScopeLibrary => 'Această bibliotecă';
+
+  @override
+  String get navigationScopeDevice => 'Doar pe acest dispozitiv';
+
+  @override
+  String get navigationAlwaysShown => 'Mereu vizibil';
 }

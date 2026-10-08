@@ -90,6 +90,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   void pushFolders(Key row) => openArea(SettingsAreaId.folders, row);
   void pushJournal(Key row) => openArea(SettingsAreaId.journal, row);
   void pushTrash(Key row) => openArea(SettingsAreaId.trashHistory, row);
+  void pushNavigation(Key row) => openArea(SettingsAreaId.navigation, row);
   void pushUpdates(Key row) => openArea(SettingsAreaId.updates, row);
   void pushDiagnostics(Key row) => openArea(SettingsAreaId.diagnostics, row);
 
@@ -106,6 +107,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   final folders = libraryArea(AppStrings.settingsAreaFolders);
   final journal = libraryArea(AppStrings.paletteGroupJournal);
   final trashHistory = libraryArea(AppStrings.settingsAreaTrashHistory);
+  final navigation = libraryArea(AppStrings.settingsAreaNavigation);
   final maintenance = AppStrings.settingsGroupMaintenance;
   final entries = <SettingsSearchEntry>[
     SettingsSearchEntry(
@@ -369,6 +371,15 @@ List<SettingsSearchEntry> settingsSearchEntries({
           : (await ops.quickNotePath) ?? AppStrings.quickNoteUnset,
       areaId: SettingsAreaId.folders,
       open: () => pushFolders(SettingsKeys.quickNote),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.navigationScopeDevice,
+      area: navigation,
+      rowKey: SettingsKeys.navigationScope,
+      value: () async =>
+          ops == null ? null : onOff(on: (await ops.navigation).device != null),
+      areaId: SettingsAreaId.navigation,
+      open: () => pushNavigation(SettingsKeys.navigationScope),
     ),
     SettingsSearchEntry(
       title: AppStrings.journalFolderTitle,

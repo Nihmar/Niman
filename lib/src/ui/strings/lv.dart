@@ -3282,4 +3282,21 @@ final class LatvianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Ielīmēts kā Markdown · ar saiti uz $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigācija';
+
+  @override
+  String get navigationIntro =>
+      'Navigācijas secība un galamērķi, ko tā rāda. Paslēpts galamērķis '
+      'paliek komandu paletē.';
+
+  @override
+  String get navigationScopeLibrary => 'Šī bibliotēka';
+
+  @override
+  String get navigationScopeDevice => 'Tikai šajā ierīcē';
+
+  @override
+  String get navigationAlwaysShown => 'Vienmēr redzams';
 }

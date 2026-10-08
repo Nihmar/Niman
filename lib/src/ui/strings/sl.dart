@@ -3309,4 +3309,21 @@ final class SlovenianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Prilepljeno kot Markdown · s povezavo na $host';
+
+  @override
+  String get settingsAreaNavigation => 'Krmarjenje';
+
+  @override
+  String get navigationIntro =>
+      'Vrstni red krmarjenja in cilji, ki jih prikazuje. Skrit cilj ostane v '
+      'paleti ukazov.';
+
+  @override
+  String get navigationScopeLibrary => 'Ta knjižnica';
+
+  @override
+  String get navigationScopeDevice => 'Samo v tej napravi';
+
+  @override
+  String get navigationAlwaysShown => 'Vedno prikazano';
 }

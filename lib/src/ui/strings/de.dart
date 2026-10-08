@@ -3362,4 +3362,21 @@ final class GermanStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Als Markdown eingefügt · mit dem Link zu $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigation';
+
+  @override
+  String get navigationIntro =>
+      'Die Reihenfolge der Navigation und die Ziele, die sie zeigt. Ein '
+      'ausgeblendetes bleibt in der Befehlspalette.';
+
+  @override
+  String get navigationScopeLibrary => 'Diese Bibliothek';
+
+  @override
+  String get navigationScopeDevice => 'Nur auf diesem Gerät';
+
+  @override
+  String get navigationAlwaysShown => 'Immer sichtbar';
 }

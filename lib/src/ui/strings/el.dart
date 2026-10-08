@@ -3394,4 +3394,21 @@ final class GreekStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Επικολλήθηκε ως Markdown · με τον σύνδεσμο προς $host';
+
+  @override
+  String get settingsAreaNavigation => 'Πλοήγηση';
+
+  @override
+  String get navigationIntro =>
+      'Η σειρά της πλοήγησης και οι προορισμοί που δείχνει. Ένας κρυμμένος '
+      'μένει στην παλέτα εντολών.';
+
+  @override
+  String get navigationScopeLibrary => 'Αυτή η βιβλιοθήκη';
+
+  @override
+  String get navigationScopeDevice => 'Μόνο σε αυτή τη συσκευή';
+
+  @override
+  String get navigationAlwaysShown => 'Πάντα ορατό';
 }

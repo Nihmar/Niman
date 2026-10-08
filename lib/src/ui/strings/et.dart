@@ -3238,4 +3238,21 @@ final class EstonianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Kleebitud Markdownina · lingiga lehele $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigeerimine';
+
+  @override
+  String get navigationIntro =>
+      'Navigeerimise järjekord ja sihtkohad, mida see näitab. Peidetud '
+      'sihtkoht jääb käsupaletti.';
+
+  @override
+  String get navigationScopeLibrary => 'See teek';
+
+  @override
+  String get navigationScopeDevice => 'Ainult selles seadmes';
+
+  @override
+  String get navigationAlwaysShown => 'Alati nähtav';
 }

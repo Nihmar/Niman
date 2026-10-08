@@ -21,6 +21,7 @@ import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_diagnostics.dart';
 import 'package:niman/src/ui/settings_editor.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
+import 'package:niman/src/ui/settings_navigation_layout.dart';
 import 'package:niman/src/ui/settings_reminders.dart';
 import 'package:niman/src/ui/settings_themes.dart';
 import 'package:niman/src/ui/settings_transcription.dart';
@@ -59,6 +60,9 @@ enum SettingsAreaId {
 
   /// The journal (#7).
   journal,
+
+  /// The bar's and the rail's order and destinations (#536).
+  navigation,
 
   /// Trash and note history.
   trashHistory,
@@ -287,6 +291,17 @@ List<SettingsArea> settingsAreas({
       title: AppStrings.paletteGroupJournal,
       build: (highlight) =>
           SettingsJournalScreen(controller: controller, highlight: highlight),
+    ),
+    SettingsArea(
+      id: SettingsAreaId.navigation,
+      group: SettingsGroup.library,
+      rowKey: const Key('settings-area-navigation'),
+      icon: () => Icons.view_week_outlined,
+      title: AppStrings.settingsAreaNavigation,
+      build: (highlight) => SettingsNavigationLayoutScreen(
+        controller: controller,
+        highlight: highlight,
+      ),
     ),
     SettingsArea(
       id: SettingsAreaId.trashHistory,

@@ -3329,4 +3329,21 @@ final class BelarusianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Устаўлена як Markdown · са спасылкай на $host';
+
+  @override
+  String get settingsAreaNavigation => 'Навігацыя';
+
+  @override
+  String get navigationIntro =>
+      'Парадак навігацыі і пункты, якія яна паказвае. Схаваны пункт застаецца '
+      'ў палітры каманд.';
+
+  @override
+  String get navigationScopeLibrary => 'Гэтая бібліятэка';
+
+  @override
+  String get navigationScopeDevice => 'Толькі на гэтай прыладзе';
+
+  @override
+  String get navigationAlwaysShown => 'Заўсёды паказана';
 }
