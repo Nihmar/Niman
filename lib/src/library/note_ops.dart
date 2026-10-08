@@ -168,6 +168,16 @@ final class NoteOps implements NoteOperations {
   Future<List<Note>> notesNamed(String query, {int limit = 50}) =>
       _dao.named(query, limit: limit);
 
+  @override
+  Future<List<Note>> recentlyModified({
+    int limit = 8,
+    String excludeFolder = '',
+  }) => _dao.recentlyModified(limit: limit, excludeFolder: excludeFolder);
+
+  @override
+  Future<Note?> randomNote({String excludeFolder = ''}) =>
+      _dao.randomNote(excludeFolder: excludeFolder);
+
   Future<Note> _mustFind(String path) async {
     final row = await _dao.find(path);
     if (row == null) throw StateError('No indexed note at "$path"');

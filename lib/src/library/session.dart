@@ -80,6 +80,17 @@ abstract interface class NoteOperations {
   /// Notes whose name holds [query], best matches first (#155).
   Future<List<Note>> notesNamed(String query, {int limit = 50});
 
+  /// The [limit] notes modified last, newest first, outside
+  /// [excludeFolder] (#535).
+  Future<List<Note>> recentlyModified({
+    int limit = 8,
+    String excludeFolder = '',
+  });
+
+  /// A note picked at random outside [excludeFolder], or null when there
+  /// is none (#535).
+  Future<Note?> randomNote({String excludeFolder = ''});
+
   /// The text of the note at [path].
   ///
   /// The editor reads notes through its own seam; this is for the flows

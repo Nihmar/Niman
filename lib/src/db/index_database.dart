@@ -258,6 +258,11 @@ class IndexDatabase extends _$IndexDatabase {
       "fts5(title, body, content = '', contentless_delete = 1, "
       "tokenize = 'unicode61 remove_diacritics 2')";
 
+  /// The notes by modification time, files apart from folders: what
+  /// `NoteDao.recentlyModified` reads newest first.
+  static const String _createRecentIndex =
+      'CREATE INDEX IF NOT EXISTS notes_recent ON notes (is_dir, modified)';
+
   /// The tables an upgrade drops, dependents before the rows they key on.
   static const List<String> _allTables = [
     'notes_fts',
@@ -293,6 +298,12 @@ class IndexDatabase extends _$IndexDatabase {
       // Belt and braces: an index file that predates the FTS table (or
       // lost it) rebuilds it here rather than failing every search.
       await customStatement(_createFts);
+      // The Home's recently modified tile (#535) walks this one from its
+      // end. Built here, not declared as a `@TableIndex`: a declared one
+      // is a schema bump, and an upgrade of this file is a wipe and a full
+      // rescan — a million notes reread for one index the rows on hand
+      // can build. `IF NOT EXISTS` makes it a one-time cost.
+      await customStatement(_createRecentIndex);
       // Dropping the old tables freed their pages but kept them in the
       // file: without this, an index that held every note's text stays
       // that size, empty. The vacuum also puts the file on the
