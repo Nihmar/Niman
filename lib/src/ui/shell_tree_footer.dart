@@ -23,6 +23,9 @@ enum NewShellItem {
   /// A voice note (frontmatter type: audio) in the current folder.
   audioNote,
 
+  /// A slides note (frontmatter type: slides) in the current folder.
+  slides,
+
   /// A note copied from a template.
   template,
 
@@ -96,6 +99,12 @@ final class TreeFooterBar extends StatelessWidget {
                 Icons.mic_outlined,
                 AppStrings.newAudioNoteTitle,
                 key: const Key('new-audio-note-action'),
+              ),
+              _item(
+                NewShellItem.slides,
+                Icons.slideshow_outlined,
+                AppStrings.newSlidesTitle,
+                key: const Key('new-slides-action'),
               ),
               _item(
                 NewShellItem.template,

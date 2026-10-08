@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
+import 'package:niman/src/ui/kinds/slides/slides_kind.dart';
 
 List<String> _markdown(String text) =>
     splitSlides(text).map((slide) => slide.markdown).toList();
@@ -54,5 +55,12 @@ void main() {
 
   test('CRLF notes split the same', () {
     expect(_markdown('A\r\n\r\n---\r\n\r\nB\r\n'), ['A', 'B']);
+  });
+
+  test('a new slides note is two slides, the second with a note', () {
+    final slides = splitSlides(slidesNoteContent('Deck'));
+    expect(slides, hasLength(2));
+    expect(slides.first.markdown, '# Deck');
+    expect(slides.last.notes, isNotEmpty);
   });
 }

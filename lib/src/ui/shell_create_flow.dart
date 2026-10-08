@@ -13,6 +13,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
+import 'package:niman/src/ui/kinds/slides/slides_kind.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -98,6 +99,25 @@ final class ShellCreateFlow {
         parentPath: createParent(),
         name: name,
         content: audioNoteContent(),
+      );
+      onCreated((path: row.path, isDir: false, hasKind: true));
+    });
+  }
+
+  /// A slides note (#534): a note with `type: slides` frontmatter in the
+  /// FAB's target folder, two slides in it to start from.
+  Future<void> createSlidesNote(BuildContext context) async {
+    final name = await showNameDialog(
+      context,
+      title: AppStrings.newSlidesTitle,
+      initial: AppStrings.newSlidesDefault,
+    );
+    if (name == null) return;
+    await guard(() async {
+      final row = await controller.ops!.createNote(
+        parentPath: createParent(),
+        name: name,
+        content: slidesNoteContent(name),
       );
       onCreated((path: row.path, isDir: false, hasKind: true));
     });

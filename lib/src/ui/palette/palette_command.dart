@@ -39,6 +39,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.newNote ||
   AppCommand.newListNote ||
   AppCommand.newAudioNote ||
+  AppCommand.newSlides ||
   AppCommand.newTodo ||
   AppCommand.captureWebPage ||
   AppCommand.quickNote ||

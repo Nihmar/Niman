@@ -2887,6 +2887,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _closeFab();
           unawaited(_createFlow.createAudioNote(context));
         },
+        onNewSlides: () {
+          _closeFab();
+          unawaited(_createFlow.createSlidesNote(context));
+        },
         onNewFromTemplate: () {
           _closeFab();
           unawaited(_templateFlow.createFromTemplate(context));
@@ -3324,6 +3328,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_createFlow.createListNote(context)),
       AppCommand.newAudioNote: () =>
           unawaited(_createFlow.createAudioNote(context)),
+      AppCommand.newSlides: () =>
+          unawaited(_createFlow.createSlidesNote(context)),
       AppCommand.newTodo: () {
         _openTodo();
         unawaited(_addTodo());
@@ -4867,6 +4873,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unawaited(_createFlow.createListNote(context));
       case NewShellItem.audioNote:
         unawaited(_createFlow.createAudioNote(context));
+      case NewShellItem.slides:
+        unawaited(_createFlow.createSlidesNote(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
       case NewShellItem.folder:

@@ -26,6 +26,9 @@ enum AppCommand {
   /// A new `type: audio` note in the current folder.
   newAudioNote,
 
+  /// A new `type: slides` note (#534).
+  newSlides,
+
   /// A new todo task.
   newTodo,
 
@@ -315,6 +318,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newNote => AppStrings.shortcutNewNote,
   AppCommand.newListNote => AppStrings.shortcutNewList,
   AppCommand.newAudioNote => AppStrings.shortcutNewAudio,
+  AppCommand.newSlides => AppStrings.newSlidesTitle,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
   AppCommand.captureWebPage => AppStrings.captureWebPage,
   AppCommand.quickNote => AppStrings.shortcutQuickNote,
