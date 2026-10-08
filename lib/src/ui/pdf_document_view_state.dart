@@ -113,6 +113,7 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
     final source = widget.marks;
     final key = widget.positions?.keyOf(widget.path);
     if (source == null || key == null) return;
+    final following = _marks;
     unawaited(
       openAnnotationMarks(
         context,
@@ -120,7 +121,7 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
         source,
         path: key,
         linkType: widget.linkType,
-      ),
+      ).then((_) => following?.refresh()),
     );
   }
 
@@ -285,7 +286,9 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
     final source = widget.marks;
     final annotation = await _selected(selection);
     if (source == null || annotation == null || !mounted) return;
+    final following = _marks;
     await highlightPassage(context, source, annotation);
+    await following?.refresh();
   }
 
   /// Annotates the passage selected, else the page being read.

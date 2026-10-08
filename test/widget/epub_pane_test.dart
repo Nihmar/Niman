@@ -819,6 +819,30 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
+    testWidgets('a highlight recoloured wears its colour at once', (
+      tester,
+    ) async {
+      marks
+        ..marks = [green()]
+        ..writes = true;
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      await tapHighlight(tester);
+      await tester.tap(find.byKey(const Key('highlight-colour-pink')));
+      // No change reported, no settle waited for: the pane asks again
+      // because it made the change.
+      await tester.pumpAndSettle();
+      final tint = tester.widget<RangeHighlight>(
+        find.descendant(of: marked(2), matching: find.byType(RangeHighlight)),
+      );
+      expect(tint.color.toARGB32() & 0xFFFFFF, HighlightColour.pink.rgb);
+      await tester.pumpWidget(const SizedBox());
+    });
+
     testWidgets('Annotate asks for the comment and annotates it', (
       tester,
     ) async {
@@ -930,9 +954,29 @@ final class _FakeMarks implements AnnotationMarkSource {
   Future<void> highlight(Annotation annotation) async =>
       highlighted.add(annotation);
 
+  /// Whether a recolour also changes [marks], as the notes on disk would.
+  bool writes = false;
+
   @override
-  Future<void> recolour(AnnotationMark mark, HighlightColour colour) async =>
-      recoloured.add((mark, colour));
+  Future<void> recolour(AnnotationMark mark, HighlightColour colour) async {
+    recoloured.add((mark, colour));
+    if (!writes) return;
+    marks = [
+      for (final m in marks)
+        if (m == mark)
+          AnnotationMark(
+            note: m.note,
+            offset: m.offset,
+            end: m.end,
+            place: m.place,
+            highlight: colour,
+            quote: m.quote,
+            label: m.label,
+          )
+        else
+          m,
+    ];
+  }
 
   @override
   Future<void> removeHighlight(AnnotationMark mark) async => removed.add(mark);
