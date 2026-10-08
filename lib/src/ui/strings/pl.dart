@@ -1818,6 +1818,11 @@ final class PolishStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Notatki z adnotacjami do PDF-a lub książki';
   @override
+  String get captureFolderTitle => 'Folder zapisów z sieci';
+  @override
+  String get captureFolderSubtitle =>
+      'Strony internetowe i cytaty zapisane jako nowe notatki';
+  @override
   String get annotationNoteSuffix => 'Adnotacja';
   @override
   String get annotateAction => 'Dodaj adnotację';

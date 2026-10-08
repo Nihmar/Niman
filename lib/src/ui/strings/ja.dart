@@ -1678,6 +1678,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'PDF や本に注釈を付けるノート';
   @override
+  String get captureFolderTitle => 'ウェブ取り込みフォルダー';
+  @override
+  String get captureFolderSubtitle => '新しいノートとして取り込んだウェブページと引用';
+  @override
   String get annotationNoteSuffix => '注釈';
   @override
   String get annotateAction => '注釈を付ける';

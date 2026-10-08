@@ -103,6 +103,11 @@ const String defaultAttachmentsFolder = 'assets';
 /// or a book are made (#284).
 const String defaultAnnotationsFolder = 'Annotations';
 
+/// The default folder (library-relative) a web page or a quote captured
+/// as a new note goes in: a folder of its own, not the one the tree has
+/// selected, which can be the attachments folder.
+const String defaultCaptureFolder = 'Clippings';
+
 /// The colour a passage is highlighted in until another is chosen (#626).
 const String defaultHighlightColour = 'yellow';
 

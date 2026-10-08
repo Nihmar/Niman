@@ -905,6 +905,10 @@ abstract base class Strings {
   String get annotationsFolderTitle;
   String get annotationsFolderSubtitle;
 
+  // Where a captured web page or quote goes as a new note.
+  String get captureFolderTitle;
+  String get captureFolderSubtitle;
+
   /// Ends the name of a note made to annotate a file:
   /// `Dune - Annotation.md`.
   String get annotationNoteSuffix;

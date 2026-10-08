@@ -1792,6 +1792,11 @@ final class IcelandicStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Glósur sem skýra PDF-skjal eða bók';
   @override
+  String get captureFolderTitle => 'Mappa fyrir vefúrklippur';
+  @override
+  String get captureFolderSubtitle =>
+      'Vefsíður og tilvitnanir vistaðar sem nýjar glósur';
+  @override
   String get annotationNoteSuffix => 'Athugasemd';
   @override
   String get annotateAction => 'Skrifa athugasemd';

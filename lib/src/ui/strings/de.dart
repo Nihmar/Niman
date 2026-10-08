@@ -1829,6 +1829,11 @@ final class GermanStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Notizen, die ein PDF oder Buch annotieren';
   @override
+  String get captureFolderTitle => 'Ordner für Web-Erfassungen';
+  @override
+  String get captureFolderSubtitle =>
+      'Webseiten und Zitate, als neue Notizen erfasst';
+  @override
   String get annotationNoteSuffix => 'Anmerkung';
   @override
   String get annotateAction => 'Anmerken';

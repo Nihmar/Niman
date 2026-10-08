@@ -59,6 +59,7 @@ sync) in `.niman/settings.json`.
 | `templateFolder` | `Templates` | Where note templates live |
 | `attachmentsFolder` | `assets` | Where copied-in images and voice clips live, under the library root |
 | `annotationsFolder` | `Annotations` | Where a note annotating a PDF or a book is made, when the file has none yet (see [organization](organization.md)) |
+| `captureFolder` | `Clippings` | Where a web page or a quote captured as a new note goes (**Settings → Folders and paths → Web captures folder**); the capture can still pick another folder for one page. Its pictures go in `attachmentsFolder` (see [web capture](web-capture.md)) |
 | `highlightColour` | `yellow` | The colour a passage of a PDF or a book is highlighted in: the one last chosen (`yellow`, `green`, `blue`, `pink`; see [organization](organization.md)) |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
 | `weekStart` | `system` | The day every calendar starts the week on (**Settings → Appearance → First day of the week**): `system` — the system's region's first day, not the app language's (on Linux `LC_ALL`, `LC_TIME`, `LANG`; on Windows the region settings' first day) — or `monday`, `saturday`, `sunday`, the same on every device of the library |
@@ -111,9 +112,9 @@ leave the file at its next write.
 | `epubFont` | `literata` | The books' face: `literata`, `serif`, `sans` or `mono` |
 | `epubTextScale` | 1.0 | The books' text size (0.8–1.8) |
 
-The four folder keys — `listNoteFolder`, `templateFolder`,
-`attachmentsFolder`, `annotationsFolder` — are paths under the library
-root, created the first time something is written there. Their picker lists the folders
+The five folder keys — `listNoteFolder`, `templateFolder`,
+`attachmentsFolder`, `annotationsFolder`, `captureFolder` — are paths
+under the library root, created the first time something is written there. Their picker lists the folders
 the library actually holds, so a default naming one it has never had
 (`assets`, until an image or a voice clip is copied in) starts out
 unselected: *New folder* then builds it at the library root, and only

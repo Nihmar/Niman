@@ -1779,6 +1779,11 @@ final class TurkishStrings extends Strings {
   String get annotationsFolderSubtitle =>
       "Bir PDF'e veya kitaba açıklama ekleyen notlar";
   @override
+  String get captureFolderTitle => 'Web kayıtları klasörü';
+  @override
+  String get captureFolderSubtitle =>
+      'Yeni not olarak kaydedilen web sayfaları ve alıntılar';
+  @override
   String get annotationNoteSuffix => 'Açıklama';
   @override
   String get annotateAction => 'Açıklama ekle';

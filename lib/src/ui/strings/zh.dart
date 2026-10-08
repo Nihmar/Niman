@@ -1637,6 +1637,10 @@ final class ChineseStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => '为 PDF 或书籍添加批注的笔记';
   @override
+  String get captureFolderTitle => '网页收藏文件夹';
+  @override
+  String get captureFolderSubtitle => '保存为新笔记的网页和引文';
+  @override
   String get annotationNoteSuffix => '批注';
   @override
   String get annotateAction => '添加批注';

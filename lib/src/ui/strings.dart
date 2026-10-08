@@ -1117,6 +1117,8 @@ final class AppStrings {
       _s.pdfPageLabel(name, page);
   static String get annotationsFolderTitle => _s.annotationsFolderTitle;
   static String get annotationsFolderSubtitle => _s.annotationsFolderSubtitle;
+  static String get captureFolderTitle => _s.captureFolderTitle;
+  static String get captureFolderSubtitle => _s.captureFolderSubtitle;
   static String get annotationNoteSuffix => _s.annotationNoteSuffix;
   static String get annotateAction => _s.annotateAction;
   static String get annotationCommentHint => _s.annotationCommentHint;

@@ -1815,6 +1815,11 @@ final class ItalianStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Note che annotano un PDF o un libro';
   @override
+  String get captureFolderTitle => 'Cartella delle catture web';
+  @override
+  String get captureFolderSubtitle =>
+      'Pagine web e citazioni catturate come nuove note';
+  @override
   String get annotationNoteSuffix => 'Annotazione';
   @override
   String get annotateAction => 'Annota';

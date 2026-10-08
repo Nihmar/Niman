@@ -1810,6 +1810,11 @@ final class BulgarianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Бележки, които анотират PDF или книга';
   @override
+  String get captureFolderTitle => 'Папка за уеб записи';
+  @override
+  String get captureFolderSubtitle =>
+      'Уеб страници и цитати, запазени като нови бележки';
+  @override
   String get annotationNoteSuffix => 'Анотация';
   @override
   String get annotateAction => 'Анотирай';

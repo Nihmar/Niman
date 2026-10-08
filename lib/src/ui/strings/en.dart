@@ -1776,6 +1776,11 @@ final class EnglishStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Notes annotating a PDF or a book';
   @override
+  String get captureFolderTitle => 'Web captures folder';
+  @override
+  String get captureFolderSubtitle =>
+      'Web pages and quotes captured as new notes';
+  @override
   String get annotationNoteSuffix => 'Annotation';
   @override
   String get annotateAction => 'Annotate';

@@ -13,6 +13,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         TreeSort,
         defaultAnnotationsFolder,
         defaultAttachmentsFolder,
+        defaultCaptureFolder,
         defaultHighlightColour,
         defaultListFolder,
         defaultTemplateFolder;
@@ -328,6 +329,11 @@ String cleanAttachmentsFolder(String folder) =>
 String cleanAnnotationsFolder(String folder) =>
     cleanFolderPath(folder, defaultAnnotationsFolder);
 
+/// Sanitizes a capture-folder path; an empty result is
+/// [defaultCaptureFolder].
+String cleanCaptureFolder(String folder) =>
+    cleanFolderPath(folder, defaultCaptureFolder);
+
 /// The per-library settings, stored in the library folder itself as
 /// `<library>/.niman/settings.json` (T-ML-01, T-ML-10).
 ///
@@ -364,6 +370,7 @@ final class LibraryConfig {
     this.templateFolder = defaultTemplateFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.annotationsFolder = defaultAnnotationsFolder,
+    this.captureFolder = defaultCaptureFolder,
     this.highlightColour = defaultHighlightColour,
     this.pinnedCollapsed = false,
     this.lineNumbers = true,
@@ -415,6 +422,7 @@ final class LibraryConfig {
     final templates = json['templateFolder'];
     final attachments = json['attachmentsFolder'];
     final annotations = json['annotationsFolder'];
+    final captures = json['captureFolder'];
     final highlight = json['highlightColour'];
     return LibraryConfig(
       trashEnabled: switch (trash) {
@@ -441,6 +449,9 @@ final class LibraryConfig {
       annotationsFolder: annotations is String
           ? cleanAnnotationsFolder(annotations)
           : defaultAnnotationsFolder,
+      captureFolder: captures is String
+          ? cleanCaptureFolder(captures)
+          : defaultCaptureFolder,
       highlightColour: highlight is String && highlight.trim().isNotEmpty
           ? highlight.trim()
           : defaultHighlightColour,
@@ -542,6 +553,10 @@ final class LibraryConfig {
   /// The folder (library-relative) where a note annotating a PDF or a book
   /// is made, when the file has none yet (#284).
   final String annotationsFolder;
+
+  /// The folder (library-relative) a web page or a quote captured as a
+  /// new note goes in unless another is picked for it.
+  final String captureFolder;
 
   /// The colour a passage is highlighted in (#626): the one last chosen,
   /// by its id — `yellow`, `green`, `blue`, `pink`.
@@ -683,6 +698,7 @@ final class LibraryConfig {
     String? templateFolder,
     String? attachmentsFolder,
     String? annotationsFolder,
+    String? captureFolder,
     String? highlightColour,
     bool? pinnedCollapsed,
     bool? lineNumbers,
@@ -725,6 +741,7 @@ final class LibraryConfig {
       templateFolder: templateFolder ?? this.templateFolder,
       attachmentsFolder: attachmentsFolder ?? this.attachmentsFolder,
       annotationsFolder: annotationsFolder ?? this.annotationsFolder,
+      captureFolder: captureFolder ?? this.captureFolder,
       highlightColour: highlightColour ?? this.highlightColour,
       pinnedCollapsed: pinnedCollapsed ?? this.pinnedCollapsed,
       lineNumbers: lineNumbers ?? this.lineNumbers,
@@ -759,8 +776,8 @@ final class LibraryConfig {
 
   /// This config with every library-relative path that pointed at the item
   /// that moved from [from] to [to] rewritten (#506): the quick note, the
-  /// list, template, attachments and annotations folders, and the journal's
-  /// own folder and template.
+  /// list, template, attachments, annotations and capture folders, and the
+  /// journal's own folder and template.
   ///
   /// A folder carries everything under it; a note only itself. A config
   /// nothing pointed to comes back equal, so the write is skipped and the
@@ -774,6 +791,7 @@ final class LibraryConfig {
       templateFolder: rewrite(templateFolder),
       attachmentsFolder: rewrite(attachmentsFolder),
       annotationsFolder: rewrite(annotationsFolder),
+      captureFolder: rewrite(captureFolder),
       journal: journal.copyWith(
         folder: rewrite(journal.folder),
         template: pathAfterMove(journal.template, from, to, isDir: isDir),
@@ -841,6 +859,7 @@ final class LibraryConfig {
     'templateFolder',
     'attachmentsFolder',
     'annotationsFolder',
+    'captureFolder',
     'highlightColour',
     'pinnedCollapsed',
     'lineNumbers',
@@ -900,6 +919,7 @@ final class LibraryConfig {
       'templateFolder': templateFolder,
       'attachmentsFolder': attachmentsFolder,
       'annotationsFolder': annotationsFolder,
+      'captureFolder': captureFolder,
       'highlightColour': highlightColour,
       'pinnedCollapsed': pinnedCollapsed,
       'lineNumbers': lineNumbers,
@@ -1005,6 +1025,7 @@ final class LibraryConfig {
         templateFolder == other.templateFolder &&
         attachmentsFolder == other.attachmentsFolder &&
         annotationsFolder == other.annotationsFolder &&
+        captureFolder == other.captureFolder &&
         highlightColour == other.highlightColour &&
         pinnedCollapsed == other.pinnedCollapsed &&
         lineNumbers == other.lineNumbers &&

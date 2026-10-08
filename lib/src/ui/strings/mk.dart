@@ -1810,6 +1810,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Белешки што анотираат PDF или книга';
   @override
+  String get captureFolderTitle => 'Папка за веб-зачувувања';
+  @override
+  String get captureFolderSubtitle =>
+      'Веб-страници и цитати зачувани како нови белешки';
+  @override
   String get annotationNoteSuffix => 'Анотација';
   @override
   String get annotateAction => 'Анотирај';

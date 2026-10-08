@@ -192,6 +192,13 @@ abstract interface class NoteOperations {
   /// Sets the annotations folder.
   Future<void> setAnnotationsFolder({required String folder});
 
+  /// The folder (library-relative) a web page or a quote captured as a
+  /// new note goes in unless another is picked (default `Clippings`).
+  Future<String> get captureFolder;
+
+  /// Sets the capture folder.
+  Future<void> setCaptureFolder({required String folder});
+
   /// The colour a passage is highlighted in: the one last chosen, by its
   /// id (default `yellow`, #626).
   Future<String> get highlightColour;
