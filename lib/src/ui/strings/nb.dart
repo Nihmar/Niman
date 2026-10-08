@@ -3273,4 +3273,21 @@ final class NorwegianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Limt inn som Markdown · med lenke til $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigasjon';
+
+  @override
+  String get navigationIntro =>
+      'Rekkefølgen i navigasjonen og målene den viser. Et skjult mål finnes '
+      'fortsatt i kommandopaletten.';
+
+  @override
+  String get navigationScopeLibrary => 'Dette biblioteket';
+
+  @override
+  String get navigationScopeDevice => 'Bare på denne enheten';
+
+  @override
+  String get navigationAlwaysShown => 'Alltid vist';
 }

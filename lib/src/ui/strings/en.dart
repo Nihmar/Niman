@@ -3248,4 +3248,21 @@ final class EnglishStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Pasted as Markdown · with the link to $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigation';
+
+  @override
+  String get navigationIntro =>
+      'The order of the navigation and the destinations it shows. A hidden '
+      'one stays in the command palette.';
+
+  @override
+  String get navigationScopeLibrary => 'This library';
+
+  @override
+  String get navigationScopeDevice => 'Only on this device';
+
+  @override
+  String get navigationAlwaysShown => 'Always shown';
 }

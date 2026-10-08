@@ -3307,4 +3307,21 @@ final class PortugueseStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Colado como Markdown · com a ligação para $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navegação';
+
+  @override
+  String get navigationIntro =>
+      'A ordem da navegação e os destinos que ela mostra. Um destino oculto '
+      'continua na paleta de comandos.';
+
+  @override
+  String get navigationScopeLibrary => 'Esta biblioteca';
+
+  @override
+  String get navigationScopeDevice => 'Só neste dispositivo';
+
+  @override
+  String get navigationAlwaysShown => 'Sempre visível';
 }

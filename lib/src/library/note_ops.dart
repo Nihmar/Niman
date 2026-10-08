@@ -8,6 +8,7 @@ import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
@@ -269,6 +270,23 @@ final class NoteOps implements NoteOperations {
   @override
   Future<void> setJournal(JournalSettings settings) =>
       config.update((c) => c.copyWith(journal: settings));
+
+  @override
+  Future<({NavigationLayout? library, NavigationLayout? device})>
+  get navigation async {
+    final c = await config.config;
+    return (library: c.navigation, device: c.deviceNavigation);
+  }
+
+  @override
+  Future<void> setNavigation(
+    NavigationLayout layout, {
+    required bool onDevice,
+  }) => config.update(
+    (c) => onDevice
+        ? c.copyWith(deviceNavigation: layout)
+        : c.copyWith(navigation: layout, clearDeviceNavigation: true),
+  );
 
   @override
   Future<List<String>> notePathsUnder(String folder) =>

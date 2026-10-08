@@ -3282,4 +3282,21 @@ final class IcelandicStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Límt sem Markdown · með tengli á $host';
+
+  @override
+  String get settingsAreaNavigation => 'Leiðsögn';
+
+  @override
+  String get navigationIntro =>
+      'Röð leiðsagnarinnar og áfangastaðirnir sem hún sýnir. Falinn '
+      'áfangastaður er áfram í skipanaspjaldinu.';
+
+  @override
+  String get navigationScopeLibrary => 'Þetta safn';
+
+  @override
+  String get navigationScopeDevice => 'Aðeins á þessu tæki';
+
+  @override
+  String get navigationAlwaysShown => 'Alltaf sýnt';
 }

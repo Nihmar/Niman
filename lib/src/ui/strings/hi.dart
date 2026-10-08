@@ -3239,4 +3239,21 @@ final class HindiStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Markdown के रूप में चिपकाया गया · $host के लिंक के साथ';
+
+  @override
+  String get settingsAreaNavigation => 'नेविगेशन';
+
+  @override
+  String get navigationIntro =>
+      'नेविगेशन का क्रम और वह जो गंतव्य दिखाता है। छिपा हुआ गंतव्य कमांड '
+      'पैलेट में बना रहता है।';
+
+  @override
+  String get navigationScopeLibrary => 'यह लाइब्रेरी';
+
+  @override
+  String get navigationScopeDevice => 'केवल इस डिवाइस पर';
+
+  @override
+  String get navigationAlwaysShown => 'हमेशा दिखाया गया';
 }

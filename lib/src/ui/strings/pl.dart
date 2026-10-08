@@ -3340,4 +3340,21 @@ final class PolishStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Wklejono jako Markdown · z linkiem do $host';
+
+  @override
+  String get settingsAreaNavigation => 'Nawigacja';
+
+  @override
+  String get navigationIntro =>
+      'Kolejność nawigacji i miejsca, które pokazuje. Ukryte miejsce zostaje '
+      'w palecie poleceń.';
+
+  @override
+  String get navigationScopeLibrary => 'Ta biblioteka';
+
+  @override
+  String get navigationScopeDevice => 'Tylko na tym urządzeniu';
+
+  @override
+  String get navigationAlwaysShown => 'Zawsze widoczne';
 }

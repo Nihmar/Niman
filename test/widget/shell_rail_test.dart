@@ -59,8 +59,8 @@ void main() {
   // destinations are found by key rather than by text on screen.
   Finder railDest(String name) => find.byKey(Key('rail-$name'));
 
-  int? railIndex(WidgetTester tester) =>
-      tester.widget<ShellRail>(find.byType(ShellRail)).selectedIndex;
+  ShellTab railIndex(WidgetTester tester) =>
+      tester.widget<ShellRail>(find.byType(ShellRail)).current;
 
   testWidgets('wide: the fixed rail shows the same 5 tabs, no bottom bar', (
     tester,
@@ -92,7 +92,7 @@ void main() {
       greaterThan(tester.getCenter(railDest('quicknote')).dy),
     );
     // Files is selected and the tree is showing.
-    expect(railIndex(tester), 0);
+    expect(railIndex(tester), ShellTab.files);
     expect(find.text('No notes yet'), findsOne);
   });
 
@@ -113,7 +113,7 @@ void main() {
       ),
       findsOne,
     );
-    expect(railIndex(tester), 0);
+    expect(railIndex(tester), ShellTab.files);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await settle(tester);
@@ -174,7 +174,7 @@ void main() {
 
     expect(find.byType(TodoTab), findsOne);
     expect(find.byKey(const Key('shell-rail')), findsOne);
-    expect(railIndex(tester), 1);
+    expect(railIndex(tester), ShellTab.todo);
   });
 
   // #202: a floating window over what was on screen, which it closes
@@ -199,7 +199,7 @@ void main() {
       ),
       findsNWidgets(2),
     );
-    expect(railIndex(tester), 0, reason: 'Files keeps the rail');
+    expect(railIndex(tester), ShellTab.files, reason: 'Files keeps the rail');
     expect(noteRow('Docs'), findsOne, reason: 'the tree is still there');
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -399,6 +399,6 @@ void main() {
     // is showing and the note is open in the detail pane next to it.
     expect(find.byType(SearchScreen).hitTestable(), findsNothing);
     expect(noteRow('alpha.md'), findsOne);
-    expect(railIndex(tester), 0);
+    expect(railIndex(tester), ShellTab.files);
   });
 }

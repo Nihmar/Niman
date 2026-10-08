@@ -3310,4 +3310,21 @@ final class SerbianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Налепљено као Markdown · са везом ка $host';
+
+  @override
+  String get settingsAreaNavigation => 'Навигација';
+
+  @override
+  String get navigationIntro =>
+      'Редослед навигације и одредишта која приказује. Скривено одредиште '
+      'остаје у палети команди.';
+
+  @override
+  String get navigationScopeLibrary => 'Ова библиотека';
+
+  @override
+  String get navigationScopeDevice => 'Само на овом уређају';
+
+  @override
+  String get navigationAlwaysShown => 'Увек приказано';
 }

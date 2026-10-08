@@ -13,8 +13,8 @@ library.
 Settings is split into areas, grouped by what they change: **App**
 (appearance, themes, editor, keyboard shortcuts, commands, text
 recognition, updates, diagnostics),
-the open **Library** (folders, journal, trash and history, sync, transcription,
-reminders), and **Maintenance** (re-index, rebuild the index, switch or
+the open **Library** (folders, journal, navigation, trash and history, sync,
+transcription, reminders), and **Maintenance** (re-index, rebuild the index, switch or
 close the library; in the settings window only the first two, since the
 rail's library window switches and closes).
 Rebuilding deletes the library's index file and reads every note into a
@@ -42,6 +42,24 @@ Every setting reads the same on both: its name, a line saying what it
 does, and the control under that. A switch flips in place; anything with
 more than two choices shows its current value in a field that opens the
 choices.
+
+### Navigation
+
+**Settings → Navigation** orders the phone's bottom bar and the
+desktop's rail, and hides the destinations you do not use: drag a row by
+its handle to move it, flip its switch to hide it. Settings cannot be
+hidden (it shows a lock), but it can be moved; the rail keeps it at its
+foot with the library switcher either way. The bar or the rail under or
+beside the list is a preview of the result.
+
+A hidden destination is still in the command palette (*Go to: …*). On
+a phone it opens as a page, with a back arrow to where you were; on the
+desktop the rail simply has nothing selected.
+
+The layout belongs to the library and travels with it. **Only on this
+device** detaches it: the device keeps its own copy, starting from what
+it shows, and the library's is left as it was; back on **This library**,
+the device drops its copy and follows the library again.
 
 ## Library settings (`LibraryConfig`)
 
@@ -75,6 +93,7 @@ sync) in `.niman/settings.json`.
 | `journalEntryName` | `YYYY/MM/YYYY-MM-DD` | An entry's name: `YYYY` `MM` `M` `DD` `D`, `/` for a folder, `'quoted'` text |
 | `journalTemplate` | none (= a heading with the date) | The template an entry is made from, library-relative |
 | `journalDayStart` | 0 | The hour a new day begins (0–6): at 4, until four in the morning is still yesterday |
+| `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order and hidden destinations (**Settings → Navigation**): `{"order": [names], "hidden": [names]}` with `files`, `todo`, `search`, `quicknote`, `settings`; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
 
 The **Diagnostics and info** area also carries the first run again
 (#266): *What Niman can do* reopens the welcome deck read-only, and
@@ -111,6 +130,7 @@ leave the file at its next write.
 | `epubBrightness` | none (= the app's) | The books' brightness: `system`, `day` or `night` |
 | `epubFont` | `literata` | The books' face: `literata`, `serif`, `sans` or `mono` |
 | `epubTextScale` | 1.0 | The books' text size (0.8–1.8); also set by a pinch over a book and, with a book on screen, by the zoom keys and commands |
+| `deviceNavigation` | none (= the library's `navigation`) | This device's own navigation, same shape as `navigation`, set by **Only on this device**; while there, it wins |
 
 The five folder keys — `listNoteFolder`, `templateFolder`,
 `attachmentsFolder`, `annotationsFolder`, `captureFolder` — are paths

@@ -3302,4 +3302,21 @@ final class BulgarianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Поставено като Markdown · с връзка към $host';
+
+  @override
+  String get settingsAreaNavigation => 'Навигация';
+
+  @override
+  String get navigationIntro =>
+      'Редът на навигацията и местата, които показва. Скритото място остава в '
+      'палитрата с команди.';
+
+  @override
+  String get navigationScopeLibrary => 'Тази библиотека';
+
+  @override
+  String get navigationScopeDevice => 'Само на това устройство';
+
+  @override
+  String get navigationAlwaysShown => 'Винаги показано';
 }

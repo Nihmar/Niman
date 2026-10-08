@@ -3315,4 +3315,21 @@ final class CroatianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Zalijepljeno kao Markdown · s poveznicom na $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigacija';
+
+  @override
+  String get navigationIntro =>
+      'Redoslijed navigacije i odredišta koja prikazuje. Skriveno odredište '
+      'ostaje u paleti naredbi.';
+
+  @override
+  String get navigationScopeLibrary => 'Ova knjižnica';
+
+  @override
+  String get navigationScopeDevice => 'Samo na ovom uređaju';
+
+  @override
+  String get navigationAlwaysShown => 'Uvijek prikazano';
 }

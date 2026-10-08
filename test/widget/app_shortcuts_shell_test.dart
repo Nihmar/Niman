@@ -8,7 +8,6 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
-import 'package:niman/src/ui/shell.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -49,22 +48,22 @@ void main() {
     await settle(tester);
   }
 
-  int? railIndex(WidgetTester tester) =>
-      tester.widget<ShellRail>(find.byType(ShellRail)).selectedIndex;
+  ShellTab railIndex(WidgetTester tester) =>
+      tester.widget<ShellRail>(find.byType(ShellRail)).current;
 
   testWidgets('Ctrl+2 selects the Todo tab and Ctrl+1 returns', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);
-    expect(railIndex(tester), ShellTab.files.index);
+    expect(railIndex(tester), ShellTab.files);
 
     await press(tester, LogicalKeyboardKey.digit2);
-    expect(railIndex(tester), ShellTab.todo.index);
+    expect(railIndex(tester), ShellTab.todo);
 
     // The tab switch unfocuses the search field; the shell has to be
     // focusable again or this second accelerator would go nowhere.
     await press(tester, LogicalKeyboardKey.digit1);
-    expect(railIndex(tester), ShellTab.files.index);
+    expect(railIndex(tester), ShellTab.files);
     await close();
   });
 

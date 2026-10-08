@@ -3271,4 +3271,21 @@ final class DanishStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Indsat som Markdown · med link til $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigation';
+
+  @override
+  String get navigationIntro =>
+      'Navigationens rækkefølge og de destinationer, den viser. En skjult '
+      'forbliver i kommandopaletten.';
+
+  @override
+  String get navigationScopeLibrary => 'Dette bibliotek';
+
+  @override
+  String get navigationScopeDevice => 'Kun på denne enhed';
+
+  @override
+  String get navigationAlwaysShown => 'Altid vist';
 }

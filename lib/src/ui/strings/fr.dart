@@ -3383,4 +3383,21 @@ final class FrenchStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Collé en Markdown · avec le lien vers $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigation';
+
+  @override
+  String get navigationIntro =>
+      "L'ordre de la navigation et les destinations qu'elle affiche. Une "
+      'destination masquée reste dans la palette de commandes.';
+
+  @override
+  String get navigationScopeLibrary => 'Cette bibliothèque';
+
+  @override
+  String get navigationScopeDevice => 'Seulement sur cet appareil';
+
+  @override
+  String get navigationAlwaysShown => 'Toujours affiché';
 }

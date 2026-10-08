@@ -3310,4 +3310,21 @@ final class ItalianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Incollato come Markdown · con il link a $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigazione';
+
+  @override
+  String get navigationIntro =>
+      "L'ordine della navigazione e le destinazioni che mostra. Una nascosta "
+      'resta nella palette dei comandi.';
+
+  @override
+  String get navigationScopeLibrary => 'Questa libreria';
+
+  @override
+  String get navigationScopeDevice => 'Solo su questo dispositivo';
+
+  @override
+  String get navigationAlwaysShown => 'Sempre visibile';
 }

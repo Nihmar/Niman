@@ -3298,4 +3298,21 @@ final class SwedishStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Inklistrat som Markdown · med länk till $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigering';
+
+  @override
+  String get navigationIntro =>
+      'Navigeringens ordning och de mål den visar. Ett dolt mål finns kvar i '
+      'kommandopaletten.';
+
+  @override
+  String get navigationScopeLibrary => 'Det här biblioteket';
+
+  @override
+  String get navigationScopeDevice => 'Bara på den här enheten';
+
+  @override
+  String get navigationAlwaysShown => 'Visas alltid';
 }

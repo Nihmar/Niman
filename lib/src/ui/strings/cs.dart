@@ -3286,4 +3286,21 @@ final class CzechStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Vloženo jako Markdown · s odkazem na $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigace';
+
+  @override
+  String get navigationIntro =>
+      'Pořadí navigace a cíle, které zobrazuje. Skrytý cíl zůstává v paletě '
+      'příkazů.';
+
+  @override
+  String get navigationScopeLibrary => 'Tato knihovna';
+
+  @override
+  String get navigationScopeDevice => 'Jen na tomto zařízení';
+
+  @override
+  String get navigationAlwaysShown => 'Vždy zobrazeno';
 }

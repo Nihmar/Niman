@@ -3315,4 +3315,21 @@ final class MacedonianStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Залепено како Markdown · со врска до $host';
+
+  @override
+  String get settingsAreaNavigation => 'Навигација';
+
+  @override
+  String get navigationIntro =>
+      'Редоследот на навигацијата и одредиштата што ги прикажува. Скриеното '
+      'одредиште останува во палетата со команди.';
+
+  @override
+  String get navigationScopeLibrary => 'Оваа библиотека';
+
+  @override
+  String get navigationScopeDevice => 'Само на овој уред';
+
+  @override
+  String get navigationAlwaysShown => 'Секогаш прикажано';
 }

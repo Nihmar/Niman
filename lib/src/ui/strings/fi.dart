@@ -3306,4 +3306,21 @@ final class FinnishStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       'Liitetty Markdownina · linkki sivulle $host';
+
+  @override
+  String get settingsAreaNavigation => 'Navigointi';
+
+  @override
+  String get navigationIntro =>
+      'Navigoinnin järjestys ja sen näyttämät kohteet. Piilotettu kohde '
+      'löytyy yhä komentopaletista.';
+
+  @override
+  String get navigationScopeLibrary => 'Tämä kirjasto';
+
+  @override
+  String get navigationScopeDevice => 'Vain tällä laitteella';
+
+  @override
+  String get navigationAlwaysShown => 'Aina näkyvissä';
 }

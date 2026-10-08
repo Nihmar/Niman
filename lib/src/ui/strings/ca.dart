@@ -3346,4 +3346,21 @@ final class CatalanStrings extends Strings {
   @override
   String pastedAsMarkdownWithLink(String host) =>
       "Enganxat com a Markdown · amb l'enllaç a $host";
+
+  @override
+  String get settingsAreaNavigation => 'Navegació';
+
+  @override
+  String get navigationIntro =>
+      "L'ordre de la navegació i les destinacions que mostra. Una d'amagada "
+      "continua a la paleta d'ordres.";
+
+  @override
+  String get navigationScopeLibrary => 'Aquesta biblioteca';
+
+  @override
+  String get navigationScopeDevice => 'Només en aquest dispositiu';
+
+  @override
+  String get navigationAlwaysShown => 'Sempre visible';
 }
