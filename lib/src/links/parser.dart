@@ -52,6 +52,7 @@ final class MarkdownLink extends ParsedLink {
     required this.text,
     required this.href,
     this.embed = false,
+    this.angled = false,
   });
 
   /// The link text between `[` and `]` (trimmed), the alt text for an image.
@@ -64,6 +65,10 @@ final class MarkdownLink extends ParsedLink {
   /// Whether it was written as an image (`![…](…)`), which the app shows
   /// rather than links. A move still has to carry it (#507).
   final bool embed;
+
+  /// Whether the href was written between angle brackets, `(<a b.md>)`:
+  /// [href] is without them, and a rewrite puts them back.
+  final bool angled;
 }
 
 /// The inside of `[[…]]`, parsed into target / heading / alias.
@@ -163,12 +168,13 @@ MarkdownLink _parseMarkdown(String src, int start, int end, int absStart) {
   // closes the href.
   final close = src.indexOf(']', start);
   final text = close == -1 ? '' : src.substring(start + 1, close).trim();
-  final href = src.substring(close + 2, end - 1).trim();
+  final (href, angled) = _destination(src.substring(close + 2, end - 1));
   return MarkdownLink(
     start: absStart,
     end: absStart + (end - start),
     text: text,
     href: href,
+    angled: angled,
   );
 }
 
@@ -177,14 +183,25 @@ MarkdownLink _parseImage(String src, int start, int end, int absStart) {
   // first `]` closes the alt text, and the last `)` closes the href.
   final close = src.indexOf(']', start);
   final text = close == -1 ? '' : src.substring(start + 2, close).trim();
-  final href = src.substring(close + 2, end - 1).trim();
+  final (href, angled) = _destination(src.substring(close + 2, end - 1));
   return MarkdownLink(
     start: absStart,
     end: absStart + (end - start),
     text: text,
     href: href,
     embed: true,
+    angled: angled,
   );
+}
+
+/// A link's destination as written between its parentheses, without the
+/// angle brackets CommonMark allows around it: `<a b.md>` is `a b.md`.
+(String, bool) _destination(String written) {
+  final trimmed = written.trim();
+  if (trimmed.length >= 2 && trimmed.startsWith('<') && trimmed.endsWith('>')) {
+    return (trimmed.substring(1, trimmed.length - 1), true);
+  }
+  return (trimmed, false);
 }
 
 /// Parses the inside of `[[…]]` (without the brackets).
