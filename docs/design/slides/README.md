@@ -72,10 +72,11 @@ Ricordare che il PDF esce in 16:9.
   down leaves presenting and stays in the slide view until the phone goes
   upright again — no fight with the sensor.
 - **The screen stays on while presenting on every platform**: Android
-  through `FLAG_KEEP_SCREEN_ON` on the existing app channel, Windows through
-  `SetThreadExecutionState` (`ffi` is already a dependency), Linux through the
-  `org.freedesktop.ScreenSaver.Inhibit` call made with `gdbus` (a process,
-  like the PDF engine). No new package.
+  through `FLAG_KEEP_SCREEN_ON` on a `niman/screen` channel, Windows through
+  `SetThreadExecutionState` (`ffi` is already a dependency), Linux through
+  GTK's `gtk_application_inhibit` on the same channel — a `gdbus` call was
+  the first idea, but the session drops an inhibit when the process that
+  asked for it exits. No new package.
 - **The tap-zone hint shows each time presenting starts** on the phone and
   fades after 2 s; nothing is remembered, so no setting.
 - **Keys**: → ↓ Space Page Down and a click forward; ← ↑ Backspace Page Up

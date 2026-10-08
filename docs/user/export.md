@@ -45,6 +45,10 @@ one file:
   opens on. A wikilink out has nothing to point at, exactly as on a
   single HTML page.
 
+A slides note has one more entry in its ⋮: **Export slides as PDF**, one
+16:9 page per slide and no speaker notes, printed the same way as the PDF
+above (see [slide notes](slides.md#export)).
+
 A link to another note becomes the text it shows on a page exported on
 its own — a wikilink highlighted, a Markdown link its own words — since
 one page has nothing to point at; a link to a website stays a link.

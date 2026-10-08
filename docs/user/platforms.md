@@ -9,6 +9,16 @@ are in both choosers, note and folder alike. EPUB is platform-neutral
 Dart — no engine, no WebView — so a book is built the same way
 everywhere; PDF goes through each platform's own printer (below).
 
+Slide notes ([slides](slides.md)) present on every platform, the screen
+kept on while they do: Android through the window's keep-screen-on flag,
+Linux through GTK's idle inhibit (the desktop's own screen saver and
+lock wait), Windows through `SetThreadExecutionState`. The presenter
+view shares the one window with the slides: putting the slides on a
+second screen and the presenter view on the first needs a second window,
+which Flutter offers only behind an experimental flag on the desktops and
+not at all on Android — a decision for now, not an omission (#534). On a
+second screen, present from the window placed there.
+
 ## Android
 
 - **Storage:** plain `dart:io` file access, gated by
