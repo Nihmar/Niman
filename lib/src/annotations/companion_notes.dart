@@ -134,7 +134,12 @@ final class CompanionNotes {
   }) => _rewrite(mark, (text, start, end) {
     final quote = text
         .substring(start, end)
-        .replaceFirst(RegExp('&highlight=${mark.highlight!.id}\\b'), '');
+        .replaceFirstMapped(
+          _highlightPair(mark.highlight!),
+          // The pair goes with one `&` of the two around it; first in the
+          // fragment, it leaves the `#` only when more follows.
+          (m) => m[1] == '#' && m[2]!.isNotEmpty ? '#' : m[2]!,
+        );
     final said = comment.trim();
     final heading = escapeMarkdownText(label.replaceAll(RegExp(r'\s+'), ' '));
     return '${text.substring(0, start)}## ${heading.trim()}\n\n$quote'
@@ -150,9 +155,9 @@ final class CompanionNotes {
             text.substring(0, start) +
             text
                 .substring(start, end)
-                .replaceFirst(
-                  RegExp('highlight=${mark.highlight!.id}\\b'),
-                  'highlight=${colour.id}',
+                .replaceFirstMapped(
+                  _highlightPair(mark.highlight!),
+                  (m) => '${m[1]}highlight=${colour.id}${m[2]}',
                 ) +
             text.substring(end),
       );
@@ -258,3 +263,9 @@ final class CompanionNotes {
     return '---\n$key: "$link"\n---\n';
   }
 }
+
+/// The `highlight=` pair of [colour] in a link's fragment, with the `#` or
+/// `&` before it and the `&` after it, if any: in any case and anywhere in
+/// the fragment, as `annotationLinksIn` reads it.
+RegExp _highlightPair(HighlightColour colour) =>
+    RegExp('([#&])highlight=${colour.id}\\b(&?)', caseSensitive: false);
