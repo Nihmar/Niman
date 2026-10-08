@@ -3268,4 +3268,31 @@ final class SerbianStrings extends Strings {
 
   @override
   String captureDownloadPicturesTo(String folder) => 'Преузми слике у $folder/';
+
+  @override
+  String get highlightAction => 'Истакни';
+
+  @override
+  String get highlightMark => 'Истицање';
+
+  @override
+  String get highlightRemove => 'Уклони истицање';
+
+  @override
+  String get highlightFailed => 'Истицање није могло да се сачува';
+
+  @override
+  String get highlightYellow => 'Жута';
+
+  @override
+  String get highlightGreen => 'Зелена';
+
+  @override
+  String get highlightBlue => 'Плава';
+
+  @override
+  String get highlightPink => 'Розе';
+
+  @override
+  String get highlightCopy => 'Копирај';
 }

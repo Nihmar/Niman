@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, a highlight tapped</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+.sub{font-size:13px;color:#A6A29A}
+.book{font-family:Literata,serif;font-size:17px;line-height:1.8;color:#E8E3DA;margin:0 0 16px}
+.pdf{font-family:Georgia,serif;font-size:14px;line-height:1.65;color:#222;margin:0 0 12px}
+.fm{font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;color:#6B7079}
+/* The four highlighter colours, see-through so the text keeps its own. */
+.hy{background:rgba(255,214,10,.30)} .hg{background:rgba(76,208,125,.30)}
+.hb{background:rgba(79,163,255,.30)} .hp{background:rgba(255,111,174,.30)}
+.py{background:rgba(255,214,10,.45)} .pg{background:rgba(76,208,125,.40)}
+.pb{background:rgba(79,163,255,.35)} .pp{background:rgba(255,111,174,.35)}
+/* An annotation keeps today's tint, and gains a dotted underline: a note is behind it. */
+.ann{background:rgba(255,214,10,.30);border-bottom:2px dotted #D8A56B}
+.pann{background:rgba(255,214,10,.45);border-bottom:2px dotted #B26A25}
+.sel{background:rgba(88,124,211,.55);color:#fff}
+.menu{position:absolute;background:#2C3037;border:1px solid #4A4F59;border-radius:10px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px;font-size:14px;color:#F2EDE5}
+.mi{display:flex;align-items:center;gap:10px;height:34px;padding:0 12px;border-radius:6px}
+.mi.on{background:#363B44}
+.sw{width:36px;height:36px;border-radius:50%;border:2px solid transparent;box-sizing:border-box}
+.sw.cur{border-color:#F2EDE5;box-shadow:0 0 0 2px #2C3037 inset}
+.note{position:absolute;font-size:12.5px;line-height:1.5;color:#A6A29A;max-width:300px}
+</style>
+</head>
+<body>
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:56px;display:flex;align-items:center;gap:14px;padding:0 14px;flex:none">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><div style="flex:1;font-size:17px;font-weight:500">Dune</div>
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+  </div>
+  <div style="padding:10px 22px;flex:1">
+    <p class="book" style="font-size:16px"><span class="hy">I must not fear. Fear is the mind-killer. Fear is the little-death that brings total obliteration.</span> I will face my fear.</p>
+    <p class="book" style="font-size:16px"><span class="hb">I will permit it to pass over me and through me.</span></p>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(10,11,13,.55);display:flex;flex-direction:column;justify-content:flex-end">
+    <div role="dialog" style="background:#2C3037;border-radius:28px 28px 0 0;padding:10px 0 22px;display:flex;flex-direction:column;gap:4px">
+      <div style="width:36px;height:4px;border-radius:2px;background:#4A4F59;align-self:center;margin-bottom:8px"></div>
+      <div style="padding:0 22px 8px" class="sub">&ldquo;I must not fear. Fear is the mind-killer&hellip;&rdquo;</div>
+      <div style="display:flex;gap:18px;padding:6px 22px 14px"><div class="sw cur" style="background:#FFD60A"></div><div class="sw" style="background:#4CD07D"></div><div class="sw" style="background:#4FA3FF"></div><div class="sw" style="background:#FF6FAE"></div></div>
+      <div class="mi" style="height:52px;padding:0 22px;gap:16px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 7h10M4 12h10M4 17h6"/><path d="M15 19l5-5-2-2-5 5v2z"/></svg>Annotate</div>
+      <div class="mi" style="height:52px;padding:0 22px;gap:16px"><svg class="ico" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>Copy</div>
+      <div class="mi" style="height:52px;padding:0 22px;gap:16px;color:#E0687A"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Remove highlight</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

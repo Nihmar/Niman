@@ -2962,4 +2962,31 @@ final class JapaneseStrings extends Strings {
 
   @override
   String captureDownloadPicturesTo(String folder) => '画像を $folder/ にダウンロード';
+
+  @override
+  String get highlightAction => 'ハイライト';
+
+  @override
+  String get highlightMark => 'ハイライト';
+
+  @override
+  String get highlightRemove => 'ハイライトを削除';
+
+  @override
+  String get highlightFailed => 'ハイライトを保存できませんでした';
+
+  @override
+  String get highlightYellow => '黄';
+
+  @override
+  String get highlightGreen => '緑';
+
+  @override
+  String get highlightBlue => '青';
+
+  @override
+  String get highlightPink => 'ピンク';
+
+  @override
+  String get highlightCopy => 'コピー';
 }

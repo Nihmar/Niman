@@ -192,6 +192,13 @@ abstract interface class NoteOperations {
   /// Sets the annotations folder.
   Future<void> setAnnotationsFolder({required String folder});
 
+  /// The colour a passage is highlighted in: the one last chosen, by its
+  /// id (default `yellow`, #626).
+  Future<String> get highlightColour;
+
+  /// Keeps [colour], an id, as the one to highlight in.
+  Future<void> setHighlightColour(String colour);
+
   /// Sets (or clears, with null) the user-chosen quick note.
   Future<void> setQuickNotePath({required String? path});
 

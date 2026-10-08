@@ -1753,4 +1753,31 @@ abstract base class Strings {
   /// Downloads a page's pictures into [folder], before their number is
   /// known.
   String captureDownloadPicturesTo(String folder);
+
+  /// Highlights the selected passage of a PDF or a book (#626).
+  String get highlightAction;
+
+  /// A highlight, among the marks a tap asks between.
+  String get highlightMark;
+
+  /// A highlight's action: takes it out of its note.
+  String get highlightRemove;
+
+  /// A highlight could not be written into its note.
+  String get highlightFailed;
+
+  /// A highlight colour, as a swatch is named.
+  String get highlightYellow;
+
+  /// A highlight colour, as a swatch is named.
+  String get highlightGreen;
+
+  /// A highlight colour, as a swatch is named.
+  String get highlightBlue;
+
+  /// A highlight colour, as a swatch is named.
+  String get highlightPink;
+
+  /// A highlight's action: copies its passage.
+  String get highlightCopy;
 }

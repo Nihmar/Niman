@@ -3287,4 +3287,31 @@ final class LithuanianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Atsisiųsti paveikslėlius į $folder/';
+
+  @override
+  String get highlightAction => 'Paryškinti';
+
+  @override
+  String get highlightMark => 'Paryškinimas';
+
+  @override
+  String get highlightRemove => 'Pašalinti paryškinimą';
+
+  @override
+  String get highlightFailed => 'Nepavyko išsaugoti paryškinimo';
+
+  @override
+  String get highlightYellow => 'Geltona';
+
+  @override
+  String get highlightGreen => 'Žalia';
+
+  @override
+  String get highlightBlue => 'Mėlyna';
+
+  @override
+  String get highlightPink => 'Rožinė';
+
+  @override
+  String get highlightCopy => 'Kopijuoti';
 }

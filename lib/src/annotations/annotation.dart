@@ -16,11 +16,20 @@
 /// annotated (#285); the quote is also what finds the place again if the
 /// file changed. A place with nothing to quote — a page of a scanned PDF —
 /// has the link on a line of its own.
+///
+/// A highlight (#626) is an annotation with a colour and nothing to say:
+/// the passage and its link alone, no heading, the colour in the link —
+///
+/// ```markdown
+/// > The passage, as the file has it.
+/// > — [[Books/Dune.pdf#page=34&chars=120-180&highlight=green|Dune, p. 34]]
+/// ```
 library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/links/place_link.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/markdown/text_escape.dart';
 import 'package:niman/src/reading/book_location.dart';
 
@@ -34,6 +43,7 @@ final class Annotation {
     required this.label,
     this.quote = '',
     this.comment = '',
+    this.highlight,
   });
 
   /// The annotated file, library-relative.
@@ -51,13 +61,26 @@ final class Annotation {
   /// What the reader said; may be empty.
   final String comment;
 
-  /// This annotation, saying [comment].
+  /// The colour of a highlight; null for an annotation.
+  final HighlightColour? highlight;
+
+  /// The annotation of this place, saying [comment]: a highlight
+  /// annotated is a highlight no more.
   Annotation withComment(String comment) => Annotation(
     path: path,
     place: place,
     label: label,
     quote: quote,
     comment: comment,
+  );
+
+  /// This place highlighted in [colour].
+  Annotation highlighted(HighlightColour colour) => Annotation(
+    path: path,
+    place: place,
+    label: label,
+    quote: quote,
+    highlight: colour,
   );
 
   /// The annotation as its note holds it, links written as [linkType]
@@ -68,8 +91,14 @@ final class Annotation {
       place: place,
       label: label,
       linkType: linkType,
+      highlight: highlight,
     );
     final passage = quote.replaceAll(_blank, ' ').trim();
+    if (highlight != null) {
+      return passage.isEmpty
+          ? '> — $link\n'
+          : '> ${escapeMarkdownText(passage)}\n> — $link\n';
+    }
     final out = StringBuffer('## ${_oneLine(label)}\n\n');
     if (passage.isEmpty) {
       out.write('$link\n');

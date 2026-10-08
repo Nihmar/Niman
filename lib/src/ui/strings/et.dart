@@ -3196,4 +3196,31 @@ final class EstonianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Laadi pildid kausta $folder/';
+
+  @override
+  String get highlightAction => 'Tõsta esile';
+
+  @override
+  String get highlightMark => 'Esiletõst';
+
+  @override
+  String get highlightRemove => 'Eemalda esiletõst';
+
+  @override
+  String get highlightFailed => 'Esiletõstu ei õnnestunud salvestada';
+
+  @override
+  String get highlightYellow => 'Kollane';
+
+  @override
+  String get highlightGreen => 'Roheline';
+
+  @override
+  String get highlightBlue => 'Sinine';
+
+  @override
+  String get highlightPink => 'Roosa';
+
+  @override
+  String get highlightCopy => 'Kopeeri';
 }

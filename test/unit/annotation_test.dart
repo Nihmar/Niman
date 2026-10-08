@@ -1,9 +1,13 @@
 // An annotation of a PDF or a book (#284) as its companion note holds it:
 // a heading naming the place, the passage quoted with the link back to
-// it, the comment.
+// it, the comment. A highlight (#626): the quote and its link alone.
+//
+// A link is written in pieces, which run on without spaces.
+// ignore_for_file: missing_whitespace_between_adjacent_strings
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/reading/book_location.dart';
 
 void main() {
@@ -59,5 +63,52 @@ void main() {
       BookLocation.fromFragment('page=3&chars=9-2'),
       const PdfLocation(page: 3),
     );
+  });
+
+  group('a highlight (#626)', () {
+    const highlight = Annotation(
+      path: 'Books/Dune.pdf',
+      place: passage,
+      label: 'Dune, p. 34',
+      quote: 'The spice #must flow.',
+      highlight: HighlightColour.green,
+    );
+
+    test('is its quote and link alone, the colour in the link', () {
+      expect(
+        highlight.toMarkdown(linkType: LinkType.wikilink),
+        r'> The spice \#must flow.'
+        '\n'
+        '> — [[Books/Dune.pdf#page=34&chars=120-180&highlight=green'
+        '|Dune, p. 34]]\n',
+      );
+      expect(
+        highlight.toMarkdown(linkType: LinkType.markdown),
+        endsWith(
+          '> — [Dune, p. 34]'
+          '(Books/Dune.pdf#page=34&chars=120-180&highlight=green)\n',
+        ),
+      );
+    });
+
+    test('the colour is a key a place passes over', () {
+      expect(
+        BookLocation.fromFragment('page=34&chars=120-180&highlight=green'),
+        passage,
+      );
+    });
+
+    test('annotated, it is an annotation with its heading', () {
+      final annotated = highlight.withComment('Remember.');
+      expect(annotated.highlight, isNull);
+      expect(
+        annotated.toMarkdown(linkType: LinkType.wikilink),
+        startsWith('## Dune, p. 34\n'),
+      );
+      expect(
+        highlight.withComment('').highlighted(HighlightColour.pink).highlight,
+        HighlightColour.pink,
+      );
+    });
   });
 }

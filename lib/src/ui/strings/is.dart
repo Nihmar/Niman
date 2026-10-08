@@ -3240,4 +3240,31 @@ final class IcelandicStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Sækja myndirnar í $folder/';
+
+  @override
+  String get highlightAction => 'Áherslumerkja';
+
+  @override
+  String get highlightMark => 'Áherslumerking';
+
+  @override
+  String get highlightRemove => 'Fjarlægja áherslumerkingu';
+
+  @override
+  String get highlightFailed => 'Ekki tókst að vista áherslumerkinguna';
+
+  @override
+  String get highlightYellow => 'Gulur';
+
+  @override
+  String get highlightGreen => 'Grænn';
+
+  @override
+  String get highlightBlue => 'Blár';
+
+  @override
+  String get highlightPink => 'Bleikur';
+
+  @override
+  String get highlightCopy => 'Afrita';
 }

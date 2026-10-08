@@ -3256,4 +3256,31 @@ final class SwedishStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Hämta bilderna till $folder/';
+
+  @override
+  String get highlightAction => 'Markera';
+
+  @override
+  String get highlightMark => 'Markering';
+
+  @override
+  String get highlightRemove => 'Ta bort markering';
+
+  @override
+  String get highlightFailed => 'Markeringen kunde inte sparas';
+
+  @override
+  String get highlightYellow => 'Gul';
+
+  @override
+  String get highlightGreen => 'Grön';
+
+  @override
+  String get highlightBlue => 'Blå';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Kopiera';
 }

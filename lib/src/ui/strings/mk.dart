@@ -3273,4 +3273,31 @@ final class MacedonianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Преземи ги сликите во $folder/';
+
+  @override
+  String get highlightAction => 'Истакни';
+
+  @override
+  String get highlightMark => 'Истакнување';
+
+  @override
+  String get highlightRemove => 'Отстрани истакнување';
+
+  @override
+  String get highlightFailed => 'Истакнувањето не можеше да се зачува';
+
+  @override
+  String get highlightYellow => 'Жолта';
+
+  @override
+  String get highlightGreen => 'Зелена';
+
+  @override
+  String get highlightBlue => 'Сина';
+
+  @override
+  String get highlightPink => 'Розова';
+
+  @override
+  String get highlightCopy => 'Копирај';
 }

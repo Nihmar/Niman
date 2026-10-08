@@ -3256,4 +3256,31 @@ final class SlovakStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Stiahnuť obrázky do $folder/';
+
+  @override
+  String get highlightAction => 'Zvýrazniť';
+
+  @override
+  String get highlightMark => 'Zvýraznenie';
+
+  @override
+  String get highlightRemove => 'Odstrániť zvýraznenie';
+
+  @override
+  String get highlightFailed => 'Zvýraznenie sa nepodarilo uložiť';
+
+  @override
+  String get highlightYellow => 'Žltá';
+
+  @override
+  String get highlightGreen => 'Zelená';
+
+  @override
+  String get highlightBlue => 'Modrá';
+
+  @override
+  String get highlightPink => 'Ružová';
+
+  @override
+  String get highlightCopy => 'Kopírovať';
 }

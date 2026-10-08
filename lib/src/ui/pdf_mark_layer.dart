@@ -1,6 +1,8 @@
-/// The marks drawn over a PDF's pages where it was annotated (#285): a
-/// passage tinted as a highlighter marks it, a page annotated as a whole
-/// pinned at its corner. A tap opens the annotation.
+/// The marks drawn over a PDF's pages where it was annotated (#285) or
+/// highlighted (#626): a passage tinted as a highlighter marks it — a
+/// highlight in its colour, an annotation in yellow and underlined, over
+/// any highlight — a page annotated as a whole pinned at its corner. A tap
+/// opens the annotation, or asks which when marks share the words.
 ///
 /// A passage is where its link says, `chars=120-180` of the page's text:
 /// its rectangles come from that text, read once per marked page when the
@@ -66,7 +68,15 @@ final class PdfMarkLayer {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final pinned = <AnnotationMark>[];
     final out = <Widget>[];
-    for (final mark in marks) {
+    // Highlights first, so an annotation on the same words is drawn over
+    // them, and takes the tap.
+    final ordered = [
+      for (final mark in marks)
+        if (mark.isHighlight) mark,
+      for (final mark in marks)
+        if (!mark.isHighlight) mark,
+    ];
+    for (final mark in ordered) {
       if (mark.place case PdfLocation(page: final number)
           when number == page.pageNumber) {
         final rects = _rects[mark];
@@ -74,14 +84,24 @@ final class PdfMarkLayer {
           pinned.add(mark);
           continue;
         }
+        final highlight = mark.highlight;
         for (final rect in rects) {
+          Widget box = ColoredBox(
+            color: highlight?.tint(dark: dark) ?? markHighlightFor(dark: dark),
+          );
+          if (highlight == null) {
+            box = CustomPaint(
+              foregroundPainter: _Underline(annotationUnderlineFor(dark: dark)),
+              child: box,
+            );
+          }
           out.add(
             Positioned.fromRect(
               rect: rect.toRect(page: page, scaledPageSize: pageRect.size),
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () => onTap([mark]),
-                child: ColoredBox(color: markHighlightFor(dark: dark)),
+                onTap: () => onTap(_marksAt(mark, rects, marks)),
+                child: box,
               ),
             ),
           );
@@ -103,4 +123,38 @@ final class PdfMarkLayer {
     }
     return out;
   }
+
+  /// [mark], tapped where it covers [rects], and every other of [marks]
+  /// covering the same words: a highlight and an annotation of one
+  /// passage are both asked about (#626).
+  List<AnnotationMark> _marksAt(
+    AnnotationMark mark,
+    List<PdfRect> rects,
+    List<AnnotationMark> marks,
+  ) => [
+    mark,
+    for (final other in marks)
+      if (other != mark &&
+          (_rects[other] ?? const <PdfRect>[]).any(
+            (theirs) => rects.any((ours) => ours.overlaps(theirs)),
+          ))
+        other,
+  ];
+}
+
+/// The dotted line under an annotated passage: a note is behind it.
+final class _Underline extends CustomPainter {
+  const new(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) => paintDottedUnderline(
+    canvas,
+    Offset.zero & Size(size.width, size.height - 2),
+    color,
+  );
+
+  @override
+  bool shouldRepaint(_Underline old) => old.color != color;
 }

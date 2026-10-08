@@ -3284,4 +3284,31 @@ final class DutchStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'De afbeeldingen downloaden naar $folder/';
+
+  @override
+  String get highlightAction => 'Markeren';
+
+  @override
+  String get highlightMark => 'Markering';
+
+  @override
+  String get highlightRemove => 'Markering verwijderen';
+
+  @override
+  String get highlightFailed => 'De markering kon niet worden opgeslagen';
+
+  @override
+  String get highlightYellow => 'Geel';
+
+  @override
+  String get highlightGreen => 'Groen';
+
+  @override
+  String get highlightBlue => 'Blauw';
+
+  @override
+  String get highlightPink => 'Roze';
+
+  @override
+  String get highlightCopy => 'Kopiëren';
 }

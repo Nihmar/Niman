@@ -15,6 +15,7 @@ import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/note_load.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
 
@@ -217,5 +218,113 @@ void main() {
         expect(shown.substring(written.offset), startsWith('## p. 9'));
       },
     );
+  });
+
+  group('highlights (#626)', () {
+    Annotation highlight(int page, HighlightColour colour) => Annotation(
+      path: 'Books/Dune.pdf',
+      place: PdfLocation(page: page, chars: (start: 0, end: 9)),
+      label: 'p. $page',
+      quote: 'Passage $page.',
+      highlight: colour,
+    );
+
+    test('are written into the companion, and read back as marks', () async {
+      await write(on('Books/Dune.pdf', 3, 'A comment.'));
+      await write(highlight(4, HighlightColour.green));
+      await write(highlight(5, HighlightColour.pink));
+      final marks = await companions.marksOf('Books/Dune.pdf');
+      expect(
+        [for (final m in marks) m.highlight],
+        [null, HighlightColour.green, HighlightColour.pink],
+      );
+      expect(marks[1].quote, 'Passage 4.');
+      expect(marks[1].title, isNull);
+    });
+
+    test('one is removed with its quote, the rest kept', () async {
+      await write(on('Books/Dune.pdf', 3, 'A comment.'));
+      await write(highlight(4, HighlightColour.green));
+      await write(highlight(5, HighlightColour.pink));
+      final path = (await companions.of('Books/Dune.pdf')).single;
+      final before = read(path);
+      final green = (await companions.marksOf('Books/Dune.pdf'))[1];
+      await companions.removeHighlight(green);
+      final after = read(path);
+      expect(after, isNot(contains('Passage 4.')));
+      expect(after, contains('A comment.\n\n> Passage 5.'));
+      expect(after.length, lessThan(before.length));
+      // The last one too, and the note ends as a note does.
+      final pink = (await companions.marksOf('Books/Dune.pdf')).last;
+      await companions.removeHighlight(pink);
+      expect(read(path), endsWith('A comment.\n'));
+      expect(
+        [for (final m in await companions.marksOf('Books/Dune.pdf')) m.title],
+        ['p. 3'],
+      );
+    });
+
+    test('its colour changes in its link', () async {
+      await write(highlight(4, HighlightColour.green));
+      final mark = (await companions.marksOf('Books/Dune.pdf')).single;
+      await companions.recolour(mark, HighlightColour.blue);
+      final again = (await companions.marksOf('Books/Dune.pdf')).single;
+      expect(again.highlight, HighlightColour.blue);
+      expect(again.quote, 'Passage 4.');
+    });
+
+    test('annotated, it becomes an annotation where it is', () async {
+      await write(highlight(4, HighlightColour.green));
+      await write(highlight(5, HighlightColour.pink));
+      final green = (await companions.marksOf('Books/Dune.pdf')).first;
+      expect(green.label, 'p. 4');
+      await companions.annotateHighlight(
+        green,
+        label: green.label!,
+        comment: 'Worth a second look.',
+      );
+      final marks = await companions.marksOf('Books/Dune.pdf');
+      expect(
+        [for (final m in marks) m.highlight],
+        [null, HighlightColour.pink],
+      );
+      expect(marks.first.title, 'p. 4');
+      final text = read(marks.first.note);
+      expect(
+        text,
+        contains(
+          '## p. 4\n\n> Passage 4.\n'
+          '> — [[Books/Dune.pdf#page=4&chars=0-9|p. 4]]\n'
+          '\nWorth a second look.\n\n> Passage 5.',
+        ),
+      );
+    });
+
+    test('a note edited since is not changed blindly', () async {
+      await write(highlight(4, HighlightColour.green));
+      final mark = (await companions.marksOf('Books/Dune.pdf')).single;
+      final path = mark.note;
+      await ops.saveNote(
+        path,
+        read(path).replaceFirst('---\n\n', '---\n\nNew line.\n\n'),
+      );
+      await expectLater(companions.removeHighlight(mark), throwsStateError);
+      expect(read(path), contains('Passage 4.'));
+    });
+
+    test('a CRLF companion stays CRLF', () async {
+      await write(highlight(4, HighlightColour.green));
+      await write(highlight(5, HighlightColour.pink));
+      final path = (await companions.of('Books/Dune.pdf')).single;
+      final file = File(p.join(root.path, path));
+      file.writeAsStringSync(file.readAsStringSync().replaceAll('\n', '\r\n'));
+      await Indexer(db).fullScan(root.path);
+      final green = (await companions.marksOf('Books/Dune.pdf')).first;
+      await companions.removeHighlight(green);
+      final text = file.readAsStringSync();
+      expect(text, isNot(contains('Passage 4.')));
+      expect(text.replaceAll('\r\n', ''), isNot(contains('\n')));
+      expect(text, contains('> Passage 5.\r\n'));
+    });
   });
 }

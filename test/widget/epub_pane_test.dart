@@ -18,6 +18,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/range_highlight.dart';
 import 'package:niman/src/reading/book_location.dart';
@@ -710,6 +711,170 @@ void main() {
     });
   });
 
+  group('highlights (#626)', () {
+    late String path;
+    late EpubChapter one;
+    late _FakeMarks marks;
+    setUp(() {
+      path = twoChapters();
+      one = readEpub(path, p.join(dir.path, 'probe')).chapters.first;
+      marks = _FakeMarks();
+    });
+    tearDown(() => marks.dispose());
+
+    AnnotationMark green() => AnnotationMark(
+      note: 'Novel - Annotation.md',
+      offset: 40,
+      end: 90,
+      place: EpubLocation(
+        chapter: one.file,
+        line: 2,
+        chars: (start: 0, end: 2),
+      ),
+      highlight: HighlightColour.green,
+      quote: 'It',
+      label: 'novel, One',
+    );
+
+    Finder marked(int line) =>
+        find.byKey(ValueKey('marked-block-${one.line + line}'));
+
+    Future<void> tapHighlight(WidgetTester tester) async {
+      await tester.tap(find.text('It begins.'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a word selected is highlighted first in the toolbar', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        onAnnotate: (_) {},
+        marks: marks,
+      );
+      await tester.longPressAt(
+        tester.getTopLeft(find.text('It begins.')) + const Offset(4, 8),
+      );
+      await tester.pumpAndSettle();
+      final labels = [
+        for (final button in tester.widgetList<TextSelectionToolbarTextButton>(
+          find.byType(TextSelectionToolbarTextButton),
+        ))
+          (button.child as Text).data,
+      ];
+      expect(labels.first, AppStrings.highlightAction);
+      await tester.tap(find.text(AppStrings.highlightAction));
+      await tester.pumpAndSettle();
+      final passage = marks.highlighted.single;
+      expect(passage.quote, 'It');
+      expect((passage.place as EpubLocation).chars, (start: 0, end: 2));
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a highlight is drawn in its colour, with no underline', (
+      tester,
+    ) async {
+      marks.marks = [green()];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      final tint = tester.widget<RangeHighlight>(
+        find.descendant(of: marked(2), matching: find.byType(RangeHighlight)),
+      );
+      expect(tint.ranges, [(start: 0, end: 2)]);
+      expect(tint.color.toARGB32() & 0xFFFFFF, HighlightColour.green.rgb);
+      expect(tint.underline, isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a tap opens its menu: a colour, Remove', (tester) async {
+      marks.marks = [green()];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      await tapHighlight(tester);
+      expect(find.byKey(const Key('highlight-menu')), findsOneWidget);
+      // The current colour is the one on.
+      final current = tester.widget<IconButton>(
+        find.byKey(const Key('highlight-colour-green')),
+      );
+      expect(current.isSelected, isTrue);
+      await tester.tap(find.byKey(const Key('highlight-colour-pink')));
+      await tester.pumpAndSettle();
+      expect(marks.recoloured.single.$2, HighlightColour.pink);
+      expect(marks.opened, isEmpty);
+
+      await tapHighlight(tester);
+      await tester.tap(find.byKey(const Key('highlight-remove')));
+      await tester.pumpAndSettle();
+      expect(marks.removed, [green()]);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('Annotate asks for the comment and annotates it', (
+      tester,
+    ) async {
+      marks.marks = [green()];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      await tapHighlight(tester);
+      await tester.tap(find.byKey(const Key('highlight-annotate')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('annotation-comment')),
+        'A strong start.',
+      );
+      await tester.tap(find.byKey(const Key('annotation-save')));
+      await tester.pumpAndSettle();
+      expect(marks.annotated.single, (green(), 'A strong start.'));
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a highlight and an annotation of a paragraph ask which', (
+      tester,
+    ) async {
+      final annotation = AnnotationMark(
+        note: 'Novel - Annotation.md',
+        offset: 10,
+        place: EpubLocation(chapter: one.file, line: 2),
+        title: 'novel, One',
+      );
+      marks.marks = [green(), annotation];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      await tapHighlight(tester);
+      expect(find.byKey(const Key('annotation-marks')), findsOneWidget);
+      expect(find.text(AppStrings.highlightMark), findsOneWidget);
+      await tester.tap(find.byKey(const Key('annotation-mark-0')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('highlight-menu')), findsOneWidget);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+
+      await tapHighlight(tester);
+      await tester.tap(find.byKey(const Key('annotation-mark-1')));
+      await tester.pumpAndSettle();
+      expect(marks.opened, [annotation]);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
   testWidgets('a file that is not a book says so', (tester) async {
     final file = File(p.join(dir.path, 'broken.epub'))
       ..writeAsStringSync('not a zip');
@@ -755,4 +920,24 @@ final class _FakeMarks implements AnnotationMarkSource {
 
   @override
   void open(AnnotationMark mark) => opened.add(mark);
+
+  final List<Annotation> highlighted = [];
+  final List<(AnnotationMark, HighlightColour)> recoloured = [];
+  final List<AnnotationMark> removed = [];
+  final List<(AnnotationMark, String)> annotated = [];
+
+  @override
+  Future<void> highlight(Annotation annotation) async =>
+      highlighted.add(annotation);
+
+  @override
+  Future<void> recolour(AnnotationMark mark, HighlightColour colour) async =>
+      recoloured.add((mark, colour));
+
+  @override
+  Future<void> removeHighlight(AnnotationMark mark) async => removed.add(mark);
+
+  @override
+  Future<void> annotateHighlight(AnnotationMark mark, String comment) async =>
+      annotated.add((mark, comment));
 }

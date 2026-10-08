@@ -3265,4 +3265,31 @@ final class PortugueseStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Baixar as imagens em $folder/';
+
+  @override
+  String get highlightAction => 'Destacar';
+
+  @override
+  String get highlightMark => 'Destaque';
+
+  @override
+  String get highlightRemove => 'Remover destaque';
+
+  @override
+  String get highlightFailed => 'Não foi possível salvar o destaque';
+
+  @override
+  String get highlightYellow => 'Amarelo';
+
+  @override
+  String get highlightGreen => 'Verde';
+
+  @override
+  String get highlightBlue => 'Azul';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Copiar';
 }

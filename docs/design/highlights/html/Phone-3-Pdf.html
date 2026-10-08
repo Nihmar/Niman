@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, a PDF with highlights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tree{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB}
+.sub{font-size:13px;color:#A6A29A}
+.book{font-family:Literata,serif;font-size:17px;line-height:1.8;color:#E8E3DA;margin:0 0 16px}
+.pdf{font-family:Georgia,serif;font-size:14px;line-height:1.65;color:#222;margin:0 0 12px}
+.fm{font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;color:#6B7079}
+/* The four highlighter colours, see-through so the text keeps its own. */
+.hy{background:rgba(255,214,10,.30)} .hg{background:rgba(76,208,125,.30)}
+.hb{background:rgba(79,163,255,.30)} .hp{background:rgba(255,111,174,.30)}
+.py{background:rgba(255,214,10,.45)} .pg{background:rgba(76,208,125,.40)}
+.pb{background:rgba(79,163,255,.35)} .pp{background:rgba(255,111,174,.35)}
+/* An annotation keeps today's tint, and gains a dotted underline: a note is behind it. */
+.ann{background:rgba(255,214,10,.30);border-bottom:2px dotted #D8A56B}
+.pann{background:rgba(255,214,10,.45);border-bottom:2px dotted #B26A25}
+.sel{background:rgba(88,124,211,.55);color:#fff}
+.menu{position:absolute;background:#2C3037;border:1px solid #4A4F59;border-radius:10px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px;font-size:14px;color:#F2EDE5}
+.mi{display:flex;align-items:center;gap:10px;height:34px;padding:0 12px;border-radius:6px}
+.mi.on{background:#363B44}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid transparent;box-sizing:border-box}
+.sw.cur{border-color:#F2EDE5;box-shadow:0 0 0 2px #2C3037 inset}
+.note{position:absolute;font-size:12.5px;line-height:1.5;color:#A6A29A;max-width:300px}
+</style>
+</head>
+<body>
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:56px;display:flex;align-items:center;gap:14px;padding:0 14px;flex:none">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><div style="flex:1;font-size:17px;font-weight:500">Local-first software</div>
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+  </div>
+  <div style="flex:1;background:#1B1D21;padding:14px;position:relative">
+    <div style="background:#FBFAF7;border-radius:3px;padding:24px 22px;position:relative">
+      <div style="font:600 14px Georgia,serif;color:#222;margin:0 0 10px">2.1 Seven ideals</div>
+      <p class="pdf" style="font-size:12.5px"><span class="pg">It is possible to create software that has all the advantages of cloud apps, while also allowing users to retain full ownership of the data.</span></p>
+      <p class="pdf" style="font-size:12.5px">In this section we propose seven ideals. <span class="py">The availability of another computer should never prevent you from working.</span></p>
+      <p class="pdf" style="font-size:12.5px"><span class="pann">Conflicts should be shown to the user as a choice, not as an error</span>, and the software should make it easy to pick one.</p>
+      <p class="pdf" style="font-size:12.5px"><span class="pp">The cloud should be a place to back up and to share data</span>, not the only place where the data lives.</p>
+      <div style="position:absolute;right:-6px;top:-6px;width:22px;height:22px;border-radius:11px;background:#D8A56B;display:flex;align-items:center;justify-content:center;color:#1B1D21"><svg class="ico" viewBox="0 0 24 24" style="width:13px;height:13px;stroke-width:2.2"><path d="M5 4h14v12l-4 4H5z"/></svg></div>
+    </div>
+  </div>
+  <div style="height:52px;border-top:1px solid #2C3037;display:flex;align-items:center;gap:16px;padding:0 16px" class="sub"><span style="flex:1">p. 4 of 22</span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 7h10M4 12h10M4 17h6"/><path d="M15 19l5-5-2-2-5 5v2z"/></svg></div>
+  <div class="note" style="left:22px;bottom:70px;max-width:340px">The PDF draws highlights as it draws annotated passages today (#285), each in its colour; a page annotation keeps its pin at the corner.</div>
+</div>
+</body>
+</html>

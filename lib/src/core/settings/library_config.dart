@@ -13,6 +13,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         TreeSort,
         defaultAnnotationsFolder,
         defaultAttachmentsFolder,
+        defaultHighlightColour,
         defaultListFolder,
         defaultTemplateFolder;
 import 'package:niman/src/core/week_start.dart';
@@ -363,6 +364,7 @@ final class LibraryConfig {
     this.templateFolder = defaultTemplateFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.annotationsFolder = defaultAnnotationsFolder,
+    this.highlightColour = defaultHighlightColour,
     this.pinnedCollapsed = false,
     this.lineNumbers = true,
     this.readableLineLength = true,
@@ -413,6 +415,7 @@ final class LibraryConfig {
     final templates = json['templateFolder'];
     final attachments = json['attachmentsFolder'];
     final annotations = json['annotationsFolder'];
+    final highlight = json['highlightColour'];
     return LibraryConfig(
       trashEnabled: switch (trash) {
         final bool enabled => enabled,
@@ -438,6 +441,9 @@ final class LibraryConfig {
       annotationsFolder: annotations is String
           ? cleanAnnotationsFolder(annotations)
           : defaultAnnotationsFolder,
+      highlightColour: highlight is String && highlight.trim().isNotEmpty
+          ? highlight.trim()
+          : defaultHighlightColour,
       pinnedCollapsed: _boolOr(json['pinnedCollapsed'], false),
       lineNumbers: _boolOr(json['lineNumbers'], true),
       readableLineLength: _boolOr(json['readableLineLength'], true),
@@ -536,6 +542,10 @@ final class LibraryConfig {
   /// The folder (library-relative) where a note annotating a PDF or a book
   /// is made, when the file has none yet (#284).
   final String annotationsFolder;
+
+  /// The colour a passage is highlighted in (#626): the one last chosen,
+  /// by its id — `yellow`, `green`, `blue`, `pink`.
+  final String highlightColour;
 
   /// Whether the tree's pinned section is rolled up (default false).
   final bool pinnedCollapsed;
@@ -673,6 +683,7 @@ final class LibraryConfig {
     String? templateFolder,
     String? attachmentsFolder,
     String? annotationsFolder,
+    String? highlightColour,
     bool? pinnedCollapsed,
     bool? lineNumbers,
     bool? readableLineLength,
@@ -714,6 +725,7 @@ final class LibraryConfig {
       templateFolder: templateFolder ?? this.templateFolder,
       attachmentsFolder: attachmentsFolder ?? this.attachmentsFolder,
       annotationsFolder: annotationsFolder ?? this.annotationsFolder,
+      highlightColour: highlightColour ?? this.highlightColour,
       pinnedCollapsed: pinnedCollapsed ?? this.pinnedCollapsed,
       lineNumbers: lineNumbers ?? this.lineNumbers,
       readableLineLength: readableLineLength ?? this.readableLineLength,
@@ -829,6 +841,7 @@ final class LibraryConfig {
     'templateFolder',
     'attachmentsFolder',
     'annotationsFolder',
+    'highlightColour',
     'pinnedCollapsed',
     'lineNumbers',
     'readableLineLength',
@@ -887,6 +900,7 @@ final class LibraryConfig {
       'templateFolder': templateFolder,
       'attachmentsFolder': attachmentsFolder,
       'annotationsFolder': annotationsFolder,
+      'highlightColour': highlightColour,
       'pinnedCollapsed': pinnedCollapsed,
       'lineNumbers': lineNumbers,
       'readableLineLength': readableLineLength,
@@ -991,6 +1005,7 @@ final class LibraryConfig {
         templateFolder == other.templateFolder &&
         attachmentsFolder == other.attachmentsFolder &&
         annotationsFolder == other.annotationsFolder &&
+        highlightColour == other.highlightColour &&
         pinnedCollapsed == other.pinnedCollapsed &&
         lineNumbers == other.lineNumbers &&
         readableLineLength == other.readableLineLength &&

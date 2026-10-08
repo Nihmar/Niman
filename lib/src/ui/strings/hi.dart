@@ -3197,4 +3197,31 @@ final class HindiStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'चित्र $folder/ में डाउनलोड करें';
+
+  @override
+  String get highlightAction => 'हाइलाइट करें';
+
+  @override
+  String get highlightMark => 'हाइलाइट';
+
+  @override
+  String get highlightRemove => 'हाइलाइट हटाएँ';
+
+  @override
+  String get highlightFailed => 'हाइलाइट सहेजा नहीं जा सका';
+
+  @override
+  String get highlightYellow => 'पीला';
+
+  @override
+  String get highlightGreen => 'हरा';
+
+  @override
+  String get highlightBlue => 'नीला';
+
+  @override
+  String get highlightPink => 'गुलाबी';
+
+  @override
+  String get highlightCopy => 'कॉपी करें';
 }

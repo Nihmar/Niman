@@ -3298,4 +3298,31 @@ final class PolishStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Pobierz obrazy do $folder/';
+
+  @override
+  String get highlightAction => 'Zaznacz';
+
+  @override
+  String get highlightMark => 'Zaznaczenie';
+
+  @override
+  String get highlightRemove => 'Usuń zaznaczenie';
+
+  @override
+  String get highlightFailed => 'Nie udało się zapisać zaznaczenia';
+
+  @override
+  String get highlightYellow => 'Żółty';
+
+  @override
+  String get highlightGreen => 'Zielony';
+
+  @override
+  String get highlightBlue => 'Niebieski';
+
+  @override
+  String get highlightPink => 'Różowy';
+
+  @override
+  String get highlightCopy => 'Kopiuj';
 }

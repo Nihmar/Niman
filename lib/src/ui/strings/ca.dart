@@ -3304,4 +3304,31 @@ final class CatalanStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Baixa les imatges a $folder/';
+
+  @override
+  String get highlightAction => 'Ressalta';
+
+  @override
+  String get highlightMark => 'Ressaltat';
+
+  @override
+  String get highlightRemove => 'Treu el ressaltat';
+
+  @override
+  String get highlightFailed => "No s'ha pogut desar el ressaltat";
+
+  @override
+  String get highlightYellow => 'Groc';
+
+  @override
+  String get highlightGreen => 'Verd';
+
+  @override
+  String get highlightBlue => 'Blau';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Copia';
 }
