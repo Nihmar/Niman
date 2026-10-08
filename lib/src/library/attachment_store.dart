@@ -12,6 +12,7 @@ import 'package:crypto/crypto.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show defaultAttachmentsFolder;
+import 'package:niman/src/library/note_writer.dart' show swapFileIn;
 import 'package:path/path.dart' as p;
 
 /// Copies a picked image into the library's attachments folder and returns
@@ -70,7 +71,10 @@ Future<String> storeAttachmentBytes({
   if (target.existsSync()) return relative;
   final temp = File(_tempName(assets.path, digest, extension));
   await temp.writeAsBytes(bytes, flush: true);
-  await temp.rename(target.path);
+  // Not a bare rename: on Windows one can go in and never come out
+  // (#103), and a capture's four downloads all stopped on theirs, the
+  // pictures whole under their temp names and the app hung behind them.
+  await swapFileIn(target.path, temp.path);
   return relative;
 }
 
@@ -119,7 +123,8 @@ Future<_Imported> _copyIntoLibrary(
   // half-copied image under its final name.
   final temp = _tempName(assets.path, digest, extension);
   await source.copy(temp);
-  await File(temp).rename(target.path);
+  // Through the rename that gives up on a hung one (#103).
+  await swapFileIn(target.path, temp);
   return (
     relative: relative,
     bytes: bytes,
