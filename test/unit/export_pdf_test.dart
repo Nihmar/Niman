@@ -8,13 +8,23 @@ import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 
 final class _Prints implements PdfPrinter {
-  const new();
+  new();
+
+  /// The last page handed over, and the sheet it was printed on.
+  String? page;
+  PdfPaper? paper;
 
   @override
   Future<bool> get canPrint async => true;
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async {
+    page = await File(htmlPath).readAsString();
+    this.paper = paper;
     await File(pdfPath).writeAsBytes(<int>[1, 2, 3, 4]);
     return const PdfPrinted();
   }
@@ -32,7 +42,11 @@ final class _NoEngine implements PdfPrinter {
   Future<bool> get canPrint async => false;
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async {
     calls++;
     return const PdfNoEngine();
   }
@@ -56,7 +70,7 @@ void main() {
       path: 'Notes/T.md',
       root: root.path,
       language: 'en',
-      printer: const _Prints(),
+      printer: _Prints(),
     );
     expect(result.selectable, isTrue);
     expect(result.payload.name, 'T.pdf');
@@ -90,7 +104,7 @@ void main() {
       path: 'Notes/T.md',
       root: root.path,
       language: 'en',
-      printer: const _Prints(),
+      printer: _Prints(),
       onProgress: (report) => stages.add(report.stage),
     );
     expect(result.selectable, isTrue);
@@ -105,10 +119,28 @@ void main() {
         path: 'Notes/T.md',
         root: root.path,
         language: 'en',
-        printer: const _Prints(),
+        printer: _Prints(),
         isCancelled: () => true,
       ),
       throwsA(isA<PdfExportCancelled>()),
     );
+  });
+
+  test('slides print one 16:9 section each, the notes left out', () async {
+    final printer = _Prints();
+    await exportNotePdf(
+      text: 'ignored: the slides are what prints',
+      title: 'Deck',
+      path: 'Deck.md',
+      root: root.path,
+      language: 'en',
+      printer: printer,
+      slides: const ['# One', '## Two'],
+    );
+    expect(printer.paper, PdfPaper.slides);
+    final page = printer.page!;
+    expect('<section class="slide">'.allMatches(page), hasLength(2));
+    expect(page, contains('@page { size: 254mm 142.875mm; margin: 0; }'));
+    expect(page, isNot(contains('ignored')));
   });
 }

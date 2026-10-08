@@ -92,6 +92,8 @@ import 'package:niman/src/ui/journal/journal_screen.dart';
 import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
+import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
+import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/library_window.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
@@ -2605,6 +2607,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.present => _presentSlides(),
         NoteMenuAction.presenterView => _presentSlides(presenter: true),
         NoteMenuAction.markdownPreview => Future<void>.sync(_showKindMarkdown),
+        NoteMenuAction.exportSlides => _exportNote(path, slidesPdf: true),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
         NoteMenuAction.delete => _rowActions.delete(context, path),
@@ -3618,11 +3621,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Exports the note at [path] as a file (#24): asks which format, reads
   /// the note (the buffer's edits first) and asks where to save it.
-  Future<void> _exportNote(String path) async {
+  ///
+  /// [slidesPdf] exports a slides note's slides (#534): a PDF, one 16:9
+  /// sheet a slide, its text as large as the slide's, no format to ask.
+  Future<void> _exportNote(String path, {bool slidesPdf = false}) async {
     // The theme is read while the context is certainly valid: the dialog
     // and the export itself both wait.
-    final theme = markdownThemeOf(context, scaler: noteTextScalerOf(context));
-    final format = await _chooseExportFormat();
+    final theme = markdownThemeOf(
+      context,
+      scaler: slidesPdf
+          ? const TextScaler.linear(slideTextScale)
+          : noteTextScalerOf(context),
+    );
+    final format = slidesPdf ? ExportFormat.pdf : await _chooseExportFormat();
     if (format == null || !mounted) return;
     final ops = widget.controller.ops;
     final root = widget.controller.root;
@@ -3707,6 +3718,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             mathCache: cache,
             onProgress: (report) => progress.value = report,
             isCancelled: () => cancelled,
+            slides: slidesPdf
+                ? [for (final slide in splitSlides(text)) slide.markdown]
+                : null,
           );
           payload = printed.payload;
           selectable = printed.selectable;

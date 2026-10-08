@@ -149,6 +149,85 @@ Future<Uint8List> rasterPdf({
   }
 }
 
+/// A slide's page in logical pixels (#534): 16:9, the 960 × 540 the app
+/// lays a slide out at, so the page and the screen show the same slide.
+const Size slidePagePx = Size(960, 540);
+
+/// Draws one page per slide of [slides] (#534), each the slide's Markdown
+/// laid out on a [slidePagePx] page and clipped to it, answering the PDF's
+/// bytes. The fallback of a machine with no engine, as [rasterPdf] is for
+/// a note; [theme] carries the slides' larger type.
+Future<Uint8List> rasterSlidesPdf({
+  required List<String> slides,
+  required MarkdownTheme theme,
+  required MathCache mathCache,
+  Map<String, Uint8List>? images,
+  void Function(int done, int total)? onProgress,
+  bool Function()? isCancelled,
+  double pixelRatio = 2,
+}) async {
+  final width = slidePagePx.width;
+  final height = slidePagePx.height;
+  final decoded = <String, ui.Image>{};
+  for (final entry in (images ?? const <String, Uint8List>{}).entries) {
+    try {
+      decoded[entry.key] = await _decode(
+        entry.value,
+        (width * pixelRatio).round(),
+      );
+    } on Object {
+      // As in [rasterPdf]: a picture that will not decode stays words.
+    }
+  }
+  final writer = PdfWriter(
+    pageWidth: width * pointsPerPixel,
+    pageHeight: height * pointsPerPixel,
+  );
+  try {
+    onProgress?.call(0, slides.length);
+    for (var index = 0; index < slides.length; index++) {
+      if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
+      final layout = _OffscreenLayout(
+        width: width,
+        height: height,
+        child: MarkdownExportView(
+          buffer: SourceBuffer.fromText(slides[index]),
+          parser: ReadParser(),
+          theme: theme,
+          mathCache: mathCache,
+          width: width,
+          padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 40),
+          embedImages: decoded.isEmpty ? null : decoded,
+        ),
+      );
+      try {
+        final recording = MarkdownExport.record(layout.layOut());
+        try {
+          final image = await recording.capture(
+            Rect.fromLTWH(0, 0, width, height),
+            pixelRatio: pixelRatio,
+          );
+          try {
+            writer.addPage(await _pageImage(image));
+          } finally {
+            image.dispose();
+          }
+        } finally {
+          recording.dispose();
+        }
+      } finally {
+        layout.dispose();
+      }
+      onProgress?.call(index + 1, slides.length);
+    }
+    return writer.finish();
+  } finally {
+    for (final image in decoded.values) {
+      image.dispose();
+    }
+  }
+}
+
 /// [bytes] as a picture the export can draw: never wider than the page
 /// needs, so a phone photo does not decode to a screenful of pixels per
 /// pixel of the note.
@@ -290,7 +369,11 @@ final class RasterPdfPrinter implements PdfPrinter {
   Future<bool> get canPrint async => true;
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async {
     try {
       final bytes = await rasterPdf(
         text: text,

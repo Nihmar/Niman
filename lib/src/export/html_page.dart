@@ -6,14 +6,17 @@ library;
 import 'package:niman/src/export/html_text.dart';
 
 /// A whole page titled [title] around [body]; [fontFaces] are the maths
-/// fonts, when a formula on it needs them.
+/// fonts, when a formula on it needs them, and [style] what a page of its
+/// own kind adds after the page's (the slides' sheets, #534).
 String htmlPage({
   required String title,
   required String body,
   String? fontFaces,
   String language = 'en',
+  String? style,
 }) {
   final fonts = fontFaces == null ? '' : '<style>$fontFaces</style>\n';
+  final own = style == null ? '' : '<style>$style</style>\n';
   return '<!DOCTYPE html>\n'
       '<html lang="${escapeAttribute(language)}">\n'
       '<head>\n'
@@ -22,6 +25,7 @@ String htmlPage({
       '<meta name="generator" content="Niman">\n'
       '<title>${escapeHtml(title)}</title>\n'
       '<style>$pageStyle</style>\n'
+      '$own'
       '$fonts'
       '</head>\n'
       '<body>\n'
@@ -122,4 +126,20 @@ details.callout > summary { cursor: pointer; }
   h1, h2, h3, h4, h5, h6 { break-after: avoid; }
   a { color: inherit; }
 }
+''';
+
+/// A slides page's sheets (#534): one 16:9 page a slide, no margin, the
+/// slide's text set as the app sets it on its 960 × 540 slide — 254 mm is
+/// 960 px at the 96 a CSS inch has.
+const String slidesPageStyle = '''
+@page { size: 254mm 142.875mm; margin: 0; }
+html, body { margin: 0; padding: 0; }
+body { padding: 0; }
+.note { max-width: none; margin: 0; }
+.slide { width: 254mm; height: 142.875mm; box-sizing: border-box;
+  padding: 40px 64px; overflow: hidden; font-size: 28.8px;
+  break-after: page; page-break-after: always; }
+.slide:last-child { break-after: auto; page-break-after: auto; }
+.slide > :first-child { margin-top: 0; }
+@media print { body { padding: 0; font-size: 28.8px; } }
 ''';

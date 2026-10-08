@@ -12,6 +12,9 @@ enum NoteMenuAction {
   /// The slides note's Markdown preview, in place of its slides (#534).
   markdownPreview,
 
+  /// The slides note as a PDF, one 16:9 sheet a slide (#534).
+  exportSlides,
+
   /// The note's headings (#175): the dock's pane where there is room for
   /// the dock, a sheet on a phone.
   outline,
@@ -138,6 +141,11 @@ final class NoteMenuButton extends StatelessWidget {
             NoteMenuAction.markdownPreview,
             Icons.visibility_outlined,
             AppStrings.slidesMarkdownPreview,
+          ),
+          _item(
+            NoteMenuAction.exportSlides,
+            Icons.picture_as_pdf_outlined,
+            AppStrings.slidesExportPdf,
           ),
         ],
         if (textNote) ...[

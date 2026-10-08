@@ -513,6 +513,9 @@ final class _NoEnginePrinter implements PdfPrinter {
   Future<bool> get canPrint async => false;
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async =>
-      const PdfNoEngine();
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async => const PdfNoEngine();
 }

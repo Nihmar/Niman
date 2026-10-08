@@ -75,11 +75,27 @@ final class PdfExportCancelled implements Exception {
   String toString() => 'PDF export cancelled';
 }
 
+/// The sheet a page is printed on.
+enum PdfPaper {
+  /// A4 with the page's margin: a note.
+  a4,
+
+  /// 16:9 with no margin, one slide a sheet (#534).
+  slides,
+}
+
 /// What prints a page.
 abstract interface class PdfPrinter {
-  /// Prints the page at [htmlPath] into [pdfPath]; whether it worked is
-  /// the [PdfOutcome].
-  Future<PdfOutcome> print(String htmlPath, String pdfPath);
+  /// Prints the page at [htmlPath] into [pdfPath] on [paper]; whether it
+  /// worked is the [PdfOutcome].
+  ///
+  /// A browser engine takes the sheet from the page's own `@page`; the
+  /// Android WebView is told it, its print attributes being its own.
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  });
 
   /// Whether this machine has anything to print with, asked before the
   /// page is built: with nothing, the note is drawn instead, and its HTML
@@ -315,7 +331,11 @@ final class ProcessPdfPrinter implements PdfPrinter {
   Future<bool> get canPrint async => await _resolveEngine() != null;
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async {
     final exe = await _resolveEngine();
     if (exe == null) return const PdfNoEngine();
     final ProcessAnswer answer;
