@@ -288,10 +288,16 @@ int _lineEnd(SourceBuffer buffer, int at) {
 /// any marker ([lineBodyStart]) — an item's content, not its bullet — or,
 /// when the caret is there already, the start of the line, so that both
 /// are a key away (#545).
+///
+/// A caret that stands *before* the text — in the indentation, among a
+/// heading's hashes, between a bullet and its space — goes to the start of
+/// the line at once: Home never moves the caret right, save from the start
+/// of the line itself, where it toggles back to the text.
 int _textStart(SourceBuffer buffer, int at, int Function(int line) body) {
   final line = buffer.lineOf(at);
+  final head = buffer.offsetOfLine(line);
   final start = body(line);
-  return at == start ? buffer.offsetOfLine(line) : start;
+  return at > head && at <= start ? head : start;
 }
 
 /// How far either side of the caret a grapheme cluster is looked for.

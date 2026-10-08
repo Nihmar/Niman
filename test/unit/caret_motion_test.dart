@@ -198,9 +198,68 @@ void main() {
       6,
       reason: 'from the content, a second Home goes to the line start',
     );
-    expect(_moved(text, 8, CaretMotion.lineTextStart), item);
+    expect(
+      _moved(text, 6, CaretMotion.lineTextStart),
+      item,
+      reason: 'from the line start, Home goes back to the content',
+    );
     final quoted = text.indexOf('citato');
     expect(_moved(text, text.length, CaretMotion.lineTextStart), quoted);
+  });
+
+  test('Home from inside the marker goes to the line start, not right', () {
+    // A caret among a heading's hashes is before the text: Home sending it
+    // right, to the text, and only a second press to the line's start, was
+    // the fault.
+    const heading = 'intro\n###### 4. Mail della dichiarazione';
+    final head = heading.indexOf('#');
+    final title = heading.indexOf('4.');
+    for (final hashes in [1, 4, 5, 6]) {
+      expect(
+        _moved(heading, head + hashes, CaretMotion.lineTextStart),
+        head,
+        reason: 'after $hashes of the hashes',
+      );
+    }
+    expect(
+      _moved(heading, title - 1, CaretMotion.lineTextStart),
+      head,
+      reason: 'between the hashes and their space',
+    );
+    // Past the text's start, the two presses are unchanged.
+    expect(_moved(heading, title + 4, CaretMotion.lineTextStart), title);
+    expect(_moved(heading, title, CaretMotion.lineTextStart), head);
+    expect(_moved(heading, head, CaretMotion.lineTextStart), title);
+
+    // The same for a list item's bullet, its number, a quote mark, a task
+    // box and the indentation before any of them.
+    const items = 'a\n- uno\n1. due\n> tre\n  - [ ] quattro\n    cinque';
+    for (final word in ['uno', 'due', 'tre', 'quattro', 'cinque']) {
+      final text = items.indexOf(word);
+      final line = items.lastIndexOf('\n', text) + 1;
+      for (var at = line + 1; at <= text; at++) {
+        expect(
+          _moved(items, at, CaretMotion.lineTextStart),
+          line,
+          reason: '`$word`, from ${at - line} into its line',
+        );
+      }
+      expect(_moved(items, text + 2, CaretMotion.lineTextStart), text);
+      expect(_moved(items, line, CaretMotion.lineTextStart), text);
+    }
+  });
+
+  test('Shift+Home from inside the marker selects back to the line start', () {
+    const text = 'intro\n## Titolo';
+    final head = text.indexOf('#');
+    final selected = moveCaret(
+      SelectionModel.at(head + 1),
+      CaretMotion.lineTextStart,
+      buffer: SourceBuffer.fromText(text),
+      extend: true,
+    );
+    expect(selected.anchor, head + 1);
+    expect(selected.extent, head, reason: 'leftwards, not over the `# `');
   });
 
   test('a double click selects the word under the offset', () {
