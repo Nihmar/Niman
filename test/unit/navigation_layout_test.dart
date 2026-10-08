@@ -87,9 +87,10 @@ void main() {
     expect(config.libraryJsonMap()['navigation'], shared.toJson());
     expect(config.libraryJsonMap(), isNot(contains('deviceNavigation')));
     expect(config.deviceJsonMap()['deviceNavigation'], mine.toJson());
-    expect(config.navigationLayout, mine);
     final back = LibraryConfig.fromJsonMap(config.toJsonMap());
     expect(back, config);
-    expect(back.copyWith(clearDeviceNavigation: true).navigationLayout, shared);
+    final following = back.copyWith(clearDeviceNavigation: true);
+    expect(following.deviceNavigation, isNull);
+    expect(following.navigation, shared);
   });
 }

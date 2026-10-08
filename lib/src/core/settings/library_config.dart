@@ -700,10 +700,6 @@ final class LibraryConfig {
   /// device*; while it is there it wins over [navigation].
   final NavigationLayout? deviceNavigation;
 
-  /// The navigation this device shows.
-  NavigationLayout get navigationLayout =>
-      deviceNavigation ?? navigation ?? const NavigationLayout();
-
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
