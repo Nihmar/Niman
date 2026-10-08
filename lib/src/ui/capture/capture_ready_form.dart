@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/capture/capture_note.dart';
 import 'package:niman/src/capture/web_capture.dart';
+import 'package:niman/src/ui/capture/capture_tags.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What the user chooses before saving.
@@ -100,7 +101,7 @@ final class CaptureReadyForm extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: onPickFolder,
         ),
-        _Tags(choices: choices, onChanged: onChanged),
+        CaptureTags(tags: choices.tags, onChanged: onChanged),
         const SizedBox(height: 12),
         Text(AppStrings.capturePreview, style: heading),
         const SizedBox(height: 4),
@@ -147,47 +148,6 @@ final class CaptureReadyForm extends StatelessWidget {
       ],
     );
   }
-}
-
-/// The note's tags: one chip each, and a field for another.
-final class _Tags extends StatelessWidget {
-  const new({required this.choices, required this.onChanged});
-
-  final CaptureChoices choices;
-  final VoidCallback onChanged;
-
-  @override
-  Widget build(BuildContext context) => Wrap(
-    spacing: 6,
-    runSpacing: 6,
-    crossAxisAlignment: WrapCrossAlignment.center,
-    children: [
-      for (final tag in choices.tags)
-        InputChip(
-          label: Text('#$tag'),
-          onDeleted: () {
-            choices.tags.remove(tag);
-            onChanged();
-          },
-        ),
-      SizedBox(
-        width: 160,
-        child: TextField(
-          key: const Key('capture-add-tag'),
-          decoration: InputDecoration(
-            hintText: AppStrings.captureAddTag,
-            isDense: true,
-          ),
-          onSubmitted: (text) {
-            final tag = text.trim().replaceFirst(RegExp('^#'), '');
-            if (tag.isEmpty || choices.tags.contains(tag)) return;
-            choices.tags.add(tag);
-            onChanged();
-          },
-        ),
-      ),
-    ],
-  );
 }
 
 /// What the note will be, at a glance: its title, author and date, how

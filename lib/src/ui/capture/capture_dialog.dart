@@ -4,8 +4,8 @@
 /// the note it made, or null.
 ///
 /// The desktop's way to a capture — from the command palette, a link
-/// pasted outside the editor or dropped on the window — and the app's own
-/// on a phone, from New.
+/// pasted outside the editor or dropped on the window. A phone asks with
+/// the capture sheet instead, and saves in the background.
 library;
 
 import 'dart:async';
@@ -26,6 +26,20 @@ typedef CaptureRead = Future<WebReading> Function(
   Uri url, {
   PageBrowser? browser,
   void Function(CaptureProgress progress)? onProgress,
+});
+
+/// Downloads a page's pictures and writes its note: [saveWebCapture], or
+/// a test's.
+typedef CaptureSave = Future<({CapturedNote note, int pictures})> Function(
+  PageReading page, {
+  required String libraryRoot,
+  required String attachmentsFolder,
+  required String unreadableNotice,
+  required DateTime captured,
+  String? title,
+  bool downloadPictures,
+  List<String> tags,
+  LinkType linkType,
 });
 
 /// Where a capture goes, and how it gets there.
@@ -70,18 +84,7 @@ final class CaptureTarget {
   final CaptureRead read;
 
   /// Saves a page's note text.
-  final Future<({CapturedNote note, int pictures})> Function(
-    PageReading page, {
-    required String libraryRoot,
-    required String attachmentsFolder,
-    required String unreadableNotice,
-    required DateTime captured,
-    String? title,
-    bool downloadPictures,
-    List<String> tags,
-    LinkType linkType,
-  })
-  save;
+  final CaptureSave save;
 
   /// The time now.
   final DateTime Function() clock;
