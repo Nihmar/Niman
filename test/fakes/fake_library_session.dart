@@ -8,6 +8,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';
@@ -915,6 +916,27 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setJournal(JournalSettings settings) async {
     _journal = settings;
+  }
+
+  NavigationLayout? _libraryNavigation;
+  NavigationLayout? _deviceNavigation;
+
+  @override
+  Future<({NavigationLayout? library, NavigationLayout? device})>
+  get navigation async =>
+      (library: _libraryNavigation, device: _deviceNavigation);
+
+  @override
+  Future<void> setNavigation(
+    NavigationLayout layout, {
+    required bool onDevice,
+  }) async {
+    if (onDevice) {
+      _deviceNavigation = layout;
+    } else {
+      _libraryNavigation = layout;
+      _deviceNavigation = null;
+    }
   }
 
   @override

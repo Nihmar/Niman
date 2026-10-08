@@ -16,6 +16,7 @@ import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/storage_access.dart';
@@ -524,25 +525,6 @@ final class _LibraryShell extends ConsumerStatefulWidget {
   ConsumerState<_LibraryShell> createState() => _LibraryShellState();
 }
 
-/// The app tabs: the bottom navigation bar on the narrow layout, the
-/// fixed left rail on the wide layout (T-PP-14).
-enum ShellTab {
-  /// The note tree plus the note-open stack (T-UI-02).
-  files,
-
-  /// Reserved tab for the todo section (T-UI-10).
-  todo,
-
-  /// Full-text search (M3 T-M3-05); the SearchScreen tab.
-  search,
-
-  /// The scratch quick note at the library root (T-UI-10).
-  quickNote,
-
-  /// The library settings (the pushed SettingsScreen on wide screens).
-  settings,
-}
-
 final class _LibraryShellState extends ConsumerState<_LibraryShell>
     with WidgetsBindingObserver {
   String? _selected;
@@ -577,7 +559,38 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// changes state the bodies do read.
   final ValueNotifier<ShellTab> _tabListenable = ValueNotifier(ShellTab.files);
   ShellTab get _tab => _tabListenable.value;
-  set _tab(ShellTab value) => _tabListenable.value = value;
+  set _tab(ShellTab value) {
+    // Every way into a hidden tab passes here, so this is where the way
+    // back out of it is remembered (#536).
+    if (_shown(_tabListenable.value) && !_shown(value)) {
+      _hiddenTabReturn = _tabListenable.value;
+    }
+    _tabListenable.value = value;
+  }
+
+  /// The library's navigation on this device (#536), read with the
+  /// editor settings; null until the first read.
+  NavigationLayout? _navigation;
+
+  /// The destinations the bar and the rail show.
+  List<ShellDestination> get _destinations =>
+      visibleDestinations(_navigation ?? const NavigationLayout());
+
+  /// Whether [tab] has a place in the bar and the rail.
+  bool _shown(ShellTab tab) => _destinations.any((d) => d.tab == tab);
+
+  /// The tab a hidden one was opened from (the palette, a widget, a
+  /// reminder): its back arrow returns there.
+  ShellTab _hiddenTabReturn = ShellTab.files;
+
+  /// Leaves the hidden tab on screen for the one it was opened from, or
+  /// the first shown when that one has been hidden since.
+  void _leaveHiddenTab() {
+    final back = _shown(_hiddenTabReturn)
+        ? _hiddenTabReturn
+        : _destinations.first.tab;
+    _selectShellTab(back);
+  }
 
   /// Every tab visited so far: bodies mount on first visit and stay
   /// mounted afterwards, so a switch only flips visibility instead of
@@ -1460,7 +1473,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Shows the tab at [index], and the Files tab it lives in.
   void _activateTab(int pane, int index) {
-    if (_tab != ShellTab.files) _onDestinationSelected(ShellTab.files.index);
+    if (_tab != ShellTab.files) _onDestinationSelected(ShellTab.files);
     _workspace.activate(pane, index);
   }
 
@@ -1996,7 +2009,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final ops = controller.ops;
     final quickNote = ops == null ? null : await ops.quickNotePath;
     final journal = ops == null ? null : await ops.journal;
+    final navigation = ops == null ? null : await ops.navigation;
     if (!mounted) return;
+    if (navigation != null) {
+      final layout =
+          navigation.device ?? navigation.library ?? const NavigationLayout();
+      if (layout != _navigation) {
+        final first = _navigation == null;
+        setState(() => _navigation = layout);
+        // The start tab is the first shown: Files, unless it was hidden.
+        if (first && _tab == ShellTab.files && !_shown(ShellTab.files)) {
+          _selectShellTab(_destinations.first.tab);
+        }
+      }
+    }
     if (journal != null && journal != _journal) {
       setState(() => _journal = journal);
     }
@@ -2573,8 +2599,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       sidebarVisible: _sidebarVisible,
       onToggleSidebar: _toggleSidebar,
       shellFocus: _shellFocus,
-      tabIndex: _tab.index,
+      tab: _tab,
+      destinations: _destinations,
       onDestinationSelected: _onDestinationSelected,
+      hiddenTab: !_shown(_tab),
+      onLeaveHiddenTab: _leaveHiddenTab,
       onSwitchLibrary: _switchLibrary,
       // The phone's way into the palette (#206); the desktop has a key.
       onOpenPalette: narrow ? () => unawaited(_openPalette()) : null,
@@ -2954,6 +2983,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       valueListenable: _tabListenable,
       builder: (context, tab, _) => Scaffold(
         appBar: AppBar(
+          // A hidden tab opened anyway is a page, not a tab (#536): back
+          // instead of a bar with nothing to select.
+          leading: _shown(tab)
+              ? null
+              : BackButton(
+                  key: const Key('hidden-tab-back'),
+                  onPressed: _leaveHiddenTab,
+                ),
           title: Text(_tabTitle),
           actions: switch (tab) {
             ShellTab.files => _filesAppBarActions(controller),
@@ -3000,6 +3037,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         },
         floatingActionButton: _tabFab(),
         bottomNavigationBar: switch (controller.sync) {
+          _ when !_shown(tab) => null,
           final sync? when tab == ShellTab.files => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -3022,14 +3060,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     return TourTarget(
       id: TourTargets.nav,
       child: ShellTabBar(
-        selectedIndex: _tab.index,
+        destinations: _destinations,
+        current: _tab,
         onDestinationSelected: _onDestinationSelected,
       ),
     );
   }
 
-  void _onDestinationSelected(int index) {
-    final tab = ShellTab.values[index];
+  void _onDestinationSelected(ShellTab tab) {
     const AppLogger(name: 'shell').debug('tap tab: ${tab.name}');
     if (tab == ShellTab.quickNote) {
       unawaited(_openQuickNoteFromTile());
@@ -3275,13 +3313,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.splitRight: () => _workspace.splitActive(SplitAxis.right),
       AppCommand.splitDown: () => _workspace.splitActive(SplitAxis.down),
       AppCommand.toggleDock: _toggleDock,
-      AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files.index),
-      AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo.index),
-      AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search.index),
-      AppCommand.tabQuickNote: () =>
-          _onDestinationSelected(ShellTab.quickNote.index),
-      AppCommand.tabSettings: () =>
-          _onDestinationSelected(ShellTab.settings.index),
+      AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files),
+      AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo),
+      AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search),
+      AppCommand.tabQuickNote: () => _onDestinationSelected(ShellTab.quickNote),
+      AppCommand.tabSettings: () => _onDestinationSelected(ShellTab.settings),
       AppCommand.togglePreview: _togglePreview,
       AppCommand.switchEditor: () => unawaited(
         _setEditorKind(
@@ -4122,7 +4158,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       return;
     }
     setState(() => _settingsTarget = target);
-    _onDestinationSelected(ShellTab.settings.index);
+    _onDestinationSelected(ShellTab.settings);
   }
 
   /// Where the Settings tab opens next, once (#229).

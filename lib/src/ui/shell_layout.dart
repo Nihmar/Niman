@@ -46,8 +46,11 @@ final class ShellLayoutProps {
     required this.sidebarVisible,
     required this.onToggleSidebar,
     required this.shellFocus,
-    required this.tabIndex,
+    required this.tab,
+    required this.destinations,
     required this.onDestinationSelected,
+    required this.hiddenTab,
+    required this.onLeaveHiddenTab,
     required this.onSwitchLibrary,
     required this.buildWideSlots,
     this.onOpenPalette,
@@ -125,11 +128,21 @@ final class ShellLayoutProps {
   /// Carries focus for the accelerators when nothing else wants it.
   final FocusNode shellFocus;
 
-  /// The current tab, as the bar and the rail count them.
-  final int tabIndex;
+  /// The current tab.
+  final ShellTab tab;
+
+  /// The destinations the rail shows, in order (#536).
+  final List<ShellDestination> destinations;
 
   /// A tap on the bar or the rail; the shell decides what it means.
-  final ValueChanged<int> onDestinationSelected;
+  final ValueChanged<ShellTab> onDestinationSelected;
+
+  /// Whether [tab] is one the navigation hides, opened anyway: on a phone
+  /// it is a page, and back leaves it (#536).
+  final bool hiddenTab;
+
+  /// Leaves that hidden tab for the one it was opened from.
+  final VoidCallback onLeaveHiddenTab;
 
   /// The rail's library button (#170): the library window (#203).
   final VoidCallback onSwitchLibrary;
@@ -220,10 +233,14 @@ final class NarrowShellLayout extends StatelessWidget {
     return CallbackShortcuts(
       bindings: props.shortcutBindings,
       child: PopScope(
-        canPop: !fullNote,
+        canPop: !fullNote && !props.hiddenTab,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
-          props.onCloseFullScreenNote();
+          if (fullNote) {
+            props.onCloseFullScreenNote();
+          } else {
+            props.onLeaveHiddenTab();
+          }
         },
         child: PaletteSwipe(
           // Two fingers down open the palette, over the tabs and over an
@@ -341,7 +358,8 @@ final class WideShellLayout extends StatelessWidget {
                         TourTarget(
                           id: TourTargets.nav,
                           child: ShellRail(
-                            selectedIndex: props.tabIndex,
+                            destinations: props.destinations,
+                            current: props.tab,
                             onDestinationSelected: props.onDestinationSelected,
                             onSwitchLibrary: props.onSwitchLibrary,
                           ),

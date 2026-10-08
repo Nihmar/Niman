@@ -5,6 +5,7 @@ import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/db/app_database.dart';
@@ -214,6 +215,15 @@ abstract interface class NoteOperations {
 
   /// Keeps [settings] as the journal's.
   Future<void> setJournal(JournalSettings settings);
+
+  /// The navigation's layout (#536): the library's, and this device's own
+  /// when *Only on this device* is on; null is the defaults.
+  Future<({NavigationLayout? library, NavigationLayout? device})>
+  get navigation;
+
+  /// Keeps [layout] as this device's own navigation when [onDevice], or
+  /// as the library's, dropping the device's own, when not.
+  Future<void> setNavigation(NavigationLayout layout, {required bool onDevice});
 
   /// The paths of the notes under [folder], at any depth (every note's
   /// for the root): an index seek, not a walk of the disk.
