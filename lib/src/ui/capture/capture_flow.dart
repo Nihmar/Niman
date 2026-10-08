@@ -103,3 +103,20 @@ final class CaptureFlow {
     if (path != null) onCaptured(path);
   }
 }
+
+/// A paste no text field or editor took: a web address on the clipboard
+/// opens the capture dialog on it; anything else is left alone.
+final class CapturePasteAction extends Action<PasteTextIntent> {
+  /// The action, calling [onAddress] with the address pasted.
+  new(this.onAddress);
+
+  /// Captures the page at an address.
+  final void Function(Uri url) onAddress;
+
+  @override
+  Future<void> invoke(PasteTextIntent intent) async {
+    final clip = await Clipboard.getData(Clipboard.kTextPlain);
+    final url = webAddressIn(clip?.text);
+    if (url != null) onAddress(url);
+  }
+}

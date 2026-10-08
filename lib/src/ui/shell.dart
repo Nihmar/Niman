@@ -2529,9 +2529,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // The region above the two panes, measured so a frame that misses with
     // both panes under their bars has a name of its own (#324).
     return _frameCost.timed(
-      () => narrow
-          ? NarrowShellLayout(props: props)
-          : WideShellLayout(props: props),
+      // A link pasted where nothing else takes a paste — the tree, the read
+      // view — is a page to capture (#531): a text field and the editor
+      // answer the paste first.
+      () => Actions(
+        actions: <Type, Action<Intent>>{
+          PasteTextIntent: CapturePasteAction(
+            (url) => unawaited(_captureFlow.capture(context, url: url)),
+          ),
+        },
+        child: narrow
+            ? NarrowShellLayout(props: props)
+            : WideShellLayout(props: props),
+      ),
     );
   }
 
