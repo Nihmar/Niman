@@ -94,5 +94,13 @@ void main() {
     await settle(tester);
     expect(find.byKey(const Key('slides-strip')), findsNothing);
     expect(find.byKey(const Key('kind-show-list')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pane-preview')), findsOneWidget);
+
+    // Back to the slides, then the pencil: the editor, not that preview.
+    await tester.tap(find.byKey(const Key('kind-show-list')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('kind-edit-raw')));
+    await settle(tester);
+    expect(find.byKey(const ValueKey('pane-preview')), findsNothing);
   });
 }

@@ -1033,9 +1033,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           key: const Key('kind-edit-raw'),
           tooltip: AppStrings.editRawTooltip,
           icon: const Icon(Icons.edit_outlined),
-          onPressed: () => setState(() => _kindRawMode = true),
+          onPressed: _editKindRaw,
         ),
     ];
+  }
+
+  /// The pencil: the note's raw editor, never the preview the ⋮'s
+  /// Markdown preview left on for the note.
+  void _editKindRaw() {
+    setState(() => _kindRawMode = true);
+    if (_notePreview) _togglePreview();
   }
 
   /// Leaves the kind's view for the note's Markdown preview (#534): the
