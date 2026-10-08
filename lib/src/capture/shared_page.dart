@@ -48,7 +48,9 @@ Uri withoutTextFragment(Uri url) {
 /// What [text] — shared with [subject] — is: a [SharedPage], a
 /// [SharedQuote], or null for plain text.
 ///
-/// A lone address, or a title and an address after it, is a page. Text
+/// A lone address, or a title and an address after it, is a page: the
+/// share's subject, or one line of its own above the address — text on
+/// the address's own line is a message that ends in a link (#640). Text
 /// before an address is a quote when the address points at it with a
 /// `#:~:text=` fragment (a browser's "share highlight") or the text is in
 /// quotation marks.
@@ -66,11 +68,12 @@ WebShare? classifyShare(String text, {String? subject}) {
     final quote = quoted ? before.substring(1, before.length - 1) : before;
     return SharedQuote(quote.trim(), url, title: title);
   }
-  // A title on its own line or before the address, and nothing else.
-  if (!before.contains('\n') || before.split('\n').length <= 2) {
-    return SharedPage(url, title: title ?? before.replaceAll('\n', ' '));
-  }
-  return null;
+  final ownLine =
+      !before.contains('\n') &&
+      trimmed.substring(before.length, match.start).contains('\n');
+  return before == title || ownLine
+      ? SharedPage(url, title: title ?? before)
+      : null;
 }
 
 String? _orNull(String? text) {

@@ -21,6 +21,15 @@ void main() {
     expect(share!.title, 'Tending a winter garden');
   });
 
+  test('the subject before the address is a page, on one line too', () {
+    final share = classifyShare(
+      'Tending a winter garden https://ex.com/g',
+      subject: 'Tending a winter garden',
+    );
+    expect(share, isA<SharedPage>());
+    expect(share!.title, 'Tending a winter garden');
+  });
+
   test("a browser's highlight is a quote, its page without the fragment", () {
     final share = classifyShare(
       '"Conflicts should read as a choice."\n'
@@ -41,6 +50,12 @@ void main() {
   test('plain text, or text with no address at its end, stays text', () {
     expect(classifyShare('buy milk'), isNull);
     expect(classifyShare('see https://example.com and call'), isNull);
+    expect(
+      classifyShare('Buy this tomorrow https://shop.example/item'),
+      isNull,
+      reason: "text on the address's line is a message (#640)",
+    );
+    expect(classifyShare('Buy this\ntomorrow\nhttps://ex.com'), isNull);
     expect(
       classifyShare('one\ntwo\nthree\nfour\nhttps://example.com'),
       isNull,

@@ -42,7 +42,8 @@ a web page at all — and the address can be corrected and read again.
 **Share → Niman** from the browser. What the browser shares decides what
 opens:
 
-- **A page** — its address, alone or with its title: the **Save to
+- **A page** — its address, alone or with its title (the share's
+  subject, or a line of its own above the address): the **Save to
   Niman** sheet, on its **Page** tab, with the title, the folder, the tags
   and the pictures to download. The page is read as soon as the sheet
   opens, so it says how many pictures there are.
