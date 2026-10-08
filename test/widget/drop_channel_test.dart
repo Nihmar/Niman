@@ -13,11 +13,13 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/core/drop_in.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
 
+import '../fakes/fake_capture_services.dart';
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
 import '../fakes/fake_window_controller.dart';
@@ -67,6 +69,9 @@ void main() {
             FakeWindowController(customTitleBar: true),
           ),
           if (!ownService) dropTargetServiceProvider.overrideWithValue(drops),
+          // A link dropped opens the capture, which must not look for a
+          // browser or reach the network here.
+          captureServicesProvider.overrideWithValue(quietCaptureServices()),
         ],
         child: const NimanApp(),
       ),

@@ -2,19 +2,16 @@
 // on the clipboard's address when it holds one, and a link pasted where
 // nothing else takes a paste opens it on that link — while a paste into a
 // text field stays a paste.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
-import 'package:niman/src/capture/web_capture.dart';
 import 'package:niman/src/library/library_state.dart';
-import 'package:niman/src/ui/capture/background_capture.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
 
+import '../fakes/fake_capture_services.dart';
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
 
@@ -49,16 +46,7 @@ void main() {
           librarySessionProvider.overrideWithValue(controller),
           // No browser and no network: the dialog's reading never ends,
           // which is all these tests need of it.
-          captureServicesProvider.overrideWithValue(
-            CaptureServices(
-              background: BackgroundCapture(
-                notifier: const SilentCaptureNotifier(),
-              ),
-              browser: () async => null,
-              read: (url, {browser, onProgress}) =>
-                  Completer<WebReading>().future,
-            ),
-          ),
+          captureServicesProvider.overrideWithValue(quietCaptureServices()),
         ],
         child: const NimanApp(),
       ),
