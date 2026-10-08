@@ -16,6 +16,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/capture/background_capture.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
@@ -172,6 +173,44 @@ void main() {
     await close();
   });
 
+  testWidgets('a quote appended to the open note keeps its edits (#635)', (
+    tester,
+  ) async {
+    await pumpOpenLibrary(tester);
+    await controller.seedFile('Reading.md', content: 'existing');
+    await settle(tester);
+    await tester.tap(noteRow('Reading.md'));
+    await settle(tester);
+    // An editor with an edit not yet written: its buffer predates the
+    // quote, and is saved whenever the editor gets to it.
+    final tracker = ProviderScope.containerOf(
+      tester.element(find.byType(NimanApp)),
+    ).read(unsavedTrackerProvider);
+    final buffer = _Buffer(
+      'Reading.md',
+      (text) => controller.saveNote('Reading.md', text),
+      'existing\n\nmy edit',
+    );
+    tracker.register(buffer);
+
+    shares.emit(
+      const SharedText(
+        '"A choice, not an error." https://example.com/garden',
+        subject: 'Garden',
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('capture-sheet-save')));
+    await settle(tester);
+    await tracker.saveAll();
+    expect(
+      controller.contentOf('Reading.md'),
+      allOf(contains('my edit'), contains('A choice, not an error.')),
+    );
+    tracker.unregister(buffer);
+    await close();
+  });
+
   testWidgets('shared text with no quick note waits for the choice', (
     tester,
   ) async {
@@ -314,4 +353,25 @@ void main() {
     );
     await close();
   });
+}
+
+/// An editor's buffer, [text] not yet written to the note at [path].
+final class _Buffer implements UnsavedNote {
+  new(this.path, this.write, this.text);
+
+  @override
+  final String path;
+
+  final Future<void> Function(String text) write;
+
+  final String text;
+
+  @override
+  bool unsaved = true;
+
+  @override
+  Future<void> save() async {
+    await write(text);
+    unsaved = false;
+  }
 }
