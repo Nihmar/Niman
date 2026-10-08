@@ -1699,6 +1699,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Спој прекршени ставки од листа';
   @override
+  String get lintRuleJoinParagraphLines => 'Спој прекршени пасуси';
+  @override
   String get tidyOnCloseTitle => 'Средување на Markdown при затворање';
   @override
   String get tidyOnCloseSubtitle =>

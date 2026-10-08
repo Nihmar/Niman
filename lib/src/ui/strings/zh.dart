@@ -1536,6 +1536,8 @@ final class ChineseStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => '合并换行的列表项';
   @override
+  String get lintRuleJoinParagraphLines => '合并换行的段落';
+  @override
   String get tidyOnCloseTitle => '关闭时整理 Markdown';
   @override
   String get tidyOnCloseSubtitle =>

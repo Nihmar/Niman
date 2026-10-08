@@ -1715,6 +1715,8 @@ final class SpanishStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Unir elementos de lista partidos';
   @override
+  String get lintRuleJoinParagraphLines => 'Unir párrafos partidos';
+  @override
   String get tidyOnCloseTitle => 'Ordenar el Markdown al cerrar';
   @override
   String get tidyOnCloseSubtitle =>

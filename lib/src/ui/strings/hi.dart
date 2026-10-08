@@ -1656,6 +1656,8 @@ final class HindiStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'टूटी हुई सूची प्रविष्टियाँ जोड़ें';
   @override
+  String get lintRuleJoinParagraphLines => 'टूटे हुए अनुच्छेद जोड़ें';
+  @override
   String get tidyOnCloseTitle => 'बंद करते समय मार्कडाउन व्यवस्थित करें';
   @override
   String get tidyOnCloseSubtitle =>

@@ -253,6 +253,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     LintRule.closingFence => AppStrings.lintRuleClosingFence,
     LintRule.fenceLanguage => AppStrings.lintRuleFenceLanguage,
     LintRule.joinWrappedItems => AppStrings.lintRuleJoinWrappedItems,
+    LintRule.joinParagraphLines => AppStrings.lintRuleJoinParagraphLines,
   };
 
   /// Asks how wide the note column is.

@@ -115,4 +115,22 @@ void main() {
     expect(await controller.readNote('note.md'), '- a\n\n- b\n');
     expect(find.text(AppStrings.formatNoteDone), findsOne);
   });
+
+  testWidgets("a paragraph's lines are joined", (tester) async {
+    await pumpWithNote(tester, 'one\ntwo\n');
+    await runFromMenu(tester);
+
+    expect(await controller.readNote('note.md'), 'one two\n');
+  });
+
+  testWidgets("with its rule off, a paragraph's lines stay", (tester) async {
+    // Switched off in Settings, the command tidies the rest — the trailing
+    // space goes — and leaves the paragraph wrapped.
+    await controller.setLintRulesOff({'join-paragraph-lines'});
+    await pumpWithNote(tester, 'one \ntwo\n');
+    await runFromMenu(tester);
+
+    expect(await controller.readNote('note.md'), 'one\ntwo\n');
+    expect(find.text(AppStrings.formatNoteDone), findsOne);
+  });
 }

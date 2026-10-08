@@ -1690,6 +1690,8 @@ final class UkrainianStrings extends Strings {
   String get lintRuleJoinWrappedItems =>
       'Об’єднувати перенесені елементи списку';
   @override
+  String get lintRuleJoinParagraphLines => 'Об’єднувати перенесені абзаци';
+  @override
   String get tidyOnCloseTitle => 'Упорядковувати Markdown під час закриття';
   @override
   String get tidyOnCloseSubtitle =>

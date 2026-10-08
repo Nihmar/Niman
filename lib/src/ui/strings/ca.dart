@@ -1716,6 +1716,8 @@ final class CatalanStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Uneix els elements de llista partits';
   @override
+  String get lintRuleJoinParagraphLines => 'Uneix els paràgrafs partits';
+  @override
   String get tidyOnCloseTitle => 'Endreça el Markdown en tancar';
   @override
   String get tidyOnCloseSubtitle =>

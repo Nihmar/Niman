@@ -1706,6 +1706,8 @@ final class ItalianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Unisci gli elementi di elenco a capo';
   @override
+  String get lintRuleJoinParagraphLines => 'Unisci i paragrafi a capo';
+  @override
   String get tidyOnCloseTitle => 'Sistema il Markdown alla chiusura';
   @override
   String get tidyOnCloseSubtitle =>

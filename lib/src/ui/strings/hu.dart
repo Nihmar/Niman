@@ -1691,6 +1691,8 @@ final class HungarianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Tördelt listaelemek összevonása';
   @override
+  String get lintRuleJoinParagraphLines => 'Tördelt bekezdések összevonása';
+  @override
   String get tidyOnCloseTitle => 'Markdown rendbetétele bezáráskor';
   @override
   String get tidyOnCloseSubtitle =>

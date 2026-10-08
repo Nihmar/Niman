@@ -1064,6 +1064,7 @@ final class AppStrings {
   static String get lintRuleClosingFence => _s.lintRuleClosingFence;
   static String get lintRuleFenceLanguage => _s.lintRuleFenceLanguage;
   static String get lintRuleJoinWrappedItems => _s.lintRuleJoinWrappedItems;
+  static String get lintRuleJoinParagraphLines => _s.lintRuleJoinParagraphLines;
   static String get typewriterSubtitle => _s.typewriterSubtitle;
   static String get zenMode => _s.zenMode;
   static String get zoomIn => _s.zoomIn;

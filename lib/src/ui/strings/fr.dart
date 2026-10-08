@@ -1725,6 +1725,8 @@ final class FrenchStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Joindre les éléments de liste coupés';
   @override
+  String get lintRuleJoinParagraphLines => 'Joindre les paragraphes coupés';
+  @override
   String get tidyOnCloseTitle => 'Ranger le Markdown à la fermeture';
   @override
   String get tidyOnCloseSubtitle =>

@@ -13,14 +13,16 @@
 /// a formatter that rewrites what it did not understand is a formatter
 /// that loses things: the code inside a fence, tables, math, frontmatter
 /// and HTML pass through untouched, and so does the prose inside a
-/// paragraph — no reflowing, no rewrapping, nothing that would make a
-/// diff of a note unreadable.
+/// paragraph, but for the line breaks between its lines — no rewrapping
+/// at a width, nothing that would make a diff of a note unreadable.
 ///
 /// What it does:
 ///
 /// * a line that continues a list item is indented to that item's text,
 ///   so the item stays one item — or, with [LintRule.joinWrappedItems],
 ///   joined to the line above, the item's paragraph on one line (#549);
+/// * with [LintRule.joinParagraphLines], any other paragraph wrapped over
+///   several lines is written on one the same way, a hard break kept;
 /// * a heading gets exactly one space after its hashes (`#Title`, which
 ///   is a paragraph and not a heading at all, is left alone: tidying is
 ///   not the place to change what a line means);
@@ -44,7 +46,7 @@
 library;
 
 import 'package:niman/src/lint/fence_fixes.dart';
-import 'package:niman/src/lint/item_unwrap.dart';
+import 'package:niman/src/lint/line_join.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/lint/list_fixes.dart';
 import 'package:niman/src/markdown/block.dart';
@@ -63,9 +65,11 @@ final RegExp _heading = RegExp(r'^(\s{0,3})(#{1,6})[ \t]*(\S.*)?$');
 String formatMarkdown(String source, {Set<LintRule>? rules}) {
   final on = rules ?? LintRule.all;
   if (source.trim().isEmpty) return source.isEmpty ? source : _newline;
-  final text = on.contains(LintRule.joinWrappedItems)
-      ? joinWrappedItems(source)
-      : source;
+  final text = joinWrappedLines(
+    source,
+    inItems: on.contains(LintRule.joinWrappedItems),
+    outside: on.contains(LintRule.joinParagraphLines),
+  );
   final out = <String>[];
   for (final block in _units(text)) {
     // Frontmatter, fences, tables, math, HTML: kept verbatim. The one

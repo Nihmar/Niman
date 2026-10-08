@@ -1738,6 +1738,8 @@ final class GreekStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Ένωση αναδιπλωμένων στοιχείων λίστας';
   @override
+  String get lintRuleJoinParagraphLines => 'Ένωση αναδιπλωμένων παραγράφων';
+  @override
   String get tidyOnCloseTitle => 'Τακτοποίηση του Markdown στο κλείσιμο';
   @override
   String get tidyOnCloseSubtitle =>

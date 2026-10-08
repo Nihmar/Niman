@@ -15,7 +15,9 @@ import 'package:niman/src/markdown/note_load.dart';
 ///
 /// The note is compared as the editor holds it — its line endings `\n` —
 /// so a note whose only untidiness is a Windows line ending is left alone,
-/// rather than rewritten for a difference the editor does not show.
+/// rather than rewritten for a difference the editor does not show. A
+/// note written with Windows line endings that is rewritten is written
+/// with them still: tidying is not the place to change them.
 ///
 /// Top-level for an isolate: it carries the path, the limit and the rules.
 String? tidiedNoteText(String abs, {required int limit, Set<LintRule>? rules}) {
@@ -27,12 +29,14 @@ String? tidiedNoteText(String abs, {required int limit, Set<LintRule>? rules}) {
   } on FileSystemException {
     return null;
   }
-  final String text;
+  final String read;
   try {
-    text = normalizedLineEndings(utf8.decode(bytes));
+    read = utf8.decode(bytes);
   } on FormatException {
     return null;
   }
+  final text = normalizedLineEndings(read);
   final tidied = formatMarkdown(text, rules: rules);
-  return tidied == text ? null : tidied;
+  if (tidied == text) return null;
+  return read.contains('\r\n') ? tidied.replaceAll('\n', '\r\n') : tidied;
 }

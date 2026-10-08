@@ -1668,6 +1668,8 @@ final class EnglishStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Join wrapped list items';
   @override
+  String get lintRuleJoinParagraphLines => 'Join wrapped paragraphs';
+  @override
   String get tidyOnCloseTitle => 'Tidy the Markdown on close';
   @override
   String get tidyOnCloseSubtitle =>

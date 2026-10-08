@@ -1676,6 +1676,8 @@ final class CzechStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Spojit zalomené položky seznamu';
   @override
+  String get lintRuleJoinParagraphLines => 'Spojit zalomené odstavce';
+  @override
   String get tidyOnCloseTitle => 'Uklidit Markdown při zavření';
   @override
   String get tidyOnCloseSubtitle =>

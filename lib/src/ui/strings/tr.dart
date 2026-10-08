@@ -1669,6 +1669,8 @@ final class TurkishStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Bölünmüş liste öğelerini birleştir';
   @override
+  String get lintRuleJoinParagraphLines => 'Bölünmüş paragrafları birleştir';
+  @override
   String get tidyOnCloseTitle => 'Kapatırken Markdown’ı düzenle';
   @override
   String get tidyOnCloseSubtitle =>

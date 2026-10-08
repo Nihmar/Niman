@@ -1696,6 +1696,8 @@ final class RomanianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Unește elementele de listă rupte';
   @override
+  String get lintRuleJoinParagraphLines => 'Unește paragrafele rupte';
+  @override
   String get tidyOnCloseTitle => 'Aranjează Markdown-ul la închidere';
   @override
   String get tidyOnCloseSubtitle =>

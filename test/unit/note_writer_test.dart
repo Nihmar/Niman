@@ -77,9 +77,23 @@ void main() {
     });
 
     test('a Windows line ending alone is not a reason to rewrite', () async {
-      File(p.join(root.path, 'crlf.md')).writeAsStringSync('one\r\ntwo\r\n');
+      File(p.join(root.path, 'crlf.md'))
+          .writeAsStringSync('one\r\n\r\ntwo\r\n');
       expect(await writer.tidy('crlf.md'), isFalse);
-      expect(read('crlf.md'), 'one\r\ntwo\r\n');
+      expect(read('crlf.md'), 'one\r\n\r\ntwo\r\n');
+    });
+
+    test("a paragraph's lines are joined with the note's endings", () async {
+      File(p.join(root.path, 'crlf.md')).writeAsStringSync('one\r\ntwo\r\n');
+      expect(await writer.tidy('crlf.md'), isTrue);
+      expect(read('crlf.md'), 'one two\r\n');
+    });
+
+    test('a note with Windows line endings is tidied with them', () async {
+      File(p.join(root.path, 'crlf.md'))
+          .writeAsStringSync('#  Heading\r\n\r\n\r\ntext  \r\n');
+      expect(await writer.tidy('crlf.md'), isTrue);
+      expect(read('crlf.md'), '# Heading\r\n\r\ntext\r\n');
     });
 
     test('a note past the limit is left as it is', () async {

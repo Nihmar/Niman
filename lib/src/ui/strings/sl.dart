@@ -1677,6 +1677,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get lintRuleJoinWrappedItems => 'Združi prelomljene elemente seznama';
   @override
+  String get lintRuleJoinParagraphLines => 'Združi prelomljene odstavke';
+  @override
   String get tidyOnCloseTitle => 'Pospravi Markdown ob zaprtju';
   @override
   String get tidyOnCloseSubtitle =>
