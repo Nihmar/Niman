@@ -17,6 +17,10 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Q` — quick note
 - `Ctrl/⌘+Alt+W` — capture a web page as a note, the clipboard's address
   when it holds one (see [web capture](web-capture.md))
+- `Ctrl/⌘+Shift+V` — paste as Markdown: what was copied from a web page
+  goes into the note as Markdown, linked to its page (see
+  [web capture](web-capture.md#paste-as-markdown)); `Ctrl/⌘+V` still
+  pastes the plain text
 - `Ctrl/⌘+Shift+J` — today's [journal](journal.md) entry, made first when
   there is none
 - `Ctrl/⌘+Shift+Page Up` / `Page Down` — the journal entry before / after
