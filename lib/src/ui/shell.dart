@@ -4154,9 +4154,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           tasksChanged: _todoController,
           onOpenTasks: _openTodo,
           focusDay: _shownJournalDay,
+          onEntryMenu: (day, position) =>
+              unawaited(_showJournalEntryMenuAt(day, position)),
         ),
       },
     );
+  }
+
+  /// A recent journal entry's right-click menu (#619): the tree's own,
+  /// for the entry's note — a new tab and beside among its actions.
+  Future<void> _showJournalEntryMenuAt(DateTime day, Offset position) async {
+    final note = await widget.controller.ops?.find(_journal.entryPath(day));
+    if (note == null || !mounted) return;
+    await _showRowMenuAt(note, position);
   }
 
   /// The open tasks due on [day], as the task list reads them: what the

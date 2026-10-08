@@ -1,5 +1,6 @@
 // #7: where the journal is reached — the phone's + button and File bar,
 // the desktop's dock, the strip's day.
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_screen.dart';
 
@@ -84,6 +86,33 @@ void main() {
     expect(find.byType(JournalBrowser), findsOne);
     expect(find.byKey(const Key('right-dock')), findsOne);
     expect(find.byType(JournalScreen), findsNothing);
+    await controller.close();
+    await controller.dispose();
+  });
+
+  testWidgets("desktop: a recent entry's right click opens the tree's menu", (
+    tester,
+  ) async {
+    // #619: a new tab and beside, as the tree's own row offers them.
+    await pumpAt(tester, const Size(1400, 900));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('journal-day')));
+    await settle(tester);
+    const journal = JournalSettings();
+    final today = journal.today(DateTime.now());
+    final row = find.byKey(
+      Key('journal-recent-${formatDateTime(today, 'YYYY-MM-DD')}'),
+    );
+    expect(row, findsOne);
+    await tester.tap(row, buttons: kSecondaryButton);
+    await settle(tester);
+    expect(find.byKey(const Key('menu-open-new-tab')), findsOne);
+    expect(find.byKey(const Key('menu-open-beside')), findsOne);
     await controller.close();
     await controller.dispose();
   });

@@ -34,8 +34,13 @@ final class JournalBrowser extends StatefulWidget {
     this.tasksChanged,
     this.onOpenTasks,
     this.focusDay,
+    this.onEntryMenu,
     super.key,
   });
+
+  /// Opens a recent entry's menu at a right click's global position (#619):
+  /// the tree's own menu for that note. Null offers none.
+  final void Function(DateTime day, Offset position)? onEntryMenu;
 
   /// The open tasks due on a day, as they read in the task list; null
   /// shows no tasks at all.
@@ -205,36 +210,42 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           Text(AppStrings.journalRecent.toUpperCase(), style: heading),
           const SizedBox(height: 4),
           for (final day in latest)
-            ListTile(
-              key: Key('journal-recent-${formatDateTime(day, 'YYYY-MM-DD')}'),
-              dense: !widget.large,
-              contentPadding: EdgeInsets.zero,
-              leading: SizedBox(
-                width: 48,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      formatDateTime(day, 'ddd').toUpperCase(),
-                      style: heading,
-                    ),
-                    Text(
-                      '${day.day}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+            GestureDetector(
+              onSecondaryTapUp: switch (widget.onEntryMenu) {
+                final menu? => (details) => menu(day, details.globalPosition),
+                null => null,
+              },
+              child: ListTile(
+                key: Key('journal-recent-${formatDateTime(day, 'YYYY-MM-DD')}'),
+                dense: !widget.large,
+                contentPadding: EdgeInsets.zero,
+                leading: SizedBox(
+                  width: 48,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        formatDateTime(day, 'ddd').toUpperCase(),
+                        style: heading,
                       ),
-                    ),
-                  ],
+                      Text(
+                        '${day.day}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                title: Text(
+                  _summaries[day]?.isNotEmpty ?? false
+                      ? _summaries[day]!
+                      : formatDateTime(day, 'D MMMM YYYY'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () => widget.onOpenDay(day),
               ),
-              title: Text(
-                _summaries[day]?.isNotEmpty ?? false
-                    ? _summaries[day]!
-                    : formatDateTime(day, 'D MMMM YYYY'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              onTap: () => widget.onOpenDay(day),
             ),
         ],
       ],
