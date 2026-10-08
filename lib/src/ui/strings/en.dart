@@ -3206,4 +3206,14 @@ final class EnglishStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Download its images to $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Paste as Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Pasted as Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Pasted as Markdown · with the link to $host';
 }

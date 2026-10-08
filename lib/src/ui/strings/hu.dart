@@ -3254,4 +3254,14 @@ final class HungarianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'A képek letöltése ide: $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Beillesztés Markdownként';
+
+  @override
+  String get pastedAsMarkdown => 'Beillesztve Markdownként';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Beillesztve Markdownként · hivatkozással ide: $host';
 }

@@ -3298,4 +3298,14 @@ final class PolishStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Pobierz obrazy do $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Wklej jako Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Wklejono jako Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Wklejono jako Markdown · z linkiem do $host';
 }

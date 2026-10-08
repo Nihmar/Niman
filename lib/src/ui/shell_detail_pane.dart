@@ -15,6 +15,7 @@ import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -45,6 +46,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.unsavedTracker,
     required this.statusActions,
     required this.spellCheck,
+    this.onPasteAsMarkdown,
     this.reloadToken = 0,
     this.templateFolder,
     this.linksFollowed = 0,
@@ -156,6 +158,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Reports the loaded note's kind.
   final void Function(String? type) onNoteKindChanged;
+
+  /// Forwarded to every [NoteView] ([NoteView.onPasteAsMarkdown]).
+  final ValueChanged<NoteViewHandle>? onPasteAsMarkdown;
 
   /// The open notes' unsaved edits (T-PP-11): the detail editor reports
   /// its dirty state here for the window's close guard.
@@ -318,6 +323,7 @@ final class ShellDetailPane extends StatelessWidget {
     // Only the note showing in the focused pane tells the shell what
     // kind it is.
     onNoteKindChanged: tab.active && tab.focused ? onNoteKindChanged : null,
+    onPasteAsMarkdown: onPasteAsMarkdown,
     unsavedTracker: unsavedTracker,
     statusActions: statusActions,
     spellCheck: spellCheck,

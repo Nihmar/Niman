@@ -1753,4 +1753,14 @@ abstract base class Strings {
   /// Downloads a page's pictures into [folder], before their number is
   /// known.
   String captureDownloadPicturesTo(String folder);
+
+  /// Paste as Markdown (#531): the clipboard's HTML pasted as Markdown —
+  /// the command, and the editor menu's entry.
+  String get pasteAsMarkdown;
+
+  /// Said once the clipboard's HTML is pasted as Markdown, with Undo.
+  String get pastedAsMarkdown;
+
+  /// The same, when the paste links to the page at [host].
+  String pastedAsMarkdownWithLink(String host);
 }

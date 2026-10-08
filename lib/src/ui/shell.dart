@@ -72,6 +72,7 @@ import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/capture/capture_routes.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
+import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
@@ -1231,6 +1232,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           initialCaretOffset: _pendingCaretOffset,
           kindMode: !_kindRawMode,
           onNoteKindChanged: _onNoteKindChanged,
+          onPasteAsMarkdown: _pasteAsMarkdown,
           unsavedTracker: widget.unsavedTracker,
           spellCheck: widget.spellCheck,
           reloadToken: _noteReloadToken,
@@ -3230,6 +3232,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.insertMindMap: () =>
           _panelNote?.insertAtCaret(mermaidMindMapTemplate),
       AppCommand.convertListToMindMap: () => _panelNote?.convertListToMindMap(),
+      AppCommand.pasteAsMarkdown: () {
+        if (_panelNote case final note?) _pasteAsMarkdown(note);
+      },
       AppCommand.exportNote: () => unawaited(_exportShownNote()),
       AppCommand.recognizeText: () {
         if (_shownNote case final path?) _recognize(path);
@@ -3413,6 +3418,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// as the settings' slider sets it, in the editor and the preview alike.
   Future<void> _zoomNote(int steps) => widget.controller.setNoteTextScale(
     AppTextScales.zoomed(AppTextScales.note, steps),
+  );
+
+  /// Pastes the clipboard's HTML into [note] as Markdown (#531).
+  void _pasteAsMarkdown(NoteViewHandle note) => unawaited(
+    pasteAsMarkdown(context, note, ref.read(pasteServicesProvider)),
   );
 
   Future<void> _formatNote() async {
@@ -4441,6 +4451,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             onOpenNote: _openNoteFromLink,
             kindMode: !_kindRawMode,
             onNoteKindChanged: _onNoteKindChanged,
+            onPasteAsMarkdown: _pasteAsMarkdown,
             unsavedTracker: widget.unsavedTracker,
             spellCheck: widget.spellCheck,
             reloadToken: _noteReloadToken,

@@ -3273,4 +3273,14 @@ final class CroatianStrings extends Strings {
 
   @override
   String captureDownloadPicturesTo(String folder) => 'Preuzmi slike u $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Zalijepi kao Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Zalijepljeno kao Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Zalijepljeno kao Markdown · s poveznicom na $host';
 }

@@ -43,6 +43,12 @@ final class _Note implements NoteViewHandle {
   void convertListToMindMap() {}
 
   @override
+  PastedText? pasteText(String text) => null;
+
+  @override
+  void replacePasted(PastedText pasted, String text) {}
+
+  @override
   void setNoteKind(String? type) {}
 
   @override

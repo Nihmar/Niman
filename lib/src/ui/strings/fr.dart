@@ -3341,4 +3341,14 @@ final class FrenchStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Télécharger les images dans $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Coller en Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Collé en Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Collé en Markdown · avec le lien vers $host';
 }

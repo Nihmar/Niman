@@ -3284,4 +3284,14 @@ final class DutchStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'De afbeeldingen downloaden naar $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Plakken als Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Geplakt als Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Geplakt als Markdown · met de link naar $host';
 }

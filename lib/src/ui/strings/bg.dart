@@ -3260,4 +3260,14 @@ final class BulgarianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Изтегляне на изображенията в $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Поставяне като Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Поставено като Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Поставено като Markdown · с връзка към $host';
 }

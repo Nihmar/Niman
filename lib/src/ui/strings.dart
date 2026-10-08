@@ -1714,4 +1714,8 @@ final class AppStrings {
   static String captureNewNoteIn(String folder) => _s.captureNewNoteIn(folder);
   static String captureDownloadPicturesTo(String folder) =>
       _s.captureDownloadPicturesTo(folder);
+  static String get pasteAsMarkdown => _s.pasteAsMarkdown;
+  static String get pastedAsMarkdown => _s.pastedAsMarkdown;
+  static String pastedAsMarkdownWithLink(String host) =>
+      _s.pastedAsMarkdownWithLink(host);
 }

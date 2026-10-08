@@ -3197,4 +3197,14 @@ final class HindiStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'चित्र $folder/ में डाउनलोड करें';
+
+  @override
+  String get pasteAsMarkdown => 'Markdown के रूप में चिपकाएँ';
+
+  @override
+  String get pastedAsMarkdown => 'Markdown के रूप में चिपकाया गया';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Markdown के रूप में चिपकाया गया · $host के लिंक के साथ';
 }

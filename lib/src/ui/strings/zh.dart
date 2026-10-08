@@ -2873,4 +2873,13 @@ final class ChineseStrings extends Strings {
 
   @override
   String captureDownloadPicturesTo(String folder) => '将图片下载到 $folder/';
+
+  @override
+  String get pasteAsMarkdown => '粘贴为 Markdown';
+
+  @override
+  String get pastedAsMarkdown => '已粘贴为 Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) => '已粘贴为 Markdown · 附 $host 的链接';
 }

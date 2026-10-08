@@ -3273,4 +3273,14 @@ final class MacedonianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Преземи ги сликите во $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Залепи како Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Залепено како Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Залепено како Markdown · со врска до $host';
 }

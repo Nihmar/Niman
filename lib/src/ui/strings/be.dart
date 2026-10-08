@@ -3287,4 +3287,14 @@ final class BelarusianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Спампаваць выявы ў $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Уставіць як Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Устаўлена як Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Устаўлена як Markdown · са спасылкай на $host';
 }

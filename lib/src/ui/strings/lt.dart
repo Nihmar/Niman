@@ -3287,4 +3287,14 @@ final class LithuanianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Atsisiųsti paveikslėlius į $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Įklijuoti kaip Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Įklijuota kaip Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Įklijuota kaip Markdown · su nuoroda į $host';
 }

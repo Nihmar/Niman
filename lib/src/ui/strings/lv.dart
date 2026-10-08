@@ -3240,4 +3240,14 @@ final class LatvianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Lejupielādēt attēlus mapē $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Ielīmēt kā Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Ielīmēts kā Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Ielīmēts kā Markdown · ar saiti uz $host';
 }

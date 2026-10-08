@@ -3267,4 +3267,14 @@ final class SlovenianStrings extends Strings {
 
   @override
   String captureDownloadPicturesTo(String folder) => 'Prenesi slike v $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Prilepi kot Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Prilepljeno kot Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Prilepljeno kot Markdown · s povezavo na $host';
 }

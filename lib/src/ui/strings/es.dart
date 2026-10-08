@@ -3295,4 +3295,14 @@ final class SpanishStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Descargar las imágenes en $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Pegar como Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Pegado como Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Pegado como Markdown · con el enlace a $host';
 }

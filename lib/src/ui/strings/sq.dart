@@ -3269,4 +3269,14 @@ final class AlbanianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Shkarko figurat te $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Ngjit si Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'U ngjit si Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'U ngjit si Markdown · me lidhjen te $host';
 }

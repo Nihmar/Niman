@@ -14,13 +14,16 @@ typedef MenuCommand = MarkdownEdit Function(String text, TextSelection sel);
 /// The menu's structure for a caret whose formats are [active] and whose
 /// line is a heading of [headingLevel] (0 for none). [run] applies a
 /// command, its `context` lines either side given to it; the image and
-/// the footnote go through their own callbacks.
+/// the footnote go through their own callbacks. [onPasteMarkdown], when
+/// there is one, opens the menu: Paste as Markdown (#531), which a phone
+/// shows right after the clipboard's Paste.
 ContextMenuPart editorMenu({
   required Set<ToolbarItem> active,
   required int headingLevel,
   required void Function(MenuCommand command, {int context}) run,
   required VoidCallback onImage,
   required VoidCallback onFootnote,
+  VoidCallback? onPasteMarkdown,
 }) {
   ContextMenuAction wrap(
     String id,
@@ -69,6 +72,15 @@ ContextMenuPart editorMenu({
   ];
 
   return [
+    if (onPasteMarkdown != null)
+      [
+        ContextMenuAction(
+          id: 'menu-paste-markdown',
+          label: AppStrings.pasteAsMarkdown,
+          icon: Icons.content_paste_go_outlined,
+          onPressed: onPasteMarkdown,
+        ),
+      ],
     [
       wrap('link', AppStrings.menuAddLink, Icons.link, '[[', ']]'),
       wrap(

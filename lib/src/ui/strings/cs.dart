@@ -3244,4 +3244,14 @@ final class CzechStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Stáhnout obrázky do $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Vložit jako Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Vloženo jako Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Vloženo jako Markdown · s odkazem na $host';
 }

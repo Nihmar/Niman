@@ -3319,4 +3319,14 @@ final class GermanStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Die Bilder nach $folder/ herunterladen';
+
+  @override
+  String get pasteAsMarkdown => 'Als Markdown einfügen';
+
+  @override
+  String get pastedAsMarkdown => 'Als Markdown eingefügt';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Als Markdown eingefügt · mit dem Link zu $host';
 }

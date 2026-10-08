@@ -3268,4 +3268,14 @@ final class GalicianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Descargar as imaxes en $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Pegar como Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Pegado como Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Pegado como Markdown · coa ligazón a $host';
 }

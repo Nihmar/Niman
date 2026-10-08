@@ -3288,4 +3288,14 @@ final class UkrainianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Завантажити зображення до $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Вставити як Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Вставлено як Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Вставлено як Markdown · з посиланням на $host';
 }

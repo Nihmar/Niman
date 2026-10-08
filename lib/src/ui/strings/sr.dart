@@ -3268,4 +3268,14 @@ final class SerbianStrings extends Strings {
 
   @override
   String captureDownloadPicturesTo(String folder) => 'Преузми слике у $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Налепи као Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Налепљено као Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Налепљено као Markdown · са везом ка $host';
 }

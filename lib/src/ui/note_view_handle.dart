@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/editor/outline.dart';
 
+/// Text a paste put in a note: where it starts, and the text as the note
+/// stored it — its line endings the note's own.
+typedef PastedText = ({int start, String text});
+
 /// What of an open note the panels beside it read and drive (#175): the
 /// right dock on a wide window, the ⋮ menu's sheets on a phone.
 ///
@@ -30,6 +34,16 @@ abstract interface class NoteViewHandle {
   /// Puts [markdown] at the caret, one undo step: on the caret's line when
   /// it is one line, on lines of its own when it is more (#265).
   void insertAtCaret(String markdown);
+
+  /// Puts [text] in place of the selection, as a paste does, one undo
+  /// step; what the note stored, and where, or null when the note takes
+  /// no text there ([canInsert]).
+  PastedText? pasteText(String text);
+
+  /// Puts [text] in place of what [pasted] put in, while the note still
+  /// says it there: Paste as Markdown's Undo, which leaves the plain text
+  /// (#531). Does nothing once that part of the note has changed.
+  void replacePasted(PastedText pasted, String text);
 
   /// Replaces the list at the caret with a `mindmap` fence, one undo step
   /// (#530). Does nothing when the caret is not in a list.

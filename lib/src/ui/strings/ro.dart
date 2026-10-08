@@ -3298,4 +3298,14 @@ final class RomanianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Descarcă imaginile în $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Lipește ca Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Lipit ca Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Lipit ca Markdown · cu linkul către $host';
 }

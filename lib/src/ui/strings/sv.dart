@@ -3256,4 +3256,14 @@ final class SwedishStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Hämta bilderna till $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Klistra in som Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Inklistrat som Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Inklistrat som Markdown · med länk till $host';
 }

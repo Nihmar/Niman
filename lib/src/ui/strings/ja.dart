@@ -2962,4 +2962,14 @@ final class JapaneseStrings extends Strings {
 
   @override
   String captureDownloadPicturesTo(String folder) => '画像を $folder/ にダウンロード';
+
+  @override
+  String get pasteAsMarkdown => 'Markdown として貼り付け';
+
+  @override
+  String get pastedAsMarkdown => 'Markdown として貼り付けました';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Markdown として貼り付けました · $host へのリンク付き';
 }

@@ -3265,4 +3265,14 @@ final class PortugueseStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Baixar as imagens em $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Colar como Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Colado como Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Colado como Markdown · com a ligação para $host';
 }

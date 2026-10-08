@@ -3268,4 +3268,14 @@ final class ItalianStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Scarica le immagini in $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Incolla come Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Incollato come Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Incollato come Markdown · con il link a $host';
 }

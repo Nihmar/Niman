@@ -3304,4 +3304,14 @@ final class CatalanStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Baixa les imatges a $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Enganxa com a Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Enganxat com a Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      "Enganxat com a Markdown · amb l'enllaç a $host";
 }

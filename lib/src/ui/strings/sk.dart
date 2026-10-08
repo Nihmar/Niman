@@ -3256,4 +3256,14 @@ final class SlovakStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Stiahnuť obrázky do $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Vložiť ako Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Vložené ako Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Vložené ako Markdown · s odkazom na $host';
 }

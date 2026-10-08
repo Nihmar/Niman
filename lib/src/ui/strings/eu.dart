@@ -3278,4 +3278,14 @@ final class BasqueStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Deskargatu irudiak $folder/ karpetara';
+
+  @override
+  String get pasteAsMarkdown => 'Itsatsi Markdown gisa';
+
+  @override
+  String get pastedAsMarkdown => 'Markdown gisa itsatsita';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Markdown gisa itsatsita · $host gunerako estekarekin';
 }

@@ -3352,4 +3352,14 @@ final class GreekStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Λήψη των εικόνων στο $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Επικόλληση ως Markdown';
+
+  @override
+  String get pastedAsMarkdown => 'Επικολλήθηκε ως Markdown';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Επικολλήθηκε ως Markdown · με τον σύνδεσμο προς $host';
 }

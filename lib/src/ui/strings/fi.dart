@@ -3264,4 +3264,14 @@ final class FinnishStrings extends Strings {
   @override
   String captureDownloadPicturesTo(String folder) =>
       'Lataa kuvat kansioon $folder/';
+
+  @override
+  String get pasteAsMarkdown => 'Liitä Markdownina';
+
+  @override
+  String get pastedAsMarkdown => 'Liitetty Markdownina';
+
+  @override
+  String pastedAsMarkdownWithLink(String host) =>
+      'Liitetty Markdownina · linkki sivulle $host';
 }
