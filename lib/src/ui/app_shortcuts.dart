@@ -29,6 +29,9 @@ enum AppCommand {
   /// A new todo task.
   newTodo,
 
+  /// A web page captured as a note (#531).
+  captureWebPage,
+
   /// The quick-note tab (its chooser when none is set).
   quickNote,
 
@@ -237,6 +240,11 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       AppCommand.toggleDock,
       SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true),
     ),
+    // W for web: the capture's own key (#531).
+    AppShortcut(
+      AppCommand.captureWebPage,
+      SingleActivator(LogicalKeyboardKey.keyW, control: true, alt: true),
+    ),
     // F11, the key that means fullscreen elsewhere: the issue's
     // Ctrl+Shift+Z is redo in both editors.
     AppShortcut(AppCommand.zenMode, SingleActivator(LogicalKeyboardKey.f11)),
@@ -298,6 +306,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newListNote => AppStrings.shortcutNewList,
   AppCommand.newAudioNote => AppStrings.shortcutNewAudio,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
+  AppCommand.captureWebPage => AppStrings.captureWebPage,
   AppCommand.quickNote => AppStrings.shortcutQuickNote,
   AppCommand.journalToday => AppStrings.journalToday,
   AppCommand.journalPrevious => AppStrings.journalPrevious,

@@ -3095,6 +3095,180 @@ final class SlovenianStrings extends Strings {
   String ocrRecognizeAgain(int page) => 'Znova prepoznaj str. $page';
 
   @override
+  String get captureWebPage => 'Shrani spletno stran';
+
+  @override
+  String get capturePageField => 'Stran';
+
+  @override
+  String get captureFromClipboard => 'Vzeto iz odložišča.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Spletni naslov se začne s http:// ali https://.';
+
+  @override
+  String get captureRead => 'Preberi';
+
+  @override
+  String get captureDownloading => 'Prenašanje…';
+
+  @override
+  String captureDownloaded(String size) => 'Preneseno · $size';
+
+  @override
+  String captureFewWords(int words) => 'Najdenih le besed: $words';
+
+  @override
+  String get captureRunningBrowser => 'Stran se izvaja v brskalniku…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Brskalnik teče skrito, z lastnim profilom, ki se nato izbriše: vašega '
+      'brskalnika in njegovih prijav se ne dotakne.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Prebrano, potem ko se je stran izvedla v brskalniku';
+
+  @override
+  String get captureNoArticle =>
+      'Članka ni bilo mogoče najti: opomba obdrži naslov, opis in povezavo.';
+
+  @override
+  String get captureTitleField => 'Naslov';
+
+  @override
+  String get captureFolderField => 'Mapa';
+
+  @override
+  String get captureAddTag => 'Dodaj oznako';
+
+  @override
+  String get capturePreview => 'Predogled';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      'Besed: $words · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Prenesi slike ($count) v $folder/';
+
+  @override
+  String get captureRemoved => 'Odstranjeno';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Skripte: $scripts, slogi: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Navigacijski meni';
+
+  @override
+  String get captureRemovedBanner => 'Pasica o piškotkih';
+
+  @override
+  String captureRemovedAround(int words) => 'Preostanek strani · besed: $words';
+
+  @override
+  String get captureSaveNote => 'Shrani opombo';
+
+  @override
+  String get captureSaving => 'Shranjevanje…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman te strani ni mogel prebrati: besedilo pokaže šele po prijavi '
+      'ali skripti, ki je ni bilo mogoče zagnati. [Odprite '
+      'povezavo](<$url>), da jo preberete.';
+
+  @override
+  String get captureFailScheme => 'Shraniti je mogoče le strani http in https.';
+
+  @override
+  String get captureFailRedirects => 'Stran preusmeri prevečkrat.';
+
+  @override
+  String get captureFailTimeout => 'Stran ni odgovorila pravočasno.';
+
+  @override
+  String get captureFailTooLarge => 'Stran je večja od 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'To ni spletna stran: datoteka, PDF ali slika.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Spletno mesto je odgovorilo z napako ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Strani ni bilo mogoče doseči: preverite povezavo.';
+
+  @override
+  String get captureDropHint => 'Spustite, da shranite to stran';
+
+  @override
+  String get captureDropDetail => 'Z njo se odpre okno za shranjevanje.';
+
+  @override
+  String get captureSaveToNiman => 'Shrani v Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Vrnete se v brskalnik; obvestilo vam bo povedalo, ko bo opomba '
+      'pripravljena.';
+
+  @override
+  String get captureAppendToNote => 'Dodaj k opombi';
+
+  @override
+  String get captureAppend => 'Dodaj';
+
+  @override
+  String captureReadingHost(String host) => 'Branje strani $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Shranjeno: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · besed: $words · slik: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Shranjeno brez članka';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host ni bilo mogoče prebrati: ohranjeni so naslov, opis in povezava';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citat dodan v $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'iz »$title«';
+
+  @override
+  String captureFailedTitle(String host) => '$host ni bilo mogoče shraniti';
+
+  @override
+  String get captureShowFolder => 'Pokaži mapo';
+
+  @override
+  String get captureOpen => 'Odpri';
+
+  @override
+  String get captureQuote => 'Citat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nova opomba v $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) => 'Prenesi slike v $folder/';
+
+  @override
   String get highlightAction => 'Označi';
 
   @override

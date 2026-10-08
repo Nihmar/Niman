@@ -32,15 +32,35 @@ static void drop_send(MyApplication* self, const gchar* method, FlValue* args) {
                                   nullptr, nullptr);
 }
 
+// Whether the drag is a browser's link rather than files (#531): a
+// browser offers a link under the Netscape and Mozilla URL targets beside
+// text/uri-list, which a file manager does not. The data itself is only
+// handed over on the drop; its targets are known as soon as it enters.
+static gboolean drag_is_link(GdkDragContext* context) {
+  for (GList* target = gdk_drag_context_list_targets(context);
+       target != nullptr; target = target->next) {
+    g_autofree gchar* name =
+        gdk_atom_name(GDK_POINTER_TO_ATOM(target->data));
+    if (g_strcmp0(name, "_NETSCAPE_URL") == 0 ||
+        g_strcmp0(name, "text/x-moz-url") == 0) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
 // Something is being dragged over the window: the frame Dart draws says a
-// drop would be taken.
+// drop would be taken, and what it would do with a link.
 static gboolean drop_drag_motion(GtkWidget* widget, GdkDragContext* context,
                                  gint x, gint y, guint time,
                                  gpointer user_data) {
   MyApplication* self = MY_APPLICATION(user_data);
   if (!self->drag_over) {
     self->drag_over = TRUE;
-    drop_send(self, "dragEntered", nullptr);
+    g_autoptr(FlValue) args = fl_value_new_map();
+    fl_value_set_string_take(args, "link",
+                             fl_value_new_bool(drag_is_link(context)));
+    drop_send(self, "dragEntered", args);
   }
   // The default handler answers the drag (GTK_DEST_DEFAULT_MOTION), which
   // is what keeps the window a drop destination at all.
@@ -73,8 +93,16 @@ static void drop_data_received(GtkWidget* widget, GdkDragContext* context,
   self->drag_over = FALSE;
 
   g_autoptr(FlValue) paths = fl_value_new_list();
+  // A web page's address — a link dragged from a browser — goes to the
+  // capture instead (#531).
+  g_autoptr(FlValue) links = fl_value_new_list();
   g_auto(GStrv) uris = gtk_selection_data_get_uris(data);
   for (gint i = 0; uris != nullptr && uris[i] != nullptr; i++) {
+    g_autofree gchar* scheme = g_uri_parse_scheme(uris[i]);
+    if (g_strcmp0(scheme, "http") == 0 || g_strcmp0(scheme, "https") == 0) {
+      fl_value_append_take(links, fl_value_new_string(uris[i]));
+      continue;
+    }
     g_autoptr(GFile) file = g_file_new_for_uri(uris[i]);
     g_autofree gchar* path = g_file_get_path(file);
     if (path != nullptr) {
@@ -82,6 +110,10 @@ static void drop_data_received(GtkWidget* widget, GdkDragContext* context,
     } else {
       g_warning("drop: %s is not a local file", uris[i]);
     }
+  }
+  if (fl_value_get_length(links) > 0) {
+    drop_send(self, "dropLinks", links);
+    if (fl_value_get_length(paths) == 0) return;
   }
   if (fl_value_get_length(paths) == 0) {
     g_autofree gchar* text = reinterpret_cast<gchar*>(

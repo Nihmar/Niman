@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
@@ -68,6 +69,9 @@ import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/attachment_view.dart';
+import 'package:niman/src/ui/capture/capture_flow.dart';
+import 'package:niman/src/ui/capture/capture_routes.dart';
+import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
@@ -347,6 +351,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                     openNotes: ref.read(openAudioNotesProvider),
                     shortcuts: ref.read(shortcutServiceProvider),
                     shareIn: ref.read(shareInServiceProvider),
+                    capture: ref.read(captureServicesProvider),
                     todoSourceFactory: ref.read(todoSourceFactoryProvider),
                     unsavedTracker: ref.watch(unsavedTrackerProvider),
                     saveExportFile: ref.read(saveExportFileProvider),
@@ -401,6 +406,7 @@ final class _LibraryShell extends ConsumerStatefulWidget {
     required this.spellCheck,
     required this.shortcuts,
     required this.shareIn,
+    required this.capture,
     required this.todoSourceFactory,
     required this.unsavedTracker,
     required this.saveExportFile,
@@ -451,6 +457,10 @@ final class _LibraryShell extends ConsumerStatefulWidget {
   /// What other apps share into Niman (#40): text to the quick note, a
   /// file imported into the library.
   final ShareInService shareIn;
+
+  /// How a captured page is read, and the captures made off screen
+  /// (#531).
+  final CaptureServices capture;
 
   /// Builds the todo file source per library root (overridden with a
   /// fake in widget tests).
@@ -751,6 +761,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onCreated: _onItemCreated,
   );
 
+  /// Web pages captured as notes (#531).
+  late final CaptureFlow _captureFlow = CaptureFlow(
+    controller: widget.controller,
+    services: widget.capture,
+    createParent: () => _createParent,
+    attachmentsFolder: () => _editorSettings.attachmentsFolder,
+    linkType: () => _editorSettings.linkType,
+    onCaptured: (path) => _openNoteFromLink(path, null),
+    openNote: () => _shownNote,
+  );
+
   /// Opens what a create just made: a note takes the screen, a folder
   /// only takes the selection.
   void _onItemCreated(CreatedItem item) {
@@ -847,6 +868,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   StreamSubscription<TrayCommand>? _trayCommands;
   StreamSubscription<String>? _launchFiles;
   StreamSubscription<String>? _launchFolders;
+  StreamSubscription<Uri>? _launchPages;
 
   /// Library session events (every note op bumps the revision): the
   /// pinned notes follow the files, so each one refreshes the note
@@ -1562,6 +1584,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // probe-skip path instead of a second full read.
     unawaited(_todoController.open());
     _reminderTaps = widget.reminders.taps.listen((payload) {
+      if (_followCaptureRoute(payload)) return;
       if (payload == todoReminderPayload && mounted) {
         const AppLogger(name: 'todo').debug('todo tap: opening the todo list');
         _openTodo();
@@ -1635,6 +1658,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _launchFolders = widget.launchRequests.folders.listen(
       (path) => unawaited(_openFolder(path)),
     );
+    // Links dropped on the window (#531).
+    _launchPages = widget.launchRequests.pages.listen((url) {
+      if (mounted) unawaited(_captureFlow.capture(context, url: url));
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final path = widget.launchRequests.consumeFile();
       if (path != null && mounted) unawaited(_openPath(path));
@@ -1690,6 +1717,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unawaited(_trayCommands?.cancel());
     unawaited(_launchFiles?.cancel());
     unawaited(_launchFolders?.cancel());
+    unawaited(_launchPages?.cancel());
     _todoController.dispose();
     _personalDictionary?.dispose();
     _shellFocus.dispose();
@@ -1737,6 +1765,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// A notification tap that started the app lands on the Todo tab.
   Future<void> _applyReminderLaunch() async {
     final payload = await widget.reminders.consumeLaunchPayload();
+    if (_followCaptureRoute(payload)) return;
     if (payload == todoReminderPayload && mounted) {
       _openTodo();
     } else if (payload != null &&
@@ -1769,11 +1798,34 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     await _handleShare(request);
   }
 
-  /// Runs a share: text into the quick note, a file into the library
+  /// Where a capture's notification leads (#531): the note it made, its
+  /// folder in the tree, or the capture's end. False when [route] is not
+  /// a capture's.
+  bool _followCaptureRoute(String? route) {
+    final capture = captureRouteOf(route);
+    if (capture == null || !mounted) return false;
+    switch (capture) {
+      case CaptureOpenNote(:final path):
+        _openNoteFromLink(path, null);
+      case CaptureShowFolder(:final folder):
+        _revealFolder(folder);
+      case CaptureCancel(:final id):
+        widget.capture.background.cancel(id);
+    }
+    return true;
+  }
+
+  /// Runs a share: a web page or a quote from one into the capture sheet
+  /// (#531), other text into the quick note, a file into the library
   /// (#40).
   Future<void> _handleShare(ShareRequest request) async {
     switch (request) {
-      case SharedText(:final text):
+      case SharedText(:final text, :final subject):
+        final web = classifyShare(text, subject: subject);
+        if (web != null) {
+          if (mounted) await _captureFlow.captureShared(context, web);
+          return;
+        }
         await _shareText(text);
       case SharedFile(:final path, :final name):
         await _importSharedFile(path: path, name: name);
@@ -2519,9 +2571,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // The region above the two panes, measured so a frame that misses with
     // both panes under their bars has a name of its own (#324).
     return _frameCost.timed(
-      () => narrow
-          ? NarrowShellLayout(props: props)
-          : WideShellLayout(props: props),
+      // A link pasted where nothing else takes a paste — the tree, the read
+      // view — is a page to capture (#531): a text field and the editor
+      // answer the paste first.
+      () => Actions(
+        actions: <Type, Action<Intent>>{
+          PasteTextIntent: CapturePasteAction(
+            (url) => unawaited(_captureFlow.capture(context, url: url)),
+          ),
+        },
+        child: narrow
+            ? NarrowShellLayout(props: props)
+            : WideShellLayout(props: props),
+      ),
     );
   }
 
@@ -2723,6 +2785,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         onNewFolder: () {
           _closeFab();
           unawaited(_createFlow.createFolder(context));
+        },
+        onCaptureWebPage: () {
+          _closeFab();
+          unawaited(_captureFlow.capture(context));
         },
       ),
     );
@@ -3135,6 +3201,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.openPalette: () => unawaited(_openPalette()),
       AppCommand.goToNote: () => unawaited(_openPalette(notesOnly: true)),
       AppCommand.newNote: () => unawaited(_createFlow.createNote(context)),
+      AppCommand.captureWebPage: () => unawaited(_captureFlow.capture(context)),
       AppCommand.newListNote: () =>
           unawaited(_createFlow.createListNote(context)),
       AppCommand.newAudioNote: () =>

@@ -99,4 +99,32 @@ void main() {
       }
     }
   });
+
+  // Issue #531: a page shared from the browser is captured with Niman off
+  // screen, under the notification plugin's foreground service. Android
+  // refuses to start a service whose type the manifest does not declare,
+  // and a short service is the one that needs no other permission — and
+  // must end within three minutes, which the capture keeps to.
+  test('the capture service is a short foreground one, not exported', () {
+    final manifest = XmlDocument.parse(manifestFile('main').readAsStringSync())
+        .rootElement;
+    final permissions = manifest
+        .findElements('uses-permission')
+        .map((e) => e.getAttribute('android:name'));
+    expect(permissions, contains('android.permission.FOREGROUND_SERVICE'));
+    final service = manifest
+        .findElements('application')
+        .single
+        .findElements('service')
+        .singleWhere(
+          (e) =>
+              e.getAttribute('android:name') ==
+              'com.dexterous.flutterlocalnotifications.ForegroundService',
+        );
+    expect(
+      service.getAttribute('android:foregroundServiceType'),
+      'shortService',
+    );
+    expect(service.getAttribute('android:exported'), 'false');
+  });
 }

@@ -3075,6 +3075,177 @@ final class CzechStrings extends Strings {
   String ocrRecognizeAgain(int page) => 'Znovu rozpoznat s. $page';
 
   @override
+  String get captureWebPage => 'Uložit webovou stránku';
+
+  @override
+  String get capturePageField => 'Stránka';
+
+  @override
+  String get captureFromClipboard => 'Převzato ze schránky.';
+
+  @override
+  String get captureInvalidUrl => 'Webová adresa začíná http:// nebo https://.';
+
+  @override
+  String get captureRead => 'Načíst';
+
+  @override
+  String get captureDownloading => 'Stahování…';
+
+  @override
+  String captureDownloaded(String size) => 'Staženo · $size';
+
+  @override
+  String captureFewWords(int words) => 'Nalezeno jen slov: $words';
+
+  @override
+  String get captureRunningBrowser => 'Stránka se spouští v prohlížeči…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Prohlížeč běží skrytě s vlastním profilem, který se poté smaže: váš '
+      'prohlížeč a jeho přihlášení zůstanou nedotčené.';
+
+  @override
+  String get captureReadInBrowser => 'Načteno po spuštění stránky v prohlížeči';
+
+  @override
+  String get captureNoArticle =>
+      'Článek nenalezen: poznámka si ponechá název, popis a odkaz.';
+
+  @override
+  String get captureTitleField => 'Název';
+
+  @override
+  String get captureFolderField => 'Složka';
+
+  @override
+  String get captureAddTag => 'Přidat štítek';
+
+  @override
+  String get capturePreview => 'Náhled';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      'Slov: $words · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Stáhnout obrázky ($count) do $folder/';
+
+  @override
+  String get captureRemoved => 'Odstraněno';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Skripty: $scripts, styly: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Navigační nabídka';
+
+  @override
+  String get captureRemovedBanner => 'Lišta o cookies';
+
+  @override
+  String captureRemovedAround(int words) => 'Zbytek stránky · slov: $words';
+
+  @override
+  String get captureSaveNote => 'Uložit poznámku';
+
+  @override
+  String get captureSaving => 'Ukládání…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman tuto stránku nedokázal přečíst: text ukazuje až po přihlášení '
+      'nebo skriptu, který nešlo spustit. [Otevřete odkaz](<$url>) a '
+      'přečtěte si ji.';
+
+  @override
+  String get captureFailScheme => 'Uložit lze jen stránky http a https.';
+
+  @override
+  String get captureFailRedirects => 'Stránka přesměrovává příliš mnohokrát.';
+
+  @override
+  String get captureFailTimeout => 'Stránka neodpověděla včas.';
+
+  @override
+  String get captureFailTooLarge => 'Stránka je větší než 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Toto není webová stránka: soubor, PDF nebo obrázek.';
+
+  @override
+  String captureFailStatus(String code) => 'Web odpověděl chybou ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Stránka není dostupná: zkontrolujte připojení.';
+
+  @override
+  String get captureDropHint => 'Pusťte pro uložení této stránky';
+
+  @override
+  String get captureDropDetail => 'Otevře se s ní okno uložení.';
+
+  @override
+  String get captureSaveToNiman => 'Uložit do Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Vrátíte se do prohlížeče; oznámení dá vědět, až bude poznámka hotová.';
+
+  @override
+  String get captureAppendToNote => 'Připojit k poznámce';
+
+  @override
+  String get captureAppend => 'Připojit';
+
+  @override
+  String captureReadingHost(String host) => 'Načítá se $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Uloženo: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · slov: $words · obrázků: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Uloženo bez článku';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nešlo přečíst: zůstal název, popis a odkaz';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citát přidán do $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'z „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host nešlo uložit';
+
+  @override
+  String get captureShowFolder => 'Zobrazit složku';
+
+  @override
+  String get captureOpen => 'Otevřít';
+
+  @override
+  String get captureQuote => 'Citace';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nová poznámka v $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Stáhnout obrázky do $folder/';
+
+  @override
   String get highlightAction => 'Zvýraznit';
 
   @override

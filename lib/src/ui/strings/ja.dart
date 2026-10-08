@@ -2800,6 +2800,170 @@ final class JapaneseStrings extends Strings {
   String ocrRecognizeAgain(int page) => '$page ページを再認識';
 
   @override
+  String get captureWebPage => 'ウェブページを取り込む';
+
+  @override
+  String get capturePageField => 'ページ';
+
+  @override
+  String get captureFromClipboard => 'クリップボードから取得しました。';
+
+  @override
+  String get captureInvalidUrl => 'ウェブアドレスは http:// または https:// で始まります。';
+
+  @override
+  String get captureRead => '読み込む';
+
+  @override
+  String get captureDownloading => 'ダウンロード中…';
+
+  @override
+  String captureDownloaded(String size) => 'ダウンロード済み · $size';
+
+  @override
+  String captureFewWords(int words) => '見つかったのは $words 語だけです';
+
+  @override
+  String get captureRunningBrowser => 'ブラウザでページを実行しています…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'ブラウザは専用のプロファイルで非表示のまま動作し、終了後にプロファイルは削除されます。お使いのブラウザやログイン情報には触れません。';
+
+  @override
+  String get captureReadInBrowser => 'ブラウザでページを実行してから読み込みました';
+
+  @override
+  String get captureNoArticle => '記事が見つかりません。ノートにはタイトル、説明、リンクが残ります。';
+
+  @override
+  String get captureTitleField => 'タイトル';
+
+  @override
+  String get captureFolderField => 'フォルダ';
+
+  @override
+  String get captureAddTag => 'タグを追加';
+
+  @override
+  String get capturePreview => 'プレビュー';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) => '$words 語 · $minutes 分';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      '$count 枚の画像を $folder/ にダウンロード';
+
+  @override
+  String get captureRemoved => '削除したもの';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'スクリプト $scripts 件とスタイル $styles 件';
+
+  @override
+  String get captureRemovedMenu => 'ナビゲーションメニュー';
+
+  @override
+  String get captureRemovedBanner => 'Cookie のバナー';
+
+  @override
+  String captureRemovedAround(int words) => 'ページの残り · $words 語';
+
+  @override
+  String get captureSaveNote => 'ノートを保存';
+
+  @override
+  String get captureSaving => '保存中…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman '
+      'はこのページを読み込めませんでした。ログイン後か、実行できなかったスクリプトの後でしか本文が表示されないページです。読むには[リンクを開いて'
+      'ください](<$url>)。';
+
+  @override
+  String get captureFailScheme => '取り込めるのは http と https のページだけです。';
+
+  @override
+  String get captureFailRedirects => 'ページのリダイレクトが多すぎます。';
+
+  @override
+  String get captureFailTimeout => 'ページが時間内に応答しませんでした。';
+
+  @override
+  String get captureFailTooLarge => 'ページが 10 MB を超えています。';
+
+  @override
+  String get captureFailNotHtml => 'これはウェブページではありません（ファイル、PDF、画像など）。';
+
+  @override
+  String captureFailStatus(String code) => 'サイトがエラーを返しました（$code）。';
+
+  @override
+  String get captureFailNetwork => 'ページに接続できませんでした。接続を確認してください。';
+
+  @override
+  String get captureDropHint => 'ドロップしてこのページを取り込む';
+
+  @override
+  String get captureDropDetail => '取り込みダイアログがこのページで開きます。';
+
+  @override
+  String get captureSaveToNiman => 'Niman に保存';
+
+  @override
+  String get captureBackgroundHint => 'ブラウザに戻ります。ノートの準備ができたら通知でお知らせします。';
+
+  @override
+  String get captureAppendToNote => 'ノートに追加';
+
+  @override
+  String get captureAppend => '追加';
+
+  @override
+  String captureReadingHost(String host) => '$host を読み込み中…';
+
+  @override
+  String captureSavedTitle(String title) => '保存しました: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words 語 · 画像 $images 枚';
+
+  @override
+  String get captureSavedUnreadable => '記事なしで保存しました';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host を読み込めませんでした。タイトル、説明、リンクは残しました';
+
+  @override
+  String captureQuoteAdded(String note) => '引用を $note に追加しました';
+
+  @override
+  String captureQuoteFrom(String title) => '「$title」から';
+
+  @override
+  String captureFailedTitle(String host) => '$host を取り込めませんでした';
+
+  @override
+  String get captureShowFolder => 'フォルダを表示';
+
+  @override
+  String get captureOpen => '開く';
+
+  @override
+  String get captureQuote => '引用';
+
+  @override
+  String captureNewNoteIn(String folder) => '$folder に新しいノート';
+
+  @override
+  String captureDownloadPicturesTo(String folder) => '画像を $folder/ にダウンロード';
+
+  @override
   String get highlightAction => 'ハイライト';
 
   @override

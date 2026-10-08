@@ -3096,6 +3096,181 @@ final class AlbanianStrings extends Strings {
   String ocrRecognizeAgain(int page) => 'Njih sërish f. $page';
 
   @override
+  String get captureWebPage => 'Ruaj faqen e uebit';
+
+  @override
+  String get capturePageField => 'Faqja';
+
+  @override
+  String get captureFromClipboard => 'Marrë nga kujtesa e fragmenteve.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Një adresë uebi fillon me http:// ose https://.';
+
+  @override
+  String get captureRead => 'Lexo';
+
+  @override
+  String get captureDownloading => 'Po shkarkohet…';
+
+  @override
+  String captureDownloaded(String size) => 'U shkarkua · $size';
+
+  @override
+  String captureFewWords(int words) => 'U gjetën vetëm $words fjalë';
+
+  @override
+  String get captureRunningBrowser => 'Faqja po ekzekutohet në një shfletues…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Shfletuesi punon i fshehur, me një profil të vetin që fshihet më pas: '
+      'shfletuesi juaj dhe hyrjet e tij nuk preken.';
+
+  @override
+  String get captureReadInBrowser =>
+      'U lexua pasi faqja u ekzekutua në një shfletues';
+
+  @override
+  String get captureNoArticle =>
+      'Nuk u gjet asnjë artikull: shënimi mban titullin, përshkrimin dhe '
+      'lidhjen.';
+
+  @override
+  String get captureTitleField => 'Titulli';
+
+  @override
+  String get captureFolderField => 'Dosja';
+
+  @override
+  String get captureAddTag => 'Shto një etiketë';
+
+  @override
+  String get capturePreview => 'Pamje paraprake';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words fjalë · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Shkarko $count figurat te $folder/';
+
+  @override
+  String get captureRemoved => 'U hoq';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts skripte dhe $styles stile';
+
+  @override
+  String get captureRemovedMenu => 'Menyja e lundrimit';
+
+  @override
+  String get captureRemovedBanner => 'Një banderolë për cookies';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'Pjesa tjetër e faqes · $words fjalë';
+
+  @override
+  String get captureSaveNote => 'Ruaj shënimin';
+
+  @override
+  String get captureSaving => 'Po ruhet…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman nuk e lexoi dot këtë faqe: e tregon tekstin vetëm pas hyrjes '
+      'ose pas një skripti që nuk u ekzekutua dot. [Hapni lidhjen](<$url>) '
+      'për ta lexuar.';
+
+  @override
+  String get captureFailScheme => 'Mund të ruhen vetëm faqe http dhe https.';
+
+  @override
+  String get captureFailRedirects => 'Faqja ridrejton shumë herë.';
+
+  @override
+  String get captureFailTimeout => 'Faqja nuk u përgjigj në kohë.';
+
+  @override
+  String get captureFailTooLarge => 'Faqja është më e madhe se 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Kjo nuk është faqe uebi: është skedar, PDF ose figurë.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Sajti u përgjigj me një gabim ($code).';
+
+  @override
+  String get captureFailNetwork => 'Faqja nuk u arrit: kontrolloni lidhjen.';
+
+  @override
+  String get captureDropHint => 'Lëshojeni për ta ruajtur këtë faqe';
+
+  @override
+  String get captureDropDetail => 'Me të hapet dritarja e ruajtjes.';
+
+  @override
+  String get captureSaveToNiman => 'Ruaje në Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Ktheheni te shfletuesi; një njoftim ju tregon kur shënimi është gati.';
+
+  @override
+  String get captureAppendToNote => 'Shto te një shënim';
+
+  @override
+  String get captureAppend => 'Shto';
+
+  @override
+  String captureReadingHost(String host) => 'Po lexohet $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'U ruajt: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words fjalë · $images figura';
+
+  @override
+  String get captureSavedUnreadable => 'U ruajt pa artikullin';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nuk u lexua dot: u mbajtën titulli, përshkrimi dhe lidhja';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citati u shtua te $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'nga «$title»';
+
+  @override
+  String captureFailedTitle(String host) => '$host nuk u ruajt dot';
+
+  @override
+  String get captureShowFolder => 'Shfaq dosjen';
+
+  @override
+  String get captureOpen => 'Hap';
+
+  @override
+  String get captureQuote => 'Citim';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Shënim i ri te $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Shkarko figurat te $folder/';
+
+  @override
   String get highlightAction => 'Thekso';
 
   @override

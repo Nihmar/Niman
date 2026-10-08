@@ -4,6 +4,7 @@
 #include <optional>
 #include <shellapi.h>
 #include <string>
+#include <utility>
 
 #include "flutter/generated_plugin_registrant.h"
 #include "utils.h"
@@ -106,13 +107,22 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
 
-  // Files and folders dropped on the window (#224): the paths Win32 hands
-  // this window are passed on to Dart over niman/drop.
+  // Files, folders and links dropped on the window (#224, #531): what the
+  // OLE drop target is handed goes on to Dart over niman/drop. OLE finds the
+  // target by walking up from the Flutter view's child window to this one.
   drop_channel_ =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           flutter_controller_->engine()->messenger(), "niman/drop",
           &flutter::StandardMethodCodec::GetInstance());
-  DragAcceptFiles(GetHandle(), TRUE);
+  drop_target_ = new DropTarget(
+      [this](const std::string& method, flutter::EncodableValue args) {
+        if (drop_channel_) {
+          drop_channel_->InvokeMethod(
+              method,
+              std::make_unique<flutter::EncodableValue>(std::move(args)));
+        }
+      });
+  RegisterDragDrop(GetHandle(), drop_target_);
 
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
@@ -162,41 +172,16 @@ void FlutterWindow::OnDestroy() {
   }
   if (flutter_controller_) {
     // The drop target goes with the engine it talks through.
-    DragAcceptFiles(GetHandle(), FALSE);
+    RevokeDragDrop(GetHandle());
+    if (drop_target_ != nullptr) {
+      drop_target_->Release();
+      drop_target_ = nullptr;
+    }
     drop_channel_ = nullptr;
     flutter_controller_ = nullptr;
   }
 
   Win32Window::OnDestroy();
-}
-
-// A drop on the window: the paths Win32 names are handed to Dart, which
-// opens or imports each one the way the rest of the app does (#224).
-//
-// The classic Win32 route, not an OLE IDropTarget on the view: this half
-// reports the drop and nothing else. A drag that is over the window says
-// nothing until it lands, so Windows drops land without the frame Linux
-// draws while a drag is over it.
-void FlutterWindow::SendDrop(WPARAM wparam) {
-  HDROP drop = reinterpret_cast<HDROP>(wparam);
-  const UINT count = DragQueryFileW(drop, 0xFFFFFFFF, nullptr, 0);
-  flutter::EncodableList paths;
-  for (UINT i = 0; i < count; ++i) {
-    const UINT length = DragQueryFileW(drop, i, nullptr, 0);
-    if (length == 0) {
-      continue;
-    }
-    // The length is the path without its terminator; the buffer takes both.
-    std::wstring wide(static_cast<size_t>(length) + 1, L'\0');
-    DragQueryFileW(drop, i, wide.data(), length + 1);
-    paths.push_back(flutter::EncodableValue(Utf8FromUtf16(wide.c_str())));
-  }
-  DragFinish(drop);
-
-  if (drop_channel_) {
-    drop_channel_->InvokeMethod(
-        "drop", std::make_unique<flutter::EncodableValue>(paths));
-  }
 }
 
 LRESULT
@@ -268,10 +253,6 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_CANCELMODE:
       pressed_caption_button_ = 0;
       break;
-    case WM_DROPFILES:
-      SendDrop(wparam);
-      // The drop is taken: nothing below it has anything to do with it.
-      return 0;
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);

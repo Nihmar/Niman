@@ -11,7 +11,9 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/capture/browser/page_browser.dart';
+import 'package:niman/src/capture/capture_note.dart';
 import 'package:niman/src/capture/fetch/page_fetch.dart';
+import 'package:niman/src/capture/page_reading.dart';
 import 'package:niman/src/capture/web_capture.dart';
 import 'package:path/path.dart' as p;
 
@@ -21,6 +23,15 @@ final bool _update = Platform.environment['NIMAN_UPDATE_GOLDENS'] == '1';
 /// The bytes the server gives for a picture at [path]: its own name, so
 /// each picture has its own hash.
 List<int> _picture(String path) => 'picture:$path'.codeUnits;
+
+/// What a capture gave: its note, its reading, and how it went.
+typedef _Captured = ({
+  CapturedNote note,
+  bool readable,
+  bool ranBrowser,
+  int pictures,
+  PageReading page,
+});
 
 /// A browser that answers the DOM recorded beside the page, or nothing.
 final class _RecordedBrowser implements PageBrowser {
@@ -74,18 +85,37 @@ void main() {
     await library.delete(recursive: true);
   });
 
-  Future<WebCapture> capture(String path, {PageBrowser? browser}) =>
-      captureWebPage(
-        Uri.parse('$base$path'),
-        libraryRoot: library.path,
-        attachmentsFolder: 'assets',
-        unreadableNotice:
-            'Niman could not read this page. '
-            '[Open the link](<$base$path>) to read it.',
-        captured: DateTime(2026, 10, 8),
-        tags: const ['web'],
-        browser: browser,
-      );
+  /// The page at [path] read, and saved as the capture's screens do.
+  Future<_Captured> capture(
+    String path, {
+    PageBrowser? browser,
+    String? title,
+    List<CaptureProgress>? steps,
+  }) async {
+    final reading = await readWebPage(
+      Uri.parse('$base$path'),
+      browser: browser,
+      onProgress: steps?.add,
+    );
+    final saved = await saveWebCapture(
+      reading.page,
+      libraryRoot: library.path,
+      attachmentsFolder: 'assets',
+      unreadableNotice:
+          'Niman could not read this page. '
+          '[Open the link](<$base$path>) to read it.',
+      captured: DateTime(2026, 10, 8),
+      tags: const ['web'],
+      title: title,
+    );
+    return (
+      note: saved.note,
+      readable: reading.page.readable,
+      ranBrowser: reading.ranBrowser,
+      pictures: saved.pictures,
+      page: reading.page,
+    );
+  }
 
   final pages =
       Directory(_fixtures)
@@ -97,7 +127,7 @@ void main() {
           .toList()
         ..sort();
 
-  Future<void> compare(WebCapture result, String goldenName) async {
+  Future<void> compare(_Captured result, String goldenName) async {
     final note = result.note.text.replaceAll(base, 'http://capture.test');
     final golden = File(p.join(_fixtures, goldenName));
     if (_update) {
@@ -122,6 +152,36 @@ void main() {
       await compare(result, '$name.browser.md');
     });
   }
+
+  test('each step is said as it happens', () async {
+    final steps = <CaptureProgress>[];
+    await capture(
+      '/script-built.html',
+      browser: const _RecordedBrowser(),
+      steps: steps,
+    );
+    expect(steps.map((step) => step.stage), [
+      CaptureStage.downloading,
+      CaptureStage.runningBrowser,
+    ]);
+    expect(steps.last.bytes, greaterThan(0));
+    expect(steps.last.words, lessThan(40), reason: 'only the title, words');
+  });
+
+  test("the title the user gives is the note's", () async {
+    final result = await capture('/jsonld-byline.html', title: ' Leaves ');
+    expect(result.note.name, 'Leaves');
+    expect(result.note.text, contains('\n# Leaves\n'));
+  });
+
+  test('what was left out around the article is counted', () async {
+    final result = await capture('/figure-srcset.html');
+    final removed = result.page.removed;
+    expect(removed.menu, isTrue, reason: 'the nav');
+    expect(removed.banner, isFalse);
+    expect(removed.wordsAround, greaterThan(0), reason: 'menu and footer');
+    expect(result.page.words, greaterThan(150));
+  });
 
   test('a page with its text is not run in a browser', () async {
     final result = await capture(

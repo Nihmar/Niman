@@ -3027,6 +3027,177 @@ final class EstonianStrings extends Strings {
   String ocrRecognizeAgain(int page) => 'Tuvasta lk $page uuesti';
 
   @override
+  String get captureWebPage => 'Salvesta veebileht';
+
+  @override
+  String get capturePageField => 'Leht';
+
+  @override
+  String get captureFromClipboard => 'Võetud lõikelaualt.';
+
+  @override
+  String get captureInvalidUrl => 'Veebiaadress algab http:// või https://.';
+
+  @override
+  String get captureRead => 'Loe';
+
+  @override
+  String get captureDownloading => 'Laadin alla…';
+
+  @override
+  String captureDownloaded(String size) => 'Alla laaditud · $size';
+
+  @override
+  String captureFewWords(int words) => 'Leiti ainult $words sõna';
+
+  @override
+  String get captureRunningBrowser => 'Lehte käitatakse brauseris…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Brauser töötab peidetult, oma profiiliga, mis pärast kustutatakse: '
+      'sinu brauserit ja selle sisselogimisi ei puudutata.';
+
+  @override
+  String get captureReadInBrowser => 'Loetud pärast lehe käitamist brauseris';
+
+  @override
+  String get captureNoArticle =>
+      'Artiklit ei leitud: märkmesse jäävad pealkiri, kirjeldus ja link.';
+
+  @override
+  String get captureTitleField => 'Pealkiri';
+
+  @override
+  String get captureFolderField => 'Kaust';
+
+  @override
+  String get captureAddTag => 'Lisa silt';
+
+  @override
+  String get capturePreview => 'Eelvaade';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words sõna · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Laadi $count pilti kausta $folder/';
+
+  @override
+  String get captureRemoved => 'Eemaldatud';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts skripti ja $styles stiili';
+
+  @override
+  String get captureRemovedMenu => 'Navigeerimismenüü';
+
+  @override
+  String get captureRemovedBanner => 'Küpsiste bänner';
+
+  @override
+  String captureRemovedAround(int words) => 'Ülejäänud leht · $words sõna';
+
+  @override
+  String get captureSaveNote => 'Salvesta märge';
+
+  @override
+  String get captureSaving => 'Salvestan…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman ei saanud seda lehte lugeda: see näitab oma teksti alles pärast '
+      'sisselogimist või skripti, mida ei õnnestunud käitada. [Ava '
+      'link](<$url>), et seda lugeda.';
+
+  @override
+  String get captureFailScheme =>
+      'Salvestada saab ainult http- ja https-lehti.';
+
+  @override
+  String get captureFailRedirects => 'Leht suunab liiga palju kordi ümber.';
+
+  @override
+  String get captureFailTimeout => 'Leht ei vastanud õigel ajal.';
+
+  @override
+  String get captureFailTooLarge => 'Leht on suurem kui 10 MB.';
+
+  @override
+  String get captureFailNotHtml => 'See pole veebileht: fail, PDF või pilt.';
+
+  @override
+  String captureFailStatus(String code) => 'Sait vastas veaga ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Lehte ei õnnestunud avada: kontrolli ühendust.';
+
+  @override
+  String get captureDropHint => 'Lase lahti, et see leht salvestada';
+
+  @override
+  String get captureDropDetail => 'Sellega avaneb salvestamise aken.';
+
+  @override
+  String get captureSaveToNiman => 'Salvesta Nimanisse';
+
+  @override
+  String get captureBackgroundHint =>
+      'Naased brauserisse; teavitus annab teada, kui märge on valmis.';
+
+  @override
+  String get captureAppendToNote => 'Lisa märkmele';
+
+  @override
+  String get captureAppend => 'Lisa';
+
+  @override
+  String captureReadingHost(String host) => 'Loen lehte $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Salvestatud: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words sõna · $images pilti';
+
+  @override
+  String get captureSavedUnreadable => 'Salvestatud ilma artiklita';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host lugeda ei õnnestunud: alles on pealkiri, kirjeldus ja link';
+
+  @override
+  String captureQuoteAdded(String note) => 'Tsitaat lisati märkmele $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'lehelt „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host salvestamine ebaõnnestus';
+
+  @override
+  String get captureShowFolder => 'Näita kausta';
+
+  @override
+  String get captureOpen => 'Ava';
+
+  @override
+  String get captureQuote => 'Tsitaat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Uus märge kaustas $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Laadi pildid kausta $folder/';
+
+  @override
   String get highlightAction => 'Tõsta esile';
 
   @override

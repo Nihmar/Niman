@@ -92,6 +92,33 @@ void main() {
       await service.dispose();
     });
 
+    test(
+      "a browser's link is a page to capture, and says so as it comes",
+      () async {
+        // #531: the runners hand a link over as its address, apart from
+        // files, and say on entering whether the drag is one.
+        final service = PlatformDropTargetService();
+        final seen = <WindowDrop>[];
+        final subscription = service.events.listen(seen.add);
+
+        await fromHost('dragEntered', {'link': true});
+        await fromHost('dropLinks', [
+          'https://example.com/a',
+          'file:///etc/passwd',
+          'not a link',
+        ]);
+        await fromHost('dropLinks', ['ftp://example.com']);
+
+        expect((seen[0] as DragEntered).link, isTrue);
+        expect((seen[1] as LinksDropped).links, [
+          Uri.parse('https://example.com/a'),
+        ]);
+        expect(seen, hasLength(2), reason: 'a drop of no web page is nothing');
+        await subscription.cancel();
+        await service.dispose();
+      },
+    );
+
     test('a call this app does not know is left alone', () async {
       final service = PlatformDropTargetService();
       final seen = <WindowDrop>[];

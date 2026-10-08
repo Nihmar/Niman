@@ -3123,6 +3123,183 @@ final class RomanianStrings extends Strings {
   String ocrRecognizeAgain(int page) => 'Recunoaște din nou p. $page';
 
   @override
+  String get captureWebPage => 'Salvează pagina web';
+
+  @override
+  String get capturePageField => 'Pagină';
+
+  @override
+  String get captureFromClipboard => 'Preluată din clipboard.';
+
+  @override
+  String get captureInvalidUrl =>
+      'O adresă web începe cu http:// sau https://.';
+
+  @override
+  String get captureRead => 'Citește';
+
+  @override
+  String get captureDownloading => 'Se descarcă…';
+
+  @override
+  String captureDownloaded(String size) => 'Descărcată · $size';
+
+  @override
+  String captureFewWords(int words) => 'S-au găsit doar $words cuvinte';
+
+  @override
+  String get captureRunningBrowser => 'Pagina rulează într-un browser…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Browserul rulează ascuns, cu un profil propriu care e șters apoi: '
+      'browserul tău și autentificările lui nu sunt atinse.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Citită după rularea paginii într-un browser';
+
+  @override
+  String get captureNoArticle =>
+      'Nu s-a găsit niciun articol: nota păstrează titlul, descrierea și '
+      'linkul.';
+
+  @override
+  String get captureTitleField => 'Titlu';
+
+  @override
+  String get captureFolderField => 'Dosar';
+
+  @override
+  String get captureAddTag => 'Adaugă o etichetă';
+
+  @override
+  String get capturePreview => 'Previzualizare';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words cuvinte · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Descarcă imaginile ($count) în $folder/';
+
+  @override
+  String get captureRemoved => 'Eliminat';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts scripturi și $styles stiluri';
+
+  @override
+  String get captureRemovedMenu => 'Meniul de navigare';
+
+  @override
+  String get captureRemovedBanner => 'Un banner de cookie-uri';
+
+  @override
+  String captureRemovedAround(int words) => 'Restul paginii · $words cuvinte';
+
+  @override
+  String get captureSaveNote => 'Salvează nota';
+
+  @override
+  String get captureSaving => 'Se salvează…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman nu a putut citi această pagină: își arată textul doar după '
+      'autentificare sau după un script care nu a putut rula. [Deschide '
+      'linkul](<$url>) ca s-o citești.';
+
+  @override
+  String get captureFailScheme => 'Se pot salva doar pagini http și https.';
+
+  @override
+  String get captureFailRedirects =>
+      'Pagina redirecționează de prea multe ori.';
+
+  @override
+  String get captureFailTimeout => 'Pagina nu a răspuns la timp.';
+
+  @override
+  String get captureFailTooLarge => 'Pagina are peste 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Aceasta nu e o pagină web: e un fișier, un PDF sau o imagine.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Site-ul a răspuns cu o eroare ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Pagina nu a putut fi accesată: verifică conexiunea.';
+
+  @override
+  String get captureDropHint => 'Eliberează pentru a salva această pagină';
+
+  @override
+  String get captureDropDetail => 'Se deschide fereastra de salvare cu ea.';
+
+  @override
+  String get captureSaveToNiman => 'Salvează în Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Te întorci în browser; o notificare îți spune când nota e gata.';
+
+  @override
+  String get captureAppendToNote => 'Adaugă la o notă';
+
+  @override
+  String get captureAppend => 'Adaugă';
+
+  @override
+  String captureReadingHost(String host) => 'Se citește $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Salvat: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words cuvinte · $images imagini';
+
+  @override
+  String get captureSavedUnreadable => 'Salvat fără articol';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nu a putut fi citit: titlul, descrierea și linkul au fost '
+      'păstrate';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citat adăugat la $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'din „$title”';
+
+  @override
+  String captureFailedTitle(String host) => '$host nu a putut fi salvat';
+
+  @override
+  String get captureShowFolder => 'Arată dosarul';
+
+  @override
+  String get captureOpen => 'Deschide';
+
+  @override
+  String get captureQuote => 'Citat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Notă nouă în $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Descarcă imaginile în $folder/';
+
+  @override
   String get highlightAction => 'Evidențiază';
 
   @override

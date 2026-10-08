@@ -3093,6 +3093,183 @@ final class GalicianStrings extends Strings {
   String ocrRecognizeAgain(int page) => 'Recoñecer de novo a p. $page';
 
   @override
+  String get captureWebPage => 'Capturar páxina web';
+
+  @override
+  String get capturePageField => 'Páxina';
+
+  @override
+  String get captureFromClipboard => 'Tomada do portapapeis.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Un enderezo web comeza por http:// ou https://.';
+
+  @override
+  String get captureRead => 'Ler';
+
+  @override
+  String get captureDownloading => 'Descargando…';
+
+  @override
+  String captureDownloaded(String size) => 'Descargada · $size';
+
+  @override
+  String captureFewWords(int words) => 'Só se atoparon $words palabras';
+
+  @override
+  String get captureRunningBrowser => 'Executando a páxina nun navegador…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'O navegador execútase agochado, cun perfil propio que se borra '
+      'despois: o teu navegador e as súas sesións non se tocan.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Lida despois de executar a páxina nun navegador';
+
+  @override
+  String get captureNoArticle =>
+      'Non se atopou ningún artigo: a nota conserva o título, a descrición e '
+      'a ligazón.';
+
+  @override
+  String get captureTitleField => 'Título';
+
+  @override
+  String get captureFolderField => 'Cartafol';
+
+  @override
+  String get captureAddTag => 'Engadir unha etiqueta';
+
+  @override
+  String get capturePreview => 'Vista previa';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words palabras · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Descargar as $count imaxes en $folder/';
+
+  @override
+  String get captureRemoved => 'Eliminado';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts scripts e $styles estilos';
+
+  @override
+  String get captureRemovedMenu => 'O menú de navegación';
+
+  @override
+  String get captureRemovedBanner => 'Un aviso de cookies';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'O resto da páxina · $words palabras';
+
+  @override
+  String get captureSaveNote => 'Gardar nota';
+
+  @override
+  String get captureSaving => 'Gardando…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman non puido ler esta páxina: só amosa o texto tras iniciar sesión '
+      'ou cun script que non se puido executar. [Abre a ligazón](<$url>) '
+      'para lela.';
+
+  @override
+  String get captureFailScheme => 'Só se poden capturar páxinas http e https.';
+
+  @override
+  String get captureFailRedirects => 'A páxina redirixe demasiadas veces.';
+
+  @override
+  String get captureFailTimeout => 'A páxina non respondeu a tempo.';
+
+  @override
+  String get captureFailTooLarge => 'A páxina ocupa máis de 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Isto non é unha páxina web: é un ficheiro, un PDF ou unha imaxe.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'O sitio respondeu cun erro ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Non se puido acceder á páxina: comproba a conexión.';
+
+  @override
+  String get captureDropHint => 'Solta para capturar esta páxina';
+
+  @override
+  String get captureDropDetail => 'Ábrese o diálogo de captura con ela.';
+
+  @override
+  String get captureSaveToNiman => 'Gardar en Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Volves ao navegador; unha notificación avisarate cando a nota estea '
+      'lista.';
+
+  @override
+  String get captureAppendToNote => 'Engadir a unha nota';
+
+  @override
+  String get captureAppend => 'Engadir';
+
+  @override
+  String captureReadingHost(String host) => 'Lendo $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Gardado: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words palabras · $images imaxes';
+
+  @override
+  String get captureSavedUnreadable => 'Gardado sen o artigo';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Non se puido ler $host: consérvanse o título, a descrición e a ligazón';
+
+  @override
+  String captureQuoteAdded(String note) => 'Cita engadida a $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'de «$title»';
+
+  @override
+  String captureFailedTitle(String host) => 'Non se puido capturar $host';
+
+  @override
+  String get captureShowFolder => 'Amosar o cartafol';
+
+  @override
+  String get captureOpen => 'Abrir';
+
+  @override
+  String get captureQuote => 'Cita';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nota nova en $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Descargar as imaxes en $folder/';
+
+  @override
   String get highlightAction => 'Destacar';
 
   @override

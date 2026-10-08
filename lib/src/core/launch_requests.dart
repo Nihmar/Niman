@@ -29,6 +29,7 @@ final class LaunchRequests {
   late final StreamSubscription<LaunchArgs> _laterFiles;
   final StreamController<String> _files = StreamController.broadcast();
   final StreamController<String> _folders = StreamController.broadcast();
+  final StreamController<Uri> _pages = StreamController.broadcast();
 
   /// The file the app was started with, once; then null.
   String? consumeFile() {
@@ -44,6 +45,9 @@ final class LaunchRequests {
   /// Folders dropped on the window (#75).
   Stream<String> get folders => _folders.stream;
 
+  /// Web pages dropped on the window as links, to capture (#531).
+  Stream<Uri> get pages => _pages.stream;
+
   /// Every later launch: the window should come to the front for each,
   /// whatever it asked. A drop needs no such thing — the window is
   /// where it landed.
@@ -55,11 +59,15 @@ final class LaunchRequests {
   /// Asks for the folder at [path] (absolute) to be opened.
   void openFolder(String path) => _folders.add(path);
 
+  /// Asks for the page at [url] to be captured.
+  void capturePage(Uri url) => _pages.add(url);
+
   /// Stops taking requests.
   Future<void> dispose() async {
     await _laterFiles.cancel();
     await _files.close();
     await _folders.close();
+    await _pages.close();
   }
 }
 

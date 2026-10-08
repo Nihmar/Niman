@@ -3035,6 +3035,182 @@ final class TurkishStrings extends Strings {
   String ocrRecognizeAgain(int page) => 'S. $page yeniden tanı';
 
   @override
+  String get captureWebPage => 'Web sayfasını kaydet';
+
+  @override
+  String get capturePageField => 'Sayfa';
+
+  @override
+  String get captureFromClipboard => 'Panodan alındı.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Bir web adresi http:// ya da https:// ile başlar.';
+
+  @override
+  String get captureRead => 'Oku';
+
+  @override
+  String get captureDownloading => 'İndiriliyor…';
+
+  @override
+  String captureDownloaded(String size) => 'İndirildi · $size';
+
+  @override
+  String captureFewWords(int words) => 'Yalnızca $words sözcük bulundu';
+
+  @override
+  String get captureRunningBrowser => 'Sayfa bir tarayıcıda çalıştırılıyor…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Tarayıcı, sonradan silinen kendine ait bir profille gizli çalışır: '
+      'sizin tarayıcınıza ve oturumlarına dokunulmaz.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Sayfa bir tarayıcıda çalıştırıldıktan sonra okundu';
+
+  @override
+  String get captureNoArticle =>
+      'Makale bulunamadı: not başlığı, açıklamayı ve bağlantıyı korur.';
+
+  @override
+  String get captureTitleField => 'Başlık';
+
+  @override
+  String get captureFolderField => 'Klasör';
+
+  @override
+  String get captureAddTag => 'Etiket ekle';
+
+  @override
+  String get capturePreview => 'Önizleme';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words sözcük · $minutes dk';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      '$count görseli $folder/ klasörüne indir';
+
+  @override
+  String get captureRemoved => 'Kaldırılanlar';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts betik ve $styles stil';
+
+  @override
+  String get captureRemovedMenu => 'Gezinme menüsü';
+
+  @override
+  String get captureRemovedBanner => 'Bir çerez afişi';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'Sayfanın geri kalanı · $words sözcük';
+
+  @override
+  String get captureSaveNote => 'Notu kaydet';
+
+  @override
+  String get captureSaving => 'Kaydediliyor…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman bu sayfayı okuyamadı: sayfa metnini yalnızca bir oturum açma '
+      'işleminden ya da çalıştırılamayan bir betikten sonra gösteriyor. '
+      'Okumak için [bağlantıyı açın](<$url>).';
+
+  @override
+  String get captureFailScheme =>
+      'Yalnızca http ve https sayfaları kaydedilebilir.';
+
+  @override
+  String get captureFailRedirects => 'Sayfa çok fazla kez yönlendiriyor.';
+
+  @override
+  String get captureFailTimeout => 'Sayfa zamanında yanıt vermedi.';
+
+  @override
+  String get captureFailTooLarge => "Sayfa 10 MB'tan büyük.";
+
+  @override
+  String get captureFailNotHtml =>
+      'Bu bir web sayfası değil: bir dosya, PDF ya da görsel.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Site bir hatayla yanıt verdi ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Sayfaya ulaşılamadı: bağlantıyı denetleyin.';
+
+  @override
+  String get captureDropHint => 'Bu sayfayı kaydetmek için bırakın';
+
+  @override
+  String get captureDropDetail => 'Kaydetme penceresi onunla açılır.';
+
+  @override
+  String get captureSaveToNiman => "Niman'a kaydet";
+
+  @override
+  String get captureBackgroundHint =>
+      'Tarayıcıya dönersiniz; not hazır olduğunda bir bildirim haber verir.';
+
+  @override
+  String get captureAppendToNote => 'Nota ekle';
+
+  @override
+  String get captureAppend => 'Ekle';
+
+  @override
+  String captureReadingHost(String host) => '$host okunuyor…';
+
+  @override
+  String captureSavedTitle(String title) => 'Kaydedildi: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words sözcük · $images görsel';
+
+  @override
+  String get captureSavedUnreadable => 'Makale olmadan kaydedildi';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host okunamadı: başlık, açıklama ve bağlantı korundu';
+
+  @override
+  String captureQuoteAdded(String note) => 'Alıntı $note notuna eklendi';
+
+  @override
+  String captureQuoteFrom(String title) => '$title sayfasından';
+
+  @override
+  String captureFailedTitle(String host) => '$host kaydedilemedi';
+
+  @override
+  String get captureShowFolder => 'Klasörü göster';
+
+  @override
+  String get captureOpen => 'Aç';
+
+  @override
+  String get captureQuote => 'Alıntı';
+
+  @override
+  String captureNewNoteIn(String folder) => '$folder içinde yeni not';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Görselleri $folder/ klasörüne indir';
+
+  @override
   String get highlightAction => 'Vurgula';
 
   @override

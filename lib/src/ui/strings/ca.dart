@@ -3125,6 +3125,187 @@ final class CatalanStrings extends Strings {
   String ocrRecognizeAgain(int page) => 'Reconeix de nou la p. $page';
 
   @override
+  String get captureWebPage => 'Captura una pàgina web';
+
+  @override
+  String get capturePageField => 'Pàgina';
+
+  @override
+  String get captureFromClipboard => 'Agafada del porta-retalls.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Una adreça web comença per http:// o https://.';
+
+  @override
+  String get captureRead => 'Llegeix';
+
+  @override
+  String get captureDownloading => "S'està baixant…";
+
+  @override
+  String captureDownloaded(String size) => 'Baixada · $size';
+
+  @override
+  String captureFewWords(int words) => "Només s'han trobat $words paraules";
+
+  @override
+  String get captureRunningBrowser =>
+      "S'està executant la pàgina en un navegador…";
+
+  @override
+  String get captureBrowserPrivacy =>
+      "El navegador s'executa amagat, amb un perfil propi que s'esborra "
+      'després: el vostre navegador i els seus inicis de sessió no es '
+      'toquen.';
+
+  @override
+  String get captureReadInBrowser =>
+      "Llegida després d'executar la pàgina en un navegador";
+
+  @override
+  String get captureNoArticle =>
+      "No s'ha trobat cap article: la nota conserva el títol, la descripció "
+      "i l'enllaç.";
+
+  @override
+  String get captureTitleField => 'Títol';
+
+  @override
+  String get captureFolderField => 'Carpeta';
+
+  @override
+  String get captureAddTag => 'Afegeix una etiqueta';
+
+  @override
+  String get capturePreview => 'Previsualització';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words paraules · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Baixa les $count imatges a $folder/';
+
+  @override
+  String get captureRemoved => 'Eliminat';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts scripts i $styles estils';
+
+  @override
+  String get captureRemovedMenu => 'El menú de navegació';
+
+  @override
+  String get captureRemovedBanner => 'Un bàner de galetes';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'La resta de la pàgina · $words paraules';
+
+  @override
+  String get captureSaveNote => 'Desa la nota';
+
+  @override
+  String get captureSaving => "S'està desant…";
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman no ha pogut llegir aquesta pàgina: només mostra el text després '
+      "d'iniciar sessió o d'un script que no ha pogut executar. [Obriu "
+      "l'enllaç](<$url>) per llegir-la.";
+
+  @override
+  String get captureFailScheme =>
+      'Només es poden capturar pàgines http i https.';
+
+  @override
+  String get captureFailRedirects => 'La pàgina redirigeix massa vegades.';
+
+  @override
+  String get captureFailTimeout => 'La pàgina no ha respost a temps.';
+
+  @override
+  String get captureFailTooLarge => 'La pàgina ocupa més de 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Això no és una pàgina web: és un fitxer, un PDF o una imatge.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'El lloc ha respost amb un error ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      "No s'ha pogut accedir a la pàgina: comproveu la connexió.";
+
+  @override
+  String get captureDropHint => 'Deixeu anar per capturar aquesta pàgina';
+
+  @override
+  String get captureDropDetail => "S'obre el diàleg de captura amb ella.";
+
+  @override
+  String get captureSaveToNiman => 'Desa a Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Tornareu al navegador; una notificació us dirà quan la nota estigui '
+      'llesta.';
+
+  @override
+  String get captureAppendToNote => 'Afegeix a una nota';
+
+  @override
+  String get captureAppend => 'Afegeix';
+
+  @override
+  String captureReadingHost(String host) => "S'està llegint $host…";
+
+  @override
+  String captureSavedTitle(String title) => 'Desat: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words paraules · $images imatges';
+
+  @override
+  String get captureSavedUnreadable => "Desat sense l'article";
+
+  @override
+  String captureUnreadableBody(String host) =>
+      "No s'ha pogut llegir $host: es conserven el títol, la descripció i "
+      "l'enllaç";
+
+  @override
+  String captureQuoteAdded(String note) => 'Cita afegida a $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'de «$title»';
+
+  @override
+  String captureFailedTitle(String host) => "No s'ha pogut capturar $host";
+
+  @override
+  String get captureShowFolder => 'Mostra la carpeta';
+
+  @override
+  String get captureOpen => 'Obre';
+
+  @override
+  String get captureQuote => 'Cita';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nota nova a $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Baixa les imatges a $folder/';
+
+  @override
   String get highlightAction => 'Ressalta';
 
   @override

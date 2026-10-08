@@ -5,19 +5,21 @@
 // and a drop that carries nothing says so rather than sitting there.
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/drop_in.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
 
+import '../fakes/fake_capture_services.dart';
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
 import '../fakes/fake_window_controller.dart';
@@ -67,6 +69,9 @@ void main() {
             FakeWindowController(customTitleBar: true),
           ),
           if (!ownService) dropTargetServiceProvider.overrideWithValue(drops),
+          // A link dropped opens the capture, which must not look for a
+          // browser or reach the network here.
+          captureServicesProvider.overrideWithValue(quietCaptureServices()),
         ],
         child: const NimanApp(),
       ),
@@ -207,6 +212,31 @@ void main() {
     await fromHost(tester, 'dragExited', null);
     await tester.pump();
     expect(find.byKey(const Key('drop-frame')), findsNothing);
+  });
+
+  // A browser's link (#531): the frame says what a drop does with it, and
+  // the drop opens the capture dialog on it.
+  testWidgets('a link dropped on the window opens the capture on it', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    await fromHost(tester, 'dragEntered', {'link': true});
+    await tester.pump();
+    expect(find.text(AppStrings.captureDropHint), findsOne);
+    expect(find.text(AppStrings.dropHint), findsNothing);
+
+    await fromHost(tester, 'dropLinks', ['https://example.com/garden']);
+    await settle(tester);
+    expect(find.byKey(const Key('drop-frame')), findsNothing);
+    expect(find.byKey(const Key('capture-dialog')), findsOne);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('capture-address')))
+          .controller!
+          .text,
+      'https://example.com/garden',
+    );
   });
 
   // The desktop can hand over a drop that names nothing, and the window

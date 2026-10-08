@@ -3081,6 +3081,181 @@ final class HungarianStrings extends Strings {
   String ocrRecognizeAgain(int page) => '$page. oldal újbóli felismerése';
 
   @override
+  String get captureWebPage => 'Weboldal mentése';
+
+  @override
+  String get capturePageField => 'Oldal';
+
+  @override
+  String get captureFromClipboard => 'A vágólapról.';
+
+  @override
+  String get captureInvalidUrl =>
+      'A webcím http:// vagy https:// előtaggal kezdődik.';
+
+  @override
+  String get captureRead => 'Beolvasás';
+
+  @override
+  String get captureDownloading => 'Letöltés…';
+
+  @override
+  String captureDownloaded(String size) => 'Letöltve · $size';
+
+  @override
+  String captureFewWords(int words) => 'Csak $words szó található';
+
+  @override
+  String get captureRunningBrowser => 'Az oldal futtatása böngészőben…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'A böngésző rejtve fut, saját profillal, amelyet utána törlünk: az Ön '
+      'böngészőjéhez és bejelentkezéseihez nem nyúlunk.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Beolvasva, miután az oldal böngészőben futott';
+
+  @override
+  String get captureNoArticle =>
+      'Nem található cikk: a jegyzet megőrzi a címet, a leírást és a '
+      'hivatkozást.';
+
+  @override
+  String get captureTitleField => 'Cím';
+
+  @override
+  String get captureFolderField => 'Mappa';
+
+  @override
+  String get captureAddTag => 'Címke hozzáadása';
+
+  @override
+  String get capturePreview => 'Előnézet';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words szó · $minutes perc';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'A(z) $count kép letöltése ide: $folder/';
+
+  @override
+  String get captureRemoved => 'Eltávolítva';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts szkript és $styles stílus';
+
+  @override
+  String get captureRemovedMenu => 'A navigációs menü';
+
+  @override
+  String get captureRemovedBanner => 'Egy sütiértesítő';
+
+  @override
+  String captureRemovedAround(int words) => 'Az oldal többi része · $words szó';
+
+  @override
+  String get captureSaveNote => 'Jegyzet mentése';
+
+  @override
+  String get captureSaving => 'Mentés…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'A Niman nem tudta beolvasni ezt az oldalt: a szövegét csak '
+      'bejelentkezés után vagy egy olyan szkript futása után mutatja, '
+      'amelyet nem sikerült futtatni. [Nyissa meg a hivatkozást](<$url>) az '
+      'elolvasásához.';
+
+  @override
+  String get captureFailScheme => 'Csak http és https oldalak menthetők.';
+
+  @override
+  String get captureFailRedirects => 'Az oldal túl sokszor irányít át.';
+
+  @override
+  String get captureFailTimeout => 'Az oldal nem válaszolt időben.';
+
+  @override
+  String get captureFailTooLarge => 'Az oldal 10 MB-nál nagyobb.';
+
+  @override
+  String get captureFailNotHtml => 'Ez nem weboldal: fájl, PDF vagy kép.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'A webhely hibával válaszolt ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Az oldal nem érhető el: ellenőrizze a kapcsolatot.';
+
+  @override
+  String get captureDropHint => 'Engedje el az oldal mentéséhez';
+
+  @override
+  String get captureDropDetail => 'Megnyílik vele a mentés ablak.';
+
+  @override
+  String get captureSaveToNiman => 'Mentés a Nimanba';
+
+  @override
+  String get captureBackgroundHint =>
+      'Visszatér a böngészőbe; egy értesítés jelzi, ha a jegyzet elkészült.';
+
+  @override
+  String get captureAppendToNote => 'Hozzáfűzés jegyzethez';
+
+  @override
+  String get captureAppend => 'Hozzáfűzés';
+
+  @override
+  String captureReadingHost(String host) => '$host beolvasása…';
+
+  @override
+  String captureSavedTitle(String title) => 'Mentve: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words szó · $images kép';
+
+  @override
+  String get captureSavedUnreadable => 'Mentve a cikk nélkül';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'A(z) $host nem olvasható: a cím, a leírás és a hivatkozás megmaradt';
+
+  @override
+  String captureQuoteAdded(String note) => 'Idézet hozzáfűzve: $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'innen: $title';
+
+  @override
+  String captureFailedTitle(String host) => 'A(z) $host nem menthető';
+
+  @override
+  String get captureShowFolder => 'Mappa megjelenítése';
+
+  @override
+  String get captureOpen => 'Megnyitás';
+
+  @override
+  String get captureQuote => 'Idézet';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Új jegyzet ide: $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'A képek letöltése ide: $folder/';
+
+  @override
   String get highlightAction => 'Kiemelés';
 
   @override
