@@ -3435,4 +3435,61 @@ final class CatalanStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'què dir aquí — només tu ho veus.';
+
+  @override
+  String get tabHome => 'Inici';
+
+  @override
+  String get homeTileActions => 'Accions';
+
+  @override
+  String get homeTileJournalToday => "Diari d'avui";
+
+  @override
+  String get homeTileTasksDue => 'Tasques pendents';
+
+  @override
+  String get homeTileRecent => 'Modificades fa poc';
+
+  @override
+  String get homeTilePinned => 'Fixades';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendari del diari';
+
+  @override
+  String get homeTileTopTags => 'Etiquetes principals';
+
+  @override
+  String get homeTileRandomNote => "Nota a l'atzar";
+
+  @override
+  String get homeTileSearch => 'Cerca desada';
+
+  @override
+  String get homeJournalEmpty => 'Avui encara no hi ha res escrit.';
+
+  @override
+  String get homeJournalWrite => "Escriu l'entrada d'avui";
+
+  @override
+  String get homeTasksEmpty => 'No hi ha tasques obertes.';
+
+  @override
+  String get homeNotesEmpty => 'Encara no hi ha notes.';
+
+  @override
+  String get homePinnedEmpty => 'Fixa una nota i apareixerà aquí.';
+
+  @override
+  String get homeTagsEmpty => 'Encara no hi ha etiquetes.';
+
+  @override
+  String get homeSearchEmpty => 'Cap coincidència.';
+
+  @override
+  String get homeSearchNoQuery => 'Encara no hi ha cap consulta.';
+
+  @override
+  String get homeRandomAnother => 'Una altra';
 }

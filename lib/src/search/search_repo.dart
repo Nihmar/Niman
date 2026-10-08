@@ -58,10 +58,12 @@ abstract interface class SearchSource {
 
   /// The ranked word-search hits for an FTS [query] built by
   /// `buildFtsQuery`; empty for a null/blank query. [id] from [begin];
-  /// superseded queries return no hits.
+  /// superseded queries return no hits. A null [id] is a read outside the
+  /// typed sequence — the Home's search tile (#535) — which supersedes
+  /// nothing and is never superseded.
   Future<List<SearchHit>> search(
     String? query, {
-    required int id,
+    required int? id,
     int limit = 200,
   });
 
@@ -113,7 +115,7 @@ final class SearchRepo implements SearchSource {
   @override
   Future<List<SearchHit>> search(
     String? query, {
-    required int id,
+    required int? id,
     int limit = 200,
   }) async {
     if (query == null || query.trim().isEmpty) return const [];
@@ -135,7 +137,7 @@ final class SearchRepo implements SearchSource {
       log.warning('word search failed for "$query": $e');
       return const [];
     }
-    if (!isCurrent(id)) {
+    if (id != null && !isCurrent(id)) {
       log.debug(
         'word "$query" (id $id): superseded by id $_invocation — dropped',
       );

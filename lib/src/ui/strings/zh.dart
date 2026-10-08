@@ -3000,4 +3000,61 @@ final class ChineseStrings extends Strings {
 
   @override
   String get slidesTemplateNote => '这里要说的话——只有你能看到。';
+
+  @override
+  String get tabHome => '主页';
+
+  @override
+  String get homeTileActions => '操作';
+
+  @override
+  String get homeTileJournalToday => '今日日志';
+
+  @override
+  String get homeTileTasksDue => '待办任务';
+
+  @override
+  String get homeTileRecent => '最近修改';
+
+  @override
+  String get homeTilePinned => '已置顶';
+
+  @override
+  String get homeTileJournalCalendar => '日志日历';
+
+  @override
+  String get homeTileTopTags => '常用标签';
+
+  @override
+  String get homeTileRandomNote => '随机笔记';
+
+  @override
+  String get homeTileSearch => '已保存的搜索';
+
+  @override
+  String get homeJournalEmpty => '今天还没有写任何内容。';
+
+  @override
+  String get homeJournalWrite => '写今天的日志';
+
+  @override
+  String get homeTasksEmpty => '没有未完成的任务。';
+
+  @override
+  String get homeNotesEmpty => '还没有笔记。';
+
+  @override
+  String get homePinnedEmpty => '置顶一条笔记，它就会显示在这里。';
+
+  @override
+  String get homeTagsEmpty => '还没有标签。';
+
+  @override
+  String get homeSearchEmpty => '没有匹配项。';
+
+  @override
+  String get homeSearchNoQuery => '还没有查询。';
+
+  @override
+  String get homeRandomAnother => '换一条';
 }

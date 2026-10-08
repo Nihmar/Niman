@@ -3415,4 +3415,61 @@ final class DutchStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'wat je hier zegt — alleen jij ziet het.';
+
+  @override
+  String get tabHome => 'Start';
+
+  @override
+  String get homeTileActions => 'Acties';
+
+  @override
+  String get homeTileJournalToday => 'Dagboek van vandaag';
+
+  @override
+  String get homeTileTasksDue => 'Taken met deadline';
+
+  @override
+  String get homeTileRecent => 'Recent gewijzigd';
+
+  @override
+  String get homeTilePinned => 'Vastgezet';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagboekkalender';
+
+  @override
+  String get homeTileTopTags => 'Meestgebruikte tags';
+
+  @override
+  String get homeTileRandomNote => 'Willekeurige notitie';
+
+  @override
+  String get homeTileSearch => 'Opgeslagen zoekopdracht';
+
+  @override
+  String get homeJournalEmpty => 'Vandaag nog niets geschreven.';
+
+  @override
+  String get homeJournalWrite => 'Schrijf het item van vandaag';
+
+  @override
+  String get homeTasksEmpty => 'Geen openstaande taken.';
+
+  @override
+  String get homeNotesEmpty => 'Nog geen notities.';
+
+  @override
+  String get homePinnedEmpty => 'Zet een notitie vast en die verschijnt hier.';
+
+  @override
+  String get homeTagsEmpty => 'Nog geen tags.';
+
+  @override
+  String get homeSearchEmpty => 'Geen resultaten.';
+
+  @override
+  String get homeSearchNoQuery => 'Nog geen zoekopdracht.';
+
+  @override
+  String get homeRandomAnother => 'Nog een';
 }

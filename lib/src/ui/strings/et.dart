@@ -3327,4 +3327,61 @@ final class EstonianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'mida siin öelda — ainult sina näed seda.';
+
+  @override
+  String get tabHome => 'Avaleht';
+
+  @override
+  String get homeTileActions => 'Toimingud';
+
+  @override
+  String get homeTileJournalToday => 'Tänane päevik';
+
+  @override
+  String get homeTileTasksDue => 'Tähtajaga ülesanded';
+
+  @override
+  String get homeTileRecent => 'Hiljuti muudetud';
+
+  @override
+  String get homeTilePinned => 'Kinnitatud';
+
+  @override
+  String get homeTileJournalCalendar => 'Päeviku kalender';
+
+  @override
+  String get homeTileTopTags => 'Populaarsed sildid';
+
+  @override
+  String get homeTileRandomNote => 'Juhuslik märge';
+
+  @override
+  String get homeTileSearch => 'Salvestatud otsing';
+
+  @override
+  String get homeJournalEmpty => 'Täna pole veel midagi kirjutatud.';
+
+  @override
+  String get homeJournalWrite => 'Kirjuta tänane sissekanne';
+
+  @override
+  String get homeTasksEmpty => 'Avatud ülesandeid pole.';
+
+  @override
+  String get homeNotesEmpty => 'Märkmeid veel pole.';
+
+  @override
+  String get homePinnedEmpty => 'Kinnita märge ja see ilmub siia.';
+
+  @override
+  String get homeTagsEmpty => 'Silte veel pole.';
+
+  @override
+  String get homeSearchEmpty => 'Vasteid pole.';
+
+  @override
+  String get homeSearchNoQuery => 'Päringut veel pole.';
+
+  @override
+  String get homeRandomAnother => 'Veel üks';
 }

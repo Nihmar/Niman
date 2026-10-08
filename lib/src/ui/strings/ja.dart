@@ -3090,4 +3090,61 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'ここで話すこと — あなただけに見えます。';
+
+  @override
+  String get tabHome => 'ホーム';
+
+  @override
+  String get homeTileActions => 'アクション';
+
+  @override
+  String get homeTileJournalToday => '今日の日記';
+
+  @override
+  String get homeTileTasksDue => '期限のあるタスク';
+
+  @override
+  String get homeTileRecent => '最近変更';
+
+  @override
+  String get homeTilePinned => 'ピン留め';
+
+  @override
+  String get homeTileJournalCalendar => '日記カレンダー';
+
+  @override
+  String get homeTileTopTags => 'よく使うタグ';
+
+  @override
+  String get homeTileRandomNote => 'ランダムなノート';
+
+  @override
+  String get homeTileSearch => '保存した検索';
+
+  @override
+  String get homeJournalEmpty => '今日はまだ何も書いていません。';
+
+  @override
+  String get homeJournalWrite => '今日のエントリーを書く';
+
+  @override
+  String get homeTasksEmpty => '未完了のタスクはありません。';
+
+  @override
+  String get homeNotesEmpty => 'まだノートがありません。';
+
+  @override
+  String get homePinnedEmpty => 'ノートをピン留めするとここに表示されます。';
+
+  @override
+  String get homeTagsEmpty => 'まだタグがありません。';
+
+  @override
+  String get homeSearchEmpty => '一致するものはありません。';
+
+  @override
+  String get homeSearchNoQuery => 'まだ検索条件がありません。';
+
+  @override
+  String get homeRandomAnother => '別のノート';
 }

@@ -3399,4 +3399,61 @@ final class SerbianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'шта овде рећи — видите само ви.';
+
+  @override
+  String get tabHome => 'Почетна';
+
+  @override
+  String get homeTileActions => 'Радње';
+
+  @override
+  String get homeTileJournalToday => 'Данашњи дневник';
+
+  @override
+  String get homeTileTasksDue => 'Задаци са роком';
+
+  @override
+  String get homeTileRecent => 'Недавно измењено';
+
+  @override
+  String get homeTilePinned => 'Закачено';
+
+  @override
+  String get homeTileJournalCalendar => 'Календар дневника';
+
+  @override
+  String get homeTileTopTags => 'Најчешће ознаке';
+
+  @override
+  String get homeTileRandomNote => 'Насумична белешка';
+
+  @override
+  String get homeTileSearch => 'Сачувана претрага';
+
+  @override
+  String get homeJournalEmpty => 'Данас још ништа није написано.';
+
+  @override
+  String get homeJournalWrite => 'Напиши данашњи унос';
+
+  @override
+  String get homeTasksEmpty => 'Нема отворених задатака.';
+
+  @override
+  String get homeNotesEmpty => 'Још нема белешки.';
+
+  @override
+  String get homePinnedEmpty => 'Закачи белешку и појавиће се овде.';
+
+  @override
+  String get homeTagsEmpty => 'Још нема ознака.';
+
+  @override
+  String get homeSearchEmpty => 'Нема резултата.';
+
+  @override
+  String get homeSearchNoQuery => 'Још нема упита.';
+
+  @override
+  String get homeRandomAnother => 'Друга';
 }

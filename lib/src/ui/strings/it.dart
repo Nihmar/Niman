@@ -3399,4 +3399,61 @@ final class ItalianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'cosa dire qui — lo vedi solo tu.';
+
+  @override
+  String get tabHome => 'Home';
+
+  @override
+  String get homeTileActions => 'Azioni';
+
+  @override
+  String get homeTileJournalToday => 'Diario di oggi';
+
+  @override
+  String get homeTileTasksDue => 'Attività in scadenza';
+
+  @override
+  String get homeTileRecent => 'Modificate di recente';
+
+  @override
+  String get homeTilePinned => 'Fissate';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendario del diario';
+
+  @override
+  String get homeTileTopTags => 'Tag principali';
+
+  @override
+  String get homeTileRandomNote => 'Nota a caso';
+
+  @override
+  String get homeTileSearch => 'Ricerca salvata';
+
+  @override
+  String get homeJournalEmpty => 'Oggi non hai ancora scritto niente.';
+
+  @override
+  String get homeJournalWrite => 'Scrivi la pagina di oggi';
+
+  @override
+  String get homeTasksEmpty => 'Nessuna attività aperta.';
+
+  @override
+  String get homeNotesEmpty => 'Ancora nessuna nota.';
+
+  @override
+  String get homePinnedEmpty => 'Fissa una nota e comparirà qui.';
+
+  @override
+  String get homeTagsEmpty => 'Ancora nessun tag.';
+
+  @override
+  String get homeSearchEmpty => 'Nessun risultato.';
+
+  @override
+  String get homeSearchNoQuery => 'Ancora nessuna ricerca.';
+
+  @override
+  String get homeRandomAnother => "Un'altra";
 }

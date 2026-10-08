@@ -3387,4 +3387,61 @@ final class SlovakStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'čo tu povedať — vidíte to iba vy.';
+
+  @override
+  String get tabHome => 'Domov';
+
+  @override
+  String get homeTileActions => 'Akcie';
+
+  @override
+  String get homeTileJournalToday => 'Dnešný denník';
+
+  @override
+  String get homeTileTasksDue => 'Úlohy s termínom';
+
+  @override
+  String get homeTileRecent => 'Nedávno upravené';
+
+  @override
+  String get homeTilePinned => 'Pripnuté';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendár denníka';
+
+  @override
+  String get homeTileTopTags => 'Najčastejšie štítky';
+
+  @override
+  String get homeTileRandomNote => 'Náhodná poznámka';
+
+  @override
+  String get homeTileSearch => 'Uložené hľadanie';
+
+  @override
+  String get homeJournalEmpty => 'Dnes ešte nič nenapísané.';
+
+  @override
+  String get homeJournalWrite => 'Napísať dnešný záznam';
+
+  @override
+  String get homeTasksEmpty => 'Žiadne otvorené úlohy.';
+
+  @override
+  String get homeNotesEmpty => 'Zatiaľ žiadne poznámky.';
+
+  @override
+  String get homePinnedEmpty => 'Pripnite poznámku a zobrazí sa tu.';
+
+  @override
+  String get homeTagsEmpty => 'Zatiaľ žiadne štítky.';
+
+  @override
+  String get homeSearchEmpty => 'Nič nezodpovedá.';
+
+  @override
+  String get homeSearchNoQuery => 'Zatiaľ žiadny dopyt.';
+
+  @override
+  String get homeRandomAnother => 'Iná';
 }

@@ -3391,4 +3391,61 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'какво да кажете тук — виждате само вие.';
+
+  @override
+  String get tabHome => 'Начало';
+
+  @override
+  String get homeTileActions => 'Действия';
+
+  @override
+  String get homeTileJournalToday => 'Дневник за днес';
+
+  @override
+  String get homeTileTasksDue => 'Задачи за срок';
+
+  @override
+  String get homeTileRecent => 'Наскоро променени';
+
+  @override
+  String get homeTilePinned => 'Закачени';
+
+  @override
+  String get homeTileJournalCalendar => 'Календар на дневника';
+
+  @override
+  String get homeTileTopTags => 'Основни етикети';
+
+  @override
+  String get homeTileRandomNote => 'Случайна бележка';
+
+  @override
+  String get homeTileSearch => 'Запазено търсене';
+
+  @override
+  String get homeJournalEmpty => 'Днес още нищо не е написано.';
+
+  @override
+  String get homeJournalWrite => 'Напиши днешния запис';
+
+  @override
+  String get homeTasksEmpty => 'Няма отворени задачи.';
+
+  @override
+  String get homeNotesEmpty => 'Все още няма бележки.';
+
+  @override
+  String get homePinnedEmpty => 'Закачете бележка и тя ще се появи тук.';
+
+  @override
+  String get homeTagsEmpty => 'Все още няма етикети.';
+
+  @override
+  String get homeSearchEmpty => 'Няма съвпадения.';
+
+  @override
+  String get homeSearchNoQuery => 'Все още няма заявка.';
+
+  @override
+  String get homeRandomAnother => 'Друга';
 }

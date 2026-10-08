@@ -3418,4 +3418,61 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'што тут сказаць — бачыце толькі вы.';
+
+  @override
+  String get tabHome => 'Галоўная';
+
+  @override
+  String get homeTileActions => 'Дзеянні';
+
+  @override
+  String get homeTileJournalToday => 'Дзённік на сёння';
+
+  @override
+  String get homeTileTasksDue => 'Задачы з тэрмінам';
+
+  @override
+  String get homeTileRecent => 'Нядаўна змененыя';
+
+  @override
+  String get homeTilePinned => 'Замацаваныя';
+
+  @override
+  String get homeTileJournalCalendar => 'Каляндар дзённіка';
+
+  @override
+  String get homeTileTopTags => 'Галоўныя тэгі';
+
+  @override
+  String get homeTileRandomNote => 'Выпадковая нататка';
+
+  @override
+  String get homeTileSearch => 'Захаваны пошук';
+
+  @override
+  String get homeJournalEmpty => 'Сёння яшчэ нічога не напісана.';
+
+  @override
+  String get homeJournalWrite => 'Напісаць запіс на сёння';
+
+  @override
+  String get homeTasksEmpty => 'Няма адкрытых задач.';
+
+  @override
+  String get homeNotesEmpty => 'Нататак пакуль няма.';
+
+  @override
+  String get homePinnedEmpty => "Замацуйце нататку, і яна з'явіцца тут.";
+
+  @override
+  String get homeTagsEmpty => 'Тэгаў пакуль няма.';
+
+  @override
+  String get homeSearchEmpty => 'Нічога не знойдзена.';
+
+  @override
+  String get homeSearchNoQuery => 'Запыт яшчэ не зададзены.';
+
+  @override
+  String get homeRandomAnother => 'Іншая';
 }

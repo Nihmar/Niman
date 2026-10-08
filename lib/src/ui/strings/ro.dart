@@ -3429,4 +3429,61 @@ final class RomanianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'ce spui aici — doar tu vezi.';
+
+  @override
+  String get tabHome => 'Acasă';
+
+  @override
+  String get homeTileActions => 'Acțiuni';
+
+  @override
+  String get homeTileJournalToday => 'Jurnalul de azi';
+
+  @override
+  String get homeTileTasksDue => 'Sarcini scadente';
+
+  @override
+  String get homeTileRecent => 'Modificate recent';
+
+  @override
+  String get homeTilePinned => 'Fixate';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendarul jurnalului';
+
+  @override
+  String get homeTileTopTags => 'Etichete principale';
+
+  @override
+  String get homeTileRandomNote => 'Notiță aleatorie';
+
+  @override
+  String get homeTileSearch => 'Căutare salvată';
+
+  @override
+  String get homeJournalEmpty => 'Nimic scris încă azi.';
+
+  @override
+  String get homeJournalWrite => 'Scrie intrarea de azi';
+
+  @override
+  String get homeTasksEmpty => 'Nicio sarcină deschisă.';
+
+  @override
+  String get homeNotesEmpty => 'Încă nu există notițe.';
+
+  @override
+  String get homePinnedEmpty => 'Fixează o notiță și va apărea aici.';
+
+  @override
+  String get homeTagsEmpty => 'Încă nu există etichete.';
+
+  @override
+  String get homeSearchEmpty => 'Niciun rezultat.';
+
+  @override
+  String get homeSearchNoQuery => 'Încă nu există căutare.';
+
+  @override
+  String get homeRandomAnother => 'Alta';
 }

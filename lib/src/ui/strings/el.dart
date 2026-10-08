@@ -3483,4 +3483,62 @@ final class GreekStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'τι να πείτε εδώ — το βλέπετε μόνο εσείς.';
+
+  @override
+  String get tabHome => 'Αρχική';
+
+  @override
+  String get homeTileActions => 'Ενέργειες';
+
+  @override
+  String get homeTileJournalToday => 'Σημερινό ημερολόγιο';
+
+  @override
+  String get homeTileTasksDue => 'Εργασίες προς λήξη';
+
+  @override
+  String get homeTileRecent => 'Πρόσφατες αλλαγές';
+
+  @override
+  String get homeTilePinned => 'Καρφιτσωμένες';
+
+  @override
+  String get homeTileJournalCalendar => 'Ημερολόγιο εγγραφών';
+
+  @override
+  String get homeTileTopTags => 'Κορυφαίες ετικέτες';
+
+  @override
+  String get homeTileRandomNote => 'Τυχαία σημείωση';
+
+  @override
+  String get homeTileSearch => 'Αποθηκευμένη αναζήτηση';
+
+  @override
+  String get homeJournalEmpty => 'Τίποτα γραμμένο σήμερα ακόμη.';
+
+  @override
+  String get homeJournalWrite => 'Γράψε τη σημερινή εγγραφή';
+
+  @override
+  String get homeTasksEmpty => 'Καμία ανοιχτή εργασία.';
+
+  @override
+  String get homeNotesEmpty => 'Δεν υπάρχουν σημειώσεις ακόμη.';
+
+  @override
+  String get homePinnedEmpty =>
+      'Καρφίτσωσε μια σημείωση και θα εμφανιστεί εδώ.';
+
+  @override
+  String get homeTagsEmpty => 'Δεν υπάρχουν ετικέτες ακόμη.';
+
+  @override
+  String get homeSearchEmpty => 'Καμία αντιστοιχία.';
+
+  @override
+  String get homeSearchNoQuery => 'Δεν υπάρχει ερώτημα ακόμη.';
+
+  @override
+  String get homeRandomAnother => 'Άλλη μία';
 }

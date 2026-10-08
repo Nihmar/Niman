@@ -3398,4 +3398,61 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'kaj povedati tukaj — vidite le vi.';
+
+  @override
+  String get tabHome => 'Domov';
+
+  @override
+  String get homeTileActions => 'Dejanja';
+
+  @override
+  String get homeTileJournalToday => 'Današnji dnevnik';
+
+  @override
+  String get homeTileTasksDue => 'Naloge z rokom';
+
+  @override
+  String get homeTileRecent => 'Nedavno spremenjeno';
+
+  @override
+  String get homeTilePinned => 'Pripeto';
+
+  @override
+  String get homeTileJournalCalendar => 'Koledar dnevnika';
+
+  @override
+  String get homeTileTopTags => 'Najpogostejše oznake';
+
+  @override
+  String get homeTileRandomNote => 'Naključni zapisek';
+
+  @override
+  String get homeTileSearch => 'Shranjeno iskanje';
+
+  @override
+  String get homeJournalEmpty => 'Danes še nič zapisano.';
+
+  @override
+  String get homeJournalWrite => 'Napiši današnji vnos';
+
+  @override
+  String get homeTasksEmpty => 'Ni odprtih nalog.';
+
+  @override
+  String get homeNotesEmpty => 'Še ni zapiskov.';
+
+  @override
+  String get homePinnedEmpty => 'Pripnite zapisek in prikazal se bo tukaj.';
+
+  @override
+  String get homeTagsEmpty => 'Še ni oznak.';
+
+  @override
+  String get homeSearchEmpty => 'Ni zadetkov.';
+
+  @override
+  String get homeSearchNoQuery => 'Še ni poizvedbe.';
+
+  @override
+  String get homeRandomAnother => 'Drugo';
 }

@@ -93,7 +93,7 @@ sync) in `.niman/settings.json`.
 | `journalEntryName` | `YYYY/MM/YYYY-MM-DD` | An entry's name: `YYYY` `MM` `M` `DD` `D`, `/` for a folder, `'quoted'` text |
 | `journalTemplate` | none (= a heading with the date) | The template an entry is made from, library-relative |
 | `journalDayStart` | 0 | The hour a new day begins (0–6): at 4, until four in the morning is still yesterday |
-| `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order and hidden destinations (**Settings → Navigation**): `{"order": [names], "hidden": [names]}` with `files`, `todo`, `search`, `quicknote`, `settings`; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
+| `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order and hidden destinations (**Settings → Navigation**): `{"order": [names], "hidden": [names]}` with `files`, `todo`, `search`, `home`, `quicknote`, `settings`; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
 
 The **Diagnostics and info** area also carries the first run again
 (#266): *What Niman can do* reopens the welcome deck read-only, and

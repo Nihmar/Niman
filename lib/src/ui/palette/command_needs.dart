@@ -115,7 +115,8 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.tabTodo ||
   AppCommand.tabSearch ||
   AppCommand.tabQuickNote ||
-  AppCommand.tabSettings => const {},
+  AppCommand.tabSettings ||
+  AppCommand.tabHome => const {},
 };
 
 /// [need] in words, for the Commands page.

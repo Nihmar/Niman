@@ -1759,4 +1759,24 @@ final class AppStrings {
   static String get slidesTemplateSecond => _s.slidesTemplateSecond;
   static String get slidesTemplatePoint => _s.slidesTemplatePoint;
   static String get slidesTemplateNote => _s.slidesTemplateNote;
+  // Home (#535): the destination, its tiles, and what they say empty.
+  static String get tabHome => _s.tabHome;
+  static String get homeTileActions => _s.homeTileActions;
+  static String get homeTileJournalToday => _s.homeTileJournalToday;
+  static String get homeTileTasksDue => _s.homeTileTasksDue;
+  static String get homeTileRecent => _s.homeTileRecent;
+  static String get homeTilePinned => _s.homeTilePinned;
+  static String get homeTileJournalCalendar => _s.homeTileJournalCalendar;
+  static String get homeTileTopTags => _s.homeTileTopTags;
+  static String get homeTileRandomNote => _s.homeTileRandomNote;
+  static String get homeTileSearch => _s.homeTileSearch;
+  static String get homeJournalEmpty => _s.homeJournalEmpty;
+  static String get homeJournalWrite => _s.homeJournalWrite;
+  static String get homeTasksEmpty => _s.homeTasksEmpty;
+  static String get homeNotesEmpty => _s.homeNotesEmpty;
+  static String get homePinnedEmpty => _s.homePinnedEmpty;
+  static String get homeTagsEmpty => _s.homeTagsEmpty;
+  static String get homeSearchEmpty => _s.homeSearchEmpty;
+  static String get homeSearchNoQuery => _s.homeSearchNoQuery;
+  static String get homeRandomAnother => _s.homeRandomAnother;
 }

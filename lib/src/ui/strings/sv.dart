@@ -3387,4 +3387,61 @@ final class SwedishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'vad du ska säga här — bara du ser det.';
+
+  @override
+  String get tabHome => 'Hem';
+
+  @override
+  String get homeTileActions => 'Åtgärder';
+
+  @override
+  String get homeTileJournalToday => 'Dagens dagbok';
+
+  @override
+  String get homeTileTasksDue => 'Uppgifter med förfallodag';
+
+  @override
+  String get homeTileRecent => 'Nyligen ändrade';
+
+  @override
+  String get homeTilePinned => 'Fästa';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagbokskalender';
+
+  @override
+  String get homeTileTopTags => 'Vanligaste taggar';
+
+  @override
+  String get homeTileRandomNote => 'Slumpad anteckning';
+
+  @override
+  String get homeTileSearch => 'Sparad sökning';
+
+  @override
+  String get homeJournalEmpty => 'Inget skrivet i dag än.';
+
+  @override
+  String get homeJournalWrite => 'Skriv dagens anteckning';
+
+  @override
+  String get homeTasksEmpty => 'Inga öppna uppgifter.';
+
+  @override
+  String get homeNotesEmpty => 'Inga anteckningar än.';
+
+  @override
+  String get homePinnedEmpty => 'Fäst en anteckning så visas den här.';
+
+  @override
+  String get homeTagsEmpty => 'Inga taggar än.';
+
+  @override
+  String get homeSearchEmpty => 'Inga träffar.';
+
+  @override
+  String get homeSearchNoQuery => 'Ingen sökning än.';
+
+  @override
+  String get homeRandomAnother => 'En annan';
 }

@@ -35,6 +35,10 @@ enum ShellTab {
 
   /// The library settings (the pushed SettingsScreen on wide screens).
   settings,
+
+  /// The library's Home (#535): its tiles and action buttons. Last in the
+  /// enum, which is the bodies' slots; the bar puts it after Search.
+  home,
 }
 
 /// One destination, as both shapes draw it.
@@ -76,6 +80,13 @@ List<ShellDestination> shellDestinations() => <ShellDestination>[
     icon: Icons.search,
     selectedIcon: Icons.search,
     label: AppStrings.tabSearch,
+  ),
+  (
+    tab: ShellTab.home,
+    name: 'home',
+    icon: Icons.home_outlined,
+    selectedIcon: Icons.home,
+    label: AppStrings.tabHome,
   ),
   (
     tab: ShellTab.quickNote,

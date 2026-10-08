@@ -7,15 +7,26 @@
 /// when a note is opened.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/tags_screen.dart';
 
 /// Search, with Tags flipping in over it.
 final class SearchSlot extends StatefulWidget {
-  /// Creates the slot over [controller]'s library.
-  const new({required this.controller, required this.onOpenNote, super.key});
+  /// Creates the slot over [controller]'s library; [requests] carries
+  /// what the Home asks it to show.
+  const new({
+    required this.controller,
+    required this.onOpenNote,
+    this.requests,
+    super.key,
+  });
+
+  /// What to show next, when asked from elsewhere.
+  final ValueListenable<SearchRequest?>? requests;
 
   /// The open library.
   final LibrarySession controller;
@@ -36,6 +47,36 @@ final class _SearchSlotState extends State<SearchSlot> {
   bool _tagsVisited = false;
 
   @override
+  void initState() {
+    super.initState();
+    widget.requests?.addListener(_requested);
+    // A request made before the first visit mounted this slot.
+    if (widget.requests?.value?.tag != null) {
+      _showTags = true;
+      _tagsVisited = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.requests?.removeListener(_requested);
+    super.dispose();
+  }
+
+  /// Flips to the side a request is for; the screens themselves read what.
+  void _requested() {
+    final request = widget.requests?.value;
+    if (request == null) return;
+    final tags = request.tag != null;
+    if (tags == _showTags && (!tags || _tagsVisited)) return;
+    if (!mounted) return;
+    setState(() {
+      _showTags = tags;
+      if (tags) _tagsVisited = true;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     // The flip is instant (same tab, no transition); the outer fade
     // already covered entering the tab. Search retains layout while Tags
@@ -54,6 +95,7 @@ final class _SearchSlotState extends State<SearchSlot> {
             child: SearchScreen(
               controller: widget.controller,
               onOpenNote: widget.onOpenNote,
+              requests: widget.requests,
               onOpenTags: () => setState(() {
                 _showTags = true;
                 _tagsVisited = true;
@@ -69,6 +111,7 @@ final class _SearchSlotState extends State<SearchSlot> {
               child: TagsScreen(
                 controller: widget.controller,
                 onOpenNote: widget.onOpenNote,
+                requests: widget.requests,
                 onBack: () => setState(() => _showTags = false),
               ),
             ),

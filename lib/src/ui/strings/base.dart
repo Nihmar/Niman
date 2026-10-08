@@ -1828,4 +1828,25 @@ abstract base class Strings {
   String get slidesTemplateSecond;
   String get slidesTemplatePoint;
   String get slidesTemplateNote;
+
+  // Home (#535): the destination, its tiles, and what they say empty.
+  String get tabHome;
+  String get homeTileActions;
+  String get homeTileJournalToday;
+  String get homeTileTasksDue;
+  String get homeTileRecent;
+  String get homeTilePinned;
+  String get homeTileJournalCalendar;
+  String get homeTileTopTags;
+  String get homeTileRandomNote;
+  String get homeTileSearch;
+  String get homeJournalEmpty;
+  String get homeJournalWrite;
+  String get homeTasksEmpty;
+  String get homeNotesEmpty;
+  String get homePinnedEmpty;
+  String get homeTagsEmpty;
+  String get homeSearchEmpty;
+  String get homeSearchNoQuery;
+  String get homeRandomAnother;
 }

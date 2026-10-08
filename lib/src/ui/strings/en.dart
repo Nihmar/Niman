@@ -3337,4 +3337,61 @@ final class EnglishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'what to say here — only you see it.';
+
+  @override
+  String get tabHome => 'Home';
+
+  @override
+  String get homeTileActions => 'Actions';
+
+  @override
+  String get homeTileJournalToday => "Today's journal";
+
+  @override
+  String get homeTileTasksDue => 'Tasks due';
+
+  @override
+  String get homeTileRecent => 'Recently modified';
+
+  @override
+  String get homeTilePinned => 'Pinned';
+
+  @override
+  String get homeTileJournalCalendar => 'Journal calendar';
+
+  @override
+  String get homeTileTopTags => 'Top tags';
+
+  @override
+  String get homeTileRandomNote => 'Random note';
+
+  @override
+  String get homeTileSearch => 'Saved search';
+
+  @override
+  String get homeJournalEmpty => 'Nothing written yet today.';
+
+  @override
+  String get homeJournalWrite => "Write today's entry";
+
+  @override
+  String get homeTasksEmpty => 'No open tasks.';
+
+  @override
+  String get homeNotesEmpty => 'No notes yet.';
+
+  @override
+  String get homePinnedEmpty => 'Pin a note and it shows here.';
+
+  @override
+  String get homeTagsEmpty => 'No tags yet.';
+
+  @override
+  String get homeSearchEmpty => 'Nothing matches.';
+
+  @override
+  String get homeSearchNoQuery => 'No query yet.';
+
+  @override
+  String get homeRandomAnother => 'Another one';
 }

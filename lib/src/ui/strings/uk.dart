@@ -3419,4 +3419,61 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'що тут сказати — бачите лише ви.';
+
+  @override
+  String get tabHome => 'Головна';
+
+  @override
+  String get homeTileActions => 'Дії';
+
+  @override
+  String get homeTileJournalToday => 'Щоденник на сьогодні';
+
+  @override
+  String get homeTileTasksDue => 'Завдання з терміном';
+
+  @override
+  String get homeTileRecent => 'Нещодавно змінені';
+
+  @override
+  String get homeTilePinned => 'Закріплені';
+
+  @override
+  String get homeTileJournalCalendar => 'Календар щоденника';
+
+  @override
+  String get homeTileTopTags => 'Найчастіші теги';
+
+  @override
+  String get homeTileRandomNote => 'Випадкова нотатка';
+
+  @override
+  String get homeTileSearch => 'Збережений пошук';
+
+  @override
+  String get homeJournalEmpty => 'Сьогодні ще нічого не написано.';
+
+  @override
+  String get homeJournalWrite => 'Написати запис на сьогодні';
+
+  @override
+  String get homeTasksEmpty => 'Немає відкритих завдань.';
+
+  @override
+  String get homeNotesEmpty => 'Нотаток ще немає.';
+
+  @override
+  String get homePinnedEmpty => "Закріпіть нотатку, і вона з'явиться тут.";
+
+  @override
+  String get homeTagsEmpty => 'Тегів ще немає.';
+
+  @override
+  String get homeSearchEmpty => 'Нічого не знайдено.';
+
+  @override
+  String get homeSearchNoQuery => 'Запиту ще немає.';
+
+  @override
+  String get homeRandomAnother => 'Інша';
 }

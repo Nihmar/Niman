@@ -145,7 +145,7 @@ final class _RowSubtitle extends StatelessWidget {
       spacing: 6,
       runSpacing: 2,
       children: [
-        if (task.due != null) _DueChip(due: task.due!, today: today),
+        if (task.due != null) TodoDueLabel(due: task.due!, today: today),
         if (task.reminder != null)
           _ReminderChip(stamp: task.reminder!, today: today),
         for (final token in tokens) _TokenChip(token: token),
@@ -157,10 +157,15 @@ final class _RowSubtitle extends StatelessWidget {
 /// The due part of the row subtitle (T-TDM-02, split on 2026-09-07):
 /// the due state + short date, prefixed ("Overdue · 1 Sep", "Due
 /// today", "Due 7 Sep") so it can never be read as the reminder's date.
-final class _DueChip extends StatelessWidget {
-  const new({required this.due, required this.today});
+/// The Home's tasks tile (#535) wears it too.
+final class TodoDueLabel extends StatelessWidget {
+  /// The label of a task due on [due], read on [today].
+  const new({required this.due, required this.today, super.key});
 
+  /// The task's due date.
   final DateTime due;
+
+  /// The day it is read on.
   final DateTime today;
 
   @override
