@@ -54,7 +54,12 @@ void main() {
   late Future<CaptureSheetResult?> closed;
 
   /// Opens the sheet from a button.
-  Future<void> open(WidgetTester tester, {WebShare? share, Uri? url}) async {
+  Future<void> open(
+    WidgetTester tester, {
+    WebShare? share,
+    Uri? url,
+    String? appendTo,
+  }) async {
     // Made in the test's zone, so the test's pumps complete it.
     page = Completer<WebReading>();
     await tester.pumpWidget(
@@ -66,6 +71,8 @@ void main() {
               target: target(),
               share: share,
               url: url,
+              appendTo: appendTo,
+              pickNote: (current) async => 'Projects/Sync screen.md',
             ),
             child: const Text('open'),
           ),
@@ -187,5 +194,74 @@ void main() {
     expect(read, [_url, _url]);
     final chosen = (await closed)! as CapturePageChosen;
     chosen.reading.dispose();
+  });
+
+  testWidgets('a shared page has no quote to keep', (tester) async {
+    await open(tester, share: SharedPage(_url));
+    final mode = tester.widget<SegmentedButton<bool>>(
+      find.byKey(const Key('capture-sheet-mode')),
+    );
+    expect(mode.selected, {false});
+    expect(mode.segments.last.enabled, isFalse);
+  });
+
+  testWidgets('a quote opens on its tab, appended to the open note', (
+    tester,
+  ) async {
+    final quote = SharedQuote(
+      'A choice, not an error.',
+      Uri.parse('https://example.com/garden#:~:text=A%20choice'),
+      title: 'Garden',
+    );
+    await open(tester, share: quote, appendTo: 'Inbox.md');
+    // A quote is kept without reading its page.
+    expect(read, isEmpty);
+    expect(find.text('A choice, not an error.'), findsOne);
+    expect(find.text('— Garden · example.com'), findsOne);
+    expect(find.text('Inbox'), findsOne);
+    await tester.tap(find.text('Append'));
+    await tester.pumpAndSettle();
+    final chosen = (await closed)! as CaptureQuoteChosen;
+    expect(chosen.quote, same(quote));
+    expect(chosen.appendTo, 'Inbox.md');
+  });
+
+  testWidgets('a quote can go to another note, or a new one', (tester) async {
+    final quote = SharedQuote('A choice.', _url);
+    await open(tester, share: quote);
+    // No note open: a new note, until one is picked.
+    expect(find.text('Append'), findsNothing);
+    final save = find.byKey(const Key('capture-sheet-save'));
+    expect(
+      find.descendant(of: save, matching: find.text('Save note')),
+      findsOne,
+    );
+    await tester.tap(find.byKey(const Key('capture-quote-append')));
+    await tester.pumpAndSettle();
+    expect(find.text('Sync screen · Projects'), findsOne);
+    await tester.tap(find.byKey(const Key('capture-quote-new')));
+    await tester.pumpAndSettle();
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    final chosen = (await closed)! as CaptureQuoteChosen;
+    expect(chosen.appendTo, isNull);
+    expect(chosen.folder, 'Reading');
+    expect(chosen.tags, ['web']);
+  });
+
+  testWidgets('the Page tab of a quote reads its page', (tester) async {
+    await open(
+      tester,
+      share: SharedQuote(
+        'A choice.',
+        Uri.parse('https://example.com/garden#:~:text=A'),
+      ),
+    );
+    expect(read, isEmpty);
+    await tester.tap(find.text('Page'));
+    await tester.pumpAndSettle();
+    expect(read, [_url]);
+    page.complete(_reading());
+    await tester.pumpAndSettle();
   });
 }

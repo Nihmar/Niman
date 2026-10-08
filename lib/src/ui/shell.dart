@@ -769,6 +769,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     attachmentsFolder: () => _editorSettings.attachmentsFolder,
     linkType: () => _editorSettings.linkType,
     onCaptured: (path) => _openNoteFromLink(path, null),
+    openNote: () => _shownNote,
   );
 
   /// Opens what a create just made: a note takes the screen, a folder

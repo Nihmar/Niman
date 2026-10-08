@@ -140,6 +140,38 @@ void main() {
     await close();
   });
 
+  testWidgets('a shared quote is kept as a note of its own', (tester) async {
+    await pumpOpenLibrary(tester);
+    await controller.seedFile('Quick note.md', content: 'existing');
+    await controller.setQuickNotePath(path: 'Quick note.md');
+
+    shares.emit(
+      const SharedText(
+        '"A choice, not an error." https://example.com/garden',
+        subject: 'Garden',
+      ),
+    );
+    await settle(tester);
+    expect(find.text('A choice, not an error.'), findsOne);
+    // A quote does not read its page.
+    expect(pagesRead, isEmpty);
+
+    await tester.tap(find.byKey(const Key('capture-sheet-save')));
+    await settle(tester);
+    expect(
+      controller.contentOf('Garden.md'),
+      allOf(
+        startsWith('---\nsource: https://example.com/garden\n'),
+        endsWith(
+          '> A choice, not an error.\n'
+          '> — [Garden](<https://example.com/garden>)\n',
+        ),
+      ),
+    );
+    expect(controller.contentOf('Quick note.md'), 'existing');
+    await close();
+  });
+
   testWidgets('shared text with no quick note waits for the choice', (
     tester,
   ) async {

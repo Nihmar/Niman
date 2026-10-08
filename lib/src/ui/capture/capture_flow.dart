@@ -15,15 +15,19 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/capture/capture_quote.dart';
 import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/android_task.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/capture/capture_dialog.dart';
+import 'package:niman/src/ui/capture/capture_routes.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/capture/capture_sheet.dart';
 import 'package:niman/src/ui/folder_picker.dart';
+import 'package:niman/src/ui/note_picker.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:path/path.dart' as p;
 
 /// [text] as the address of a web page, or null when it is not one: one
 /// http or https address, and nothing else.
@@ -47,6 +51,8 @@ final class CaptureFlow {
     required this.attachmentsFolder,
     required this.linkType,
     required this.onCaptured,
+    this.openNote,
+    this.clock = DateTime.now,
     bool? useSheet,
   }) : useSheet = useSheet ?? Platform.isAndroid;
 
@@ -68,6 +74,13 @@ final class CaptureFlow {
 
   /// Opens the note a capture made, by its library-relative path.
   final void Function(String path) onCaptured;
+
+  /// The note on screen, library-relative: where a shared quote is
+  /// appended unless another note is picked.
+  final String? Function()? openNote;
+
+  /// The time now, for a new note's frontmatter.
+  final DateTime Function() clock;
 
   /// Whether a capture asks with the phone's sheet, saving in the
   /// background, rather than with the desktop's dialog.
@@ -93,7 +106,7 @@ final class CaptureFlow {
         url: page,
         fromClipboard: fromClipboard,
       );
-      _run(chosen, target);
+      await _run(chosen, target);
       return;
     }
     final path = await showCaptureDialog(
@@ -114,13 +127,20 @@ final class CaptureFlow {
       context,
       target: target,
       share: share,
+      appendTo: openNote?.call(),
+      pickNote: (current) => showNotePicker(
+        context,
+        controller: controller,
+        title: AppStrings.captureAppendToNote,
+        currentPath: current,
+      ),
     );
     if (chosen == null) return;
-    _run(chosen, target);
+    await _run(chosen, target);
     await moveTaskToBack();
   }
 
-  void _run(CaptureSheetResult? chosen, CaptureTarget target) {
+  Future<void> _run(CaptureSheetResult? chosen, CaptureTarget target) async {
     switch (chosen) {
       case null:
         return;
@@ -128,6 +148,49 @@ final class CaptureFlow {
         unawaited(
           services.background.add(reading, target: target, chosen: chosen),
         );
+      case CaptureQuoteChosen():
+        await _keepQuote(chosen);
+    }
+  }
+
+  /// Appends [chosen]'s quote to its note, or makes it a new one, and
+  /// says so outside the app: the user is back in the browser by then.
+  Future<void> _keepQuote(CaptureQuoteChosen chosen) async {
+    final ops = controller.ops;
+    if (ops == null) return;
+    final quote = chosen.quote;
+    final page = quote.pageUrl;
+    final notifier = services.background.notifier;
+    try {
+      final appendTo = chosen.appendTo;
+      final note = appendTo != null
+          ? await ops.appendToNote(
+              appendTo,
+              quoteMarkdown(quote.quote, page, title: quote.title),
+            )
+          : await ops.createNote(
+              parentPath: chosen.folder,
+              name: quote.title ?? page.host,
+              content: quoteNote(
+                quote.quote,
+                page,
+                captured: clock(),
+                title: quote.title,
+                tags: chosen.tags,
+              ),
+            );
+      await notifier.result(
+        title: AppStrings.captureQuoteAdded(
+          p.posix.basenameWithoutExtension(note.path),
+        ),
+        body: AppStrings.captureQuoteFrom(quote.title ?? page.host),
+        open: captureOpenRoute(note.path),
+      );
+    } on Object catch (error) {
+      await notifier.result(
+        title: AppStrings.captureFailedTitle(page.host),
+        body: '$error',
+      );
     }
   }
 
