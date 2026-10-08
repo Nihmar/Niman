@@ -1,5 +1,6 @@
-/// Where a book's annotations fall in its text (#285): the lines of the
-/// book its marks point at, and the characters of a passage (#283).
+/// Where a book's annotations and highlights fall in its text (#285,
+/// #626): the lines of the book its marks point at, and the characters of
+/// a passage (#283).
 library;
 
 import 'package:niman/src/annotations/annotation_mark.dart';
@@ -15,7 +16,11 @@ List<BlockMark> epubBlockMarks(
   List<AnnotationMark> marks,
 ) => [
   for (final (:line, :mark) in _placed(document, marks))
-    (line: line, chars: (mark.place as EpubLocation).chars),
+    (
+      line: line,
+      chars: (mark.place as EpubLocation).chars,
+      highlight: mark.highlight,
+    ),
 ]..sort((a, b) => a.line.compareTo(b.line));
 
 /// The [marks] of [document] that point at its lines [start]..[end], the

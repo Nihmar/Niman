@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/markdown/read_parser.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -112,7 +113,13 @@ final class _OcrTextPaneState extends State<OcrTextPane> {
             selectionActions: const [],
             marks: [
               if (selected != null)
-                (line: selected.sourceLine, chars: selected.chars),
+                (
+                  line: selected.sourceLine,
+                  chars: selected.chars,
+                  // The line the scan is on: tinted as a highlighter
+                  // marks it, with no note behind it to underline.
+                  highlight: HighlightColour.yellow,
+                ),
             ],
           ),
         ),

@@ -1,5 +1,6 @@
 /// Characters of a block tinted as a highlighter marks them: the part of a
-/// book's paragraph that was annotated (#283, #285).
+/// book's paragraph that was annotated (#283, #285), or highlighted (#626),
+/// an annotation underlined besides, as a note is behind it.
 ///
 /// The ranges are offsets into the block's text as drawn — its paragraphs'
 /// text in order, one after the other — which is what a selection of the
@@ -12,20 +13,24 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 
 /// A character range of a block's text, the end excluded.
 typedef CharRange = ({int start, int end});
 
-/// A block's mark: the line it falls on, and the characters of the
-/// block's text it covers, or null for the whole block.
-typedef BlockMark = ({int line, CharRange? chars});
+/// A block's mark: the line it falls on, the characters of the block's
+/// text it covers, or null for the whole block, and a highlight's colour —
+/// null for an annotation.
+typedef BlockMark = ({int line, CharRange? chars, HighlightColour? highlight});
 
-/// Paints [ranges] of [child]'s text in [color], behind it.
+/// Paints [ranges] of [child]'s text in [color], behind it, and a dotted
+/// [underline] under them when there is one.
 final class RangeHighlight extends SingleChildRenderObjectWidget {
   /// Tints [ranges] of [child]'s text.
   const new({
     required this.ranges,
     required this.color,
+    this.underline,
     super.child,
     super.key,
   });
@@ -36,9 +41,12 @@ final class RangeHighlight extends SingleChildRenderObjectWidget {
   /// Their tint.
   final Color color;
 
+  /// The colour of a dotted line under them; null draws none.
+  final Color? underline;
+
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      RenderRangeHighlight(ranges, color);
+      RenderRangeHighlight(ranges, color, underline);
 
   @override
   void updateRenderObject(
@@ -47,14 +55,16 @@ final class RangeHighlight extends SingleChildRenderObjectWidget {
   ) {
     renderObject
       ..ranges = ranges
-      ..color = color;
+      ..color = color
+      ..underline = underline;
   }
 }
 
 /// The render object of [RangeHighlight].
 final class RenderRangeHighlight extends RenderProxyBox {
-  /// Tints [ranges] of its child's text in [color].
-  new(this._ranges, this._color);
+  /// Tints [ranges] of its child's text in [color], underlined in
+  /// [underline] when it is given.
+  new(this._ranges, this._color, [this._underline]);
 
   /// The ranges tinted.
   List<CharRange> get ranges => _ranges;
@@ -74,11 +84,21 @@ final class RenderRangeHighlight extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// The colour of the dotted line under them, or null.
+  Color? get underline => _underline;
+  Color? _underline;
+  set underline(Color? value) {
+    if (_underline == value) return;
+    _underline = value;
+    markNeedsPaint();
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     final child = this.child;
     if (child != null && _ranges.isNotEmpty) {
       final paint = Paint()..color = _color;
+      final underline = _underline;
       var base = 0;
       for (final paragraph in _paragraphsOf(child)) {
         final length = paragraph.text.toPlainText().length;
@@ -92,13 +112,17 @@ final class RenderRangeHighlight extends RenderProxyBox {
           );
           for (final box in boxes) {
             final rect = MatrixUtils.transformRect(transform, box.toRect());
+            final shifted = rect.shift(offset);
             context.canvas.drawRRect(
               RRect.fromRectAndRadius(
-                rect.shift(offset).inflate(1),
+                shifted.inflate(1),
                 const Radius.circular(2),
               ),
               paint,
             );
+            if (underline != null) {
+              paintDottedUnderline(context.canvas, shifted, underline);
+            }
           }
         }
         base += length;

@@ -18,6 +18,25 @@ const Color markHighlightDark = Color(0x4DFFD60A);
 Color markHighlightFor({required bool dark}) =>
     dark ? markHighlightDark : markHighlightLight;
 
+/// The dotted line under an annotated passage (#626): a note is behind it,
+/// which tells it from a yellow highlight. The amber of the palettes'
+/// pictures, as the mark is the same in every palette.
+Color annotationUnderlineFor({required bool dark}) =>
+    dark ? const Color(0xFFD8A56B) : const Color(0xFFB26A25);
+
+/// Paints a dotted line under [box], in [color].
+void paintDottedUnderline(Canvas canvas, Rect box, Color color) {
+  final paint = Paint()..color = color;
+  const dot = 2.0;
+  const gap = 2.0;
+  for (var x = box.left; x < box.right; x += dot + gap) {
+    canvas.drawRect(
+      Rect.fromLTWH(x, box.bottom, (box.right - x).clamp(0, dot), dot),
+      paint,
+    );
+  }
+}
+
 /// A highlight's colour (#626): the four a reader highlights a book or a
 /// PDF with. Yellow is the `==mark==` yellow.
 enum HighlightColour {
