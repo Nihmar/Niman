@@ -29,6 +29,8 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/note_load.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
+import 'package:niman/src/markdown/text_escape.dart';
 import 'package:path/path.dart' as p;
 
 /// Where an annotation was written: the note, and the offset its text
@@ -95,11 +97,93 @@ final class CompanionNotes {
             offset: link.offset,
             place: link.place,
             title: link.title,
+            highlight: link.highlight,
+            end: link.end,
+            quote: link.quote,
+            label: link.label,
           ),
         );
       }
     }
     return out;
+  }
+
+  /// Takes the highlight [mark] out of its note (#626): its quote, and the
+  /// blank line that kept it apart. Throws a [StateError] when the note no
+  /// longer has it where [mark] says — it was edited since.
+  Future<void> removeHighlight(AnnotationMark mark) =>
+      _rewrite(mark, (text, start, end) {
+        var before = text.substring(0, start);
+        var after = text.substring(end);
+        if (after.isEmpty) {
+          before = before.replaceFirst(RegExp(r'\n+$'), '\n');
+        } else if (before.isEmpty || before.endsWith('\n\n')) {
+          after = after.replaceFirst(RegExp(r'^\n+'), '');
+        }
+        return '$before$after';
+      });
+
+  /// Turns the highlight [mark] into an annotation saying [comment], where
+  /// it is: its quote gains the heading an annotation has, named [label],
+  /// and the comment under it, and its link loses its colour. Throws a
+  /// [StateError] when the note no longer has it where [mark] says.
+  Future<void> annotateHighlight(
+    AnnotationMark mark, {
+    required String label,
+    required String comment,
+  }) => _rewrite(mark, (text, start, end) {
+    final quote = text
+        .substring(start, end)
+        .replaceFirst(RegExp('&highlight=${mark.highlight!.id}\\b'), '');
+    final said = comment.trim();
+    final heading = escapeMarkdownText(label.replaceAll(RegExp(r'\s+'), ' '));
+    return '${text.substring(0, start)}## ${heading.trim()}\n\n$quote'
+        '${said.isEmpty ? '' : '\n$said\n'}${text.substring(end)}';
+  });
+
+  /// Gives the highlight [mark] the colour [colour]. Throws a [StateError]
+  /// when the note no longer has it where [mark] says.
+  Future<void> recolour(AnnotationMark mark, HighlightColour colour) =>
+      _rewrite(
+        mark,
+        (text, start, end) =>
+            text.substring(0, start) +
+            text
+                .substring(start, end)
+                .replaceFirst(
+                  RegExp('highlight=${mark.highlight!.id}\\b'),
+                  'highlight=${colour.id}',
+                ) +
+            text.substring(end),
+      );
+
+  /// Rewrites the note of the highlight [mark] with [change], given its
+  /// text and where the highlight is in it; the note's line endings are
+  /// kept.
+  Future<void> _rewrite(
+    AnnotationMark mark,
+    String Function(String text, int start, int end) change,
+  ) async {
+    final end = mark.end;
+    if (!mark.isHighlight || end == null) {
+      throw StateError('$mark is not a highlight');
+    }
+    final raw = await ops.readNote(mark.note);
+    final text = normalizedLineEndings(raw);
+    final links = await Isolate.run(() => annotationLinksIn(text));
+    final still = links.any(
+      (link) =>
+          link.highlight == mark.highlight &&
+          link.offset == mark.offset &&
+          link.end == end &&
+          link.place == mark.place,
+    );
+    if (!still) throw StateError('${mark.note} changed under $mark');
+    final changed = change(text, mark.offset, end);
+    await ops.saveNote(
+      mark.note,
+      raw.contains('\r\n') ? changed.replaceAll('\n', '\r\n') : changed,
+    );
   }
 
   /// Whether [link], written in the note at [from], resolves to the file at

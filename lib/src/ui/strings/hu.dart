@@ -3256,6 +3256,33 @@ final class HungarianStrings extends Strings {
       'A képek letöltése ide: $folder/';
 
   @override
+  String get highlightAction => 'Kiemelés';
+
+  @override
+  String get highlightMark => 'Kiemelés';
+
+  @override
+  String get highlightRemove => 'Kiemelés eltávolítása';
+
+  @override
+  String get highlightFailed => 'A kiemelést nem sikerült menteni';
+
+  @override
+  String get highlightYellow => 'Sárga';
+
+  @override
+  String get highlightGreen => 'Zöld';
+
+  @override
+  String get highlightBlue => 'Kék';
+
+  @override
+  String get highlightPink => 'Rózsaszín';
+
+  @override
+  String get highlightCopy => 'Másolás';
+
+  @override
   String get pasteAsMarkdown => 'Beillesztés Markdownként';
 
   @override

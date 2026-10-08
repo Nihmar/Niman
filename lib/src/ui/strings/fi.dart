@@ -3266,6 +3266,33 @@ final class FinnishStrings extends Strings {
       'Lataa kuvat kansioon $folder/';
 
   @override
+  String get highlightAction => 'Korosta';
+
+  @override
+  String get highlightMark => 'Korostus';
+
+  @override
+  String get highlightRemove => 'Poista korostus';
+
+  @override
+  String get highlightFailed => 'Korostusta ei voitu tallentaa';
+
+  @override
+  String get highlightYellow => 'Keltainen';
+
+  @override
+  String get highlightGreen => 'Vihreä';
+
+  @override
+  String get highlightBlue => 'Sininen';
+
+  @override
+  String get highlightPink => 'Vaaleanpunainen';
+
+  @override
+  String get highlightCopy => 'Kopioi';
+
+  @override
   String get pasteAsMarkdown => 'Liitä Markdownina';
 
   @override

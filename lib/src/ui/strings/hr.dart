@@ -3275,6 +3275,33 @@ final class CroatianStrings extends Strings {
   String captureDownloadPicturesTo(String folder) => 'Preuzmi slike u $folder/';
 
   @override
+  String get highlightAction => 'Istakni';
+
+  @override
+  String get highlightMark => 'Isticanje';
+
+  @override
+  String get highlightRemove => 'Ukloni isticanje';
+
+  @override
+  String get highlightFailed => 'Isticanje nije moguće spremiti';
+
+  @override
+  String get highlightYellow => 'Žuta';
+
+  @override
+  String get highlightGreen => 'Zelena';
+
+  @override
+  String get highlightBlue => 'Plava';
+
+  @override
+  String get highlightPink => 'Ružičasta';
+
+  @override
+  String get highlightCopy => 'Kopiraj';
+
+  @override
   String get pasteAsMarkdown => 'Zalijepi kao Markdown';
 
   @override

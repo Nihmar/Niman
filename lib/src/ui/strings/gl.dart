@@ -3270,6 +3270,33 @@ final class GalicianStrings extends Strings {
       'Descargar as imaxes en $folder/';
 
   @override
+  String get highlightAction => 'Destacar';
+
+  @override
+  String get highlightMark => 'Destacado';
+
+  @override
+  String get highlightRemove => 'Quitar o destacado';
+
+  @override
+  String get highlightFailed => 'Non se puido gardar o destacado';
+
+  @override
+  String get highlightYellow => 'Amarelo';
+
+  @override
+  String get highlightGreen => 'Verde';
+
+  @override
+  String get highlightBlue => 'Azul';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Copiar';
+
+  @override
   String get pasteAsMarkdown => 'Pegar como Markdown';
 
   @override

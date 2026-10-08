@@ -2875,6 +2875,33 @@ final class ChineseStrings extends Strings {
   String captureDownloadPicturesTo(String folder) => '将图片下载到 $folder/';
 
   @override
+  String get highlightAction => '高亮';
+
+  @override
+  String get highlightMark => '高亮';
+
+  @override
+  String get highlightRemove => '移除高亮';
+
+  @override
+  String get highlightFailed => '无法保存高亮';
+
+  @override
+  String get highlightYellow => '黄色';
+
+  @override
+  String get highlightGreen => '绿色';
+
+  @override
+  String get highlightBlue => '蓝色';
+
+  @override
+  String get highlightPink => '粉色';
+
+  @override
+  String get highlightCopy => '复制';
+
+  @override
   String get pasteAsMarkdown => '粘贴为 Markdown';
 
   @override

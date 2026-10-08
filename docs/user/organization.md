@@ -279,12 +279,39 @@ so you can go back and forth between the file and the note. The note's
 outline is the list of its annotations.
 
 The file shows where it was annotated: in a book, the annotated
-paragraph is tinted as a highlighter marks it; in a PDF, the passage is,
-and a page annotated as a whole wears a note button at its top right
-corner. **Tap a mark** to open its annotation in the companion note;
-where several annotate the same place, a sheet asks which. The marks are
-read from the companion notes: edit or delete an annotation there, and
-the file follows.
+paragraph is tinted as a highlighter marks it, with a dotted underline —
+a note is behind it; in a PDF, the passage is, and a page annotated as a
+whole wears a note button at its top right corner. **Tap a mark** to open
+its annotation in the companion note; where several mark the same place,
+a sheet asks which. The marks are read from the companion notes: edit or
+delete an annotation there, and the file follows.
+
+### Highlighting a PDF or a book
+
+To mark a passage without writing about it, **select it** and pick
+**Highlight** in its menu — first in a book's menu, beside Annotate in a
+PDF's. It is drawn at once in the colour last chosen, yellow to start;
+there is nothing to fill in.
+
+**Tap a highlight** for its menu: its four colours — yellow, green,
+blue, pink, the current one marked — **Annotate**, which asks for a
+comment and turns it into an annotation where it is, **Copy**, **Copy
+link to this place**, and **Remove highlight**. A colour picked is the
+one the next highlight takes. Where a highlight and an annotation cover
+the same words, the annotation is drawn over it and a tap asks which.
+
+A highlight is kept in the companion note too, after the annotations
+written before it: the passage quoted and its link, no heading and no
+comment, its colour in the link —
+
+```markdown
+> The spice must flow.
+> — [[Books/Dune.pdf#page=34&chars=120-180&highlight=green|Dune, p. 34]]
+```
+
+— so it syncs with the note, and deleting the quote there removes the
+highlight from the file. The colour last chosen is the library's
+`highlightColour` setting (see [settings](settings.md)).
 
 A companion is a plain note that names its file in its frontmatter,
 `annotates: "[[Books/Dune.pdf]]"` — not by its name or its folder: it can

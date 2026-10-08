@@ -3270,6 +3270,33 @@ final class ItalianStrings extends Strings {
       'Scarica le immagini in $folder/';
 
   @override
+  String get highlightAction => 'Evidenzia';
+
+  @override
+  String get highlightMark => 'Evidenziazione';
+
+  @override
+  String get highlightRemove => 'Rimuovi evidenziazione';
+
+  @override
+  String get highlightFailed => "Impossibile salvare l'evidenziazione";
+
+  @override
+  String get highlightYellow => 'Giallo';
+
+  @override
+  String get highlightGreen => 'Verde';
+
+  @override
+  String get highlightBlue => 'Blu';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Copia';
+
+  @override
   String get pasteAsMarkdown => 'Incolla come Markdown';
 
   @override

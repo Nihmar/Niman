@@ -1,10 +1,16 @@
 // Annotating a PDF or a book from its pane (#284): the comment asked over
 // the file, the companion written, the reader told and offered the note,
-// and nothing written when they cancel.
+// and nothing written when they cancel. A passage highlighted (#626) in
+// the colour last chosen, recoloured and removed.
+//
+// A link is written in pieces, which run on without spaces.
+// ignore_for_file: missing_whitespace_between_adjacent_strings
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/annotations/annotation_mark.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -95,5 +101,56 @@ void main() {
     expect(session.contentOf(note), isNull);
     expect(written, 0);
     expect(find.text(AppStrings.annotationSaved), findsNothing);
+  });
+
+  group('highlights (#626)', () {
+    ShellAnnotationFlow flow() => ShellAnnotationFlow(
+      controller: session,
+      unsaved: unsaved,
+      linkType: () => LinkType.wikilink,
+      onWritten: () => written++,
+      onOpen: (path, offset) => opened.add((path, offset)),
+    );
+
+    test('a passage is highlighted in the colour last chosen', () async {
+      session.highlightColourId = 'blue';
+      await flow().highlight(annotation);
+      expect(
+        session.contentOf(note),
+        endsWith(
+          '> The spice must flow.\n'
+          '> — [[Books/Dune.pdf#page=34&chars=5-25&highlight=blue'
+          '|Dune, p. 34]]\n',
+        ),
+      );
+      expect(written, 1);
+    });
+
+    test('a colour chosen is the one the next highlight takes', () async {
+      // The highlight as its note holds it: the mark `marksOf` gives, read
+      // here from the text, the fake keeping no index of frontmatter.
+      AnnotationMark highlighted() {
+        final link = annotationLinksIn(session.contentOf(note)!).single;
+        return AnnotationMark(
+          note: note,
+          offset: link.offset,
+          place: link.place,
+          highlight: link.highlight,
+          end: link.end,
+          quote: link.quote,
+          label: link.label,
+        );
+      }
+
+      final shell = flow();
+      await shell.highlight(annotation);
+      expect(highlighted().highlight, HighlightColour.yellow);
+      await shell.recolour(highlighted(), HighlightColour.pink);
+      expect(session.highlightColourId, 'pink');
+      expect(highlighted().highlight, HighlightColour.pink);
+      await shell.removeHighlight(highlighted());
+      expect(session.contentOf(note), isNot(contains('The spice')));
+      expect(written, 3);
+    });
   });
 }

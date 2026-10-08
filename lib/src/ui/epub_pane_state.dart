@@ -27,6 +27,7 @@ import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/epub_places.dart';
 import 'package:niman/src/ui/epub_theme.dart';
 import 'package:niman/src/ui/file_marks.dart';
+import 'package:niman/src/ui/highlight_menu.dart';
 import 'package:niman/src/ui/place_link_button.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -225,9 +226,18 @@ final class EpubPaneState extends State<EpubPane> {
   void _openMarks(EpubDocument document, int start, int end) {
     final source = widget.marks;
     final marks = _marks?.marks;
-    if (source == null || marks == null) return;
+    final key = widget.positions?.keyOf(widget.path);
+    if (source == null || marks == null || key == null) return;
     final here = epubMarksBetween(document, marks, start, end);
-    unawaited(openAnnotationMarks(context, here, source));
+    unawaited(
+      openAnnotationMarks(
+        context,
+        here,
+        source,
+        path: key,
+        linkType: widget.linkType,
+      ),
+    );
   }
 
   /// The book's places, as links and annotations name them.
@@ -242,9 +252,20 @@ final class EpubPaneState extends State<EpubPane> {
     if (annotation != null) widget.onAnnotate?.call(annotation);
   }
 
-  /// What a selection of the book offers (#283): annotating it and a link
-  /// to it, in a library; copying it, anywhere.
+  /// What a selection of the book offers (#283): highlighting it (#626) —
+  /// first, where a phone keeps it in sight — annotating it and a link to
+  /// it, in a library; copying it, anywhere.
   List<ReadSelectionAction> _selectionActions() => [
+    if (widget.positions != null && widget.marks != null)
+      (
+        label: AppStrings.highlightAction,
+        onPressed: (selection) {
+          final source = widget.marks;
+          final annotation = _places.selectionAnnotation(selection);
+          if (source == null || annotation == null) return;
+          unawaited(highlightPassage(context, source, annotation));
+        },
+      ),
     if (widget.positions != null && widget.onAnnotate != null)
       (
         label: AppStrings.annotateAction,

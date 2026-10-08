@@ -3354,6 +3354,33 @@ final class GreekStrings extends Strings {
       'Λήψη των εικόνων στο $folder/';
 
   @override
+  String get highlightAction => 'Επισήμανε';
+
+  @override
+  String get highlightMark => 'Επισήμανση';
+
+  @override
+  String get highlightRemove => 'Αφαίρεση επισήμανσης';
+
+  @override
+  String get highlightFailed => 'Δεν ήταν δυνατή η αποθήκευση της επισήμανσης';
+
+  @override
+  String get highlightYellow => 'Κίτρινο';
+
+  @override
+  String get highlightGreen => 'Πράσινο';
+
+  @override
+  String get highlightBlue => 'Μπλε';
+
+  @override
+  String get highlightPink => 'Ροζ';
+
+  @override
+  String get highlightCopy => 'Αντιγραφή';
+
+  @override
   String get pasteAsMarkdown => 'Επικόλληση ως Markdown';
 
   @override

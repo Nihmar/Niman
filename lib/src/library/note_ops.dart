@@ -230,6 +230,16 @@ final class NoteOps implements NoteOperations {
     (c) => c.copyWith(annotationsFolder: cleanAnnotationsFolder(folder)),
   );
 
+  /// The colour a passage is highlighted in, the one last chosen (#626).
+  @override
+  Future<String> get highlightColour async =>
+      (await config.config).highlightColour;
+
+  /// Keeps [colour] as the one to highlight in.
+  @override
+  Future<void> setHighlightColour(String colour) =>
+      config.update((c) => c.copyWith(highlightColour: colour));
+
   /// The user-chosen quick note, or null for the default.
   @override
   Future<String?> get quickNotePath async =>

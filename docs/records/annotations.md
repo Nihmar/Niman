@@ -102,3 +102,43 @@ real index and `NoteOps`), `visible_text_test.dart`,
 `test/widget/annotation_sheet_test.dart`, `shell_annotation_flow_test.dart`,
 the `#284` group of `epub_pane_test.dart`. The PDF view has no widget test:
 pdfium does not load under `flutter test`.
+
+## Highlights (#626)
+
+Agreed against the mockups in
+[docs/design/highlights](../design/highlights/README.md). A highlight is an
+annotation with a colour and nothing to say, kept in the same companion:
+
+- **The model.** `HighlightColour` (`markdown/render/mark_highlight.dart`,
+  beside the `==mark==` yellow it starts from) names four colours by id.
+  `Annotation.highlight` writes the passage and its link alone, no heading,
+  the colour as a key of the link's fragment, `&highlight=green`, which
+  `BookLocation.fromFragment` passes over as it passes over any key it does
+  not know — so a highlight's link opens its place, and every link written
+  before is an annotation still. `annotationLinksIn` gives a highlight's
+  link its quote (the run of `>` lines around it, start and end, the
+  passage unescaped) instead of the heading above it, and every link its
+  label. `CompanionNotes` removes a highlight (its quote and the blank line
+  keeping it apart), recolours it in its link, and turns it into an
+  annotation in place (`annotateHighlight`: the heading added above the
+  quote, the comment below, the colour taken off the link) — each after
+  reading the note again and finding the highlight where the mark says,
+  refusing otherwise, a CRLF note kept CRLF.
+- **The colour last chosen** is the library's `highlightColour` setting.
+- **Drawing.** A book's `MarkedBlock` layers one `RangeHighlight` per
+  colour, the annotations innermost so they paint last, in yellow with a
+  dotted underline (`annotationUnderlineFor`); `PdfMarkLayer` draws
+  highlights first and hands a tap every mark whose rectangles overlap.
+- **The surface.** `AnnotationMarkSource` grew `highlight`, `recolour`,
+  `removeHighlight` and `annotateHighlight`; `ShellAnnotationFlow` runs
+  each as an annotation is written (open notes saved first, the note on
+  screen re-read after). A book's selection offers **Highlight** first, a
+  PDF's beside Annotate; `openAnnotationMarks` opens a highlight's menu
+  (`highlight_menu.dart`) — in the app's action sheet rather than the
+  mockups' popover, as every menu of the app opens that way.
+
+Tests: the `#626` groups of `annotation_test.dart`,
+`annotation_mark_test.dart`, `companion_notes_test.dart`,
+`range_highlight_test.dart`, `epub_pane_test.dart` and
+`shell_annotation_flow_test.dart`, and the setting's in
+`library_config_test.dart`.

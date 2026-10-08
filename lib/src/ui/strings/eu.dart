@@ -3280,6 +3280,33 @@ final class BasqueStrings extends Strings {
       'Deskargatu irudiak $folder/ karpetara';
 
   @override
+  String get highlightAction => 'Nabarmendu';
+
+  @override
+  String get highlightMark => 'Nabarmentzea';
+
+  @override
+  String get highlightRemove => 'Kendu nabarmentzea';
+
+  @override
+  String get highlightFailed => 'Ezin izan da nabarmentzea gorde';
+
+  @override
+  String get highlightYellow => 'Horia';
+
+  @override
+  String get highlightGreen => 'Berdea';
+
+  @override
+  String get highlightBlue => 'Urdina';
+
+  @override
+  String get highlightPink => 'Arrosa';
+
+  @override
+  String get highlightCopy => 'Kopiatu';
+
+  @override
   String get pasteAsMarkdown => 'Itsatsi Markdown gisa';
 
   @override

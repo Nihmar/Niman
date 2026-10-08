@@ -3246,6 +3246,33 @@ final class CzechStrings extends Strings {
       'Stáhnout obrázky do $folder/';
 
   @override
+  String get highlightAction => 'Zvýraznit';
+
+  @override
+  String get highlightMark => 'Zvýraznění';
+
+  @override
+  String get highlightRemove => 'Odebrat zvýraznění';
+
+  @override
+  String get highlightFailed => 'Zvýraznění se nepodařilo uložit';
+
+  @override
+  String get highlightYellow => 'Žlutá';
+
+  @override
+  String get highlightGreen => 'Zelená';
+
+  @override
+  String get highlightBlue => 'Modrá';
+
+  @override
+  String get highlightPink => 'Růžová';
+
+  @override
+  String get highlightCopy => 'Kopírovat';
+
+  @override
   String get pasteAsMarkdown => 'Vložit jako Markdown';
 
   @override

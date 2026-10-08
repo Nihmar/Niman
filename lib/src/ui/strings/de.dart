@@ -3321,6 +3321,34 @@ final class GermanStrings extends Strings {
       'Die Bilder nach $folder/ herunterladen';
 
   @override
+  String get highlightAction => 'Markieren';
+
+  @override
+  String get highlightMark => 'Markierung';
+
+  @override
+  String get highlightRemove => 'Markierung entfernen';
+
+  @override
+  String get highlightFailed =>
+      'Die Markierung konnte nicht gespeichert werden';
+
+  @override
+  String get highlightYellow => 'Gelb';
+
+  @override
+  String get highlightGreen => 'Grün';
+
+  @override
+  String get highlightBlue => 'Blau';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Kopieren';
+
+  @override
   String get pasteAsMarkdown => 'Als Markdown einfügen';
 
   @override

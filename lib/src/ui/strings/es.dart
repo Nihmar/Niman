@@ -3297,6 +3297,33 @@ final class SpanishStrings extends Strings {
       'Descargar las imágenes en $folder/';
 
   @override
+  String get highlightAction => 'Resaltar';
+
+  @override
+  String get highlightMark => 'Resaltado';
+
+  @override
+  String get highlightRemove => 'Quitar resaltado';
+
+  @override
+  String get highlightFailed => 'No se pudo guardar el resaltado';
+
+  @override
+  String get highlightYellow => 'Amarillo';
+
+  @override
+  String get highlightGreen => 'Verde';
+
+  @override
+  String get highlightBlue => 'Azul';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Copiar';
+
+  @override
   String get pasteAsMarkdown => 'Pegar como Markdown';
 
   @override

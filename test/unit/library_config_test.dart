@@ -11,6 +11,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         TreeSort,
         defaultAnnotationsFolder,
         defaultAttachmentsFolder,
+        defaultHighlightColour,
         defaultListFolder;
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:path/path.dart' as p;
@@ -591,6 +592,20 @@ void main() {
       expect(
         LibraryConfig.fromJsonMap(config.toJsonMap()).annotationsFolder,
         'R',
+      );
+    });
+
+    test('the highlight colour round-trips, yellow to start (#626)', () {
+      expect(LibraryConfig.defaults.highlightColour, 'yellow');
+      expect(
+        LibraryConfig.fromJsonMap(const {'highlightColour': '  '})
+            .highlightColour,
+        defaultHighlightColour,
+      );
+      final config = LibraryConfig.defaults.copyWith(highlightColour: 'green');
+      expect(
+        LibraryConfig.fromJsonMap(config.toJsonMap()).highlightColour,
+        'green',
       );
     });
 

@@ -110,6 +110,10 @@ Wikilinks and Markdown links alike:
   page's text, or in the text of the book's paragraph on that line. An
   annotation's link carries it, for the file to mark just the passage;
   following it goes to the page or the paragraph.
+- `&highlight=green` makes the link a highlight's, in that colour
+  (`yellow`, `green`, `blue`, `pink`; see
+  [organization](organization.md#highlighting-a-pdf-or-a-book)); following
+  it goes to the place as any other does.
 
 You rarely write one by hand: the **link** button on the row under a PDF
 or a book copies a link to the place you are reading — the page, or the

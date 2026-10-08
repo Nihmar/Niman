@@ -3300,6 +3300,33 @@ final class RomanianStrings extends Strings {
       'Descarcă imaginile în $folder/';
 
   @override
+  String get highlightAction => 'Evidențiază';
+
+  @override
+  String get highlightMark => 'Evidențiere';
+
+  @override
+  String get highlightRemove => 'Elimină evidențierea';
+
+  @override
+  String get highlightFailed => 'Evidențierea nu a putut fi salvată';
+
+  @override
+  String get highlightYellow => 'Galben';
+
+  @override
+  String get highlightGreen => 'Verde';
+
+  @override
+  String get highlightBlue => 'Albastru';
+
+  @override
+  String get highlightPink => 'Roz';
+
+  @override
+  String get highlightCopy => 'Copiază';
+
+  @override
   String get pasteAsMarkdown => 'Lipește ca Markdown';
 
   @override

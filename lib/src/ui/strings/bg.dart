@@ -3262,6 +3262,33 @@ final class BulgarianStrings extends Strings {
       'Изтегляне на изображенията в $folder/';
 
   @override
+  String get highlightAction => 'Маркирай';
+
+  @override
+  String get highlightMark => 'Маркиране';
+
+  @override
+  String get highlightRemove => 'Премахни маркирането';
+
+  @override
+  String get highlightFailed => 'Маркирането не можа да бъде запазено';
+
+  @override
+  String get highlightYellow => 'Жълто';
+
+  @override
+  String get highlightGreen => 'Зелено';
+
+  @override
+  String get highlightBlue => 'Синьо';
+
+  @override
+  String get highlightPink => 'Розово';
+
+  @override
+  String get highlightCopy => 'Копирай';
+
+  @override
   String get pasteAsMarkdown => 'Поставяне като Markdown';
 
   @override

@@ -3271,6 +3271,33 @@ final class AlbanianStrings extends Strings {
       'Shkarko figurat te $folder/';
 
   @override
+  String get highlightAction => 'Thekso';
+
+  @override
+  String get highlightMark => 'Theksim';
+
+  @override
+  String get highlightRemove => 'Hiq theksimin';
+
+  @override
+  String get highlightFailed => 'Theksimi nuk mund të ruhej';
+
+  @override
+  String get highlightYellow => 'E verdhë';
+
+  @override
+  String get highlightGreen => 'E gjelbër';
+
+  @override
+  String get highlightBlue => 'Blu';
+
+  @override
+  String get highlightPink => 'Rozë';
+
+  @override
+  String get highlightCopy => 'Kopjo';
+
+  @override
   String get pasteAsMarkdown => 'Ngjit si Markdown';
 
   @override

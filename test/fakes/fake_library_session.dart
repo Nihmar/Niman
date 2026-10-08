@@ -1100,6 +1100,17 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _annotationsFolder = folder;
   }
 
+  /// The colour last highlighted in (#626).
+  String highlightColourId = defaultHighlightColour;
+
+  @override
+  Future<String> get highlightColour async => highlightColourId;
+
+  @override
+  Future<void> setHighlightColour(String colour) async {
+    highlightColourId = colour;
+  }
+
   /// Templates come from the fake's own rows, so a test that creates a
   /// note under the folder has a template.
   @override

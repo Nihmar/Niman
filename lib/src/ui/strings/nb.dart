@@ -3233,6 +3233,33 @@ final class NorwegianStrings extends Strings {
       'Last ned bildene til $folder/';
 
   @override
+  String get highlightAction => 'Uthev';
+
+  @override
+  String get highlightMark => 'Utheving';
+
+  @override
+  String get highlightRemove => 'Fjern utheving';
+
+  @override
+  String get highlightFailed => 'Uthevingen kunne ikke lagres';
+
+  @override
+  String get highlightYellow => 'Gul';
+
+  @override
+  String get highlightGreen => 'Grønn';
+
+  @override
+  String get highlightBlue => 'Blå';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Kopier';
+
+  @override
   String get pasteAsMarkdown => 'Lim inn som Markdown';
 
   @override

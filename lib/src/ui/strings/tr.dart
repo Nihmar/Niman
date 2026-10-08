@@ -3211,6 +3211,33 @@ final class TurkishStrings extends Strings {
       'Görselleri $folder/ klasörüne indir';
 
   @override
+  String get highlightAction => 'Vurgula';
+
+  @override
+  String get highlightMark => 'Vurgu';
+
+  @override
+  String get highlightRemove => 'Vurguyu kaldır';
+
+  @override
+  String get highlightFailed => 'Vurgu kaydedilemedi';
+
+  @override
+  String get highlightYellow => 'Sarı';
+
+  @override
+  String get highlightGreen => 'Yeşil';
+
+  @override
+  String get highlightBlue => 'Mavi';
+
+  @override
+  String get highlightPink => 'Pembe';
+
+  @override
+  String get highlightCopy => 'Kopyala';
+
+  @override
   String get pasteAsMarkdown => 'Markdown olarak yapıştır';
 
   @override
