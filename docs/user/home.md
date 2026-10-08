@@ -82,6 +82,11 @@ trash mends it. A folder that is gone is simply made again.
 To set the buttons, **Edit home** and the tile's ⚙: drag to reorder, the
 bin to remove, a tap to edit one, *Add action* for another.
 
+Every action of the Home on show is also in the [command
+palette](shortcuts.md): type its name, and *Home: Meeting…* runs it from
+anywhere, the Home's tab hidden or not. An action has no keyboard
+shortcut of its own.
+
 ## Editing the Home
 
 On a wide window, **Edit home** at the top right turns the grid into its
