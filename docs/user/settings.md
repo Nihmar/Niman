@@ -109,7 +109,7 @@ leave the file at its next write.
 | `epubTheme` | none (= the app's) | The theme the EPUB books wear: a theme id, a shipped one or `custom:…` |
 | `epubBrightness` | none (= the app's) | The books' brightness: `system`, `day` or `night` |
 | `epubFont` | `literata` | The books' face: `literata`, `serif`, `sans` or `mono` |
-| `epubTextScale` | 1.0 | The books' text size (0.8–1.8) |
+| `epubTextScale` | 1.0 | The books' text size (0.8–1.8); also set by a pinch over a book and, with a book on screen, by the zoom keys and commands |
 
 The four folder keys — `listNoteFolder`, `templateFolder`,
 `attachmentsFolder`, `annotationsFolder` — are paths under the library

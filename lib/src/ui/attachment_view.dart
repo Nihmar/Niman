@@ -47,6 +47,9 @@ bool isShownAttachment(String path) {
       pictureExtensions.contains(extension);
 }
 
+/// Whether the file at [path] is a book, read by [EpubPane].
+bool isBook(String path) => p.extension(path).toLowerCase() == '.epub';
+
 /// The attachment at [path], an absolute path, in the note pane.
 final class AttachmentView extends StatelessWidget {
   /// Shows the file at [path].
@@ -55,6 +58,7 @@ final class AttachmentView extends StatelessWidget {
     this.launcher = const OsLauncher(),
     this.column = NoteColumn.off,
     this.onEditEpubLook,
+    this.onEpubTextScale,
     this.positions,
     this.anchor,
     this.reloadToken = 0,
@@ -77,6 +81,10 @@ final class AttachmentView extends StatelessWidget {
 
   /// Opens the sheet that sets how the books look ([EpubPane.onEditLook]).
   final VoidCallback? onEditEpubLook;
+
+  /// Keeps the books' text size a pinch or a zoom key reached
+  /// ([EpubPane.onTextScale]).
+  final ValueChanged<double>? onEpubTextScale;
 
   /// Where the library keeps where each book and PDF was left; null keeps
   /// none.
@@ -109,17 +117,16 @@ final class AttachmentView extends StatelessWidget {
 
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
-  bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
-
   @override
   Widget build(BuildContext context) {
     // A book reads on the note's own ground, and brings its own row.
-    if (_isEpub) {
+    if (isBook(path)) {
       return EpubPane(
         path: path,
         launcher: launcher,
         column: column,
         onEditLook: onEditEpubLook,
+        onTextScale: onEpubTextScale,
         positions: positions,
         anchor: anchor,
         reloadToken: reloadToken,

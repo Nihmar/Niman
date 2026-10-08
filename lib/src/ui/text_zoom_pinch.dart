@@ -1,5 +1,7 @@
-/// The note's text zoomed by a pinch (#538): two fingers spread or
-/// brought together over the note, or a trackpad's pinch on the desktop.
+/// Text zoomed by a pinch (#538): two fingers spread or brought together
+/// over a note or a book, or a trackpad's pinch on the desktop. Which size
+/// it is, and where it is kept, is the caller's: the note text size over a
+/// note, the books' over a book.
 ///
 /// Like the palette's two-finger swipe (`PaletteSwipe`), it watches the
 /// raw pointers and claims no gesture in the arena, so the scroll and the
@@ -12,25 +14,30 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 
-/// Zooms the note's text as two fingers pinch over [child].
-final class NoteZoomPinch extends StatefulWidget {
-  /// Watches [child]; [scale] is the note's text size the pinch starts
+/// Zooms the text of [child] as two fingers pinch over it.
+final class TextZoomPinch extends StatefulWidget {
+  /// Watches [child]; [scale] is the text size the pinch starts
   /// from, [onZoom] is told each step and, when the fingers lift, where it
   /// ends.
   const new({
     required this.scale,
     required this.onZoom,
     required this.child,
+    this.enabled = true,
     super.key,
   });
 
-  /// The note's text size now.
+  /// Whether a pinch zooms: off over a pane whose text zooms by a pinch
+  /// of its own, a book in the note pane, so one pinch is one zoom.
+  final bool enabled;
+
+  /// The text size now.
   final double Function() scale;
 
   /// The size the pinch has reached; `done` when the fingers are lifted.
   final void Function(double scale, {required bool done}) onZoom;
 
-  /// The note.
+  /// The note or the book.
   final Widget child;
 
   /// How much the fingers' distance has to change before it is a pinch:
@@ -45,10 +52,10 @@ final class NoteZoomPinch extends StatefulWidget {
       normalizeTextScale((scale / step).round() * step);
 
   @override
-  State<NoteZoomPinch> createState() => _NoteZoomPinchState();
+  State<TextZoomPinch> createState() => _TextZoomPinchState();
 }
 
-final class _NoteZoomPinchState extends State<NoteZoomPinch> {
+final class _TextZoomPinchState extends State<TextZoomPinch> {
   final Map<int, Offset> _at = {};
   double? _startDistance;
   double _startScale = 1;
@@ -80,7 +87,7 @@ final class _NoteZoomPinchState extends State<NoteZoomPinch> {
     final start = _startDistance;
     if (_at.length != 2 || start == null || start == 0) return;
     final ratio = _distance / start;
-    if (!_pinching && (ratio - 1).abs() < NoteZoomPinch.threshold) return;
+    if (!_pinching && (ratio - 1).abs() < TextZoomPinch.threshold) return;
     _pinching = true;
     _show(_startScale * ratio);
   }
@@ -93,8 +100,8 @@ final class _NoteZoomPinchState extends State<NoteZoomPinch> {
 
   /// A step the size reached, told once.
   void _show(double scale) {
-    final snapped = NoteZoomPinch.snap(scale);
-    if (snapped == _shown) return;
+    final snapped = TextZoomPinch.snap(scale);
+    if (!widget.enabled || snapped == _shown) return;
     _shown = snapped;
     widget.onZoom(snapped, done: false);
   }

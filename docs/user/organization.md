@@ -231,6 +231,14 @@ library.
   choice applies at once to every book of the library, and is kept per
   library on this device, like the note text size. A fresh library reads
   its books in Literata, in the app's colours.
+- **Zooming a book's text** works as it does in a note, on the same
+  **Text size** the sheet sets: pinch the book with two fingers (or a
+  laptop's trackpad) — spread them to zoom in, bring them together to
+  zoom out — or press `Ctrl/⌘+=`, `Ctrl/⌘+-` and `Ctrl/⌘+0` (back to the
+  normal size), in full screen too; the palette's *Zoom in*, *Zoom out*
+  and *Reset zoom* do the same while a book is on screen. The size is
+  kept like a pick in the sheet, and stays between 80% and 180%; a note's
+  own text size is left alone.
 - **Full screen**: the full-screen button on the book's row reads it over
   the whole screen, its row still under it — the window goes full screen
   on the desktop, and the system bars step aside on Android. The same
