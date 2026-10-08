@@ -62,6 +62,7 @@ final class AttachmentView extends StatelessWidget {
     this.onAnnotate,
     this.marks,
     this.ocr,
+    this.fullScreen,
     super.key,
   });
 
@@ -103,6 +104,9 @@ final class AttachmentView extends StatelessWidget {
   /// Recognizes a PDF's or a picture's text (#594); null offers none.
   final OcrFileActions? ocr;
 
+  /// Which book is read in full screen ([EpubPane.fullScreen]).
+  final ValueNotifier<Object?>? fullScreen;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
   bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
@@ -122,6 +126,7 @@ final class AttachmentView extends StatelessWidget {
         linkType: linkType,
         onAnnotate: onAnnotate,
         marks: marks,
+        fullScreen: fullScreen,
       );
     }
     final theme = Theme.of(context);

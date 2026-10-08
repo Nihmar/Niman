@@ -8,7 +8,8 @@
 /// of contents is a button on that row too. It opens where it was left
 /// ([ReadingPositions]), or where the link it was opened by points
 /// ([BookLocation.fromFragment]). Its paragraphs are annotated in a
-/// companion note (#284), and marked where they were (#285).
+/// companion note (#284), and marked where they were (#285). It can be
+/// read over the whole screen (#621).
 library;
 
 import 'dart:async';
@@ -48,6 +49,7 @@ final class EpubPane extends StatefulWidget {
     this.linkType = LinkType.wikilink,
     this.onAnnotate,
     this.marks,
+    this.fullScreen,
     super.key,
   });
 
@@ -92,6 +94,11 @@ final class EpubPane extends StatefulWidget {
   /// companion note points at are marked, and a tap opens the note. Null
   /// marks nothing.
   final AnnotationMarkSource? marks;
+
+  /// Which pane reads its book over the whole screen (#621): its state, or
+  /// null. The shell holds it, to take the window there and to leave on
+  /// Back; null offers no full screen.
+  final ValueNotifier<Object?>? fullScreen;
 
   @override
   State<EpubPane> createState() => EpubPaneState();

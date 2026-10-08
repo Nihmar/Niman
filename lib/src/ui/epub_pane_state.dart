@@ -61,16 +61,53 @@ final class EpubPaneState extends State<EpubPane> {
   /// it does not move the reader.
   String? _anchorTaken;
 
+  /// The book over the whole window (#621), drawn in the root overlay. The
+  /// pane moves there under [_paneKey], so it keeps its place and state.
+  final OverlayPortalController _portal = OverlayPortalController();
+  final GlobalKey _paneKey = GlobalKey();
+  final FocusNode _fullScreenFocus = FocusNode(debugLabel: 'epub full screen');
+
+  /// Whether the book is read in full screen.
+  bool get fullScreen => _fullScreen;
+  bool _fullScreen = false;
+
   @override
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
+    widget.fullScreen?.addListener(_onFullScreen);
     unawaited(_open());
+  }
+
+  /// Follows the shell's word on who reads in full screen: this pane's own
+  /// button, or the shell's Back.
+  void _onFullScreen() {
+    final on = widget.fullScreen?.value == this;
+    if (on == _fullScreen) return;
+    setState(() {
+      _fullScreen = on;
+      on ? _portal.show() : _portal.hide();
+    });
+    if (on) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _fullScreen) _fullScreenFocus.requestFocus();
+      });
+    }
+  }
+
+  void _toggleFullScreen() {
+    final owner = widget.fullScreen;
+    if (owner != null) owner.value = owner.value == this ? null : this;
   }
 
   @override
   void didUpdateWidget(EpubPane oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.fullScreen != widget.fullScreen) {
+      oldWidget.fullScreen?.removeListener(_onFullScreen);
+      widget.fullScreen?.addListener(_onFullScreen);
+      _onFullScreen();
+    }
     if (oldWidget.path == widget.path) {
       final anchor = widget.anchor;
       final document = _document;
@@ -95,6 +132,10 @@ final class EpubPaneState extends State<EpubPane> {
 
   @override
   void dispose() {
+    final owner = widget.fullScreen?..removeListener(_onFullScreen);
+    // A book closed in full screen takes the window out with it.
+    if (owner?.value == this) owner!.value = null;
+    _fullScreenFocus.dispose();
     _marks?.dispose();
     _reading.flush();
     _scroll.dispose();
@@ -223,14 +264,35 @@ final class EpubPaneState extends State<EpubPane> {
   ];
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: EpubLooks.revision,
-    // The whole pane wears the book's look, its row included.
-    builder: (context, _) => Theme(
-      data: epubThemeOf(context),
-      child: Builder(builder: _pane),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final pane = KeyedSubtree(
+      key: _paneKey,
+      child: ListenableBuilder(
+        listenable: EpubLooks.revision,
+        // The whole pane wears the book's look, its row included.
+        builder: (context, _) => Theme(
+          data: epubThemeOf(context),
+          child: Builder(builder: _pane),
+        ),
+      ),
+    );
+    return OverlayPortal(
+      controller: _portal,
+      overlayLocation: OverlayChildLocation.rootOverlay,
+      overlayChildBuilder: (context) => Positioned.fill(
+        // Esc leaves, as it leaves Zen.
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            DismissIntent: CallbackAction<DismissIntent>(
+              onInvoke: (_) => _toggleFullScreen(),
+            ),
+          },
+          child: Focus(focusNode: _fullScreenFocus, child: pane),
+        ),
+      ),
+      child: _fullScreen ? const SizedBox.expand() : pane,
+    );
+  }
 
   Widget _pane(BuildContext context) {
     final document = _document;
@@ -263,6 +325,8 @@ final class EpubPaneState extends State<EpubPane> {
                     widget.onAnnotate == null
                 ? null
                 : () => _annotate(_places.annotationHere()),
+            fullScreen: _fullScreen,
+            onFullScreen: widget.fullScreen == null ? null : _toggleFullScreen,
           ),
         ],
       ),

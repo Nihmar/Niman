@@ -231,6 +231,11 @@ library.
   choice applies at once to every book of the library, and is kept per
   library on this device, like the note text size. A fresh library reads
   its books in Literata, in the app's colours.
+- **Full screen**: the full-screen button on the book's row reads it over
+  the whole screen, its row still under it — the window goes full screen
+  on the desktop, and the system bars step aside on Android. The same
+  button, **Esc** on the desktop or **Back** on Android leaves it, the
+  book still where you were reading.
 - **Anything else** (an audio clip, an archive) does not go
   in the editor: the pane says the file is not a text note, and on
   desktop offers **Open in default app** right there.
