@@ -46,6 +46,7 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
   @override
   void initState() {
     super.initState();
+    _live++;
     _place.addListener(_placeMoved);
   }
 
@@ -62,6 +63,10 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
 
   @override
   void dispose() {
+    // The view rebuilt in the other layout mounts before this one goes, so
+    // the count drops to nothing only when the slides left the screen: a
+    // phone turned elsewhere must not present them on their return.
+    if (--_live == 0) _held = null;
     _place.removeListener(_placeMoved);
     _pages.dispose();
     _strip.dispose();
@@ -95,6 +100,7 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
   // ponytail: one orientation for the whole run, so a slide view rebuilt in
   // the other layout as the phone turns still knows how it was held.
   static Orientation? _held;
+  static int _live = 0;
 
   void _present({bool presenter = false, bool byTurning = false}) => unawaited(
     presentSlides(
