@@ -106,13 +106,22 @@ void main() {
       expect(layout['a']!.cell, (x: 0, y: 1, w: 2, h: 1));
     });
 
-    test('tiles rise into the gap a removed one left', () {
+    test('a tile keeps the row it was put on, gap or not', () {
       final layout = grid({
         'a': (x: 0, y: 2, w: 1, h: 1),
         'b': (x: 1, y: 5, w: 1, h: 2),
       }).settled();
-      expect(layout['a']!.cell.y, 0);
-      expect(layout['b']!.cell.y, 0);
+      expect(layout['a']!.cell.y, 2);
+      expect(layout['b']!.cell.y, 5);
+    });
+
+    test('a move down past a tile puts that tile under it', () {
+      final layout = grid({
+        'a': (x: 0, y: 1, w: 2, h: 1),
+        'b': (x: 0, y: 1, w: 2, h: 1),
+      }).settled(first: 'a');
+      expect(layout['a']!.cell.y, 1);
+      expect(layout['b']!.cell.y, 2);
     });
 
     test('a hidden tile is neither moved nor in the way', () {
@@ -132,7 +141,7 @@ void main() {
         ),
       ]).settled();
       expect(layout['h']!.cell, (x: 0, y: 0, w: 4, h: 4));
-      expect(layout['a']!.cell.y, 0);
+      expect(layout['a']!.cell.y, 3, reason: 'not pushed by a hidden one');
     });
   });
 
