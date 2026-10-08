@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
+import 'package:niman/src/ui/kinds/slides/slides_parts.dart';
 
 /// Every slide of the deck in a grid, one ringed (#534): pick one to go
 /// there. Presenting and the presenter view both open it.
@@ -60,23 +61,13 @@ final class SlidesOverview extends StatelessWidget {
             children: [
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: Container(
-                  foregroundDecoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: index == selected
-                          ? scheme.primary
-                          : scheme.outlineVariant,
-                      width: index == selected ? 3 : 1,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: SlideFrame(
-                      markdown: slides[index].markdown,
-                      resolveEmbed: resolveEmbed,
-                      live: false,
-                    ),
+                child: SlideStage(
+                  radius: 6,
+                  ringWidth: index == selected ? 3 : null,
+                  child: SlideFrame(
+                    markdown: slides[index].markdown,
+                    resolveEmbed: resolveEmbed,
+                    live: false,
                   ),
                 ),
               ),

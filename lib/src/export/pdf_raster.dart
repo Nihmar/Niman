@@ -26,6 +26,7 @@ import 'package:flutter/rendering.dart';
 import 'package:niman/src/export/pdf_breaks.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_writer.dart';
+import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -149,12 +150,8 @@ Future<Uint8List> rasterPdf({
   }
 }
 
-/// A slide's page in logical pixels (#534): 16:9, the 960 × 540 the app
-/// lays a slide out at, so the page and the screen show the same slide.
-const Size slidePagePx = Size(960, 540);
-
 /// Draws one page per slide of [slides] (#534), each the slide's Markdown
-/// laid out on a [slidePagePx] page and clipped to it, answering the PDF's
+/// laid out on a [slideSize] page and clipped to it, answering the PDF's
 /// bytes. The fallback of a machine with no engine, as [rasterPdf] is for
 /// a note; [theme] carries the slides' larger type.
 Future<Uint8List> rasterSlidesPdf({
@@ -166,8 +163,8 @@ Future<Uint8List> rasterSlidesPdf({
   bool Function()? isCancelled,
   double pixelRatio = 2,
 }) async {
-  final width = slidePagePx.width;
-  final height = slidePagePx.height;
+  final width = slideSize.width;
+  final height = slideSize.height;
   final decoded = <String, ui.Image>{};
   for (final entry in (images ?? const <String, Uint8List>{}).entries) {
     try {
@@ -196,7 +193,7 @@ Future<Uint8List> rasterSlidesPdf({
           theme: theme,
           mathCache: mathCache,
           width: width,
-          padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 40),
+          padding: slidePadding,
           embedImages: decoded.isEmpty ? null : decoded,
         ),
       );

@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
-
-/// The size a slide is laid out at, in logical pixels (#534): one layout,
-/// scaled to the pane, the projector, the thumbnails and the PDF alike.
-const Size slideSize = Size(960, 540);
-
-/// How much larger than a note's text a slide's is: a 16 px line on a
-/// 960 px slide reads as a footnote on a projector.
-const double slideTextScale = 1.8;
 
 /// One slide, drawn: its Markdown through the note's own read view, laid
 /// out at [slideSize] and scaled to whatever box it is given.
@@ -77,7 +70,7 @@ final class _SlideFrameState extends State<SlideFrame> {
         buffer: _buffer,
         parser: _parser,
         mathCache: _mathCache,
-        padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 40),
+        padding: slidePadding,
         embedResolver: widget.resolveEmbed,
         onTapLink: onTapLink == null
             ? null

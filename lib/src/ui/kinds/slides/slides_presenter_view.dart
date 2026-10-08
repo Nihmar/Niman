@@ -221,20 +221,12 @@ final class _SlidesPresenterViewState extends State<SlidesPresenterView> {
     );
   }
 
-  Widget _framed(BuildContext context, Slide slide, {required bool current}) {
-    final scheme = Theme.of(context).colorScheme;
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        foregroundDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: current ? scheme.primary : scheme.outlineVariant,
-            width: current ? 2 : 1,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+  Widget _framed(BuildContext context, Slide slide, {required bool current}) =>
+      AspectRatio(
+        aspectRatio: 16 / 9,
+        child: SlideStage(
+          radius: 8,
+          ringWidth: current ? 2 : null,
           child: SlideFrame(
             key: ValueKey(slide),
             markdown: slide.markdown,
@@ -242,9 +234,7 @@ final class _SlidesPresenterViewState extends State<SlidesPresenterView> {
             live: false,
           ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _timer(BuildContext context, TextStyle? label, TimeOfDay now) {
     final theme = Theme.of(context);

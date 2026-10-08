@@ -4,6 +4,7 @@
 library;
 
 import 'package:niman/src/export/html_text.dart';
+import 'package:niman/src/export/slide_page.dart';
 
 /// A whole page titled [title] around [body]; [fontFaces] are the maths
 /// fonts, when a formula on it needs them, and [style] what a page of its
@@ -129,17 +130,23 @@ details.callout > summary { cursor: pointer; }
 ''';
 
 /// A slides page's sheets (#534): one 16:9 page a slide, no margin, the
-/// slide's text set as the app sets it on its 960 × 540 slide — 254 mm is
-/// 960 px at the 96 a CSS inch has.
-const String slidesPageStyle = '''
-@page { size: 254mm 142.875mm; margin: 0; }
+/// slide's text set as the app sets it on its [slideSize] slide — a CSS
+/// inch is 96 px, 25.4 mm.
+final String slidesPageStyle = () {
+  String mm(double px) => '${(px / 96 * 25.4).toStringAsFixed(3)}mm';
+  final width = mm(slideSize.width);
+  final height = mm(slideSize.height);
+  const font = '${16 * slideTextScale}px';
+  return '''
+@page { size: $width $height; margin: 0; }
 html, body { margin: 0; padding: 0; }
 body { padding: 0; }
 .note { max-width: none; margin: 0; }
-.slide { width: 254mm; height: 142.875mm; box-sizing: border-box;
-  padding: 40px 64px; overflow: hidden; font-size: 28.8px;
-  break-after: page; page-break-after: always; }
+.slide { width: $width; height: $height; box-sizing: border-box;
+  padding: ${slidePadding.top}px ${slidePadding.left}px; overflow: hidden;
+  font-size: $font; break-after: page; page-break-after: always; }
 .slide:last-child { break-after: auto; page-break-after: auto; }
 .slide > :first-child { margin-top: 0; }
-@media print { body { padding: 0; font-size: 28.8px; } }
+@media print { body { padding: 0; font-size: $font; } }
 ''';
+}();

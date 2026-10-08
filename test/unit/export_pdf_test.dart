@@ -140,7 +140,7 @@ void main() {
     expect(printer.paper, PdfPaper.slides);
     final page = printer.page!;
     expect('<section class="slide">'.allMatches(page), hasLength(2));
-    expect(page, contains('@page { size: 254mm 142.875mm; margin: 0; }'));
+    expect(page, contains('@page { size: 254.000mm 142.875mm; margin: 0; }'));
     expect(page, isNot(contains('ignored')));
   });
 }
