@@ -52,6 +52,8 @@ final class CaptureFlow {
     required this.linkType,
     required this.onCaptured,
     this.openNote,
+    this.saveOpen,
+    this.onAppended,
     this.clock = DateTime.now,
     bool? useSheet,
   }) : useSheet = useSheet ?? Platform.isAndroid;
@@ -78,6 +80,13 @@ final class CaptureFlow {
   /// The note on screen, library-relative: where a shared quote is
   /// appended unless another note is picked.
   final String? Function()? openNote;
+
+  /// Writes the open editors' pending edits: a quote is appended to the
+  /// file, and a buffer saved after would take it back out.
+  final Future<void> Function()? saveOpen;
+
+  /// A quote went into a note on disk: the open editors re-read theirs.
+  final void Function()? onAppended;
 
   /// The time now, for a new note's frontmatter.
   final DateTime Function() clock;
@@ -163,6 +172,7 @@ final class CaptureFlow {
     final notifier = services.background.notifier;
     try {
       final appendTo = chosen.appendTo;
+      if (appendTo != null) await saveOpen?.call();
       final note = appendTo != null
           ? await ops.appendToNote(
               appendTo,
@@ -179,6 +189,7 @@ final class CaptureFlow {
                 tags: chosen.tags,
               ),
             );
+      if (appendTo != null) onAppended?.call();
       await notifier.result(
         title: AppStrings.captureQuoteAdded(
           p.posix.basenameWithoutExtension(note.path),
