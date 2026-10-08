@@ -97,7 +97,6 @@ import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
-import 'package:niman/src/ui/note_zoom_pinch.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/ocr/ocr_job_status.dart';
 import 'package:niman/src/ui/ocr/ocr_notifier.dart';
@@ -137,6 +136,7 @@ import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
+import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
@@ -1254,7 +1254,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// [note] with its text zoomed by a pinch (#538): each step shown at
   /// once, and the size kept for the library when the fingers lift.
-  Widget _pinchToZoom(Widget note) => NoteZoomPinch(
+  Widget _pinchToZoom(Widget note) => TextZoomPinch(
     scale: () => AppTextScales.note,
     onZoom: (scale, {required done}) {
       if (done) {

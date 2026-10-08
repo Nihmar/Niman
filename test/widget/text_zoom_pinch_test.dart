@@ -4,7 +4,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/ui/note_zoom_pinch.dart';
+import 'package:niman/src/ui/text_zoom_pinch.dart';
 
 void main() {
   late double scale;
@@ -15,7 +15,7 @@ void main() {
     told = [];
     await tester.pumpWidget(
       MaterialApp(
-        home: NoteZoomPinch(
+        home: TextZoomPinch(
           scale: () => scale,
           onZoom: (value, {required done}) {
             told.add((value, done));
