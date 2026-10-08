@@ -1797,6 +1797,11 @@ final class BosnianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Bilješke koje anotiraju PDF ili knjigu';
   @override
+  String get captureFolderTitle => 'Mapa za web snimke';
+  @override
+  String get captureFolderSubtitle =>
+      'Web stranice i citati sačuvani kao nove bilješke';
+  @override
   String get annotationNoteSuffix => 'Anotacija';
   @override
   String get annotateAction => 'Anotiraj';

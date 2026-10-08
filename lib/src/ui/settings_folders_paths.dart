@@ -12,8 +12,8 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/template_help.dart';
 
 /// The Folders and paths area of the settings home (issue #104): where
-/// the library's notes, templates and attachments live, and the library
-/// itself.
+/// the library's notes, templates, attachments and captured pages live,
+/// and the library itself.
 final class SettingsFoldersPathsScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
   const new({required this.controller, this.highlight, super.key});
@@ -35,6 +35,7 @@ final class _SettingsFoldersPathsScreenState
   String? _templateFolder;
   String? _attachmentsFolder;
   String? _annotationsFolder;
+  String? _captureFolder;
   String? _quickNotePath;
 
   /// The folders the library actually holds, for the "to create" badge:
@@ -65,6 +66,7 @@ final class _SettingsFoldersPathsScreenState
     final templateFolder = await ops.templateFolder;
     final attachmentsFolder = await ops.attachmentsFolder;
     final annotationsFolder = await ops.annotationsFolder;
+    final captureFolder = await ops.captureFolder;
     final quickNotePath = await ops.quickNotePath;
     final folders = await widget.controller.folders();
     if (!mounted) return;
@@ -73,6 +75,7 @@ final class _SettingsFoldersPathsScreenState
       _templateFolder = templateFolder;
       _attachmentsFolder = attachmentsFolder;
       _annotationsFolder = annotationsFolder;
+      _captureFolder = captureFolder;
       _quickNotePath = quickNotePath;
       _folderPaths = {for (final folder in folders) folder.path};
     });
@@ -82,96 +85,90 @@ final class _SettingsFoldersPathsScreenState
   /// "to create" badge rather than a confident value.
   bool _exists(String folder) => _folderPaths.contains(folder);
 
-  /// Opens the list-folder picker (T-M4-04): where the notes the tree
-  /// lists live, chosen from the library's folders rather than typed.
+  /// Opens the folder picker for a folder setting, from the library's
+  /// folders rather than typed, and keeps the answer with [save]: the
+  /// value [read] then gives back (sanitized), or null when nothing was
+  /// picked.
+  Future<String?> _pickFolder({
+    required String title,
+    required String current,
+    required Future<void> Function(NoteOperations ops, String folder) save,
+    required Future<String> Function(NoteOperations ops) read,
+  }) async {
+    final ops = widget.controller.ops;
+    if (ops == null) return null;
+    final folders = await widget.controller.folders();
+    if (!mounted) return null;
+    final folder = await showFolderPicker(
+      context,
+      title: title,
+      folders: folders,
+      ops: ops,
+      current: current,
+    );
+    if (folder == null) return null;
+    await save(ops, folder);
+    final saved = await read(ops);
+    widget.controller.notify();
+    return saved;
+  }
+
+  /// Where the notes the tree lists live (T-M4-04).
   Future<void> _pickListFolder() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final folders = await widget.controller.folders();
-    if (!mounted) return;
-    final folder = await showFolderPicker(
-      context,
+    final saved = await _pickFolder(
       title: AppStrings.listFolderTitle,
-      folders: folders,
-      ops: ops,
       current: _listFolder ?? defaultListFolder,
+      save: (ops, folder) => ops.setListNoteFolder(folder: folder),
+      read: (ops) => ops.listNoteFolder,
     );
-    if (folder == null) return;
-    await ops.setListNoteFolder(folder: folder);
-    final saved = await ops.listNoteFolder;
-    widget.controller.notify();
-    if (mounted) {
-      setState(() => _listFolder = saved);
-    }
+    if (saved != null && mounted) setState(() => _listFolder = saved);
   }
 
-  /// Opens the template-folder picker (T-M4-05): where the note
-  /// templates live, chosen from the library's folders rather than
-  /// typed.
+  /// Where the note templates live (T-M4-05).
   Future<void> _pickTemplateFolder() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final folders = await widget.controller.folders();
-    if (!mounted) return;
-    final folder = await showFolderPicker(
-      context,
+    final saved = await _pickFolder(
       title: AppStrings.templateFolderTitle,
-      folders: folders,
-      ops: ops,
       current: _templateFolder ?? defaultTemplateFolder,
+      save: (ops, folder) => ops.setTemplateFolder(folder: folder),
+      read: (ops) => ops.templateFolder,
     );
-    if (folder == null) return;
-    await ops.setTemplateFolder(folder: folder);
-    final saved = await ops.templateFolder;
-    widget.controller.notify();
-    if (mounted) {
-      setState(() => _templateFolder = saved);
-    }
+    if (saved != null && mounted) setState(() => _templateFolder = saved);
   }
 
-  /// Opens the attachments-folder picker (issue #56): where images
-  /// copied in by the editor and voice-note clips live, chosen from the
-  /// library's folders rather than typed.
+  /// Where images copied in by the editor and voice-note clips live
+  /// (issue #56).
   Future<void> _pickAttachmentsFolder() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final folders = await widget.controller.folders();
-    if (!mounted) return;
-    final folder = await showFolderPicker(
-      context,
+    final saved = await _pickFolder(
       title: AppStrings.attachmentsFolderTitle,
-      folders: folders,
-      ops: ops,
       current: _attachmentsFolder ?? defaultAttachmentsFolder,
+      save: (ops, folder) => ops.setAttachmentsFolder(folder: folder),
+      read: (ops) => ops.attachmentsFolder,
     );
-    if (folder == null) return;
-    await ops.setAttachmentsFolder(folder: folder);
-    final saved = await ops.attachmentsFolder;
-    widget.controller.notify();
-    if (mounted) {
-      setState(() => _attachmentsFolder = saved);
-    }
+    if (saved != null && mounted) setState(() => _attachmentsFolder = saved);
   }
 
-  /// Opens the annotations-folder picker (#284): where a note annotating
-  /// a PDF or a book is made, when the file has none yet.
+  /// Where a note annotating a PDF or a book is made, when the file has
+  /// none yet (#284).
   Future<void> _pickAnnotationsFolder() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final folders = await widget.controller.folders();
-    if (!mounted) return;
-    final folder = await showFolderPicker(
-      context,
+    final saved = await _pickFolder(
       title: AppStrings.annotationsFolderTitle,
-      folders: folders,
-      ops: ops,
       current: _annotationsFolder ?? defaultAnnotationsFolder,
+      save: (ops, folder) => ops.setAnnotationsFolder(folder: folder),
+      read: (ops) => ops.annotationsFolder,
     );
-    if (folder == null) return;
-    await ops.setAnnotationsFolder(folder: folder);
-    final saved = await ops.annotationsFolder;
-    widget.controller.notify();
-    if (mounted) setState(() => _annotationsFolder = saved);
+    if (saved != null && mounted) setState(() => _annotationsFolder = saved);
+  }
+
+  /// Where a web page or a quote captured as a new note goes, unless the
+  /// capture picks another folder.
+  Future<void> _pickCaptureFolder() async {
+    final saved = await _pickFolder(
+      title: AppStrings.captureFolderTitle,
+      current: _captureFolder ?? defaultCaptureFolder,
+      save: (ops, folder) => ops.setCaptureFolder(folder: folder),
+      read: (ops) => ops.captureFolder,
+    );
+    if (saved != null && mounted) setState(() => _captureFolder = saved);
   }
 
   /// Opens the quick-note picker (the chosen note is set from the tree
@@ -190,6 +187,25 @@ final class _SettingsFoldersPathsScreenState
     }
   }
 
+  /// A folder setting's row: its [value], with the "to create" badge
+  /// while the library does not hold that folder.
+  Widget _folderRow({
+    required Key key,
+    required String title,
+    required String subtitle,
+    required String value,
+    required VoidCallback onTap,
+  }) => HighlightRow(
+    key: key,
+    child: SettingsValueRow(
+      title: title,
+      subtitle: subtitle,
+      value: value,
+      badge: _exists(value) ? null : AppStrings.settingsFolderToCreate,
+      onTap: onTap,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
@@ -197,6 +213,7 @@ final class _SettingsFoldersPathsScreenState
     final templateFolder = _templateFolder ?? defaultTemplateFolder;
     final attachmentsFolder = _attachmentsFolder ?? defaultAttachmentsFolder;
     final annotationsFolder = _annotationsFolder ?? defaultAnnotationsFolder;
+    final captureFolder = _captureFolder ?? defaultCaptureFolder;
     return SettingsAreaShell(
       title: AppStrings.settingsAreaFolders,
       controller: controller,
@@ -205,29 +222,19 @@ final class _SettingsFoldersPathsScreenState
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
-          HighlightRow(
+          _folderRow(
             key: SettingsKeys.listFolder,
-            child: SettingsValueRow(
-              title: AppStrings.listFolderTitle,
-              subtitle: AppStrings.listFolderSubtitle,
-              value: listFolder,
-              badge: _exists(listFolder)
-                  ? null
-                  : AppStrings.settingsFolderToCreate,
-              onTap: _pickListFolder,
-            ),
+            title: AppStrings.listFolderTitle,
+            subtitle: AppStrings.listFolderSubtitle,
+            value: listFolder,
+            onTap: _pickListFolder,
           ),
-          HighlightRow(
+          _folderRow(
             key: SettingsKeys.templateFolder,
-            child: SettingsValueRow(
-              title: AppStrings.templateFolderTitle,
-              subtitle: AppStrings.templateFolderSubtitle,
-              value: templateFolder,
-              badge: _exists(templateFolder)
-                  ? null
-                  : AppStrings.settingsFolderToCreate,
-              onTap: _pickTemplateFolder,
-            ),
+            title: AppStrings.templateFolderTitle,
+            subtitle: AppStrings.templateFolderSubtitle,
+            value: templateFolder,
+            onTap: _pickTemplateFolder,
           ),
           // Next to the folder, because that is where someone setting
           // templates up is already standing (T-TPL-08).
@@ -244,29 +251,26 @@ final class _SettingsFoldersPathsScreenState
               ),
             ),
           ),
-          HighlightRow(
+          _folderRow(
             key: SettingsKeys.attachmentsFolder,
-            child: SettingsValueRow(
-              title: AppStrings.attachmentsFolderTitle,
-              subtitle: AppStrings.attachmentsFolderSubtitle,
-              value: attachmentsFolder,
-              badge: _exists(attachmentsFolder)
-                  ? null
-                  : AppStrings.settingsFolderToCreate,
-              onTap: _pickAttachmentsFolder,
-            ),
+            title: AppStrings.attachmentsFolderTitle,
+            subtitle: AppStrings.attachmentsFolderSubtitle,
+            value: attachmentsFolder,
+            onTap: _pickAttachmentsFolder,
           ),
-          HighlightRow(
+          _folderRow(
             key: SettingsKeys.annotationsFolder,
-            child: SettingsValueRow(
-              title: AppStrings.annotationsFolderTitle,
-              subtitle: AppStrings.annotationsFolderSubtitle,
-              value: annotationsFolder,
-              badge: _exists(annotationsFolder)
-                  ? null
-                  : AppStrings.settingsFolderToCreate,
-              onTap: _pickAnnotationsFolder,
-            ),
+            title: AppStrings.annotationsFolderTitle,
+            subtitle: AppStrings.annotationsFolderSubtitle,
+            value: annotationsFolder,
+            onTap: _pickAnnotationsFolder,
+          ),
+          _folderRow(
+            key: SettingsKeys.captureFolder,
+            title: AppStrings.captureFolderTitle,
+            subtitle: AppStrings.captureFolderSubtitle,
+            value: captureFolder,
+            onTap: _pickCaptureFolder,
           ),
           HighlightRow(
             key: SettingsKeys.quickNote,

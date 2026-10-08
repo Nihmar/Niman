@@ -1792,6 +1792,11 @@ final class SlovakStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Poznámky k PDF alebo knihe';
   @override
+  String get captureFolderTitle => 'Priečinok webových záznamov';
+  @override
+  String get captureFolderSubtitle =>
+      'Webové stránky a citáty uložené ako nové poznámky';
+  @override
   String get annotationNoteSuffix => 'Anotácia';
   @override
   String get annotateAction => 'Anotovať';

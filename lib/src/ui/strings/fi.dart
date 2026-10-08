@@ -1807,6 +1807,11 @@ final class FinnishStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'PDF:ää tai kirjaa kommentoivat muistiinpanot';
   @override
+  String get captureFolderTitle => 'Verkkotallenteiden kansio';
+  @override
+  String get captureFolderSubtitle =>
+      'Uusina muistiinpanoina tallennetut sivut ja lainaukset';
+  @override
   String get annotationNoteSuffix => 'Merkintä';
   @override
   String get annotateAction => 'Merkitse';

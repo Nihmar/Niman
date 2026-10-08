@@ -82,6 +82,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String _templateFolder = defaultTemplateFolder;
   String _attachmentsFolder = defaultAttachmentsFolder;
   String _annotationsFolder = defaultAnnotationsFolder;
+  String _captureFolder = defaultCaptureFolder;
 
   /// Search hits returned for every word query (empty = no results).
   ///
@@ -1098,6 +1099,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setAnnotationsFolder({required String folder}) async {
     _annotationsFolder = folder;
+  }
+
+  @override
+  Future<String> get captureFolder async => _captureFolder;
+
+  @override
+  Future<void> setCaptureFolder({required String folder}) async {
+    _captureFolder = folder;
   }
 
   /// The colour last highlighted in (#626).

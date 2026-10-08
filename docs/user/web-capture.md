@@ -24,7 +24,8 @@ for a page that builds its text with a script, **Only 40 words found**
 and **Running the page in a browser…** (see below). Then the note it will
 be:
 
-- its **title**, the **folder** (the tree's, or another one picked) and
+- its **title**, the **folder** (the library's
+  [web captures folder](#where-the-note-goes), or another one picked) and
   its **tags** (`#web` to start with);
 - a **preview**: the author, how many words and minutes, the first lines;
 - **Download the 7 images to assets/** — off, the note points at the
@@ -36,6 +37,20 @@ be:
 **Save note** downloads the pictures, writes the note and opens it. A page
 that cannot be had says why — no connection, an error from the site, not
 a web page at all — and the address can be corrected and read again.
+
+## Where the note goes
+
+A captured page, and a quote kept as a new note, go in the library's
+**web captures folder**: `Clippings` until another is chosen in
+**Settings → Folders and paths → Web captures folder** (`captureFolder`
+in the [library settings](settings.md)). The folder is made by the first
+capture that goes there. The dialog and the sheet start on it, and
+**Folder** picks another for that one capture. The folder the tree has
+selected plays no part, so a capture made with a picture selected no
+longer lands among the attachments.
+
+The pictures go in the attachments folder whatever folder the note is
+in: the note links them from there.
 
 ## On a phone
 
@@ -51,7 +66,7 @@ opens:
   browser's *share highlight*, or text in quotation marks before the
   address): the same sheet on its **Quote** tab. The quote goes at the end
   of the note on screen (**Append**), of another note picked, or into a
-  new note in a folder.
+  new note in a folder (the web captures folder, or another one picked).
 - **Anything else** goes to the quick note, as shared text always has.
 
 **Save** sends you back to the browser at once; the page is read and saved

@@ -224,6 +224,7 @@ void main() {
       await ops.setTemplateFolder(folder: 'Docs');
       await ops.setAttachmentsFolder(folder: 'Docs/assets');
       await ops.setAnnotationsFolder(folder: 'Elsewhere');
+      await ops.setCaptureFolder(folder: 'Docs/web');
       await ops.setJournal(
         const JournalSettings(folder: 'Docs', template: 'Docs/Tpl.md'),
       );
@@ -238,6 +239,7 @@ void main() {
         'Elsewhere',
         reason: 'a setting pointing elsewhere is left alone',
       );
+      expect(await ops.captureFolder, 'Books/web');
       final journal = await ops.journal;
       expect(journal.folder, 'Books');
       expect(journal.template, 'Books/Tpl.md');
@@ -819,6 +821,33 @@ void main() {
       await ops.setQuickNotePath(path: 'Inbox/Scratch.md');
       await ops.setQuickNotePath(path: null);
       expect(await ops.quickNotePath, isNull);
+    });
+  });
+
+  group('capture folder', () {
+    test('defaults to Clippings', () async {
+      expect(await ops.captureFolder, 'Clippings');
+    });
+
+    test('the chosen folder persists across ops instances, sanitized '
+        'into the library settings file', () async {
+      await ops.setCaptureFolder(folder: '/Web/Articles/');
+      final fresh = NoteOps(
+        root: root.path,
+        db: db,
+        indexer: indexer,
+        config: LibraryConfigRepo(root.path),
+      );
+      expect(await fresh.captureFolder, 'Web/Articles');
+      final settings = File(p.join(root.path, '.niman', 'settings.json'));
+      final json = jsonDecode(await settings.readAsString()) as Map;
+      expect(json['captureFolder'], 'Web/Articles');
+    });
+
+    test('an empty folder falls back to the default', () async {
+      await ops.setCaptureFolder(folder: 'Web');
+      await ops.setCaptureFolder(folder: '  ');
+      expect(await ops.captureFolder, 'Clippings');
     });
   });
 }

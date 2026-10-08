@@ -1839,6 +1839,11 @@ final class FrenchStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Notes qui annotent un PDF ou un livre';
   @override
+  String get captureFolderTitle => 'Dossier des captures web';
+  @override
+  String get captureFolderSubtitle =>
+      'Pages web et citations capturées en nouvelles notes';
+  @override
   String get annotationNoteSuffix => 'Annotation';
   @override
   String get annotateAction => 'Annoter';

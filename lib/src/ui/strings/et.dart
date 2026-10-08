@@ -1776,6 +1776,11 @@ final class EstonianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'PDF-i või raamatu kohta tehtud märkmed';
   @override
+  String get captureFolderTitle => 'Veebisalvestuste kaust';
+  @override
+  String get captureFolderSubtitle =>
+      'Uute märkmetena salvestatud veebilehed ja tsitaadid';
+  @override
   String get annotationNoteSuffix => 'Märkus';
   @override
   String get annotateAction => 'Lisa märkus';

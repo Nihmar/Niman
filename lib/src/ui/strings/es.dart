@@ -1824,6 +1824,11 @@ final class SpanishStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Notas que anotan un PDF o un libro';
   @override
+  String get captureFolderTitle => 'Carpeta de capturas web';
+  @override
+  String get captureFolderSubtitle =>
+      'Páginas web y citas capturadas como notas nuevas';
+  @override
   String get annotationNoteSuffix => 'Anotación';
   @override
   String get annotateAction => 'Anotar';

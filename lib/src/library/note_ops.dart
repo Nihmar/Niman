@@ -230,6 +230,18 @@ final class NoteOps implements NoteOperations {
     (c) => c.copyWith(annotationsFolder: cleanAnnotationsFolder(folder)),
   );
 
+  /// The folder a captured web page or quote goes in as a new note
+  /// (default `Clippings`).
+  @override
+  Future<String> get captureFolder async => (await config.config).captureFolder;
+
+  /// Sets the capture folder (sanitized; an empty result falls back to
+  /// the default).
+  @override
+  Future<void> setCaptureFolder({required String folder}) => config.update(
+    (c) => c.copyWith(captureFolder: cleanCaptureFolder(folder)),
+  );
+
   /// The colour a passage is highlighted in, the one last chosen (#626).
   @override
   Future<String> get highlightColour async =>

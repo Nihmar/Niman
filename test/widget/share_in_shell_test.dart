@@ -135,7 +135,11 @@ void main() {
     await tester.tap(find.byKey(const Key('capture-sheet-save')));
     await settle(tester);
     expect(find.byKey(const Key('capture-sheet')), findsNothing);
-    expect(controller.contentOf('Tending a winter garden.md'), 'tags: [web]');
+    // In the web captures folder, made for it.
+    expect(
+      controller.contentOf('Clippings/Tending a winter garden.md'),
+      'tags: [web]',
+    );
     // The quick note is not where a page goes.
     expect(controller.contentOf('Quick note.md'), 'existing');
     await close();
@@ -160,7 +164,7 @@ void main() {
     await tester.tap(find.byKey(const Key('capture-sheet-save')));
     await settle(tester);
     expect(
-      controller.contentOf('Garden.md'),
+      controller.contentOf('Clippings/Garden.md'),
       allOf(
         startsWith('---\nsource: https://example.com/garden\n'),
         endsWith(
@@ -191,7 +195,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('capture-sheet-save')));
     await settle(tester);
-    expect(controller.contentOf('Garden.md'), contains('A choice'));
+    expect(controller.contentOf('Clippings/Garden.md'), contains('A choice'));
     expect(controller.contentOf('photo.png'), isNot(contains('A choice')));
     await close();
   });

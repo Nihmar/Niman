@@ -1798,6 +1798,11 @@ final class BelarusianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Нататкі з анатацыямі да PDF ці кнігі';
   @override
+  String get captureFolderTitle => 'Папка вэб-захаванняў';
+  @override
+  String get captureFolderSubtitle =>
+      'Вэб-старонкі і цытаты, захаваныя як новыя нататкі';
+  @override
   String get annotationNoteSuffix => 'Анатацыя';
   @override
   String get annotateAction => 'Анатаваць';

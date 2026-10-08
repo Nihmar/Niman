@@ -1788,6 +1788,11 @@ final class LatvianStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Piezīmes, kas anotē PDF vai grāmatu';
   @override
+  String get captureFolderTitle => 'Tīmekļa saglabājumu mape';
+  @override
+  String get captureFolderSubtitle =>
+      'Tīmekļa lapas un citāti, saglabāti kā jaunas piezīmes';
+  @override
   String get annotationNoteSuffix => 'Anotācija';
   @override
   String get annotateAction => 'Anotēt';

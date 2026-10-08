@@ -353,6 +353,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushFolders(SettingsKeys.annotationsFolder),
     ),
     SettingsSearchEntry(
+      title: AppStrings.captureFolderTitle,
+      area: folders,
+      rowKey: SettingsKeys.captureFolder,
+      value: () async => ops == null ? null : await ops.captureFolder,
+      areaId: SettingsAreaId.folders,
+      open: () => pushFolders(SettingsKeys.captureFolder),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.quickNoteTitle,
       area: folders,
       rowKey: SettingsKeys.quickNote,

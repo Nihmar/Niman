@@ -1807,6 +1807,11 @@ final class AlbanianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Shënime që anotojnë një PDF ose një libër';
   @override
+  String get captureFolderTitle => 'Dosja e ruajtjeve nga uebi';
+  @override
+  String get captureFolderSubtitle =>
+      'Faqe uebi dhe citime të ruajtura si shënime të reja';
+  @override
   String get annotationNoteSuffix => 'Anotim';
   @override
   String get annotateAction => 'Anoto';

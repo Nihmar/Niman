@@ -1766,6 +1766,11 @@ final class HindiStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'PDF या किताब पर एनोटेशन वाले नोट';
   @override
+  String get captureFolderTitle => 'वेब कैप्चर फ़ोल्डर';
+  @override
+  String get captureFolderSubtitle =>
+      'नए नोट के रूप में सहेजे गए वेब पेज और उद्धरण';
+  @override
   String get annotationNoteSuffix => 'एनोटेशन';
   @override
   String get annotateAction => 'एनोटेट करें';

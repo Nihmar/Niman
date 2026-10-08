@@ -1808,6 +1808,11 @@ final class GalicianStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Notas que anotan un PDF ou un libro';
   @override
+  String get captureFolderTitle => 'Cartafol das capturas web';
+  @override
+  String get captureFolderSubtitle =>
+      'Páxinas web e citas capturadas como notas novas';
+  @override
   String get annotationNoteSuffix => 'Anotación';
   @override
   String get annotateAction => 'Anotar';

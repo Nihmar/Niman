@@ -1785,6 +1785,11 @@ final class CzechStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Poznámky k PDF nebo knize';
   @override
+  String get captureFolderTitle => 'Složka webových záznamů';
+  @override
+  String get captureFolderSubtitle =>
+      'Webové stránky a citace uložené jako nové poznámky';
+  @override
   String get annotationNoteSuffix => 'Anotace';
   @override
   String get annotateAction => 'Anotovat';
