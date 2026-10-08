@@ -830,6 +830,33 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     return [for (final row in hits.take(limit)) _toNote(row)];
   }
 
+  /// Newest created first: the fake keeps no modification time, and a
+  /// row's id is the order it was made in.
+  @override
+  Future<List<Note>> recentlyModified({
+    int limit = 8,
+    String excludeFolder = '',
+  }) async => [
+    for (final row in _rows.reversed.where(
+      (r) => !r.isDir && !r.trashed && !_under(r.path, excludeFolder),
+    ))
+      _toNote(row),
+  ].take(limit).toList();
+
+  /// Not random at all: the first live note, so a test can predict it.
+  @override
+  Future<Note?> randomNote({String excludeFolder = ''}) async {
+    for (final row in _rows) {
+      if (!row.isDir && !row.trashed && !_under(row.path, excludeFolder)) {
+        return _toNote(row);
+      }
+    }
+    return null;
+  }
+
+  static bool _under(String path, String folder) =>
+      folder.isNotEmpty && path.startsWith('$folder/');
+
   @override
   Future<SearchSource?> get searchSource async =>
       FakeSearchSource(hits: searchHits);
@@ -1588,6 +1615,23 @@ final class _FakeFieldSource implements FieldSource {
           (note: note, value: value),
     ];
     return out..sort((a, b) => a.note.path.compareTo(b.note.path));
+  }
+
+  @override
+  Future<List<String>> topValues(String key, {int limit = 20}) async {
+    final name = key.trim().toLowerCase();
+    final counts = <String, int>{};
+    for (final (_, fm) in _session._liveFrontmatter()) {
+      for (final value in fm?.fields[name] ?? const <String>[]) {
+        counts[value] = (counts[value] ?? 0) + 1;
+      }
+    }
+    final values = counts.keys.toList()
+      ..sort((a, b) {
+        final byCount = counts[b]!.compareTo(counts[a]!);
+        return byCount != 0 ? byCount : a.compareTo(b);
+      });
+    return values.take(limit).toList();
   }
 
   @override

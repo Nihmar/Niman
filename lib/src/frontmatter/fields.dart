@@ -60,6 +60,11 @@ abstract interface class FieldSource {
   /// Every value of [key], with the note holding it, in path order: the
   /// notes that name the file they annotate (#284) ask it of `annotates`.
   Future<List<({Note note, String value})>> fieldValues(String key);
+
+  /// The values [key] holds across the library, most used first (ties
+  /// alphabetical), at most [limit]: the suggestions a Home action's form
+  /// offers for a field it asks for (#535).
+  Future<List<String>> topValues(String key, {int limit = 20});
 }
 
 /// Queries over the frontmatter fields of the open library's index.
@@ -113,6 +118,24 @@ final class FieldRepo implements FieldSource {
       for (final row in rows)
         (note: row.readTable(notes), value: row.readTable(fields).value),
     ];
+  }
+
+  /// Grouped over the rows of one key, which the `fields_key_value` index
+  /// hands over without a look at any other key's.
+  @override
+  Future<List<String>> topValues(String key, {int limit = 20}) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT value, count(*) AS c FROM frontmatter_fields '
+          'WHERE key = ? GROUP BY value ORDER BY c DESC, value ASC LIMIT ?',
+          variables: [
+            Variable.withString(key.trim().toLowerCase()),
+            Variable.withInt(limit),
+          ],
+          readsFrom: {_db.frontmatterFields},
+        )
+        .get();
+    return [for (final row in rows) row.read<String>('value')];
   }
 
   @override

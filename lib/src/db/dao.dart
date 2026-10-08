@@ -141,6 +141,70 @@ final class NoteDao {
     return [for (final row in rows) _db.notes.map(row.data)];
   }
 
+  /// The [limit] notes modified last, newest first, leaving out the ones
+  /// under [excludeFolder] (the templates): the Home's recently modified
+  /// tile (#535).
+  ///
+  /// `is_dir = 0` and the order on `modified` are what the `notes_recent`
+  /// index holds (`IndexDatabase`), so the query walks that index from its
+  /// end and stops after [limit] rows, whatever the library's size.
+  Future<List<Note>> recentlyModified({
+    int limit = 8,
+    String excludeFolder = '',
+  }) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM notes WHERE is_dir = 0${_outside(excludeFolder)} '
+          'ORDER BY modified DESC LIMIT ?',
+          variables: [..._outsideArgs(excludeFolder), Variable.withInt(limit)],
+          readsFrom: {_db.notes},
+        )
+        .get();
+    return [for (final row in rows) _db.notes.map(row.data)];
+  }
+
+  /// A note picked at random, outside [excludeFolder], or null when there
+  /// is none: the Home's random note tile (#535).
+  ///
+  /// A random id and the first note at or after it: one seek on the
+  /// primary key. `ORDER BY random()` would read every row to pick one.
+  /// Notes after a gap of deleted ids come up more often, which a tile
+  /// that only wants something to reread can live with. The sign bit is
+  /// masked rather than `abs()`ed: `abs` of the smallest integer throws.
+  Future<Note?> randomNote({String excludeFolder = ''}) async {
+    final where = 'is_dir = 0${_outside(excludeFolder)}';
+    final args = _outsideArgs(excludeFolder);
+    final picked = await _db
+        .customSelect(
+          'SELECT * FROM notes WHERE $where AND id >= '
+          '((random() & 9223372036854775807) % '
+          '((SELECT max(id) FROM notes) + 1)) ORDER BY id LIMIT 1',
+          variables: args,
+          readsFrom: {_db.notes},
+        )
+        .getSingleOrNull();
+    final row =
+        picked ??
+        await _db
+            .customSelect(
+              'SELECT * FROM notes WHERE $where ORDER BY id LIMIT 1',
+              variables: args,
+              readsFrom: {_db.notes},
+            )
+            .getSingleOrNull();
+    return row == null ? null : _db.notes.map(row.data);
+  }
+
+  /// The SQL that keeps a row out of [folder]'s subtree; empty for none.
+  static String _outside(String folder) =>
+      folder.isEmpty ? '' : ' AND NOT (path >= ? AND path < ?)';
+
+  static List<Variable<Object>> _outsideArgs(String folder) {
+    if (folder.isEmpty) return const [];
+    final range = subtreePathRange(folder);
+    return [Variable.withString(range.from), Variable.withString(range.to)];
+  }
+
   /// All directory rows, path-ordered (for move-target pickers).
   ///
   /// `is_dir = 1` rather than the bare column: SQLite matches an index on

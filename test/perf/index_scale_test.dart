@@ -316,6 +316,31 @@ void main() {
     expect(notes, hasLength(tagNotesLimit));
   });
 
+  // #535: the Home reads these whenever it shows. Both walk an index from
+  // one end and stop, so a million notes cost what a hundred do.
+  test(
+    'the recent and random notes of the Home seek instead of scanning',
+    () async {
+      late List<Note> recent;
+      final recentMs = await timed('recently modified', () async {
+        recent = await dao.recentlyModified(excludeFolder: _folderName(0));
+      });
+      final randomMs = await timed('random note', () => dao.randomNote());
+
+      expect(recent, hasLength(8));
+      expect(
+        recentMs,
+        lessThan(_bar(500)),
+        reason: 'recently modified took $recentMs ms',
+      );
+      expect(
+        randomMs,
+        lessThan(_bar(500)),
+        reason: 'random note took $randomMs ms',
+      );
+    },
+  );
+
   // Deliberately not a gate: this measures the one read that did not stay
   // bounded, so the number is on the record. Before #302 the
   // reconciliation loaded every row into a map and the whole walk into a
