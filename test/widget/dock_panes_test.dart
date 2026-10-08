@@ -53,6 +53,12 @@ final class _Note implements NoteViewHandle {
 
   @override
   void openFind({bool replace = false}) {}
+
+  @override
+  String get notePath => 'Celestia.md';
+
+  @override
+  Future<String?> resolveEmbed(String target) async => null;
 }
 
 final class _Tags implements TagSource {

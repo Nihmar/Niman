@@ -131,6 +131,12 @@ enum AppCommand {
   /// Show the note's preview, or back its editor.
   togglePreview,
 
+  /// Present the slides note on screen (#534).
+  presentSlides,
+
+  /// The slides note's presenter view (#534).
+  presenterView,
+
   /// Switch the note between the source editor and the WYSIWYG.
   switchEditor,
 
@@ -186,132 +192,137 @@ final class AppShortcut {
 /// changed them (#159).
 ///
 /// Tab order matches the rail (T-PP-14), so Ctrl+1..5 select the five tabs.
-final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
-  const <AppShortcut>[
-    AppShortcut(
-      AppCommand.newNote,
-      SingleActivator(LogicalKeyboardKey.keyN, control: true),
-    ),
-    AppShortcut(
-      AppCommand.newListNote,
-      SingleActivator(LogicalKeyboardKey.keyN, control: true, shift: true),
-    ),
-    AppShortcut(
-      AppCommand.newAudioNote,
-      SingleActivator(LogicalKeyboardKey.keyA, control: true, shift: true),
-    ),
-    AppShortcut(
-      AppCommand.newTodo,
-      SingleActivator(LogicalKeyboardKey.keyT, control: true),
-    ),
-    AppShortcut(
-      AppCommand.quickNote,
-      SingleActivator(LogicalKeyboardKey.keyQ, control: true),
-    ),
-    // Not Ctrl+Alt: Linux desktops switch workspaces on it, and on
-    // Windows it is AltGr, which types letters on many layouts.
-    AppShortcut(
-      AppCommand.journalToday,
-      SingleActivator(LogicalKeyboardKey.keyJ, control: true, shift: true),
-    ),
-    AppShortcut(
-      AppCommand.journalPrevious,
-      SingleActivator(LogicalKeyboardKey.pageUp, control: true, shift: true),
-    ),
-    AppShortcut(
-      AppCommand.journalNext,
-      SingleActivator(LogicalKeyboardKey.pageDown, control: true, shift: true),
-    ),
-    AppShortcut(
-      AppCommand.toggleSidebar,
-      SingleActivator(LogicalKeyboardKey.keyB, control: true),
-    ),
-    AppShortcut(
-      AppCommand.closeTab,
-      SingleActivator(LogicalKeyboardKey.keyW, control: true),
-    ),
-    AppShortcut(
-      AppCommand.nextTab,
-      SingleActivator(LogicalKeyboardKey.tab, control: true),
-    ),
-    AppShortcut(
-      AppCommand.previousTab,
-      SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
-    ),
-    AppShortcut(
-      AppCommand.splitRight,
-      SingleActivator(LogicalKeyboardKey.backslash, control: true),
-    ),
-    AppShortcut(
-      AppCommand.toggleDock,
-      SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true),
-    ),
-    // W for web: the capture's own key (#531). With Shift, not Alt: see
-    // the journal's keys above (#637).
-    AppShortcut(
-      AppCommand.captureWebPage,
-      SingleActivator(LogicalKeyboardKey.keyW, control: true, shift: true),
-    ),
-    // Paste with Shift: the editor's own Ctrl+V pastes the plain text, and
-    // binds nothing with Shift (#531).
-    AppShortcut(
-      AppCommand.pasteAsMarkdown,
-      SingleActivator(LogicalKeyboardKey.keyV, control: true, shift: true),
-    ),
-    // F11, the key that means fullscreen elsewhere: the issue's
-    // Ctrl+Shift+Z is redo in both editors.
-    AppShortcut(AppCommand.zenMode, SingleActivator(LogicalKeyboardKey.f11)),
-    AppShortcut(
-      AppCommand.typewriterMode,
-      SingleActivator(LogicalKeyboardKey.keyT, control: true, shift: true),
-    ),
-    // The browsers' keys for the page's zoom, here the note's (#538).
-    AppShortcut(
-      AppCommand.zoomIn,
-      SingleActivator(LogicalKeyboardKey.equal, control: true),
-    ),
-    AppShortcut(
-      AppCommand.zoomOut,
-      SingleActivator(LogicalKeyboardKey.minus, control: true),
-    ),
-    AppShortcut(
-      AppCommand.zoomReset,
-      SingleActivator(LogicalKeyboardKey.digit0, control: true),
-    ),
-    AppShortcut(
-      AppCommand.openPalette,
-      SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true),
-    ),
-    AppShortcut(
-      AppCommand.openFile,
-      SingleActivator(LogicalKeyboardKey.keyO, control: true, shift: true),
-    ),
-    AppShortcut(
-      AppCommand.goToNote,
-      SingleActivator(LogicalKeyboardKey.keyO, control: true),
-    ),
-    AppShortcut(
-      AppCommand.tabFiles,
-      SingleActivator(LogicalKeyboardKey.digit1, control: true),
-    ),
-    AppShortcut(
-      AppCommand.tabTodo,
-      SingleActivator(LogicalKeyboardKey.digit2, control: true),
-    ),
-    AppShortcut(
-      AppCommand.tabSearch,
-      SingleActivator(LogicalKeyboardKey.digit3, control: true),
-    ),
-    AppShortcut(
-      AppCommand.tabQuickNote,
-      SingleActivator(LogicalKeyboardKey.digit4, control: true),
-    ),
-    AppShortcut(
-      AppCommand.tabSettings,
-      SingleActivator(LogicalKeyboardKey.digit5, control: true),
-    ),
-  ],
-);
+final List<AppShortcut>
+nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
+  AppShortcut(
+    AppCommand.newNote,
+    SingleActivator(LogicalKeyboardKey.keyN, control: true),
+  ),
+  AppShortcut(
+    AppCommand.newListNote,
+    SingleActivator(LogicalKeyboardKey.keyN, control: true, shift: true),
+  ),
+  AppShortcut(
+    AppCommand.newAudioNote,
+    SingleActivator(LogicalKeyboardKey.keyA, control: true, shift: true),
+  ),
+  AppShortcut(
+    AppCommand.newTodo,
+    SingleActivator(LogicalKeyboardKey.keyT, control: true),
+  ),
+  AppShortcut(
+    AppCommand.quickNote,
+    SingleActivator(LogicalKeyboardKey.keyQ, control: true),
+  ),
+  // Not Ctrl+Alt: Linux desktops switch workspaces on it, and on
+  // Windows it is AltGr, which types letters on many layouts.
+  AppShortcut(
+    AppCommand.journalToday,
+    SingleActivator(LogicalKeyboardKey.keyJ, control: true, shift: true),
+  ),
+  AppShortcut(
+    AppCommand.journalPrevious,
+    SingleActivator(LogicalKeyboardKey.pageUp, control: true, shift: true),
+  ),
+  AppShortcut(
+    AppCommand.journalNext,
+    SingleActivator(LogicalKeyboardKey.pageDown, control: true, shift: true),
+  ),
+  AppShortcut(
+    AppCommand.toggleSidebar,
+    SingleActivator(LogicalKeyboardKey.keyB, control: true),
+  ),
+  AppShortcut(
+    AppCommand.closeTab,
+    SingleActivator(LogicalKeyboardKey.keyW, control: true),
+  ),
+  AppShortcut(
+    AppCommand.nextTab,
+    SingleActivator(LogicalKeyboardKey.tab, control: true),
+  ),
+  AppShortcut(
+    AppCommand.previousTab,
+    SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
+  ),
+  AppShortcut(
+    AppCommand.splitRight,
+    SingleActivator(LogicalKeyboardKey.backslash, control: true),
+  ),
+  AppShortcut(
+    AppCommand.toggleDock,
+    SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true),
+  ),
+  // W for web: the capture's own key (#531). With Shift, not Alt: see
+  // the journal's keys above (#637).
+  AppShortcut(
+    AppCommand.captureWebPage,
+    SingleActivator(LogicalKeyboardKey.keyW, control: true, shift: true),
+  ),
+  // Paste with Shift: the editor's own Ctrl+V pastes the plain text, and
+  // binds nothing with Shift (#531).
+  AppShortcut(
+    AppCommand.pasteAsMarkdown,
+    SingleActivator(LogicalKeyboardKey.keyV, control: true, shift: true),
+  ),
+  // F11, the key that means fullscreen elsewhere: the issue's
+  // Ctrl+Shift+Z is redo in both editors.
+  AppShortcut(AppCommand.zenMode, SingleActivator(LogicalKeyboardKey.f11)),
+  // F5 is what presents in every slide app (#534).
+  AppShortcut(AppCommand.presentSlides, SingleActivator(LogicalKeyboardKey.f5)),
+  AppShortcut(
+    AppCommand.presenterView,
+    SingleActivator(LogicalKeyboardKey.f5, alt: true),
+  ),
+  AppShortcut(
+    AppCommand.typewriterMode,
+    SingleActivator(LogicalKeyboardKey.keyT, control: true, shift: true),
+  ),
+  // The browsers' keys for the page's zoom, here the note's (#538).
+  AppShortcut(
+    AppCommand.zoomIn,
+    SingleActivator(LogicalKeyboardKey.equal, control: true),
+  ),
+  AppShortcut(
+    AppCommand.zoomOut,
+    SingleActivator(LogicalKeyboardKey.minus, control: true),
+  ),
+  AppShortcut(
+    AppCommand.zoomReset,
+    SingleActivator(LogicalKeyboardKey.digit0, control: true),
+  ),
+  AppShortcut(
+    AppCommand.openPalette,
+    SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true),
+  ),
+  AppShortcut(
+    AppCommand.openFile,
+    SingleActivator(LogicalKeyboardKey.keyO, control: true, shift: true),
+  ),
+  AppShortcut(
+    AppCommand.goToNote,
+    SingleActivator(LogicalKeyboardKey.keyO, control: true),
+  ),
+  AppShortcut(
+    AppCommand.tabFiles,
+    SingleActivator(LogicalKeyboardKey.digit1, control: true),
+  ),
+  AppShortcut(
+    AppCommand.tabTodo,
+    SingleActivator(LogicalKeyboardKey.digit2, control: true),
+  ),
+  AppShortcut(
+    AppCommand.tabSearch,
+    SingleActivator(LogicalKeyboardKey.digit3, control: true),
+  ),
+  AppShortcut(
+    AppCommand.tabQuickNote,
+    SingleActivator(LogicalKeyboardKey.digit4, control: true),
+  ),
+  AppShortcut(
+    AppCommand.tabSettings,
+    SingleActivator(LogicalKeyboardKey.digit5, control: true),
+  ),
+]);
 
 /// The command's localized name, for the reference.
 String appCommandLabel(AppCommand command) => switch (command) {
@@ -319,6 +330,8 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newListNote => AppStrings.shortcutNewList,
   AppCommand.newAudioNote => AppStrings.shortcutNewAudio,
   AppCommand.newSlides => AppStrings.newSlidesTitle,
+  AppCommand.presentSlides => AppStrings.slidesPresent,
+  AppCommand.presenterView => AppStrings.slidesPresenterView,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
   AppCommand.captureWebPage => AppStrings.captureWebPage,
   AppCommand.quickNote => AppStrings.shortcutQuickNote,

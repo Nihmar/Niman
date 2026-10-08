@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -9,10 +10,8 @@ import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slides_parts.dart';
+import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/strings.dart';
-
-/// Asks to present the deck: the slide alone, or the presenter view.
-typedef PresentSlides = void Function({required bool presenter});
 
 /// The slides kind's body (#534): the slide on screen large, its speaker
 /// notes under it, and the others as thumbnails — a row of them on a wide
@@ -21,21 +20,13 @@ typedef PresentSlides = void Function({required bool presenter});
 /// The view only reads the note; the slides are edited in the raw editor.
 final class SlidesNoteView extends StatefulWidget {
   /// Shows the slides of [text], the note [host] holds.
-  const new({
-    required this.text,
-    required this.host,
-    this.onPresent,
-    super.key,
-  });
+  const new({required this.text, required this.host, super.key});
 
   /// The full note text.
   final String text;
 
   /// The note's window: its path, pictures and links.
   final NoteKindHost host;
-
-  /// Presents the deck; null leaves the Present button out.
-  final PresentSlides? onPresent;
 
   @override
   State<SlidesNoteView> createState() => _SlidesNoteViewState();
@@ -101,6 +92,35 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
 
   void _go(int index) => _place.value = index.clamp(0, _slides.length - 1);
 
+  // ponytail: one orientation for the whole run, so a slide view rebuilt in
+  // the other layout as the phone turns still knows how it was held.
+  static Orientation? _held;
+
+  void _present({bool presenter = false, bool lockLandscape = false}) =>
+      unawaited(
+        presentSlides(
+          context,
+          text: widget.text,
+          notePath: _path,
+          resolveEmbed: widget.host.resolveEmbed,
+          presenter: presenter,
+          lockLandscape: lockLandscape,
+        ),
+      );
+
+  /// Turning a phone sideways while its slides are on screen presents
+  /// them; turning it upright again ends that (the presenting screen's).
+  void _watchTurn(BuildContext context) {
+    if (!isSlidesPhone(context)) return;
+    final now = MediaQuery.orientationOf(context);
+    if (_held == Orientation.portrait && now == Orientation.landscape) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _present();
+      });
+    }
+    _held = now;
+  }
+
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
@@ -118,6 +138,8 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
       _go(0);
     } else if (key == LogicalKeyboardKey.end) {
       _go(_slides.length - 1);
+    } else if (key == LogicalKeyboardKey.f5) {
+      _present(presenter: HardwareKeyboard.instance.isAltPressed);
     } else {
       return KeyEventResult.ignored;
     }
@@ -137,6 +159,7 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
+    _watchTurn(context);
     return Focus(
       autofocus: wide,
       onKeyEvent: _onKey,
@@ -225,7 +248,6 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
     final notes = slide.notes;
     final scheme = Theme.of(context).colorScheme;
     final showMarkdown = widget.host.showMarkdown;
-    final onPresent = widget.onPresent;
     return Column(
       children: [
         Padding(
@@ -271,29 +293,27 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
                   child: SpeakerNotes(notes: notes),
                 ),
         ),
-        if (showMarkdown != null || onPresent != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: Row(
-              children: [
-                if (showMarkdown != null)
-                  OutlinedButton.icon(
-                    key: const Key('slides-markdown'),
-                    onPressed: showMarkdown,
-                    icon: const Icon(Icons.article_outlined),
-                    label: Text(AppStrings.slidesMarkdown),
-                  ),
-                const Spacer(),
-                if (onPresent != null)
-                  FilledButton.icon(
-                    key: const Key('slides-present'),
-                    onPressed: () => onPresent(presenter: false),
-                    icon: const Icon(Icons.open_in_full),
-                    label: Text(AppStrings.slidesPresent),
-                  ),
-              ],
-            ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: Row(
+            children: [
+              if (showMarkdown != null)
+                OutlinedButton.icon(
+                  key: const Key('slides-markdown'),
+                  onPressed: showMarkdown,
+                  icon: const Icon(Icons.article_outlined),
+                  label: Text(AppStrings.slidesMarkdown),
+                ),
+              const Spacer(),
+              FilledButton.icon(
+                key: const Key('slides-present-button'),
+                onPressed: () => _present(lockLandscape: true),
+                icon: const Icon(Icons.open_in_full),
+                label: Text(AppStrings.slidesPresent),
+              ),
+            ],
           ),
+        ),
       ],
     );
   }

@@ -127,4 +127,65 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('1 / 1'), findsOneWidget);
   });
+
+  presentingTests();
+}
+
+void presentingTests() {
+  testWidgets('F5 presents from the slide on screen; Esc gives it back', (
+    tester,
+  ) async {
+    final host = _Host('present.md');
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: host),
+      const Size(1200, 800),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('slides-present')), findsOneWidget);
+    expect(find.byKey(const Key('speaker-notes')), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(slidePlaceOf('present.md').value, 1);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('slides-present')), findsNothing);
+    expect(find.text('2 / 2'), findsOneWidget);
+  });
+
+  testWidgets('the presenter view shows the notes, the next slide, the time', (
+    tester,
+  ) async {
+    final host = _Host('presenter.md');
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: host),
+      const Size(1280, 800),
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('slides-presenter')), findsOneWidget);
+    expect(find.text('00:00'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('slides-presenter-next')));
+    await tester.pump();
+    expect(find.text('say beta'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('slides-slide-only')));
+    await tester.pump();
+    expect(find.byKey(const Key('slides-present')), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyO);
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('overview-slide-0')));
+    await tester.pump();
+    expect(slidePlaceOf('presenter.md').value, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+  });
 }

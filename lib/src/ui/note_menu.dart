@@ -3,6 +3,15 @@ import 'package:niman/src/ui/strings.dart';
 
 /// What the open note's ⋮ menu can do.
 enum NoteMenuAction {
+  /// Present the slides note (#534): the slide alone, full screen.
+  present,
+
+  /// The slides note's presenter view (#534).
+  presenterView,
+
+  /// The slides note's Markdown preview, in place of its slides (#534).
+  markdownPreview,
+
   /// The note's headings (#175): the dock's pane where there is room for
   /// the dock, a sheet on a phone.
   outline,
@@ -70,8 +79,17 @@ final class NoteMenuButton extends StatelessWidget {
     this.textNote = true,
     this.recognize = false,
     this.kindSwitch,
+    this.slides = false,
+    this.presenterView = false,
     super.key,
   });
+
+  /// Whether the note on screen is a deck shown as slides (#534): the
+  /// slide entries lead the menu, and the editor's ones step aside.
+  final bool slides;
+
+  /// Whether the slides entries include the presenter view: the desktop's.
+  final bool presenterView;
 
   /// Called with the action picked.
   final ValueChanged<NoteMenuAction> onSelected;
@@ -104,6 +122,24 @@ final class NoteMenuButton extends StatelessWidget {
       icon: const Icon(Icons.more_vert),
       onSelected: onSelected,
       itemBuilder: (context) => [
+        if (slides) ...[
+          _item(
+            NoteMenuAction.present,
+            Icons.present_to_all_outlined,
+            AppStrings.slidesPresent,
+          ),
+          if (presenterView)
+            _item(
+              NoteMenuAction.presenterView,
+              Icons.speaker_notes_outlined,
+              AppStrings.slidesPresenterView,
+            ),
+          _item(
+            NoteMenuAction.markdownPreview,
+            Icons.visibility_outlined,
+            AppStrings.slidesMarkdownPreview,
+          ),
+        ],
         if (textNote) ...[
           _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
           _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
@@ -117,11 +153,12 @@ final class NoteMenuButton extends StatelessWidget {
                   ? AppStrings.shoppingListName
                   : AppStrings.checklistName,
             ),
-          _item(
-            NoteMenuAction.typewriter,
-            Icons.vertical_align_center,
-            typewriter ? AppStrings.typewriterOff : AppStrings.typewriterOn,
-          ),
+          if (!slides)
+            _item(
+              NoteMenuAction.typewriter,
+              Icons.vertical_align_center,
+              typewriter ? AppStrings.typewriterOff : AppStrings.typewriterOn,
+            ),
         ],
         if (palette)
           _item(
@@ -130,21 +167,23 @@ final class NoteMenuButton extends StatelessWidget {
             AppStrings.commandPaletteTitle,
           ),
         if (textNote) ...[
-          _item(
-            NoteMenuAction.format,
-            Icons.cleaning_services_outlined,
-            AppStrings.formatNoteTitle,
-          ),
+          if (!slides)
+            _item(
+              NoteMenuAction.format,
+              Icons.cleaning_services_outlined,
+              AppStrings.formatNoteTitle,
+            ),
           _item(
             NoteMenuAction.export,
             Icons.save_alt_outlined,
             AppStrings.exportTitle,
           ),
-          _item(
-            NoteMenuAction.cheatsheet,
-            Icons.menu_book_outlined,
-            AppStrings.cheatsheetTitle,
-          ),
+          if (!slides)
+            _item(
+              NoteMenuAction.cheatsheet,
+              Icons.menu_book_outlined,
+              AppStrings.cheatsheetTitle,
+            ),
           _item(
             NoteMenuAction.history,
             Icons.history,

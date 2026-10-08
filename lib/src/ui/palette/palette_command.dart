@@ -52,6 +52,8 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.recognizeText ||
   AppCommand.closeTab => PaletteGroup.note,
   AppCommand.togglePreview ||
+  AppCommand.presentSlides ||
+  AppCommand.presenterView ||
   AppCommand.switchEditor ||
   AppCommand.typewriterMode ||
   AppCommand.formatNote ||

@@ -92,6 +92,7 @@ import 'package:niman/src/ui/journal/journal_screen.dart';
 import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
+import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/library_window.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
@@ -1005,6 +1006,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _ => Icons.checklist,
     };
     return [
+      // The phone presents from the button under its slides, or by
+      // turning: its bar keeps to the pencil and the ⋮.
+      if (_showsSlides && _wide)
+        IconButton(
+          key: const Key('slides-present-action'),
+          tooltip: '${AppStrings.slidesPresent} (F5)',
+          icon: const Icon(Icons.present_to_all_outlined),
+          onPressed: () => unawaited(_presentSlides()),
+        ),
       if (_kindRawMode)
         IconButton(
           key: const Key('kind-show-list'),
@@ -2569,6 +2579,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         isRecognizableFile(_selected ?? ''),
     // The phone has no key for the palette (#206); the wide layout has.
     palette: !_wide,
+    slides: _showsSlides,
+    presenterView: _wide,
     kindSwitch: switch (_noteKind) {
       'list' => NoteKindSwitch.toShoppingList,
       'shopping-list' => NoteKindSwitch.toChecklist,
@@ -2590,12 +2602,32 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           () => _recognize(path),
         ),
         NoteMenuAction.kindSwitch => Future<void>.sync(_switchNoteKind),
+        NoteMenuAction.present => _presentSlides(),
+        NoteMenuAction.presenterView => _presentSlides(presenter: true),
+        NoteMenuAction.markdownPreview => Future<void>.sync(_showKindMarkdown),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
         NoteMenuAction.delete => _rowActions.delete(context, path),
       });
     },
   );
+
+  /// Whether the note on screen is a deck shown as its slides (#534).
+  bool get _showsSlides => _noteKind == 'slides' && !_kindRawMode;
+
+  /// Presents the slides note on screen (#534), from the slide its view
+  /// shows; [presenter] opens on the presenter view.
+  Future<void> _presentSlides({bool presenter = false}) async {
+    final note = _panelNote;
+    if (note == null || _noteKind != 'slides') return;
+    await presentSlides(
+      context,
+      text: note.currentText,
+      notePath: note.notePath,
+      resolveEmbed: note.resolveEmbed,
+      presenter: presenter,
+    );
+  }
 
   /// Turns the open note between `list` and `shopping-list` (#309).
   ///
@@ -3294,6 +3326,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.previewToggle => _previewToggleVisible,
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
+    CommandNeed.slidesNote => _noteKind == 'slides',
     CommandNeed.ocrFile =>
       _ocrFlow != null &&
           _shownIsAttachment &&
@@ -3330,6 +3363,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_createFlow.createAudioNote(context)),
       AppCommand.newSlides: () =>
           unawaited(_createFlow.createSlidesNote(context)),
+      AppCommand.presentSlides: () => unawaited(_presentSlides()),
+      AppCommand.presenterView: () =>
+          unawaited(_presentSlides(presenter: true)),
       AppCommand.newTodo: () {
         _openTodo();
         unawaited(_addTodo());

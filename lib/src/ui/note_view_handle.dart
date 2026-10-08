@@ -56,4 +56,10 @@ abstract interface class NoteViewHandle {
   /// Nothing happens in preview-only mode, where the editor and its bar are
   /// not on screen.
   void openFind({bool replace = false});
+
+  /// The path of the note on screen, as the shell gave it.
+  String get notePath;
+
+  /// The absolute path a picture's [target] names in this note, or null.
+  Future<String?> resolveEmbed(String target);
 }

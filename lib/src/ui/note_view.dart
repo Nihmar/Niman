@@ -459,6 +459,12 @@ final class _NoteViewState extends State<NoteView>
   String get currentText => _currentText;
 
   @override
+  String get notePath => widget.path;
+
+  @override
+  Future<String?> resolveEmbed(String target) => _resolveEmbed(target);
+
+  @override
   void jumpToHeading(int line) => _jumpToHeading(line);
 
   @override

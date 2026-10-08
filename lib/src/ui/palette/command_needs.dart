@@ -48,6 +48,9 @@ enum CommandNeed {
   /// A PDF or a picture is on screen, and text recognition is there to
   /// read it (#594).
   ocrFile,
+
+  /// A slides note is on screen (#534).
+  slidesNote,
 }
 
 /// What [command] waits on; empty for one that can always run.
@@ -81,6 +84,11 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.journalNext => const {CommandNeed.journalEntry},
   AppCommand.zenMode => const {CommandNeed.zenRoom},
   AppCommand.recognizeText => const {CommandNeed.ocrFile},
+  AppCommand.presentSlides => const {CommandNeed.slidesNote},
+  AppCommand.presenterView => const {
+    CommandNeed.slidesNote,
+    CommandNeed.desktop,
+  },
   AppCommand.openFile => const {CommandNeed.desktop},
   AppCommand.openPalette ||
   AppCommand.goToNote ||
@@ -123,4 +131,5 @@ String commandNeedLabel(CommandNeed need) => switch (need) {
   CommandNeed.twoEditors => AppStrings.commandNeedTwoEditors,
   CommandNeed.journalEntry => AppStrings.commandNeedJournalEntry,
   CommandNeed.ocrFile => AppStrings.commandNeedOcrFile,
+  CommandNeed.slidesNote => AppStrings.commandNeedSlidesNote,
 };
