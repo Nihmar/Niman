@@ -3245,4 +3245,17 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Показване на папката';
+
+  @override
+  String get captureOpen => 'Отваряне';
+
+  @override
+  String get captureQuote => 'Цитат';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Нова бележка в $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Изтегляне на изображенията в $folder/';
 }

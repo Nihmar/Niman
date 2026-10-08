@@ -3283,4 +3283,17 @@ final class RomanianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Arată dosarul';
+
+  @override
+  String get captureOpen => 'Deschide';
+
+  @override
+  String get captureQuote => 'Citat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Notă nouă în $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Descarcă imaginile în $folder/';
 }

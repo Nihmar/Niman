@@ -3280,4 +3280,17 @@ final class SpanishStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Mostrar carpeta';
+
+  @override
+  String get captureOpen => 'Abrir';
+
+  @override
+  String get captureQuote => 'Cita';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nueva nota en $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Descargar las imágenes en $folder/';
 }

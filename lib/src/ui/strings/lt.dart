@@ -3272,4 +3272,17 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Rodyti aplanką';
+
+  @override
+  String get captureOpen => 'Atidaryti';
+
+  @override
+  String get captureQuote => 'Citata';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nauja pastaba aplanke $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Atsisiųsti paveikslėlius į $folder/';
 }

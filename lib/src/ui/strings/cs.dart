@@ -3229,4 +3229,17 @@ final class CzechStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Zobrazit složku';
+
+  @override
+  String get captureOpen => 'Otevřít';
+
+  @override
+  String get captureQuote => 'Citace';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nová poznámka v $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Stáhnout obrázky do $folder/';
 }

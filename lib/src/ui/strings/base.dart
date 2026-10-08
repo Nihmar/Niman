@@ -1739,4 +1739,17 @@ abstract base class Strings {
 
   /// A notification's button: the app, the note's folder in the tree.
   String get captureShowFolder;
+
+  /// A notification's button: opens the note a capture made (#531).
+  String get captureOpen;
+
+  /// The share sheet's tab for text selected on a page.
+  String get captureQuote;
+
+  /// A shared quote goes in a new note in [folder].
+  String captureNewNoteIn(String folder);
+
+  /// Downloads a page's pictures into [folder], before their number is
+  /// known.
+  String captureDownloadPicturesTo(String folder);
 }

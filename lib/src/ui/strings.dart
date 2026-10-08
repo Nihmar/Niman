@@ -1708,4 +1708,9 @@ final class AppStrings {
   static String captureQuoteFrom(String title) => _s.captureQuoteFrom(title);
   static String captureFailedTitle(String host) => _s.captureFailedTitle(host);
   static String get captureShowFolder => _s.captureShowFolder;
+  static String get captureOpen => _s.captureOpen;
+  static String get captureQuote => _s.captureQuote;
+  static String captureNewNoteIn(String folder) => _s.captureNewNoteIn(folder);
+  static String captureDownloadPicturesTo(String folder) =>
+      _s.captureDownloadPicturesTo(folder);
 }

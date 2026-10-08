@@ -3258,4 +3258,17 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Прикажи папка';
+
+  @override
+  String get captureOpen => 'Отвори';
+
+  @override
+  String get captureQuote => 'Цитат';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Нова белешка во $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Преземи ги сликите во $folder/';
 }

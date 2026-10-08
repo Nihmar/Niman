@@ -3181,4 +3181,17 @@ final class EstonianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Näita kausta';
+
+  @override
+  String get captureOpen => 'Ava';
+
+  @override
+  String get captureQuote => 'Tsitaat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Uus märge kaustas $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Laadi pildid kausta $folder/';
 }

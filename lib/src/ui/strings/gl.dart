@@ -3253,4 +3253,17 @@ final class GalicianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Amosar o cartafol';
+
+  @override
+  String get captureOpen => 'Abrir';
+
+  @override
+  String get captureQuote => 'Cita';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nota nova en $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Descargar as imaxes en $folder/';
 }

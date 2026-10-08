@@ -3304,4 +3304,17 @@ final class GermanStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Ordner zeigen';
+
+  @override
+  String get captureOpen => 'Öffnen';
+
+  @override
+  String get captureQuote => 'Zitat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Neue Notiz in $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Die Bilder nach $folder/ herunterladen';
 }

@@ -3254,4 +3254,17 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Shfaq dosjen';
+
+  @override
+  String get captureOpen => 'Hap';
+
+  @override
+  String get captureQuote => 'Citim';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Shënim i ri te $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Shkarko figurat te $folder/';
 }

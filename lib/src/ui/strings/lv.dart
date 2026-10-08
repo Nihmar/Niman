@@ -3225,4 +3225,17 @@ final class LatvianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Rādīt mapi';
+
+  @override
+  String get captureOpen => 'Atvērt';
+
+  @override
+  String get captureQuote => 'Citāts';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Jauna piezīme mapē $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Lejupielādēt attēlus mapē $folder/';
 }

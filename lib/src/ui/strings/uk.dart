@@ -3273,4 +3273,17 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Показати теку';
+
+  @override
+  String get captureOpen => 'Відкрити';
+
+  @override
+  String get captureQuote => 'Цитата';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Нова нотатка в $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Завантажити зображення до $folder/';
 }

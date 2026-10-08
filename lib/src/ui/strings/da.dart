@@ -3215,4 +3215,17 @@ final class DanishStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Vis mappe';
+
+  @override
+  String get captureOpen => 'Åbn';
+
+  @override
+  String get captureQuote => 'Citat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Ny note i $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Hent billederne til $folder/';
 }

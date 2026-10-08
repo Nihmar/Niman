@@ -3289,4 +3289,17 @@ final class CatalanStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Mostra la carpeta';
+
+  @override
+  String get captureOpen => 'Obre';
+
+  @override
+  String get captureQuote => 'Cita';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nota nova a $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Baixa les imatges a $folder/';
 }

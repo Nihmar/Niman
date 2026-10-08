@@ -3253,4 +3253,16 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Pokaži mapo';
+
+  @override
+  String get captureOpen => 'Odpri';
+
+  @override
+  String get captureQuote => 'Citat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nova opomba v $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) => 'Prenesi slike v $folder/';
 }

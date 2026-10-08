@@ -3253,4 +3253,17 @@ final class ItalianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Mostra cartella';
+
+  @override
+  String get captureOpen => 'Apri';
+
+  @override
+  String get captureQuote => 'Citazione';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nuova nota in $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Scarica le immagini in $folder/';
 }

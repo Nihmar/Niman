@@ -3248,4 +3248,18 @@ final class FinnishStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Näytä kansio';
+
+  @override
+  String get captureOpen => 'Avaa';
+
+  @override
+  String get captureQuote => 'Lainaus';
+
+  @override
+  String captureNewNoteIn(String folder) =>
+      'Uusi muistiinpano kansioon $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Lataa kuvat kansioon $folder/';
 }

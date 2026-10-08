@@ -3216,4 +3216,17 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Vis mappe';
+
+  @override
+  String get captureOpen => 'Åpne';
+
+  @override
+  String get captureQuote => 'Sitat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nytt notat i $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Last ned bildene til $folder/';
 }

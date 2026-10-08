@@ -3258,4 +3258,16 @@ final class BosnianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Prikaži mapu';
+
+  @override
+  String get captureOpen => 'Otvori';
+
+  @override
+  String get captureQuote => 'Citat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nova bilješka u $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) => 'Preuzmi slike u $folder/';
 }

@@ -3241,4 +3241,17 @@ final class SwedishStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Visa mapp';
+
+  @override
+  String get captureOpen => 'Öppna';
+
+  @override
+  String get captureQuote => 'Citat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Ny anteckning i $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Hämta bilderna till $folder/';
 }

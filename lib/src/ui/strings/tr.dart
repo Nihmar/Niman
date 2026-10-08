@@ -3194,4 +3194,17 @@ final class TurkishStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Klasörü göster';
+
+  @override
+  String get captureOpen => 'Aç';
+
+  @override
+  String get captureQuote => 'Alıntı';
+
+  @override
+  String captureNewNoteIn(String folder) => '$folder içinde yeni not';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Görselleri $folder/ klasörüne indir';
 }

@@ -3263,4 +3263,17 @@ final class BasqueStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Erakutsi karpeta';
+
+  @override
+  String get captureOpen => 'Ireki';
+
+  @override
+  String get captureQuote => 'Aipua';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Ohar berria $folder karpetan';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Deskargatu irudiak $folder/ karpetara';
 }

@@ -3182,4 +3182,17 @@ final class HindiStrings extends Strings {
 
   @override
   String get captureShowFolder => 'फ़ोल्डर दिखाएँ';
+
+  @override
+  String get captureOpen => 'खोलें';
+
+  @override
+  String get captureQuote => 'उद्धरण';
+
+  @override
+  String captureNewNoteIn(String folder) => '$folder में नया नोट';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'चित्र $folder/ में डाउनलोड करें';
 }

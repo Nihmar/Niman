@@ -3225,4 +3225,17 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Sýna möppu';
+
+  @override
+  String get captureOpen => 'Opna';
+
+  @override
+  String get captureQuote => 'Tilvitnun';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nýtt minnisblað í $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Sækja myndirnar í $folder/';
 }

@@ -3191,4 +3191,17 @@ final class EnglishStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Show folder';
+
+  @override
+  String get captureOpen => 'Open';
+
+  @override
+  String get captureQuote => 'Quote';
+
+  @override
+  String captureNewNoteIn(String folder) => 'New note in $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Download its images to $folder/';
 }

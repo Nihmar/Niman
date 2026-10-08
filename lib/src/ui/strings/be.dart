@@ -3272,4 +3272,17 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Паказаць папку';
+
+  @override
+  String get captureOpen => 'Адкрыць';
+
+  @override
+  String get captureQuote => 'Цытата';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Новая заўвага ў $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Спампаваць выявы ў $folder/';
 }

@@ -3269,4 +3269,17 @@ final class DutchStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Map tonen';
+
+  @override
+  String get captureOpen => 'Openen';
+
+  @override
+  String get captureQuote => 'Citaat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nieuwe notitie in $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'De afbeeldingen downloaden naar $folder/';
 }

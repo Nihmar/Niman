@@ -3326,4 +3326,17 @@ final class FrenchStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Afficher le dossier';
+
+  @override
+  String get captureOpen => 'Ouvrir';
+
+  @override
+  String get captureQuote => 'Citation';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nouvelle note dans $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Télécharger les images dans $folder/';
 }

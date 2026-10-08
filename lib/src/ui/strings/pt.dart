@@ -3250,4 +3250,17 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Mostrar pasta';
+
+  @override
+  String get captureOpen => 'Abrir';
+
+  @override
+  String get captureQuote => 'Citação';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nova nota em $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Baixar as imagens em $folder/';
 }

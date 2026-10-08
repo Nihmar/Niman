@@ -3241,4 +3241,17 @@ final class SlovakStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Zobraziť priečinok';
+
+  @override
+  String get captureOpen => 'Otvoriť';
+
+  @override
+  String get captureQuote => 'Citát';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nová poznámka v $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Stiahnuť obrázky do $folder/';
 }

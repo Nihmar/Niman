@@ -3283,4 +3283,17 @@ final class PolishStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Pokaż folder';
+
+  @override
+  String get captureOpen => 'Otwórz';
+
+  @override
+  String get captureQuote => 'Cytat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nowa notatka w $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Pobierz obrazy do $folder/';
 }

@@ -3337,4 +3337,17 @@ final class GreekStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Εμφάνιση φακέλου';
+
+  @override
+  String get captureOpen => 'Άνοιγμα';
+
+  @override
+  String get captureQuote => 'Απόσπασμα';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Νέα σημείωση στο $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Λήψη των εικόνων στο $folder/';
 }

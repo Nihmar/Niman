@@ -3239,4 +3239,17 @@ final class HungarianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Mappa megjelenítése';
+
+  @override
+  String get captureOpen => 'Megnyitás';
+
+  @override
+  String get captureQuote => 'Idézet';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Új jegyzet ide: $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'A képek letöltése ide: $folder/';
 }

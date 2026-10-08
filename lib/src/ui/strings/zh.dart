@@ -2859,4 +2859,16 @@ final class ChineseStrings extends Strings {
 
   @override
   String get captureShowFolder => '显示文件夹';
+
+  @override
+  String get captureOpen => '打开';
+
+  @override
+  String get captureQuote => '引文';
+
+  @override
+  String captureNewNoteIn(String folder) => '在 $folder 中新建笔记';
+
+  @override
+  String captureDownloadPicturesTo(String folder) => '将图片下载到 $folder/';
 }

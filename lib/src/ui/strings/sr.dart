@@ -3254,4 +3254,16 @@ final class SerbianStrings extends Strings {
 
   @override
   String get captureShowFolder => 'Прикажи фасциклу';
+
+  @override
+  String get captureOpen => 'Отвори';
+
+  @override
+  String get captureQuote => 'Цитат';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Нова белешка у $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) => 'Преузми слике у $folder/';
 }

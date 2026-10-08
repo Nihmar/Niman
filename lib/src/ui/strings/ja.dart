@@ -2948,4 +2948,16 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get captureShowFolder => 'フォルダを表示';
+
+  @override
+  String get captureOpen => '開く';
+
+  @override
+  String get captureQuote => '引用';
+
+  @override
+  String captureNewNoteIn(String folder) => '$folder に新しいノート';
+
+  @override
+  String captureDownloadPicturesTo(String folder) => '画像を $folder/ にダウンロード';
 }
