@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presenter view, desktop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;padding:28px;font-family:'IBM Plex Sans',sans-serif;background:#14161A;color:#F2EDE5}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+h2{font-size:14px;font-weight:600;margin:32px 0 10px;color:#A6A29A;text-transform:uppercase;letter-spacing:.08em}
+p.lead{margin:0 0 8px;color:#A6A29A;font-size:13px;max-width:820px;line-height:1.5}
+.screen{width:1280px;height:800px;background:#1B1D21;position:relative;overflow:hidden;border-radius:6px;display:flex;flex-direction:column}
+.ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.slide{width:960px;height:540px;box-sizing:border-box;padding:56px 72px;background:#23262B;font-family:Literata,serif;color:#F2EDE5;transform-origin:0 0;overflow:hidden}
+.slide h3{font-size:46px;font-weight:600;margin:0 0 28px;line-height:1.15}
+.slide ol,.slide ul{margin:0;padding-left:40px;font-size:30px;line-height:1.6}
+.slide table{border-collapse:collapse;font-size:26px;width:100%}
+.slide td,.slide th{border-bottom:1px solid #4A4F59;padding:10px 14px;text-align:left}
+.slide th{color:#A6A29A;font-weight:600}
+.slide .muted{color:#A6A29A}
+.top{height:52px;flex:none;display:flex;align-items:center;gap:6px;padding:0 14px;border-bottom:1px solid #2C3037}
+.b{height:36px;min-width:36px;padding:0 12px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:7px;color:#D9D4CB;box-sizing:border-box;font-size:13.5px}
+.b.out{border:1px solid #4A4F59}
+.lbl{font-size:12px;font-weight:600;color:#A6A29A;letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
+.caption{font-size:12.5px;color:#A6A29A;margin:10px 0 0;max-width:1280px;line-height:1.5}
+.big{font-size:44px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+</style>
+</head>
+<body>
+
+<h1>Slides — the presenter view</h1>
+<p class="lead">From ⋮ › Presenter view, Alt+F5, or Notes on the presenting bar. Full screen, one window: what the speaker
+needs and the audience does not see.</p>
+
+<h2>1 · The presenter view</h2>
+<div class="screen">
+  <div class="top">
+    <div style="font-weight:600;font-size:14px">Piano Q4</div>
+    <div style="color:#A6A29A;font-size:13.5px;margin-left:6px">· 3 / 7</div>
+    <div style="flex:1"></div>
+    <div class="b"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>Overview</div>
+    <div class="b"><svg class="ico" viewBox="0 0 20 20"><rect x="2.5" y="3.5" width="15" height="10" rx="1.5"/><path d="M8.6 6.4l3.4 2.1-3.4 2.1z"/><path d="M10 13.5v3M7 16.5h6"/></svg>Slide only</div>
+    <div class="b out"><svg class="ico" viewBox="0 0 20 20"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M3 13v4h4"/><path d="M8 8l4 4M12 8l-4 4"/></svg>Exit</div>
+  </div>
+
+  <div style="flex:1;min-height:0;display:flex;gap:22px;padding:22px">
+    <div style="display:flex;flex-direction:column;min-width:0">
+      <div class="lbl">Now</div>
+      <div style="width:784px;height:441px;border-radius:8px;overflow:hidden;box-shadow:0 0 0 2px #587CD3">
+        <div class="slide" style="transform:scale(.81667)">
+          <h3>Obiettivi del trimestre</h3>
+          <ol><li>Note-presentazione <span class="muted">(#534)</span></li><li>Sync verso S3</li><li>Avvio sotto i 400 ms</li></ol>
+        </div>
+      </div>
+      <div class="lbl" style="margin-top:18px">Speaker notes</div>
+      <div style="font-family:Literata,serif;font-size:21px;line-height:1.55;color:#F2EDE5;max-width:784px">
+        Partire dal #534: è quello che vedete adesso.<br>Ricordare che il PDF esce in 16:9.
+      </div>
+    </div>
+
+    <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+      <div class="lbl">Next · 4</div>
+      <div style="width:408px;height:229.5px;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px #363B44;opacity:.92">
+        <div class="slide" style="transform:scale(.425)">
+          <h3>Tempi</h3>
+          <table><tr><th>Fase</th><th>Inizio</th><th>Fine</th></tr><tr><td>Slide</td><td>13 ott</td><td>24 ott</td></tr><tr><td>Sync S3</td><td>27 ott</td><td>21 nov</td></tr><tr><td>Avvio</td><td>24 nov</td><td>12 dic</td></tr></table>
+        </div>
+      </div>
+
+      <div style="margin-top:26px;padding:16px 18px;border-radius:12px;background:#23262B;border:1px solid #2C3037">
+        <div class="lbl">Elapsed</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="big">07:42</div>
+          <div style="flex:1"></div>
+          <div class="b out" title="Pause"><svg class="ico" viewBox="0 0 20 20"><path d="M7 4.5v11M13 4.5v11"/></svg></div>
+          <div class="b out" title="Restart"><svg class="ico" viewBox="0 0 20 20"><path d="M3.5 10a6.5 6.5 0 1 0 2-4.7M3.5 3.5v3h3"/></svg></div>
+        </div>
+        <div style="font-size:13px;color:#A6A29A;margin-top:4px">Clock 15:12</div>
+      </div>
+
+      <div style="flex:1"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <div class="b out" style="height:44px;border-radius:22px;padding:0 16px"><svg class="ico" viewBox="0 0 20 20"><path d="M12.5 4.5L7 10l5.5 5.5"/></svg>Previous</div>
+        <div class="b" style="height:44px;border-radius:22px;padding:0 18px;background:#587CD3;color:#F2EDE5">Next<svg class="ico" viewBox="0 0 20 20"><path d="M7.5 4.5L13 10l-5.5 5.5"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="caption">The timer starts on the first move after the view opens, not on opening it; P pauses it, R restarts it.
+The keys are the presenting ones. <b>Slide only</b> goes back to the bare slide (F5), Exit to the slide view. Long notes scroll in
+their own column; the slides keep their place. On the last slide, Next is disabled rather than hidden.</p>
+
+</body>
+</html>

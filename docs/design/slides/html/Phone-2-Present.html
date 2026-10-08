@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presenting, phone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;padding:28px;font-family:'IBM Plex Sans',sans-serif;background:#14161A;color:#F2EDE5}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+h2{font-size:14px;font-weight:600;margin:30px 0 10px;color:#A6A29A;text-transform:uppercase;letter-spacing:.08em}
+p.lead{margin:0 0 8px;color:#A6A29A;font-size:13px;max-width:820px;line-height:1.5}
+.cap{font-size:12.5px;color:#A6A29A;line-height:1.5;max-width:844px;margin-top:10px}
+.land{width:844px;height:390px;background:#000;position:relative;overflow:hidden;border-radius:6px;display:flex;justify-content:center}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.slide{width:960px;height:540px;box-sizing:border-box;padding:56px 72px;background:#23262B;font-family:Literata,serif;color:#F2EDE5;transform-origin:0 0;overflow:hidden}
+.slide h3{font-size:46px;font-weight:600;margin:0 0 28px;line-height:1.15}
+.slide ol,.slide ul{margin:0;padding-left:40px;font-size:30px;line-height:1.6}
+.slide .muted{color:#A6A29A}
+.fit{width:693.3px;height:390px;overflow:hidden}
+.zone{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;font-size:13px;color:#F2EDE5}
+.phone{width:390px;height:844px;background:#23262B;color:#F2EDE5;font-size:15px;overflow:hidden;position:relative;border-radius:6px}
+.mini{display:flex;align-items:center;justify-content:flex-end;gap:12px}
+.mini .l{height:32px;padding:0 12px;border-radius:8px;background:#363B44;display:flex;align-items:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mini .f{width:44px;height:44px;border-radius:14px;background:#363B44;color:#D9D4CB;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mini.new .l{box-shadow:0 0 0 1.5px #587CD3}
+</style>
+</head>
+<body>
+
+<h1>Slides — presenting from the phone</h1>
+<p class="lead">Turning the phone while the slide view is on presents: the slide fills the screen in landscape, the system bars
+hide, and the screen stays on until the talk ends. 844×390.</p>
+
+<h2>1 · Landscape — only the slide</h2>
+<div class="land">
+  <div class="fit"><div class="slide" style="transform:scale(.72222)">
+    <h3>Obiettivi del trimestre</h3>
+    <ol><li>Note-presentazione <span class="muted">(#534)</span></li><li>Sync verso S3</li><li>Avvio sotto i 400 ms</li></ol>
+  </div></div>
+  <div style="position:absolute;right:14px;bottom:10px;font-size:12px;color:rgba(242,237,229,.45)">3 / 7</div>
+</div>
+<p class="cap">A tap on the right third goes forward, on the left third back; a swipe left/right too. A swipe down exits
+to the slide view — which, with the phone still sideways, stays in the slide view until the phone turns upright and sideways
+again. The faint counter is the only chrome. A Bluetooth clicker works as is: it sends Page Up / Page Down, the keys the desktop already answers.</p>
+
+<h2>2 · On entering — where to tap</h2>
+<div class="land">
+  <div class="fit" style="opacity:.35"><div class="slide" style="transform:scale(.72222)">
+    <h3>Obiettivi del trimestre</h3>
+    <ol><li>Note-presentazione</li><li>Sync verso S3</li><li>Avvio sotto i 400 ms</li></ol>
+  </div></div>
+  <div class="zone" style="left:0;width:33%;border-right:1px dashed rgba(242,237,229,.3)"><svg class="ico" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Back</div>
+  <div class="zone" style="left:33%;width:34%"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v13M6 12l6 6 6-6"/></svg>Swipe down to exit</div>
+  <div class="zone" style="right:0;width:33%;border-left:1px dashed rgba(242,237,229,.3)"><svg class="ico" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>Next</div>
+</div>
+<p class="cap">Shown over the slide each time presenting starts, gone after 2 s or at the first tap. Nothing is
+remembered, so there is no setting behind it.</p>
+
+<h2>3 · New → Slides</h2>
+<div class="phone">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.45)"></div>
+  <div style="position:absolute;right:16px;bottom:24px;display:flex;flex-direction:column;gap:14px;align-items:flex-end">
+    <div class="mini"><div class="l">Today's journal</div><div class="f"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div></div>
+    <div class="mini"><div class="l">New note</div><div class="f"><svg class="ico" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M12 11v6M9 14h6"/></svg></div></div>
+    <div class="mini"><div class="l">New from template</div><div class="f"><svg class="ico" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V4H4v13h4"/></svg></div></div>
+    <div class="mini"><div class="l">New list note</div><div class="f"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7l2 2 3-3M4 15l2 2 3-3M12 8h8M12 16h8"/></svg></div></div>
+    <div class="mini"><div class="l">New voice note</div><div class="f"><svg class="ico" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div></div>
+    <div class="mini new"><div class="l">New slides</div><div class="f"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg></div></div>
+    <div class="mini"><div class="l">Capture a web page</div><div class="f"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></div></div>
+    <div class="mini"><div class="l">New folder</div><div class="f"><svg class="ico" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M12 12v5M9.5 14.5h5"/></svg></div></div>
+    <div style="width:56px;height:56px;border-radius:16px;background:#587CD3;display:flex;align-items:center;justify-content:center;margin-top:4px"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+  </div>
+</div>
+<p class="cap">Same entry on the desktop's create menu and in the command palette ("New slides"). It asks for a name, like the
+other kinds, and writes the note in the menu's target folder:</p>
+<pre style="font-size:12.5px;background:#1B1D21;border:1px solid #2C3037;border-radius:8px;padding:12px 14px;color:#D9D4CB;width:max-content">---
+type: slides
+---
+
+# Piano Q4
+
+---
+
+## Second slide
+
+- A point
+
+Note: what to say here — only you see it.</pre>
+
+</body>
+</html>
