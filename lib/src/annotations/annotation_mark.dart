@@ -36,6 +36,7 @@ final class AnnotationMark {
     this.highlight,
     this.end,
     this.quote = '',
+    this.label,
   });
 
   /// The companion note, library-relative.
@@ -60,6 +61,10 @@ final class AnnotationMark {
   /// A highlight's passage, as its quote says it; empty for an annotation.
   final String quote;
 
+  /// What its link shows, `Dune, p. 34`: the place's name, for a heading
+  /// or a link to it.
+  final String? label;
+
   /// Whether this is a highlight rather than an annotation.
   bool get isHighlight => highlight != null;
 
@@ -72,11 +77,12 @@ final class AnnotationMark {
       other.title == title &&
       other.highlight == highlight &&
       other.end == end &&
-      other.quote == quote;
+      other.quote == quote &&
+      other.label == label;
 
   @override
   int get hashCode =>
-      Object.hash(note, offset, place, title, highlight, end, quote);
+      Object.hash(note, offset, place, title, highlight, end, quote, label);
 
   @override
   String toString() =>
@@ -97,6 +103,7 @@ typedef AnnotationLink = ({
   HighlightColour? highlight,
   int? end,
   String quote,
+  String? label,
 });
 
 /// The links of [text], a note, that point at a place of a file, each with
@@ -113,11 +120,13 @@ List<AnnotationLink> annotationLinksIn(String text) {
     final String target;
     final String? fragment;
     final bool markdown;
+    final String? label;
     switch (link) {
       case WikiLink(:final ref):
         target = ref.target;
         fragment = ref.heading;
         markdown = false;
+        label = ref.alias;
       case MarkdownLink(href: final written):
         // `<Books/My Book.pdf#page=3>`, the form that allows spaces.
         final href = written.startsWith('<') && written.endsWith('>')
@@ -128,6 +137,7 @@ List<AnnotationLink> annotationLinksIn(String text) {
         target = percentDecoded(href.substring(0, hash));
         fragment = href.substring(hash + 1);
         markdown = true;
+        label = link.text.isEmpty ? null : link.text;
     }
     if (target.isEmpty || fragment == null) continue;
     final place = BookLocation.fromFragment(fragment);
@@ -148,6 +158,7 @@ List<AnnotationLink> annotationLinksIn(String text) {
         highlight: highlight,
         end: quote.end,
         quote: quote.text,
+        label: label,
       ));
       continue;
     }
@@ -162,6 +173,7 @@ List<AnnotationLink> annotationLinksIn(String text) {
       highlight: null,
       end: null,
       quote: '',
+      label: label,
     ));
   }
   return out;

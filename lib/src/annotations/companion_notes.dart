@@ -30,6 +30,7 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/render/mark_highlight.dart';
+import 'package:niman/src/markdown/text_escape.dart';
 import 'package:path/path.dart' as p;
 
 /// Where an annotation was written: the note, and the offset its text
@@ -99,6 +100,7 @@ final class CompanionNotes {
             highlight: link.highlight,
             end: link.end,
             quote: link.quote,
+            label: link.label,
           ),
         );
       }
@@ -120,6 +122,24 @@ final class CompanionNotes {
         }
         return '$before$after';
       });
+
+  /// Turns the highlight [mark] into an annotation saying [comment], where
+  /// it is: its quote gains the heading an annotation has, named [label],
+  /// and the comment under it, and its link loses its colour. Throws a
+  /// [StateError] when the note no longer has it where [mark] says.
+  Future<void> annotateHighlight(
+    AnnotationMark mark, {
+    required String label,
+    required String comment,
+  }) => _rewrite(mark, (text, start, end) {
+    final quote = text
+        .substring(start, end)
+        .replaceFirst(RegExp('&highlight=${mark.highlight!.id}\\b'), '');
+    final said = comment.trim();
+    final heading = escapeMarkdownText(label.replaceAll(RegExp(r'\s+'), ' '));
+    return '${text.substring(0, start)}## ${heading.trim()}\n\n$quote'
+        '${said.isEmpty ? '' : '\n$said\n'}${text.substring(end)}';
+  });
 
   /// Gives the highlight [mark] the colour [colour]. Throws a [StateError]
   /// when the note no longer has it where [mark] says.

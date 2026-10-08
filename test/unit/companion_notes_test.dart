@@ -273,6 +273,33 @@ void main() {
       expect(again.quote, 'Passage 4.');
     });
 
+    test('annotated, it becomes an annotation where it is', () async {
+      await write(highlight(4, HighlightColour.green));
+      await write(highlight(5, HighlightColour.pink));
+      final green = (await companions.marksOf('Books/Dune.pdf')).first;
+      expect(green.label, 'p. 4');
+      await companions.annotateHighlight(
+        green,
+        label: green.label!,
+        comment: 'Worth a second look.',
+      );
+      final marks = await companions.marksOf('Books/Dune.pdf');
+      expect(
+        [for (final m in marks) m.highlight],
+        [null, HighlightColour.pink],
+      );
+      expect(marks.first.title, 'p. 4');
+      final text = read(marks.first.note);
+      expect(
+        text,
+        contains(
+          '## p. 4\n\n> Passage 4.\n'
+          '> — [[Books/Dune.pdf#page=4&chars=0-9|p. 4]]\n'
+          '\nWorth a second look.\n\n> Passage 5.',
+        ),
+      );
+    });
+
     test('a note edited since is not changed blindly', () async {
       await write(highlight(4, HighlightColour.green));
       final mark = (await companions.marksOf('Books/Dune.pdf')).single;
