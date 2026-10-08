@@ -9,6 +9,7 @@ library;
 
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html;
+import 'package:niman/src/capture/page_removed.dart';
 import 'package:niman/src/capture/readability/dom.dart';
 import 'package:niman/src/capture/readability/metadata.dart';
 import 'package:niman/src/capture/readability/post_process.dart';
@@ -35,6 +36,8 @@ final class PageReading {
     this.siteName,
     this.publishedTime,
     this.image,
+    this.words = 0,
+    this.removed = nothingRemoved,
   });
 
   /// Where the page was read from, after its redirects.
@@ -61,6 +64,26 @@ final class PageReading {
   /// Its picture (`og:image`), absolute.
   final String? image;
 
+  /// The words of its article.
+  final int words;
+
+  /// What was left out of it around the article.
+  final PageRemoved removed;
+
+  /// The same page under another [title]: the one the user gave it.
+  PageReading withTitle(String title) => PageReading(
+    url: url,
+    title: title,
+    article: article,
+    byline: byline,
+    description: description,
+    siteName: siteName,
+    publishedTime: publishedTime,
+    image: image,
+    words: words,
+    removed: removed,
+  );
+
   /// Whether an article was found.
   bool get readable => article != null;
 }
@@ -79,10 +102,12 @@ PageReading readPage(String? text, Uri url) {
     'twitter:description',
   ]);
   final title = documentTitle(document);
+  final seen = removedFrom(document, articleWords: 0);
   final article = readArticle(document, documentUri: url);
   final found =
       article != null &&
       article.textContent.trim().length >= minimumArticleCharacters;
+  final words = found ? wordCount(article.textContent) : 0;
   return PageReading(
     url: url,
     title: _firstOf([article?.title, title]) ?? fallbackTitle,
@@ -92,6 +117,18 @@ PageReading readPage(String? text, Uri url) {
     siteName: _firstOf([article?.siteName]),
     publishedTime: _firstOf([article?.publishedTime]),
     image: image == null ? null : resolveUrl(url, image),
+    words: words,
+    removed: found
+        ? (
+            scripts: seen.scripts,
+            styles: seen.styles,
+            menu: seen.menu,
+            banner: seen.banner,
+            wordsAround: seen.wordsAround > words
+                ? seen.wordsAround - words
+                : 0,
+          )
+        : nothingRemoved,
   );
 }
 

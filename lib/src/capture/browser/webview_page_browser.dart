@@ -3,9 +3,8 @@
 /// network pictures off, no file access, no JavaScript interface — whose
 /// `outerHTML` is read once the page has stopped growing.
 ///
-/// The capture runs off the UI isolate, so the channel is reached through
-/// the background isolate messenger, with the token taken on the UI
-/// isolate.
+/// Called off the UI isolate, the channel is reached through the
+/// background isolate messenger, with the token taken on the UI isolate.
 library;
 
 import 'dart:async';
@@ -36,7 +35,11 @@ final class WebViewPageBrowser implements PageBrowser {
   @override
   Future<String?> read(Uri url) async {
     if (!(url.isScheme('http') || url.isScheme('https'))) return null;
-    BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+    // Off the UI isolate the channel goes through the background
+    // messenger; on it, through the app's own.
+    if (RootIsolateToken.instance == null) {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+    }
     try {
       return await _channel
           .invokeMethod<String>('read', <String, Object>{
