@@ -27,11 +27,11 @@ final class FakeSearchSource implements SearchSource {
   @override
   Future<List<SearchHit>> search(
     String? query, {
-    required int id,
+    required int? id,
     int limit = 200,
   }) async {
     queries.add(query ?? '');
-    if (!isCurrent(id)) return const [];
+    if (id != null && !isCurrent(id)) return const [];
     if (query == null || query.trim().isEmpty) return const [];
     return hits;
   }

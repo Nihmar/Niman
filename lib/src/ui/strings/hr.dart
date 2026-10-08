@@ -3404,4 +3404,61 @@ final class CroatianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'što ovdje reći — vidite samo vi.';
+
+  @override
+  String get tabHome => 'Početna';
+
+  @override
+  String get homeTileActions => 'Radnje';
+
+  @override
+  String get homeTileJournalToday => 'Današnji dnevnik';
+
+  @override
+  String get homeTileTasksDue => 'Zadaci s rokom';
+
+  @override
+  String get homeTileRecent => 'Nedavno izmijenjeno';
+
+  @override
+  String get homeTilePinned => 'Prikvačeno';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendar dnevnika';
+
+  @override
+  String get homeTileTopTags => 'Najčešće oznake';
+
+  @override
+  String get homeTileRandomNote => 'Nasumična bilješka';
+
+  @override
+  String get homeTileSearch => 'Spremljeno pretraživanje';
+
+  @override
+  String get homeJournalEmpty => 'Danas još ništa nije napisano.';
+
+  @override
+  String get homeJournalWrite => 'Napiši današnji unos';
+
+  @override
+  String get homeTasksEmpty => 'Nema otvorenih zadataka.';
+
+  @override
+  String get homeNotesEmpty => 'Još nema bilješki.';
+
+  @override
+  String get homePinnedEmpty => 'Prikvači bilješku i pojavit će se ovdje.';
+
+  @override
+  String get homeTagsEmpty => 'Još nema oznaka.';
+
+  @override
+  String get homeSearchEmpty => 'Nema rezultata.';
+
+  @override
+  String get homeSearchNoQuery => 'Još nema upita.';
+
+  @override
+  String get homeRandomAnother => 'Druga';
 }

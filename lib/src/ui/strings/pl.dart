@@ -3429,4 +3429,61 @@ final class PolishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'co tu powiedzieć — widzisz to tylko ty.';
+
+  @override
+  String get tabHome => 'Start';
+
+  @override
+  String get homeTileActions => 'Akcje';
+
+  @override
+  String get homeTileJournalToday => 'Dzisiejszy dziennik';
+
+  @override
+  String get homeTileTasksDue => 'Zadania do zrobienia';
+
+  @override
+  String get homeTileRecent => 'Ostatnio zmienione';
+
+  @override
+  String get homeTilePinned => 'Przypięte';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendarz dziennika';
+
+  @override
+  String get homeTileTopTags => 'Najczęstsze tagi';
+
+  @override
+  String get homeTileRandomNote => 'Losowa notatka';
+
+  @override
+  String get homeTileSearch => 'Zapisane wyszukiwanie';
+
+  @override
+  String get homeJournalEmpty => 'Dziś jeszcze nic nie napisano.';
+
+  @override
+  String get homeJournalWrite => 'Napisz dzisiejszy wpis';
+
+  @override
+  String get homeTasksEmpty => 'Brak otwartych zadań.';
+
+  @override
+  String get homeNotesEmpty => 'Brak notatek.';
+
+  @override
+  String get homePinnedEmpty => 'Przypnij notatkę, a pojawi się tutaj.';
+
+  @override
+  String get homeTagsEmpty => 'Brak tagów.';
+
+  @override
+  String get homeSearchEmpty => 'Brak wyników.';
+
+  @override
+  String get homeSearchNoQuery => 'Brak zapytania.';
+
+  @override
+  String get homeRandomAnother => 'Inna';
 }

@@ -3371,4 +3371,61 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'hvað á að segja hér — aðeins þú sérð það.';
+
+  @override
+  String get tabHome => 'Heim';
+
+  @override
+  String get homeTileActions => 'Aðgerðir';
+
+  @override
+  String get homeTileJournalToday => 'Dagbók dagsins';
+
+  @override
+  String get homeTileTasksDue => 'Verkefni á gjalddaga';
+
+  @override
+  String get homeTileRecent => 'Nýlega breytt';
+
+  @override
+  String get homeTilePinned => 'Fest';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagbókardagatal';
+
+  @override
+  String get homeTileTopTags => 'Algengustu merki';
+
+  @override
+  String get homeTileRandomNote => 'Handahófskennd glósa';
+
+  @override
+  String get homeTileSearch => 'Vistuð leit';
+
+  @override
+  String get homeJournalEmpty => 'Ekkert skrifað í dag enn.';
+
+  @override
+  String get homeJournalWrite => 'Skrifa færslu dagsins';
+
+  @override
+  String get homeTasksEmpty => 'Engin opin verkefni.';
+
+  @override
+  String get homeNotesEmpty => 'Engar glósur enn.';
+
+  @override
+  String get homePinnedEmpty => 'Festu glósu og hún birtist hér.';
+
+  @override
+  String get homeTagsEmpty => 'Engin merki enn.';
+
+  @override
+  String get homeSearchEmpty => 'Ekkert passar.';
+
+  @override
+  String get homeSearchNoQuery => 'Engin leit enn.';
+
+  @override
+  String get homeRandomAnother => 'Aðra';
 }

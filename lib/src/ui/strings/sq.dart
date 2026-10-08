@@ -3400,4 +3400,61 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'çfarë të thuash këtu — e sheh vetëm ti.';
+
+  @override
+  String get tabHome => 'Kreu';
+
+  @override
+  String get homeTileActions => 'Veprime';
+
+  @override
+  String get homeTileJournalToday => 'Ditari i sotëm';
+
+  @override
+  String get homeTileTasksDue => 'Detyra në afat';
+
+  @override
+  String get homeTileRecent => 'Ndryshuar së fundmi';
+
+  @override
+  String get homeTilePinned => 'Të fiksuara';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendari i ditarit';
+
+  @override
+  String get homeTileTopTags => 'Etiketat kryesore';
+
+  @override
+  String get homeTileRandomNote => 'Shënim i rastësishëm';
+
+  @override
+  String get homeTileSearch => 'Kërkim i ruajtur';
+
+  @override
+  String get homeJournalEmpty => 'Asgjë e shkruar sot ende.';
+
+  @override
+  String get homeJournalWrite => 'Shkruaj hyrjen e sotme';
+
+  @override
+  String get homeTasksEmpty => 'Asnjë detyrë e hapur.';
+
+  @override
+  String get homeNotesEmpty => 'Ende nuk ka shënime.';
+
+  @override
+  String get homePinnedEmpty => 'Fikso një shënim dhe do të shfaqet këtu.';
+
+  @override
+  String get homeTagsEmpty => 'Ende nuk ka etiketa.';
+
+  @override
+  String get homeSearchEmpty => 'Asnjë përputhje.';
+
+  @override
+  String get homeSearchNoQuery => 'Ende nuk ka kërkim.';
+
+  @override
+  String get homeRandomAnother => 'Një tjetër';
 }

@@ -3399,4 +3399,61 @@ final class GalicianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'que dicir aquí — só ti o ves.';
+
+  @override
+  String get tabHome => 'Inicio';
+
+  @override
+  String get homeTileActions => 'Accións';
+
+  @override
+  String get homeTileJournalToday => 'Diario de hoxe';
+
+  @override
+  String get homeTileTasksDue => 'Tarefas pendentes';
+
+  @override
+  String get homeTileRecent => 'Modificadas recentemente';
+
+  @override
+  String get homeTilePinned => 'Fixadas';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendario do diario';
+
+  @override
+  String get homeTileTopTags => 'Etiquetas principais';
+
+  @override
+  String get homeTileRandomNote => 'Nota ao chou';
+
+  @override
+  String get homeTileSearch => 'Busca gardada';
+
+  @override
+  String get homeJournalEmpty => 'Aínda non hai nada escrito hoxe.';
+
+  @override
+  String get homeJournalWrite => 'Escribir a entrada de hoxe';
+
+  @override
+  String get homeTasksEmpty => 'Non hai tarefas abertas.';
+
+  @override
+  String get homeNotesEmpty => 'Aínda non hai notas.';
+
+  @override
+  String get homePinnedEmpty => 'Fixa unha nota e aparecerá aquí.';
+
+  @override
+  String get homeTagsEmpty => 'Aínda non hai etiquetas.';
+
+  @override
+  String get homeSearchEmpty => 'Sen coincidencias.';
+
+  @override
+  String get homeSearchNoQuery => 'Aínda non hai consulta.';
+
+  @override
+  String get homeRandomAnother => 'Outra';
 }

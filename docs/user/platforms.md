@@ -185,6 +185,12 @@ second screen, present from the window placed there.
   browsers write with the page it came from (see
   [web capture](web-capture.md#paste-as-markdown)).
 
+## Home
+
+On Linux, Windows and a wide Android window the [Home](home.md) is a grid
+of tiles; on a phone it is a column of the same tiles. One Home, one file:
+only the shape changes.
+
 ## Density
 
 On Linux and Windows the note tree and its right-click menu are drawn

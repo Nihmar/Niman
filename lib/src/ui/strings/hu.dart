@@ -3385,4 +3385,61 @@ final class HungarianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'mit mondj itt — csak te látod.';
+
+  @override
+  String get tabHome => 'Kezdőlap';
+
+  @override
+  String get homeTileActions => 'Műveletek';
+
+  @override
+  String get homeTileJournalToday => 'Mai napló';
+
+  @override
+  String get homeTileTasksDue => 'Esedékes feladatok';
+
+  @override
+  String get homeTileRecent => 'Nemrég módosított';
+
+  @override
+  String get homeTilePinned => 'Kitűzött';
+
+  @override
+  String get homeTileJournalCalendar => 'Naplónaptár';
+
+  @override
+  String get homeTileTopTags => 'Legtöbbet használt címkék';
+
+  @override
+  String get homeTileRandomNote => 'Véletlen jegyzet';
+
+  @override
+  String get homeTileSearch => 'Mentett keresés';
+
+  @override
+  String get homeJournalEmpty => 'Ma még nincs semmi leírva.';
+
+  @override
+  String get homeJournalWrite => 'Mai bejegyzés írása';
+
+  @override
+  String get homeTasksEmpty => 'Nincs nyitott feladat.';
+
+  @override
+  String get homeNotesEmpty => 'Még nincsenek jegyzetek.';
+
+  @override
+  String get homePinnedEmpty => 'Tűzz ki egy jegyzetet, és itt jelenik meg.';
+
+  @override
+  String get homeTagsEmpty => 'Még nincsenek címkék.';
+
+  @override
+  String get homeSearchEmpty => 'Nincs találat.';
+
+  @override
+  String get homeSearchNoQuery => 'Még nincs keresés.';
+
+  @override
+  String get homeRandomAnother => 'Másikat';
 }

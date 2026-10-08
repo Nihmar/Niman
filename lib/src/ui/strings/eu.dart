@@ -3410,4 +3410,61 @@ final class BasqueStrings extends Strings {
   @override
   String get slidesTemplateNote =>
       'hemen zer esan — zuk bakarrik ikusten duzu.';
+
+  @override
+  String get tabHome => 'Hasiera';
+
+  @override
+  String get homeTileActions => 'Ekintzak';
+
+  @override
+  String get homeTileJournalToday => 'Gaurko egunkaria';
+
+  @override
+  String get homeTileTasksDue => 'Epea duten zereginak';
+
+  @override
+  String get homeTileRecent => 'Duela gutxi aldatuak';
+
+  @override
+  String get homeTilePinned => 'Finkatuak';
+
+  @override
+  String get homeTileJournalCalendar => 'Egunkariaren egutegia';
+
+  @override
+  String get homeTileTopTags => 'Etiketa nagusiak';
+
+  @override
+  String get homeTileRandomNote => 'Ausazko oharra';
+
+  @override
+  String get homeTileSearch => 'Gordetako bilaketa';
+
+  @override
+  String get homeJournalEmpty => 'Gaur ez da ezer idatzi oraindik.';
+
+  @override
+  String get homeJournalWrite => 'Idatzi gaurko sarrera';
+
+  @override
+  String get homeTasksEmpty => 'Ez dago zeregin irekirik.';
+
+  @override
+  String get homeNotesEmpty => 'Ez dago oharrik oraindik.';
+
+  @override
+  String get homePinnedEmpty => 'Finkatu ohar bat eta hemen agertuko da.';
+
+  @override
+  String get homeTagsEmpty => 'Ez dago etiketarik oraindik.';
+
+  @override
+  String get homeSearchEmpty => 'Ez dago bat-etortzerik.';
+
+  @override
+  String get homeSearchNoQuery => 'Ez dago kontsultarik oraindik.';
+
+  @override
+  String get homeRandomAnother => 'Beste bat';
 }

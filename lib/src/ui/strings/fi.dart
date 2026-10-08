@@ -3395,4 +3395,61 @@ final class FinnishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'mitä tässä sanotaan — vain sinä näet sen.';
+
+  @override
+  String get tabHome => 'Koti';
+
+  @override
+  String get homeTileActions => 'Toiminnot';
+
+  @override
+  String get homeTileJournalToday => 'Päivän päiväkirja';
+
+  @override
+  String get homeTileTasksDue => 'Erääntyvät tehtävät';
+
+  @override
+  String get homeTileRecent => 'Viimeksi muokatut';
+
+  @override
+  String get homeTilePinned => 'Kiinnitetyt';
+
+  @override
+  String get homeTileJournalCalendar => 'Päiväkirjan kalenteri';
+
+  @override
+  String get homeTileTopTags => 'Suosituimmat tunnisteet';
+
+  @override
+  String get homeTileRandomNote => 'Satunnainen muistiinpano';
+
+  @override
+  String get homeTileSearch => 'Tallennettu haku';
+
+  @override
+  String get homeJournalEmpty => 'Tänään ei ole vielä kirjoitettu mitään.';
+
+  @override
+  String get homeJournalWrite => 'Kirjoita päivän merkintä';
+
+  @override
+  String get homeTasksEmpty => 'Ei avoimia tehtäviä.';
+
+  @override
+  String get homeNotesEmpty => 'Ei vielä muistiinpanoja.';
+
+  @override
+  String get homePinnedEmpty => 'Kiinnitä muistiinpano, niin se näkyy tässä.';
+
+  @override
+  String get homeTagsEmpty => 'Ei vielä tunnisteita.';
+
+  @override
+  String get homeSearchEmpty => 'Ei osumia.';
+
+  @override
+  String get homeSearchNoQuery => 'Ei vielä hakua.';
+
+  @override
+  String get homeRandomAnother => 'Toinen';
 }

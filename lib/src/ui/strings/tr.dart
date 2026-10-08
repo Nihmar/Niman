@@ -3341,4 +3341,61 @@ final class TurkishStrings extends Strings {
   @override
   String get slidesTemplateNote =>
       'burada ne söyleneceği — yalnızca siz görürsünüz.';
+
+  @override
+  String get tabHome => 'Ana sayfa';
+
+  @override
+  String get homeTileActions => 'Eylemler';
+
+  @override
+  String get homeTileJournalToday => 'Bugünün günlüğü';
+
+  @override
+  String get homeTileTasksDue => 'Vadesi gelen görevler';
+
+  @override
+  String get homeTileRecent => 'Son değiştirilenler';
+
+  @override
+  String get homeTilePinned => 'Sabitlenenler';
+
+  @override
+  String get homeTileJournalCalendar => 'Günlük takvimi';
+
+  @override
+  String get homeTileTopTags => 'En çok kullanılan etiketler';
+
+  @override
+  String get homeTileRandomNote => 'Rastgele not';
+
+  @override
+  String get homeTileSearch => 'Kayıtlı arama';
+
+  @override
+  String get homeJournalEmpty => 'Bugün henüz bir şey yazılmadı.';
+
+  @override
+  String get homeJournalWrite => 'Bugünün kaydını yaz';
+
+  @override
+  String get homeTasksEmpty => 'Açık görev yok.';
+
+  @override
+  String get homeNotesEmpty => 'Henüz not yok.';
+
+  @override
+  String get homePinnedEmpty => 'Bir notu sabitleyin, burada görünsün.';
+
+  @override
+  String get homeTagsEmpty => 'Henüz etiket yok.';
+
+  @override
+  String get homeSearchEmpty => 'Eşleşme yok.';
+
+  @override
+  String get homeSearchNoQuery => 'Henüz sorgu yok.';
+
+  @override
+  String get homeRandomAnother => 'Başka bir tane';
 }

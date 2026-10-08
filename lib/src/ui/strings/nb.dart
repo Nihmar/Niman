@@ -3362,4 +3362,61 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'hva du skal si her — bare du ser det.';
+
+  @override
+  String get tabHome => 'Hjem';
+
+  @override
+  String get homeTileActions => 'Handlinger';
+
+  @override
+  String get homeTileJournalToday => 'Dagens dagbok';
+
+  @override
+  String get homeTileTasksDue => 'Oppgaver med frist';
+
+  @override
+  String get homeTileRecent => 'Nylig endret';
+
+  @override
+  String get homeTilePinned => 'Festet';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagbokkalender';
+
+  @override
+  String get homeTileTopTags => 'Mest brukte tagger';
+
+  @override
+  String get homeTileRandomNote => 'Tilfeldig notat';
+
+  @override
+  String get homeTileSearch => 'Lagret søk';
+
+  @override
+  String get homeJournalEmpty => 'Ingenting skrevet i dag ennå.';
+
+  @override
+  String get homeJournalWrite => 'Skriv dagens innlegg';
+
+  @override
+  String get homeTasksEmpty => 'Ingen åpne oppgaver.';
+
+  @override
+  String get homeNotesEmpty => 'Ingen notater ennå.';
+
+  @override
+  String get homePinnedEmpty => 'Fest et notat, så vises det her.';
+
+  @override
+  String get homeTagsEmpty => 'Ingen tagger ennå.';
+
+  @override
+  String get homeSearchEmpty => 'Ingen treff.';
+
+  @override
+  String get homeSearchNoQuery => 'Ingen søk ennå.';
+
+  @override
+  String get homeRandomAnother => 'En annen';
 }

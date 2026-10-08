@@ -49,8 +49,9 @@ shortcuts lists them and lets you change them:
   the same keys, pinch and commands zoom the book's text instead, the
   books' own text size (see
   [organization](organization.md#files-that-are-not-notes))
-- `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs (on a
-  wide window Settings opens as a floating window)
+- `Ctrl/⌘+1…6` — Files, Todo, Search, Quick note, Settings and
+  [Home](home.md) tabs (on a wide window Settings opens as a floating
+  window)
 
 Formatting, in both editors, on the note's selection:
 

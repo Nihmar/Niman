@@ -3375,4 +3375,61 @@ final class CzechStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'co tu říct — vidíte to jen vy.';
+
+  @override
+  String get tabHome => 'Domů';
+
+  @override
+  String get homeTileActions => 'Akce';
+
+  @override
+  String get homeTileJournalToday => 'Dnešní deník';
+
+  @override
+  String get homeTileTasksDue => 'Úkoly k termínu';
+
+  @override
+  String get homeTileRecent => 'Nedávno upravené';
+
+  @override
+  String get homeTilePinned => 'Připnuté';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendář deníku';
+
+  @override
+  String get homeTileTopTags => 'Nejčastější štítky';
+
+  @override
+  String get homeTileRandomNote => 'Náhodná poznámka';
+
+  @override
+  String get homeTileSearch => 'Uložené hledání';
+
+  @override
+  String get homeJournalEmpty => 'Dnes ještě nic nenapsáno.';
+
+  @override
+  String get homeJournalWrite => 'Napsat dnešní záznam';
+
+  @override
+  String get homeTasksEmpty => 'Žádné otevřené úkoly.';
+
+  @override
+  String get homeNotesEmpty => 'Zatím žádné poznámky.';
+
+  @override
+  String get homePinnedEmpty => 'Připněte poznámku a objeví se zde.';
+
+  @override
+  String get homeTagsEmpty => 'Zatím žádné štítky.';
+
+  @override
+  String get homeSearchEmpty => 'Nic neodpovídá.';
+
+  @override
+  String get homeSearchNoQuery => 'Zatím žádný dotaz.';
+
+  @override
+  String get homeRandomAnother => 'Jiná';
 }

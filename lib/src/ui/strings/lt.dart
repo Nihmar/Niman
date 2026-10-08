@@ -3418,4 +3418,61 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'ką čia pasakyti — matote tik jūs.';
+
+  @override
+  String get tabHome => 'Pradžia';
+
+  @override
+  String get homeTileActions => 'Veiksmai';
+
+  @override
+  String get homeTileJournalToday => 'Šiandienos dienoraštis';
+
+  @override
+  String get homeTileTasksDue => 'Artėjančios užduotys';
+
+  @override
+  String get homeTileRecent => 'Neseniai keisti';
+
+  @override
+  String get homeTilePinned => 'Prisegti';
+
+  @override
+  String get homeTileJournalCalendar => 'Dienoraščio kalendorius';
+
+  @override
+  String get homeTileTopTags => 'Dažniausios žymos';
+
+  @override
+  String get homeTileRandomNote => 'Atsitiktinis užrašas';
+
+  @override
+  String get homeTileSearch => 'Išsaugota paieška';
+
+  @override
+  String get homeJournalEmpty => 'Šiandien dar nieko neparašyta.';
+
+  @override
+  String get homeJournalWrite => 'Rašyti šiandienos įrašą';
+
+  @override
+  String get homeTasksEmpty => 'Atvirų užduočių nėra.';
+
+  @override
+  String get homeNotesEmpty => 'Užrašų dar nėra.';
+
+  @override
+  String get homePinnedEmpty => 'Prisekite užrašą ir jis bus rodomas čia.';
+
+  @override
+  String get homeTagsEmpty => 'Žymų dar nėra.';
+
+  @override
+  String get homeSearchEmpty => 'Nieko nerasta.';
+
+  @override
+  String get homeSearchNoQuery => 'Užklausos dar nėra.';
+
+  @override
+  String get homeRandomAnother => 'Kitas';
 }

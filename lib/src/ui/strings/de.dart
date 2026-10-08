@@ -3451,4 +3451,61 @@ final class GermanStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'was hier zu sagen ist — nur du siehst es.';
+
+  @override
+  String get tabHome => 'Start';
+
+  @override
+  String get homeTileActions => 'Aktionen';
+
+  @override
+  String get homeTileJournalToday => 'Heutiges Journal';
+
+  @override
+  String get homeTileTasksDue => 'Fällige Aufgaben';
+
+  @override
+  String get homeTileRecent => 'Zuletzt geändert';
+
+  @override
+  String get homeTilePinned => 'Angeheftet';
+
+  @override
+  String get homeTileJournalCalendar => 'Journalkalender';
+
+  @override
+  String get homeTileTopTags => 'Häufigste Tags';
+
+  @override
+  String get homeTileRandomNote => 'Zufällige Notiz';
+
+  @override
+  String get homeTileSearch => 'Gespeicherte Suche';
+
+  @override
+  String get homeJournalEmpty => 'Heute noch nichts geschrieben.';
+
+  @override
+  String get homeJournalWrite => 'Heutigen Eintrag schreiben';
+
+  @override
+  String get homeTasksEmpty => 'Keine offenen Aufgaben.';
+
+  @override
+  String get homeNotesEmpty => 'Noch keine Notizen.';
+
+  @override
+  String get homePinnedEmpty => 'Hefte eine Notiz an, dann erscheint sie hier.';
+
+  @override
+  String get homeTagsEmpty => 'Noch keine Tags.';
+
+  @override
+  String get homeSearchEmpty => 'Keine Treffer.';
+
+  @override
+  String get homeSearchNoQuery => 'Noch keine Suchanfrage.';
+
+  @override
+  String get homeRandomAnother => 'Eine andere';
 }

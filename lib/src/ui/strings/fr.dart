@@ -3473,4 +3473,61 @@ final class FrenchStrings extends Strings {
   @override
   String get slidesTemplateNote =>
       "ce qu'il faut dire ici — vous seul le voyez.";
+
+  @override
+  String get tabHome => 'Accueil';
+
+  @override
+  String get homeTileActions => 'Actions';
+
+  @override
+  String get homeTileJournalToday => 'Journal du jour';
+
+  @override
+  String get homeTileTasksDue => 'Tâches à faire';
+
+  @override
+  String get homeTileRecent => 'Modifiées récemment';
+
+  @override
+  String get homeTilePinned => 'Épinglées';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendrier du journal';
+
+  @override
+  String get homeTileTopTags => 'Étiquettes principales';
+
+  @override
+  String get homeTileRandomNote => 'Note au hasard';
+
+  @override
+  String get homeTileSearch => 'Recherche enregistrée';
+
+  @override
+  String get homeJournalEmpty => "Rien d'écrit aujourd'hui pour l'instant.";
+
+  @override
+  String get homeJournalWrite => "Écrire l'entrée du jour";
+
+  @override
+  String get homeTasksEmpty => 'Aucune tâche ouverte.';
+
+  @override
+  String get homeNotesEmpty => "Aucune note pour l'instant.";
+
+  @override
+  String get homePinnedEmpty => "Épinglez une note et elle s'affichera ici.";
+
+  @override
+  String get homeTagsEmpty => "Aucune étiquette pour l'instant.";
+
+  @override
+  String get homeSearchEmpty => 'Aucun résultat.';
+
+  @override
+  String get homeSearchNoQuery => "Aucune requête pour l'instant.";
+
+  @override
+  String get homeRandomAnother => 'Une autre';
 }

@@ -3404,4 +3404,61 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'што да се каже тука — гледате само вие.';
+
+  @override
+  String get tabHome => 'Почетна';
+
+  @override
+  String get homeTileActions => 'Дејства';
+
+  @override
+  String get homeTileJournalToday => 'Денешен дневник';
+
+  @override
+  String get homeTileTasksDue => 'Задачи со рок';
+
+  @override
+  String get homeTileRecent => 'Неодамна изменети';
+
+  @override
+  String get homeTilePinned => 'Закачени';
+
+  @override
+  String get homeTileJournalCalendar => 'Календар на дневникот';
+
+  @override
+  String get homeTileTopTags => 'Најчести ознаки';
+
+  @override
+  String get homeTileRandomNote => 'Случајна белешка';
+
+  @override
+  String get homeTileSearch => 'Зачувано пребарување';
+
+  @override
+  String get homeJournalEmpty => 'Денес сè уште ништо не е напишано.';
+
+  @override
+  String get homeJournalWrite => 'Напиши го денешниот запис';
+
+  @override
+  String get homeTasksEmpty => 'Нема отворени задачи.';
+
+  @override
+  String get homeNotesEmpty => 'Сè уште нема белешки.';
+
+  @override
+  String get homePinnedEmpty => 'Закачете белешка и ќе се појави тука.';
+
+  @override
+  String get homeTagsEmpty => 'Сè уште нема ознаки.';
+
+  @override
+  String get homeSearchEmpty => 'Нема совпаѓања.';
+
+  @override
+  String get homeSearchNoQuery => 'Сè уште нема барање.';
+
+  @override
+  String get homeRandomAnother => 'Друга';
 }

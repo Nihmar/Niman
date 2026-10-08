@@ -3371,4 +3371,61 @@ final class LatvianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'ko šeit teikt — to redzat tikai jūs.';
+
+  @override
+  String get tabHome => 'Sākums';
+
+  @override
+  String get homeTileActions => 'Darbības';
+
+  @override
+  String get homeTileJournalToday => 'Šodienas dienasgrāmata';
+
+  @override
+  String get homeTileTasksDue => 'Termiņa uzdevumi';
+
+  @override
+  String get homeTileRecent => 'Nesen mainītas';
+
+  @override
+  String get homeTilePinned => 'Piespraustās';
+
+  @override
+  String get homeTileJournalCalendar => 'Dienasgrāmatas kalendārs';
+
+  @override
+  String get homeTileTopTags => 'Biežākās birkas';
+
+  @override
+  String get homeTileRandomNote => 'Nejauša piezīme';
+
+  @override
+  String get homeTileSearch => 'Saglabāta meklēšana';
+
+  @override
+  String get homeJournalEmpty => 'Šodien vēl nekas nav uzrakstīts.';
+
+  @override
+  String get homeJournalWrite => 'Rakstīt šodienas ierakstu';
+
+  @override
+  String get homeTasksEmpty => 'Nav atvērtu uzdevumu.';
+
+  @override
+  String get homeNotesEmpty => 'Piezīmju vēl nav.';
+
+  @override
+  String get homePinnedEmpty => 'Piespraud piezīmi, un tā parādīsies šeit.';
+
+  @override
+  String get homeTagsEmpty => 'Birku vēl nav.';
+
+  @override
+  String get homeSearchEmpty => 'Nekas neatbilst.';
+
+  @override
+  String get homeSearchNoQuery => 'Vaicājuma vēl nav.';
+
+  @override
+  String get homeRandomAnother => 'Citu';
 }

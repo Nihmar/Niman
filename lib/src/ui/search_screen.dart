@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
@@ -8,6 +9,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart' show displayNameOf;
 
@@ -31,6 +33,7 @@ final class SearchScreen extends StatefulWidget {
     required this.controller,
     required this.onOpenNote,
     this.onOpenTags,
+    this.requests,
     this.source,
     this.replaceSource,
     this.fieldSource,
@@ -46,6 +49,10 @@ final class SearchScreen extends StatefulWidget {
   /// Opens the Tags screen (shell-provided; the tags button shows only
   /// when set).
   final VoidCallback? onOpenTags;
+
+  /// What another part of the app asks Search to show (#535): a query is
+  /// typed into the box, as if by hand.
+  final ValueListenable<SearchRequest?>? requests;
 
   /// Optional source override (widget tests inject a fake); when null the
   /// screen resolves it from [controller].
@@ -104,6 +111,12 @@ final class _SearchScreenState extends State<SearchScreen> {
     // milliseconds, while the cost of building and painting the screen
     // shows up as slow frames after a mount that took no time at all.
     final started = DateTime.now();
+    // A request made before the first visit mounted this screen: typed in
+    // before the box listens, and searched once the source is ready.
+    if (widget.requests?.value case SearchRequest(tag: null, :final text)) {
+      _query.text = text;
+    }
+    widget.requests?.addListener(_requested);
     _query.addListener(_onQueryChanged);
     _replacement.addListener(_onReplacementChanged);
     if (widget.source == null) unawaited(_loadSource(since: started));
@@ -116,11 +129,19 @@ final class _SearchScreenState extends State<SearchScreen> {
     const AppLogger(name: 'search.ui').debug('dispose');
     _debounceTimer?.cancel();
     _replaceRefresh?.cancel();
+    widget.requests?.removeListener(_requested);
     _query.removeListener(_onQueryChanged);
     _replacement.removeListener(_onReplacementChanged);
     _query.dispose();
     _replacement.dispose();
     super.dispose();
+  }
+
+  /// Types a requested query into the box; a tag is the Tags screen's.
+  void _requested() {
+    if (widget.requests?.value case SearchRequest(tag: null, :final text)) {
+      _query.text = text;
+    }
   }
 
   /// Resolves the search source once; a failed load leaves [_source] null

@@ -3396,4 +3396,61 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'o que dizer aqui — só você vê.';
+
+  @override
+  String get tabHome => 'Início';
+
+  @override
+  String get homeTileActions => 'Ações';
+
+  @override
+  String get homeTileJournalToday => 'Diário de hoje';
+
+  @override
+  String get homeTileTasksDue => 'Tarefas pendentes';
+
+  @override
+  String get homeTileRecent => 'Modificadas recentemente';
+
+  @override
+  String get homeTilePinned => 'Fixadas';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendário do diário';
+
+  @override
+  String get homeTileTopTags => 'Etiquetas principais';
+
+  @override
+  String get homeTileRandomNote => 'Nota aleatória';
+
+  @override
+  String get homeTileSearch => 'Pesquisa salva';
+
+  @override
+  String get homeJournalEmpty => 'Nada escrito hoje ainda.';
+
+  @override
+  String get homeJournalWrite => 'Escrever a entrada de hoje';
+
+  @override
+  String get homeTasksEmpty => 'Nenhuma tarefa aberta.';
+
+  @override
+  String get homeNotesEmpty => 'Ainda não há notas.';
+
+  @override
+  String get homePinnedEmpty => 'Fixe uma nota e ela aparece aqui.';
+
+  @override
+  String get homeTagsEmpty => 'Ainda não há etiquetas.';
+
+  @override
+  String get homeSearchEmpty => 'Nenhum resultado.';
+
+  @override
+  String get homeSearchNoQuery => 'Ainda não há pesquisa.';
+
+  @override
+  String get homeRandomAnother => 'Outra';
 }

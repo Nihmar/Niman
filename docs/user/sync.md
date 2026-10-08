@@ -87,7 +87,8 @@ address), or a sync that would remove many files (tap **Sync now** to
 see what and decide). Syncing by hand lifts the pause.
 
 What travels: every note and attachment, plus the library's
-`.niman/settings.json`, `.niman/counters.json`, where each book and PDF
+`.niman/settings.json`, `.niman/counters.json`, its [Home](home.md)
+(`.niman/home.json`), where each book and PDF
 was left (`.niman/reading.json`) and personal dictionary
 (`.niman/dictionary.txt`, the words added with *Add to dictionary*). What stays on each
 device: `.trash/`, `.history/`, any other dot folder (a `.git/`, for
@@ -102,7 +103,8 @@ example), and the files the operating system drops into folders
   is **moved to this device's trash**, never deleted outright. After such
   a sync a message offers **Show**, which opens the trash.
 - The library's own files (`.niman/settings.json`, `.niman/counters.json`,
-  `.niman/reading.json`, `.niman/dictionary.txt`) are never deleted by a sync: if one goes
+  `.niman/home.json`, `.niman/reading.json`, `.niman/dictionary.txt`) are
+  never deleted by a sync: if one goes
   missing on one side, it is put back from the other.
 - If a sync would remove more than 10 files and more than half of the
   library, Niman stops and asks first. That is what a wrong address, an
@@ -152,6 +154,9 @@ copy from another tool, a hand edit here that is not valid JSON — is
 not merged and not sent over the other: the sync reports it as a
 conflict and leaves both copies where they are, so a good file is never
 replaced by a broken one, on this device or on the server.
+The Home (`.niman/home.json`) merges the same way, tile by tile: a
+tile moved on one device and another hidden on the other keep both
+changes.
 Template counters (`.niman/counters.json`) keep the highest number
 either device reached, so a number is never handed out twice. The
 personal dictionary merges word by word: a word added on either device

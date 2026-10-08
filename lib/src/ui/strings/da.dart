@@ -3360,4 +3360,61 @@ final class DanishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'hvad du skal sige her — kun du ser det.';
+
+  @override
+  String get tabHome => 'Hjem';
+
+  @override
+  String get homeTileActions => 'Handlinger';
+
+  @override
+  String get homeTileJournalToday => 'Dagens dagbog';
+
+  @override
+  String get homeTileTasksDue => 'Opgaver med frist';
+
+  @override
+  String get homeTileRecent => 'Senest ændret';
+
+  @override
+  String get homeTilePinned => 'Fastgjort';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagbogskalender';
+
+  @override
+  String get homeTileTopTags => 'Mest brugte tags';
+
+  @override
+  String get homeTileRandomNote => 'Tilfældig note';
+
+  @override
+  String get homeTileSearch => 'Gemt søgning';
+
+  @override
+  String get homeJournalEmpty => 'Intet skrevet i dag endnu.';
+
+  @override
+  String get homeJournalWrite => 'Skriv dagens indlæg';
+
+  @override
+  String get homeTasksEmpty => 'Ingen åbne opgaver.';
+
+  @override
+  String get homeNotesEmpty => 'Ingen noter endnu.';
+
+  @override
+  String get homePinnedEmpty => 'Fastgør en note, så vises den her.';
+
+  @override
+  String get homeTagsEmpty => 'Ingen tags endnu.';
+
+  @override
+  String get homeSearchEmpty => 'Intet matcher.';
+
+  @override
+  String get homeSearchNoQuery => 'Ingen søgning endnu.';
+
+  @override
+  String get homeRandomAnother => 'En anden';
 }

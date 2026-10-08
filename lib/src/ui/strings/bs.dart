@@ -3403,4 +3403,61 @@ final class BosnianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'šta ovdje reći — vidite samo vi.';
+
+  @override
+  String get tabHome => 'Početna';
+
+  @override
+  String get homeTileActions => 'Radnje';
+
+  @override
+  String get homeTileJournalToday => 'Današnji dnevnik';
+
+  @override
+  String get homeTileTasksDue => 'Zadaci na čekanju';
+
+  @override
+  String get homeTileRecent => 'Nedavno izmijenjeno';
+
+  @override
+  String get homeTilePinned => 'Zakačeno';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendar dnevnika';
+
+  @override
+  String get homeTileTopTags => 'Najčešće oznake';
+
+  @override
+  String get homeTileRandomNote => 'Nasumična bilješka';
+
+  @override
+  String get homeTileSearch => 'Sačuvana pretraga';
+
+  @override
+  String get homeJournalEmpty => 'Danas još ništa nije napisano.';
+
+  @override
+  String get homeJournalWrite => 'Napiši današnji zapis';
+
+  @override
+  String get homeTasksEmpty => 'Nema otvorenih zadataka.';
+
+  @override
+  String get homeNotesEmpty => 'Još nema bilješki.';
+
+  @override
+  String get homePinnedEmpty => 'Zakači bilješku i pojavit će se ovdje.';
+
+  @override
+  String get homeTagsEmpty => 'Još nema oznaka.';
+
+  @override
+  String get homeSearchEmpty => 'Nema rezultata.';
+
+  @override
+  String get homeSearchNoQuery => 'Još nema upita.';
+
+  @override
+  String get homeRandomAnother => 'Druga';
 }

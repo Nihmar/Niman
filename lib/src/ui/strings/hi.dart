@@ -3328,4 +3328,61 @@ final class HindiStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'यहाँ क्या कहना है — केवल आप देखते हैं।';
+
+  @override
+  String get tabHome => 'होम';
+
+  @override
+  String get homeTileActions => 'क्रियाएँ';
+
+  @override
+  String get homeTileJournalToday => 'आज की डायरी';
+
+  @override
+  String get homeTileTasksDue => 'देय कार्य';
+
+  @override
+  String get homeTileRecent => 'हाल में बदले गए';
+
+  @override
+  String get homeTilePinned => 'पिन किए गए';
+
+  @override
+  String get homeTileJournalCalendar => 'डायरी कैलेंडर';
+
+  @override
+  String get homeTileTopTags => 'शीर्ष टैग';
+
+  @override
+  String get homeTileRandomNote => 'यादृच्छिक नोट';
+
+  @override
+  String get homeTileSearch => 'सहेजी गई खोज';
+
+  @override
+  String get homeJournalEmpty => 'आज अभी तक कुछ नहीं लिखा गया।';
+
+  @override
+  String get homeJournalWrite => 'आज की प्रविष्टि लिखें';
+
+  @override
+  String get homeTasksEmpty => 'कोई खुला कार्य नहीं।';
+
+  @override
+  String get homeNotesEmpty => 'अभी कोई नोट नहीं।';
+
+  @override
+  String get homePinnedEmpty => 'कोई नोट पिन करें और वह यहाँ दिखेगा।';
+
+  @override
+  String get homeTagsEmpty => 'अभी कोई टैग नहीं।';
+
+  @override
+  String get homeSearchEmpty => 'कुछ भी मेल नहीं खाता।';
+
+  @override
+  String get homeSearchNoQuery => 'अभी कोई खोज नहीं।';
+
+  @override
+  String get homeRandomAnother => 'दूसरा';
 }
