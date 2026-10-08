@@ -190,7 +190,7 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
   }
 
   KeyEventResult _overviewKey(LogicalKeyboardKey key) {
-    const perRow = 4;
+    final perRow = SlidesOverview.columnsFor(MediaQuery.sizeOf(context).width);
     final moves = {
       LogicalKeyboardKey.arrowRight: 1,
       LogicalKeyboardKey.arrowLeft: -1,

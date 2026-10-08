@@ -169,6 +169,34 @@ void presentingTests() {
     expect(find.text('2 / 2'), findsOneWidget);
   });
 
+  testWidgets('down in the overview rings the slide under, row as wide as it', (
+    tester,
+  ) async {
+    final deck = [for (var i = 1; i <= 10; i++) '# S$i'].join('\n\n---\n\n');
+    await _show(
+      tester,
+      SlidesNoteView(text: deck, host: _Host('grid.md')),
+      const Size(1920, 1080),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyO);
+    await tester.pump();
+    final under = tester.getTopLeft(find.byKey(const Key('overview-slide-0')));
+    final row = [
+      for (var i = 1; i < 10; i++)
+        if (tester.getTopLeft(find.byKey(Key('overview-slide-$i'))).dy ==
+            under.dy)
+          i,
+    ];
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(slidePlaceOf('grid.md').value, row.length + 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('the presenter view shows the notes, the next slide, the time', (
     tester,
   ) async {
