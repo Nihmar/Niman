@@ -111,6 +111,7 @@ final class _AppDropTargetState extends State<AppDropTarget> {
 
   late final StreamSubscription<WindowDrop> _drops;
   bool _over = false;
+  bool _link = false;
 
   @override
   void initState() {
@@ -127,10 +128,17 @@ final class _AppDropTargetState extends State<AppDropTarget> {
   void _onDrop(WindowDrop event) {
     if (!mounted) return;
     switch (event) {
-      case DragEntered():
-        setState(() => _over = true);
+      case DragEntered(:final link):
+        setState(() {
+          _over = true;
+          _link = link;
+        });
       case DragExited():
         setState(() => _over = false);
+      case LinksDropped(:final links):
+        setState(() => _over = false);
+        // One page at a time: the dialog captures the first.
+        widget.requests.capturePage(links.first);
       case Dropped(:final paths):
         setState(() => _over = false);
         final messenger = ScaffoldMessenger.maybeOf(context);
@@ -154,15 +162,19 @@ final class _AppDropTargetState extends State<AppDropTarget> {
   Widget build(BuildContext context) => Stack(
     children: [
       widget.child,
-      if (_over) const Positioned.fill(child: DropFrame()),
+      if (_over) Positioned.fill(child: DropFrame(link: _link)),
     ],
   );
 }
 
-/// The frame shown while something is dragged over the window.
+/// The frame shown while something is dragged over the window: what a
+/// drop of files does, or, for a browser's link, that it is captured.
 final class DropFrame extends StatelessWidget {
   /// Creates the frame.
-  const new({super.key});
+  const new({this.link = false, super.key});
+
+  /// Whether a link is dragged.
+  final bool link;
 
   @override
   Widget build(BuildContext context) {
@@ -186,9 +198,22 @@ final class DropFrame extends StatelessWidget {
                   horizontal: 16,
                   vertical: 10,
                 ),
-                child: Text(
-                  AppStrings.dropHint,
-                  style: TextStyle(color: scheme.onPrimaryContainer),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      link ? AppStrings.captureDropHint : AppStrings.dropHint,
+                      style: TextStyle(color: scheme.onPrimaryContainer),
+                    ),
+                    if (link)
+                      Text(
+                        AppStrings.captureDropDetail,
+                        style: TextStyle(
+                          color: scheme.onPrimaryContainer,
+                          fontSize: 12,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),

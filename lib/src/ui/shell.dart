@@ -857,6 +857,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   StreamSubscription<TrayCommand>? _trayCommands;
   StreamSubscription<String>? _launchFiles;
   StreamSubscription<String>? _launchFolders;
+  StreamSubscription<Uri>? _launchPages;
 
   /// Library session events (every note op bumps the revision): the
   /// pinned notes follow the files, so each one refreshes the note
@@ -1645,6 +1646,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _launchFolders = widget.launchRequests.folders.listen(
       (path) => unawaited(_openFolder(path)),
     );
+    // Links dropped on the window (#531).
+    _launchPages = widget.launchRequests.pages.listen((url) {
+      if (mounted) unawaited(_captureFlow.capture(context, url: url));
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final path = widget.launchRequests.consumeFile();
       if (path != null && mounted) unawaited(_openPath(path));
@@ -1700,6 +1705,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unawaited(_trayCommands?.cancel());
     unawaited(_launchFiles?.cancel());
     unawaited(_launchFolders?.cancel());
+    unawaited(_launchPages?.cancel());
     _todoController.dispose();
     _personalDictionary?.dispose();
     _shellFocus.dispose();

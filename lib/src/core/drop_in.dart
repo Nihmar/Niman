@@ -24,10 +24,14 @@ sealed class WindowDrop {
   const new();
 }
 
-/// Something is being dragged over the window.
+/// Something is being dragged over the window: a browser's link when
+/// [link], files or anything else otherwise.
 final class DragEntered extends WindowDrop {
   /// Creates the entered event.
-  const new();
+  const new({this.link = false});
+
+  /// Whether the drag is a link, which a drop captures (#531).
+  final bool link;
 }
 
 /// The drag left the window, or landed on it.
@@ -48,6 +52,27 @@ final class Dropped extends WindowDrop {
   /// The paths the drop named, in the order the desktop listed them.
   final List<String> paths;
 }
+
+/// Web pages' addresses dropped on the window — links dragged from a
+/// browser — to capture (#531).
+final class LinksDropped extends WindowDrop {
+  /// Creates a drop of [links].
+  const new(this.links);
+
+  /// The addresses, in the order the desktop listed them.
+  final List<Uri> links;
+}
+
+/// Reads the http and https addresses a drop payload holds.
+List<Uri> dropLinksFrom(Object? payload) => [
+  if (payload is List)
+    for (final value in payload)
+      if (value is String)
+        if (Uri.tryParse(value.trim()) case final uri?
+            when (uri.isScheme('http') || uri.isScheme('https')) &&
+                uri.host.isNotEmpty)
+          uri,
+];
 
 /// Reads the paths a drop payload holds, dropping what cannot be one.
 ///
@@ -120,11 +145,15 @@ final class PlatformDropTargetService implements DropTargetService {
     if (_disposed) return;
     switch (call.method) {
       case 'dragEntered':
-        _events.add(const DragEntered());
+        final args = call.arguments;
+        _events.add(DragEntered(link: args is Map && args['link'] == true));
       case 'dragExited':
         _events.add(const DragExited());
       case 'drop':
         _events.add(Dropped(dropPathsFrom(call.arguments)));
+      case 'dropLinks':
+        final links = dropLinksFrom(call.arguments);
+        if (links.isNotEmpty) _events.add(LinksDropped(links));
     }
   }
 
