@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
+import 'package:niman/src/ui/home/home_tile_frame.dart';
 
 /// A group of action buttons.
 final class ActionsTile extends StatelessWidget {
@@ -29,8 +30,9 @@ final class ActionsTile extends StatelessWidget {
           for (final action in actions)
             // A kind a later build wrote is kept in the file, not shown.
             if (action.kind != null)
-              FilledButton.tonalIcon(
+              FilledButton.icon(
                 key: Key('home-action-${action.id}'),
+                style: homeTileButtonStyle(context),
                 onPressed: () => host.runAction(action),
                 icon: Icon(homeActionIcon(action), size: 18),
                 label: Text(

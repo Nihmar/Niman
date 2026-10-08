@@ -65,8 +65,9 @@ final class JournalTodayTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 HomeTileEmpty(AppStrings.homeJournalEmpty),
                 const SizedBox(height: 8),
-                FilledButton.tonalIcon(
+                FilledButton.icon(
                   key: const Key('home-journal-write'),
+                  style: homeTileButtonStyle(context),
                   onPressed: () => unawaited(host.journal.openToday(context)),
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   label: Text(AppStrings.homeJournalWrite),

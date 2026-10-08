@@ -81,6 +81,17 @@ final class HomeTileFrame extends StatelessWidget {
   }
 }
 
+/// The look of a button on a tile: the island's own ground, so it stands
+/// off the card it sits on in every theme (a tonal one can match the card).
+ButtonStyle homeTileButtonStyle(BuildContext context) {
+  final scheme = Theme.of(context).colorScheme;
+  return FilledButton.styleFrom(
+    backgroundColor: scheme.surface,
+    foregroundColor: scheme.onSurface,
+    iconColor: scheme.primary,
+  );
+}
+
 /// The line a tile shows when it has nothing to list.
 final class HomeTileEmpty extends StatelessWidget {
   /// Says [text].
