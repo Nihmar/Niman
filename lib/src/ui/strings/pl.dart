@@ -2948,7 +2948,7 @@ final class PolishStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Pełny ekran';
+  String get fullScreen => 'Pełny ekran';
   @override
   String get commandInsertDiagram => 'Wstaw diagram (Mermaid)';
 

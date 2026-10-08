@@ -2851,7 +2851,7 @@ final class EstonianStrings extends Strings {
   String get diagramTitle => 'Diagramm';
 
   @override
-  String get diagramFullScreen => 'Täisekraan';
+  String get fullScreen => 'Täisekraan';
   @override
   String get commandInsertDiagram => 'Lisa diagramm (Mermaid)';
 

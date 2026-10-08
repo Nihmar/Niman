@@ -2991,7 +2991,7 @@ final class GreekStrings extends Strings {
   String get diagramTitle => 'Διάγραμμα';
 
   @override
-  String get diagramFullScreen => 'Πλήρης οθόνη';
+  String get fullScreen => 'Πλήρης οθόνη';
   @override
   String get commandInsertDiagram => 'Εισαγωγή διαγράμματος (Mermaid)';
 

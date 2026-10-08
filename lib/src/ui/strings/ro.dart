@@ -2944,7 +2944,7 @@ final class RomanianStrings extends Strings {
   String get diagramTitle => 'Diagramă';
 
   @override
-  String get diagramFullScreen => 'Ecran complet';
+  String get fullScreen => 'Ecran complet';
   @override
   String get commandInsertDiagram => 'Inserează diagramă (Mermaid)';
 

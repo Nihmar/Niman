@@ -2901,7 +2901,7 @@ final class HungarianStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Teljes képernyő';
+  String get fullScreen => 'Teljes képernyő';
   @override
   String get commandInsertDiagram => 'Diagram beszúrása (Mermaid)';
 

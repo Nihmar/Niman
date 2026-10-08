@@ -2903,7 +2903,7 @@ final class SwedishStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Helskärm';
+  String get fullScreen => 'Helskärm';
   @override
   String get commandInsertDiagram => 'Infoga diagram (Mermaid)';
 

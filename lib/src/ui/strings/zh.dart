@@ -2547,7 +2547,7 @@ final class ChineseStrings extends Strings {
   String get diagramTitle => '图表';
 
   @override
-  String get diagramFullScreen => '全屏';
+  String get fullScreen => '全屏';
   @override
   String get commandInsertDiagram => '插入图表（Mermaid）';
 

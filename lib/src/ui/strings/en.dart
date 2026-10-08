@@ -2856,7 +2856,7 @@ final class EnglishStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Full screen';
+  String get fullScreen => 'Full screen';
   @override
   String get commandInsertDiagram => 'Insert diagram (Mermaid)';
 

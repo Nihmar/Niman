@@ -2917,7 +2917,7 @@ final class SlovenianStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Celoten zaslon';
+  String get fullScreen => 'Celoten zaslon';
   @override
   String get commandInsertDiagram => 'Vstavi diagram (Mermaid)';
 

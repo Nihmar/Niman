@@ -2632,7 +2632,7 @@ final class JapaneseStrings extends Strings {
   String get diagramTitle => '図';
 
   @override
-  String get diagramFullScreen => '全画面';
+  String get fullScreen => '全画面';
   @override
   String get commandInsertDiagram => '図を挿入（Mermaid）';
 

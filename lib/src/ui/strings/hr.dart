@@ -2926,7 +2926,7 @@ final class CroatianStrings extends Strings {
   String get diagramTitle => 'Dijagram';
 
   @override
-  String get diagramFullScreen => 'Cijeli zaslon';
+  String get fullScreen => 'Cijeli zaslon';
   @override
   String get commandInsertDiagram => 'Umetni dijagram (Mermaid)';
 

@@ -91,7 +91,7 @@ final class BlockDiagramView extends StatelessWidget {
               right: 0,
               child: IconButton(
                 key: const Key('diagram-full-screen'),
-                tooltip: AppStrings.diagramFullScreen,
+                tooltip: AppStrings.fullScreen,
                 iconSize: 20,
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.fullscreen),

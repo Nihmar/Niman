@@ -2857,7 +2857,7 @@ final class TurkishStrings extends Strings {
   String get diagramTitle => 'Diyagram';
 
   @override
-  String get diagramFullScreen => 'Tam ekran';
+  String get fullScreen => 'Tam ekran';
   @override
   String get commandInsertDiagram => 'Diyagram ekle (Mermaid)';
 
