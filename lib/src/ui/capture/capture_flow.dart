@@ -5,9 +5,10 @@
 /// open the capture sheet instead, and Save leaves the page to the
 /// background capture — a share's sending the user back to the browser.
 ///
-/// Like the create flow, it needs nothing of the shell's state: where to
-/// capture is a question it asks, and what to open afterwards is a fact it
-/// reports.
+/// A new note goes in the library's web captures folder unless the user
+/// picks another — not the folder the tree has selected, which can be the
+/// attachments folder. Like the create flow, it needs nothing of the
+/// shell's state: what to open afterwards is a fact it reports.
 library;
 
 import 'dart:async';
@@ -19,6 +20,7 @@ import 'package:niman/src/capture/capture_quote.dart';
 import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/android_task.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
+import 'package:niman/src/db/index_database.dart' show Note;
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/capture/capture_dialog.dart';
 import 'package:niman/src/ui/capture/capture_routes.dart';
@@ -47,7 +49,6 @@ final class CaptureFlow {
   new({
     required this.controller,
     required this.services,
-    required this.createParent,
     required this.attachmentsFolder,
     required this.linkType,
     required this.onCaptured,
@@ -64,9 +65,6 @@ final class CaptureFlow {
   /// How pages are read and saved, and the captures that run off
   /// screen.
   final CaptureServices services;
-
-  /// The folder a capture goes in unless another is picked: the tree's.
-  final String Function() createParent;
 
   /// The library's attachments folder.
   final String Function() attachmentsFolder;
@@ -106,8 +104,8 @@ final class CaptureFlow {
       fromClipboard = page != null;
     }
     if (!context.mounted) return;
-    final target = _target(context);
-    if (target == null) return;
+    final target = await _target(context);
+    if (target == null || !context.mounted) return;
     if (useSheet) {
       final chosen = await showCaptureSheet(
         context,
@@ -130,8 +128,8 @@ final class CaptureFlow {
   /// Asks where to save what the browser shared; Save sends the user back
   /// to the browser while the page is captured.
   Future<void> captureShared(BuildContext context, WebShare share) async {
-    final target = _target(context);
-    if (target == null) return;
+    final target = await _target(context);
+    if (target == null || !context.mounted) return;
     final chosen = await showCaptureSheet(
       context,
       target: target,
@@ -178,8 +176,9 @@ final class CaptureFlow {
               appendTo,
               quoteMarkdown(quote.quote, page, title: quote.title),
             )
-          : await ops.createNote(
-              parentPath: chosen.folder,
+          : await createCapturedNote(
+              ops,
+              folder: chosen.folder,
               name: quote.title ?? page.host,
               content: quoteNote(
                 quote.quote,
@@ -205,16 +204,18 @@ final class CaptureFlow {
     }
   }
 
-  /// Where a capture goes: the open library, or null when none is open.
-  CaptureTarget? _target(BuildContext context) {
+  /// Where a capture goes: the open library, its web captures folder
+  /// first, or null when none is open.
+  Future<CaptureTarget?> _target(BuildContext context) async {
     final ops = controller.ops;
     final root = controller.root;
     if (ops == null || root == null) return null;
+    final folder = await ops.captureFolder;
     return CaptureTarget(
       libraryRoot: root,
       attachmentsFolder: attachmentsFolder(),
       linkType: linkType(),
-      folder: createParent(),
+      folder: folder,
       browser: services.browser,
       read: services.read,
       save: services.save,
@@ -231,8 +232,9 @@ final class CaptureFlow {
         );
       },
       create: (folder, name, text) async {
-        final row = await ops.createNote(
-          parentPath: folder,
+        final row = await createCapturedNote(
+          ops,
+          folder: folder,
           name: name,
           content: text,
         );
@@ -240,6 +242,20 @@ final class CaptureFlow {
       },
     );
   }
+}
+
+/// Makes a captured page's or quote's note, [name] with [content], in
+/// [folder] ('' is the root) — the folder made first when the library
+/// does not hold it yet, as the web captures folder's default does not
+/// until the first capture.
+Future<Note> createCapturedNote(
+  NoteOperations ops, {
+  required String folder,
+  required String name,
+  required String content,
+}) async {
+  if (folder.isNotEmpty) await ops.ensureFolder(folder);
+  return await ops.createNote(parentPath: folder, name: name, content: content);
 }
 
 /// A paste no text field or editor took: a web address on the clipboard

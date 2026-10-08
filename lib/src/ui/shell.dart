@@ -773,7 +773,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onAppended: () {
       if (mounted) setState(() => _noteReloadToken++);
     },
-    createParent: () => _createParent,
     attachmentsFolder: () => _editorSettings.attachmentsFolder,
     linkType: () => _editorSettings.linkType,
     onCaptured: (path) => _openNoteFromLink(path, null),
