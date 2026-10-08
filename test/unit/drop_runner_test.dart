@@ -1,14 +1,16 @@
 // #224: the drop is taken by the platform runner — GDK in `linux/runner`,
-// `WM_DROPFILES` in `windows/runner` — so the runner half is where the fix
+// an OLE drop target in `windows/runner` — so the runner half is where the fix
 // lives, and nothing on this machine runs it: the Dart side is tested
 // through the channel seam (`drop_in_test.dart`, `drop_channel_test.dart`),
 // and what the runners say is pinned here instead.
 //
 // What is pinned is what the two halves have to agree on: the channel both
-// talk over, GDK's URI target on Linux, Win32's dropped files on Windows,
+// talk over, GDK's URI target on Linux, OLE's dropped files on Windows,
 // and the portal file-transfer target that KDE offers beside the URIs and
 // that must not be asked for — asking for it is what left a drop on
-// KDE/Wayland with nothing to open (#224).
+// KDE/Wayland with nothing to open (#224). A link dragged from a browser
+// is a page to capture (#531): both runners hand it over as `dropLinks`,
+// and say as the drag comes in whether it is one.
 //
 // Run from the package root, like `flutter test` does.
 import 'dart:io';
@@ -88,6 +90,16 @@ void main() {
     test('reports over the channel Dart listens on', () {
       expect(source, contains('"${dartChannelName()}"'));
     });
+
+    test("hands a browser's link over as a page to capture (#531)", () {
+      expect(source, contains('"dropLinks"'));
+      expect(source, contains('g_uri_parse_scheme'));
+      expect(
+        source,
+        contains('"_NETSCAPE_URL"'),
+        reason: 'a link drag is told from a file drag as it comes in',
+      );
+    });
   });
 
   group('the Windows runner', () {
@@ -99,22 +111,46 @@ void main() {
       );
     });
 
-    test('takes the paths Win32 hands the window', () {
+    test('registers an OLE drop target for the window, and revokes it', () {
       expect(
         source,
-        contains('DragAcceptFiles(GetHandle(), TRUE)'),
-        reason: 'without it Windows never posts WM_DROPFILES to the window',
+        contains('RegisterDragDrop(GetHandle(), drop_target_)'),
+        reason: 'WM_DROPFILES only ever saw files; a link needs OLE (#531)',
       );
-      expect(source, contains('case WM_DROPFILES:'));
+      expect(source, contains('RevokeDragDrop(GetHandle())'));
       expect(
         source,
+        isNot(contains('DragAcceptFiles')),
+        reason: 'OLE takes the drop: the old route would never be called',
+      );
+      expect(
+        codeOnly(runnerSource(['windows', 'runner', 'main.cpp'])),
+        contains('OleInitialize(nullptr)'),
+        reason: 'RegisterDragDrop fails on a thread OLE was not set up on',
+      );
+    });
+
+    test('reads the paths of files, and the address of a link', () {
+      final target = codeOnly(
+        runnerSource(['windows', 'runner', 'drop_target.cpp']),
+      );
+      expect(
+        target,
         contains('DragQueryFileW'),
         reason: 'the drop arrives as an HDROP the paths are read from',
       );
+      expect(target, contains('UniformResourceLocatorW'));
+      expect(target, contains('"dropLinks"'));
+      expect(target, contains('"dragEntered"'));
+      expect(target, contains('"dragExited"'));
       expect(
-        source,
-        contains('DragFinish'),
-        reason: "the drop Win32 allocated is the window's to free",
+        target,
+        contains('ReleaseStgMedium'),
+        reason: "the medium OLE hands over is the target's to free",
+      );
+      expect(
+        codeOnly(runnerSource(['windows', 'runner', 'CMakeLists.txt'])),
+        contains('"drop_target.cpp"'),
       );
     });
 

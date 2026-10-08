@@ -3123,4 +3123,179 @@ final class PolishStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Rozpoznaj ponownie s. $page';
+
+  @override
+  String get captureWebPage => 'Zapisz stronę internetową';
+
+  @override
+  String get capturePageField => 'Strona';
+
+  @override
+  String get captureFromClipboard => 'Pobrano ze schowka.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Adres internetowy zaczyna się od http:// lub https://.';
+
+  @override
+  String get captureRead => 'Wczytaj';
+
+  @override
+  String get captureDownloading => 'Pobieranie…';
+
+  @override
+  String captureDownloaded(String size) => 'Pobrano · $size';
+
+  @override
+  String captureFewWords(int words) => 'Znaleziono tylko słów: $words';
+
+  @override
+  String get captureRunningBrowser => 'Uruchamianie strony w przeglądarce…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Przeglądarka działa w ukryciu, z własnym profilem usuwanym potem: '
+      'Twoja przeglądarka i jej logowania pozostają nietknięte.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Wczytano po uruchomieniu strony w przeglądarce';
+
+  @override
+  String get captureNoArticle =>
+      'Nie znaleziono artykułu: notatka zachowa tytuł, opis i link.';
+
+  @override
+  String get captureTitleField => 'Tytuł';
+
+  @override
+  String get captureFolderField => 'Folder';
+
+  @override
+  String get captureAddTag => 'Dodaj tag';
+
+  @override
+  String get capturePreview => 'Podgląd';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      'Słów: $words · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Pobierz obrazy ($count) do $folder/';
+
+  @override
+  String get captureRemoved => 'Usunięto';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Skrypty: $scripts, style: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Menu nawigacji';
+
+  @override
+  String get captureRemovedBanner => 'Baner o ciasteczkach';
+
+  @override
+  String captureRemovedAround(int words) => 'Reszta strony · słów: $words';
+
+  @override
+  String get captureSaveNote => 'Zapisz notatkę';
+
+  @override
+  String get captureSaving => 'Zapisywanie…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman nie mógł odczytać tej strony: pokazuje ona tekst dopiero po '
+      'zalogowaniu lub po skrypcie, którego nie udało się uruchomić. [Otwórz '
+      'link](<$url>), aby ją przeczytać.';
+
+  @override
+  String get captureFailScheme => 'Zapisać można tylko strony http i https.';
+
+  @override
+  String get captureFailRedirects => 'Strona przekierowuje zbyt wiele razy.';
+
+  @override
+  String get captureFailTimeout => 'Strona nie odpowiedziała na czas.';
+
+  @override
+  String get captureFailTooLarge => 'Strona przekracza 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'To nie jest strona internetowa: plik, PDF lub obraz.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Witryna odpowiedziała błędem ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Nie udało się połączyć ze stroną: sprawdź połączenie.';
+
+  @override
+  String get captureDropHint => 'Upuść, aby zapisać tę stronę';
+
+  @override
+  String get captureDropDetail => 'Otworzy się z nią okno zapisu.';
+
+  @override
+  String get captureSaveToNiman => 'Zapisz w Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Wrócisz do przeglądarki; powiadomienie da znać, gdy notatka będzie '
+      'gotowa.';
+
+  @override
+  String get captureAppendToNote => 'Dołącz do notatki';
+
+  @override
+  String get captureAppend => 'Dołącz';
+
+  @override
+  String captureReadingHost(String host) => 'Wczytywanie $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Zapisano: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · słów: $words · obrazów: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Zapisano bez artykułu';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Nie udało się odczytać $host: zachowano tytuł, opis i link';
+
+  @override
+  String captureQuoteAdded(String note) => 'Cytat dodano do $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'z „$title”';
+
+  @override
+  String captureFailedTitle(String host) => 'Nie udało się zapisać $host';
+
+  @override
+  String get captureShowFolder => 'Pokaż folder';
+
+  @override
+  String get captureOpen => 'Otwórz';
+
+  @override
+  String get captureQuote => 'Cytat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nowa notatka w $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Pobierz obrazy do $folder/';
 }

@@ -1591,4 +1591,166 @@ abstract base class Strings {
 
   /// Reads that page again.
   String ocrRecognizeAgain(int page);
+
+  /// Capturing a web page as a note (#531): the command, the dialog's title.
+  String get captureWebPage;
+
+  /// The field of the page's address.
+  String get capturePageField;
+
+  /// Under the address, when it came from the clipboard.
+  String get captureFromClipboard;
+
+  /// An address that is not a web page's.
+  String get captureInvalidUrl;
+
+  /// Reads the page at the address typed.
+  String get captureRead;
+
+  /// The page is downloading.
+  String get captureDownloading;
+
+  /// The page downloaded, and how large it was.
+  String captureDownloaded(String size);
+
+  /// The download had too little text.
+  String captureFewWords(int words);
+
+  /// The page runs in a browser, after too little text.
+  String get captureRunningBrowser;
+
+  /// What the browser a page runs in can reach.
+  String get captureBrowserPrivacy;
+
+  /// The article was found by running the page in a browser.
+  String get captureReadInBrowser;
+
+  /// A page read with no article in it.
+  String get captureNoArticle;
+
+  /// The field of the note's title.
+  String get captureTitleField;
+
+  /// The field of the folder the note goes in.
+  String get captureFolderField;
+
+  /// The field a tag is added from.
+  String get captureAddTag;
+
+  /// The heading of what the note will be.
+  String get capturePreview;
+
+  /// How long the article is, and how long it takes to read.
+  String captureWordsMinutes(int words, int minutes);
+
+  /// Whether the article's pictures are downloaded into the attachments
+  /// folder.
+  String captureDownloadPictures(int count, String folder);
+
+  /// The heading of what was left out of the page.
+  String get captureRemoved;
+
+  /// The page's scripts and styles, left out.
+  String captureRemovedCode(int scripts, int styles);
+
+  /// The page's navigation menu, left out.
+  String get captureRemovedMenu;
+
+  /// The page's cookie banner, left out.
+  String get captureRemovedBanner;
+
+  /// The rest of the page around the article — its footer, related posts —
+  /// left out.
+  String captureRemovedAround(int words);
+
+  /// Saves the captured page as a note.
+  String get captureSaveNote;
+
+  /// The note is being saved, its pictures downloaded.
+  String get captureSaving;
+
+  /// The notice a captured page with no article gets in its note, as
+  /// Markdown:
+  /// its link to the page is kept.
+  String captureUnreadableNotice(String url);
+
+  /// A capture refused: the address is not http or https.
+  String get captureFailScheme;
+
+  /// A capture failed: too many redirects.
+  String get captureFailRedirects;
+
+  /// A capture failed: no answer in time.
+  String get captureFailTimeout;
+
+  /// A capture failed: the page is too large.
+  String get captureFailTooLarge;
+
+  /// A capture failed: the address is a file, not a page.
+  String get captureFailNotHtml;
+
+  /// A capture failed: the site answered with an error status.
+  String captureFailStatus(String code);
+
+  /// A capture failed: the page could not be reached.
+  String get captureFailNetwork;
+
+  /// A link dragged over the window.
+  String get captureDropHint;
+
+  /// What a link dropped on the window does.
+  String get captureDropDetail;
+
+  /// The title of the sheet a browser's share opens (#531).
+  String get captureSaveToNiman;
+
+  /// Under the share sheet's Save: the capture goes on without the app on
+  /// screen.
+  String get captureBackgroundHint;
+
+  /// A shared quote goes at the end of a note the user picks.
+  String get captureAppendToNote;
+
+  /// Appends the shared quote.
+  String get captureAppend;
+
+  /// The notification while a shared page is read.
+  String captureReadingHost(String host);
+
+  /// The notification once a shared page is a note.
+  String captureSavedTitle(String title);
+
+  /// Under it: where the note is, how long, and how many pictures came.
+  String captureSavedBody(String folder, int words, int images);
+
+  /// The notification once a shared page with no article is a note.
+  String get captureSavedUnreadable;
+
+  /// Under it: what such a note keeps.
+  String captureUnreadableBody(String host);
+
+  /// The notification once a shared quote is in a note.
+  String captureQuoteAdded(String note);
+
+  /// Under it: the page the quote came from.
+  String captureQuoteFrom(String title);
+
+  /// The notification when a shared page could not be captured.
+  String captureFailedTitle(String host);
+
+  /// A notification's button: the app, the note's folder in the tree.
+  String get captureShowFolder;
+
+  /// A notification's button: opens the note a capture made (#531).
+  String get captureOpen;
+
+  /// The share sheet's tab for text selected on a page.
+  String get captureQuote;
+
+  /// A shared quote goes in a new note in [folder].
+  String captureNewNoteIn(String folder);
+
+  /// Downloads a page's pictures into [folder], before their number is
+  /// known.
+  String captureDownloadPicturesTo(String folder);
 }

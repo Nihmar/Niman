@@ -3080,4 +3080,180 @@ final class SwedishStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Känn igen s. $page igen';
+
+  @override
+  String get captureWebPage => 'Spara webbsida';
+
+  @override
+  String get capturePageField => 'Sida';
+
+  @override
+  String get captureFromClipboard => 'Hämtad från urklipp.';
+
+  @override
+  String get captureInvalidUrl =>
+      'En webbadress börjar med http:// eller https://.';
+
+  @override
+  String get captureRead => 'Läs';
+
+  @override
+  String get captureDownloading => 'Hämtar…';
+
+  @override
+  String captureDownloaded(String size) => 'Hämtad · $size';
+
+  @override
+  String captureFewWords(int words) => 'Bara $words ord hittades';
+
+  @override
+  String get captureRunningBrowser => 'Sidan körs i en webbläsare…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Webbläsaren körs dold, med en egen profil som raderas efteråt: din '
+      'webbläsare och dess inloggningar rörs inte.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Läst efter att sidan körts i en webbläsare';
+
+  @override
+  String get captureNoArticle =>
+      'Ingen artikel hittades: anteckningen behåller titeln, beskrivningen '
+      'och länken.';
+
+  @override
+  String get captureTitleField => 'Titel';
+
+  @override
+  String get captureFolderField => 'Mapp';
+
+  @override
+  String get captureAddTag => 'Lägg till en tagg';
+
+  @override
+  String get capturePreview => 'Förhandsgranskning';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words ord · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Hämta de $count bilderna till $folder/';
+
+  @override
+  String get captureRemoved => 'Borttaget';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts skript och $styles stilar';
+
+  @override
+  String get captureRemovedMenu => 'Navigeringsmenyn';
+
+  @override
+  String get captureRemovedBanner => 'En cookiebanner';
+
+  @override
+  String captureRemovedAround(int words) => 'Resten av sidan · $words ord';
+
+  @override
+  String get captureSaveNote => 'Spara anteckning';
+
+  @override
+  String get captureSaving => 'Sparar…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman kunde inte läsa sidan: den visar sin text först efter en '
+      'inloggning eller ett skript som inte kunde köras. [Öppna '
+      'länken](<$url>) för att läsa den.';
+
+  @override
+  String get captureFailScheme => 'Bara http- och https-sidor kan sparas.';
+
+  @override
+  String get captureFailRedirects => 'Sidan omdirigerar för många gånger.';
+
+  @override
+  String get captureFailTimeout => 'Sidan svarade inte i tid.';
+
+  @override
+  String get captureFailTooLarge => 'Sidan är större än 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Det här är ingen webbsida: en fil, en PDF eller en bild.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Webbplatsen svarade med ett fel ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Sidan kunde inte nås: kontrollera anslutningen.';
+
+  @override
+  String get captureDropHint => 'Släpp för att spara den här sidan';
+
+  @override
+  String get captureDropDetail => 'Spara-dialogen öppnas med den.';
+
+  @override
+  String get captureSaveToNiman => 'Spara i Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Du går tillbaka till webbläsaren; en avisering säger till när '
+      'anteckningen är klar.';
+
+  @override
+  String get captureAppendToNote => 'Lägg till i anteckning';
+
+  @override
+  String get captureAppend => 'Lägg till';
+
+  @override
+  String captureReadingHost(String host) => 'Läser $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Sparad: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words ord · $images bilder';
+
+  @override
+  String get captureSavedUnreadable => 'Sparad utan artikeln';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host kunde inte läsas: titel, beskrivning och länk behålls';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citat tillagt i $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'från ”$title”';
+
+  @override
+  String captureFailedTitle(String host) => 'Kunde inte spara $host';
+
+  @override
+  String get captureShowFolder => 'Visa mapp';
+
+  @override
+  String get captureOpen => 'Öppna';
+
+  @override
+  String get captureQuote => 'Citat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Ny anteckning i $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Hämta bilderna till $folder/';
 }

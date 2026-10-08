@@ -3170,4 +3170,186 @@ final class GreekStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Νέα αναγνώριση σελ. $page';
+
+  @override
+  String get captureWebPage => 'Αποθήκευση ιστοσελίδας';
+
+  @override
+  String get capturePageField => 'Σελίδα';
+
+  @override
+  String get captureFromClipboard => 'Από το πρόχειρο.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Μια διεύθυνση ιστού ξεκινά με http:// ή https://.';
+
+  @override
+  String get captureRead => 'Ανάγνωση';
+
+  @override
+  String get captureDownloading => 'Λήψη…';
+
+  @override
+  String captureDownloaded(String size) => 'Λήφθηκε · $size';
+
+  @override
+  String captureFewWords(int words) => 'Βρέθηκαν μόνο $words λέξεις';
+
+  @override
+  String get captureRunningBrowser =>
+      'Η σελίδα εκτελείται σε πρόγραμμα περιήγησης…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Το πρόγραμμα περιήγησης εκτελείται κρυφά, με δικό του προφίλ που '
+      'διαγράφεται μετά: ο δικός σας περιηγητής και οι συνδέσεις του δεν '
+      'αγγίζονται.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Διαβάστηκε αφού εκτελέστηκε η σελίδα σε πρόγραμμα περιήγησης';
+
+  @override
+  String get captureNoArticle =>
+      'Δεν βρέθηκε άρθρο: η σημείωση κρατά τον τίτλο, την περιγραφή και τον '
+      'σύνδεσμο.';
+
+  @override
+  String get captureTitleField => 'Τίτλος';
+
+  @override
+  String get captureFolderField => 'Φάκελος';
+
+  @override
+  String get captureAddTag => 'Προσθήκη ετικέτας';
+
+  @override
+  String get capturePreview => 'Προεπισκόπηση';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words λέξεις · $minutes λεπ.';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Λήψη των $count εικόνων στο $folder/';
+
+  @override
+  String get captureRemoved => 'Αφαιρέθηκαν';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts σενάρια και $styles στυλ';
+
+  @override
+  String get captureRemovedMenu => 'Το μενού πλοήγησης';
+
+  @override
+  String get captureRemovedBanner => 'Ένα πλαίσιο για cookies';
+
+  @override
+  String captureRemovedAround(int words) => 'Η υπόλοιπη σελίδα · $words λέξεις';
+
+  @override
+  String get captureSaveNote => 'Αποθήκευση σημείωσης';
+
+  @override
+  String get captureSaving => 'Αποθήκευση…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Το Niman δεν μπόρεσε να διαβάσει αυτή τη σελίδα: δείχνει το κείμενό '
+      'της μόνο μετά από σύνδεση ή ένα σενάριο που δεν μπόρεσε να '
+      'εκτελεστεί. [Ανοίξτε τον σύνδεσμο](<$url>) για να τη διαβάσετε.';
+
+  @override
+  String get captureFailScheme =>
+      'Μόνο σελίδες http και https μπορούν να αποθηκευτούν.';
+
+  @override
+  String get captureFailRedirects =>
+      'Η σελίδα ανακατευθύνει πάρα πολλές φορές.';
+
+  @override
+  String get captureFailTimeout => 'Η σελίδα δεν απάντησε εγκαίρως.';
+
+  @override
+  String get captureFailTooLarge => 'Η σελίδα είναι μεγαλύτερη από 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Αυτή δεν είναι ιστοσελίδα: αρχείο, PDF ή εικόνα.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Ο ιστότοπος απάντησε με σφάλμα ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Η σελίδα δεν ήταν προσβάσιμη: ελέγξτε τη σύνδεση.';
+
+  @override
+  String get captureDropHint => 'Αφήστε για να αποθηκευτεί αυτή η σελίδα';
+
+  @override
+  String get captureDropDetail => 'Το παράθυρο αποθήκευσης ανοίγει με αυτήν.';
+
+  @override
+  String get captureSaveToNiman => 'Αποθήκευση στο Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Επιστρέφετε στο πρόγραμμα περιήγησης· μια ειδοποίηση θα σας πει πότε '
+      'η σημείωση είναι έτοιμη.';
+
+  @override
+  String get captureAppendToNote => 'Προσθήκη σε σημείωση';
+
+  @override
+  String get captureAppend => 'Προσθήκη';
+
+  @override
+  String captureReadingHost(String host) => 'Ανάγνωση του $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Αποθηκεύτηκε: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words λέξεις · $images εικόνες';
+
+  @override
+  String get captureSavedUnreadable => 'Αποθηκεύτηκε χωρίς το άρθρο';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Το $host δεν διαβάστηκε: κρατήθηκαν ο τίτλος, η περιγραφή και ο '
+      'σύνδεσμος';
+
+  @override
+  String captureQuoteAdded(String note) => 'Το απόσπασμα προστέθηκε στο $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'από «$title»';
+
+  @override
+  String captureFailedTitle(String host) =>
+      'Δεν ήταν δυνατή η αποθήκευση του $host';
+
+  @override
+  String get captureShowFolder => 'Εμφάνιση φακέλου';
+
+  @override
+  String get captureOpen => 'Άνοιγμα';
+
+  @override
+  String get captureQuote => 'Απόσπασμα';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Νέα σημείωση στο $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Λήψη των εικόνων στο $folder/';
 }

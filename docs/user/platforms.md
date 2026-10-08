@@ -38,6 +38,10 @@ everywhere; PDF goes through each platform's own printer (below).
   freezes the app in the background and goes on when you come back; the
   strip under the top bar follows it on any note (see
   [text recognition](text-recognition.md)).
+- **Web capture:** a page is captured with Niman off screen, under a short
+  foreground service and its notification; a page with too little text is
+  run in a hidden WebView of the app's own (see
+  [web capture](web-capture.md)).
 
 ## Linux
 
@@ -102,6 +106,10 @@ everywhere; PDF goes through each platform's own printer (below).
 - **Text recognition:** the distribution's Tesseract (4.1 or later) when
   it is installed, with no download; otherwise a 2.9 MB engine built for
   glibc 2.34 and later (see [text recognition](text-recognition.md)).
+- **Web capture:** a page with too little text is run headless in the
+  same Chromium-family browser, with a throwaway profile. Without one, such
+  a page is saved as its title, description and picture, under a notice
+  to open the link (see [web capture](web-capture.md)).
 
 ## Windows
 
@@ -152,6 +160,8 @@ everywhere; PDF goes through each platform's own printer (below).
 - **Text recognition:** a 3.9 MB engine downloaded into the app folder,
   with the C runtime built in, so nothing else needs installing (see
   [text recognition](text-recognition.md)).
+- **Web capture:** a page with too little text is run headless in Edge,
+  with a throwaway profile (see [web capture](web-capture.md)).
 
 ## Density
 
@@ -214,9 +224,10 @@ everything but the note.
 
 **Dropping files and folders on the window** (see
 [organization](organization.md#dropping-files-on-the-window)) is Linux
-and Windows only: a phone has nothing to drag from. On Linux the window
-draws a frame while a drag is over it; on Windows the drop lands without
-that frame, which needs an OLE drop target this pass did not add (#224).
+and Windows only: a phone has nothing to drag from. The window draws a
+frame while a drag is over it, on Linux and on Windows alike, where the
+window's drop target is OLE's (#531). A link dropped the same way is a
+[web capture](web-capture.md); on a phone, the browser's Share does it.
 
 **Opening a file outside any library** (`Ctrl+Shift+O`, see
 [organization](organization.md#opening-a-file-outside-any-library)) is
@@ -225,7 +236,10 @@ the file, which could be read but not saved back.
 
 **Sharing into Niman (Android)** goes the other way: another app's
 **Share** menu offers Niman for text and for a Markdown file, and a file
-manager's **Open with** does for a `.md`. Shared text is appended to the
+manager's **Open with** does for a `.md`. A web page or a passage of one
+shared from the browser opens the [web capture](web-capture.md) sheet,
+saved in the background with Niman off screen. Other shared text is
+appended to the
 [quick note](organization.md#folders-quick-note-list-notes-voice-notes)
 and the note opens; with no quick note chosen yet, the choose/create
 screen opens and the text lands in whatever note it picks. A shared file

@@ -4,10 +4,10 @@ import 'package:niman/src/ui/strings.dart';
 
 /// The expandable "+" FAB (T-UI-05): the main round button reveals the
 /// mini FABs above it — New note, New from template, New list note, New
-/// voice note and New folder — instead of opening the note dialog
-/// directly. Controlled by the shell ([expanded]) so it can cover the
-/// body with a tap-to-dismiss scrim while the menu is open; tapping the
-/// main FAB again (or choosing an action) collapses the menu.
+/// voice note, Capture web page and New folder — instead of opening the
+/// note dialog directly. Controlled by the shell ([expanded]) so it can
+/// cover the body with a tap-to-dismiss scrim while the menu is open;
+/// tapping the main FAB again (or choosing an action) collapses the menu.
 final class NewItemFab extends StatelessWidget {
   /// Creates an expandable FAB wired to the shell's create handlers.
   ///
@@ -23,6 +23,7 @@ final class NewItemFab extends StatelessWidget {
     required this.onNewFromTemplate,
     required this.onNewFolder,
     required this.onJournalToday,
+    required this.onCaptureWebPage,
     this.listFolder,
     super.key,
   });
@@ -62,6 +63,9 @@ final class NewItemFab extends StatelessWidget {
 
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
+
+  /// Captures a web page as a note in the FAB target folder (#531).
+  final VoidCallback onCaptureWebPage;
 
   /// The configured list folder, naming where *New list note* lands:
   /// the only action that does not use the FAB target folder, so the
@@ -116,6 +120,14 @@ final class NewItemFab extends StatelessWidget {
           label: AppStrings.newAudioNoteTitle,
           open: expanded,
           onTap: onNewAudioNote,
+        ),
+        const SizedBox(height: 12),
+        _MiniFab(
+          key: const Key('capture-web-page-action'),
+          icon: Icons.language_outlined,
+          label: AppStrings.captureWebPage,
+          open: expanded,
+          onTap: onCaptureWebPage,
         ),
         const SizedBox(height: 12),
         _MiniFab(

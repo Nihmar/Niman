@@ -24,6 +24,22 @@ void main() {
       final request = shareRequestFrom({'type': 'text', 'text': 'hello'});
       expect(request, isA<SharedText>());
       expect((request! as SharedText).text, 'hello');
+      expect((request as SharedText).subject, isNull);
+    });
+
+    test('a text share carries the subject a browser gives it', () {
+      final request = shareRequestFrom({
+        'type': 'text',
+        'text': 'https://example.com/a',
+        'subject': 'A page',
+      });
+      expect((request! as SharedText).subject, 'A page');
+      final blank = shareRequestFrom({
+        'type': 'text',
+        'text': 'https://example.com/a',
+        'subject': '  ',
+      });
+      expect((blank! as SharedText).subject, isNull);
     });
 
     test('a file share carries the copy and the name it came with', () {

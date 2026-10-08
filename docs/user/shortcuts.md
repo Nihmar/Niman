@@ -15,6 +15,8 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Shift+A` — new voice note
 - `Ctrl/⌘+T` — new todo
 - `Ctrl/⌘+Q` — quick note
+- `Ctrl/⌘+Alt+W` — capture a web page as a note, the clipboard's address
+  when it holds one (see [web capture](web-capture.md))
 - `Ctrl/⌘+Shift+J` — today's [journal](journal.md) entry, made first when
   there is none
 - `Ctrl/⌘+Shift+Page Up` / `Page Down` — the journal entry before / after

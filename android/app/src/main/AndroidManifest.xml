@@ -34,6 +34,11 @@
          Android 6+ (asked when the first recording starts). -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- Web capture (#531): a page shared from the browser is read and
+         saved with Niman off screen, under a short foreground service
+         (shortService needs no permission of its own beyond this one). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <!-- Auto-update (issue #81): installing the downloaded APK through
          the system installer. The user still confirms on the system
          screen (including the per-app "unknown apps" allowlist). -->
@@ -230,6 +235,17 @@
             android:name=".NoteWidgetService"
             android:exported="true"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <!-- Web capture (#531): the plugin's foreground service keeps the
+             process alive while a shared page is read and saved, the user
+             back in the browser. shortService: the capture ends within
+             Android's three minutes (Niman gives up at 150 s), and no
+             other type fits reading one page. -->
+        <service
+            android:name="com.dexterous.flutterlocalnotifications.ForegroundService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="shortService" />
 
         <!-- Auto-update (issue #81): shares the downloaded APK read-only
              with the system package installer. -->

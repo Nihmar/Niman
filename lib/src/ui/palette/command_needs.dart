@@ -87,6 +87,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.newListNote ||
   AppCommand.newAudioNote ||
   AppCommand.newTodo ||
+  AppCommand.captureWebPage ||
   AppCommand.quickNote ||
   AppCommand.journalToday ||
   AppCommand.journalCalendar ||

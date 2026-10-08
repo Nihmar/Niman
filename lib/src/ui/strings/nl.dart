@@ -3106,4 +3106,182 @@ final class DutchStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'P. $page opnieuw herkennen';
+
+  @override
+  String get captureWebPage => 'Webpagina vastleggen';
+
+  @override
+  String get capturePageField => 'Pagina';
+
+  @override
+  String get captureFromClipboard => 'Overgenomen van het klembord.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Een webadres begint met http:// of https://.';
+
+  @override
+  String get captureRead => 'Lezen';
+
+  @override
+  String get captureDownloading => 'Downloaden…';
+
+  @override
+  String captureDownloaded(String size) => 'Gedownload · $size';
+
+  @override
+  String captureFewWords(int words) => 'Slechts $words woorden gevonden';
+
+  @override
+  String get captureRunningBrowser => 'De pagina draait in een browser…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'De browser draait verborgen, met een eigen profiel dat daarna wordt '
+      'verwijderd: uw browser en zijn aanmeldingen blijven onaangeroerd.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Gelezen nadat de pagina in een browser draaide';
+
+  @override
+  String get captureNoArticle =>
+      'Geen artikel gevonden: de notitie houdt de titel, de beschrijving en '
+      'de link.';
+
+  @override
+  String get captureTitleField => 'Titel';
+
+  @override
+  String get captureFolderField => 'Map';
+
+  @override
+  String get captureAddTag => 'Tag toevoegen';
+
+  @override
+  String get capturePreview => 'Voorbeeld';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words woorden · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'De $count afbeeldingen downloaden naar $folder/';
+
+  @override
+  String get captureRemoved => 'Verwijderd';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts scripts en $styles stijlen';
+
+  @override
+  String get captureRemovedMenu => 'Het navigatiemenu';
+
+  @override
+  String get captureRemovedBanner => 'Een cookiebanner';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'De rest van de pagina · $words woorden';
+
+  @override
+  String get captureSaveNote => 'Notitie opslaan';
+
+  @override
+  String get captureSaving => 'Opslaan…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman kon deze pagina niet lezen: ze toont haar tekst pas na een '
+      'aanmelding of een script dat niet kon worden uitgevoerd. [Open de '
+      'link](<$url>) om haar te lezen.';
+
+  @override
+  String get captureFailScheme =>
+      "Alleen http- en https-pagina's kunnen worden vastgelegd.";
+
+  @override
+  String get captureFailRedirects => 'De pagina stuurt te vaak door.';
+
+  @override
+  String get captureFailTimeout => 'De pagina antwoordde niet op tijd.';
+
+  @override
+  String get captureFailTooLarge => 'De pagina is groter dan 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Dit is geen webpagina: een bestand, een pdf of een afbeelding.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'De site antwoordde met een fout ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'De pagina is niet bereikbaar: controleer de verbinding.';
+
+  @override
+  String get captureDropHint => 'Loslaten om deze pagina vast te leggen';
+
+  @override
+  String get captureDropDetail => 'Het vastlegvenster opent ermee.';
+
+  @override
+  String get captureSaveToNiman => 'Opslaan in Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'U gaat terug naar de browser; een melding laat weten wanneer de '
+      'notitie klaar is.';
+
+  @override
+  String get captureAppendToNote => 'Toevoegen aan notitie';
+
+  @override
+  String get captureAppend => 'Toevoegen';
+
+  @override
+  String captureReadingHost(String host) => '$host lezen…';
+
+  @override
+  String captureSavedTitle(String title) => 'Opgeslagen: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words woorden · $images afbeeldingen';
+
+  @override
+  String get captureSavedUnreadable => 'Opgeslagen zonder het artikel';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host kon niet worden gelezen: titel, beschrijving en link behouden';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citaat toegevoegd aan $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'uit „$title”';
+
+  @override
+  String captureFailedTitle(String host) => '$host kon niet worden vastgelegd';
+
+  @override
+  String get captureShowFolder => 'Map tonen';
+
+  @override
+  String get captureOpen => 'Openen';
+
+  @override
+  String get captureQuote => 'Citaat';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Nieuwe notitie in $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'De afbeeldingen downloaden naar $folder/';
 }

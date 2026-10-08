@@ -2711,4 +2711,166 @@ final class ChineseStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => '重新识别第 $page 页';
+
+  @override
+  String get captureWebPage => '保存网页';
+
+  @override
+  String get capturePageField => '页面';
+
+  @override
+  String get captureFromClipboard => '取自剪贴板。';
+
+  @override
+  String get captureInvalidUrl => '网址以 http:// 或 https:// 开头。';
+
+  @override
+  String get captureRead => '读取';
+
+  @override
+  String get captureDownloading => '正在下载…';
+
+  @override
+  String captureDownloaded(String size) => '已下载 · $size';
+
+  @override
+  String captureFewWords(int words) => '仅找到 $words 个词';
+
+  @override
+  String get captureRunningBrowser => '正在浏览器中运行页面…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      '浏览器在后台运行，使用其专属的配置文件，结束后即删除：不会触及你的浏览器及其登录信息。';
+
+  @override
+  String get captureReadInBrowser => '在浏览器中运行页面后读取';
+
+  @override
+  String get captureNoArticle => '未找到文章：笔记将保留标题、描述和链接。';
+
+  @override
+  String get captureTitleField => '标题';
+
+  @override
+  String get captureFolderField => '文件夹';
+
+  @override
+  String get captureAddTag => '添加标签';
+
+  @override
+  String get capturePreview => '预览';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words 词 · $minutes 分钟';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      '将 $count 张图片下载到 $folder/';
+
+  @override
+  String get captureRemoved => '已移除';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts 个脚本和 $styles 个样式';
+
+  @override
+  String get captureRemovedMenu => '导航菜单';
+
+  @override
+  String get captureRemovedBanner => 'Cookie 横幅';
+
+  @override
+  String captureRemovedAround(int words) => '页面其余部分 · $words 词';
+
+  @override
+  String get captureSaveNote => '保存笔记';
+
+  @override
+  String get captureSaving => '正在保存…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman 无法读取此页面：它只在登录后或运行某个无法执行的脚本后才显示文字。[打开链接](<$url>)即可阅读。';
+
+  @override
+  String get captureFailScheme => '只能保存 http 和 https 页面。';
+
+  @override
+  String get captureFailRedirects => '该页面重定向次数过多。';
+
+  @override
+  String get captureFailTimeout => '页面未及时响应。';
+
+  @override
+  String get captureFailTooLarge => '页面大于 10 MB。';
+
+  @override
+  String get captureFailNotHtml => '这不是网页：而是文件、PDF 或图片。';
+
+  @override
+  String captureFailStatus(String code) => '网站返回了错误（$code）。';
+
+  @override
+  String get captureFailNetwork => '无法访问该页面：请检查网络连接。';
+
+  @override
+  String get captureDropHint => '松开以保存此页面';
+
+  @override
+  String get captureDropDetail => '将以此页面打开保存窗口。';
+
+  @override
+  String get captureSaveToNiman => '保存到 Niman';
+
+  @override
+  String get captureBackgroundHint => '你会返回浏览器；笔记准备好后会有通知告诉你。';
+
+  @override
+  String get captureAppendToNote => '追加到笔记';
+
+  @override
+  String get captureAppend => '追加';
+
+  @override
+  String captureReadingHost(String host) => '正在读取 $host…';
+
+  @override
+  String captureSavedTitle(String title) => '已保存：$title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words 词 · $images 张图片';
+
+  @override
+  String get captureSavedUnreadable => '已保存（无正文）';
+
+  @override
+  String captureUnreadableBody(String host) => '无法读取 $host：已保留标题、描述和链接';
+
+  @override
+  String captureQuoteAdded(String note) => '引用已追加到 $note';
+
+  @override
+  String captureQuoteFrom(String title) => '来自《$title》';
+
+  @override
+  String captureFailedTitle(String host) => '无法保存 $host';
+
+  @override
+  String get captureShowFolder => '显示文件夹';
+
+  @override
+  String get captureOpen => '打开';
+
+  @override
+  String get captureQuote => '引文';
+
+  @override
+  String captureNewNoteIn(String folder) => '在 $folder 中新建笔记';
+
+  @override
+  String captureDownloadPicturesTo(String folder) => '将图片下载到 $folder/';
 }

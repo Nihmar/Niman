@@ -57,6 +57,16 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+        // Web capture (#531): Save on a page shared from the browser sends
+        // the user back to it, the activity kept (and with it the engine
+        // the capture runs in) rather than finished.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "niman/task")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "moveToBack" -> result.success(moveTaskToBack(true))
+                    else -> result.notImplemented()
+                }
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "niman/update")
             .setMethodCallHandler { call, result ->
                 when (call.method) {

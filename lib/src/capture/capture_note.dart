@@ -55,7 +55,7 @@ CapturedNote captureNote(
   }
 
   final out = StringBuffer()
-    ..write(_frontmatter(page, captured, tags))
+    ..write(captureFrontmatter(page, captured, tags))
     ..write('\n# ${escapeMarkdownText(page.title)}\n');
   final article = page.article;
   if (article != null) {
@@ -79,8 +79,13 @@ CapturedNote captureNote(
   return (name: page.title, text: out.toString());
 }
 
-/// The frontmatter block.
-String _frontmatter(PageReading page, DateTime captured, List<String> tags) {
+/// The frontmatter block of [page]'s note, captured on [captured] with
+/// [tags]: what the note starts with, and what the dialog shows of it.
+String captureFrontmatter(
+  PageReading page,
+  DateTime captured,
+  List<String> tags,
+) {
   String two(int n) => n.toString().padLeft(2, '0');
   final day = '${captured.year}-${two(captured.month)}-${two(captured.day)}';
   final byline = page.byline;

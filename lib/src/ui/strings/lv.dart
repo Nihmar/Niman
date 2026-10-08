@@ -3068,4 +3068,176 @@ final class LatvianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Atpazīt $page. lp. vēlreiz';
+
+  @override
+  String get captureWebPage => 'Saglabāt tīmekļa lapu';
+
+  @override
+  String get capturePageField => 'Lapa';
+
+  @override
+  String get captureFromClipboard => 'Ņemts no starpliktuves.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Tīmekļa adrese sākas ar http:// vai https://.';
+
+  @override
+  String get captureRead => 'Lasīt';
+
+  @override
+  String get captureDownloading => 'Lejupielādē…';
+
+  @override
+  String captureDownloaded(String size) => 'Lejupielādēts · $size';
+
+  @override
+  String captureFewWords(int words) => 'Atrasti tikai $words vārdi';
+
+  @override
+  String get captureRunningBrowser => 'Lapa tiek palaista pārlūkā…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Pārlūks darbojas slēpti, ar savu profilu, kas pēc tam tiek dzēsts: '
+      'jūsu pārlūks un tā pierakstīšanās netiek skarta.';
+
+  @override
+  String get captureReadInBrowser => 'Nolasīts pēc lapas palaišanas pārlūkā';
+
+  @override
+  String get captureNoArticle =>
+      'Raksts nav atrasts: piezīmē paliek virsraksts, apraksts un saite.';
+
+  @override
+  String get captureTitleField => 'Virsraksts';
+
+  @override
+  String get captureFolderField => 'Mape';
+
+  @override
+  String get captureAddTag => 'Pievienot cilpi';
+
+  @override
+  String get capturePreview => 'Priekšskatījums';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words vārdi · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Lejupielādēt attēlus ($count) mapē $folder/';
+
+  @override
+  String get captureRemoved => 'Noņemts';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Skripti: $scripts, stili: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Navigācijas izvēlne';
+
+  @override
+  String get captureRemovedBanner => 'Sīkdatņu paziņojums';
+
+  @override
+  String captureRemovedAround(int words) => 'Pārējā lapa · $words vārdi';
+
+  @override
+  String get captureSaveNote => 'Saglabāt piezīmi';
+
+  @override
+  String get captureSaving => 'Saglabā…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman nevarēja nolasīt šo lapu: tā rāda tekstu tikai pēc '
+      'pierakstīšanās vai skripta, ko neizdevās palaist. [Atveriet '
+      'saiti](<$url>), lai to izlasītu.';
+
+  @override
+  String get captureFailScheme => 'Saglabāt var tikai http un https lapas.';
+
+  @override
+  String get captureFailRedirects => 'Lapa pārvirza pārāk daudz reižu.';
+
+  @override
+  String get captureFailTimeout => 'Lapa neatbildēja laikā.';
+
+  @override
+  String get captureFailTooLarge => 'Lapa ir lielāka par 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Tā nav tīmekļa lapa: fails, PDF vai attēls.';
+
+  @override
+  String captureFailStatus(String code) => 'Vietne atbildēja ar kļūdu ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Lapai nevarēja piekļūt: pārbaudiet savienojumu.';
+
+  @override
+  String get captureDropHint => 'Nometiet, lai saglabātu šo lapu';
+
+  @override
+  String get captureDropDetail => 'Ar to atvērsies saglabāšanas logs.';
+
+  @override
+  String get captureSaveToNiman => 'Saglabāt Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Jūs atgriezīsieties pārlūkā; paziņojums ziņos, kad piezīme būs gatava.';
+
+  @override
+  String get captureAppendToNote => 'Pievienot piezīmei';
+
+  @override
+  String get captureAppend => 'Pievienot';
+
+  @override
+  String captureReadingHost(String host) => 'Lasa $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Saglabāts: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words vārdi · $images attēli';
+
+  @override
+  String get captureSavedUnreadable => 'Saglabāts bez raksta';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nevarēja nolasīt: saglabāts virsraksts, apraksts un saite';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citāts pievienots piezīmei $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'no “$title”';
+
+  @override
+  String captureFailedTitle(String host) => 'Neizdevās saglabāt $host';
+
+  @override
+  String get captureShowFolder => 'Rādīt mapi';
+
+  @override
+  String get captureOpen => 'Atvērt';
+
+  @override
+  String get captureQuote => 'Citāts';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Jauna piezīme mapē $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Lejupielādēt attēlus mapē $folder/';
 }

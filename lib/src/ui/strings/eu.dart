@@ -3100,4 +3100,182 @@ final class BasqueStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Ezagutu berriro $page. orria';
+
+  @override
+  String get captureWebPage => 'Gorde web-orria';
+
+  @override
+  String get capturePageField => 'Orria';
+
+  @override
+  String get captureFromClipboard => 'Arbeletik hartua.';
+
+  @override
+  String get captureInvalidUrl =>
+      'Web-helbide bat http:// edo https:// hasten da.';
+
+  @override
+  String get captureRead => 'Irakurri';
+
+  @override
+  String get captureDownloading => 'Deskargatzen…';
+
+  @override
+  String captureDownloaded(String size) => 'Deskargatuta · $size';
+
+  @override
+  String captureFewWords(int words) => '$words hitz baino ez dira aurkitu';
+
+  @override
+  String get captureRunningBrowser => 'Orria nabigatzaile batean exekutatzen…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Nabigatzailea ezkutuan dabil, gero ezabatzen den profil propio '
+      'batekin: zure nabigatzailea eta haren saio-hasierak ez dira ukitzen.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Orria nabigatzaile batean exekutatu ondoren irakurria';
+
+  @override
+  String get captureNoArticle =>
+      'Ez da artikulurik aurkitu: oharrak izenburua, deskribapena eta esteka '
+      'gordetzen ditu.';
+
+  @override
+  String get captureTitleField => 'Izenburua';
+
+  @override
+  String get captureFolderField => 'Karpeta';
+
+  @override
+  String get captureAddTag => 'Gehitu etiketa bat';
+
+  @override
+  String get capturePreview => 'Aurrebista';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words hitz · $minutes min';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Deskargatu $count irudiak $folder/ karpetara';
+
+  @override
+  String get captureRemoved => 'Kendua';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      '$scripts script eta $styles estilo';
+
+  @override
+  String get captureRemovedMenu => 'Nabigazio-menua';
+
+  @override
+  String get captureRemovedBanner => 'Cookie-ohar bat';
+
+  @override
+  String captureRemovedAround(int words) => 'Orriaren gainerakoa · $words hitz';
+
+  @override
+  String get captureSaveNote => 'Gorde oharra';
+
+  @override
+  String get captureSaving => 'Gordetzen…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman-ek ezin izan du orri hau irakurri: saioa hasi ondoren edo '
+      'exekutatu ezin izan den script baten ondoren soilik erakusten du '
+      'testua. [Ireki esteka](<$url>) irakurtzeko.';
+
+  @override
+  String get captureFailScheme =>
+      'http eta https orriak soilik gorde daitezke.';
+
+  @override
+  String get captureFailRedirects => 'Orriak gehiegitan birbideratzen du.';
+
+  @override
+  String get captureFailTimeout => 'Orriak ez du garaiz erantzun.';
+
+  @override
+  String get captureFailTooLarge => 'Orriak 10 MB baino gehiago ditu.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Hau ez da web-orri bat: fitxategi bat, PDF bat edo irudi bat da.';
+
+  @override
+  String captureFailStatus(String code) =>
+      'Guneak errore batekin erantzun du ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Ezin izan da orrira iritsi: egiaztatu konexioa.';
+
+  @override
+  String get captureDropHint => 'Askatu orri hau gordetzeko';
+
+  @override
+  String get captureDropDetail => 'Gordetzeko leihoa irekiko da harekin.';
+
+  @override
+  String get captureSaveToNiman => 'Gorde Niman-en';
+
+  @override
+  String get captureBackgroundHint =>
+      'Nabigatzailera itzuliko zara; jakinarazpen batek esango dizu oharra '
+      'prest dagoenean.';
+
+  @override
+  String get captureAppendToNote => 'Gehitu ohar bati';
+
+  @override
+  String get captureAppend => 'Gehitu';
+
+  @override
+  String captureReadingHost(String host) => '$host irakurtzen…';
+
+  @override
+  String captureSavedTitle(String title) => 'Gordeta: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words hitz · $images irudi';
+
+  @override
+  String get captureSavedUnreadable => 'Artikulurik gabe gordeta';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Ezin izan da $host irakurri: izenburua, deskribapena eta esteka gorde '
+      'dira';
+
+  @override
+  String captureQuoteAdded(String note) => 'Aipua $note oharrari gehitu zaio';
+
+  @override
+  String captureQuoteFrom(String title) => '«$title» orritik';
+
+  @override
+  String captureFailedTitle(String host) => 'Ezin izan da $host gorde';
+
+  @override
+  String get captureShowFolder => 'Erakutsi karpeta';
+
+  @override
+  String get captureOpen => 'Ireki';
+
+  @override
+  String get captureQuote => 'Aipua';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Ohar berria $folder karpetan';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Deskargatu irudiak $folder/ karpetara';
 }

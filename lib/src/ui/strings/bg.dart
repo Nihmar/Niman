@@ -3084,4 +3084,180 @@ final class BulgarianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Разпознай отново стр. $page';
+
+  @override
+  String get captureWebPage => 'Запазване на уеб страница';
+
+  @override
+  String get capturePageField => 'Страница';
+
+  @override
+  String get captureFromClipboard => 'Взето от клипборда.';
+
+  @override
+  String get captureInvalidUrl => 'Уеб адресът започва с http:// или https://.';
+
+  @override
+  String get captureRead => 'Прочитане';
+
+  @override
+  String get captureDownloading => 'Изтегляне…';
+
+  @override
+  String captureDownloaded(String size) => 'Изтеглено · $size';
+
+  @override
+  String captureFewWords(int words) => 'Намерени са само $words думи';
+
+  @override
+  String get captureRunningBrowser => 'Страницата се изпълнява в браузър…';
+
+  @override
+  String get captureBrowserPrivacy =>
+      'Браузърът работи скрито, със собствен профил, който после се изтрива: '
+      'вашият браузър и влизанията в него не се засягат.';
+
+  @override
+  String get captureReadInBrowser =>
+      'Прочетено след изпълнение на страницата в браузър';
+
+  @override
+  String get captureNoArticle =>
+      'Не е намерена статия: бележката ще запази заглавието, описанието и '
+      'връзката.';
+
+  @override
+  String get captureTitleField => 'Заглавие';
+
+  @override
+  String get captureFolderField => 'Папка';
+
+  @override
+  String get captureAddTag => 'Добавяне на етикет';
+
+  @override
+  String get capturePreview => 'Преглед';
+
+  @override
+  String captureWordsMinutes(int words, int minutes) =>
+      '$words думи · $minutes мин';
+
+  @override
+  String captureDownloadPictures(int count, String folder) =>
+      'Изтегляне на изображенията ($count) в $folder/';
+
+  @override
+  String get captureRemoved => 'Премахнато';
+
+  @override
+  String captureRemovedCode(int scripts, int styles) =>
+      'Скриптове: $scripts, стилове: $styles';
+
+  @override
+  String get captureRemovedMenu => 'Навигационното меню';
+
+  @override
+  String get captureRemovedBanner => 'Банер за бисквитки';
+
+  @override
+  String captureRemovedAround(int words) =>
+      'Останалата част от страницата · $words думи';
+
+  @override
+  String get captureSaveNote => 'Запазване на бележката';
+
+  @override
+  String get captureSaving => 'Запазване…';
+
+  @override
+  String captureUnreadableNotice(String url) =>
+      'Niman не можа да прочете тази страница: тя показва текста си само '
+      'след вход или скрипт, който не можа да се изпълни. [Отворете '
+      'връзката](<$url>), за да я прочетете.';
+
+  @override
+  String get captureFailScheme =>
+      'Могат да се запазват само страници с http и https.';
+
+  @override
+  String get captureFailRedirects => 'Страницата пренасочва твърде много пъти.';
+
+  @override
+  String get captureFailTimeout => 'Страницата не отговори навреме.';
+
+  @override
+  String get captureFailTooLarge => 'Страницата е по-голяма от 10 MB.';
+
+  @override
+  String get captureFailNotHtml =>
+      'Това не е уеб страница: файл, PDF или изображение.';
+
+  @override
+  String captureFailStatus(String code) => 'Сайтът отговори с грешка ($code).';
+
+  @override
+  String get captureFailNetwork =>
+      'Страницата не е достъпна: проверете връзката.';
+
+  @override
+  String get captureDropHint => 'Пуснете, за да запазите тази страница';
+
+  @override
+  String get captureDropDetail => 'Прозорецът за запазване ще се отвори с нея.';
+
+  @override
+  String get captureSaveToNiman => 'Запазване в Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Връщате се в браузъра; известие ще ви каже, когато бележката е готова.';
+
+  @override
+  String get captureAppendToNote => 'Добавяне към бележка';
+
+  @override
+  String get captureAppend => 'Добавяне';
+
+  @override
+  String captureReadingHost(String host) => 'Четене на $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Запазено: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words думи · $images изображения';
+
+  @override
+  String get captureSavedUnreadable => 'Запазено без статията';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host не можа да бъде прочетен: запазени са заглавието, описанието и '
+      'връзката';
+
+  @override
+  String captureQuoteAdded(String note) => 'Цитатът е добавен в $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'от „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host не можа да бъде запазен';
+
+  @override
+  String get captureShowFolder => 'Показване на папката';
+
+  @override
+  String get captureOpen => 'Отваряне';
+
+  @override
+  String get captureQuote => 'Цитат';
+
+  @override
+  String captureNewNoteIn(String folder) => 'Нова бележка в $folder';
+
+  @override
+  String captureDownloadPicturesTo(String folder) =>
+      'Изтегляне на изображенията в $folder/';
 }
