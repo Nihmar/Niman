@@ -3346,4 +3346,76 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Заўсёды паказана';
+
+  @override
+  String get newSlidesTitle => 'Новая прэзентацыя';
+
+  @override
+  String get newSlidesDefault => 'Мая прэзентацыя';
+
+  @override
+  String get showSlidesTooltip => 'Паказаць слайды';
+
+  @override
+  String get slidesPresent => 'Паказаць';
+
+  @override
+  String get slidesPresenterView => 'Рэжым дакладчыка';
+
+  @override
+  String get slidesMarkdownPreview => 'Перадпрагляд Markdown';
+
+  @override
+  String get slidesExportPdf => 'Экспартаваць слайды як PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Нататкі дакладчыка';
+
+  @override
+  String get slidesOverview => 'Агляд';
+
+  @override
+  String get slidesNotes => 'Нататкі';
+
+  @override
+  String get slidesExit => 'Выйсці';
+
+  @override
+  String get slidesPrevious => 'Папярэдні';
+
+  @override
+  String get slidesNext => 'Наступны';
+
+  @override
+  String get slidesNow => 'Зараз';
+
+  @override
+  String get slidesElapsed => 'Прайшло';
+
+  @override
+  String get slidesSlideOnly => 'Толькі слайд';
+
+  @override
+  String get slidesPause => 'Паўза';
+
+  @override
+  String get slidesRestart => 'Пачаць зноў';
+
+  @override
+  String get slidesSwipeToExit => 'Правядзіце ўніз, каб выйсці';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Патрэбна адкрытая прэзентацыя';
+
+  @override
+  String get slidesTemplateSecond => 'Другі слайд';
+
+  @override
+  String get slidesTemplatePoint => 'Пункт';
+
+  @override
+  String get slidesTemplateNote => 'што тут сказаць — бачыце толькі вы.';
 }

@@ -3265,4 +3265,76 @@ final class EnglishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Always shown';
+
+  @override
+  String get newSlidesTitle => 'New slides';
+
+  @override
+  String get newSlidesDefault => 'My slides';
+
+  @override
+  String get showSlidesTooltip => 'Show slides';
+
+  @override
+  String get slidesPresent => 'Present';
+
+  @override
+  String get slidesPresenterView => 'Presenter view';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown preview';
+
+  @override
+  String get slidesExportPdf => 'Export slides as PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Speaker notes';
+
+  @override
+  String get slidesOverview => 'Overview';
+
+  @override
+  String get slidesNotes => 'Notes';
+
+  @override
+  String get slidesExit => 'Exit';
+
+  @override
+  String get slidesPrevious => 'Previous';
+
+  @override
+  String get slidesNext => 'Next';
+
+  @override
+  String get slidesNow => 'Now';
+
+  @override
+  String get slidesElapsed => 'Elapsed';
+
+  @override
+  String get slidesSlideOnly => 'Slide only';
+
+  @override
+  String get slidesPause => 'Pause';
+
+  @override
+  String get slidesRestart => 'Restart';
+
+  @override
+  String get slidesSwipeToExit => 'Swipe down to exit';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Needs an open slides note';
+
+  @override
+  String get slidesTemplateSecond => 'Second slide';
+
+  @override
+  String get slidesTemplatePoint => 'A point';
+
+  @override
+  String get slidesTemplateNote => 'what to say here — only you see it.';
 }

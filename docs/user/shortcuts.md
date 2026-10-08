@@ -33,6 +33,8 @@ shortcuts lists them and lets you change them:
   the journal's calendar)
 - `F11` — Zen mode: the note and nothing else; `Esc` or `F11` again
   leaves it (see [editing](editing.md#zen-mode))
+- `F5` — present the slides note on screen, `Alt+F5` its presenter view
+  (see [slide notes](slides.md#presenting))
 - `Ctrl/⌘+Shift+T` — typewriter mode on or off: the line being written
   stays in the middle (see [editing](editing.md#typewriter-mode))
 - `Ctrl/⌘+=` / `Ctrl/⌘+-` — zoom the note's text in and out, `Ctrl/⌘+0`

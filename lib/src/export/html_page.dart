@@ -4,16 +4,20 @@
 library;
 
 import 'package:niman/src/export/html_text.dart';
+import 'package:niman/src/export/slide_page.dart';
 
 /// A whole page titled [title] around [body]; [fontFaces] are the maths
-/// fonts, when a formula on it needs them.
+/// fonts, when a formula on it needs them, and [style] what a page of its
+/// own kind adds after the page's (the slides' sheets, #534).
 String htmlPage({
   required String title,
   required String body,
   String? fontFaces,
   String language = 'en',
+  String? style,
 }) {
   final fonts = fontFaces == null ? '' : '<style>$fontFaces</style>\n';
+  final own = style == null ? '' : '<style>$style</style>\n';
   return '<!DOCTYPE html>\n'
       '<html lang="${escapeAttribute(language)}">\n'
       '<head>\n'
@@ -22,6 +26,7 @@ String htmlPage({
       '<meta name="generator" content="Niman">\n'
       '<title>${escapeHtml(title)}</title>\n'
       '<style>$pageStyle</style>\n'
+      '$own'
       '$fonts'
       '</head>\n'
       '<body>\n'
@@ -123,3 +128,25 @@ details.callout > summary { cursor: pointer; }
   a { color: inherit; }
 }
 ''';
+
+/// A slides page's sheets (#534): one 16:9 page a slide, no margin, the
+/// slide's text set as the app sets it on its [slideSize] slide — a CSS
+/// inch is 96 px, 25.4 mm.
+final String slidesPageStyle = () {
+  String mm(double px) => '${(px / 96 * 25.4).toStringAsFixed(3)}mm';
+  final width = mm(slideSize.width);
+  final height = mm(slideSize.height);
+  const font = '${16 * slideTextScale}px';
+  return '''
+@page { size: $width $height; margin: 0; }
+html, body { margin: 0; padding: 0; }
+body { padding: 0; }
+.note { max-width: none; margin: 0; }
+.slide { width: $width; height: $height; box-sizing: border-box;
+  padding: ${slidePadding.top}px ${slidePadding.left}px; overflow: hidden;
+  font-size: $font; break-after: page; page-break-after: always; }
+.slide:last-child { break-after: auto; page-break-after: auto; }
+.slide > :first-child { margin-top: 0; }
+@media print { body { padding: 0; font-size: $font; } }
+''';
+}();

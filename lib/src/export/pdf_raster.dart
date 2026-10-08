@@ -26,6 +26,7 @@ import 'package:flutter/rendering.dart';
 import 'package:niman/src/export/pdf_breaks.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_writer.dart';
+import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -143,6 +144,81 @@ Future<Uint8List> rasterPdf({
     return writer.finish();
   } finally {
     layout.dispose();
+    for (final image in decoded.values) {
+      image.dispose();
+    }
+  }
+}
+
+/// Draws one page per slide of [slides] (#534), each the slide's Markdown
+/// laid out on a [slideSize] page and clipped to it, answering the PDF's
+/// bytes. The fallback of a machine with no engine, as [rasterPdf] is for
+/// a note; [theme] carries the slides' larger type.
+Future<Uint8List> rasterSlidesPdf({
+  required List<String> slides,
+  required MarkdownTheme theme,
+  required MathCache mathCache,
+  Map<String, Uint8List>? images,
+  void Function(int done, int total)? onProgress,
+  bool Function()? isCancelled,
+  double pixelRatio = 2,
+}) async {
+  final width = slideSize.width;
+  final height = slideSize.height;
+  final decoded = <String, ui.Image>{};
+  for (final entry in (images ?? const <String, Uint8List>{}).entries) {
+    try {
+      decoded[entry.key] = await _decode(
+        entry.value,
+        (width * pixelRatio).round(),
+      );
+    } on Object {
+      // As in [rasterPdf]: a picture that will not decode stays words.
+    }
+  }
+  final writer = PdfWriter(
+    pageWidth: width * pointsPerPixel,
+    pageHeight: height * pointsPerPixel,
+  );
+  try {
+    onProgress?.call(0, slides.length);
+    for (var index = 0; index < slides.length; index++) {
+      if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
+      final layout = _OffscreenLayout(
+        width: width,
+        height: height,
+        child: MarkdownExportView(
+          buffer: SourceBuffer.fromText(slides[index]),
+          parser: ReadParser(),
+          theme: theme,
+          mathCache: mathCache,
+          width: width,
+          padding: slidePadding,
+          embedImages: decoded.isEmpty ? null : decoded,
+        ),
+      );
+      try {
+        final recording = MarkdownExport.record(layout.layOut());
+        try {
+          final image = await recording.capture(
+            Rect.fromLTWH(0, 0, width, height),
+            pixelRatio: pixelRatio,
+          );
+          try {
+            writer.addPage(await _pageImage(image));
+          } finally {
+            image.dispose();
+          }
+        } finally {
+          recording.dispose();
+        }
+      } finally {
+        layout.dispose();
+      }
+      onProgress?.call(index + 1, slides.length);
+    }
+    return writer.finish();
+  } finally {
     for (final image in decoded.values) {
       image.dispose();
     }
@@ -290,7 +366,11 @@ final class RasterPdfPrinter implements PdfPrinter {
   Future<bool> get canPrint async => true;
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async {
     try {
       final bytes = await rasterPdf(
         text: text,

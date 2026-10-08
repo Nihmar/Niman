@@ -3303,4 +3303,76 @@ final class CzechStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vždy zobrazeno';
+
+  @override
+  String get newSlidesTitle => 'Nová prezentace';
+
+  @override
+  String get newSlidesDefault => 'Moje prezentace';
+
+  @override
+  String get showSlidesTooltip => 'Zobrazit snímky';
+
+  @override
+  String get slidesPresent => 'Prezentovat';
+
+  @override
+  String get slidesPresenterView => 'Zobrazení přednášejícího';
+
+  @override
+  String get slidesMarkdownPreview => 'Náhled Markdownu';
+
+  @override
+  String get slidesExportPdf => 'Exportovat snímky jako PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Poznámky přednášejícího';
+
+  @override
+  String get slidesOverview => 'Přehled';
+
+  @override
+  String get slidesNotes => 'Poznámky';
+
+  @override
+  String get slidesExit => 'Ukončit';
+
+  @override
+  String get slidesPrevious => 'Předchozí';
+
+  @override
+  String get slidesNext => 'Další';
+
+  @override
+  String get slidesNow => 'Teď';
+
+  @override
+  String get slidesElapsed => 'Uplynulo';
+
+  @override
+  String get slidesSlideOnly => 'Jen snímek';
+
+  @override
+  String get slidesPause => 'Pozastavit';
+
+  @override
+  String get slidesRestart => 'Začít znovu';
+
+  @override
+  String get slidesSwipeToExit => 'Přejetím dolů ukončíte';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Vyžaduje otevřenou prezentaci';
+
+  @override
+  String get slidesTemplateSecond => 'Druhý snímek';
+
+  @override
+  String get slidesTemplatePoint => 'Bod';
+
+  @override
+  String get slidesTemplateNote => 'co tu říct — vidíte to jen vy.';
 }

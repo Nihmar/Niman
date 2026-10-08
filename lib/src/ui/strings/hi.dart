@@ -3256,4 +3256,76 @@ final class HindiStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'हमेशा दिखाया गया';
+
+  @override
+  String get newSlidesTitle => 'नई प्रस्तुति';
+
+  @override
+  String get newSlidesDefault => 'मेरी प्रस्तुति';
+
+  @override
+  String get showSlidesTooltip => 'स्लाइड दिखाएँ';
+
+  @override
+  String get slidesPresent => 'प्रस्तुत करें';
+
+  @override
+  String get slidesPresenterView => 'प्रस्तुतकर्ता दृश्य';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown पूर्वावलोकन';
+
+  @override
+  String get slidesExportPdf => 'स्लाइड PDF के रूप में निर्यात करें';
+
+  @override
+  String get slidesSpeakerNotes => 'वक्ता के नोट्स';
+
+  @override
+  String get slidesOverview => 'सिंहावलोकन';
+
+  @override
+  String get slidesNotes => 'नोट्स';
+
+  @override
+  String get slidesExit => 'बाहर निकलें';
+
+  @override
+  String get slidesPrevious => 'पिछली';
+
+  @override
+  String get slidesNext => 'अगली';
+
+  @override
+  String get slidesNow => 'अभी';
+
+  @override
+  String get slidesElapsed => 'बीता समय';
+
+  @override
+  String get slidesSlideOnly => 'केवल स्लाइड';
+
+  @override
+  String get slidesPause => 'रोकें';
+
+  @override
+  String get slidesRestart => 'फिर से शुरू करें';
+
+  @override
+  String get slidesSwipeToExit => 'बाहर निकलने के लिए नीचे स्वाइप करें';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'खुली प्रस्तुति चाहिए';
+
+  @override
+  String get slidesTemplateSecond => 'दूसरी स्लाइड';
+
+  @override
+  String get slidesTemplatePoint => 'एक बिंदु';
+
+  @override
+  String get slidesTemplateNote => 'यहाँ क्या कहना है — केवल आप देखते हैं।';
 }

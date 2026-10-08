@@ -3319,4 +3319,76 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Винаги показано';
+
+  @override
+  String get newSlidesTitle => 'Нова презентация';
+
+  @override
+  String get newSlidesDefault => 'Моята презентация';
+
+  @override
+  String get showSlidesTooltip => 'Покажи слайдовете';
+
+  @override
+  String get slidesPresent => 'Представи';
+
+  @override
+  String get slidesPresenterView => 'Изглед на водещия';
+
+  @override
+  String get slidesMarkdownPreview => 'Преглед на Markdown';
+
+  @override
+  String get slidesExportPdf => 'Експортирай слайдовете като PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Бележки на водещия';
+
+  @override
+  String get slidesOverview => 'Общ преглед';
+
+  @override
+  String get slidesNotes => 'Бележки';
+
+  @override
+  String get slidesExit => 'Изход';
+
+  @override
+  String get slidesPrevious => 'Предишен';
+
+  @override
+  String get slidesNext => 'Следващ';
+
+  @override
+  String get slidesNow => 'Сега';
+
+  @override
+  String get slidesElapsed => 'Изминало';
+
+  @override
+  String get slidesSlideOnly => 'Само слайд';
+
+  @override
+  String get slidesPause => 'Пауза';
+
+  @override
+  String get slidesRestart => 'Започни отначало';
+
+  @override
+  String get slidesSwipeToExit => 'Плъзнете надолу за изход';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Нужна е отворена презентация';
+
+  @override
+  String get slidesTemplateSecond => 'Втори слайд';
+
+  @override
+  String get slidesTemplatePoint => 'Точка';
+
+  @override
+  String get slidesTemplateNote => 'какво да кажете тук — виждате само вие.';
 }

@@ -3343,4 +3343,76 @@ final class DutchStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Altijd zichtbaar';
+
+  @override
+  String get newSlidesTitle => 'Nieuwe presentatie';
+
+  @override
+  String get newSlidesDefault => 'Mijn presentatie';
+
+  @override
+  String get showSlidesTooltip => "Dia's tonen";
+
+  @override
+  String get slidesPresent => 'Presenteren';
+
+  @override
+  String get slidesPresenterView => 'Presentatorweergave';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown-voorbeeld';
+
+  @override
+  String get slidesExportPdf => "Dia's exporteren als pdf";
+
+  @override
+  String get slidesSpeakerNotes => 'Sprekersnotities';
+
+  @override
+  String get slidesOverview => 'Overzicht';
+
+  @override
+  String get slidesNotes => 'Notities';
+
+  @override
+  String get slidesExit => 'Afsluiten';
+
+  @override
+  String get slidesPrevious => 'Vorige';
+
+  @override
+  String get slidesNext => 'Volgende';
+
+  @override
+  String get slidesNow => 'Nu';
+
+  @override
+  String get slidesElapsed => 'Verstreken';
+
+  @override
+  String get slidesSlideOnly => 'Alleen dia';
+
+  @override
+  String get slidesPause => 'Pauzeren';
+
+  @override
+  String get slidesRestart => 'Opnieuw';
+
+  @override
+  String get slidesSwipeToExit => 'Veeg omlaag om af te sluiten';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Vereist een open presentatie';
+
+  @override
+  String get slidesTemplateSecond => 'Tweede dia';
+
+  @override
+  String get slidesTemplatePoint => 'Een punt';
+
+  @override
+  String get slidesTemplateNote => 'wat je hier zegt — alleen jij ziet het.';
 }

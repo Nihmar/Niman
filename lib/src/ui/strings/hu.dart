@@ -3313,4 +3313,76 @@ final class HungarianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Mindig látható';
+
+  @override
+  String get newSlidesTitle => 'Új bemutató';
+
+  @override
+  String get newSlidesDefault => 'Saját bemutató';
+
+  @override
+  String get showSlidesTooltip => 'Diák megjelenítése';
+
+  @override
+  String get slidesPresent => 'Bemutatás';
+
+  @override
+  String get slidesPresenterView => 'Előadói nézet';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown-előnézet';
+
+  @override
+  String get slidesExportPdf => 'Diák exportálása PDF-be';
+
+  @override
+  String get slidesSpeakerNotes => 'Előadói jegyzetek';
+
+  @override
+  String get slidesOverview => 'Áttekintés';
+
+  @override
+  String get slidesNotes => 'Jegyzetek';
+
+  @override
+  String get slidesExit => 'Kilépés';
+
+  @override
+  String get slidesPrevious => 'Előző';
+
+  @override
+  String get slidesNext => 'Következő';
+
+  @override
+  String get slidesNow => 'Most';
+
+  @override
+  String get slidesElapsed => 'Eltelt';
+
+  @override
+  String get slidesSlideOnly => 'Csak a dia';
+
+  @override
+  String get slidesPause => 'Szünet';
+
+  @override
+  String get slidesRestart => 'Újrakezdés';
+
+  @override
+  String get slidesSwipeToExit => 'Kilépéshez húzza lefelé';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Nyitott bemutató szükséges';
+
+  @override
+  String get slidesTemplateSecond => 'Második dia';
+
+  @override
+  String get slidesTemplatePoint => 'Egy pont';
+
+  @override
+  String get slidesTemplateNote => 'mit mondj itt — csak te látod.';
 }

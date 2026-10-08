@@ -3328,4 +3328,76 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Gjithmonë i dukshëm';
+
+  @override
+  String get newSlidesTitle => 'Prezantim i ri';
+
+  @override
+  String get newSlidesDefault => 'Prezantimi im';
+
+  @override
+  String get showSlidesTooltip => 'Shfaq rrëshqitjet';
+
+  @override
+  String get slidesPresent => 'Prezanto';
+
+  @override
+  String get slidesPresenterView => 'Pamja e prezantuesit';
+
+  @override
+  String get slidesMarkdownPreview => 'Parapamje Markdown';
+
+  @override
+  String get slidesExportPdf => 'Eksporto rrëshqitjet si PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Shënimet e folësit';
+
+  @override
+  String get slidesOverview => 'Përmbledhje';
+
+  @override
+  String get slidesNotes => 'Shënime';
+
+  @override
+  String get slidesExit => 'Dil';
+
+  @override
+  String get slidesPrevious => 'E mëparshmja';
+
+  @override
+  String get slidesNext => 'Tjetra';
+
+  @override
+  String get slidesNow => 'Tani';
+
+  @override
+  String get slidesElapsed => 'Kaluar';
+
+  @override
+  String get slidesSlideOnly => 'Vetëm rrëshqitja';
+
+  @override
+  String get slidesPause => 'Pushim';
+
+  @override
+  String get slidesRestart => 'Rifillo';
+
+  @override
+  String get slidesSwipeToExit => 'Rrëshqit poshtë për të dalë';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Kërkon një prezantim të hapur';
+
+  @override
+  String get slidesTemplateSecond => 'Rrëshqitja e dytë';
+
+  @override
+  String get slidesTemplatePoint => 'Një pikë';
+
+  @override
+  String get slidesTemplateNote => 'çfarë të thuash këtu — e sheh vetëm ti.';
 }

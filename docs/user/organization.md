@@ -91,7 +91,7 @@ aliases: [My alias]
 Any key is stored and filterable (`key = value` in search). Keys the app
 acts on: `title`, `tags`, `date`, `pinned`, `aliases`, `type` (`list`
 shows the checklist, `shopping-list` the same with a quantity per item,
-`audio` shows the recordings). Everything else is your own vocabulary —
+`audio` shows the recordings, `slides` shows a deck). Everything else is your own vocabulary —
 stored, searchable, but driving nothing.
 
 `pinned: true` notes appear in the tree's pinned section.
@@ -475,6 +475,10 @@ else in it that is not Markdown is kept as a file.
   extra codec); attaching keeps the file's own format (`.mp3`, `.m4a`,
   `.ogg`, `.opus`, `.aac`, `.flac`, …). On Linux recording needs
   `pulseaudio-utils` and `ffmpeg` installed.
+- **Slide notes:** a note with `type: slides` frontmatter is a deck: one
+  slide per `---`, speaker notes after `Note:`, presented full screen
+  (`F5`) or in the presenter view, and exported as a PDF of 16:9 slides.
+  See [slide notes](slides.md).
 - **Templates:** live under `templateFolder` (default `Templates`).
   See [templates](templates.md).
 

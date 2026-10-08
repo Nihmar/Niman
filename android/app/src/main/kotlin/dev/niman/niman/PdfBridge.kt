@@ -38,6 +38,9 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
         /** 18 mm in thousandths of an inch. */
         const val MARGIN_MILS = 709
 
+        /** A slide's sheet (#534): 10 × 5.625 in, 16:9, landscape. */
+        val SLIDE_SHEET = PrintAttributes.MediaSize("niman-slide", "16:9", 10000, 5625)
+
         /** How long a print may run before the watchdog answers it failed.
          *  Longer than the route a slow one takes, shorter than the Dart
          *  side's own timeout: a WebView that is laying a long note out
@@ -90,7 +93,7 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
                     result.error("print-busy", "another page is being printed", null)
                     return
                 }
-                print(htmlPath, pdfPath, result)
+                print(htmlPath, pdfPath, call.argument<String>("paper") == "slides", result)
             }
             // The export was cancelled: destroy the view and answer the
             // waiting print, instead of staying busy until the watchdog.
@@ -119,7 +122,12 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
         result.success(null)
     }
 
-    private fun print(htmlPath: String, pdfPath: String, result: MethodChannel.Result) {
+    private fun print(
+        htmlPath: String,
+        pdfPath: String,
+        slides: Boolean,
+        result: MethodChannel.Result,
+    ) {
         busy = true
         val answered = AtomicBoolean(false)
         pendingResult = result
@@ -157,7 +165,7 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
         view.settings.allowContentAccess = true
         view.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String?) {
-                write(view, pdfPath) { ok, error -> finish(ok, error) }
+                write(view, pdfPath, slides) { ok, error -> finish(ok, error) }
             }
         }
         view.loadUrl(Uri.fromFile(File(htmlPath)).toString())
@@ -167,10 +175,13 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
     private fun write(
         view: WebView,
         pdfPath: String,
+        slides: Boolean,
         done: (Boolean, String?) -> Unit,
     ) {
+        // A slides note (#534) prints one 16:9 sheet a slide, edge to edge.
+        val margin = if (slides) 0 else MARGIN_MILS
         val attributes = PrintAttributes.Builder()
-            .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
+            .setMediaSize(if (slides) SLIDE_SHEET else PrintAttributes.MediaSize.ISO_A4)
             // The WebView's adapter refuses a layout whose attributes say
             // nothing about resolution: without it `onLayout` answers
             // "attributes must specify print resolution" and every export
@@ -178,7 +189,7 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
             // the text stays vector either way.
             .setResolution(PrintAttributes.Resolution("niman", "Niman", 300, 300))
             .setMinMargins(
-                PrintAttributes.Margins(MARGIN_MILS, MARGIN_MILS, MARGIN_MILS, MARGIN_MILS),
+                PrintAttributes.Margins(margin, margin, margin, margin),
             )
             .build()
         try {

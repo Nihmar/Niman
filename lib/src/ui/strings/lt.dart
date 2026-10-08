@@ -3346,4 +3346,76 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Visada rodoma';
+
+  @override
+  String get newSlidesTitle => 'Nauja pateiktis';
+
+  @override
+  String get newSlidesDefault => 'Mano pateiktis';
+
+  @override
+  String get showSlidesTooltip => 'Rodyti skaidres';
+
+  @override
+  String get slidesPresent => 'Pristatyti';
+
+  @override
+  String get slidesPresenterView => 'Pranešėjo rodinys';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown peržiūra';
+
+  @override
+  String get slidesExportPdf => 'Eksportuoti skaidres kaip PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Pranešėjo pastabos';
+
+  @override
+  String get slidesOverview => 'Apžvalga';
+
+  @override
+  String get slidesNotes => 'Pastabos';
+
+  @override
+  String get slidesExit => 'Išeiti';
+
+  @override
+  String get slidesPrevious => 'Ankstesnė';
+
+  @override
+  String get slidesNext => 'Kita';
+
+  @override
+  String get slidesNow => 'Dabar';
+
+  @override
+  String get slidesElapsed => 'Praėjo';
+
+  @override
+  String get slidesSlideOnly => 'Tik skaidrė';
+
+  @override
+  String get slidesPause => 'Pristabdyti';
+
+  @override
+  String get slidesRestart => 'Pradėti iš naujo';
+
+  @override
+  String get slidesSwipeToExit => 'Perbraukite žemyn, kad išeitumėte';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Reikia atvertos pateikties';
+
+  @override
+  String get slidesTemplateSecond => 'Antra skaidrė';
+
+  @override
+  String get slidesTemplatePoint => 'Punktas';
+
+  @override
+  String get slidesTemplateNote => 'ką čia pasakyti — matote tik jūs.';
 }

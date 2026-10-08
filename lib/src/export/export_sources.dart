@@ -199,6 +199,32 @@ abstract final class ExportSources {
     );
   });
 
+  /// The page of a slides note (#534): each of [slides] — a slide's
+  /// Markdown, its speaker notes left out — a sheet of its own, with
+  /// [source]'s title and pictures. Built off the UI isolate, as [page].
+  static Future<String> slidesPage(
+    NoteHtmlSource source,
+    List<String> slides, {
+    required String language,
+  }) => Isolate.run(() {
+    final body = StringBuffer();
+    final fonts = <String>{};
+    for (final slide in slides) {
+      final html = NoteHtml(
+        NoteHtmlSource(text: slide, title: source.title, images: source.images),
+      );
+      body.write('<section class="slide">\n${html.body()}</section>\n');
+      if (html.fontFaces case final faces?) fonts.add(faces);
+    }
+    return htmlPage(
+      title: source.title,
+      body: body.toString(),
+      fontFaces: fonts.isEmpty ? null : fonts.join('\n'),
+      language: language,
+      style: slidesPageStyle,
+    );
+  });
+
   /// The picture targets [text] names, as written: an embed's
   /// (`![[photo.png]]`) and a Markdown image's `src`, as the page reads
   /// them — a `![[…]]` in code, math, raw HTML or the frontmatter is none.

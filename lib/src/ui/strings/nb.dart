@@ -3290,4 +3290,76 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alltid vist';
+
+  @override
+  String get newSlidesTitle => 'Ny presentasjon';
+
+  @override
+  String get newSlidesDefault => 'Min presentasjon';
+
+  @override
+  String get showSlidesTooltip => 'Vis lysbilder';
+
+  @override
+  String get slidesPresent => 'Presenter';
+
+  @override
+  String get slidesPresenterView => 'Presentatørvisning';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown-forhåndsvisning';
+
+  @override
+  String get slidesExportPdf => 'Eksporter lysbilder som PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Talernotater';
+
+  @override
+  String get slidesOverview => 'Oversikt';
+
+  @override
+  String get slidesNotes => 'Notater';
+
+  @override
+  String get slidesExit => 'Avslutt';
+
+  @override
+  String get slidesPrevious => 'Forrige';
+
+  @override
+  String get slidesNext => 'Neste';
+
+  @override
+  String get slidesNow => 'Nå';
+
+  @override
+  String get slidesElapsed => 'Medgått';
+
+  @override
+  String get slidesSlideOnly => 'Bare lysbilde';
+
+  @override
+  String get slidesPause => 'Pause';
+
+  @override
+  String get slidesRestart => 'Start på nytt';
+
+  @override
+  String get slidesSwipeToExit => 'Sveip ned for å avslutte';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Krever en åpen presentasjon';
+
+  @override
+  String get slidesTemplateSecond => 'Andre lysbilde';
+
+  @override
+  String get slidesTemplatePoint => 'Et punkt';
+
+  @override
+  String get slidesTemplateNote => 'hva du skal si her — bare du ser det.';
 }

@@ -3299,4 +3299,76 @@ final class LatvianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vienmēr redzams';
+
+  @override
+  String get newSlidesTitle => 'Jauna prezentācija';
+
+  @override
+  String get newSlidesDefault => 'Mana prezentācija';
+
+  @override
+  String get showSlidesTooltip => 'Rādīt slaidus';
+
+  @override
+  String get slidesPresent => 'Prezentēt';
+
+  @override
+  String get slidesPresenterView => 'Prezentētāja skats';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown priekšskatījums';
+
+  @override
+  String get slidesExportPdf => 'Eksportēt slaidus kā PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Runātāja piezīmes';
+
+  @override
+  String get slidesOverview => 'Pārskats';
+
+  @override
+  String get slidesNotes => 'Piezīmes';
+
+  @override
+  String get slidesExit => 'Iziet';
+
+  @override
+  String get slidesPrevious => 'Iepriekšējais';
+
+  @override
+  String get slidesNext => 'Nākamais';
+
+  @override
+  String get slidesNow => 'Tagad';
+
+  @override
+  String get slidesElapsed => 'Pagājis';
+
+  @override
+  String get slidesSlideOnly => 'Tikai slaids';
+
+  @override
+  String get slidesPause => 'Pauze';
+
+  @override
+  String get slidesRestart => 'Sākt no jauna';
+
+  @override
+  String get slidesSwipeToExit => 'Velciet uz leju, lai izietu';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Nepieciešama atvērta prezentācija';
+
+  @override
+  String get slidesTemplateSecond => 'Otrais slaids';
+
+  @override
+  String get slidesTemplatePoint => 'Punkts';
+
+  @override
+  String get slidesTemplateNote => 'ko šeit teikt — to redzat tikai jūs.';
 }

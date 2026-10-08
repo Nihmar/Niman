@@ -53,13 +53,18 @@ final class WebViewPdfPrinter implements PdfPrinter {
   }
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async {
     for (var attempt = 0; ; attempt++) {
       try {
         await _channel
             .invokeMethod<void>('print', <String, String>{
               'htmlPath': htmlPath,
               'pdfPath': pdfPath,
+              'paper': paper.name,
             })
             .timeout(timeout);
         break;

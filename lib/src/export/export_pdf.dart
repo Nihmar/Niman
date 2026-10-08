@@ -57,6 +57,9 @@ typedef PdfProgressListener = void Function(PdfExportProgress progress);
 /// answer, the pages the fallback draws; [isCancelled] is asked at stage
 /// boundaries and between drawn pages, and answers with
 /// [PdfExportCancelled] rather than a file.
+///
+/// [slides], a slides note's slides as Markdown (#534), prints them one
+/// 16:9 sheet each instead of the note on A4.
 Future<PdfExport> exportNotePdf({
   required String text,
   required String title,
@@ -70,6 +73,7 @@ Future<PdfExport> exportNotePdf({
   Directory? scratch,
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
+  List<String>? slides,
 }) async {
   final chosen = printer ?? ProcessPdfPrinter();
   // Nothing to print with: the note is drawn, and its page — the reads,
@@ -85,6 +89,7 @@ Future<PdfExport> exportNotePdf({
       mathCache: mathCache,
       onProgress: onProgress,
       isCancelled: isCancelled,
+      slides: slides,
     );
   }
   final source = await ExportSources.forPrint(
@@ -94,14 +99,20 @@ Future<PdfExport> exportNotePdf({
     root: root,
     linkSource: linkSource,
   );
-  final page = await ExportSources.page(source, language: language);
+  final page = slides == null
+      ? await ExportSources.page(source, language: language)
+      : await ExportSources.slidesPage(source, slides, language: language);
   final dir = scratch ?? await Directory.systemTemp.createTemp('niman-pdf-');
   try {
     final htmlPath = p.join(dir.path, 'page.html');
     final pdfPath = p.join(dir.path, 'page.pdf');
     await File(htmlPath).writeAsString(page);
     onProgress?.call(const PdfExportProgress(stage: PdfExportStage.printing));
-    final outcome = await chosen.print(htmlPath, pdfPath);
+    final outcome = await chosen.print(
+      htmlPath,
+      pdfPath,
+      paper: slides == null ? PdfPaper.a4 : PdfPaper.slides,
+    );
     // A cancel during the print cannot stop a running engine, but its
     // answer is not the user's: nothing is written.
     if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
@@ -124,6 +135,7 @@ Future<PdfExport> exportNotePdf({
           mathCache: mathCache,
           onProgress: onProgress,
           isCancelled: isCancelled,
+          slides: slides,
         );
       case PdfFailed(:final message):
         _log.warning('the PDF engine failed ($message): drawing the note');
@@ -141,6 +153,7 @@ Future<PdfExport> exportNotePdf({
           // and the dialog's cancel must be heard (P2).
           onProgress: onProgress,
           isCancelled: isCancelled,
+          slides: slides,
         );
     }
   } finally {
@@ -167,6 +180,7 @@ Future<PdfExport> _draw({
   required String? engineFailure,
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
+  List<String>? slides,
 }) async {
   if (theme == null || mathCache == null) throw const NoPdfEngine();
   // The pictures are read here, off the UI isolate, and drawn by the
@@ -178,24 +192,35 @@ Future<PdfExport> _draw({
     root: root,
     linkSource: linkSource,
   );
-  final drawn = await rasterPdf(
-    text: text,
-    theme: theme,
-    mathCache: mathCache,
-    images: images,
-    onProgress: onProgress == null
-        ? null
-        : (done, total) => onProgress(
-            PdfExportProgress(
-              stage: PdfExportStage.drawing,
-              done: done,
-              total: total,
-            ),
+  void Function(int done, int total)? drawn(PdfProgressListener? listener) =>
+      listener == null
+      ? null
+      : (done, total) => listener(
+          PdfExportProgress(
+            stage: PdfExportStage.drawing,
+            done: done,
+            total: total,
           ),
-    isCancelled: isCancelled,
-  );
+        );
+  final bytes = slides == null
+      ? await rasterPdf(
+          text: text,
+          theme: theme,
+          mathCache: mathCache,
+          images: images,
+          onProgress: drawn(onProgress),
+          isCancelled: isCancelled,
+        )
+      : await rasterSlidesPdf(
+          slides: slides,
+          theme: theme,
+          mathCache: mathCache,
+          images: images,
+          onProgress: drawn(onProgress),
+          isCancelled: isCancelled,
+        );
   return (
-    payload: _payload(path, drawn),
+    payload: _payload(path, bytes),
     selectable: false,
     engineFailure: engineFailure,
   );

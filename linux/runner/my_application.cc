@@ -1,5 +1,7 @@
 #include "my_application.h"
 
+#include <cstring>
+
 #include <flutter_linux/flutter_linux.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -17,9 +19,38 @@ struct _MyApplication {
   gboolean drag_over;
   // The clipboard's HTML for Paste as Markdown (#531).
   FlMethodChannel* clipboard_channel;
+  // Presenting slides (#534): the idle inhibit that keeps the screen on,
+  // and its cookie (0 = none held).
+  FlMethodChannel* screen_channel;
+  GtkWindow* window;
+  guint idle_cookie;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
+
+// niman/screen: `keepOn` true asks the session not to blank the screen or
+// lock while slides are presented (#534), false gives that back.
+static void screen_method_call(FlMethodChannel* channel, FlMethodCall* call,
+                               gpointer user_data) {
+  MyApplication* self = MY_APPLICATION(user_data);
+  if (strcmp(fl_method_call_get_name(call), "keepOn") != 0) {
+    fl_method_call_respond_not_implemented(call, nullptr);
+    return;
+  }
+  FlValue* args = fl_method_call_get_args(call);
+  const gboolean on = args != nullptr &&
+                      fl_value_get_type(args) == FL_VALUE_TYPE_BOOL &&
+                      fl_value_get_bool(args);
+  if (on && self->idle_cookie == 0) {
+    self->idle_cookie =
+        gtk_application_inhibit(GTK_APPLICATION(self), self->window,
+                                GTK_APPLICATION_INHIBIT_IDLE, "Presenting");
+  } else if (!on && self->idle_cookie != 0) {
+    gtk_application_uninhibit(GTK_APPLICATION(self), self->idle_cookie);
+    self->idle_cookie = 0;
+  }
+  fl_method_call_respond_success(call, nullptr, nullptr);
+}
 
 // Called when first Flutter frame received.
 static void first_frame_cb(MyApplication* self, FlView* view) {
@@ -211,6 +242,13 @@ static void my_application_activate(GApplication* application) {
   self->clipboard_channel = clipboard_html_channel_new(
       fl_engine_get_binary_messenger(fl_view_get_engine(view)));
 
+  self->window = window;
+  self->screen_channel = fl_method_channel_new(
+      fl_engine_get_binary_messenger(fl_view_get_engine(view)), "niman/screen",
+      FL_METHOD_CODEC(codec));
+  fl_method_channel_set_method_call_handler(
+      self->screen_channel, screen_method_call, self, nullptr);
+
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
 
@@ -264,6 +302,10 @@ static void my_application_dispose(GObject* object) {
   if (self->clipboard_channel != nullptr) {
     g_object_unref(self->clipboard_channel);
     self->clipboard_channel = nullptr;
+  }
+  if (self->screen_channel != nullptr) {
+    g_object_unref(self->screen_channel);
+    self->screen_channel = nullptr;
   }
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }

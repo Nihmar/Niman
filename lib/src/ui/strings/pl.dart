@@ -3357,4 +3357,76 @@ final class PolishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Zawsze widoczne';
+
+  @override
+  String get newSlidesTitle => 'Nowa prezentacja';
+
+  @override
+  String get newSlidesDefault => 'Moja prezentacja';
+
+  @override
+  String get showSlidesTooltip => 'Pokaż slajdy';
+
+  @override
+  String get slidesPresent => 'Prezentuj';
+
+  @override
+  String get slidesPresenterView => 'Widok prezentera';
+
+  @override
+  String get slidesMarkdownPreview => 'Podgląd Markdown';
+
+  @override
+  String get slidesExportPdf => 'Eksportuj slajdy jako PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Notatki prelegenta';
+
+  @override
+  String get slidesOverview => 'Przegląd';
+
+  @override
+  String get slidesNotes => 'Notatki';
+
+  @override
+  String get slidesExit => 'Zakończ';
+
+  @override
+  String get slidesPrevious => 'Poprzedni';
+
+  @override
+  String get slidesNext => 'Następny';
+
+  @override
+  String get slidesNow => 'Teraz';
+
+  @override
+  String get slidesElapsed => 'Upłynęło';
+
+  @override
+  String get slidesSlideOnly => 'Tylko slajd';
+
+  @override
+  String get slidesPause => 'Wstrzymaj';
+
+  @override
+  String get slidesRestart => 'Zacznij od nowa';
+
+  @override
+  String get slidesSwipeToExit => 'Przesuń w dół, aby zakończyć';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Wymaga otwartej prezentacji';
+
+  @override
+  String get slidesTemplateSecond => 'Drugi slajd';
+
+  @override
+  String get slidesTemplatePoint => 'Punkt';
+
+  @override
+  String get slidesTemplateNote => 'co tu powiedzieć — widzisz to tylko ty.';
 }

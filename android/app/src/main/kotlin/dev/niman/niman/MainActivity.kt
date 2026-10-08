@@ -11,6 +11,7 @@ import android.provider.Settings
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import android.view.WindowManager
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 
@@ -66,6 +67,19 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "moveToBack" -> result.success(moveTaskToBack(true))
+                    else -> result.notImplemented()
+                }
+            }
+        // Presenting slides (#534): the screen stays on until the talk ends.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "niman/screen")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "keepOn" -> {
+                        val flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                        if (call.arguments == true) window.addFlags(flag)
+                        else window.clearFlags(flag)
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }

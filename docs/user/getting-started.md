@@ -70,6 +70,8 @@ any step; nothing of it is left in your library.
   spellcheck, the read view.
 - [List notes and shopping lists](lists.md) — checklists, quantities, and
   the ⋮ switch between the two.
+- [Slide notes](slides.md) — a note as a deck: presented full screen, with
+  speaker notes, and exported as a PDF of slides.
 - [Organization](organization.md) — trash, history, templates, tags — and
   reading pictures, PDFs and books.
 - [Export](export.md) — a note, a folder or the library out as Markdown,

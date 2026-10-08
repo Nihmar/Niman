@@ -3379,4 +3379,76 @@ final class GermanStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Immer sichtbar';
+
+  @override
+  String get newSlidesTitle => 'Neue Präsentation';
+
+  @override
+  String get newSlidesDefault => 'Meine Präsentation';
+
+  @override
+  String get showSlidesTooltip => 'Folien zeigen';
+
+  @override
+  String get slidesPresent => 'Präsentieren';
+
+  @override
+  String get slidesPresenterView => 'Referentenansicht';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown-Vorschau';
+
+  @override
+  String get slidesExportPdf => 'Folien als PDF exportieren';
+
+  @override
+  String get slidesSpeakerNotes => 'Sprechernotizen';
+
+  @override
+  String get slidesOverview => 'Übersicht';
+
+  @override
+  String get slidesNotes => 'Notizen';
+
+  @override
+  String get slidesExit => 'Beenden';
+
+  @override
+  String get slidesPrevious => 'Zurück';
+
+  @override
+  String get slidesNext => 'Weiter';
+
+  @override
+  String get slidesNow => 'Jetzt';
+
+  @override
+  String get slidesElapsed => 'Vergangen';
+
+  @override
+  String get slidesSlideOnly => 'Nur Folie';
+
+  @override
+  String get slidesPause => 'Pause';
+
+  @override
+  String get slidesRestart => 'Neu starten';
+
+  @override
+  String get slidesSwipeToExit => 'Zum Beenden nach unten wischen';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Braucht eine offene Präsentation';
+
+  @override
+  String get slidesTemplateSecond => 'Zweite Folie';
+
+  @override
+  String get slidesTemplatePoint => 'Ein Punkt';
+
+  @override
+  String get slidesTemplateNote => 'was hier zu sagen ist — nur du siehst es.';
 }

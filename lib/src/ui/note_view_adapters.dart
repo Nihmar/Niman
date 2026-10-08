@@ -4,6 +4,7 @@
 /// surface for them.
 library;
 
+import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -60,6 +61,10 @@ final class NoteKindHostAdapter implements NoteKindHost {
     required this.rootDirectory,
     required this.attachmentsFolderOf,
     required this.linkTypeOf,
+    required this.embedResolver,
+    required this.linkOpener,
+    required this.wikiLinkOpener,
+    required this.markdownShower,
   });
 
   /// The full note text (frontmatter + body).
@@ -80,6 +85,18 @@ final class NoteKindHostAdapter implements NoteKindHost {
   /// What new attachment links look like.
   final LinkType Function() linkTypeOf;
 
+  /// Resolves an embed's target to an absolute path.
+  final Future<String?> Function(String target) embedResolver;
+
+  /// Follows a Markdown link.
+  final void Function(BuildContext context, String href) linkOpener;
+
+  /// Follows a wikilink.
+  final void Function(BuildContext context, String inner) wikiLinkOpener;
+
+  /// The switch to the note's Markdown preview, when the screen has one.
+  final VoidCallback? Function() markdownShower;
+
   @override
   String get text => noteText();
 
@@ -97,4 +114,17 @@ final class NoteKindHostAdapter implements NoteKindHost {
 
   @override
   LinkType get linkType => linkTypeOf();
+
+  @override
+  Future<String?> resolveEmbed(String target) => embedResolver(target);
+
+  @override
+  void openLink(BuildContext context, String href) => linkOpener(context, href);
+
+  @override
+  void openWikiLink(BuildContext context, String inner) =>
+      wikiLinkOpener(context, inner);
+
+  @override
+  VoidCallback? get showMarkdown => markdownShower();
 }

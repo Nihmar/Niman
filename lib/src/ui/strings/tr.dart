@@ -3268,4 +3268,77 @@ final class TurkishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Her zaman gösterilir';
+
+  @override
+  String get newSlidesTitle => 'Yeni sunum';
+
+  @override
+  String get newSlidesDefault => 'Sunumum';
+
+  @override
+  String get showSlidesTooltip => 'Slaytları göster';
+
+  @override
+  String get slidesPresent => 'Sun';
+
+  @override
+  String get slidesPresenterView => 'Sunucu görünümü';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown önizlemesi';
+
+  @override
+  String get slidesExportPdf => 'Slaytları PDF olarak dışa aktar';
+
+  @override
+  String get slidesSpeakerNotes => 'Konuşmacı notları';
+
+  @override
+  String get slidesOverview => 'Genel bakış';
+
+  @override
+  String get slidesNotes => 'Notlar';
+
+  @override
+  String get slidesExit => 'Çık';
+
+  @override
+  String get slidesPrevious => 'Önceki';
+
+  @override
+  String get slidesNext => 'Sonraki';
+
+  @override
+  String get slidesNow => 'Şimdi';
+
+  @override
+  String get slidesElapsed => 'Geçen süre';
+
+  @override
+  String get slidesSlideOnly => 'Yalnızca slayt';
+
+  @override
+  String get slidesPause => 'Duraklat';
+
+  @override
+  String get slidesRestart => 'Yeniden başlat';
+
+  @override
+  String get slidesSwipeToExit => 'Çıkmak için aşağı kaydırın';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Açık bir sunum gerekir';
+
+  @override
+  String get slidesTemplateSecond => 'İkinci slayt';
+
+  @override
+  String get slidesTemplatePoint => 'Bir madde';
+
+  @override
+  String get slidesTemplateNote =>
+      'burada ne söyleneceği — yalnızca siz görürsünüz.';
 }

@@ -3347,4 +3347,76 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Завжди показано';
+
+  @override
+  String get newSlidesTitle => 'Нова презентація';
+
+  @override
+  String get newSlidesDefault => 'Моя презентація';
+
+  @override
+  String get showSlidesTooltip => 'Показати слайди';
+
+  @override
+  String get slidesPresent => 'Показати';
+
+  @override
+  String get slidesPresenterView => 'Режим доповідача';
+
+  @override
+  String get slidesMarkdownPreview => 'Перегляд Markdown';
+
+  @override
+  String get slidesExportPdf => 'Експортувати слайди як PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Нотатки доповідача';
+
+  @override
+  String get slidesOverview => 'Огляд';
+
+  @override
+  String get slidesNotes => 'Нотатки';
+
+  @override
+  String get slidesExit => 'Вийти';
+
+  @override
+  String get slidesPrevious => 'Попередній';
+
+  @override
+  String get slidesNext => 'Наступний';
+
+  @override
+  String get slidesNow => 'Зараз';
+
+  @override
+  String get slidesElapsed => 'Минуло';
+
+  @override
+  String get slidesSlideOnly => 'Лише слайд';
+
+  @override
+  String get slidesPause => 'Пауза';
+
+  @override
+  String get slidesRestart => 'Почати знову';
+
+  @override
+  String get slidesSwipeToExit => 'Проведіть униз, щоб вийти';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Потрібна відкрита презентація';
+
+  @override
+  String get slidesTemplateSecond => 'Другий слайд';
+
+  @override
+  String get slidesTemplatePoint => 'Пункт';
+
+  @override
+  String get slidesTemplateNote => 'що тут сказати — бачите лише ви.';
 }

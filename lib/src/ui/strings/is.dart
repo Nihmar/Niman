@@ -3299,4 +3299,76 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alltaf sýnt';
+
+  @override
+  String get newSlidesTitle => 'Ný kynning';
+
+  @override
+  String get newSlidesDefault => 'Kynningin mín';
+
+  @override
+  String get showSlidesTooltip => 'Sýna glærur';
+
+  @override
+  String get slidesPresent => 'Kynna';
+
+  @override
+  String get slidesPresenterView => 'Sýn kynnis';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown-forskoðun';
+
+  @override
+  String get slidesExportPdf => 'Flytja glærur út sem PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Minnispunktar kynnis';
+
+  @override
+  String get slidesOverview => 'Yfirlit';
+
+  @override
+  String get slidesNotes => 'Minnispunktar';
+
+  @override
+  String get slidesExit => 'Hætta';
+
+  @override
+  String get slidesPrevious => 'Fyrri';
+
+  @override
+  String get slidesNext => 'Næsta';
+
+  @override
+  String get slidesNow => 'Núna';
+
+  @override
+  String get slidesElapsed => 'Liðinn tími';
+
+  @override
+  String get slidesSlideOnly => 'Aðeins glæra';
+
+  @override
+  String get slidesPause => 'Hlé';
+
+  @override
+  String get slidesRestart => 'Byrja aftur';
+
+  @override
+  String get slidesSwipeToExit => 'Strjúktu niður til að hætta';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Krefst opinnar kynningar';
+
+  @override
+  String get slidesTemplateSecond => 'Önnur glæra';
+
+  @override
+  String get slidesTemplatePoint => 'Atriði';
+
+  @override
+  String get slidesTemplateNote => 'hvað á að segja hér — aðeins þú sérð það.';
 }

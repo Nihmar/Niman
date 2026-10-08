@@ -3323,4 +3323,76 @@ final class FinnishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Aina näkyvissä';
+
+  @override
+  String get newSlidesTitle => 'Uusi esitys';
+
+  @override
+  String get newSlidesDefault => 'Oma esitys';
+
+  @override
+  String get showSlidesTooltip => 'Näytä diat';
+
+  @override
+  String get slidesPresent => 'Esitä';
+
+  @override
+  String get slidesPresenterView => 'Esittäjän näkymä';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown-esikatselu';
+
+  @override
+  String get slidesExportPdf => 'Vie diat PDF:nä';
+
+  @override
+  String get slidesSpeakerNotes => 'Puhujan muistiinpanot';
+
+  @override
+  String get slidesOverview => 'Yleiskatsaus';
+
+  @override
+  String get slidesNotes => 'Muistiinpanot';
+
+  @override
+  String get slidesExit => 'Lopeta';
+
+  @override
+  String get slidesPrevious => 'Edellinen';
+
+  @override
+  String get slidesNext => 'Seuraava';
+
+  @override
+  String get slidesNow => 'Nyt';
+
+  @override
+  String get slidesElapsed => 'Kulunut';
+
+  @override
+  String get slidesSlideOnly => 'Vain dia';
+
+  @override
+  String get slidesPause => 'Tauko';
+
+  @override
+  String get slidesRestart => 'Aloita alusta';
+
+  @override
+  String get slidesSwipeToExit => 'Pyyhkäise alas lopettaaksesi';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Vaatii avoimen esityksen';
+
+  @override
+  String get slidesTemplateSecond => 'Toinen dia';
+
+  @override
+  String get slidesTemplatePoint => 'Kohta';
+
+  @override
+  String get slidesTemplateNote => 'mitä tässä sanotaan — vain sinä näet sen.';
 }

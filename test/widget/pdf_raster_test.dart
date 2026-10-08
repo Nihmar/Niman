@@ -82,6 +82,24 @@ void main() {
     expect(text, contains('/MediaBox [0 0 595.28 841.89]'));
   });
 
+  testWidgets('slides draw one 16:9 sheet each (#534)', (tester) async {
+    await pumpTheme(tester);
+    final bytes = await tester.runAsync(
+      () => rasterSlidesPdf(
+        slides: const ['# One', '## Two\n\n- a point', ''],
+        theme: theme,
+        mathCache: cache,
+      ),
+    );
+    final text = latin1.decode(bytes!);
+    expect(text, contains('/Count 3'));
+    // 960 × 540 logical pixels are 720 × 405 points: 10 × 5.625 in.
+    expect(text, contains('/MediaBox [0 0 720 405]'));
+    final pages = _imageStreams(bytes);
+    expect(pages, hasLength(3));
+    expect(pages.first, isNot(equals(pages[1])));
+  });
+
   testWidgets('a note that lays out to nothing is still one page', (
     tester,
   ) async {
@@ -354,6 +372,9 @@ final class _Fails implements PdfPrinter {
   Future<bool> get canPrint async => true;
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async =>
-      const PdfFailed('the engine exited with 2');
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async => const PdfFailed('the engine exited with 2');
 }

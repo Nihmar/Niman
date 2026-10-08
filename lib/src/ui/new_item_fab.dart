@@ -20,6 +20,7 @@ final class NewItemFab extends StatelessWidget {
     required this.onNewNote,
     required this.onNewListNote,
     required this.onNewAudioNote,
+    required this.onNewSlides,
     required this.onNewFromTemplate,
     required this.onNewFolder,
     required this.onJournalToday,
@@ -60,6 +61,9 @@ final class NewItemFab extends StatelessWidget {
 
   /// Opens today's journal entry, made first when there is none (#7).
   final VoidCallback onJournalToday;
+
+  /// Creates a slides note in the FAB target folder (#534).
+  final VoidCallback onNewSlides;
 
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
@@ -120,6 +124,14 @@ final class NewItemFab extends StatelessWidget {
           label: AppStrings.newAudioNoteTitle,
           open: expanded,
           onTap: onNewAudioNote,
+        ),
+        const SizedBox(height: 12),
+        _MiniFab(
+          key: const Key('new-slides-action'),
+          icon: Icons.slideshow_outlined,
+          label: AppStrings.newSlidesTitle,
+          open: expanded,
+          onTap: onNewSlides,
         ),
         const SizedBox(height: 12),
         _MiniFab(

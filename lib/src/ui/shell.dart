@@ -37,6 +37,7 @@ import 'package:niman/src/export/export_working_dialog.dart';
 import 'package:niman/src/export/pdf_export_progress_dialog.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
+import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
@@ -92,6 +93,8 @@ import 'package:niman/src/ui/journal/journal_screen.dart';
 import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
+import 'package:niman/src/ui/kinds/slides/slide_split.dart';
+import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/library_window.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
@@ -1000,16 +1003,34 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (_kindGui == null) return const [];
     final icon = switch (_noteKind) {
       'audio' => Icons.mic_outlined,
+      'slides' => Icons.slideshow_outlined,
       'shopping-list' => Icons.shopping_cart_outlined,
       _ => Icons.checklist,
     };
     return [
+      // The phone presents from the button under its slides, or by
+      // turning: its bar keeps to the pencil and the ⋮.
+      if (_showsSlides && _wide)
+        IconButton(
+          key: const Key('slides-present-action'),
+          tooltip: switch (AppKeyMap.current.value.bindingOf(
+            AppCommand.presentSlides,
+          )) {
+            final keys? =>
+              '${AppStrings.slidesPresent} (${describeActivator(keys)})',
+            null => AppStrings.slidesPresent,
+          },
+          icon: const Icon(Icons.present_to_all_outlined),
+          onPressed: () => unawaited(_presentSlides()),
+        ),
       if (_kindRawMode)
         IconButton(
           key: const Key('kind-show-list'),
-          tooltip: _noteKind == 'audio'
-              ? AppStrings.showAudioTooltip
-              : AppStrings.showListTooltip,
+          tooltip: switch (_noteKind) {
+            'audio' => AppStrings.showAudioTooltip,
+            'slides' => AppStrings.showSlidesTooltip,
+            _ => AppStrings.showListTooltip,
+          },
           icon: Icon(icon),
           onPressed: () => setState(() => _kindRawMode = false),
         )
@@ -1018,9 +1039,23 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           key: const Key('kind-edit-raw'),
           tooltip: AppStrings.editRawTooltip,
           icon: const Icon(Icons.edit_outlined),
-          onPressed: () => setState(() => _kindRawMode = true),
+          onPressed: _editKindRaw,
         ),
     ];
+  }
+
+  /// The pencil: the note's raw editor, never the preview the ⋮'s
+  /// Markdown preview left on for the note.
+  void _editKindRaw() {
+    setState(() => _kindRawMode = true);
+    if (_notePreview) _togglePreview();
+  }
+
+  /// Leaves the kind's view for the note's Markdown preview (#534): the
+  /// raw mode with the eye on, the preview every note has.
+  void _showKindMarkdown() {
+    setState(() => _kindRawMode = true);
+    if (!_notePreview) _togglePreview();
   }
 
   void _resetNoteKind() {
@@ -1303,6 +1338,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           initialCaretOffset: _pendingCaretOffset,
           kindMode: !_kindRawMode,
           onNoteKindChanged: _onNoteKindChanged,
+          onKindMarkdown: _showKindMarkdown,
           onPasteAsMarkdown: _pasteAsMarkdown,
           unsavedTracker: widget.unsavedTracker,
           spellCheck: widget.spellCheck,
@@ -2558,6 +2594,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         isRecognizableFile(_selected ?? ''),
     // The phone has no key for the palette (#206); the wide layout has.
     palette: !_wide,
+    slides: _showsSlides,
+    presenterView: _wide,
     kindSwitch: switch (_noteKind) {
       'list' => NoteKindSwitch.toShoppingList,
       'shopping-list' => NoteKindSwitch.toChecklist,
@@ -2579,12 +2617,33 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           () => _recognize(path),
         ),
         NoteMenuAction.kindSwitch => Future<void>.sync(_switchNoteKind),
+        NoteMenuAction.present => _presentSlides(),
+        NoteMenuAction.presenterView => _presentSlides(presenter: true),
+        NoteMenuAction.markdownPreview => Future<void>.sync(_showKindMarkdown),
+        NoteMenuAction.exportSlides => _exportNote(path, slidesPdf: true),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
         NoteMenuAction.delete => _rowActions.delete(context, path),
       });
     },
   );
+
+  /// Whether the note on screen is a deck shown as its slides (#534).
+  bool get _showsSlides => _noteKind == 'slides' && !_kindRawMode;
+
+  /// Presents the slides note on screen (#534), from the slide its view
+  /// shows; [presenter] opens on the presenter view.
+  Future<void> _presentSlides({bool presenter = false}) async {
+    final note = _panelNote;
+    if (note == null || _noteKind != 'slides') return;
+    await presentSlides(
+      context,
+      text: note.currentText,
+      notePath: note.notePath,
+      resolveEmbed: note.resolveEmbed,
+      presenter: presenter,
+    );
+  }
 
   /// Turns the open note between `list` and `shopping-list` (#309).
   ///
@@ -2875,6 +2934,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         onNewAudioNote: () {
           _closeFab();
           unawaited(_createFlow.createAudioNote(context));
+        },
+        onNewSlides: () {
+          _closeFab();
+          unawaited(_createFlow.createSlidesNote(context));
         },
         onNewFromTemplate: () {
           _closeFab();
@@ -3279,6 +3342,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.previewToggle => _previewToggleVisible,
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
+    CommandNeed.slidesNote => _noteKind == 'slides',
     CommandNeed.ocrFile =>
       _ocrFlow != null &&
           _shownIsAttachment &&
@@ -3313,6 +3377,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_createFlow.createListNote(context)),
       AppCommand.newAudioNote: () =>
           unawaited(_createFlow.createAudioNote(context)),
+      AppCommand.newSlides: () =>
+          unawaited(_createFlow.createSlidesNote(context)),
+      AppCommand.presentSlides: () => unawaited(_presentSlides()),
+      AppCommand.presenterView: () =>
+          unawaited(_presentSlides(presenter: true)),
       AppCommand.newTodo: () {
         _openTodo();
         unawaited(_addTodo());
@@ -3565,11 +3634,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Exports the note at [path] as a file (#24): asks which format, reads
   /// the note (the buffer's edits first) and asks where to save it.
-  Future<void> _exportNote(String path) async {
+  ///
+  /// [slidesPdf] exports a slides note's slides (#534): a PDF, one 16:9
+  /// sheet a slide, its text as large as the slide's, no format to ask.
+  Future<void> _exportNote(String path, {bool slidesPdf = false}) async {
     // The theme is read while the context is certainly valid: the dialog
     // and the export itself both wait.
-    final theme = markdownThemeOf(context, scaler: noteTextScalerOf(context));
-    final format = await _chooseExportFormat();
+    final theme = markdownThemeOf(
+      context,
+      scaler: slidesPdf
+          ? const TextScaler.linear(slideTextScale)
+          : noteTextScalerOf(context),
+    );
+    final format = slidesPdf ? ExportFormat.pdf : await _chooseExportFormat();
     if (format == null || !mounted) return;
     final ops = widget.controller.ops;
     final root = widget.controller.root;
@@ -3654,6 +3731,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             mathCache: cache,
             onProgress: (report) => progress.value = report,
             isCancelled: () => cancelled,
+            slides: slidesPdf
+                ? [for (final slide in splitSlides(text)) slide.markdown]
+                : null,
           );
           payload = printed.payload;
           selectable = printed.selectable;
@@ -4856,6 +4936,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unawaited(_createFlow.createListNote(context));
       case NewShellItem.audioNote:
         unawaited(_createFlow.createAudioNote(context));
+      case NewShellItem.slides:
+        unawaited(_createFlow.createSlidesNote(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
       case NewShellItem.folder:

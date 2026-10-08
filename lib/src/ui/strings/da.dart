@@ -3288,4 +3288,76 @@ final class DanishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Altid vist';
+
+  @override
+  String get newSlidesTitle => 'Ny præsentation';
+
+  @override
+  String get newSlidesDefault => 'Min præsentation';
+
+  @override
+  String get showSlidesTooltip => 'Vis dias';
+
+  @override
+  String get slidesPresent => 'Præsentér';
+
+  @override
+  String get slidesPresenterView => 'Præsentationsvisning';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown-forhåndsvisning';
+
+  @override
+  String get slidesExportPdf => 'Eksportér dias som PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Talernoter';
+
+  @override
+  String get slidesOverview => 'Oversigt';
+
+  @override
+  String get slidesNotes => 'Noter';
+
+  @override
+  String get slidesExit => 'Afslut';
+
+  @override
+  String get slidesPrevious => 'Forrige';
+
+  @override
+  String get slidesNext => 'Næste';
+
+  @override
+  String get slidesNow => 'Nu';
+
+  @override
+  String get slidesElapsed => 'Forløbet';
+
+  @override
+  String get slidesSlideOnly => 'Kun dias';
+
+  @override
+  String get slidesPause => 'Pause';
+
+  @override
+  String get slidesRestart => 'Start forfra';
+
+  @override
+  String get slidesSwipeToExit => 'Stryg ned for at afslutte';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Kræver en åben præsentation';
+
+  @override
+  String get slidesTemplateSecond => 'Andet dias';
+
+  @override
+  String get slidesTemplatePoint => 'Et punkt';
+
+  @override
+  String get slidesTemplateNote => 'hvad du skal sige her — kun du ser det.';
 }
