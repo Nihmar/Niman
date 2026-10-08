@@ -23,13 +23,17 @@ sealed class ShareRequest {
   const new();
 }
 
-/// Plain text shared into Niman: inserted into the quick note.
+/// Text shared into Niman: a web page or a quote from one (#531), else
+/// inserted into the quick note.
 final class SharedText extends ShareRequest {
   /// Creates a text share.
-  const new(this.text);
+  const new(this.text, {this.subject});
 
   /// The shared text, as the sender wrote it.
   final String text;
+
+  /// The share's subject: a browser puts the page's title there.
+  final String? subject;
 }
 
 /// A file shared into Niman, to import into the library.
@@ -52,7 +56,13 @@ ShareRequest? shareRequestFrom(Object? payload) {
     case 'text':
       final text = payload['text'];
       if (text is! String || text.trim().isEmpty) return null;
-      return SharedText(text);
+      final subject = payload['subject'];
+      return SharedText(
+        text,
+        subject: subject is String && subject.trim().isNotEmpty
+            ? subject
+            : null,
+      );
     case 'file':
       final path = payload['path'];
       if (path is! String || path.isEmpty) return null;

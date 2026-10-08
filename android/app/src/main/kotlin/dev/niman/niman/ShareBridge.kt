@@ -215,10 +215,18 @@ class ShareBridge(private val activity: Activity) :
         return started
     }
 
+    /**
+     * The text half of a share, with its subject: a browser sharing a page
+     * puts the page's title there (#531), which the address alone in the
+     * text does not carry.
+     */
     private fun textPayload(intent: Intent): Map<String, String>? {
         val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
         if (text.isNullOrBlank()) return null
-        return mapOf("type" to "text", "text" to text)
+        val payload = mutableMapOf("type" to "text", "text" to text)
+        val subject = intent.getCharSequenceExtra(Intent.EXTRA_SUBJECT)
+        if (!subject.isNullOrBlank()) payload["subject"] = subject.toString()
+        return payload
     }
 
     /** The file payload [uri] becomes, or null when it cannot be one. */
