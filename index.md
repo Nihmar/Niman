@@ -24,6 +24,8 @@ you need:
 - [Search](docs/user/search.md) — full-text search, field and tag search.
 - [Text recognition](docs/user/text-recognition.md) — the text of a scanned
   PDF or a picture, on the device, with what it downloads.
+- [Web capture](docs/user/web-capture.md) — a web page, or a passage of
+  one, saved as a note with its pictures.
 - [Links](docs/user/links.md) — wikilinks and Markdown links, between notes
   and into a PDF or a book.
 - [Templates](docs/user/templates.md) — placeholders, filters and prompts.

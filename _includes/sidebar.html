@@ -14,7 +14,7 @@
 
   <p class="sidebar__group" id="sidebar-user">Guides</p>
   <ul class="sidebar__list" aria-labelledby="sidebar-user">
-    {%- assign user_slugs = 'getting-started,editing,lists,organization,export,journal,search,text-recognition,links,templates,tasks,themes,settings,shortcuts,sync,widgets,platforms' | split: ',' -%}
+    {%- assign user_slugs = 'getting-started,editing,lists,organization,export,journal,search,text-recognition,web-capture,links,templates,tasks,themes,settings,shortcuts,sync,widgets,platforms' | split: ',' -%}
     {%- for slug in user_slugs -%}
       {%- assign path = 'docs/user/' | append: slug | append: '.md' -%}
       {%- assign doc = site.pages | where: 'path', path | first -%}
