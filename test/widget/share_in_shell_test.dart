@@ -172,6 +172,29 @@ void main() {
     await close();
   });
 
+  testWidgets('a quote shared over a picture is not appended to it (#636)', (
+    tester,
+  ) async {
+    await pumpOpenLibrary(tester);
+    await controller.seedFile('photo.png');
+    await settle(tester);
+    await tester.tap(noteRow('photo.png'));
+    await settle(tester);
+
+    shares.emit(
+      const SharedText(
+        '"A choice, not an error." https://example.com/garden',
+        subject: 'Garden',
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('capture-sheet-save')));
+    await settle(tester);
+    expect(controller.contentOf('Garden.md'), contains('A choice'));
+    expect(controller.contentOf('photo.png'), isNot(contains('A choice')));
+    await close();
+  });
+
   testWidgets('shared text with no quick note waits for the choice', (
     tester,
   ) async {
