@@ -173,6 +173,37 @@ void main() {
     await close();
   });
 
+  testWidgets('shared text with no quick note waits for the choice', (
+    tester,
+  ) async {
+    await pumpOpenLibrary(tester);
+    await controller.seedFile('Ideas.md', content: 'ideas');
+
+    shares.emit(const SharedText('captured thought'));
+    await settle(tester);
+
+    // No quick note yet: the choose/create screen, and the text is still
+    // waiting.
+    expect(find.byType(QuickNoteTab), findsOne);
+    expect(controller.contentOf('Ideas.md'), 'ideas');
+    await tester.tap(find.byKey(const Key('quick-note-choose')));
+    await settle(tester);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('note-picker')),
+        matching: find.text('Ideas.md'),
+      ),
+    );
+    await settle(tester);
+
+    // The chosen note became the quick note and took the text.
+    expect(await controller.quickNotePath, 'Ideas.md');
+    expect(controller.contentOf('Ideas.md'), 'ideas\n\ncaptured thought');
+    expect(find.byType(QuickNoteTab), findsNothing);
+    await close();
+  });
+
   testWidgets('a quote appended to the open note keeps its edits (#635)', (
     tester,
   ) async {
@@ -208,37 +239,6 @@ void main() {
       allOf(contains('my edit'), contains('A choice, not an error.')),
     );
     tracker.unregister(buffer);
-    await close();
-  });
-
-  testWidgets('shared text with no quick note waits for the choice', (
-    tester,
-  ) async {
-    await pumpOpenLibrary(tester);
-    await controller.seedFile('Ideas.md', content: 'ideas');
-
-    shares.emit(const SharedText('captured thought'));
-    await settle(tester);
-
-    // No quick note yet: the choose/create screen, and the text is still
-    // waiting.
-    expect(find.byType(QuickNoteTab), findsOne);
-    expect(controller.contentOf('Ideas.md'), 'ideas');
-    await tester.tap(find.byKey(const Key('quick-note-choose')));
-    await settle(tester);
-
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const Key('note-picker')),
-        matching: find.text('Ideas.md'),
-      ),
-    );
-    await settle(tester);
-
-    // The chosen note became the quick note and took the text.
-    expect(await controller.quickNotePath, 'Ideas.md');
-    expect(controller.contentOf('Ideas.md'), 'ideas\n\ncaptured thought');
-    expect(find.byType(QuickNoteTab), findsNothing);
     await close();
   });
 
