@@ -82,6 +82,13 @@ void main() {
       expect(read('crlf.md'), 'one\r\ntwo\r\n');
     });
 
+    test('a note with Windows line endings is tidied with them', () async {
+      File(p.join(root.path, 'crlf.md'))
+          .writeAsStringSync('#  Heading\r\n\r\n\r\ntext  \r\n');
+      expect(await writer.tidy('crlf.md'), isTrue);
+      expect(read('crlf.md'), '# Heading\r\n\r\ntext\r\n');
+    });
+
     test('a note past the limit is left as it is', () async {
       final big = '${'word  \n' * (NoteWriter.tidyLimit ~/ 7 + 1)}\n\n';
       File(p.join(root.path, 'big.md')).writeAsStringSync(big);
