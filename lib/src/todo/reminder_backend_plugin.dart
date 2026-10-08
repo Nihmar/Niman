@@ -23,6 +23,17 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+/// What a notification's tap is routed by: the button's id when one of its
+/// buttons was pressed, else the notification's payload.
+///
+/// A button carries what it does in its id (a capture's "Show folder"
+/// names the folder, #531), as a press reports the notification's payload
+/// too and that payload is the tap's.
+String? notificationRoute(NotificationResponse response) {
+  final action = response.actionId;
+  return action == null || action.isEmpty ? response.payload : action;
+}
+
 /// Reminders through the notifications plugin.
 final class PluginReminderBackend implements ReminderBackend {
   /// Creates the backend; the plugin is only touched on-device.
@@ -106,7 +117,7 @@ final class PluginReminderBackend implements ReminderBackend {
             android: AndroidInitializationSettings(candidate),
           ),
           onDidReceiveNotificationResponse: (response) =>
-              _taps.add(response.payload),
+              _taps.add(notificationRoute(response)),
         );
         _icon = candidate;
         if (candidate == todoReminderIcon) {
@@ -252,7 +263,8 @@ final class PluginReminderBackend implements ReminderBackend {
     final details = await _plugin.getNotificationAppLaunchDetails();
     if (details?.didNotificationLaunchApp ?? false) {
       _log.info('todo reminders: launched from a tap');
-      return details?.notificationResponse?.payload;
+      final response = details?.notificationResponse;
+      return response == null ? null : notificationRoute(response);
     }
     return null;
   }
