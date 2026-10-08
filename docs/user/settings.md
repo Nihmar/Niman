@@ -59,6 +59,7 @@ sync) in `.niman/settings.json`.
 | `templateFolder` | `Templates` | Where note templates live |
 | `attachmentsFolder` | `assets` | Where copied-in images and voice clips live, under the library root |
 | `annotationsFolder` | `Annotations` | Where a note annotating a PDF or a book is made, when the file has none yet (see [organization](organization.md)) |
+| `highlightColour` | `yellow` | The colour a passage of a PDF or a book is highlighted in: the one last chosen (`yellow`, `green`, `blue`, `pink`; see [organization](organization.md)) |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
 | `weekStart` | `system` | The day every calendar starts the week on (**Settings → Appearance → First day of the week**): `system` — the system's region's first day, not the app language's (on Linux `LC_ALL`, `LC_TIME`, `LANG`; on Windows the region settings' first day) — or `monday`, `saturday`, `sunday`, the same on every device of the library |
 | `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |

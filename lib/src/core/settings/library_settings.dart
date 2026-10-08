@@ -103,6 +103,9 @@ const String defaultAttachmentsFolder = 'assets';
 /// or a book are made (#284).
 const String defaultAnnotationsFolder = 'Annotations';
 
+/// The colour a passage is highlighted in until another is chosen (#626).
+const String defaultHighlightColour = 'yellow';
+
 /// Global app settings, a single row (id 1).
 final class AppSettingsRepo {
   /// Creates the repo over the given [AppDatabase].
