@@ -96,17 +96,16 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
   // the other layout as the phone turns still knows how it was held.
   static Orientation? _held;
 
-  void _present({bool presenter = false, bool lockLandscape = false}) =>
-      unawaited(
-        presentSlides(
-          context,
-          text: widget.text,
-          notePath: _path,
-          resolveEmbed: widget.host.resolveEmbed,
-          presenter: presenter,
-          lockLandscape: lockLandscape,
-        ),
-      );
+  void _present({bool presenter = false, bool byTurning = false}) => unawaited(
+    presentSlides(
+      context,
+      text: widget.text,
+      notePath: _path,
+      resolveEmbed: widget.host.resolveEmbed,
+      presenter: presenter,
+      byTurning: byTurning,
+    ),
+  );
 
   /// Turning a phone sideways while its slides are on screen presents
   /// them; turning it upright again ends that (the presenting screen's).
@@ -115,7 +114,7 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
     final now = MediaQuery.orientationOf(context);
     if (_held == Orientation.portrait && now == Orientation.landscape) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _present();
+        if (mounted) _present(byTurning: true);
       });
     }
     _held = now;
@@ -307,7 +306,7 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
               const Spacer(),
               FilledButton.icon(
                 key: const Key('slides-present-button'),
-                onPressed: () => _present(lockLandscape: true),
+                onPressed: _present,
                 icon: const Icon(Icons.open_in_full),
                 label: Text(AppStrings.slidesPresent),
               ),

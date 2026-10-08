@@ -20,28 +20,28 @@ bool isSlidesPhone(BuildContext context) =>
 /// (#534): the whole screen for the slide alone, or the presenter view.
 ///
 /// The desktops take the window full screen, Android hides the system
-/// bars, and the screen stays on until the talk ends. [lockLandscape]
-/// turns a phone held upright (its Present button); a phone already
-/// turned sideways stops presenting when it is turned upright again.
+/// bars, and the screen stays on until the talk ends. A phone is turned
+/// to landscape for the talk, wherever it was started from — unless
+/// [byTurning], the talk the phone started by being turned sideways,
+/// which ends when it is turned upright again.
 Future<void> presentSlides(
   BuildContext context, {
   required String text,
   required String notePath,
   required Future<String?> Function(String target) resolveEmbed,
   bool presenter = false,
-  bool lockLandscape = false,
+  bool byTurning = false,
 }) async {
   if (_presenting) return;
   final slides = splitSlides(text);
   final phone = isSlidesPhone(context);
   final window = _windowOf(context);
   final navigator = Navigator.of(context, rootNavigator: true);
+  final lockLandscape = phone && !byTurning;
   _presenting = true;
   // The screen is asked for, not waited on: the slide shows at once, and a
   // platform that answers late (or never, as in tests) holds nothing up.
-  unawaited(
-    _takeScreen(window, on: true, lockLandscape: lockLandscape && phone),
-  );
+  unawaited(_takeScreen(window, on: true, lockLandscape: lockLandscape));
   try {
     await navigator.push(
       PageRouteBuilder<void>(
@@ -53,14 +53,12 @@ Future<void> presentSlides(
           resolveEmbed: resolveEmbed,
           presenter: presenter,
           touch: Platform.isAndroid,
-          exitWhenUpright: phone && !lockLandscape,
+          exitWhenUpright: phone && byTurning,
         ),
       ),
     );
   } finally {
-    unawaited(
-      _takeScreen(window, on: false, lockLandscape: lockLandscape && phone),
-    );
+    unawaited(_takeScreen(window, on: false, lockLandscape: lockLandscape));
     _presenting = false;
   }
 }
