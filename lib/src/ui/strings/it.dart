@@ -2913,7 +2913,7 @@ final class ItalianStrings extends Strings {
   String get diagramTitle => 'Diagramma';
 
   @override
-  String get diagramFullScreen => 'Schermo intero';
+  String get fullScreen => 'Schermo intero';
   @override
   String get commandInsertDiagram => 'Inserisci diagramma (Mermaid)';
 

@@ -515,7 +515,7 @@ final class AppStrings {
   static String get toolMindMapSubtitle => _s.toolMindMapSubtitle;
   static String get toolMindMapNeedsList => _s.toolMindMapNeedsList;
   static String get diagramTitle => _s.diagramTitle;
-  static String get diagramFullScreen => _s.diagramFullScreen;
+  static String get fullScreen => _s.fullScreen;
   static String get commandInsertDiagram => _s.commandInsertDiagram;
   static String get commandInsertMindMap => _s.commandInsertMindMap;
   static String get commandConvertListToMindMap =>

@@ -2924,7 +2924,7 @@ final class BasqueStrings extends Strings {
   String get diagramTitle => 'Diagrama';
 
   @override
-  String get diagramFullScreen => 'Pantaila osoa';
+  String get fullScreen => 'Pantaila osoa';
   @override
   String get commandInsertDiagram => 'Txertatu diagrama (Mermaid)';
 

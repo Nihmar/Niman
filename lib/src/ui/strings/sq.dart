@@ -2917,7 +2917,7 @@ final class AlbanianStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Ekran i plotë';
+  String get fullScreen => 'Ekran i plotë';
   @override
   String get commandInsertDiagram => 'Fut diagramë (Mermaid)';
 

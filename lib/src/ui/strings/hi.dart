@@ -2849,7 +2849,7 @@ final class HindiStrings extends Strings {
   String get diagramTitle => 'आरेख';
 
   @override
-  String get diagramFullScreen => 'पूर्ण स्क्रीन';
+  String get fullScreen => 'पूर्ण स्क्रीन';
   @override
   String get commandInsertDiagram => 'आरेख डालें (Mermaid)';
 

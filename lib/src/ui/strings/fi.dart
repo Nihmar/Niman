@@ -2912,7 +2912,7 @@ final class FinnishStrings extends Strings {
   String get diagramTitle => 'Kaavio';
 
   @override
-  String get diagramFullScreen => 'Koko näyttö';
+  String get fullScreen => 'Koko näyttö';
   @override
   String get commandInsertDiagram => 'Lisää kaavio (Mermaid)';
 

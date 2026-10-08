@@ -2921,7 +2921,7 @@ final class MacedonianStrings extends Strings {
   String get diagramTitle => 'Дијаграм';
 
   @override
-  String get diagramFullScreen => 'Целосен екран';
+  String get fullScreen => 'Целосен екран';
   @override
   String get commandInsertDiagram => 'Вметни дијаграм (Mermaid)';
 

@@ -2937,7 +2937,7 @@ final class BelarusianStrings extends Strings {
   String get diagramTitle => 'Дыяграма';
 
   @override
-  String get diagramFullScreen => 'Поўны экран';
+  String get fullScreen => 'Поўны экран';
   @override
   String get commandInsertDiagram => 'Уставіць дыяграму (Mermaid)';
 

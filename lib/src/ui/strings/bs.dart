@@ -2925,7 +2925,7 @@ final class BosnianStrings extends Strings {
   String get diagramTitle => 'Dijagram';
 
   @override
-  String get diagramFullScreen => 'Cijeli ekran';
+  String get fullScreen => 'Cijeli ekran';
   @override
   String get commandInsertDiagram => 'Umetni dijagram (Mermaid)';
 

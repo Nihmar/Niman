@@ -2905,7 +2905,7 @@ final class SlovakStrings extends Strings {
   String get diagramTitle => 'Diagram';
 
   @override
-  String get diagramFullScreen => 'Celá obrazovka';
+  String get fullScreen => 'Celá obrazovka';
   @override
   String get commandInsertDiagram => 'Vložiť diagram (Mermaid)';
 

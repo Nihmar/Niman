@@ -1,6 +1,6 @@
 /// A book's row, under it in the note pane (#280): its name, how the books
 /// look, its contents, a link to the place being read (#282), annotating
-/// it (#284), and on desktop the system's application.
+/// it (#284), full screen (#621), and on desktop the system's application.
 library;
 
 import 'package:flutter/material.dart';
@@ -25,6 +25,8 @@ final class EpubBar extends StatelessWidget {
     this.onContents,
     this.here,
     this.onAnnotate,
+    this.fullScreen = false,
+    this.onFullScreen,
     super.key,
   });
 
@@ -48,6 +50,12 @@ final class EpubBar extends StatelessWidget {
 
   /// Annotates the paragraph being read.
   final VoidCallback? onAnnotate;
+
+  /// Whether the book is read in full screen.
+  final bool fullScreen;
+
+  /// Enters full screen, or leaves it.
+  final VoidCallback? onFullScreen;
 
   @override
   Widget build(BuildContext context) => AttachmentBar(
@@ -75,6 +83,15 @@ final class EpubBar extends StatelessWidget {
         icon: const Icon(Icons.edit_note),
         visualDensity: VisualDensity.compact,
         onPressed: onAnnotate,
+      ),
+      IconButton(
+        key: const Key('epub-full-screen-button'),
+        tooltip: AppStrings.fullScreen,
+        isSelected: fullScreen,
+        icon: const Icon(Icons.fullscreen),
+        selectedIcon: const Icon(Icons.fullscreen_exit),
+        visualDensity: VisualDensity.compact,
+        onPressed: onFullScreen,
       ),
     ],
   );

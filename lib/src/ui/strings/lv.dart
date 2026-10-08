@@ -2893,7 +2893,7 @@ final class LatvianStrings extends Strings {
   String get diagramTitle => 'Diagramma';
 
   @override
-  String get diagramFullScreen => 'Pilnekrāns';
+  String get fullScreen => 'Pilnekrāns';
   @override
   String get commandInsertDiagram => 'Ievietot diagrammu (Mermaid)';
 

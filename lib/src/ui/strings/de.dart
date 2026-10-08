@@ -2963,7 +2963,7 @@ final class GermanStrings extends Strings {
   String get diagramTitle => 'Diagramm';
 
   @override
-  String get diagramFullScreen => 'Vollbild';
+  String get fullScreen => 'Vollbild';
   @override
   String get commandInsertDiagram => 'Diagramm einfügen (Mermaid)';
 

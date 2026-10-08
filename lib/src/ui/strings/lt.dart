@@ -2936,7 +2936,7 @@ final class LithuanianStrings extends Strings {
   String get diagramTitle => 'Diagrama';
 
   @override
-  String get diagramFullScreen => 'Visas ekranas';
+  String get fullScreen => 'Visas ekranas';
   @override
   String get commandInsertDiagram => 'Įterpti diagramą (Mermaid)';
 

@@ -2907,7 +2907,7 @@ final class BulgarianStrings extends Strings {
   String get diagramTitle => 'Диаграма';
 
   @override
-  String get diagramFullScreen => 'Цял екран';
+  String get fullScreen => 'Цял екран';
   @override
   String get commandInsertDiagram => 'Вмъкни диаграма (Mermaid)';
 
