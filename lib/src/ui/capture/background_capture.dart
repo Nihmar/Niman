@@ -5,8 +5,10 @@
 /// folder, or why not.
 ///
 /// Android keeps the process alive meanwhile with a short foreground
-/// service, which must end within three minutes: the reading gives up at
-/// [captureTimeLimit], and the service ends there whatever is left to do.
+/// service, which must end within three minutes of its last start: at
+/// [captureTimeLimit] from then the reading under way gives up, the
+/// captures still waiting fail rather than run without the service, and
+/// the service ends (#643).
 library;
 
 import 'dart:async';
@@ -70,6 +72,7 @@ final class BackgroundCapture {
 
   final Queue<_Job> _queue = Queue<_Job>();
   _Job? _running;
+  Timer? _deadline;
   int _next = 0;
 
   /// Whether a capture is running or waiting.
@@ -90,6 +93,10 @@ final class BackgroundCapture {
       title: AppStrings.captureReadingHost(job.host),
       cancel: captureCancelRoute(job.id),
     );
+    // The service's time runs from its last start, made with the app on
+    // screen: one deadline for every capture it keeps alive.
+    _deadline?.cancel();
+    _deadline = Timer(limit, _timeUp);
     if (_running == null) unawaited(_drain());
   }
 
@@ -118,16 +125,36 @@ final class BackgroundCapture {
         _running = null;
       }
     }
+    _deadline?.cancel();
+    _deadline = null;
     await notifier.end();
   }
 
+  /// The service's time is up: the reading under way gives up — a save
+  /// under way finishes without it — and the captures waiting fail, as
+  /// nothing would keep the app alive for them.
+  void _timeUp() {
+    _deadline = null;
+    final running = _running;
+    if (running != null && !running.timedOut.isCompleted) {
+      running.timedOut.complete();
+    }
+    while (_queue.isNotEmpty) {
+      final job = _queue.removeFirst();
+      job.reading.dispose();
+      unawaited(
+        notifier.result(
+          title: AppStrings.captureFailedTitle(job.host),
+          body: captureFailureText(
+            const PageFetchException(PageFetchFailure.timeout),
+          ),
+        ),
+      );
+    }
+    unawaited(notifier.end());
+  }
+
   Future<void> _capture(_Job job) async {
-    final deadline = Timer(limit, () {
-      // The service's time is up: the reading gives up, and a save
-      // under way finishes without it.
-      if (!job.timedOut.isCompleted) job.timedOut.complete();
-      unawaited(notifier.end());
-    });
     void onStep() => unawaited(_say(job));
     job.reading.addListener(onStep);
     try {
@@ -154,7 +181,6 @@ final class BackgroundCapture {
       );
     } finally {
       job.reading.removeListener(onStep);
-      deadline.cancel();
     }
   }
 

@@ -281,4 +281,30 @@ void main() {
     ]);
     expect(notifier.said.where((line) => line == 'end'), hasLength(1));
   });
+
+  test('at the limit, the captures waiting fail with the one reading', () {
+    fakeAsync((async) {
+      final capture = BackgroundCapture(notifier: notifier);
+      for (var i = 0; i < 2; i++) {
+        unawaited(
+          capture.add(
+            reading(() => Completer<WebReading>().future),
+            target: target(),
+            chosen: chosen,
+          ),
+        );
+      }
+      async.elapse(captureTimeLimit + const Duration(seconds: 1));
+      expect(created, isEmpty);
+      expect([
+        for (final result in notifier.results) result.body,
+      ], List.filled(2, 'The page did not answer in time.'));
+      expect(capture.busy, isFalse);
+      expect(notifier.said.last, 'end');
+      // Nothing runs on after the service has ended.
+      final said = notifier.said.length;
+      async.elapse(captureTimeLimit * 2);
+      expect(notifier.said, hasLength(said));
+    });
+  });
 }
