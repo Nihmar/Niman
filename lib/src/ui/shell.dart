@@ -82,6 +82,7 @@ import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
+import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/journal/journal_screen.dart';
@@ -1287,11 +1288,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The tabs in the title bar (#23), with the unsaved dot of every note
   /// whose editor holds edits the disk does not have yet.
   Widget _buildTabs(Widget dragArea) {
-    // The panes end where the dock begins, when it shows (#175).
+    // The panes end where the dock begins, when it shows (#175), and
+    // short of the window's edge by the base around the islands.
     final dock = _dockShown ? _dockWidth + ResizeDivider.width : 0;
     return _tabRow(
       dragArea,
-      panesWidth: MediaQuery.sizeOf(context).width - _tabsStart - dock,
+      panesWidth:
+          MediaQuery.sizeOf(context).width - _tabsStart - dock - Island.gap,
     );
   }
 
@@ -1319,10 +1322,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         },
       );
 
-  /// Where the tabs start in the title bar: the tree's right edge.
+  /// Where the tabs start in the title bar: the panes' island's left
+  /// edge, past the base and the tree's island.
   double get _tabsStart =>
       ShellRail.width +
       1 +
+      Island.gap +
       (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
   /// [pane]'s tab row.
@@ -2674,13 +2679,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _wideSlot(
             visible: _tab == tab,
             retainLayout: tab == ShellTab.search,
-            child: _tabBodyFor(tab, controller),
+            child: _islandSlot(_tabBodyFor(tab, controller)),
           ),
       // The quick-note chooser: empty while its note is open in the slot
       // above, the choose/create screen otherwise.
       _wideSlot(
         visible: _tab == ShellTab.quickNote && _showQuickNoteChooser,
-        child: _tabBodyFor(ShellTab.quickNote, controller),
+        child: _islandSlot(_tabBodyFor(ShellTab.quickNote, controller)),
       ),
     ];
   }
@@ -2690,6 +2695,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   bool get _filesSlotVisible =>
       _tab == ShellTab.files ||
       (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
+
+  /// A tab's screen on the wide layout: one island on the base, as the
+  /// tree, the panes and the dock are on Files.
+  Widget _islandSlot(Widget body) => Padding(
+    padding: const EdgeInsets.all(Island.gap),
+    child: Island(child: body),
+  );
 
   /// One kept-alive wide-layout slot. Hidden slots skip layout, paint and
   /// tickers (see [TabBodyStack]); [retainLayout] keeps an expensive one
@@ -4120,59 +4132,88 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// note gets a header inside the detail pane carrying its name and the
   /// note controls the window app bar used to hold. Hiding the tree (the
   /// title bar's toggle) gives its width to the detail pane.
+  ///
+  /// Each of the three is an [Island] on the chrome's base, [Island.gap]
+  /// from the window's edges and from each other; the dividers are the
+  /// base between them. The gaps never change while the tree or the dock
+  /// comes and goes, so nothing on screen moves but the edge that has to.
+  /// Zen drops the base: the note takes the window edge to edge.
   Widget _wideBody(LibrarySession controller) {
     final zen = _inZen;
-    return Row(
-      children: [
-        if (_sidebarVisible && !zen) ...[
-          SizedBox(
-            width: _editorSettings.treeWidth,
-            child: Column(
-              children: [
-                Expanded(child: _treePane(controller)),
-                if (controller.sync case final sync?)
-                  SyncProgressStrip(sync: sync),
-                _treeFooter(controller),
-              ],
+    return Padding(
+      padding: EdgeInsets.all(zen ? 0 : Island.gap),
+      child: Row(
+        children: [
+          if (_sidebarVisible && !zen) ...[
+            SizedBox(
+              width: _editorSettings.treeWidth,
+              child: Island(
+                key: const Key('tree-island'),
+                child: Column(
+                  children: [
+                    Expanded(child: _treePane(controller)),
+                    if (controller.sync case final sync?)
+                      SyncProgressStrip(sync: sync),
+                    _treeFooter(controller),
+                  ],
+                ),
+              ),
+            ),
+            _treeDivider(),
+          ],
+          Expanded(
+            // Keyed: the tree and the dock come and go on either side of
+            // it (Zen takes both at once), and the panes must stay where
+            // they are.
+            key: const ValueKey('wide-panes'),
+            // One island for the panes, split or not: the split's divider
+            // stays a line inside it, as the title bar's tabs divide at
+            // that same x — two islands would part the panes by a gap the
+            // tabs above them do not have.
+            child: Island(
+              key: const Key('panes-island'),
+              floating: !zen,
+              child: Column(
+                children: [
+                  // Without a title bar of the app's own (an Android
+                  // tablet, a phone in landscape) the tabs head the panes
+                  // instead: the same row, at the same x as the panes
+                  // below it.
+                  if (!widget.window.customTitleBar) ...[
+                    SizedBox(
+                      key: const Key('pane-tab-row'),
+                      height: 38,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) => _tabRow(
+                          const SizedBox.shrink(),
+                          panesWidth: constraints.maxWidth,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                  ],
+                  Expanded(
+                    child: zen ? _zenPanes(controller) : _panes(controller),
+                  ),
+                ],
+              ),
             ),
           ),
-          _treeDivider(),
-        ],
-        Expanded(
-          // Keyed: the tree and the dock come and go on either side of it
-          // (Zen takes both at once), and the panes must stay where they
-          // are.
-          key: const ValueKey('wide-panes'),
-          child: Column(
-            children: [
-              // Without a title bar of the app's own (an Android tablet,
-              // a phone in landscape) the tabs head the panes instead:
-              // the same row, at the same x as the panes below it.
-              if (!widget.window.customTitleBar) ...[
-                SizedBox(
-                  key: const Key('pane-tab-row'),
-                  height: 38,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) => _tabRow(
-                      const SizedBox.shrink(),
-                      panesWidth: constraints.maxWidth,
-                    ),
-                  ),
+          if (_dockShown && !zen) ...[
+            _dockDivider(),
+            TourTarget(
+              id: TourTargets.dock,
+              child: SizedBox(
+                width: _dockWidth,
+                child: Island(
+                  key: const Key('dock-island'),
+                  child: _rightDock(controller),
                 ),
-                const Divider(height: 1),
-              ],
-              Expanded(child: zen ? _zenPanes(controller) : _panes(controller)),
-            ],
-          ),
-        ),
-        if (_dockShown && !zen) ...[
-          _dockDivider(),
-          TourTarget(
-            id: TourTargets.dock,
-            child: SizedBox(width: _dockWidth, child: _rightDock(controller)),
-          ),
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -4610,6 +4651,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         MediaQuery.sizeOf(context).width -
         _tabsStart -
         ResizeDivider.width -
+        Island.gap -
         RightDock.minPanesWidth;
     return width.clamp(minDockWidth, room.clamp(minDockWidth, maxDockWidth));
   }

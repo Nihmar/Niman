@@ -62,6 +62,11 @@ Each theme in the list carries a ⋮ menu:
   first, naming it; deleting the theme in use leaves the app Niman's own
   colors.
 
+On a wide window, `background` is the ground of the islands the tree,
+the notes and the side panel sit on, and `surface` is the base around
+them — the title bar's and the rail's color. A theme that gives the two
+the same color still works; the islands just stop standing out.
+
 Two themes cannot answer to the same name; a name already in the list —
 shipped names included — is refused while it is typed.
 
