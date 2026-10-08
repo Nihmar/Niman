@@ -133,6 +133,10 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
+    if (slidesPresentKey(event) case final presenter?) {
+      _present(presenter: presenter);
+      return KeyEventResult.handled;
+    }
     final key = event.logicalKey;
     if (key == LogicalKeyboardKey.arrowRight ||
         key == LogicalKeyboardKey.arrowDown ||
@@ -146,8 +150,6 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
       _go(0);
     } else if (key == LogicalKeyboardKey.end) {
       _go(_slides.length - 1);
-    } else if (key == LogicalKeyboardKey.f5) {
-      _present(presenter: HardwareKeyboard.instance.isAltPressed);
     } else {
       return KeyEventResult.ignored;
     }

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/keep_awake.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present_screen.dart';
@@ -15,6 +17,19 @@ bool _presenting = false;
 /// Whether [context] is a phone: Android, and narrow on its short side.
 bool isSlidesPhone(BuildContext context) =>
     Platform.isAndroid && MediaQuery.sizeOf(context).shortestSide < 600;
+
+/// Whether [event] is the key presenting runs on, by the map in force
+/// (#159): true for [AppCommand.presenterView]'s, false for
+/// [AppCommand.presentSlides]', null for neither.
+bool? slidesPresentKey(KeyEvent event) {
+  final map = AppKeyMap.current.value;
+  bool on(AppCommand command) =>
+      map.bindingOf(command)?.accepts(event, HardwareKeyboard.instance) ??
+      false;
+  if (on(AppCommand.presenterView)) return true;
+  if (on(AppCommand.presentSlides)) return false;
+  return null;
+}
 
 /// Presents the slides of the note at [notePath], whose text is [text]
 /// (#534): the whole screen for the slide alone, or the presenter view.

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slides_overview.dart';
+import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present_bar.dart';
 import 'package:niman/src/ui/kinds/slides/slides_presenter_view.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -155,6 +156,10 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
     }
     final key = event.logicalKey;
     if (_overview) return _overviewKey(key);
+    if (slidesPresentKey(event) case final presenter?) {
+      setState(() => _presenter = presenter);
+      return KeyEventResult.handled;
+    }
     if (key == LogicalKeyboardKey.escape) {
       _exit();
     } else if (key == LogicalKeyboardKey.arrowRight ||
@@ -177,9 +182,6 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
     } else if (key == LogicalKeyboardKey.keyB && !_presenter) {
       // A held B blacks out once, not on and off with the key's repeat.
       if (event is KeyDownEvent) setState(() => _black = !_black);
-    } else if (key == LogicalKeyboardKey.f5) {
-      final presenter = HardwareKeyboard.instance.isAltPressed;
-      setState(() => _presenter = presenter);
     } else if (_presenter && key == LogicalKeyboardKey.keyP) {
       _togglePause();
     } else if (_presenter && key == LogicalKeyboardKey.keyR) {

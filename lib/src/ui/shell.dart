@@ -1013,7 +1013,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (_showsSlides && _wide)
         IconButton(
           key: const Key('slides-present-action'),
-          tooltip: '${AppStrings.slidesPresent} (F5)',
+          tooltip: switch (AppKeyMap.current.value.bindingOf(
+            AppCommand.presentSlides,
+          )) {
+            final keys? =>
+              '${AppStrings.slidesPresent} (${describeActivator(keys)})',
+            null => AppStrings.slidesPresent,
+          },
           icon: const Icon(Icons.present_to_all_outlined),
           onPressed: () => unawaited(_presentSlides()),
         ),

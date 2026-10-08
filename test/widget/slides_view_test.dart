@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slides_view.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -247,6 +249,30 @@ void presentingTests() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
     expect(slidePlaceOf('grid.md').value, row.length + 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('presenting runs on the key the user chose, not on F5', (
+    tester,
+  ) async {
+    AppKeyMap.current.value = KeyMap.defaults.withBinding(
+      AppCommand.presentSlides,
+      const SingleActivator(LogicalKeyboardKey.f6),
+    );
+    addTearDown(() => AppKeyMap.current.value = KeyMap.defaults);
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: _Host('chosen.md')),
+      const Size(1200, 800),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('slides-present')), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.f6);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('slides-present')), findsOneWidget);
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
   });
