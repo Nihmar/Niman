@@ -128,6 +128,19 @@ void main() {
     expect(find.text('1 / 1'), findsOneWidget);
   });
 
+  testWidgets('a pane shorter than the notes lays out, the slide at nothing', (
+    tester,
+  ) async {
+    slidePlaceOf('short.md').value = 1;
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: _Host('short.md')),
+      const Size(1200, 220),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text('2 / 2'), findsOneWidget);
+  });
+
   presentingTests();
 }
 

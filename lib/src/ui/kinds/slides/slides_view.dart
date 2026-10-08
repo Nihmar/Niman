@@ -177,7 +177,9 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
             padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
             child: LayoutBuilder(
               builder: (context, box) {
-                const notesHeight = 120.0;
+                // A pane shorter than the notes gives them all of it, the
+                // slide none, rather than a negative size.
+                final notesHeight = math.min<double>(120, box.maxHeight);
                 final room = box.maxHeight - (notes == null ? 0 : notesHeight);
                 final width = math.min(box.maxWidth, room * 16 / 9);
                 return Column(
