@@ -3354,4 +3354,76 @@ final class SpanishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Siempre visible';
+
+  @override
+  String get newSlidesTitle => 'Nueva presentación';
+
+  @override
+  String get newSlidesDefault => 'Mi presentación';
+
+  @override
+  String get showSlidesTooltip => 'Mostrar diapositivas';
+
+  @override
+  String get slidesPresent => 'Presentar';
+
+  @override
+  String get slidesPresenterView => 'Vista del presentador';
+
+  @override
+  String get slidesMarkdownPreview => 'Vista previa Markdown';
+
+  @override
+  String get slidesExportPdf => 'Exportar diapositivas como PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Notas del orador';
+
+  @override
+  String get slidesOverview => 'Vista general';
+
+  @override
+  String get slidesNotes => 'Notas';
+
+  @override
+  String get slidesExit => 'Salir';
+
+  @override
+  String get slidesPrevious => 'Anterior';
+
+  @override
+  String get slidesNext => 'Siguiente';
+
+  @override
+  String get slidesNow => 'Ahora';
+
+  @override
+  String get slidesElapsed => 'Transcurrido';
+
+  @override
+  String get slidesSlideOnly => 'Solo la diapositiva';
+
+  @override
+  String get slidesPause => 'Pausa';
+
+  @override
+  String get slidesRestart => 'Reiniciar';
+
+  @override
+  String get slidesSwipeToExit => 'Desliza hacia abajo para salir';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Necesita una presentación abierta';
+
+  @override
+  String get slidesTemplateSecond => 'Segunda diapositiva';
+
+  @override
+  String get slidesTemplatePoint => 'Un punto';
+
+  @override
+  String get slidesTemplateNote => 'qué decir aquí — solo tú lo ves.';
 }

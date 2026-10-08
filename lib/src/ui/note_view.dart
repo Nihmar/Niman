@@ -162,6 +162,7 @@ final class NoteView extends StatefulWidget {
     this.onLoaded,
     this.kindMode = true,
     this.onNoteKindChanged,
+    this.onKindMarkdown,
     this.onPasteAsMarkdown,
     this.toolbarTop = false,
     this.zen = false,
@@ -344,6 +345,11 @@ final class NoteView extends StatefulWidget {
   /// Reports the loaded note's kind (the frontmatter `type` value, null =
   /// plain note); the shell shows the kind toggle for known kinds.
   final void Function(String? type)? onNoteKindChanged;
+
+  /// Leaves the kind's view for the note's Markdown preview: the phone's
+  /// button under a slides note (#534). Null where the screen offers no
+  /// such button.
+  final VoidCallback? onKindMarkdown;
 
   /// Paste as Markdown from the editor's menu (#531), run by the shell on
   /// this note; null leaves the entry out.
@@ -865,6 +871,12 @@ final class _NoteViewState extends State<NoteView>
       rootDirectory: () => widget.libraryRoot,
       attachmentsFolderOf: () => widget.attachmentsFolder,
       linkTypeOf: () => widget.linkType,
+      embedResolver: _resolveEmbed,
+      linkOpener: (context, href) =>
+          unawaited(openHref(context, href, _linkTargets())),
+      wikiLinkOpener: (context, inner) =>
+          unawaited(openWiki(context, parseWikiRef(inner), _linkTargets())),
+      markdownShower: () => widget.onKindMarkdown,
     );
     _unsaved = widget.unsavedTracker;
     _unsaved?.register(_unsavedNote);

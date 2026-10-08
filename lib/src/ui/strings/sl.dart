@@ -3326,4 +3326,76 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vedno prikazano';
+
+  @override
+  String get newSlidesTitle => 'Nova predstavitev';
+
+  @override
+  String get newSlidesDefault => 'Moja predstavitev';
+
+  @override
+  String get showSlidesTooltip => 'Pokaži diapozitive';
+
+  @override
+  String get slidesPresent => 'Predstavi';
+
+  @override
+  String get slidesPresenterView => 'Pogled predavatelja';
+
+  @override
+  String get slidesMarkdownPreview => 'Predogled Markdown';
+
+  @override
+  String get slidesExportPdf => 'Izvozi diapozitive kot PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Opombe predavatelja';
+
+  @override
+  String get slidesOverview => 'Pregled';
+
+  @override
+  String get slidesNotes => 'Opombe';
+
+  @override
+  String get slidesExit => 'Izhod';
+
+  @override
+  String get slidesPrevious => 'Prejšnji';
+
+  @override
+  String get slidesNext => 'Naslednji';
+
+  @override
+  String get slidesNow => 'Zdaj';
+
+  @override
+  String get slidesElapsed => 'Preteklo';
+
+  @override
+  String get slidesSlideOnly => 'Samo diapozitiv';
+
+  @override
+  String get slidesPause => 'Premor';
+
+  @override
+  String get slidesRestart => 'Začni znova';
+
+  @override
+  String get slidesSwipeToExit => 'Za izhod podrsajte navzdol';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Potrebna je odprta predstavitev';
+
+  @override
+  String get slidesTemplateSecond => 'Drugi diapozitiv';
+
+  @override
+  String get slidesTemplatePoint => 'Točka';
+
+  @override
+  String get slidesTemplateNote => 'kaj povedati tukaj — vidite le vi.';
 }

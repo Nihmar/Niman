@@ -3018,4 +3018,76 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => '常に表示';
+
+  @override
+  String get newSlidesTitle => '新しいスライド';
+
+  @override
+  String get newSlidesDefault => 'マイスライド';
+
+  @override
+  String get showSlidesTooltip => 'スライドを表示';
+
+  @override
+  String get slidesPresent => 'プレゼンテーション';
+
+  @override
+  String get slidesPresenterView => '発表者ビュー';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown プレビュー';
+
+  @override
+  String get slidesExportPdf => 'スライドを PDF に書き出す';
+
+  @override
+  String get slidesSpeakerNotes => 'スピーカーノート';
+
+  @override
+  String get slidesOverview => '一覧';
+
+  @override
+  String get slidesNotes => 'ノート';
+
+  @override
+  String get slidesExit => '終了';
+
+  @override
+  String get slidesPrevious => '前へ';
+
+  @override
+  String get slidesNext => '次へ';
+
+  @override
+  String get slidesNow => '現在';
+
+  @override
+  String get slidesElapsed => '経過';
+
+  @override
+  String get slidesSlideOnly => 'スライドのみ';
+
+  @override
+  String get slidesPause => '一時停止';
+
+  @override
+  String get slidesRestart => '最初から';
+
+  @override
+  String get slidesSwipeToExit => '下にスワイプして終了';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => '開いているスライドノートが必要';
+
+  @override
+  String get slidesTemplateSecond => '2 枚目のスライド';
+
+  @override
+  String get slidesTemplatePoint => 'ポイント';
+
+  @override
+  String get slidesTemplateNote => 'ここで話すこと — あなただけに見えます。';
 }

@@ -3363,4 +3363,76 @@ final class CatalanStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visible';
+
+  @override
+  String get newSlidesTitle => 'Nova presentació';
+
+  @override
+  String get newSlidesDefault => 'La meva presentació';
+
+  @override
+  String get showSlidesTooltip => 'Mostra les diapositives';
+
+  @override
+  String get slidesPresent => 'Presenta';
+
+  @override
+  String get slidesPresenterView => 'Vista del presentador';
+
+  @override
+  String get slidesMarkdownPreview => 'Previsualització Markdown';
+
+  @override
+  String get slidesExportPdf => 'Exporta les diapositives com a PDF';
+
+  @override
+  String get slidesSpeakerNotes => "Notes de l'orador";
+
+  @override
+  String get slidesOverview => 'Vista general';
+
+  @override
+  String get slidesNotes => 'Notes';
+
+  @override
+  String get slidesExit => 'Surt';
+
+  @override
+  String get slidesPrevious => 'Anterior';
+
+  @override
+  String get slidesNext => 'Següent';
+
+  @override
+  String get slidesNow => 'Ara';
+
+  @override
+  String get slidesElapsed => 'Transcorregut';
+
+  @override
+  String get slidesSlideOnly => 'Només la diapositiva';
+
+  @override
+  String get slidesPause => 'Pausa';
+
+  @override
+  String get slidesRestart => 'Torna a començar';
+
+  @override
+  String get slidesSwipeToExit => 'Llisca avall per sortir';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Cal una presentació oberta';
+
+  @override
+  String get slidesTemplateSecond => 'Segona diapositiva';
+
+  @override
+  String get slidesTemplatePoint => 'Un punt';
+
+  @override
+  String get slidesTemplateNote => 'què dir aquí — només tu ho veus.';
 }

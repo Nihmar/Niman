@@ -3357,4 +3357,76 @@ final class RomanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Mereu vizibil';
+
+  @override
+  String get newSlidesTitle => 'Prezentare nouă';
+
+  @override
+  String get newSlidesDefault => 'Prezentarea mea';
+
+  @override
+  String get showSlidesTooltip => 'Arată diapozitivele';
+
+  @override
+  String get slidesPresent => 'Prezintă';
+
+  @override
+  String get slidesPresenterView => 'Vizualizare prezentator';
+
+  @override
+  String get slidesMarkdownPreview => 'Previzualizare Markdown';
+
+  @override
+  String get slidesExportPdf => 'Exportă diapozitivele ca PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Notele vorbitorului';
+
+  @override
+  String get slidesOverview => 'Prezentare generală';
+
+  @override
+  String get slidesNotes => 'Note';
+
+  @override
+  String get slidesExit => 'Ieșire';
+
+  @override
+  String get slidesPrevious => 'Anterior';
+
+  @override
+  String get slidesNext => 'Următor';
+
+  @override
+  String get slidesNow => 'Acum';
+
+  @override
+  String get slidesElapsed => 'Scurs';
+
+  @override
+  String get slidesSlideOnly => 'Doar diapozitivul';
+
+  @override
+  String get slidesPause => 'Pauză';
+
+  @override
+  String get slidesRestart => 'Reîncepe';
+
+  @override
+  String get slidesSwipeToExit => 'Glisează în jos pentru a ieși';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Necesită o prezentare deschisă';
+
+  @override
+  String get slidesTemplateSecond => 'Al doilea diapozitiv';
+
+  @override
+  String get slidesTemplatePoint => 'Un punct';
+
+  @override
+  String get slidesTemplateNote => 'ce spui aici — doar tu vezi.';
 }

@@ -1734,4 +1734,29 @@ final class AppStrings {
   static String get navigationScopeLibrary => _s.navigationScopeLibrary;
   static String get navigationScopeDevice => _s.navigationScopeDevice;
   static String get navigationAlwaysShown => _s.navigationAlwaysShown;
+  // Slide notes (#534).
+  static String get newSlidesTitle => _s.newSlidesTitle;
+  static String get newSlidesDefault => _s.newSlidesDefault;
+  static String get showSlidesTooltip => _s.showSlidesTooltip;
+  static String get slidesPresent => _s.slidesPresent;
+  static String get slidesPresenterView => _s.slidesPresenterView;
+  static String get slidesMarkdownPreview => _s.slidesMarkdownPreview;
+  static String get slidesExportPdf => _s.slidesExportPdf;
+  static String get slidesSpeakerNotes => _s.slidesSpeakerNotes;
+  static String get slidesOverview => _s.slidesOverview;
+  static String get slidesNotes => _s.slidesNotes;
+  static String get slidesExit => _s.slidesExit;
+  static String get slidesPrevious => _s.slidesPrevious;
+  static String get slidesNext => _s.slidesNext;
+  static String get slidesNow => _s.slidesNow;
+  static String get slidesElapsed => _s.slidesElapsed;
+  static String get slidesSlideOnly => _s.slidesSlideOnly;
+  static String get slidesPause => _s.slidesPause;
+  static String get slidesRestart => _s.slidesRestart;
+  static String get slidesSwipeToExit => _s.slidesSwipeToExit;
+  static String get slidesMarkdown => _s.slidesMarkdown;
+  static String get commandNeedSlidesNote => _s.commandNeedSlidesNote;
+  static String get slidesTemplateSecond => _s.slidesTemplateSecond;
+  static String get slidesTemplatePoint => _s.slidesTemplatePoint;
+  static String get slidesTemplateNote => _s.slidesTemplateNote;
 }

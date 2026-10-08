@@ -3315,4 +3315,76 @@ final class SwedishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Visas alltid';
+
+  @override
+  String get newSlidesTitle => 'Ny presentation';
+
+  @override
+  String get newSlidesDefault => 'Min presentation';
+
+  @override
+  String get showSlidesTooltip => 'Visa bilder';
+
+  @override
+  String get slidesPresent => 'Presentera';
+
+  @override
+  String get slidesPresenterView => 'Presentatörsvy';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown-förhandsvisning';
+
+  @override
+  String get slidesExportPdf => 'Exportera bilder som PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Talaranteckningar';
+
+  @override
+  String get slidesOverview => 'Översikt';
+
+  @override
+  String get slidesNotes => 'Anteckningar';
+
+  @override
+  String get slidesExit => 'Avsluta';
+
+  @override
+  String get slidesPrevious => 'Föregående';
+
+  @override
+  String get slidesNext => 'Nästa';
+
+  @override
+  String get slidesNow => 'Nu';
+
+  @override
+  String get slidesElapsed => 'Förfluten tid';
+
+  @override
+  String get slidesSlideOnly => 'Bara bilden';
+
+  @override
+  String get slidesPause => 'Pausa';
+
+  @override
+  String get slidesRestart => 'Börja om';
+
+  @override
+  String get slidesSwipeToExit => 'Svep nedåt för att avsluta';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Kräver en öppen presentation';
+
+  @override
+  String get slidesTemplateSecond => 'Andra bilden';
+
+  @override
+  String get slidesTemplatePoint => 'En punkt';
+
+  @override
+  String get slidesTemplateNote => 'vad du ska säga här — bara du ser det.';
 }

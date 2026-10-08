@@ -1802,4 +1802,30 @@ abstract base class Strings {
   String get navigationScopeLibrary;
   String get navigationScopeDevice;
   String get navigationAlwaysShown;
+
+  // Slide notes (#534).
+  String get newSlidesTitle;
+  String get newSlidesDefault;
+  String get showSlidesTooltip;
+  String get slidesPresent;
+  String get slidesPresenterView;
+  String get slidesMarkdownPreview;
+  String get slidesExportPdf;
+  String get slidesSpeakerNotes;
+  String get slidesOverview;
+  String get slidesNotes;
+  String get slidesExit;
+  String get slidesPrevious;
+  String get slidesNext;
+  String get slidesNow;
+  String get slidesElapsed;
+  String get slidesSlideOnly;
+  String get slidesPause;
+  String get slidesRestart;
+  String get slidesSwipeToExit;
+  String get slidesMarkdown;
+  String get commandNeedSlidesNote;
+  String get slidesTemplateSecond;
+  String get slidesTemplatePoint;
+  String get slidesTemplateNote;
 }

@@ -3,6 +3,7 @@ import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/kinds/shopping_list_note.dart';
+import 'package:niman/src/ui/kinds/slides/slides_kind.dart';
 
 /// The note text as seen and edited by a kind GUI.
 abstract interface class NoteKindHost {
@@ -25,6 +26,20 @@ abstract interface class NoteKindHost {
 
   /// What new attachment links look like (wikilink or Markdown).
   LinkType get linkType;
+
+  /// The absolute path an embed's [target] names, or null: the pictures
+  /// a kind draws from the note's Markdown (a slide's, #534).
+  Future<String?> resolveEmbed(String target);
+
+  /// Follows a Markdown link's [href] the way the note's preview does.
+  void openLink(BuildContext context, String href);
+
+  /// Follows a wikilink, [inner] being what sits between `[[` and `]]`.
+  void openWikiLink(BuildContext context, String inner);
+
+  /// Shows the note's Markdown preview in place of the kind's view, or
+  /// null where the screen has no such switch to make.
+  VoidCallback? get showMarkdown;
 }
 
 /// A note-kind GUI: the dedicated UI for notes whose frontmatter declares
@@ -50,6 +65,7 @@ final class NoteKinds {
     ListKindGui(),
     ShoppingListKindGui(),
     AudioKindGui(),
+    SlidesKindGui(),
   ];
 
   /// The GUI for [type], or null for an unknown or absent kind.

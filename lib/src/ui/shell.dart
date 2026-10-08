@@ -1000,6 +1000,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (_kindGui == null) return const [];
     final icon = switch (_noteKind) {
       'audio' => Icons.mic_outlined,
+      'slides' => Icons.slideshow_outlined,
       'shopping-list' => Icons.shopping_cart_outlined,
       _ => Icons.checklist,
     };
@@ -1007,9 +1008,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (_kindRawMode)
         IconButton(
           key: const Key('kind-show-list'),
-          tooltip: _noteKind == 'audio'
-              ? AppStrings.showAudioTooltip
-              : AppStrings.showListTooltip,
+          tooltip: switch (_noteKind) {
+            'audio' => AppStrings.showAudioTooltip,
+            'slides' => AppStrings.showSlidesTooltip,
+            _ => AppStrings.showListTooltip,
+          },
           icon: Icon(icon),
           onPressed: () => setState(() => _kindRawMode = false),
         )
@@ -1021,6 +1024,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           onPressed: () => setState(() => _kindRawMode = true),
         ),
     ];
+  }
+
+  /// Leaves the kind's view for the note's Markdown preview (#534): the
+  /// raw mode with the eye on, the preview every note has.
+  void _showKindMarkdown() {
+    setState(() => _kindRawMode = true);
+    if (!_notePreview) _togglePreview();
   }
 
   void _resetNoteKind() {
@@ -1303,6 +1313,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           initialCaretOffset: _pendingCaretOffset,
           kindMode: !_kindRawMode,
           onNoteKindChanged: _onNoteKindChanged,
+          onKindMarkdown: _showKindMarkdown,
           onPasteAsMarkdown: _pasteAsMarkdown,
           unsavedTracker: widget.unsavedTracker,
           spellCheck: widget.spellCheck,

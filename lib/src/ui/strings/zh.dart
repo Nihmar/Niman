@@ -2928,4 +2928,76 @@ final class ChineseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => '始终显示';
+
+  @override
+  String get newSlidesTitle => '新建幻灯片';
+
+  @override
+  String get newSlidesDefault => '我的幻灯片';
+
+  @override
+  String get showSlidesTooltip => '显示幻灯片';
+
+  @override
+  String get slidesPresent => '放映';
+
+  @override
+  String get slidesPresenterView => '演讲者视图';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown 预览';
+
+  @override
+  String get slidesExportPdf => '将幻灯片导出为 PDF';
+
+  @override
+  String get slidesSpeakerNotes => '演讲者备注';
+
+  @override
+  String get slidesOverview => '概览';
+
+  @override
+  String get slidesNotes => '备注';
+
+  @override
+  String get slidesExit => '退出';
+
+  @override
+  String get slidesPrevious => '上一张';
+
+  @override
+  String get slidesNext => '下一张';
+
+  @override
+  String get slidesNow => '当前';
+
+  @override
+  String get slidesElapsed => '已用时间';
+
+  @override
+  String get slidesSlideOnly => '仅幻灯片';
+
+  @override
+  String get slidesPause => '暂停';
+
+  @override
+  String get slidesRestart => '重新开始';
+
+  @override
+  String get slidesSwipeToExit => '向下滑动以退出';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => '需要打开的幻灯片笔记';
+
+  @override
+  String get slidesTemplateSecond => '第二张幻灯片';
+
+  @override
+  String get slidesTemplatePoint => '要点';
+
+  @override
+  String get slidesTemplateNote => '这里要说的话——只有你能看到。';
 }

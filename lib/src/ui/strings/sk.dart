@@ -3315,4 +3315,76 @@ final class SlovakStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vždy zobrazené';
+
+  @override
+  String get newSlidesTitle => 'Nová prezentácia';
+
+  @override
+  String get newSlidesDefault => 'Moja prezentácia';
+
+  @override
+  String get showSlidesTooltip => 'Zobraziť snímky';
+
+  @override
+  String get slidesPresent => 'Prezentovať';
+
+  @override
+  String get slidesPresenterView => 'Zobrazenie prednášajúceho';
+
+  @override
+  String get slidesMarkdownPreview => 'Náhľad Markdownu';
+
+  @override
+  String get slidesExportPdf => 'Exportovať snímky ako PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Poznámky prednášajúceho';
+
+  @override
+  String get slidesOverview => 'Prehľad';
+
+  @override
+  String get slidesNotes => 'Poznámky';
+
+  @override
+  String get slidesExit => 'Ukončiť';
+
+  @override
+  String get slidesPrevious => 'Predchádzajúca';
+
+  @override
+  String get slidesNext => 'Ďalšia';
+
+  @override
+  String get slidesNow => 'Teraz';
+
+  @override
+  String get slidesElapsed => 'Uplynulo';
+
+  @override
+  String get slidesSlideOnly => 'Iba snímka';
+
+  @override
+  String get slidesPause => 'Pozastaviť';
+
+  @override
+  String get slidesRestart => 'Začať znova';
+
+  @override
+  String get slidesSwipeToExit => 'Potiahnutím nadol ukončíte';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Vyžaduje otvorenú prezentáciu';
+
+  @override
+  String get slidesTemplateSecond => 'Druhá snímka';
+
+  @override
+  String get slidesTemplatePoint => 'Bod';
+
+  @override
+  String get slidesTemplateNote => 'čo tu povedať — vidíte to iba vy.';
 }

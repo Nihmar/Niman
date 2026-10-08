@@ -3411,4 +3411,76 @@ final class GreekStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Πάντα ορατό';
+
+  @override
+  String get newSlidesTitle => 'Νέα παρουσίαση';
+
+  @override
+  String get newSlidesDefault => 'Η παρουσίασή μου';
+
+  @override
+  String get showSlidesTooltip => 'Εμφάνιση διαφανειών';
+
+  @override
+  String get slidesPresent => 'Παρουσίαση';
+
+  @override
+  String get slidesPresenterView => 'Προβολή παρουσιαστή';
+
+  @override
+  String get slidesMarkdownPreview => 'Προεπισκόπηση Markdown';
+
+  @override
+  String get slidesExportPdf => 'Εξαγωγή διαφανειών σε PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Σημειώσεις ομιλητή';
+
+  @override
+  String get slidesOverview => 'Επισκόπηση';
+
+  @override
+  String get slidesNotes => 'Σημειώσεις';
+
+  @override
+  String get slidesExit => 'Έξοδος';
+
+  @override
+  String get slidesPrevious => 'Προηγούμενη';
+
+  @override
+  String get slidesNext => 'Επόμενη';
+
+  @override
+  String get slidesNow => 'Τώρα';
+
+  @override
+  String get slidesElapsed => 'Πέρασε';
+
+  @override
+  String get slidesSlideOnly => 'Μόνο η διαφάνεια';
+
+  @override
+  String get slidesPause => 'Παύση';
+
+  @override
+  String get slidesRestart => 'Επανεκκίνηση';
+
+  @override
+  String get slidesSwipeToExit => 'Σύρετε προς τα κάτω για έξοδο';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Χρειάζεται ανοιχτή παρουσίαση';
+
+  @override
+  String get slidesTemplateSecond => 'Δεύτερη διαφάνεια';
+
+  @override
+  String get slidesTemplatePoint => 'Ένα σημείο';
+
+  @override
+  String get slidesTemplateNote => 'τι να πείτε εδώ — το βλέπετε μόνο εσείς.';
 }

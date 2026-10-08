@@ -3337,4 +3337,77 @@ final class BasqueStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Beti ikusgai';
+
+  @override
+  String get newSlidesTitle => 'Aurkezpen berria';
+
+  @override
+  String get newSlidesDefault => 'Nire aurkezpena';
+
+  @override
+  String get showSlidesTooltip => 'Erakutsi diapositibak';
+
+  @override
+  String get slidesPresent => 'Aurkeztu';
+
+  @override
+  String get slidesPresenterView => 'Aurkezlearen ikuspegia';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdown aurrebista';
+
+  @override
+  String get slidesExportPdf => 'Esportatu diapositibak PDF gisa';
+
+  @override
+  String get slidesSpeakerNotes => 'Hizlariaren oharrak';
+
+  @override
+  String get slidesOverview => 'Ikuspegi orokorra';
+
+  @override
+  String get slidesNotes => 'Oharrak';
+
+  @override
+  String get slidesExit => 'Irten';
+
+  @override
+  String get slidesPrevious => 'Aurrekoa';
+
+  @override
+  String get slidesNext => 'Hurrengoa';
+
+  @override
+  String get slidesNow => 'Orain';
+
+  @override
+  String get slidesElapsed => 'Igarotakoa';
+
+  @override
+  String get slidesSlideOnly => 'Diapositiba soilik';
+
+  @override
+  String get slidesPause => 'Pausatu';
+
+  @override
+  String get slidesRestart => 'Berrabiarazi';
+
+  @override
+  String get slidesSwipeToExit => 'Irristatu behera irteteko';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Aurkezpen bat ireki behar da';
+
+  @override
+  String get slidesTemplateSecond => 'Bigarren diapositiba';
+
+  @override
+  String get slidesTemplatePoint => 'Puntu bat';
+
+  @override
+  String get slidesTemplateNote =>
+      'hemen zer esan — zuk bakarrik ikusten duzu.';
 }

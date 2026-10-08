@@ -3255,4 +3255,76 @@ final class EstonianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alati nähtav';
+
+  @override
+  String get newSlidesTitle => 'Uus esitlus';
+
+  @override
+  String get newSlidesDefault => 'Minu esitlus';
+
+  @override
+  String get showSlidesTooltip => 'Näita slaide';
+
+  @override
+  String get slidesPresent => 'Esita';
+
+  @override
+  String get slidesPresenterView => 'Esitaja vaade';
+
+  @override
+  String get slidesMarkdownPreview => 'Markdowni eelvaade';
+
+  @override
+  String get slidesExportPdf => 'Ekspordi slaidid PDF-ina';
+
+  @override
+  String get slidesSpeakerNotes => 'Esineja märkmed';
+
+  @override
+  String get slidesOverview => 'Ülevaade';
+
+  @override
+  String get slidesNotes => 'Märkmed';
+
+  @override
+  String get slidesExit => 'Välju';
+
+  @override
+  String get slidesPrevious => 'Eelmine';
+
+  @override
+  String get slidesNext => 'Järgmine';
+
+  @override
+  String get slidesNow => 'Praegu';
+
+  @override
+  String get slidesElapsed => 'Möödunud';
+
+  @override
+  String get slidesSlideOnly => 'Ainult slaid';
+
+  @override
+  String get slidesPause => 'Paus';
+
+  @override
+  String get slidesRestart => 'Alusta uuesti';
+
+  @override
+  String get slidesSwipeToExit => 'Väljumiseks pühi alla';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Vajab avatud esitlust';
+
+  @override
+  String get slidesTemplateSecond => 'Teine slaid';
+
+  @override
+  String get slidesTemplatePoint => 'Üks punkt';
+
+  @override
+  String get slidesTemplateNote => 'mida siin öelda — ainult sina näed seda.';
 }

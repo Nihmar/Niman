@@ -3327,4 +3327,76 @@ final class GalicianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visible';
+
+  @override
+  String get newSlidesTitle => 'Nova presentación';
+
+  @override
+  String get newSlidesDefault => 'A miña presentación';
+
+  @override
+  String get showSlidesTooltip => 'Amosar as diapositivas';
+
+  @override
+  String get slidesPresent => 'Presentar';
+
+  @override
+  String get slidesPresenterView => 'Vista do presentador';
+
+  @override
+  String get slidesMarkdownPreview => 'Vista previa Markdown';
+
+  @override
+  String get slidesExportPdf => 'Exportar as diapositivas como PDF';
+
+  @override
+  String get slidesSpeakerNotes => 'Notas do orador';
+
+  @override
+  String get slidesOverview => 'Vista xeral';
+
+  @override
+  String get slidesNotes => 'Notas';
+
+  @override
+  String get slidesExit => 'Saír';
+
+  @override
+  String get slidesPrevious => 'Anterior';
+
+  @override
+  String get slidesNext => 'Seguinte';
+
+  @override
+  String get slidesNow => 'Agora';
+
+  @override
+  String get slidesElapsed => 'Transcorrido';
+
+  @override
+  String get slidesSlideOnly => 'Só a diapositiva';
+
+  @override
+  String get slidesPause => 'Pausa';
+
+  @override
+  String get slidesRestart => 'Reiniciar';
+
+  @override
+  String get slidesSwipeToExit => 'Esvara cara abaixo para saír';
+
+  @override
+  String get slidesMarkdown => 'Markdown';
+
+  @override
+  String get commandNeedSlidesNote => 'Precisa dunha presentación aberta';
+
+  @override
+  String get slidesTemplateSecond => 'Segunda diapositiva';
+
+  @override
+  String get slidesTemplatePoint => 'Un punto';
+
+  @override
+  String get slidesTemplateNote => 'que dicir aquí — só ti o ves.';
 }
