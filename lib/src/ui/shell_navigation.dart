@@ -144,10 +144,6 @@ final class ShellTabBar extends StatelessWidget {
   /// Reports a tap; the shell decides what it means.
   final ValueChanged<ShellTab> onDestinationSelected;
 
-  /// Past this many, the labels are too narrow to show at once (#536):
-  /// the selected one keeps its label.
-  static const int labelledMax = 5;
-
   @override
   Widget build(BuildContext context) {
     final index = destinations.indexWhere((d) => d.tab == current);
@@ -155,9 +151,6 @@ final class ShellTabBar extends StatelessWidget {
       key: const Key('shell-tabs'),
       selectedIndex: index < 0 ? 0 : index,
       onDestinationSelected: (i) => onDestinationSelected(destinations[i].tab),
-      labelBehavior: destinations.length > labelledMax
-          ? NavigationDestinationLabelBehavior.onlyShowSelected
-          : null,
       destinations: [
         for (final destination in destinations)
           NavigationDestination(
@@ -214,13 +207,12 @@ final class ShellRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Settings is locked (it is always among them) and sits at the foot.
+    final settings = destinations.firstWhere((d) => d.tab == ShellTab.settings);
     final places = [
       for (final d in destinations)
-        if (d.tab != ShellTab.settings) d,
+        if (d != settings) d,
     ];
-    final settings = shellDestinations().firstWhere(
-      (d) => d.tab == ShellTab.settings,
-    );
     return Container(
       key: const Key('shell-rail'),
       width: width,

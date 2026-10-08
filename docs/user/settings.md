@@ -50,8 +50,7 @@ desktop's rail, and hides the destinations you do not use: drag a row by
 its handle to move it, flip its switch to hide it. Settings cannot be
 hidden (it shows a lock), but it can be moved; the rail keeps it at its
 foot with the library switcher either way. The bar or the rail under or
-beside the list is a preview of the result. With more than five items
-the phone's bar labels only the selected one.
+beside the list is a preview of the result.
 
 A hidden destination is still in the command palette (*Go to: …*). On
 a phone it opens as a page, with a back arrow to where you were; on the
