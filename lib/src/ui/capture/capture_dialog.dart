@@ -208,11 +208,15 @@ final class _CaptureDialogState extends State<CaptureDialog> {
         );
         _phase = _Phase.ready;
       });
-    } on PageFetchException catch (error) {
+    } on Object catch (error) {
+      // Whatever went wrong is said: a reading that failed otherwise than
+      // as a fetch would leave the dialog reading for good (#639).
       if (!mounted) return;
       setState(() {
         _phase = _Phase.failed;
-        _error = captureFailureText(error);
+        _error = error is PageFetchException
+            ? captureFailureText(error)
+            : '$error';
       });
     }
   }

@@ -98,7 +98,7 @@ Future<FetchedPage> fetchPage(
     throw PageFetchException(PageFetchFailure.network, error.message);
   } on HttpException catch (error) {
     throw PageFetchException(PageFetchFailure.network, error.message);
-  } on HandshakeException catch (error) {
+  } on TlsException catch (error) {
     throw PageFetchException(PageFetchFailure.network, error.message);
   } on TimeoutException {
     throw const PageFetchException(PageFetchFailure.timeout);
@@ -137,7 +137,14 @@ Future<FetchedPage> _follow(
       if (hop >= limits.redirects) {
         throw const PageFetchException(PageFetchFailure.redirects);
       }
-      url = url.resolve(location);
+      try {
+        url = url.resolve(location);
+      } on FormatException {
+        throw PageFetchException(
+          PageFetchFailure.status,
+          '${response.statusCode} to $location',
+        );
+      }
       continue;
     }
     if (response.statusCode < 200 || response.statusCode >= 300) {

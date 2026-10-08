@@ -64,6 +64,10 @@ void main() {
       } else if (path == '/moved') {
         await response.redirect(Uri.parse('/figure-srcset.html'));
         return;
+      } else if (path == '/badly-moved') {
+        response
+          ..statusCode = HttpStatus.found
+          ..headers.set(HttpHeaders.locationHeader, 'http://a:99x/');
       } else if (path == '/report.pdf') {
         response.headers.contentType = ContentType('application', 'pdf');
         response.write('%PDF-1.7');
@@ -214,6 +218,17 @@ void main() {
           (e) => e.failure,
           'failure',
           PageFetchFailure.notHtml,
+        ),
+      ),
+    );
+    // A redirect to no address at all is the server's error (#639).
+    await expectLater(
+      capture('/badly-moved'),
+      throwsA(
+        isA<PageFetchException>().having(
+          (e) => e.failure,
+          'failure',
+          PageFetchFailure.status,
         ),
       ),
     );
