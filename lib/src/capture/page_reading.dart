@@ -16,6 +16,11 @@ import 'package:niman/src/capture/readability/readability.dart';
 
 /// The characters an article needs for the page to count as read:
 /// Readability's own threshold.
+///
+/// ponytail: characters of any script count alike, so a short Japanese or
+/// Chinese article — 300 characters say what 900 say in English — counts
+/// as too little text and gets the unreadable note; weighing CJK characters
+/// three times is the upgrade if captures of such pages come out empty.
 const int minimumArticleCharacters = 500;
 
 /// A page read.

@@ -1,12 +1,16 @@
 // Capturing a web page (#531), end to end: each page of
 // test/fixtures/capture/ is served by a local server, captured into a
 // library of its own, and its note compared with the golden `.md` beside
-// it — the address of the server written as http://capture.test. A run
-// with NIMAN_UPDATE_GOLDENS=1 writes the goldens instead.
+// it — the address of the server written as http://capture.test. A page
+// with a `.dom.html` beside it — what a real browser's --dump-dom gave for
+// it — is captured a second time with a browser that answers that DOM, and
+// compared with its `.browser.md`. A run with NIMAN_UPDATE_GOLDENS=1
+// writes the goldens instead.
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/capture/browser/page_browser.dart';
 import 'package:niman/src/capture/fetch/page_fetch.dart';
 import 'package:niman/src/capture/web_capture.dart';
 import 'package:path/path.dart' as p;
@@ -17,6 +21,19 @@ final bool _update = Platform.environment['NIMAN_UPDATE_GOLDENS'] == '1';
 /// The bytes the server gives for a picture at [path]: its own name, so
 /// each picture has its own hash.
 List<int> _picture(String path) => 'picture:$path'.codeUnits;
+
+/// A browser that answers the DOM recorded beside the page, or nothing.
+final class _RecordedBrowser implements PageBrowser {
+  const new();
+
+  @override
+  Future<String?> read(Uri url) async {
+    final dom = File(
+      p.join(_fixtures, '${p.basenameWithoutExtension(url.path)}.dom.html'),
+    );
+    return dom.existsSync() ? dom.readAsStringSync() : null;
+  }
+}
 
 void main() {
   late HttpServer server;
@@ -57,39 +74,62 @@ void main() {
     await library.delete(recursive: true);
   });
 
-  Future<WebCapture> capture(String path) => captureWebPage(
-    Uri.parse('$base$path'),
-    libraryRoot: library.path,
-    attachmentsFolder: 'assets',
-    unreadableNotice:
-        'Niman could not read this page. '
-        '[Open the link](<$base$path>) to read it.',
-    captured: DateTime(2026, 10, 8),
-    tags: const ['web'],
-  );
+  Future<WebCapture> capture(String path, {PageBrowser? browser}) =>
+      captureWebPage(
+        Uri.parse('$base$path'),
+        libraryRoot: library.path,
+        attachmentsFolder: 'assets',
+        unreadableNotice:
+            'Niman could not read this page. '
+            '[Open the link](<$base$path>) to read it.',
+        captured: DateTime(2026, 10, 8),
+        tags: const ['web'],
+        browser: browser,
+      );
 
   final pages =
       Directory(_fixtures)
           .listSync()
           .map((entry) => p.basename(entry.path))
-          .where((name) => name.endsWith('.html'))
+          .where(
+            (name) => name.endsWith('.html') && !name.endsWith('.dom.html'),
+          )
           .toList()
         ..sort();
 
+  Future<void> compare(WebCapture result, String goldenName) async {
+    final note = result.note.text.replaceAll(base, 'http://capture.test');
+    final golden = File(p.join(_fixtures, goldenName));
+    if (_update) {
+      golden.writeAsStringSync(note);
+      return;
+    }
+    expect(note, golden.readAsStringSync());
+  }
+
   for (final page in pages) {
+    final name = p.basenameWithoutExtension(page);
     test(page, () async {
       final result = await capture('/$page');
-      final note = result.note.text.replaceAll(base, 'http://capture.test');
-      final golden = File(
-        p.join(_fixtures, '${p.basenameWithoutExtension(page)}.md'),
-      );
-      if (_update) {
-        golden.writeAsStringSync(note);
-        return;
-      }
-      expect(note, golden.readAsStringSync());
+      expect(result.ranBrowser, isFalse);
+      await compare(result, '$name.md');
+    });
+    if (!File(p.join(_fixtures, '$name.dom.html')).existsSync()) continue;
+    test('$page, run in a browser', () async {
+      final result = await capture('/$page', browser: const _RecordedBrowser());
+      expect(result.readable, isTrue, reason: 'the browser found the text');
+      expect(result.ranBrowser, isTrue);
+      await compare(result, '$name.browser.md');
     });
   }
+
+  test('a page with its text is not run in a browser', () async {
+    final result = await capture(
+      '/jsonld-byline.html',
+      browser: const _RecordedBrowser(),
+    );
+    expect(result.ranBrowser, isFalse);
+  });
 
   test('the pictures are in the attachments folder, by their hash', () async {
     final result = await capture('/figure-srcset.html');
