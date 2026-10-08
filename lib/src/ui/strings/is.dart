@@ -3182,4 +3182,47 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Vistunarglugginn opnast með henni.';
+
+  @override
+  String get captureSaveToNiman => 'Vista í Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Þú ferð aftur í vafrann; tilkynning segir til þegar minnisblaðið er '
+      'tilbúið.';
+
+  @override
+  String get captureAppendToNote => 'Bæta við minnisblað';
+
+  @override
+  String get captureAppend => 'Bæta við';
+
+  @override
+  String captureReadingHost(String host) => 'Les $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Vistað: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words orð · $images myndir';
+
+  @override
+  String get captureSavedUnreadable => 'Vistað án greinarinnar';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Ekki tókst að lesa $host: titill, lýsing og tengill haldast';
+
+  @override
+  String captureQuoteAdded(String note) => 'Tilvitnun bætt við $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'úr „$title“';
+
+  @override
+  String captureFailedTitle(String host) => 'Ekki tókst að vista $host';
+
+  @override
+  String get captureShowFolder => 'Sýna möppu';
 }

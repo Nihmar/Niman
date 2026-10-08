@@ -3215,4 +3215,47 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Со неа се отвора прозорецот за зачувување.';
+
+  @override
+  String get captureSaveToNiman => 'Зачувај во Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Се враќате во прелистувачот; известување ќе ви каже кога белешката е '
+      'готова.';
+
+  @override
+  String get captureAppendToNote => 'Додај во белешка';
+
+  @override
+  String get captureAppend => 'Додај';
+
+  @override
+  String captureReadingHost(String host) => 'Се чита $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Зачувано: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words зборови · $images слики';
+
+  @override
+  String get captureSavedUnreadable => 'Зачувано без статијата';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host не можеше да се прочита: задржани се насловот, описот и врската';
+
+  @override
+  String captureQuoteAdded(String note) => 'Цитатот е додаден во $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'од „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host не можеше да се зачува';
+
+  @override
+  String get captureShowFolder => 'Прикажи папка';
 }

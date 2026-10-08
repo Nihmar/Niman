@@ -3140,4 +3140,46 @@ final class HindiStrings extends Strings {
 
   @override
   String get captureDropDetail => 'इसके साथ सहेजने वाला संवाद खुलेगा।';
+
+  @override
+  String get captureSaveToNiman => 'Niman में सहेजें';
+
+  @override
+  String get captureBackgroundHint =>
+      'आप ब्राउज़र पर लौट जाएँगे; नोट तैयार होने पर एक सूचना बताएगी।';
+
+  @override
+  String get captureAppendToNote => 'नोट में जोड़ें';
+
+  @override
+  String get captureAppend => 'जोड़ें';
+
+  @override
+  String captureReadingHost(String host) => '$host पढ़ा जा रहा है…';
+
+  @override
+  String captureSavedTitle(String title) => 'सहेजा गया: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words शब्द · $images चित्र';
+
+  @override
+  String get captureSavedUnreadable => 'लेख के बिना सहेजा गया';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host पढ़ा नहीं जा सका: शीर्षक, विवरण और लिंक रखे गए';
+
+  @override
+  String captureQuoteAdded(String note) => 'उद्धरण $note में जोड़ा गया';
+
+  @override
+  String captureQuoteFrom(String title) => '«$title» से';
+
+  @override
+  String captureFailedTitle(String host) => '$host सहेजा नहीं जा सका';
+
+  @override
+  String get captureShowFolder => 'फ़ोल्डर दिखाएँ';
 }

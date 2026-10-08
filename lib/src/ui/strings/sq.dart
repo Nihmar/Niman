@@ -3212,4 +3212,46 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Me të hapet dritarja e ruajtjes.';
+
+  @override
+  String get captureSaveToNiman => 'Ruaje në Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Ktheheni te shfletuesi; një njoftim ju tregon kur shënimi është gati.';
+
+  @override
+  String get captureAppendToNote => 'Shto te një shënim';
+
+  @override
+  String get captureAppend => 'Shto';
+
+  @override
+  String captureReadingHost(String host) => 'Po lexohet $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'U ruajt: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words fjalë · $images figura';
+
+  @override
+  String get captureSavedUnreadable => 'U ruajt pa artikullin';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nuk u lexua dot: u mbajtën titulli, përshkrimi dhe lidhja';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citati u shtua te $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'nga «$title»';
+
+  @override
+  String captureFailedTitle(String host) => '$host nuk u ruajt dot';
+
+  @override
+  String get captureShowFolder => 'Shfaq dosjen';
 }

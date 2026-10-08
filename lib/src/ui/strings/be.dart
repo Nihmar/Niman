@@ -3229,4 +3229,47 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'З ёй адкрыецца акно захавання.';
+
+  @override
+  String get captureSaveToNiman => 'Захаваць у Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Вы вернецеся ў браўзер; апавяшчэнне паведаміць, калі заўвага будзе '
+      'гатовая.';
+
+  @override
+  String get captureAppendToNote => 'Дадаць у заўвагу';
+
+  @override
+  String get captureAppend => 'Дадаць';
+
+  @override
+  String captureReadingHost(String host) => 'Чытанне $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Захавана: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · слоў: $words · выяў: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Захавана без артыкула';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Не ўдалося прачытаць $host: захаваныя назва, апісанне і спасылка';
+
+  @override
+  String captureQuoteAdded(String note) => 'Цытата дададзена ў $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'з «$title»';
+
+  @override
+  String captureFailedTitle(String host) => 'Не ўдалося захаваць $host';
+
+  @override
+  String get captureShowFolder => 'Паказаць папку';
 }

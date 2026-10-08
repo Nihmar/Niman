@@ -3210,4 +3210,47 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Z njo se odpre okno za shranjevanje.';
+
+  @override
+  String get captureSaveToNiman => 'Shrani v Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Vrnete se v brskalnik; obvestilo vam bo povedalo, ko bo opomba '
+      'pripravljena.';
+
+  @override
+  String get captureAppendToNote => 'Dodaj k opombi';
+
+  @override
+  String get captureAppend => 'Dodaj';
+
+  @override
+  String captureReadingHost(String host) => 'Branje strani $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Shranjeno: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · besed: $words · slik: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Shranjeno brez članka';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host ni bilo mogoče prebrati: ohranjeni so naslov, opis in povezava';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citat dodan v $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'iz »$title«';
+
+  @override
+  String captureFailedTitle(String host) => '$host ni bilo mogoče shraniti';
+
+  @override
+  String get captureShowFolder => 'Pokaži mapo';
 }

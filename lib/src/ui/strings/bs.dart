@@ -3216,4 +3216,46 @@ final class BosnianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'S njom se otvara prozor za spremanje.';
+
+  @override
+  String get captureSaveToNiman => 'Sačuvaj u Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Vraćate se u preglednik; obavijest će javiti kad bilješka bude spremna.';
+
+  @override
+  String get captureAppendToNote => 'Dodaj u bilješku';
+
+  @override
+  String get captureAppend => 'Dodaj';
+
+  @override
+  String captureReadingHost(String host) => 'Čitanje stranice $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Sačuvano: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · riječi: $words · slika: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Sačuvano bez članka';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nije moguće pročitati: zadržani su naslov, opis i veza';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citat dodan u $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'iz „$title“';
+
+  @override
+  String captureFailedTitle(String host) => 'Nije moguće sačuvati $host';
+
+  @override
+  String get captureShowFolder => 'Prikaži mapu';
 }

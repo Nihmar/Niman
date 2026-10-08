@@ -3207,4 +3207,47 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get captureDropDetail => 'A janela de captura abre com ela.';
+
+  @override
+  String get captureSaveToNiman => 'Salvar no Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Você volta ao navegador; uma notificação avisa quando a nota estiver '
+      'pronta.';
+
+  @override
+  String get captureAppendToNote => 'Adicionar a uma nota';
+
+  @override
+  String get captureAppend => 'Adicionar';
+
+  @override
+  String captureReadingHost(String host) => 'Lendo $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Salvo: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words palavras · $images imagens';
+
+  @override
+  String get captureSavedUnreadable => 'Salvo sem o artigo';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Não foi possível ler $host: título, descrição e link mantidos';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citação adicionada a $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'de “$title”';
+
+  @override
+  String captureFailedTitle(String host) => 'Não foi possível capturar $host';
+
+  @override
+  String get captureShowFolder => 'Mostrar pasta';
 }

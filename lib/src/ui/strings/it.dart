@@ -3211,4 +3211,46 @@ final class ItalianStrings extends Strings {
   @override
   String get captureDropDetail =>
       'Si apre la finestra di cattura con questa pagina.';
+
+  @override
+  String get captureSaveToNiman => 'Salva in Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Torni al browser; una notifica ti dirà quando la nota è pronta.';
+
+  @override
+  String get captureAppendToNote => 'Aggiungi a una nota';
+
+  @override
+  String get captureAppend => 'Aggiungi';
+
+  @override
+  String captureReadingHost(String host) => 'Lettura di $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Salvata: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words parole · $images immagini';
+
+  @override
+  String get captureSavedUnreadable => "Salvata senza l'articolo";
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Impossibile leggere $host: titolo, descrizione e link conservati';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citazione aggiunta a $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'da «$title»';
+
+  @override
+  String captureFailedTitle(String host) => 'Impossibile catturare $host';
+
+  @override
+  String get captureShowFolder => 'Mostra cartella';
 }

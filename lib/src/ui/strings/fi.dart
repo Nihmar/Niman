@@ -3205,4 +3205,47 @@ final class FinnishStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Tallennusikkuna avautuu sen kanssa.';
+
+  @override
+  String get captureSaveToNiman => 'Tallenna Nimaniin';
+
+  @override
+  String get captureBackgroundHint =>
+      'Palaat selaimeen; ilmoitus kertoo, kun muistiinpano on valmis.';
+
+  @override
+  String get captureAppendToNote => 'Lisää muistiinpanoon';
+
+  @override
+  String get captureAppend => 'Lisää';
+
+  @override
+  String captureReadingHost(String host) => 'Luetaan sivua $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Tallennettu: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words sanaa · $images kuvaa';
+
+  @override
+  String get captureSavedUnreadable => 'Tallennettu ilman artikkelia';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Sivua $host ei voitu lukea: otsikko, kuvaus ja linkki säilytettiin';
+
+  @override
+  String captureQuoteAdded(String note) =>
+      'Lainaus lisätty muistiinpanoon $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'lähteestä $title';
+
+  @override
+  String captureFailedTitle(String host) => 'Sivua $host ei voitu tallentaa';
+
+  @override
+  String get captureShowFolder => 'Näytä kansio';
 }

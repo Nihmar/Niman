@@ -3230,4 +3230,47 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'З нею відкриється вікно збереження.';
+
+  @override
+  String get captureSaveToNiman => 'Зберегти в Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Ви повернетеся до браузера; сповіщення повідомить, коли нотатка буде '
+      'готова.';
+
+  @override
+  String get captureAppendToNote => 'Додати до нотатки';
+
+  @override
+  String get captureAppend => 'Додати';
+
+  @override
+  String captureReadingHost(String host) => 'Читання $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Збережено: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · слів: $words · зображень: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Збережено без статті';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Не вдалося прочитати $host: збережено назву, опис і посилання';
+
+  @override
+  String captureQuoteAdded(String note) => 'Цитату додано до $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'з «$title»';
+
+  @override
+  String captureFailedTitle(String host) => 'Не вдалося зберегти $host';
+
+  @override
+  String get captureShowFolder => 'Показати теку';
 }

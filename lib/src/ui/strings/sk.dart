@@ -3198,4 +3198,47 @@ final class SlovakStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Otvorí sa s ňou okno uloženia.';
+
+  @override
+  String get captureSaveToNiman => 'Uložiť do Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Vrátite sa do prehliadača; oznámenie dá vedieť, keď bude poznámka '
+      'hotová.';
+
+  @override
+  String get captureAppendToNote => 'Pripojiť k poznámke';
+
+  @override
+  String get captureAppend => 'Pripojiť';
+
+  @override
+  String captureReadingHost(String host) => 'Načítava sa $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Uložené: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · slov: $words · obrázkov: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Uložené bez článku';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host sa nedalo prečítať: zostal názov, popis a odkaz';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citát pridaný do $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'z „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host sa nepodarilo uložiť';
+
+  @override
+  String get captureShowFolder => 'Zobraziť priečinok';
 }

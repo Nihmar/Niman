@@ -1699,4 +1699,44 @@ abstract base class Strings {
 
   /// What a link dropped on the window does.
   String get captureDropDetail;
+
+  /// The title of the sheet a browser's share opens (#531).
+  String get captureSaveToNiman;
+
+  /// Under the share sheet's Save: the capture goes on without the app on
+  /// screen.
+  String get captureBackgroundHint;
+
+  /// A shared quote goes at the end of a note the user picks.
+  String get captureAppendToNote;
+
+  /// Appends the shared quote.
+  String get captureAppend;
+
+  /// The notification while a shared page is read.
+  String captureReadingHost(String host);
+
+  /// The notification once a shared page is a note.
+  String captureSavedTitle(String title);
+
+  /// Under it: where the note is, how long, and how many pictures came.
+  String captureSavedBody(String folder, int words, int images);
+
+  /// The notification once a shared page with no article is a note.
+  String get captureSavedUnreadable;
+
+  /// Under it: what such a note keeps.
+  String captureUnreadableBody(String host);
+
+  /// The notification once a shared quote is in a note.
+  String captureQuoteAdded(String note);
+
+  /// Under it: the page the quote came from.
+  String captureQuoteFrom(String title);
+
+  /// The notification when a shared page could not be captured.
+  String captureFailedTitle(String host);
+
+  /// A notification's button: the app, the note's folder in the tree.
+  String get captureShowFolder;
 }

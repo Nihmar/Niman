@@ -3236,4 +3236,48 @@ final class SpanishStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Se abre el diálogo de captura con ella.';
+
+  @override
+  String get captureSaveToNiman => 'Guardar en Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Vuelves al navegador; una notificación te avisará cuando la nota esté '
+      'lista.';
+
+  @override
+  String get captureAppendToNote => 'Añadir a una nota';
+
+  @override
+  String get captureAppend => 'Añadir';
+
+  @override
+  String captureReadingHost(String host) => 'Leyendo $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Guardado: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words palabras · $images imágenes';
+
+  @override
+  String get captureSavedUnreadable => 'Guardado sin el artículo';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'No se pudo leer $host: se conservan el título, la descripción y el '
+      'enlace';
+
+  @override
+  String captureQuoteAdded(String note) => 'Cita añadida a $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'de «$title»';
+
+  @override
+  String captureFailedTitle(String host) => 'No se pudo capturar $host';
+
+  @override
+  String get captureShowFolder => 'Mostrar carpeta';
 }

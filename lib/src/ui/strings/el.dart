@@ -3292,4 +3292,49 @@ final class GreekStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Το παράθυρο αποθήκευσης ανοίγει με αυτήν.';
+
+  @override
+  String get captureSaveToNiman => 'Αποθήκευση στο Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Επιστρέφετε στο πρόγραμμα περιήγησης· μια ειδοποίηση θα σας πει πότε '
+      'η σημείωση είναι έτοιμη.';
+
+  @override
+  String get captureAppendToNote => 'Προσθήκη σε σημείωση';
+
+  @override
+  String get captureAppend => 'Προσθήκη';
+
+  @override
+  String captureReadingHost(String host) => 'Ανάγνωση του $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Αποθηκεύτηκε: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words λέξεις · $images εικόνες';
+
+  @override
+  String get captureSavedUnreadable => 'Αποθηκεύτηκε χωρίς το άρθρο';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Το $host δεν διαβάστηκε: κρατήθηκαν ο τίτλος, η περιγραφή και ο '
+      'σύνδεσμος';
+
+  @override
+  String captureQuoteAdded(String note) => 'Το απόσπασμα προστέθηκε στο $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'από «$title»';
+
+  @override
+  String captureFailedTitle(String host) =>
+      'Δεν ήταν δυνατή η αποθήκευση του $host';
+
+  @override
+  String get captureShowFolder => 'Εμφάνιση φακέλου';
 }

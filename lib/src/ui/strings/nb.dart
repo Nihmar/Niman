@@ -3173,4 +3173,47 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Lagringsvinduet åpnes med den.';
+
+  @override
+  String get captureSaveToNiman => 'Lagre i Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Du går tilbake til nettleseren; et varsel sier fra når notatet er '
+      'klart.';
+
+  @override
+  String get captureAppendToNote => 'Legg til i notat';
+
+  @override
+  String get captureAppend => 'Legg til';
+
+  @override
+  String captureReadingHost(String host) => 'Leser $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Lagret: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words ord · $images bilder';
+
+  @override
+  String get captureSavedUnreadable => 'Lagret uten artikkelen';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host kunne ikke leses: tittel, beskrivelse og lenke er beholdt';
+
+  @override
+  String captureQuoteAdded(String note) => 'Sitat lagt til i $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'fra «$title»';
+
+  @override
+  String captureFailedTitle(String host) => 'Kunne ikke lagre $host';
+
+  @override
+  String get captureShowFolder => 'Vis mappe';
 }

@@ -3152,4 +3152,46 @@ final class TurkishStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Kaydetme penceresi onunla açılır.';
+
+  @override
+  String get captureSaveToNiman => "Niman'a kaydet";
+
+  @override
+  String get captureBackgroundHint =>
+      'Tarayıcıya dönersiniz; not hazır olduğunda bir bildirim haber verir.';
+
+  @override
+  String get captureAppendToNote => 'Nota ekle';
+
+  @override
+  String get captureAppend => 'Ekle';
+
+  @override
+  String captureReadingHost(String host) => '$host okunuyor…';
+
+  @override
+  String captureSavedTitle(String title) => 'Kaydedildi: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words sözcük · $images görsel';
+
+  @override
+  String get captureSavedUnreadable => 'Makale olmadan kaydedildi';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host okunamadı: başlık, açıklama ve bağlantı korundu';
+
+  @override
+  String captureQuoteAdded(String note) => 'Alıntı $note notuna eklendi';
+
+  @override
+  String captureQuoteFrom(String title) => '$title sayfasından';
+
+  @override
+  String captureFailedTitle(String host) => '$host kaydedilemedi';
+
+  @override
+  String get captureShowFolder => 'Klasörü göster';
 }

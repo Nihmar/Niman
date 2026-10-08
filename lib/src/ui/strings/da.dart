@@ -3172,4 +3172,47 @@ final class DanishStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Gem-vinduet åbner med den.';
+
+  @override
+  String get captureSaveToNiman => 'Gem i Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Du vender tilbage til browseren; en notifikation siger til, når noten '
+      'er klar.';
+
+  @override
+  String get captureAppendToNote => 'Føj til note';
+
+  @override
+  String get captureAppend => 'Tilføj';
+
+  @override
+  String captureReadingHost(String host) => 'Læser $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Gemt: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words ord · $images billeder';
+
+  @override
+  String get captureSavedUnreadable => 'Gemt uden artiklen';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host kunne ikke læses: titel, beskrivelse og link er gemt';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citat føjet til $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'fra $title';
+
+  @override
+  String captureFailedTitle(String host) => '$host kunne ikke gemmes';
+
+  @override
+  String get captureShowFolder => 'Vis mappe';
 }

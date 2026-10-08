@@ -3245,4 +3245,48 @@ final class CatalanStrings extends Strings {
 
   @override
   String get captureDropDetail => "S'obre el diàleg de captura amb ella.";
+
+  @override
+  String get captureSaveToNiman => 'Desa a Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Tornareu al navegador; una notificació us dirà quan la nota estigui '
+      'llesta.';
+
+  @override
+  String get captureAppendToNote => 'Afegeix a una nota';
+
+  @override
+  String get captureAppend => 'Afegeix';
+
+  @override
+  String captureReadingHost(String host) => "S'està llegint $host…";
+
+  @override
+  String captureSavedTitle(String title) => 'Desat: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words paraules · $images imatges';
+
+  @override
+  String get captureSavedUnreadable => "Desat sense l'article";
+
+  @override
+  String captureUnreadableBody(String host) =>
+      "No s'ha pogut llegir $host: es conserven el títol, la descripció i "
+      "l'enllaç";
+
+  @override
+  String captureQuoteAdded(String note) => 'Cita afegida a $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'de «$title»';
+
+  @override
+  String captureFailedTitle(String host) => "No s'ha pogut capturar $host";
+
+  @override
+  String get captureShowFolder => 'Mostra la carpeta';
 }

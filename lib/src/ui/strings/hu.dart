@@ -3197,4 +3197,46 @@ final class HungarianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Megnyílik vele a mentés ablak.';
+
+  @override
+  String get captureSaveToNiman => 'Mentés a Nimanba';
+
+  @override
+  String get captureBackgroundHint =>
+      'Visszatér a böngészőbe; egy értesítés jelzi, ha a jegyzet elkészült.';
+
+  @override
+  String get captureAppendToNote => 'Hozzáfűzés jegyzethez';
+
+  @override
+  String get captureAppend => 'Hozzáfűzés';
+
+  @override
+  String captureReadingHost(String host) => '$host beolvasása…';
+
+  @override
+  String captureSavedTitle(String title) => 'Mentve: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words szó · $images kép';
+
+  @override
+  String get captureSavedUnreadable => 'Mentve a cikk nélkül';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'A(z) $host nem olvasható: a cím, a leírás és a hivatkozás megmaradt';
+
+  @override
+  String captureQuoteAdded(String note) => 'Idézet hozzáfűzve: $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'innen: $title';
+
+  @override
+  String captureFailedTitle(String host) => 'A(z) $host nem menthető';
+
+  @override
+  String get captureShowFolder => 'Mappa megjelenítése';
 }

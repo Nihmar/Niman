@@ -2819,4 +2819,44 @@ final class ChineseStrings extends Strings {
 
   @override
   String get captureDropDetail => '将以此页面打开保存窗口。';
+
+  @override
+  String get captureSaveToNiman => '保存到 Niman';
+
+  @override
+  String get captureBackgroundHint => '你会返回浏览器；笔记准备好后会有通知告诉你。';
+
+  @override
+  String get captureAppendToNote => '追加到笔记';
+
+  @override
+  String get captureAppend => '追加';
+
+  @override
+  String captureReadingHost(String host) => '正在读取 $host…';
+
+  @override
+  String captureSavedTitle(String title) => '已保存：$title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words 词 · $images 张图片';
+
+  @override
+  String get captureSavedUnreadable => '已保存（无正文）';
+
+  @override
+  String captureUnreadableBody(String host) => '无法读取 $host：已保留标题、描述和链接';
+
+  @override
+  String captureQuoteAdded(String note) => '引用已追加到 $note';
+
+  @override
+  String captureQuoteFrom(String title) => '来自《$title》';
+
+  @override
+  String captureFailedTitle(String host) => '无法保存 $host';
+
+  @override
+  String get captureShowFolder => '显示文件夹';
 }

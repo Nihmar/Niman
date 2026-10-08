@@ -3226,4 +3226,47 @@ final class DutchStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Het vastlegvenster opent ermee.';
+
+  @override
+  String get captureSaveToNiman => 'Opslaan in Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'U gaat terug naar de browser; een melding laat weten wanneer de '
+      'notitie klaar is.';
+
+  @override
+  String get captureAppendToNote => 'Toevoegen aan notitie';
+
+  @override
+  String get captureAppend => 'Toevoegen';
+
+  @override
+  String captureReadingHost(String host) => '$host lezen…';
+
+  @override
+  String captureSavedTitle(String title) => 'Opgeslagen: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words woorden · $images afbeeldingen';
+
+  @override
+  String get captureSavedUnreadable => 'Opgeslagen zonder het artikel';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host kon niet worden gelezen: titel, beschrijving en link behouden';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citaat toegevoegd aan $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'uit „$title”';
+
+  @override
+  String captureFailedTitle(String host) => '$host kon niet worden vastgelegd';
+
+  @override
+  String get captureShowFolder => 'Map tonen';
 }

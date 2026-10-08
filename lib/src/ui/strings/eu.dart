@@ -3219,4 +3219,48 @@ final class BasqueStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Gordetzeko leihoa irekiko da harekin.';
+
+  @override
+  String get captureSaveToNiman => 'Gorde Niman-en';
+
+  @override
+  String get captureBackgroundHint =>
+      'Nabigatzailera itzuliko zara; jakinarazpen batek esango dizu oharra '
+      'prest dagoenean.';
+
+  @override
+  String get captureAppendToNote => 'Gehitu ohar bati';
+
+  @override
+  String get captureAppend => 'Gehitu';
+
+  @override
+  String captureReadingHost(String host) => '$host irakurtzen…';
+
+  @override
+  String captureSavedTitle(String title) => 'Gordeta: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words hitz · $images irudi';
+
+  @override
+  String get captureSavedUnreadable => 'Artikulurik gabe gordeta';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Ezin izan da $host irakurri: izenburua, deskribapena eta esteka gorde '
+      'dira';
+
+  @override
+  String captureQuoteAdded(String note) => 'Aipua $note oharrari gehitu zaio';
+
+  @override
+  String captureQuoteFrom(String title) => '«$title» orritik';
+
+  @override
+  String captureFailedTitle(String host) => 'Ezin izan da $host gorde';
+
+  @override
+  String get captureShowFolder => 'Erakutsi karpeta';
 }

@@ -1693,4 +1693,19 @@ final class AppStrings {
   static String get captureFailNetwork => _s.captureFailNetwork;
   static String get captureDropHint => _s.captureDropHint;
   static String get captureDropDetail => _s.captureDropDetail;
+  static String get captureSaveToNiman => _s.captureSaveToNiman;
+  static String get captureBackgroundHint => _s.captureBackgroundHint;
+  static String get captureAppendToNote => _s.captureAppendToNote;
+  static String get captureAppend => _s.captureAppend;
+  static String captureReadingHost(String host) => _s.captureReadingHost(host);
+  static String captureSavedTitle(String title) => _s.captureSavedTitle(title);
+  static String captureSavedBody(String folder, int words, int images) =>
+      _s.captureSavedBody(folder, words, images);
+  static String get captureSavedUnreadable => _s.captureSavedUnreadable;
+  static String captureUnreadableBody(String host) =>
+      _s.captureUnreadableBody(host);
+  static String captureQuoteAdded(String note) => _s.captureQuoteAdded(note);
+  static String captureQuoteFrom(String title) => _s.captureQuoteFrom(title);
+  static String captureFailedTitle(String host) => _s.captureFailedTitle(host);
+  static String get captureShowFolder => _s.captureShowFolder;
 }

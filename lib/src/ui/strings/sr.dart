@@ -3212,4 +3212,46 @@ final class SerbianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Са њом се отвара прозор за чување.';
+
+  @override
+  String get captureSaveToNiman => 'Сачувај у Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Враћате се у прегледач; обавештење ће јавити када белешка буде спремна.';
+
+  @override
+  String get captureAppendToNote => 'Додај у белешку';
+
+  @override
+  String get captureAppend => 'Додај';
+
+  @override
+  String captureReadingHost(String host) => 'Читање странице $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Сачувано: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · речи: $words · слика: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Сачувано без чланка';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host није могао да се прочита: задржани су наслов, опис и веза';
+
+  @override
+  String captureQuoteAdded(String note) => 'Цитат додат у $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'из „$title“';
+
+  @override
+  String captureFailedTitle(String host) => 'Није могуће сачувати $host';
+
+  @override
+  String get captureShowFolder => 'Прикажи фасциклу';
 }

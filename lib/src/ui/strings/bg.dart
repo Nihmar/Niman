@@ -3202,4 +3202,47 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Прозорецът за запазване ще се отвори с нея.';
+
+  @override
+  String get captureSaveToNiman => 'Запазване в Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Връщате се в браузъра; известие ще ви каже, когато бележката е готова.';
+
+  @override
+  String get captureAppendToNote => 'Добавяне към бележка';
+
+  @override
+  String get captureAppend => 'Добавяне';
+
+  @override
+  String captureReadingHost(String host) => 'Четене на $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Запазено: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words думи · $images изображения';
+
+  @override
+  String get captureSavedUnreadable => 'Запазено без статията';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host не можа да бъде прочетен: запазени са заглавието, описанието и '
+      'връзката';
+
+  @override
+  String captureQuoteAdded(String note) => 'Цитатът е добавен в $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'от „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host не можа да бъде запазен';
+
+  @override
+  String get captureShowFolder => 'Показване на папката';
 }

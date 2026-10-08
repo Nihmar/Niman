@@ -3139,4 +3139,46 @@ final class EstonianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Sellega avaneb salvestamise aken.';
+
+  @override
+  String get captureSaveToNiman => 'Salvesta Nimanisse';
+
+  @override
+  String get captureBackgroundHint =>
+      'Naased brauserisse; teavitus annab teada, kui märge on valmis.';
+
+  @override
+  String get captureAppendToNote => 'Lisa märkmele';
+
+  @override
+  String get captureAppend => 'Lisa';
+
+  @override
+  String captureReadingHost(String host) => 'Loen lehte $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Salvestatud: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words sõna · $images pilti';
+
+  @override
+  String get captureSavedUnreadable => 'Salvestatud ilma artiklita';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host lugeda ei õnnestunud: alles on pealkiri, kirjeldus ja link';
+
+  @override
+  String captureQuoteAdded(String note) => 'Tsitaat lisati märkmele $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'lehelt „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host salvestamine ebaõnnestus';
+
+  @override
+  String get captureShowFolder => 'Näita kausta';
 }

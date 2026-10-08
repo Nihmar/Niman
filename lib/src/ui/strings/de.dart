@@ -3261,4 +3261,47 @@ final class GermanStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Der Erfassungsdialog öffnet sich damit.';
+
+  @override
+  String get captureSaveToNiman => 'In Niman speichern';
+
+  @override
+  String get captureBackgroundHint =>
+      'Sie kehren zum Browser zurück; eine Benachrichtigung meldet, wenn die '
+      'Notiz fertig ist.';
+
+  @override
+  String get captureAppendToNote => 'An Notiz anhängen';
+
+  @override
+  String get captureAppend => 'Anhängen';
+
+  @override
+  String captureReadingHost(String host) => '$host wird gelesen…';
+
+  @override
+  String captureSavedTitle(String title) => 'Gespeichert: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words Wörter · $images Bilder';
+
+  @override
+  String get captureSavedUnreadable => 'Ohne den Artikel gespeichert';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host konnte nicht gelesen werden: Titel, Beschreibung und Link bleiben';
+
+  @override
+  String captureQuoteAdded(String note) => 'Zitat an $note angehängt';
+
+  @override
+  String captureQuoteFrom(String title) => 'aus „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host konnte nicht erfasst werden';
+
+  @override
+  String get captureShowFolder => 'Ordner zeigen';
 }

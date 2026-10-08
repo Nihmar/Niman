@@ -3240,4 +3240,47 @@ final class PolishStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Otworzy się z nią okno zapisu.';
+
+  @override
+  String get captureSaveToNiman => 'Zapisz w Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Wrócisz do przeglądarki; powiadomienie da znać, gdy notatka będzie '
+      'gotowa.';
+
+  @override
+  String get captureAppendToNote => 'Dołącz do notatki';
+
+  @override
+  String get captureAppend => 'Dołącz';
+
+  @override
+  String captureReadingHost(String host) => 'Wczytywanie $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Zapisano: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · słów: $words · obrazów: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Zapisano bez artykułu';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Nie udało się odczytać $host: zachowano tytuł, opis i link';
+
+  @override
+  String captureQuoteAdded(String note) => 'Cytat dodano do $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'z „$title”';
+
+  @override
+  String captureFailedTitle(String host) => 'Nie udało się zapisać $host';
+
+  @override
+  String get captureShowFolder => 'Pokaż folder';
 }

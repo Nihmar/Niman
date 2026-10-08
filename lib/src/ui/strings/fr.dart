@@ -3283,4 +3283,47 @@ final class FrenchStrings extends Strings {
 
   @override
   String get captureDropDetail => "La boîte de capture s'ouvre avec elle.";
+
+  @override
+  String get captureSaveToNiman => 'Enregistrer dans Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Vous revenez au navigateur ; une notification vous dira quand la note '
+      'sera prête.';
+
+  @override
+  String get captureAppendToNote => 'Ajouter à une note';
+
+  @override
+  String get captureAppend => 'Ajouter';
+
+  @override
+  String captureReadingHost(String host) => 'Lecture de $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Enregistré : $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words mots · $images images';
+
+  @override
+  String get captureSavedUnreadable => "Enregistré sans l'article";
+
+  @override
+  String captureUnreadableBody(String host) =>
+      "$host n'a pas pu être lu : titre, description et lien conservés";
+
+  @override
+  String captureQuoteAdded(String note) => 'Citation ajoutée à $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'de « $title »';
+
+  @override
+  String captureFailedTitle(String host) => 'Impossible de capturer $host';
+
+  @override
+  String get captureShowFolder => 'Afficher le dossier';
 }

@@ -3230,4 +3230,46 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Su juo atsidarys išsaugojimo langas.';
+
+  @override
+  String get captureSaveToNiman => 'Išsaugoti Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Grįšite į naršyklę; pranešimas praneš, kai pastaba bus paruošta.';
+
+  @override
+  String get captureAppendToNote => 'Pridėti prie pastabos';
+
+  @override
+  String get captureAppend => 'Pridėti';
+
+  @override
+  String captureReadingHost(String host) => 'Skaitoma $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Išsaugota: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · žodžių: $words · paveikslėlių: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Išsaugota be straipsnio';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nepavyko perskaityti: išsaugoti pavadinimas, aprašymas ir nuoroda';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citata pridėta prie $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'iš „$title“';
+
+  @override
+  String captureFailedTitle(String host) => 'Nepavyko išsaugoti $host';
+
+  @override
+  String get captureShowFolder => 'Rodyti aplanką';
 }

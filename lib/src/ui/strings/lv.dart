@@ -3183,4 +3183,46 @@ final class LatvianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Ar to atvērsies saglabāšanas logs.';
+
+  @override
+  String get captureSaveToNiman => 'Saglabāt Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Jūs atgriezīsieties pārlūkā; paziņojums ziņos, kad piezīme būs gatava.';
+
+  @override
+  String get captureAppendToNote => 'Pievienot piezīmei';
+
+  @override
+  String get captureAppend => 'Pievienot';
+
+  @override
+  String captureReadingHost(String host) => 'Lasa $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Saglabāts: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words vārdi · $images attēli';
+
+  @override
+  String get captureSavedUnreadable => 'Saglabāts bez raksta';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nevarēja nolasīt: saglabāts virsraksts, apraksts un saite';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citāts pievienots piezīmei $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'no “$title”';
+
+  @override
+  String captureFailedTitle(String host) => 'Neizdevās saglabāt $host';
+
+  @override
+  String get captureShowFolder => 'Rādīt mapi';
 }

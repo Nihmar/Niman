@@ -3198,4 +3198,47 @@ final class SwedishStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Spara-dialogen öppnas med den.';
+
+  @override
+  String get captureSaveToNiman => 'Spara i Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Du går tillbaka till webbläsaren; en avisering säger till när '
+      'anteckningen är klar.';
+
+  @override
+  String get captureAppendToNote => 'Lägg till i anteckning';
+
+  @override
+  String get captureAppend => 'Lägg till';
+
+  @override
+  String captureReadingHost(String host) => 'Läser $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Sparad: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words ord · $images bilder';
+
+  @override
+  String get captureSavedUnreadable => 'Sparad utan artikeln';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host kunde inte läsas: titel, beskrivning och länk behålls';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citat tillagt i $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'från ”$title”';
+
+  @override
+  String captureFailedTitle(String host) => 'Kunde inte spara $host';
+
+  @override
+  String get captureShowFolder => 'Visa mapp';
 }

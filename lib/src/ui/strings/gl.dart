@@ -3210,4 +3210,47 @@ final class GalicianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Ábrese o diálogo de captura con ela.';
+
+  @override
+  String get captureSaveToNiman => 'Gardar en Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Volves ao navegador; unha notificación avisarate cando a nota estea '
+      'lista.';
+
+  @override
+  String get captureAppendToNote => 'Engadir a unha nota';
+
+  @override
+  String get captureAppend => 'Engadir';
+
+  @override
+  String captureReadingHost(String host) => 'Lendo $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Gardado: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words palabras · $images imaxes';
+
+  @override
+  String get captureSavedUnreadable => 'Gardado sen o artigo';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      'Non se puido ler $host: consérvanse o título, a descrición e a ligazón';
+
+  @override
+  String captureQuoteAdded(String note) => 'Cita engadida a $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'de «$title»';
+
+  @override
+  String captureFailedTitle(String host) => 'Non se puido capturar $host';
+
+  @override
+  String get captureShowFolder => 'Amosar o cartafol';
 }

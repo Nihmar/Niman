@@ -3187,4 +3187,46 @@ final class CzechStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Otevře se s ní okno uložení.';
+
+  @override
+  String get captureSaveToNiman => 'Uložit do Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Vrátíte se do prohlížeče; oznámení dá vědět, až bude poznámka hotová.';
+
+  @override
+  String get captureAppendToNote => 'Připojit k poznámce';
+
+  @override
+  String get captureAppend => 'Připojit';
+
+  @override
+  String captureReadingHost(String host) => 'Načítá se $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Uloženo: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · slov: $words · obrázků: $images';
+
+  @override
+  String get captureSavedUnreadable => 'Uloženo bez článku';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nešlo přečíst: zůstal název, popis a odkaz';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citát přidán do $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'z „$title“';
+
+  @override
+  String captureFailedTitle(String host) => '$host nešlo uložit';
+
+  @override
+  String get captureShowFolder => 'Zobrazit složku';
 }

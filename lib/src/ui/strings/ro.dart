@@ -3240,4 +3240,47 @@ final class RomanianStrings extends Strings {
 
   @override
   String get captureDropDetail => 'Se deschide fereastra de salvare cu ea.';
+
+  @override
+  String get captureSaveToNiman => 'Salvează în Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'Te întorci în browser; o notificare îți spune când nota e gata.';
+
+  @override
+  String get captureAppendToNote => 'Adaugă la o notă';
+
+  @override
+  String get captureAppend => 'Adaugă';
+
+  @override
+  String captureReadingHost(String host) => 'Se citește $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Salvat: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words cuvinte · $images imagini';
+
+  @override
+  String get captureSavedUnreadable => 'Salvat fără articol';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host nu a putut fi citit: titlul, descrierea și linkul au fost '
+      'păstrate';
+
+  @override
+  String captureQuoteAdded(String note) => 'Citat adăugat la $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'din „$title”';
+
+  @override
+  String captureFailedTitle(String host) => '$host nu a putut fi salvat';
+
+  @override
+  String get captureShowFolder => 'Arată dosarul';
 }

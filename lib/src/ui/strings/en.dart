@@ -3149,4 +3149,46 @@ final class EnglishStrings extends Strings {
 
   @override
   String get captureDropDetail => 'The capture dialog opens with it.';
+
+  @override
+  String get captureSaveToNiman => 'Save to Niman';
+
+  @override
+  String get captureBackgroundHint =>
+      'You go back to the browser; a notification says when the note is ready.';
+
+  @override
+  String get captureAppendToNote => 'Append to note';
+
+  @override
+  String get captureAppend => 'Append';
+
+  @override
+  String captureReadingHost(String host) => 'Reading $host…';
+
+  @override
+  String captureSavedTitle(String title) => 'Saved: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words words · $images images';
+
+  @override
+  String get captureSavedUnreadable => 'Saved without the article';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host could not be read: title, description and link kept';
+
+  @override
+  String captureQuoteAdded(String note) => 'Quote added to $note';
+
+  @override
+  String captureQuoteFrom(String title) => 'from $title';
+
+  @override
+  String captureFailedTitle(String host) => 'Could not capture $host';
+
+  @override
+  String get captureShowFolder => 'Show folder';
 }

@@ -2907,4 +2907,45 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get captureDropDetail => '取り込みダイアログがこのページで開きます。';
+
+  @override
+  String get captureSaveToNiman => 'Niman に保存';
+
+  @override
+  String get captureBackgroundHint => 'ブラウザに戻ります。ノートの準備ができたら通知でお知らせします。';
+
+  @override
+  String get captureAppendToNote => 'ノートに追加';
+
+  @override
+  String get captureAppend => '追加';
+
+  @override
+  String captureReadingHost(String host) => '$host を読み込み中…';
+
+  @override
+  String captureSavedTitle(String title) => '保存しました: $title';
+
+  @override
+  String captureSavedBody(String folder, int words, int images) =>
+      '$folder · $words 語 · 画像 $images 枚';
+
+  @override
+  String get captureSavedUnreadable => '記事なしで保存しました';
+
+  @override
+  String captureUnreadableBody(String host) =>
+      '$host を読み込めませんでした。タイトル、説明、リンクは残しました';
+
+  @override
+  String captureQuoteAdded(String note) => '引用を $note に追加しました';
+
+  @override
+  String captureQuoteFrom(String title) => '「$title」から';
+
+  @override
+  String captureFailedTitle(String host) => '$host を取り込めませんでした';
+
+  @override
+  String get captureShowFolder => 'フォルダを表示';
 }
