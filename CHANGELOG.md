@@ -6,6 +6,39 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.1.8] - 2026-10-08
+
+The web, saved as notes.
+
+Niman saves a web page as a note — the article in clean Markdown, without
+the menu, the banners and the footer, its pictures in the attachments
+folder — from the desktop's dialog, a link pasted or dropped on the window,
+or the browser's Share on a phone. A passage shared from the browser joins
+a note as a quote, and one copied pastes as Markdown. Around it, highlights
+in four colours on a PDF or a book, a book read in full screen and zoomed
+by a pinch, and a wide window whose parts float as rounded islands.
+
+### Added
+- **Capture web page** (#531): the command palette or `Ctrl/⌘+Shift+W`, a link pasted where no text field takes it, or a link dropped on the window. The dialog says each step as it goes, then shows the note it will be — title, folder, tags (`#web` to start with), a preview, the pictures to download, the frontmatter and what was removed from the page. A page that builds its text with scripts is run in a browser and read again; one that cannot be had says why
+- **Share → Niman from the browser** on a phone: a page opens the **Save to Niman** sheet and is saved in the background, with a notification that says how it goes (**Open**, **Show folder**, **Cancel**); a passage shared with its link opens the **Quote** tab, appended to the note on screen, another one picked, or a new note. **New ▸ Capture web page** opens the same sheet inside the app
+- **Paste as Markdown**: a passage copied in the browser goes into the note as Markdown, linked to its page — `Ctrl/⌘+Shift+V`, the command palette, or the editor's menu on a phone; **Undo** puts the plain text back
+- **The web captures folder** in Settings → Folders and paths (`Clippings` to start with): where a captured page or quote kept as a new note goes, instead of whatever folder the tree had selected
+- **Highlights on a PDF or a book** (#626): **Highlight** in the selection's menu, in green, blue, pink or yellow — the colour last chosen. A tap on a highlight changes its colour, copies it or its link, removes it, or **Annotate**s it, which turns it into an annotation in place. A highlight is a quote in the notes whose link carries its colour
+- **A book in full screen** (#621): a button on its row, Esc or Back to leave
+- **A book's text zooms** by a pinch and the zoom keys, as a note's does (#538)
+- **Tidy joins a paragraph wrapped over several lines** into one, outside lists too — the **Join wrapped paragraphs** rule, switchable off in Settings → Editor → Markdown rules
+- **A recent journal entry's right click** in the side panel opens the menu its row opens in the tree (#619)
+
+### Changed
+- **The wide layout's parts float as rounded islands**: the tree, the panes and the side panel, apart from the window's edges and from each other, instead of edge to edge between 1 px lines
+
+### Fixed
+- **Down moves from a soft wrap at any text size**, instead of sticking at a size off 100 % (#620)
+- **Home from inside a line's marker** — a heading's hashes, the indentation, a bullet — goes to the line start at the first press
+- **A note with Windows line endings keeps them** when it is tidied
+- **A language download started from the search** in Text recognition keeps the search
+- **A picture added on Windows no longer hangs the app** when the file system's rename never returns (#103)
+
 ## [0.1.7] - 2026-10-07
 
 Text from a scan.
