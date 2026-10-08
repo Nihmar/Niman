@@ -27,9 +27,25 @@ final class OcrLanguageList extends StatefulWidget {
 }
 
 final class _OcrLanguageListState extends State<OcrLanguageList> {
-  String _query = '';
+  /// The search's text, and the one place the filter reads it from: the
+  /// list cannot show one query while the field shows another.
+  final _search = TextEditingController();
 
   OcrInstallation get _ocr => widget.installation;
+
+  @override
+  void initState() {
+    super.initState();
+    _search.addListener(_searched);
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _searched() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +59,7 @@ final class _OcrLanguageListState extends State<OcrLanguageList> {
     final others = [
       for (final file in files)
         if (_ocr.stateOf(file) is NotDownloaded &&
-            file.language.matches(_query))
+            file.language.matches(_search.text))
           file,
     ];
     return Column(
@@ -58,17 +74,21 @@ final class _OcrLanguageListState extends State<OcrLanguageList> {
           for (final file in here) _tile(file),
         ],
         SettingsSection(AppStrings.ocrOtherLanguages),
+        // Keyed: a language starting to download joins those on the device
+        // above, and an unkeyed row here would be matched by position —
+        // the field built afresh under the user, its focus lost.
         Padding(
+          key: const ValueKey('ocr-language-search-row'),
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: TextField(
             key: const Key('ocr-language-search'),
+            controller: _search,
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.search),
               hintText: AppStrings.ocrSearchLanguages(files.length),
               border: const OutlineInputBorder(),
               isDense: true,
             ),
-            onChanged: (query) => setState(() => _query = query),
           ),
         ),
         for (final file in others) _tile(file),
