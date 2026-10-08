@@ -3254,11 +3254,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       ),
       boxHeightStyle: ui.BoxHeightStyle.max,
     );
+    // The row whose top is nearest the caret's, not the one that contains
+    // it: at a text size off 100 % the rows' edges are fractions, and the
+    // caret at a soft wrap came back a hair above the next row's top — so
+    // it was drawn on the row before, and Down from there landed on the
+    // same offset again, for ever (#620).
+    Rect? nearest;
     for (final box in boxes) {
       final row = box.toRect();
-      if (at.dy >= row.top && at.dy < row.bottom) {
-        return Rect.fromLTWH(at.dx, row.top, _caretWidth, row.height);
+      if (nearest == null ||
+          (row.top - at.dy).abs() < (nearest.top - at.dy).abs()) {
+        nearest = row;
       }
+    }
+    if (nearest != null) {
+      return Rect.fromLTWH(at.dx, nearest.top, _caretWidth, nearest.height);
     }
     // An empty paragraph bounds no line: the glyph's own height is all there.
     return Rect.fromLTWH(
