@@ -174,8 +174,9 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
       _go(_count - 1);
     } else if (key == LogicalKeyboardKey.keyO) {
       _openOverview();
-    } else if (key == LogicalKeyboardKey.keyB) {
-      setState(() => _black = !_black);
+    } else if (key == LogicalKeyboardKey.keyB && !_presenter) {
+      // A held B blacks out once, not on and off with the key's repeat.
+      if (event is KeyDownEvent) setState(() => _black = !_black);
     } else if (key == LogicalKeyboardKey.f5) {
       final presenter = HardwareKeyboard.instance.isAltPressed;
       setState(() => _presenter = presenter);
@@ -230,6 +231,9 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
         MediaQuery.orientationOf(context) == Orientation.portrait) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _exit());
     }
+    // The blackout is the slide alone's: leaving it for the overview or the
+    // presenter view ends it, rather than finding the screen black later.
+    if (_overview || _presenter) _black = false;
     final Widget body;
     if (_overview) {
       body = SlidesOverview(
@@ -297,7 +301,12 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
           ),
           if (_black)
             const Positioned.fill(
-              child: IgnorePointer(child: ColoredBox(color: Colors.black)),
+              child: IgnorePointer(
+                child: ColoredBox(
+                  key: Key('slides-black'),
+                  color: Colors.black,
+                ),
+              ),
             ),
           if (widget.touch)
             Positioned(

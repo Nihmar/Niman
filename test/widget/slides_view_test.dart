@@ -192,6 +192,37 @@ void presentingTests() {
     expect(find.text('2 / 2'), findsOneWidget);
   });
 
+  testWidgets('B blacks the slide alone out, held or not, and only there', (
+    tester,
+  ) async {
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: _Host('black.md')),
+      const Size(1200, 800),
+    );
+    const black = Key('slides-black');
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyB);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
+    await tester.pump();
+    expect(find.byKey(black), findsOneWidget);
+
+    // To the presenter view and back: the slide shows, not the black.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pump();
+    expect(find.byKey(const Key('slides-present')), findsOneWidget);
+    expect(find.byKey(black), findsNothing);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('down in the overview rings the slide under, row as wide as it', (
     tester,
   ) async {
