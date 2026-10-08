@@ -54,6 +54,8 @@ Future<void> pasteAsMarkdown(
     ..showSnackBar(
       SnackBar(
         key: const Key('paste-markdown-done'),
+        // An action would keep it up until it is dismissed by hand (#508).
+        persist: false,
         content: Text(
           link == null
               ? AppStrings.pastedAsMarkdown
