@@ -2798,4 +2798,31 @@ final class JapaneseStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => '$page ページを再認識';
+
+  @override
+  String get highlightAction => 'ハイライト';
+
+  @override
+  String get highlightMark => 'ハイライト';
+
+  @override
+  String get highlightRemove => 'ハイライトを削除';
+
+  @override
+  String get highlightFailed => 'ハイライトを保存できませんでした';
+
+  @override
+  String get highlightYellow => '黄';
+
+  @override
+  String get highlightGreen => '緑';
+
+  @override
+  String get highlightBlue => '青';
+
+  @override
+  String get highlightPink => 'ピンク';
+
+  @override
+  String get highlightCopy => 'コピー';
 }

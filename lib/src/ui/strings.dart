@@ -1654,4 +1654,13 @@ final class AppStrings {
   static String ocrLostPlaces(int page, int lines) =>
       _s.ocrLostPlaces(page, lines);
   static String ocrRecognizeAgain(int page) => _s.ocrRecognizeAgain(page);
+  static String get highlightAction => _s.highlightAction;
+  static String get highlightMark => _s.highlightMark;
+  static String get highlightRemove => _s.highlightRemove;
+  static String get highlightFailed => _s.highlightFailed;
+  static String get highlightYellow => _s.highlightYellow;
+  static String get highlightGreen => _s.highlightGreen;
+  static String get highlightBlue => _s.highlightBlue;
+  static String get highlightPink => _s.highlightPink;
+  static String get highlightCopy => _s.highlightCopy;
 }

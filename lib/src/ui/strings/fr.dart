@@ -3163,4 +3163,31 @@ final class FrenchStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Reconnaître à nouveau la p. $page';
+
+  @override
+  String get highlightAction => 'Surligner';
+
+  @override
+  String get highlightMark => 'Surlignage';
+
+  @override
+  String get highlightRemove => 'Retirer le surlignage';
+
+  @override
+  String get highlightFailed => "Le surlignage n'a pas pu être enregistré";
+
+  @override
+  String get highlightYellow => 'Jaune';
+
+  @override
+  String get highlightGreen => 'Vert';
+
+  @override
+  String get highlightBlue => 'Bleu';
+
+  @override
+  String get highlightPink => 'Rose';
+
+  @override
+  String get highlightCopy => 'Copier';
 }

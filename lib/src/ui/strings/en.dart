@@ -3031,4 +3031,31 @@ final class EnglishStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Recognize p. $page again';
+
+  @override
+  String get highlightAction => 'Highlight';
+
+  @override
+  String get highlightMark => 'Highlight';
+
+  @override
+  String get highlightRemove => 'Remove highlight';
+
+  @override
+  String get highlightFailed => 'The highlight could not be saved';
+
+  @override
+  String get highlightYellow => 'Yellow';
+
+  @override
+  String get highlightGreen => 'Green';
+
+  @override
+  String get highlightBlue => 'Blue';
+
+  @override
+  String get highlightPink => 'Pink';
+
+  @override
+  String get highlightCopy => 'Copy';
 }

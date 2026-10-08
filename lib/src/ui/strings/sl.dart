@@ -3093,4 +3093,31 @@ final class SlovenianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Znova prepoznaj str. $page';
+
+  @override
+  String get highlightAction => 'Označi';
+
+  @override
+  String get highlightMark => 'Oznaka';
+
+  @override
+  String get highlightRemove => 'Odstrani oznako';
+
+  @override
+  String get highlightFailed => 'Oznake ni bilo mogoče shraniti';
+
+  @override
+  String get highlightYellow => 'Rumena';
+
+  @override
+  String get highlightGreen => 'Zelena';
+
+  @override
+  String get highlightBlue => 'Modra';
+
+  @override
+  String get highlightPink => 'Roza';
+
+  @override
+  String get highlightCopy => 'Kopiraj';
 }

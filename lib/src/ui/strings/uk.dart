@@ -3114,4 +3114,31 @@ final class UkrainianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Розпізнати с. $page знову';
+
+  @override
+  String get highlightAction => 'Виділити';
+
+  @override
+  String get highlightMark => 'Виділення';
+
+  @override
+  String get highlightRemove => 'Прибрати виділення';
+
+  @override
+  String get highlightFailed => 'Не вдалося зберегти виділення';
+
+  @override
+  String get highlightYellow => 'Жовтий';
+
+  @override
+  String get highlightGreen => 'Зелений';
+
+  @override
+  String get highlightBlue => 'Синій';
+
+  @override
+  String get highlightPink => 'Рожевий';
+
+  @override
+  String get highlightCopy => 'Копіювати';
 }

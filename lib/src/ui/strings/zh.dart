@@ -2711,4 +2711,31 @@ final class ChineseStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => '重新识别第 $page 页';
+
+  @override
+  String get highlightAction => '高亮';
+
+  @override
+  String get highlightMark => '高亮';
+
+  @override
+  String get highlightRemove => '移除高亮';
+
+  @override
+  String get highlightFailed => '无法保存高亮';
+
+  @override
+  String get highlightYellow => '黄色';
+
+  @override
+  String get highlightGreen => '绿色';
+
+  @override
+  String get highlightBlue => '蓝色';
+
+  @override
+  String get highlightPink => '粉色';
+
+  @override
+  String get highlightCopy => '复制';
 }

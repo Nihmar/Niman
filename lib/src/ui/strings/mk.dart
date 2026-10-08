@@ -3096,4 +3096,31 @@ final class MacedonianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Повторно препознај стр. $page';
+
+  @override
+  String get highlightAction => 'Истакни';
+
+  @override
+  String get highlightMark => 'Истакнување';
+
+  @override
+  String get highlightRemove => 'Отстрани истакнување';
+
+  @override
+  String get highlightFailed => 'Истакнувањето не можеше да се зачува';
+
+  @override
+  String get highlightYellow => 'Жолта';
+
+  @override
+  String get highlightGreen => 'Зелена';
+
+  @override
+  String get highlightBlue => 'Сина';
+
+  @override
+  String get highlightPink => 'Розова';
+
+  @override
+  String get highlightCopy => 'Копирај';
 }

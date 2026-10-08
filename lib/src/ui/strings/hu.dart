@@ -3079,4 +3079,31 @@ final class HungarianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => '$page. oldal újbóli felismerése';
+
+  @override
+  String get highlightAction => 'Kiemelés';
+
+  @override
+  String get highlightMark => 'Kiemelés';
+
+  @override
+  String get highlightRemove => 'Kiemelés eltávolítása';
+
+  @override
+  String get highlightFailed => 'A kiemelést nem sikerült menteni';
+
+  @override
+  String get highlightYellow => 'Sárga';
+
+  @override
+  String get highlightGreen => 'Zöld';
+
+  @override
+  String get highlightBlue => 'Kék';
+
+  @override
+  String get highlightPink => 'Rózsaszín';
+
+  @override
+  String get highlightCopy => 'Másolás';
 }

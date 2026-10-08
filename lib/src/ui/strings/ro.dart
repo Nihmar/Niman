@@ -3121,4 +3121,31 @@ final class RomanianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Recunoaște din nou p. $page';
+
+  @override
+  String get highlightAction => 'Evidențiază';
+
+  @override
+  String get highlightMark => 'Evidențiere';
+
+  @override
+  String get highlightRemove => 'Elimină evidențierea';
+
+  @override
+  String get highlightFailed => 'Evidențierea nu a putut fi salvată';
+
+  @override
+  String get highlightYellow => 'Galben';
+
+  @override
+  String get highlightGreen => 'Verde';
+
+  @override
+  String get highlightBlue => 'Albastru';
+
+  @override
+  String get highlightPink => 'Roz';
+
+  @override
+  String get highlightCopy => 'Copiază';
 }

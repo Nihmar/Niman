@@ -3068,4 +3068,31 @@ final class LatvianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Atpazīt $page. lp. vēlreiz';
+
+  @override
+  String get highlightAction => 'Izcelt';
+
+  @override
+  String get highlightMark => 'Izcēlums';
+
+  @override
+  String get highlightRemove => 'Noņemt izcēlumu';
+
+  @override
+  String get highlightFailed => 'Izcēlumu neizdevās saglabāt';
+
+  @override
+  String get highlightYellow => 'Dzeltena';
+
+  @override
+  String get highlightGreen => 'Zaļa';
+
+  @override
+  String get highlightBlue => 'Zila';
+
+  @override
+  String get highlightPink => 'Rozā';
+
+  @override
+  String get highlightCopy => 'Kopēt';
 }

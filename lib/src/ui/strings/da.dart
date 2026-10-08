@@ -3056,4 +3056,31 @@ final class DanishStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Genkend s. $page igen';
+
+  @override
+  String get highlightAction => 'Fremhæv';
+
+  @override
+  String get highlightMark => 'Fremhævning';
+
+  @override
+  String get highlightRemove => 'Fjern fremhævning';
+
+  @override
+  String get highlightFailed => 'Fremhævningen kunne ikke gemmes';
+
+  @override
+  String get highlightYellow => 'Gul';
+
+  @override
+  String get highlightGreen => 'Grøn';
+
+  @override
+  String get highlightBlue => 'Blå';
+
+  @override
+  String get highlightPink => 'Lyserød';
+
+  @override
+  String get highlightCopy => 'Kopiér';
 }

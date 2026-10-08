@@ -3025,4 +3025,31 @@ final class EstonianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Tuvasta lk $page uuesti';
+
+  @override
+  String get highlightAction => 'Tõsta esile';
+
+  @override
+  String get highlightMark => 'Esiletõst';
+
+  @override
+  String get highlightRemove => 'Eemalda esiletõst';
+
+  @override
+  String get highlightFailed => 'Esiletõstu ei õnnestunud salvestada';
+
+  @override
+  String get highlightYellow => 'Kollane';
+
+  @override
+  String get highlightGreen => 'Roheline';
+
+  @override
+  String get highlightBlue => 'Sinine';
+
+  @override
+  String get highlightPink => 'Roosa';
+
+  @override
+  String get highlightCopy => 'Kopeeri';
 }

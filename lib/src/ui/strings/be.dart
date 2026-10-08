@@ -3111,4 +3111,31 @@ final class BelarusianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Распазнаць с. $page зноў';
+
+  @override
+  String get highlightAction => 'Вылучыць';
+
+  @override
+  String get highlightMark => 'Вылучэнне';
+
+  @override
+  String get highlightRemove => 'Прыбраць вылучэнне';
+
+  @override
+  String get highlightFailed => 'Не ўдалося захаваць вылучэнне';
+
+  @override
+  String get highlightYellow => 'Жоўты';
+
+  @override
+  String get highlightGreen => 'Зялёны';
+
+  @override
+  String get highlightBlue => 'Сіні';
+
+  @override
+  String get highlightPink => 'Ружовы';
+
+  @override
+  String get highlightCopy => 'Капіраваць';
 }

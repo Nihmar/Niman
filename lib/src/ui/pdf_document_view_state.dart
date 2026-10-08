@@ -14,6 +14,7 @@ import 'package:niman/src/ui/annotation_mark_chooser.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
 import 'package:niman/src/ui/attachment_unreadable.dart';
 import 'package:niman/src/ui/file_marks.dart';
+import 'package:niman/src/ui/highlight_menu.dart';
 import 'package:niman/src/ui/ocr/ocr_file_controls.dart';
 import 'package:niman/src/ui/ocr/ocr_line_layer.dart';
 import 'package:niman/src/ui/ocr/ocr_lines_scope.dart';
@@ -110,7 +111,17 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
   /// Opens the annotations [marks] stand for.
   void _openMarks(List<AnnotationMark> marks) {
     final source = widget.marks;
-    if (source != null) unawaited(openAnnotationMarks(context, marks, source));
+    final key = widget.positions?.keyOf(widget.path);
+    if (source == null || key == null) return;
+    unawaited(
+      openAnnotationMarks(
+        context,
+        marks,
+        source,
+        path: key,
+        linkType: widget.linkType,
+      ),
+    );
   }
 
   /// Sets the PDF, once it is laid out, at the link's page, else where it
@@ -243,25 +254,38 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
   /// library, and someone writes annotations.
   bool get _annotates => widget.onAnnotate != null && widget.positions != null;
 
-  /// Annotates the passage [selection] holds: its first page's characters,
-  /// quoting all of it.
-  Future<void> _annotateSelection(PdfTextSelection selection) async {
+  /// The passage [selection] holds: its first page's characters, quoting
+  /// all of it; null outside a library.
+  Future<Annotation?> _selected(PdfTextSelection selection) async {
     final key = widget.positions?.keyOf(widget.path);
     final ranges = await selection.getSelectedTextRanges();
-    if (key == null || ranges.isEmpty) return;
+    if (key == null || ranges.isEmpty) return null;
     final text = await selection.getSelectedText();
     final first = ranges.first;
-    widget.onAnnotate?.call(
-      Annotation(
-        path: key,
-        place: PdfLocation(
-          page: first.pageNumber,
-          chars: (start: first.start, end: first.end),
-        ),
-        label: _label(first.pageNumber),
-        quote: text,
+    return Annotation(
+      path: key,
+      place: PdfLocation(
+        page: first.pageNumber,
+        chars: (start: first.start, end: first.end),
       ),
+      label: _label(first.pageNumber),
+      quote: text,
     );
+  }
+
+  /// Annotates the passage [selection] holds.
+  Future<void> _annotateSelection(PdfTextSelection selection) async {
+    final annotation = await _selected(selection);
+    if (annotation != null) widget.onAnnotate?.call(annotation);
+  }
+
+  /// Highlights the passage [selection] holds, in the colour last chosen
+  /// (#626); a highlight that cannot be written says so.
+  Future<void> _highlightSelection(PdfTextSelection selection) async {
+    final source = widget.marks;
+    final annotation = await _selected(selection);
+    if (source == null || annotation == null || !mounted) return;
+    await highlightPassage(context, source, annotation);
   }
 
   /// Annotates the passage selected, else the page being read.
@@ -283,13 +307,24 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
     );
   }
 
-  /// A selection's menu, with the passage's annotation.
+  /// A selection's menu, with the passage's highlight and annotation.
   void _selectionMenu(
     PdfViewerContextMenuBuilderParams params,
     List<ContextMenuButtonItem> items,
   ) {
     final selection = params.textSelectionDelegate;
     if (!_annotates || !selection.hasSelectedText) return;
+    if (widget.marks != null) {
+      items.add(
+        ContextMenuButtonItem(
+          label: AppStrings.highlightAction,
+          onPressed: () {
+            params.dismissContextMenu();
+            unawaited(_highlightSelection(selection));
+          },
+        ),
+      );
+    }
     items.add(
       ContextMenuButtonItem(
         label: AppStrings.annotateAction,

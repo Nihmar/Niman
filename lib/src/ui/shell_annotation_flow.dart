@@ -10,8 +10,9 @@
 /// the companion may be open in another pane, and its editor would write
 /// its own copy back over the annotation.
 ///
-/// It is also where a pane asks where its file was annotated (#285), and
-/// how a mark opens its note.
+/// It is also where a pane asks where its file was annotated (#285), how
+/// a mark opens its note, and where a passage is highlighted, a highlight
+/// recoloured, removed or annotated (#626).
 library;
 
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ import 'package:niman/src/annotations/companion_notes.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/ui/annotation_sheet.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -73,6 +75,58 @@ final class ShellAnnotationFlow implements AnnotationMarkSource {
 
   @override
   void open(AnnotationMark mark) => onOpen(mark.note, mark.offset);
+
+  @override
+  Future<void> highlight(Annotation annotation) => _write((companions) async {
+    final ops = controller.ops!;
+    final colour =
+        HighlightColour.fromId(await ops.highlightColour) ??
+        HighlightColour.yellow;
+    final written = await companions.write(
+      annotation.highlighted(colour),
+      folder: await ops.annotationsFolder,
+      suffix: AppStrings.annotationNoteSuffix,
+      linkType: linkType(),
+    );
+    _log.info('highlighted ${annotation.path} in ${written.path}');
+  });
+
+  @override
+  Future<void> recolour(AnnotationMark mark, HighlightColour colour) =>
+      _write((companions) async {
+        await companions.recolour(mark, colour);
+        await controller.ops!.setHighlightColour(colour.id);
+      });
+
+  @override
+  Future<void> removeHighlight(AnnotationMark mark) =>
+      _write((companions) => companions.removeHighlight(mark));
+
+  @override
+  Future<void> annotateHighlight(AnnotationMark mark, String comment) => _write(
+    (companions) => companions.annotateHighlight(
+      mark,
+      label: mark.label ?? AppStrings.highlightMark,
+      comment: comment,
+    ),
+  );
+
+  /// Runs [change] on the open library's companions (#626): the open notes
+  /// saved first, for an editor holding the companion not to write its
+  /// copy back over the change, and the note on screen re-read after.
+  Future<void> _write(
+    Future<void> Function(CompanionNotes companions) change,
+  ) async {
+    final ops = controller.ops;
+    final fields = await controller.fieldSource;
+    final links = await controller.linkSource;
+    if (ops == null || fields == null || links == null) {
+      throw StateError('no library is open');
+    }
+    await unsaved.saveAll();
+    await change(CompanionNotes(fields: fields, links: links, ops: ops));
+    onWritten();
+  }
 
   /// Asks for the comment on [annotation], and writes it.
   Future<void> annotate(BuildContext context, Annotation annotation) async {

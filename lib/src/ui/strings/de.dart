@@ -3141,4 +3141,32 @@ final class GermanStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'S. $page erneut erkennen';
+
+  @override
+  String get highlightAction => 'Markieren';
+
+  @override
+  String get highlightMark => 'Markierung';
+
+  @override
+  String get highlightRemove => 'Markierung entfernen';
+
+  @override
+  String get highlightFailed =>
+      'Die Markierung konnte nicht gespeichert werden';
+
+  @override
+  String get highlightYellow => 'Gelb';
+
+  @override
+  String get highlightGreen => 'Grün';
+
+  @override
+  String get highlightBlue => 'Blau';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Kopieren';
 }

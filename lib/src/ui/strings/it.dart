@@ -3090,4 +3090,31 @@ final class ItalianStrings extends Strings {
 
   @override
   String ocrRecognizeAgain(int page) => 'Riconosci di nuovo p. $page';
+
+  @override
+  String get highlightAction => 'Evidenzia';
+
+  @override
+  String get highlightMark => 'Evidenziazione';
+
+  @override
+  String get highlightRemove => 'Rimuovi evidenziazione';
+
+  @override
+  String get highlightFailed => "Impossibile salvare l'evidenziazione";
+
+  @override
+  String get highlightYellow => 'Giallo';
+
+  @override
+  String get highlightGreen => 'Verde';
+
+  @override
+  String get highlightBlue => 'Blu';
+
+  @override
+  String get highlightPink => 'Rosa';
+
+  @override
+  String get highlightCopy => 'Copia';
 }
