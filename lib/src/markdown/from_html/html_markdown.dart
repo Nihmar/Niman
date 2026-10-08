@@ -18,17 +18,29 @@ import 'package:niman/src/markdown/text_escape.dart';
 /// into the page.
 typedef MarkdownWithAnchors = ({String markdown, Map<String, int> anchors});
 
+/// A picture as a Markdown image: `![alt](target)`.
+String markdownImage(String target, String alt) => '![$alt]($target)';
+
 /// Converts a page's HTML (or XHTML).
 ///
 /// [picture] names a picture by its `src` as the page wrote it, for the
 /// Markdown image to point at (the caller resolves the name); null leaves
-/// the picture out. [link] does the same for a link's `href`.
+/// the picture out. [link] does the same for a link's `href`. [embed]
+/// writes the picture's name and its escaped alt text as the note embeds
+/// it: a Markdown image unless the caller says otherwise.
 final class HtmlMarkdown {
   /// A converter with the caller's own ways to name pictures and links.
-  const new({required this.picture, required this.link});
+  const new({
+    required this.picture,
+    required this.link,
+    this.embed = markdownImage,
+  });
 
   /// The name a picture's `src` is written under, or null to leave it out.
   final String? Function(String src) picture;
+
+  /// How a picture, named, is written into the note.
+  final String Function(String target, String alt) embed;
 
   /// The target a link's `href` is written under.
   final String Function(String href) link;
@@ -189,15 +201,36 @@ final class HtmlMarkdown {
         ? element.querySelector('image')
         : element;
     if (img == null) return null;
-    final src =
-        img.attributes['src'] ??
-        _attribute(img, 'xlink:href') ??
-        img.attributes['href'];
-    if (src == null || src.isEmpty) return null;
+    final src = [
+      img.attributes['src'],
+      _attribute(img, 'xlink:href'),
+      img.attributes['href'],
+      largestOfSrcset(img.attributes['srcset'] ?? ''),
+    ].firstWhere((src) => src != null && src.isNotEmpty, orElse: () => null);
+    if (src == null) return null;
     final name = picture(src);
     if (name == null) return null;
     final alt = escapeMarkdownText(_collapse(img.attributes['alt'] ?? ''));
-    return '![$alt]($name)';
+    return embed(name, alt);
+  }
+
+  /// The largest picture a `srcset` offers — the widest, else the densest;
+  /// the first when none says — or null when it offers none.
+  static String? largestOfSrcset(String srcset) {
+    String? best;
+    var bestSize = -1.0;
+    for (final candidate in srcset.split(RegExp(r',\s+|,$'))) {
+      final parts = candidate.trim().split(RegExp(r'\s+'));
+      if (parts.first.isEmpty) continue;
+      final descriptor = parts.length > 1 ? parts[1] : '1x';
+      final size =
+          double.tryParse(descriptor.substring(0, descriptor.length - 1)) ?? 1;
+      if (size > bestSize) {
+        best = parts.first;
+        bestSize = size;
+      }
+    }
+    return best;
   }
 
   /// The TeX a formula's SVG carries in its `aria-label`, as the app's own

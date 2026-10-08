@@ -282,4 +282,30 @@ void main() {
       expect(links, isEmpty);
     });
   });
+
+  group('the web (#531)', () {
+    test('a picture with only a srcset is its largest', () {
+      final markdown = converter
+          .convert(
+            '<p><img alt="Q" srcset="s.png 480w, l.png 1200w, m.png 800w">'
+            '</p>',
+          )
+          .markdown;
+      expect(markdown, '![Q](pic:l.png)');
+      expect(HtmlMarkdown.largestOfSrcset('a.png, b.png 2x'), 'b.png');
+      expect(HtmlMarkdown.largestOfSrcset(''), isNull);
+    });
+
+    test('a picture is embedded as the caller writes it', () {
+      final wikilinks = HtmlMarkdown(
+        picture: (src) => 'assets/$src',
+        link: (href) => href,
+        embed: (target, alt) => '![[$target]]',
+      );
+      expect(
+        wikilinks.convert('<p><img src="a.png" alt="x"></p>').markdown,
+        '![[assets/a.png]]',
+      );
+    });
+  });
 }
