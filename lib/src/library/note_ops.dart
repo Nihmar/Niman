@@ -17,6 +17,8 @@ import 'package:niman/src/frontmatter/edit_in_file.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
+import 'package:niman/src/home/home_file.dart';
+import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
@@ -299,6 +301,26 @@ final class NoteOps implements NoteOperations {
   );
 
   @override
+  Future<({HomeLayout? library, HomeLayout? device})> get home async {
+    final device = (await config.config).deviceHome;
+    return (
+      library: await HomeFile(root).read(),
+      device: device == null ? null : HomeLayout.fromJson(device),
+    );
+  }
+
+  @override
+  Future<void> setHome(HomeLayout layout, {required bool onDevice}) async {
+    if (onDevice) {
+      await config.update((c) => c.copyWith(deviceHome: layout.toJson()));
+      return;
+    }
+    await HomeFile(root).write(layout);
+    _hint(HomeFile.filePath, SyncOpKind.changed);
+    await config.update((c) => c.copyWith(clearDeviceHome: true));
+  }
+
+  @override
   Future<List<String>> notePathsUnder(String folder) =>
       _dao.filePathsUnder(folder);
 
@@ -430,6 +452,7 @@ final class NoteOps implements NoteOperations {
       await history.moved(path, newRel, isDir: row.isDir);
       await _carryReading(path, newRel, isDir: row.isDir);
       await _carrySettings(path, newRel, isDir: row.isDir);
+      await _carryHome(path, newRel, isDir: row.isDir);
       await _carryOutside(path, newRel, isDir: row.isDir);
       // Before the index hears of the move: a folder's reindex re-creates
       // its notes, and the edges that named them would be gone (#507).
@@ -481,6 +504,7 @@ final class NoteOps implements NoteOperations {
       await history.moved(path, newRel, isDir: row.isDir);
       await _carryReading(path, newRel, isDir: row.isDir);
       await _carrySettings(path, newRel, isDir: row.isDir);
+      await _carryHome(path, newRel, isDir: row.isDir);
       await _carryOutside(path, newRel, isDir: row.isDir);
       // Before the index hears of the move: a folder's reindex re-creates
       // its notes, and the edges that named them would be gone (#507).
@@ -503,6 +527,30 @@ final class NoteOps implements NoteOperations {
   /// subtree; a note only itself. Nothing pointed at it means no write.
   Future<void> _carrySettings(String from, String to, {required bool isDir}) {
     return config.update((c) => c.renamed(from, to, isDir: isDir));
+  }
+
+  /// Rewrites the Home actions that named what moved from [from] to [to]
+  /// (#535): the library's file and this device's own Home. The move is
+  /// already done on disk: a failure here is logged and leaves it standing.
+  Future<void> _carryHome(String from, String to, {required bool isDir}) async {
+    try {
+      if (await HomeFile(root).moved(from, to, isDir: isDir)) {
+        _hint(HomeFile.filePath, SyncOpKind.changed);
+      }
+      await config.update((c) {
+        final device = c.deviceHome;
+        if (device == null) return c;
+        final layout = HomeLayout.fromJson(device);
+        if (layout == null) return c;
+        final next = layout.renamed(from, to, isDir: isDir);
+        return identical(next, layout)
+            ? c
+            : c.copyWith(deviceHome: next.toJson());
+      });
+    } on Object catch (error) {
+      const AppLogger(name: 'home')
+          .warning('could not carry the Home past "$from" -> "$to": $error');
+    }
   }
 
   /// Hands the move to [carryOutside] (#506). The move is already done on

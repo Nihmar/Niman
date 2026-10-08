@@ -1,0 +1,142 @@
+// #535: `.niman/home.json` on disk, the device's own Home beside it, and
+// both following a rename of what their actions name.
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/device_settings_store.dart';
+import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/home/home_action.dart';
+import 'package:niman/src/home/home_file.dart';
+import 'package:niman/src/home/home_layout.dart';
+import 'package:niman/src/home/home_tile.dart';
+import 'package:niman/src/library/note_ops.dart';
+import 'package:path/path.dart' as p;
+
+void main() {
+  late Directory root;
+  late IndexDatabase db;
+  late NoteOps ops;
+  late MemoryDeviceSettingsStore device;
+
+  setUp(() async {
+    root = await Directory.current.createTemp('niman_home_file_');
+    db = IndexDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    device = MemoryDeviceSettingsStore();
+    ops = NoteOps(
+      root: root.path,
+      db: db,
+      indexer: Indexer(db),
+      config: LibraryConfigRepo(root.path, device: device),
+    );
+  });
+
+  tearDown(() async {
+    await root.delete(recursive: true);
+  });
+
+  File homeFile() => File(p.join(root.path, '.niman', 'home.json'));
+
+  /// A Home whose one actions tile makes notes from [template] in
+  /// [folder].
+  HomeLayout meeting({
+    String template = 'Templates/Meeting.md',
+    String folder = 'Work',
+  }) => HomeLayout([
+    HomeTile(
+      id: 'actions',
+      kind: HomeTileKind.actions,
+      cell: (x: 0, y: 0, w: 2, h: 1),
+      at: 0,
+      actions: [
+        HomeAction(
+          id: 'm',
+          label: 'Meeting',
+          kind: HomeActionKind.newNote,
+          template: template,
+          folder: folder,
+        ),
+      ],
+    ),
+  ]);
+
+  group('HomeFile', () {
+    test('reads nothing where there is no file', () async {
+      expect(await HomeFile(root.path).read(), isNull);
+    });
+
+    test('reads nothing from a file that is not JSON', () async {
+      homeFile()
+        ..parent.createSync(recursive: true)
+        ..writeAsStringSync('{not json');
+      expect(await HomeFile(root.path).read(), isNull);
+    });
+
+    test('writes a layout it reads back, indented', () async {
+      await HomeFile(root.path).write(HomeLayout.defaults);
+      expect(await HomeFile(root.path).read(), HomeLayout.defaults);
+      expect(homeFile().readAsStringSync(), contains('\n  "actions": {'));
+    });
+
+    test('a move nothing points at writes nothing', () async {
+      expect(
+        await HomeFile(root.path).moved('a.md', 'b.md', isDir: false),
+        isFalse,
+      );
+      expect(homeFile().existsSync(), isFalse);
+    });
+  });
+
+  group('the library ops', () {
+    test(
+      'keep the library Home in the file, and drop the device one',
+      () async {
+        await ops.setHome(meeting(folder: 'Phone'), onDevice: true);
+        expect((await ops.home).device, meeting(folder: 'Phone'));
+        expect(homeFile().existsSync(), isFalse);
+
+        await ops.setHome(meeting(), onDevice: false);
+        final home = await ops.home;
+        expect(home.library, meeting());
+        expect(home.device, isNull);
+        expect(jsonDecode(homeFile().readAsStringSync()), meeting().toJson());
+      },
+    );
+
+    test('keep the device Home off the library file', () async {
+      await ops.setHome(meeting(), onDevice: true);
+      final settings = File(p.join(root.path, '.niman', 'settings.json'));
+      expect(
+        settings.existsSync() &&
+            settings.readAsStringSync().contains('Meeting'),
+        isFalse,
+      );
+      expect((await device.read(root.path))!['deviceHome'], meeting().toJson());
+    });
+
+    test('carry the actions past a renamed folder, file and device', () async {
+      await ops.createFolder(parentPath: '', name: 'Templates');
+      await ops.createNote(parentPath: 'Templates', name: 'Meeting');
+      await ops.createFolder(parentPath: '', name: 'Work');
+      await ops.setHome(meeting(), onDevice: false);
+      await ops.rename('Templates', 'Models');
+      expect((await ops.home).library, meeting(template: 'Models/Meeting.md'));
+
+      await ops.setHome(meeting(template: 'Models/Meeting.md'), onDevice: true);
+      await ops.move('Work', 'Models');
+      final home = await ops.home;
+      expect(
+        home.device,
+        meeting(template: 'Models/Meeting.md', folder: 'Models/Work'),
+      );
+      expect(
+        home.library,
+        meeting(template: 'Models/Meeting.md', folder: 'Models/Work'),
+      );
+    });
+  });
+}

@@ -14,6 +14,7 @@ import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -235,6 +236,14 @@ abstract interface class NoteOperations {
   /// Keeps [layout] as this device's own navigation when [onDevice], or
   /// as the library's, dropping the device's own, when not.
   Future<void> setNavigation(NavigationLayout layout, {required bool onDevice});
+
+  /// The library's Home (#535): the file's, and this device's own when
+  /// *Only on this device* is on; null for none (the defaults).
+  Future<({HomeLayout? library, HomeLayout? device})> get home;
+
+  /// Keeps [layout] as this device's own Home when [onDevice]; as the
+  /// library's when not, dropping the device's own.
+  Future<void> setHome(HomeLayout layout, {required bool onDevice});
 
   /// The paths of the notes under [folder], at any depth (every note's
   /// for the root): an index seek, not a walk of the disk.
