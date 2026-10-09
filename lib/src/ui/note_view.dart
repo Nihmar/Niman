@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,15 +10,9 @@ import 'package:niman/src/core/settings/library_config.dart'
     show defaultSourceFont;
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
-import 'package:niman/src/editor/context_menu_items.dart';
-import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/editor_shortcuts.dart';
-import 'package:niman/src/editor/editor_tool.dart';
 import 'package:niman/src/editor/find_bar.dart';
 import 'package:niman/src/editor/highlighting.dart';
-import 'package:niman/src/editor/list_tally.dart';
-import 'package:niman/src/editor/list_tally_edit.dart';
-import 'package:niman/src/editor/list_to_mindmap.dart' as mindmap;
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -30,15 +23,12 @@ import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
-import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
-import 'package:niman/src/markdown/block.dart';
-import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
@@ -53,17 +43,12 @@ import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/spellcheck/spell_check_sheet.dart';
-import 'package:niman/src/spellcheck/spell_issue.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/dropped_link.dart';
-import 'package:niman/src/ui/editor_menu.dart';
-import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
-import 'package:niman/src/ui/heading_level_sheet.dart';
-import 'package:niman/src/ui/list_tally_sheet.dart';
+import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
@@ -476,7 +461,7 @@ final class _NoteViewState extends State<NoteView>
   @override
   void insertAtCaret(String markdown) {
     if (!canInsert) return;
-    _runCommand(
+    _commands.run(
       (text, selection) =>
           insertSnippet(text: text, selection: selection, snippet: markdown),
       // A block keeps a blank line from the lines either side.
@@ -515,59 +500,46 @@ final class _NoteViewState extends State<NoteView>
   }
 
   @override
-  void convertListToMindMap() {
-    if (!canInsert) return;
-    final surface = _surface;
-    if (surface == null) return;
-    final map = _mindMapAtCaret();
-    if (map == null) {
-      // The palette offers the command anywhere: say why it did nothing.
-      final messenger = ScaffoldMessenger.maybeOf(context);
-      final reason = SnackBar(content: Text(AppStrings.toolMindMapNeedsList));
-      messenger?.showSnackBar(reason);
-      return;
-    }
-    // Only the list's lines are replaced: one undo step, and the note is
-    // never copied whole to make it.
-    final buffer = surface.buffer;
-    final last = map.endLine - 1;
-    final terminator = buffer.terminatorAt(map.startLine);
-    surface.applyEdit(
-      map.fence.join(terminator.isEmpty ? '\n' : terminator),
-      const TextSelection.collapsed(offset: 0),
-      start: buffer.offsetOfLine(map.startLine),
-      end: buffer.offsetOfLine(last) + buffer.lineLengthAt(last),
-    );
-    _focus.requestFocus();
-  }
+  void convertListToMindMap() => _commands.convertListToMindMap();
 
-  /// The mind map the list at the caret becomes, or null when the caret is
-  /// not in one — what the palette command converts and the Tools sheet
-  /// offers, read the same way for both.
-  mindmap.ListMindMap? _mindMapAtCaret() =>
-      _caretList<mindmap.ListMindMap?>(mindmap.listToMindMap);
-
-  /// [read] of the list at the caret, or null without a note: the caret's
-  /// line, and the pane's own scan when it draws this buffer — a scan as far
-  /// as the list otherwise.
-  T? _caretList<T>(
-    T Function({
-      required SourceBuffer buffer,
-      required int line,
-      Block? Function(int line)? blockAt,
-    })
-    read,
-  ) {
-    final surface = _surface;
-    if (surface == null) return null;
-    final buffer = surface.buffer;
-    final view = _sourceViewKey.currentState;
-    return read(
-      buffer: buffer,
-      line: buffer.lineOf(surface.selection.extent),
-      blockAt: identical(view?.widget.buffer, buffer) ? view?.blockAt : null,
-    );
-  }
+  /// The note's editing commands: the toolbar's, the format keys', the
+  /// context menu's, the Tools sheet's and the spelling review's.
+  late final NoteEditCommands _commands = NoteEditCommands(
+    surface: () => _surface,
+    focus: _focus.requestFocus,
+    context: () => context,
+    mounted: () => mounted,
+    canInsert: () => canInsert,
+    text: () => _unifiedText,
+    sourceView: () => _sourceViewKey.currentState,
+    readView: () => _readViewKey.currentState,
+    activeFormats: _activeFormats,
+    linkType: () => widget.linkType,
+    indentWidth: () => widget.indentWidth,
+    toolbarLayout: () => widget.toolbarLayout,
+    pasteAsMarkdown: () => switch (widget.onPasteAsMarkdown) {
+      final paste? => () => paste(this),
+      null => null,
+    },
+    libraryRoot: () => widget.libraryRoot,
+    pickImage: () =>
+        widget.pickImagePath?.call() ?? NoteEditCommands.pickImageFile(),
+    importImage: (root, source) =>
+        widget.importImage?.call(root, source) ??
+        importImageToLibrary(
+          libraryRoot: root,
+          sourcePath: source,
+          attachmentsFolder: widget.attachmentsFolder,
+        ),
+    onInserted: () {
+      _stats.refresh();
+      _refreshPreview();
+    },
+    spellCheck: () => widget.spellCheck,
+    onSpellChecked: () {
+      if (mounted) setState(() {});
+    },
+  );
 
   /// What the note's file looked like when it was last read or written.
   ///
@@ -1369,8 +1341,8 @@ final class _NoteViewState extends State<NoteView>
         indentWidth: widget.indentWidth,
         sourceFont: widget.sourceFont,
         column: widget.noteColumn,
-        formatMenu: _formatMenu,
-        editorMenu: _editorMenu,
+        formatMenu: _commands.formatMenu,
+        editorMenu: _commands.contextMenu,
         spellCheck: widget.spellCheck,
         // Only a template is checked: a `{{…}}` in an ordinary note is text
         // like any other (T-TPL-09).
@@ -1749,36 +1721,6 @@ final class _NoteViewState extends State<NoteView>
     }
   }
 
-  /// T-M2-09: pick an image, copy it into the library's attachments
-  /// folder, insert a library-relative link at the caret — in the
-  /// library's link format (wikilink embed or Markdown image).
-  Future<void> _insertImage() async {
-    final root = widget.libraryRoot;
-    if (root == null) return;
-    final source = await (widget.pickImagePath?.call() ?? _pickImageFile());
-    if (source == null || !mounted) return;
-    final relative =
-        await (widget.importImage?.call(root, source) ??
-            importImageToLibrary(
-              libraryRoot: root,
-              sourcePath: source,
-              attachmentsFolder: widget.attachmentsFolder,
-            ));
-    if (!mounted) return;
-    // Alt text comes from the picked file's name; the link itself is the
-    // content-addressed library path, so `photo.png` keeps a readable label.
-    final label = p.basenameWithoutExtension(source);
-    final snippet = attachmentEmbed(
-      relativePath: relative,
-      label: label,
-      linkType: widget.linkType,
-    );
-    _surface?.replaceSelection(snippet);
-    _focus.requestFocus();
-    _stats.refresh();
-    _refreshPreview();
-  }
-
   /// Writes a link to the library file at [path], dropped from the tree,
   /// at the caret the drop left (#704): one edit, one undo step.
   Future<void> _insertDroppedLink(String path) async {
@@ -1797,13 +1739,6 @@ final class _NoteViewState extends State<NoteView>
     _focus.requestFocus();
     _stats.refresh();
     _refreshPreview();
-  }
-
-  Future<String?> _pickImageFile() async {
-    // Picker returns [] when canceled: static API (v12).
-    final result = await FilePicker.pickFiles(type: FileType.image);
-    final file = result.isEmpty ? null : result.first;
-    return file?.path;
   }
 
   /// Records what the note's file looks like now, for [_unchangedOnDisk].
@@ -1918,52 +1853,6 @@ final class _NoteViewState extends State<NoteView>
     if (mounted) setState(() {});
   }
 
-  /// Opens the spelling review panel (T-PP-09).
-  Future<void> _openSpellCheck() async {
-    final spell = widget.spellCheck;
-    if (spell == null) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => SpellCheckSheet(
-        start: _scanSpelling,
-        suggest: spell.suggestionsFor,
-        apply: _applySpelling,
-        available: spell.available,
-      ),
-    );
-    if (mounted) setState(() {});
-  }
-
-  /// A pass over the whole note, in reading order (the panel's), reading
-  /// each line — and tokenizing it for what to skip — only as the pass
-  /// gets to it (#61).
-  SpellScan _scanSpelling() {
-    final spell = widget.spellCheck!;
-    final surface = _surface;
-    if (surface == null) {
-      return spell.startScan(lineCount: 0, lineAt: (_) => (text: '', skip: []));
-    }
-    // The surface's own lines, and its own tokenizer's runs: code, maths,
-    // links and markers are skipped as they are in the underline.
-    final buffer = surface.buffer;
-    return spell.startScan(
-      lineCount: buffer.lineCount,
-      lineAt: (i) =>
-          (text: buffer.lineAt(i), skip: spellSkipRanges(surface.tokensOf(i))),
-    );
-  }
-
-  /// Replaces one issue's word in the controller (the panel's fix).
-  void _applySpelling(SpellIssue issue, String replacement) {
-    final surface = _surface;
-    if (surface == null) return;
-    final buffer = surface.buffer;
-    if (issue.line >= buffer.lineCount) return;
-    final start = buffer.offsetOfLine(issue.line);
-    surface.replaceRange(start + issue.start, start + issue.end, replacement);
-  }
-
   String get _status {
     if (_error != null) return AppStrings.noteStatusError;
     if (_loading) return AppStrings.noteStatusLoading;
@@ -1995,7 +1884,7 @@ final class _NoteViewState extends State<NoteView>
   /// The formatting keys (#205), applied through the toolbar's own
   /// actions for whichever surface is showing.
   late final EditorFormatKeys _formatKeys = EditorFormatKeys(
-    actions: _toolbarActions,
+    actions: _commands.toolbarActions,
     active: () => mounted && _keyboardUp,
   );
 
@@ -2131,7 +2020,7 @@ final class _NoteViewState extends State<NoteView>
                       statusActions: widget.statusActions,
                       onOutline: _openOutline,
                       onFind: () => _sourceFind.open(),
-                      onSpellCheck: _openSpellCheck,
+                      onSpellCheck: _commands.openSpellCheck,
                       onToggleEditorKind: _toggleEditorKind,
                       typewriter: widget.typewriter,
                       onToggleTypewriter: widget.onToggleTypewriter,
@@ -2173,7 +2062,7 @@ final class _NoteViewState extends State<NoteView>
   /// through the surface; the image button keeps the file-picker flow
   /// (T-M2-09) it already had in the status row.
   Widget _toolbar(BuildContext context, {bool dense = false}) {
-    final actions = _toolbarActions();
+    final actions = _commands.toolbarActions();
     Widget bar(Set<ToolbarItem> active) => NoteToolbarBar(
       dense: dense,
       actions: actions,
@@ -2186,295 +2075,6 @@ final class _NoteViewState extends State<NoteView>
     return ValueListenableBuilder<Set<ToolbarItem>>(
       valueListenable: _activeFormats,
       builder: (context, active, _) => bar(active),
-    );
-  }
-
-  /// What each toolbar button does. The catalogue and the order live in
-  /// `editor/toolbar_item.dart`; the commands stay here, with the
-  /// controller they act on.
-  /// The toolbar's buttons as context-menu entries (#174): the same
-  /// visible items in the same order, the same actions, and the same
-  /// pressed state — read when the menu opens, so it is the caret's now.
-  List<FormatMenuEntry> _formatMenu() {
-    final actions = _toolbarActions();
-    final active = _activeFormats.value;
-    return [
-      for (final item in widget.toolbarLayout.visible)
-        if (actions[item] case final action?)
-          FormatMenuEntry(
-            item: item,
-            onPressed: action,
-            active: active.contains(item),
-          ),
-    ];
-  }
-
-  /// The unified surface's context menu, grouped (#260): read as it
-  /// opens, so its lit entries are the caret's now.
-  ContextMenuPart _editorMenu() {
-    final surface = _surface;
-    var level = 0;
-    if (surface != null) {
-      final buffer = surface.buffer;
-      final line = buffer.lineOf(surface.selection.extent);
-      final text = buffer.lineAt(line);
-      while (level < text.length && level < 7 && text[level] == '#') {
-        level++;
-      }
-      if (level > 6 || (level < text.length && text[level] != ' ')) level = 0;
-    }
-    return editorMenu(
-      active: _activeFormats.value,
-      headingLevel: level,
-      run: _runCommand,
-      onImage: _insertImage,
-      onFootnote: _insertFootnote,
-      onPasteMarkdown: switch (widget.onPasteAsMarkdown) {
-        final paste? => () => paste(this),
-        null => null,
-      },
-    );
-  }
-
-  /// A footnote cited at the caret, defined under its paragraph, numbered
-  /// one past the note's highest (#260).
-  void _insertFootnote() {
-    final surface = _surface;
-    if (surface != null) {
-      final labels = _sourceViewKey.currentState?.footnoteLabels;
-      final label = nextFootnoteLabel(labels ?? const <String>[]);
-      // The caret's paragraph, as far as its first blank line: the lines
-      // the definition goes under.
-      final buffer = surface.buffer;
-      final start = buffer.lineOf(surface.selection.extent);
-      var last = start;
-      while (last + 1 < buffer.lineCount &&
-          last - start < _footnoteReach &&
-          buffer.lineAt(last + 1).trim().isNotEmpty) {
-        last++;
-      }
-      surface.applyLineCommand(
-        (text, selection) =>
-            insertFootnote(text: text, selection: selection, label: label),
-        through: last + 1,
-      );
-      _focus.requestFocus();
-    }
-  }
-
-  /// How far down a paragraph the footnote's definition is looked for a
-  /// place under it: a paragraph longer than that has it here.
-  static const int _footnoteReach = 2000;
-
-  Map<ToolbarItem, VoidCallback> _toolbarActions() {
-    return {
-      ToolbarItem.bold: () => _wrapSelection(left: '**', right: '**'),
-      ToolbarItem.italic: () => _wrapSelection(left: '*', right: '*'),
-      ToolbarItem.strikethrough: () => _wrapSelection(left: '~~', right: '~~'),
-      ToolbarItem.highlight: () => _wrapSelection(left: '==', right: '=='),
-      ToolbarItem.superscript: () =>
-          _wrapSelection(left: '<sup>', right: '</sup>'),
-      ToolbarItem.underline: () => _wrapSelection(left: '<u>', right: '</u>'),
-      ToolbarItem.link: _insertLink,
-      ToolbarItem.code: _insertCodeBlock,
-      ToolbarItem.image: _insertImage,
-      ToolbarItem.table: () => _runCommand(
-        (text, selection) => insertTable(text: text, selection: selection),
-        // The lines either side: the table keeps a blank line from them.
-        context: 1,
-      ),
-      ToolbarItem.heading: _showHeadingDialog,
-      ToolbarItem.list: () => _prefixLines(prefix: '- '),
-      ToolbarItem.orderedList: _insertOrderedList,
-      ToolbarItem.checklist: () => _runCommand(
-        (text, selection) => toggleTaskList(text: text, selection: selection),
-      ),
-      ToolbarItem.quote: () => _prefixLines(prefix: '> '),
-      ToolbarItem.outdent: () => _indentLines(outdent: true),
-      ToolbarItem.indent: () => _indentLines(outdent: false),
-      ToolbarItem.tools: () => unawaited(_openTools()),
-    };
-  }
-
-  /// Opens the editor's Tools sheet (#136) and runs whatever was picked.
-  ///
-  /// The availability is worked out here rather than in the sheet: only
-  /// this side knows which surface is showing, and each one finds its
-  /// lists its own way.
-  Future<void> _openTools() async {
-    final tool = await showEditorToolsSheet(
-      context,
-      available: <EditorTool>{
-        if (_hasListToCount) EditorTool.countList,
-        if (_hasListAtCaret) EditorTool.mindMap,
-      },
-    );
-    if (!mounted || tool == null) return;
-    switch (tool) {
-      case EditorTool.countList:
-        await _countListSource();
-      case EditorTool.mindMap:
-        convertListToMindMap();
-    }
-  }
-
-  /// Whether the caret stands in a list, so the mind-map tool can run.
-  /// One block read, not the conversion: the sheet only asks.
-  bool get _hasListAtCaret => _caretList(mindmap.hasListAt) ?? false;
-
-  /// Whether the note has a list the count could run on.
-  ///
-  /// Asks the pane's own scan rather than reading the note: the tool sheet
-  /// lists every tool and greys the ones that cannot run, so this used to
-  /// join a 246 MB note and tokenize it every time the sheet opened
-  /// (`tallyTargetsIn` builds a whole `HighlightDocument`). The scan is what
-  /// the colours are drawn from, and it already knows a list item when it
-  /// makes one (see `blockList`).
-  bool get _hasListToCount {
-    // The pane on screen has the note scanned; a hidden one does not, and
-    // then the source pane's own copy is asked for its blocks rather than
-    // the text being read again.
-    final source = _sourceViewKey.currentState;
-    final scanned = source?.blocks ?? _readViewKey.currentState?.blocks;
-    final buffer = _unifiedSurfaceBuffer;
-    if (scanned != null) return blockList(scanned);
-    if (buffer != null) return blockList(BlockScanner(buffer).index.blocks);
-    return blockList(scannedBlocksOf(_unifiedText));
-  }
-
-  /// Counts a list into a checklist.
-  Future<void> _countListSource() async {
-    final text = _unifiedText;
-    final targets = tallyTargetsIn(text);
-    if (targets.isEmpty) return;
-    final here = tallyTargetAt(text, _editCaretLine);
-    final choice = await showListTallySheet(
-      context,
-      candidates: <TallyCandidate>[
-        for (final target in targets)
-          TallyCandidate(
-            rows: target.rows,
-            checks: tallyChecksAt(text, target),
-            replaces: target.replaces,
-          ),
-      ],
-      initialIndex: here == null
-          ? 0
-          : targets.indexWhere((t) => t.sourceStart == here.sourceStart),
-    );
-    if (!mounted || choice == null) return;
-    final target = targets[choice.index];
-    _applyMarkdownEdit(
-      applyTally(
-        text: text,
-        target: target,
-        rows: tallyList(
-          rows: target.rows,
-          cut: choice.cut,
-          sort: choice.sort,
-          checked: tallyChecksAt(text, target),
-        ),
-      ),
-    );
-  }
-
-  /// Applies a pure markdown command's result: the whole text is set
-  /// (undoable) and the selection lands where the command put it — inside
-  /// the markers for wraps, the same lines for line edits. The editor
-  /// keeps its focus (the IME stays up); focus is re-requested
-  /// defensively.
-  void _applyMarkdownEdit(MarkdownEdit edit) {
-    // Through the surface: one undoable edit, the platform told, the save
-    // scheduled.
-    _surface?.applyEdit(edit.text, edit.selection);
-    _focus.requestFocus();
-  }
-
-  /// Runs a Markdown [command] on the source pane on screen.
-  ///
-  /// It is handed the lines the selection touches, not the note
-  /// ([MarkdownSurfaceController.applyLineCommand]).
-  void _runCommand(
-    MarkdownEdit Function(String text, TextSelection selection) command, {
-    int context = 0,
-  }) {
-    _surface?.applyLineCommand(command, context: context);
-    _focus.requestFocus();
-  }
-
-  /// The line the command's caret is on (0-based).
-  int get _editCaretLine {
-    final surface = _surface;
-    if (surface == null) return 0;
-    return surface.buffer.lineOf(surface.selection.anchor);
-  }
-
-  void _wrapSelection({required String left, required String right}) {
-    _runCommand(
-      (text, selection) => wrapSelection(
-        text: text,
-        selection: selection,
-        left: left,
-        right: right,
-      ),
-    );
-  }
-
-  void _insertCodeBlock() {
-    _runCommand(
-      (text, selection) => codeBlock(text: text, selection: selection),
-    );
-  }
-
-  void _prefixLines({required String prefix}) {
-    _runCommand(
-      (text, selection) =>
-          prefixLines(text: text, selection: selection, prefix: prefix),
-    );
-  }
-
-  /// Inserts a link in the format chosen in settings (wikilink `[[…]]`
-  /// or markdown `[…](…)`).
-  void _insertLink() {
-    final markdown = widget.linkType == LinkType.markdown;
-    _runCommand(
-      (text, selection) => wrapSelection(
-        text: text,
-        selection: selection,
-        left: markdown ? '[' : '[[',
-        right: markdown ? '](...)' : ']]',
-      ),
-    );
-  }
-
-  /// Numbers the selected line(s) as an ordered list.
-  void _insertOrderedList() {
-    _runCommand(
-      (text, selection) => orderedList(text: text, selection: selection),
-    );
-  }
-
-  /// Indents (or outdents, [outdent] true) the selected line(s) by the
-  /// width chosen in settings.
-  void _indentLines({required bool outdent}) {
-    _runCommand(
-      (text, selection) => indentLines(
-        text: text,
-        selection: selection,
-        width: widget.indentWidth,
-        outdent: outdent,
-      ),
-    );
-  }
-
-  /// Shows the heading-level picker (H1..H6) and applies the chosen level
-  /// to the selected line(s).
-  Future<void> _showHeadingDialog() async {
-    final level = await showHeadingLevelDialog(context);
-    if (level == null) return;
-    _runCommand(
-      (text, selection) =>
-          setHeading(text: text, selection: selection, level: level),
     );
   }
 }
