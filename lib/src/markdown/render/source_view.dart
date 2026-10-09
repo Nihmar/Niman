@@ -62,7 +62,6 @@ import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/source_shortcuts.dart';
-import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -91,6 +90,7 @@ import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
+import 'package:niman/src/markdown/render/source_touch.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/markdown/render/wikilink_suggest.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -538,30 +538,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   final ValueNotifier<bool> _caretOn = ValueNotifier<bool>(true);
   Timer? _blink;
 
-  /// The overlay the touch selection's handles and toolbar are drawn in.
-  final OverlayPortalController _touchOverlay = OverlayPortalController();
+  /// The selection by touch (#291): its handles, its toolbar, and the
+  /// gestures that bring them. Listened to from [initState]: the note
+  /// rebuilds when they come or go.
+  late final SourceTouchSelection _touch = SourceTouchSelection(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    select: select,
+    offsetAt: offsetAt,
+    requestKeyboard: _requestKeyboard,
+    caretRectAt: _caretRectAt,
+    followsLastClick: (global) => _followsLastClick(global, DateTime.now()),
+    clipboardItems: (dismiss) => _clipboardItems(dismiss, touch: true),
+    spellingItems: _spellingItems,
+    formats: () => widget.editorMenu == null
+        ? widget.formatMenu?.call() ?? const <FormatMenuEntry>[]
+        : const <FormatMenuEntry>[],
+    structure: () => widget.editorMenu?.call(),
+    table: () => _tableCommands()?.menu(),
+  );
 
-  /// Ticks when the touch overlay should build again: its handles and
-  /// toolbar hang from the selected line's paragraph, and the frame that
-  /// shows them can find it detached — a rebuild (the keyboard coming up, a
-  /// reveal) in the same frame (#291).
-  final ValueNotifier<int> _touchTick = ValueNotifier<int>(0);
-
-  /// How many frames the overlay has asked to be built again, and whether
-  /// one such ask is already queued.
-  int _touchFrames = 0;
-  bool _touchScheduled = false;
-
-  /// How many frames the overlay keeps asking ([_showTouch] resets it):
-  /// enough for the keyboard's rise and a sliver's round of rebuilds, and
-  /// short enough that a selection off screen stops asking.
-  static const int _touchRetryFrames = 30;
-
-  /// Whether the selection was made by touch and shows its handles.
-  bool _touchHandles = false;
-
-  /// Whether the touch toolbar (copy, cut, paste, select all) is up.
-  bool _touchToolbar = false;
+  /// The touch selection's handles or toolbar came or went.
+  void _onTouchChanged() => setState(() {});
 
   /// The kind of the pointer that last went down: a long press or a tap by a
   /// finger is a touch gesture, by a mouse it is not.
@@ -655,6 +653,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     });
     _restyle();
     _suggest.addListener(_onSuggestChanged);
+    _touch.addListener(_onTouchChanged);
     _scroll = widget.controller ?? ScrollController();
     _ownsScroll = widget.controller == null;
     _focus = widget.focusNode ?? FocusNode();
@@ -704,7 +703,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _suggest.refresh();
     },
     onEdited: (edit) {
-      _hideTouch();
+      _touch.hide();
       _syncLines(edit);
       setState(() {
         _ownSelection = _ownSelection.clampTo(widget.buffer.length);
@@ -879,7 +878,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _footnoteMath.dispose();
     _caretSpot.dispose();
     _caretOn.dispose();
-    _touchTick.dispose();
+    _touch
+      ..removeListener(_onTouchChanged)
+      ..dispose();
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
   }
@@ -1340,7 +1341,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     bool follow = true,
   }) {
     if (start < 0 || end < start || end > widget.buffer.length) return;
-    _hideTouch();
+    _touch.hide();
     final buffer = widget.buffer;
     final before = buffer.length;
     final removed = buffer.substring(start, end);
@@ -1886,7 +1887,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           lineStart + math.min(start, text.length),
           lineStart + math.min(end, text.length),
         );
-        if (finger) _showTouch(toolbar: true);
+        if (finger) _touch.show(toolbar: true);
       default:
         final line = widget.buffer.lineOf(offset);
         _select(
@@ -1894,7 +1895,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           widget.buffer.offsetOfLine(line) + widget.buffer.lineLengthAt(line),
         );
         _clicks = 0;
-        if (finger) _showTouch(toolbar: true);
+        if (finger) _touch.show(toolbar: true);
     }
   }
 
@@ -2039,7 +2040,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
       // only scrolls the note does not bring the keyboard up.
       if (event.kind != PointerDeviceKind.mouse) return;
-      _hideTouch();
+      _touch.hide();
       _requestKeyboard();
       if (_controlPress) {
         _controlPress = false;
@@ -3170,7 +3171,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             _input.attach(viewId: View.of(context).viewId);
           } else {
             _input.detach();
-            _hideTouch();
+            _touch.hide();
             hideContextMenu();
           }
         },
@@ -3237,7 +3238,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   }
                   _requestKeyboard();
                   if (details.kind != PointerDeviceKind.mouse &&
-                      _touchTap(details.globalPosition)) {
+                      _touch.tap(details.globalPosition)) {
                     return;
                   }
                   _tapUp(details.globalPosition);
@@ -3247,15 +3248,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 // the toolbar up. A mouse has its drag instead.
                 onLongPressStart: (details) {
                   if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _longPressAt(details.globalPosition, start: true);
+                  _touch.longPressAt(details.globalPosition, start: true);
                 },
                 onLongPressMoveUpdate: (details) {
                   if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _longPressAt(details.globalPosition, start: false);
+                  _touch.longPressAt(details.globalPosition, start: false);
                 },
                 onLongPressEnd: (details) {
                   if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _showTouch(toolbar: true);
+                  _touch.show(toolbar: true);
                 },
                 // The text's own pointer over the note; the gutter keeps the
                 // arrow (`_Line`), and a drawn task box the hand (#505).
@@ -3435,10 +3436,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       controller: _menuOverlay,
       overlayChildBuilder: _desktopMenu,
       child: OverlayPortal(
-        controller: _touchOverlay,
+        controller: _touch.overlay,
         overlayChildBuilder: (context) => ListenableBuilder(
-          listenable: Listenable.merge([_scroll, _touchTick]),
-          builder: (context, _) => _touchSelectionOverlay(),
+          listenable: Listenable.merge([_scroll, _touch.tick]),
+          builder: (context, _) => _touch.buildOverlay(),
         ),
         child: OverlayPortal(
           controller: _tableOverlay,
@@ -3920,7 +3921,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void showContextMenu([Offset? global]) {
     final at = global ?? caretRect?.bottomLeft;
     if (at == null) return;
-    _hideTouch();
+    _touch.hide();
     setState(() => _menuAt = at);
     _menuOverlay.show();
   }
@@ -3962,8 +3963,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         hideContextMenu();
         return KeyEventResult.handled;
       }
-      if (_touchHandles || _touchToolbar) {
-        _hideTouch();
+      if (_touch.isUp) {
+        _touch.hide();
         return KeyEventResult.handled;
       }
       // A selection takes the first press, as it did in the legacy editor;
@@ -4066,7 +4067,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   // By touch the handles stay, so the selection can be
                   // pasted over or extended; the toolbar goes.
                   if (touch) {
-                    _showTouch(toolbar: false);
+                    _touch.show(toolbar: false);
                   } else {
                     dismiss();
                   }
@@ -4088,7 +4089,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               : () {
                   selectAll();
                   if (touch) {
-                    _showTouch(toolbar: true);
+                    _touch.show(toolbar: true);
                   } else {
                     dismiss();
                   }
@@ -4167,41 +4168,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return spell.rangesFor(index, text, skip: spellSkipRanges(tokens));
   }
 
-  // ------------------------------------------------------- touch selection
-
-  /// The handles and toolbar for the selection as it stands.
-  Widget _touchSelectionOverlay() {
-    final selection = _selection.clampTo(widget.buffer.length);
-    final collapsed = selection.isCollapsed;
-    final start = _caretRectAt(selection.start);
-    final end = _caretRectAt(selection.end);
-    // A line the frame has not laid out yet has no paragraph to hang from:
-    // the overlay is empty, and it asks again next frame (#291).
-    if ((_touchHandles || _touchToolbar) && (start == null || end == null)) {
-      _retryTouchOverlay();
-    }
-    // The toolbar is the context menu's phone face: the same clipboard, the
-    // toolbar's formats in its overflow, the spelling after them.
-    return TouchSelectionOverlay(
-      start: start,
-      end: end,
-      showHandles: _touchHandles && !collapsed,
-      showToolbar: _touchToolbar,
-      buttons: _clipboardItems(_hideTouch, touch: true),
-      formats: _touchToolbar && widget.editorMenu == null
-          ? widget.formatMenu?.call() ?? const <FormatMenuEntry>[]
-          : const <FormatMenuEntry>[],
-      structure: _touchToolbar ? widget.editorMenu?.call() : null,
-      extras: _touchToolbar
-          ? _spellingItems(_hideTouch)
-          : const <ContextMenuButtonItem>[],
-      table: _touchToolbar ? _tableCommands()?.menu() : null,
-      onDismiss: _hideTouch,
-      onHandleDrag: _dragHandle,
-      onHandleDragEnd: () => _showTouch(toolbar: true),
-    );
-  }
-
   /// The caret rectangle at [offset] in global coordinates, from the piece of
   /// its line the offset is drawn in — or null when that line is not built.
   ///
@@ -4229,122 +4195,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       1.5,
       paragraph.getFullHeightForCaret(position),
     ).shift(paragraph.localToGlobal(Offset.zero));
-  }
-
-  /// Shows the touch selection: the handles for a range, and the toolbar when
-  /// [toolbar] asks for it.
-  void _showTouch({required bool toolbar}) {
-    _touchFrames = 0;
-    setState(() {
-      _touchHandles = !_selection.isCollapsed;
-      _touchToolbar = toolbar;
-    });
-    _touchOverlay.show();
-    // The frame that shows the handles is the one the gesture landed in; the
-    // next one has the note laid out where the gesture left it.
-    _retryTouchOverlay();
-  }
-
-  /// Asks the touch overlay to build again after this frame: the handles and
-  /// the toolbar hang from the selected line's paragraph, and the frame that
-  /// shows them can find it detached — the keyboard rising relayouts the
-  /// pane and a reveal rebuilds the line — so the overlay is drawn once,
-  /// empty, with nothing to build it again when the paragraph is back
-  /// (#291). Bounded, so a selection that is off screen stops asking.
-  void _retryTouchOverlay() {
-    if (_touchScheduled || _touchFrames >= _touchRetryFrames) return;
-    _touchScheduled = true;
-    _touchFrames++;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _touchScheduled = false;
-      if (mounted && (_touchHandles || _touchToolbar)) {
-        _touchTick.value++;
-      }
-    });
-  }
-
-  /// Takes the touch selection's handles and toolbar away.
-  void _hideTouch() {
-    if (!_touchHandles && !_touchToolbar) return;
-    if (mounted) {
-      setState(() {
-        _touchHandles = false;
-        _touchToolbar = false;
-      });
-    }
-    _touchOverlay.hide();
-  }
-
-  /// A finger's tap, when it means something to the touch selection: a tap
-  /// on the caret brings the toolbar up (to paste), a tap anywhere else puts
-  /// it and the handles away. True when the tap was taken.
-  bool _touchTap(Offset global) {
-    if (_followsLastClick(global, DateTime.now())) {
-      // The second tap of a double tap: the word, not the toolbar.
-      _hideTouch();
-      return false;
-    }
-    final offset = offsetAt(global);
-    final selection = _selection;
-    if (offset != null &&
-        selection.isCollapsed &&
-        offset == selection.extent &&
-        !_touchToolbar) {
-      _showTouch(toolbar: true);
-      return true;
-    }
-    _hideTouch();
-    return false;
-  }
-
-  /// The word the long press started on, held while the finger moves.
-  (int, int)? _longPressWord;
-
-  /// A long press at [global]: the word under it, or — while the finger moves
-  /// — the selection from the first word to the word under it now.
-  void _longPressAt(Offset global, {required bool start}) {
-    final offset = offsetAt(global);
-    if (offset == null) return;
-    final buffer = widget.buffer;
-    final line = buffer.lineOf(offset);
-    final lineStart = buffer.offsetOfLine(line);
-    final text = buffer.lineAt(line);
-    final (from, to) = wordRangeAt(text, offset - lineStart);
-    final wordStart = lineStart + math.min<int>(from, text.length);
-    final wordEnd = lineStart + math.min<int>(to, text.length);
-    final word = (wordStart, wordEnd);
-    if (start) {
-      _longPressWord = word;
-      _requestKeyboard();
-      select(SelectionModel(anchor: word.$1, extent: word.$2));
-      _showTouch(toolbar: false);
-      return;
-    }
-    final first = _longPressWord ?? word;
-    final next = word.$2 >= first.$2
-        ? SelectionModel(anchor: first.$1, extent: word.$2)
-        : SelectionModel(anchor: first.$2, extent: word.$1);
-    select(next);
-    _showTouch(toolbar: false);
-  }
-
-  /// A handle dragged to [point]: that end of the selection follows the
-  /// finger, through the same hit test a tap uses.
-  void _dragHandle(SelectionHandle handle, Offset point) {
-    final offset = offsetAt(point);
-    if (offset == null) return;
-    final selection = _selection;
-    final next = handle == SelectionHandle.start
-        ? SelectionModel(anchor: selection.end, extent: offset)
-        : SelectionModel(anchor: selection.start, extent: offset);
-    // An empty selection has no handles to hold: the dragged end stops one
-    // character short of the other.
-    if (next.isCollapsed) return;
-    select(next);
-    setState(() {
-      _touchHandles = true;
-      _touchToolbar = false;
-    });
   }
 
   /// What the surface's own keys do ([sourceShortcuts]).
