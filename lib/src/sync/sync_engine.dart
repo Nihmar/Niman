@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
@@ -18,11 +17,11 @@ import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_sides.dart';
 import 'package:niman/src/sync/sync_step_failure.dart';
 import 'package:niman/src/sync/sync_step_outcome.dart';
+import 'package:niman/src/sync/sync_steps.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
-import 'package:niman/src/sync/webdav/webdav_probe.dart';
 import 'package:path/path.dart' as p;
 
 /// Asked before a plan runs when it is a first sync or looks like a mass
@@ -103,6 +102,16 @@ final class SyncEngine {
     ops: ops,
     store: store,
     sides: _sides,
+  );
+
+  /// Carries out the plan's decisions.
+  late final _steps = SyncStepRunner(
+    root: root,
+    ops: ops,
+    store: store,
+    sides: _sides,
+    merger: _merger,
+    hashPasses: _hashPasses,
   );
 
   /// Looks at both sides before a run plans.
@@ -558,7 +567,7 @@ final class SyncEngine {
       onProgress?.call(SyncStage.applying, index++, total);
       final clock = Stopwatch()..start();
       try {
-        final outcome = await _apply(context, decision);
+        final outcome = await _steps.apply(context, decision);
         switch (outcome) {
           case SyncStepOutcome.done:
             report.done.update(decision.kind, (n) => n + 1, ifAbsent: () => 1);
@@ -871,246 +880,4 @@ final class SyncEngine {
       throw SyncFailure.stale('$path changed on the server');
     }
   }
-
-  // --- applying -------------------------------------------------------
-
-  Future<SyncStepOutcome> _apply(SyncRunContext c, SyncDecision d) async {
-    switch (d.kind) {
-      case SyncActionKind.nothing:
-        return SyncStepOutcome.done;
-      case SyncActionKind.hashLocal:
-      case SyncActionKind.hashRemote:
-        throw const SyncStepFailure(
-          'still waiting for a hash after $_hashPasses passes',
-        );
-      case SyncActionKind.upload:
-        return await _upload(c, d);
-      case SyncActionKind.download:
-        return await _download(c, d);
-      case SyncActionKind.deleteRemote:
-        return await _deleteRemote(c, d);
-      case SyncActionKind.trashLocal:
-        return await _trashLocal(c, d);
-      case SyncActionKind.dropRow:
-        await store.removeItems(root, [d.path]);
-        return SyncStepOutcome.done;
-      case SyncActionKind.record:
-        return await _record(c, d);
-      case SyncActionKind.conflict:
-        return await _merger.conflict(c, d);
-      case SyncActionKind.moveRemote:
-        return await _moveRemote(c, d);
-      case SyncActionKind.moveLocal:
-        return await _moveLocal(c, d);
-    }
-  }
-
-  /// The remote still is what the scan saw, checked with a PROPFIND when
-  /// the write has no precondition to guard it.
-  Future<void> _remoteStillAsPlanned(
-    SyncRunContext c,
-    SyncDecision d, {
-    String? expectedSha,
-  }) async {
-    if (!d.checkRemoteFirst) return;
-    await _sides.remoteUnchangedSince(
-      c,
-      d.fromPath ?? d.path,
-      expectedSha: expectedSha,
-    );
-  }
-
-  /// Whether [file] holds a JSON object — what a [jsonStateFiles] side has to
-  /// be before the sync may replace the other with it (#336).
-  static Future<bool> _isJsonObject(File file) async {
-    try {
-      final text = utf8.decode(await file.readAsBytes(), allowMalformed: true);
-      return jsonDecode(text) is Map;
-    } on Object {
-      return false;
-    }
-  }
-
-  Future<SyncStepOutcome> _upload(
-    SyncRunContext c,
-    SyncDecision d,
-  ) => _sides.guarded(() async {
-    final local = (await _sides.localStillAsPlanned(c, d.path))!;
-    await _remoteStillAsPlanned(c, d);
-    final sha = _sides.localShaOf(c, d.path);
-    // The #336 rule holds both ways: a JSON state file that does not parse
-    // here — a hand edit with a syntax error — is not a newer version of the
-    // remote copy either, and `.niman/*` has no history to bring that one
-    // back. Both sides stay, and the path is reported for the merge.
-    if (jsonStateFiles.contains(d.path) &&
-        c.remote[d.path] != null &&
-        !await _isJsonObject(File(p.join(root, d.path)))) {
-      return _sides.reportConflict(
-        c,
-        d,
-        localSha: sha,
-        remoteSha: c.rows[d.path]?.localSha256 ?? '',
-        why: 'the local copy is not a JSON object',
-      );
-    }
-    await _sides.uploadAndRecord(
-      c,
-      d.path,
-      sha: sha,
-      local: local,
-      notListed: const SyncStepFailure('uploaded but not listed'),
-      ifMatch: d.ifMatch,
-      ifNoneMatch: d.ifNoneMatch,
-      modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
-    );
-    return SyncStepOutcome.done;
-  });
-
-  Future<SyncStepOutcome> _download(SyncRunContext c, SyncDecision d) =>
-      _sides.guarded(() async {
-        final fetched = await _sides.fetch(c, d.path);
-        try {
-          await _sides.localStillAsPlanned(c, d.path);
-        } on Object {
-          if (fetched.temp.existsSync()) await fetched.temp.delete();
-          rethrow;
-        }
-        // A JSON state file whose remote copy does not parse is not a newer
-        // version of this device's: replacing a good local copy with it —
-        // there is no history for `.niman/*` — is how a half-written settings
-        // file wiped every setting on the run after (#336). Both sides stay,
-        // and the path is reported for the merge.
-        if (jsonStateFiles.contains(d.path) &&
-            // The async stat is on purpose: a blocking one on the UI isolate
-            // is the FUSE round trip this engine keeps off its frames.
-            // ignore: avoid_slow_async_io
-            await File(p.join(root, d.path)).exists() &&
-            !await _isJsonObject(fetched.temp)) {
-          await fetched.temp.delete();
-          return _sides.reportConflict(
-            c,
-            d,
-            localSha: c.rows[d.path]?.localSha256 ?? '',
-            remoteSha: fetched.download.sha256,
-            why: 'the remote copy is not a JSON object',
-          );
-        }
-        await ops.syncReplace(d.path, fetched.temp.path);
-        final local = await _sides.stat(d.path);
-        if (local == null) {
-          throw const SyncStepFailure('downloaded but not on disk');
-        }
-        await store.putItems([
-          await _sides.row(
-            c,
-            d.path,
-            sha: fetched.download.sha256,
-            local: local,
-            remote: _sides.remoteFrom(c, d.path, fetched.download),
-          ),
-        ]);
-        return SyncStepOutcome.done;
-      });
-
-  Future<SyncStepOutcome> _deleteRemote(SyncRunContext c, SyncDecision d) =>
-      _sides.guarded(() async {
-        await _sides.localStillAsPlanned(c, d.path);
-        await _remoteStillAsPlanned(c, d);
-        await c.client.delete(d.path, ifMatch: d.ifMatch);
-        await store.removeItems(root, [d.path]);
-        return SyncStepOutcome.done;
-      });
-
-  Future<SyncStepOutcome> _trashLocal(SyncRunContext c, SyncDecision d) =>
-      _sides.guarded(() async {
-        await _sides.localStillAsPlanned(c, d.path);
-        await ops.syncTrash(d.path);
-        await store.removeItems(root, [d.path]);
-        return SyncStepOutcome.done;
-      });
-
-  Future<SyncStepOutcome> _record(SyncRunContext c, SyncDecision d) =>
-      _sides.guarded(() async {
-        final local = (await _sides.localStillAsPlanned(c, d.path))!;
-        final sha = _sides.localShaOf(c, d.path);
-        final row = c.rows[d.path];
-        final remote = c.remote[d.path]!;
-        final contentChanged = row == null || row.localSha256 != sha;
-        await store.putItems([
-          await _sides.row(
-            c,
-            d.path,
-            sha: sha,
-            local: local,
-            remote: remote,
-            baseVersion: row?.baseVersion,
-            pinBase: contentChanged,
-          ),
-        ]);
-        return SyncStepOutcome.done;
-      });
-
-  Future<SyncStepOutcome> _moveRemote(SyncRunContext c, SyncDecision d) =>
-      _sides.guarded(() async {
-        final from = d.fromPath!;
-        final local = (await _sides.localStillAsPlanned(c, d.path))!;
-        await _sides.localStillAsPlanned(c, from);
-        await _remoteStillAsPlanned(c, d);
-        await _sides.ensureRemoteParent(c, d.path);
-        try {
-          await c.client.move(from, d.path);
-        } on WebDavUnsupported {
-          // The probe said MOVE works; it does not any more. Probe again on
-          // the next run, and let it plan DELETE + PUT.
-          await store.setCapabilities(
-            root,
-            WebDavCapabilities.fromJson({
-                  ...c.capabilities.toJson(),
-                  'move': false,
-                }) ??
-                c.capabilities,
-          );
-          rethrow;
-        }
-        await store.moveItems(root, from, d.path);
-        final remote = await c.client.stat(d.path);
-        if (remote == null) throw const SyncStepFailure('moved but not listed');
-        final row = c.rows[from]!;
-        await store.putItems([
-          await _sides.row(
-            c,
-            d.path,
-            sha: row.localSha256,
-            local: local,
-            remote: remote,
-            baseVersion: row.baseVersion,
-            pinBase: false,
-          ),
-        ]);
-        return SyncStepOutcome.done;
-      });
-
-  Future<SyncStepOutcome> _moveLocal(SyncRunContext c, SyncDecision d) =>
-      _sides.guarded(() async {
-        final from = d.fromPath!;
-        await _sides.localStillAsPlanned(c, from);
-        await _sides.localStillAsPlanned(c, d.path);
-        await ops.syncMove(from, d.path);
-        await store.moveItems(root, from, d.path);
-        final local = await _sides.stat(d.path);
-        if (local == null) throw const SyncStepFailure('moved but not on disk');
-        final row = c.rows[from]!;
-        await store.putItems([
-          await _sides.row(
-            c,
-            d.path,
-            sha: row.localSha256,
-            local: local,
-            remote: c.remote[d.path]!,
-            baseVersion: row.baseVersion,
-            pinBase: false,
-          ),
-        ]);
-        return SyncStepOutcome.done;
-      });
 }
