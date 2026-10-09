@@ -1075,6 +1075,11 @@ final class SerbianStrings extends Strings {
   @override
   String get actionRename => 'Промени име';
   @override
+  String get renameNameInvalid =>
+      'Назив садржи знак који систем датотека одбија.';
+  @override
+  String renameNameTaken(String name) => 'Ова фасцикла већ садржи „$name”.';
+  @override
   String get actionMove => 'Премести';
   @override
   String get saveAndClose => 'Сачувај и затвори';

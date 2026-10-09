@@ -1079,6 +1079,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get actionRename => 'Презаглави';
   @override
+  String get renameNameInvalid =>
+      'Името съдържа знак, който файловата система отказва.';
+  @override
+  String renameNameTaken(String name) => 'Тази папка вече съдържа „$name“.';
+  @override
   String get actionMove => 'Премести';
   @override
   String get saveAndClose => 'Запази и затвори';

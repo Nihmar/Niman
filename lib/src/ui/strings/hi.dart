@@ -1054,6 +1054,11 @@ final class HindiStrings extends Strings {
   @override
   String get actionRename => 'नाम बदलें';
   @override
+  String get renameNameInvalid =>
+      'नाम में ऐसा वर्ण है जिसे फ़ाइल सिस्टम स्वीकार नहीं करता।';
+  @override
+  String renameNameTaken(String name) => 'इस फ़ोल्डर में पहले से “$name” है।';
+  @override
   String get actionMove => 'स्थानांतरित करें';
   @override
   String get saveAndClose => 'सहेजकर बंद करें';

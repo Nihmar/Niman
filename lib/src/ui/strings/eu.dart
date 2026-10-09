@@ -1076,6 +1076,12 @@ final class BasqueStrings extends Strings {
   @override
   String get actionRename => 'Izena aldatu';
   @override
+  String get renameNameInvalid =>
+      'Izenak fitxategi-sistemak onartzen ez duen karaktere bat du.';
+  @override
+  String renameNameTaken(String name) =>
+      'Karpeta honek badu «$name» dagoeneko.';
+  @override
   String get actionMove => 'Mugitu';
   @override
   String get saveAndClose => 'Gorde eta itxi';

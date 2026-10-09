@@ -1064,6 +1064,11 @@ final class TurkishStrings extends Strings {
   @override
   String get actionRename => 'Yeniden adlandır';
   @override
+  String get renameNameInvalid =>
+      'Ad, dosya sisteminin kabul etmediği bir karakter içeriyor.';
+  @override
+  String renameNameTaken(String name) => 'Bu klasörde zaten “$name” var.';
+  @override
   String get actionMove => 'Taşı';
   @override
   String get saveAndClose => 'Kaydet ve kapat';

@@ -723,6 +723,8 @@ final class AppStrings {
   static String get actionChoose => _s.actionChoose;
   static String get actionDelete => _s.actionDelete;
   static String get actionRename => _s.actionRename;
+  static String get renameNameInvalid => _s.renameNameInvalid;
+  static String renameNameTaken(String name) => _s.renameNameTaken(name);
   static String get actionMove => _s.actionMove;
 
   /// The close-with-unsaved-edits ask (T-PP-11).

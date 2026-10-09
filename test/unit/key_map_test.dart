@@ -17,7 +17,7 @@ void main() {
     for (final shortcut in nimanAppShortcuts) {
       expect(KeyMap.defaults.bindingOf(shortcut.command), shortcut.activation);
     }
-    expect(KeyMap.defaults.bindingOf(AppCommand.renameNote), isNull);
+    expect(KeyMap.defaults.bindingOf(AppCommand.moveNote), isNull);
   });
 
   test('a key moved, a key cleared, and the way back', () {

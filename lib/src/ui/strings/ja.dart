@@ -1009,6 +1009,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get actionRename => '名前変更';
   @override
+  String get renameNameInvalid => 'ファイルシステムで使えない文字が名前に含まれています。';
+  @override
+  String renameNameTaken(String name) => 'このフォルダーにはすでに「$name」があります。';
+  @override
   String get actionMove => '移動';
   @override
   String get saveAndClose => '保存して閉じる';

@@ -999,6 +999,10 @@ final class ChineseStrings extends Strings {
   @override
   String get actionRename => '重命名';
   @override
+  String get renameNameInvalid => '名称包含文件系统不接受的字符。';
+  @override
+  String renameNameTaken(String name) => '此文件夹中已有“$name”。';
+  @override
   String get actionMove => '移动';
   @override
   String get saveAndClose => '保存并关闭';

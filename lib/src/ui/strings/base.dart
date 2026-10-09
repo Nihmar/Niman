@@ -542,6 +542,8 @@ abstract base class Strings {
   String get actionChoose;
   String get actionDelete;
   String get actionRename;
+  String get renameNameInvalid;
+  String renameNameTaken(String name);
   String get actionMove;
   String get saveAndClose;
   String get closeUnsavedTitle;

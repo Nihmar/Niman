@@ -1081,6 +1081,11 @@ final class ItalianStrings extends Strings {
   @override
   String get actionRename => 'Rinomina';
   @override
+  String get renameNameInvalid =>
+      'Il nome contiene un carattere che il file system rifiuta.';
+  @override
+  String renameNameTaken(String name) => 'In questa cartella c’è già “$name”.';
+  @override
   String get actionMove => 'Sposta';
   @override
   String get saveAndClose => 'Salva e chiudi';

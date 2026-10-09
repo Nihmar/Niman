@@ -1086,6 +1086,12 @@ final class GermanStrings extends Strings {
   @override
   String get actionRename => 'Umbenennen';
   @override
+  String get renameNameInvalid =>
+      'Der Name enthält ein Zeichen, das das Dateisystem ablehnt.';
+  @override
+  String renameNameTaken(String name) =>
+      'Dieser Ordner enthält bereits „$name“.';
+  @override
   String get actionMove => 'Verschieben';
   @override
   String get saveAndClose => 'Speichern und schließen';

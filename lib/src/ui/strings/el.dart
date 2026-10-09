@@ -1101,6 +1101,11 @@ final class GreekStrings extends Strings {
   @override
   String get actionRename => 'Μετανομασία';
   @override
+  String get renameNameInvalid =>
+      'Το όνομα περιέχει χαρακτήρα που το σύστημα αρχείων δεν δέχεται.';
+  @override
+  String renameNameTaken(String name) => 'Αυτός ο φάκελος έχει ήδη «$name».';
+  @override
   String get actionMove => 'Μετακίνηση';
   @override
   String get saveAndClose => 'Αποθήκευση και κλείσιμο';

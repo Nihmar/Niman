@@ -200,6 +200,13 @@ thumb-sized rows and the long-press sheet. The choice follows the
 platform's own density (compact on a desktop), not the window's width,
 so a tablet in landscape keeps the touch sizes.
 
+## Renaming
+
+On Linux and Windows a note or a folder is renamed in its tree row
+([organization](organization.md#renaming-a-note-or-a-folder)). A phone
+keeps the dialog: the tree and the note are not on screen together, and a
+row is too short to type in comfortably. A decision, not an omission.
+
 ## Dragging into a note
 
 On Linux and Windows a file dragged from the tree onto an open note

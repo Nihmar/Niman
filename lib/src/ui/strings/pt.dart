@@ -1075,6 +1075,11 @@ final class PortugueseStrings extends Strings {
   @override
   String get actionRename => 'Renomear';
   @override
+  String get renameNameInvalid =>
+      'O nome contém um carácter que o sistema de ficheiros recusa.';
+  @override
+  String renameNameTaken(String name) => 'Esta pasta já tem «$name».';
+  @override
   String get actionMove => 'Mover';
   @override
   String get saveAndClose => 'Salvar e fechar';

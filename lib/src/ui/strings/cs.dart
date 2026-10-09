@@ -1071,6 +1071,11 @@ final class CzechStrings extends Strings {
   @override
   String get actionRename => 'Přejmenovat';
   @override
+  String get renameNameInvalid =>
+      'Název obsahuje znak, který souborový systém odmítá.';
+  @override
+  String renameNameTaken(String name) => 'Tato složka už obsahuje „$name“.';
+  @override
   String get actionMove => 'Přesunout';
   @override
   String get saveAndClose => 'Uložit a zavřít';

@@ -1075,6 +1075,11 @@ final class BosnianStrings extends Strings {
   @override
   String get actionRename => 'Promijeni ime';
   @override
+  String get renameNameInvalid =>
+      'Naziv sadrži znak koji sistem datoteka odbija.';
+  @override
+  String renameNameTaken(String name) => 'Ovaj folder već sadrži „$name”.';
+  @override
   String get actionMove => 'Premjesti';
   @override
   String get saveAndClose => 'Spremi i zatvori';

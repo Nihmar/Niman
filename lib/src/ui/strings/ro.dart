@@ -1083,6 +1083,11 @@ final class RomanianStrings extends Strings {
   @override
   String get actionRename => 'Redenumește';
   @override
+  String get renameNameInvalid =>
+      'Numele conține un caracter pe care sistemul de fișiere îl refuză.';
+  @override
+  String renameNameTaken(String name) => 'Acest dosar are deja „$name”.';
+  @override
   String get actionMove => 'Mută';
   @override
   String get saveAndClose => 'Salvează și închide';

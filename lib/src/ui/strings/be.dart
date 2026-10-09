@@ -1072,6 +1072,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get actionRename => 'Перайменаваць';
   @override
+  String get renameNameInvalid =>
+      'Назва змяшчае знак, які файлавая сістэма не прымае.';
+  @override
+  String renameNameTaken(String name) => 'У гэтай папцы ўжо ёсць «$name».';
+  @override
   String get actionMove => 'Перамясціць';
   @override
   String get saveAndClose => 'Захаваць і зачыніць';

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -898,6 +899,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// What a tree row's menu choice does: rename, move, delete, pin, open
   /// outside the app (issue #100 moved them into [ShellRowActions]).
   late final ShellRowActions _rowActions = ShellRowActions(
+    renameInPlace: _startRenameInPlace,
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),
@@ -3521,7 +3523,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               : EditorKind.wysiwyg,
         ),
       ),
-      AppCommand.renameNote: () => unawaited(_rowActions.rename(context, note)),
+      // The selected row, which F2 renames (#707): on a desktop the note on
+      // screen, or the folder clicked last.
+      AppCommand.renameNote: () =>
+          unawaited(_rowActions.rename(context, _selected ?? note)),
       AppCommand.moveNote: () => unawaited(_rowActions.move(context, note)),
       AppCommand.deleteNote: () => unawaited(_rowActions.delete(context, note)),
       AppCommand.noteHistory: () => unawaited(_openHistory(note!)),
@@ -5139,9 +5144,50 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         onBackgroundSecondaryTapUp: (details) =>
             unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
         onMove: (path, folder) => unawaited(_rowActions.moveTo(path, folder)),
+        renaming: _treeRename,
       ),
     );
   }
+
+  /// The row being renamed in place in the tree (#707), or null.
+  String? _renaming;
+
+  /// Starts renaming [path] in its tree row (#707): on Linux and Windows,
+  /// with the tree on screen. The row is revealed — every folder above it
+  /// opened — and its name becomes a field. False leaves the rename to a
+  /// dialog: a phone, or a desktop with the tree hidden.
+  bool _startRenameInPlace(String path) {
+    final desktop = switch (defaultTargetPlatform) {
+      TargetPlatform.linux || TargetPlatform.windows => true,
+      _ => false,
+    };
+    if (!desktop || !_wide || !_sidebarVisible || !_filesSlotVisible) {
+      return false;
+    }
+    setState(() {
+      for (var at = parentOf(path); at.isNotEmpty; at = parentOf(at)) {
+        _expanded.add(at);
+      }
+      _renaming = path;
+    });
+    return true;
+  }
+
+  /// What the renamed row's field does.
+  TreeRename? get _treeRename => switch (_renaming) {
+    final path? => (
+      path: path,
+      submit: (name) async {
+        final problem = await _rowActions.renameTo(path, name);
+        if (problem == null && mounted) setState(() => _renaming = null);
+        return problem;
+      },
+      cancel: () {
+        if (mounted) setState(() => _renaming = null);
+      },
+    ),
+    null => null,
+  };
 
   /// The right-click menu on the tree's empty space: a note, a note from a
   /// template or a folder, at the library's root.

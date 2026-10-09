@@ -1065,6 +1065,11 @@ final class EnglishStrings extends Strings {
   @override
   String get actionRename => 'Rename';
   @override
+  String get renameNameInvalid =>
+      'The name holds a character the file system refuses.';
+  @override
+  String renameNameTaken(String name) => 'This folder already has “$name”.';
+  @override
   String get actionMove => 'Move';
   @override
   String get saveAndClose => 'Save and close';

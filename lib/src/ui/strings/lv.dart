@@ -1069,6 +1069,11 @@ final class LatvianStrings extends Strings {
   @override
   String get actionRename => 'Pārsaukt';
   @override
+  String get renameNameInvalid =>
+      'Nosaukumā ir rakstzīme, ko failu sistēma neatļauj.';
+  @override
+  String renameNameTaken(String name) => 'Šajā mapē jau ir “$name”.';
+  @override
   String get actionMove => 'Pārvietot';
   @override
   String get saveAndClose => 'Saglabāt un aizvērt';

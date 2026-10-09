@@ -1073,6 +1073,11 @@ final class SlovenianStrings extends Strings {
   @override
   String get actionRename => 'Preimenuj';
   @override
+  String get renameNameInvalid =>
+      'Ime vsebuje znak, ki ga datotečni sistem zavrne.';
+  @override
+  String renameNameTaken(String name) => 'Ta mapa že vsebuje »$name«.';
+  @override
   String get actionMove => 'Prenesi';
   @override
   String get saveAndClose => 'Shrani in zapri';

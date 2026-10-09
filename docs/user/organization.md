@@ -154,6 +154,21 @@ A tag's characters are letters and digits — any script's, so `#città` and
 `#идея` are one tag each — plus `-`, `_` and `/`. The frontmatter and the note
 body are read the same way, so the same tag written either way is one tag.
 
+## Renaming a note or a folder
+
+On Linux and Windows a rename happens in the tree, as in a file manager:
+**Rename** in a row's right-click menu, `F2` on the selected row, or
+*Rename* in the command palette and the note's ⋮ menu (which show the
+note's row first) turn the row's name into a field, the name selected
+without its extension — `note` of `note.md`, a folder's whole name.
+`Enter` or a click elsewhere renames, `Esc` puts the name back, and an
+empty or unchanged name changes nothing. A name that cannot be used — one
+another file of the folder already has, or a character the file system
+refuses — leaves the field open and says why under it. A file keeps its
+extension: a PDF renamed is still a PDF. With the tree hidden, and on a
+phone, the rename asks for the name in a dialog. `F2` can be changed under
+Settings → Keyboard shortcuts.
+
 ## Moving a note or a folder
 
 Long-press a row in the tree (right-click on desktop) and pick **Move**.

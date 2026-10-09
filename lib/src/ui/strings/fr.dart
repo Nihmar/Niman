@@ -1091,6 +1091,11 @@ final class FrenchStrings extends Strings {
   @override
   String get actionRename => 'Renommer';
   @override
+  String get renameNameInvalid =>
+      'Le nom contient un caractère refusé par le système de fichiers.';
+  @override
+  String renameNameTaken(String name) => 'Ce dossier contient déjà « $name ».';
+  @override
   String get actionMove => 'Déplacer';
   @override
   String get saveAndClose => 'Enregistrer et fermer';

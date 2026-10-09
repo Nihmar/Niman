@@ -1077,6 +1077,11 @@ final class AlbanianStrings extends Strings {
   @override
   String get actionRename => 'Rimëmbaj';
   @override
+  String get renameNameInvalid =>
+      'Emri përmban një shenjë që sistemi i skedarëve e refuzon.';
+  @override
+  String renameNameTaken(String name) => 'Kjo dosje e ka tashmë “$name”.';
+  @override
   String get actionMove => 'Lëviz';
   @override
   String get saveAndClose => 'Ruaj dhe mbyll';

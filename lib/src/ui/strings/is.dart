@@ -1072,6 +1072,11 @@ final class IcelandicStrings extends Strings {
   @override
   String get actionRename => 'Endurheita';
   @override
+  String get renameNameInvalid =>
+      'Nafnið inniheldur staf sem skráakerfið hafnar.';
+  @override
+  String renameNameTaken(String name) => 'Mappan inniheldur þegar „$name“.';
+  @override
   String get actionMove => 'Færa';
   @override
   String get saveAndClose => 'Vista og loka';

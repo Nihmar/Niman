@@ -1085,6 +1085,11 @@ final class PolishStrings extends Strings {
   @override
   String get actionRename => 'Zmień nazwę';
   @override
+  String get renameNameInvalid =>
+      'Nazwa zawiera znak, którego system plików nie przyjmuje.';
+  @override
+  String renameNameTaken(String name) => 'Ten folder ma już „$name”.';
+  @override
   String get actionMove => 'Przenieś';
   @override
   String get saveAndClose => 'Zapisz i zamknij';

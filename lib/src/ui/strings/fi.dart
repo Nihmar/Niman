@@ -1075,6 +1075,11 @@ final class FinnishStrings extends Strings {
   @override
   String get actionRename => 'Nimeä uudelleen';
   @override
+  String get renameNameInvalid =>
+      'Nimessä on merkki, jota tiedostojärjestelmä ei hyväksy.';
+  @override
+  String renameNameTaken(String name) => 'Kansiossa on jo ”$name”.';
+  @override
   String get actionMove => 'Siirrä';
   @override
   String get saveAndClose => 'Tallenna ja sulje';

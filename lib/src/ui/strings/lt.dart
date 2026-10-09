@@ -1071,6 +1071,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get actionRename => 'Pervadinti';
   @override
+  String get renameNameInvalid =>
+      'Pavadinime yra simbolis, kurio failų sistema neleidžia.';
+  @override
+  String renameNameTaken(String name) => 'Šiame aplanke jau yra „$name“.';
+  @override
   String get actionMove => 'Perkelti';
   @override
   String get saveAndClose => 'Išsaugoti ir uždaryti';

@@ -1074,6 +1074,11 @@ final class SwedishStrings extends Strings {
   @override
   String get actionRename => 'Byt namn';
   @override
+  String get renameNameInvalid =>
+      'Namnet innehåller ett tecken som filsystemet inte godtar.';
+  @override
+  String renameNameTaken(String name) => 'Mappen har redan ”$name”.';
+  @override
   String get actionMove => 'Flytta';
   @override
   String get saveAndClose => 'Spara och stäng';

@@ -1082,6 +1082,11 @@ final class GalicianStrings extends Strings {
   @override
   String get actionRename => 'Cambiar o nome';
   @override
+  String get renameNameInvalid =>
+      'O nome contén un carácter que o sistema de ficheiros rexeita.';
+  @override
+  String renameNameTaken(String name) => 'Este cartafol xa ten «$name».';
+  @override
   String get actionMove => 'Mover';
   @override
   String get saveAndClose => 'Gardar e pechar';

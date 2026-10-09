@@ -1074,6 +1074,11 @@ final class SlovakStrings extends Strings {
   @override
   String get actionRename => 'Premenovať';
   @override
+  String get renameNameInvalid =>
+      'Názov obsahuje znak, ktorý súborový systém odmieta.';
+  @override
+  String renameNameTaken(String name) => 'Tento priečinok už obsahuje „$name“.';
+  @override
   String get actionMove => 'Presunúť';
   @override
   String get saveAndClose => 'Uložiť a uzavrieť';

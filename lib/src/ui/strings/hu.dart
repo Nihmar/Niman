@@ -1076,6 +1076,11 @@ final class HungarianStrings extends Strings {
   @override
   String get actionRename => 'Átnevezés';
   @override
+  String get renameNameInvalid =>
+      'A név olyan karaktert tartalmaz, amelyet a fájlrendszer nem fogad el.';
+  @override
+  String renameNameTaken(String name) => 'Ebben a mappában már van „$name”.';
+  @override
   String get actionMove => 'Áthelyezés';
   @override
   String get saveAndClose => 'Mentés és bezárás';

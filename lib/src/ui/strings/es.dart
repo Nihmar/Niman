@@ -1089,6 +1089,11 @@ final class SpanishStrings extends Strings {
   @override
   String get actionRename => 'Renombrar';
   @override
+  String get renameNameInvalid =>
+      'El nombre contiene un carácter que el sistema de archivos rechaza.';
+  @override
+  String renameNameTaken(String name) => 'Esta carpeta ya tiene «$name».';
+  @override
   String get actionMove => 'Mover';
   @override
   String get saveAndClose => 'Guardar y cerrar';

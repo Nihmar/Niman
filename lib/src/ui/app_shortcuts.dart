@@ -284,6 +284,8 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
   // F11, the key that means fullscreen elsewhere: the issue's
   // Ctrl+Shift+Z is redo in both editors.
   AppShortcut(AppCommand.zenMode, SingleActivator(LogicalKeyboardKey.f11)),
+  // F2, the file managers' rename (#707).
+  AppShortcut(AppCommand.renameNote, SingleActivator(LogicalKeyboardKey.f2)),
   // F5 is what presents in every slide app (#534).
   AppShortcut(AppCommand.presentSlides, SingleActivator(LogicalKeyboardKey.f5)),
   AppShortcut(

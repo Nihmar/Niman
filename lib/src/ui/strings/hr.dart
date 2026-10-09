@@ -1070,6 +1070,11 @@ final class CroatianStrings extends Strings {
   @override
   String get actionRename => 'Preimenuj';
   @override
+  String get renameNameInvalid =>
+      'Naziv sadrži znak koji datotečni sustav odbija.';
+  @override
+  String renameNameTaken(String name) => 'Ova mapa već sadrži „$name”.';
+  @override
   String get actionMove => 'Premjesti';
   @override
   String get saveAndClose => 'Spremi i zatvori';

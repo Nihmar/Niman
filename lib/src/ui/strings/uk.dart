@@ -1073,6 +1073,11 @@ final class UkrainianStrings extends Strings {
   @override
   String get actionRename => 'Перейменувати';
   @override
+  String get renameNameInvalid =>
+      'Назва містить символ, який файлова система не приймає.';
+  @override
+  String renameNameTaken(String name) => 'У цій теці вже є «$name».';
+  @override
   String get actionMove => 'Перемістити';
   @override
   String get saveAndClose => 'Зберегти і закрити';

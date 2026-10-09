@@ -1081,6 +1081,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get actionRename => 'Промени име';
   @override
+  String get renameNameInvalid =>
+      'Името содржи знак што датотечниот систем го одбива.';
+  @override
+  String renameNameTaken(String name) => 'Оваа папка веќе содржи „$name“.';
+  @override
   String get actionMove => 'Премести';
   @override
   String get saveAndClose => 'Зачувај и затвори';

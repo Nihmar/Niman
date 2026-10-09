@@ -1077,6 +1077,11 @@ final class DutchStrings extends Strings {
   @override
   String get actionRename => 'Hernoemen';
   @override
+  String get renameNameInvalid =>
+      'De naam bevat een teken dat het bestandssysteem weigert.';
+  @override
+  String renameNameTaken(String name) => 'Deze map heeft al “$name”.';
+  @override
   String get actionMove => 'Verplaatsen';
   @override
   String get saveAndClose => 'Opslaan en sluiten';

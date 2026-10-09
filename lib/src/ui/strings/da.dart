@@ -1068,6 +1068,11 @@ final class DanishStrings extends Strings {
   @override
   String get actionRename => 'Omdøb';
   @override
+  String get renameNameInvalid =>
+      'Navnet indeholder et tegn, som filsystemet afviser.';
+  @override
+  String renameNameTaken(String name) => 'Mappen har allerede “$name”.';
+  @override
   String get actionMove => 'Flyt';
   @override
   String get saveAndClose => 'Gem og luk';

@@ -1062,6 +1062,10 @@ final class EstonianStrings extends Strings {
   @override
   String get actionRename => 'Nime muuda';
   @override
+  String get renameNameInvalid => 'Nimes on märk, mida failisüsteem ei luba.';
+  @override
+  String renameNameTaken(String name) => 'Selles kaustas on juba „$name“.';
+  @override
   String get actionMove => 'Liiguta';
   @override
   String get saveAndClose => 'Salvesta ja sulge';

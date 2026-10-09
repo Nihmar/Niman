@@ -1091,6 +1091,11 @@ final class CatalanStrings extends Strings {
   @override
   String get actionRename => 'Canvia el nom';
   @override
+  String get renameNameInvalid =>
+      'El nom conté un caràcter que el sistema de fitxers rebutja.';
+  @override
+  String renameNameTaken(String name) => 'Aquesta carpeta ja té «$name».';
+  @override
   String get actionMove => 'Mou';
   @override
   String get saveAndClose => 'Guarda i tanca';

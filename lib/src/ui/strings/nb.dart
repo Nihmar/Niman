@@ -1066,6 +1066,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get actionRename => 'Endre navn';
   @override
+  String get renameNameInvalid =>
+      'Navnet inneholder et tegn filsystemet avviser.';
+  @override
+  String renameNameTaken(String name) => 'Mappen har allerede «$name».';
+  @override
   String get actionMove => 'Flytt';
   @override
   String get saveAndClose => 'Lagre og lukk';
