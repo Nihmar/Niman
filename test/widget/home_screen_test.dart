@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/home/home_action.dart';
+import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/home/home_tile.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -14,6 +15,7 @@ import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/fake_sync_service.dart';
 import '../fakes/fake_todo_source.dart';
 import '../fakes/shell_harness.dart';
 
@@ -73,6 +75,23 @@ void main() {
       tester.getTopLeft(tile('recent')).dx,
       reason: 'one column',
     );
+  });
+
+  testWidgets('a sync that brings only the Home file shows it (#680)', (
+    tester,
+  ) async {
+    final sync = FakeSyncService();
+    controller.syncService = sync;
+    await open(tester, _phone);
+    await goHome(tester);
+    expect(tile('recent'), findsOne);
+
+    controller.libraryHome = HomeLayout.defaults.hide('recent');
+    sync.emitChanges({HomeFile.filePath});
+    await tester.pump(const Duration(milliseconds: 400));
+    await settle(tester);
+
+    expect(tile('recent'), findsNothing);
   });
 
   testWidgets('desktop: Home is in the rail, the tiles on the grid', (
