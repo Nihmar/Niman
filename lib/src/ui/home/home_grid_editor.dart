@@ -71,7 +71,9 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
 
   void _end({required bool drop}) {
     final id = _dragging;
-    final tile = id == null || !drop ? null : _editing.layout[id];
+    // The tile as drawn and dragged, not as stored: two a merge left on
+    // the same cells, or one with no cell, are drawn settled (#681).
+    final tile = id == null || !drop ? null : _editing.layout.settled()[id];
     final target = tile == null ? null : _targetFor(tile);
     setState(() {
       _dragging = null;
