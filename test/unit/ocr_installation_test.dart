@@ -194,6 +194,20 @@ void main() {
     expect(ocr.engine, isNull);
   });
 
+  test(
+    'a check that throws leaves the engine failed, not Downloaded (#607)',
+    () async {
+      final ocr = installation(
+        engineBuild: build,
+        probe: (_) async => throw const FileSystemException('locked'),
+      );
+      await ocr.load();
+      await expectLater(ocr.download(build), completes);
+      expect(ocr.stateOf(build), isA<DownloadFailed>());
+      expect(ocr.engine, isNull);
+    },
+  );
+
   test('a download that does not match its SHA-256 fails for good', () async {
     final ocr = installation();
     await ocr.load();

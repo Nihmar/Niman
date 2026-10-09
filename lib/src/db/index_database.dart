@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:niman/src/db/tag_counts.dart' as tag_counts;
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 part 'index_database.g.dart';
@@ -263,9 +264,26 @@ class IndexDatabase extends _$IndexDatabase {
   static const String _createRecentIndex =
       'CREATE INDEX IF NOT EXISTS notes_recent ON notes (is_dir, modified)';
 
+  /// Builds the `notes_recent` index the Home's recently modified tile
+  /// (#535) walks, when this file lacks it; nothing when it has it.
+  ///
+  /// A new or upgraded file gets it as it is created, empty. A file from
+  /// before the index gets it here, which the library calls after it is
+  /// open and its tree shown (#671): built on open, it held the very first
+  /// launch after the update while SQLite sorted every row. Not declared
+  /// as a `@TableIndex` either: that is a schema bump, and an upgrade of
+  /// this file is a wipe and a full rescan. Until it exists, the tile's
+  /// query reads the table, which still answers.
+  Future<void> ensureRecentIndex() => customStatement(_createRecentIndex);
+
+  /// Builds the tag counts (#692) on a file from before them, the way
+  /// [ensureRecentIndex] builds its index, and for the same reason.
+  Future<void> ensureTagCounts() => tag_counts.ensureTagCounts(this);
+
   /// The tables an upgrade drops, dependents before the rows they key on.
   static const List<String> _allTables = [
     'notes_fts',
+    tag_counts.tagCountsTable,
     'pending_links',
     'frontmatter_fields',
     'note_links',
@@ -280,6 +298,8 @@ class IndexDatabase extends _$IndexDatabase {
     onCreate: (m) async {
       await m.createAll();
       await m.database.customStatement(_createFts);
+      await m.database.customStatement(_createRecentIndex);
+      await tag_counts.createTagCounts(m.database);
     },
     // Every row here is derived from the notes on disk, so an upgrade is a
     // wipe and a rescan: the file is emptied and recreated at the new
@@ -293,17 +313,13 @@ class IndexDatabase extends _$IndexDatabase {
       }
       await m.createAll();
       await m.database.customStatement(_createFts);
+      await m.database.customStatement(_createRecentIndex);
+      await tag_counts.createTagCounts(m.database);
     },
     beforeOpen: (details) async {
       // Belt and braces: an index file that predates the FTS table (or
       // lost it) rebuilds it here rather than failing every search.
       await customStatement(_createFts);
-      // The Home's recently modified tile (#535) walks this one from its
-      // end. Built here, not declared as a `@TableIndex`: a declared one
-      // is a schema bump, and an upgrade of this file is a wipe and a full
-      // rescan — a million notes reread for one index the rows on hand
-      // can build. `IF NOT EXISTS` makes it a one-time cost.
-      await customStatement(_createRecentIndex);
       // Dropping the old tables freed their pages but kept them in the
       // file: without this, an index that held every note's text stays
       // that size, empty. The vacuum also puts the file on the

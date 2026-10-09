@@ -131,6 +131,34 @@ void main() {
     expect(content, contains('code: "007"\n'));
   });
 
+  testWidgets('a value YAML would cut short is quoted whole (#693)', (
+    tester,
+  ) async {
+    controller.libraryHome = _withActions([
+      const HomeAction(
+        id: 'r',
+        label: 'Ref',
+        kind: HomeActionKind.newNote,
+        name: FieldPreset.value('Ref'),
+        fields: {
+          'ref': FieldPreset.value('Issue #42'),
+          'quoted': FieldPreset.value("'as typed'"),
+        },
+        open: false,
+      ),
+    ]);
+    await open(tester);
+    await press(tester, 'r');
+
+    final content = controller.contentOf('Ref.md')!;
+    expect(content, contains('ref: "Issue #42"\n'));
+    expect(
+      content,
+      contains("quoted: 'as typed'\n"),
+      reason: 'YAML of its own',
+    );
+  });
+
   testWidgets('a fixed value answers the template, the name is asked', (
     tester,
   ) async {

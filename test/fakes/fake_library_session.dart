@@ -992,6 +992,25 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<HomeLayout> editHome({
+    required HomeLayout from,
+    required HomeLayout to,
+    required bool onDevice,
+  }) async {
+    await holdHomeWrites;
+    final current = onDevice ? deviceHome : libraryHome;
+    final edited = (current ?? (onDevice ? from : HomeLayout.defaults))
+        .withEdit(from: from, to: to);
+    if (onDevice) {
+      deviceHome = edited;
+    } else {
+      libraryHome = edited;
+      deviceHome = null;
+    }
+    return edited;
+  }
+
+  @override
   Future<void> clearDeviceHome() async => deviceHome = null;
 
   @override

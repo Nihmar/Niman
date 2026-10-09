@@ -631,9 +631,12 @@ final class LibraryController implements LibrarySession {
     // a folder full of them never holds the library shut.
     unawaited(_sweepStaleTempFiles(abs));
     _bump();
-    if (!blockingScan) {
-      _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
-    }
+    // What a file from before the Home lacks (#671, #692) is built here,
+    // with the reconciliation and behind the tree, not on open.
+    _reconcileTimer = Timer(resumeReconcileDelay, () async {
+      await _ensureRecentIndex(indexDb);
+      if (!blockingScan) await _safeRescan(abs);
+    });
     if (contentOwed) unawaited(_indexContents(abs));
   }
 
@@ -1739,6 +1742,22 @@ final class LibraryController implements LibrarySession {
     final clock = Stopwatch()..start();
     await db.customSelect('SELECT 1').get();
     _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
+  }
+
+  /// [IndexDatabase.ensureRecentIndex] and [IndexDatabase.ensureTagCounts],
+  /// logged rather than thrown: their readers answer without them, only
+  /// slower.
+  Future<void> _ensureRecentIndex(IndexDatabase db) async {
+    final clock = Stopwatch()..start();
+    try {
+      await db.ensureRecentIndex();
+      await db.ensureTagCounts();
+      _log.debug(
+        'notes_recent and tag counts ready in ${clock.elapsedMilliseconds} ms',
+      );
+    } on Object catch (error) {
+      _log.warning('notes_recent or tag counts not built: $error');
+    }
   }
 
   Future<void> _safeRescan(String abs) async {

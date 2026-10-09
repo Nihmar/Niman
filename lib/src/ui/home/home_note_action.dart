@@ -183,8 +183,18 @@ String _fieldYaml(String key, String value) {
     }
     return frontmatterListYaml(frontmatterListItems(text));
   }
+  // A string read back must be the text itself, or YAML cut something:
+  // `Issue #42` reads as `Issue`, the rest a comment (#693). A value the
+  // user quoted is YAML of its own, kept as written (`"007"`).
+  final quoted = RegExp(r'''^(".*"|'.*')$''').hasMatch(text);
   final typed =
       !text.contains('\n') &&
-      yamlReadsBack(text, (read) => read != null && read is! Map);
+      yamlReadsBack(
+        text,
+        (read) =>
+            read != null &&
+            read is! Map &&
+            (read is! String || read == text || quoted),
+      );
   return typed ? text : yamlString(text);
 }

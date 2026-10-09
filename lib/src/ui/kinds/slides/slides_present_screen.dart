@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slides_alone_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_overview.dart';
@@ -60,6 +61,7 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
   Timer? _hintTimer;
   bool _leaving = false;
   final TalkClock _clock = TalkClock();
+  final MathCache _mathCache = MathCache();
 
   int get _count => widget.slides.length;
   int get _index => widget.place.value.clamp(0, _count - 1);
@@ -80,6 +82,7 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
     widget.place.removeListener(_moved);
     _barTimer?.cancel();
     _hintTimer?.cancel();
+    _mathCache.dispose();
     super.dispose();
   }
 
@@ -214,6 +217,7 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
         slides: widget.slides,
         selected: _ringed,
         resolveEmbed: widget.resolveEmbed,
+        mathCache: _mathCache,
         onPick: _pick,
       );
     } else if (_presenter) {
@@ -221,6 +225,7 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
         slides: widget.slides,
         index: _index,
         resolveEmbed: widget.resolveEmbed,
+        mathCache: _mathCache,
         elapsed: () => _clock.elapsed,
         paused: _clock.paused,
         onGo: _go,
@@ -236,6 +241,7 @@ final class _SlidesPresentScreenState extends State<SlidesPresentScreen> {
         index: _index,
         count: _count,
         resolveEmbed: widget.resolveEmbed,
+        mathCache: _mathCache,
         black: _black,
         bar: _bar,
         touch: widget.touch,

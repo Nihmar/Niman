@@ -281,8 +281,15 @@ final class OcrInstallation extends ChangeNotifier {
       return;
     }
     _log.warning('engine ${build.target} does not load on this device');
-    await _files.delete(build);
+    // Failed first: the probe may have loaded the library, and Windows
+    // then refuses the delete until the app exits (#607), as [delete]
+    // says; the next launch deletes it.
     _set(build, const DownloadFailed('does not load on this device'));
+    try {
+      await _files.delete(build);
+    } on FileSystemException catch (error) {
+      _log.warning('${build.id} not deleted: ${error.osError ?? error}');
+    }
   }
 
   /// Deletes [item]'s file.

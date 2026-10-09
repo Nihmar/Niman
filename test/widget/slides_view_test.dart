@@ -8,8 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slides_view.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -53,7 +55,6 @@ final class _Host implements NoteKindHost {
 
 const String _deck =
     '---\ntype: slides\n---\n\n# Alpha\n\n---\n\n## Beta\n\nNote: say beta\n';
-
 Finder _text(String text) => find.textContaining(text, findRichText: true);
 
 /// The window presenting takes full screen, recorded.
@@ -100,6 +101,61 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('1 / 2'), findsOneWidget);
     expect(_text('Alpha'), findsWidgets);
+
+    final caches = {
+      for (final frame in tester.widgetList<SlideFrame>(
+        find.byType(SlideFrame),
+      ))
+        frame.mathCache,
+    };
+    expect(caches, hasLength(1), reason: 'one for the deck (#672)');
+  });
+
+  testWidgets('wide: the keys move the slide at once, though something '
+      'else held the focus when the note opened', (tester) async {
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    // The tree the note was opened from keeps the focus it had.
+    final tree = FocusNode();
+    addTearDown(tree.dispose);
+    final open = ValueNotifier(false);
+    addTearDown(open.dispose);
+    await tester.pumpWidget(
+      _app(
+        Column(
+          children: [
+            Focus(focusNode: tree, autofocus: true, child: const Text('tree')),
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: open,
+                builder: (context, open, _) => open
+                    ? SlidesNoteView(text: _deck, host: _Host('focus.md'))
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tree.hasFocus, isTrue);
+
+    open.value = true;
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text('2 / 2'), findsOneWidget);
+
+    // A thumbnail clicked while the focus is elsewhere brings it back.
+    tree.requestFocus();
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('slide-thumb-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('1 / 2'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text('2 / 2'), findsOneWidget, reason: 'after a thumbnail');
   });
 
   testWidgets('narrow: a swipe moves the slide; Markdown leaves the view', (
@@ -127,6 +183,30 @@ void main() {
     expect(markdown, 1);
   });
 
+  testWidgets('a link with no target is not followed (#674)', (tester) async {
+    final links = <String>[];
+    final math = MathCache();
+    addTearDown(math.dispose);
+    Future<void> slide(String markdown) => _show(
+      tester,
+      SlideFrame(
+        markdown: markdown,
+        resolveEmbed: (_) async => null,
+        mathCache: math,
+        onTapLink: links.add,
+      ),
+      const Size(1600, 900),
+    );
+
+    await slide('[nowhere]()');
+    await tester.tapOnText(find.textRange.ofSubstring('nowhere'));
+    expect(links, isEmpty);
+
+    await slide('[there](a.md)');
+    await tester.tapOnText(find.textRange.ofSubstring('there'));
+    expect(links, ['a.md'], reason: 'a link with one is');
+  });
+
   testWidgets('an edit that removes the slide on screen falls back', (
     tester,
   ) async {
@@ -141,6 +221,34 @@ void main() {
     await tester.pumpWidget(_app(SlidesNoteView(text: '# Only', host: host)));
     await tester.pumpAndSettle();
     expect(find.text('1 / 1'), findsOneWidget);
+  });
+
+  testWidgets('a long deck is split off the UI isolate, the old one shown '
+      'meanwhile (#695)', (tester) async {
+    final host = _Host('long.md');
+    slidePlaceOf('long.md').value = 0;
+    final pad = 'word ' * (SlidesNoteView.isolateFrom ~/ 5);
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: host),
+      const Size(1200, 800),
+    );
+    expect(find.text('1 / 2'), findsOneWidget);
+
+    await tester.pumpWidget(
+      _app(
+        SlidesNoteView(text: '$_deck\n---\n\n# Gamma\n\n$pad\n', host: host),
+      ),
+    );
+    expect(find.text('1 / 2'), findsOneWidget, reason: 'not split yet');
+
+    for (var i = 0; i < 250 && find.text('1 / 3').evaluate().isEmpty; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    expect(find.text('1 / 3'), findsOneWidget);
   });
 
   testWidgets("a renamed note shows the new path's slide, swipe and count", (

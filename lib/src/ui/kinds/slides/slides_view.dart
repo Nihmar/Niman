@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show wideBreakpoint;
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/slides/slide_dots.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
@@ -33,6 +35,12 @@ final class SlidesNoteView extends ConsumerStatefulWidget {
   /// The note's window: its path, pictures and links.
   final NoteKindHost host;
 
+  /// From this length on, an edit's split runs on a background isolate
+  /// (#695): a scan of every block per keystroke is a long deck's jank.
+  /// A short note splits in less than the hop costs.
+  @visibleForTesting
+  static const int isolateFrom = 64 * 1024;
+
   @override
   ConsumerState<SlidesNoteView> createState() => _SlidesNoteViewState();
 }
@@ -44,26 +52,67 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
   late final PageController _pages = PageController(initialPage: _index);
   final ScrollController _strip = ScrollController();
 
+  /// The deck's formulas, shared by the slide, the row and the swipe
+  /// (#672).
+  final MathCache _mathCache = MathCache();
+
   int get _index => _place.value.clamp(0, _slides.length - 1);
+
+  /// Bumped by every split: a background one that lands after a later
+  /// one is dropped.
+  int _splits = 0;
+
+  /// Splits [text], at once when it is short; otherwise the slides on
+  /// screen stay until the background split lands.
+  void _split(String text) {
+    final at = ++_splits;
+    if (text.length < SlidesNoteView.isolateFrom) {
+      _slides = splitSlides(text);
+      return;
+    }
+    unawaited(
+      _splitOff(text).then((slides) {
+        if (!mounted || at != _splits) return;
+        setState(() => _slides = slides);
+      }),
+    );
+  }
+
+  /// The keys' way in: the arrows move the slide wherever in the view
+  /// the focus sits.
+  final FocusNode _focus = FocusNode(debugLabel: 'slides');
 
   @override
   void initState() {
     super.initState();
     _live++;
     _place.addListener(_placeMoved);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _takeKeys());
+  }
+
+  /// Takes the keyboard on a wide window, as a note's editor does. Asked
+  /// for, not left to `autofocus`: that gives way to whatever its scope
+  /// already focused — the tree the note was opened from — and the arrows
+  /// went there until a click in the slide.
+  void _takeKeys() {
+    if (!mounted || MediaQuery.sizeOf(context).width < wideBreakpoint) return;
+    _focus.requestFocus();
   }
 
   @override
   void didUpdateWidget(covariant SlidesNoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text) _slides = splitSlides(widget.text);
+    if (oldWidget.text != widget.text) _split(widget.text);
     if (widget.host.notePath != _path) {
       _place.removeListener(_placeMoved);
       _path = widget.host.notePath;
       _place = slidePlaceOf(_path)..addListener(_placeMoved);
       // The swipe and the row still show the old path's slide; they move
       // once this frame is built, not in the middle of it.
-      WidgetsBinding.instance.addPostFrameCallback((_) => _placeMoved());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _placeMoved();
+        _takeKeys();
+      });
     }
   }
 
@@ -76,6 +125,8 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
     _place.removeListener(_placeMoved);
     _pages.dispose();
     _strip.dispose();
+    _mathCache.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -163,6 +214,7 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
   SlideFrame _frame(Slide slide, {bool live = true}) => SlideFrame(
     markdown: slide.markdown,
     resolveEmbed: widget.host.resolveEmbed,
+    mathCache: _mathCache,
     onTapLink: live ? (href) => widget.host.openLink(context, href) : null,
     onTapWikiLink: live
         ? (inner) => widget.host.openWikiLink(context, inner)
@@ -174,18 +226,27 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     _watchTurn(context);
-    return Focus(
-      autofocus: wide,
-      onKeyEvent: _onKey,
-      child: wide
-          ? SlidesWideLayout(
-              slides: _slides,
-              index: _index,
-              strip: _strip,
-              frame: _frame,
-              onGo: _go,
-            )
-          : _narrow(context),
+    // A press anywhere in the view takes the keys back: a thumbnail, a
+    // button, the space between, take no focus of their own, and the
+    // arrows went on to whatever held it.
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) {
+        if (!_focus.hasFocus) _focus.requestFocus();
+      },
+      child: Focus(
+        focusNode: _focus,
+        onKeyEvent: _onKey,
+        child: wide
+            ? SlidesWideLayout(
+                slides: _slides,
+                index: _index,
+                strip: _strip,
+                frame: _frame,
+                onGo: _go,
+              )
+            : _narrow(context),
+      ),
     );
   }
 
@@ -264,3 +325,9 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
     );
   }
 }
+
+/// [text] split on a background isolate. Top level: a closure made in the
+/// state would carry the state, and the widget tree with it, to the
+/// isolate.
+Future<List<Slide>> _splitOff(String text) =>
+    Isolate.run(() => splitSlides(text));

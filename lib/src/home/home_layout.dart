@@ -254,6 +254,28 @@ final class HomeLayout {
     return changed ? HomeLayout(next) : this;
   }
 
+  /// This layout with the edit that turned [from] into [to] made on it:
+  /// each tile [to] added, changed or dropped is put or removed here, and
+  /// every other tile stays as this layout has it (#691).
+  ///
+  /// An edit is made on the Home on screen, and the file may have moved
+  /// on since it was read — a sync, a rename carried into an action. The
+  /// edit then lands on what the file holds, not on the snapshot.
+  HomeLayout withEdit({required HomeLayout from, required HomeLayout to}) {
+    var next = this;
+    for (final tile in from.tiles) {
+      if (to[tile.id] == null) next = next.remove(tile.id);
+    }
+    for (final tile in to.tiles) {
+      final before = from[tile.id];
+      if (before == null || !_sameTile(before, tile)) next = next.put(tile);
+    }
+    return next;
+  }
+
+  static bool _sameTile(HomeTile a, HomeTile b) =>
+      jsonEncode(a.toJson()) == jsonEncode(b.toJson());
+
   /// The file's object: one key per tile, in [tiles] order.
   Map<String, Object?> toJson() => {for (final t in tiles) t.id: t.toJson()};
 

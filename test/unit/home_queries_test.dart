@@ -71,6 +71,30 @@ void main() {
       },
     );
 
+    test('a file from before the index opens without building it, and '
+        'builds it when asked (#671)', () async {
+      Future<bool> hasIndex(IndexDatabase db) async =>
+          (await db
+                  .customSelect(
+                    "SELECT 1 FROM sqlite_master WHERE name = 'notes_recent'",
+                  )
+                  .get())
+              .isNotEmpty;
+      final file = File(p.join(root.path, 'index.sqlite'));
+      final old = IndexDatabase(NativeDatabase(file));
+      expect(await hasIndex(old), isTrue, reason: 'a new file has it');
+      await old.customStatement('DROP INDEX notes_recent');
+      await old.close();
+
+      final opened = IndexDatabase(NativeDatabase(file));
+      addTearDown(opened.close);
+      expect(await hasIndex(opened), isFalse, reason: 'not built on open');
+      expect(await NoteDao(opened).recentlyModified(), isEmpty);
+
+      await opened.ensureRecentIndex();
+      expect(await hasIndex(opened), isTrue);
+    });
+
     test('walks the notes_recent index instead of sorting the table', () async {
       await indexer.fullScan(root.path);
       final plan = await db
@@ -145,6 +169,76 @@ void main() {
 
       final tags = await TagRepo(db).tagCounts(limit: 2);
       expect(tags.map((t) => t.name), ['all', 't0']);
+    });
+  });
+
+  group('the tag counts the index keeps (#692)', () {
+    /// The counts grouped from the tag rows, as they were read before.
+    Future<List<(String, int)>> grouped(IndexDatabase db) async => [
+      for (final row
+          in await db
+              .customSelect(
+                'SELECT tag, count(DISTINCT note_id) AS c FROM note_tags '
+                'GROUP BY tag ORDER BY c DESC, tag ASC',
+              )
+              .get())
+        (row.read<String>('tag'), row.read<int>('c')),
+    ];
+
+    Future<List<(String, int)>> kept(IndexDatabase db) async => [
+      for (final t in await TagRepo(db).tagCounts()) (t.name, t.count),
+    ];
+
+    test('follow every write, a tag in two sources counted once', () async {
+      write('a.md', content: '---\ntags: [x]\n---\n#x #y\n');
+      write('b.md', content: '---\ntags: [x, z]\n---\n');
+      await indexer.fullScan(root.path);
+      expect(await kept(db), [('x', 2), ('y', 1), ('z', 1)]);
+
+      write('a.md', minutesAgo: -1, content: '#y only, a longer text\n');
+      File(p.join(root.path, 'b.md')).deleteSync();
+      await indexer.fullScan(root.path);
+      expect(await kept(db), [('y', 1)]);
+      expect(await kept(db), await grouped(db));
+    });
+
+    test('are read off their index, the top first', () async {
+      final plan = await db
+          .customSelect(
+            'EXPLAIN QUERY PLAN SELECT tag, c FROM tag_counts '
+            'ORDER BY c DESC, tag ASC LIMIT 12',
+          )
+          .get();
+      final detail = plan.map((r) => r.read<String>('detail')).join('\n');
+      expect(detail, contains('tag_counts_c'));
+      expect(detail, isNot(contains('TEMP B-TREE')));
+    });
+
+    test('a file from before them groups the rows, then is filled from '
+        'them when asked', () async {
+      write('a.md', content: '---\ntags: [x]\n---\n#y\n');
+      write('b.md', content: '#x\n');
+      final file = File(p.join(root.path, 'index.sqlite'));
+      final old = IndexDatabase(NativeDatabase(file));
+      await Indexer(old).fullScan(root.path);
+      for (final drop in [
+        'DROP TRIGGER tag_counts_add',
+        'DROP TRIGGER tag_counts_drop',
+        'DROP TABLE tag_counts',
+      ]) {
+        await old.customStatement(drop);
+      }
+      await old.close();
+
+      final opened = IndexDatabase(NativeDatabase(file));
+      addTearDown(opened.close);
+      expect(await kept(opened), [('x', 2), ('y', 1)], reason: 'grouped');
+
+      await opened.ensureTagCounts();
+      expect(await kept(opened), [('x', 2), ('y', 1)]);
+      write('c.md', content: '#y\n');
+      await Indexer(opened).fullScan(root.path);
+      expect(await kept(opened), [('x', 2), ('y', 2)], reason: 'counting');
     });
   });
 

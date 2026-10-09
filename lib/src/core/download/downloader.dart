@@ -218,7 +218,14 @@ final class Downloader<T extends Downloadable> {
         '$speed MB/s)',
       );
       setState(item, Downloaded(bytes));
-      await onInstalled(item);
+      // A check after the download that throws (a delete Windows refuses,
+      // a probe that fails) leaves no item Downloaded that is not (#607).
+      try {
+        await onInstalled(item);
+      } on Object catch (error) {
+        log.warning('download ${item.id}: install check failed: $error');
+        setState(item, DownloadFailed('install check failed: $error'));
+      }
       return null;
     } on DownloadCancelled {
       log.info(

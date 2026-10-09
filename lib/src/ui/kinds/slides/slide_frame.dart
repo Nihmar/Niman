@@ -16,6 +16,7 @@ final class SlideFrame extends StatefulWidget {
   const new({
     required this.markdown,
     required this.resolveEmbed,
+    required this.mathCache,
     this.onTapLink,
     this.onTapWikiLink,
     this.live = true,
@@ -27,6 +28,10 @@ final class SlideFrame extends StatefulWidget {
 
   /// Resolves a picture's target to an absolute path.
   final Future<String?> Function(String target) resolveEmbed;
+
+  /// The formulas typeset so far: one cache for the deck, which owns
+  /// and disposes it (#672), not one per slide drawn.
+  final MathCache mathCache;
 
   /// Follows a link's href.
   final ValueChanged<String>? onTapLink;
@@ -43,7 +48,6 @@ final class SlideFrame extends StatefulWidget {
 
 final class _SlideFrameState extends State<SlideFrame> {
   final ReadParser _parser = ReadParser();
-  final MathCache _mathCache = MathCache();
   late SourceBuffer _buffer = SourceBuffer.fromText(widget.markdown);
 
   @override
@@ -55,12 +59,6 @@ final class _SlideFrameState extends State<SlideFrame> {
   }
 
   @override
-  void dispose() {
-    _mathCache.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final onTapLink = widget.onTapLink;
     final view = MediaQuery(
@@ -69,12 +67,16 @@ final class _SlideFrameState extends State<SlideFrame> {
       child: MarkdownReadView(
         buffer: _buffer,
         parser: _parser,
-        mathCache: _mathCache,
+        mathCache: widget.mathCache,
         padding: slidePadding,
         embedResolver: widget.resolveEmbed,
+        // A link with no target (`[x]()`) goes nowhere (#674): followed,
+        // it resolved as a note named nothing.
         onTapLink: onTapLink == null
             ? null
-            : (text, href) => onTapLink(href ?? ''),
+            : (text, href) {
+                if (href != null && href.trim().isNotEmpty) onTapLink(href);
+              },
         onTapWikiLink: widget.onTapWikiLink,
       ),
     );

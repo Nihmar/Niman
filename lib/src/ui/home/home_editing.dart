@@ -56,12 +56,34 @@ final class HomeEditing extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Shows [next] at once and writes it where the Home is kept.
+  /// Shows [next] at once and makes the edit where the Home is kept: on
+  /// the Home kept there now, which a sync or a rename may have moved on
+  /// since it was read, and not over it (#691). What that gives is shown
+  /// once written, unless another edit came first.
   Future<void> change(HomeLayout next) async {
+    final from = layout;
+    final device = onDevice;
     layout = next;
     notifyListeners();
-    await _write(() => _ops.setHome(next, onDevice: onDevice));
-    if (!onDevice) _library = next;
+    final at = _edits + 1;
+    await _write(() async {
+      final kept = await _ops.editHome(from: from, to: next, onDevice: device);
+      if (!device) _library = kept;
+      if (_disposed || at != _edits || kept == layout) return;
+      layout = kept;
+      notifyListeners();
+    });
+  }
+
+  /// Puts the default Home back, where the Home is kept: the whole of it,
+  /// whatever the file holds.
+  Future<void> reset() async {
+    const next = HomeLayout.defaults;
+    final device = onDevice;
+    layout = next;
+    notifyListeners();
+    await _write(() => _ops.setHome(next, onDevice: device));
+    if (!device) _library = next;
   }
 
   /// Detaches this device's Home, starting from the one shown.
@@ -78,9 +100,6 @@ final class HomeEditing extends ChangeNotifier {
     notifyListeners();
     await _write(_ops.clearDeviceHome);
   }
-
-  /// Puts the default Home back, where the Home is kept.
-  Future<void> reset() => change(HomeLayout.defaults);
 
   /// Queues a write behind the ones not landed yet; a failed one is
   /// logged and leaves the Home on screen as it was edited, to be written

@@ -3,6 +3,7 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:path/path.dart' as p;
@@ -11,14 +12,23 @@ import 'package:path/path.dart' as p;
 /// frontmatter and a leading heading left out, whole lines only.
 ///
 /// Only the first [bytes] are read, so a novel-length note costs what a
-/// short one does; the read is asynchronous, off the UI isolate's thread.
-/// Empty when the note cannot be read.
-Future<String> notePreview(String root, String path, {int bytes = 4096}) async {
+/// short one does; the read runs on a background isolate, as every open
+/// is a FUSE round trip on Android (#688). Empty when the note cannot be
+/// read.
+Future<String> notePreview(String root, String path, {int bytes = 4096}) {
+  final file = p.join(root, path);
+  return Isolate.run(() => _preview(file, bytes));
+}
+
+String _preview(String path, int bytes) {
   final List<int> head;
   try {
-    head = await File(p.join(root, path))
-        .openRead(0, bytes)
-        .fold<List<int>>(<int>[], (all, chunk) => all..addAll(chunk));
+    final file = File(path).openSync();
+    try {
+      head = file.readSync(bytes);
+    } finally {
+      file.closeSync();
+    }
   } on FileSystemException {
     return '';
   }

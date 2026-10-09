@@ -83,6 +83,15 @@ void main() {
     }
     expect(treeRect.left, ShellRail.width + 1 + gap);
     expect(dockRect.right, size.width - gap);
+    // The rail's buttons stand off the tree by the islands' gap (and the
+    // base's pixel), no more: the glyphs sit near the middle between the
+    // window's edge and the panel.
+    final button = tester.getRect(find.byKey(const Key('rail-files')));
+    expect(treeRect.left - button.right, gap + 1);
+    expect(
+      (button.left - (treeRect.left - button.right)).abs(),
+      lessThanOrEqualTo(gap),
+    );
     // The dividers are the base between two islands.
     expect(panesRect.left, treeRect.right + ResizeDivider.width);
     expect(dockRect.left, panesRect.right + ResizeDivider.width);
@@ -113,11 +122,22 @@ void main() {
     expect(ground.color, scheme.surface);
   });
 
-  testWidgets('the tabs start at the panes island', (tester) async {
-    await pumpAt(tester, size);
-    final tab = tester.getRect(find.byKey(const Key('note-tab-0')));
-    expect(tab.left, tester.getRect(panes).left);
-  });
+  testWidgets(
+    'the tabs start at the panes island, with the tree and without',
+    (tester) async {
+      await pumpAt(tester, size);
+      Rect tab() => tester.getRect(find.byKey(const Key('note-tab-0')));
+      expect(tab().left, tester.getRect(panes).left);
+
+      await tester.tap(find.byKey(const Key('toggle-sidebar')));
+      await settle(tester);
+      expect(tree, findsNothing);
+      expect(tab().left, tester.getRect(panes).left);
+    },
+    // A desktop draws the bar's toggle at its own density: on a phone's
+    // the tabs lined up while a desktop put them 6 px left.
+    variant: TargetPlatformVariant.desktop(),
+  );
 
   testWidgets('the tree and the side panel come and go, and the panes keep '
       'every other edge', (tester) async {

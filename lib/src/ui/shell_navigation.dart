@@ -206,8 +206,15 @@ final class ShellRail extends StatelessWidget {
     super.key,
   });
 
-  /// The rail's width, and the note column's first tax on the window.
-  static const double width = 48;
+  /// The rail's width, and the note column's first tax on the window: a
+  /// button and the margin left of it, no margin right. The islands' own
+  /// gap is the space on that side, so the glyph sits as far from the
+  /// panel as from the window's edge, near enough, and the active pill
+  /// stands off the panel as one island does off the next.
+  static const double width = _margin + _RailButton.size;
+
+  /// The space between the window's edge and the buttons.
+  static const double _margin = 5;
 
   /// The destinations shown, in order ([visibleDestinations]).
   final List<ShellDestination> destinations;
@@ -233,8 +240,9 @@ final class ShellRail extends StatelessWidget {
       key: const Key('shell-rail'),
       width: width,
       color: Theme.of(context).colorScheme.surfaceContainer,
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.only(left: _margin, top: 6, bottom: 6),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final destination in places)
             _RailButton(
@@ -280,6 +288,9 @@ final class _RailButton extends StatelessWidget {
     required this.onPressed,
   });
 
+  /// The button's side.
+  static const double size = 38;
+
   final Key buttonKey;
   final IconData icon;
   final IconData selectedIcon;
@@ -303,12 +314,12 @@ final class _RailButton extends StatelessWidget {
         icon: Icon(selected ? selectedIcon : icon),
         iconSize: 20,
         padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(width: 38, height: 38),
+        constraints: const BoxConstraints.tightFor(width: size, height: size),
         style: IconButton.styleFrom(
           backgroundColor: selected ? scheme.surfaceContainerHigh : null,
           foregroundColor: selected ? scheme.primary : scheme.onSurfaceVariant,
-          minimumSize: const Size.square(38),
-          fixedSize: const Size.square(38),
+          minimumSize: const Size.square(size),
+          fixedSize: const Size.square(size),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
