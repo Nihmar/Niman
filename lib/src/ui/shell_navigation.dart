@@ -103,14 +103,19 @@ List<({ShellDestination destination, bool hidden})> placedDestinations(
   NavigationLayout layout,
 ) {
   final all = {for (final d in shellDestinations()) d.name: d};
+  final placed = layout.place(all.keys.toList(), locked: lockedDestinations);
+  // A bar needs two destinations (`NavigationBar` asserts it, #667): a
+  // layout that hides all but Settings — a file edited by hand, a build
+  // that dropped one — shows the first hidden ones back.
+  var missing = minShownDestinations - placed.where((p) => !p.hidden).length;
   return [
-    for (final placed in layout.place(
-      all.keys.toList(),
-      locked: lockedDestinations,
-    ))
-      (destination: all[placed.name]!, hidden: placed.hidden),
+    for (final p in placed)
+      (destination: all[p.name]!, hidden: p.hidden && missing-- <= 0),
   ];
 }
+
+/// The fewest destinations the bar and the rail show.
+const int minShownDestinations = 2;
 
 /// The destinations [layout] shows, in its order.
 List<ShellDestination> visibleDestinations(NavigationLayout layout) => [

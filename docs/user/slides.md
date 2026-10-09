@@ -71,7 +71,8 @@ the slideshow icon on the bar brings the slides back.
   Space, Page Down, Enter or a click go forward; ← ↑ Backspace or Page Up
   go back; Home / End go to the first / last slide; `B` blacks the screen
   out and back; `O` opens the overview of every slide (arrows and Enter,
-  or a click, pick one); `Esc` stops, on the slide where the talk stopped.
+  or a click, pick one); `Esc` stops, on the slide where the talk stopped,
+  and gives the window back as it was (full screen stays full screen).
   Moving the mouse shows a bar — ‹ 3 / 7 › · Overview · Notes · Exit —
   that fades after two seconds of stillness, with the cursor. A clicker
   works as it is: it sends Page Up / Page Down.
@@ -84,7 +85,8 @@ the slideshow icon on the bar brings the slides back.
   they are presented in landscape, or press **Present**. Tap the right
   third for the next slide and the left third for the one before, or
   swipe; swipe down to stop. A hint says where to tap each time
-  presenting starts. Turning the phone upright again stops a talk that
+  presenting starts. The presenter view is not laid out for a phone:
+  `Alt+F5` on a keyboard plugged into one presents the slide alone. Turning the phone upright again stops a talk that
   began by turning it.
 
 While slides are presented the screen stays on — no dimming, no lock —

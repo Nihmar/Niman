@@ -1,7 +1,10 @@
 // #534: the slides kind's view — the slide on screen, its notes, the
 // thumbnail row and the keys on a wide window, the swipe on a phone.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -10,6 +13,9 @@ import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slides_view.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/window_controller.dart';
+
+import '../fakes/fake_window_controller.dart';
 
 final class _Host implements NoteKindHost {
   new(this.notePath, {this.showMarkdown});
@@ -50,11 +56,24 @@ const String _deck =
 
 Finder _text(String text) => find.textContaining(text, findRichText: true);
 
-Future<void> _show(WidgetTester tester, Widget view, Size size) async {
+/// The window presenting takes full screen, recorded.
+final FakeWindowController _window = FakeWindowController();
+
+Widget _app(Widget view, {WindowController? window}) => ProviderScope(
+  overrides: [windowControllerProvider.overrideWithValue(window ?? _window)],
+  child: MaterialApp(home: Scaffold(body: view)),
+);
+
+Future<void> _show(
+  WidgetTester tester,
+  Widget view,
+  Size size, {
+  WindowController? window,
+}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(MaterialApp(home: Scaffold(body: view)));
+  await tester.pumpWidget(_app(view, window: window));
   await tester.pumpAndSettle();
 }
 
@@ -119,13 +138,7 @@ void main() {
       const Size(1200, 800),
     );
     expect(find.text('2 / 2'), findsOneWidget);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SlidesNoteView(text: '# Only', host: host),
-        ),
-      ),
-    );
+    await tester.pumpWidget(_app(SlidesNoteView(text: '# Only', host: host)));
     await tester.pumpAndSettle();
     expect(find.text('1 / 1'), findsOneWidget);
   });
@@ -141,11 +154,7 @@ void main() {
     );
     expect(find.text('say beta'), findsOneWidget);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SlidesNoteView(text: _deck, host: _Host('new.md')),
-        ),
-      ),
+      _app(SlidesNoteView(text: _deck, host: _Host('new.md'))),
     );
     await tester.pumpAndSettle();
     expect(find.text('1 / 2'), findsOneWidget);
@@ -183,6 +192,8 @@ void presentingTests() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('slides-present')), findsOneWidget);
     expect(find.byKey(const Key('speaker-notes')), findsNothing);
+    // The window the view was handed, not one looked up (#675).
+    expect(_window.fullScreen, isTrue);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
@@ -192,6 +203,47 @@ void presentingTests() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('slides-present')), findsNothing);
     expect(find.text('2 / 2'), findsOneWidget);
+    expect(_window.fullScreen, isFalse);
+  });
+
+  testWidgets('a talk ended before the window went full screen gives it '
+      'back after (#668)', (tester) async {
+    final window = _SlowWindow();
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: _Host('quick.md')),
+      const Size(1200, 800),
+      window: window,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    window.answer.complete();
+    await tester.pumpAndSettle();
+
+    expect(window.calls, [true, false]);
+    expect(window.fullScreen, isFalse);
+  });
+
+  testWidgets('a window full screen before the talk stays so after (#669)', (
+    tester,
+  ) async {
+    final window = FakeWindowController()..fullScreen = true;
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: _Host('full.md')),
+      const Size(1200, 800),
+      window: window,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('slides-present')), findsNothing);
+    expect(window.fullScreen, isTrue);
   });
 
   testWidgets('B blacks the slide alone out, held or not, and only there', (
@@ -309,4 +361,21 @@ void presentingTests() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
   });
+}
+
+/// A window that goes full screen only once [answer] is completed.
+final class _SlowWindow extends Fake implements WindowController {
+  final Completer<void> answer = Completer<void>();
+  final List<bool> calls = [];
+  bool fullScreen = false;
+
+  @override
+  Future<bool> isFullScreen() async => fullScreen;
+
+  @override
+  Future<void> setFullScreen({required bool on}) async {
+    calls.add(on);
+    if (on) await answer.future;
+    fullScreen = on;
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show wideBreakpoint;
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -15,13 +16,14 @@ import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/kinds/slides/slides_wide_layout.dart';
 import 'package:niman/src/ui/kinds/slides/speaker_notes.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
 /// The slides kind's body (#534): the slide on screen large, its speaker
 /// notes under it, and the others as thumbnails — a row of them on a wide
 /// window, a swipe and dots on a phone.
 ///
 /// The view only reads the note; the slides are edited in the raw editor.
-final class SlidesNoteView extends StatefulWidget {
+final class SlidesNoteView extends ConsumerStatefulWidget {
   /// Shows the slides of [text], the note [host] holds.
   const new({required this.text, required this.host, super.key});
 
@@ -32,10 +34,10 @@ final class SlidesNoteView extends StatefulWidget {
   final NoteKindHost host;
 
   @override
-  State<SlidesNoteView> createState() => _SlidesNoteViewState();
+  ConsumerState<SlidesNoteView> createState() => _SlidesNoteViewState();
 }
 
-final class _SlidesNoteViewState extends State<SlidesNoteView> {
+final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
   late List<Slide> _slides = splitSlides(widget.text);
   late String _path = widget.host.notePath;
   late ValueNotifier<int> _place = slidePlaceOf(_path);
@@ -112,6 +114,7 @@ final class _SlidesNoteViewState extends State<SlidesNoteView> {
       text: widget.text,
       notePath: _path,
       resolveEmbed: widget.host.resolveEmbed,
+      window: ref.read(windowControllerProvider),
       presenter: presenter,
       byTurning: byTurning,
     ),

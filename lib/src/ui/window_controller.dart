@@ -75,6 +75,10 @@ abstract interface class WindowController {
   /// the whole screen (#621).
   Future<void> setFullScreen({required bool on});
 
+  /// Asks the platform whether the window is full screen right now: a
+  /// talk (#534) gives back a full screen it found, not a window (#669).
+  Future<bool> isFullScreen();
+
   /// Releases the platform side.
   Future<void> dispose();
 }
@@ -174,6 +178,9 @@ final class WindowManagerController implements WindowController {
 
   @override
   Future<void> setFullScreen({required bool on}) => _manager.setFullScreen(on);
+
+  @override
+  Future<bool> isFullScreen() => _manager.isFullScreen();
 
   @override
   Future<void> setPreventClose({required bool prevent}) {
@@ -289,6 +296,9 @@ final class NoopWindowController implements WindowController {
 
   @override
   Future<void> setFullScreen({required bool on}) async {}
+
+  @override
+  Future<bool> isFullScreen() async => false;
 
   @override
   Future<void> dispose() async {

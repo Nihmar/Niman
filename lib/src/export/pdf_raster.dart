@@ -16,7 +16,6 @@
 /// print CSS keeps blocks whole.
 library;
 
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -333,55 +332,4 @@ ui.FlutterView _platformView(ui.PlatformDispatcher dispatcher) {
     throw StateError('the note cannot be laid out without a platform view');
   }
   return view;
-}
-
-/// The raster printer: a [PdfPrinter] that draws the note itself, for a
-/// machine with no engine to print the page's HTML with.
-///
-/// The HTML path is ignored: what is drawn is [text] with this theme, not
-/// the page file. It exists so a caller that found no engine has something
-/// to fall back to with the same interface.
-final class RasterPdfPrinter implements PdfPrinter {
-  /// Prints [text].
-  const new({
-    required this.text,
-    required this.theme,
-    required this.mathCache,
-    this.pixelRatio = 2,
-  });
-
-  /// The note, as written.
-  final String text;
-
-  /// The typography the pages are set in.
-  final MarkdownTheme theme;
-
-  /// The formulas the pages may typeset.
-  final MathCache mathCache;
-
-  /// Device pixels per logical pixel.
-  final double pixelRatio;
-
-  @override
-  Future<bool> get canPrint async => true;
-
-  @override
-  Future<PdfOutcome> print(
-    String htmlPath,
-    String pdfPath, {
-    PdfPaper paper = PdfPaper.a4,
-  }) async {
-    try {
-      final bytes = await rasterPdf(
-        text: text,
-        theme: theme,
-        mathCache: mathCache,
-        pixelRatio: pixelRatio,
-      );
-      await File(pdfPath).writeAsBytes(bytes);
-      return const PdfPrinted();
-    } on Object catch (error) {
-      return PdfFailed('$error');
-    }
-  }
 }

@@ -114,6 +114,19 @@ void main() {
       // Random, not stuck on one row.
       expect(seen.length, greaterThan(1));
     });
+
+    test('reaches the whole library, not only its lowest ids (#666)', () async {
+      for (var i = 0; i < 200; i++) {
+        write('n$i.md');
+      }
+      await indexer.fullScan(root.path);
+      final ids = [for (var i = 0; i < 60; i++) (await dao.randomNote())!.id];
+      final top = ids.reduce((a, b) => a > b ? a : b);
+
+      // A threshold drawn per row let only the first ~√n notes win; one
+      // drawn per query lands in the upper half all but 2⁻⁶⁰ of the time.
+      expect(top, greaterThan(100), reason: 'ids $ids');
+    });
   });
 
   group('topValues', () {

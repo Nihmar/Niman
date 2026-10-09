@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/keep_awake.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
@@ -35,28 +35,31 @@ bool? slidesPresentKey(KeyEvent event) {
 /// (#534): the whole screen for the slide alone, or the presenter view.
 ///
 /// The desktops take the window full screen, Android hides the system
-/// bars, and the screen stays on until the talk ends. A phone is turned
+/// bars, and the screen stays on until the talk ends. A window that was
+/// full screen already stays so (#669). A phone is turned
 /// to landscape for the talk, wherever it was started from — unless
 /// [byTurning], the talk the phone started by being turned sideways,
 /// which ends when it is turned upright again.
+///
+/// [window] is the desktop window; Android has none to make full screen.
 Future<void> presentSlides(
   BuildContext context, {
   required String text,
   required String notePath,
   required Future<String?> Function(String target) resolveEmbed,
+  required WindowController window,
   bool presenter = false,
   bool byTurning = false,
 }) async {
   if (_presenting) return;
   final slides = splitSlides(text);
   final phone = isSlidesPhone(context);
-  final window = _windowOf(context);
   final navigator = Navigator.of(context, rootNavigator: true);
   final lockLandscape = phone && !byTurning;
   _presenting = true;
   // The screen is asked for, not waited on: the slide shows at once, and a
   // platform that answers late (or never, as in tests) holds nothing up.
-  unawaited(_takeScreen(window, on: true, lockLandscape: lockLandscape));
+  final taken = _takeScreen(window, on: true, lockLandscape: lockLandscape);
   try {
     await navigator.push(
       PageRouteBuilder<void>(
@@ -66,56 +69,65 @@ Future<void> presentSlides(
           slides: slides,
           place: slidePlaceOf(notePath),
           resolveEmbed: resolveEmbed,
-          presenter: presenter,
+          // Not laid out for a phone: a key that asks for it there (Alt+F5
+          // on a hardware keyboard) presents the slide alone (#673).
+          presenter: presenter && !phone,
           touch: Platform.isAndroid,
           exitWhenUpright: phone && byTurning,
         ),
       ),
     );
   } finally {
-    unawaited(_takeScreen(window, on: false, lockLandscape: lockLandscape));
+    // Given back once taken: a talk that ends before its screen was taken
+    // would otherwise have the taking land last (#668).
+    unawaited(
+      taken.then(
+        (wasFullScreen) => _takeScreen(
+          window,
+          on: false,
+          lockLandscape: lockLandscape,
+          keepFullScreen: wasFullScreen,
+        ),
+      ),
+    );
     _presenting = false;
   }
 }
 
-/// The desktop window, or null where the screen shows no app providers
-/// (widget tests) or has no window to make full screen (Android).
-WindowController? _windowOf(BuildContext context) {
-  if (Platform.isAndroid) return null;
-  try {
-    return ProviderScope.containerOf(
-      context,
-      listen: false,
-    ).read(windowControllerProvider);
-    // Riverpod reports a missing scope only by throwing; its scope widget
-    // is private, so there is nothing to look up first.
-    // ignore: avoid_catching_errors
-  } on StateError {
-    return null;
-  }
-}
-
-Future<void> _takeScreen(
-  WindowController? window, {
+/// Takes the screen for the talk, or gives it back; true when the window
+/// was full screen before it was taken. A platform that refuses is
+/// logged, not thrown: giving the screen back still follows.
+Future<bool> _takeScreen(
+  WindowController window, {
   required bool on,
   required bool lockLandscape,
+  bool keepFullScreen = false,
 }) async {
-  if (Platform.isAndroid) {
-    await SystemChrome.setEnabledSystemUIMode(
-      on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
-    );
-    if (lockLandscape) {
-      await SystemChrome.setPreferredOrientations(
-        on
-            ? const [
-                DeviceOrientation.landscapeLeft,
-                DeviceOrientation.landscapeRight,
-              ]
-            : const [],
+  var wasFullScreen = false;
+  try {
+    if (Platform.isAndroid) {
+      await SystemChrome.setEnabledSystemUIMode(
+        on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
       );
+      if (lockLandscape) {
+        await SystemChrome.setPreferredOrientations(
+          on
+              ? const [
+                  DeviceOrientation.landscapeLeft,
+                  DeviceOrientation.landscapeRight,
+                ]
+              : const [],
+        );
+      }
+    } else {
+      wasFullScreen = on && await window.isFullScreen();
+      await window.setFullScreen(on: on || keepFullScreen);
     }
-  } else {
-    await window?.setFullScreen(on: on);
+  } on Exception catch (error) {
+    const AppLogger(name: 'slides').warning('take the screen: $error');
   }
-  await keepScreenOn(on: on);
+  // Sent, not waited on: one channel keeps its calls in order, and one
+  // that never answers (as in tests) would hold up giving the screen back.
+  unawaited(keepScreenOn(on: on));
+  return wasFullScreen;
 }

@@ -89,5 +89,8 @@ final class FakeWindowController implements WindowController {
   Future<void> setFullScreen({required bool on}) async => fullScreen = on;
 
   @override
+  Future<bool> isFullScreen() async => fullScreen;
+
+  @override
   Future<void> dispose() async {}
 }

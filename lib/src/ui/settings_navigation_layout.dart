@@ -166,15 +166,19 @@ final class _SettingsNavigationLayoutScreenState
                 : Switch(
                     key: Key('navigation-switch-${p.destination.name}'),
                     value: !p.hidden,
-                    onChanged: (shown) => unawaited(
-                      _keep([
-                        for (final q in placed)
-                          if (q.destination == p.destination)
-                            (destination: q.destination, hidden: !shown)
-                          else
-                            q,
-                      ]),
-                    ),
+                    // The last ones shown stay: a bar needs two (#667).
+                    onChanged:
+                        !p.hidden && visible.length <= minShownDestinations
+                        ? null
+                        : (shown) => unawaited(
+                            _keep([
+                              for (final q in placed)
+                                if (q.destination == p.destination)
+                                  (destination: q.destination, hidden: !shown)
+                                else
+                                  q,
+                            ]),
+                          ),
                   ),
           ),
       ],
