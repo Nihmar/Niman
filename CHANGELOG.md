@@ -6,6 +6,37 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.1.9] - 2026-10-09
+
+A Home, slides, and back and forward.
+
+Each library gets a **Home**: a page of tiles for what you come back to
+every day — today's journal entry, the tasks due, the notes changed last,
+and buttons that make a note just so — on a grid on a wide window and in
+a column on a phone, the same on every device. A note can be a
+**presentation**: its slides split by `---`, presented full screen or with
+a presenter view, exported as a PDF. The mouse's side buttons and
+`Alt+←` / `Alt+→` go back and forward through the notes you looked at,
+and the navigation's destinations can be ordered and hidden.
+
+### Added
+- **Home** (#535): a destination of the navigation (`Ctrl/⌘+6`) with tiles — Actions, Today's journal, Tasks due, Recently modified, Pinned, Journal calendar, Top tags, Random note, Saved search. Edit it in place on the grid, or as a list on a phone; it is kept in `.niman/home.json` and travels with sync tile by tile, or stays on one device (**Only on this device**)
+- **Home actions**: buttons for a new note (from a template, in a folder, its name and fields set in advance or asked for, with the values the library already uses offered), a task, a note to open, today's journal entry, a captured page — every one in the command palette too
+- **Slides** (#534): a note with `type: slides` is a presentation — slides split by `---`, speaker notes after `Note:`. **New ▸ Slides**, a slide view with thumbnails (a swipe on a phone), **Present** (`F5`) full screen with the screen kept on, the **presenter view** (`Alt+F5`) with the next slide, the notes and the time, `B` to black out, `O` for the overview, and **Export slides as PDF**, one 16:9 sheet each
+- **Back and forward through the notes shown** (#700): the mouse's side buttons on Linux and Windows, `Alt+←` / `Alt+→` everywhere (remappable, in the palette). One history for the window; a note closed since opens again in a tab of its own, one deleted since is skipped
+- **Settings → Navigation** (#536): order the phone's bottom bar and the desktop's rail, and hide the destinations you do not use — per library, or on this device alone
+
+### Changed
+- **The outline button leaves the row under the note** where the side panel has room for its own outline
+- **The rail is narrower**: its icons sit as far from the panel as from the window's edge
+- **The fold arrows stand off** the line numbers and the text by 2 px each side
+
+### Fixed
+- **A note made during a long index opens at once**, instead of after the whole scan — 30 s on a phone's first index of a library holding a very large note (#697)
+- **The first tab lines up with the panel under it** on a desktop, with the tree shown and hidden
+- **The OCR engine that does not load on a Windows PC is shown as failed** instead of downloaded, so recognition says so instead of failing at every start (#607)
+- **A Markdown link with no target goes nowhere** when tapped, instead of offering to create a note named nothing (#674)
+
 ## [0.1.8] - 2026-10-08
 
 The web, saved as notes.
