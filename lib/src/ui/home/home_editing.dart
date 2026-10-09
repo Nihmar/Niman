@@ -39,14 +39,16 @@ final class HomeEditing extends ChangeNotifier {
   /// Bumped by every edit: what a read begun before one says is stale.
   int _edits = 0;
 
+  bool _disposed = false;
+
   /// Reads the Home again: after an edit elsewhere, or a sync.
   Future<void> load() async {
     final at = _edits;
     await _writes;
     final home = await _ops.home;
-    // Edited while reading: what was read is older than the Home on
-    // screen.
-    if (at != _edits) return;
+    // Gone (#689), or edited while reading: what was read is older than
+    // the Home on screen.
+    if (_disposed || at != _edits) return;
     _library = home.library;
     onDevice = home.device != null;
     layout = home.device ?? home.library ?? HomeLayout.defaults;
@@ -92,5 +94,11 @@ final class HomeEditing extends ChangeNotifier {
         _log.warning('could not save the Home: $error');
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }

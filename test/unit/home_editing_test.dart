@@ -86,6 +86,17 @@ void main() {
       expect(session.libraryHome!['recent']!.hidden, isTrue);
     });
 
+    test(
+      'a read that ends after the Home is gone notifies no one (#689)',
+      () async {
+        final gone = HomeEditing(session);
+        final read = gone.load();
+        gone.dispose();
+
+        await expectLater(read, completes);
+      },
+    );
+
     test('shows the defaults until the Home is edited', () async {
       await editing.load();
       expect(editing.layout, HomeLayout.defaults);
