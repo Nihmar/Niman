@@ -12,6 +12,8 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_failure.dart';
+import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:path/path.dart' as p;

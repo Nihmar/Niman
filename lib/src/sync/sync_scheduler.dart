@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/sync/network_monitor.dart';
 import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_store.dart';
 
 /// Why the automatic triggers stopped until the user acts.

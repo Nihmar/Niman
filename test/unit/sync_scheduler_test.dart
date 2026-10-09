@@ -4,7 +4,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/sync/network_monitor.dart';
 import 'package:niman/src/sync/reconcile.dart';
-import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_scheduler.dart';
 
 final class _Network implements NetworkMonitor {

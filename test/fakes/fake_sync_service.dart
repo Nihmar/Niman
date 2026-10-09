@@ -6,6 +6,8 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_failure.dart';
+import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/settings_rows.dart';

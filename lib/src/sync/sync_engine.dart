@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/diff/record_merge.dart';
@@ -16,6 +15,9 @@ import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/state_merge.dart';
+import 'package:niman/src/sync/sync_conflict.dart';
+import 'package:niman/src/sync/sync_failure.dart';
+import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
@@ -24,133 +26,6 @@ import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:path/path.dart' as p;
-
-/// A path both sides changed differently, left untouched for the merge
-/// (docs/records/sync.md, "Conflicts").
-@immutable
-final class SyncConflict {
-  /// A conflict at [path].
-  const new({
-    required this.path,
-    required this.localSha256,
-    required this.remoteSha256,
-    this.baseVersion,
-  });
-
-  /// The library-relative path.
-  final String path;
-
-  /// The local content's sha256.
-  final String localSha256;
-
-  /// The remote content's sha256.
-  final String remoteSha256;
-
-  /// The pinned history version both came from, when there is one.
-  final int? baseVersion;
-
-  @override
-  String toString() => 'conflict $path (base ${baseVersion ?? 'none'})';
-}
-
-/// Why a run stopped before carrying out its plan.
-enum SyncAbort {
-  /// The library has no destination.
-  notConfigured,
-
-  /// The destination needs a password and none is stored.
-  missingPassword,
-
-  /// The server refused the credentials.
-  authentication,
-
-  /// The server could not be reached (or went away mid-run).
-  offline,
-
-  /// The remote folder does not exist.
-  remoteMissing,
-
-  /// The folder is not a usable WebDAV collection.
-  unsupported,
-
-  /// The plan deletes too much, or it is a first sync, and the caller did
-  /// not confirm it.
-  notConfirmed,
-
-  /// Something else went wrong before any file was touched.
-  failed,
-}
-
-/// What a run did.
-final class SyncReport {
-  /// How many decisions of each kind were carried out.
-  final Map<SyncActionKind, int> done = {};
-
-  /// Paths left for the merge.
-  final List<SyncConflict> conflicts = [];
-
-  /// Paths both sides changed that the run merged by itself.
-  final List<String> merged = [];
-
-  /// Paths that failed, with the reason; retried on the next run.
-  final List<({String path, String error})> failures = [];
-
-  /// Paths skipped because they changed while the run was going.
-  final List<String> skipped = [];
-
-  /// Local paths the run wrote, moved or trashed — what an open editor
-  /// has to re-read.
-  final Set<String> changedLocally = {};
-
-  /// The plan the run carried out (the last hashing pass).
-  SyncPlan? plan;
-
-  /// Why the run stopped early, or null when it ran to the end.
-  SyncAbort? aborted;
-
-  /// Detail for [aborted], safe to show.
-  String? abortDetail;
-
-  /// Whether the run was a quick sync of the queued paths only.
-  bool quick = false;
-
-  /// What a quick sync left for the next full sync: trashing or moving a
-  /// local file because a single path is missing remotely is a full
-  /// sync's call, which sees the whole remote tree.
-  final List<SyncDecision> deferred = [];
-
-  /// What an automatic full sync left alone because its queued hint is
-  /// still backing off (#163): the backoff holds for every run, not only
-  /// the quick ones. A sync the user asks for lifts it first.
-  final List<SyncDecision> waiting = [];
-
-  /// The longest `Retry-After` the server asked for, if any.
-  Duration? retryAfter;
-
-  /// Queued hints the run settled.
-  int hintsDone = 0;
-
-  /// Queued hints the run left backing off.
-  int hintsFailed = 0;
-
-  /// Whether the run reached the end with nothing failed or left over.
-  bool get clean => aborted == null && failures.isEmpty && conflicts.isEmpty;
-
-  /// One line for the log.
-  String summary() {
-    if (aborted != null) return 'aborted: ${aborted!.name} ($abortDetail)';
-    final parts = [
-      for (final entry in done.entries) '${entry.key.name} ${entry.value}',
-      if (merged.isNotEmpty) '${merged.length} merged',
-      if (conflicts.isNotEmpty) '${conflicts.length} conflicts',
-      if (skipped.isNotEmpty) '${skipped.length} skipped',
-      if (failures.isNotEmpty) '${failures.length} failed',
-      if (deferred.isNotEmpty) '${deferred.length} left for a full sync',
-      if (waiting.isNotEmpty) '${waiting.length} waiting out a backoff',
-    ];
-    return parts.isEmpty ? 'nothing to do' : parts.join(', ');
-  }
-}
 
 /// Asked before a plan runs when it is a first sync or looks like a mass
 /// deletion; true carries it out.
@@ -181,48 +56,6 @@ typedef SyncProgress = void Function(SyncStage stage, int done, int total);
 /// true when the call joined a run that was already going, which is settled
 /// by the caller that started it (#391).
 typedef SyncRun = ({SyncReport report, bool joined});
-
-/// Why a conflict resolution or a conflict read could not complete.
-final class SyncFailure implements Exception {
-  /// A failure for [reason], with a [detail] safe to show.
-  const new(this.reason, this.detail, {this.moved = false});
-
-  /// A resolution refused because a side is no longer the version the
-  /// user decided on; nothing was written.
-  factory stale(String detail) =>
-      SyncFailure(SyncAbort.failed, detail, moved: true);
-
-  /// The failure a WebDAV [error] amounts to.
-  ///
-  /// A refused precondition is a side that moved: the only guarded writes
-  /// here are a resolution's, against the version the user saw.
-  factory of(WebDavFailure error) => SyncFailure(
-    switch (error) {
-      WebDavAuthFailure() => SyncAbort.authentication,
-      WebDavNotFound() => SyncAbort.remoteMissing,
-      WebDavUnsupported() => SyncAbort.unsupported,
-      WebDavRetryable() => SyncAbort.offline,
-      WebDavPrecondition() ||
-      WebDavProtocolFailure() ||
-      WebDavCertificateFailure() => SyncAbort.failed,
-    },
-    error.message,
-    moved: error is WebDavPrecondition,
-  );
-
-  /// The same classification a run's abort uses.
-  final SyncAbort reason;
-
-  /// What went wrong; never a secret.
-  final String detail;
-
-  /// Whether a side moved after the user saw it: the conflict should be
-  /// read again, not given up on.
-  final bool moved;
-
-  @override
-  String toString() => 'SyncFailure(${moved ? 'moved' : reason.name}: $detail)';
-}
 
 /// Carries out sync runs for one library (docs/records/sync.md): scans both
 /// sides, plans with `reconcile.dart`, and applies the plan through
