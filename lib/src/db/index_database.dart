@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:niman/src/db/tag_counts.dart' as tag_counts;
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 part 'index_database.g.dart';
@@ -275,9 +276,14 @@ class IndexDatabase extends _$IndexDatabase {
   /// query reads the table, which still answers.
   Future<void> ensureRecentIndex() => customStatement(_createRecentIndex);
 
+  /// Builds the tag counts (#692) on a file from before them, the way
+  /// [ensureRecentIndex] builds its index, and for the same reason.
+  Future<void> ensureTagCounts() => tag_counts.ensureTagCounts(this);
+
   /// The tables an upgrade drops, dependents before the rows they key on.
   static const List<String> _allTables = [
     'notes_fts',
+    tag_counts.tagCountsTable,
     'pending_links',
     'frontmatter_fields',
     'note_links',
@@ -293,6 +299,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.createAll();
       await m.database.customStatement(_createFts);
       await m.database.customStatement(_createRecentIndex);
+      await tag_counts.createTagCounts(m.database);
     },
     // Every row here is derived from the notes on disk, so an upgrade is a
     // wipe and a rescan: the file is emptied and recreated at the new
@@ -307,6 +314,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.createAll();
       await m.database.customStatement(_createFts);
       await m.database.customStatement(_createRecentIndex);
+      await tag_counts.createTagCounts(m.database);
     },
     beforeOpen: (details) async {
       // Belt and braces: an index file that predates the FTS table (or

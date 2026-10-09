@@ -7,6 +7,7 @@ library;
 
 import 'package:drift/drift.dart' show OrderingTerm, Variable;
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/tag_counts.dart';
 
 /// A tag with its note count.
 final class TagCount {
@@ -52,13 +53,15 @@ final class TagRepo implements TagSource {
 
   @override
   Future<List<TagCount>> tagCounts({int? limit}) async {
-    // ponytail: the count still reads every tag row; a counts table kept
-    // by the indexer is the step past it, if the Home's tile shows in a
-    // profile.
+    // The counts the index keeps (#692), walked from the top; an index
+    // file from before them groups the tag rows until they are built.
+    final source = await hasTagCounts(_db)
+        ? 'SELECT tag, c FROM $tagCountsTable'
+        : 'SELECT tag, count(DISTINCT note_id) AS c FROM note_tags '
+              'GROUP BY tag';
     final rows = await _db
         .customSelect(
-          'SELECT tag, count(DISTINCT note_id) AS c FROM note_tags '
-          'GROUP BY tag ORDER BY c DESC, tag ASC'
+          '$source ORDER BY c DESC, tag ASC'
           '${limit == null ? '' : ' LIMIT ?'}',
           variables: [if (limit != null) Variable.withInt(limit)],
         )
