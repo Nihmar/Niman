@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'dart:isolate';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -33,7 +30,6 @@ import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
-import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
@@ -47,7 +43,6 @@ import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
-import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -72,6 +67,7 @@ import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
+import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -84,31 +80,12 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:path/path.dart' as p;
 
-/// Saves [content] as the note at absolute [path]; [editSession] is the
-/// editor session the save belongs to (one opening of the note).
-typedef NoteSaver = Future<void> Function(
-  String path,
-  String content, {
-  required int editSession,
-});
+export 'package:niman/src/ui/note_save_pipeline.dart'
+    show NoteSaver, NoteStreamSaver;
 
 /// How wide the caret is in Zen mode (#69): thicker, to be found at a
 /// glance on a page with nothing else on it.
 const double zenCaretWidth = 3;
-
-/// Saves a note whose text the editor never joins: [content] makes the
-/// bytes a slice at a time, and the save answers when the disk holds them.
-/// See [NoteView.saveNoteStream].
-///
-/// [references] are the note's tags and links as of the text saved, when
-/// the editor keeps them (a long note): the index takes them rather than
-/// reading the note for them.
-typedef NoteStreamSaver = Future<void> Function(
-  String path,
-  NoteContentProducer content, {
-  required int editSession,
-  NoteReferences? references,
-});
 
 /// Opens a note file in the source editor and keeps disk in sync.
 ///
@@ -425,8 +402,6 @@ final class _NoteViewState extends State<NoteView>
 
   bool _loading = true;
   bool _ready = false;
-  bool _saving = false;
-  bool _savePending = false;
 
   /// Why the note could not be opened, in the user's words; the raw error
   /// goes to the log only (issue #156).
@@ -435,7 +410,6 @@ final class _NoteViewState extends State<NoteView>
   /// The failed file is not text at all: the error pane offers it to the
   /// OS instead.
   bool _notText = false;
-  Timer? _saveTimer;
 
   /// Hands in where the note is, a moment after the reader stops (#23):
   /// a window closed with nothing to save goes without asking the app,
@@ -820,27 +794,9 @@ final class _NoteViewState extends State<NoteView>
     return _unifiedBuffer!;
   }
 
-  /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
-  /// is a revision, not a text copy.
-  int _revision = 0;
-  int _lastSavedRevision = 0;
-
   /// Whether the note on screen was edited since it was opened: what makes
   /// its closing worth reporting ([NoteView.onEditedNoteClosed]).
   bool _edited = false;
-
-  /// Process-wide source of [_editSession] ids.
-  static int _editSessions = 0;
-
-  /// The editor session: a new id each time a note's text is taken from
-  /// disk (opened, or adopted after an outside change). History keys its
-  /// "state before this session's edits" snapshot on it.
-  int _editSession = 0;
-
-  /// The save in flight, if any: a coalesced [_save] hands it back, so a
-  /// caller that must know the disk moved ([_saveForClose]) awaits the
-  /// real write instead of the pending flag.
-  Future<void>? _activeSave;
 
   /// The app-level unsaved registry this editor reports into (T-PP-11),
   /// or null when the owner does not track.
@@ -851,9 +807,29 @@ final class _NoteViewState extends State<NoteView>
   late final UnsavedNoteAdapter _unsavedNote = UnsavedNoteAdapter(
     notePath: () => widget.path,
     loading: () => _loading,
-    revision: () => _revision,
-    lastSavedRevision: () => _lastSavedRevision,
-    saveForClose: _saveForClose,
+    revision: () => _saves.revision,
+    lastSavedRevision: () => _saves.lastSavedRevision,
+    saveForClose: _saves.saveForClose,
+  );
+
+  /// How the note reaches the disk: its revisions, the debounce after an
+  /// edit and the saves themselves.
+  late final NoteSavePipeline _saves = NoteSavePipeline(
+    notePath: () => widget.path,
+    ready: () => _ready,
+    text: () => _unifiedText,
+    buffer: () => _unifiedSurfaceBuffer,
+    references: () => _sourceViewKey.currentState?.references(),
+    saveNote: () => widget.saveNote,
+    writeNote: () => widget.writeNote,
+    saveNoteStream: () => widget.saveNoteStream,
+    onSaved: (path) {
+      _recordDiskStat(path);
+      _unsaved?.noteChanged();
+    },
+    onSettled: () {
+      if (mounted) setState(() {});
+    },
   );
 
   /// The loaded note's kind (the frontmatter `type` value, null = plain
@@ -935,23 +911,9 @@ final class _NoteViewState extends State<NoteView>
     }
     if (oldWidget.path != widget.path) {
       _handMemento(oldWidget.path);
-      _saveTimer?.cancel();
-      _savePending = false;
       // Persist the outgoing note under its own path before the buffer is
-      // replaced by the incoming one (its text is read synchronously at the
-      // start of a save, before the _load below resets the buffer). A save
-      // in flight holds an *older* revision of it, so the newest one is
-      // taken here and its write chained behind that save — switching
-      // during a save dropped every edit made since it started (#334).
-      final Future<void> saved;
-      if (_revision == _lastSavedRevision) {
-        saved = _activeSave ?? Future<void>.value();
-      } else if (!_saving) {
-        saved = _save(path: oldWidget.path);
-      } else {
-        saved = _saveOutgoingAfter(_activeSave, oldWidget.path);
-      }
-      _closed(oldWidget.path, saved);
+      // replaced by the incoming one: the _load below resets it.
+      _closed(oldWidget.path, _saves.saveOutgoing(oldWidget.path));
       // The tracker now sees the incoming path (the adapter reads it
       // live) — re-read the dirty set so the guard does not act on the
       // outgoing note.
@@ -984,14 +946,11 @@ final class _NoteViewState extends State<NoteView>
     _mementoTimer?.cancel();
     _activeFormats.removeListener(_scheduleMemento);
     _templateCheck.dispose();
-    _saveTimer?.cancel();
+    _saves.cancel();
     _statsTimer?.cancel();
     _previewTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    final saved = _revision != _lastSavedRevision
-        ? _save()
-        : _activeSave ?? Future<void>.value();
-    _closed(widget.path, saved);
+    _closed(widget.path, _saves.close());
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _sourceFind.dispose();
@@ -1071,42 +1030,13 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
-  Future<void> _write(String path, String content, int editSession) async {
-    final saver = widget.saveNote;
-    if (saver != null) {
-      await saver(path, content, editSession: editSession);
-      return;
-    }
-    final seam = widget.writeNote;
-    if (seam != null) {
-      await seam(path, content);
-      return;
-    }
-    // Encode + atomic write off the UI isolate: the utf8 encode is an O(n)
-    // string pass and the write the FUSE round trips — neither may touch
-    // the UI frame.
-    final (bytes, encodeMs, writeMs) = await Isolate.run(() async {
-      final encodeClock = Stopwatch()..start();
-      final encoded = utf8.encode(content);
-      final encodeMs = encodeClock.elapsedMilliseconds;
-      final writeClock = Stopwatch()..start();
-      await writeFileAtomically(File(path), encoded);
-      final writeMs = writeClock.elapsedMilliseconds;
-      return (encoded.length, encodeMs, writeMs);
-    });
-    _log.debug(
-      'save write: $bytes bytes (encode $encodeMs ms, write $writeMs ms, '
-      'off-isolate)',
-    );
-  }
-
   Future<void> _load() async {
     final path = widget.path;
     // The buffer stops being any note's text here: the outgoing note's
     // save already left with its own path and text (didUpdateWidget), and
     // the incoming one is not read yet. Nothing in it is owed to the disk,
     // so the close guard has nothing to wait for (#156).
-    _lastSavedRevision = _revision;
+    _saves.markClean();
     setState(() {
       _loading = true;
       _ready = false;
@@ -1154,9 +1084,9 @@ final class _NoteViewState extends State<NoteView>
       // The spell cache is keyed by line index + text; a different note can
       // reuse the same indices, so forget the previous file's answers.
       widget.spellCheck?.reset();
-      _lastSavedRevision = _revision;
-      _editSession = ++_editSessions;
-      _log.debug('edit session $_editSession: $path');
+      _saves.markClean();
+      final session = _saves.newSession();
+      _log.debug('edit session $session: $path');
       _unsaved?.noteChanged();
       setState(() {
         _loading = false;
@@ -1224,11 +1154,11 @@ final class _NoteViewState extends State<NoteView>
   /// external edit never disturbs the caret. The WYSIWYG surface owns a
   /// live document the buffer cannot replace, so it never auto-reloads.
   Future<void> _reloadIfChanged() async {
-    if (_loading || _saving || _savePending) {
+    if (_loading || _saves.busy) {
       _log.debug('reload skipped (busy): ${widget.path}');
       return;
     }
-    if (_revision != _lastSavedRevision) {
+    if (_saves.dirty) {
       _log.debug('reload skipped (unsaved edits): ${widget.path}');
       return;
     }
@@ -1257,10 +1187,7 @@ final class _NoteViewState extends State<NoteView>
     if (!mounted || widget.path != path) return;
     // The user may have typed during the read: re-check clean before
     // adopting anything.
-    if (_loading ||
-        _saving ||
-        _savePending ||
-        _revision != _lastSavedRevision) {
+    if (_loading || _saves.busy || _saves.dirty) {
       return;
     }
     final text = normalizedLineEndings(content);
@@ -1274,10 +1201,10 @@ final class _NoteViewState extends State<NoteView>
       surface.replaceAll(text);
       _adoptWords(surface);
     }
-    _lastSavedRevision = _revision;
+    _saves.markClean();
     // Text taken from disk again: edits from here on are a new session.
-    _editSession = ++_editSessions;
-    _log.debug('edit session $_editSession: $path (adopted disk text)');
+    final session = _saves.newSession();
+    _log.debug('edit session $session: $path (adopted disk text)');
     _noteKind = frontmatterTypeOf(text);
     widget.spellCheck?.reset();
     _loading = false;
@@ -1303,11 +1230,9 @@ final class _NoteViewState extends State<NoteView>
       // which is the whole point of keeping it per line.
       _surface?.words.edited(edit, _surface!.buffer);
     }
-    _revision++;
+    _saves.edited();
     _unsaved?.noteChanged();
     _caretLine = caretLine;
-    _saveTimer?.cancel();
-    _saveTimer = Timer(_saveDelay, _save);
     _statsTimer?.cancel();
     _statsTimer = Timer(_statsDelay, _refreshStats);
     _previewTimer?.cancel();
@@ -2070,23 +1995,6 @@ final class _NoteViewState extends State<NoteView>
     return const Duration(milliseconds: 350);
   }
 
-  /// How long after the last edit the note is saved.
-  ///
-  /// Half a second, or a second while a save is in flight (typing fast: one
-  /// trailing save, not a queue). A note that size waits for a real pause, as
-  /// the statistics do: the save no longer stalls the frames — it goes over
-  /// in slices (see [_performSave]) — but it is still a write of hundreds of
-  /// megabytes, and there is no reason to make one for every breath between
-  /// words.
-  Duration get _saveDelay {
-    final length = _noteLength;
-    if (length > 16 << 20) return const Duration(seconds: 5);
-    if (length > 2 << 20) return const Duration(seconds: 2);
-    return _saving
-        ? const Duration(seconds: 1)
-        : const Duration(milliseconds: 500);
-  }
-
   /// The note's length, without joining it.
   int get _noteLength => _surface?.buffer.length ?? 0;
 
@@ -2159,7 +2067,7 @@ final class _NoteViewState extends State<NoteView>
   );
 
   void _onFocusChanged() {
-    if (!_focus.hasFocus) unawaited(_save());
+    if (!_focus.hasFocus) unawaited(_saves.save());
     _onToolbarFocusChanged();
   }
 
@@ -2173,7 +2081,7 @@ final class _NoteViewState extends State<NoteView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _log.info('lifecycle: ${state.name}');
-    if (state == AppLifecycleState.paused) unawaited(_save());
+    if (state == AppLifecycleState.paused) unawaited(_saves.save());
     // Leaving the foreground may be the last thing this process does.
     if (state != AppLifecycleState.resumed && widget.active) {
       _mementoTimer?.cancel();
@@ -2188,234 +2096,6 @@ final class _NoteViewState extends State<NoteView>
     _mementoTimer = Timer(_mementoDelay, () {
       if (mounted) _handMemento(widget.path);
     });
-  }
-
-  /// Saves the buffer at most once: a request that finds a save in flight
-  /// coalesces into one trailing save (the text is re-read from the buffer
-  /// at that point, so nothing is lost) and returns the write already
-  /// running, so an awaiting caller still learns when the disk moved.
-  Future<void> _save({String? path}) {
-    // Until the note at widget.path is loaded, the buffer is not its text:
-    // it is the previous note's, or nothing — and when the load failed,
-    // widget.path may be a picture. Only a save with its own path (the
-    // outgoing note's) may write then (#156).
-    if (path == null && !_ready) return Future<void>.value();
-    final revision = _revision;
-    if (revision == _lastSavedRevision) {
-      return Future<void>.value(); // nothing new on disk
-    }
-    if (path == null && _saving) {
-      _savePending = true;
-      return _activeSave ?? Future<void>.value();
-    }
-    _saving = true;
-    final future = _performSave(revision, path ?? widget.path);
-    _activeSave = future;
-    return future;
-  }
-
-  /// Saves the outgoing note at [target] as it stands *now*, after
-  /// [waiting] — the save already running for it — so one note never has
-  /// two writes racing for the same path.
-  ///
-  /// The text, or the streaming save's buffer snapshot, is taken before the
-  /// first await: the note switch that calls this replaces the buffer with
-  /// the incoming note's, and an edit made during a save would otherwise be
-  /// the one nobody writes (#334).
-  Future<void> _saveOutgoingAfter(Future<void>? waiting, String target) async {
-    final session = _editSession;
-    final stream = _takeStreamSave();
-    final text = stream == null ? _unifiedText : null;
-    if (waiting != null) {
-      try {
-        await waiting;
-      } on Object {
-        // The save that was already running reports its own failure; this
-        // one still has to try.
-      }
-    }
-    final clock = Stopwatch()..start();
-    try {
-      if (stream != null) {
-        await widget.saveNoteStream!(
-          target,
-          (index) => _nextSlice(stream, index),
-          editSession: session,
-          references: stream.references,
-        );
-      } else {
-        await _write(target, text!, session);
-      }
-      _log.info(
-        'note saved: $target (outgoing, ${clock.elapsedMilliseconds} ms)',
-      );
-    } on Object catch (error) {
-      _log.error('note save failed: $target ($error)');
-      rethrow;
-    }
-  }
-
-  /// The actual write for [_save]; a write error reaches every caller
-  /// awaiting the returned future.
-  ///
-  /// On the unified surface the note is handed over in slices and never
-  /// joined whole: the join and the encode of a 246 MB note cost the UI
-  /// isolate 300–530 ms in one go (see `docs/records/huge-notes.md`), and both
-  /// are cut here into turns of a few milliseconds that leave the frames
-  /// their gaps. A note with no streaming writer (a note outside a library, a
-  /// test) is joined and saved whole.
-  Future<void> _performSave(int revision, String target) async {
-    final clock = Stopwatch()..start();
-    final stream = _takeStreamSave();
-    if (stream != null) {
-      // Awaited, not handed over: `_activeSave` must be the write itself, or
-      // a caller that awaits a save — the close guard, a note switch (#334) —
-      // believes the disk moved while the slices are still going out.
-      return await _saveStreamed(stream, revision, target, clock);
-    }
-    // The full-text join (O(n)) happens here only — the save path, never
-    // the keystroke path.
-    final joinClock = Stopwatch()..start();
-    final text = _unifiedText;
-    final joinMs = joinClock.elapsedMilliseconds;
-    // Read with the text, before the first await: a note switch that
-    // saves the outgoing note is followed by a _load that starts the next
-    // session, and this save belongs to the one it came from.
-    final session = _editSession;
-    _log.info(
-      'save start: $target (${text.length} chars, join $joinMs ms, '
-      'session $session)',
-    );
-    try {
-      await _write(target, text, session);
-      if (target == widget.path) {
-        _lastSavedRevision = revision;
-        _recordDiskStat(target);
-        _unsaved?.noteChanged();
-      }
-      _log.info(
-        'note saved: $target (${text.length} chars, '
-        '${clock.elapsedMilliseconds} ms)',
-      );
-    } finally {
-      _finishSave();
-    }
-  }
-
-  /// Saves with the note handed over in slices, off the join.
-  ///
-  /// The write is away from this isolate, so this only awaits it — after
-  /// reading the trailing-save flag the write's own edits may have set,
-  /// which is what keeps an edit that landed mid-save from being the one
-  /// nobody writes.
-  Future<void> _saveStreamed(
-    _StreamSave stream,
-    int revision,
-    String target,
-    Stopwatch clock,
-  ) async {
-    final buffer = stream.buffer;
-    // Read with the buffer, before the first await: a note switch that
-    // saves the outgoing note is followed by a _load that starts the next
-    // session, and this save belongs to the one it came from.
-    final session = _editSession;
-    _log.info(
-      'save start: $target (${buffer.length} chars in '
-      '${stream.slices} slices, session $session)',
-    );
-    try {
-      await widget.saveNoteStream!(
-        target,
-        (index) => _nextSlice(stream, index),
-        editSession: session,
-        references: stream.references,
-      );
-      if (target == widget.path) {
-        _lastSavedRevision = revision;
-        _recordDiskStat(target);
-        _unsaved?.noteChanged();
-      }
-      _log.info(
-        'note saved: $target (${buffer.length} chars, '
-        '${clock.elapsedMilliseconds} ms)',
-      );
-    } on Object catch (error) {
-      _log.error('note save failed: $target ($error)');
-      rethrow;
-    } finally {
-      _finishSave();
-    }
-  }
-
-  /// The save is over, however it ended: the flag goes, the pane repaints,
-  /// and a save that arrived meanwhile runs its own turn.
-  void _finishSave() {
-    _saving = false;
-    final trailing = _savePending;
-    _savePending = false;
-    if (mounted) setState(() {});
-    if (trailing) unawaited(_save());
-  }
-
-  /// The note as this save will write it, or null when there is nothing to
-  /// stream (no seam, no unified buffer, an empty note).
-  ///
-  /// The buffer is taken whole — a copy of the two line lists, O(lines) of
-  /// pointers, the strings themselves shared — so an edit that lands
-  /// between two slices cannot make the note it writes a different note
-  /// from the one it started. It is what a save of a note being typed in
-  /// has to be: the writer's own text at one moment, never half of one and
-  /// half of another.
-  _StreamSave? _takeStreamSave() {
-    if (widget.saveNoteStream == null) return null;
-    final buffer = _unifiedSurfaceBuffer;
-    if (buffer == null || buffer.lineCount == 0) {
-      return null;
-    }
-    // The references with the lines, of the same revision: the source
-    // pane's scan follows this very buffer.
-    return _StreamSave(
-      buffer.snapshot(),
-      references: _sourceViewKey.currentState?.references(),
-    );
-  }
-
-  /// The next slice of [stream]'s buffer, or null when the note is out.
-  ///
-  /// Each slice is built and encoded here, on the UI isolate, because that
-  /// is where the note's strings are — a string is copied between
-  /// isolates, never shared, and one copy of the whole note is what this
-  /// exists to avoid. Each is small enough that the frame after it is on
-  /// time.
-  Future<NoteBytes?> _nextSlice(_StreamSave stream, int index) async {
-    final first = index * kSaveSliceLines;
-    if (first >= stream.buffer.lineCount) return null;
-    final text = stream.buffer.sliceText(
-      first,
-      first + kSaveSliceLines,
-      kSaveSliceChars,
-    );
-    // Building the first slice is what starts the save; the gap the frames
-    // need is the one after it, not before it.
-    if (index > 0) await Future<void>.delayed(Duration.zero);
-    return utf8.encode(text);
-  }
-
-  /// Lines one slice of a streaming save asks for, and the character count
-  /// that cuts it short — a note of very long lines would otherwise build
-  /// a slice of megabytes. Around four milliseconds of join and encode per
-  /// slice at these figures, measured on the 2.7 M-line fixture.
-  static const int kSaveSliceLines = 16384;
-  static const int kSaveSliceChars = 4 << 20;
-
-  /// The close guard's save (T-PP-11): writes until the disk holds the
-  /// latest revision — waiting out a save that was already in flight — and
-  /// completes with the write's error when one fails. The caller keeps the
-  /// window open on a failure: the edits are still only in the buffer.
-  Future<void> _saveForClose() async {
-    while (_revision != _lastSavedRevision) {
-      await _save();
-    }
   }
 
   /// Spelling results changed (the note loaded, or a settings toggle): the
@@ -2473,8 +2153,8 @@ final class _NoteViewState extends State<NoteView>
   String get _status {
     if (_error != null) return AppStrings.noteStatusError;
     if (_loading) return AppStrings.noteStatusLoading;
-    if (_saving) return AppStrings.noteStatusSaving;
-    if (_revision != _lastSavedRevision) return AppStrings.noteStatusUnsaved;
+    if (_saves.saving) return AppStrings.noteStatusSaving;
+    if (_saves.dirty) return AppStrings.noteStatusUnsaved;
     return AppStrings.noteStatusSaved;
   }
 
@@ -2495,7 +2175,7 @@ final class _NoteViewState extends State<NoteView>
       );
     }
     setState(() {});
-    unawaited(_save());
+    unawaited(_saves.save());
   }
 
   /// The formatting keys (#205), applied through the toolbar's own
@@ -2983,22 +2663,4 @@ final class _NoteViewState extends State<NoteView>
           setHeading(text: text, selection: selection, level: level),
     );
   }
-}
-
-/// What a streaming save holds of the note while it runs: the lines as they
-/// were when the save started, which no later edit reaches.
-final class _StreamSave {
-  /// Saves [buffer]'s lines, slice by slice.
-  const new(this.buffer, {this.references});
-
-  /// The note's lines, at the moment the save began.
-  final SourceBuffer buffer;
-
-  /// The note's tags and links as of [buffer], when the editor keeps them.
-  final NoteReferences? references;
-
-  /// How many slices the save will hand over; for the log only.
-  int get slices =>
-      (buffer.lineCount + _NoteViewState.kSaveSliceLines - 1) ~/
-      _NoteViewState.kSaveSliceLines;
 }
