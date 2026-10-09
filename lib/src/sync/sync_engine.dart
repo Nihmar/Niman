@@ -20,6 +20,8 @@ import 'package:niman/src/sync/sync_failure.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_run_context.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
+import 'package:niman/src/sync/sync_step_failure.dart';
+import 'package:niman/src/sync/sync_step_outcome.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
@@ -544,7 +546,7 @@ final class SyncEngine {
       try {
         final outcome = await _apply(context, decision);
         switch (outcome) {
-          case _Outcome.done:
+          case SyncStepOutcome.done:
             report.done.update(decision.kind, (n) => n + 1, ifAbsent: () => 1);
             if (const {
               SyncActionKind.download,
@@ -554,13 +556,13 @@ final class SyncEngine {
               report.changedLocally.addAll([decision.path, ?decision.fromPath]);
             }
             _log.info('apply: $decision (${clock.elapsedMilliseconds} ms)');
-          case _Outcome.skipped:
+          case SyncStepOutcome.skipped:
             report.skipped.add(decision.path);
             _log.info(
               'apply: skipped ${decision.kind.name} "${decision.path}": '
               'a side changed during the run, decided again next time',
             );
-          case _Outcome.conflict:
+          case SyncStepOutcome.conflict:
             break;
         }
       } on WebDavAuthFailure {
@@ -583,7 +585,7 @@ final class SyncEngine {
         );
       } on FileSystemException catch (e) {
         _failed(report, decision, 'local: ${e.message}');
-      } on _StepFailure catch (e) {
+      } on SyncStepFailure catch (e) {
         _failed(report, decision, e.message);
       }
     }
@@ -1030,13 +1032,13 @@ final class SyncEngine {
 
   // --- applying -------------------------------------------------------
 
-  Future<_Outcome> _apply(SyncRunContext c, SyncDecision d) async {
+  Future<SyncStepOutcome> _apply(SyncRunContext c, SyncDecision d) async {
     switch (d.kind) {
       case SyncActionKind.nothing:
-        return _Outcome.done;
+        return SyncStepOutcome.done;
       case SyncActionKind.hashLocal:
       case SyncActionKind.hashRemote:
-        throw const _StepFailure(
+        throw const SyncStepFailure(
           'still waiting for a hash after $_hashPasses passes',
         );
       case SyncActionKind.upload:
@@ -1049,7 +1051,7 @@ final class SyncEngine {
         return await _trashLocal(c, d);
       case SyncActionKind.dropRow:
         await store.removeItems(root, [d.path]);
-        return _Outcome.done;
+        return SyncStepOutcome.done;
       case SyncActionKind.record:
         return await _record(c, d);
       case SyncActionKind.conflict:
@@ -1157,13 +1159,13 @@ final class SyncEngine {
   String _localShaOf(SyncRunContext c, String path) {
     final sha =
         c.local[path]?.sha256 ?? c.localSha[path] ?? c.rows[path]?.localSha256;
-    if (sha == null) throw _StepFailure('no hash for $path');
+    if (sha == null) throw SyncStepFailure('no hash for $path');
     return sha;
   }
 
   /// Records [d]'s path as a conflict and touches neither side: the merge
   /// screen is where it is resolved.
-  _Outcome _reportConflict(
+  SyncStepOutcome _reportConflict(
     SyncRunContext c,
     SyncDecision d, {
     required String localSha,
@@ -1179,7 +1181,7 @@ final class SyncEngine {
       ),
     );
     _log.warning('conflict ${d.path}: $why; left for the merge');
-    return _Outcome.conflict;
+    return SyncStepOutcome.conflict;
   }
 
   /// Whether [file] holds a JSON object — what a [jsonStateFiles] side has to
@@ -1251,15 +1253,17 @@ final class SyncEngine {
     }
   }
 
-  Future<_Outcome> _guarded(Future<_Outcome> Function() action) async {
+  Future<SyncStepOutcome> _guarded(
+    Future<SyncStepOutcome> Function() action,
+  ) async {
     try {
       return await action();
     } on _ChangedDuringSync {
-      return _Outcome.skipped;
+      return SyncStepOutcome.skipped;
     }
   }
 
-  Future<_Outcome> _upload(SyncRunContext c, SyncDecision d) => _guarded(
+  Future<SyncStepOutcome> _upload(SyncRunContext c, SyncDecision d) => _guarded(
     () async {
       final local = (await _localStillAsPlanned(c, d.path))!;
       await _remoteStillAsPlanned(c, d);
@@ -1284,12 +1288,12 @@ final class SyncEngine {
         d.path,
         sha: sha,
         local: local,
-        notListed: const _StepFailure('uploaded but not listed'),
+        notListed: const SyncStepFailure('uploaded but not listed'),
         ifMatch: d.ifMatch,
         ifNoneMatch: d.ifNoneMatch,
         modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
       );
-      return _Outcome.done;
+      return SyncStepOutcome.done;
     },
   );
 
@@ -1412,69 +1416,70 @@ final class SyncEngine {
     );
   }
 
-  Future<_Outcome> _download(SyncRunContext c, SyncDecision d) => _guarded(
-    () async {
-      final fetched = await _fetch(c, d.path);
-      try {
-        await _localStillAsPlanned(c, d.path);
-      } on Object {
-        if (fetched.temp.existsSync()) await fetched.temp.delete();
-        rethrow;
-      }
-      // A JSON state file whose remote copy does not parse is not a newer
-      // version of this device's: replacing a good local copy with it —
-      // there is no history for `.niman/*` — is how a half-written settings
-      // file wiped every setting on the run after (#336). Both sides stay,
-      // and the path is reported for the merge.
-      if (jsonStateFiles.contains(d.path) &&
-          // The async stat is on purpose: a blocking one on the UI isolate
-          // is the FUSE round trip this engine keeps off its frames.
-          // ignore: avoid_slow_async_io
-          await File(p.join(root, d.path)).exists() &&
-          !await _isJsonObject(fetched.temp)) {
-        await fetched.temp.delete();
-        return _reportConflict(
-          c,
-          d,
-          localSha: c.rows[d.path]?.localSha256 ?? '',
-          remoteSha: fetched.download.sha256,
-          why: 'the remote copy is not a JSON object',
-        );
-      }
-      await ops.syncReplace(d.path, fetched.temp.path);
-      final local = await _stat(d.path);
-      if (local == null) throw const _StepFailure('downloaded but not on disk');
-      await store.putItems([
-        await _row(
-          c,
-          d.path,
-          sha: fetched.download.sha256,
-          local: local,
-          remote: _remoteFrom(c, d.path, fetched.download),
-        ),
-      ]);
-      return _Outcome.done;
-    },
-  );
+  Future<SyncStepOutcome> _download(SyncRunContext c, SyncDecision d) =>
+      _guarded(() async {
+        final fetched = await _fetch(c, d.path);
+        try {
+          await _localStillAsPlanned(c, d.path);
+        } on Object {
+          if (fetched.temp.existsSync()) await fetched.temp.delete();
+          rethrow;
+        }
+        // A JSON state file whose remote copy does not parse is not a newer
+        // version of this device's: replacing a good local copy with it —
+        // there is no history for `.niman/*` — is how a half-written settings
+        // file wiped every setting on the run after (#336). Both sides stay,
+        // and the path is reported for the merge.
+        if (jsonStateFiles.contains(d.path) &&
+            // The async stat is on purpose: a blocking one on the UI isolate
+            // is the FUSE round trip this engine keeps off its frames.
+            // ignore: avoid_slow_async_io
+            await File(p.join(root, d.path)).exists() &&
+            !await _isJsonObject(fetched.temp)) {
+          await fetched.temp.delete();
+          return _reportConflict(
+            c,
+            d,
+            localSha: c.rows[d.path]?.localSha256 ?? '',
+            remoteSha: fetched.download.sha256,
+            why: 'the remote copy is not a JSON object',
+          );
+        }
+        await ops.syncReplace(d.path, fetched.temp.path);
+        final local = await _stat(d.path);
+        if (local == null) {
+          throw const SyncStepFailure('downloaded but not on disk');
+        }
+        await store.putItems([
+          await _row(
+            c,
+            d.path,
+            sha: fetched.download.sha256,
+            local: local,
+            remote: _remoteFrom(c, d.path, fetched.download),
+          ),
+        ]);
+        return SyncStepOutcome.done;
+      });
 
-  Future<_Outcome> _deleteRemote(SyncRunContext c, SyncDecision d) =>
+  Future<SyncStepOutcome> _deleteRemote(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         await _localStillAsPlanned(c, d.path);
         await _remoteStillAsPlanned(c, d);
         await c.client.delete(d.path, ifMatch: d.ifMatch);
         await store.removeItems(root, [d.path]);
-        return _Outcome.done;
+        return SyncStepOutcome.done;
       });
 
-  Future<_Outcome> _trashLocal(SyncRunContext c, SyncDecision d) =>
+  Future<SyncStepOutcome> _trashLocal(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         await _localStillAsPlanned(c, d.path);
         await ops.syncTrash(d.path);
         await store.removeItems(root, [d.path]);
-        return _Outcome.done;
+        return SyncStepOutcome.done;
       });
 
-  Future<_Outcome> _record(SyncRunContext c, SyncDecision d) =>
+  Future<SyncStepOutcome> _record(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         final local = (await _localStillAsPlanned(c, d.path))!;
         final sha = _localShaOf(c, d.path);
@@ -1492,108 +1497,109 @@ final class SyncEngine {
             pinBase: contentChanged,
           ),
         ]);
-        return _Outcome.done;
+        return SyncStepOutcome.done;
       });
 
-  Future<_Outcome> _conflict(SyncRunContext c, SyncDecision d) => _guarded(
-    () async {
-      final local = (await _localStillAsPlanned(c, d.path))!;
-      final localSha = _localShaOf(c, d.path);
-      final fetched = await _fetch(c, d.path);
-      // The fetch wrote the remote body into a temp next to the target,
-      // and every end below — the swapped-in download, the merge's
-      // write-back through the temp, the path left for the merge screen —
-      // consumes it or deletes it. What none of them covered was stopping
-      // between the two: a merge the guard stops on a `_ChangedDuringSync`
-      // threw past them all and left the full remote body in the library
-      // folder as `.x.md.niman-tmp-sync-<µs>`, one more on every retry
-      // until the next open's sweep (#495). The temp is this method's to
-      // clean up whatever it returns or throws.
-      try {
-        final remote = _remoteFrom(c, d.path, fetched.download);
-        final remoteSha = fetched.download.sha256;
+  Future<SyncStepOutcome> _conflict(
+    SyncRunContext c,
+    SyncDecision d,
+  ) => _guarded(() async {
+    final local = (await _localStillAsPlanned(c, d.path))!;
+    final localSha = _localShaOf(c, d.path);
+    final fetched = await _fetch(c, d.path);
+    // The fetch wrote the remote body into a temp next to the target,
+    // and every end below — the swapped-in download, the merge's
+    // write-back through the temp, the path left for the merge screen —
+    // consumes it or deletes it. What none of them covered was stopping
+    // between the two: a merge the guard stops on a `_ChangedDuringSync`
+    // threw past them all and left the full remote body in the library
+    // folder as `.x.md.niman-tmp-sync-<µs>`, one more on every retry
+    // until the next open's sweep (#495). The temp is this method's to
+    // clean up whatever it returns or throws.
+    try {
+      final remote = _remoteFrom(c, d.path, fetched.download);
+      final remoteSha = fetched.download.sha256;
 
-        if (remoteSha == localSha) {
-          await store.putItems([
-            await _row(c, d.path, sha: localSha, local: local, remote: remote),
-          ]);
-          _log.info('conflict ${d.path}: same content on both sides, recorded');
-          return _Outcome.done;
-        }
+      if (remoteSha == localSha) {
+        await store.putItems([
+          await _row(c, d.path, sha: localSha, local: local, remote: remote),
+        ]);
+        _log.info('conflict ${d.path}: same content on both sides, recorded');
+        return SyncStepOutcome.done;
+      }
 
-        if (d.path.startsWith('.niman/')) {
-          // Settings and counters are JSON: merged key by key, not by line,
-          // which could break them. A side that does not parse is not a
-          // merge: taking the newer file whole replaced the other device's
-          // copy — and this device's good copy on the run after — with no
-          // history and no way back (#336), so both sides are left as they
-          // are and the path is reported like any other conflict.
-          final merge = await _mergeState(
-            c,
-            d,
-            fetched.temp,
-            remote,
-            remoteSha: remoteSha,
-          );
-          switch (merge) {
-            case _StateMerge.merged:
-              return _Outcome.done;
-            case _StateMerge.notJson:
-              return _reportConflict(
-                c,
-                d,
-                localSha: localSha,
-                remoteSha: remoteSha,
-                why: 'a side is not a JSON object',
-              );
-            case _StateMerge.clockDecides:
-              return _reportConflict(
-                c,
-                d,
-                localSha: localSha,
-                remoteSha: remoteSha,
-                why:
-                    'a key both sides changed, which no device clock can '
-                    'decide',
-              );
-          }
-        }
-
-        // Both sides changed: with the version they last agreed on, the
-        // edits that do not overlap merge without asking anyone
-        // (docs/records/sync.md, "Conflicts").
-        final merge = await _tryMerge(
+      if (d.path.startsWith('.niman/')) {
+        // Settings and counters are JSON: merged key by key, not by line,
+        // which could break them. A side that does not parse is not a
+        // merge: taking the newer file whole replaced the other device's
+        // copy — and this device's good copy on the run after — with no
+        // history and no way back (#336), so both sides are left as they
+        // are and the path is reported like any other conflict.
+        final merge = await _mergeState(
           c,
           d,
           fetched.temp,
           remote,
           remoteSha: remoteSha,
         );
-        if (merge != null) {
-          c.report
-            ..merged.add(d.path)
-            ..changedLocally.addAll(merge.changedLocally ? [d.path] : const []);
-          return _Outcome.done;
+        switch (merge) {
+          case _StateMerge.merged:
+            return SyncStepOutcome.done;
+          case _StateMerge.notJson:
+            return _reportConflict(
+              c,
+              d,
+              localSha: localSha,
+              remoteSha: remoteSha,
+              why: 'a side is not a JSON object',
+            );
+          case _StateMerge.clockDecides:
+            return _reportConflict(
+              c,
+              d,
+              localSha: localSha,
+              remoteSha: remoteSha,
+              why:
+                  'a key both sides changed, which no device clock can '
+                  'decide',
+            );
         }
-
-        final conflict = SyncConflict(
-          path: d.path,
-          localSha256: localSha,
-          remoteSha256: remoteSha,
-          baseVersion: d.baseVersion,
-        );
-        c.report.conflicts.add(conflict);
-        _log.warning(
-          'conflict ${d.path}: both changed (local ${_short(localSha)}, '
-          'remote ${_short(remoteSha)}, base ${d.baseVersion ?? 'none'}); '
-          'left for the merge',
-        );
-        return _Outcome.conflict;
-      } finally {
-        if (fetched.temp.existsSync()) await fetched.temp.delete();
       }
-    },
-  );
+
+      // Both sides changed: with the version they last agreed on, the
+      // edits that do not overlap merge without asking anyone
+      // (docs/records/sync.md, "Conflicts").
+      final merge = await _tryMerge(
+        c,
+        d,
+        fetched.temp,
+        remote,
+        remoteSha: remoteSha,
+      );
+      if (merge != null) {
+        c.report
+          ..merged.add(d.path)
+          ..changedLocally.addAll(merge.changedLocally ? [d.path] : const []);
+        return SyncStepOutcome.done;
+      }
+
+      final conflict = SyncConflict(
+        path: d.path,
+        localSha256: localSha,
+        remoteSha256: remoteSha,
+        baseVersion: d.baseVersion,
+      );
+      c.report.conflicts.add(conflict);
+      _log.warning(
+        'conflict ${d.path}: both changed (local ${_short(localSha)}, '
+        'remote ${_short(remoteSha)}, base ${d.baseVersion ?? 'none'}); '
+        'left for the merge',
+      );
+      return SyncStepOutcome.conflict;
+    } finally {
+      if (fetched.temp.existsSync()) await fetched.temp.delete();
+    }
+  });
 
   /// Merges a library state file ([mergeSettingsJson] key by key, for the
   /// settings and for the Home's tiles (#535), [mergeCountersJson],
@@ -1681,12 +1687,12 @@ final class SyncEngine {
       );
       listed =
           await c.client.stat(d.path) ??
-          (throw const _StepFailure('merged but not listed'));
+          (throw const SyncStepFailure('merged but not listed'));
     }
     final after = await _stat(d.path);
-    if (after == null) throw const _StepFailure('merged but not on disk');
+    if (after == null) throw const SyncStepFailure('merged but not on disk');
     final sha = (await _hashLocal(root, [d.path]))[d.path];
-    if (sha == null) throw const _StepFailure('merged but not hashed');
+    if (sha == null) throw const SyncStepFailure('merged but not hashed');
     await store.putItems([
       await _row(c, d.path, sha: sha, local: after, remote: listed),
     ]);
@@ -1763,15 +1769,15 @@ final class SyncEngine {
     if (changedLocally) await ops.syncMerge(d.path, text);
     // The file on disk is the merge now: hash and stat it as written.
     final local = await _stat(d.path);
-    if (local == null) throw const _StepFailure('merged but not on disk');
+    if (local == null) throw const SyncStepFailure('merged but not on disk');
     final sha = (await _hashLocal(root, [d.path]))[d.path];
-    if (sha == null) throw const _StepFailure('merged but not hashed');
+    if (sha == null) throw const SyncStepFailure('merged but not hashed');
     await _uploadAndRecord(
       c,
       d.path,
       sha: sha,
       local: local,
-      notListed: const _StepFailure('merged but not listed'),
+      notListed: const SyncStepFailure('merged but not listed'),
       ifMatch: c.capabilities.ifMatch ? remote.guardEtag : null,
       modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
     );
@@ -1825,7 +1831,7 @@ final class SyncEngine {
   /// the calling isolate; an isolate costs more than the merge itself.
   static const _inlineMergeLimit = 20000;
 
-  Future<_Outcome> _moveRemote(SyncRunContext c, SyncDecision d) =>
+  Future<SyncStepOutcome> _moveRemote(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         final from = d.fromPath!;
         final local = (await _localStillAsPlanned(c, d.path))!;
@@ -1849,7 +1855,7 @@ final class SyncEngine {
         }
         await store.moveItems(root, from, d.path);
         final remote = await c.client.stat(d.path);
-        if (remote == null) throw const _StepFailure('moved but not listed');
+        if (remote == null) throw const SyncStepFailure('moved but not listed');
         final row = c.rows[from]!;
         await store.putItems([
           await _row(
@@ -1862,10 +1868,10 @@ final class SyncEngine {
             pinBase: false,
           ),
         ]);
-        return _Outcome.done;
+        return SyncStepOutcome.done;
       });
 
-  Future<_Outcome> _moveLocal(SyncRunContext c, SyncDecision d) =>
+  Future<SyncStepOutcome> _moveLocal(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         final from = d.fromPath!;
         await _localStillAsPlanned(c, from);
@@ -1873,7 +1879,7 @@ final class SyncEngine {
         await ops.syncMove(from, d.path);
         await store.moveItems(root, from, d.path);
         final local = await _stat(d.path);
-        if (local == null) throw const _StepFailure('moved but not on disk');
+        if (local == null) throw const SyncStepFailure('moved but not on disk');
         final row = c.rows[from]!;
         await store.putItems([
           await _row(
@@ -1886,11 +1892,9 @@ final class SyncEngine {
             pinBase: false,
           ),
         ]);
-        return _Outcome.done;
+        return SyncStepOutcome.done;
       });
 }
-
-enum _Outcome { done, skipped, conflict }
 
 /// What merging a library state file did.
 enum _StateMerge {
@@ -1910,14 +1914,6 @@ enum _StateMerge {
 /// path is skipped and the next run decides again.
 final class _ChangedDuringSync implements Exception {
   const new();
-}
-
-/// A step that cannot complete (nothing listed after an upload, a hash
-/// still missing); the path is reported as failed.
-final class _StepFailure implements Exception {
-  const new(this.message);
-
-  final String message;
 }
 
 /// What a scan found: files on both sides, the remote folders known to
