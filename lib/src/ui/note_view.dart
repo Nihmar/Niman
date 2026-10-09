@@ -38,7 +38,6 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
-import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
@@ -69,6 +68,7 @@ import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
+import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -182,7 +182,10 @@ final class NoteView extends StatefulWidget {
   /// A test sets it to zero so the count is on screen by the frame after a
   /// keystroke; nothing in the app sets it.
   @visibleForTesting
-  static Duration? statsDelayOverride;
+  static Duration? get statsDelayOverride => NoteStatsController.delayOverride;
+  @visibleForTesting
+  static set statsDelayOverride(Duration? delay) =>
+      NoteStatsController.delayOverride = delay;
 
   /// The note's own controls at the right end of the desktop's top row
   /// (#173): the kind toggles and the ⋮ menu the shell builds.
@@ -420,10 +423,15 @@ final class _NoteViewState extends State<NoteView>
   /// How long after the last move, scroll or edit the memento goes in.
   static const _mementoDelay = Duration(seconds: 1);
 
-  /// Debounced note-statistics refresh (word count + outline, T-M2-07).
-  Timer? _statsTimer;
-  int _wordCount = 0;
-  List<OutlineEntry> _outline = const <OutlineEntry>[];
+  /// The note's word count, outline and frontmatter error (T-M2-07),
+  /// refreshed a pause after the last edit; the view repaints on each
+  /// refresh.
+  late final NoteStatsController _stats = NoteStatsController(
+    surface: () => _surface,
+    loading: () => _loading,
+    sourceView: () => _sourceViewKey.currentState,
+    readView: () => _readViewKey.currentState,
+  );
 
   /// The template checker's state (T-TPL-09): the problems of the note when
   /// it is a template, and nothing when it is not. Owned here, handed to the
@@ -431,13 +439,8 @@ final class _NoteViewState extends State<NoteView>
   /// can show the count the surface works out.
   final TemplateCheck _templateCheck = TemplateCheck();
 
-  /// [_outline], published for the panels beside the note (#175).
-  final ValueNotifier<List<OutlineEntry>> _outlineNotifier = ValueNotifier(
-    const <OutlineEntry>[],
-  );
-
   @override
-  ValueListenable<List<OutlineEntry>> get outline => _outlineNotifier;
+  ValueListenable<List<OutlineEntry>> get outline => _stats.outline;
 
   @override
   String get currentText => _unifiedText;
@@ -566,11 +569,6 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
-  /// The unified note's revision the word count and the outline were last
-  /// read at, or -1 before the first read. Comparing revisions is what says
-  /// a note changed, where the statistics used to compare its whole text.
-  int _unifiedStatsRevision = -1;
-
   /// What the note's file looked like when it was last read or written.
   ///
   /// A reload is asked for by a watcher, and a watcher is not a promise: a
@@ -581,10 +579,6 @@ final class _NoteViewState extends State<NoteView>
   /// (208 ms to join the pane's text, 734 ms to normalize a fresh read, 44 ms
   /// to compare; measured 2026-09-22).
   DiskStamp? _diskStat;
-
-  /// Why the note's frontmatter block does not parse, or null when it
-  /// does (or when there is no block). Refreshed on the stats debounce.
-  String? _frontmatterError;
 
   /// The read pane's refresh (T-M2-08), after a pause in the typing.
   Timer? _previewTimer;
@@ -732,7 +726,7 @@ final class _NoteViewState extends State<NoteView>
   void _adoptWords(MarkdownSurfaceController surface) {
     if (surface.words.isCounted) return;
     final buffer = surface.buffer;
-    if (buffer.length > _syncWorkLimit) {
+    if (buffer.length > NoteStatsController.syncWorkLimit) {
       unawaited(surface.buildWords());
       return;
     }
@@ -872,6 +866,7 @@ final class _NoteViewState extends State<NoteView>
     // The WYSIWYG publishes the formats at its caret on every selection
     // change: the same moment its memento moves.
     _activeFormats.addListener(_scheduleMemento);
+    _stats.addListener(_onStatsChanged);
     unawaited(_load());
   }
 
@@ -948,14 +943,15 @@ final class _NoteViewState extends State<NoteView>
     _activeFormats.removeListener(_scheduleMemento);
     _templateCheck.dispose();
     _saves.cancel();
-    _statsTimer?.cancel();
     _previewTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _closed(widget.path, _saves.close());
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _sourceFind.dispose();
-    _outlineNotifier.dispose();
+    _stats
+      ..removeListener(_onStatsChanged)
+      ..dispose();
     _activeFormats.dispose();
     _formatKeys.detach();
     _focus.dispose();
@@ -1111,7 +1107,7 @@ final class _NoteViewState extends State<NoteView>
       // than reading the note (see PreviewWork's `read`). Small notes
       // answer synchronously inside this call; big ones go to an isolate
       // and land a moment later.
-      _refreshStats();
+      _stats.refresh();
       // The editor gets this frame: the preview's parse and first layout
       // start right after the text is on screen, so a large note shows it
       // before the preview works (T-PP-22).
@@ -1211,7 +1207,7 @@ final class _NoteViewState extends State<NoteView>
     _loading = false;
     _unsaved?.noteChanged();
     widget.onNoteKindChanged?.call(_noteKind);
-    _refreshStats();
+    _stats.refresh();
     _refreshPreview();
     if (mounted) setState(() {});
     _log.info('note reloaded: $path (external change, ${text.length} chars)');
@@ -1234,8 +1230,7 @@ final class _NoteViewState extends State<NoteView>
     _saves.edited();
     _unsaved?.noteChanged();
     _caretLine = caretLine;
-    _statsTimer?.cancel();
-    _statsTimer = Timer(_statsDelay, _refreshStats);
+    _stats.schedule();
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
   }
@@ -1636,7 +1631,7 @@ final class _NoteViewState extends State<NoteView>
     if (edit == null) return;
     surface.replaceRange(0, edit.end, edit.text, caret: surface.selection);
     _refreshPreview();
-    _refreshStats();
+    _stats.refresh();
   }
 
   /// Ticks or unticks the task item on [line] of the note the read pane is
@@ -1780,7 +1775,7 @@ final class _NoteViewState extends State<NoteView>
     );
     _surface?.replaceSelection(snippet);
     _focus.requestFocus();
-    _refreshStats();
+    _stats.refresh();
     _refreshPreview();
   }
 
@@ -1800,7 +1795,7 @@ final class _NoteViewState extends State<NoteView>
     if (!mounted) return;
     _surface?.replaceSelection(text);
     _focus.requestFocus();
-    _refreshStats();
+    _stats.refresh();
     _refreshPreview();
   }
 
@@ -1810,118 +1805,6 @@ final class _NoteViewState extends State<NoteView>
     final file = result.isEmpty ? null : result.first;
     return file?.path;
   }
-
-  /// Refreshes the word count and the outline (T-M2-07).
-  ///
-  /// Neither reads the note any more, which is what this used to cost: the
-  /// statistics joined the whole text (190 ms on the 246 MB note), compared
-  /// it to the last one for equality, copied it to an isolate and walked it
-  /// twice there (1.2 s). Now the count is kept by the edits
-  /// ([MarkdownSurfaceController.words]) and the outline is read off the
-  /// blocks the styling is already drawn from, so this is O(blocks) at
-  /// worst — and the frontmatter check, which only ever wanted the leading
-  /// block, gets the note's first lines rather than the whole note.
-  void _refreshStats() {
-    if (!mounted || _loading) return;
-    final surface = _surface;
-    if (surface != null) {
-      // The surface counts its own words as it is edited. A note whose
-      // count is not there yet (a big one, counted in the background) keeps
-      // the count it has and takes the next refresh's.
-      final revision = surface.revision;
-      if (revision == _unifiedStatsRevision && surface.words.isCounted) return;
-      final counted = surface.words.isCounted ? surface.words.words : null;
-      final headings = _outlineNow(surface);
-      // The pane's scan may still be carrying on an edit that changed the rest
-      // of the note, and the outline is the whole note's: this revision is not
-      // done until it lands, so the refresh asks again rather than keeping
-      // the outline from before the edit for as long as nobody types.
-      if (_sourceViewKey.currentState?.scanSettled ?? true) {
-        _unifiedStatsRevision = revision;
-      } else {
-        _statsTimer?.cancel();
-        _statsTimer = Timer(_statsDelay, _refreshStats);
-      }
-      final frontmatter = frontmatterErrorOf(surface.buffer);
-      setState(() {
-        if (counted != null) _wordCount = counted;
-        if (headings != null) _outline = headings;
-        _frontmatterError = frontmatter;
-      });
-      if (headings != null) _outlineNotifier.value = _outline;
-      // Nothing else asks again once the count lands: a note nobody types
-      // in would keep showing none.
-      if (!surface.words.isCounted) {
-        unawaited(surface.buildWords().then((_) => _statsAgain(surface)));
-      }
-    }
-  }
-
-  /// Refreshes the statistics once [surface]'s count has landed, if it is
-  /// still the note on screen.
-  void _statsAgain(MarkdownSurfaceController surface) {
-    if (!mounted || !identical(_surface, surface)) return;
-    if (!surface.words.isCounted) return;
-    _unifiedStatsRevision = -1;
-    _refreshStats();
-  }
-
-  /// The note's headings, from a scan something already paid for, or worked
-  /// out here for a note small enough to walk now.
-  ///
-  /// The source pane's own reading of the blocks, the read pane's — scanned
-  /// for the page — or the surface's, for a note whose pane is hidden or has
-  /// not scanned yet. The first three cost nothing; the last is
-  /// [outlineOfText] over the note's text, which is why it is behind
-  /// [_syncWorkLimit] and nothing larger takes it.
-  List<OutlineEntry>? _outlineNow(MarkdownSurfaceController? surface) {
-    final source = _sourceViewKey.currentState;
-    if (source != null) {
-      final headings = source.headings;
-      if (headings != null) return headings;
-    }
-    final read = _readViewKey.currentState;
-    if (read != null) {
-      final headings = read.headings;
-      if (headings != null) return headings;
-    }
-    final scanned = surface?.headings;
-    if (scanned != null) return scanned;
-    if (surface == null) return null;
-    // Nothing has scanned this note yet — a note just opened, or one whose
-    // pane is off stage — and only a small one may be walked for its
-    // headings here. A big one keeps the outline it has until a pane's own
-    // scan lands ([_refreshStats] asks again).
-    if (surface.buffer.length > _syncWorkLimit) return null;
-    return outlineOfBlocks(
-      BlockIndex(
-        blocks: BlockScanner(surface.buffer).index.blocks,
-        revision: surface.revision,
-      ),
-      surface.buffer.lineAt,
-    );
-  }
-
-  static const int _syncWorkLimit = 64 * 1024;
-
-  /// How long the writer has to pause before the word count and the outline
-  /// are worked out again.
-  ///
-  /// They read the whole note — joined, sent to an isolate, scanned — so a
-  /// note of hundreds of megabytes waits for a real pause rather than for
-  /// every breath between words (0.0.9 stress test: a 246 MB note paid 12 s
-  /// of isolate time after each one).
-  Duration get _statsDelay {
-    final override = NoteView.statsDelayOverride;
-    if (override != null) return override;
-    final length = _noteLength;
-    if (length > 16 << 20) return const Duration(seconds: 5);
-    if (length > 2 << 20) return const Duration(seconds: 2);
-    return const Duration(milliseconds: 350);
-  }
-
-  /// The note's length, without joining it.
-  int get _noteLength => _surface?.buffer.length ?? 0;
 
   /// Records what the note's file looks like now, for [_unchangedOnDisk].
   ///
@@ -1938,7 +1821,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// Opens the outline sheet and jumps to whatever was picked.
   Future<void> _openOutline() async {
-    final line = await showOutlineSheet(context, entries: _outline);
+    final line = await showOutlineSheet(context, entries: _stats.outline.value);
     if (line == null || !mounted) return;
     _jumpToHeading(line);
   }
@@ -1983,7 +1866,7 @@ final class _NoteViewState extends State<NoteView>
     notePath: widget.path,
     libraryRoot: widget.libraryRoot,
     missingNoteLocation: widget.missingNoteLocation,
-    outline: _outline,
+    outline: _stats.outline.value,
     jumpToHeading: _jumpToHeading,
     onOpenNote: widget.onOpenNote,
     createMissingNote: widget.createMissingNote,
@@ -2021,6 +1904,12 @@ final class _NoteViewState extends State<NoteView>
     _mementoTimer = Timer(_mementoDelay, () {
       if (mounted) _handMemento(widget.path);
     });
+  }
+
+  /// The statistics were refreshed: the status row and the fields panel are
+  /// drawn again.
+  void _onStatsChanged() {
+    if (mounted) setState(() {});
   }
 
   /// Spelling results changed (the note loaded, or a settings toggle): the
@@ -2215,8 +2104,8 @@ final class _NoteViewState extends State<NoteView>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (!_loading && _frontmatterError != null)
-                  FrontmatterWarningBanner(message: _frontmatterError!),
+                if (!_loading && _stats.frontmatterError != null)
+                  FrontmatterWarningBanner(message: _stats.frontmatterError!),
                 NoteColumnPadding(
                   column: widget.noteColumn,
                   child: ListenableBuilder(
@@ -2232,7 +2121,7 @@ final class _NoteViewState extends State<NoteView>
                       // In its place, and off: a todo.txt has one pane.
                       canSwitchEditorKind: widget.onEditorKindChanged != null,
                       editorKindLocked: _plainTextIn(widget),
-                      wordCount: _wordCount,
+                      wordCount: _stats.wordCount,
                       // Only a template is counted; elsewhere the checker
                       // never ran and stays at nothing (T-TPL-09).
                       templateProblems: _templateIn(widget)
