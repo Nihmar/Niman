@@ -71,6 +71,30 @@ void main() {
       },
     );
 
+    test('a file from before the index opens without building it, and '
+        'builds it when asked (#671)', () async {
+      Future<bool> hasIndex(IndexDatabase db) async =>
+          (await db
+                  .customSelect(
+                    "SELECT 1 FROM sqlite_master WHERE name = 'notes_recent'",
+                  )
+                  .get())
+              .isNotEmpty;
+      final file = File(p.join(root.path, 'index.sqlite'));
+      final old = IndexDatabase(NativeDatabase(file));
+      expect(await hasIndex(old), isTrue, reason: 'a new file has it');
+      await old.customStatement('DROP INDEX notes_recent');
+      await old.close();
+
+      final opened = IndexDatabase(NativeDatabase(file));
+      addTearDown(opened.close);
+      expect(await hasIndex(opened), isFalse, reason: 'not built on open');
+      expect(await NoteDao(opened).recentlyModified(), isEmpty);
+
+      await opened.ensureRecentIndex();
+      expect(await hasIndex(opened), isTrue);
+    });
+
     test('walks the notes_recent index instead of sorting the table', () async {
       await indexer.fullScan(root.path);
       final plan = await db
