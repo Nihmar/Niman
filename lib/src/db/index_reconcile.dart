@@ -34,12 +34,13 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/index_tree.dart';
+import 'package:niman/src/db/scan_touches.dart';
 import 'package:niman/src/links/resolver.dart';
 
 /// Reconciles the index with the library a directory at a time (#302).
 ///
 /// Owned by the indexer facade, which serializes every entry point through
-/// its mutex before calling in.
+/// its mutex before calling in; [fullScan] takes it a step at a time.
 final class IndexReconciler {
   /// Creates the reconciler over the given [IndexDatabase], sharing the
   /// tree sync and content store of the indexer facade.
@@ -76,6 +77,12 @@ final class IndexReconciler {
   /// it, so the pairing is skipped and its tables never made.
   bool _pairing = false;
 
+  /// What writes outside the scan touched while it ran (#697).
+  final ScanTouches touches = ScanTouches();
+
+  /// A directory that takes this long is logged with its numbers (#698).
+  static const _slowDirMs = 500;
+
   /// Rebuilds the index from a full disk scan of `root`.
   ///
   /// The index is diffed against the walk directory by directory, so every
@@ -88,13 +95,29 @@ final class IndexReconciler {
   /// the paths the scan pruned.
   Future<void> fullScan(
     String root, {
+    required Future<T> Function<T>(Future<T> Function() fn) step,
     void Function()? onChanged,
     void Function(Set<String> removed)? onRemoved,
   }) async {
-    await _db.customStatement('PRAGMA incremental_vacuum');
-    final contentOwed = !await _store.contentIndexComplete();
-    final hadRows = await _dao.hasRows();
-    final progressTotal = _tree.onProgress == null ? 0 : await _dao.noteCount();
+    // Each [step] holds the indexer's lock: the setup, one directory, the
+    // close. Between them a write outside the scan goes through — a note
+    // made during a long walk opens at once (#697) — and [touches] keeps
+    // what it touched out of the scan's hands.
+    final (:contentOwed, :hadRows, :progressTotal) = await step(() async {
+      await _db.customStatement('PRAGMA incremental_vacuum');
+      final contentOwed = !await _store.contentIndexComplete();
+      final hadRows = await _dao.hasRows();
+      final progressTotal = _tree.onProgress == null
+          ? 0
+          : await _dao.noteCount();
+      await _openScanTables(hadRows);
+      touches.begin();
+      return (
+        contentOwed: contentOwed,
+        hadRows: hadRows,
+        progressTotal: progressTotal,
+      );
+    });
     if (contentOwed) {
       _log.info(
         'fullScan: content index incomplete — rebuilding it as it scans',
@@ -106,7 +129,6 @@ final class IndexReconciler {
     var files = 0;
     var reads = 0;
     final removed = <String>{};
-    await _openScanTables(hadRows);
     try {
       final walk = await DirWalker.start(root);
       Object? failure;
@@ -122,13 +144,30 @@ final class IndexReconciler {
           if (listing.failed) continue;
           entries += listing.entries.length;
           files += listing.entries.where((e) => !e.isDir).length;
-          final result = await _reconcileDir(
+          final dirClock = Stopwatch()..start();
+          // The notes are read before the step, off the lock: a big one
+          // takes seconds on a phone, and the lock is only the writes'.
+          final read = await _readDir(
             root,
             listing,
             contentOwed: contentOwed,
             progressTotal: progressTotal,
             readsDone: reads,
           );
+          final readMs = dirClock.elapsedMilliseconds;
+          final current = listing;
+          final result = await step(() => _reconcileDir(root, current, read));
+          // Where a slow scan spends its time (#698).
+          if (dirClock.elapsedMilliseconds >= _slowDirMs) {
+            final biggest = _biggestRead(listing, read.contents.keys);
+            _log.debug(
+              'scan: "${listing.rel}" ${listing.entries.length} entr(ies), '
+              '${result.read} read in $readMs ms'
+              '${biggest == null ? '' : ' (largest "${biggest.rel}", '
+                        '${biggest.size} b)'}, '
+              'written in ${dirClock.elapsedMilliseconds - readMs} ms',
+            );
+          }
           reads += result.read;
           wrote |= result.wrote;
         }
@@ -138,23 +177,28 @@ final class IndexReconciler {
       } finally {
         await walk.close(error: failure);
       }
-      if (hadRows) {
-        final paired = await _pairOrphans(
-          root,
-          contentOwed: contentOwed,
-          progressTotal: progressTotal,
-          readsDone: reads,
-        );
-        reads += paired.read;
-        wrote |= paired.wrote;
-      }
-      final pruned = await _pruneGone();
-      wrote |= pruned.wrote;
-      removed.addAll(pruned.removed);
-      await _writePendingLinks();
-      if (contentOwed && await _store.repairDerivedRows()) wrote = true;
+      await step(() async {
+        if (hadRows) {
+          final paired = await _pairOrphans(
+            root,
+            contentOwed: contentOwed,
+            progressTotal: progressTotal,
+            readsDone: reads,
+          );
+          reads += paired.read;
+          wrote |= paired.wrote;
+        }
+        final pruned = await _pruneGone();
+        wrote |= pruned.wrote;
+        removed.addAll(pruned.removed);
+        await _writePendingLinks();
+        if (contentOwed && await _store.repairDerivedRows()) wrote = true;
+      });
     } finally {
-      await _closeScanTables();
+      await step(() async {
+        touches.end();
+        await _closeScanTables();
+      });
     }
     _log.info(
       'fullScan $root: $entries entr(ies) ($files file, '
@@ -170,6 +214,19 @@ final class IndexReconciler {
       final cb = onRemoved;
       if (cb != null) cb(removed);
     }
+  }
+
+  /// The largest of [listing]'s entries among [read], for the slow
+  /// directory's log line (#698).
+  static DiskEntry? _biggestRead(DirListing listing, Iterable<String> read) {
+    final rels = read.toSet();
+    DiskEntry? biggest;
+    for (final e in listing.entries) {
+      if (rels.contains(e.rel) && (biggest == null || e.size > biggest.size)) {
+        biggest = e;
+      }
+    }
+    return biggest;
   }
 
   /// The first index of a library, the tree alone: when the index is empty,
@@ -249,28 +306,55 @@ final class IndexReconciler {
 
   /// Reconciles one directory listing against the index rows of that
   /// directory. Answers whether it wrote and how many notes it read.
-  Future<({bool wrote, int read})> _reconcileDir(
+  Future<_DirRead> _readDir(
     String root,
     DirListing listing, {
     required bool contentOwed,
     required int progressTotal,
     required int readsDone,
   }) async {
+    final version = touches.version;
+    final state = await _dirState(listing);
+    if (listing.rel.isNotEmpty && state.dirRow == null) {
+      return (
+        contents: const <String, NoteContent>{},
+        shas: const <String, String>{},
+        state: state,
+        version: version,
+      );
+    }
+    final read = await _tree.readContents(
+      root,
+      state.entries,
+      state.old,
+      contentOwed: contentOwed,
+      progressTotal: progressTotal,
+      doneBase: readsDone,
+    );
+    return (
+      contents: read.contents,
+      shas: read.shas,
+      state: state,
+      version: version,
+    );
+  }
+
+  /// [listing]'s directory row, the rows under it and the entries to
+  /// mirror, leaving out what a write touched since the scan began.
+  Future<_DirState> _dirState(DirListing listing) async {
     final dirRel = listing.rel;
     final dirRow = dirRel.isEmpty ? null : await _dao.find(dirRel);
-    if (dirRel.isNotEmpty && dirRow == null) {
-      // Its parent's listing should have written the row before the walk
-      // descended; without one the parent chain cannot resolve. Nothing
-      // else can prune it mid-scan — the scan holds the indexer's mutex —
-      // so this is a race with the disk, and the next scan finds it again.
-      _log.debug('scan: no row for "$dirRel" — skipping its listing');
-      return (wrote: false, read: 0);
-    }
     final parentId = dirRow?.id ?? 0;
+    // A path a write touched since the listing was taken is the write's:
+    // neither its entry nor its row is the scan's to change (#697). A
+    // folder holding one stays: it is on disk and in the listing, and out
+    // of `old` it would read as new and be written twice; the prune and
+    // the pairing shield it instead.
     final old = <String, Note>{
       dirRel: ?dirRow,
-      for (final row in await _dao.children(parentId)) row.path: row,
-    };
+      if (dirRel.isEmpty || dirRow != null)
+        for (final row in await _dao.children(parentId)) row.path: row,
+    }..removeWhere((rel, _) => rel != dirRel && touches.owns(rel));
     final entries = <DiskEntry>[
       if (dirRow != null)
         DiskEntry(
@@ -280,15 +364,43 @@ final class IndexReconciler {
           size: 0,
           modified: listing.modified,
         ),
-      ...listing.entries,
+      for (final e in listing.entries)
+        if (!touches.owns(e.rel)) e,
     ];
-    final read = await _tree.readContents(
-      root,
-      entries,
-      old,
-      contentOwed: contentOwed,
-      progressTotal: progressTotal,
-      doneBase: readsDone,
+    return (dirRow: dirRow, old: old, entries: entries);
+  }
+
+  Future<({bool wrote, int read})> _reconcileDir(
+    String root,
+    DirListing listing,
+    _DirRead before,
+  ) async {
+    final dirRel = listing.rel;
+    // The rows as they are now, under the lock — read again only when a
+    // write came in between, or an idle library's every directory would be
+    // queried twice — and what was read before it, less what a write
+    // touched in between (#697).
+    final (:dirRow, :old, :entries) = before.version == touches.version
+        ? before.state
+        : await _dirState(listing);
+    if (dirRel.isNotEmpty && dirRow == null) {
+      // Its parent's listing should have written the row before the walk
+      // descended; without one the parent chain cannot resolve. A write
+      // between two of the scan's steps may have deleted or moved it
+      // (#697): a race with the disk either way, which the write itself
+      // or the next scan settles.
+      _log.debug('scan: no row for "$dirRel" — skipping its listing');
+      return (wrote: false, read: 0);
+    }
+    final read = (
+      contents: {
+        for (final MapEntry(:key, :value) in before.contents.entries)
+          if (!touches.owns(key)) key: value,
+      },
+      shas: {
+        for (final MapEntry(:key, :value) in before.shas.entries)
+          if (!touches.owns(key)) key: value,
+      },
     );
     var wrote = read.contents.isNotEmpty;
     var paired = const <String>{};
@@ -367,6 +479,7 @@ final class IndexReconciler {
         .get();
     if (rows.length != 1) return null;
     final path = rows.single.read<String>('path');
+    if (touches.shields(path)) return null;
     final row = await _dao.find(path);
     if (row == null) return null;
     await _db.customStatement('DELETE FROM scan_orphans WHERE path = ?', [
@@ -458,6 +571,10 @@ final class IndexReconciler {
             .get();
         if (matches.length != 1) continue;
         final orphanPath = matches.single.read<String>('path');
+        if (touches.shields(orphanPath) ||
+            touches.shields(row.read<String>('path'))) {
+          continue;
+        }
         final orphan = await _dao.find(orphanPath);
         if (orphan == null) continue;
         final newPath = row.read<String>('path');
@@ -640,7 +757,10 @@ final class IndexReconciler {
       if (rows.isEmpty) break;
       for (final row in rows) {
         final path = row.read<String>('path');
-        final deleted = await _dao.deleteSubtree(path);
+        // Made again, or written inside, since the scan saw it gone.
+        final deleted = touches.shields(path)
+            ? 0
+            : await _dao.deleteSubtree(path);
         await _db.customStatement('DELETE FROM scan_gone WHERE path = ?', [
           path,
         ]);
@@ -683,3 +803,19 @@ final class IndexReconciler {
 
   static int _seconds(DateTime dt) => dt.millisecondsSinceEpoch ~/ 1000;
 }
+
+/// A directory's notes as read before its step: their parsed content, and
+/// the digest of every note the step mirrors.
+typedef _DirRead = ({
+  Map<String, NoteContent> contents,
+  Map<String, String> shas,
+  _DirState state,
+  int version,
+});
+
+/// A directory's row, the rows under it and the entries to mirror.
+typedef _DirState = ({
+  Note? dirRow,
+  Map<String, Note> old,
+  List<DiskEntry> entries,
+});
