@@ -171,14 +171,18 @@ final class NoteDao {
   /// Notes after a gap of deleted ids come up more often, which a tile
   /// that only wants something to reread can live with. The sign bit is
   /// masked rather than `abs()`ed: `abs` of the smallest integer throws.
+  ///
+  /// The id is drawn once, in a scalar subquery, and `+is_dir` keeps the
+  /// planner off `notes_recent`: with the index on hand it scanned it,
+  /// drew a fresh threshold per row, and the lowest ids always won (#666).
   Future<Note?> randomNote({String excludeFolder = ''}) async {
-    final where = 'is_dir = 0${_outside(excludeFolder)}';
+    final where = '+is_dir = 0${_outside(excludeFolder)}';
     final args = _outsideArgs(excludeFolder);
     final picked = await _db
         .customSelect(
           'SELECT * FROM notes WHERE $where AND id >= '
-          '((random() & 9223372036854775807) % '
-          '((SELECT max(id) FROM notes) + 1)) ORDER BY id LIMIT 1',
+          '(SELECT (random() & 9223372036854775807) % (max(id) + 1) '
+          'FROM notes) ORDER BY id LIMIT 1',
           variables: args,
           readsFrom: {_db.notes},
         )
