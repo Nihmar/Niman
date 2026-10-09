@@ -60,33 +60,39 @@ void main() {
     ]);
   });
 
+  // Derived, not listed: a destination added later (the Home, #535) must
+  // not change what these two prove.
+  final names = [for (final d in shellDestinations()) d.name];
+  final hideable = [
+    for (final n in names)
+      if (!lockedDestinations.contains(n)) n,
+  ];
+  final lastShown = [
+    for (final n in names)
+      if (n == hideable.first || lockedDestinations.contains(n)) n,
+  ];
+
   testWidgets('the last destination shown besides Settings keeps its switch '
       'on (#667)', (tester) async {
     await pump(tester);
-    for (final name in ['todo', 'search', 'quicknote']) {
+    for (final name in hideable.skip(1)) {
       await tester.tap(find.byKey(Key('navigation-switch-$name')));
       await tester.pumpAndSettle();
     }
-    final files = find.byKey(const Key('navigation-switch-files'));
-    expect(tester.widget<Switch>(files).onChanged, isNull);
+    final last = find.byKey(Key('navigation-switch-${hideable.first}'));
+    expect(tester.widget<Switch>(last).onChanged, isNull);
 
-    await tester.tap(files);
+    await tester.tap(last);
     await tester.pumpAndSettle();
 
-    expect(previewed(tester), ['files', 'settings']);
+    expect(previewed(tester), lastShown);
     expect(tester.takeException(), isNull);
   });
 
   test('a layout that hides all but Settings shows the first back (#667)', () {
-    const layout = NavigationLayout(
-      order: ['files', 'todo', 'search', 'quicknote', 'settings'],
-      hidden: {'files', 'todo', 'search', 'quicknote'},
-    );
+    final layout = NavigationLayout(order: names, hidden: hideable.toSet());
 
-    expect(
-      [for (final d in visibleDestinations(layout)) d.name],
-      ['files', 'settings'],
-    );
+    expect([for (final d in visibleDestinations(layout)) d.name], lastShown);
   });
 
   testWidgets('dragging a row moves the destination', (tester) async {
