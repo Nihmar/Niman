@@ -1336,11 +1336,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// tells everyone who needs to know.
   void _moveCaretTo(int offset, {bool extend = false}) {
     final to = _inCell(offset, 0);
-    final next = extend
-        ? SelectionModel(anchor: _selection.anchor, extent: to)
-        : SelectionModel.at(to);
-    _publishSelection(next.clampTo(widget.buffer.length));
-    widget.onSelection?.call(_selection);
+    final next =
+        (extend
+                ? SelectionModel(anchor: _selection.anchor, extent: to)
+                : SelectionModel.at(to))
+            .clampTo(widget.buffer.length);
+    _publishSelection(next);
+    // The selection made, not `_selection`: a caller that holds the caret
+    // still has the old one until it takes this.
+    widget.onSelection?.call(next);
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
@@ -4052,8 +4056,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Makes [next] the selection, and tells everyone who needs to know.
   void _moveSelection(SelectionModel next) {
-    _publishSelection(next.clampTo(widget.buffer.length));
-    widget.onSelection?.call(_selection);
+    final clamped = next.clampTo(widget.buffer.length);
+    _publishSelection(clamped);
+    widget.onSelection?.call(clamped);
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();

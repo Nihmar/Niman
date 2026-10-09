@@ -683,6 +683,43 @@ void main() {
     expect(selection.extent, greaterThan(0), reason: 'to the click');
   });
 
+  testWidgets('Shift+click in a view whose caller holds the caret reports '
+      'the selection it made', (tester) async {
+    // A view handed its selection reads the caller's until the caller takes
+    // the new one: the report has to be of the selection made, not of the
+    // one still held, or the caller keeps the caret where it was.
+    final buffer = SourceBuffer.fromText('una riga di testo\n');
+    var selection = const SelectionModel.at(0);
+    final carets = <SelectionModel>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) => MarkdownSourceView(
+              buffer: buffer,
+              theme: _theme,
+              showLineNumbers: false,
+              selection: selection,
+              onSelection: (next) {
+                carets.add(next);
+                setState(() => selection = next);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tapAt(const Offset(6, 16), kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.tapAt(const Offset(120, 16), kind: PointerDeviceKind.mouse);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    expect(carets.last.anchor, 0, reason: 'from where the caret was');
+    expect(carets.last.extent, greaterThan(0), reason: 'to the click');
+  });
+
   testWidgets('Ctrl+A selects the whole note', (tester) async {
     final buffer = SourceBuffer.fromText('una\ndue\ntre\n');
     final carets = <SelectionModel>[];
