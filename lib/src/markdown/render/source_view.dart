@@ -86,6 +86,7 @@ import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
+import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
@@ -3830,7 +3831,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       final start = math.max(0, selection.start - _semanticsReach);
       final end = math.min(buffer.length, selection.end + _semanticsReach);
       int local(int offset) => (offset - start).clamp(0, end - start);
-      return _NoteSemantics(
+      return NoteSemantics(
         value: buffer.substring(start, end),
         selection: TextSelection(
           baseOffset: local(selection.anchor),
@@ -6310,92 +6311,6 @@ typedef _Ink = ({
 /// from the left edge and below the first visual line for a fragment of a
 /// table row laid out in fitted columns.
 typedef _Piece = ({GlobalKey key, int start, int end, double x, double y});
-
-/// The note as a text field to the platform's accessibility: what
-/// `RenderEditable` tells it about a `TextField`, which the `Semantics`
-/// widget has no way to say — the selection inside the value above all.
-final class _NoteSemantics extends SingleChildRenderObjectWidget {
-  const new({
-    required this.value,
-    required this.selection,
-    required this.focused,
-    required this.onTap,
-    required this.onSetSelection,
-    required this.onMove,
-    required this.onCopy,
-    required this.onCut,
-    required this.onPaste,
-    super.child,
-  });
-
-  final String value;
-  final TextSelection selection;
-  final bool focused;
-  final VoidCallback onTap;
-  final ValueChanged<TextSelection> onSetSelection;
-  final void Function(CaretMotion motion, {required bool extend}) onMove;
-  final VoidCallback? onCopy;
-  final VoidCallback? onCut;
-  final VoidCallback onPaste;
-
-  @override
-  _RenderNoteSemantics createRenderObject(BuildContext context) =>
-      _RenderNoteSemantics(this);
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    _RenderNoteSemantics renderObject,
-  ) {
-    renderObject.semantics = this;
-  }
-}
-
-final class _RenderNoteSemantics extends RenderProxyBox {
-  new(this._semantics);
-
-  _NoteSemantics _semantics;
-
-  // A setter the widget pairs with, as every render object's are.
-  // ignore: avoid_setters_without_getters
-  set semantics(_NoteSemantics value) {
-    _semantics = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    final note = _semantics;
-    MoveCursorHandler move(CaretMotion motion) =>
-        (extend) => note.onMove(motion, extend: extend);
-    // Named first: a closure written in the cascade would swallow the rest of
-    // it into its body.
-    final characterRight = move(CaretMotion.characterRight);
-    final characterLeft = move(CaretMotion.characterLeft);
-    final wordRight = move(CaretMotion.wordRight);
-    final wordLeft = move(CaretMotion.wordLeft);
-    config
-      ..isSemanticBoundary = true
-      ..isTextField = true
-      ..isMultiline = true
-      ..isFocused = note.focused
-      ..isEnabled = true
-      ..value = note.value
-      // The note is written left to right, as every line of it is laid out.
-      ..textDirection = TextDirection.ltr
-      ..textSelection = note.selection
-      ..onTap = note.onTap
-      ..onSetSelection = note.onSetSelection
-      ..onPaste = note.onPaste
-      ..onMoveCursorForwardByCharacter = characterRight
-      ..onMoveCursorBackwardByCharacter = characterLeft
-      ..onMoveCursorForwardByWord = wordRight
-      ..onMoveCursorBackwardByWord = wordLeft;
-    if (note.onCopy != null) config.onCopy = note.onCopy;
-    if (note.onCut != null) config.onCut = note.onCut;
-  }
-}
 
 /// What a line's gutter shows for folding.
 enum _FoldMark {
