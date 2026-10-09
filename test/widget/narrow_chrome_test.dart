@@ -4,8 +4,10 @@
 // toggle.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
+import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/title_bar.dart';
 import 'package:niman/src/workspace/workspace_tab.dart';
 
@@ -92,9 +94,8 @@ void main() {
     expect(saved.right, greaterThan(700));
   });
 
-  testWidgets('with the tree hidden, the first tab keeps off the toggle', (
-    tester,
-  ) async {
+  testWidgets('with the tree hidden, the first tab keeps off the toggle '
+      'and over the panel', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -103,8 +104,9 @@ void main() {
             sidebarVisible: false,
             onToggleSidebar: () {},
             window: FakeWindowController(customTitleBar: true),
-            // The note pane's edge with the tree hidden: rail + divider.
-            tabsStart: 49,
+            // The panes' island with the tree hidden: the rail, the base's
+            // pixel and the islands' gap.
+            tabsStart: _panesStart,
             tabs: (drag) => _tabs(['alpha.md']),
           ),
         ),
@@ -116,6 +118,12 @@ void main() {
     final tab = tester.getRect(
       find.ancestor(of: find.text('alpha'), matching: find.byType(InkWell)),
     );
-    expect(tab.left - toggle.right, greaterThanOrEqualTo(16));
+    expect(tab.left, _panesStart, reason: 'over the panel, not past it');
+    // Room still (0.0.8 test round): the toggle's glyph ends 8 px inside
+    // its box, so the eye reads some 22 px of it.
+    expect(tab.left - toggle.right, greaterThanOrEqualTo(12));
   });
 }
+
+/// Where the panes' island starts with the tree hidden.
+const double _panesStart = ShellRail.width + 1 + Island.gap;

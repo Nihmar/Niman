@@ -88,19 +88,26 @@ final class AppTitleBar extends StatelessWidget {
                 final label = sidebarVisible
                     ? AppStrings.hideSidebarTooltip
                     : AppStrings.showSidebarTooltip;
-                return IconButton(
-                  key: const Key('toggle-sidebar'),
-                  tooltip: keys == null
-                      ? label
-                      : '$label (${describeActivator(keys)})',
-                  icon: Icon(
-                    sidebarVisible
-                        ? Icons.vertical_split
-                        : Icons.chrome_reader_mode_outlined,
+                // Its width fixed, not left to the platform's density: the
+                // tabs are placed past [_leading], and a desktop drew the
+                // button 6 px narrower than a phone (34 against 40), which
+                // put them that far left of the panes under them.
+                return SizedBox.square(
+                  dimension: _toggleSize,
+                  child: IconButton(
+                    key: const Key('toggle-sidebar'),
+                    tooltip: keys == null
+                        ? label
+                        : '$label (${describeActivator(keys)})',
+                    icon: Icon(
+                      sidebarVisible
+                          ? Icons.vertical_split
+                          : Icons.chrome_reader_mode_outlined,
+                    ),
+                    iconSize: 18,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: onToggleSidebar,
                   ),
-                  iconSize: 18,
-                  visualDensity: VisualDensity.compact,
-                  onPressed: onToggleSidebar,
                 );
               },
             ),
@@ -247,13 +254,18 @@ final class ZenTitleBar extends StatelessWidget {
   );
 }
 
-/// Left of the title: the leading gap and the sidebar toggle.
-const double _leading = 4 + 40;
+/// The sidebar toggle's side: what a desktop draws it at.
+const double _toggleSize = 34;
 
-/// The least room between the sidebar toggle and the first tab. With the
-/// tree hidden the tabs' edge (the note pane's) falls 5 px from the
-/// toggle, and the first tab read as stuck to it (0.0.8 test round).
-const double _tabsGap = 16;
+/// Left of the title: the leading gap and the sidebar toggle.
+const double _leading = 4 + _toggleSize;
+
+/// The least room between the sidebar toggle and the first tab, a guard
+/// only: the tabs start at the panes' island, which with the tree hidden
+/// is 14 px past the toggle — room enough, and kept so the first tab
+/// stands over the panel (0.0.8 test round asked for room; a 16 px floor
+/// once pushed the tab 8 px off the panel's edge).
+const double _tabsGap = 8;
 
 /// Minimize, maximize/restore and close, at the bar's right edge.
 ///
