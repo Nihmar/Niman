@@ -78,11 +78,25 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
     );
   }
 
+  /// The keys' way in: the arrows move the slide wherever in the view
+  /// the focus sits.
+  final FocusNode _focus = FocusNode(debugLabel: 'slides');
+
   @override
   void initState() {
     super.initState();
     _live++;
     _place.addListener(_placeMoved);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _takeKeys());
+  }
+
+  /// Takes the keyboard on a wide window, as a note's editor does. Asked
+  /// for, not left to `autofocus`: that gives way to whatever its scope
+  /// already focused — the tree the note was opened from — and the arrows
+  /// went there until a click in the slide.
+  void _takeKeys() {
+    if (!mounted || MediaQuery.sizeOf(context).width < wideBreakpoint) return;
+    _focus.requestFocus();
   }
 
   @override
@@ -95,7 +109,10 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
       _place = slidePlaceOf(_path)..addListener(_placeMoved);
       // The swipe and the row still show the old path's slide; they move
       // once this frame is built, not in the middle of it.
-      WidgetsBinding.instance.addPostFrameCallback((_) => _placeMoved());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _placeMoved();
+        _takeKeys();
+      });
     }
   }
 
@@ -109,6 +126,7 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
     _pages.dispose();
     _strip.dispose();
     _mathCache.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -208,18 +226,27 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     _watchTurn(context);
-    return Focus(
-      autofocus: wide,
-      onKeyEvent: _onKey,
-      child: wide
-          ? SlidesWideLayout(
-              slides: _slides,
-              index: _index,
-              strip: _strip,
-              frame: _frame,
-              onGo: _go,
-            )
-          : _narrow(context),
+    // A press anywhere in the view takes the keys back: a thumbnail, a
+    // button, the space between, take no focus of their own, and the
+    // arrows went on to whatever held it.
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) {
+        if (!_focus.hasFocus) _focus.requestFocus();
+      },
+      child: Focus(
+        focusNode: _focus,
+        onKeyEvent: _onKey,
+        child: wide
+            ? SlidesWideLayout(
+                slides: _slides,
+                index: _index,
+                strip: _strip,
+                frame: _frame,
+                onGo: _go,
+              )
+            : _narrow(context),
+      ),
     );
   }
 

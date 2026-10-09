@@ -111,6 +111,53 @@ void main() {
     expect(caches, hasLength(1), reason: 'one for the deck (#672)');
   });
 
+  testWidgets('wide: the keys move the slide at once, though something '
+      'else held the focus when the note opened', (tester) async {
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    // The tree the note was opened from keeps the focus it had.
+    final tree = FocusNode();
+    addTearDown(tree.dispose);
+    final open = ValueNotifier(false);
+    addTearDown(open.dispose);
+    await tester.pumpWidget(
+      _app(
+        Column(
+          children: [
+            Focus(focusNode: tree, autofocus: true, child: const Text('tree')),
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: open,
+                builder: (context, open, _) => open
+                    ? SlidesNoteView(text: _deck, host: _Host('focus.md'))
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tree.hasFocus, isTrue);
+
+    open.value = true;
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text('2 / 2'), findsOneWidget);
+
+    // A thumbnail clicked while the focus is elsewhere brings it back.
+    tree.requestFocus();
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('slide-thumb-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('1 / 2'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text('2 / 2'), findsOneWidget, reason: 'after a thumbnail');
+  });
+
   testWidgets('narrow: a swipe moves the slide; Markdown leaves the view', (
     tester,
   ) async {
