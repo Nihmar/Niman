@@ -859,56 +859,28 @@ final class SyncEngine {
     String path,
     String text, {
     required ConflictTexts shown,
-  }) => _exclusively(() async {
-    final clock = Stopwatch()..start();
-    _log.info('resolve $path: merged text (${text.length} chars)');
-    final connection = await _connect();
-    final client = connection.client;
-    try {
-      final capabilities = await _capabilities(client, connection.destination);
-      final remote = await client.stat(path);
-      await _stillAsShown(client, path, shown, remote);
-      final c = _RunContext(
-        client: client,
-        capabilities: capabilities,
-        local: const {},
-        remote: {path: ?remote},
-        rows: const {},
-        localSha: const {},
-        remoteSha: const {},
-        folders: {''},
-        report: SyncReport(),
-      );
+  }) => _resolve(
+    path,
+    intent: 'merged text (${text.length} chars)',
+    outcome: 'merged',
+    shown: shown,
+    (c, remote) async {
       await ops.syncMerge(path, text);
       final local = await _stat(path);
       if (local == null) {
         throw SyncFailure(SyncAbort.failed, '$path is gone here');
       }
       final sha = (await _hashLocal(root, [path]))[path]!;
-      await _ensureRemoteParent(c, path);
-      await client.uploadFile(
+      await _uploadAndRecord(
+        c,
         path,
-        File(p.join(root, path)),
-        ifMatch: capabilities.ifMatch ? remote?.guardEtag : null,
+        sha: sha,
+        local: local,
+        notListed: SyncFailure(SyncAbort.failed, '$path uploaded, not listed'),
+        ifMatch: c.capabilities.ifMatch ? remote?.guardEtag : null,
       );
-      final listed = await client.stat(path);
-      if (listed == null) {
-        throw SyncFailure(SyncAbort.failed, '$path uploaded, not listed');
-      }
-      await store.putItems([
-        await _row(c, path, sha: sha, local: local, remote: listed),
-      ]);
-      _log.info('resolve $path: merged (${clock.elapsedMilliseconds} ms)');
-    } on WebDavFailure catch (e) {
-      _log.warning('resolve $path failed: ${e.message}');
-      throw SyncFailure.of(e);
-    } on FileSystemException catch (e) {
-      _log.warning('resolve $path failed: ${e.message}');
-      throw SyncFailure(SyncAbort.failed, 'local: ${e.message}');
-    } finally {
-      client.close();
-    }
-  });
+    },
+  );
 
   /// Resolves a conflict at [path] by keeping one whole side: with
   /// [keepLocal] the local file is uploaded over the server's (guarded by
@@ -922,46 +894,30 @@ final class SyncEngine {
     String path, {
     required bool keepLocal,
     ConflictTexts? shown,
-  }) => _exclusively(() async {
-    final clock = Stopwatch()..start();
-    _log.info('resolve $path: keep ${keepLocal ? 'local' : 'remote'}');
-    final connection = await _connect();
-    final client = connection.client;
-    try {
-      final capabilities = await _capabilities(client, connection.destination);
-      final remote = await client.stat(path);
-      if (shown != null) await _stillAsShown(client, path, shown, remote);
-      final c = _RunContext(
-        client: client,
-        capabilities: capabilities,
-        local: const {},
-        remote: {path: ?remote},
-        rows: const {},
-        localSha: const {},
-        remoteSha: const {},
-        folders: {''},
-        report: SyncReport(),
-      );
+  }) => _resolve(
+    path,
+    intent: 'keep ${keepLocal ? 'local' : 'remote'}',
+    outcome: 'done',
+    shown: shown,
+    (c, remote) async {
       if (keepLocal) {
         final local = await _stat(path);
         if (local == null) {
           throw SyncFailure(SyncAbort.failed, '$path is gone here');
         }
         final sha = (await _hashLocal(root, [path]))[path]!;
-        await _ensureRemoteParent(c, path);
-        await client.uploadFile(
+        await _uploadAndRecord(
+          c,
           path,
-          File(p.join(root, path)),
-          ifMatch: capabilities.ifMatch ? remote?.guardEtag : null,
-          ifNoneMatch: remote == null && capabilities.ifNoneMatch,
+          sha: sha,
+          local: local,
+          notListed: SyncFailure(
+            SyncAbort.failed,
+            '$path uploaded, not listed',
+          ),
+          ifMatch: c.capabilities.ifMatch ? remote?.guardEtag : null,
+          ifNoneMatch: remote == null && c.capabilities.ifNoneMatch,
         );
-        final listed = await client.stat(path);
-        if (listed == null) {
-          throw SyncFailure(SyncAbort.failed, '$path uploaded, not listed');
-        }
-        await store.putItems([
-          await _row(c, path, sha: sha, local: local, remote: listed),
-        ]);
       } else {
         if (remote == null) {
           throw SyncFailure(SyncAbort.failed, '$path is gone on the server');
@@ -987,7 +943,42 @@ final class SyncEngine {
           ),
         ]);
       }
-      _log.info('resolve $path: done (${clock.elapsedMilliseconds} ms)');
+    },
+  );
+
+  /// Runs a conflict resolution of [path] on its own: logs [intent],
+  /// connects, lists the server's copy, refuses a side that moved since
+  /// [shown] (when given), and hands [body] a context of that one path
+  /// and the listing; logs [outcome] when it went through. A WebDAV or a
+  /// local failure is thrown as a [SyncFailure].
+  Future<void> _resolve(
+    String path,
+    Future<void> Function(_RunContext c, WebDavResource? remote) body, {
+    required String intent,
+    required String outcome,
+    ConflictTexts? shown,
+  }) => _exclusively(() async {
+    final clock = Stopwatch()..start();
+    _log.info('resolve $path: $intent');
+    final connection = await _connect();
+    final client = connection.client;
+    try {
+      final capabilities = await _capabilities(client, connection.destination);
+      final remote = await client.stat(path);
+      if (shown != null) await _stillAsShown(client, path, shown, remote);
+      final c = _RunContext(
+        client: client,
+        capabilities: capabilities,
+        local: const {},
+        remote: {path: ?remote},
+        rows: const {},
+        localSha: const {},
+        remoteSha: const {},
+        folders: {''},
+        report: SyncReport(),
+      );
+      await body(c, remote);
+      _log.info('resolve $path: $outcome (${clock.elapsedMilliseconds} ms)');
     } on WebDavFailure catch (e) {
       _log.warning('resolve $path failed: ${e.message}');
       throw SyncFailure.of(e);
@@ -1453,23 +1444,48 @@ final class SyncEngine {
         why: 'the local copy is not a JSON object',
       );
     }
-    await _ensureRemoteParent(c, d.path);
-    await c.client.uploadFile(
+    await _uploadAndRecord(
+      c,
       d.path,
-      File(p.join(root, d.path)),
+      sha: sha,
+      local: local,
+      notListed: const _StepFailure('uploaded but not listed'),
       ifMatch: d.ifMatch,
       ifNoneMatch: d.ifNoneMatch,
       modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
     );
-    final remote = await c.client.stat(d.path);
-    if (remote == null) {
-      throw const _StepFailure('uploaded but not listed');
-    }
-    await store.putItems([
-      await _row(c, d.path, sha: sha, local: local, remote: remote),
-    ]);
     return _Outcome.done;
   });
+
+  /// Uploads the local file at [path] — content [sha], state [local] —
+  /// and records the row both sides now agree on, from the listing the
+  /// server gives after the upload; throws [notListed] when the file is
+  /// not listed then. [ifMatch], [ifNoneMatch] and [modified] go with the
+  /// upload as they are.
+  Future<void> _uploadAndRecord(
+    _RunContext c,
+    String path, {
+    required String sha,
+    required LocalFileState local,
+    required Exception notListed,
+    String? ifMatch,
+    bool ifNoneMatch = false,
+    DateTime? modified,
+  }) async {
+    await _ensureRemoteParent(c, path);
+    await c.client.uploadFile(
+      path,
+      File(p.join(root, path)),
+      ifMatch: ifMatch,
+      ifNoneMatch: ifNoneMatch,
+      modified: modified,
+    );
+    final listed = await c.client.stat(path);
+    if (listed == null) throw notListed;
+    await store.putItems([
+      await _row(c, path, sha: sha, local: local, remote: listed),
+    ]);
+  }
 
   Future<void> _ensureRemoteParent(_RunContext c, String path) async {
     final slash = path.lastIndexOf('/');
@@ -1913,18 +1929,15 @@ final class SyncEngine {
     if (local == null) throw const _StepFailure('merged but not on disk');
     final sha = (await _hashLocal(root, [d.path]))[d.path];
     if (sha == null) throw const _StepFailure('merged but not hashed');
-    await _ensureRemoteParent(c, d.path);
-    await c.client.uploadFile(
+    await _uploadAndRecord(
+      c,
       d.path,
-      File(p.join(root, d.path)),
+      sha: sha,
+      local: local,
+      notListed: const _StepFailure('merged but not listed'),
       ifMatch: c.capabilities.ifMatch ? remote.guardEtag : null,
       modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
     );
-    final listed = await c.client.stat(d.path);
-    if (listed == null) throw const _StepFailure('merged but not listed');
-    await store.putItems([
-      await _row(c, d.path, sha: sha, local: local, remote: listed),
-    ]);
     _log.info('merge ${d.path}: $how, both sides now agree');
     return (changedLocally: changedLocally);
   }
