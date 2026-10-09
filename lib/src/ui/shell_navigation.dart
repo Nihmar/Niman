@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
+import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The app tabs: the bottom navigation bar on the narrow layout, the
@@ -212,6 +213,19 @@ final class ShellRail extends StatelessWidget {
   /// panel as from the window's edge, near enough, and the active pill
   /// stands off the panel as one island does off the next.
   static const double width = _margin + _RailButton.size;
+
+  /// The base's pixel between the rail and the islands: no line, but
+  /// counted wherever the islands' left edge is worked out.
+  static const double seam = 1;
+
+  /// Where the panels start, from the window's left edge: past the rail,
+  /// its seam and the islands' gap. The title bar's name starts here, so
+  /// it stands over the panel's edge (#708).
+  static const double panelStart = width + seam + Island.gap;
+
+  /// The centre of the buttons' glyphs, from the window's left edge: the
+  /// title bar's sidebar toggle is centred on it (#708).
+  static const double glyphCentre = _margin + _RailButton.size / 2;
 
   /// The space between the window's edge and the buttons.
   static const double _margin = 5;

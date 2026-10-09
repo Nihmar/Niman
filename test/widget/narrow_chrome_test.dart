@@ -4,7 +4,6 @@
 // toggle.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
@@ -120,10 +119,11 @@ void main() {
     );
     expect(tab.left, _panesStart, reason: 'over the panel, not past it');
     // Room still (0.0.8 test round): the toggle's glyph ends 8 px inside
-    // its box, so the eye reads some 22 px of it.
-    expect(tab.left - toggle.right, greaterThanOrEqualTo(12));
+    // its box, so the eye reads some 19 px of it — the toggle centred on
+    // the rail's glyphs took 3 px of the 22 there were (#708).
+    expect(tab.left - toggle.right, greaterThanOrEqualTo(11));
   });
 }
 
 /// Where the panes' island starts with the tree hidden.
-const double _panesStart = ShellRail.width + 1 + Island.gap;
+const double _panesStart = ShellRail.panelStart;

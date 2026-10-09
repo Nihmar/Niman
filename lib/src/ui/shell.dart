@@ -1469,9 +1469,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Where the tabs start in the title bar: the panes' island's left
   /// edge, past the base and the tree's island.
   double get _tabsStart =>
-      ShellRail.width +
-      1 +
-      Island.gap +
+      ShellRail.panelStart +
       (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
   /// [pane]'s tab row.
