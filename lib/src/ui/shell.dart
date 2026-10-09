@@ -27,18 +27,8 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
-import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
-import 'package:niman/src/export/export_note.dart';
-import 'package:niman/src/export/export_pdf.dart';
-import 'package:niman/src/export/export_progress_dialog.dart';
-import 'package:niman/src/export/export_tree.dart';
-import 'package:niman/src/export/export_tree_book.dart';
-import 'package:niman/src/export/export_working_dialog.dart';
-import 'package:niman/src/export/pdf_export_progress_dialog.dart';
 import 'package:niman/src/export/pdf_printer.dart';
-import 'package:niman/src/export/pdf_webview.dart';
-import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/home/home_layout.dart';
@@ -51,13 +41,11 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
-import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_installation_provider.dart';
 import 'package:niman/src/ocr/ocr_job.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ocr/ocr_queue_provider.dart';
-import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
@@ -71,7 +59,6 @@ import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
-import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
@@ -87,7 +74,6 @@ import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
-import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/home/action_runner.dart';
 import 'package:niman/src/ui/home/home_host.dart';
@@ -100,7 +86,6 @@ import 'package:niman/src/ui/journal/journal_screen.dart';
 import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
-import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/library_window.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
@@ -132,6 +117,7 @@ import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
+import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
@@ -896,6 +882,22 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     });
   }
 
+  /// The exports: a note, a folder, the library (#24).
+  late final ShellExportFlow _exportFlow = ShellExportFlow(
+    controller: widget.controller,
+    guard: _guard,
+    saveOpen: () => widget.unsavedTracker.saveAll(),
+    saveExportFile: widget.saveExportFile,
+    pickExportFolder: widget.pickExportFolder,
+    pdfPrinter: widget.pdfPrinter,
+    pdfEngineLookup: widget.pdfEngineLookup,
+    epubMetadataProblem: widget.epubMetadataProblem,
+    epubExport: widget.epubExport,
+    linkSource: () => _linkSource,
+    wide: () => _wide,
+    shownNote: () => _shownNote,
+  );
+
   /// What a tree row's menu choice does: rename, move, delete, pin, open
   /// outside the app (issue #100 moved them into [ShellRowActions]).
   late final ShellRowActions _rowActions = ShellRowActions(
@@ -944,8 +946,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onOpenInNewTab: (path) => _workspace.show(path, newTab: true),
     onOpenBeside: (path) => _workspace.openBeside(path, SplitAxis.right),
     onHistory: _openHistory,
-    onExport: _exportNote,
-    onExportFolder: (path) => _exportFolder(path, library: false),
+    onExport: (path) => _exportFlow.runNoteExport(context, path),
+    onExportFolder: (path) =>
+        _exportFlow.runFolderExport(context, path, library: false),
     onRecognize: _recognize,
   );
 
@@ -2654,7 +2657,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _openPalette(),
         NoteMenuAction.format => _formatNote(),
-        NoteMenuAction.export => _exportNote(path),
+        NoteMenuAction.export => _exportFlow.runNoteExport(context, path),
         NoteMenuAction.cheatsheet => _openCheatsheet(),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.recognizeText => Future<void>.sync(
@@ -2664,7 +2667,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.present => _presentSlides(),
         NoteMenuAction.presenterView => _presentSlides(presenter: true),
         NoteMenuAction.markdownPreview => Future<void>.sync(_showKindMarkdown),
-        NoteMenuAction.exportSlides => _exportNote(path, slidesPdf: true),
+        NoteMenuAction.exportSlides => _exportFlow.runNoteExport(
+          context,
+          path,
+          slidesPdf: true,
+        ),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
         NoteMenuAction.delete => _rowActions.delete(context, path),
@@ -3490,12 +3497,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.pasteAsMarkdown: () {
         if (_panelNote case final note?) _pasteAsMarkdown(note);
       },
-      AppCommand.exportNote: () => unawaited(_exportShownNote()),
+      AppCommand.exportNote: () =>
+          unawaited(_exportFlow.runShownNoteExport(context)),
       AppCommand.recognizeText: () {
         if (_shownNote case final path?) _recognize(path);
       },
       AppCommand.exportLibrary: () =>
-          unawaited(_exportFolder('', library: true)),
+          unawaited(_exportFlow.runFolderExport(context, '', library: true)),
       AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
       AppCommand.welcomeTour: () => unawaited(resumeTour(context, ref)),
       AppCommand.welcomeDeck: () => unawaited(showWelcomeDeck(context)),
@@ -3718,523 +3726,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           .showSnackBar(SnackBar(content: Text(AppStrings.formatNoteDone)));
     });
   }
-
-  /// Exports the note at [path] as a file (#24): asks which format, reads
-  /// the note (the buffer's edits first) and asks where to save it.
-  ///
-  /// [slidesPdf] exports a slides note's slides (#534): a PDF, one 16:9
-  /// sheet a slide, its text as large as the slide's, no format to ask.
-  Future<void> _exportNote(String path, {bool slidesPdf = false}) async {
-    // The theme is read while the context is certainly valid: the dialog
-    // and the export itself both wait.
-    final theme = markdownThemeOf(
-      context,
-      scaler: slidesPdf
-          ? const TextScaler.linear(slideTextScale)
-          : noteTextScalerOf(context),
-    );
-    final format = slidesPdf ? ExportFormat.pdf : await _chooseExportFormat();
-    if (format == null || !mounted) return;
-    final ops = widget.controller.ops;
-    final root = widget.controller.root;
-    if (ops == null || root == null) return;
-    final save = widget.saveExportFile;
-    await _guard(() async {
-      // What is exported is the note as it stands, not as it was last
-      // written: the editors' pending edits land first.
-      await widget.unsavedTracker.saveAll();
-      final note = await ops.find(path);
-      final title = note == null ? p.basename(path) : displayNameOf(note);
-      final ExportPayload payload;
-      var selectable = true;
-      // Why a found engine could not print, when it could not: the note was
-      // drawn, and the user is told rather than left with pictures and no
-      // reason (device report, 2026-09-29).
-      String? engineFailure;
-      if (format == ExportFormat.markdown) {
-        // The file's own bytes: `readNote` would hand back a leniently
-        // decoded text, and re-encoding that is not the file on disk.
-        payload = exportMarkdown(
-          path: path,
-          bytes: await ops.readNoteBytes(path),
-        );
-      } else if (format == ExportFormat.pdf) {
-        // The machine prints the page with a browser engine, or draws it
-        // here when it has none. Which of the two it will be is settled
-        // before the note is read: a picture of the pages is not what
-        // everyone asked for — no text to select or search, and minutes of
-        // drawing on a long note — and finding out when the file is
-        // written is too late (#63).
-        if (!await widget.pdfPrinter.canPrint) {
-          if (!mounted) return;
-          if (!await _confirmPdfPicture()) return;
-        }
-        // The raster fallback draws with the note's own typography, so a
-        // cache of its own goes with it.
-        final cache = MathCache();
-        // A browser print reports no progress and the drawing fallback can
-        // take minutes on a novel: the dialog says the export is running
-        // and offers the one way to stop it.
-        final progress = ValueNotifier<PdfExportProgress?>(null);
-        final done = Completer<void>();
-        var cancelled = false;
-        if (mounted) {
-          unawaited(
-            showDialog<void>(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => PdfExportProgressDialog(
-                title: title,
-                progress: progress,
-                done: done.future,
-                onCancel: () {
-                  cancelled = true;
-                  // Android's WebView print is the one engine that can be
-                  // stopped mid-flight; a desktop process is left to its
-                  // own timeout, and the flag aborts before anything is
-                  // written or drawn.
-                  if (Platform.isAndroid) {
-                    unawaited(WebViewPdfPrinter.cancel());
-                  }
-                },
-              ),
-            ),
-          );
-        }
-        try {
-          // Read behind the dialog, as the EPUB branch does: a big note is
-          // not instant, and a gap between the chooser closing and the
-          // dialog opening reads as a stall (#63).
-          final text = await ops.readNote(path);
-          final printed = await exportNotePdf(
-            text: text,
-            title: title,
-            path: path,
-            root: root,
-            language: AppLanguages.resolved.id,
-            linkSource: _linkSource,
-            printer: widget.pdfPrinter,
-            theme: theme,
-            mathCache: cache,
-            onProgress: (report) => progress.value = report,
-            isCancelled: () => cancelled,
-            slides: slidesPdf
-                ? [for (final slide in splitSlides(text)) slide.markdown]
-                : null,
-          );
-          payload = printed.payload;
-          selectable = printed.selectable;
-          engineFailure = printed.engineFailure;
-        } on PdfExportCancelled {
-          // The dialog closed itself; a cancel says nothing.
-          return;
-        } finally {
-          if (!done.isCompleted) done.complete();
-          progress.dispose();
-          cache.dispose();
-        }
-      } else if (format == ExportFormat.epub) {
-        // The book carries its pictures itself; the body is the same
-        // exported page the other formats draw (#303). Building it —
-        // typesetting, copying the pictures, writing the zip — is the slow
-        // part, and on a phone it is seconds: the dialog says the app is
-        // working, where a PDF has its own.
-        final done = Completer<void>();
-        var cancelled = false;
-        if (mounted) {
-          unawaited(
-            showDialog<void>(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => ExportWorkingDialog(
-                title: title,
-                done: done.future,
-                onCancel: () => cancelled = true,
-              ),
-            ),
-          );
-        }
-        try {
-          payload = await widget.epubExport(
-            text: await ops.readNote(path),
-            title: title,
-            path: path,
-            root: root,
-            language: AppLanguages.resolved.id,
-            linkSource: _linkSource,
-            isCancelled: () => cancelled,
-          );
-        } on EpubExportCancelled {
-          // The dialog closed itself; a cancel says nothing.
-          return;
-        } finally {
-          if (!done.isCompleted) done.complete();
-        }
-      } else {
-        payload = await exportNote(
-          text: await ops.readNote(path),
-          title: title,
-          path: path,
-          root: root,
-          language: AppLanguages.resolved.id,
-          // The chooser knows more formats than the builder: PDF and EPUB
-          // went their own ways above.
-          format: format == ExportFormat.markdown
-              ? ExportFileFormat.markdown
-              : ExportFileFormat.html,
-          linkSource: _linkSource,
-        );
-      }
-      final String? place;
-      try {
-        place = await save(
-          name: payload.name,
-          bytes: payload.bytes,
-          mimeType: payload.mimeType,
-          dialogTitle: AppStrings.exportTitle,
-        );
-      } on Object catch (error) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppStrings.exportFailed(error))),
-          );
-        }
-        return;
-      }
-      if (place == null || !mounted) return;
-      _showExportDone(
-        place,
-        picture: !selectable,
-        engineFailure: engineFailure,
-      );
-    });
-  }
-
-  /// Exports the note showing, from the palette (#24).
-  Future<void> _exportShownNote() async {
-    final path = _shownNote;
-    if (path == null) return;
-    await _exportNote(path);
-  }
-
-  /// Asks which format to export in: the wide window's dialog, the phone's
-  /// sheet.
-  Future<ExportFormat?> _chooseExportFormat() {
-    final formats = <Widget>[
-      for (final format in ExportFormat.values)
-        ListTile(
-          key: Key('export-format-${format.name}'),
-          title: Text(_exportFormatName(format)),
-          onTap: () => Navigator.of(context).pop(format),
-        ),
-    ];
-    if (_wide) {
-      return showDialog<ExportFormat>(
-        context: context,
-        builder: (context) => AlertDialog(
-          key: const Key('export-dialog'),
-          title: Text(AppStrings.exportTitle),
-          content: Column(mainAxisSize: MainAxisSize.min, children: formats),
-        ),
-      );
-    }
-    return showActionSheet<ExportFormat>(
-      context,
-      title: AppStrings.exportTitle,
-      sheetKey: const Key('export-sheet'),
-      items: (context) => formats,
-    );
-  }
-
-  static String _exportFormatName(ExportFormat format) => switch (format) {
-    ExportFormat.markdown => AppStrings.exportFormatMarkdown,
-    ExportFormat.html => AppStrings.exportFormatHtml,
-    ExportFormat.pdf => AppStrings.exportFormatPdf,
-    ExportFormat.epub => AppStrings.exportFormatEpub,
-  };
-
-  /// Exports the folder at library-relative [dir] ('' = the library root)
-  /// as one zip (#24): asks the format and the destination, runs the
-  /// export behind its progress dialog, and says where the file landed.
-  Future<void> _exportFolder(String dir, {required bool library}) async {
-    final root = widget.controller.root;
-    if (root == null) return;
-    // The isolate reads the notes from disk, so the buffers' pending edits
-    // land before it starts — and before the pickers, so the write happens
-    // while the user is choosing (M2).
-    await _guard(() => widget.unsavedTracker.saveAll());
-    // Android's WebView needs no engine at all; the desktop looks for one
-    // now, before the chooser asks whether PDF is on offer.
-    final engine = Platform.isAndroid ? null : await widget.pdfEngineLookup();
-    final format = await _chooseExportTreeFormat(
-      library: library,
-      pdfAvailable: Platform.isAndroid || engine != null,
-    );
-    if (format == null || !mounted) return;
-    // A book's metadata is its folder's `index.md`: without one the book
-    // would carry the folder's name and nothing else. Asked before the
-    // destination is even chosen, so the export can be stopped and the
-    // note written first (E3).
-    if (format == ExportTreeFormat.epub) {
-      final problem = await widget.epubMetadataProblem(
-        dir.isEmpty ? root : p.join(root, dir),
-      );
-      if (!mounted) return;
-      if (problem != null && !await _confirmEpubMetadata(problem)) return;
-    }
-    final folder = await widget.pickExportFolder(
-      dialogTitle: AppStrings.exportTitle,
-    );
-    if (folder == null || !mounted) return;
-    final name = dir.isEmpty ? p.basename(root) : p.basename(dir);
-    // An existing file is never overwritten silently: a second export of
-    // the same folder writes `name (2).zip` (L6). A book is a `.epub`.
-    final extension = format == ExportTreeFormat.epub ? 'epub' : 'zip';
-    final zipPath = await _freeZipPath(folder, name, extension);
-    final TreeExport export;
-    try {
-      export = await TreeExport.start(
-        dir: dir.isEmpty ? root : p.join(root, dir),
-        zipPath: zipPath,
-        format: format,
-        language: AppLanguages.resolved.id,
-        engine: engine,
-      );
-    } on Object catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppStrings.exportFailed(error))));
-      }
-      return;
-    }
-    if (!mounted) return;
-    unawaited(
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => ExportProgressDialog(export: export),
-      ),
-    );
-    try {
-      await export.done;
-      if (!mounted) return;
-      _showExportDone(zipPath);
-    } on ExportCancelled catch (cancelled) {
-      // The dialog closed itself; a cancel says nothing unless the zip is
-      // still there (a Windows handle the killed isolate did not let go).
-      if (!cancelled.zipLeftBehind || !mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppStrings.exportFailed(cancelled))),
-      );
-    } on Object catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppStrings.exportFailed(error))));
-    }
-  }
-
-  /// Asks whether an EPUB export should go on when the folder has no
-  /// metadata source (#303, E3): the book would carry the folder's name and
-  /// no author, cover or series. True when the user lets it go on — false
-  /// stops the export before anything is written.
-  Future<bool> _confirmEpubMetadata(EpubMetadataProblem problem) async {
-    final message = switch (problem) {
-      EpubMetadataProblem.missingIndex => AppStrings.exportEpubNoIndex,
-      EpubMetadataProblem.missingFrontmatter =>
-        AppStrings.exportEpubNoFrontmatter,
-    };
-    final go = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('export-epub-metadata-dialog'),
-        title: Text(AppStrings.exportEpubNoMetadataTitle),
-        content: Text(message),
-        actions: [
-          TextButton(
-            key: const Key('export-epub-cancel'),
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          FilledButton(
-            key: const Key('export-epub-anyway'),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(AppStrings.exportAnyway),
-          ),
-        ],
-      ),
-    );
-    return go ?? false;
-  }
-
-  /// Asks whether a PDF should be drawn when this machine has no browser
-  /// engine to print the page with (#63): what is written is a picture of
-  /// the pages, with no text to select or search, and a long note is
-  /// minutes of drawing it. True when the user lets it go on — false stops
-  /// the export before the note is even read.
-  Future<bool> _confirmPdfPicture() async {
-    final go = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('export-pdf-picture-dialog'),
-        title: Text(AppStrings.exportPdfNoEngineTitle),
-        content: Text(AppStrings.exportPdfNoEngine),
-        actions: [
-          TextButton(
-            key: const Key('export-pdf-picture-cancel'),
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          FilledButton(
-            key: const Key('export-pdf-picture-anyway'),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(AppStrings.exportAnyway),
-          ),
-        ],
-      ),
-    );
-    return go ?? false;
-  }
-
-  /// Says where an export landed, with a way to its folder where the OS
-  /// can be given one (a desktop; on Android the picker already knows),
-  /// and — for a PDF drawn here — that it is a picture of the pages, with
-  /// [engineFailure] saying why when the engine was there and failed.
-  void _showExportDone(
-    String place, {
-    bool picture = false,
-    String? engineFailure,
-  }) {
-    final lines = <String>[AppStrings.exportDone(place)];
-    if (picture) {
-      lines.add(AppStrings.exportPdfPicture);
-      if (engineFailure != null) {
-        lines.add(AppStrings.exportPdfEngineFailed(engineFailure));
-      }
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        // An action would keep it up until it is dismissed by hand (#508):
-        // the banner says where the file went, and the way there is offered,
-        // not demanded — it goes on its own.
-        persist: false,
-        // A close button on the roomy layouts; a phone has the swipe and the
-        // timeout, and no width to spare for it.
-        showCloseIcon: _wide,
-        content: Text(lines.join('\n')),
-        action: supportsTreeContextActions
-            ? SnackBarAction(
-                label: AppStrings.openInFileManager,
-                onPressed: () => unawaited(_revealExport(place)),
-              )
-            : null,
-      ),
-    );
-  }
-
-  /// Shows the export in the file manager, reporting the outcome: a button
-  /// that silently does nothing is worse than no button.
-  Future<void> _revealExport(String place) async {
-    final outcome = await runTreeContextAction(
-      place,
-      TreeContextAction.openInFileManager,
-    );
-    if (!mounted || outcome == TreeContextOutcome.opened) return;
-    final message = switch (outcome) {
-      TreeContextOutcome.missing => AppStrings.openFileMissing,
-      _ => AppStrings.openFileFailed,
-    };
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  /// Asks which format a folder or the library is exported in: the wide
-  /// window's dialog, the phone's sheet. [pdfAvailable] is decided by the
-  /// caller, after the engine search has answered.
-  Future<ExportTreeFormat?> _chooseExportTreeFormat({
-    required bool library,
-    required bool pdfAvailable,
-  }) {
-    final title = library
-        ? AppStrings.exportLibraryTitle
-        : AppStrings.exportFolderTitle;
-    final formats = <Widget>[
-      for (final format in ExportTreeFormat.values)
-        if (format != ExportTreeFormat.pdf || pdfAvailable)
-          ListTile(
-            key: Key('export-tree-${format.name}'),
-            title: Text(_treeFormatName(format)),
-            onTap: () => Navigator.of(context).pop(format),
-          ),
-    ];
-    if (_wide) {
-      return showDialog<ExportTreeFormat>(
-        context: context,
-        builder: (context) => AlertDialog(
-          key: const Key('export-tree-dialog'),
-          title: Text(title),
-          content: Column(mainAxisSize: MainAxisSize.min, children: formats),
-        ),
-      );
-    }
-    return showActionSheet<ExportTreeFormat>(
-      context,
-      title: title,
-      sheetKey: const Key('export-tree-sheet'),
-      items: (context) => formats,
-    );
-  }
-
-  static String _treeFormatName(ExportTreeFormat format) => switch (format) {
-    ExportTreeFormat.markdown => AppStrings.exportFormatMarkdown,
-    ExportTreeFormat.html => AppStrings.exportFormatHtml,
-    ExportTreeFormat.pdf => AppStrings.exportFormatPdf,
-    ExportTreeFormat.epub => AppStrings.exportFormatEpub,
-  };
-
-  /// The zip's file name for a folder called [name]: the characters a file
-  /// name cannot hold become dashes, the names Windows reserves become
-  /// something else, and a name of dots reads as "export".
-  static String _zipName(String name, String extension) {
-    var wanted = name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '-').trim();
-    // Windows rejects a name that ends in a dot or a space, and treats the
-    // device names — CON, NUL, COM1 — as the devices themselves.
-    wanted = wanted.replaceAll(RegExp(r'[. ]+$'), '');
-    if (_windowsDevices.contains(wanted.toUpperCase())) wanted = 'export';
-    return '${wanted.isEmpty ? 'export' : wanted}.$extension';
-  }
-
-  /// A path no file holds yet: [name]'s zip, or `name (2).epub`, `(3)`…
-  /// beside it. The picker chose the folder, not the name, and truncating
-  /// an export the user already has is not a choice to make for them.
-  static Future<String> _freeZipPath(
-    String folder,
-    String name,
-    String extension,
-  ) async {
-    final wanted = _zipName(name, extension);
-    final stem = p.basenameWithoutExtension(wanted);
-    var path = p.join(folder, wanted);
-    // A stat per candidate, awaited: a `statSync` here would be a FUSE
-    // round trip on the UI isolate on Android, and the rule is no disk I/O
-    // there. The lint prefers the sync form; the platform rule wins.
-    // ignore: avoid_slow_async_io
-    for (var n = 2; await File(path).exists(); n++) {
-      path = p.join(folder, '$stem ($n).$extension');
-    }
-    return path;
-  }
-
-  /// The names Windows treats as devices, whatever their extension.
-  static final Set<String> _windowsDevices = <String>{
-    'CON',
-    'PRN',
-    'AUX',
-    'NUL',
-    for (var n = 1; n <= 9; n++) 'COM$n',
-    for (var n = 1; n <= 9; n++) 'LPT$n',
-  };
 
   /// Tidies the note at absolute [path], edited and now closed, when the
   /// library asks for it ([ShellEditorSettings.tidyOnClose]).
@@ -5204,7 +4695,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       case 'folder':
         await _createFlow.createFolder(context, parent: '');
       case 'exportlibrary':
-        await _exportFolder('', library: true);
+        await _exportFlow.runFolderExport(context, '', library: true);
     }
   }
 }
