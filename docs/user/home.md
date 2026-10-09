@@ -55,7 +55,8 @@ already does with what it needs set in advance:
 - **Open a note**.
 - **Today's entry** — the [journal](journal.md)'s.
 - **Capture web page** — into a folder of its own instead of the capture
-  folder (see [web capture](web-capture.md)).
+  folder (see [web capture](web-capture.md)); with none chosen, into the
+  capture folder. The library root is not among the choices.
 
 Every value of a new note is **Fixed** or **Ask**:
 

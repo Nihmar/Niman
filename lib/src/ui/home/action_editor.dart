@@ -144,7 +144,9 @@ final class _ActionEditorState extends State<_ActionEditor> {
       folders: folders,
       ops: ops,
       current: _folder,
-      allowRoot: true,
+      // A capture's empty folder is the capture folder, not the root
+      // (#682): the root is offered where it is what empty means.
+      allowRoot: _kind != HomeActionKind.capture,
     );
     if (picked != null) setState(() => _folder = picked);
   }
