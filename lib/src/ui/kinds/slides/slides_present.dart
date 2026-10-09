@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/keep_awake.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
@@ -39,18 +38,20 @@ bool? slidesPresentKey(KeyEvent event) {
 /// to landscape for the talk, wherever it was started from — unless
 /// [byTurning], the talk the phone started by being turned sideways,
 /// which ends when it is turned upright again.
+///
+/// [window] is the desktop window; Android has none to make full screen.
 Future<void> presentSlides(
   BuildContext context, {
   required String text,
   required String notePath,
   required Future<String?> Function(String target) resolveEmbed,
+  required WindowController window,
   bool presenter = false,
   bool byTurning = false,
 }) async {
   if (_presenting) return;
   final slides = splitSlides(text);
   final phone = isSlidesPhone(context);
-  final window = _windowOf(context);
   final navigator = Navigator.of(context, rootNavigator: true);
   final lockLandscape = phone && !byTurning;
   _presenting = true;
@@ -78,25 +79,8 @@ Future<void> presentSlides(
   }
 }
 
-/// The desktop window, or null where the screen shows no app providers
-/// (widget tests) or has no window to make full screen (Android).
-WindowController? _windowOf(BuildContext context) {
-  if (Platform.isAndroid) return null;
-  try {
-    return ProviderScope.containerOf(
-      context,
-      listen: false,
-    ).read(windowControllerProvider);
-    // Riverpod reports a missing scope only by throwing; its scope widget
-    // is private, so there is nothing to look up first.
-    // ignore: avoid_catching_errors
-  } on StateError {
-    return null;
-  }
-}
-
 Future<void> _takeScreen(
-  WindowController? window, {
+  WindowController window, {
   required bool on,
   required bool lockLandscape,
 }) async {
@@ -115,7 +99,7 @@ Future<void> _takeScreen(
       );
     }
   } else {
-    await window?.setFullScreen(on: on);
+    await window.setFullScreen(on: on);
   }
   await keepScreenOn(on: on);
 }

@@ -2641,6 +2641,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       text: note.currentText,
       notePath: note.notePath,
       resolveEmbed: note.resolveEmbed,
+      window: widget.window,
       presenter: presenter,
     );
   }

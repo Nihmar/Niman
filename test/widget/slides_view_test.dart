@@ -2,6 +2,7 @@
 // thumbnail row and the keys on a wide window, the swipe on a phone.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -10,6 +11,9 @@ import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slides_view.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/window_controller.dart';
+
+import '../fakes/fake_window_controller.dart';
 
 final class _Host implements NoteKindHost {
   new(this.notePath, {this.showMarkdown});
@@ -50,11 +54,19 @@ const String _deck =
 
 Finder _text(String text) => find.textContaining(text, findRichText: true);
 
+/// The window presenting takes full screen, recorded.
+final FakeWindowController _window = FakeWindowController();
+
+Widget _app(Widget view) => ProviderScope(
+  overrides: [windowControllerProvider.overrideWithValue(_window)],
+  child: MaterialApp(home: Scaffold(body: view)),
+);
+
 Future<void> _show(WidgetTester tester, Widget view, Size size) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(MaterialApp(home: Scaffold(body: view)));
+  await tester.pumpWidget(_app(view));
   await tester.pumpAndSettle();
 }
 
@@ -119,13 +131,7 @@ void main() {
       const Size(1200, 800),
     );
     expect(find.text('2 / 2'), findsOneWidget);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SlidesNoteView(text: '# Only', host: host),
-        ),
-      ),
-    );
+    await tester.pumpWidget(_app(SlidesNoteView(text: '# Only', host: host)));
     await tester.pumpAndSettle();
     expect(find.text('1 / 1'), findsOneWidget);
   });
@@ -141,11 +147,7 @@ void main() {
     );
     expect(find.text('say beta'), findsOneWidget);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SlidesNoteView(text: _deck, host: _Host('new.md')),
-        ),
-      ),
+      _app(SlidesNoteView(text: _deck, host: _Host('new.md'))),
     );
     await tester.pumpAndSettle();
     expect(find.text('1 / 2'), findsOneWidget);
@@ -183,6 +185,8 @@ void presentingTests() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('slides-present')), findsOneWidget);
     expect(find.byKey(const Key('speaker-notes')), findsNothing);
+    // The window the view was handed, not one looked up (#675).
+    expect(_window.fullScreen, isTrue);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
@@ -192,6 +196,7 @@ void presentingTests() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('slides-present')), findsNothing);
     expect(find.text('2 / 2'), findsOneWidget);
+    expect(_window.fullScreen, isFalse);
   });
 
   testWidgets('B blacks the slide alone out, held or not, and only there', (
