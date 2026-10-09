@@ -59,7 +59,8 @@ final class FrameCost {
     this.barMicros = frameBarMicros,
   });
 
-  /// This view's name in the line, e.g. `note pane`.
+  /// This view's name in the line, e.g. `note pane`; empty for a view the
+  /// logger's own name already names — the source view's `[edit] frame: …`.
   final String label;
 
   /// The bar this view's own share of a frame is held to.
@@ -155,8 +156,9 @@ final class FrameCost {
   void report() {
     final sum = total;
     if (sum >= barMicros || edit >= editBarMicros) {
+      final named = label.isEmpty ? '' : '$label ';
       log.debug(
-        '$label frame: edit ${_ms(edit)}, build ${_ms(build)}, '
+        '${named}frame: edit ${_ms(edit)}, build ${_ms(build)}, '
         'layout ${_ms(layout)}, paint ${_ms(paint)} (${_ms(sum)} here)',
       );
     }
