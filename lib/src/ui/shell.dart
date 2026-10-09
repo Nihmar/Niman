@@ -42,7 +42,6 @@ import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_installation_provider.dart';
-import 'package:niman/src/ocr/ocr_job.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ocr/ocr_queue_provider.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -115,6 +114,7 @@ import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
+import 'package:niman/src/ui/shell_inbound.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
@@ -958,35 +958,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Opens and makes journal entries (#7).
   late final JournalFlow _journalFlow;
 
-  /// Notification taps while running: a todo tap opens the Todo tab, a
-  /// recognition's opens its text.
-  StreamSubscription<String?>? _reminderTaps;
-
-  /// Recognitions as they finish (#594).
-  StreamSubscription<OcrJob>? _ocrFinished;
-  StreamSubscription<ShortcutAction>? _shortcutTaps;
-
-  /// What other apps share in while the shell is up (#40).
-  StreamSubscription<ShareRequest>? _shareTaps;
-  StreamSubscription<ShortcutAction>? _trayTaps;
-  StreamSubscription<void>? _trayActivations;
-  StreamSubscription<TrayCommand>? _trayCommands;
-  StreamSubscription<String>? _launchFiles;
-  StreamSubscription<String>? _launchFolders;
-  StreamSubscription<Uri>? _launchPages;
-
-  /// Library session events (every note op bumps the revision): the
-  /// pinned notes follow the files, so each one refreshes the note
-  /// widgets (issue 6).
-  StreamSubscription<int>? _libraryEvents;
-
-  /// Paths a re-index pruned from the tree: the tabs they hold stay, and
-  /// are flagged missing (issues #289, #372).
-  StreamSubscription<Set<String>>? _libraryRemovals;
-
-  /// Paths a sync just changed on disk: the open note among them is
-  /// re-read (its buffer was saved before the sync started).
-  StreamSubscription<Set<String>>? _syncChanges;
+  /// What reaches the shell from outside while it is up — notification
+  /// taps, finished recognitions, shortcuts, shares, the tray, launches,
+  /// the library's events — each listened to in [initState] and all of
+  /// them cancelled at once in [dispose].
+  final ShellInbound _inbound = ShellInbound();
 
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
@@ -1761,7 +1737,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // otherwise never reconcile. The tab's own open() then takes the
     // probe-skip path instead of a second full read.
     unawaited(_todoController.open());
-    _reminderTaps = widget.reminders.taps.listen((payload) {
+    // Notification taps while running: a todo tap opens the Todo tab, a
+    // recognition's opens its text.
+    _inbound.listen(widget.reminders.taps, (payload) {
       if (_followCaptureRoute(payload)) return;
       if (payload == todoReminderPayload && mounted) {
         const AppLogger(name: 'todo').debug('todo tap: opening the todo list');
@@ -1772,7 +1750,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _openRecognizedText(payload.substring(ocrNotificationPrefix.length));
       }
     });
-    _ocrFinished = widget.ocrQueue?.finished.listen((job) {
+    // Recognitions as they finish (#594).
+    _inbound.listen(widget.ocrQueue?.finished, (job) {
       if (!mounted) return;
       _ocrFlow?.finished(
         context,
@@ -1790,14 +1769,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _zen.addListener(_onZenChanged);
     _epubFullScreen.addListener(_onEpubFullScreen);
     unawaited(_workspace.load());
-    _libraryEvents = widget.controller.events.listen((_) {
+    // Library session events (every note op bumps the revision): the
+    // pinned notes follow the files, so each one refreshes the note
+    // widgets (issue 6).
+    _inbound.listen(widget.controller.events, (_) {
       _homeWidgets.pushNotes();
       unawaited(_workspace.indexChanged());
     });
-    _libraryRemovals = widget.controller.removals.listen(
-      (paths) => _workspace.missing(paths),
-    );
-    _syncChanges = widget.controller.sync?.localChanges.listen((paths) {
+    // Paths a re-index pruned from the tree: the tabs they hold stay, and
+    // are flagged missing (issues #289, #372).
+    _inbound.listen(widget.controller.removals, _workspace.missing);
+    // Paths a sync just changed on disk: the open note among them is
+    // re-read (its buffer was saved before the sync started).
+    _inbound.listen(widget.controller.sync?.localChanges, (paths) {
       // Words added on another device count as soon as they arrive.
       if (paths.contains(_personalDictionaryPath)) {
         unawaited(_personalDictionary?.reload());
@@ -1806,21 +1790,26 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (!mounted || open == null || _selectedIsDir) return;
       if (paths.contains(open)) setState(() => _noteReloadToken++);
     });
-    _shortcutTaps = widget.shortcuts.actions.listen(
+    _inbound.listen(
+      widget.shortcuts.actions,
       (action) => unawaited(_runShortcut(action)),
     );
-    _shareTaps = widget.shareIn.requests.listen(
+    // What other apps share in while the shell is up (#40).
+    _inbound.listen(
+      widget.shareIn.requests,
       (request) => unawaited(_handleShare(request)),
     );
-    _trayTaps = widget.tray.actions.listen(
+    _inbound.listen(
+      widget.tray.actions,
       (action) => unawaited(_runShortcut(action)),
     );
-    _trayActivations = widget.tray.activated.listen(
+    _inbound.listen(
+      widget.tray.activated,
       (_) => unawaited(widget.window.show()),
     );
     // The tray menu's own entries (#209): the way back to a hidden
     // window, and the way out.
-    _trayCommands = widget.tray.commands.listen((command) {
+    _inbound.listen(widget.tray.commands, (command) {
       switch (command) {
         case TrayCommand.open:
           unawaited(widget.window.show());
@@ -1830,15 +1819,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     });
     // Files a launch asked for (#41): the one the app started with, once
     // the shell can open it, and every later one.
-    _launchFiles = widget.launchRequests.files.listen(
+    _inbound.listen(
+      widget.launchRequests.files,
       (path) => unawaited(_openPath(path)),
     );
     // Folders dropped on the window (#75).
-    _launchFolders = widget.launchRequests.folders.listen(
+    _inbound.listen(
+      widget.launchRequests.folders,
       (path) => unawaited(_openFolder(path)),
     );
     // Links dropped on the window (#531).
-    _launchPages = widget.launchRequests.pages.listen((url) {
+    _inbound.listen(widget.launchRequests.pages, (url) {
       if (mounted) unawaited(_captureFlow.capture(context, url: url));
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1885,20 +1876,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
     unawaited(_homeWidgets.dispose());
-    unawaited(_reminderTaps?.cancel());
-    unawaited(_ocrFinished?.cancel());
-    unawaited(_shortcutTaps?.cancel());
-    unawaited(_shareTaps?.cancel());
-    unawaited(_libraryEvents?.cancel());
-    unawaited(_libraryRemovals?.cancel());
-    unawaited(_syncChanges?.cancel());
+    unawaited(_inbound.cancel());
     _todoController.removeListener(_homeWidgets.pushTodos);
-    unawaited(_trayTaps?.cancel());
-    unawaited(_trayActivations?.cancel());
-    unawaited(_trayCommands?.cancel());
-    unawaited(_launchFiles?.cancel());
-    unawaited(_launchFolders?.cancel());
-    unawaited(_launchPages?.cancel());
     _todoController.dispose();
     _personalDictionary?.dispose();
     _shellFocus.dispose();
