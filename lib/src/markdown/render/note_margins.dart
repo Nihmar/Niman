@@ -13,10 +13,18 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:niman/src/editor/note_column.dart';
 
-/// The gap between the line numbers and the text: the room the legacy
-/// gutter kept for the fold arrows, which is why its text never touched
-/// its numbers.
-const double lineNumbersGap = 14;
+/// The gap between the line numbers and the text: the fold arrows' room,
+/// which is why the text never touches its numbers — the arrow and the
+/// space either side of it.
+const double lineNumbersGap = foldArrowSize + 2 * foldArrowSpace;
+
+/// The fold arrow's size.
+const double foldArrowSize = 14;
+
+/// The space between the fold arrow and the numbers, and the same between
+/// it and the text: a gap the arrow filled whole sat against both
+/// (2026-10-09).
+const double foldArrowSpace = 2;
 
 /// How far in from its pane's left edge a note's field starts: the legacy
 /// editor's own number, under the numbers as under the text.

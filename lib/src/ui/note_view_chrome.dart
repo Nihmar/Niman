@@ -81,6 +81,7 @@ final class NoteStatusRow extends StatelessWidget {
     required this.onSpellCheck,
     required this.onToggleEditorKind,
     this.editorKindLocked = false,
+    this.showOutline = true,
     this.typewriter = false,
     this.templateProblems = 0,
     this.onToggleTypewriter,
@@ -123,6 +124,11 @@ final class NoteStatusRow extends StatelessWidget {
 
   /// Opens the outline sheet.
   final Future<void> Function() onOutline;
+
+  /// Whether the outline button shows: the dock has the outline where
+  /// there is room for it, and the row leaves it out there. Fixed for a
+  /// window's width, so nothing moves under a pointer on it.
+  final bool showOutline;
 
   /// Opens find (source bar or WYSIWYG panel, chosen by the owner).
   final VoidCallback onFind;
@@ -181,7 +187,7 @@ final class NoteStatusRow extends StatelessWidget {
     final iconPadding = EdgeInsets.symmetric(horizontal: desktop ? 3 : 0);
     return Row(
       children: [
-        if (!loading)
+        if (!loading && showOutline)
           Padding(
             padding: iconPadding,
             child: IconButton(

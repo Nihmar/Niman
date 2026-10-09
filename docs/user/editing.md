@@ -152,7 +152,9 @@ edited. The panel's button in the note's row, its **×**, or
 `Ctrl+Shift+B` shows and hides it. Whether it is open, and which of the
 three it shows, is remembered with the tabs. The note's **⋮** menu has
 Outline and Tags too: they open the panel where it fits, and a sheet on
-a phone.
+a phone. Where the panel fits, the outline button leaves the row under
+the note — the panel is where the outline is; on a narrower window and a
+phone that button opens the outline as a sheet.
 
 Each tab keeps its own way of showing its note: the source editor or the
 WYSIWYG one, the preview or not. The **Default editor** setting is the
