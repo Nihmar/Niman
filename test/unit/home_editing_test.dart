@@ -1,5 +1,7 @@
 // #535: editing the Home — a tile moved a cell at a time, hidden and shown
 // again, and every change written where the Home is kept.
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/home/home_tile.dart';
@@ -70,6 +72,30 @@ void main() {
       editing.dispose();
       return session.dispose();
     });
+
+    test('a read waits for the write before it (#684)', () async {
+      final landed = Completer<void>();
+      session.holdHomeWrites = landed.future;
+      unawaited(editing.change(HomeLayout.defaults.hide('recent')));
+
+      final read = editing.load();
+      landed.complete();
+      await read;
+
+      expect(editing.layout['recent']!.hidden, isTrue);
+      expect(session.libraryHome!['recent']!.hidden, isTrue);
+    });
+
+    test(
+      'a read that ends after the Home is gone notifies no one (#689)',
+      () async {
+        final gone = HomeEditing(session);
+        final read = gone.load();
+        gone.dispose();
+
+        await expectLater(read, completes);
+      },
+    );
 
     test('shows the defaults until the Home is edited', () async {
       await editing.load();

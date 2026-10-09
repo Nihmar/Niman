@@ -32,6 +32,10 @@ Future<String> notePreview(String root, String path, {int bytes = 4096}) async {
   if (block != null) {
     final lines = text.split('\n');
     text = lines.skip(block.endLine + 1).join('\n');
+  } else if (head.length == bytes && text.split('\n').first.trim() == '---') {
+    // A frontmatter longer than what was read: its fence is past the end,
+    // and nothing read is the note's text (#687).
+    return '';
   }
   final lines = text.split('\n').skipWhile((l) => l.trim().isEmpty).toList();
   if (lines.isNotEmpty && lines.first.startsWith('# ')) lines.removeAt(0);

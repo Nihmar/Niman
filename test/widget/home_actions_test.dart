@@ -101,6 +101,36 @@ void main() {
     expect(content, contains('attendees: Marta'));
   });
 
+  testWidgets('fixed values keep their YAML types, tags a list (#683)', (
+    tester,
+  ) async {
+    controller.libraryHome = _withActions([
+      const HomeAction(
+        id: 'b',
+        label: 'Book',
+        kind: HomeActionKind.newNote,
+        name: FieldPreset.value('Dune'),
+        fields: {
+          'tags': FieldPreset.value('book, scifi'),
+          'priority': FieldPreset.value('3'),
+          'done': FieldPreset.value('false'),
+          'author': FieldPreset.value('Herbert, F'),
+          'code': FieldPreset.value('"007"'),
+        },
+        open: false,
+      ),
+    ]);
+    await open(tester);
+    await press(tester, 'b');
+
+    final content = controller.contentOf('Dune.md')!;
+    expect(content, contains('tags: [book, scifi]'));
+    expect(content, contains('priority: 3\n'));
+    expect(content, contains('done: false\n'));
+    expect(content, contains('author: Herbert, F\n'));
+    expect(content, contains('code: "007"\n'));
+  });
+
   testWidgets('a fixed value answers the template, the name is asked', (
     tester,
   ) async {

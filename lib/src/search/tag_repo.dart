@@ -5,7 +5,7 @@
 /// so the same note folder grouping applies everywhere.
 library;
 
-import 'package:drift/drift.dart' show OrderingTerm;
+import 'package:drift/drift.dart' show OrderingTerm, Variable;
 import 'package:niman/src/db/index_database.dart';
 
 /// A tag with its note count.
@@ -34,8 +34,9 @@ const int tagNotesLimit = 500;
 /// and tag→notes. [TagRepo] is the production implementation over drift;
 /// widget tests inject a fake.
 abstract interface class TagSource {
-  /// Every tag with counts, most used first (ties alphabetical).
-  Future<List<TagCount>> tagCounts();
+  /// Every tag with counts, most used first (ties alphabetical); the
+  /// first [limit] of them when given.
+  Future<List<TagCount>> tagCounts({int? limit});
 
   /// The first [limit] notes carrying [tag] (normalized — no `#`), in
   /// path order.
@@ -50,11 +51,16 @@ final class TagRepo implements TagSource {
   final IndexDatabase _db;
 
   @override
-  Future<List<TagCount>> tagCounts() async {
+  Future<List<TagCount>> tagCounts({int? limit}) async {
+    // ponytail: the count still reads every tag row; a counts table kept
+    // by the indexer is the step past it, if the Home's tile shows in a
+    // profile.
     final rows = await _db
         .customSelect(
           'SELECT tag, count(DISTINCT note_id) AS c FROM note_tags '
-          'GROUP BY tag ORDER BY c DESC, tag ASC',
+          'GROUP BY tag ORDER BY c DESC, tag ASC'
+          '${limit == null ? '' : ' LIMIT ?'}',
+          variables: [if (limit != null) Variable.withInt(limit)],
         )
         .get();
     return [

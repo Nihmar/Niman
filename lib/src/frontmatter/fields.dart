@@ -51,8 +51,8 @@ abstract interface class FieldSource {
   /// Both are matched case-insensitively: the key is stored lowercased,
   /// and a person filtering by `status = Draft` means the note that says
   /// `status: draft`. An empty [value] matches every note that declares
-  /// the key at all.
-  Future<List<Note>> notesWithField(String key, String value);
+  /// the key at all. [limit] keeps the first ones only.
+  Future<List<Note>> notesWithField(String key, String value, {int? limit});
 
   /// Every key in use, most declared first (ties alphabetical).
   Future<List<FieldKeyCount>> fieldKeys();
@@ -83,24 +83,25 @@ final class FieldRepo implements FieldSource {
   }
 
   @override
-  Future<List<Note>> notesWithField(String key, String value) {
+  Future<List<Note>> notesWithField(String key, String value, {int? limit}) {
     final wanted = value.trim().toLowerCase();
     final fields = _db.frontmatterFields;
-    return (_db.select(_db.notes)
-          ..where(
-            (n) => n.id.isInQuery(
-              _db.selectOnly(fields)
-                ..addColumns([fields.noteId])
-                ..where(
-                  wanted.isEmpty
-                      ? fields.key.equals(key.trim().toLowerCase())
-                      : fields.key.equals(key.trim().toLowerCase()) &
-                            fields.value.lower().equals(wanted),
-                ),
+    final query = _db.select(_db.notes)
+      ..where(
+        (n) => n.id.isInQuery(
+          _db.selectOnly(fields)
+            ..addColumns([fields.noteId])
+            ..where(
+              wanted.isEmpty
+                  ? fields.key.equals(key.trim().toLowerCase())
+                  : fields.key.equals(key.trim().toLowerCase()) &
+                        fields.value.lower().equals(wanted),
             ),
-          )
-          ..orderBy([(n) => OrderingTerm.asc(n.path)]))
-        .get();
+        ),
+      )
+      ..orderBy([(n) => OrderingTerm.asc(n.path)]);
+    if (limit != null) query.limit(limit);
+    return query.get();
   }
 
   @override

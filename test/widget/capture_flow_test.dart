@@ -87,7 +87,7 @@ void main() {
   );
 
   /// Captures [_url] with the desktop's dialog and saves it as it comes.
-  Future<void> captureAndSave(WidgetTester tester) async {
+  Future<void> captureAndSave(WidgetTester tester, {String? folder}) async {
     tester.view.physicalSize = const Size(1200, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -96,7 +96,8 @@ void main() {
       MaterialApp(
         home: Builder(
           builder: (context) => TextButton(
-            onPressed: () => capture.capture(context, url: _url),
+            onPressed: () =>
+                capture.capture(context, url: _url, folder: folder),
             child: const Text('capture'),
           ),
         ),
@@ -129,5 +130,13 @@ void main() {
 
     expect(captured, ['Reading/Web/Tending a winter garden.md']);
     expect(picturesTo, ['Attachments']);
+  });
+
+  testWidgets("a Home action's empty folder is the capture folder (#682)", (
+    tester,
+  ) async {
+    await captureAndSave(tester, folder: '');
+
+    expect(captured, ['Clippings/Tending a winter garden.md']);
   });
 }

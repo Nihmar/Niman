@@ -41,7 +41,7 @@ final class FakeTagSource implements TagSource {
   }
 
   @override
-  Future<List<TagCount>> tagCounts() async {
+  Future<List<TagCount>> tagCounts({int? limit}) async {
     final counts = <String, int>{};
     for (final entry in tags.entries) {
       final distinct = entry.value.toSet();
@@ -55,7 +55,7 @@ final class FakeTagSource implements TagSource {
           final byCount = b.count.compareTo(a.count);
           return byCount != 0 ? byCount : a.name.compareTo(b.name);
         });
-    return out;
+    return limit == null ? out : out.take(limit).toList();
   }
 
   @override

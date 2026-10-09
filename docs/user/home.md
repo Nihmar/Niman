@@ -55,7 +55,8 @@ already does with what it needs set in advance:
 - **Open a note**.
 - **Today's entry** — the [journal](journal.md)'s.
 - **Capture web page** — into a folder of its own instead of the capture
-  folder (see [web capture](web-capture.md)).
+  folder (see [web capture](web-capture.md)); with none chosen, into the
+  capture folder. The library root is not among the choices.
 
 Every value of a new note is **Fixed** or **Ask**:
 
@@ -68,6 +69,9 @@ Every value of a new note is **Fixed** or **Ask**:
 - A field named like one of the template's own questions (`Topic` for
   `{{ask:Topic}}`) answers that question; any other fills the frontmatter
   key of that name.
+- A value lands in the frontmatter as YAML reads it: `3` is a number,
+  `false` a boolean, `[a, b]` a list, `"007"` the text it quotes, and
+  anything else text. `tags` is always a list: `book, scifi` is two tags.
 
 All the questions come in one form — a dialog on a wide window, a sheet
 on a phone — and with nothing to ask, the note is made at once. *Open

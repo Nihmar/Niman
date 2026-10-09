@@ -32,9 +32,23 @@ final class HomeEditing extends ChangeNotifier {
   /// The library's own Home; null while it never was edited.
   HomeLayout? _library;
 
+  /// The writes not landed yet, one after the other: a read waits for
+  /// them, or it reads the file from before the last edit (#684).
+  Future<void> _writes = Future<void>.value();
+
+  /// Bumped by every edit: what a read begun before one says is stale.
+  int _edits = 0;
+
+  bool _disposed = false;
+
   /// Reads the Home again: after an edit elsewhere, or a sync.
   Future<void> load() async {
+    final at = _edits;
+    await _writes;
     final home = await _ops.home;
+    // Gone (#689), or edited while reading: what was read is older than
+    // the Home on screen.
+    if (_disposed || at != _edits) return;
     _library = home.library;
     onDevice = home.device != null;
     layout = home.device ?? home.library ?? HomeLayout.defaults;
@@ -68,13 +82,23 @@ final class HomeEditing extends ChangeNotifier {
   /// Puts the default Home back, where the Home is kept.
   Future<void> reset() => change(HomeLayout.defaults);
 
-  /// Runs a write; a failed one is logged and leaves the Home on screen
-  /// as it was edited, to be written by the next change.
-  Future<void> _write(Future<void> Function() write) async {
-    try {
-      await write();
-    } on Object catch (error) {
-      _log.warning('could not save the Home: $error');
-    }
+  /// Queues a write behind the ones not landed yet; a failed one is
+  /// logged and leaves the Home on screen as it was edited, to be written
+  /// by the next change.
+  Future<void> _write(Future<void> Function() write) {
+    _edits++;
+    return _writes = _writes.then((_) async {
+      try {
+        await write();
+      } on Object catch (error) {
+        _log.warning('could not save the Home: $error');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }

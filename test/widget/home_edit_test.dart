@@ -64,6 +64,48 @@ void main() {
       expect(saved('pinned').cell, (x: 2, y: 3, w: 2, h: 1));
     });
 
+    testWidgets('a drag the pointer cancels leaves the tile (#686)', (
+      tester,
+    ) async {
+      await open(tester, _desktop);
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const Key('home-drag-pinned'))),
+        kind: PointerDeviceKind.mouse,
+      );
+      for (var i = 0; i < 6; i++) {
+        await gesture.moveBy(const Offset(0, 24));
+        await tester.pump();
+      }
+      await gesture.cancel();
+      await settle(tester);
+
+      expect(controller.libraryHome, isNull, reason: 'nothing written');
+    });
+
+    testWidgets('a tile drawn settled is dropped from where it is drawn '
+        '(#681)', (tester) async {
+      // A tile with no cell yet, as a merge can leave one: drawn at the
+      // foot, stored a million rows down.
+      final pinned = HomeLayout.defaults['pinned']!;
+      controller.libraryHome = HomeLayout.defaults.put(
+        pinned.copyWith(cell: (x: 0, y: HomeTile.unplaced, w: 2, h: 1)),
+      );
+      await open(tester, _desktop);
+
+      await tester.drag(
+        find.byKey(const Key('home-drag-pinned')),
+        const Offset(0, -124),
+        kind: PointerDeviceKind.mouse,
+      );
+      await settle(tester);
+
+      expect(
+        saved('pinned').cell.y,
+        lessThan(20),
+        reason: 'a row above the foot, not a million rows down',
+      );
+    });
+
     testWidgets('a corner dragged right makes the tile wider', (tester) async {
       await open(tester, _desktop);
       await tester.drag(

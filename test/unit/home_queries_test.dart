@@ -8,6 +8,7 @@ import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/search/tag_repo.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -126,6 +127,24 @@ void main() {
       // A threshold drawn per row let only the first ~√n notes win; one
       // drawn per query lands in the upper half all but 2⁻⁶⁰ of the time.
       expect(top, greaterThan(100), reason: 'ids $ids');
+    });
+  });
+
+  group('the tiles read what they show (#685)', () {
+    test("a key's notes and the tags stop at the limit", () async {
+      for (var i = 0; i < 5; i++) {
+        write('n$i.md', content: '---\ntype: book\ntags: [t$i, all]\n---\n');
+      }
+      await indexer.fullScan(root.path);
+
+      final books = await FieldRepo(db).notesWithField('type', 'book');
+      final first = await FieldRepo(db)
+          .notesWithField('type', 'book', limit: 2);
+      expect(books, hasLength(5));
+      expect(first.map((n) => n.path), books.take(2).map((n) => n.path));
+
+      final tags = await TagRepo(db).tagCounts(limit: 2);
+      expect(tags.map((t) => t.name), ['all', 't0']);
     });
   });
 

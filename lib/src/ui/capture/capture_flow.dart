@@ -211,7 +211,10 @@ final class CaptureFlow {
     final ops = controller.ops;
     final root = controller.root;
     if (ops == null || root == null) return null;
-    final into = folder ?? await ops.captureFolder;
+    // Empty is the default, as a Home action stores it (#682).
+    final into = folder == null || folder.isEmpty
+        ? await ops.captureFolder
+        : folder;
     return CaptureTarget(
       libraryRoot: root,
       attachmentsFolder: attachmentsFolder(),

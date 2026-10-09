@@ -39,6 +39,7 @@ final class SearchTile extends StatelessWidget {
       final notes = await (await controller.fieldSource)?.notesWithField(
         key,
         value,
+        limit: limit,
       );
       return [
         for (final note in (notes ?? const <Note>[]).take(limit))

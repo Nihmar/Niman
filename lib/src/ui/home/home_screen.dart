@@ -11,6 +11,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_tile.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/home/home_column.dart';
@@ -61,12 +62,18 @@ final class _HomeScreenState extends State<HomeScreen> {
   bool _stale = false;
 
   StreamSubscription<int>? _events;
+  StreamSubscription<Set<String>>? _synced;
   Timer? _settling;
 
   @override
   void initState() {
     super.initState();
     _events = widget.host.controller.events.listen((_) => _changed());
+    // A sync that brings only the Home's file moves no note: the index
+    // says nothing, so the file is heard here (#680).
+    _synced = widget.host.controller.sync?.localChanges.listen((paths) {
+      if (paths.contains(HomeFile.filePath)) _changed();
+    });
     widget.tab.addListener(_tabChanged);
     _home?.addListener(_homeChanged);
     unawaited(_home?.load());
@@ -87,6 +94,7 @@ final class _HomeScreenState extends State<HomeScreen> {
     _home?.removeListener(_homeChanged);
     _home?.dispose();
     unawaited(_events?.cancel());
+    unawaited(_synced?.cancel());
     _settling?.cancel();
     super.dispose();
   }
@@ -114,9 +122,9 @@ final class _HomeScreenState extends State<HomeScreen> {
   void _reload() {
     if (!mounted) return;
     setState(() => _revision++);
-    // An edit in progress is the newest Home: what the file says may be
-    // the write it is waiting on.
-    if (!_editing) unawaited(_home?.load());
+    // An edit in progress stays: the read waits for its writes, and one
+    // made while reading outdates what was read (#684).
+    unawaited(_home?.load());
   }
 
   Future<void> _editColumn(HomeEditing home) async {

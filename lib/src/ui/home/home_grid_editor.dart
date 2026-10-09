@@ -69,9 +69,11 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
   void _update(DragUpdateDetails details) =>
       setState(() => _delta += details.delta);
 
-  void _end() {
+  void _end({required bool drop}) {
     final id = _dragging;
-    final tile = id == null ? null : _editing.layout[id];
+    // The tile as drawn and dragged, not as stored: two a merge left on
+    // the same cells, or one with no cell, are drawn settled (#681).
+    final tile = id == null || !drop ? null : _editing.layout.settled()[id];
     final target = tile == null ? null : _targetFor(tile);
     setState(() {
       _dragging = null;
@@ -245,7 +247,7 @@ final class _EditableTile extends StatelessWidget {
   final bool lifted;
   final void Function({required bool resize}) onStart;
   final GestureDragUpdateCallback onUpdate;
-  final VoidCallback onEnd;
+  final void Function({required bool drop}) onEnd;
   final ValueChanged<HomeTileMove> onMove;
   final VoidCallback onHide;
   final VoidCallback? onSettings;
@@ -387,7 +389,7 @@ final class _Grab extends StatelessWidget {
 
   final VoidCallback onStart;
   final GestureDragUpdateCallback onUpdate;
-  final VoidCallback onEnd;
+  final void Function({required bool drop}) onEnd;
   final Widget child;
 
   Drag _start(Offset _) {
@@ -435,14 +437,16 @@ final class _TileDrag extends Drag {
   new({required this.onUpdate, required this.onEnd});
 
   final GestureDragUpdateCallback onUpdate;
-  final VoidCallback onEnd;
+  final void Function({required bool drop}) onEnd;
 
   @override
   void update(DragUpdateDetails details) => onUpdate(details);
 
   @override
-  void end(DragEndDetails details) => onEnd();
+  void end(DragEndDetails details) => onEnd(drop: true);
 
+  /// A gesture the arena took away, or a pointer lost: the tile goes back
+  /// where it was (#686).
   @override
-  void cancel() => onEnd();
+  void cancel() => onEnd(drop: false);
 }

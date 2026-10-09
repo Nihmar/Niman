@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/frontmatter/typed_fields.dart';
 import 'package:niman/src/frontmatter/yaml_scalar.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/session.dart';
@@ -106,10 +107,10 @@ Future<void> makeHomeNote(
   };
   final frontmatter = {
     for (final MapEntry(:key, :value) in rendered.entries)
-      if (!ownLabels.contains(key)) key: yamlString(value),
+      if (!ownLabels.contains(key)) key: _fieldYaml(key, value),
     for (final key in asked)
       if (!ownLabels.contains(key) && (answers[key] ?? '').isNotEmpty)
-        key: yamlString(answers[key]!),
+        key: _fieldYaml(key, answers[key]!),
   };
   final surroundings = await templates.surroundingsOf(
     template,
@@ -168,4 +169,22 @@ Future<List<TemplateField>> _questions(
     );
   }
   return out;
+}
+
+/// [value] as the YAML of [key] in the new note (#683): `tags` a list, its
+/// items split at the commas the form joins chips with; anything else as
+/// typed when YAML reads it as one value — `3`, `false`, a date, `[a, b]`
+/// stay what they are — and as text otherwise.
+String _fieldYaml(String key, String value) {
+  var text = value.trim();
+  if (key == 'tags') {
+    if (text.startsWith('[') && text.endsWith(']')) {
+      text = text.substring(1, text.length - 1);
+    }
+    return frontmatterListYaml(frontmatterListItems(text));
+  }
+  final typed =
+      !text.contains('\n') &&
+      yamlReadsBack(text, (read) => read != null && read is! Map);
+  return typed ? text : yamlString(text);
 }

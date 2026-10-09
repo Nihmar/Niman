@@ -40,6 +40,16 @@ void main() {
     );
   });
 
+  test('shows nothing of a frontmatter longer than the read (#687)', () async {
+    write('d.md', '---\n${'summary: long\n' * 20}---\n\nThe day.');
+    expect(await notePreview(root.path, 'd.md', bytes: 100), '');
+  });
+
+  test('keeps a whole short note that opens with a rule', () async {
+    write('e.md', '---\nAfter the rule.');
+    expect(await notePreview(root.path, 'e.md'), '---\nAfter the rule.');
+  });
+
   test('is empty for a note that is not there', () async {
     expect(await notePreview(root.path, 'missing.md'), '');
   });
