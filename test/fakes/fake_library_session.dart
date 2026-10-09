@@ -977,8 +977,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<({HomeLayout? library, HomeLayout? device})> get home async =>
       (library: libraryHome, device: deviceHome);
 
+  /// While set, a Home write waits for it: one that lands late (#684).
+  Future<void>? holdHomeWrites;
+
   @override
   Future<void> setHome(HomeLayout layout, {required bool onDevice}) async {
+    await holdHomeWrites;
     if (onDevice) {
       deviceHome = layout;
     } else {
