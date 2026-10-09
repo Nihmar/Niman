@@ -988,6 +988,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<void> clearDeviceHome() async => deviceHome = null;
+
+  @override
   Future<List<String>> notePathsUnder(String folder) async => [
     for (final row in _rows)
       if (!row.isDir &&

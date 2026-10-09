@@ -3456,4 +3456,95 @@ final class SerbianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Друга';
+
+  @override
+  String get homeEdit => 'Уреди почетну';
+
+  @override
+  String get homeEditDone => 'Готово';
+
+  @override
+  String get homeReset => 'Врати';
+
+  @override
+  String get homeResetTitle => 'Вратити почетну?';
+
+  @override
+  String get homeResetBody =>
+      'Све плочице се враћају на подразумевану почетну.';
+
+  @override
+  String get homeUseLibraryTitle => 'Користити почетну библиотеке?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Сопствена почетна овог уређаја се одбацује, а овде се поново '
+      'приказује почетна библиотеке.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Одбаци';
+
+  @override
+  String get homeAddTiles => 'Додај плочице';
+
+  @override
+  String get homeHiddenTiles => 'Скривено';
+
+  @override
+  String get homeTileOnHome => 'На почетној';
+
+  @override
+  String get homeTileHide => 'Сакриј';
+
+  @override
+  String get homeTileShow => 'Прикажи';
+
+  @override
+  String get homeTileMove => 'Помери и промени величину';
+
+  @override
+  String get homeMoveLeft => 'Помери лево';
+
+  @override
+  String get homeMoveRight => 'Помери десно';
+
+  @override
+  String get homeMoveUp => 'Помери горе';
+
+  @override
+  String get homeMoveDown => 'Помери доле';
+
+  @override
+  String get homeWider => 'Шире';
+
+  @override
+  String get homeNarrower => 'Уже';
+
+  @override
+  String get homeTaller => 'Више';
+
+  @override
+  String get homeShorter => 'Ниже';
+
+  @override
+  String get homeTileSettings => 'Подешавања плочице';
+
+  @override
+  String get homeSearchName => 'Назив';
+
+  @override
+  String get homeSearchQuery => 'Упит';
+
+  @override
+  String get homeSearchQueryHint => 'Речи или кључ = вредност';
+
+  @override
+  String get homeGridHint =>
+      'Превуците плочицу да бисте је померили, а њен угао да бисте променили '
+      'величину.';
+
+  @override
+  String get homeColumnHint =>
+      'Превуците ручицу да промените редослед. Прекидач приказује или скрива '
+      'плочицу на сваком уређају.';
 }

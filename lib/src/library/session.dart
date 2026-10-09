@@ -245,6 +245,9 @@ abstract interface class NoteOperations {
   /// library's when not, dropping the device's own.
   Future<void> setHome(HomeLayout layout, {required bool onDevice});
 
+  /// Drops this device's own Home: the library's shows here again.
+  Future<void> clearDeviceHome();
+
   /// The paths of the notes under [folder], at any depth (every note's
   /// for the root): an index seek, not a walk of the disk.
   Future<List<String>> notePathsUnder(String folder);

@@ -1779,4 +1779,33 @@ final class AppStrings {
   static String get homeSearchEmpty => _s.homeSearchEmpty;
   static String get homeSearchNoQuery => _s.homeSearchNoQuery;
   static String get homeRandomAnother => _s.homeRandomAnother;
+  // Home (#535): editing it — the grid, the list, where it is kept.
+  static String get homeEdit => _s.homeEdit;
+  static String get homeEditDone => _s.homeEditDone;
+  static String get homeReset => _s.homeReset;
+  static String get homeResetTitle => _s.homeResetTitle;
+  static String get homeResetBody => _s.homeResetBody;
+  static String get homeUseLibraryTitle => _s.homeUseLibraryTitle;
+  static String get homeUseLibraryBody => _s.homeUseLibraryBody;
+  static String get homeUseLibraryConfirm => _s.homeUseLibraryConfirm;
+  static String get homeAddTiles => _s.homeAddTiles;
+  static String get homeHiddenTiles => _s.homeHiddenTiles;
+  static String get homeTileOnHome => _s.homeTileOnHome;
+  static String get homeTileHide => _s.homeTileHide;
+  static String get homeTileShow => _s.homeTileShow;
+  static String get homeTileMove => _s.homeTileMove;
+  static String get homeMoveLeft => _s.homeMoveLeft;
+  static String get homeMoveRight => _s.homeMoveRight;
+  static String get homeMoveUp => _s.homeMoveUp;
+  static String get homeMoveDown => _s.homeMoveDown;
+  static String get homeWider => _s.homeWider;
+  static String get homeNarrower => _s.homeNarrower;
+  static String get homeTaller => _s.homeTaller;
+  static String get homeShorter => _s.homeShorter;
+  static String get homeTileSettings => _s.homeTileSettings;
+  static String get homeSearchName => _s.homeSearchName;
+  static String get homeSearchQuery => _s.homeSearchQuery;
+  static String get homeSearchQueryHint => _s.homeSearchQueryHint;
+  static String get homeGridHint => _s.homeGridHint;
+  static String get homeColumnHint => _s.homeColumnHint;
 }

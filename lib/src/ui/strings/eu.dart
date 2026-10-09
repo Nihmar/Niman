@@ -3467,4 +3467,94 @@ final class BasqueStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Beste bat';
+
+  @override
+  String get homeEdit => 'Editatu hasiera';
+
+  @override
+  String get homeEditDone => 'Eginda';
+
+  @override
+  String get homeReset => 'Berrezarri';
+
+  @override
+  String get homeResetTitle => 'Hasiera berrezarri?';
+
+  @override
+  String get homeResetBody =>
+      'Lauza guztiak hasiera lehenetsira itzultzen dira.';
+
+  @override
+  String get homeUseLibraryTitle => 'Liburutegiaren hasiera erabili?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Gailu honen hasiera propioa baztertu egingo da, eta liburutegiarena '
+      'agertuko da berriro.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Baztertu';
+
+  @override
+  String get homeAddTiles => 'Gehitu lauzak';
+
+  @override
+  String get homeHiddenTiles => 'Ezkutuak';
+
+  @override
+  String get homeTileOnHome => 'Hasieran';
+
+  @override
+  String get homeTileHide => 'Ezkutatu';
+
+  @override
+  String get homeTileShow => 'Erakutsi';
+
+  @override
+  String get homeTileMove => 'Mugitu eta aldatu tamaina';
+
+  @override
+  String get homeMoveLeft => 'Mugitu ezkerrera';
+
+  @override
+  String get homeMoveRight => 'Mugitu eskuinera';
+
+  @override
+  String get homeMoveUp => 'Mugitu gora';
+
+  @override
+  String get homeMoveDown => 'Mugitu behera';
+
+  @override
+  String get homeWider => 'Zabalagoa';
+
+  @override
+  String get homeNarrower => 'Estuagoa';
+
+  @override
+  String get homeTaller => 'Altuagoa';
+
+  @override
+  String get homeShorter => 'Baxuagoa';
+
+  @override
+  String get homeTileSettings => 'Lauzaren ezarpenak';
+
+  @override
+  String get homeSearchName => 'Izena';
+
+  @override
+  String get homeSearchQuery => 'Kontsulta';
+
+  @override
+  String get homeSearchQueryHint => 'Hitzak, edo gakoa = balioa';
+
+  @override
+  String get homeGridHint =>
+      'Arrastatu lauza bat mugitzeko, eta haren izkina tamaina aldatzeko.';
+
+  @override
+  String get homeColumnHint =>
+      'Arrastatu helduleku bat ordena aldatzeko. Etengailu batek lauza bat '
+      'erakusten edo ezkutatzen du gailu guztietan.';
 }

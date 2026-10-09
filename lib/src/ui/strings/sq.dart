@@ -3457,4 +3457,95 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Një tjetër';
+
+  @override
+  String get homeEdit => 'Ndrysho kreun';
+
+  @override
+  String get homeEditDone => 'U krye';
+
+  @override
+  String get homeReset => 'Rivendos';
+
+  @override
+  String get homeResetTitle => 'Të rivendoset kreu?';
+
+  @override
+  String get homeResetBody =>
+      'Të gjitha pllakat kthehen te kreu i parazgjedhur.';
+
+  @override
+  String get homeUseLibraryTitle => 'Të përdoret kreu i bibliotekës?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Kreu i vetë i kësaj pajisjeje hidhet poshtë dhe këtu shfaqet sërish '
+      'ai i bibliotekës.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Hidh poshtë';
+
+  @override
+  String get homeAddTiles => 'Shto pllaka';
+
+  @override
+  String get homeHiddenTiles => 'Të fshehura';
+
+  @override
+  String get homeTileOnHome => 'Në kreu';
+
+  @override
+  String get homeTileHide => 'Fshih';
+
+  @override
+  String get homeTileShow => 'Shfaq';
+
+  @override
+  String get homeTileMove => 'Lëviz dhe ndrysho madhësinë';
+
+  @override
+  String get homeMoveLeft => 'Lëviz majtas';
+
+  @override
+  String get homeMoveRight => 'Lëviz djathtas';
+
+  @override
+  String get homeMoveUp => 'Lëviz lart';
+
+  @override
+  String get homeMoveDown => 'Lëviz poshtë';
+
+  @override
+  String get homeWider => 'Më i gjerë';
+
+  @override
+  String get homeNarrower => 'Më i ngushtë';
+
+  @override
+  String get homeTaller => 'Më i lartë';
+
+  @override
+  String get homeShorter => 'Më i ulët';
+
+  @override
+  String get homeTileSettings => 'Cilësimet e pllakës';
+
+  @override
+  String get homeSearchName => 'Emri';
+
+  @override
+  String get homeSearchQuery => 'Kërkim';
+
+  @override
+  String get homeSearchQueryHint => 'Fjalë, ose çelës = vlerë';
+
+  @override
+  String get homeGridHint =>
+      'Tërhiqni një pllakë për ta lëvizur, dhe këndin e saj për ta ndryshuar '
+      'madhësinë.';
+
+  @override
+  String get homeColumnHint =>
+      'Tërhiqni një dorezë për të rirenditur. Një çelës shfaq ose fsheh një '
+      'pllakë në çdo pajisje.';
 }

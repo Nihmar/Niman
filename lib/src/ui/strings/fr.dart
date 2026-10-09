@@ -3530,4 +3530,95 @@ final class FrenchStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Une autre';
+
+  @override
+  String get homeEdit => "Modifier l'accueil";
+
+  @override
+  String get homeEditDone => 'Terminé';
+
+  @override
+  String get homeReset => 'Réinitialiser';
+
+  @override
+  String get homeResetTitle => "Réinitialiser l'accueil ?";
+
+  @override
+  String get homeResetBody =>
+      "Toutes les tuiles reviennent à l'accueil par défaut.";
+
+  @override
+  String get homeUseLibraryTitle => "Utiliser l'accueil de la bibliothèque ?";
+
+  @override
+  String get homeUseLibraryBody =>
+      "L'accueil propre à cet appareil est abandonné, et celui de la "
+      "bibliothèque s'affiche de nouveau.";
+
+  @override
+  String get homeUseLibraryConfirm => 'Abandonner';
+
+  @override
+  String get homeAddTiles => 'Ajouter des tuiles';
+
+  @override
+  String get homeHiddenTiles => 'Masquées';
+
+  @override
+  String get homeTileOnHome => "Sur l'accueil";
+
+  @override
+  String get homeTileHide => 'Masquer';
+
+  @override
+  String get homeTileShow => 'Afficher';
+
+  @override
+  String get homeTileMove => 'Déplacer et redimensionner';
+
+  @override
+  String get homeMoveLeft => 'Déplacer à gauche';
+
+  @override
+  String get homeMoveRight => 'Déplacer à droite';
+
+  @override
+  String get homeMoveUp => 'Déplacer vers le haut';
+
+  @override
+  String get homeMoveDown => 'Déplacer vers le bas';
+
+  @override
+  String get homeWider => 'Plus large';
+
+  @override
+  String get homeNarrower => 'Plus étroit';
+
+  @override
+  String get homeTaller => 'Plus haut';
+
+  @override
+  String get homeShorter => 'Moins haut';
+
+  @override
+  String get homeTileSettings => 'Réglages de la tuile';
+
+  @override
+  String get homeSearchName => 'Nom';
+
+  @override
+  String get homeSearchQuery => 'Requête';
+
+  @override
+  String get homeSearchQueryHint => 'Des mots, ou clé = valeur';
+
+  @override
+  String get homeGridHint =>
+      'Faites glisser une tuile pour la déplacer, et son coin pour la '
+      'redimensionner.';
+
+  @override
+  String get homeColumnHint =>
+      'Faites glisser une poignée pour réordonner. Un interrupteur affiche '
+      'ou masque une tuile sur chaque appareil.';
 }

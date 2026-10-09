@@ -3147,4 +3147,89 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get homeRandomAnother => '別のノート';
+
+  @override
+  String get homeEdit => 'ホームを編集';
+
+  @override
+  String get homeEditDone => '完了';
+
+  @override
+  String get homeReset => 'リセット';
+
+  @override
+  String get homeResetTitle => 'ホームをリセットしますか？';
+
+  @override
+  String get homeResetBody => 'すべてのタイルが既定のホームに戻ります。';
+
+  @override
+  String get homeUseLibraryTitle => 'ライブラリのホームを使いますか？';
+
+  @override
+  String get homeUseLibraryBody => 'このデバイス独自のホームは破棄され、ライブラリのホームが再び表示されます。';
+
+  @override
+  String get homeUseLibraryConfirm => '破棄';
+
+  @override
+  String get homeAddTiles => 'タイルを追加';
+
+  @override
+  String get homeHiddenTiles => '非表示';
+
+  @override
+  String get homeTileOnHome => 'ホームにあり';
+
+  @override
+  String get homeTileHide => '非表示にする';
+
+  @override
+  String get homeTileShow => '表示する';
+
+  @override
+  String get homeTileMove => '移動とサイズ';
+
+  @override
+  String get homeMoveLeft => '左へ移動';
+
+  @override
+  String get homeMoveRight => '右へ移動';
+
+  @override
+  String get homeMoveUp => '上へ移動';
+
+  @override
+  String get homeMoveDown => '下へ移動';
+
+  @override
+  String get homeWider => '幅を広げる';
+
+  @override
+  String get homeNarrower => '幅を狭める';
+
+  @override
+  String get homeTaller => '高くする';
+
+  @override
+  String get homeShorter => '低くする';
+
+  @override
+  String get homeTileSettings => 'タイルの設定';
+
+  @override
+  String get homeSearchName => '名前';
+
+  @override
+  String get homeSearchQuery => '検索条件';
+
+  @override
+  String get homeSearchQueryHint => '単語、または キー = 値';
+
+  @override
+  String get homeGridHint => 'タイルをドラッグして移動、角をドラッグしてサイズを変更します。';
+
+  @override
+  String get homeColumnHint =>
+      'ハンドルをドラッグして並べ替えます。スイッチはすべてのデバイスでタイルを表示または非表示にします。';
 }

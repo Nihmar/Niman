@@ -3417,4 +3417,93 @@ final class DanishStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'En anden';
+
+  @override
+  String get homeEdit => 'Rediger hjem';
+
+  @override
+  String get homeEditDone => 'Færdig';
+
+  @override
+  String get homeReset => 'Nulstil';
+
+  @override
+  String get homeResetTitle => 'Nulstil hjem?';
+
+  @override
+  String get homeResetBody => 'Alle felter går tilbage til standardhjem.';
+
+  @override
+  String get homeUseLibraryTitle => 'Brug bibliotekets hjem?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Denne enheds eget hjem kasseres, og bibliotekets vises her igen.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Kassér';
+
+  @override
+  String get homeAddTiles => 'Tilføj felter';
+
+  @override
+  String get homeHiddenTiles => 'Skjult';
+
+  @override
+  String get homeTileOnHome => 'På hjem';
+
+  @override
+  String get homeTileHide => 'Skjul';
+
+  @override
+  String get homeTileShow => 'Vis';
+
+  @override
+  String get homeTileMove => 'Flyt og tilpas størrelse';
+
+  @override
+  String get homeMoveLeft => 'Flyt til venstre';
+
+  @override
+  String get homeMoveRight => 'Flyt til højre';
+
+  @override
+  String get homeMoveUp => 'Flyt op';
+
+  @override
+  String get homeMoveDown => 'Flyt ned';
+
+  @override
+  String get homeWider => 'Bredere';
+
+  @override
+  String get homeNarrower => 'Smallere';
+
+  @override
+  String get homeTaller => 'Højere';
+
+  @override
+  String get homeShorter => 'Lavere';
+
+  @override
+  String get homeTileSettings => 'Feltindstillinger';
+
+  @override
+  String get homeSearchName => 'Navn';
+
+  @override
+  String get homeSearchQuery => 'Søgning';
+
+  @override
+  String get homeSearchQueryHint => 'Ord, eller nøgle = værdi';
+
+  @override
+  String get homeGridHint =>
+      'Træk et felt for at flytte det, og dets hjørne for at ændre '
+      'størrelsen.';
+
+  @override
+  String get homeColumnHint =>
+      'Træk i et håndtag for at ændre rækkefølgen. En kontakt viser eller '
+      'skjuler et felt på alle enheder.';
 }

@@ -3483,4 +3483,94 @@ final class SpanishStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Otra';
+
+  @override
+  String get homeEdit => 'Editar inicio';
+
+  @override
+  String get homeEditDone => 'Listo';
+
+  @override
+  String get homeReset => 'Restablecer';
+
+  @override
+  String get homeResetTitle => '¿Restablecer el inicio?';
+
+  @override
+  String get homeResetBody =>
+      'Todos los mosaicos vuelven al inicio predeterminado.';
+
+  @override
+  String get homeUseLibraryTitle => '¿Usar el inicio de la biblioteca?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Se descarta el inicio propio de este dispositivo y aquí vuelve a '
+      'aparecer el de la biblioteca.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Descartar';
+
+  @override
+  String get homeAddTiles => 'Añadir mosaicos';
+
+  @override
+  String get homeHiddenTiles => 'Ocultos';
+
+  @override
+  String get homeTileOnHome => 'En el inicio';
+
+  @override
+  String get homeTileHide => 'Ocultar';
+
+  @override
+  String get homeTileShow => 'Mostrar';
+
+  @override
+  String get homeTileMove => 'Mover y cambiar tamaño';
+
+  @override
+  String get homeMoveLeft => 'Mover a la izquierda';
+
+  @override
+  String get homeMoveRight => 'Mover a la derecha';
+
+  @override
+  String get homeMoveUp => 'Mover arriba';
+
+  @override
+  String get homeMoveDown => 'Mover abajo';
+
+  @override
+  String get homeWider => 'Más ancho';
+
+  @override
+  String get homeNarrower => 'Más estrecho';
+
+  @override
+  String get homeTaller => 'Más alto';
+
+  @override
+  String get homeShorter => 'Más bajo';
+
+  @override
+  String get homeTileSettings => 'Ajustes del mosaico';
+
+  @override
+  String get homeSearchName => 'Nombre';
+
+  @override
+  String get homeSearchQuery => 'Consulta';
+
+  @override
+  String get homeSearchQueryHint => 'Palabras, o clave = valor';
+
+  @override
+  String get homeGridHint =>
+      'Arrastra un mosaico para moverlo, y su esquina para cambiar su tamaño.';
+
+  @override
+  String get homeColumnHint =>
+      'Arrastra un asa para reordenar. Un interruptor muestra u oculta un '
+      'mosaico en todos los dispositivos.';
 }

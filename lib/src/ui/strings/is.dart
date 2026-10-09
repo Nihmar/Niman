@@ -3428,4 +3428,93 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Aðra';
+
+  @override
+  String get homeEdit => 'Breyta heimasíðu';
+
+  @override
+  String get homeEditDone => 'Lokið';
+
+  @override
+  String get homeReset => 'Endurstilla';
+
+  @override
+  String get homeResetTitle => 'Endurstilla heimasíðu?';
+
+  @override
+  String get homeResetBody => 'Allir reitir fara aftur á sjálfgefna heimasíðu.';
+
+  @override
+  String get homeUseLibraryTitle => 'Nota heimasíðu safnsins?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Eigin heimasíðu þessa tækis er hent og heimasíða safnsins birtist hér '
+      'aftur.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Henda';
+
+  @override
+  String get homeAddTiles => 'Bæta við reitum';
+
+  @override
+  String get homeHiddenTiles => 'Falið';
+
+  @override
+  String get homeTileOnHome => 'Á heimasíðu';
+
+  @override
+  String get homeTileHide => 'Fela';
+
+  @override
+  String get homeTileShow => 'Sýna';
+
+  @override
+  String get homeTileMove => 'Færa og breyta stærð';
+
+  @override
+  String get homeMoveLeft => 'Færa til vinstri';
+
+  @override
+  String get homeMoveRight => 'Færa til hægri';
+
+  @override
+  String get homeMoveUp => 'Færa upp';
+
+  @override
+  String get homeMoveDown => 'Færa niður';
+
+  @override
+  String get homeWider => 'Breiðara';
+
+  @override
+  String get homeNarrower => 'Mjórra';
+
+  @override
+  String get homeTaller => 'Hærra';
+
+  @override
+  String get homeShorter => 'Lægra';
+
+  @override
+  String get homeTileSettings => 'Stillingar reits';
+
+  @override
+  String get homeSearchName => 'Heiti';
+
+  @override
+  String get homeSearchQuery => 'Leit';
+
+  @override
+  String get homeSearchQueryHint => 'Orð, eða lykill = gildi';
+
+  @override
+  String get homeGridHint =>
+      'Dragðu reit til að færa hann og horn hans til að breyta stærðinni.';
+
+  @override
+  String get homeColumnHint =>
+      'Dragðu handfang til að endurraða. Rofi sýnir eða felur reit á öllum '
+      'tækjum.';
 }

@@ -1849,4 +1849,34 @@ abstract base class Strings {
   String get homeSearchEmpty;
   String get homeSearchNoQuery;
   String get homeRandomAnother;
+
+  // Home (#535): editing it — the grid, the list, where it is kept.
+  String get homeEdit;
+  String get homeEditDone;
+  String get homeReset;
+  String get homeResetTitle;
+  String get homeResetBody;
+  String get homeUseLibraryTitle;
+  String get homeUseLibraryBody;
+  String get homeUseLibraryConfirm;
+  String get homeAddTiles;
+  String get homeHiddenTiles;
+  String get homeTileOnHome;
+  String get homeTileHide;
+  String get homeTileShow;
+  String get homeTileMove;
+  String get homeMoveLeft;
+  String get homeMoveRight;
+  String get homeMoveUp;
+  String get homeMoveDown;
+  String get homeWider;
+  String get homeNarrower;
+  String get homeTaller;
+  String get homeShorter;
+  String get homeTileSettings;
+  String get homeSearchName;
+  String get homeSearchQuery;
+  String get homeSearchQueryHint;
+  String get homeGridHint;
+  String get homeColumnHint;
 }

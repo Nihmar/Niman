@@ -11,12 +11,16 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/home/home_tile.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/home/home_column.dart';
+import 'package:niman/src/ui/home/home_column_editor.dart';
+import 'package:niman/src/ui/home/home_edit_dialogs.dart';
+import 'package:niman/src/ui/home/home_editing.dart';
 import 'package:niman/src/ui/home/home_grid.dart';
+import 'package:niman/src/ui/home/home_grid_editor.dart';
 import 'package:niman/src/ui/home/home_host.dart';
+import 'package:niman/src/ui/home/home_scope_switch.dart';
 import 'package:niman/src/ui/home/home_tile_view.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -41,7 +45,14 @@ final class _HomeScreenState extends State<HomeScreen> {
   /// How long a burst of library changes is let settle before a reload.
   static const _settle = Duration(milliseconds: 300);
 
-  HomeLayout? _layout;
+  /// The Home shown, and edited; null with no library open.
+  late final HomeEditing? _home = switch (widget.host.controller.ops) {
+    final ops? => HomeEditing(ops),
+    null => null,
+  };
+
+  /// Whether the grid is being edited, in place.
+  bool _editing = false;
 
   /// Bumped on every reload: the tiles read the library again.
   int _revision = 0;
@@ -57,7 +68,8 @@ final class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _events = widget.host.controller.events.listen((_) => _changed());
     widget.tab.addListener(_tabChanged);
-    unawaited(_load());
+    _home?.addListener(_homeChanged);
+    unawaited(_home?.load());
   }
 
   @override
@@ -72,10 +84,14 @@ final class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     widget.tab.removeListener(_tabChanged);
+    _home?.removeListener(_homeChanged);
+    _home?.dispose();
     unawaited(_events?.cancel());
     _settling?.cancel();
     super.dispose();
   }
+
+  void _homeChanged() => setState(() {});
 
   bool get _visible => widget.tab.value == ShellTab.home;
 
@@ -98,23 +114,21 @@ final class _HomeScreenState extends State<HomeScreen> {
   void _reload() {
     if (!mounted) return;
     setState(() => _revision++);
-    unawaited(_load());
+    // An edit in progress is the newest Home: what the file says may be
+    // the write it is waiting on.
+    if (!_editing) unawaited(_home?.load());
   }
 
-  Future<void> _load() async {
-    final ops = widget.host.controller.ops;
-    if (ops == null) return;
-    final home = await ops.home;
-    if (!mounted) return;
-    setState(() {
-      _layout = home.device ?? home.library ?? HomeLayout.defaults;
-    });
+  Future<void> _editColumn(HomeEditing home) async {
+    await openHomeColumnEditor(context, home);
+    if (mounted) unawaited(home.load());
   }
 
   @override
   Widget build(BuildContext context) {
-    final layout = _layout;
-    if (layout == null) return const SizedBox.shrink();
+    final home = _home;
+    if (home == null || !home.loaded) return const SizedBox.shrink();
+    final layout = home.layout;
     return LayoutBuilder(
       builder: (context, box) {
         final wide = box.maxWidth >= HomeGridMetrics.minWidth;
@@ -124,16 +138,26 @@ final class _HomeScreenState extends State<HomeScreen> {
           revision: _revision,
           fit: fit,
         );
+        final editing = wide && _editing;
         return SingleChildScrollView(
           key: const Key('home-screen'),
           padding: wide
               ? const EdgeInsets.fromLTRB(20, 8, 20, 20)
-              : const EdgeInsets.all(12),
+              : const EdgeInsets.fromLTRB(12, 4, 12, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (wide) const _HomeHeader(),
               if (wide)
+                _GridHeader(
+                  home: home,
+                  editing: editing,
+                  onEdit: (on) => setState(() => _editing = on),
+                )
+              else
+                _ColumnHeader(onEdit: () => unawaited(_editColumn(home))),
+              if (editing)
+                HomeGridEditor(editing: home, tile: tile)
+              else if (wide)
                 HomeGrid(layout: layout.settled(), tile: tile)
               else
                 HomeColumn(layout: layout, tile: tile),
@@ -145,27 +169,101 @@ final class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// The wide Home's title and today's date: the phone's app bar says it.
-final class _HomeHeader extends StatelessWidget {
-  const new();
+/// Today, said under the title or beside it.
+String _today() => formatDateTime(DateTime.now(), 'dddd D MMMM');
+
+/// The wide Home's title, today's date and the way into editing; while
+/// editing, where the Home is kept, a reset and *Done*.
+final class _GridHeader extends StatelessWidget {
+  const new({required this.home, required this.editing, required this.onEdit});
+
+  final HomeEditing home;
+  final bool editing;
+  final ValueChanged<bool> onEdit;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SizedBox(
-      height: 48,
-      child: Row(
+    final muted = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppStrings.tabHome, style: theme.textTheme.titleLarge),
-          const SizedBox(width: 12),
-          Text(
-            formatDateTime(DateTime.now(), 'dddd D MMMM'),
+          SizedBox(
+            height: 48,
+            child: Row(
+              children: [
+                Text(
+                  editing ? AppStrings.homeEdit : AppStrings.tabHome,
+                  style: theme.textTheme.titleLarge,
+                ),
+                const SizedBox(width: 12),
+                if (!editing) Text(_today(), style: muted),
+                const Spacer(),
+                if (editing) ...[
+                  HomeScopeSwitch(editing: home),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    key: const Key('home-reset'),
+                    onPressed: () async {
+                      if (await confirmHomeReset(context)) await home.reset();
+                    },
+                    child: Text(AppStrings.homeReset),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton.icon(
+                    key: const Key('home-edit-done'),
+                    onPressed: () => onEdit(false),
+                    icon: const Icon(Icons.check),
+                    label: Text(AppStrings.homeEditDone),
+                  ),
+                ] else
+                  TextButton.icon(
+                    key: const Key('home-edit'),
+                    onPressed: () => onEdit(true),
+                    icon: const Icon(Icons.edit_outlined),
+                    label: Text(AppStrings.homeEdit),
+                  ),
+              ],
+            ),
+          ),
+          if (editing) Text(AppStrings.homeGridHint, style: muted),
+        ],
+      ),
+    );
+  }
+}
+
+/// The phone's line over the column: today's date (the app bar says
+/// *Home*) and the way into editing.
+final class _ColumnHeader extends StatelessWidget {
+  const new({required this.onEdit});
+
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            _today(),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-        ],
-      ),
+        ),
+        IconButton(
+          key: const Key('home-edit'),
+          tooltip: AppStrings.homeEdit,
+          onPressed: onEdit,
+          icon: const Icon(Icons.edit_outlined),
+        ),
+      ],
     );
   }
 }

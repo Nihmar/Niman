@@ -3456,4 +3456,93 @@ final class ItalianStrings extends Strings {
 
   @override
   String get homeRandomAnother => "Un'altra";
+
+  @override
+  String get homeEdit => 'Modifica home';
+
+  @override
+  String get homeEditDone => 'Fatto';
+
+  @override
+  String get homeReset => 'Ripristina';
+
+  @override
+  String get homeResetTitle => 'Ripristinare la home?';
+
+  @override
+  String get homeResetBody => 'Tutti i riquadri tornano alla home predefinita.';
+
+  @override
+  String get homeUseLibraryTitle => 'Usare la home della libreria?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'La home propria di questo dispositivo viene scartata e torna quella '
+      'della libreria.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Scarta';
+
+  @override
+  String get homeAddTiles => 'Aggiungi riquadri';
+
+  @override
+  String get homeHiddenTiles => 'Nascosti';
+
+  @override
+  String get homeTileOnHome => 'Già nella home';
+
+  @override
+  String get homeTileHide => 'Nascondi';
+
+  @override
+  String get homeTileShow => 'Mostra';
+
+  @override
+  String get homeTileMove => 'Sposta e ridimensiona';
+
+  @override
+  String get homeMoveLeft => 'Sposta a sinistra';
+
+  @override
+  String get homeMoveRight => 'Sposta a destra';
+
+  @override
+  String get homeMoveUp => 'Sposta in alto';
+
+  @override
+  String get homeMoveDown => 'Sposta in basso';
+
+  @override
+  String get homeWider => 'Più largo';
+
+  @override
+  String get homeNarrower => 'Più stretto';
+
+  @override
+  String get homeTaller => 'Più alto';
+
+  @override
+  String get homeShorter => 'Più basso';
+
+  @override
+  String get homeTileSettings => 'Impostazioni del riquadro';
+
+  @override
+  String get homeSearchName => 'Nome';
+
+  @override
+  String get homeSearchQuery => 'Ricerca';
+
+  @override
+  String get homeSearchQueryHint => 'Parole, oppure chiave = valore';
+
+  @override
+  String get homeGridHint =>
+      'Trascina un riquadro per spostarlo, il suo angolo per ridimensionarlo.';
+
+  @override
+  String get homeColumnHint =>
+      'Trascina una maniglia per riordinare. Un interruttore mostra o '
+      'nasconde un riquadro su ogni dispositivo.';
 }

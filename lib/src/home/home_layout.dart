@@ -111,25 +111,44 @@ final class HomeLayout {
   /// which a Home holds one and that one is hidden: at the foot of the
   /// grid and of the column.
   HomeLayout add(HomeTileKind kind, {Random? random}) {
-    final hidden = kind.repeats
+    final existing = kind.repeats
         ? null
         : tiles.where((t) => t.kind == kind).firstOrNull;
+    if (existing != null) return show(existing.id);
     final size = kind.defaultSize;
-    final cell = (x: 0, y: bottom, w: size.w, h: size.h);
-    final at = tiles.isEmpty ? 0 : tiles.map((t) => t.at).reduce(max) + 1;
-    if (hidden != null) {
-      if (!hidden.hidden) return this;
-      return put(hidden.copyWith(hidden: false, cell: cell, at: at));
-    }
     return put(
       HomeTile(
         id: freshId(kind, random: random),
         kind: kind,
-        cell: cell,
-        at: at,
+        cell: (x: 0, y: bottom, w: size.w, h: size.h),
+        at: _nextAt,
       ),
     );
   }
+
+  /// This layout with the hidden tile [id] shown again, at the foot of the
+  /// grid and of the column, its size and settings as they were.
+  HomeLayout show(String id) {
+    final tile = this[id];
+    if (tile == null || !tile.hidden) return this;
+    final (:w, :h, x: _, y: _) = tile.cell;
+    return put(
+      tile.copyWith(
+        hidden: false,
+        cell: (x: 0, y: bottom, w: w, h: h),
+        at: _nextAt,
+      ),
+    );
+  }
+
+  /// This layout with the tile [id] hidden, on every device.
+  HomeLayout hide(String id) {
+    final tile = this[id];
+    if (tile == null || tile.hidden) return this;
+    return put(tile.copyWith(hidden: true));
+  }
+
+  int get _nextAt => tiles.isEmpty ? 0 : tiles.map((t) => t.at).reduce(max) + 1;
 
   /// The first free row under the shown tiles.
   int get bottom => tiles
@@ -167,10 +186,14 @@ final class HomeLayout {
     ]);
   }
 
-  /// The grid with no two shown tiles on the same cell and none floating
-  /// over a gap: in reading order — [first] before the rest, it being
-  /// the one the user just placed — each moves down past whatever it
-  /// overlaps, then everything rises as far as it can.
+  /// The grid with no two shown tiles on the same cell: in reading order —
+  /// [first] before the rest, it being the one the user just placed — each
+  /// moves down past whatever it overlaps. A tile with no place yet goes
+  /// to the foot of the others.
+  ///
+  /// Nothing rises into a gap: a tile stays on the row it was put on, so a
+  /// move down is a move down, and the user closes a gap by moving a tile
+  /// up into it.
   HomeLayout settled({String? first}) {
     final order = tiles.where((t) => t.shown).toList()
       ..sort((a, b) {
@@ -181,32 +204,18 @@ final class HomeLayout {
         final byColumn = a.cell.x.compareTo(b.cell.x);
         return byColumn != 0 ? byColumn : a.id.compareTo(b.id);
       });
-    final placed = <HomeCell>[];
     final cells = <String, HomeCell>{};
     for (final tile in order) {
       var cell = tile.cell;
+      if (cell.y >= HomeTile.unplaced) {
+        final foot = cells.values.fold(0, (low, c) => max(low, c.y + c.h));
+        cell = (x: cell.x, y: foot, w: cell.w, h: cell.h);
+      }
       // ponytail: O(n²) over the shown tiles, a dozen at most.
-      while (placed.any((c) => _overlap(c, cell))) {
+      while (cells.values.any((c) => _overlap(c, cell))) {
         cell = (x: cell.x, y: cell.y + 1, w: cell.w, h: cell.h);
       }
-      placed.add(cell);
       cells[tile.id] = cell;
-    }
-    final rising = order.map((t) => t.id).toList()
-      ..sort((a, b) {
-        final byRow = cells[a]!.y.compareTo(cells[b]!.y);
-        return byRow != 0 ? byRow : cells[a]!.x.compareTo(cells[b]!.x);
-      });
-    for (final id in rising) {
-      var cell = cells[id]!;
-      while (cell.y > 0) {
-        final up = (x: cell.x, y: cell.y - 1, w: cell.w, h: cell.h);
-        if (cells.entries.any((e) => e.key != id && _overlap(e.value, up))) {
-          break;
-        }
-        cell = up;
-      }
-      cells[id] = cell;
     }
     return HomeLayout([
       for (final t in tiles)

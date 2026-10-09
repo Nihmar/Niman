@@ -3475,4 +3475,93 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Kitas';
+
+  @override
+  String get homeEdit => 'Redaguoti pradžią';
+
+  @override
+  String get homeEditDone => 'Atlikta';
+
+  @override
+  String get homeReset => 'Atstatyti';
+
+  @override
+  String get homeResetTitle => 'Atstatyti pradžią?';
+
+  @override
+  String get homeResetBody => 'Visos plytelės grįžta į numatytąją pradžią.';
+
+  @override
+  String get homeUseLibraryTitle => 'Naudoti bibliotekos pradžią?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Šio įrenginio pradžia atmetama, ir čia vėl rodoma bibliotekos pradžia.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Atmesti';
+
+  @override
+  String get homeAddTiles => 'Pridėti plyteles';
+
+  @override
+  String get homeHiddenTiles => 'Paslėptos';
+
+  @override
+  String get homeTileOnHome => 'Pradžioje';
+
+  @override
+  String get homeTileHide => 'Slėpti';
+
+  @override
+  String get homeTileShow => 'Rodyti';
+
+  @override
+  String get homeTileMove => 'Perkelti ir keisti dydį';
+
+  @override
+  String get homeMoveLeft => 'Perkelti kairėn';
+
+  @override
+  String get homeMoveRight => 'Perkelti dešinėn';
+
+  @override
+  String get homeMoveUp => 'Perkelti aukštyn';
+
+  @override
+  String get homeMoveDown => 'Perkelti žemyn';
+
+  @override
+  String get homeWider => 'Platesnis';
+
+  @override
+  String get homeNarrower => 'Siauresnis';
+
+  @override
+  String get homeTaller => 'Aukštesnis';
+
+  @override
+  String get homeShorter => 'Žemesnis';
+
+  @override
+  String get homeTileSettings => 'Plytelės nustatymai';
+
+  @override
+  String get homeSearchName => 'Pavadinimas';
+
+  @override
+  String get homeSearchQuery => 'Užklausa';
+
+  @override
+  String get homeSearchQueryHint => 'Žodžiai arba raktas = reikšmė';
+
+  @override
+  String get homeGridHint =>
+      'Vilkite plytelę, kad ją perkeltumėte, o jos kampą – kad pakeistumėte '
+      'dydį.';
+
+  @override
+  String get homeColumnHint =>
+      'Vilkite rankenėlę, kad pakeistumėte tvarką. Jungiklis rodo arba '
+      'slepia plytelę visuose įrenginiuose.';
 }

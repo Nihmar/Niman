@@ -3472,4 +3472,94 @@ final class DutchStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Nog een';
+
+  @override
+  String get homeEdit => 'Start bewerken';
+
+  @override
+  String get homeEditDone => 'Klaar';
+
+  @override
+  String get homeReset => 'Herstellen';
+
+  @override
+  String get homeResetTitle => 'Start herstellen?';
+
+  @override
+  String get homeResetBody => 'Alle tegels gaan terug naar de standaard start.';
+
+  @override
+  String get homeUseLibraryTitle => 'De start van de bibliotheek gebruiken?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'De eigen start van dit apparaat wordt weggegooid en die van de '
+      'bibliotheek verschijnt weer.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Weggooien';
+
+  @override
+  String get homeAddTiles => 'Tegels toevoegen';
+
+  @override
+  String get homeHiddenTiles => 'Verborgen';
+
+  @override
+  String get homeTileOnHome => 'Op de start';
+
+  @override
+  String get homeTileHide => 'Verbergen';
+
+  @override
+  String get homeTileShow => 'Tonen';
+
+  @override
+  String get homeTileMove => 'Verplaatsen en formaat';
+
+  @override
+  String get homeMoveLeft => 'Naar links';
+
+  @override
+  String get homeMoveRight => 'Naar rechts';
+
+  @override
+  String get homeMoveUp => 'Omhoog';
+
+  @override
+  String get homeMoveDown => 'Omlaag';
+
+  @override
+  String get homeWider => 'Breder';
+
+  @override
+  String get homeNarrower => 'Smaller';
+
+  @override
+  String get homeTaller => 'Hoger';
+
+  @override
+  String get homeShorter => 'Lager';
+
+  @override
+  String get homeTileSettings => 'Tegelinstellingen';
+
+  @override
+  String get homeSearchName => 'Naam';
+
+  @override
+  String get homeSearchQuery => 'Zoekopdracht';
+
+  @override
+  String get homeSearchQueryHint => 'Woorden, of sleutel = waarde';
+
+  @override
+  String get homeGridHint =>
+      'Sleep een tegel om hem te verplaatsen, en zijn hoek om het formaat te '
+      'wijzigen.';
+
+  @override
+  String get homeColumnHint =>
+      'Sleep een greep om de volgorde te wijzigen. Een schakelaar toont of '
+      'verbergt een tegel op elk apparaat.';
 }

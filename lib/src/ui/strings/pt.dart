@@ -3453,4 +3453,93 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Outra';
+
+  @override
+  String get homeEdit => 'Editar início';
+
+  @override
+  String get homeEditDone => 'Concluído';
+
+  @override
+  String get homeReset => 'Redefinir';
+
+  @override
+  String get homeResetTitle => 'Redefinir o início?';
+
+  @override
+  String get homeResetBody => 'Todos os blocos voltam ao início padrão.';
+
+  @override
+  String get homeUseLibraryTitle => 'Usar o início da biblioteca?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'O início próprio deste dispositivo é descartado e o da biblioteca '
+      'volta a aparecer aqui.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Descartar';
+
+  @override
+  String get homeAddTiles => 'Adicionar blocos';
+
+  @override
+  String get homeHiddenTiles => 'Ocultos';
+
+  @override
+  String get homeTileOnHome => 'No início';
+
+  @override
+  String get homeTileHide => 'Ocultar';
+
+  @override
+  String get homeTileShow => 'Mostrar';
+
+  @override
+  String get homeTileMove => 'Mover e redimensionar';
+
+  @override
+  String get homeMoveLeft => 'Mover para a esquerda';
+
+  @override
+  String get homeMoveRight => 'Mover para a direita';
+
+  @override
+  String get homeMoveUp => 'Mover para cima';
+
+  @override
+  String get homeMoveDown => 'Mover para baixo';
+
+  @override
+  String get homeWider => 'Mais largo';
+
+  @override
+  String get homeNarrower => 'Mais estreito';
+
+  @override
+  String get homeTaller => 'Mais alto';
+
+  @override
+  String get homeShorter => 'Mais baixo';
+
+  @override
+  String get homeTileSettings => 'Configurações do bloco';
+
+  @override
+  String get homeSearchName => 'Nome';
+
+  @override
+  String get homeSearchQuery => 'Pesquisa';
+
+  @override
+  String get homeSearchQueryHint => 'Palavras, ou chave = valor';
+
+  @override
+  String get homeGridHint =>
+      'Arraste um bloco para movê-lo, e o canto dele para redimensionar.';
+
+  @override
+  String get homeColumnHint =>
+      'Arraste uma alça para reordenar. Um interruptor mostra ou oculta um '
+      'bloco em todos os dispositivos.';
 }

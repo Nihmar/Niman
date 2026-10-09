@@ -3442,4 +3442,94 @@ final class HungarianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Másikat';
+
+  @override
+  String get homeEdit => 'Kezdőlap szerkesztése';
+
+  @override
+  String get homeEditDone => 'Kész';
+
+  @override
+  String get homeReset => 'Visszaállítás';
+
+  @override
+  String get homeResetTitle => 'Visszaállítod a kezdőlapot?';
+
+  @override
+  String get homeResetBody =>
+      'Minden csempe visszaáll az alapértelmezett kezdőlapra.';
+
+  @override
+  String get homeUseLibraryTitle => 'A könyvtár kezdőlapját használod?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Az eszköz saját kezdőlapja elvetésre kerül, és ismét a könyvtáré '
+      'jelenik meg.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Elvetés';
+
+  @override
+  String get homeAddTiles => 'Csempék hozzáadása';
+
+  @override
+  String get homeHiddenTiles => 'Elrejtett';
+
+  @override
+  String get homeTileOnHome => 'A kezdőlapon';
+
+  @override
+  String get homeTileHide => 'Elrejtés';
+
+  @override
+  String get homeTileShow => 'Megjelenítés';
+
+  @override
+  String get homeTileMove => 'Áthelyezés és méretezés';
+
+  @override
+  String get homeMoveLeft => 'Mozgatás balra';
+
+  @override
+  String get homeMoveRight => 'Mozgatás jobbra';
+
+  @override
+  String get homeMoveUp => 'Mozgatás fel';
+
+  @override
+  String get homeMoveDown => 'Mozgatás le';
+
+  @override
+  String get homeWider => 'Szélesebb';
+
+  @override
+  String get homeNarrower => 'Keskenyebb';
+
+  @override
+  String get homeTaller => 'Magasabb';
+
+  @override
+  String get homeShorter => 'Alacsonyabb';
+
+  @override
+  String get homeTileSettings => 'Csempe beállításai';
+
+  @override
+  String get homeSearchName => 'Név';
+
+  @override
+  String get homeSearchQuery => 'Keresés';
+
+  @override
+  String get homeSearchQueryHint => 'Szavak vagy kulcs = érték';
+
+  @override
+  String get homeGridHint =>
+      'Húzz egy csempét az áthelyezéshez, a sarkát az átméretezéshez.';
+
+  @override
+  String get homeColumnHint =>
+      'Húzz egy fogantyút az átrendezéshez. A kapcsoló minden eszközön '
+      'megjeleníti vagy elrejti a csempét.';
 }

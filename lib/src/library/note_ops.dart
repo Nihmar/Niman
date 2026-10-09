@@ -317,8 +317,12 @@ final class NoteOps implements NoteOperations {
     }
     await HomeFile(root).write(layout);
     _hint(HomeFile.filePath, SyncOpKind.changed);
-    await config.update((c) => c.copyWith(clearDeviceHome: true));
+    await clearDeviceHome();
   }
+
+  @override
+  Future<void> clearDeviceHome() =>
+      config.update((c) => c.copyWith(clearDeviceHome: true));
 
   @override
   Future<List<String>> notePathsUnder(String folder) =>

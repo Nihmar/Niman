@@ -3384,4 +3384,93 @@ final class EstonianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Veel üks';
+
+  @override
+  String get homeEdit => 'Muuda avalehte';
+
+  @override
+  String get homeEditDone => 'Valmis';
+
+  @override
+  String get homeReset => 'Lähtesta';
+
+  @override
+  String get homeResetTitle => 'Lähtestada avaleht?';
+
+  @override
+  String get homeResetBody => 'Kõik paanid lähevad tagasi vaikimisi avalehele.';
+
+  @override
+  String get homeUseLibraryTitle => 'Kasutada kogu avalehte?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Selle seadme oma avaleht visatakse ära ja siin kuvatakse taas kogu '
+      'oma.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Viska ära';
+
+  @override
+  String get homeAddTiles => 'Lisa paane';
+
+  @override
+  String get homeHiddenTiles => 'Peidetud';
+
+  @override
+  String get homeTileOnHome => 'Avalehel';
+
+  @override
+  String get homeTileHide => 'Peida';
+
+  @override
+  String get homeTileShow => 'Näita';
+
+  @override
+  String get homeTileMove => 'Liiguta ja muuda suurust';
+
+  @override
+  String get homeMoveLeft => 'Liiguta vasakule';
+
+  @override
+  String get homeMoveRight => 'Liiguta paremale';
+
+  @override
+  String get homeMoveUp => 'Liiguta üles';
+
+  @override
+  String get homeMoveDown => 'Liiguta alla';
+
+  @override
+  String get homeWider => 'Laiemaks';
+
+  @override
+  String get homeNarrower => 'Kitsamaks';
+
+  @override
+  String get homeTaller => 'Kõrgemaks';
+
+  @override
+  String get homeShorter => 'Madalamaks';
+
+  @override
+  String get homeTileSettings => 'Paani seaded';
+
+  @override
+  String get homeSearchName => 'Nimi';
+
+  @override
+  String get homeSearchQuery => 'Päring';
+
+  @override
+  String get homeSearchQueryHint => 'Sõnad või võti = väärtus';
+
+  @override
+  String get homeGridHint =>
+      'Lohista paani selle liigutamiseks ja selle nurka suuruse muutmiseks.';
+
+  @override
+  String get homeColumnHint =>
+      'Järjestuse muutmiseks lohista pidet. Lüliti näitab või peidab paani '
+      'igas seadmes.';
 }

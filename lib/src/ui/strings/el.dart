@@ -3541,4 +3541,95 @@ final class GreekStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Άλλη μία';
+
+  @override
+  String get homeEdit => 'Επεξεργασία αρχικής';
+
+  @override
+  String get homeEditDone => 'Τέλος';
+
+  @override
+  String get homeReset => 'Επαναφορά';
+
+  @override
+  String get homeResetTitle => 'Επαναφορά της αρχικής;';
+
+  @override
+  String get homeResetBody =>
+      'Όλα τα πλακίδια επιστρέφουν στην προεπιλεγμένη αρχική.';
+
+  @override
+  String get homeUseLibraryTitle => 'Χρήση της αρχικής της βιβλιοθήκης;';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Η δική της αρχική αυτής της συσκευής απορρίπτεται και εμφανίζεται '
+      'ξανά αυτή της βιβλιοθήκης.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Απόρριψη';
+
+  @override
+  String get homeAddTiles => 'Προσθήκη πλακιδίων';
+
+  @override
+  String get homeHiddenTiles => 'Κρυφά';
+
+  @override
+  String get homeTileOnHome => 'Στην αρχική';
+
+  @override
+  String get homeTileHide => 'Απόκρυψη';
+
+  @override
+  String get homeTileShow => 'Εμφάνιση';
+
+  @override
+  String get homeTileMove => 'Μετακίνηση και μέγεθος';
+
+  @override
+  String get homeMoveLeft => 'Μετακίνηση αριστερά';
+
+  @override
+  String get homeMoveRight => 'Μετακίνηση δεξιά';
+
+  @override
+  String get homeMoveUp => 'Μετακίνηση πάνω';
+
+  @override
+  String get homeMoveDown => 'Μετακίνηση κάτω';
+
+  @override
+  String get homeWider => 'Φαρδύτερο';
+
+  @override
+  String get homeNarrower => 'Στενότερο';
+
+  @override
+  String get homeTaller => 'Ψηλότερο';
+
+  @override
+  String get homeShorter => 'Κοντύτερο';
+
+  @override
+  String get homeTileSettings => 'Ρυθμίσεις πλακιδίου';
+
+  @override
+  String get homeSearchName => 'Όνομα';
+
+  @override
+  String get homeSearchQuery => 'Ερώτημα';
+
+  @override
+  String get homeSearchQueryHint => 'Λέξεις, ή κλειδί = τιμή';
+
+  @override
+  String get homeGridHint =>
+      'Σύρε ένα πλακίδιο για να το μετακινήσεις και τη γωνία του για να '
+      'αλλάξεις μέγεθος.';
+
+  @override
+  String get homeColumnHint =>
+      'Σύρε μια λαβή για αναδιάταξη. Ένας διακόπτης εμφανίζει ή κρύβει ένα '
+      'πλακίδιο σε κάθε συσκευή.';
 }

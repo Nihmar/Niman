@@ -43,9 +43,41 @@ nothing. While the Home is on screen, a change in the library shows in
 its tiles; a change made while you were elsewhere is there when you come
 back.
 
+## Editing the Home
+
+On a wide window, **Edit home** at the top right turns the grid into its
+editor, with the tiles to add on the right:
+
+- **Move** a tile by dragging it, **resize** it by dragging its corner.
+  The tile you drop keeps its place; a tile it lands on moves down.
+  Tiles stay on the row you put them on, so a gap stays until you move
+  something into it. On a touch screen, press a tile a moment before you
+  drag it, so a plain swipe still scrolls.
+- **⋯** on a tile moves or sizes it one cell at a time, without a
+  pointer.
+- **✕** hides a tile. It waits under *Hidden* in the panel, its settings
+  as they were, and comes back from there.
+- **Add tiles** lists every kind; one a Home shows once is offered only
+  while it has none. A Home can hold several *Actions* and *Saved search*
+  tiles.
+- **⚙** on a saved search sets its name and its query.
+- **Reset** puts the default Home back, after asking.
+
+On a phone, the ✎ beside the date opens the same Home as a list: a handle
+to drag each tile up or down, a switch to show or hide it, ⚙ for a saved
+search's settings, and the tiles to add at the foot. Every change is kept
+as you make it.
+
+A tile hidden here is hidden on every device. A phone that should show
+fewer tiles than the desktop uses **Only on this device**, at the top of
+either editor: the device keeps its own copy of the Home, starting from
+the one on screen, and its changes stay there. **This library** goes back
+to the library's Home, after asking, and drops the device's copy.
+
 ## Where it is kept
 
 The Home belongs to the library: `.niman/home.json`, one entry per tile,
 so it is the same on every device and travels with
 [sync](sync.md). A library whose Home you never changed shows the default
-one and keeps no file.
+one and keeps no file. A device's own Home (*Only on this device*) is
+kept on the device, with its other device settings.

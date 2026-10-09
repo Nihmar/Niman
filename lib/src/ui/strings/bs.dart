@@ -3460,4 +3460,94 @@ final class BosnianStrings extends Strings {
 
   @override
   String get homeRandomAnother => 'Druga';
+
+  @override
+  String get homeEdit => 'Uredi početnu';
+
+  @override
+  String get homeEditDone => 'Gotovo';
+
+  @override
+  String get homeReset => 'Vrati';
+
+  @override
+  String get homeResetTitle => 'Vratiti početnu?';
+
+  @override
+  String get homeResetBody => 'Sve pločice se vraćaju na zadanu početnu.';
+
+  @override
+  String get homeUseLibraryTitle => 'Koristiti početnu biblioteke?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Vlastita početna ovog uređaja se odbacuje, a ovdje se ponovo '
+      'prikazuje početna biblioteke.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Odbaci';
+
+  @override
+  String get homeAddTiles => 'Dodaj pločice';
+
+  @override
+  String get homeHiddenTiles => 'Skriveno';
+
+  @override
+  String get homeTileOnHome => 'Na početnoj';
+
+  @override
+  String get homeTileHide => 'Sakrij';
+
+  @override
+  String get homeTileShow => 'Prikaži';
+
+  @override
+  String get homeTileMove => 'Pomakni i promijeni veličinu';
+
+  @override
+  String get homeMoveLeft => 'Pomakni lijevo';
+
+  @override
+  String get homeMoveRight => 'Pomakni desno';
+
+  @override
+  String get homeMoveUp => 'Pomakni gore';
+
+  @override
+  String get homeMoveDown => 'Pomakni dolje';
+
+  @override
+  String get homeWider => 'Šire';
+
+  @override
+  String get homeNarrower => 'Uže';
+
+  @override
+  String get homeTaller => 'Više';
+
+  @override
+  String get homeShorter => 'Niže';
+
+  @override
+  String get homeTileSettings => 'Postavke pločice';
+
+  @override
+  String get homeSearchName => 'Naziv';
+
+  @override
+  String get homeSearchQuery => 'Upit';
+
+  @override
+  String get homeSearchQueryHint => 'Riječi ili ključ = vrijednost';
+
+  @override
+  String get homeGridHint =>
+      'Povucite pločicu da je pomaknete, a njezin kut da promijenite '
+      'veličinu.';
+
+  @override
+  String get homeColumnHint =>
+      'Povucite ručku za promjenu redoslijeda. Prekidač prikazuje ili skriva '
+      'pločicu na svakom uređaju.';
 }
