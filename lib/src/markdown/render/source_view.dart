@@ -88,6 +88,7 @@ import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
+import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
@@ -549,11 +550,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     requestKeyboard: _requestKeyboard,
     caretRectAt: _caretRectAt,
     followsLastClick: (global) => _followsLastClick(global, DateTime.now()),
-    clipboardItems: (dismiss) => _clipboardItems(dismiss, touch: true),
-    spellingItems: _spellingItems,
-    formats: () => widget.editorMenu == null
-        ? widget.formatMenu?.call() ?? const <FormatMenuEntry>[]
-        : const <FormatMenuEntry>[],
+    clipboardItems: (dismiss) => _menu.clipboardItems(dismiss, touch: true),
+    spellingItems: (dismiss) => _menu.spellingItems(dismiss),
+    formats: _menuFormats,
     structure: () => widget.editorMenu?.call(),
     table: () => _tableCommands()?.menu(),
   );
@@ -572,8 +571,36 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Typewriter mode's glide to the caret, one per burst of moves.
   late final TypewriterFollow _typewriter = TypewriterFollow(_centerCaret);
 
-  /// The overlay the desktop context menu is drawn in.
-  final OverlayPortalController _menuOverlay = OverlayPortalController();
+  /// The desktop context menu, and the clipboard's and the spelling's
+  /// entries it shares with the touch toolbar. Listened to from [initState]:
+  /// the note rebuilds when it opens or closes.
+  late final SourceContextMenu _menu = SourceContextMenu(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    grouped: () => widget.editorMenu != null,
+    caretRect: () => caretRect,
+    hideTouch: () => _touch.hide(),
+    showTouch: ({required toolbar}) => _touch.show(toolbar: toolbar),
+    cut: cutSelection,
+    copy: copySelection,
+    paste: paste,
+    selectAll: selectAll,
+    replace: _replaceRange,
+    spellCheck: () => widget.spellCheck,
+    spellRanges: _spellRanges,
+    formats: _menuFormats,
+    table: () => _tableCommands()?.menu(),
+    structure: () => widget.editorMenu?.call(),
+  );
+
+  /// The context menu opened or closed.
+  void _onMenuChanged() => setState(() {});
+
+  /// The toolbar's formats a menu offers: none when the editor gives it a
+  /// grouped menu of its own, which holds them.
+  List<FormatMenuEntry> _menuFormats() => widget.editorMenu != null
+      ? const <FormatMenuEntry>[]
+      : widget.formatMenu?.call() ?? const <FormatMenuEntry>[];
 
   /// The `+` handles of the table in play (#261): the one under the mouse
   /// on the desktop, the caret's on a phone.
@@ -599,9 +626,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// from the table onto a handle leaves the note before it reaches the
   /// handle, and letting go at once took the handle from under it.
   Timer? _tableHoverClear;
-
-  /// Where the context menu opens, in global coordinates, while it is up.
-  Offset? _menuAt;
 
   /// The template checker (T-TPL-09): the check run and armed on the note,
   /// the problems on a line, and the hint under the span the caret is on.
@@ -654,6 +678,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _restyle();
     _suggest.addListener(_onSuggestChanged);
     _touch.addListener(_onTouchChanged);
+    _menu.addListener(_onMenuChanged);
     _scroll = widget.controller ?? ScrollController();
     _ownsScroll = widget.controller == null;
     _focus = widget.focusNode ?? FocusNode();
@@ -880,6 +905,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _caretOn.dispose();
     _touch
       ..removeListener(_onTouchChanged)
+      ..dispose();
+    _menu
+      ..removeListener(_onMenuChanged)
       ..dispose();
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
@@ -3433,8 +3461,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // click was.
     note = _semantics(note);
     final content = OverlayPortal(
-      controller: _menuOverlay,
-      overlayChildBuilder: _desktopMenu,
+      controller: _menu.overlay,
+      overlayChildBuilder: _menu.buildOverlay,
       child: OverlayPortal(
         controller: _touch.overlay,
         overlayChildBuilder: (context) => ListenableBuilder(
@@ -3918,23 +3946,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Opens the context menu at [global], or at the caret without one (the
   /// menu key, Shift+F10).
-  void showContextMenu([Offset? global]) {
-    final at = global ?? caretRect?.bottomLeft;
-    if (at == null) return;
-    _touch.hide();
-    setState(() => _menuAt = at);
-    _menuOverlay.show();
-  }
+  void showContextMenu([Offset? global]) => _menu.show(global);
 
   /// Whether the context menu is up.
-  bool get isContextMenuShown => _menuAt != null;
+  bool get isContextMenuShown => _menu.isShown;
 
   /// Closes the context menu.
-  void hideContextMenu() {
-    if (_menuAt == null) return;
-    if (mounted) setState(() => _menuAt = null);
-    _menuOverlay.hide();
-  }
+  void hideContextMenu() => _menu.hide();
 
   /// Whether the suggester panel is up, for the shell's tour and the tests.
   bool get isSuggesterShown => _suggest.isShown;
@@ -3959,7 +3977,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
     if (taken != null) return taken;
     if (key == LogicalKeyboardKey.escape) {
-      if (_menuAt != null) {
+      if (_menu.isShown) {
         hideContextMenu();
         return KeyEventResult.handled;
       }
@@ -3990,166 +4008,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     }
     return KeyEventResult.ignored;
   }
-
-  /// The desktop menu at the click, over a barrier that closes it.
-  ///
-  /// The barrier is the menu's own: one click anywhere else takes it down and
-  /// does nothing else, which is how a context menu behaves everywhere — and
-  /// what the legacy editor's menu learnt the hard way (a menu left up
-  /// through every click after it, 2026-09-10).
-  Widget _desktopMenu(BuildContext context) {
-    final at = _menuAt;
-    if (at == null) return const SizedBox.shrink();
-    final overlay = Overlay.of(context).context.findRenderObject();
-    final local = overlay is RenderBox && overlay.hasSize
-        ? overlay.globalToLocal(at)
-        : at;
-    return Stack(
-      children: <Widget>[
-        Positioned.fill(
-          child: GestureDetector(
-            key: const Key('editor-menu-barrier'),
-            behavior: HitTestBehavior.opaque,
-            onTapDown: (_) => hideContextMenu(),
-            onSecondaryTapDown: (_) => hideContextMenu(),
-          ),
-        ),
-        // Full-screen constraints on purpose: the toolbar places itself from
-        // the anchors inside the box it is given.
-        Positioned.fill(
-          child: EditorContextMenu(
-            anchors: TextSelectionToolbarAnchors(primaryAnchor: local),
-            clipboard: _clipboardItems(hideContextMenu),
-            formats: widget.editorMenu != null
-                ? const <FormatMenuEntry>[]
-                : widget.formatMenu?.call() ?? const <FormatMenuEntry>[],
-            extras: _spellingItems(hideContextMenu),
-            table: _tableCommands()?.menu(),
-            structure: widget.editorMenu?.call(),
-            onDismiss: hideContextMenu,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Cut, copy, paste and select all, as they apply to the selection; each
-  /// closes its menu through [dismiss] before it acts.
-  ///
-  /// Cut and copy of a caret are not offered: there is nothing to take.
-  List<ContextMenuButtonItem> _clipboardItems(
-    VoidCallback dismiss, {
-    bool touch = false,
-  }) {
-    final selection = _selection.clampTo(widget.buffer.length);
-    final collapsed = selection.isCollapsed;
-    // The grouped menu keeps what cannot run in its place, greyed out, so
-    // nothing moves under the pointer (#260); the flat one leaves it out.
-    final keep = widget.editorMenu != null;
-    return <ContextMenuButtonItem>[
-      if (!collapsed || keep)
-        ContextMenuButtonItem(
-          type: ContextMenuButtonType.cut,
-          onPressed: collapsed
-              ? null
-              : () {
-                  dismiss();
-                  unawaited(cutSelection());
-                },
-        ),
-      if (!collapsed || keep)
-        ContextMenuButtonItem(
-          type: ContextMenuButtonType.copy,
-          onPressed: collapsed
-              ? null
-              : () {
-                  unawaited(copySelection());
-                  // By touch the handles stay, so the selection can be
-                  // pasted over or extended; the toolbar goes.
-                  if (touch) {
-                    _touch.show(toolbar: false);
-                  } else {
-                    dismiss();
-                  }
-                },
-        ),
-      ContextMenuButtonItem(
-        type: ContextMenuButtonType.paste,
-        onPressed: () {
-          dismiss();
-          unawaited(paste());
-        },
-      ),
-      if (selection.start > 0 || selection.end < widget.buffer.length || keep)
-        ContextMenuButtonItem(
-          type: ContextMenuButtonType.selectAll,
-          onPressed:
-              selection.start == 0 && selection.end == widget.buffer.length
-              ? null
-              : () {
-                  selectAll();
-                  if (touch) {
-                    _touch.show(toolbar: true);
-                  } else {
-                    dismiss();
-                  }
-                },
-        ),
-    ];
-  }
-
-  /// The spelling's entries for the word under the caret or the selection:
-  /// what the checker suggests for it, then Add to dictionary.
-  ///
-  /// Only for a word the note underlines — the ranges come from the same
-  /// call that draws the underline — and only within one line.
-  List<ContextMenuButtonItem> _spellingItems(VoidCallback dismiss) {
-    final spell = widget.spellCheck;
-    if (spell == null) return const <ContextMenuButtonItem>[];
-    final buffer = widget.buffer;
-    final selection = _selection.clampTo(buffer.length);
-    final line = buffer.lineOf(selection.start);
-    if (line != buffer.lineOf(selection.end)) {
-      return const <ContextMenuButtonItem>[];
-    }
-    final lineStart = buffer.offsetOfLine(line);
-    final text = buffer.lineAt(line);
-    final start = selection.start - lineStart;
-    final end = selection.end - lineStart;
-    final items = <ContextMenuButtonItem>[];
-    for (final range in _spellRanges(line, text)) {
-      if (start < range.start || end > range.end) continue;
-      final word = text.substring(range.start, range.end);
-      for (final suggestion in spell.suggestionsFor(word).take(_suggestions)) {
-        items.add(
-          ContextMenuButtonItem(
-            label: suggestion,
-            onPressed: () {
-              dismiss();
-              _replaceRange(
-                lineStart + range.start,
-                lineStart + range.end,
-                suggestion,
-              );
-            },
-          ),
-        );
-      }
-      break;
-    }
-    final add = addToDictionaryItem(
-      spell: spell,
-      text: text,
-      start: start,
-      end: end,
-      onDismiss: dismiss,
-    );
-    if (add != null) items.add(add);
-    return items;
-  }
-
-  /// How many of the checker's suggestions the menu offers.
-  static const int _suggestions = 4;
 
   /// The misspelled ranges of line [index], whose text is [text]: the ranges
   /// the checker finds outside what the tokenizer says is not prose (code,
