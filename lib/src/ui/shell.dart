@@ -857,19 +857,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// only takes the selection.
   void _onItemCreated(CreatedItem item) {
     if (!mounted) return;
-    if (!item.isDir && _opensPreviewOnly()) {
-      FocusManager.instance.primaryFocus?.unfocus();
-    }
+    if (!item.isDir) return _showNote(item.path);
     setState(() {
       _selected = item.path;
-      _selectedIsDir = item.isDir;
-      _pendingAnchor = null;
-      _pendingCaretOffset = null;
-      if (item.hasKind) _resetNoteKind();
-      if (!item.isDir) {
-        _treeVisible = false;
-        _noteOpened();
-      }
+      _selectedIsDir = true;
     });
   }
 
@@ -1080,27 +1071,53 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     }
   }
 
-  /// Opens a note reached through a link (T-M3-07): selects it, remembers
-  /// the heading anchor, and clears pending anchors for direct
-  /// selections.
+  /// Opens a note reached through a link (T-M3-07), at the heading
+  /// [anchor] when there is one.
   void _openNoteFromLink(String path, String? anchor) {
     const AppLogger(name: 'links').debug(
       'shell open request: $path anchor=${anchor == null ? '-' : '"$anchor"'} '
       '(current tab ${_tab.name})',
     );
+    _showNote(path, anchor: anchor, followsLink: true);
+  }
+
+  /// Shows the note at [path] (library-relative): the one way the shell
+  /// opens a note, whoever asks (#709, #710). It selects the note, keeps
+  /// the tab it was opened from for the way back and, on a wide window,
+  /// brings Files forward — the only slot a note shows in there — so a
+  /// note opened from the Home, the Todo list or the search does not
+  /// open out of sight behind it.
+  ///
+  /// [anchor] is a heading to land on, [caret] a template `{{cursor}}`
+  /// offset (#53), [preview] opens the note in its preview (a template's
+  /// `open` directive, #51). [followsLink] counts a link followed: a PDF
+  /// or a book goes back to the link's place (#282).
+  void _showNote(
+    String path, {
+    String? anchor,
+    int? caret,
+    bool preview = false,
+    bool followsLink = false,
+  }) {
     if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
     // Reopening the already-open note (a widget header tap after a row
     // toggle): the path does not change, so the NoteView would keep its
     // buffer — ask it to re-read the file instead.
     final sameNote = _selected == path && !_selectedIsDir;
+    final wide = _wide;
     setState(() {
+      if (preview) _opensInPreview = path;
       _selected = path;
       _selectedIsDir = false;
       _treeVisible = false;
       _noteFromTab = _tab;
+      if (wide && !_filesSlotVisible) {
+        _tab = ShellTab.files;
+        _visitedTabs.add(ShellTab.files);
+      }
       _pendingAnchor = anchor;
-      _pendingCaretOffset = null;
-      _linksFollowed++;
+      _pendingCaretOffset = caret;
+      if (followsLink) _linksFollowed++;
       _resetNoteKind();
       if (sameNote) _noteReloadToken++;
       _noteOpened();
@@ -2279,20 +2296,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// rail flips to Files and the detail pane shows it alongside the tree
   /// (the search body would otherwise hide the selection).
   void _openSearchNote(String path) {
-    if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
-    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
-    setState(() {
-      _selected = path;
-      _selectedIsDir = false;
-      _treeVisible = false;
-      _noteFromTab = _tab;
-      if (wide) {
-        _tab = ShellTab.files;
-        _visitedTabs.add(ShellTab.files);
-      }
-      _resetNoteKind();
-      _noteOpened();
-    });
+    _showNote(path);
     logNextFrame('shell', 'search result open first frame');
   }
 
@@ -2515,18 +2519,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     required String path,
     required bool preview,
     required int? caret,
-  }) {
-    setState(() {
-      if (preview) _opensInPreview = path;
-      _selected = path;
-      _selectedIsDir = false;
-      _treeVisible = false;
-      _pendingAnchor = null;
-      _pendingCaretOffset = caret;
-      _resetNoteKind();
-      _noteOpened();
-    });
-  }
+  }) => _showNote(path, preview: preview, caret: caret);
 
   /// Adds a task from the Todo tab's add FAB (T-TD-04).
   Future<void> _addTodo() async {
@@ -3417,10 +3410,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Opens an entry the journal just made, the caret where its template
   /// put it.
-  void _openNewJournalEntry(String path, int? caret) {
-    _openNoteFromLink(path, null);
-    if (caret != null) setState(() => _pendingCaretOffset = caret);
-  }
+  void _openNewJournalEntry(String path, int? caret) =>
+      _showNote(path, caret: caret);
 
   /// Every command's handler; [_commandHandlers] keeps the ones that can
   /// run now. A handler whose command needs an open note runs only with
