@@ -31,7 +31,6 @@ import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/home/home_action.dart';
-import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -102,15 +101,12 @@ import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
-import 'package:niman/src/ui/palette/command_palette.dart';
-import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/settings_areas.dart';
-import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/settings_window.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
@@ -123,6 +119,7 @@ import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
+import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_row_menu.dart';
@@ -2655,7 +2652,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.outline => _showPanel(DockPane.outline),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
-        NoteMenuAction.palette => _openPalette(),
+        NoteMenuAction.palette => _palette.open(context),
         NoteMenuAction.format => _formatNote(),
         NoteMenuAction.export => _exportFlow.runNoteExport(context, path),
         NoteMenuAction.cheatsheet => _openCheatsheet(),
@@ -2761,7 +2758,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onLeaveHiddenTab: _leaveHiddenTab,
       onSwitchLibrary: _switchLibrary,
       // The phone's way into the palette (#206); the desktop has a key.
-      onOpenPalette: narrow ? () => unawaited(_openPalette()) : null,
+      onOpenPalette: narrow ? () => unawaited(_palette.open(context)) : null,
       buildWideSlots: () => _wideSlots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
@@ -3199,7 +3196,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 key: const Key('search-open-palette'),
                 tooltip: AppStrings.commandPaletteTitle,
                 icon: const Icon(Icons.bolt_outlined),
-                onPressed: () => unawaited(_openPalette()),
+                onPressed: () => unawaited(_palette.open(context)),
               ),
             ],
             _ => const [],
@@ -3457,8 +3454,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Map<AppCommand, VoidCallback> _allCommandHandlers() {
     final note = _shownNote;
     return {
-      AppCommand.openPalette: () => unawaited(_openPalette()),
-      AppCommand.goToNote: () => unawaited(_openPalette(notesOnly: true)),
+      AppCommand.openPalette: () => unawaited(_palette.open(context)),
+      AppCommand.goToNote: () =>
+          unawaited(_palette.open(context, notesOnly: true)),
       AppCommand.newNote: () => unawaited(_createFlow.createNote(context)),
       AppCommand.captureWebPage: () => unawaited(_captureFlow.capture(context)),
       AppCommand.newListNote: () =>
@@ -3764,100 +3762,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
   });
 
-  /// Commands run from the palette this session, most recent first.
-  final List<AppCommand> _recentCommands = [];
-
-  /// The command palette (#155); [notesOnly] is Go to note's.
-  Future<void> _openPalette({bool notesOnly = false}) async {
-    final handlers = _commandHandlers();
-    final commands = _paletteCommands(handlers);
-    final ops = widget.controller.ops;
-    final choice = await showCommandPalette(
-      context,
-      commands: commands,
-      notesOnly: notesOnly,
-      recentCommands: _recentCommands,
-      recentNotes: _workspace.recentNotes,
-      settings: _paletteSettings(),
-      homeActions: _homeActionsOffered,
-      onTogglePin: (command) =>
-          unawaited(PinnedCommands.toggle(widget.controller, command)),
-      searchNotes: (query) async => ops == null
-          ? const []
-          : [for (final note in await ops.notesNamed(query)) note.path],
-    );
-    if (!mounted || choice == null) return;
-    switch (choice) {
-      case PaletteCommandChoice(:final command):
-        _runCommand(handlers, command);
-      case PaletteNoteChoice(:final path):
-        _openNoteFromLink(path, null);
-      case PaletteSettingChoice(:final setting):
-        _openSettingsAt(setting.target);
-      case PaletteActionChoice(:final action):
-        unawaited(_homeActions.run(context, action));
-    }
-  }
-
-  /// Every action of the Home on show (#535), for the palette: the
-  /// buttons of its shown actions tiles, the ones a later build wrote
-  /// left out. Hidden or not, the Home's tab is not asked for.
-  Future<List<HomeAction>> _homeActionsOffered() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return const [];
-    final home = await ops.home;
-    final layout = home.device ?? home.library ?? HomeLayout.defaults;
-    return [
-      for (final tile in layout.column)
-        for (final action in tile.actions)
-          if (action.kind != null) action,
-    ];
-  }
-
-  /// The palette's commands: every one that can run now, but the
-  /// palette's own two.
-  List<PaletteCommand> _paletteCommands([
-    Map<AppCommand, VoidCallback>? handlers,
-  ]) => [
-    for (final command in (handlers ?? _commandHandlers()).keys)
-      if (command != AppCommand.openPalette && command != AppCommand.goToNote)
-        PaletteCommand.of(command, label: _paletteLabel(command)),
-  ];
-
-  /// The settings rows the palette can answer with (#229).
-  ///
-  /// The same rows the settings search finds, read for their titles and
-  /// their places: the palette opens the settings itself, so the
-  /// callbacks the settings screen builds them with are not used here.
-  List<PaletteSetting> _paletteSettings() {
-    final root = widget.controller.root;
-    if (root == null) return const [];
-    return [
-      for (final entry in settingsSearchEntries(
-        controller: widget.controller,
-        transcription: widget.transcription,
-        ocr: widget.ocr,
-        spellCheck: widget.spellCheck,
-        libraryName: p.basename(root),
-        context: context,
-        flashHome: (_) {},
-        openArea: (_, _) {},
-        libraryRows: !_wide,
-      ))
-        // The keyboard and Commands pages hold a row per command, which
-        // the palette already lists as the commands themselves: a second
-        // row saying the same name would be noise, and the key is on the
-        // command's own row anyway.
-        if (entry.areaId case final area?
-            when area != SettingsAreaId.shortcuts &&
-                area != SettingsAreaId.commands)
-          PaletteSetting(
-            title: entry.title,
-            area: entry.area,
-            target: (area: area, row: entry.rowKey),
-          ),
-    ];
-  }
+  /// The command palette (#155).
+  late final ShellPalette _palette = ShellPalette(
+    controller: widget.controller,
+    transcription: widget.transcription,
+    ocr: widget.ocr,
+    spellCheck: widget.spellCheck,
+    commandHandlers: _commandHandlers,
+    labelOf: _paletteLabel,
+    recentNotes: () => _workspace.recentNotes,
+    wide: () => _wide,
+    openNote: (path) => _openNoteFromLink(path, null),
+    openSettingsAt: _openSettingsAt,
+    runHomeAction: (action) => unawaited(_homeActions.run(context, action)),
+  );
 
   /// Opens the settings at [target] (#229): the floating window on a
   /// wide one, the Settings tab on a phone.
@@ -3883,14 +3801,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Where the Settings tab opens next, once (#229).
   SettingsTarget? _settingsTarget;
-
-  /// Runs [command] through [handlers], remembering it for next time.
-  void _runCommand(Map<AppCommand, VoidCallback> handlers, AppCommand command) {
-    _recentCommands
-      ..remove(command)
-      ..insert(0, command);
-    handlers[command]?.call();
-  }
 
   /// A command's name where the state words it better than the
   /// registry: what it would switch to, not a fixed verb.
