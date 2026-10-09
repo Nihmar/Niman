@@ -95,6 +95,14 @@ final class FakeWikilinkSuggester implements WikilinkSuggester {
   }
 
   @override
+  Future<String> targetOf(String path) async {
+    final name = path.split('/').last;
+    return name.toLowerCase().endsWith('.md')
+        ? name.substring(0, name.length - 3)
+        : name;
+  }
+
+  @override
   Future<List<HeadingSuggestion>> headings(String target) async {
     headingTargets.add(target);
     await _answer();

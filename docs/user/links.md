@@ -165,6 +165,21 @@ not notes: they are never created. External URLs keep their behavior.
 Notes opened without a library (editor-only mode) keep the old
 "link not found" outcome.
 
+## Dropping a file from the tree
+
+On Linux and Windows a row of the tree dragged onto an open note writes a
+link to that file where it is let go: the caret follows the pointer while
+the row is over the note, and the link goes in as one edit, undone in one
+step. It is written in the library's link format, as the link button and
+the panel write one — `[[Meeting]]`, with as much of the folder as another
+file of that name makes it take, or `[Meeting](../Work/Meeting.md)`,
+relative to the note. A picture or an audio file is embedded instead
+(`![[photo.png]]`, `![photo.png](Media/photo.png)`), as one added from the
+editor is; a PDF, a book or any other file is linked. A folder dragged
+onto the note writes nothing, and the read view, with no caret, takes no
+drop. The tree's own drops are unchanged: let go on a folder, the row
+moves into it.
+
 ## Link button
 
 The editor's link button inserts a wikilink by default; set the

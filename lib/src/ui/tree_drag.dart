@@ -50,6 +50,11 @@ final class TreeRowDrag extends StatefulWidget {
   /// The row as drawn.
   final Widget child;
 
+  /// The row being dragged, while one is: what a drop outside the tree —
+  /// an open note, which takes a link to it (#704) — asks of it, the drag
+  /// itself carrying only the path.
+  static final ValueNotifier<Note?> dragged = ValueNotifier<Note?>(null);
+
   /// Whether rows are held before they drag: the touch platforms'.
   static bool get holdToDrag => switch (defaultTargetPlatform) {
     TargetPlatform.android || TargetPlatform.iOS => true,
@@ -108,6 +113,12 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
         data: note.path,
         feedback: feedback,
         childWhenDragging: dimmed,
+        // The pointer is where the drag is: a note it is let go on puts the
+        // link where the pointer stands, which the drop reports only this
+        // way (#704).
+        dragAnchorStrategy: pointerDragAnchorStrategy,
+        onDragStarted: () => TreeRowDrag.dragged.value = note,
+        onDragEnd: (_) => TreeRowDrag.dragged.value = null,
         child: child,
       );
     }

@@ -445,6 +445,18 @@ void main() {
     expect(rows.every((r) => r.folder == 'Y'), isTrue);
   });
 
+  test("a file's target is its name, qualified when shared (#704)", () async {
+    await addNote('Work/Meeting.md', stems: ['meeting']);
+    await addNote('Home/Meeting.md', stems: ['meeting']);
+    await addNote('Solo.md', stems: ['solo']);
+    await addNote('Media/photo.png', stems: ['photo.png']);
+    final suggester = suggesterOver();
+
+    expect(await suggester.targetOf('Work/Meeting.md'), 'Work/Meeting');
+    expect(await suggester.targetOf('Solo.md'), 'Solo');
+    expect(await suggester.targetOf('Media/photo.png'), 'photo.png');
+  });
+
   group('after ![[ (#705)', () {
     IndexWikilinkSuggester embedder() => IndexWikilinkSuggester(
       db,

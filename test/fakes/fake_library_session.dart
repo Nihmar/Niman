@@ -1818,6 +1818,20 @@ final class _FakeWikilinkSuggester implements WikilinkSuggester {
   }
 
   @override
+  Future<String> targetOf(String path) async {
+    final name = p.basename(path);
+    final bare = name.toLowerCase().endsWith('.md')
+        ? p.basenameWithoutExtension(name)
+        : name;
+    final shared = _session._rows.where(
+      (row) => !row.trashed && p.basename(row.path) == name,
+    );
+    if (shared.length <= 1) return bare;
+    final folder = p.dirname(path);
+    return folder == '.' ? bare : '$folder/$bare';
+  }
+
+  @override
   Future<List<NoteSuggestion>> embeds(String query) async {
     final q = query.trim().toLowerCase();
     final folder = '${await _session.attachmentsFolder}/';

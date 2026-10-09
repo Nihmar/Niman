@@ -64,6 +64,7 @@ import 'package:niman/src/spellcheck/spell_issue.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/editor_menu.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
@@ -78,6 +79,7 @@ import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree_link_drop.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:path/path.dart' as p;
@@ -1479,6 +1481,13 @@ final class _NoteViewState extends State<NoteView>
         },
       ),
     );
+    // A row of the tree let go on the note writes a link to its file
+    // where the pointer let it go (#704).
+    final dropping = TreeLinkDrop(
+      viewKey: _sourceViewKey,
+      onDrop: (path) => unawaited(_insertDroppedLink(path)),
+      child: note,
+    );
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
@@ -1504,7 +1513,7 @@ final class _NoteViewState extends State<NoteView>
               minInset: NoteColumn.textInset,
               child: frontmatter,
             ),
-          Expanded(child: note),
+          Expanded(child: dropping),
         ],
       ),
     );
@@ -1905,6 +1914,26 @@ final class _NoteViewState extends State<NoteView>
       linkType: widget.linkType,
     );
     _surface?.replaceSelection(snippet);
+    _focus.requestFocus();
+    _refreshStats();
+    _refreshPreview();
+  }
+
+  /// Writes a link to the library file at [path], dropped from the tree,
+  /// at the caret the drop left (#704): one edit, one undo step.
+  Future<void> _insertDroppedLink(String path) async {
+    final root = widget.libraryRoot;
+    if (root == null) return;
+    final suggester = widget.wikilinkSuggester;
+    final text = await droppedLink(
+      path: path,
+      note: relPath(widget.path, root),
+      linkType: widget.linkType,
+      wikiTarget: (path) async =>
+          await suggester?.targetOf(path) ?? p.basenameWithoutExtension(path),
+    );
+    if (!mounted) return;
+    _surface?.replaceSelection(text);
     _focus.requestFocus();
     _refreshStats();
     _refreshPreview();

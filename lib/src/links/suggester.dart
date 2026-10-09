@@ -95,6 +95,11 @@ abstract interface class WikilinkSuggester {
   /// as [notes] ranks; a target keeps its extension (`photo.png`).
   Future<List<NoteSuggestion>> embeds(String query);
 
+  /// The shortest wiki target that names the file at [path] alone (#704):
+  /// its name (`.md` dropped, any other extension kept), with as much of
+  /// its folder as another file of that name makes it take.
+  Future<String> targetOf(String path);
+
   /// The headings of the note named by the wiki [target] — `note`,
   /// `folder/note` — or none when it does not resolve or cannot be read.
   /// The list is the note's own headings, as the outline reads them; the
@@ -189,6 +194,19 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
     if (rows.length >= limit) return rows;
     final notes = await _complete(_rank(await _rows(q, _note), q));
     return [...rows, ...notes.take(limit - rows.length)];
+  }
+
+  @override
+  Future<String> targetOf(String path) async {
+    final stem = LinkResolver.normalizeTarget(_displayName(path));
+    final rows = await _db
+        .customSelect(
+          'SELECT DISTINCT n.path AS path FROM note_stems AS s '
+          'JOIN notes AS n ON n.id = s.note_id WHERE s.stem = ?',
+          variables: [Variable<String>(stem)],
+        )
+        .get();
+    return _targetFor(path, {for (final row in rows) row.read<String>('path')});
   }
 
   /// [ranked] qualified and cut to [limit] rows that read back.

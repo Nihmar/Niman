@@ -238,6 +238,12 @@ String? _movedPath(
   return null;
 }
 
+/// The Markdown href that names the library file [path] from the note at
+/// [note] (both library-relative): relative to the note's folder and
+/// percent-encoded, as a link the app rewrites is written (#704).
+String hrefFrom(String path, {required String note}) =>
+    _encodeHref(_relative(path, note, dotted: false));
+
 /// [path] written from the folder of [here]: `../` up to the folders the two
 /// share, then down. A leading `./` is kept when the link had one.
 String _relative(String path, String? here, {required bool dotted}) {
