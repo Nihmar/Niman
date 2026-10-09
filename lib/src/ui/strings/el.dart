@@ -3483,4 +3483,226 @@ final class GreekStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'τι να πείτε εδώ — το βλέπετε μόνο εσείς.';
+
+  @override
+  String get tabHome => 'Αρχική';
+
+  @override
+  String get homeTileActions => 'Ενέργειες';
+
+  @override
+  String get homeTileJournalToday => 'Σημερινό ημερολόγιο';
+
+  @override
+  String get homeTileTasksDue => 'Εργασίες προς λήξη';
+
+  @override
+  String get homeTileRecent => 'Πρόσφατες αλλαγές';
+
+  @override
+  String get homeTilePinned => 'Καρφιτσωμένες';
+
+  @override
+  String get homeTileJournalCalendar => 'Ημερολόγιο εγγραφών';
+
+  @override
+  String get homeTileTopTags => 'Κορυφαίες ετικέτες';
+
+  @override
+  String get homeTileRandomNote => 'Τυχαία σημείωση';
+
+  @override
+  String get homeTileSearch => 'Αποθηκευμένη αναζήτηση';
+
+  @override
+  String get homeJournalEmpty => 'Τίποτα γραμμένο σήμερα ακόμη.';
+
+  @override
+  String get homeJournalWrite => 'Γράψε τη σημερινή εγγραφή';
+
+  @override
+  String get homeTasksEmpty => 'Καμία ανοιχτή εργασία.';
+
+  @override
+  String get homeNotesEmpty => 'Δεν υπάρχουν σημειώσεις ακόμη.';
+
+  @override
+  String get homePinnedEmpty =>
+      'Καρφίτσωσε μια σημείωση και θα εμφανιστεί εδώ.';
+
+  @override
+  String get homeTagsEmpty => 'Δεν υπάρχουν ετικέτες ακόμη.';
+
+  @override
+  String get homeSearchEmpty => 'Καμία αντιστοιχία.';
+
+  @override
+  String get homeSearchNoQuery => 'Δεν υπάρχει ερώτημα ακόμη.';
+
+  @override
+  String get homeRandomAnother => 'Άλλη μία';
+
+  @override
+  String get homeEdit => 'Επεξεργασία αρχικής';
+
+  @override
+  String get homeEditDone => 'Τέλος';
+
+  @override
+  String get homeReset => 'Επαναφορά';
+
+  @override
+  String get homeResetTitle => 'Επαναφορά της αρχικής;';
+
+  @override
+  String get homeResetBody =>
+      'Όλα τα πλακίδια επιστρέφουν στην προεπιλεγμένη αρχική.';
+
+  @override
+  String get homeUseLibraryTitle => 'Χρήση της αρχικής της βιβλιοθήκης;';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Η δική της αρχική αυτής της συσκευής απορρίπτεται και εμφανίζεται '
+      'ξανά αυτή της βιβλιοθήκης.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Απόρριψη';
+
+  @override
+  String get homeAddTiles => 'Προσθήκη πλακιδίων';
+
+  @override
+  String get homeHiddenTiles => 'Κρυφά';
+
+  @override
+  String get homeTileOnHome => 'Στην αρχική';
+
+  @override
+  String get homeTileHide => 'Απόκρυψη';
+
+  @override
+  String get homeTileShow => 'Εμφάνιση';
+
+  @override
+  String get homeTileMove => 'Μετακίνηση και μέγεθος';
+
+  @override
+  String get homeMoveLeft => 'Μετακίνηση αριστερά';
+
+  @override
+  String get homeMoveRight => 'Μετακίνηση δεξιά';
+
+  @override
+  String get homeMoveUp => 'Μετακίνηση πάνω';
+
+  @override
+  String get homeMoveDown => 'Μετακίνηση κάτω';
+
+  @override
+  String get homeWider => 'Φαρδύτερο';
+
+  @override
+  String get homeNarrower => 'Στενότερο';
+
+  @override
+  String get homeTaller => 'Ψηλότερο';
+
+  @override
+  String get homeShorter => 'Κοντύτερο';
+
+  @override
+  String get homeTileSettings => 'Ρυθμίσεις πλακιδίου';
+
+  @override
+  String get homeSearchName => 'Όνομα';
+
+  @override
+  String get homeSearchQuery => 'Ερώτημα';
+
+  @override
+  String get homeSearchQueryHint => 'Λέξεις, ή κλειδί = τιμή';
+
+  @override
+  String get homeGridHint =>
+      'Σύρε ένα πλακίδιο για να το μετακινήσεις και τη γωνία του για να '
+      'αλλάξεις μέγεθος.';
+
+  @override
+  String get homeColumnHint =>
+      'Σύρε μια λαβή για αναδιάταξη. Ένας διακόπτης εμφανίζει ή κρύβει ένα '
+      'πλακίδιο σε κάθε συσκευή.';
+
+  @override
+  String get homeActionAdd => 'Προσθήκη ενέργειας';
+
+  @override
+  String get homeActionAsk => 'Ερώτηση';
+
+  @override
+  String get homeActionAskHint => 'Ερωτάται όταν πατηθεί το κουμπί';
+
+  @override
+  String get homeActionCaptureFolder => 'Ο φάκελος των λήψεων';
+
+  @override
+  String get homeActionContext => 'Πλαίσιο';
+
+  @override
+  String get homeActionEdit => 'Επεξεργασία ενέργειας';
+
+  @override
+  String get homeActionFieldAdd => 'Προσθήκη πεδίου';
+
+  @override
+  String get homeActionFieldKey => 'Κλειδί frontmatter';
+
+  @override
+  String get homeActionFields => 'Πεδία';
+
+  @override
+  String get homeActionFixed => 'Σταθερό';
+
+  @override
+  String get homeActionFixedHint => 'Κείμενο ή {{date}}';
+
+  @override
+  String get homeActionFolder => 'Φάκελος';
+
+  @override
+  String get homeActionIcon => 'Εικονίδιο';
+
+  @override
+  String get homeActionKind => 'Κάνει';
+
+  @override
+  String get homeActionKindOpenNote => 'Άνοιγμα σημείωσης';
+
+  @override
+  String get homeActionLabel => 'Ετικέτα';
+
+  @override
+  String get homeActionNoNote => 'Δεν επιλέχθηκε σημείωση';
+
+  @override
+  String get homeActionNote => 'Σημείωση';
+
+  @override
+  String get homeActionNoTemplate => 'Καμία: κενή σημείωση';
+
+  @override
+  String get homeActionNoteName => 'Όνομα';
+
+  @override
+  String get homeActionOpenAfter => 'Άνοιγμα μετά τη δημιουργία';
+
+  @override
+  String get homeActionProject => 'Έργο';
+
+  @override
+  String get homeActionTemplate => 'Πρότυπο';
+
+  @override
+  String homeActionMissing(String path) =>
+      'Το $path δεν υπάρχει πια στη βιβλιοθήκη';
 }

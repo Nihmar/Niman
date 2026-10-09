@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The Tags screen (T-M3-06): the tag list with counts, and per tag the
@@ -22,6 +24,7 @@ final class TagsScreen extends StatefulWidget {
     required this.onOpenNote,
     required this.onBack,
     this.sourceOverride,
+    this.requests,
     super.key,
   });
 
@@ -38,6 +41,10 @@ final class TagsScreen extends StatefulWidget {
   /// screen resolves it from [controller].
   final TagSource? sourceOverride;
 
+  /// What another part of the app asks Search to show (#535): a tag's
+  /// notes open here.
+  final ValueListenable<SearchRequest?>? requests;
+
   @override
   State<TagsScreen> createState() => _TagsScreenState();
 }
@@ -52,7 +59,20 @@ final class _TagsScreenState extends State<TagsScreen> {
   void initState() {
     super.initState();
     const AppLogger(name: 'tags.ui').debug('mount');
+    widget.requests?.addListener(_requested);
     unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    widget.requests?.removeListener(_requested);
+    super.dispose();
+  }
+
+  /// Opens a requested tag, once the counts are in.
+  void _requested() {
+    final tag = widget.requests?.value?.tag;
+    if (tag != null && _source != null) unawaited(_openTag(tag));
   }
 
   Future<void> _load() async {
@@ -69,6 +89,7 @@ final class _TagsScreenState extends State<TagsScreen> {
       _source = source;
       _counts = counts;
     });
+    _requested();
     logNextFrame('tags.ui', 'tag list first frame');
   }
 

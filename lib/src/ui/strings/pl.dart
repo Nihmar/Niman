@@ -3429,4 +3429,223 @@ final class PolishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'co tu powiedzieć — widzisz to tylko ty.';
+
+  @override
+  String get tabHome => 'Start';
+
+  @override
+  String get homeTileActions => 'Akcje';
+
+  @override
+  String get homeTileJournalToday => 'Dzisiejszy dziennik';
+
+  @override
+  String get homeTileTasksDue => 'Zadania do zrobienia';
+
+  @override
+  String get homeTileRecent => 'Ostatnio zmienione';
+
+  @override
+  String get homeTilePinned => 'Przypięte';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendarz dziennika';
+
+  @override
+  String get homeTileTopTags => 'Najczęstsze tagi';
+
+  @override
+  String get homeTileRandomNote => 'Losowa notatka';
+
+  @override
+  String get homeTileSearch => 'Zapisane wyszukiwanie';
+
+  @override
+  String get homeJournalEmpty => 'Dziś jeszcze nic nie napisano.';
+
+  @override
+  String get homeJournalWrite => 'Napisz dzisiejszy wpis';
+
+  @override
+  String get homeTasksEmpty => 'Brak otwartych zadań.';
+
+  @override
+  String get homeNotesEmpty => 'Brak notatek.';
+
+  @override
+  String get homePinnedEmpty => 'Przypnij notatkę, a pojawi się tutaj.';
+
+  @override
+  String get homeTagsEmpty => 'Brak tagów.';
+
+  @override
+  String get homeSearchEmpty => 'Brak wyników.';
+
+  @override
+  String get homeSearchNoQuery => 'Brak zapytania.';
+
+  @override
+  String get homeRandomAnother => 'Inna';
+
+  @override
+  String get homeEdit => 'Edytuj start';
+
+  @override
+  String get homeEditDone => 'Gotowe';
+
+  @override
+  String get homeReset => 'Przywróć';
+
+  @override
+  String get homeResetTitle => 'Przywrócić start?';
+
+  @override
+  String get homeResetBody => 'Wszystkie kafelki wracają do domyślnego startu.';
+
+  @override
+  String get homeUseLibraryTitle => 'Użyć startu biblioteki?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Własny start tego urządzenia zostanie odrzucony, a tu znów pojawi się '
+      'start biblioteki.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Odrzuć';
+
+  @override
+  String get homeAddTiles => 'Dodaj kafelki';
+
+  @override
+  String get homeHiddenTiles => 'Ukryte';
+
+  @override
+  String get homeTileOnHome => 'Na starcie';
+
+  @override
+  String get homeTileHide => 'Ukryj';
+
+  @override
+  String get homeTileShow => 'Pokaż';
+
+  @override
+  String get homeTileMove => 'Przenieś i zmień rozmiar';
+
+  @override
+  String get homeMoveLeft => 'Przesuń w lewo';
+
+  @override
+  String get homeMoveRight => 'Przesuń w prawo';
+
+  @override
+  String get homeMoveUp => 'Przesuń w górę';
+
+  @override
+  String get homeMoveDown => 'Przesuń w dół';
+
+  @override
+  String get homeWider => 'Szerszy';
+
+  @override
+  String get homeNarrower => 'Węższy';
+
+  @override
+  String get homeTaller => 'Wyższy';
+
+  @override
+  String get homeShorter => 'Niższy';
+
+  @override
+  String get homeTileSettings => 'Ustawienia kafelka';
+
+  @override
+  String get homeSearchName => 'Nazwa';
+
+  @override
+  String get homeSearchQuery => 'Zapytanie';
+
+  @override
+  String get homeSearchQueryHint => 'Słowa lub klucz = wartość';
+
+  @override
+  String get homeGridHint =>
+      'Przeciągnij kafelek, aby go przenieść, a jego róg, aby zmienić '
+      'rozmiar.';
+
+  @override
+  String get homeColumnHint =>
+      'Przeciągnij uchwyt, aby zmienić kolejność. Przełącznik pokazuje lub '
+      'ukrywa kafelek na każdym urządzeniu.';
+
+  @override
+  String get homeActionAdd => 'Dodaj akcję';
+
+  @override
+  String get homeActionAsk => 'Pytaj';
+
+  @override
+  String get homeActionAskHint => 'Pytane po naciśnięciu przycisku';
+
+  @override
+  String get homeActionCaptureFolder => 'Folder przechwyceń';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Edytuj akcję';
+
+  @override
+  String get homeActionFieldAdd => 'Dodaj pole';
+
+  @override
+  String get homeActionFieldKey => 'Klucz frontmattera';
+
+  @override
+  String get homeActionFields => 'Pola';
+
+  @override
+  String get homeActionFixed => 'Stałe';
+
+  @override
+  String get homeActionFixedHint => 'Tekst lub {{date}}';
+
+  @override
+  String get homeActionFolder => 'Folder';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Robi';
+
+  @override
+  String get homeActionKindOpenNote => 'Otwórz notatkę';
+
+  @override
+  String get homeActionLabel => 'Etykieta';
+
+  @override
+  String get homeActionNoNote => 'Nie wybrano notatki';
+
+  @override
+  String get homeActionNote => 'Notatka';
+
+  @override
+  String get homeActionNoTemplate => 'Brak: pusta notatka';
+
+  @override
+  String get homeActionNoteName => 'Nazwa';
+
+  @override
+  String get homeActionOpenAfter => 'Otwórz po utworzeniu';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Szablon';
+
+  @override
+  String homeActionMissing(String path) => '$path nie ma już w bibliotece';
 }

@@ -51,7 +51,13 @@ void main() {
     final saved = await session.navigation;
     expect(saved.library?.hidden, {'todo'});
     expect(saved.device, isNull);
-    expect(previewed(tester), ['files', 'search', 'quicknote', 'settings']);
+    expect(previewed(tester), [
+      'files',
+      'search',
+      'home',
+      'quicknote',
+      'settings',
+    ]);
   });
 
   testWidgets('the last destination shown besides Settings keeps its switch '
@@ -124,7 +130,13 @@ void main() {
     await tester.pumpAndSettle();
     saved = await session.navigation;
     expect(saved.device, isNull);
-    expect(previewed(tester), ['files', 'search', 'quicknote', 'settings']);
+    expect(previewed(tester), [
+      'files',
+      'search',
+      'home',
+      'quicknote',
+      'settings',
+    ]);
   });
 
   testWidgets('a wide window previews the rail beside the list', (

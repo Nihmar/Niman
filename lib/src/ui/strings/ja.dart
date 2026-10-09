@@ -3090,4 +3090,218 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'ここで話すこと — あなただけに見えます。';
+
+  @override
+  String get tabHome => 'ホーム';
+
+  @override
+  String get homeTileActions => 'アクション';
+
+  @override
+  String get homeTileJournalToday => '今日の日記';
+
+  @override
+  String get homeTileTasksDue => '期限のあるタスク';
+
+  @override
+  String get homeTileRecent => '最近変更';
+
+  @override
+  String get homeTilePinned => 'ピン留め';
+
+  @override
+  String get homeTileJournalCalendar => '日記カレンダー';
+
+  @override
+  String get homeTileTopTags => 'よく使うタグ';
+
+  @override
+  String get homeTileRandomNote => 'ランダムなノート';
+
+  @override
+  String get homeTileSearch => '保存した検索';
+
+  @override
+  String get homeJournalEmpty => '今日はまだ何も書いていません。';
+
+  @override
+  String get homeJournalWrite => '今日のエントリーを書く';
+
+  @override
+  String get homeTasksEmpty => '未完了のタスクはありません。';
+
+  @override
+  String get homeNotesEmpty => 'まだノートがありません。';
+
+  @override
+  String get homePinnedEmpty => 'ノートをピン留めするとここに表示されます。';
+
+  @override
+  String get homeTagsEmpty => 'まだタグがありません。';
+
+  @override
+  String get homeSearchEmpty => '一致するものはありません。';
+
+  @override
+  String get homeSearchNoQuery => 'まだ検索条件がありません。';
+
+  @override
+  String get homeRandomAnother => '別のノート';
+
+  @override
+  String get homeEdit => 'ホームを編集';
+
+  @override
+  String get homeEditDone => '完了';
+
+  @override
+  String get homeReset => 'リセット';
+
+  @override
+  String get homeResetTitle => 'ホームをリセットしますか？';
+
+  @override
+  String get homeResetBody => 'すべてのタイルが既定のホームに戻ります。';
+
+  @override
+  String get homeUseLibraryTitle => 'ライブラリのホームを使いますか？';
+
+  @override
+  String get homeUseLibraryBody => 'このデバイス独自のホームは破棄され、ライブラリのホームが再び表示されます。';
+
+  @override
+  String get homeUseLibraryConfirm => '破棄';
+
+  @override
+  String get homeAddTiles => 'タイルを追加';
+
+  @override
+  String get homeHiddenTiles => '非表示';
+
+  @override
+  String get homeTileOnHome => 'ホームにあり';
+
+  @override
+  String get homeTileHide => '非表示にする';
+
+  @override
+  String get homeTileShow => '表示する';
+
+  @override
+  String get homeTileMove => '移動とサイズ';
+
+  @override
+  String get homeMoveLeft => '左へ移動';
+
+  @override
+  String get homeMoveRight => '右へ移動';
+
+  @override
+  String get homeMoveUp => '上へ移動';
+
+  @override
+  String get homeMoveDown => '下へ移動';
+
+  @override
+  String get homeWider => '幅を広げる';
+
+  @override
+  String get homeNarrower => '幅を狭める';
+
+  @override
+  String get homeTaller => '高くする';
+
+  @override
+  String get homeShorter => '低くする';
+
+  @override
+  String get homeTileSettings => 'タイルの設定';
+
+  @override
+  String get homeSearchName => '名前';
+
+  @override
+  String get homeSearchQuery => '検索条件';
+
+  @override
+  String get homeSearchQueryHint => '単語、または キー = 値';
+
+  @override
+  String get homeGridHint => 'タイルをドラッグして移動、角をドラッグしてサイズを変更します。';
+
+  @override
+  String get homeColumnHint =>
+      'ハンドルをドラッグして並べ替えます。スイッチはすべてのデバイスでタイルを表示または非表示にします。';
+
+  @override
+  String get homeActionAdd => 'アクションを追加';
+
+  @override
+  String get homeActionAsk => '尋ねる';
+
+  @override
+  String get homeActionAskHint => 'ボタンを押したときに尋ねます';
+
+  @override
+  String get homeActionCaptureFolder => 'キャプチャ用フォルダ';
+
+  @override
+  String get homeActionContext => 'コンテキスト';
+
+  @override
+  String get homeActionEdit => 'アクションを編集';
+
+  @override
+  String get homeActionFieldAdd => 'フィールドを追加';
+
+  @override
+  String get homeActionFieldKey => 'フロントマターのキー';
+
+  @override
+  String get homeActionFields => 'フィールド';
+
+  @override
+  String get homeActionFixed => '固定';
+
+  @override
+  String get homeActionFixedHint => 'テキスト、または {{date}}';
+
+  @override
+  String get homeActionFolder => 'フォルダ';
+
+  @override
+  String get homeActionIcon => 'アイコン';
+
+  @override
+  String get homeActionKind => '動作';
+
+  @override
+  String get homeActionKindOpenNote => 'ノートを開く';
+
+  @override
+  String get homeActionLabel => 'ラベル';
+
+  @override
+  String get homeActionNoNote => 'ノートが選ばれていません';
+
+  @override
+  String get homeActionNote => 'ノート';
+
+  @override
+  String get homeActionNoTemplate => 'なし：空のノート';
+
+  @override
+  String get homeActionNoteName => '名前';
+
+  @override
+  String get homeActionOpenAfter => '作成後に開く';
+
+  @override
+  String get homeActionProject => 'プロジェクト';
+
+  @override
+  String get homeActionTemplate => 'テンプレート';
+
+  @override
+  String homeActionMissing(String path) => '$path はもうライブラリにありません';
 }

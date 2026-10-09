@@ -3385,4 +3385,223 @@ final class HungarianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'mit mondj itt — csak te látod.';
+
+  @override
+  String get tabHome => 'Kezdőlap';
+
+  @override
+  String get homeTileActions => 'Műveletek';
+
+  @override
+  String get homeTileJournalToday => 'Mai napló';
+
+  @override
+  String get homeTileTasksDue => 'Esedékes feladatok';
+
+  @override
+  String get homeTileRecent => 'Nemrég módosított';
+
+  @override
+  String get homeTilePinned => 'Kitűzött';
+
+  @override
+  String get homeTileJournalCalendar => 'Naplónaptár';
+
+  @override
+  String get homeTileTopTags => 'Legtöbbet használt címkék';
+
+  @override
+  String get homeTileRandomNote => 'Véletlen jegyzet';
+
+  @override
+  String get homeTileSearch => 'Mentett keresés';
+
+  @override
+  String get homeJournalEmpty => 'Ma még nincs semmi leírva.';
+
+  @override
+  String get homeJournalWrite => 'Mai bejegyzés írása';
+
+  @override
+  String get homeTasksEmpty => 'Nincs nyitott feladat.';
+
+  @override
+  String get homeNotesEmpty => 'Még nincsenek jegyzetek.';
+
+  @override
+  String get homePinnedEmpty => 'Tűzz ki egy jegyzetet, és itt jelenik meg.';
+
+  @override
+  String get homeTagsEmpty => 'Még nincsenek címkék.';
+
+  @override
+  String get homeSearchEmpty => 'Nincs találat.';
+
+  @override
+  String get homeSearchNoQuery => 'Még nincs keresés.';
+
+  @override
+  String get homeRandomAnother => 'Másikat';
+
+  @override
+  String get homeEdit => 'Kezdőlap szerkesztése';
+
+  @override
+  String get homeEditDone => 'Kész';
+
+  @override
+  String get homeReset => 'Visszaállítás';
+
+  @override
+  String get homeResetTitle => 'Visszaállítod a kezdőlapot?';
+
+  @override
+  String get homeResetBody =>
+      'Minden csempe visszaáll az alapértelmezett kezdőlapra.';
+
+  @override
+  String get homeUseLibraryTitle => 'A könyvtár kezdőlapját használod?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Az eszköz saját kezdőlapja elvetésre kerül, és ismét a könyvtáré '
+      'jelenik meg.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Elvetés';
+
+  @override
+  String get homeAddTiles => 'Csempék hozzáadása';
+
+  @override
+  String get homeHiddenTiles => 'Elrejtett';
+
+  @override
+  String get homeTileOnHome => 'A kezdőlapon';
+
+  @override
+  String get homeTileHide => 'Elrejtés';
+
+  @override
+  String get homeTileShow => 'Megjelenítés';
+
+  @override
+  String get homeTileMove => 'Áthelyezés és méretezés';
+
+  @override
+  String get homeMoveLeft => 'Mozgatás balra';
+
+  @override
+  String get homeMoveRight => 'Mozgatás jobbra';
+
+  @override
+  String get homeMoveUp => 'Mozgatás fel';
+
+  @override
+  String get homeMoveDown => 'Mozgatás le';
+
+  @override
+  String get homeWider => 'Szélesebb';
+
+  @override
+  String get homeNarrower => 'Keskenyebb';
+
+  @override
+  String get homeTaller => 'Magasabb';
+
+  @override
+  String get homeShorter => 'Alacsonyabb';
+
+  @override
+  String get homeTileSettings => 'Csempe beállításai';
+
+  @override
+  String get homeSearchName => 'Név';
+
+  @override
+  String get homeSearchQuery => 'Keresés';
+
+  @override
+  String get homeSearchQueryHint => 'Szavak vagy kulcs = érték';
+
+  @override
+  String get homeGridHint =>
+      'Húzz egy csempét az áthelyezéshez, a sarkát az átméretezéshez.';
+
+  @override
+  String get homeColumnHint =>
+      'Húzz egy fogantyút az átrendezéshez. A kapcsoló minden eszközön '
+      'megjeleníti vagy elrejti a csempét.';
+
+  @override
+  String get homeActionAdd => 'Művelet hozzáadása';
+
+  @override
+  String get homeActionAsk => 'Kérdezés';
+
+  @override
+  String get homeActionAskHint => 'A gomb megnyomásakor kérdezi';
+
+  @override
+  String get homeActionCaptureFolder => 'A mentések mappája';
+
+  @override
+  String get homeActionContext => 'Környezet';
+
+  @override
+  String get homeActionEdit => 'Művelet szerkesztése';
+
+  @override
+  String get homeActionFieldAdd => 'Mező hozzáadása';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-kulcs';
+
+  @override
+  String get homeActionFields => 'Mezők';
+
+  @override
+  String get homeActionFixed => 'Rögzített';
+
+  @override
+  String get homeActionFixedHint => 'Szöveg vagy {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mappa';
+
+  @override
+  String get homeActionIcon => 'Ikon';
+
+  @override
+  String get homeActionKind => 'Mit csinál';
+
+  @override
+  String get homeActionKindOpenNote => 'Jegyzet megnyitása';
+
+  @override
+  String get homeActionLabel => 'Felirat';
+
+  @override
+  String get homeActionNoNote => 'Nincs kiválasztott jegyzet';
+
+  @override
+  String get homeActionNote => 'Jegyzet';
+
+  @override
+  String get homeActionNoTemplate => 'Nincs: üres jegyzet';
+
+  @override
+  String get homeActionNoteName => 'Név';
+
+  @override
+  String get homeActionOpenAfter => 'Megnyitás létrehozás után';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Sablon';
+
+  @override
+  String homeActionMissing(String path) => '$path már nincs a könyvtárban';
 }

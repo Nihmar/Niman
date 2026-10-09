@@ -3418,4 +3418,222 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'што тут сказаць — бачыце толькі вы.';
+
+  @override
+  String get tabHome => 'Галоўная';
+
+  @override
+  String get homeTileActions => 'Дзеянні';
+
+  @override
+  String get homeTileJournalToday => 'Дзённік на сёння';
+
+  @override
+  String get homeTileTasksDue => 'Задачы з тэрмінам';
+
+  @override
+  String get homeTileRecent => 'Нядаўна змененыя';
+
+  @override
+  String get homeTilePinned => 'Замацаваныя';
+
+  @override
+  String get homeTileJournalCalendar => 'Каляндар дзённіка';
+
+  @override
+  String get homeTileTopTags => 'Галоўныя тэгі';
+
+  @override
+  String get homeTileRandomNote => 'Выпадковая нататка';
+
+  @override
+  String get homeTileSearch => 'Захаваны пошук';
+
+  @override
+  String get homeJournalEmpty => 'Сёння яшчэ нічога не напісана.';
+
+  @override
+  String get homeJournalWrite => 'Напісаць запіс на сёння';
+
+  @override
+  String get homeTasksEmpty => 'Няма адкрытых задач.';
+
+  @override
+  String get homeNotesEmpty => 'Нататак пакуль няма.';
+
+  @override
+  String get homePinnedEmpty => "Замацуйце нататку, і яна з'явіцца тут.";
+
+  @override
+  String get homeTagsEmpty => 'Тэгаў пакуль няма.';
+
+  @override
+  String get homeSearchEmpty => 'Нічога не знойдзена.';
+
+  @override
+  String get homeSearchNoQuery => 'Запыт яшчэ не зададзены.';
+
+  @override
+  String get homeRandomAnother => 'Іншая';
+
+  @override
+  String get homeEdit => 'Змяніць галоўную';
+
+  @override
+  String get homeEditDone => 'Гатова';
+
+  @override
+  String get homeReset => 'Скінуць';
+
+  @override
+  String get homeResetTitle => 'Скінуць галоўную?';
+
+  @override
+  String get homeResetBody => 'Усе пліткі вернуцца да галоўнай па змаўчанні.';
+
+  @override
+  String get homeUseLibraryTitle => 'Ужываць галоўную бібліятэкі?';
+
+  @override
+  String get homeUseLibraryBody =>
+      "Уласная галоўная гэтай прылады будзе адкінута, і тут зноў з'явіцца "
+      'галоўная бібліятэкі.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Адкінуць';
+
+  @override
+  String get homeAddTiles => 'Дадаць пліткі';
+
+  @override
+  String get homeHiddenTiles => 'Схаваныя';
+
+  @override
+  String get homeTileOnHome => 'На галоўнай';
+
+  @override
+  String get homeTileHide => 'Схаваць';
+
+  @override
+  String get homeTileShow => 'Паказаць';
+
+  @override
+  String get homeTileMove => 'Перамясціць і змяніць памер';
+
+  @override
+  String get homeMoveLeft => 'Улева';
+
+  @override
+  String get homeMoveRight => 'Управа';
+
+  @override
+  String get homeMoveUp => 'Уверх';
+
+  @override
+  String get homeMoveDown => 'Уніз';
+
+  @override
+  String get homeWider => 'Шырэй';
+
+  @override
+  String get homeNarrower => 'Вузей';
+
+  @override
+  String get homeTaller => 'Вышэй';
+
+  @override
+  String get homeShorter => 'Ніжэй';
+
+  @override
+  String get homeTileSettings => 'Налады пліткі';
+
+  @override
+  String get homeSearchName => 'Назва';
+
+  @override
+  String get homeSearchQuery => 'Запыт';
+
+  @override
+  String get homeSearchQueryHint => 'Словы або ключ = значэнне';
+
+  @override
+  String get homeGridHint =>
+      'Цягніце плітку, каб перамясціць яе, і яе вугал, каб змяніць памер.';
+
+  @override
+  String get homeColumnHint =>
+      'Цягніце за ручку, каб змяніць парадак. Пераключальнік паказвае ці '
+      'хавае плітку на ўсіх прыладах.';
+
+  @override
+  String get homeActionAdd => 'Дадаць дзеянне';
+
+  @override
+  String get homeActionAsk => 'Пытаць';
+
+  @override
+  String get homeActionAskHint => 'Пытаецца пры націсканні кнопкі';
+
+  @override
+  String get homeActionCaptureFolder => 'Папка для захопленняў';
+
+  @override
+  String get homeActionContext => 'Кантэкст';
+
+  @override
+  String get homeActionEdit => 'Змяніць дзеянне';
+
+  @override
+  String get homeActionFieldAdd => 'Дадаць поле';
+
+  @override
+  String get homeActionFieldKey => 'Ключ frontmatter';
+
+  @override
+  String get homeActionFields => 'Палі';
+
+  @override
+  String get homeActionFixed => 'Фіксавана';
+
+  @override
+  String get homeActionFixedHint => 'Тэкст або {{date}}';
+
+  @override
+  String get homeActionFolder => 'Папка';
+
+  @override
+  String get homeActionIcon => 'Значок';
+
+  @override
+  String get homeActionKind => 'Робіць';
+
+  @override
+  String get homeActionKindOpenNote => 'Адкрыць нататку';
+
+  @override
+  String get homeActionLabel => 'Подпіс';
+
+  @override
+  String get homeActionNoNote => 'Нататка не выбрана';
+
+  @override
+  String get homeActionNote => 'Нататка';
+
+  @override
+  String get homeActionNoTemplate => 'Няма: пустая нататка';
+
+  @override
+  String get homeActionNoteName => 'Назва';
+
+  @override
+  String get homeActionOpenAfter => 'Адкрыць пасля стварэння';
+
+  @override
+  String get homeActionProject => 'Праект';
+
+  @override
+  String get homeActionTemplate => 'Шаблон';
+
+  @override
+  String homeActionMissing(String path) => '$path больш няма ў бібліятэцы';
 }

@@ -198,7 +198,9 @@ final class _SettingsNavigationLayoutScreenState
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: SizedBox(
-                    height: 360,
+                    // Room for every destination the rail can hold, the
+                    // library switch and Settings: a rail button is 50 high.
+                    height: 460,
                     child: _preview(visible, wide: true),
                   ),
                 ),

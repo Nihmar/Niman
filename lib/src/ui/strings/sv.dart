@@ -3387,4 +3387,222 @@ final class SwedishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'vad du ska säga här — bara du ser det.';
+
+  @override
+  String get tabHome => 'Hem';
+
+  @override
+  String get homeTileActions => 'Åtgärder';
+
+  @override
+  String get homeTileJournalToday => 'Dagens dagbok';
+
+  @override
+  String get homeTileTasksDue => 'Uppgifter med förfallodag';
+
+  @override
+  String get homeTileRecent => 'Nyligen ändrade';
+
+  @override
+  String get homeTilePinned => 'Fästa';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagbokskalender';
+
+  @override
+  String get homeTileTopTags => 'Vanligaste taggar';
+
+  @override
+  String get homeTileRandomNote => 'Slumpad anteckning';
+
+  @override
+  String get homeTileSearch => 'Sparad sökning';
+
+  @override
+  String get homeJournalEmpty => 'Inget skrivet i dag än.';
+
+  @override
+  String get homeJournalWrite => 'Skriv dagens anteckning';
+
+  @override
+  String get homeTasksEmpty => 'Inga öppna uppgifter.';
+
+  @override
+  String get homeNotesEmpty => 'Inga anteckningar än.';
+
+  @override
+  String get homePinnedEmpty => 'Fäst en anteckning så visas den här.';
+
+  @override
+  String get homeTagsEmpty => 'Inga taggar än.';
+
+  @override
+  String get homeSearchEmpty => 'Inga träffar.';
+
+  @override
+  String get homeSearchNoQuery => 'Ingen sökning än.';
+
+  @override
+  String get homeRandomAnother => 'En annan';
+
+  @override
+  String get homeEdit => 'Redigera hem';
+
+  @override
+  String get homeEditDone => 'Klar';
+
+  @override
+  String get homeReset => 'Återställ';
+
+  @override
+  String get homeResetTitle => 'Återställa hem?';
+
+  @override
+  String get homeResetBody => 'Alla rutor går tillbaka till standardhemmet.';
+
+  @override
+  String get homeUseLibraryTitle => 'Använda bibliotekets hem?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Den här enhetens eget hem kastas, och bibliotekets visas här igen.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Kasta';
+
+  @override
+  String get homeAddTiles => 'Lägg till rutor';
+
+  @override
+  String get homeHiddenTiles => 'Dolda';
+
+  @override
+  String get homeTileOnHome => 'På hem';
+
+  @override
+  String get homeTileHide => 'Dölj';
+
+  @override
+  String get homeTileShow => 'Visa';
+
+  @override
+  String get homeTileMove => 'Flytta och ändra storlek';
+
+  @override
+  String get homeMoveLeft => 'Flytta vänster';
+
+  @override
+  String get homeMoveRight => 'Flytta höger';
+
+  @override
+  String get homeMoveUp => 'Flytta upp';
+
+  @override
+  String get homeMoveDown => 'Flytta ned';
+
+  @override
+  String get homeWider => 'Bredare';
+
+  @override
+  String get homeNarrower => 'Smalare';
+
+  @override
+  String get homeTaller => 'Högre';
+
+  @override
+  String get homeShorter => 'Lägre';
+
+  @override
+  String get homeTileSettings => 'Ruteinställningar';
+
+  @override
+  String get homeSearchName => 'Namn';
+
+  @override
+  String get homeSearchQuery => 'Sökning';
+
+  @override
+  String get homeSearchQueryHint => 'Ord, eller nyckel = värde';
+
+  @override
+  String get homeGridHint =>
+      'Dra en ruta för att flytta den, och dess hörn för att ändra storlek.';
+
+  @override
+  String get homeColumnHint =>
+      'Dra i ett handtag för att ändra ordningen. En brytare visar eller '
+      'döljer en ruta på alla enheter.';
+
+  @override
+  String get homeActionAdd => 'Lägg till åtgärd';
+
+  @override
+  String get homeActionAsk => 'Fråga';
+
+  @override
+  String get homeActionAskHint => 'Frågas när knappen trycks';
+
+  @override
+  String get homeActionCaptureFolder => 'Mappen för sparade sidor';
+
+  @override
+  String get homeActionContext => 'Kontext';
+
+  @override
+  String get homeActionEdit => 'Redigera åtgärd';
+
+  @override
+  String get homeActionFieldAdd => 'Lägg till fält';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-nyckel';
+
+  @override
+  String get homeActionFields => 'Fält';
+
+  @override
+  String get homeActionFixed => 'Fast';
+
+  @override
+  String get homeActionFixedHint => 'Text eller {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mapp';
+
+  @override
+  String get homeActionIcon => 'Ikon';
+
+  @override
+  String get homeActionKind => 'Gör';
+
+  @override
+  String get homeActionKindOpenNote => 'Öppna en anteckning';
+
+  @override
+  String get homeActionLabel => 'Etikett';
+
+  @override
+  String get homeActionNoNote => 'Ingen anteckning vald';
+
+  @override
+  String get homeActionNote => 'Anteckning';
+
+  @override
+  String get homeActionNoTemplate => 'Ingen: en tom anteckning';
+
+  @override
+  String get homeActionNoteName => 'Namn';
+
+  @override
+  String get homeActionOpenAfter => 'Öppna efter att den skapats';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Mall';
+
+  @override
+  String homeActionMissing(String path) =>
+      '$path finns inte längre i biblioteket';
 }

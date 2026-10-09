@@ -1828,4 +1828,81 @@ abstract base class Strings {
   String get slidesTemplateSecond;
   String get slidesTemplatePoint;
   String get slidesTemplateNote;
+
+  // Home (#535): the destination, its tiles, and what they say empty.
+  String get tabHome;
+  String get homeTileActions;
+  String get homeTileJournalToday;
+  String get homeTileTasksDue;
+  String get homeTileRecent;
+  String get homeTilePinned;
+  String get homeTileJournalCalendar;
+  String get homeTileTopTags;
+  String get homeTileRandomNote;
+  String get homeTileSearch;
+  String get homeJournalEmpty;
+  String get homeJournalWrite;
+  String get homeTasksEmpty;
+  String get homeNotesEmpty;
+  String get homePinnedEmpty;
+  String get homeTagsEmpty;
+  String get homeSearchEmpty;
+  String get homeSearchNoQuery;
+  String get homeRandomAnother;
+
+  // Home (#535): editing it — the grid, the list, where it is kept.
+  String get homeEdit;
+  String get homeEditDone;
+  String get homeReset;
+  String get homeResetTitle;
+  String get homeResetBody;
+  String get homeUseLibraryTitle;
+  String get homeUseLibraryBody;
+  String get homeUseLibraryConfirm;
+  String get homeAddTiles;
+  String get homeHiddenTiles;
+  String get homeTileOnHome;
+  String get homeTileHide;
+  String get homeTileShow;
+  String get homeTileMove;
+  String get homeMoveLeft;
+  String get homeMoveRight;
+  String get homeMoveUp;
+  String get homeMoveDown;
+  String get homeWider;
+  String get homeNarrower;
+  String get homeTaller;
+  String get homeShorter;
+  String get homeTileSettings;
+  String get homeSearchName;
+  String get homeSearchQuery;
+  String get homeSearchQueryHint;
+  String get homeGridHint;
+  String get homeColumnHint;
+
+  // Home (#535): its actions, their editor and what breaks them.
+  String get homeActionAdd;
+  String get homeActionAsk;
+  String get homeActionAskHint;
+  String get homeActionCaptureFolder;
+  String get homeActionContext;
+  String get homeActionEdit;
+  String get homeActionFieldAdd;
+  String get homeActionFieldKey;
+  String get homeActionFields;
+  String get homeActionFixed;
+  String get homeActionFixedHint;
+  String get homeActionFolder;
+  String get homeActionIcon;
+  String get homeActionKind;
+  String get homeActionKindOpenNote;
+  String get homeActionLabel;
+  String get homeActionNoNote;
+  String get homeActionNote;
+  String get homeActionNoTemplate;
+  String get homeActionNoteName;
+  String get homeActionOpenAfter;
+  String get homeActionProject;
+  String get homeActionTemplate;
+  String homeActionMissing(String path);
 }

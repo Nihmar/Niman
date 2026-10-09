@@ -3327,4 +3327,222 @@ final class EstonianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'mida siin öelda — ainult sina näed seda.';
+
+  @override
+  String get tabHome => 'Avaleht';
+
+  @override
+  String get homeTileActions => 'Toimingud';
+
+  @override
+  String get homeTileJournalToday => 'Tänane päevik';
+
+  @override
+  String get homeTileTasksDue => 'Tähtajaga ülesanded';
+
+  @override
+  String get homeTileRecent => 'Hiljuti muudetud';
+
+  @override
+  String get homeTilePinned => 'Kinnitatud';
+
+  @override
+  String get homeTileJournalCalendar => 'Päeviku kalender';
+
+  @override
+  String get homeTileTopTags => 'Populaarsed sildid';
+
+  @override
+  String get homeTileRandomNote => 'Juhuslik märge';
+
+  @override
+  String get homeTileSearch => 'Salvestatud otsing';
+
+  @override
+  String get homeJournalEmpty => 'Täna pole veel midagi kirjutatud.';
+
+  @override
+  String get homeJournalWrite => 'Kirjuta tänane sissekanne';
+
+  @override
+  String get homeTasksEmpty => 'Avatud ülesandeid pole.';
+
+  @override
+  String get homeNotesEmpty => 'Märkmeid veel pole.';
+
+  @override
+  String get homePinnedEmpty => 'Kinnita märge ja see ilmub siia.';
+
+  @override
+  String get homeTagsEmpty => 'Silte veel pole.';
+
+  @override
+  String get homeSearchEmpty => 'Vasteid pole.';
+
+  @override
+  String get homeSearchNoQuery => 'Päringut veel pole.';
+
+  @override
+  String get homeRandomAnother => 'Veel üks';
+
+  @override
+  String get homeEdit => 'Muuda avalehte';
+
+  @override
+  String get homeEditDone => 'Valmis';
+
+  @override
+  String get homeReset => 'Lähtesta';
+
+  @override
+  String get homeResetTitle => 'Lähtestada avaleht?';
+
+  @override
+  String get homeResetBody => 'Kõik paanid lähevad tagasi vaikimisi avalehele.';
+
+  @override
+  String get homeUseLibraryTitle => 'Kasutada kogu avalehte?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Selle seadme oma avaleht visatakse ära ja siin kuvatakse taas kogu '
+      'oma.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Viska ära';
+
+  @override
+  String get homeAddTiles => 'Lisa paane';
+
+  @override
+  String get homeHiddenTiles => 'Peidetud';
+
+  @override
+  String get homeTileOnHome => 'Avalehel';
+
+  @override
+  String get homeTileHide => 'Peida';
+
+  @override
+  String get homeTileShow => 'Näita';
+
+  @override
+  String get homeTileMove => 'Liiguta ja muuda suurust';
+
+  @override
+  String get homeMoveLeft => 'Liiguta vasakule';
+
+  @override
+  String get homeMoveRight => 'Liiguta paremale';
+
+  @override
+  String get homeMoveUp => 'Liiguta üles';
+
+  @override
+  String get homeMoveDown => 'Liiguta alla';
+
+  @override
+  String get homeWider => 'Laiemaks';
+
+  @override
+  String get homeNarrower => 'Kitsamaks';
+
+  @override
+  String get homeTaller => 'Kõrgemaks';
+
+  @override
+  String get homeShorter => 'Madalamaks';
+
+  @override
+  String get homeTileSettings => 'Paani seaded';
+
+  @override
+  String get homeSearchName => 'Nimi';
+
+  @override
+  String get homeSearchQuery => 'Päring';
+
+  @override
+  String get homeSearchQueryHint => 'Sõnad või võti = väärtus';
+
+  @override
+  String get homeGridHint =>
+      'Lohista paani selle liigutamiseks ja selle nurka suuruse muutmiseks.';
+
+  @override
+  String get homeColumnHint =>
+      'Järjestuse muutmiseks lohista pidet. Lüliti näitab või peidab paani '
+      'igas seadmes.';
+
+  @override
+  String get homeActionAdd => 'Lisa toiming';
+
+  @override
+  String get homeActionAsk => 'Küsi';
+
+  @override
+  String get homeActionAskHint => 'Küsitakse nupu vajutamisel';
+
+  @override
+  String get homeActionCaptureFolder => 'Salvestuste kaust';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Muuda toimingut';
+
+  @override
+  String get homeActionFieldAdd => 'Lisa väli';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatteri võti';
+
+  @override
+  String get homeActionFields => 'Väljad';
+
+  @override
+  String get homeActionFixed => 'Fikseeritud';
+
+  @override
+  String get homeActionFixedHint => 'Tekst või {{date}}';
+
+  @override
+  String get homeActionFolder => 'Kaust';
+
+  @override
+  String get homeActionIcon => 'Ikoon';
+
+  @override
+  String get homeActionKind => 'Teeb';
+
+  @override
+  String get homeActionKindOpenNote => 'Ava märge';
+
+  @override
+  String get homeActionLabel => 'Silt';
+
+  @override
+  String get homeActionNoNote => 'Märget pole valitud';
+
+  @override
+  String get homeActionNote => 'Märge';
+
+  @override
+  String get homeActionNoTemplate => 'Puudub: tühi märge';
+
+  @override
+  String get homeActionNoteName => 'Nimi';
+
+  @override
+  String get homeActionOpenAfter => 'Ava pärast loomist';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Mall';
+
+  @override
+  String homeActionMissing(String path) => '$path pole enam kogus';
 }

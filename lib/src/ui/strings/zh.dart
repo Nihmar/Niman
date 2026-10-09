@@ -3000,4 +3000,217 @@ final class ChineseStrings extends Strings {
 
   @override
   String get slidesTemplateNote => '这里要说的话——只有你能看到。';
+
+  @override
+  String get tabHome => '主页';
+
+  @override
+  String get homeTileActions => '操作';
+
+  @override
+  String get homeTileJournalToday => '今日日志';
+
+  @override
+  String get homeTileTasksDue => '待办任务';
+
+  @override
+  String get homeTileRecent => '最近修改';
+
+  @override
+  String get homeTilePinned => '已置顶';
+
+  @override
+  String get homeTileJournalCalendar => '日志日历';
+
+  @override
+  String get homeTileTopTags => '常用标签';
+
+  @override
+  String get homeTileRandomNote => '随机笔记';
+
+  @override
+  String get homeTileSearch => '已保存的搜索';
+
+  @override
+  String get homeJournalEmpty => '今天还没有写任何内容。';
+
+  @override
+  String get homeJournalWrite => '写今天的日志';
+
+  @override
+  String get homeTasksEmpty => '没有未完成的任务。';
+
+  @override
+  String get homeNotesEmpty => '还没有笔记。';
+
+  @override
+  String get homePinnedEmpty => '置顶一条笔记，它就会显示在这里。';
+
+  @override
+  String get homeTagsEmpty => '还没有标签。';
+
+  @override
+  String get homeSearchEmpty => '没有匹配项。';
+
+  @override
+  String get homeSearchNoQuery => '还没有查询。';
+
+  @override
+  String get homeRandomAnother => '换一条';
+
+  @override
+  String get homeEdit => '编辑主页';
+
+  @override
+  String get homeEditDone => '完成';
+
+  @override
+  String get homeReset => '重置';
+
+  @override
+  String get homeResetTitle => '要重置主页吗？';
+
+  @override
+  String get homeResetBody => '所有磁贴都会恢复为默认主页。';
+
+  @override
+  String get homeUseLibraryTitle => '要使用资料库的主页吗？';
+
+  @override
+  String get homeUseLibraryBody => '此设备自己的主页将被丢弃，这里会重新显示资料库的主页。';
+
+  @override
+  String get homeUseLibraryConfirm => '丢弃';
+
+  @override
+  String get homeAddTiles => '添加磁贴';
+
+  @override
+  String get homeHiddenTiles => '已隐藏';
+
+  @override
+  String get homeTileOnHome => '已在主页';
+
+  @override
+  String get homeTileHide => '隐藏';
+
+  @override
+  String get homeTileShow => '显示';
+
+  @override
+  String get homeTileMove => '移动和调整大小';
+
+  @override
+  String get homeMoveLeft => '左移';
+
+  @override
+  String get homeMoveRight => '右移';
+
+  @override
+  String get homeMoveUp => '上移';
+
+  @override
+  String get homeMoveDown => '下移';
+
+  @override
+  String get homeWider => '加宽';
+
+  @override
+  String get homeNarrower => '变窄';
+
+  @override
+  String get homeTaller => '加高';
+
+  @override
+  String get homeShorter => '降低';
+
+  @override
+  String get homeTileSettings => '磁贴设置';
+
+  @override
+  String get homeSearchName => '名称';
+
+  @override
+  String get homeSearchQuery => '查询';
+
+  @override
+  String get homeSearchQueryHint => '词语，或 键 = 值';
+
+  @override
+  String get homeGridHint => '拖动磁贴可移动它，拖动它的角可调整大小。';
+
+  @override
+  String get homeColumnHint => '拖动手柄可重新排序。开关会在所有设备上显示或隐藏磁贴。';
+
+  @override
+  String get homeActionAdd => '添加操作';
+
+  @override
+  String get homeActionAsk => '询问';
+
+  @override
+  String get homeActionAskHint => '按下按钮时询问';
+
+  @override
+  String get homeActionCaptureFolder => '捕获文件夹';
+
+  @override
+  String get homeActionContext => '情境';
+
+  @override
+  String get homeActionEdit => '编辑操作';
+
+  @override
+  String get homeActionFieldAdd => '添加字段';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter 键';
+
+  @override
+  String get homeActionFields => '字段';
+
+  @override
+  String get homeActionFixed => '固定';
+
+  @override
+  String get homeActionFixedHint => '文字，或 {{date}}';
+
+  @override
+  String get homeActionFolder => '文件夹';
+
+  @override
+  String get homeActionIcon => '图标';
+
+  @override
+  String get homeActionKind => '执行';
+
+  @override
+  String get homeActionKindOpenNote => '打开笔记';
+
+  @override
+  String get homeActionLabel => '标签';
+
+  @override
+  String get homeActionNoNote => '未选择笔记';
+
+  @override
+  String get homeActionNote => '笔记';
+
+  @override
+  String get homeActionNoTemplate => '无：空白笔记';
+
+  @override
+  String get homeActionNoteName => '名称';
+
+  @override
+  String get homeActionOpenAfter => '创建后打开';
+
+  @override
+  String get homeActionProject => '项目';
+
+  @override
+  String get homeActionTemplate => '模板';
+
+  @override
+  String homeActionMissing(String path) => '$path 已不在资料库中';
 }

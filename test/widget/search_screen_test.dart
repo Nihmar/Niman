@@ -486,14 +486,14 @@ final class _SlowSource implements SearchSource {
   @override
   Future<List<SearchHit>> search(
     String? query, {
-    required int id,
+    required int? id,
     int limit = 200,
   }) {
     started++;
     final queryAtStart = query;
     return Future<List<SearchHit>>.delayed(
       Duration.zero,
-      () => isCurrent(id)
+      () => id == null || isCurrent(id)
           ? [
               _hit(
                 queryAtStart == 'first' ? 'first.md' : 'second.md',
@@ -538,12 +538,12 @@ final class _HangingSource implements SearchSource {
   @override
   Future<List<SearchHit>> search(
     String? query, {
-    required int id,
+    required int? id,
     int limit = 200,
   }) async {
     started++;
     await _gate.future;
-    if (!isCurrent(id)) return const [];
+    if (id != null && !isCurrent(id)) return const [];
     return [_hit('first.md', title: 'First hit')];
   }
 

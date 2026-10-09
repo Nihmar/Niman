@@ -3371,4 +3371,222 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'hvað á að segja hér — aðeins þú sérð það.';
+
+  @override
+  String get tabHome => 'Heim';
+
+  @override
+  String get homeTileActions => 'Aðgerðir';
+
+  @override
+  String get homeTileJournalToday => 'Dagbók dagsins';
+
+  @override
+  String get homeTileTasksDue => 'Verkefni á gjalddaga';
+
+  @override
+  String get homeTileRecent => 'Nýlega breytt';
+
+  @override
+  String get homeTilePinned => 'Fest';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagbókardagatal';
+
+  @override
+  String get homeTileTopTags => 'Algengustu merki';
+
+  @override
+  String get homeTileRandomNote => 'Handahófskennd glósa';
+
+  @override
+  String get homeTileSearch => 'Vistuð leit';
+
+  @override
+  String get homeJournalEmpty => 'Ekkert skrifað í dag enn.';
+
+  @override
+  String get homeJournalWrite => 'Skrifa færslu dagsins';
+
+  @override
+  String get homeTasksEmpty => 'Engin opin verkefni.';
+
+  @override
+  String get homeNotesEmpty => 'Engar glósur enn.';
+
+  @override
+  String get homePinnedEmpty => 'Festu glósu og hún birtist hér.';
+
+  @override
+  String get homeTagsEmpty => 'Engin merki enn.';
+
+  @override
+  String get homeSearchEmpty => 'Ekkert passar.';
+
+  @override
+  String get homeSearchNoQuery => 'Engin leit enn.';
+
+  @override
+  String get homeRandomAnother => 'Aðra';
+
+  @override
+  String get homeEdit => 'Breyta heimasíðu';
+
+  @override
+  String get homeEditDone => 'Lokið';
+
+  @override
+  String get homeReset => 'Endurstilla';
+
+  @override
+  String get homeResetTitle => 'Endurstilla heimasíðu?';
+
+  @override
+  String get homeResetBody => 'Allir reitir fara aftur á sjálfgefna heimasíðu.';
+
+  @override
+  String get homeUseLibraryTitle => 'Nota heimasíðu safnsins?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Eigin heimasíðu þessa tækis er hent og heimasíða safnsins birtist hér '
+      'aftur.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Henda';
+
+  @override
+  String get homeAddTiles => 'Bæta við reitum';
+
+  @override
+  String get homeHiddenTiles => 'Falið';
+
+  @override
+  String get homeTileOnHome => 'Á heimasíðu';
+
+  @override
+  String get homeTileHide => 'Fela';
+
+  @override
+  String get homeTileShow => 'Sýna';
+
+  @override
+  String get homeTileMove => 'Færa og breyta stærð';
+
+  @override
+  String get homeMoveLeft => 'Færa til vinstri';
+
+  @override
+  String get homeMoveRight => 'Færa til hægri';
+
+  @override
+  String get homeMoveUp => 'Færa upp';
+
+  @override
+  String get homeMoveDown => 'Færa niður';
+
+  @override
+  String get homeWider => 'Breiðara';
+
+  @override
+  String get homeNarrower => 'Mjórra';
+
+  @override
+  String get homeTaller => 'Hærra';
+
+  @override
+  String get homeShorter => 'Lægra';
+
+  @override
+  String get homeTileSettings => 'Stillingar reits';
+
+  @override
+  String get homeSearchName => 'Heiti';
+
+  @override
+  String get homeSearchQuery => 'Leit';
+
+  @override
+  String get homeSearchQueryHint => 'Orð, eða lykill = gildi';
+
+  @override
+  String get homeGridHint =>
+      'Dragðu reit til að færa hann og horn hans til að breyta stærðinni.';
+
+  @override
+  String get homeColumnHint =>
+      'Dragðu handfang til að endurraða. Rofi sýnir eða felur reit á öllum '
+      'tækjum.';
+
+  @override
+  String get homeActionAdd => 'Bæta við aðgerð';
+
+  @override
+  String get homeActionAsk => 'Spyrja';
+
+  @override
+  String get homeActionAskHint => 'Spurt þegar ýtt er á hnappinn';
+
+  @override
+  String get homeActionCaptureFolder => 'Mappan fyrir vistanir';
+
+  @override
+  String get homeActionContext => 'Samhengi';
+
+  @override
+  String get homeActionEdit => 'Breyta aðgerð';
+
+  @override
+  String get homeActionFieldAdd => 'Bæta við reit';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-lykill';
+
+  @override
+  String get homeActionFields => 'Reitir';
+
+  @override
+  String get homeActionFixed => 'Fast';
+
+  @override
+  String get homeActionFixedHint => 'Texti, eða {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mappa';
+
+  @override
+  String get homeActionIcon => 'Tákn';
+
+  @override
+  String get homeActionKind => 'Gerir';
+
+  @override
+  String get homeActionKindOpenNote => 'Opna glósu';
+
+  @override
+  String get homeActionLabel => 'Merki';
+
+  @override
+  String get homeActionNoNote => 'Engin glósa valin';
+
+  @override
+  String get homeActionNote => 'Glósa';
+
+  @override
+  String get homeActionNoTemplate => 'Ekkert: auð glósa';
+
+  @override
+  String get homeActionNoteName => 'Heiti';
+
+  @override
+  String get homeActionOpenAfter => 'Opna eftir stofnun';
+
+  @override
+  String get homeActionProject => 'Verkefni';
+
+  @override
+  String get homeActionTemplate => 'Sniðmát';
+
+  @override
+  String homeActionMissing(String path) => '$path er ekki lengur í safninu';
 }

@@ -172,6 +172,9 @@ enum AppCommand {
 
   /// Select the Settings tab.
   tabSettings,
+
+  /// Select the Home tab (#535).
+  tabHome,
 }
 
 /// One accelerator and the command it runs.
@@ -322,6 +325,10 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
     AppCommand.tabSettings,
     SingleActivator(LogicalKeyboardKey.digit5, control: true),
   ),
+  AppShortcut(
+    AppCommand.tabHome,
+    SingleActivator(LogicalKeyboardKey.digit6, control: true),
+  ),
 ]);
 
 /// The command's localized name, for the reference.
@@ -378,6 +385,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.tabSearch => AppStrings.tabSearch,
   AppCommand.tabQuickNote => AppStrings.quickNoteTitle,
   AppCommand.tabSettings => AppStrings.tabSettings,
+  AppCommand.tabHome => AppStrings.tabHome,
 };
 
 /// The keys as a human reads them ("Ctrl+Shift+N").

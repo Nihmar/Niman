@@ -3415,4 +3415,224 @@ final class DutchStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'wat je hier zegt — alleen jij ziet het.';
+
+  @override
+  String get tabHome => 'Start';
+
+  @override
+  String get homeTileActions => 'Acties';
+
+  @override
+  String get homeTileJournalToday => 'Dagboek van vandaag';
+
+  @override
+  String get homeTileTasksDue => 'Taken met deadline';
+
+  @override
+  String get homeTileRecent => 'Recent gewijzigd';
+
+  @override
+  String get homeTilePinned => 'Vastgezet';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagboekkalender';
+
+  @override
+  String get homeTileTopTags => 'Meestgebruikte tags';
+
+  @override
+  String get homeTileRandomNote => 'Willekeurige notitie';
+
+  @override
+  String get homeTileSearch => 'Opgeslagen zoekopdracht';
+
+  @override
+  String get homeJournalEmpty => 'Vandaag nog niets geschreven.';
+
+  @override
+  String get homeJournalWrite => 'Schrijf het item van vandaag';
+
+  @override
+  String get homeTasksEmpty => 'Geen openstaande taken.';
+
+  @override
+  String get homeNotesEmpty => 'Nog geen notities.';
+
+  @override
+  String get homePinnedEmpty => 'Zet een notitie vast en die verschijnt hier.';
+
+  @override
+  String get homeTagsEmpty => 'Nog geen tags.';
+
+  @override
+  String get homeSearchEmpty => 'Geen resultaten.';
+
+  @override
+  String get homeSearchNoQuery => 'Nog geen zoekopdracht.';
+
+  @override
+  String get homeRandomAnother => 'Nog een';
+
+  @override
+  String get homeEdit => 'Start bewerken';
+
+  @override
+  String get homeEditDone => 'Klaar';
+
+  @override
+  String get homeReset => 'Herstellen';
+
+  @override
+  String get homeResetTitle => 'Start herstellen?';
+
+  @override
+  String get homeResetBody => 'Alle tegels gaan terug naar de standaard start.';
+
+  @override
+  String get homeUseLibraryTitle => 'De start van de bibliotheek gebruiken?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'De eigen start van dit apparaat wordt weggegooid en die van de '
+      'bibliotheek verschijnt weer.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Weggooien';
+
+  @override
+  String get homeAddTiles => 'Tegels toevoegen';
+
+  @override
+  String get homeHiddenTiles => 'Verborgen';
+
+  @override
+  String get homeTileOnHome => 'Op de start';
+
+  @override
+  String get homeTileHide => 'Verbergen';
+
+  @override
+  String get homeTileShow => 'Tonen';
+
+  @override
+  String get homeTileMove => 'Verplaatsen en formaat';
+
+  @override
+  String get homeMoveLeft => 'Naar links';
+
+  @override
+  String get homeMoveRight => 'Naar rechts';
+
+  @override
+  String get homeMoveUp => 'Omhoog';
+
+  @override
+  String get homeMoveDown => 'Omlaag';
+
+  @override
+  String get homeWider => 'Breder';
+
+  @override
+  String get homeNarrower => 'Smaller';
+
+  @override
+  String get homeTaller => 'Hoger';
+
+  @override
+  String get homeShorter => 'Lager';
+
+  @override
+  String get homeTileSettings => 'Tegelinstellingen';
+
+  @override
+  String get homeSearchName => 'Naam';
+
+  @override
+  String get homeSearchQuery => 'Zoekopdracht';
+
+  @override
+  String get homeSearchQueryHint => 'Woorden, of sleutel = waarde';
+
+  @override
+  String get homeGridHint =>
+      'Sleep een tegel om hem te verplaatsen, en zijn hoek om het formaat te '
+      'wijzigen.';
+
+  @override
+  String get homeColumnHint =>
+      'Sleep een greep om de volgorde te wijzigen. Een schakelaar toont of '
+      'verbergt een tegel op elk apparaat.';
+
+  @override
+  String get homeActionAdd => 'Actie toevoegen';
+
+  @override
+  String get homeActionAsk => 'Vragen';
+
+  @override
+  String get homeActionAskHint => 'Gevraagd bij het indrukken';
+
+  @override
+  String get homeActionCaptureFolder => 'De map voor opnames';
+
+  @override
+  String get homeActionContext => 'Context';
+
+  @override
+  String get homeActionEdit => 'Actie bewerken';
+
+  @override
+  String get homeActionFieldAdd => 'Veld toevoegen';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-sleutel';
+
+  @override
+  String get homeActionFields => 'Velden';
+
+  @override
+  String get homeActionFixed => 'Vast';
+
+  @override
+  String get homeActionFixedHint => 'Tekst, of {{date}}';
+
+  @override
+  String get homeActionFolder => 'Map';
+
+  @override
+  String get homeActionIcon => 'Pictogram';
+
+  @override
+  String get homeActionKind => 'Doet';
+
+  @override
+  String get homeActionKindOpenNote => 'Een notitie openen';
+
+  @override
+  String get homeActionLabel => 'Label';
+
+  @override
+  String get homeActionNoNote => 'Geen notitie gekozen';
+
+  @override
+  String get homeActionNote => 'Notitie';
+
+  @override
+  String get homeActionNoTemplate => 'Geen: een lege notitie';
+
+  @override
+  String get homeActionNoteName => 'Naam';
+
+  @override
+  String get homeActionOpenAfter => 'Openen na het maken';
+
+  @override
+  String get homeActionProject => 'Project';
+
+  @override
+  String get homeActionTemplate => 'Sjabloon';
+
+  @override
+  String homeActionMissing(String path) =>
+      '$path staat niet meer in de bibliotheek';
 }

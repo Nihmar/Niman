@@ -413,6 +413,43 @@ void main() {
     );
   });
 
+  test('the Home changed on two devices keeps both tiles (#535)', () async {
+    a.write(
+      '.niman/home.json',
+      '{"recent": {"kind": "recent", "grid": [0, 0, 1, 2]}, '
+          '"pinned": {"kind": "pinned", "grid": [1, 0, 1, 1]}}',
+    );
+    await a.sync();
+    await b.sync();
+    a.write(
+      '.niman/home.json',
+      '{"recent": {"kind": "recent", "grid": [2, 0, 1, 2]}, '
+          '"pinned": {"kind": "pinned", "grid": [1, 0, 1, 1]}}',
+    );
+    b.write(
+      '.niman/home.json',
+      '{"recent": {"kind": "recent", "grid": [0, 0, 1, 2]}, '
+          '"pinned": {"kind": "pinned", "grid": [1, 0, 1, 1], "hidden": true}}',
+    );
+    await a.sync();
+    final report = await b.sync();
+    expect(report.conflicts, isEmpty, reason: report.summary());
+    final both = {
+      'recent': {
+        'kind': 'recent',
+        'grid': [2, 0, 1, 2],
+      },
+      'pinned': {
+        'kind': 'pinned',
+        'grid': [1, 0, 1, 1],
+        'hidden': true,
+      },
+    };
+    expect(jsonOf(b.read('.niman/home.json')), both);
+    await a.sync();
+    expect(jsonOf(a.read('.niman/home.json')), both);
+  });
+
   test('template counters keep the highest on each side', () async {
     a.write('.niman/counters.json', '{"meeting": 2}');
     await a.sync();

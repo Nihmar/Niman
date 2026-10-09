@@ -3419,4 +3419,222 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'що тут сказати — бачите лише ви.';
+
+  @override
+  String get tabHome => 'Головна';
+
+  @override
+  String get homeTileActions => 'Дії';
+
+  @override
+  String get homeTileJournalToday => 'Щоденник на сьогодні';
+
+  @override
+  String get homeTileTasksDue => 'Завдання з терміном';
+
+  @override
+  String get homeTileRecent => 'Нещодавно змінені';
+
+  @override
+  String get homeTilePinned => 'Закріплені';
+
+  @override
+  String get homeTileJournalCalendar => 'Календар щоденника';
+
+  @override
+  String get homeTileTopTags => 'Найчастіші теги';
+
+  @override
+  String get homeTileRandomNote => 'Випадкова нотатка';
+
+  @override
+  String get homeTileSearch => 'Збережений пошук';
+
+  @override
+  String get homeJournalEmpty => 'Сьогодні ще нічого не написано.';
+
+  @override
+  String get homeJournalWrite => 'Написати запис на сьогодні';
+
+  @override
+  String get homeTasksEmpty => 'Немає відкритих завдань.';
+
+  @override
+  String get homeNotesEmpty => 'Нотаток ще немає.';
+
+  @override
+  String get homePinnedEmpty => "Закріпіть нотатку, і вона з'явиться тут.";
+
+  @override
+  String get homeTagsEmpty => 'Тегів ще немає.';
+
+  @override
+  String get homeSearchEmpty => 'Нічого не знайдено.';
+
+  @override
+  String get homeSearchNoQuery => 'Запиту ще немає.';
+
+  @override
+  String get homeRandomAnother => 'Інша';
+
+  @override
+  String get homeEdit => 'Редагувати головну';
+
+  @override
+  String get homeEditDone => 'Готово';
+
+  @override
+  String get homeReset => 'Скинути';
+
+  @override
+  String get homeResetTitle => 'Скинути головну?';
+
+  @override
+  String get homeResetBody => 'Усі плитки повертаються до типової головної.';
+
+  @override
+  String get homeUseLibraryTitle => 'Використовувати головну бібліотеки?';
+
+  @override
+  String get homeUseLibraryBody =>
+      "Власну головну цього пристрою буде відкинуто, і тут знову з'явиться "
+      'головна бібліотеки.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Відкинути';
+
+  @override
+  String get homeAddTiles => 'Додати плитки';
+
+  @override
+  String get homeHiddenTiles => 'Приховані';
+
+  @override
+  String get homeTileOnHome => 'На головній';
+
+  @override
+  String get homeTileHide => 'Приховати';
+
+  @override
+  String get homeTileShow => 'Показати';
+
+  @override
+  String get homeTileMove => 'Перемістити й змінити розмір';
+
+  @override
+  String get homeMoveLeft => 'Посунути ліворуч';
+
+  @override
+  String get homeMoveRight => 'Посунути праворуч';
+
+  @override
+  String get homeMoveUp => 'Посунути вгору';
+
+  @override
+  String get homeMoveDown => 'Посунути вниз';
+
+  @override
+  String get homeWider => 'Ширше';
+
+  @override
+  String get homeNarrower => 'Вужче';
+
+  @override
+  String get homeTaller => 'Вище';
+
+  @override
+  String get homeShorter => 'Нижче';
+
+  @override
+  String get homeTileSettings => 'Налаштування плитки';
+
+  @override
+  String get homeSearchName => 'Назва';
+
+  @override
+  String get homeSearchQuery => 'Запит';
+
+  @override
+  String get homeSearchQueryHint => 'Слова або ключ = значення';
+
+  @override
+  String get homeGridHint =>
+      'Перетягніть плитку, щоб перемістити її, а її кут — щоб змінити розмір.';
+
+  @override
+  String get homeColumnHint =>
+      'Перетягніть ручку, щоб змінити порядок. Перемикач показує або '
+      'приховує плитку на всіх пристроях.';
+
+  @override
+  String get homeActionAdd => 'Додати дію';
+
+  @override
+  String get homeActionAsk => 'Питати';
+
+  @override
+  String get homeActionAskHint => 'Запитується під час натискання кнопки';
+
+  @override
+  String get homeActionCaptureFolder => 'Тека для захоплень';
+
+  @override
+  String get homeActionContext => 'Контекст';
+
+  @override
+  String get homeActionEdit => 'Редагувати дію';
+
+  @override
+  String get homeActionFieldAdd => 'Додати поле';
+
+  @override
+  String get homeActionFieldKey => 'Ключ frontmatter';
+
+  @override
+  String get homeActionFields => 'Поля';
+
+  @override
+  String get homeActionFixed => 'Фіксоване';
+
+  @override
+  String get homeActionFixedHint => 'Текст або {{date}}';
+
+  @override
+  String get homeActionFolder => 'Тека';
+
+  @override
+  String get homeActionIcon => 'Значок';
+
+  @override
+  String get homeActionKind => 'Робить';
+
+  @override
+  String get homeActionKindOpenNote => 'Відкрити нотатку';
+
+  @override
+  String get homeActionLabel => 'Підпис';
+
+  @override
+  String get homeActionNoNote => 'Нотатку не вибрано';
+
+  @override
+  String get homeActionNote => 'Нотатка';
+
+  @override
+  String get homeActionNoTemplate => 'Немає: порожня нотатка';
+
+  @override
+  String get homeActionNoteName => 'Назва';
+
+  @override
+  String get homeActionOpenAfter => 'Відкрити після створення';
+
+  @override
+  String get homeActionProject => 'Проєкт';
+
+  @override
+  String get homeActionTemplate => 'Шаблон';
+
+  @override
+  String homeActionMissing(String path) => '$path більше немає в бібліотеці';
 }

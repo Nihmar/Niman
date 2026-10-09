@@ -9,6 +9,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/diff/record_merge.dart';
 import 'package:niman/src/diff/three_way.dart';
+import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -1741,14 +1742,15 @@ final class SyncEngine {
     },
   );
 
-  /// Merges a library state file ([mergeSettingsJson] key by key,
-  /// [mergeCountersJson], [mergeWordList] word by word, [mergeReadingJson]
-  /// book by book) and writes the result on whichever side lacks it;
-  /// [_StateMerge.notJson] when a JSON side does not parse, and
-  /// [_StateMerge.clockDecides] when a `.niman/settings.json` key both
-  /// sides changed differently, which only the file mtimes could settle —
-  /// and the remote one is the uploading device's clock (#350). Both
-  /// cases touch nothing and leave the path to the caller.
+  /// Merges a library state file ([mergeSettingsJson] key by key, for the
+  /// settings and for the Home's tiles (#535), [mergeCountersJson],
+  /// [mergeWordList] word by word, [mergeReadingJson] book by book) and
+  /// writes the result on whichever side lacks it; [_StateMerge.notJson]
+  /// when a JSON side does not parse, and [_StateMerge.clockDecides] when
+  /// a settings key or a Home tile both sides changed differently, which
+  /// only the file mtimes could settle — and the remote one is the
+  /// uploading device's clock (#350). Both cases touch nothing and leave
+  /// the path to the caller.
   Future<_StateMerge> _mergeState(
     _RunContext c,
     SyncDecision d,
@@ -1767,7 +1769,7 @@ final class SyncEngine {
     );
     final base = c.rows[d.path]?.baseText;
     final String? text;
-    if (d.path == NoteOps.settingsFilePath) {
+    if (d.path == NoteOps.settingsFilePath || d.path == HomeFile.filePath) {
       // The clock's vote each way: when the two merges differ, the clock
       // was what picked the disputed key's side — no outcome may rest on
       // it, so the key is left for the user instead.

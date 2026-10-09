@@ -3362,4 +3362,221 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'hva du skal si her — bare du ser det.';
+
+  @override
+  String get tabHome => 'Hjem';
+
+  @override
+  String get homeTileActions => 'Handlinger';
+
+  @override
+  String get homeTileJournalToday => 'Dagens dagbok';
+
+  @override
+  String get homeTileTasksDue => 'Oppgaver med frist';
+
+  @override
+  String get homeTileRecent => 'Nylig endret';
+
+  @override
+  String get homeTilePinned => 'Festet';
+
+  @override
+  String get homeTileJournalCalendar => 'Dagbokkalender';
+
+  @override
+  String get homeTileTopTags => 'Mest brukte tagger';
+
+  @override
+  String get homeTileRandomNote => 'Tilfeldig notat';
+
+  @override
+  String get homeTileSearch => 'Lagret søk';
+
+  @override
+  String get homeJournalEmpty => 'Ingenting skrevet i dag ennå.';
+
+  @override
+  String get homeJournalWrite => 'Skriv dagens innlegg';
+
+  @override
+  String get homeTasksEmpty => 'Ingen åpne oppgaver.';
+
+  @override
+  String get homeNotesEmpty => 'Ingen notater ennå.';
+
+  @override
+  String get homePinnedEmpty => 'Fest et notat, så vises det her.';
+
+  @override
+  String get homeTagsEmpty => 'Ingen tagger ennå.';
+
+  @override
+  String get homeSearchEmpty => 'Ingen treff.';
+
+  @override
+  String get homeSearchNoQuery => 'Ingen søk ennå.';
+
+  @override
+  String get homeRandomAnother => 'En annen';
+
+  @override
+  String get homeEdit => 'Rediger hjem';
+
+  @override
+  String get homeEditDone => 'Ferdig';
+
+  @override
+  String get homeReset => 'Tilbakestill';
+
+  @override
+  String get homeResetTitle => 'Tilbakestille hjem?';
+
+  @override
+  String get homeResetBody => 'Alle felt går tilbake til standard hjem.';
+
+  @override
+  String get homeUseLibraryTitle => 'Bruke bibliotekets hjem?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Denne enhetens eget hjem forkastes, og bibliotekets vises her igjen.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Forkast';
+
+  @override
+  String get homeAddTiles => 'Legg til felt';
+
+  @override
+  String get homeHiddenTiles => 'Skjult';
+
+  @override
+  String get homeTileOnHome => 'På hjem';
+
+  @override
+  String get homeTileHide => 'Skjul';
+
+  @override
+  String get homeTileShow => 'Vis';
+
+  @override
+  String get homeTileMove => 'Flytt og endre størrelse';
+
+  @override
+  String get homeMoveLeft => 'Flytt til venstre';
+
+  @override
+  String get homeMoveRight => 'Flytt til høyre';
+
+  @override
+  String get homeMoveUp => 'Flytt opp';
+
+  @override
+  String get homeMoveDown => 'Flytt ned';
+
+  @override
+  String get homeWider => 'Bredere';
+
+  @override
+  String get homeNarrower => 'Smalere';
+
+  @override
+  String get homeTaller => 'Høyere';
+
+  @override
+  String get homeShorter => 'Lavere';
+
+  @override
+  String get homeTileSettings => 'Feltinnstillinger';
+
+  @override
+  String get homeSearchName => 'Navn';
+
+  @override
+  String get homeSearchQuery => 'Søk';
+
+  @override
+  String get homeSearchQueryHint => 'Ord, eller nøkkel = verdi';
+
+  @override
+  String get homeGridHint =>
+      'Dra et felt for å flytte det, og hjørnet for å endre størrelsen.';
+
+  @override
+  String get homeColumnHint =>
+      'Dra i et håndtak for å endre rekkefølgen. En bryter viser eller '
+      'skjuler et felt på alle enheter.';
+
+  @override
+  String get homeActionAdd => 'Legg til handling';
+
+  @override
+  String get homeActionAsk => 'Spør';
+
+  @override
+  String get homeActionAskHint => 'Spørres når knappen trykkes';
+
+  @override
+  String get homeActionCaptureFolder => 'Mappen for lagrede sider';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Rediger handling';
+
+  @override
+  String get homeActionFieldAdd => 'Legg til felt';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-nøkkel';
+
+  @override
+  String get homeActionFields => 'Felter';
+
+  @override
+  String get homeActionFixed => 'Fast';
+
+  @override
+  String get homeActionFixedHint => 'Tekst eller {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mappe';
+
+  @override
+  String get homeActionIcon => 'Ikon';
+
+  @override
+  String get homeActionKind => 'Gjør';
+
+  @override
+  String get homeActionKindOpenNote => 'Åpne et notat';
+
+  @override
+  String get homeActionLabel => 'Etikett';
+
+  @override
+  String get homeActionNoNote => 'Ikke noe notat valgt';
+
+  @override
+  String get homeActionNote => 'Notat';
+
+  @override
+  String get homeActionNoTemplate => 'Ingen: et tomt notat';
+
+  @override
+  String get homeActionNoteName => 'Navn';
+
+  @override
+  String get homeActionOpenAfter => 'Åpne etter oppretting';
+
+  @override
+  String get homeActionProject => 'Prosjekt';
+
+  @override
+  String get homeActionTemplate => 'Mal';
+
+  @override
+  String homeActionMissing(String path) => '$path er ikke lenger i biblioteket';
 }

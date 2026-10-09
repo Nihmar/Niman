@@ -3429,4 +3429,224 @@ final class RomanianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'ce spui aici — doar tu vezi.';
+
+  @override
+  String get tabHome => 'Acasă';
+
+  @override
+  String get homeTileActions => 'Acțiuni';
+
+  @override
+  String get homeTileJournalToday => 'Jurnalul de azi';
+
+  @override
+  String get homeTileTasksDue => 'Sarcini scadente';
+
+  @override
+  String get homeTileRecent => 'Modificate recent';
+
+  @override
+  String get homeTilePinned => 'Fixate';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendarul jurnalului';
+
+  @override
+  String get homeTileTopTags => 'Etichete principale';
+
+  @override
+  String get homeTileRandomNote => 'Notiță aleatorie';
+
+  @override
+  String get homeTileSearch => 'Căutare salvată';
+
+  @override
+  String get homeJournalEmpty => 'Nimic scris încă azi.';
+
+  @override
+  String get homeJournalWrite => 'Scrie intrarea de azi';
+
+  @override
+  String get homeTasksEmpty => 'Nicio sarcină deschisă.';
+
+  @override
+  String get homeNotesEmpty => 'Încă nu există notițe.';
+
+  @override
+  String get homePinnedEmpty => 'Fixează o notiță și va apărea aici.';
+
+  @override
+  String get homeTagsEmpty => 'Încă nu există etichete.';
+
+  @override
+  String get homeSearchEmpty => 'Niciun rezultat.';
+
+  @override
+  String get homeSearchNoQuery => 'Încă nu există căutare.';
+
+  @override
+  String get homeRandomAnother => 'Alta';
+
+  @override
+  String get homeEdit => 'Editează acasă';
+
+  @override
+  String get homeEditDone => 'Gata';
+
+  @override
+  String get homeReset => 'Resetează';
+
+  @override
+  String get homeResetTitle => 'Resetezi pagina de pornire?';
+
+  @override
+  String get homeResetBody =>
+      'Toate plăcile revin la pagina de pornire implicită.';
+
+  @override
+  String get homeUseLibraryTitle =>
+      'Folosești pagina de pornire a bibliotecii?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Pagina de pornire proprie a acestui dispozitiv se renunță, iar aici '
+      'apare din nou cea a bibliotecii.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Renunță';
+
+  @override
+  String get homeAddTiles => 'Adaugă plăci';
+
+  @override
+  String get homeHiddenTiles => 'Ascunse';
+
+  @override
+  String get homeTileOnHome => 'Pe pagina de pornire';
+
+  @override
+  String get homeTileHide => 'Ascunde';
+
+  @override
+  String get homeTileShow => 'Afișează';
+
+  @override
+  String get homeTileMove => 'Mută și redimensionează';
+
+  @override
+  String get homeMoveLeft => 'Mută la stânga';
+
+  @override
+  String get homeMoveRight => 'Mută la dreapta';
+
+  @override
+  String get homeMoveUp => 'Mută în sus';
+
+  @override
+  String get homeMoveDown => 'Mută în jos';
+
+  @override
+  String get homeWider => 'Mai lat';
+
+  @override
+  String get homeNarrower => 'Mai îngust';
+
+  @override
+  String get homeTaller => 'Mai înalt';
+
+  @override
+  String get homeShorter => 'Mai scund';
+
+  @override
+  String get homeTileSettings => 'Setările plăcii';
+
+  @override
+  String get homeSearchName => 'Nume';
+
+  @override
+  String get homeSearchQuery => 'Căutare';
+
+  @override
+  String get homeSearchQueryHint => 'Cuvinte sau cheie = valoare';
+
+  @override
+  String get homeGridHint =>
+      'Trage o placă pentru a o muta, iar colțul ei pentru a o redimensiona.';
+
+  @override
+  String get homeColumnHint =>
+      'Trage un mâner pentru a reordona. Un comutator afișează sau ascunde o '
+      'placă pe fiecare dispozitiv.';
+
+  @override
+  String get homeActionAdd => 'Adaugă acțiune';
+
+  @override
+  String get homeActionAsk => 'Întreabă';
+
+  @override
+  String get homeActionAskHint => 'Se cere la apăsarea butonului';
+
+  @override
+  String get homeActionCaptureFolder => 'Dosarul capturilor';
+
+  @override
+  String get homeActionContext => 'Context';
+
+  @override
+  String get homeActionEdit => 'Editează acțiunea';
+
+  @override
+  String get homeActionFieldAdd => 'Adaugă câmp';
+
+  @override
+  String get homeActionFieldKey => 'Cheie frontmatter';
+
+  @override
+  String get homeActionFields => 'Câmpuri';
+
+  @override
+  String get homeActionFixed => 'Fix';
+
+  @override
+  String get homeActionFixedHint => 'Text sau {{date}}';
+
+  @override
+  String get homeActionFolder => 'Dosar';
+
+  @override
+  String get homeActionIcon => 'Pictogramă';
+
+  @override
+  String get homeActionKind => 'Face';
+
+  @override
+  String get homeActionKindOpenNote => 'Deschide o notiță';
+
+  @override
+  String get homeActionLabel => 'Etichetă';
+
+  @override
+  String get homeActionNoNote => 'Nicio notiță aleasă';
+
+  @override
+  String get homeActionNote => 'Notiță';
+
+  @override
+  String get homeActionNoTemplate => 'Niciunul: o notiță goală';
+
+  @override
+  String get homeActionNoteName => 'Nume';
+
+  @override
+  String get homeActionOpenAfter => 'Deschide după creare';
+
+  @override
+  String get homeActionProject => 'Proiect';
+
+  @override
+  String get homeActionTemplate => 'Șablon';
+
+  @override
+  String homeActionMissing(String path) => '$path nu mai este în bibliotecă';
 }

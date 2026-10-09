@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/templates/counters.dart';
 import 'package:niman/src/templates/directives.dart';
@@ -93,46 +94,12 @@ final class ShellTemplateFlow {
     // screen: the selection cannot move until it closes, so this is what
     // the form below would read.
     final parentName = parentNoteName(context, templateFolder: folder);
-    final ops = controller.ops!;
-    final String template;
-    try {
-      // Includes first (T-TPL-06): the pasted text is then read like the
-      // rest of the file, so its placeholders are substituted and its
-      // own questions join the same form.
-      template = await expandTemplateIncludes(
-        await ops.readNote(chosen.path),
-        sourcePath: chosen.path,
-        resolve: (written) => resolveInclude(ops, folder, written),
-      );
-    } on Object catch (error) {
-      const AppLogger(name: 'template')
-          .error('reading template "${chosen.path}" failed: $error');
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppStrings.templateOpenFailed)));
-      }
-      return;
-    }
+    final template = await readTemplate(context, chosen.path, folder);
+    if (template == null || !context.mounted) return;
     // The template's own questions first (T-TPL-03): an answer can name
     // the file and pick the folder, so it has to exist before either is
     // decided.
-    //
-    // The backlink joins them as a field of its own when the template
-    // wants one (user, 2026-09-10): the note it points at is a choice,
-    // and the app guessing it from wherever the user happened to be is
-    // what got it wrong. The note on screen is only the suggestion.
-    final wantsBacklink = templateUses(template, 'parent');
-    final fields = <TemplateField>[
-      if (wantsBacklink)
-        TemplateField(
-          label: parentFieldLabel,
-          title: AppStrings.templateFormBacklink,
-          kind: TemplateFieldKind.note,
-          hint: parentName,
-        ),
-      ...templateFields(template),
-    ];
+    final fields = questionsOf(template, parentName: parentName);
     var answers = <String, String>{};
     if (fields.isNotEmpty) {
       if (!context.mounted) return;
@@ -144,17 +111,7 @@ final class ShellTemplateFlow {
       if (given == null) return;
       answers = given;
     }
-    // Where the note is being made from (T-TPL-04). The clipboard is
-    // read once, here, rather than per occurrence — two `{{clipboard}}`
-    // in one template must not be able to disagree — and only for a
-    // template that asks for it, so using any other template never
-    // reaches into what the user copied.
-    final surroundings = TemplateContext(
-      parent: answers.remove(parentFieldLabel) ?? '',
-      clipboard: templateUses(template, 'clipboard')
-          ? await clipboardText()
-          : '',
-    );
+    final surroundings = await surroundingsOf(template, answers);
     // Read once with no title, only to find out whether the template
     // names the note itself; the real read happens below, once the name
     // is known, so a folder may be built from it. No counter is reserved
@@ -165,6 +122,110 @@ final class ShellTemplateFlow {
       answers: answers,
       context: surroundings,
     ).namesItself;
+    String? name;
+    if (!namesItself) {
+      if (!context.mounted) return;
+      name = await showNameDialog(
+        context,
+        title: AppStrings.newFromTemplateTitle,
+        initial: chosen.name.split('/').last,
+      );
+      if (name == null) return;
+    }
+    if (!context.mounted) return;
+    await file(
+      context,
+      template: template,
+      answers: answers,
+      surroundings: surroundings,
+      name: name,
+      folder: awayFromTemplates(parent ?? createParent(), folder),
+      templateName: chosen.name,
+    );
+  }
+
+  /// The text of the template at [path], its includes pasted in
+  /// (T-TPL-06); null, said in a snackbar, when it cannot be read.
+  Future<String?> readTemplate(
+    BuildContext context,
+    String path,
+    String templateFolder,
+  ) async {
+    final ops = controller.ops!;
+    try {
+      // Includes first: the pasted text is then read like the rest of the
+      // file, so its placeholders are substituted and its own questions
+      // join the same form.
+      return await expandTemplateIncludes(
+        await ops.readNote(path),
+        sourcePath: path,
+        resolve: (written) => resolveInclude(ops, templateFolder, written),
+      );
+    } on Object catch (error) {
+      const AppLogger(name: 'template')
+          .error('reading template "$path" failed: $error');
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppStrings.templateOpenFailed)));
+      }
+      return null;
+    }
+  }
+
+  /// The questions [template] asks before its note exists (T-TPL-03).
+  ///
+  /// The backlink joins them as a field of its own when the template
+  /// wants one (user, 2026-09-10): the note it points at is a choice, and
+  /// the app guessing it from wherever the user happened to be is what
+  /// got it wrong. The note on screen, [parentName], is only the
+  /// suggestion.
+  List<TemplateField> questionsOf(String template, {String parentName = ''}) =>
+      [
+        if (templateUses(template, 'parent'))
+          TemplateField(
+            label: parentFieldLabel,
+            title: AppStrings.templateFormBacklink,
+            kind: TemplateFieldKind.note,
+            hint: parentName,
+          ),
+        ...templateFields(template),
+      ];
+
+  /// Where the note is being made from (T-TPL-04), the backlink taken
+  /// out of [answers]. The clipboard is read once, here, rather than per
+  /// occurrence — two `{{clipboard}}` in one template must not be able to
+  /// disagree — and only for a template that asks for it, so using any
+  /// other template never reaches into what the user copied.
+  Future<TemplateContext> surroundingsOf(
+    String template,
+    Map<String, String> answers,
+  ) async => TemplateContext(
+    parent: answers.remove(parentFieldLabel) ?? '',
+    clipboard: templateUses(template, 'clipboard') ? await clipboardText() : '',
+  );
+
+  /// Makes the note [template] describes, answered by [answers], and opens
+  /// it as the template says.
+  ///
+  /// [name] null is a template that names its own notes. [folder] is
+  /// where the note goes when the template does not say; with
+  /// [folderWins] it goes there whatever the template says — a Home
+  /// action's own folder (#535). [frontmatter] is set on the note once
+  /// rendered, each value a YAML scalar already; [open] false files it
+  /// without opening it. [templateName] is what a fault reports.
+  Future<void> file(
+    BuildContext context, {
+    required String template,
+    required Map<String, String> answers,
+    required TemplateContext surroundings,
+    required String? name,
+    required String folder,
+    required String templateName,
+    bool folderWins = false,
+    Map<String, String> frontmatter = const {},
+    bool open = true,
+  }) async {
     // Per-creation counters (#52, #359, #497): one number per name,
     // reserved on disk once the name is known — never before the name
     // dialog, which the user may still cancel and which used to burn a
@@ -173,75 +234,63 @@ final class ShellTemplateFlow {
     // below. The file is read and written under [guard], where a failure is
     // reported instead of escaping the flow.
     ({CounterStore store, int Function(String name) counter})? reserved;
-    Future<bool> reserveCounters() async {
-      if (reserved != null) return true;
-      var reservedOk = false;
-      await guard(() async {
-        reserved = await CounterStore.reserve(
-          controller.root,
-          counterNames(template),
-        );
-        reservedOk = true;
-      });
-      return reservedOk;
-    }
-
-    final String name;
-    if (namesItself) {
-      // The template's own name may hold a counter, so it is read with
-      // the numbers reserved.
-      if (!await reserveCounters()) return;
-      name = readTemplateDirectives(
-        template,
-        answers: answers,
-        context: surroundings,
-        counter: reserved?.counter,
-      ).filename!;
-    } else {
-      if (!context.mounted) return;
-      final asked = await showNameDialog(
-        context,
-        title: AppStrings.newFromTemplateTitle,
-        initial: chosen.name.split('/').last,
+    var reservedOk = false;
+    await guard(() async {
+      reserved = await CounterStore.reserve(
+        controller.root,
+        counterNames(template),
       );
-      if (asked == null) return;
-      name = asked;
-      if (!await reserveCounters()) return;
-    }
+      reservedOk = true;
+    });
+    if (!reservedOk) return;
+    // The template's own name may hold a counter, so it is read with the
+    // numbers reserved.
+    final title =
+        name ??
+        readTemplateDirectives(
+          template,
+          answers: answers,
+          context: surroundings,
+          counter: reserved?.counter,
+        ).filename!;
     final counters = reserved?.store;
     final counter = reserved?.counter;
+    final ops = controller.ops!;
     await guard(() async {
       final directives = readTemplateDirectives(
         template,
-        title: name,
+        title: title,
         answers: answers,
         context: surroundings,
         counter: counter,
       );
-      final target =
-          directives.folder ??
-          awayFromTemplates(parent ?? createParent(), folder);
+      final target = folderWins ? folder : directives.folder ?? folder;
       // The body is rendered after the folder is settled, which is the
       // only reason `{{folder}}` can answer at all.
       final rendered = renderTemplateWithCaret(
         template,
-        title: name,
+        title: title,
         answers: answers,
         context: surroundings.withFolder(target),
         counter: counter,
       );
-      final content = rendered.text;
+      var content = rendered.text;
+      for (final MapEntry(:key, :value) in frontmatter.entries) {
+        content = setFrontmatterKey(content, key, value);
+      }
+      // The frontmatter set above moved the text the caret was counted in.
+      final caret = rendered.caret == null
+          ? null
+          : rendered.caret! + content.length - rendered.text.length;
       // The numbers are on disk before the note exists: one that could not
       // be made gives them back, so the next one does not skip them.
       final row = await CounterStore.whileCreating(counters, () async {
-        if (directives.folder case final wanted? when wanted.isNotEmpty) {
-          await ops.ensureFolder(wanted);
-        }
+        if (target.isNotEmpty) await ops.ensureFolder(target);
         return directives.append
-            ? await ops.appendToNote(resolvePath(target, '$name.md'), content)
+            ? await ops.appendToNote(resolvePath(target, '$title.md'), content)
             : await ops.createNote(
                 parentPath: target,
-                name: name,
+                name: title,
                 content: content,
               );
       });
@@ -255,12 +304,12 @@ final class ShellTemplateFlow {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppStrings.templateFrontmatterInvalid(chosen.name, reason),
+              AppStrings.templateFrontmatterInvalid(templateName, reason),
             ),
           ),
         );
       }
-      if (directives.open == TemplateOpen.none) {
+      if (!open || directives.open == TemplateOpen.none) {
         // The template filed something away; the user was in the middle
         // of something else and stays there.
         controller.notify();
@@ -272,7 +321,7 @@ final class ShellTemplateFlow {
       onNoteFiled(
         path: row.path,
         preview: directives.open == TemplateOpen.preview,
-        caret: directives.append ? null : rendered.caret,
+        caret: directives.append ? null : caret,
       );
     });
   }

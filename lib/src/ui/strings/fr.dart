@@ -3473,4 +3473,225 @@ final class FrenchStrings extends Strings {
   @override
   String get slidesTemplateNote =>
       "ce qu'il faut dire ici — vous seul le voyez.";
+
+  @override
+  String get tabHome => 'Accueil';
+
+  @override
+  String get homeTileActions => 'Actions';
+
+  @override
+  String get homeTileJournalToday => 'Journal du jour';
+
+  @override
+  String get homeTileTasksDue => 'Tâches à faire';
+
+  @override
+  String get homeTileRecent => 'Modifiées récemment';
+
+  @override
+  String get homeTilePinned => 'Épinglées';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendrier du journal';
+
+  @override
+  String get homeTileTopTags => 'Étiquettes principales';
+
+  @override
+  String get homeTileRandomNote => 'Note au hasard';
+
+  @override
+  String get homeTileSearch => 'Recherche enregistrée';
+
+  @override
+  String get homeJournalEmpty => "Rien d'écrit aujourd'hui pour l'instant.";
+
+  @override
+  String get homeJournalWrite => "Écrire l'entrée du jour";
+
+  @override
+  String get homeTasksEmpty => 'Aucune tâche ouverte.';
+
+  @override
+  String get homeNotesEmpty => "Aucune note pour l'instant.";
+
+  @override
+  String get homePinnedEmpty => "Épinglez une note et elle s'affichera ici.";
+
+  @override
+  String get homeTagsEmpty => "Aucune étiquette pour l'instant.";
+
+  @override
+  String get homeSearchEmpty => 'Aucun résultat.';
+
+  @override
+  String get homeSearchNoQuery => "Aucune requête pour l'instant.";
+
+  @override
+  String get homeRandomAnother => 'Une autre';
+
+  @override
+  String get homeEdit => "Modifier l'accueil";
+
+  @override
+  String get homeEditDone => 'Terminé';
+
+  @override
+  String get homeReset => 'Réinitialiser';
+
+  @override
+  String get homeResetTitle => "Réinitialiser l'accueil ?";
+
+  @override
+  String get homeResetBody =>
+      "Toutes les tuiles reviennent à l'accueil par défaut.";
+
+  @override
+  String get homeUseLibraryTitle => "Utiliser l'accueil de la bibliothèque ?";
+
+  @override
+  String get homeUseLibraryBody =>
+      "L'accueil propre à cet appareil est abandonné, et celui de la "
+      "bibliothèque s'affiche de nouveau.";
+
+  @override
+  String get homeUseLibraryConfirm => 'Abandonner';
+
+  @override
+  String get homeAddTiles => 'Ajouter des tuiles';
+
+  @override
+  String get homeHiddenTiles => 'Masquées';
+
+  @override
+  String get homeTileOnHome => "Sur l'accueil";
+
+  @override
+  String get homeTileHide => 'Masquer';
+
+  @override
+  String get homeTileShow => 'Afficher';
+
+  @override
+  String get homeTileMove => 'Déplacer et redimensionner';
+
+  @override
+  String get homeMoveLeft => 'Déplacer à gauche';
+
+  @override
+  String get homeMoveRight => 'Déplacer à droite';
+
+  @override
+  String get homeMoveUp => 'Déplacer vers le haut';
+
+  @override
+  String get homeMoveDown => 'Déplacer vers le bas';
+
+  @override
+  String get homeWider => 'Plus large';
+
+  @override
+  String get homeNarrower => 'Plus étroit';
+
+  @override
+  String get homeTaller => 'Plus haut';
+
+  @override
+  String get homeShorter => 'Moins haut';
+
+  @override
+  String get homeTileSettings => 'Réglages de la tuile';
+
+  @override
+  String get homeSearchName => 'Nom';
+
+  @override
+  String get homeSearchQuery => 'Requête';
+
+  @override
+  String get homeSearchQueryHint => 'Des mots, ou clé = valeur';
+
+  @override
+  String get homeGridHint =>
+      'Faites glisser une tuile pour la déplacer, et son coin pour la '
+      'redimensionner.';
+
+  @override
+  String get homeColumnHint =>
+      'Faites glisser une poignée pour réordonner. Un interrupteur affiche '
+      'ou masque une tuile sur chaque appareil.';
+
+  @override
+  String get homeActionAdd => 'Ajouter une action';
+
+  @override
+  String get homeActionAsk => 'Demander';
+
+  @override
+  String get homeActionAskHint => "Demandé à l'appui du bouton";
+
+  @override
+  String get homeActionCaptureFolder => 'Le dossier des captures';
+
+  @override
+  String get homeActionContext => 'Contexte';
+
+  @override
+  String get homeActionEdit => "Modifier l'action";
+
+  @override
+  String get homeActionFieldAdd => 'Ajouter un champ';
+
+  @override
+  String get homeActionFieldKey => 'Clé du frontmatter';
+
+  @override
+  String get homeActionFields => 'Champs';
+
+  @override
+  String get homeActionFixed => 'Fixe';
+
+  @override
+  String get homeActionFixedHint => 'Du texte, ou {{date}}';
+
+  @override
+  String get homeActionFolder => 'Dossier';
+
+  @override
+  String get homeActionIcon => 'Icône';
+
+  @override
+  String get homeActionKind => 'Fait';
+
+  @override
+  String get homeActionKindOpenNote => 'Ouvrir une note';
+
+  @override
+  String get homeActionLabel => 'Libellé';
+
+  @override
+  String get homeActionNoNote => 'Aucune note choisie';
+
+  @override
+  String get homeActionNote => 'Note';
+
+  @override
+  String get homeActionNoTemplate => 'Aucun : une note vide';
+
+  @override
+  String get homeActionNoteName => 'Nom';
+
+  @override
+  String get homeActionOpenAfter => 'Ouvrir après la création';
+
+  @override
+  String get homeActionProject => 'Projet';
+
+  @override
+  String get homeActionTemplate => 'Modèle';
+
+  @override
+  String homeActionMissing(String path) =>
+      "$path n'est plus dans la bibliothèque";
 }

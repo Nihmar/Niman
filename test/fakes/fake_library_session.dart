@@ -23,6 +23,7 @@ import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -965,6 +966,29 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       _deviceNavigation = null;
     }
   }
+
+  /// The library's Home file, as a test seeds or reads it; null for none.
+  HomeLayout? libraryHome;
+
+  /// This device's own Home; null while *Only on this device* is off.
+  HomeLayout? deviceHome;
+
+  @override
+  Future<({HomeLayout? library, HomeLayout? device})> get home async =>
+      (library: libraryHome, device: deviceHome);
+
+  @override
+  Future<void> setHome(HomeLayout layout, {required bool onDevice}) async {
+    if (onDevice) {
+      deviceHome = layout;
+    } else {
+      libraryHome = layout;
+      deviceHome = null;
+    }
+  }
+
+  @override
+  Future<void> clearDeviceHome() async => deviceHome = null;
 
   @override
   Future<List<String>> notePathsUnder(String folder) async => [

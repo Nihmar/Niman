@@ -3371,4 +3371,222 @@ final class LatvianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'ko šeit teikt — to redzat tikai jūs.';
+
+  @override
+  String get tabHome => 'Sākums';
+
+  @override
+  String get homeTileActions => 'Darbības';
+
+  @override
+  String get homeTileJournalToday => 'Šodienas dienasgrāmata';
+
+  @override
+  String get homeTileTasksDue => 'Termiņa uzdevumi';
+
+  @override
+  String get homeTileRecent => 'Nesen mainītas';
+
+  @override
+  String get homeTilePinned => 'Piespraustās';
+
+  @override
+  String get homeTileJournalCalendar => 'Dienasgrāmatas kalendārs';
+
+  @override
+  String get homeTileTopTags => 'Biežākās birkas';
+
+  @override
+  String get homeTileRandomNote => 'Nejauša piezīme';
+
+  @override
+  String get homeTileSearch => 'Saglabāta meklēšana';
+
+  @override
+  String get homeJournalEmpty => 'Šodien vēl nekas nav uzrakstīts.';
+
+  @override
+  String get homeJournalWrite => 'Rakstīt šodienas ierakstu';
+
+  @override
+  String get homeTasksEmpty => 'Nav atvērtu uzdevumu.';
+
+  @override
+  String get homeNotesEmpty => 'Piezīmju vēl nav.';
+
+  @override
+  String get homePinnedEmpty => 'Piespraud piezīmi, un tā parādīsies šeit.';
+
+  @override
+  String get homeTagsEmpty => 'Birku vēl nav.';
+
+  @override
+  String get homeSearchEmpty => 'Nekas neatbilst.';
+
+  @override
+  String get homeSearchNoQuery => 'Vaicājuma vēl nav.';
+
+  @override
+  String get homeRandomAnother => 'Citu';
+
+  @override
+  String get homeEdit => 'Rediģēt sākumu';
+
+  @override
+  String get homeEditDone => 'Gatavs';
+
+  @override
+  String get homeReset => 'Atiestatīt';
+
+  @override
+  String get homeResetTitle => 'Atiestatīt sākumu?';
+
+  @override
+  String get homeResetBody => 'Visas flīzes atgriežas noklusējuma sākumā.';
+
+  @override
+  String get homeUseLibraryTitle => 'Izmantot bibliotēkas sākumu?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Šīs ierīces sākums tiek atmests, un šeit atkal tiek rādīts '
+      'bibliotēkas sākums.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Atmest';
+
+  @override
+  String get homeAddTiles => 'Pievienot flīzes';
+
+  @override
+  String get homeHiddenTiles => 'Paslēptās';
+
+  @override
+  String get homeTileOnHome => 'Sākumā';
+
+  @override
+  String get homeTileHide => 'Paslēpt';
+
+  @override
+  String get homeTileShow => 'Rādīt';
+
+  @override
+  String get homeTileMove => 'Pārvietot un mainīt izmēru';
+
+  @override
+  String get homeMoveLeft => 'Pārvietot pa kreisi';
+
+  @override
+  String get homeMoveRight => 'Pārvietot pa labi';
+
+  @override
+  String get homeMoveUp => 'Pārvietot uz augšu';
+
+  @override
+  String get homeMoveDown => 'Pārvietot uz leju';
+
+  @override
+  String get homeWider => 'Platāks';
+
+  @override
+  String get homeNarrower => 'Šaurāks';
+
+  @override
+  String get homeTaller => 'Augstāks';
+
+  @override
+  String get homeShorter => 'Zemāks';
+
+  @override
+  String get homeTileSettings => 'Flīzes iestatījumi';
+
+  @override
+  String get homeSearchName => 'Nosaukums';
+
+  @override
+  String get homeSearchQuery => 'Vaicājums';
+
+  @override
+  String get homeSearchQueryHint => 'Vārdi vai atslēga = vērtība';
+
+  @override
+  String get homeGridHint =>
+      'Velciet flīzi, lai to pārvietotu, un tās stūri, lai mainītu izmēru.';
+
+  @override
+  String get homeColumnHint =>
+      'Velciet turi, lai mainītu secību. Slēdzis rāda vai paslēpj flīzi '
+      'visās ierīcēs.';
+
+  @override
+  String get homeActionAdd => 'Pievienot darbību';
+
+  @override
+  String get homeActionAsk => 'Jautāt';
+
+  @override
+  String get homeActionAskHint => 'Jautā, nospiežot pogu';
+
+  @override
+  String get homeActionCaptureFolder => 'Saglabāto lapu mape';
+
+  @override
+  String get homeActionContext => 'Konteksts';
+
+  @override
+  String get homeActionEdit => 'Rediģēt darbību';
+
+  @override
+  String get homeActionFieldAdd => 'Pievienot lauku';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter atslēga';
+
+  @override
+  String get homeActionFields => 'Lauki';
+
+  @override
+  String get homeActionFixed => 'Fiksēta';
+
+  @override
+  String get homeActionFixedHint => 'Teksts vai {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mape';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Dara';
+
+  @override
+  String get homeActionKindOpenNote => 'Atvērt piezīmi';
+
+  @override
+  String get homeActionLabel => 'Etiķete';
+
+  @override
+  String get homeActionNoNote => 'Piezīme nav izvēlēta';
+
+  @override
+  String get homeActionNote => 'Piezīme';
+
+  @override
+  String get homeActionNoTemplate => 'Nav: tukša piezīme';
+
+  @override
+  String get homeActionNoteName => 'Nosaukums';
+
+  @override
+  String get homeActionOpenAfter => 'Atvērt pēc izveides';
+
+  @override
+  String get homeActionProject => 'Projekts';
+
+  @override
+  String get homeActionTemplate => 'Veidne';
+
+  @override
+  String homeActionMissing(String path) => '$path vairs nav bibliotēkā';
 }

@@ -11,7 +11,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
@@ -52,6 +54,15 @@ final class PaletteSettingChoice extends PaletteChoice {
   final PaletteSetting setting;
 }
 
+/// A Home action, to run (#535).
+final class PaletteActionChoice extends PaletteChoice {
+  /// Picked [action].
+  const new(this.action);
+
+  /// The action.
+  final HomeAction action;
+}
+
 /// One settings row as the palette lists it (#229): its title, the area
 /// it lives in, and where to open.
 @immutable
@@ -81,6 +92,7 @@ Future<PaletteChoice?> showCommandPalette(
   List<AppCommand> recentCommands = const [],
   List<String> recentNotes = const [],
   List<PaletteSetting> settings = const [],
+  Future<List<HomeAction>> Function()? homeActions,
   bool notesOnly = false,
   void Function(AppCommand command)? onTogglePin,
 }) {
@@ -96,6 +108,7 @@ Future<PaletteChoice?> showCommandPalette(
       recentCommands: recentCommands,
       recentNotes: recentNotes,
       settings: notesOnly ? const [] : settings,
+      homeActions: notesOnly ? null : homeActions,
       onTogglePin: notesOnly ? null : onTogglePin,
     ),
   );
@@ -110,6 +123,7 @@ final class CommandPalette extends StatefulWidget {
     this.recentCommands = const [],
     this.recentNotes = const [],
     this.settings = const [],
+    this.homeActions,
     this.onTogglePin,
     super.key,
   });
@@ -131,6 +145,10 @@ final class CommandPalette extends StatefulWidget {
   /// three and the slowest to want.
   final List<PaletteSetting> settings;
 
+  /// The Home's actions (#535), read once the palette is up so it never
+  /// waits on the file; null for none.
+  final Future<List<HomeAction>> Function()? homeActions;
+
   /// Pins or unpins a command (#208); null leaves the pins out (Go to
   /// note's palette, which has no commands).
   final void Function(AppCommand command)? onTogglePin;
@@ -148,6 +166,8 @@ final class _CommandPaletteState extends State<CommandPalette> {
   List<PaletteCommand> _commands = const [];
   List<String> _notes = const [];
   List<PaletteSetting> _settings = const [];
+  List<HomeAction> _allActions = const [];
+  List<HomeAction> _actions = const [];
   int _selected = 0;
   int _token = 0;
   Timer? _debounce;
@@ -164,6 +184,35 @@ final class _CommandPaletteState extends State<CommandPalette> {
     // A pin from a row re-ranks the list under it (#208): the row moves
     // to the pinned head, or leaves it, without reopening the palette.
     PinnedCommands.current.addListener(_onPins);
+    unawaited(_loadActions());
+  }
+
+  Future<void> _loadActions() async {
+    final load = widget.homeActions;
+    if (load == null) return;
+    final actions = await load();
+    if (!mounted) return;
+    setState(() {
+      _allActions = actions;
+      _actions = _rankActions(_query.text);
+    });
+  }
+
+  /// An action's name in the palette: `Home: Meeting…`, like a command.
+  static String _actionName(HomeAction action) =>
+      '${AppStrings.tabHome}: ${homeActionLabel(action)}'
+      '${action.asks ? '…' : ''}';
+
+  /// The actions [query] finds; nothing with nothing typed, so the
+  /// palette still opens on what was used.
+  List<HomeAction> _rankActions(String query) {
+    if (query.trim().isEmpty) return const [];
+    return paletteRank(
+      _allActions,
+      query,
+      name: _actionName,
+      id: (a) => a.id,
+    ).take(6).toList();
   }
 
   void _onPins() {
@@ -229,6 +278,7 @@ final class _CommandPaletteState extends State<CommandPalette> {
   /// Everything listed, commands first, settings last: what ↑↓ walk.
   List<PaletteChoice> get _items => [
     for (final c in _commands) PaletteCommandChoice(c.command),
+    for (final a in _actions) PaletteActionChoice(a),
     for (final n in _notes) PaletteNoteChoice(n),
     for (final s in _settings) PaletteSettingChoice(s),
   ];
@@ -249,6 +299,7 @@ final class _CommandPaletteState extends State<CommandPalette> {
     setState(() {
       _settings = _rankSettings(query);
       _commands = _rankCommands(query);
+      _actions = _rankActions(query);
       if (query.trim().isEmpty) _notes = widget.recentNotes.take(8).toList();
       _selected = 0;
     });
@@ -421,7 +472,18 @@ final class _CommandPaletteState extends State<CommandPalette> {
                                     keys: keys,
                                   ),
                                 ),
-                              if (_commands.isNotEmpty && _notes.isNotEmpty)
+                              if (_actions.isNotEmpty)
+                                _Heading(AppStrings.tabHome),
+                              for (final action in _actions)
+                                row(
+                                  _ActionLine(
+                                    action: action,
+                                    name: _actionName(action),
+                                  ),
+                                ),
+                              if ((_commands.isNotEmpty ||
+                                      _actions.isNotEmpty) &&
+                                  _notes.isNotEmpty)
                                 _Heading(AppStrings.paletteNotes),
                               for (final path in _notes)
                                 row(_NoteLine(path: path)),
@@ -634,6 +696,38 @@ final class _PinButton extends StatelessWidget {
       color: pinned ? scheme.primary : scheme.onSurfaceVariant,
       icon: Icon(pinned ? Icons.push_pin : Icons.push_pin_outlined),
       onPressed: () => onPressed(command),
+    );
+  }
+}
+
+/// One Home action in the palette (#535): its icon and its name.
+final class _ActionLine extends StatelessWidget {
+  const new({required this.action, required this.name});
+
+  final HomeAction action;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      key: Key('palette-action-${action.id}'),
+      children: [
+        Icon(
+          homeActionIcon(action),
+          size: 18,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium,
+          ),
+        ),
+      ],
     );
   }
 }

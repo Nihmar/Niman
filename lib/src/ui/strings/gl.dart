@@ -3399,4 +3399,224 @@ final class GalicianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'que dicir aquí — só ti o ves.';
+
+  @override
+  String get tabHome => 'Inicio';
+
+  @override
+  String get homeTileActions => 'Accións';
+
+  @override
+  String get homeTileJournalToday => 'Diario de hoxe';
+
+  @override
+  String get homeTileTasksDue => 'Tarefas pendentes';
+
+  @override
+  String get homeTileRecent => 'Modificadas recentemente';
+
+  @override
+  String get homeTilePinned => 'Fixadas';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendario do diario';
+
+  @override
+  String get homeTileTopTags => 'Etiquetas principais';
+
+  @override
+  String get homeTileRandomNote => 'Nota ao chou';
+
+  @override
+  String get homeTileSearch => 'Busca gardada';
+
+  @override
+  String get homeJournalEmpty => 'Aínda non hai nada escrito hoxe.';
+
+  @override
+  String get homeJournalWrite => 'Escribir a entrada de hoxe';
+
+  @override
+  String get homeTasksEmpty => 'Non hai tarefas abertas.';
+
+  @override
+  String get homeNotesEmpty => 'Aínda non hai notas.';
+
+  @override
+  String get homePinnedEmpty => 'Fixa unha nota e aparecerá aquí.';
+
+  @override
+  String get homeTagsEmpty => 'Aínda non hai etiquetas.';
+
+  @override
+  String get homeSearchEmpty => 'Sen coincidencias.';
+
+  @override
+  String get homeSearchNoQuery => 'Aínda non hai consulta.';
+
+  @override
+  String get homeRandomAnother => 'Outra';
+
+  @override
+  String get homeEdit => 'Editar inicio';
+
+  @override
+  String get homeEditDone => 'Feito';
+
+  @override
+  String get homeReset => 'Restablecer';
+
+  @override
+  String get homeResetTitle => 'Restablecer o inicio?';
+
+  @override
+  String get homeResetBody =>
+      'Todos os mosaicos volven ao inicio predeterminado.';
+
+  @override
+  String get homeUseLibraryTitle => 'Usar o inicio da biblioteca?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Descártase o inicio propio deste dispositivo e aquí volve aparecer o '
+      'da biblioteca.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Descartar';
+
+  @override
+  String get homeAddTiles => 'Engadir mosaicos';
+
+  @override
+  String get homeHiddenTiles => 'Agochados';
+
+  @override
+  String get homeTileOnHome => 'No inicio';
+
+  @override
+  String get homeTileHide => 'Agochar';
+
+  @override
+  String get homeTileShow => 'Amosar';
+
+  @override
+  String get homeTileMove => 'Mover e cambiar o tamaño';
+
+  @override
+  String get homeMoveLeft => 'Mover á esquerda';
+
+  @override
+  String get homeMoveRight => 'Mover á dereita';
+
+  @override
+  String get homeMoveUp => 'Mover arriba';
+
+  @override
+  String get homeMoveDown => 'Mover abaixo';
+
+  @override
+  String get homeWider => 'Máis ancho';
+
+  @override
+  String get homeNarrower => 'Máis estreito';
+
+  @override
+  String get homeTaller => 'Máis alto';
+
+  @override
+  String get homeShorter => 'Máis baixo';
+
+  @override
+  String get homeTileSettings => 'Axustes do mosaico';
+
+  @override
+  String get homeSearchName => 'Nome';
+
+  @override
+  String get homeSearchQuery => 'Consulta';
+
+  @override
+  String get homeSearchQueryHint => 'Palabras, ou clave = valor';
+
+  @override
+  String get homeGridHint =>
+      'Arrastra un mosaico para movelo, e a súa esquina para cambiar o '
+      'tamaño.';
+
+  @override
+  String get homeColumnHint =>
+      'Arrastra un asa para reordenar. Un interruptor amosa ou agocha un '
+      'mosaico en todos os dispositivos.';
+
+  @override
+  String get homeActionAdd => 'Engadir acción';
+
+  @override
+  String get homeActionAsk => 'Preguntar';
+
+  @override
+  String get homeActionAskHint => 'Pregúntase ao premer o botón';
+
+  @override
+  String get homeActionCaptureFolder => 'O cartafol das capturas';
+
+  @override
+  String get homeActionContext => 'Contexto';
+
+  @override
+  String get homeActionEdit => 'Editar acción';
+
+  @override
+  String get homeActionFieldAdd => 'Engadir campo';
+
+  @override
+  String get homeActionFieldKey => 'Clave do frontmatter';
+
+  @override
+  String get homeActionFields => 'Campos';
+
+  @override
+  String get homeActionFixed => 'Fixo';
+
+  @override
+  String get homeActionFixedHint => 'Texto, ou {{date}}';
+
+  @override
+  String get homeActionFolder => 'Cartafol';
+
+  @override
+  String get homeActionIcon => 'Icona';
+
+  @override
+  String get homeActionKind => 'Fai';
+
+  @override
+  String get homeActionKindOpenNote => 'Abrir unha nota';
+
+  @override
+  String get homeActionLabel => 'Etiqueta';
+
+  @override
+  String get homeActionNoNote => 'Non se escolleu ningunha nota';
+
+  @override
+  String get homeActionNote => 'Nota';
+
+  @override
+  String get homeActionNoTemplate => 'Ningún: unha nota baleira';
+
+  @override
+  String get homeActionNoteName => 'Nome';
+
+  @override
+  String get homeActionOpenAfter => 'Abrir despois de crear';
+
+  @override
+  String get homeActionProject => 'Proxecto';
+
+  @override
+  String get homeActionTemplate => 'Modelo';
+
+  @override
+  String homeActionMissing(String path) => '$path xa non está na biblioteca';
 }

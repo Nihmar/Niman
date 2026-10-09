@@ -3418,4 +3418,222 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'ką čia pasakyti — matote tik jūs.';
+
+  @override
+  String get tabHome => 'Pradžia';
+
+  @override
+  String get homeTileActions => 'Veiksmai';
+
+  @override
+  String get homeTileJournalToday => 'Šiandienos dienoraštis';
+
+  @override
+  String get homeTileTasksDue => 'Artėjančios užduotys';
+
+  @override
+  String get homeTileRecent => 'Neseniai keisti';
+
+  @override
+  String get homeTilePinned => 'Prisegti';
+
+  @override
+  String get homeTileJournalCalendar => 'Dienoraščio kalendorius';
+
+  @override
+  String get homeTileTopTags => 'Dažniausios žymos';
+
+  @override
+  String get homeTileRandomNote => 'Atsitiktinis užrašas';
+
+  @override
+  String get homeTileSearch => 'Išsaugota paieška';
+
+  @override
+  String get homeJournalEmpty => 'Šiandien dar nieko neparašyta.';
+
+  @override
+  String get homeJournalWrite => 'Rašyti šiandienos įrašą';
+
+  @override
+  String get homeTasksEmpty => 'Atvirų užduočių nėra.';
+
+  @override
+  String get homeNotesEmpty => 'Užrašų dar nėra.';
+
+  @override
+  String get homePinnedEmpty => 'Prisekite užrašą ir jis bus rodomas čia.';
+
+  @override
+  String get homeTagsEmpty => 'Žymų dar nėra.';
+
+  @override
+  String get homeSearchEmpty => 'Nieko nerasta.';
+
+  @override
+  String get homeSearchNoQuery => 'Užklausos dar nėra.';
+
+  @override
+  String get homeRandomAnother => 'Kitas';
+
+  @override
+  String get homeEdit => 'Redaguoti pradžią';
+
+  @override
+  String get homeEditDone => 'Atlikta';
+
+  @override
+  String get homeReset => 'Atstatyti';
+
+  @override
+  String get homeResetTitle => 'Atstatyti pradžią?';
+
+  @override
+  String get homeResetBody => 'Visos plytelės grįžta į numatytąją pradžią.';
+
+  @override
+  String get homeUseLibraryTitle => 'Naudoti bibliotekos pradžią?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Šio įrenginio pradžia atmetama, ir čia vėl rodoma bibliotekos pradžia.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Atmesti';
+
+  @override
+  String get homeAddTiles => 'Pridėti plyteles';
+
+  @override
+  String get homeHiddenTiles => 'Paslėptos';
+
+  @override
+  String get homeTileOnHome => 'Pradžioje';
+
+  @override
+  String get homeTileHide => 'Slėpti';
+
+  @override
+  String get homeTileShow => 'Rodyti';
+
+  @override
+  String get homeTileMove => 'Perkelti ir keisti dydį';
+
+  @override
+  String get homeMoveLeft => 'Perkelti kairėn';
+
+  @override
+  String get homeMoveRight => 'Perkelti dešinėn';
+
+  @override
+  String get homeMoveUp => 'Perkelti aukštyn';
+
+  @override
+  String get homeMoveDown => 'Perkelti žemyn';
+
+  @override
+  String get homeWider => 'Platesnis';
+
+  @override
+  String get homeNarrower => 'Siauresnis';
+
+  @override
+  String get homeTaller => 'Aukštesnis';
+
+  @override
+  String get homeShorter => 'Žemesnis';
+
+  @override
+  String get homeTileSettings => 'Plytelės nustatymai';
+
+  @override
+  String get homeSearchName => 'Pavadinimas';
+
+  @override
+  String get homeSearchQuery => 'Užklausa';
+
+  @override
+  String get homeSearchQueryHint => 'Žodžiai arba raktas = reikšmė';
+
+  @override
+  String get homeGridHint =>
+      'Vilkite plytelę, kad ją perkeltumėte, o jos kampą – kad pakeistumėte '
+      'dydį.';
+
+  @override
+  String get homeColumnHint =>
+      'Vilkite rankenėlę, kad pakeistumėte tvarką. Jungiklis rodo arba '
+      'slepia plytelę visuose įrenginiuose.';
+
+  @override
+  String get homeActionAdd => 'Pridėti veiksmą';
+
+  @override
+  String get homeActionAsk => 'Klausti';
+
+  @override
+  String get homeActionAskHint => 'Klausiama paspaudus mygtuką';
+
+  @override
+  String get homeActionCaptureFolder => 'Išsaugojimų aplankas';
+
+  @override
+  String get homeActionContext => 'Kontekstas';
+
+  @override
+  String get homeActionEdit => 'Redaguoti veiksmą';
+
+  @override
+  String get homeActionFieldAdd => 'Pridėti lauką';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter raktas';
+
+  @override
+  String get homeActionFields => 'Laukai';
+
+  @override
+  String get homeActionFixed => 'Fiksuota';
+
+  @override
+  String get homeActionFixedHint => 'Tekstas arba {{date}}';
+
+  @override
+  String get homeActionFolder => 'Aplankas';
+
+  @override
+  String get homeActionIcon => 'Piktograma';
+
+  @override
+  String get homeActionKind => 'Daro';
+
+  @override
+  String get homeActionKindOpenNote => 'Atidaryti užrašą';
+
+  @override
+  String get homeActionLabel => 'Užrašas';
+
+  @override
+  String get homeActionNoNote => 'Užrašas nepasirinktas';
+
+  @override
+  String get homeActionNote => 'Užrašas';
+
+  @override
+  String get homeActionNoTemplate => 'Nėra: tuščias užrašas';
+
+  @override
+  String get homeActionNoteName => 'Pavadinimas';
+
+  @override
+  String get homeActionOpenAfter => 'Atidaryti sukūrus';
+
+  @override
+  String get homeActionProject => 'Projektas';
+
+  @override
+  String get homeActionTemplate => 'Šablonas';
+
+  @override
+  String homeActionMissing(String path) => '$path nebėra bibliotekoje';
 }

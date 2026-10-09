@@ -3375,4 +3375,223 @@ final class CzechStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'co tu říct — vidíte to jen vy.';
+
+  @override
+  String get tabHome => 'Domů';
+
+  @override
+  String get homeTileActions => 'Akce';
+
+  @override
+  String get homeTileJournalToday => 'Dnešní deník';
+
+  @override
+  String get homeTileTasksDue => 'Úkoly k termínu';
+
+  @override
+  String get homeTileRecent => 'Nedávno upravené';
+
+  @override
+  String get homeTilePinned => 'Připnuté';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendář deníku';
+
+  @override
+  String get homeTileTopTags => 'Nejčastější štítky';
+
+  @override
+  String get homeTileRandomNote => 'Náhodná poznámka';
+
+  @override
+  String get homeTileSearch => 'Uložené hledání';
+
+  @override
+  String get homeJournalEmpty => 'Dnes ještě nic nenapsáno.';
+
+  @override
+  String get homeJournalWrite => 'Napsat dnešní záznam';
+
+  @override
+  String get homeTasksEmpty => 'Žádné otevřené úkoly.';
+
+  @override
+  String get homeNotesEmpty => 'Zatím žádné poznámky.';
+
+  @override
+  String get homePinnedEmpty => 'Připněte poznámku a objeví se zde.';
+
+  @override
+  String get homeTagsEmpty => 'Zatím žádné štítky.';
+
+  @override
+  String get homeSearchEmpty => 'Nic neodpovídá.';
+
+  @override
+  String get homeSearchNoQuery => 'Zatím žádný dotaz.';
+
+  @override
+  String get homeRandomAnother => 'Jiná';
+
+  @override
+  String get homeEdit => 'Upravit domovskou stránku';
+
+  @override
+  String get homeEditDone => 'Hotovo';
+
+  @override
+  String get homeReset => 'Obnovit';
+
+  @override
+  String get homeResetTitle => 'Obnovit domovskou stránku?';
+
+  @override
+  String get homeResetBody =>
+      'Všechny dlaždice se vrátí na výchozí domovskou stránku.';
+
+  @override
+  String get homeUseLibraryTitle => 'Použít domovskou stránku knihovny?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Vlastní domovská stránka tohoto zařízení se zahodí a znovu se zobrazí '
+      'ta z knihovny.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Zahodit';
+
+  @override
+  String get homeAddTiles => 'Přidat dlaždice';
+
+  @override
+  String get homeHiddenTiles => 'Skryté';
+
+  @override
+  String get homeTileOnHome => 'Na domovské stránce';
+
+  @override
+  String get homeTileHide => 'Skrýt';
+
+  @override
+  String get homeTileShow => 'Zobrazit';
+
+  @override
+  String get homeTileMove => 'Přesunout a změnit velikost';
+
+  @override
+  String get homeMoveLeft => 'Posunout doleva';
+
+  @override
+  String get homeMoveRight => 'Posunout doprava';
+
+  @override
+  String get homeMoveUp => 'Posunout nahoru';
+
+  @override
+  String get homeMoveDown => 'Posunout dolů';
+
+  @override
+  String get homeWider => 'Širší';
+
+  @override
+  String get homeNarrower => 'Užší';
+
+  @override
+  String get homeTaller => 'Vyšší';
+
+  @override
+  String get homeShorter => 'Nižší';
+
+  @override
+  String get homeTileSettings => 'Nastavení dlaždice';
+
+  @override
+  String get homeSearchName => 'Název';
+
+  @override
+  String get homeSearchQuery => 'Dotaz';
+
+  @override
+  String get homeSearchQueryHint => 'Slova, nebo klíč = hodnota';
+
+  @override
+  String get homeGridHint =>
+      'Přetažením dlaždici přesunete, tažením za roh změníte její velikost.';
+
+  @override
+  String get homeColumnHint =>
+      'Přetažením úchytu změníte pořadí. Přepínač zobrazí nebo skryje '
+      'dlaždici na všech zařízeních.';
+
+  @override
+  String get homeActionAdd => 'Přidat akci';
+
+  @override
+  String get homeActionAsk => 'Zeptat se';
+
+  @override
+  String get homeActionAskHint => 'Zeptá se při stisknutí tlačítka';
+
+  @override
+  String get homeActionCaptureFolder => 'Složka pro záchyty';
+
+  @override
+  String get homeActionContext => 'Kontext';
+
+  @override
+  String get homeActionEdit => 'Upravit akci';
+
+  @override
+  String get homeActionFieldAdd => 'Přidat pole';
+
+  @override
+  String get homeActionFieldKey => 'Klíč frontmatteru';
+
+  @override
+  String get homeActionFields => 'Pole';
+
+  @override
+  String get homeActionFixed => 'Pevné';
+
+  @override
+  String get homeActionFixedHint => 'Text nebo {{date}}';
+
+  @override
+  String get homeActionFolder => 'Složka';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Dělá';
+
+  @override
+  String get homeActionKindOpenNote => 'Otevřít poznámku';
+
+  @override
+  String get homeActionLabel => 'Popisek';
+
+  @override
+  String get homeActionNoNote => 'Není vybrána žádná poznámka';
+
+  @override
+  String get homeActionNote => 'Poznámka';
+
+  @override
+  String get homeActionNoTemplate => 'Žádná: prázdná poznámka';
+
+  @override
+  String get homeActionNoteName => 'Název';
+
+  @override
+  String get homeActionOpenAfter => 'Po vytvoření otevřít';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Šablona';
+
+  @override
+  String homeActionMissing(String path) => '$path už v knihovně není';
 }

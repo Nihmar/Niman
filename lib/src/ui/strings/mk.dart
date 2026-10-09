@@ -3404,4 +3404,223 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'што да се каже тука — гледате само вие.';
+
+  @override
+  String get tabHome => 'Почетна';
+
+  @override
+  String get homeTileActions => 'Дејства';
+
+  @override
+  String get homeTileJournalToday => 'Денешен дневник';
+
+  @override
+  String get homeTileTasksDue => 'Задачи со рок';
+
+  @override
+  String get homeTileRecent => 'Неодамна изменети';
+
+  @override
+  String get homeTilePinned => 'Закачени';
+
+  @override
+  String get homeTileJournalCalendar => 'Календар на дневникот';
+
+  @override
+  String get homeTileTopTags => 'Најчести ознаки';
+
+  @override
+  String get homeTileRandomNote => 'Случајна белешка';
+
+  @override
+  String get homeTileSearch => 'Зачувано пребарување';
+
+  @override
+  String get homeJournalEmpty => 'Денес сè уште ништо не е напишано.';
+
+  @override
+  String get homeJournalWrite => 'Напиши го денешниот запис';
+
+  @override
+  String get homeTasksEmpty => 'Нема отворени задачи.';
+
+  @override
+  String get homeNotesEmpty => 'Сè уште нема белешки.';
+
+  @override
+  String get homePinnedEmpty => 'Закачете белешка и ќе се појави тука.';
+
+  @override
+  String get homeTagsEmpty => 'Сè уште нема ознаки.';
+
+  @override
+  String get homeSearchEmpty => 'Нема совпаѓања.';
+
+  @override
+  String get homeSearchNoQuery => 'Сè уште нема барање.';
+
+  @override
+  String get homeRandomAnother => 'Друга';
+
+  @override
+  String get homeEdit => 'Уреди почетна';
+
+  @override
+  String get homeEditDone => 'Готово';
+
+  @override
+  String get homeReset => 'Ресетирај';
+
+  @override
+  String get homeResetTitle => 'Да се ресетира почетната?';
+
+  @override
+  String get homeResetBody => 'Сите плочки се враќаат на стандардната почетна.';
+
+  @override
+  String get homeUseLibraryTitle => 'Да се користи почетната на библиотеката?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Сопствената почетна на овој уред се отфрла, а тука повторно се '
+      'прикажува онаа на библиотеката.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Отфрли';
+
+  @override
+  String get homeAddTiles => 'Додај плочки';
+
+  @override
+  String get homeHiddenTiles => 'Скриени';
+
+  @override
+  String get homeTileOnHome => 'На почетната';
+
+  @override
+  String get homeTileHide => 'Скриј';
+
+  @override
+  String get homeTileShow => 'Прикажи';
+
+  @override
+  String get homeTileMove => 'Премести и промени големина';
+
+  @override
+  String get homeMoveLeft => 'Помести лево';
+
+  @override
+  String get homeMoveRight => 'Помести десно';
+
+  @override
+  String get homeMoveUp => 'Помести горе';
+
+  @override
+  String get homeMoveDown => 'Помести долу';
+
+  @override
+  String get homeWider => 'Пошироко';
+
+  @override
+  String get homeNarrower => 'Потесно';
+
+  @override
+  String get homeTaller => 'Повисоко';
+
+  @override
+  String get homeShorter => 'Пониско';
+
+  @override
+  String get homeTileSettings => 'Поставки на плочката';
+
+  @override
+  String get homeSearchName => 'Име';
+
+  @override
+  String get homeSearchQuery => 'Барање';
+
+  @override
+  String get homeSearchQueryHint => 'Зборови или клуч = вредност';
+
+  @override
+  String get homeGridHint =>
+      'Повлечете плочка за да ја преместите, а нејзиниот агол за да ја '
+      'промените големината.';
+
+  @override
+  String get homeColumnHint =>
+      'Повлечете рачка за да го промените редоследот. Прекинувачот прикажува '
+      'или скрива плочка на секој уред.';
+
+  @override
+  String get homeActionAdd => 'Додај дејство';
+
+  @override
+  String get homeActionAsk => 'Прашај';
+
+  @override
+  String get homeActionAskHint => 'Се прашува кога ќе се притисне копчето';
+
+  @override
+  String get homeActionCaptureFolder => 'Папката за снимени страници';
+
+  @override
+  String get homeActionContext => 'Контекст';
+
+  @override
+  String get homeActionEdit => 'Уреди дејство';
+
+  @override
+  String get homeActionFieldAdd => 'Додај поле';
+
+  @override
+  String get homeActionFieldKey => 'Клуч на frontmatter';
+
+  @override
+  String get homeActionFields => 'Полиња';
+
+  @override
+  String get homeActionFixed => 'Фиксно';
+
+  @override
+  String get homeActionFixedHint => 'Текст или {{date}}';
+
+  @override
+  String get homeActionFolder => 'Папка';
+
+  @override
+  String get homeActionIcon => 'Икона';
+
+  @override
+  String get homeActionKind => 'Прави';
+
+  @override
+  String get homeActionKindOpenNote => 'Отвори белешка';
+
+  @override
+  String get homeActionLabel => 'Натпис';
+
+  @override
+  String get homeActionNoNote => 'Не е избрана белешка';
+
+  @override
+  String get homeActionNote => 'Белешка';
+
+  @override
+  String get homeActionNoTemplate => 'Ниеден: празна белешка';
+
+  @override
+  String get homeActionNoteName => 'Име';
+
+  @override
+  String get homeActionOpenAfter => 'Отвори по создавањето';
+
+  @override
+  String get homeActionProject => 'Проект';
+
+  @override
+  String get homeActionTemplate => 'Шаблон';
+
+  @override
+  String homeActionMissing(String path) => '$path веќе не е во библиотеката';
 }

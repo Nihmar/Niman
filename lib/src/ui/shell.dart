@@ -39,6 +39,8 @@ import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
 import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/home/home_action.dart';
+import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -86,6 +88,10 @@ import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
+import 'package:niman/src/ui/home/action_runner.dart';
+import 'package:niman/src/ui/home/home_host.dart';
+import 'package:niman/src/ui/home/home_note_action.dart';
+import 'package:niman/src/ui/home/home_screen.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
@@ -116,6 +122,7 @@ import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
+import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/settings_tab.dart';
@@ -1804,6 +1811,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       });
     }
     _markOpenNote(null, null);
+    _searchRequests.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
@@ -2886,7 +2894,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final fab = switch (_tab) {
       ShellTab.files => _newItemFab(),
       ShellTab.todo => _todoAddFab(),
-      ShellTab.search || ShellTab.quickNote || ShellTab.settings => null,
+      ShellTab.search ||
+      ShellTab.quickNote ||
+      ShellTab.settings ||
+      ShellTab.home => null,
     };
     if (fab == null) return null;
     return KeyedSubtree(key: const Key('shell-tab-fab'), child: fab);
@@ -3072,6 +3083,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ShellTab.search => AppStrings.tabSearch,
     ShellTab.quickNote => AppStrings.quickNoteTitle,
     ShellTab.settings => AppStrings.tabSettings,
+    ShellTab.home => AppStrings.tabHome,
   };
 
   /// The narrow shell: app bar for the tab + the bottom navigation bar.
@@ -3432,6 +3444,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search),
       AppCommand.tabQuickNote: () => _onDestinationSelected(ShellTab.quickNote),
       AppCommand.tabSettings: () => _onDestinationSelected(ShellTab.settings),
+      AppCommand.tabHome: () => _onDestinationSelected(ShellTab.home),
       AppCommand.togglePreview: _togglePreview,
       AppCommand.switchEditor: () => unawaited(
         _setEditorKind(
@@ -4202,6 +4215,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       recentCommands: _recentCommands,
       recentNotes: _workspace.recentNotes,
       settings: _paletteSettings(),
+      homeActions: _homeActionsOffered,
       onTogglePin: (command) =>
           unawaited(PinnedCommands.toggle(widget.controller, command)),
       searchNotes: (query) async => ops == null
@@ -4216,7 +4230,24 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _openNoteFromLink(path, null);
       case PaletteSettingChoice(:final setting):
         _openSettingsAt(setting.target);
+      case PaletteActionChoice(:final action):
+        unawaited(_homeActions.run(context, action));
     }
+  }
+
+  /// Every action of the Home on show (#535), for the palette: the
+  /// buttons of its shown actions tiles, the ones a later build wrote
+  /// left out. Hidden or not, the Home's tab is not asked for.
+  Future<List<HomeAction>> _homeActionsOffered() async {
+    final ops = widget.controller.ops;
+    if (ops == null) return const [];
+    final home = await ops.home;
+    final layout = home.device ?? home.library ?? HomeLayout.defaults;
+    return [
+      for (final tile in layout.column)
+        for (final action in tile.actions)
+          if (action.kind != null) action,
+    ];
   }
 
   /// The palette's commands: every one that can run now, but the
@@ -4891,6 +4922,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _showQuickNoteChooser
             ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
             : const SizedBox.shrink(),
+      ShellTab.home => HomeScreen(
+        host: _homeHost(controller),
+        tab: _tabListenable,
+      ),
       ShellTab.settings => SettingsTab(
         // A palette pick opens the tab where it points, once (#229).
         key: ValueKey(_settingsTarget),
@@ -4909,7 +4944,75 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The Search tab's body; the slot owns which of the two shows
   /// (issue #100 moved it into [SearchSlot]).
   Widget _searchSlot(LibrarySession controller) {
-    return SearchSlot(controller: controller, onOpenNote: _openSearchNote);
+    return SearchSlot(
+      controller: controller,
+      onOpenNote: _openSearchNote,
+      requests: _searchRequests,
+    );
+  }
+
+  /// What the Home asks Search to show (#535).
+  final ValueNotifier<SearchRequest?> _searchRequests = ValueNotifier(null);
+
+  /// Shows Search with [request]: a query typed in, or a tag's notes.
+  void _showSearch(SearchRequest request) {
+    _searchRequests.value = request;
+    _selectShellTab(ShellTab.search);
+  }
+
+  /// The Home's way into the shell (#535). A note opens the way a search
+  /// result does: over the tab on a phone, in the panes on a wide window.
+  HomeHost _homeHost(LibrarySession controller) => HomeHost(
+    controller: controller,
+    todo: _todoController,
+    journal: _journalFlow,
+    openNote: _openSearchNote,
+    openSearch: (query) => _showSearch(SearchRequest.forText(query)),
+    openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),
+    openTodo: _openTodo,
+    runAction: (action) => unawaited(_homeActions.run(context, action)),
+  );
+
+  /// Runs the Home's actions through the shell's own flows (#535).
+  late final HomeActionRunner _homeActions = HomeActionRunner(
+    newNote: (context, action) => makeHomeNote(
+      context,
+      action,
+      controller: widget.controller,
+      templates: _templateFlow,
+    ),
+    addTask: _addHomeTask,
+    openNote: _openSearchNote,
+    openJournal: _journalFlow.openToday,
+    capture: (context, action) =>
+        _captureFlow.capture(context, folder: action.folder),
+    missing: widget.controller.missingPaths,
+    tell: (message) =>
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message))),
+  );
+
+  /// Adds a task from a Home action: its project and context are written
+  /// in, the caret before them.
+  Future<void> _addHomeTask(HomeAction action) async {
+    final snapshot = _todoController.snapshot;
+    final line = await showTodoTaskDialog(
+      context,
+      today: DateTime.now(),
+      text: [
+        '',
+        if (action.project case final project? when project.isNotEmpty)
+          '+$project',
+        if (action.context case final where? when where.isNotEmpty) '@$where',
+      ].join(' '),
+      knownTokens: snapshot == null
+          ? const <String>{}
+          : snapshotTokens(snapshot),
+      health: widget.reminders.health.value,
+      onOpenReminderSettings: widget.reminders.openHealthSettings,
+    );
+    if (line == null || !mounted) return;
+    await _guard(() => _todoController.add(line));
   }
 
   /// The desktop tree's controls at the base of its column (T-PP-22):

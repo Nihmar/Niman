@@ -3395,4 +3395,221 @@ final class FinnishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'mitä tässä sanotaan — vain sinä näet sen.';
+
+  @override
+  String get tabHome => 'Koti';
+
+  @override
+  String get homeTileActions => 'Toiminnot';
+
+  @override
+  String get homeTileJournalToday => 'Päivän päiväkirja';
+
+  @override
+  String get homeTileTasksDue => 'Erääntyvät tehtävät';
+
+  @override
+  String get homeTileRecent => 'Viimeksi muokatut';
+
+  @override
+  String get homeTilePinned => 'Kiinnitetyt';
+
+  @override
+  String get homeTileJournalCalendar => 'Päiväkirjan kalenteri';
+
+  @override
+  String get homeTileTopTags => 'Suosituimmat tunnisteet';
+
+  @override
+  String get homeTileRandomNote => 'Satunnainen muistiinpano';
+
+  @override
+  String get homeTileSearch => 'Tallennettu haku';
+
+  @override
+  String get homeJournalEmpty => 'Tänään ei ole vielä kirjoitettu mitään.';
+
+  @override
+  String get homeJournalWrite => 'Kirjoita päivän merkintä';
+
+  @override
+  String get homeTasksEmpty => 'Ei avoimia tehtäviä.';
+
+  @override
+  String get homeNotesEmpty => 'Ei vielä muistiinpanoja.';
+
+  @override
+  String get homePinnedEmpty => 'Kiinnitä muistiinpano, niin se näkyy tässä.';
+
+  @override
+  String get homeTagsEmpty => 'Ei vielä tunnisteita.';
+
+  @override
+  String get homeSearchEmpty => 'Ei osumia.';
+
+  @override
+  String get homeSearchNoQuery => 'Ei vielä hakua.';
+
+  @override
+  String get homeRandomAnother => 'Toinen';
+
+  @override
+  String get homeEdit => 'Muokkaa kotia';
+
+  @override
+  String get homeEditDone => 'Valmis';
+
+  @override
+  String get homeReset => 'Palauta';
+
+  @override
+  String get homeResetTitle => 'Palautetaanko koti?';
+
+  @override
+  String get homeResetBody => 'Kaikki ruudut palaavat oletuskotiin.';
+
+  @override
+  String get homeUseLibraryTitle => 'Käytetäänkö kirjaston kotia?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Tämän laitteen oma koti hylätään, ja kirjaston koti näkyy taas tässä.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Hylkää';
+
+  @override
+  String get homeAddTiles => 'Lisää ruutuja';
+
+  @override
+  String get homeHiddenTiles => 'Piilotetut';
+
+  @override
+  String get homeTileOnHome => 'Kodissa';
+
+  @override
+  String get homeTileHide => 'Piilota';
+
+  @override
+  String get homeTileShow => 'Näytä';
+
+  @override
+  String get homeTileMove => 'Siirrä ja muuta kokoa';
+
+  @override
+  String get homeMoveLeft => 'Siirrä vasemmalle';
+
+  @override
+  String get homeMoveRight => 'Siirrä oikealle';
+
+  @override
+  String get homeMoveUp => 'Siirrä ylös';
+
+  @override
+  String get homeMoveDown => 'Siirrä alas';
+
+  @override
+  String get homeWider => 'Leveämpi';
+
+  @override
+  String get homeNarrower => 'Kapeampi';
+
+  @override
+  String get homeTaller => 'Korkeampi';
+
+  @override
+  String get homeShorter => 'Matalampi';
+
+  @override
+  String get homeTileSettings => 'Ruudun asetukset';
+
+  @override
+  String get homeSearchName => 'Nimi';
+
+  @override
+  String get homeSearchQuery => 'Haku';
+
+  @override
+  String get homeSearchQueryHint => 'Sanoja tai avain = arvo';
+
+  @override
+  String get homeGridHint =>
+      'Siirrä ruutua vetämällä, muuta kokoa vetämällä sen kulmasta.';
+
+  @override
+  String get homeColumnHint =>
+      'Järjestä vetämällä kahvasta. Kytkin näyttää tai piilottaa ruudun '
+      'kaikilla laitteilla.';
+
+  @override
+  String get homeActionAdd => 'Lisää toiminto';
+
+  @override
+  String get homeActionAsk => 'Kysy';
+
+  @override
+  String get homeActionAskHint => 'Kysytään, kun painiketta painetaan';
+
+  @override
+  String get homeActionCaptureFolder => 'Tallennusten kansio';
+
+  @override
+  String get homeActionContext => 'Konteksti';
+
+  @override
+  String get homeActionEdit => 'Muokkaa toimintoa';
+
+  @override
+  String get homeActionFieldAdd => 'Lisää kenttä';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-avain';
+
+  @override
+  String get homeActionFields => 'Kentät';
+
+  @override
+  String get homeActionFixed => 'Kiinteä';
+
+  @override
+  String get homeActionFixedHint => 'Tekstiä tai {{date}}';
+
+  @override
+  String get homeActionFolder => 'Kansio';
+
+  @override
+  String get homeActionIcon => 'Kuvake';
+
+  @override
+  String get homeActionKind => 'Tekee';
+
+  @override
+  String get homeActionKindOpenNote => 'Avaa muistiinpano';
+
+  @override
+  String get homeActionLabel => 'Nimike';
+
+  @override
+  String get homeActionNoNote => 'Muistiinpanoa ei ole valittu';
+
+  @override
+  String get homeActionNote => 'Muistiinpano';
+
+  @override
+  String get homeActionNoTemplate => 'Ei mitään: tyhjä muistiinpano';
+
+  @override
+  String get homeActionNoteName => 'Nimi';
+
+  @override
+  String get homeActionOpenAfter => 'Avaa luomisen jälkeen';
+
+  @override
+  String get homeActionProject => 'Projekti';
+
+  @override
+  String get homeActionTemplate => 'Pohja';
+
+  @override
+  String homeActionMissing(String path) => '$path ei ole enää kirjastossa';
 }

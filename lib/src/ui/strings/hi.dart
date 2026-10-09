@@ -3328,4 +3328,222 @@ final class HindiStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'यहाँ क्या कहना है — केवल आप देखते हैं।';
+
+  @override
+  String get tabHome => 'होम';
+
+  @override
+  String get homeTileActions => 'क्रियाएँ';
+
+  @override
+  String get homeTileJournalToday => 'आज की डायरी';
+
+  @override
+  String get homeTileTasksDue => 'देय कार्य';
+
+  @override
+  String get homeTileRecent => 'हाल में बदले गए';
+
+  @override
+  String get homeTilePinned => 'पिन किए गए';
+
+  @override
+  String get homeTileJournalCalendar => 'डायरी कैलेंडर';
+
+  @override
+  String get homeTileTopTags => 'शीर्ष टैग';
+
+  @override
+  String get homeTileRandomNote => 'यादृच्छिक नोट';
+
+  @override
+  String get homeTileSearch => 'सहेजी गई खोज';
+
+  @override
+  String get homeJournalEmpty => 'आज अभी तक कुछ नहीं लिखा गया।';
+
+  @override
+  String get homeJournalWrite => 'आज की प्रविष्टि लिखें';
+
+  @override
+  String get homeTasksEmpty => 'कोई खुला कार्य नहीं।';
+
+  @override
+  String get homeNotesEmpty => 'अभी कोई नोट नहीं।';
+
+  @override
+  String get homePinnedEmpty => 'कोई नोट पिन करें और वह यहाँ दिखेगा।';
+
+  @override
+  String get homeTagsEmpty => 'अभी कोई टैग नहीं।';
+
+  @override
+  String get homeSearchEmpty => 'कुछ भी मेल नहीं खाता।';
+
+  @override
+  String get homeSearchNoQuery => 'अभी कोई खोज नहीं।';
+
+  @override
+  String get homeRandomAnother => 'दूसरा';
+
+  @override
+  String get homeEdit => 'होम संपादित करें';
+
+  @override
+  String get homeEditDone => 'हो गया';
+
+  @override
+  String get homeReset => 'रीसेट करें';
+
+  @override
+  String get homeResetTitle => 'होम रीसेट करें?';
+
+  @override
+  String get homeResetBody => 'सभी टाइल डिफ़ॉल्ट होम पर लौट जाती हैं।';
+
+  @override
+  String get homeUseLibraryTitle => 'लाइब्रेरी का होम इस्तेमाल करें?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'इस डिवाइस का अपना होम हटा दिया जाएगा, और यहाँ फिर से लाइब्रेरी का होम '
+      'दिखेगा।';
+
+  @override
+  String get homeUseLibraryConfirm => 'हटाएँ';
+
+  @override
+  String get homeAddTiles => 'टाइल जोड़ें';
+
+  @override
+  String get homeHiddenTiles => 'छिपी हुई';
+
+  @override
+  String get homeTileOnHome => 'होम पर';
+
+  @override
+  String get homeTileHide => 'छिपाएँ';
+
+  @override
+  String get homeTileShow => 'दिखाएँ';
+
+  @override
+  String get homeTileMove => 'खिसकाएँ और आकार बदलें';
+
+  @override
+  String get homeMoveLeft => 'बाएँ खिसकाएँ';
+
+  @override
+  String get homeMoveRight => 'दाएँ खिसकाएँ';
+
+  @override
+  String get homeMoveUp => 'ऊपर खिसकाएँ';
+
+  @override
+  String get homeMoveDown => 'नीचे खिसकाएँ';
+
+  @override
+  String get homeWider => 'चौड़ा';
+
+  @override
+  String get homeNarrower => 'संकरा';
+
+  @override
+  String get homeTaller => 'लंबा';
+
+  @override
+  String get homeShorter => 'छोटा';
+
+  @override
+  String get homeTileSettings => 'टाइल सेटिंग्स';
+
+  @override
+  String get homeSearchName => 'नाम';
+
+  @override
+  String get homeSearchQuery => 'खोज';
+
+  @override
+  String get homeSearchQueryHint => 'शब्द, या कुंजी = मान';
+
+  @override
+  String get homeGridHint =>
+      'टाइल को खिसकाने के लिए खींचें, और आकार बदलने के लिए उसका कोना खींचें।';
+
+  @override
+  String get homeColumnHint =>
+      'क्रम बदलने के लिए हैंडल खींचें। स्विच हर डिवाइस पर टाइल दिखाता या '
+      'छिपाता है।';
+
+  @override
+  String get homeActionAdd => 'क्रिया जोड़ें';
+
+  @override
+  String get homeActionAsk => 'पूछें';
+
+  @override
+  String get homeActionAskHint => 'बटन दबाने पर पूछा जाता है';
+
+  @override
+  String get homeActionCaptureFolder => 'कैप्चर फ़ोल्डर';
+
+  @override
+  String get homeActionContext => 'संदर्भ';
+
+  @override
+  String get homeActionEdit => 'क्रिया संपादित करें';
+
+  @override
+  String get homeActionFieldAdd => 'फ़ील्ड जोड़ें';
+
+  @override
+  String get homeActionFieldKey => 'फ्रंटमैटर कुंजी';
+
+  @override
+  String get homeActionFields => 'फ़ील्ड';
+
+  @override
+  String get homeActionFixed => 'स्थिर';
+
+  @override
+  String get homeActionFixedHint => 'पाठ, या {{date}}';
+
+  @override
+  String get homeActionFolder => 'फ़ोल्डर';
+
+  @override
+  String get homeActionIcon => 'आइकन';
+
+  @override
+  String get homeActionKind => 'करता है';
+
+  @override
+  String get homeActionKindOpenNote => 'नोट खोलें';
+
+  @override
+  String get homeActionLabel => 'लेबल';
+
+  @override
+  String get homeActionNoNote => 'कोई नोट नहीं चुना';
+
+  @override
+  String get homeActionNote => 'नोट';
+
+  @override
+  String get homeActionNoTemplate => 'कोई नहीं: खाली नोट';
+
+  @override
+  String get homeActionNoteName => 'नाम';
+
+  @override
+  String get homeActionOpenAfter => 'बनाने के बाद खोलें';
+
+  @override
+  String get homeActionProject => 'प्रोजेक्ट';
+
+  @override
+  String get homeActionTemplate => 'टेम्पलेट';
+
+  @override
+  String homeActionMissing(String path) => '$path अब लाइब्रेरी में नहीं है';
 }

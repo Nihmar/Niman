@@ -3341,4 +3341,223 @@ final class TurkishStrings extends Strings {
   @override
   String get slidesTemplateNote =>
       'burada ne söyleneceği — yalnızca siz görürsünüz.';
+
+  @override
+  String get tabHome => 'Ana sayfa';
+
+  @override
+  String get homeTileActions => 'Eylemler';
+
+  @override
+  String get homeTileJournalToday => 'Bugünün günlüğü';
+
+  @override
+  String get homeTileTasksDue => 'Vadesi gelen görevler';
+
+  @override
+  String get homeTileRecent => 'Son değiştirilenler';
+
+  @override
+  String get homeTilePinned => 'Sabitlenenler';
+
+  @override
+  String get homeTileJournalCalendar => 'Günlük takvimi';
+
+  @override
+  String get homeTileTopTags => 'En çok kullanılan etiketler';
+
+  @override
+  String get homeTileRandomNote => 'Rastgele not';
+
+  @override
+  String get homeTileSearch => 'Kayıtlı arama';
+
+  @override
+  String get homeJournalEmpty => 'Bugün henüz bir şey yazılmadı.';
+
+  @override
+  String get homeJournalWrite => 'Bugünün kaydını yaz';
+
+  @override
+  String get homeTasksEmpty => 'Açık görev yok.';
+
+  @override
+  String get homeNotesEmpty => 'Henüz not yok.';
+
+  @override
+  String get homePinnedEmpty => 'Bir notu sabitleyin, burada görünsün.';
+
+  @override
+  String get homeTagsEmpty => 'Henüz etiket yok.';
+
+  @override
+  String get homeSearchEmpty => 'Eşleşme yok.';
+
+  @override
+  String get homeSearchNoQuery => 'Henüz sorgu yok.';
+
+  @override
+  String get homeRandomAnother => 'Başka bir tane';
+
+  @override
+  String get homeEdit => 'Ana sayfayı düzenle';
+
+  @override
+  String get homeEditDone => 'Bitti';
+
+  @override
+  String get homeReset => 'Sıfırla';
+
+  @override
+  String get homeResetTitle => 'Ana sayfa sıfırlansın mı?';
+
+  @override
+  String get homeResetBody => 'Tüm kutucuklar varsayılan ana sayfaya döner.';
+
+  @override
+  String get homeUseLibraryTitle => 'Kitaplığın ana sayfası kullanılsın mı?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Bu cihazın kendi ana sayfası atılır ve burada yeniden kitaplığınki '
+      'gösterilir.';
+
+  @override
+  String get homeUseLibraryConfirm => 'At';
+
+  @override
+  String get homeAddTiles => 'Kutucuk ekle';
+
+  @override
+  String get homeHiddenTiles => 'Gizli';
+
+  @override
+  String get homeTileOnHome => 'Ana sayfada';
+
+  @override
+  String get homeTileHide => 'Gizle';
+
+  @override
+  String get homeTileShow => 'Göster';
+
+  @override
+  String get homeTileMove => 'Taşı ve boyutlandır';
+
+  @override
+  String get homeMoveLeft => 'Sola taşı';
+
+  @override
+  String get homeMoveRight => 'Sağa taşı';
+
+  @override
+  String get homeMoveUp => 'Yukarı taşı';
+
+  @override
+  String get homeMoveDown => 'Aşağı taşı';
+
+  @override
+  String get homeWider => 'Daha geniş';
+
+  @override
+  String get homeNarrower => 'Daha dar';
+
+  @override
+  String get homeTaller => 'Daha uzun';
+
+  @override
+  String get homeShorter => 'Daha kısa';
+
+  @override
+  String get homeTileSettings => 'Kutucuk ayarları';
+
+  @override
+  String get homeSearchName => 'Ad';
+
+  @override
+  String get homeSearchQuery => 'Sorgu';
+
+  @override
+  String get homeSearchQueryHint => 'Sözcükler ya da anahtar = değer';
+
+  @override
+  String get homeGridHint =>
+      'Bir kutucuğu taşımak için sürükleyin, boyutlandırmak için köşesini '
+      'sürükleyin.';
+
+  @override
+  String get homeColumnHint =>
+      'Sıralamak için bir tutamacı sürükleyin. Bir anahtar, kutucuğu her '
+      'cihazda gösterir veya gizler.';
+
+  @override
+  String get homeActionAdd => 'Eylem ekle';
+
+  @override
+  String get homeActionAsk => 'Sor';
+
+  @override
+  String get homeActionAskHint => 'Düğmeye basınca sorulur';
+
+  @override
+  String get homeActionCaptureFolder => 'Yakalama klasörü';
+
+  @override
+  String get homeActionContext => 'Bağlam';
+
+  @override
+  String get homeActionEdit => 'Eylemi düzenle';
+
+  @override
+  String get homeActionFieldAdd => 'Alan ekle';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter anahtarı';
+
+  @override
+  String get homeActionFields => 'Alanlar';
+
+  @override
+  String get homeActionFixed => 'Sabit';
+
+  @override
+  String get homeActionFixedHint => 'Metin ya da {{date}}';
+
+  @override
+  String get homeActionFolder => 'Klasör';
+
+  @override
+  String get homeActionIcon => 'Simge';
+
+  @override
+  String get homeActionKind => 'Yapar';
+
+  @override
+  String get homeActionKindOpenNote => 'Bir not aç';
+
+  @override
+  String get homeActionLabel => 'Etiket';
+
+  @override
+  String get homeActionNoNote => 'Not seçilmedi';
+
+  @override
+  String get homeActionNote => 'Not';
+
+  @override
+  String get homeActionNoTemplate => 'Yok: boş bir not';
+
+  @override
+  String get homeActionNoteName => 'Ad';
+
+  @override
+  String get homeActionOpenAfter => 'Oluşturduktan sonra aç';
+
+  @override
+  String get homeActionProject => 'Proje';
+
+  @override
+  String get homeActionTemplate => 'Şablon';
+
+  @override
+  String homeActionMissing(String path) => '$path artık kitaplıkta değil';
 }

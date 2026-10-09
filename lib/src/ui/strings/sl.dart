@@ -3398,4 +3398,223 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'kaj povedati tukaj — vidite le vi.';
+
+  @override
+  String get tabHome => 'Domov';
+
+  @override
+  String get homeTileActions => 'Dejanja';
+
+  @override
+  String get homeTileJournalToday => 'Današnji dnevnik';
+
+  @override
+  String get homeTileTasksDue => 'Naloge z rokom';
+
+  @override
+  String get homeTileRecent => 'Nedavno spremenjeno';
+
+  @override
+  String get homeTilePinned => 'Pripeto';
+
+  @override
+  String get homeTileJournalCalendar => 'Koledar dnevnika';
+
+  @override
+  String get homeTileTopTags => 'Najpogostejše oznake';
+
+  @override
+  String get homeTileRandomNote => 'Naključni zapisek';
+
+  @override
+  String get homeTileSearch => 'Shranjeno iskanje';
+
+  @override
+  String get homeJournalEmpty => 'Danes še nič zapisano.';
+
+  @override
+  String get homeJournalWrite => 'Napiši današnji vnos';
+
+  @override
+  String get homeTasksEmpty => 'Ni odprtih nalog.';
+
+  @override
+  String get homeNotesEmpty => 'Še ni zapiskov.';
+
+  @override
+  String get homePinnedEmpty => 'Pripnite zapisek in prikazal se bo tukaj.';
+
+  @override
+  String get homeTagsEmpty => 'Še ni oznak.';
+
+  @override
+  String get homeSearchEmpty => 'Ni zadetkov.';
+
+  @override
+  String get homeSearchNoQuery => 'Še ni poizvedbe.';
+
+  @override
+  String get homeRandomAnother => 'Drugo';
+
+  @override
+  String get homeEdit => 'Uredi domov';
+
+  @override
+  String get homeEditDone => 'Končano';
+
+  @override
+  String get homeReset => 'Ponastavi';
+
+  @override
+  String get homeResetTitle => 'Ponastavim domov?';
+
+  @override
+  String get homeResetBody => 'Vse ploščice se vrnejo na privzeti domov.';
+
+  @override
+  String get homeUseLibraryTitle => 'Uporabim domov knjižnice?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Lastni domov te naprave se zavrže, tukaj pa se znova prikaže domov '
+      'knjižnice.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Zavrzi';
+
+  @override
+  String get homeAddTiles => 'Dodaj ploščice';
+
+  @override
+  String get homeHiddenTiles => 'Skrito';
+
+  @override
+  String get homeTileOnHome => 'Na domovu';
+
+  @override
+  String get homeTileHide => 'Skrij';
+
+  @override
+  String get homeTileShow => 'Prikaži';
+
+  @override
+  String get homeTileMove => 'Premakni in spremeni velikost';
+
+  @override
+  String get homeMoveLeft => 'Premakni levo';
+
+  @override
+  String get homeMoveRight => 'Premakni desno';
+
+  @override
+  String get homeMoveUp => 'Premakni gor';
+
+  @override
+  String get homeMoveDown => 'Premakni dol';
+
+  @override
+  String get homeWider => 'Širše';
+
+  @override
+  String get homeNarrower => 'Ožje';
+
+  @override
+  String get homeTaller => 'Višje';
+
+  @override
+  String get homeShorter => 'Nižje';
+
+  @override
+  String get homeTileSettings => 'Nastavitve ploščice';
+
+  @override
+  String get homeSearchName => 'Ime';
+
+  @override
+  String get homeSearchQuery => 'Poizvedba';
+
+  @override
+  String get homeSearchQueryHint => 'Besede ali ključ = vrednost';
+
+  @override
+  String get homeGridHint =>
+      'Povlecite ploščico, da jo premaknete, in njen kot, da ji spremenite '
+      'velikost.';
+
+  @override
+  String get homeColumnHint =>
+      'Povlecite ročico, da spremenite vrstni red. Stikalo prikaže ali '
+      'skrije ploščico na vseh napravah.';
+
+  @override
+  String get homeActionAdd => 'Dodaj dejanje';
+
+  @override
+  String get homeActionAsk => 'Vprašaj';
+
+  @override
+  String get homeActionAskHint => 'Vpraša ob pritisku na gumb';
+
+  @override
+  String get homeActionCaptureFolder => 'Mapa za zajeme';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Uredi dejanje';
+
+  @override
+  String get homeActionFieldAdd => 'Dodaj polje';
+
+  @override
+  String get homeActionFieldKey => 'Ključ frontmatterja';
+
+  @override
+  String get homeActionFields => 'Polja';
+
+  @override
+  String get homeActionFixed => 'Fiksno';
+
+  @override
+  String get homeActionFixedHint => 'Besedilo ali {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mapa';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Naredi';
+
+  @override
+  String get homeActionKindOpenNote => 'Odpri zapisek';
+
+  @override
+  String get homeActionLabel => 'Oznaka';
+
+  @override
+  String get homeActionNoNote => 'Ni izbranega zapiska';
+
+  @override
+  String get homeActionNote => 'Zapisek';
+
+  @override
+  String get homeActionNoTemplate => 'Brez: prazen zapisek';
+
+  @override
+  String get homeActionNoteName => 'Ime';
+
+  @override
+  String get homeActionOpenAfter => 'Odpri po ustvarjanju';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Predloga';
+
+  @override
+  String homeActionMissing(String path) => '$path ni več v knjižnici';
 }

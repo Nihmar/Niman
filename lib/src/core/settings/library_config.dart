@@ -402,6 +402,7 @@ final class LibraryConfig {
     this.epubLook = const EpubLook(),
     this.navigation,
     this.deviceNavigation,
+    this.deviceHome,
     this.extra = const {},
   });
 
@@ -513,6 +514,12 @@ final class LibraryConfig {
       deviceNavigation: json['deviceNavigation'] == null
           ? null
           : NavigationLayout.fromJson(json['deviceNavigation']),
+      deviceHome: switch (json['deviceHome']) {
+        final Map<Object?, Object?> home => {
+          for (final e in home.entries) e.key.toString(): e.value,
+        },
+        _ => null,
+      },
       extra: extra,
     );
   }
@@ -700,6 +707,11 @@ final class LibraryConfig {
   /// device*; while it is there it wins over [navigation].
   final NavigationLayout? deviceNavigation;
 
+  /// This device's own Home (#535), set by *Only on this device*: the
+  /// object `.niman/home.json` would hold (`HomeLayout`). While it is there
+  /// it wins over the file.
+  final Map<String, Object?>? deviceHome;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -747,6 +759,8 @@ final class LibraryConfig {
     NavigationLayout? navigation,
     NavigationLayout? deviceNavigation,
     bool clearDeviceNavigation = false,
+    Map<String, Object?>? deviceHome,
+    bool clearDeviceHome = false,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -794,6 +808,7 @@ final class LibraryConfig {
       deviceNavigation: clearDeviceNavigation
           ? null
           : deviceNavigation ?? this.deviceNavigation,
+      deviceHome: clearDeviceHome ? null : deviceHome ?? this.deviceHome,
       extra: extra,
     );
   }
@@ -841,6 +856,7 @@ final class LibraryConfig {
     'editorKind',
     'enabledEditors',
     'deviceNavigation',
+    'deviceHome',
     ...EpubLook.keys,
   };
 
@@ -922,6 +938,7 @@ final class LibraryConfig {
     'previewEnabled',
     'navigation',
     'deviceNavigation',
+    'deviceHome',
     ...JournalSettings.keys,
     ...EpubLook.keys,
   };
@@ -989,6 +1006,7 @@ final class LibraryConfig {
     if (deviceNavigation case final layout?) {
       json['deviceNavigation'] = layout.toJson();
     }
+    if (deviceHome case final home?) json['deviceHome'] = home;
     if (lintRulesOff.isNotEmpty) {
       // Canonical order, so the file does not churn on a set rebuilt
       // insertion-ordered differently.
@@ -1088,6 +1106,7 @@ final class LibraryConfig {
         epubLook == other.epubLook &&
         navigation == other.navigation &&
         deviceNavigation == other.deviceNavigation &&
+        _deepEquals(deviceHome, other.deviceHome) &&
         _deepEquals(extra, other.extra);
   }
 

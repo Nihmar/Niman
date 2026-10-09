@@ -3400,4 +3400,224 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'çfarë të thuash këtu — e sheh vetëm ti.';
+
+  @override
+  String get tabHome => 'Kreu';
+
+  @override
+  String get homeTileActions => 'Veprime';
+
+  @override
+  String get homeTileJournalToday => 'Ditari i sotëm';
+
+  @override
+  String get homeTileTasksDue => 'Detyra në afat';
+
+  @override
+  String get homeTileRecent => 'Ndryshuar së fundmi';
+
+  @override
+  String get homeTilePinned => 'Të fiksuara';
+
+  @override
+  String get homeTileJournalCalendar => 'Kalendari i ditarit';
+
+  @override
+  String get homeTileTopTags => 'Etiketat kryesore';
+
+  @override
+  String get homeTileRandomNote => 'Shënim i rastësishëm';
+
+  @override
+  String get homeTileSearch => 'Kërkim i ruajtur';
+
+  @override
+  String get homeJournalEmpty => 'Asgjë e shkruar sot ende.';
+
+  @override
+  String get homeJournalWrite => 'Shkruaj hyrjen e sotme';
+
+  @override
+  String get homeTasksEmpty => 'Asnjë detyrë e hapur.';
+
+  @override
+  String get homeNotesEmpty => 'Ende nuk ka shënime.';
+
+  @override
+  String get homePinnedEmpty => 'Fikso një shënim dhe do të shfaqet këtu.';
+
+  @override
+  String get homeTagsEmpty => 'Ende nuk ka etiketa.';
+
+  @override
+  String get homeSearchEmpty => 'Asnjë përputhje.';
+
+  @override
+  String get homeSearchNoQuery => 'Ende nuk ka kërkim.';
+
+  @override
+  String get homeRandomAnother => 'Një tjetër';
+
+  @override
+  String get homeEdit => 'Ndrysho kreun';
+
+  @override
+  String get homeEditDone => 'U krye';
+
+  @override
+  String get homeReset => 'Rivendos';
+
+  @override
+  String get homeResetTitle => 'Të rivendoset kreu?';
+
+  @override
+  String get homeResetBody =>
+      'Të gjitha pllakat kthehen te kreu i parazgjedhur.';
+
+  @override
+  String get homeUseLibraryTitle => 'Të përdoret kreu i bibliotekës?';
+
+  @override
+  String get homeUseLibraryBody =>
+      'Kreu i vetë i kësaj pajisjeje hidhet poshtë dhe këtu shfaqet sërish '
+      'ai i bibliotekës.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Hidh poshtë';
+
+  @override
+  String get homeAddTiles => 'Shto pllaka';
+
+  @override
+  String get homeHiddenTiles => 'Të fshehura';
+
+  @override
+  String get homeTileOnHome => 'Në kreu';
+
+  @override
+  String get homeTileHide => 'Fshih';
+
+  @override
+  String get homeTileShow => 'Shfaq';
+
+  @override
+  String get homeTileMove => 'Lëviz dhe ndrysho madhësinë';
+
+  @override
+  String get homeMoveLeft => 'Lëviz majtas';
+
+  @override
+  String get homeMoveRight => 'Lëviz djathtas';
+
+  @override
+  String get homeMoveUp => 'Lëviz lart';
+
+  @override
+  String get homeMoveDown => 'Lëviz poshtë';
+
+  @override
+  String get homeWider => 'Më i gjerë';
+
+  @override
+  String get homeNarrower => 'Më i ngushtë';
+
+  @override
+  String get homeTaller => 'Më i lartë';
+
+  @override
+  String get homeShorter => 'Më i ulët';
+
+  @override
+  String get homeTileSettings => 'Cilësimet e pllakës';
+
+  @override
+  String get homeSearchName => 'Emri';
+
+  @override
+  String get homeSearchQuery => 'Kërkim';
+
+  @override
+  String get homeSearchQueryHint => 'Fjalë, ose çelës = vlerë';
+
+  @override
+  String get homeGridHint =>
+      'Tërhiqni një pllakë për ta lëvizur, dhe këndin e saj për ta ndryshuar '
+      'madhësinë.';
+
+  @override
+  String get homeColumnHint =>
+      'Tërhiqni një dorezë për të rirenditur. Një çelës shfaq ose fsheh një '
+      'pllakë në çdo pajisje.';
+
+  @override
+  String get homeActionAdd => 'Shto veprim';
+
+  @override
+  String get homeActionAsk => 'Pyet';
+
+  @override
+  String get homeActionAskHint => 'Pyetet kur shtypet butoni';
+
+  @override
+  String get homeActionCaptureFolder => 'Dosja e kapjeve';
+
+  @override
+  String get homeActionContext => 'Konteksti';
+
+  @override
+  String get homeActionEdit => 'Ndrysho veprimin';
+
+  @override
+  String get homeActionFieldAdd => 'Shto fushë';
+
+  @override
+  String get homeActionFieldKey => 'Çelësi i frontmatter';
+
+  @override
+  String get homeActionFields => 'Fushat';
+
+  @override
+  String get homeActionFixed => 'Fiks';
+
+  @override
+  String get homeActionFixedHint => 'Tekst, ose {{date}}';
+
+  @override
+  String get homeActionFolder => 'Dosja';
+
+  @override
+  String get homeActionIcon => 'Ikona';
+
+  @override
+  String get homeActionKind => 'Bën';
+
+  @override
+  String get homeActionKindOpenNote => 'Hap një shënim';
+
+  @override
+  String get homeActionLabel => 'Etiketa';
+
+  @override
+  String get homeActionNoNote => 'Asnjë shënim i zgjedhur';
+
+  @override
+  String get homeActionNote => 'Shënim';
+
+  @override
+  String get homeActionNoTemplate => 'Asnjë: një shënim bosh';
+
+  @override
+  String get homeActionNoteName => 'Emri';
+
+  @override
+  String get homeActionOpenAfter => 'Hape pas krijimit';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Shabllon';
+
+  @override
+  String homeActionMissing(String path) => '$path nuk është më në bibliotekë';
 }

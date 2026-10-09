@@ -3435,4 +3435,223 @@ final class CatalanStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'què dir aquí — només tu ho veus.';
+
+  @override
+  String get tabHome => 'Inici';
+
+  @override
+  String get homeTileActions => 'Accions';
+
+  @override
+  String get homeTileJournalToday => "Diari d'avui";
+
+  @override
+  String get homeTileTasksDue => 'Tasques pendents';
+
+  @override
+  String get homeTileRecent => 'Modificades fa poc';
+
+  @override
+  String get homeTilePinned => 'Fixades';
+
+  @override
+  String get homeTileJournalCalendar => 'Calendari del diari';
+
+  @override
+  String get homeTileTopTags => 'Etiquetes principals';
+
+  @override
+  String get homeTileRandomNote => "Nota a l'atzar";
+
+  @override
+  String get homeTileSearch => 'Cerca desada';
+
+  @override
+  String get homeJournalEmpty => 'Avui encara no hi ha res escrit.';
+
+  @override
+  String get homeJournalWrite => "Escriu l'entrada d'avui";
+
+  @override
+  String get homeTasksEmpty => 'No hi ha tasques obertes.';
+
+  @override
+  String get homeNotesEmpty => 'Encara no hi ha notes.';
+
+  @override
+  String get homePinnedEmpty => 'Fixa una nota i apareixerà aquí.';
+
+  @override
+  String get homeTagsEmpty => 'Encara no hi ha etiquetes.';
+
+  @override
+  String get homeSearchEmpty => 'Cap coincidència.';
+
+  @override
+  String get homeSearchNoQuery => 'Encara no hi ha cap consulta.';
+
+  @override
+  String get homeRandomAnother => 'Una altra';
+
+  @override
+  String get homeEdit => "Edita l'inici";
+
+  @override
+  String get homeEditDone => 'Fet';
+
+  @override
+  String get homeReset => 'Restableix';
+
+  @override
+  String get homeResetTitle => "Vols restablir l'inici?";
+
+  @override
+  String get homeResetBody => "Totes les rajoles tornen a l'inici per defecte.";
+
+  @override
+  String get homeUseLibraryTitle => "Vols fer servir l'inici de la biblioteca?";
+
+  @override
+  String get homeUseLibraryBody =>
+      "Es descarta l'inici propi d'aquest dispositiu i aquí torna a "
+      'aparèixer el de la biblioteca.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Descarta';
+
+  @override
+  String get homeAddTiles => 'Afegeix rajoles';
+
+  @override
+  String get homeHiddenTiles => 'Amagades';
+
+  @override
+  String get homeTileOnHome => "A l'inici";
+
+  @override
+  String get homeTileHide => 'Amaga';
+
+  @override
+  String get homeTileShow => 'Mostra';
+
+  @override
+  String get homeTileMove => 'Mou i canvia la mida';
+
+  @override
+  String get homeMoveLeft => "Mou a l'esquerra";
+
+  @override
+  String get homeMoveRight => 'Mou a la dreta';
+
+  @override
+  String get homeMoveUp => 'Mou amunt';
+
+  @override
+  String get homeMoveDown => 'Mou avall';
+
+  @override
+  String get homeWider => 'Més ample';
+
+  @override
+  String get homeNarrower => 'Més estret';
+
+  @override
+  String get homeTaller => 'Més alt';
+
+  @override
+  String get homeShorter => 'Més baix';
+
+  @override
+  String get homeTileSettings => 'Configuració de la rajola';
+
+  @override
+  String get homeSearchName => 'Nom';
+
+  @override
+  String get homeSearchQuery => 'Consulta';
+
+  @override
+  String get homeSearchQueryHint => 'Paraules, o clau = valor';
+
+  @override
+  String get homeGridHint =>
+      'Arrossega una rajola per moure-la, i la cantonada per canviar-ne la '
+      'mida.';
+
+  @override
+  String get homeColumnHint =>
+      'Arrossega una nansa per reordenar. Un interruptor mostra o amaga una '
+      'rajola a tots els dispositius.';
+
+  @override
+  String get homeActionAdd => 'Afegeix una acció';
+
+  @override
+  String get homeActionAsk => 'Pregunta';
+
+  @override
+  String get homeActionAskHint => 'Es pregunta en prémer el botó';
+
+  @override
+  String get homeActionCaptureFolder => 'La carpeta de captures';
+
+  @override
+  String get homeActionContext => 'Context';
+
+  @override
+  String get homeActionEdit => "Edita l'acció";
+
+  @override
+  String get homeActionFieldAdd => 'Afegeix un camp';
+
+  @override
+  String get homeActionFieldKey => 'Clau del frontmatter';
+
+  @override
+  String get homeActionFields => 'Camps';
+
+  @override
+  String get homeActionFixed => 'Fix';
+
+  @override
+  String get homeActionFixedHint => 'Text, o {{date}}';
+
+  @override
+  String get homeActionFolder => 'Carpeta';
+
+  @override
+  String get homeActionIcon => 'Icona';
+
+  @override
+  String get homeActionKind => 'Fa';
+
+  @override
+  String get homeActionKindOpenNote => 'Obre una nota';
+
+  @override
+  String get homeActionLabel => 'Etiqueta';
+
+  @override
+  String get homeActionNoNote => "No s'ha triat cap nota";
+
+  @override
+  String get homeActionNote => 'Nota';
+
+  @override
+  String get homeActionNoTemplate => 'Cap: una nota buida';
+
+  @override
+  String get homeActionNoteName => 'Nom';
+
+  @override
+  String get homeActionOpenAfter => 'Obre després de crear';
+
+  @override
+  String get homeActionProject => 'Projecte';
+
+  @override
+  String get homeActionTemplate => 'Plantilla';
+
+  @override
+  String homeActionMissing(String path) => '$path ja no és a la biblioteca';
 }

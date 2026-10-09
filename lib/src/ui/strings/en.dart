@@ -3337,4 +3337,221 @@ final class EnglishStrings extends Strings {
 
   @override
   String get slidesTemplateNote => 'what to say here — only you see it.';
+
+  @override
+  String get tabHome => 'Home';
+
+  @override
+  String get homeTileActions => 'Actions';
+
+  @override
+  String get homeTileJournalToday => "Today's journal";
+
+  @override
+  String get homeTileTasksDue => 'Tasks due';
+
+  @override
+  String get homeTileRecent => 'Recently modified';
+
+  @override
+  String get homeTilePinned => 'Pinned';
+
+  @override
+  String get homeTileJournalCalendar => 'Journal calendar';
+
+  @override
+  String get homeTileTopTags => 'Top tags';
+
+  @override
+  String get homeTileRandomNote => 'Random note';
+
+  @override
+  String get homeTileSearch => 'Saved search';
+
+  @override
+  String get homeJournalEmpty => 'Nothing written yet today.';
+
+  @override
+  String get homeJournalWrite => "Write today's entry";
+
+  @override
+  String get homeTasksEmpty => 'No open tasks.';
+
+  @override
+  String get homeNotesEmpty => 'No notes yet.';
+
+  @override
+  String get homePinnedEmpty => 'Pin a note and it shows here.';
+
+  @override
+  String get homeTagsEmpty => 'No tags yet.';
+
+  @override
+  String get homeSearchEmpty => 'Nothing matches.';
+
+  @override
+  String get homeSearchNoQuery => 'No query yet.';
+
+  @override
+  String get homeRandomAnother => 'Another one';
+
+  @override
+  String get homeEdit => 'Edit home';
+
+  @override
+  String get homeEditDone => 'Done';
+
+  @override
+  String get homeReset => 'Reset';
+
+  @override
+  String get homeResetTitle => 'Reset the Home?';
+
+  @override
+  String get homeResetBody => 'Every tile goes back to the default Home.';
+
+  @override
+  String get homeUseLibraryTitle => "Use the library's Home?";
+
+  @override
+  String get homeUseLibraryBody =>
+      "This device's own Home is discarded, and the library's shows here "
+      'again.';
+
+  @override
+  String get homeUseLibraryConfirm => 'Discard';
+
+  @override
+  String get homeAddTiles => 'Add tiles';
+
+  @override
+  String get homeHiddenTiles => 'Hidden';
+
+  @override
+  String get homeTileOnHome => 'On the Home';
+
+  @override
+  String get homeTileHide => 'Hide';
+
+  @override
+  String get homeTileShow => 'Show';
+
+  @override
+  String get homeTileMove => 'Move and size';
+
+  @override
+  String get homeMoveLeft => 'Move left';
+
+  @override
+  String get homeMoveRight => 'Move right';
+
+  @override
+  String get homeMoveUp => 'Move up';
+
+  @override
+  String get homeMoveDown => 'Move down';
+
+  @override
+  String get homeWider => 'Wider';
+
+  @override
+  String get homeNarrower => 'Narrower';
+
+  @override
+  String get homeTaller => 'Taller';
+
+  @override
+  String get homeShorter => 'Shorter';
+
+  @override
+  String get homeTileSettings => 'Tile settings';
+
+  @override
+  String get homeSearchName => 'Name';
+
+  @override
+  String get homeSearchQuery => 'Query';
+
+  @override
+  String get homeSearchQueryHint => 'Words, or key = value';
+
+  @override
+  String get homeGridHint => 'Drag a tile to move it, its corner to resize it.';
+
+  @override
+  String get homeColumnHint =>
+      'Drag a handle to reorder. A switch shows or hides a tile on every '
+      'device.';
+
+  @override
+  String get homeActionAdd => 'Add action';
+
+  @override
+  String get homeActionAsk => 'Ask';
+
+  @override
+  String get homeActionAskHint => 'Asked when the button is pressed';
+
+  @override
+  String get homeActionCaptureFolder => 'The capture folder';
+
+  @override
+  String get homeActionContext => 'Context';
+
+  @override
+  String get homeActionEdit => 'Edit action';
+
+  @override
+  String get homeActionFieldAdd => 'Add field';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter key';
+
+  @override
+  String get homeActionFields => 'Fields';
+
+  @override
+  String get homeActionFixed => 'Fixed';
+
+  @override
+  String get homeActionFixedHint => 'Text, or {{date}}';
+
+  @override
+  String get homeActionFolder => 'Folder';
+
+  @override
+  String get homeActionIcon => 'Icon';
+
+  @override
+  String get homeActionKind => 'Does';
+
+  @override
+  String get homeActionKindOpenNote => 'Open a note';
+
+  @override
+  String get homeActionLabel => 'Label';
+
+  @override
+  String get homeActionNoNote => 'No note picked';
+
+  @override
+  String get homeActionNote => 'Note';
+
+  @override
+  String get homeActionNoTemplate => 'None: an empty note';
+
+  @override
+  String get homeActionNoteName => 'Name';
+
+  @override
+  String get homeActionOpenAfter => 'Open after creating';
+
+  @override
+  String get homeActionProject => 'Project';
+
+  @override
+  String get homeActionTemplate => 'Template';
+
+  @override
+  String homeActionMissing(String path) => '$path is no longer in the library';
 }
