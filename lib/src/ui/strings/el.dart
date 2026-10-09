@@ -3415,6 +3415,11 @@ final class GreekStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Πάντα ορατό';
+  @override
+  String get navigationStart => 'Ανοίγει σε';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      'Το $hidden είναι κρυφό: η εφαρμογή ανοίγει σε $start.';
 
   @override
   String get newSlidesTitle => 'Νέα παρουσίαση';

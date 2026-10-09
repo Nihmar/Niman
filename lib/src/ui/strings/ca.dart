@@ -3367,6 +3367,11 @@ final class CatalanStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visible';
+  @override
+  String get navigationStart => 'S’obre a';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden està amagat: l’app s’obre a $start.';
 
   @override
   String get newSlidesTitle => 'Nova presentació';

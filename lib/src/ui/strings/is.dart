@@ -3303,6 +3303,11 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alltaf sýnt';
+  @override
+  String get navigationStart => 'Opnast á';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden er falið: forritið opnast á $start.';
 
   @override
   String get newSlidesTitle => 'Ný kynning';

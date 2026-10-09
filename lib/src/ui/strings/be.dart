@@ -3350,6 +3350,11 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Заўсёды паказана';
+  @override
+  String get navigationStart => 'Адкрываецца на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden схавана: праграма адкрываецца на $start.';
 
   @override
   String get newSlidesTitle => 'Новая прэзентацыя';

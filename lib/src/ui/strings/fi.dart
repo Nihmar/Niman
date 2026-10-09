@@ -3327,6 +3327,11 @@ final class FinnishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Aina näkyvissä';
+  @override
+  String get navigationStart => 'Avautuu kohtaan';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden on piilotettu: sovellus avautuu kohtaan $start.';
 
   @override
   String get newSlidesTitle => 'Uusi esitys';

@@ -3323,6 +3323,11 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Винаги показано';
+  @override
+  String get navigationStart => 'Отваря се на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden е скрито: приложението се отваря на $start.';
 
   @override
   String get newSlidesTitle => 'Нова презентация';

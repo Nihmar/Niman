@@ -3269,6 +3269,11 @@ final class EnglishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Always shown';
+  @override
+  String get navigationStart => 'Opens on';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden is hidden: the app opens on $start.';
 
   @override
   String get newSlidesTitle => 'New slides';

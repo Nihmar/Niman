@@ -3328,6 +3328,11 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visível';
+  @override
+  String get navigationStart => 'Abre em';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden está oculto: a app abre em $start.';
 
   @override
   String get newSlidesTitle => 'Nova apresentação';

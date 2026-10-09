@@ -3336,6 +3336,11 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Секогаш прикажано';
+  @override
+  String get navigationStart => 'Се отвора на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden е скриено: апликацијата се отвора на $start.';
 
   @override
   String get newSlidesTitle => 'Нова презентација';

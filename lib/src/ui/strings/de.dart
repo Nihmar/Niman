@@ -3383,6 +3383,11 @@ final class GermanStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Immer sichtbar';
+  @override
+  String get navigationStart => 'Startet mit';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden ist ausgeblendet: Die App startet mit $start.';
 
   @override
   String get newSlidesTitle => 'Neue Präsentation';

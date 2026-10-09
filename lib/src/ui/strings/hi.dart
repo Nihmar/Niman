@@ -3260,6 +3260,11 @@ final class HindiStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'हमेशा दिखाया गया';
+  @override
+  String get navigationStart => 'इस पर खुलता है';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden छिपा है: ऐप $start पर खुलता है।';
 
   @override
   String get newSlidesTitle => 'नई प्रस्तुति';

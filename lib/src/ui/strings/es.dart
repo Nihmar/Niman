@@ -3358,6 +3358,11 @@ final class SpanishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Siempre visible';
+  @override
+  String get navigationStart => 'Se abre en';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden está oculto: la app se abre en $start.';
 
   @override
   String get newSlidesTitle => 'Nueva presentación';

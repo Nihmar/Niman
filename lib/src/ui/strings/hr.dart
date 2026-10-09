@@ -3336,6 +3336,11 @@ final class CroatianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Uvijek prikazano';
+  @override
+  String get navigationStart => 'Otvara se na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skriveno: aplikacija se otvara na $start.';
 
   @override
   String get newSlidesTitle => 'Nova prezentacija';

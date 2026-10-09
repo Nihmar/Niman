@@ -3404,6 +3404,11 @@ final class FrenchStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Toujours affiché';
+  @override
+  String get navigationStart => 'S’ouvre sur';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden est masqué : l’app s’ouvre sur $start.';
 
   @override
   String get newSlidesTitle => 'Nouvelle présentation';

@@ -3317,6 +3317,11 @@ final class HungarianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Mindig látható';
+  @override
+  String get navigationStart => 'Indításkor';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden rejtve van: az alkalmazás ezzel indul: $start.';
 
   @override
   String get newSlidesTitle => 'Új bemutató';

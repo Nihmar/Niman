@@ -3331,6 +3331,11 @@ final class SerbianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Увек приказано';
+  @override
+  String get navigationStart => 'Отвара се на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden је скривено: апликација се отвара на $start.';
 
   @override
   String get newSlidesTitle => 'Нова презентација';

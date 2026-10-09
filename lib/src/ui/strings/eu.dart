@@ -3341,6 +3341,11 @@ final class BasqueStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Beti ikusgai';
+  @override
+  String get navigationStart => 'Hemen irekitzen da';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden ezkutatuta dago: aplikazioa hemen irekitzen da: $start.';
 
   @override
   String get newSlidesTitle => 'Aurkezpen berria';

@@ -3361,6 +3361,11 @@ final class RomanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Mereu vizibil';
+  @override
+  String get navigationStart => 'Se deschide pe';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden este ascuns: aplicația se deschide pe $start.';
 
   @override
   String get newSlidesTitle => 'Prezentare nouă';

@@ -3331,6 +3331,11 @@ final class ItalianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visibile';
+  @override
+  String get navigationStart => 'Si apre su';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden è nascosta: l’app si apre su $start.';
 
   @override
   String get newSlidesTitle => 'Nuova presentazione';

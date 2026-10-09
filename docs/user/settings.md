@@ -58,6 +58,17 @@ A hidden destination is still in the command palette (*Go to: …*). On
 a phone it opens as a page, with a back arrow to where you were; on the
 desktop the rail simply has nothing selected.
 
+**Opens on** picks the destination the app opens on: where a library
+opens, and where the app comes back to after a restart. Any destination
+shown can be it but Settings and the quick note (a note, not a place);
+without a choice it is Files. Hiding it makes the app open on Files
+again — or, with Files hidden too, on the first destination shown — and
+the row says which; showing it again brings the choice back. Something
+that names a destination of its own still wins: a widget, a
+notification, a shared item, a reminder, the palette. The back arrow of
+a hidden destination whose way back has been hidden since returns to it
+too.
+
 The layout belongs to the library and travels with it. **Only on this
 device** detaches it: the device keeps its own copy, starting from what
 it shows, and the library's is left as it was; back on **This library**,
@@ -95,7 +106,7 @@ sync) in `.niman/settings.json`.
 | `journalEntryName` | `YYYY/MM/YYYY-MM-DD` | An entry's name: `YYYY` `MM` `M` `DD` `D`, `/` for a folder, `'quoted'` text |
 | `journalTemplate` | none (= a heading with the date) | The template an entry is made from, library-relative |
 | `journalDayStart` | 0 | The hour a new day begins (0–6): at 4, until four in the morning is still yesterday |
-| `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order and hidden destinations (**Settings → Navigation**): `{"order": [names], "hidden": [names]}` with `files`, `todo`, `search`, `home`, `quicknote`, `settings`; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
+| `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order, hidden destinations and start (**Settings → Navigation**): `{"order": [names], "hidden": [names], "start": name}` with `files`, `todo`, `search`, `home`, `quicknote`, `settings`, where `start` (**Opens on**) is absent for Files; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
 
 The **Diagnostics and info** area also carries the first run again
 (#266): *What Niman can do* reopens the welcome deck read-only, and

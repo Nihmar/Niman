@@ -3347,6 +3347,11 @@ final class DutchStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Altijd zichtbaar';
+  @override
+  String get navigationStart => 'Opent op';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden is verborgen: de app opent op $start.';
 
   @override
   String get newSlidesTitle => 'Nieuwe presentatie';

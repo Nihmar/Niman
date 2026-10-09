@@ -1,6 +1,6 @@
 /// Settings → Library → Navigation (#536): the order of the bar and the
-/// rail, the destinations they show, and whether this device keeps its
-/// own.
+/// rail, the destinations they show, the one the app opens on (#706), and
+/// whether this device keeps its own.
 ///
 /// The preview is the bar or the rail itself, drawn from the layout being
 /// edited: what the shell will show, not a picture of it.
@@ -138,6 +138,7 @@ final class _SettingsNavigationLayoutScreenState
               ),
             ),
           ),
+          _startRow(theme),
         ],
       ),
       footer: wide
@@ -207,6 +208,59 @@ final class _SettingsNavigationLayoutScreenState
               ],
             )
           : list,
+    );
+  }
+
+  /// The destination the app opens on (#706), among the shown ones that
+  /// can be; a chosen one hidden since says which took its place.
+  Widget _startRow(ThemeData theme) {
+    final layout = _layout;
+    final starts = startDestinations(layout);
+    final start = startDestination(layout);
+    String? hiddenStart;
+    if (layout.start case final name?) {
+      for (final p in placedDestinations(layout)) {
+        if (p.destination.name == name && p.destination.tab != start) {
+          hiddenStart = p.destination.label;
+        }
+      }
+    }
+    return HighlightRow(
+      key: SettingsKeys.navigationStart,
+      child: ListTile(
+        title: Text(AppStrings.navigationStart),
+        subtitle: switch ((hiddenStart, startLabel(layout))) {
+          (final hidden?, final shown?) => Text(
+            AppStrings.navigationStartHidden(hidden, shown),
+          ),
+          _ => null,
+        },
+        trailing: start == null
+            ? null
+            : DropdownButton<ShellTab>(
+                key: const Key('navigation-start'),
+                value: start,
+                items: [
+                  for (final d in starts)
+                    DropdownMenuItem(
+                      key: Key('navigation-start-${d.name}'),
+                      value: d.tab,
+                      child: Text(d.label),
+                    ),
+                ],
+                onChanged: (tab) {
+                  if (tab == null) return;
+                  final name = starts.firstWhere((d) => d.tab == tab).name;
+                  unawaited(
+                    _save(
+                      // Files is the start a layout without one has.
+                      layout.withStart(tab == ShellTab.files ? null : name),
+                      onDevice: _onDevice,
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 

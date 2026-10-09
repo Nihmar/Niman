@@ -3319,6 +3319,11 @@ final class SlovakStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vždy zobrazené';
+  @override
+  String get navigationStart => 'Otvára sa na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skryté: aplikácia sa otvára na $start.';
 
   @override
   String get newSlidesTitle => 'Nová prezentácia';

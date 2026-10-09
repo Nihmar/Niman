@@ -3351,6 +3351,11 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Завжди показано';
+  @override
+  String get navigationStart => 'Відкривається на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden приховано: застосунок відкривається на $start.';
 
   @override
   String get newSlidesTitle => 'Нова презентація';

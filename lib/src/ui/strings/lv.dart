@@ -3303,6 +3303,11 @@ final class LatvianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vienmēr redzams';
+  @override
+  String get navigationStart => 'Atveras sadaļā';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden ir paslēpts: lietotne atveras sadaļā $start.';
 
   @override
   String get newSlidesTitle => 'Jauna prezentācija';

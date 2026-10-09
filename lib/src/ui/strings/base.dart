@@ -1804,6 +1804,8 @@ abstract base class Strings {
   String get navigationScopeLibrary;
   String get navigationScopeDevice;
   String get navigationAlwaysShown;
+  String get navigationStart;
+  String navigationStartHidden(String hidden, String start);
 
   // Slide notes (#534).
   String get newSlidesTitle;

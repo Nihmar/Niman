@@ -3292,6 +3292,11 @@ final class DanishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Altid vist';
+  @override
+  String get navigationStart => 'Åbner på';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden er skjult: appen åbner på $start.';
 
   @override
   String get newSlidesTitle => 'Ny præsentation';

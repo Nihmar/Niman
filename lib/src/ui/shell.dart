@@ -571,6 +571,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   final ValueNotifier<ShellTab> _tabListenable = ValueNotifier(ShellTab.files);
   ShellTab get _tab => _tabListenable.value;
   set _tab(ShellTab value) {
+    _tabRequested = true;
     // Every way into a hidden tab passes here, so this is where the way
     // back out of it is remembered (#536).
     if (_shown(_tabListenable.value) && !_shown(value)) {
@@ -598,10 +599,23 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Whether [tab] has a place in the bar and the rail.
   bool _shown(ShellTab tab) => _shownTabs.contains(tab);
 
-  /// The tab the shell starts on and falls back to: the first shown that
-  /// is a place of its own — not the quick note, a note rather than a
-  /// place, nor Settings on a wide window, where it floats (#202). Files
-  /// when there is none, which a wide window shows with nothing selected.
+  /// Whether something chose the tab before the layout was read: a
+  /// widget, a notification, a shared item, a reminder, the palette. What
+  /// a request names wins over the start destination (#706).
+  bool _tabRequested = false;
+
+  /// The tab the shell opens on and falls back to (#706): the layout's
+  /// start destination ([startDestination]), or [_homeTab] when the
+  /// layout leaves none.
+  ShellTab get _startTab => switch (_navigation) {
+    final layout? => startDestination(layout) ?? _homeTab,
+    null => _homeTab,
+  };
+
+  /// The last fallback: the first shown that is a place of its own — not
+  /// the quick note, a note rather than a place, nor Settings on a wide
+  /// window, where it floats (#202). Files when there is none, which a
+  /// wide window shows with nothing selected.
   ShellTab get _homeTab {
     for (final tab in _shownTabs) {
       if (tab == ShellTab.quickNote) continue;
@@ -611,18 +625,21 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     return ShellTab.files;
   }
 
-  /// Takes [layout] as the navigation (#536). A tab it hides from under
-  /// the user — Files at the start, or the tab on screen when another
-  /// device hides it — gives way to [_homeTab]; a note on screen stays,
-  /// and its back lands there. A hidden tab opened on purpose stays.
+  /// Takes [layout] as the navigation (#536). The first one read opens
+  /// the shell on its start destination ([_openOnStart]). A tab it hides
+  /// from under the user — the tab on screen when another device hides
+  /// it — gives way to [_startTab]; a note on screen stays, and its back
+  /// lands there. A hidden tab opened on purpose stays.
   void _setNavigation(NavigationLayout layout) {
+    final first = _navigation == null;
     final wasShown = _shown(_tab);
     setState(() {
       _navigation = layout;
       _shownTabs = [for (final d in visibleDestinations(layout)) d.tab];
     });
+    if (first && !_tabRequested) return _openOnStart();
     if (!wasShown || _shown(_tab)) return;
-    final home = _homeTab;
+    final home = _startTab;
     _hiddenTabReturn = home;
     if (!_treeVisible) {
       if (!_shown(_noteFromTab)) _noteFromTab = home;
@@ -631,16 +648,30 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _selectShellTab(home);
   }
 
+  /// Opens the shell on the layout's start destination (#706), where a
+  /// library opens and where the app comes back to after a restart. A
+  /// note already on screen — a widget's, a link's from outside — stays:
+  /// a wide window keeps it on Files, a phone's back lands on the start.
+  void _openOnStart() {
+    final start = _startTab;
+    _hiddenTabReturn = start;
+    if (!_treeVisible) {
+      if (!_wide) _noteFromTab = start;
+      return;
+    }
+    _selectShellTab(start);
+  }
+
   /// The tab a hidden one was opened from (the palette, a widget, a
   /// reminder): its back arrow returns there.
   ShellTab _hiddenTabReturn = ShellTab.files;
 
   /// Leaves the hidden tab on screen for the one it was opened from, or
-  /// the home tab when that one has been hidden since: as a tap on it,
-  /// so the quick note comes back as a note, not as its empty tab.
+  /// the start destination when that one has been hidden since: as a tap
+  /// on it, so the quick note comes back as a note, not as its empty tab.
   void _leaveHiddenTab() {
     _onDestinationSelected(
-      _shown(_hiddenTabReturn) ? _hiddenTabReturn : _homeTab,
+      _shown(_hiddenTabReturn) ? _hiddenTabReturn : _startTab,
     );
   }
 
@@ -2340,7 +2371,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // here from the quick note tab itself, and the home tab is its home;
       // a hidden tab is a page, not a place to come back to (#536).
       final fromTab = _tab == ShellTab.quickNote || !_shown(_tab)
-          ? _homeTab
+          ? _startTab
           : _tab;
       setState(() {
         _tab = ShellTab.quickNote;

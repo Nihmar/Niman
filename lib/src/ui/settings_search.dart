@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/library/session.dart';
@@ -19,6 +20,7 @@ import 'package:niman/src/ui/ocr/ocr_settings_section.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
+import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/theme/theme_row.dart';
@@ -380,6 +382,20 @@ List<SettingsSearchEntry> settingsSearchEntries({
           ops == null ? null : onOff(on: (await ops.navigation).device != null),
       areaId: SettingsAreaId.navigation,
       open: () => pushNavigation(SettingsKeys.navigationScope),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.navigationStart,
+      area: navigation,
+      rowKey: SettingsKeys.navigationStart,
+      value: () async {
+        if (ops == null) return null;
+        final navigation = await ops.navigation;
+        return startLabel(
+          navigation.device ?? navigation.library ?? const NavigationLayout(),
+        );
+      },
+      areaId: SettingsAreaId.navigation,
+      open: () => pushNavigation(SettingsKeys.navigationStart),
     ),
     SettingsSearchEntry(
       title: AppStrings.journalFolderTitle,

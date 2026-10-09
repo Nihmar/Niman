@@ -1736,6 +1736,9 @@ final class AppStrings {
   static String get navigationScopeLibrary => _s.navigationScopeLibrary;
   static String get navigationScopeDevice => _s.navigationScopeDevice;
   static String get navigationAlwaysShown => _s.navigationAlwaysShown;
+  static String get navigationStart => _s.navigationStart;
+  static String navigationStartHidden(String hidden, String start) =>
+      _s.navigationStartHidden(hidden, start);
   // Slide notes (#534).
   static String get newSlidesTitle => _s.newSlidesTitle;
   static String get newSlidesDefault => _s.newSlidesDefault;

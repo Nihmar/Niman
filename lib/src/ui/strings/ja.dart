@@ -3022,6 +3022,11 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => '常に表示';
+  @override
+  String get navigationStart => '起動時の画面';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden は非表示です。$start で起動します。';
 
   @override
   String get newSlidesTitle => '新しいスライド';

@@ -3332,6 +3332,11 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Gjithmonë i dukshëm';
+  @override
+  String get navigationStart => 'Hapet në';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden është i fshehur: aplikacioni hapet në $start.';
 
   @override
   String get newSlidesTitle => 'Prezantim i ri';

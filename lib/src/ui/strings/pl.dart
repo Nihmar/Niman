@@ -3361,6 +3361,11 @@ final class PolishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Zawsze widoczne';
+  @override
+  String get navigationStart => 'Otwiera się na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden jest ukryte: aplikacja otwiera się na $start.';
 
   @override
   String get newSlidesTitle => 'Nowa prezentacja';

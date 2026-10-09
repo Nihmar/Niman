@@ -3331,6 +3331,11 @@ final class GalicianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visible';
+  @override
+  String get navigationStart => 'Ábrese en';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden está oculto: a app ábrese en $start.';
 
   @override
   String get newSlidesTitle => 'Nova presentación';

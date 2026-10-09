@@ -3272,6 +3272,11 @@ final class TurkishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Her zaman gösterilir';
+  @override
+  String get navigationStart => 'Açılış ekranı';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden gizli: uygulama $start ile açılır.';
 
   @override
   String get newSlidesTitle => 'Yeni sunum';

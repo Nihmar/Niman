@@ -2932,6 +2932,11 @@ final class ChineseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => '始终显示';
+  @override
+  String get navigationStart => '启动时打开';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden 已隐藏：应用将打开 $start。';
 
   @override
   String get newSlidesTitle => '新建幻灯片';

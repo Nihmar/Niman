@@ -3259,6 +3259,11 @@ final class EstonianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alati nähtav';
+  @override
+  String get navigationStart => 'Avaneb vaates';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden on peidetud: rakendus avaneb vaates $start.';
 
   @override
   String get newSlidesTitle => 'Uus esitlus';

@@ -3307,6 +3307,11 @@ final class CzechStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vždy zobrazeno';
+  @override
+  String get navigationStart => 'Otevírá se na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skryto: aplikace se otevírá na $start.';
 
   @override
   String get newSlidesTitle => 'Nová prezentace';

@@ -3330,6 +3330,11 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vedno prikazano';
+  @override
+  String get navigationStart => 'Odpre se na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skrito: aplikacija se odpre na $start.';
 
   @override
   String get newSlidesTitle => 'Nova predstavitev';

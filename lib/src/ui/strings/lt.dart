@@ -3350,6 +3350,11 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Visada rodoma';
+  @override
+  String get navigationStart => 'Atsidaro skiltyje';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden paslėpta: programa atsidaro skiltyje $start.';
 
   @override
   String get newSlidesTitle => 'Nauja pateiktis';

@@ -3294,6 +3294,11 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alltid vist';
+  @override
+  String get navigationStart => 'Åpner på';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden er skjult: appen åpner på $start.';
 
   @override
   String get newSlidesTitle => 'Ny presentasjon';

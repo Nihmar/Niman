@@ -3319,6 +3319,11 @@ final class SwedishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Visas alltid';
+  @override
+  String get navigationStart => 'Öppnas på';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden är dold: appen öppnas på $start.';
 
   @override
   String get newSlidesTitle => 'Ny presentation';

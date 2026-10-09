@@ -93,4 +93,15 @@ void main() {
     expect(following.deviceNavigation, isNull);
     expect(following.navigation, shared);
   });
+
+  test('the start round-trips, survives keep, and is absent by default', () {
+    // #706: the destination the app opens on, by name.
+    const layout = NavigationLayout(order: defaults, start: 'search');
+    expect(NavigationLayout.fromJson(layout.toJson()), layout);
+    expect(const NavigationLayout().toJson().containsKey('start'), isFalse);
+    expect(layout.keep(layout.place(defaults)).start, 'search');
+    expect(layout.withStart(null).start, isNull);
+    expect(layout.withStart(null), isNot(layout));
+    expect(NavigationLayout.fromJson(const {'start': 3}).start, isNull);
+  });
 }
