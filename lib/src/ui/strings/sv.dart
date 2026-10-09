@@ -2838,6 +2838,8 @@ final class SwedishStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ingen anteckning matchar “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) => 'Ingen fil matchar ”$query”.';
+  @override
   String get wikilinkNoHeading =>
       'den här anteckningen har ingen rubrik med det namnet';
   @override

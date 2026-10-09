@@ -2793,6 +2793,8 @@ final class EnglishStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => 'No note matches “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) => 'No file matches “$query”.';
+  @override
   String get wikilinkNoHeading => 'this note has no heading with that name';
   @override
   String get wikilinkNoNote => 'nothing in the library has that name or alias';

@@ -2894,6 +2894,8 @@ final class GermanStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => 'Keine Notiz passt zu „$query“.';
   @override
+  String wikilinkNoMatchFile(String query) => 'Keine Datei passt zu „$query“.';
+  @override
   String get wikilinkNoHeading =>
       'diese Notiz hat keine Überschrift mit diesem Namen';
   @override

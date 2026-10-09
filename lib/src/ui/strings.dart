@@ -852,6 +852,8 @@ final class AppStrings {
       _s.wikilinkNoMatchHeading(query);
   static String wikilinkNoMatchNote(String query) =>
       _s.wikilinkNoMatchNote(query);
+  static String wikilinkNoMatchFile(String query) =>
+      _s.wikilinkNoMatchFile(query);
   static String get wikilinkNoHeading => _s.wikilinkNoHeading;
   static String get wikilinkNoNote => _s.wikilinkNoNote;
   static String wikilinkAlias(String alias) => _s.wikilinkAlias(alias);

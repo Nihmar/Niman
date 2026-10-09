@@ -17,11 +17,22 @@ enum WikilinkPanelKind {
   /// The library's notes, after `[[`.
   notes,
 
+  /// The library's attachments, then its notes, after `![[` (#705).
+  embeds,
+
   /// A note's headings, after `#`.
   headings,
 
   /// A book's place forms, after `#` on a PDF or an EPUB.
   book,
+}
+
+/// What the kinds share.
+extension WikilinkPanelKindRows on WikilinkPanelKind {
+  /// Whether the rows are files of the library — notes or attachments — and
+  /// not a named note's headings or places, which a caption introduces.
+  bool get listsFiles =>
+      this == WikilinkPanelKind.notes || this == WikilinkPanelKind.embeds;
 }
 
 /// The width the panel is drawn at (the drawing's 300).
@@ -44,7 +55,7 @@ double wikilinkPanelHeight(
   bool keys = true,
 }) {
   final body = rows == 0 ? 58.0 : rows * rowHeight;
-  final caption = kind == WikilinkPanelKind.notes ? 0.0 : 25.0;
+  final caption = kind.listsFiles ? 0.0 : 25.0;
   final note = hasBodyNote ? 40.0 : 0.0;
   final footer = keys ? 27.0 : 0.0;
   return caption + body + note + footer;
@@ -121,7 +132,7 @@ final class WikilinkPanel extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            if (kind != WikilinkPanelKind.notes) _caption(context),
+            if (!kind.listsFiles) _caption(context),
             if (entries.isEmpty)
               _empty(context)
             else
@@ -167,13 +178,17 @@ final class WikilinkPanel extends StatelessWidget {
   /// The panel's own words when nothing matched.
   Widget _empty(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final headings = kind == WikilinkPanelKind.headings;
-    final sentence = headings
-        ? AppStrings.wikilinkNoMatchHeading(query)
-        : AppStrings.wikilinkNoMatchNote(query);
-    final sub = headings
-        ? AppStrings.wikilinkNoHeading
-        : AppStrings.wikilinkNoNote;
+    final (sentence, sub) = switch (kind) {
+      WikilinkPanelKind.headings => (
+        AppStrings.wikilinkNoMatchHeading(query),
+        AppStrings.wikilinkNoHeading,
+      ),
+      WikilinkPanelKind.embeds => (
+        AppStrings.wikilinkNoMatchFile(query),
+        AppStrings.wikilinkNoNote,
+      ),
+      _ => (AppStrings.wikilinkNoMatchNote(query), AppStrings.wikilinkNoNote),
+    };
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 13, 12, 13),
       child: Column(

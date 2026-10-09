@@ -2871,6 +2871,9 @@ final class BelarusianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ніводная нататка не адпавядае „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Няма файла, які адпавядае «$query».';
+  @override
   String get wikilinkNoHeading =>
       'у гэтай нататцы няма загалоўка з такой назвай';
   @override

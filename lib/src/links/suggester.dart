@@ -1,10 +1,11 @@
 /// What the wikilink suggester panel offers (#475), and where the app reads
 /// it from.
 ///
-/// While a wikilink is typed the panel lists the library's notes after `[[`
-/// and a note's headings after `#`. Everything comes from what the app
-/// already keeps: the notes and their aliases from `note_stems` (one query,
-/// never a walk of the tree), a note's headings from its own file — read and
+/// While a wikilink is typed the panel lists the library's notes after
+/// `[[`, its attachments after `![[` (#705), and a note's headings after
+/// `#`. Everything comes from what the app already keeps: the notes, the
+/// attachments and the aliases from `note_stems` (one query, never a walk
+/// of the tree), a note's headings from its own file — read and
 /// outlined off the UI isolate, once per revision of it (#491) — and a
 /// book's place forms from the target itself. Nothing here scans the library
 /// to fill the panel.
@@ -25,7 +26,7 @@ sealed class SuggestEntry {
   const new();
 }
 
-/// A note a `[[` target can name.
+/// A note a `[[` target can name, or a file an `![[` embed can.
 final class NoteSuggestion extends SuggestEntry {
   /// Creates a note row: [name] shown, [folder] dimmed, [target] written.
   const new({
@@ -35,7 +36,8 @@ final class NoteSuggestion extends SuggestEntry {
     this.alias,
   });
 
-  /// The name shown — the file's stem, its case as on disk (`.md` dropped).
+  /// The name shown — the file's name, its case as on disk (`.md` dropped,
+  /// any other extension kept: `photo.png`).
   final String name;
 
   /// The folder the note sits in, relative to the library; empty at the root.
@@ -86,6 +88,13 @@ abstract interface class WikilinkSuggester {
   /// note.
   Future<List<NoteSuggestion>> notes(String query);
 
+  /// What an `![[` embed can name, matching [query] (#705): the files of the
+  /// attachments folder first — pictures, audio, video, PDFs, whatever is
+  /// there — then the attachments kept elsewhere (a picture beside its
+  /// note), then the notes, which an embed transcludes. Ranked within each
+  /// as [notes] ranks; a target keeps its extension (`photo.png`).
+  Future<List<NoteSuggestion>> embeds(String query);
+
   /// The headings of the note named by the wiki [target] — `note`,
   /// `folder/note` — or none when it does not resolve or cannot be read.
   /// The list is the note's own headings, as the outline reads them; the
@@ -107,9 +116,17 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   /// Creates a suggester over [_db], reading a named note's headings through
   /// [readHeadings] (the session's own read and scan of a library-relative
   /// path, off the UI isolate; null when it is gone).
-  new(this._db, {required this.readHeadings}) : _resolver = LinkResolver(_db);
+  ///
+  /// [attachmentsFolder] names the library's attachments folder, whose
+  /// files an embed lists first; null lists every attachment as one.
+  new(this._db, {required this.readHeadings, this.attachmentsFolder})
+    : _resolver = LinkResolver(_db);
 
   final IndexDatabase _db;
+
+  /// The library's attachments folder, read when an embed is typed: the
+  /// setting can change under a running editor.
+  final Future<String> Function()? attachmentsFolder;
 
   /// The headings of a library-relative note path, in document order, or
   /// null when it is gone. The whole note is read, decoded and walked, so
@@ -148,7 +165,34 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   @override
   Future<List<NoteSuggestion>> notes(String query) async {
     final q = query.trim().toLowerCase();
-    final ranked = _rank(await _rows(q), q);
+    return await _complete(_rank(await _rows(q, _linkable), q));
+  }
+
+  @override
+  Future<List<NoteSuggestion>> embeds(String query) async {
+    final q = query.trim().toLowerCase();
+    final folder = await attachmentsFolder?.call() ?? '';
+    // Two reads, the folder's and the rest: one read cut at its cap by path
+    // could fill up with attachments elsewhere before it reached the folder.
+    final attachments = folder.isEmpty
+        ? _rank(await _rows(q, _attachment), q)
+        : [
+            ..._rank(await _rows(q, _attachment, under: folder), q),
+            ..._rank(
+              await _rows(q, _attachment, under: folder, outside: true),
+              q,
+            ),
+          ];
+    // The notes after, while the attachments leave room: an embed of a note
+    // transcludes it, and the panel still offers that.
+    final rows = await _complete(attachments);
+    if (rows.length >= limit) return rows;
+    final notes = await _complete(_rank(await _rows(q, _note), q));
+    return [...rows, ...notes.take(limit - rows.length)];
+  }
+
+  /// [ranked] qualified and cut to [limit] rows that read back.
+  Future<List<NoteSuggestion>> _complete(List<_Ranked> ranked) async {
     // A row the panel cannot write takes no slot: [limit] rows are cut from
     // the ones that read back, not from the ranking, or a run of names with
     // a `#` at its head would leave the panel short (#491). A name is
@@ -240,27 +284,47 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
     return bare;
   }
 
-  /// The matching `note_stems` rows joined to their file, prefix matches
-  /// first. An empty [q] lists every file, by path; a non-empty one reads the
-  /// indexed prefix matches, then the contains matches only while the cap has
-  /// room (#491).
-  Future<List<_StemRow>> _rows(String q) async {
-    // A note, a PDF or an EPUB: the files a `[[…]]` link names, and the
-    // books the `#` half serves. Other attachments are left to embeds.
-    const files =
-        "(lower(substr(n.name, -3)) = '.md' "
-        "OR lower(substr(n.name, -4)) = '.pdf' "
-        "OR lower(substr(n.name, -5)) = '.epub')";
-    const select =
+  /// A note, a PDF or an EPUB: the files a `[[…]]` link names, and the
+  /// books the `#` half serves. Other attachments are left to embeds.
+  static const String _linkable =
+      "(lower(substr(n.name, -3)) = '.md' "
+      "OR lower(substr(n.name, -4)) = '.pdf' "
+      "OR lower(substr(n.name, -5)) = '.epub')";
+
+  /// Every file but a note: what an `![[` embed names first (#705).
+  static const String _attachment = "lower(substr(n.name, -3)) <> '.md'";
+
+  /// A note: what an `![[` embed names after the attachments, a PDF or an
+  /// EPUB being one of those.
+  static const String _note = "lower(substr(n.name, -3)) = '.md'";
+
+  /// The matching `note_stems` rows of the [files] kind joined to their
+  /// file, prefix matches first. An empty [q] lists every file, by path; a
+  /// non-empty one reads the indexed prefix matches, then the contains
+  /// matches only while the cap has room (#491). With [under], only the
+  /// files in that folder (at any depth) — or, [outside], only the others.
+  Future<List<_StemRow>> _rows(
+    String q,
+    String files, {
+    String? under,
+    bool outside = false,
+  }) async {
+    final scope = under == null
+        ? ''
+        : " AND n.path ${outside ? 'NOT ' : ''}LIKE ? ESCAPE '\\'";
+    final scoped = <Variable<Object>>[
+      if (under != null) Variable<String>('${_escapeLike(under)}/%'),
+    ];
+    final select =
         'SELECT s.stem AS stem, s.source AS source, n.id AS id, n.path AS path '
         'FROM note_stems AS s JOIN notes AS n ON n.id = s.note_id '
-        'WHERE n.is_dir = 0 AND $files';
+        'WHERE n.is_dir = 0 AND $files$scope';
     final List<QueryRow> result;
     if (q.isEmpty) {
       result = await _db
           .customSelect(
             '$select ORDER BY n.path ASC LIMIT ?',
-            variables: const [Variable<int>(_fetch)],
+            variables: [...scoped, const Variable<int>(_fetch)],
           )
           .get();
     } else {
@@ -275,7 +339,11 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
           .customSelect(
             "$select AND s.stem LIKE ? ESCAPE '\\' "
             'ORDER BY n.path ASC LIMIT ?',
-            variables: [Variable<String>(prefix), const Variable<int>(_fetch)],
+            variables: [
+              ...scoped,
+              Variable<String>(prefix),
+              const Variable<int>(_fetch),
+            ],
           )
           .get();
       if (rows.length < _fetch) {
@@ -287,6 +355,7 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
                 r"AND s.stem NOT LIKE ? ESCAPE '\' "
                 'ORDER BY n.path ASC LIMIT ?',
                 variables: [
+                  ...scoped,
                   Variable<String>('%$escaped%'),
                   Variable<String>(prefix),
                   Variable<int>(_fetch - rows.length),

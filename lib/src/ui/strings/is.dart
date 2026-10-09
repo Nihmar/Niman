@@ -2829,6 +2829,8 @@ final class IcelandicStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Enginn minnispunktur passar við „$query".';
   @override
+  String wikilinkNoMatchFile(String query) => 'Engin skrá passar við „$query“.';
+  @override
   String get wikilinkNoHeading =>
       'þessi minnispunktur hefur engan titil með þessu nafni';
   @override

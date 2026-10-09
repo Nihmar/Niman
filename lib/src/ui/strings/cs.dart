@@ -2834,6 +2834,9 @@ final class CzechStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Žádná poznámka neodpovídá „$query“.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Žádný soubor neodpovídá „$query“.';
+  @override
   String get wikilinkNoHeading => 'tato poznámka nemá nadpis s tímto názvem';
   @override
   String get wikilinkNoNote => 'nic v knihovně nemá tento název ani alias';

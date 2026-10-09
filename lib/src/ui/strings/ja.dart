@@ -2578,6 +2578,8 @@ final class JapaneseStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => '「$query」 に一致するノートはありません。';
   @override
+  String wikilinkNoMatchFile(String query) => '「$query」に一致するファイルはありません。';
+  @override
   String get wikilinkNoHeading => 'このノートにその名前の見出しはありません';
   @override
   String get wikilinkNoNote => 'ライブラリにその名前または別名のものはありません';

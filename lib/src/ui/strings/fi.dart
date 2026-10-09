@@ -2846,6 +2846,9 @@ final class FinnishStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Mikään muistiinpano ei vastaa hakua “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Mikään tiedosto ei vastaa hakua ”$query”.';
+  @override
   String get wikilinkNoHeading =>
       'tässä muistiinpanossa ei ole sen nimistä otsikkoa';
   @override

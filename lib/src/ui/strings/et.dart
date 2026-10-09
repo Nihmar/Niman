@@ -2791,6 +2791,9 @@ final class EstonianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ükski märge ei vasta päringule „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ükski fail ei vasta päringule „$query“.';
+  @override
   String get wikilinkNoHeading => 'selles märkes pole sellenimelist pealkirja';
   @override
   String get wikilinkNoNote => 'kogus pole midagi selle nime või aliasega';

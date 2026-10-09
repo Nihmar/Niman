@@ -2884,6 +2884,9 @@ final class PolishStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Żadna notatka nie pasuje do „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Żaden plik nie pasuje do „$query”.';
+  @override
   String get wikilinkNoHeading => 'ta notatka nie ma nagłówka o tej nazwie';
   @override
   String get wikilinkNoNote => 'nic w bibliotece nie ma tej nazwy ani aliasu';

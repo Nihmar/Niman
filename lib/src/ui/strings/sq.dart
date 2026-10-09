@@ -2851,6 +2851,9 @@ final class AlbanianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Asnjë shënim nuk përputhet me „$query".';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Asnjë skedar nuk përputhet me “$query”.';
+  @override
   String get wikilinkNoHeading => 'ky shënim nuk ka titull me atë emër';
   @override
   String get wikilinkNoNote =>

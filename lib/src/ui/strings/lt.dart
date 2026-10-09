@@ -2868,6 +2868,9 @@ final class LithuanianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nė viena pastaba neatitinka „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Joks failas neatitinka „$query“.';
+  @override
   String get wikilinkNoHeading =>
       'šioje pastaboje nėra antraštės tokiu pavadinimu';
   @override

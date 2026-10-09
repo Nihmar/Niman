@@ -2872,6 +2872,9 @@ final class SpanishStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ninguna nota coincide con «$query».';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ningún archivo coincide con «$query».';
+  @override
   String get wikilinkNoHeading => 'esta nota no tiene un título con ese nombre';
   @override
   String get wikilinkNoNote =>

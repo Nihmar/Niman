@@ -2842,6 +2842,9 @@ final class SlovakStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Žiadna poznámka nezodpovedá „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Žiadny súbor nezodpovedá „$query“.';
+  @override
   String get wikilinkNoHeading => 'táto poznámka nemá nadpis s týmto názvom';
   @override
   String get wikilinkNoNote => 'nič v knižnici nemá tento názov ani alias';

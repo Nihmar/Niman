@@ -2877,6 +2877,9 @@ final class RomanianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nicio notă nu corespunde cu “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Niciun fișier nu se potrivește cu „$query”.';
+  @override
   String get wikilinkNoHeading =>
       'această notă nu are niciun titlu cu acest nume';
   @override

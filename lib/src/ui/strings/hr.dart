@@ -2863,6 +2863,9 @@ final class CroatianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nijedna napomena se ne podudara s „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nijedna datoteka ne odgovara „$query”.';
+  @override
   String get wikilinkNoHeading => 'ova napomena nema naslov s tim imenom';
   @override
   String get wikilinkNoNote => 'ništa u knjižnici nema to ime ni alias';

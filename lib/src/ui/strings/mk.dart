@@ -2857,6 +2857,9 @@ final class MacedonianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ниту една белешка не се совпаѓа со „$query".';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ниедна датотека не одговара на „$query“.';
+  @override
   String get wikilinkNoHeading => 'оваа белешка нема наслов со тоа име';
   @override
   String get wikilinkNoNote =>

@@ -2856,6 +2856,9 @@ final class SlovenianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nobena opomba se ne ujema s „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nobena datoteka se ne ujema z »$query«.';
+  @override
   String get wikilinkNoHeading => 'ta opomba nima naslova s tem imenom';
   @override
   String get wikilinkNoNote => 'nič v knjižnici nima tega imena ali vzdevka';

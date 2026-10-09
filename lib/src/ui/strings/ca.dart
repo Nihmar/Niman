@@ -2877,6 +2877,9 @@ final class CatalanStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Cap nota coincideix amb “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Cap fitxer coincideix amb «$query».';
+  @override
   String get wikilinkNoHeading => 'aquesta nota no té cap títol amb aquest nom';
   @override
   String get wikilinkNoNote =>

@@ -2857,6 +2857,9 @@ final class BasqueStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ez dago oharrik “$query” izenarekin.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ez dago «$query»-rekin bat datorren fitxategirik.';
+  @override
   String get wikilinkNoHeading => 'ohar honek ez du izen hori duen izenbururik';
   @override
   String get wikilinkNoNote =>

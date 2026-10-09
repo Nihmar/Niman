@@ -2867,6 +2867,9 @@ final class DutchStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Geen notitie komt overeen met “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Geen bestand komt overeen met “$query”.';
+  @override
   String get wikilinkNoHeading => 'deze notitie heeft geen kop met die naam';
   @override
   String get wikilinkNoNote =>

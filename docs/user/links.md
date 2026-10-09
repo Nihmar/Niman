@@ -30,6 +30,15 @@ the note's. The panel lists:
   has no escape for them, and the row would write a link that reads back
   as another note — link to one of those with a Markdown link instead
   (`[C# tips](C%23%20tips.md)`);
+- after `![[` — an embed — the attachments instead: the files of the
+  attachments folder (**Settings → Folders and paths**) and its
+  subfolders first — pictures, audio, video, PDFs, whatever is there —
+  then the attachments kept elsewhere in the library (a picture beside
+  its note), then the notes, which an embed transcludes. They are
+  matched by the typed name as the notes are, and the row writes the
+  file's name with its extension (`![[photo.png]]`), with as much of its
+  folder as it takes when another file shares the name. A Markdown
+  embed, `![](…)`, has no panel, as a Markdown link has none;
 - after a `#` — the headings of the note just named, filtered the same
   way. `[[#` — no target — lists the headings of the note being edited;
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or

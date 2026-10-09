@@ -2816,6 +2816,8 @@ final class DanishStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => 'Ingen noter matcher “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) => 'Ingen fil matcher “$query”.';
+  @override
   String get wikilinkNoHeading =>
       'denne note har ingen overskrift med det navn';
   @override

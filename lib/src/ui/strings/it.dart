@@ -2849,6 +2849,9 @@ final class ItalianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nessuna nota corrisponde a “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nessun file corrisponde a “$query”.';
+  @override
   String get wikilinkNoHeading => 'questa nota non ha un titolo con quel nome';
   @override
   String get wikilinkNoNote => 'niente nella libreria ha quel nome o alias';

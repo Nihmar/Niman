@@ -2813,6 +2813,9 @@ final class NorwegianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ingen notater samsvarer med “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ingen fil samsvarer med «$query».';
+  @override
   String get wikilinkNoHeading =>
       'dette notatet har ingen overskrift med det navnet';
   @override

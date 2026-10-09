@@ -2860,6 +2860,9 @@ final class SerbianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ниједна белешка се не поклапа са „$query".';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ниједна датотека не одговара „$query”.';
+  @override
   String get wikilinkNoHeading => 'ова белешка нема наслов с тим именом';
   @override
   String get wikilinkNoNote => 'ништа у библиотеци нема то име или алијас';

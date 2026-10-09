@@ -172,6 +172,40 @@ void main() {
     ]);
   });
 
+  testWidgets('typing ![[ lists the attachments, then the notes (#705)', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    final suggester = FakeWikilinkSuggester(
+      notes: const <NoteSuggestion>[
+        NoteSuggestion(name: 'Notes', folder: '', target: 'Notes'),
+      ],
+      attachments: const <NoteSuggestion>[
+        NoteSuggestion(
+          name: 'photo.png',
+          folder: 'attachments',
+          target: 'photo.png',
+        ),
+      ],
+    );
+    final state = await pump(tester, buffer, suggester);
+
+    await type(tester, '![[');
+
+    expect(state.isSuggesterShown, isTrue);
+    expect(suggester.embedQueries, ['']);
+    expect(suggester.noteQueries, [''], reason: 'the fake lists notes after');
+    expect(panel(tester).kind, WikilinkPanelKind.embeds);
+    expect(
+      panel(tester).entries.whereType<NoteSuggestion>().map((n) => n.name),
+      ['photo.png', 'Notes'],
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(buffer.text, '![[photo.png]]');
+  });
+
   testWidgets('typing more narrows the list', (tester) async {
     final buffer = SourceBuffer.fromText('');
     final suggester = _library();

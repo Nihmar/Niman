@@ -1367,6 +1367,7 @@ abstract base class Strings {
 
   /// The panel's sentence when no note matched [query].
   String wikilinkNoMatchNote(String query);
+  String wikilinkNoMatchFile(String query);
 
   /// What stands under [wikilinkNoMatchHeading].
   String get wikilinkNoHeading;

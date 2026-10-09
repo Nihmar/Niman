@@ -2847,6 +2847,9 @@ final class GalicianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ningunha nota coincide con “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ningún ficheiro coincide con «$query».';
+  @override
   String get wikilinkNoHeading =>
       'esta nota non ten ningún título con ese nome';
   @override

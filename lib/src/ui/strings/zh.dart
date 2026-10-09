@@ -2497,6 +2497,8 @@ final class ChineseStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => '没有笔记与「$query」匹配。';
   @override
+  String wikilinkNoMatchFile(String query) => '没有与“$query”匹配的文件。';
+  @override
   String get wikilinkNoHeading => '本笔记没有该名称的标题';
   @override
   String get wikilinkNoNote => '资料库中没有这个名称或别名的内容';

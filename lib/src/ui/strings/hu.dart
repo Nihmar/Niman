@@ -2839,6 +2839,9 @@ final class HungarianStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => 'Nincs „$query” jegyzet.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Egy fájl sem egyezik ezzel: „$query”.';
+  @override
   String get wikilinkNoHeading => 'ennek a jegyzetnek nincs ilyen nevű címsora';
   @override
   String get wikilinkNoNote =>

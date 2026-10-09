@@ -2863,6 +2863,9 @@ final class BosnianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nijedna bilješka se ne poklapa sa "$query".';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nijedna datoteka ne odgovara „$query”.';
+  @override
   String get wikilinkNoHeading => 'ova bilješka nema naslov s tim imenom';
   @override
   String get wikilinkNoNote => 'ništa u biblioteci nema to ime ni alias';

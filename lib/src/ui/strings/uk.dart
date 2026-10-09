@@ -2873,6 +2873,9 @@ final class UkrainianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Жодна нотатка не відповідає „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Жоден файл не відповідає «$query».';
+  @override
   String get wikilinkNoHeading =>
       'у цій нотатці немає заголовка з такою назвою';
   @override

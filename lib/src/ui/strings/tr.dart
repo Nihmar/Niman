@@ -2794,6 +2794,8 @@ final class TurkishStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => '“$query” ile eşleşen not yok.';
   @override
+  String wikilinkNoMatchFile(String query) => '“$query” ile eşleşen dosya yok.';
+  @override
   String get wikilinkNoHeading => 'bu notta o adı taşıyan başlık yok';
   @override
   String get wikilinkNoNote =>

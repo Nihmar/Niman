@@ -2913,6 +2913,9 @@ final class FrenchStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Aucune note ne correspond à « $query ».';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Aucun fichier ne correspond à « $query ».';
+  @override
   String get wikilinkNoHeading => 'cette note n’a aucun titre de ce nom';
   @override
   String get wikilinkNoNote =>

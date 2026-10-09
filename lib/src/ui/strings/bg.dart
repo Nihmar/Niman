@@ -2846,6 +2846,9 @@ final class BulgarianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Никоя бележка не съвпада с „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Няма файл, който да съвпада с „$query“.';
+  @override
   String get wikilinkNoHeading => 'тази бележка няма заглавие с това име';
   @override
   String get wikilinkNoNote =>

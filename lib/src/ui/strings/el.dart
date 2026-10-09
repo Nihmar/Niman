@@ -2924,6 +2924,9 @@ final class GreekStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Καμία σημείωση δεν ταιριάζει με «$query».';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Κανένα αρχείο δεν ταιριάζει με «$query».';
+  @override
   String get wikilinkNoHeading =>
       'αυτή η σημείωση δεν έχει τίτλο με αυτό το όνομα';
   @override

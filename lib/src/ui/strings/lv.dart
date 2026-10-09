@@ -2828,6 +2828,9 @@ final class LatvianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Neviena piezīme neatbilst „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Neviens fails neatbilst “$query”.';
+  @override
   String get wikilinkNoHeading =>
       'šai piezīmei nav virsraksta ar šādu nosaukumu';
   @override
