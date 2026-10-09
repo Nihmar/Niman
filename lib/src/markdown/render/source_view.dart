@@ -1835,6 +1835,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// How long two taps may be apart and still be one gesture.
   static const Duration _clickWindow = Duration(milliseconds: 400);
 
+  /// Whether a tap at [position], at [now], is the next of the last one's
+  /// gesture: near it in time *and* in place. Two quick taps on different
+  /// words are two carets, not a double click — counting time alone selected
+  /// a word under the second tap and the next keystroke replaced it.
+  bool _followsLastClick(Offset position, DateTime now) {
+    final last = _lastClick;
+    final lastAt = _lastClickAt;
+    return last != null &&
+        lastAt != null &&
+        now.difference(last) <= _clickWindow &&
+        (position - lastAt).distance <= kDoubleTapSlop;
+  }
+
   /// A tap: one places the caret, two take the word under it, three take the
   /// line.
   ///
@@ -1854,18 +1867,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _pressOffset = null;
     if (offset == null) return;
     final now = DateTime.now();
-    final last = _lastClick;
-    final lastAt = _lastClickAt;
-    // Near in time *and* in place: two quick taps on different words are two
-    // carets, not a double click — counting time alone selected a word under
-    // the second tap and the next keystroke replaced it.
-    _clicks =
-        last != null &&
-            lastAt != null &&
-            now.difference(last) <= _clickWindow &&
-            (position - lastAt).distance <= kDoubleTapSlop
-        ? _clicks + 1
-        : 1;
+    _clicks = _followsLastClick(position, now) ? _clicks + 1 : 1;
     _lastClick = now;
     _lastClickAt = position;
     switch (_clicks) {
@@ -4277,12 +4279,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// on the caret brings the toolbar up (to paste), a tap anywhere else puts
   /// it and the handles away. True when the tap was taken.
   bool _touchTap(Offset global) {
-    final last = _lastClick;
-    final lastAt = _lastClickAt;
-    if (last != null &&
-        lastAt != null &&
-        DateTime.now().difference(last) <= _clickWindow &&
-        (global - lastAt).distance <= kDoubleTapSlop) {
+    if (_followsLastClick(global, DateTime.now())) {
       // The second tap of a double tap: the word, not the toolbar.
       _hideTouch();
       return false;
