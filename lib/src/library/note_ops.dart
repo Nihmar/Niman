@@ -20,6 +20,8 @@ import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
+import 'package:niman/src/library/note_op_seams.dart';
+import 'package:niman/src/library/note_trash.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
@@ -32,33 +34,8 @@ import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
 
-/// Hears what a user operation did to a library-relative path, for the
-/// sync queue (docs/records/sync.md, "Queue and triggers"). A hint, not a
-/// command: the reconcile decides what to do.
-typedef SyncHintSink = void Function(
-  String path,
-  SyncOpKind kind, {
-  String? fromPath,
-});
-
-/// One item in `.trash/`, mapped back to its library-relative origin.
-final class TrashItem {
-  /// Creates a trash listing entry.
-  const new({
-    required this.name,
-    required this.originalPath,
-    required this.deletedAt,
-  });
-
-  /// Name inside `.trash/` (timestamped when a collision was resolved).
-  final String name;
-
-  /// Library-relative path before the delete.
-  final String originalPath;
-
-  /// When the item was deleted.
-  final DateTime deletedAt;
-}
+export 'package:niman/src/library/note_op_seams.dart' show SyncHintSink;
+export 'package:niman/src/library/note_trash.dart' show TrashItem;
 
 /// Creates / renames / moves / deletes notes and folders on disk, and keeps
 /// the index in step through the shared [indexer] (T-M1-05, T-M1-07).
@@ -110,6 +87,17 @@ final class NoteOps implements NoteOperations {
 
   final NoteDao _dao;
 
+  /// The library's `.trash/` and its manifest.
+  late final NoteTrash _trash = NoteTrash(
+    root: root,
+    indexer: indexer,
+    history: history,
+    config: config,
+    serialize: _synchronized,
+    hint: _hint,
+    find: _mustFind,
+  );
+
   /// What else, outside the library's own files, names a note by its path
   /// and has to follow a rename or a move (#506): the home-screen note
   /// widgets, kept in the app's database rather than the library's. Null
@@ -148,7 +136,7 @@ final class NoteOps implements NoteOperations {
   }
 
   /// The name of the trash manifest inside `.trash/`.
-  static const manifestFileName = '.niman-trash.json';
+  static const String manifestFileName = NoteTrash.manifestFileName;
 
   Future<void> _chain = Future<void>.value();
 
@@ -838,55 +826,7 @@ final class NoteOps implements NoteOperations {
   /// Deletes [path]: into `.trash/` when the trash toggle is on, hard
   /// delete otherwise.
   @override
-  Future<void> delete(String path) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      final oldAbs = _abs(path);
-      final trash = await trashEnabled;
-      String? trashAbs;
-      if (trash) {
-        trashAbs = await _moveIntoTrash(path, isDir: row.isDir);
-      } else {
-        if (row.isDir) {
-          await Directory(oldAbs).delete(recursive: true);
-        } else {
-          await File(oldAbs).delete();
-        }
-        // No trash to come back from: the history goes with the note.
-        await history.deleted(path, isDir: row.isDir);
-      }
-      _hint(path, SyncOpKind.deleted);
-      final events = <String>[oldAbs];
-      if (trashAbs != null) events.add(trashAbs);
-      await indexer.applyEvents(root, events);
-    });
-  }
-
-  /// Moves [path] into `.trash/` under a collision-safe name and records
-  /// it in the manifest; returns the absolute trash path. The history
-  /// stays at [path] (a restore brings it back).
-  Future<String> _moveIntoTrash(String path, {required bool isDir}) async {
-    final trashDir = Directory(_abs('.trash'));
-    if (!trashDir.existsSync()) {
-      await trashDir.create(recursive: true);
-    }
-    final name = p.basename(path);
-    String target;
-    if (isDir) {
-      target = await trashDirName(trashDir, name);
-    } else {
-      final parts = splitFileName(name);
-      target = await trashFileName(trashDir, parts.base, parts.ext);
-    }
-    final trashAbs = _abs('.trash/$target');
-    if (isDir) {
-      await Directory(_abs(path)).rename(trashAbs);
-    } else {
-      await File(_abs(path)).rename(trashAbs);
-    }
-    await _manifestAdd(trashDir, target, path);
-    return trashAbs;
-  }
+  Future<void> delete(String path) => _trash.delete(path);
 
   // -- sync (docs/records/sync.md) -------------------------------------------
 
@@ -928,7 +868,7 @@ final class NoteOps implements NoteOperations {
       final isDir = Directory(abs).existsSync();
       if (!isDir && !File(abs).existsSync()) return;
       _markSyncWrite(path);
-      final trashAbs = await _moveIntoTrash(path, isDir: isDir);
+      final trashAbs = await _trash.moveIntoTrash(path, isDir: isDir);
       await indexer.applyEvents(root, [abs, trashAbs]);
     });
   }
@@ -964,209 +904,22 @@ final class NoteOps implements NoteOperations {
 
   /// Lists the managed trash items (manifest-backed), in deletion order.
   @override
-  Future<List<TrashItem>> trashItems() {
-    return _synchronized(() async {
-      final manifest = await _readManifest();
-      return [
-        for (final entry in manifest.entries)
-          if (_existsInTrash(entry.key))
-            TrashItem(
-              name: entry.key,
-              originalPath: entry.value.originalPath,
-              deletedAt: entry.value.deletedAt,
-            ),
-      ];
-    });
-  }
+  Future<List<TrashItem>> trashItems() => _trash.items();
 
   /// Restores the trash item [trashName] to its original parent when that
   /// folder still exists, otherwise to the library root.
-  ///
-  /// The item comes back under its original name (uniquified only on a
-  /// real collision), which is taken from the manifest's `originalPath` —
-  /// never from the name inside `.trash/`, which carries a collision
-  /// timestamp and would survive the restore.
   @override
-  Future<Note> restoreTrash(String trashName) {
-    return _synchronized(() async {
-      final manifest = await _readManifest();
-      final entry = manifest[trashName];
-      if (entry == null) {
-        throw StateError('Not a managed trash item: "$trashName"');
-      }
-      final trashAbs = _abs('.trash/$trashName');
-      final isDir = Directory(trashAbs).existsSync();
-      final originalName = p.basename(entry.originalPath);
-      final originalParent = parentOf(entry.originalPath);
-      final originalDir = Directory(_abs(originalParent));
-      final restoreParent = originalDir.existsSync() ? originalParent : '';
-      final parentDirObj = Directory(_abs(restoreParent));
-      String target;
-      if (isDir) {
-        target = await uniqueFolderName(parentDirObj, originalName);
-      } else {
-        final parts = splitFileName(originalName);
-        target = await uniqueFileName(parentDirObj, parts.base, parts.ext);
-      }
-      final newRel = resolvePath(restoreParent, target);
-      if (isDir) {
-        await Directory(trashAbs).rename(_abs(newRel));
-      } else {
-        await File(trashAbs).rename(_abs(newRel));
-      }
-      manifest.remove(trashName);
-      await _writeManifest(manifest);
-      _hint(newRel, SyncOpKind.changed);
-      // The history stayed at the original path while the item was in the
-      // trash; it follows only when the item came back somewhere else.
-      await history.moved(entry.originalPath, newRel, isDir: isDir);
-      await indexer.applyEvents(root, [trashAbs, _abs(newRel)]);
-      return await _mustFind(newRel);
-    });
-  }
+  Future<Note> restoreTrash(String trashName) => _trash.restore(trashName);
 
   /// Permanently deletes the trash item [trashName] (no restore possible).
   @override
-  Future<void> deleteTrashPermanently(String trashName) {
-    return _synchronized(() async {
-      final manifest = await _readManifest();
-      final entry = manifest.remove(trashName);
-      if (entry == null) {
-        throw StateError('Not a managed trash item: "$trashName"');
-      }
-      final trashAbs = _abs('.trash/$trashName');
-      final isDir = Directory(trashAbs).existsSync();
-      if (isDir) {
-        await Directory(trashAbs).delete(recursive: true);
-      } else if (File(trashAbs).existsSync()) {
-        await File(trashAbs).delete();
-      }
-      await _writeManifest(manifest);
-      await _dropTrashedHistory(entry.originalPath, isDir: isDir);
-    });
-  }
+  Future<void> deleteTrashPermanently(String trashName) =>
+      _trash.deletePermanently(trashName);
 
-  /// Permanently deletes every managed trash item.
-  @override
   /// Deletes every entry in `.trash/`, not just the items Niman put
-  /// there: the trash screen promises to empty the folder, and that
-  /// includes anything a user moved into it by hand. Ends with an empty
-  /// manifest.
-  Future<void> emptyTrash() {
-    return _synchronized(() async {
-      final trashDir = Directory(_abs('.trash'));
-      // Read before the items go: the manifest is what knows where each
-      // one came from, and so whose history is now orphaned.
-      final origins = [
-        for (final entry in (await _readManifest()).entries)
-          (
-            entry.value.originalPath,
-            Directory(_abs('.trash/${entry.key}')).existsSync(),
-          ),
-      ];
-      if (trashDir.existsSync()) {
-        for (final entry in trashDir.listSync()) {
-          if (entry is Directory) {
-            await entry.delete(recursive: true);
-          } else {
-            await entry.delete();
-          }
-        }
-      }
-      await _writeManifest(<String, _ManifestEntry>{});
-      for (final (originalPath, isDir) in origins) {
-        await _dropTrashedHistory(originalPath, isDir: isDir);
-      }
-    });
-  }
-
-  /// Removes the history a permanently deleted trash item left at
-  /// [originalPath] — unless a note lives there again, whose history it
-  /// now is.
-  Future<void> _dropTrashedHistory(
-    String originalPath, {
-    required bool isDir,
-  }) async {
-    final abs = _abs(originalPath);
-    if (File(abs).existsSync() || Directory(abs).existsSync()) return;
-    await history.deleted(originalPath, isDir: isDir);
-  }
-
-  bool _existsInTrash(String name) {
-    final abs = _abs('.trash/$name');
-    return Directory(abs).existsSync() || File(abs).existsSync();
-  }
-
-  // -- manifest --------------------------------------------------------
-
-  /// Reads the trash manifest, surviving a torn or partially corrupt file:
-  /// a whole file that is not a JSON object yields an empty manifest, and
-  /// individual entries that do not decode are skipped, so one bad entry
-  /// can never take the trash screen down.
-  Future<Map<String, _ManifestEntry>> _readManifest() async {
-    final file = File(_abs('.trash/$manifestFileName'));
-    if (!file.existsSync()) return <String, _ManifestEntry>{};
-    final raw = file.readAsStringSync();
-    if (raw.trim().isEmpty) return <String, _ManifestEntry>{};
-    Object? decoded;
-    try {
-      decoded = jsonDecode(raw);
-    } on FormatException {
-      return <String, _ManifestEntry>{};
-    }
-    if (decoded is! Map) return <String, _ManifestEntry>{};
-    final manifest = <String, _ManifestEntry>{};
-    for (final entry in decoded.entries) {
-      final name = entry.key;
-      if (name is! String) continue;
-      final parsed = _parseManifestEntry(entry.value);
-      if (parsed != null) manifest[name] = parsed;
-    }
-    return manifest;
-  }
-
-  static _ManifestEntry? _parseManifestEntry(Object? json) {
-    if (json is! Map) return null;
-    final originalPath = json['originalPath'];
-    final deletedAt = json['deletedAt'];
-    if (originalPath is! String || deletedAt is! int) return null;
-    return _ManifestEntry(
-      originalPath: originalPath,
-      deletedAt: DateTime.fromMillisecondsSinceEpoch(deletedAt),
-    );
-  }
-
-  /// Writes the manifest, dropping entries whose item is no longer on disk
-  /// so the file converges with `.trash/` even when something removed an
-  /// item without going through the ops.
-  Future<void> _writeManifest(Map<String, _ManifestEntry> manifest) async {
-    final trashDir = Directory(_abs('.trash'));
-    if (!trashDir.existsSync()) await trashDir.create(recursive: true);
-    final kept = {
-      for (final entry in manifest.entries)
-        if (_existsInTrash(entry.key)) entry.key: entry.value,
-    };
-    final payload = jsonEncode({
-      for (final entry in kept.entries) entry.key: entry.value.toJson(),
-    });
-    await writeFileAtomically(
-      File(_abs('.trash/$manifestFileName')),
-      utf8.encode(payload),
-    );
-  }
-
-  Future<void> _manifestAdd(
-    Directory trashDir,
-    String name,
-    String originalPath,
-  ) async {
-    final manifest = await _readManifest();
-    manifest[name] = _ManifestEntry(
-      originalPath: originalPath,
-      deletedAt: DateTime.now(),
-    );
-    await _writeManifest(manifest);
-  }
+  /// there. Ends with an empty manifest.
+  @override
+  Future<void> emptyTrash() => _trash.empty();
 }
 
 /// The heading texts of the note file at absolute [path], read as it lies.
@@ -1181,22 +934,4 @@ List<String> headingsOfNoteFile(String path) {
     text = text.substring(1);
   }
   return [for (final heading in outlineOfText(text)) heading.text];
-}
-
-/// One manifest entry: where a trash item came from.
-final class _ManifestEntry {
-  /// Creates a manifest entry.
-  const new({required this.originalPath, required this.deletedAt});
-
-  /// Library-relative path before the delete.
-  final String originalPath;
-
-  /// When the item was deleted.
-  final DateTime deletedAt;
-
-  /// Serializes the entry for the manifest file.
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'originalPath': originalPath,
-    'deletedAt': deletedAt.millisecondsSinceEpoch,
-  };
 }
