@@ -321,6 +321,31 @@ final class NoteOps implements NoteOperations {
   }
 
   @override
+  Future<HomeLayout> editHome({
+    required HomeLayout from,
+    required HomeLayout to,
+    required bool onDevice,
+  }) async {
+    if (onDevice) {
+      var edited = to;
+      await config.update((c) {
+        final current = switch (c.deviceHome) {
+          final json? => HomeLayout.fromJson(json),
+          null => null,
+        };
+        edited = (current ?? from).withEdit(from: from, to: to);
+        return c.copyWith(deviceHome: edited.toJson());
+      });
+      return edited;
+    }
+    final edited = await HomeFile(root)
+        .update((current) => current.withEdit(from: from, to: to));
+    _hint(HomeFile.filePath, SyncOpKind.changed);
+    await clearDeviceHome();
+    return edited;
+  }
+
+  @override
   Future<void> clearDeviceHome() =>
       config.update((c) => c.copyWith(clearDeviceHome: true));
 

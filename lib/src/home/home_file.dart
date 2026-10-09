@@ -38,7 +38,15 @@ final class HomeFile {
 
   /// The Home the file holds; null when there is no file, or it does not
   /// read as one — the library then shows [HomeLayout.defaults].
+  ///
+  /// It waits for the writes still running, or it reads the file from
+  /// before them (#691).
   Future<HomeLayout?> read() async {
+    if (_queues[_path] case final pending?) await pending;
+    return await _readNow();
+  }
+
+  Future<HomeLayout?> _readNow() async {
     final path = _path;
     final text = await Isolate.run(() => _readText(path));
     if (text == null) return null;
@@ -52,6 +60,18 @@ final class HomeFile {
 
   /// Writes [layout] whole.
   Future<void> write(HomeLayout layout) => _update((_) => layout);
+
+  /// Writes what [change] makes of the Home the file holds when its turn
+  /// comes — [HomeLayout.defaults] for no file — and returns it.
+  Future<HomeLayout> update(
+    HomeLayout Function(HomeLayout current) change,
+  ) async {
+    late HomeLayout written;
+    await _update(
+      (current) => written = change(current ?? HomeLayout.defaults),
+    );
+    return written;
+  }
 
   /// Rewrites the actions' paths after the item at [from] moved to [to];
   /// whether the file changed. No file, or none pointing there, is no
@@ -77,7 +97,7 @@ final class HomeFile {
     _queues[key] = done.future;
     try {
       if (before != null) await before;
-      final next = change(await read());
+      final next = change(await _readNow());
       if (next == null) return;
       final json = next.toJson();
       await Isolate.run(() => _writeJson(key, json));

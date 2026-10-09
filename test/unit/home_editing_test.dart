@@ -58,6 +58,20 @@ void main() {
     });
   });
 
+  group('withEdit', () {
+    test('puts and removes what the edit touched, keeps the rest', () {
+      const from = HomeLayout.defaults;
+      final to = from.hide('pinned').remove('recent');
+      final current = from.hide('tasksDue');
+
+      final edited = current.withEdit(from: from, to: to);
+
+      expect(edited['pinned']!.hidden, isTrue);
+      expect(edited['recent'], isNull);
+      expect(edited['tasksDue']!.hidden, isTrue, reason: 'not the edit');
+    });
+  });
+
   group('HomeEditing', () {
     late FakeLibrarySession session;
     late HomeEditing editing;
@@ -131,6 +145,21 @@ void main() {
         expect(session.deviceHome, isNull);
         expect(editing.layout, session.libraryHome);
         expect(editing.onDevice, isFalse);
+      },
+    );
+
+    test(
+      'an edit lands on the Home kept now, not on the one read (#691)',
+      () async {
+        await editing.load();
+        // A sync brings another device's change after the read.
+        session.libraryHome = HomeLayout.defaults.hide('tasksDue');
+
+        await editing.change(editing.layout.hide('pinned'));
+
+        expect(session.libraryHome!['tasksDue']!.hidden, isTrue);
+        expect(session.libraryHome!['pinned']!.hidden, isTrue);
+        expect(editing.layout, session.libraryHome, reason: 'shown as kept');
       },
     );
 

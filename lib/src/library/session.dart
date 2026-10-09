@@ -245,6 +245,16 @@ abstract interface class NoteOperations {
   /// library's when not, dropping the device's own.
   Future<void> setHome(HomeLayout layout, {required bool onDevice});
 
+  /// Makes the edit that turned [from] into [to] on the Home as it is
+  /// kept now — this device's own when [onDevice], else the library's —
+  /// and returns the Home that results: the tiles the edit touched as
+  /// [to] has them, the others as they stand (#691).
+  Future<HomeLayout> editHome({
+    required HomeLayout from,
+    required HomeLayout to,
+    required bool onDevice,
+  });
+
   /// Drops this device's own Home: the library's shows here again.
   Future<void> clearDeviceHome();
 

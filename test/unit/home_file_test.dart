@@ -82,6 +82,13 @@ void main() {
       expect(homeFile().readAsStringSync(), contains('\n  "actions": {'));
     });
 
+    test('a read waits for the writes still running (#691)', () async {
+      final file = HomeFile(root.path);
+      final write = file.write(HomeLayout.defaults);
+      expect(await file.read(), HomeLayout.defaults);
+      await write;
+    });
+
     test('a move nothing points at writes nothing', () async {
       expect(
         await HomeFile(root.path).moved('a.md', 'b.md', isDir: false),
@@ -117,6 +124,33 @@ void main() {
       );
       expect((await device.read(root.path))!['deviceHome'], meeting().toJson());
     });
+
+    test(
+      'make an edit on the file as it is, past a rename it missed (#691)',
+      () async {
+        await ops.createFolder(parentPath: '', name: 'Templates');
+        await ops.createNote(parentPath: 'Templates', name: 'Meeting');
+        final shown = meeting().put(HomeLayout.defaults['recent']!);
+        await ops.setHome(shown, onDevice: false);
+        await ops.rename('Templates', 'Models');
+
+        // The screen still holds the layout from before the rename.
+        final edited = await ops.editHome(
+          from: shown,
+          to: shown.hide('recent'),
+          onDevice: false,
+        );
+
+        final file = (await ops.home).library!;
+        expect(file, edited);
+        expect(file['recent']!.hidden, isTrue);
+        expect(
+          file['actions']!.actions.single.template,
+          'Models/Meeting.md',
+          reason: 'the rename stands',
+        );
+      },
+    );
 
     test('carry the actions past a renamed folder, file and device', () async {
       await ops.createFolder(parentPath: '', name: 'Templates');
