@@ -14,6 +14,11 @@ final class ScanTouches {
   final Set<String> _paths = {};
   bool _open = false;
 
+  /// Bumped by every [add] while a scan runs: a step whose reading saw the
+  /// same count can trust what it read of the rows.
+  int get version => _version;
+  int _version = 0;
+
   /// A scan starts: touches count from now.
   void begin() {
     _paths.clear();
@@ -29,7 +34,9 @@ final class ScanTouches {
   /// Library-relative [rels] were written by something other than the
   /// scan; nothing while no scan runs.
   void add(Iterable<String> rels) {
-    if (_open) _paths.addAll(rels);
+    if (!_open) return;
+    _paths.addAll(rels);
+    _version++;
   }
 
   /// Whether a listing's entry [rel] is a touched path or inside one: the

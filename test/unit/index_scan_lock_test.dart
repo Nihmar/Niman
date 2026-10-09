@@ -154,5 +154,24 @@ void main() {
         expect(await paths(), containsAll(['f5', 'f5/back.md']));
       },
     );
+
+    test("reads a folder's notes before it takes the lock", () async {
+      // A first index: the tree written, every note's content owed.
+      final fresh = IndexDatabase(NativeDatabase.memory());
+      addTearDown(fresh.close);
+      final first = Indexer(fresh);
+      await first.indexTreeFirst(root.path);
+      final read = <String>[];
+      first.onProgress = (progress) => read.add(progress.file);
+      var steps = 0;
+      List<String>? readAtRootStep;
+      first.beforeScanStep = () async {
+        // The second step is the root's: its one note is read by now, so
+        // a big note there no longer holds every write back (#697).
+        if (++steps == 2) readAtRootStep = List.of(read);
+      };
+      await first.fullScan(root.path);
+      expect(readAtRootStep, contains(endsWith('keep.md')));
+    });
   });
 }

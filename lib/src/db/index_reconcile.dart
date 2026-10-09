@@ -145,21 +145,27 @@ final class IndexReconciler {
           entries += listing.entries.length;
           files += listing.entries.where((e) => !e.isDir).length;
           final dirClock = Stopwatch()..start();
-          final current = listing;
-          final result = await step(
-            () => _reconcileDir(
-              root,
-              current,
-              contentOwed: contentOwed,
-              progressTotal: progressTotal,
-              readsDone: reads,
-            ),
+          // The notes are read before the step, off the lock: a big one
+          // takes seconds on a phone, and the lock is only the writes'.
+          final read = await _readDir(
+            root,
+            listing,
+            contentOwed: contentOwed,
+            progressTotal: progressTotal,
+            readsDone: reads,
           );
+          final readMs = dirClock.elapsedMilliseconds;
+          final current = listing;
+          final result = await step(() => _reconcileDir(root, current, read));
           // Where a slow scan spends its time (#698).
           if (dirClock.elapsedMilliseconds >= _slowDirMs) {
+            final biggest = _biggestRead(listing, read.contents.keys);
             _log.debug(
               'scan: "${listing.rel}" ${listing.entries.length} entr(ies), '
-              '${result.read} read, in ${dirClock.elapsedMilliseconds} ms',
+              '${result.read} read in $readMs ms'
+              '${biggest == null ? '' : ' (largest "${biggest.rel}", '
+                        '${biggest.size} b)'}, '
+              'written in ${dirClock.elapsedMilliseconds - readMs} ms',
             );
           }
           reads += result.read;
@@ -208,6 +214,19 @@ final class IndexReconciler {
       final cb = onRemoved;
       if (cb != null) cb(removed);
     }
+  }
+
+  /// The largest of [listing]'s entries among [read], for the slow
+  /// directory's log line (#698).
+  static DiskEntry? _biggestRead(DirListing listing, Iterable<String> read) {
+    final rels = read.toSet();
+    DiskEntry? biggest;
+    for (final e in listing.entries) {
+      if (rels.contains(e.rel) && (biggest == null || e.size > biggest.size)) {
+        biggest = e;
+      }
+    }
+    return biggest;
   }
 
   /// The first index of a library, the tree alone: when the index is empty,
@@ -287,24 +306,44 @@ final class IndexReconciler {
 
   /// Reconciles one directory listing against the index rows of that
   /// directory. Answers whether it wrote and how many notes it read.
-  Future<({bool wrote, int read})> _reconcileDir(
+  Future<_DirRead> _readDir(
     String root,
     DirListing listing, {
     required bool contentOwed,
     required int progressTotal,
     required int readsDone,
   }) async {
+    final version = touches.version;
+    final state = await _dirState(listing);
+    if (listing.rel.isNotEmpty && state.dirRow == null) {
+      return (
+        contents: const <String, NoteContent>{},
+        shas: const <String, String>{},
+        state: state,
+        version: version,
+      );
+    }
+    final read = await _tree.readContents(
+      root,
+      state.entries,
+      state.old,
+      contentOwed: contentOwed,
+      progressTotal: progressTotal,
+      doneBase: readsDone,
+    );
+    return (
+      contents: read.contents,
+      shas: read.shas,
+      state: state,
+      version: version,
+    );
+  }
+
+  /// [listing]'s directory row, the rows under it and the entries to
+  /// mirror, leaving out what a write touched since the scan began.
+  Future<_DirState> _dirState(DirListing listing) async {
     final dirRel = listing.rel;
     final dirRow = dirRel.isEmpty ? null : await _dao.find(dirRel);
-    if (dirRel.isNotEmpty && dirRow == null) {
-      // Its parent's listing should have written the row before the walk
-      // descended; without one the parent chain cannot resolve. A write
-      // between two of the scan's steps may have deleted or moved it
-      // (#697): a race with the disk either way, which the write itself
-      // or the next scan settles.
-      _log.debug('scan: no row for "$dirRel" — skipping its listing');
-      return (wrote: false, read: 0);
-    }
     final parentId = dirRow?.id ?? 0;
     // A path a write touched since the listing was taken is the write's:
     // neither its entry nor its row is the scan's to change (#697). A
@@ -313,7 +352,8 @@ final class IndexReconciler {
     // the pairing shield it instead.
     final old = <String, Note>{
       dirRel: ?dirRow,
-      for (final row in await _dao.children(parentId)) row.path: row,
+      if (dirRel.isEmpty || dirRow != null)
+        for (final row in await _dao.children(parentId)) row.path: row,
     }..removeWhere((rel, _) => rel != dirRel && touches.owns(rel));
     final entries = <DiskEntry>[
       if (dirRow != null)
@@ -327,13 +367,40 @@ final class IndexReconciler {
       for (final e in listing.entries)
         if (!touches.owns(e.rel)) e,
     ];
-    final read = await _tree.readContents(
-      root,
-      entries,
-      old,
-      contentOwed: contentOwed,
-      progressTotal: progressTotal,
-      doneBase: readsDone,
+    return (dirRow: dirRow, old: old, entries: entries);
+  }
+
+  Future<({bool wrote, int read})> _reconcileDir(
+    String root,
+    DirListing listing,
+    _DirRead before,
+  ) async {
+    final dirRel = listing.rel;
+    // The rows as they are now, under the lock — read again only when a
+    // write came in between, or an idle library's every directory would be
+    // queried twice — and what was read before it, less what a write
+    // touched in between (#697).
+    final (:dirRow, :old, :entries) = before.version == touches.version
+        ? before.state
+        : await _dirState(listing);
+    if (dirRel.isNotEmpty && dirRow == null) {
+      // Its parent's listing should have written the row before the walk
+      // descended; without one the parent chain cannot resolve. A write
+      // between two of the scan's steps may have deleted or moved it
+      // (#697): a race with the disk either way, which the write itself
+      // or the next scan settles.
+      _log.debug('scan: no row for "$dirRel" — skipping its listing');
+      return (wrote: false, read: 0);
+    }
+    final read = (
+      contents: {
+        for (final MapEntry(:key, :value) in before.contents.entries)
+          if (!touches.owns(key)) key: value,
+      },
+      shas: {
+        for (final MapEntry(:key, :value) in before.shas.entries)
+          if (!touches.owns(key)) key: value,
+      },
     );
     var wrote = read.contents.isNotEmpty;
     var paired = const <String>{};
@@ -736,3 +803,19 @@ final class IndexReconciler {
 
   static int _seconds(DateTime dt) => dt.millisecondsSinceEpoch ~/ 1000;
 }
+
+/// A directory's notes as read before its step: their parsed content, and
+/// the digest of every note the step mirrors.
+typedef _DirRead = ({
+  Map<String, NoteContent> contents,
+  Map<String, String> shas,
+  _DirState state,
+  int version,
+});
+
+/// A directory's row, the rows under it and the entries to mirror.
+typedef _DirState = ({
+  Note? dirRow,
+  Map<String, Note> old,
+  List<DiskEntry> entries,
+});

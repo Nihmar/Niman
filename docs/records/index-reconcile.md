@@ -40,8 +40,12 @@ kill that recurs on every rescan.
   write that went through before its step: what such a write touched
   (`ScanTouches`) is the write's, so the scan neither writes a row for it
   from the older listing nor prunes it, nor a folder above it, and pairs
-  no rename through it. The extra lock hops cost the disk fixture's first
-  scan about 5 %.
+  no rename through it. A directory's notes are read before its step, off
+  the lock — the phone's first index spent 31.8 s reading one folder's 15
+  notes, and holding the lock through that was the same wait in one step —
+  and the step writes only; it reads the rows again only when a write came
+  in between. The disk fixture's first scan costs about 5 % more, an
+  unchanged library's rescan about 8 %.
 - **Link edges are resolved after the walk.** Directory-at-a-time writing
   made the old inline resolution wrong twice over: a link to a note a later
   directory introduces found no row, and a link to a note moving into an
