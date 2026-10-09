@@ -61,6 +61,7 @@ import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
+import 'package:niman/src/markdown/edit/source_shortcuts.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
@@ -4349,129 +4350,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     });
   }
 
-  /// The keys the surface answers itself.
-  ///
-  /// The *logical* motions and undo/redo, which are this surface's own
-  /// business.
-  /// What the shell binds — the remappable command table, the toolbar, find —
-  /// is
-  /// dispatched to it by the shell, not captured here, so a user's rebinding
-  /// wins.
-  Widget _shortcuts(Widget child) => CallbackShortcuts(
-    bindings: <ShortcutActivator, VoidCallback>{
-      const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
-          moveCaretVertically(-1),
-      const SingleActivator(LogicalKeyboardKey.arrowDown): () {
-        if (!_downOutOfTable()) moveCaretVertically(1);
-      },
-      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): () =>
-          moveCaretVertically(-1, extend: true),
-      const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): () =>
-          moveCaretVertically(1, extend: true),
-      const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
-          moveCaretBy(CaretMotion.characterLeft),
-      const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
-          moveCaretBy(CaretMotion.characterRight),
-      const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () =>
-          moveCaretBy(CaretMotion.characterLeft, extend: true),
-      const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () =>
-          moveCaretBy(CaretMotion.characterRight, extend: true),
-      const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): () =>
-          moveCaretBy(CaretMotion.wordLeft),
-      const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): () =>
-          moveCaretBy(CaretMotion.wordRight),
-      const SingleActivator(
-        LogicalKeyboardKey.arrowLeft,
-        control: true,
-        shift: true,
-      ): () =>
-          moveCaretBy(CaretMotion.wordLeft, extend: true),
-      const SingleActivator(
-        LogicalKeyboardKey.arrowRight,
-        control: true,
-        shift: true,
-      ): () =>
-          moveCaretBy(CaretMotion.wordRight, extend: true),
-      const SingleActivator(LogicalKeyboardKey.home): () =>
-          moveCaretBy(CaretMotion.lineTextStart),
-      const SingleActivator(LogicalKeyboardKey.end): () =>
-          moveCaretBy(CaretMotion.lineEnd),
-      const SingleActivator(LogicalKeyboardKey.home, shift: true): () =>
-          moveCaretBy(CaretMotion.lineTextStart, extend: true),
-      const SingleActivator(LogicalKeyboardKey.end, shift: true): () =>
-          moveCaretBy(CaretMotion.lineEnd, extend: true),
-      const SingleActivator(LogicalKeyboardKey.home, control: true): () =>
-          moveCaretBy(CaretMotion.documentStart),
-      const SingleActivator(LogicalKeyboardKey.end, control: true): () =>
-          moveCaretBy(CaretMotion.documentEnd),
-      const SingleActivator(
-        LogicalKeyboardKey.home,
-        control: true,
-        shift: true,
-      ): () =>
-          moveCaretBy(CaretMotion.documentStart, extend: true),
-      const SingleActivator(
-        LogicalKeyboardKey.end,
-        control: true,
-        shift: true,
-      ): () =>
-          moveCaretBy(CaretMotion.documentEnd, extend: true),
-      const SingleActivator(LogicalKeyboardKey.pageUp): () => _page(-1),
-      const SingleActivator(LogicalKeyboardKey.pageDown): () => _page(1),
-      const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): () =>
-          _page(-1, extend: true),
-      const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): () =>
-          _page(1, extend: true),
-      // Tab is the note's: left to the app it moves the focus away, and the
-      // keyboard with it.
-      // In a table in `live` it goes from cell to cell instead (#261).
-      const SingleActivator(LogicalKeyboardKey.tab): () => _tab(forward: true),
-      const SingleActivator(LogicalKeyboardKey.tab, shift: true): () =>
-          _tab(forward: false),
-      const SingleActivator(LogicalKeyboardKey.keyC, control: true):
-          copySelection,
-      const SingleActivator(LogicalKeyboardKey.keyC, meta: true): copySelection,
-      const SingleActivator(LogicalKeyboardKey.keyX, control: true):
-          cutSelection,
-      const SingleActivator(LogicalKeyboardKey.keyX, meta: true): cutSelection,
-      const SingleActivator(LogicalKeyboardKey.keyV, control: true): paste,
-      const SingleActivator(LogicalKeyboardKey.keyV, meta: true): paste,
-      const SingleActivator(LogicalKeyboardKey.keyA, control: true): selectAll,
-      const SingleActivator(LogicalKeyboardKey.keyA, meta: true): selectAll,
-      // Backspace and Delete *are* bound: no embedder edits the text for them
-      // (Linux says so in its source, and Android's hardware key reaches the
-      // framework first), so a surface that leaves them to the platform is one
-      // that cannot delete. Handling the key stops it here, so it is never
-      // applied twice.
-      const SingleActivator(LogicalKeyboardKey.backspace): deleteBackward,
-      const SingleActivator(LogicalKeyboardKey.backspace, shift: true):
-          deleteBackward,
-      const SingleActivator(LogicalKeyboardKey.backspace, control: true): () =>
-          deleteBackward(word: true),
-      const SingleActivator(LogicalKeyboardKey.backspace, alt: true): () =>
-          deleteBackward(word: true),
-      const SingleActivator(LogicalKeyboardKey.delete): deleteForward,
-      const SingleActivator(LogicalKeyboardKey.delete, control: true): () =>
-          deleteForward(word: true),
-      const SingleActivator(LogicalKeyboardKey.delete, alt: true): () =>
-          deleteForward(word: true),
-      // Enter is deliberately *not* bound here. The platform already sends the
-      // line break as text — an IME commits it, and the Linux embedder inserts
-      // it and then calls the newline action, which inserts nothing (see
-      // `SourceInput.performAction`) — so the delta is the only source.
-      const SingleActivator(LogicalKeyboardKey.keyZ, control: true): undo,
-      const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): undo,
-      const SingleActivator(
-        LogicalKeyboardKey.keyZ,
-        control: true,
-        shift: true,
-      ): redo,
-      const SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true):
-          redo,
-      const SingleActivator(LogicalKeyboardKey.keyY, control: true): redo,
-    },
-    child: child,
+  /// What the surface's own keys do ([sourceShortcuts]).
+  late final SourceKeyActions _keyActions = SourceKeyActions(
+    moveVertically: moveCaretVertically,
+    moveBy: moveCaretBy,
+    downOutOfTable: _downOutOfTable,
+    page: _page,
+    tab: _tab,
+    copy: copySelection,
+    cut: cutSelection,
+    paste: paste,
+    selectAll: selectAll,
+    deleteBackward: deleteBackward,
+    deleteForward: deleteForward,
+    undo: undo,
+    redo: redo,
   );
+
+  /// [child] with the keys the surface answers itself ([sourceShortcuts]).
+  Widget _shortcuts(Widget child) =>
+      CallbackShortcuts(bindings: sourceShortcuts(_keyActions), child: child);
 }
 
 /// One source line: its gutter number, its styled runs, and its caret.
