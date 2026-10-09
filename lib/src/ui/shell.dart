@@ -35,7 +35,6 @@ import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
-import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -112,6 +111,7 @@ import 'package:niman/src/ui/shell_journal_ui.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
+import 'package:niman/src/ui/shell_note_io.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
 import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
@@ -1355,9 +1355,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unsavedTracker: widget.unsavedTracker,
           spellCheck: widget.spellCheck,
           reloadToken: _noteReloadToken,
-          saveNote: _noteSaver(controller),
-          saveNoteStream: _noteStreamSaver(controller),
-          createMissingNote: _missingNoteCreator(controller),
+          saveNote: noteSaverFor(controller),
+          saveNoteStream: noteStreamSaverFor(controller),
+          createMissingNote: missingNoteCreatorFor(controller),
         ),
       ),
     );
@@ -1378,23 +1378,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     },
     child: note,
   );
-
-  /// The dead-link note-creation path (issue #78): an empty note through
-  /// the library's own creation path; null while no library is ready,
-  /// which keeps the dead-link snackbar instead of the offer.
-  Future<String> Function(String relPath)? _missingNoteCreator(
-    LibrarySession controller,
-  ) {
-    final ops = controller.ops;
-    if (ops == null) return null;
-    return (relPath) async {
-      final note = await ops.createNote(
-        parentPath: parentOf(relPath),
-        name: p.basenameWithoutExtension(relPath),
-      );
-      return note.path;
-    };
-  }
 
   /// The notes open in this library on this device (issue #23): for now
   /// the one the shell shows, kept current and kept for the next launch.
@@ -1599,49 +1582,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _openNote = path;
     if (path != null) notes.open(path);
     if (previous != null) notes.close(previous);
-  }
-
-  /// The editor's write path into the open library: [NoteOperations.saveNote]
-  /// with the editor's absolute path turned library-relative. Null while no
-  /// library is ready, or for a note outside the library root — the editor
-  /// then writes the file itself.
-  NoteSaver? _noteSaver(LibrarySession controller) {
-    final ops = controller.ops;
-    final root = controller.root;
-    if (ops == null || root == null) return null;
-    return (path, content, {required editSession}) {
-      if (!p.isWithin(root, path)) {
-        return writeNoteOffIsolate(path, content).then((_) {});
-      }
-      return ops.saveNote(
-        relPath(path, root),
-        content,
-        editSession: editSession,
-      );
-    };
-  }
-
-  /// The same write path for a note handed over in slices
-  /// ([NoteView.saveNoteStream]): the joined twin above, without the join.
-  ///
-  /// Null for a note outside the library root as well, which is the one
-  /// case the streaming write does not cover — [NoteView] then joins the
-  /// note and saves it through [_noteSaver].
-  NoteStreamSaver? _noteStreamSaver(LibrarySession controller) {
-    final ops = controller.ops;
-    final root = controller.root;
-    if (ops == null || root == null) return null;
-    return (path, content, {required editSession, references}) {
-      if (!p.isWithin(root, path)) {
-        return Future<void>.error(StateError('"$path" is outside the library'));
-      }
-      return ops.saveNoteStream(
-        relPath(path, root),
-        content,
-        editSession: editSession,
-        references: references,
-      );
-    };
   }
 
   /// The app-bar eye action: flips the editor/preview pane.
@@ -3970,9 +3910,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             onAnnotate: _annotate,
             ocr: _ocrActions,
             marks: _annotations,
-            saveNote: _noteSaver(controller),
-            saveNoteStream: _noteStreamSaver(controller),
-            createMissingNote: _missingNoteCreator(controller),
+            saveNote: noteSaverFor(controller),
+            saveNoteStream: noteStreamSaverFor(controller),
+            createMissingNote: missingNoteCreatorFor(controller),
             statusActions: _statusActionsFor(pane),
             header: (path) => _journalUi.header(context, path),
             onEditEpubLook: () => _editEpubLook(controller),
