@@ -76,6 +76,29 @@ void main() {
       expect(await HomeFile(root.path).read(), isNull);
     });
 
+    test(
+      'sets a file that does not read aside before a write (#694)',
+      () async {
+        homeFile()
+          ..parent.createSync(recursive: true)
+          ..writeAsStringSync('{"actions": {,}}');
+        final aside = File(p.join(root.path, HomeFile.asidePath))
+          ..writeAsStringSync('older');
+
+        await HomeFile(root.path).write(HomeLayout.defaults);
+
+        expect(aside.readAsStringSync(), '{"actions": {,}}');
+        expect(await HomeFile(root.path).read(), HomeLayout.defaults);
+
+        await HomeFile(root.path).write(HomeLayout.defaults.hide('recent'));
+        expect(
+          aside.readAsStringSync(),
+          '{"actions": {,}}',
+          reason: 'a file that reads is not set aside',
+        );
+      },
+    );
+
     test('writes a layout it reads back, indented', () async {
       await HomeFile(root.path).write(HomeLayout.defaults);
       expect(await HomeFile(root.path).read(), HomeLayout.defaults);

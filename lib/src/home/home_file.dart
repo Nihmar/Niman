@@ -46,17 +46,28 @@ final class HomeFile {
     return await _readNow();
   }
 
-  Future<HomeLayout?> _readNow() async {
+  Future<HomeLayout?> _readNow() async => (await _load()).layout;
+
+  /// The file's layout, and whether there is a file that does not read
+  /// as one.
+  Future<({HomeLayout? layout, bool unreadable})> _load() async {
     final path = _path;
-    final text = await Isolate.run(() => _readText(path));
-    if (text == null) return null;
+    final bytes = await Isolate.run(() => _readBytes(path));
+    if (bytes == null) return (layout: null, unreadable: false);
     try {
-      return HomeLayout.fromJson(jsonDecode(text));
+      final layout = HomeLayout.fromJson(jsonDecode(utf8.decode(bytes)));
+      if (layout != null) return (layout: layout, unreadable: false);
+      _log.warning('$filePath holds no object');
     } on FormatException catch (error) {
       _log.warning('$filePath does not read: $error');
-      return null;
     }
+    return (layout: null, unreadable: true);
   }
+
+  /// Where a file that does not read is set aside before a write replaces
+  /// it (#694): a hand edit with a stray comma is the user's Home still.
+  /// Not a library state file, so it stays on this device.
+  static const String asidePath = '$filePath.bad';
 
   /// Writes [layout] whole.
   Future<void> write(HomeLayout layout) => _update((_) => layout);
@@ -97,8 +108,14 @@ final class HomeFile {
     _queues[key] = done.future;
     try {
       if (before != null) await before;
-      final next = change(await _readNow());
+      final current = await _load();
+      final next = change(current.layout);
       if (next == null) return;
+      if (current.unreadable) {
+        final aside = p.join(root, asidePath);
+        await Isolate.run(() => _setAside(key, aside));
+        _log.warning('$filePath set aside as $asidePath before a write');
+      }
       final json = next.toJson();
       await Isolate.run(() => _writeJson(key, json));
     } finally {
@@ -108,9 +125,14 @@ final class HomeFile {
   }
 }
 
-Future<String?> _readText(String path) async {
+/// Moves the file at [path] to [aside], over an older one.
+Future<void> _setAside(String path, String aside) async {
+  await File(path).rename(aside);
+}
+
+Future<List<int>?> _readBytes(String path) async {
   try {
-    return await File(path).readAsString();
+    return await File(path).readAsBytes();
   } on FileSystemException {
     return null;
   }

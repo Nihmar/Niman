@@ -130,3 +130,8 @@ so it is the same on every device and travels with
 [sync](sync.md). A library whose Home you never changed shows the default
 one and keeps no file. A device's own Home (*Only on this device*) is
 kept on the device, with its other device settings.
+
+A `home.json` that does not read — a hand edit with a stray comma — shows
+the default Home, and is not lost: the next change you make sets it aside
+as `.niman/home.json.bad` on this device before writing the new one, so
+you can mend it and put it back.
