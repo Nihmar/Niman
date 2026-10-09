@@ -3532,4 +3532,77 @@ final class SwedishStrings extends Strings {
   String get homeColumnHint =>
       'Dra i ett handtag för att ändra ordningen. En brytare visar eller '
       'döljer en ruta på alla enheter.';
+
+  @override
+  String get homeActionAdd => 'Lägg till åtgärd';
+
+  @override
+  String get homeActionAsk => 'Fråga';
+
+  @override
+  String get homeActionAskHint => 'Frågas när knappen trycks';
+
+  @override
+  String get homeActionCaptureFolder => 'Mappen för sparade sidor';
+
+  @override
+  String get homeActionContext => 'Kontext';
+
+  @override
+  String get homeActionEdit => 'Redigera åtgärd';
+
+  @override
+  String get homeActionFieldAdd => 'Lägg till fält';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-nyckel';
+
+  @override
+  String get homeActionFields => 'Fält';
+
+  @override
+  String get homeActionFixed => 'Fast';
+
+  @override
+  String get homeActionFixedHint => 'Text eller {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mapp';
+
+  @override
+  String get homeActionIcon => 'Ikon';
+
+  @override
+  String get homeActionKind => 'Gör';
+
+  @override
+  String get homeActionKindOpenNote => 'Öppna en anteckning';
+
+  @override
+  String get homeActionLabel => 'Etikett';
+
+  @override
+  String get homeActionNoNote => 'Ingen anteckning vald';
+
+  @override
+  String get homeActionNote => 'Anteckning';
+
+  @override
+  String get homeActionNoTemplate => 'Ingen: en tom anteckning';
+
+  @override
+  String get homeActionNoteName => 'Namn';
+
+  @override
+  String get homeActionOpenAfter => 'Öppna efter att den skapats';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Mall';
+
+  @override
+  String homeActionMissing(String path) =>
+      '$path finns inte längre i biblioteket';
 }

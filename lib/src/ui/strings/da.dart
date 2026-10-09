@@ -3506,4 +3506,77 @@ final class DanishStrings extends Strings {
   String get homeColumnHint =>
       'Træk i et håndtag for at ændre rækkefølgen. En kontakt viser eller '
       'skjuler et felt på alle enheder.';
+
+  @override
+  String get homeActionAdd => 'Tilføj handling';
+
+  @override
+  String get homeActionAsk => 'Spørg';
+
+  @override
+  String get homeActionAskHint => 'Spørges når knappen trykkes';
+
+  @override
+  String get homeActionCaptureFolder => 'Mappen til gemte sider';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Rediger handling';
+
+  @override
+  String get homeActionFieldAdd => 'Tilføj felt';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-nøgle';
+
+  @override
+  String get homeActionFields => 'Felter';
+
+  @override
+  String get homeActionFixed => 'Fast';
+
+  @override
+  String get homeActionFixedHint => 'Tekst eller {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mappe';
+
+  @override
+  String get homeActionIcon => 'Ikon';
+
+  @override
+  String get homeActionKind => 'Gør';
+
+  @override
+  String get homeActionKindOpenNote => 'Åbn en note';
+
+  @override
+  String get homeActionLabel => 'Etiket';
+
+  @override
+  String get homeActionNoNote => 'Ingen note valgt';
+
+  @override
+  String get homeActionNote => 'Note';
+
+  @override
+  String get homeActionNoTemplate => 'Ingen: en tom note';
+
+  @override
+  String get homeActionNoteName => 'Navn';
+
+  @override
+  String get homeActionOpenAfter => 'Åbn efter oprettelse';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Skabelon';
+
+  @override
+  String homeActionMissing(String path) =>
+      '$path er ikke længere i biblioteket';
 }

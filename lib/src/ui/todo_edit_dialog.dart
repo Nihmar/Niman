@@ -41,6 +41,7 @@ Future<String?> showTodoTaskDialog(
   BuildContext context, {
   required DateTime today,
   TodoTask? initial,
+  String text = '',
   Set<String> knownTokens = const <String>{},
   VoidCallback? onDelete,
   ReminderHealth health = ReminderHealth.ok,
@@ -50,6 +51,7 @@ Future<String?> showTodoTaskDialog(
     context: context,
     builder: (context) => _TodoTaskDialog(
       initial: initial,
+      text: text,
       today: today,
       knownTokens: knownTokens,
       onDelete: initial == null ? null : onDelete,
@@ -65,6 +67,7 @@ Future<String?> showTodoTaskDialog(
 final class _TodoTaskDialog extends StatefulWidget {
   const new({
     required this.initial,
+    required this.text,
     required this.today,
     required this.knownTokens,
     required this.onDelete,
@@ -73,6 +76,10 @@ final class _TodoTaskDialog extends StatefulWidget {
   });
 
   final TodoTask? initial;
+
+  /// A new task's text to start from — a Home action's project and
+  /// context (#535), with the caret before them.
+  final String text;
   final DateTime today;
   final Set<String> knownTokens;
   final VoidCallback? onDelete;
@@ -93,8 +100,13 @@ final class _TodoTaskDialog extends StatefulWidget {
 final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   static const AppLogger _log = AppLogger(name: 'todo');
 
-  late final TextEditingController _field = TextEditingController(
-    text: widget.initial?.description ?? '',
+  late final TextEditingController _field = TextEditingController.fromValue(
+    TextEditingValue(
+      text: widget.initial?.description ?? widget.text,
+      selection: TextSelection.collapsed(
+        offset: widget.initial == null ? 0 : widget.initial!.description.length,
+      ),
+    ),
   );
   late final FocusNode _focus = FocusNode();
 

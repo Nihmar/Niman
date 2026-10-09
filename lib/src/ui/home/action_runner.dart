@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/home/home_action.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// What the runner hands each kind of action to: the shell's own flows.
 final class HomeActionRunner {
@@ -14,7 +15,15 @@ final class HomeActionRunner {
     required this.openNote,
     required this.openJournal,
     required this.capture,
+    required this.missing,
+    required this.tell,
   });
+
+  /// Which of the paths given the library no longer holds.
+  final Future<Set<String>> Function(Iterable<String> paths) missing;
+
+  /// Says something to the user (a snackbar).
+  final void Function(String message) tell;
 
   /// Makes a note for an action (its folder, template and fields).
   final Future<void> Function(BuildContext context, HomeAction action) newNote;
@@ -31,8 +40,15 @@ final class HomeActionRunner {
   /// Captures a web page into an action's folder.
   final Future<void> Function(BuildContext context, HomeAction action) capture;
 
-  /// Runs [action]; a kind this build does not know does nothing.
+  /// Runs [action]; a kind this build does not know does nothing, and one
+  /// whose template or note is gone says so instead of half running.
   Future<void> run(BuildContext context, HomeAction action) async {
+    final gone = await missing(action.requiredPaths);
+    if (gone.isNotEmpty) {
+      tell(AppStrings.homeActionMissing(gone.first));
+      return;
+    }
+    if (!context.mounted) return;
     switch (action.kind) {
       case HomeActionKind.newNote:
         await newNote(context, action);

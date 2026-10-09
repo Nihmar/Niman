@@ -3473,4 +3473,76 @@ final class EstonianStrings extends Strings {
   String get homeColumnHint =>
       'Järjestuse muutmiseks lohista pidet. Lüliti näitab või peidab paani '
       'igas seadmes.';
+
+  @override
+  String get homeActionAdd => 'Lisa toiming';
+
+  @override
+  String get homeActionAsk => 'Küsi';
+
+  @override
+  String get homeActionAskHint => 'Küsitakse nupu vajutamisel';
+
+  @override
+  String get homeActionCaptureFolder => 'Salvestuste kaust';
+
+  @override
+  String get homeActionContext => 'Kontekst';
+
+  @override
+  String get homeActionEdit => 'Muuda toimingut';
+
+  @override
+  String get homeActionFieldAdd => 'Lisa väli';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatteri võti';
+
+  @override
+  String get homeActionFields => 'Väljad';
+
+  @override
+  String get homeActionFixed => 'Fikseeritud';
+
+  @override
+  String get homeActionFixedHint => 'Tekst või {{date}}';
+
+  @override
+  String get homeActionFolder => 'Kaust';
+
+  @override
+  String get homeActionIcon => 'Ikoon';
+
+  @override
+  String get homeActionKind => 'Teeb';
+
+  @override
+  String get homeActionKindOpenNote => 'Ava märge';
+
+  @override
+  String get homeActionLabel => 'Silt';
+
+  @override
+  String get homeActionNoNote => 'Märget pole valitud';
+
+  @override
+  String get homeActionNote => 'Märge';
+
+  @override
+  String get homeActionNoTemplate => 'Puudub: tühi märge';
+
+  @override
+  String get homeActionNoteName => 'Nimi';
+
+  @override
+  String get homeActionOpenAfter => 'Ava pärast loomist';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Mall';
+
+  @override
+  String homeActionMissing(String path) => '$path pole enam kogus';
 }

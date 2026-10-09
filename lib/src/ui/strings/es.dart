@@ -3573,4 +3573,76 @@ final class SpanishStrings extends Strings {
   String get homeColumnHint =>
       'Arrastra un asa para reordenar. Un interruptor muestra u oculta un '
       'mosaico en todos los dispositivos.';
+
+  @override
+  String get homeActionAdd => 'Añadir acción';
+
+  @override
+  String get homeActionAsk => 'Preguntar';
+
+  @override
+  String get homeActionAskHint => 'Se pregunta al pulsar el botón';
+
+  @override
+  String get homeActionCaptureFolder => 'La carpeta de capturas';
+
+  @override
+  String get homeActionContext => 'Contexto';
+
+  @override
+  String get homeActionEdit => 'Editar acción';
+
+  @override
+  String get homeActionFieldAdd => 'Añadir campo';
+
+  @override
+  String get homeActionFieldKey => 'Clave del frontmatter';
+
+  @override
+  String get homeActionFields => 'Campos';
+
+  @override
+  String get homeActionFixed => 'Fijo';
+
+  @override
+  String get homeActionFixedHint => 'Texto, o {{date}}';
+
+  @override
+  String get homeActionFolder => 'Carpeta';
+
+  @override
+  String get homeActionIcon => 'Icono';
+
+  @override
+  String get homeActionKind => 'Hace';
+
+  @override
+  String get homeActionKindOpenNote => 'Abrir una nota';
+
+  @override
+  String get homeActionLabel => 'Etiqueta';
+
+  @override
+  String get homeActionNoNote => 'Ninguna nota elegida';
+
+  @override
+  String get homeActionNote => 'Nota';
+
+  @override
+  String get homeActionNoTemplate => 'Ninguna: una nota vacía';
+
+  @override
+  String get homeActionNoteName => 'Nombre';
+
+  @override
+  String get homeActionOpenAfter => 'Abrir tras crear';
+
+  @override
+  String get homeActionProject => 'Proyecto';
+
+  @override
+  String get homeActionTemplate => 'Plantilla';
+
+  @override
+  String homeActionMissing(String path) => '$path ya no está en la biblioteca';
 }

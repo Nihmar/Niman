@@ -3532,4 +3532,76 @@ final class HungarianStrings extends Strings {
   String get homeColumnHint =>
       'Húzz egy fogantyút az átrendezéshez. A kapcsoló minden eszközön '
       'megjeleníti vagy elrejti a csempét.';
+
+  @override
+  String get homeActionAdd => 'Művelet hozzáadása';
+
+  @override
+  String get homeActionAsk => 'Kérdezés';
+
+  @override
+  String get homeActionAskHint => 'A gomb megnyomásakor kérdezi';
+
+  @override
+  String get homeActionCaptureFolder => 'A mentések mappája';
+
+  @override
+  String get homeActionContext => 'Környezet';
+
+  @override
+  String get homeActionEdit => 'Művelet szerkesztése';
+
+  @override
+  String get homeActionFieldAdd => 'Mező hozzáadása';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-kulcs';
+
+  @override
+  String get homeActionFields => 'Mezők';
+
+  @override
+  String get homeActionFixed => 'Rögzített';
+
+  @override
+  String get homeActionFixedHint => 'Szöveg vagy {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mappa';
+
+  @override
+  String get homeActionIcon => 'Ikon';
+
+  @override
+  String get homeActionKind => 'Mit csinál';
+
+  @override
+  String get homeActionKindOpenNote => 'Jegyzet megnyitása';
+
+  @override
+  String get homeActionLabel => 'Felirat';
+
+  @override
+  String get homeActionNoNote => 'Nincs kiválasztott jegyzet';
+
+  @override
+  String get homeActionNote => 'Jegyzet';
+
+  @override
+  String get homeActionNoTemplate => 'Nincs: üres jegyzet';
+
+  @override
+  String get homeActionNoteName => 'Név';
+
+  @override
+  String get homeActionOpenAfter => 'Megnyitás létrehozás után';
+
+  @override
+  String get homeActionProject => 'Projekt';
+
+  @override
+  String get homeActionTemplate => 'Sablon';
+
+  @override
+  String homeActionMissing(String path) => '$path már nincs a könyvtárban';
 }

@@ -11,13 +11,18 @@ import 'package:niman/src/core/logging.dart';
 /// while the next load runs, so a refresh never flashes empty.
 final class HomeTileLoader<T> extends StatefulWidget {
   /// Runs [load] now and whenever [revision] changes, and draws its answer
-  /// with [builder]; nothing until the first answer.
+  /// with [builder]; until the first answer, [initial], or nothing.
   const new({
     required this.revision,
     required this.load,
     required this.builder,
+    this.initial,
     super.key,
   });
+
+  /// What to draw before the first answer, in a record so a null [T] can
+  /// be one; null draws nothing.
+  final ({T value})? initial;
 
   /// Bumped by the Home when the library changed.
   final int revision;
@@ -35,7 +40,7 @@ final class HomeTileLoader<T> extends StatefulWidget {
 final class _HomeTileLoaderState<T> extends State<HomeTileLoader<T>> {
   static const _log = AppLogger(name: 'home');
 
-  ({T value})? _loaded;
+  late ({T value})? _loaded = widget.initial;
   int _token = 0;
 
   @override

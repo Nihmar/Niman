@@ -3577,4 +3577,76 @@ final class RomanianStrings extends Strings {
   String get homeColumnHint =>
       'Trage un mâner pentru a reordona. Un comutator afișează sau ascunde o '
       'placă pe fiecare dispozitiv.';
+
+  @override
+  String get homeActionAdd => 'Adaugă acțiune';
+
+  @override
+  String get homeActionAsk => 'Întreabă';
+
+  @override
+  String get homeActionAskHint => 'Se cere la apăsarea butonului';
+
+  @override
+  String get homeActionCaptureFolder => 'Dosarul capturilor';
+
+  @override
+  String get homeActionContext => 'Context';
+
+  @override
+  String get homeActionEdit => 'Editează acțiunea';
+
+  @override
+  String get homeActionFieldAdd => 'Adaugă câmp';
+
+  @override
+  String get homeActionFieldKey => 'Cheie frontmatter';
+
+  @override
+  String get homeActionFields => 'Câmpuri';
+
+  @override
+  String get homeActionFixed => 'Fix';
+
+  @override
+  String get homeActionFixedHint => 'Text sau {{date}}';
+
+  @override
+  String get homeActionFolder => 'Dosar';
+
+  @override
+  String get homeActionIcon => 'Pictogramă';
+
+  @override
+  String get homeActionKind => 'Face';
+
+  @override
+  String get homeActionKindOpenNote => 'Deschide o notiță';
+
+  @override
+  String get homeActionLabel => 'Etichetă';
+
+  @override
+  String get homeActionNoNote => 'Nicio notiță aleasă';
+
+  @override
+  String get homeActionNote => 'Notiță';
+
+  @override
+  String get homeActionNoTemplate => 'Niciunul: o notiță goală';
+
+  @override
+  String get homeActionNoteName => 'Nume';
+
+  @override
+  String get homeActionOpenAfter => 'Deschide după creare';
+
+  @override
+  String get homeActionProject => 'Proiect';
+
+  @override
+  String get homeActionTemplate => 'Șablon';
+
+  @override
+  String homeActionMissing(String path) => '$path nu mai este în bibliotecă';
 }

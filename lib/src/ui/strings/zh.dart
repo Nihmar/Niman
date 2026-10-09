@@ -3141,4 +3141,76 @@ final class ChineseStrings extends Strings {
 
   @override
   String get homeColumnHint => '拖动手柄可重新排序。开关会在所有设备上显示或隐藏磁贴。';
+
+  @override
+  String get homeActionAdd => '添加操作';
+
+  @override
+  String get homeActionAsk => '询问';
+
+  @override
+  String get homeActionAskHint => '按下按钮时询问';
+
+  @override
+  String get homeActionCaptureFolder => '捕获文件夹';
+
+  @override
+  String get homeActionContext => '情境';
+
+  @override
+  String get homeActionEdit => '编辑操作';
+
+  @override
+  String get homeActionFieldAdd => '添加字段';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter 键';
+
+  @override
+  String get homeActionFields => '字段';
+
+  @override
+  String get homeActionFixed => '固定';
+
+  @override
+  String get homeActionFixedHint => '文字，或 {{date}}';
+
+  @override
+  String get homeActionFolder => '文件夹';
+
+  @override
+  String get homeActionIcon => '图标';
+
+  @override
+  String get homeActionKind => '执行';
+
+  @override
+  String get homeActionKindOpenNote => '打开笔记';
+
+  @override
+  String get homeActionLabel => '标签';
+
+  @override
+  String get homeActionNoNote => '未选择笔记';
+
+  @override
+  String get homeActionNote => '笔记';
+
+  @override
+  String get homeActionNoTemplate => '无：空白笔记';
+
+  @override
+  String get homeActionNoteName => '名称';
+
+  @override
+  String get homeActionOpenAfter => '创建后打开';
+
+  @override
+  String get homeActionProject => '项目';
+
+  @override
+  String get homeActionTemplate => '模板';
+
+  @override
+  String homeActionMissing(String path) => '$path 已不在资料库中';
 }

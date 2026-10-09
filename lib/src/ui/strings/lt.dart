@@ -3564,4 +3564,76 @@ final class LithuanianStrings extends Strings {
   String get homeColumnHint =>
       'Vilkite rankenėlę, kad pakeistumėte tvarką. Jungiklis rodo arba '
       'slepia plytelę visuose įrenginiuose.';
+
+  @override
+  String get homeActionAdd => 'Pridėti veiksmą';
+
+  @override
+  String get homeActionAsk => 'Klausti';
+
+  @override
+  String get homeActionAskHint => 'Klausiama paspaudus mygtuką';
+
+  @override
+  String get homeActionCaptureFolder => 'Išsaugojimų aplankas';
+
+  @override
+  String get homeActionContext => 'Kontekstas';
+
+  @override
+  String get homeActionEdit => 'Redaguoti veiksmą';
+
+  @override
+  String get homeActionFieldAdd => 'Pridėti lauką';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter raktas';
+
+  @override
+  String get homeActionFields => 'Laukai';
+
+  @override
+  String get homeActionFixed => 'Fiksuota';
+
+  @override
+  String get homeActionFixedHint => 'Tekstas arba {{date}}';
+
+  @override
+  String get homeActionFolder => 'Aplankas';
+
+  @override
+  String get homeActionIcon => 'Piktograma';
+
+  @override
+  String get homeActionKind => 'Daro';
+
+  @override
+  String get homeActionKindOpenNote => 'Atidaryti užrašą';
+
+  @override
+  String get homeActionLabel => 'Užrašas';
+
+  @override
+  String get homeActionNoNote => 'Užrašas nepasirinktas';
+
+  @override
+  String get homeActionNote => 'Užrašas';
+
+  @override
+  String get homeActionNoTemplate => 'Nėra: tuščias užrašas';
+
+  @override
+  String get homeActionNoteName => 'Pavadinimas';
+
+  @override
+  String get homeActionOpenAfter => 'Atidaryti sukūrus';
+
+  @override
+  String get homeActionProject => 'Projektas';
+
+  @override
+  String get homeActionTemplate => 'Šablonas';
+
+  @override
+  String homeActionMissing(String path) => '$path nebėra bibliotekoje';
 }

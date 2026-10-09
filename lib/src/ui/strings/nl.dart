@@ -3562,4 +3562,77 @@ final class DutchStrings extends Strings {
   String get homeColumnHint =>
       'Sleep een greep om de volgorde te wijzigen. Een schakelaar toont of '
       'verbergt een tegel op elk apparaat.';
+
+  @override
+  String get homeActionAdd => 'Actie toevoegen';
+
+  @override
+  String get homeActionAsk => 'Vragen';
+
+  @override
+  String get homeActionAskHint => 'Gevraagd bij het indrukken';
+
+  @override
+  String get homeActionCaptureFolder => 'De map voor opnames';
+
+  @override
+  String get homeActionContext => 'Context';
+
+  @override
+  String get homeActionEdit => 'Actie bewerken';
+
+  @override
+  String get homeActionFieldAdd => 'Veld toevoegen';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-sleutel';
+
+  @override
+  String get homeActionFields => 'Velden';
+
+  @override
+  String get homeActionFixed => 'Vast';
+
+  @override
+  String get homeActionFixedHint => 'Tekst, of {{date}}';
+
+  @override
+  String get homeActionFolder => 'Map';
+
+  @override
+  String get homeActionIcon => 'Pictogram';
+
+  @override
+  String get homeActionKind => 'Doet';
+
+  @override
+  String get homeActionKindOpenNote => 'Een notitie openen';
+
+  @override
+  String get homeActionLabel => 'Label';
+
+  @override
+  String get homeActionNoNote => 'Geen notitie gekozen';
+
+  @override
+  String get homeActionNote => 'Notitie';
+
+  @override
+  String get homeActionNoTemplate => 'Geen: een lege notitie';
+
+  @override
+  String get homeActionNoteName => 'Naam';
+
+  @override
+  String get homeActionOpenAfter => 'Openen na het maken';
+
+  @override
+  String get homeActionProject => 'Project';
+
+  @override
+  String get homeActionTemplate => 'Sjabloon';
+
+  @override
+  String homeActionMissing(String path) =>
+      '$path staat niet meer in de bibliotheek';
 }

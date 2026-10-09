@@ -3547,4 +3547,76 @@ final class SerbianStrings extends Strings {
   String get homeColumnHint =>
       'Превуците ручицу да промените редослед. Прекидач приказује или скрива '
       'плочицу на сваком уређају.';
+
+  @override
+  String get homeActionAdd => 'Додај радњу';
+
+  @override
+  String get homeActionAsk => 'Питај';
+
+  @override
+  String get homeActionAskHint => 'Пита се када се притисне дугме';
+
+  @override
+  String get homeActionCaptureFolder => 'Фасцикла за снимке';
+
+  @override
+  String get homeActionContext => 'Контекст';
+
+  @override
+  String get homeActionEdit => 'Уреди радњу';
+
+  @override
+  String get homeActionFieldAdd => 'Додај поље';
+
+  @override
+  String get homeActionFieldKey => 'Кључ frontmatter-а';
+
+  @override
+  String get homeActionFields => 'Поља';
+
+  @override
+  String get homeActionFixed => 'Фиксно';
+
+  @override
+  String get homeActionFixedHint => 'Текст или {{date}}';
+
+  @override
+  String get homeActionFolder => 'Фасцикла';
+
+  @override
+  String get homeActionIcon => 'Икона';
+
+  @override
+  String get homeActionKind => 'Ради';
+
+  @override
+  String get homeActionKindOpenNote => 'Отвори белешку';
+
+  @override
+  String get homeActionLabel => 'Ознака';
+
+  @override
+  String get homeActionNoNote => 'Није изабрана белешка';
+
+  @override
+  String get homeActionNote => 'Белешка';
+
+  @override
+  String get homeActionNoTemplate => 'Ниједан: празна белешка';
+
+  @override
+  String get homeActionNoteName => 'Назив';
+
+  @override
+  String get homeActionOpenAfter => 'Отвори након прављења';
+
+  @override
+  String get homeActionProject => 'Пројекат';
+
+  @override
+  String get homeActionTemplate => 'Шаблон';
+
+  @override
+  String homeActionMissing(String path) => '$path више није у библиотеци';
 }

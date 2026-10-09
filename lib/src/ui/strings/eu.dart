@@ -3557,4 +3557,76 @@ final class BasqueStrings extends Strings {
   String get homeColumnHint =>
       'Arrastatu helduleku bat ordena aldatzeko. Etengailu batek lauza bat '
       'erakusten edo ezkutatzen du gailu guztietan.';
+
+  @override
+  String get homeActionAdd => 'Gehitu ekintza';
+
+  @override
+  String get homeActionAsk => 'Galdetu';
+
+  @override
+  String get homeActionAskHint => 'Botoia sakatzean galdetzen da';
+
+  @override
+  String get homeActionCaptureFolder => 'Kapturen karpeta';
+
+  @override
+  String get homeActionContext => 'Testuingurua';
+
+  @override
+  String get homeActionEdit => 'Editatu ekintza';
+
+  @override
+  String get homeActionFieldAdd => 'Gehitu eremua';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter gakoa';
+
+  @override
+  String get homeActionFields => 'Eremuak';
+
+  @override
+  String get homeActionFixed => 'Finkoa';
+
+  @override
+  String get homeActionFixedHint => 'Testua, edo {{date}}';
+
+  @override
+  String get homeActionFolder => 'Karpeta';
+
+  @override
+  String get homeActionIcon => 'Ikonoa';
+
+  @override
+  String get homeActionKind => 'Egiten du';
+
+  @override
+  String get homeActionKindOpenNote => 'Ireki ohar bat';
+
+  @override
+  String get homeActionLabel => 'Etiketa';
+
+  @override
+  String get homeActionNoNote => 'Ez da oharrik aukeratu';
+
+  @override
+  String get homeActionNote => 'Oharra';
+
+  @override
+  String get homeActionNoTemplate => 'Bat ere ez: ohar huts bat';
+
+  @override
+  String get homeActionNoteName => 'Izena';
+
+  @override
+  String get homeActionOpenAfter => 'Ireki sortu ondoren';
+
+  @override
+  String get homeActionProject => 'Proiektua';
+
+  @override
+  String get homeActionTemplate => 'Txantiloia';
+
+  @override
+  String homeActionMissing(String path) => '$path ez dago jada liburutegian';
 }

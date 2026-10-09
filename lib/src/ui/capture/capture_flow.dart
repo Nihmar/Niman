@@ -94,8 +94,9 @@ final class CaptureFlow {
   final bool useSheet;
 
   /// Asks where to capture [url]; with none, the address the clipboard
-  /// holds, when it holds one.
-  Future<void> capture(BuildContext context, {Uri? url}) async {
+  /// holds, when it holds one. [folder] is where the note goes in place
+  /// of the capture folder: a Home action's own (#535).
+  Future<void> capture(BuildContext context, {Uri? url, String? folder}) async {
     var page = url;
     var fromClipboard = false;
     if (page == null) {
@@ -104,7 +105,7 @@ final class CaptureFlow {
       fromClipboard = page != null;
     }
     if (!context.mounted) return;
-    final target = await _target(context);
+    final target = await _target(context, folder: folder);
     if (target == null || !context.mounted) return;
     if (useSheet) {
       final chosen = await showCaptureSheet(
@@ -206,16 +207,16 @@ final class CaptureFlow {
 
   /// Where a capture goes: the open library, its web captures folder
   /// first, or null when none is open.
-  Future<CaptureTarget?> _target(BuildContext context) async {
+  Future<CaptureTarget?> _target(BuildContext context, {String? folder}) async {
     final ops = controller.ops;
     final root = controller.root;
     if (ops == null || root == null) return null;
-    final folder = await ops.captureFolder;
+    final into = folder ?? await ops.captureFolder;
     return CaptureTarget(
       libraryRoot: root,
       attachmentsFolder: attachmentsFolder(),
       linkType: linkType(),
-      folder: folder,
+      folder: into,
       browser: services.browser,
       read: services.read,
       save: services.save,

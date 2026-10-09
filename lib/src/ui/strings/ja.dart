@@ -3232,4 +3232,76 @@ final class JapaneseStrings extends Strings {
   @override
   String get homeColumnHint =>
       'ハンドルをドラッグして並べ替えます。スイッチはすべてのデバイスでタイルを表示または非表示にします。';
+
+  @override
+  String get homeActionAdd => 'アクションを追加';
+
+  @override
+  String get homeActionAsk => '尋ねる';
+
+  @override
+  String get homeActionAskHint => 'ボタンを押したときに尋ねます';
+
+  @override
+  String get homeActionCaptureFolder => 'キャプチャ用フォルダ';
+
+  @override
+  String get homeActionContext => 'コンテキスト';
+
+  @override
+  String get homeActionEdit => 'アクションを編集';
+
+  @override
+  String get homeActionFieldAdd => 'フィールドを追加';
+
+  @override
+  String get homeActionFieldKey => 'フロントマターのキー';
+
+  @override
+  String get homeActionFields => 'フィールド';
+
+  @override
+  String get homeActionFixed => '固定';
+
+  @override
+  String get homeActionFixedHint => 'テキスト、または {{date}}';
+
+  @override
+  String get homeActionFolder => 'フォルダ';
+
+  @override
+  String get homeActionIcon => 'アイコン';
+
+  @override
+  String get homeActionKind => '動作';
+
+  @override
+  String get homeActionKindOpenNote => 'ノートを開く';
+
+  @override
+  String get homeActionLabel => 'ラベル';
+
+  @override
+  String get homeActionNoNote => 'ノートが選ばれていません';
+
+  @override
+  String get homeActionNote => 'ノート';
+
+  @override
+  String get homeActionNoTemplate => 'なし：空のノート';
+
+  @override
+  String get homeActionNoteName => '名前';
+
+  @override
+  String get homeActionOpenAfter => '作成後に開く';
+
+  @override
+  String get homeActionProject => 'プロジェクト';
+
+  @override
+  String get homeActionTemplate => 'テンプレート';
+
+  @override
+  String homeActionMissing(String path) => '$path はもうライブラリにありません';
 }

@@ -3621,4 +3621,77 @@ final class FrenchStrings extends Strings {
   String get homeColumnHint =>
       'Faites glisser une poignée pour réordonner. Un interrupteur affiche '
       'ou masque une tuile sur chaque appareil.';
+
+  @override
+  String get homeActionAdd => 'Ajouter une action';
+
+  @override
+  String get homeActionAsk => 'Demander';
+
+  @override
+  String get homeActionAskHint => "Demandé à l'appui du bouton";
+
+  @override
+  String get homeActionCaptureFolder => 'Le dossier des captures';
+
+  @override
+  String get homeActionContext => 'Contexte';
+
+  @override
+  String get homeActionEdit => "Modifier l'action";
+
+  @override
+  String get homeActionFieldAdd => 'Ajouter un champ';
+
+  @override
+  String get homeActionFieldKey => 'Clé du frontmatter';
+
+  @override
+  String get homeActionFields => 'Champs';
+
+  @override
+  String get homeActionFixed => 'Fixe';
+
+  @override
+  String get homeActionFixedHint => 'Du texte, ou {{date}}';
+
+  @override
+  String get homeActionFolder => 'Dossier';
+
+  @override
+  String get homeActionIcon => 'Icône';
+
+  @override
+  String get homeActionKind => 'Fait';
+
+  @override
+  String get homeActionKindOpenNote => 'Ouvrir une note';
+
+  @override
+  String get homeActionLabel => 'Libellé';
+
+  @override
+  String get homeActionNoNote => 'Aucune note choisie';
+
+  @override
+  String get homeActionNote => 'Note';
+
+  @override
+  String get homeActionNoTemplate => 'Aucun : une note vide';
+
+  @override
+  String get homeActionNoteName => 'Nom';
+
+  @override
+  String get homeActionOpenAfter => 'Ouvrir après la création';
+
+  @override
+  String get homeActionProject => 'Projet';
+
+  @override
+  String get homeActionTemplate => 'Modèle';
+
+  @override
+  String homeActionMissing(String path) =>
+      "$path n'est plus dans la bibliothèque";
 }

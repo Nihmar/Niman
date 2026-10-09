@@ -3482,4 +3482,76 @@ final class EnglishStrings extends Strings {
   String get homeColumnHint =>
       'Drag a handle to reorder. A switch shows or hides a tile on every '
       'device.';
+
+  @override
+  String get homeActionAdd => 'Add action';
+
+  @override
+  String get homeActionAsk => 'Ask';
+
+  @override
+  String get homeActionAskHint => 'Asked when the button is pressed';
+
+  @override
+  String get homeActionCaptureFolder => 'The capture folder';
+
+  @override
+  String get homeActionContext => 'Context';
+
+  @override
+  String get homeActionEdit => 'Edit action';
+
+  @override
+  String get homeActionFieldAdd => 'Add field';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter key';
+
+  @override
+  String get homeActionFields => 'Fields';
+
+  @override
+  String get homeActionFixed => 'Fixed';
+
+  @override
+  String get homeActionFixedHint => 'Text, or {{date}}';
+
+  @override
+  String get homeActionFolder => 'Folder';
+
+  @override
+  String get homeActionIcon => 'Icon';
+
+  @override
+  String get homeActionKind => 'Does';
+
+  @override
+  String get homeActionKindOpenNote => 'Open a note';
+
+  @override
+  String get homeActionLabel => 'Label';
+
+  @override
+  String get homeActionNoNote => 'No note picked';
+
+  @override
+  String get homeActionNote => 'Note';
+
+  @override
+  String get homeActionNoTemplate => 'None: an empty note';
+
+  @override
+  String get homeActionNoteName => 'Name';
+
+  @override
+  String get homeActionOpenAfter => 'Open after creating';
+
+  @override
+  String get homeActionProject => 'Project';
+
+  @override
+  String get homeActionTemplate => 'Template';
+
+  @override
+  String homeActionMissing(String path) => '$path is no longer in the library';
 }

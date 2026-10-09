@@ -3632,4 +3632,77 @@ final class GreekStrings extends Strings {
   String get homeColumnHint =>
       'Σύρε μια λαβή για αναδιάταξη. Ένας διακόπτης εμφανίζει ή κρύβει ένα '
       'πλακίδιο σε κάθε συσκευή.';
+
+  @override
+  String get homeActionAdd => 'Προσθήκη ενέργειας';
+
+  @override
+  String get homeActionAsk => 'Ερώτηση';
+
+  @override
+  String get homeActionAskHint => 'Ερωτάται όταν πατηθεί το κουμπί';
+
+  @override
+  String get homeActionCaptureFolder => 'Ο φάκελος των λήψεων';
+
+  @override
+  String get homeActionContext => 'Πλαίσιο';
+
+  @override
+  String get homeActionEdit => 'Επεξεργασία ενέργειας';
+
+  @override
+  String get homeActionFieldAdd => 'Προσθήκη πεδίου';
+
+  @override
+  String get homeActionFieldKey => 'Κλειδί frontmatter';
+
+  @override
+  String get homeActionFields => 'Πεδία';
+
+  @override
+  String get homeActionFixed => 'Σταθερό';
+
+  @override
+  String get homeActionFixedHint => 'Κείμενο ή {{date}}';
+
+  @override
+  String get homeActionFolder => 'Φάκελος';
+
+  @override
+  String get homeActionIcon => 'Εικονίδιο';
+
+  @override
+  String get homeActionKind => 'Κάνει';
+
+  @override
+  String get homeActionKindOpenNote => 'Άνοιγμα σημείωσης';
+
+  @override
+  String get homeActionLabel => 'Ετικέτα';
+
+  @override
+  String get homeActionNoNote => 'Δεν επιλέχθηκε σημείωση';
+
+  @override
+  String get homeActionNote => 'Σημείωση';
+
+  @override
+  String get homeActionNoTemplate => 'Καμία: κενή σημείωση';
+
+  @override
+  String get homeActionNoteName => 'Όνομα';
+
+  @override
+  String get homeActionOpenAfter => 'Άνοιγμα μετά τη δημιουργία';
+
+  @override
+  String get homeActionProject => 'Έργο';
+
+  @override
+  String get homeActionTemplate => 'Πρότυπο';
+
+  @override
+  String homeActionMissing(String path) =>
+      'Το $path δεν υπάρχει πια στη βιβλιοθήκη';
 }

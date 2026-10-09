@@ -3542,4 +3542,76 @@ final class PortugueseStrings extends Strings {
   String get homeColumnHint =>
       'Arraste uma alça para reordenar. Um interruptor mostra ou oculta um '
       'bloco em todos os dispositivos.';
+
+  @override
+  String get homeActionAdd => 'Adicionar ação';
+
+  @override
+  String get homeActionAsk => 'Perguntar';
+
+  @override
+  String get homeActionAskHint => 'Perguntado ao tocar no botão';
+
+  @override
+  String get homeActionCaptureFolder => 'A pasta de capturas';
+
+  @override
+  String get homeActionContext => 'Contexto';
+
+  @override
+  String get homeActionEdit => 'Editar ação';
+
+  @override
+  String get homeActionFieldAdd => 'Adicionar campo';
+
+  @override
+  String get homeActionFieldKey => 'Chave do frontmatter';
+
+  @override
+  String get homeActionFields => 'Campos';
+
+  @override
+  String get homeActionFixed => 'Fixo';
+
+  @override
+  String get homeActionFixedHint => 'Texto, ou {{date}}';
+
+  @override
+  String get homeActionFolder => 'Pasta';
+
+  @override
+  String get homeActionIcon => 'Ícone';
+
+  @override
+  String get homeActionKind => 'Faz';
+
+  @override
+  String get homeActionKindOpenNote => 'Abrir uma nota';
+
+  @override
+  String get homeActionLabel => 'Rótulo';
+
+  @override
+  String get homeActionNoNote => 'Nenhuma nota escolhida';
+
+  @override
+  String get homeActionNote => 'Nota';
+
+  @override
+  String get homeActionNoTemplate => 'Nenhum: uma nota vazia';
+
+  @override
+  String get homeActionNoteName => 'Nome';
+
+  @override
+  String get homeActionOpenAfter => 'Abrir após criar';
+
+  @override
+  String get homeActionProject => 'Projeto';
+
+  @override
+  String get homeActionTemplate => 'Modelo';
+
+  @override
+  String homeActionMissing(String path) => '$path não está mais na biblioteca';
 }

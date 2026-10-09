@@ -3547,4 +3547,76 @@ final class GalicianStrings extends Strings {
   String get homeColumnHint =>
       'Arrastra un asa para reordenar. Un interruptor amosa ou agocha un '
       'mosaico en todos os dispositivos.';
+
+  @override
+  String get homeActionAdd => 'Engadir acción';
+
+  @override
+  String get homeActionAsk => 'Preguntar';
+
+  @override
+  String get homeActionAskHint => 'Pregúntase ao premer o botón';
+
+  @override
+  String get homeActionCaptureFolder => 'O cartafol das capturas';
+
+  @override
+  String get homeActionContext => 'Contexto';
+
+  @override
+  String get homeActionEdit => 'Editar acción';
+
+  @override
+  String get homeActionFieldAdd => 'Engadir campo';
+
+  @override
+  String get homeActionFieldKey => 'Clave do frontmatter';
+
+  @override
+  String get homeActionFields => 'Campos';
+
+  @override
+  String get homeActionFixed => 'Fixo';
+
+  @override
+  String get homeActionFixedHint => 'Texto, ou {{date}}';
+
+  @override
+  String get homeActionFolder => 'Cartafol';
+
+  @override
+  String get homeActionIcon => 'Icona';
+
+  @override
+  String get homeActionKind => 'Fai';
+
+  @override
+  String get homeActionKindOpenNote => 'Abrir unha nota';
+
+  @override
+  String get homeActionLabel => 'Etiqueta';
+
+  @override
+  String get homeActionNoNote => 'Non se escolleu ningunha nota';
+
+  @override
+  String get homeActionNote => 'Nota';
+
+  @override
+  String get homeActionNoTemplate => 'Ningún: unha nota baleira';
+
+  @override
+  String get homeActionNoteName => 'Nome';
+
+  @override
+  String get homeActionOpenAfter => 'Abrir despois de crear';
+
+  @override
+  String get homeActionProject => 'Proxecto';
+
+  @override
+  String get homeActionTemplate => 'Modelo';
+
+  @override
+  String homeActionMissing(String path) => '$path xa non está na biblioteca';
 }

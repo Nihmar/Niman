@@ -48,7 +48,11 @@ final class HomeTileView extends StatelessWidget {
       title: homeTileTitle(tile),
       fit: fit,
       child: switch (kind) {
-        HomeTileKind.actions => ActionsTile(host: host, actions: tile.actions),
+        HomeTileKind.actions => ActionsTile(
+          host: host,
+          actions: tile.actions,
+          revision: revision,
+        ),
         HomeTileKind.journalToday => JournalTodayTile(
           host: host,
           revision: revision,

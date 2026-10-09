@@ -3517,4 +3517,76 @@ final class IcelandicStrings extends Strings {
   String get homeColumnHint =>
       'Dragðu handfang til að endurraða. Rofi sýnir eða felur reit á öllum '
       'tækjum.';
+
+  @override
+  String get homeActionAdd => 'Bæta við aðgerð';
+
+  @override
+  String get homeActionAsk => 'Spyrja';
+
+  @override
+  String get homeActionAskHint => 'Spurt þegar ýtt er á hnappinn';
+
+  @override
+  String get homeActionCaptureFolder => 'Mappan fyrir vistanir';
+
+  @override
+  String get homeActionContext => 'Samhengi';
+
+  @override
+  String get homeActionEdit => 'Breyta aðgerð';
+
+  @override
+  String get homeActionFieldAdd => 'Bæta við reit';
+
+  @override
+  String get homeActionFieldKey => 'Frontmatter-lykill';
+
+  @override
+  String get homeActionFields => 'Reitir';
+
+  @override
+  String get homeActionFixed => 'Fast';
+
+  @override
+  String get homeActionFixedHint => 'Texti, eða {{date}}';
+
+  @override
+  String get homeActionFolder => 'Mappa';
+
+  @override
+  String get homeActionIcon => 'Tákn';
+
+  @override
+  String get homeActionKind => 'Gerir';
+
+  @override
+  String get homeActionKindOpenNote => 'Opna glósu';
+
+  @override
+  String get homeActionLabel => 'Merki';
+
+  @override
+  String get homeActionNoNote => 'Engin glósa valin';
+
+  @override
+  String get homeActionNote => 'Glósa';
+
+  @override
+  String get homeActionNoTemplate => 'Ekkert: auð glósa';
+
+  @override
+  String get homeActionNoteName => 'Heiti';
+
+  @override
+  String get homeActionOpenAfter => 'Opna eftir stofnun';
+
+  @override
+  String get homeActionProject => 'Verkefni';
+
+  @override
+  String get homeActionTemplate => 'Sniðmát';
+
+  @override
+  String homeActionMissing(String path) => '$path er ekki lengur í safninu';
 }

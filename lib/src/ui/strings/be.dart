@@ -3564,4 +3564,76 @@ final class BelarusianStrings extends Strings {
   String get homeColumnHint =>
       'Цягніце за ручку, каб змяніць парадак. Пераключальнік паказвае ці '
       'хавае плітку на ўсіх прыладах.';
+
+  @override
+  String get homeActionAdd => 'Дадаць дзеянне';
+
+  @override
+  String get homeActionAsk => 'Пытаць';
+
+  @override
+  String get homeActionAskHint => 'Пытаецца пры націсканні кнопкі';
+
+  @override
+  String get homeActionCaptureFolder => 'Папка для захопленняў';
+
+  @override
+  String get homeActionContext => 'Кантэкст';
+
+  @override
+  String get homeActionEdit => 'Змяніць дзеянне';
+
+  @override
+  String get homeActionFieldAdd => 'Дадаць поле';
+
+  @override
+  String get homeActionFieldKey => 'Ключ frontmatter';
+
+  @override
+  String get homeActionFields => 'Палі';
+
+  @override
+  String get homeActionFixed => 'Фіксавана';
+
+  @override
+  String get homeActionFixedHint => 'Тэкст або {{date}}';
+
+  @override
+  String get homeActionFolder => 'Папка';
+
+  @override
+  String get homeActionIcon => 'Значок';
+
+  @override
+  String get homeActionKind => 'Робіць';
+
+  @override
+  String get homeActionKindOpenNote => 'Адкрыць нататку';
+
+  @override
+  String get homeActionLabel => 'Подпіс';
+
+  @override
+  String get homeActionNoNote => 'Нататка не выбрана';
+
+  @override
+  String get homeActionNote => 'Нататка';
+
+  @override
+  String get homeActionNoTemplate => 'Няма: пустая нататка';
+
+  @override
+  String get homeActionNoteName => 'Назва';
+
+  @override
+  String get homeActionOpenAfter => 'Адкрыць пасля стварэння';
+
+  @override
+  String get homeActionProject => 'Праект';
+
+  @override
+  String get homeActionTemplate => 'Шаблон';
+
+  @override
+  String homeActionMissing(String path) => '$path больш няма ў бібліятэцы';
 }
