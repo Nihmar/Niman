@@ -18,6 +18,7 @@ import 'package:niman/src/sync/state_merge.dart';
 import 'package:niman/src/sync/sync_conflict.dart';
 import 'package:niman/src/sync/sync_failure.dart';
 import 'package:niman/src/sync/sync_report.dart';
+import 'package:niman/src/sync/sync_run_context.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
@@ -524,7 +525,7 @@ final class SyncEngine {
       }
     }
 
-    final context = _RunContext(
+    final context = SyncRunContext(
       client: client,
       capabilities: capabilities,
       local: local,
@@ -607,7 +608,7 @@ final class SyncEngine {
   /// the size of a request (nginx's `client_max_body_size` is 1 MB unless
   /// set), met with a reset or a 413 (#617).
   static String _refused(
-    _RunContext context,
+    SyncRunContext context,
     SyncDecision decision,
     String error,
   ) {
@@ -786,7 +787,7 @@ final class SyncEngine {
   /// local failure is thrown as a [SyncFailure].
   Future<void> _resolve(
     String path,
-    Future<void> Function(_RunContext c, WebDavResource? remote) body, {
+    Future<void> Function(SyncRunContext c, WebDavResource? remote) body, {
     required String intent,
     required String outcome,
     ConflictTexts? shown,
@@ -799,7 +800,7 @@ final class SyncEngine {
       final capabilities = await _capabilities(client, connection.destination);
       final remote = await client.stat(path);
       if (shown != null) await _stillAsShown(client, path, shown, remote);
-      final c = _RunContext(
+      final c = SyncRunContext(
         client: client,
         capabilities: capabilities,
         local: const {},
@@ -1029,7 +1030,7 @@ final class SyncEngine {
 
   // --- applying -------------------------------------------------------
 
-  Future<_Outcome> _apply(_RunContext c, SyncDecision d) async {
+  Future<_Outcome> _apply(SyncRunContext c, SyncDecision d) async {
     switch (d.kind) {
       case SyncActionKind.nothing:
         return _Outcome.done;
@@ -1062,7 +1063,7 @@ final class SyncEngine {
 
   /// The file at [path] still is what the scan saw (both absent counts).
   Future<LocalFileState?> _localStillAsPlanned(
-    _RunContext c,
+    SyncRunContext c,
     String path,
   ) async {
     final now = await _stat(path);
@@ -1088,7 +1089,7 @@ final class SyncEngine {
   /// The remote still is what the scan saw, checked with a PROPFIND when
   /// the write has no precondition to guard it.
   Future<void> _remoteStillAsPlanned(
-    _RunContext c,
+    SyncRunContext c,
     SyncDecision d, {
     String? expectedSha,
   }) async {
@@ -1117,7 +1118,7 @@ final class SyncEngine {
   /// merge was built from — a row recorded minutes ago reads as verified
   /// while the listing is in the server's current second.
   Future<void> _remoteUnchangedSince(
-    _RunContext c,
+    SyncRunContext c,
     String path, {
     String? expectedSha,
   }) async {
@@ -1144,7 +1145,7 @@ final class SyncEngine {
   /// honors ETags the upload carries If-Match instead, and this does
   /// nothing — unless the ETag is weak, which the upload cannot carry.
   Future<void> _guardMergeUpload(
-    _RunContext c,
+    SyncRunContext c,
     SyncDecision d,
     WebDavResource remote, {
     required String expectedSha,
@@ -1153,7 +1154,7 @@ final class SyncEngine {
     await _remoteUnchangedSince(c, d.path, expectedSha: expectedSha);
   }
 
-  String _localShaOf(_RunContext c, String path) {
+  String _localShaOf(SyncRunContext c, String path) {
     final sha =
         c.local[path]?.sha256 ?? c.localSha[path] ?? c.rows[path]?.localSha256;
     if (sha == null) throw _StepFailure('no hash for $path');
@@ -1163,7 +1164,7 @@ final class SyncEngine {
   /// Records [d]'s path as a conflict and touches neither side: the merge
   /// screen is where it is resolved.
   _Outcome _reportConflict(
-    _RunContext c,
+    SyncRunContext c,
     SyncDecision d, {
     required String localSha,
     required String remoteSha,
@@ -1195,7 +1196,7 @@ final class SyncEngine {
   /// Whether a listing of [modified] cannot rule out a second write within
   /// the same second: no file ETags, and the mtime is the server's current
   /// second (or the server sends no clock at all).
-  bool _unverified(_RunContext c, DateTime? modified) {
+  bool _unverified(SyncRunContext c, DateTime? modified) {
     if (c.capabilities.fileEtags) return false;
     final serverNow = c.client.serverDate;
     if (modified == null || serverNow == null) return true;
@@ -1203,7 +1204,7 @@ final class SyncEngine {
   }
 
   Future<SyncItem> _row(
-    _RunContext c,
+    SyncRunContext c,
     String path, {
     required String sha,
     required LocalFileState local,
@@ -1258,37 +1259,39 @@ final class SyncEngine {
     }
   }
 
-  Future<_Outcome> _upload(_RunContext c, SyncDecision d) => _guarded(() async {
-    final local = (await _localStillAsPlanned(c, d.path))!;
-    await _remoteStillAsPlanned(c, d);
-    final sha = _localShaOf(c, d.path);
-    // The #336 rule holds both ways: a JSON state file that does not parse
-    // here — a hand edit with a syntax error — is not a newer version of the
-    // remote copy either, and `.niman/*` has no history to bring that one
-    // back. Both sides stay, and the path is reported for the merge.
-    if (jsonStateFiles.contains(d.path) &&
-        c.remote[d.path] != null &&
-        !await _isJsonObject(File(p.join(root, d.path)))) {
-      return _reportConflict(
+  Future<_Outcome> _upload(SyncRunContext c, SyncDecision d) => _guarded(
+    () async {
+      final local = (await _localStillAsPlanned(c, d.path))!;
+      await _remoteStillAsPlanned(c, d);
+      final sha = _localShaOf(c, d.path);
+      // The #336 rule holds both ways: a JSON state file that does not parse
+      // here — a hand edit with a syntax error — is not a newer version of the
+      // remote copy either, and `.niman/*` has no history to bring that one
+      // back. Both sides stay, and the path is reported for the merge.
+      if (jsonStateFiles.contains(d.path) &&
+          c.remote[d.path] != null &&
+          !await _isJsonObject(File(p.join(root, d.path)))) {
+        return _reportConflict(
+          c,
+          d,
+          localSha: sha,
+          remoteSha: c.rows[d.path]?.localSha256 ?? '',
+          why: 'the local copy is not a JSON object',
+        );
+      }
+      await _uploadAndRecord(
         c,
-        d,
-        localSha: sha,
-        remoteSha: c.rows[d.path]?.localSha256 ?? '',
-        why: 'the local copy is not a JSON object',
+        d.path,
+        sha: sha,
+        local: local,
+        notListed: const _StepFailure('uploaded but not listed'),
+        ifMatch: d.ifMatch,
+        ifNoneMatch: d.ifNoneMatch,
+        modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
       );
-    }
-    await _uploadAndRecord(
-      c,
-      d.path,
-      sha: sha,
-      local: local,
-      notListed: const _StepFailure('uploaded but not listed'),
-      ifMatch: d.ifMatch,
-      ifNoneMatch: d.ifNoneMatch,
-      modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
-    );
-    return _Outcome.done;
-  });
+      return _Outcome.done;
+    },
+  );
 
   /// Uploads the local file at [path] — content [sha], state [local] —
   /// and records the row both sides now agree on, from the listing the
@@ -1296,7 +1299,7 @@ final class SyncEngine {
   /// not listed then. [ifMatch], [ifNoneMatch] and [modified] go with the
   /// upload as they are.
   Future<void> _uploadAndRecord(
-    _RunContext c,
+    SyncRunContext c,
     String path, {
     required String sha,
     required LocalFileState local,
@@ -1320,7 +1323,7 @@ final class SyncEngine {
     ]);
   }
 
-  Future<void> _ensureRemoteParent(_RunContext c, String path) async {
+  Future<void> _ensureRemoteParent(SyncRunContext c, String path) async {
     final slash = path.lastIndexOf('/');
     if (slash < 0) return;
     final parent = path.substring(0, slash);
@@ -1337,7 +1340,7 @@ final class SyncEngine {
   /// GETs [path] into a temp file next to its target; returns it with the
   /// response's metadata. The temp file is removed on failure.
   Future<({File temp, WebDavDownload download})> _fetch(
-    _RunContext c,
+    SyncRunContext c,
     String path,
   ) async {
     final target = p.join(root, path);
@@ -1394,7 +1397,7 @@ final class SyncEngine {
   }
 
   WebDavResource _remoteFrom(
-    _RunContext c,
+    SyncRunContext c,
     String path,
     WebDavDownload download,
   ) {
@@ -1409,7 +1412,7 @@ final class SyncEngine {
     );
   }
 
-  Future<_Outcome> _download(_RunContext c, SyncDecision d) => _guarded(
+  Future<_Outcome> _download(SyncRunContext c, SyncDecision d) => _guarded(
     () async {
       final fetched = await _fetch(c, d.path);
       try {
@@ -1454,7 +1457,7 @@ final class SyncEngine {
     },
   );
 
-  Future<_Outcome> _deleteRemote(_RunContext c, SyncDecision d) =>
+  Future<_Outcome> _deleteRemote(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         await _localStillAsPlanned(c, d.path);
         await _remoteStillAsPlanned(c, d);
@@ -1463,7 +1466,7 @@ final class SyncEngine {
         return _Outcome.done;
       });
 
-  Future<_Outcome> _trashLocal(_RunContext c, SyncDecision d) =>
+  Future<_Outcome> _trashLocal(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         await _localStillAsPlanned(c, d.path);
         await ops.syncTrash(d.path);
@@ -1471,27 +1474,28 @@ final class SyncEngine {
         return _Outcome.done;
       });
 
-  Future<_Outcome> _record(_RunContext c, SyncDecision d) => _guarded(() async {
-    final local = (await _localStillAsPlanned(c, d.path))!;
-    final sha = _localShaOf(c, d.path);
-    final row = c.rows[d.path];
-    final remote = c.remote[d.path]!;
-    final contentChanged = row == null || row.localSha256 != sha;
-    await store.putItems([
-      await _row(
-        c,
-        d.path,
-        sha: sha,
-        local: local,
-        remote: remote,
-        baseVersion: row?.baseVersion,
-        pinBase: contentChanged,
-      ),
-    ]);
-    return _Outcome.done;
-  });
+  Future<_Outcome> _record(SyncRunContext c, SyncDecision d) =>
+      _guarded(() async {
+        final local = (await _localStillAsPlanned(c, d.path))!;
+        final sha = _localShaOf(c, d.path);
+        final row = c.rows[d.path];
+        final remote = c.remote[d.path]!;
+        final contentChanged = row == null || row.localSha256 != sha;
+        await store.putItems([
+          await _row(
+            c,
+            d.path,
+            sha: sha,
+            local: local,
+            remote: remote,
+            baseVersion: row?.baseVersion,
+            pinBase: contentChanged,
+          ),
+        ]);
+        return _Outcome.done;
+      });
 
-  Future<_Outcome> _conflict(_RunContext c, SyncDecision d) => _guarded(
+  Future<_Outcome> _conflict(SyncRunContext c, SyncDecision d) => _guarded(
     () async {
       final local = (await _localStillAsPlanned(c, d.path))!;
       final localSha = _localShaOf(c, d.path);
@@ -1601,7 +1605,7 @@ final class SyncEngine {
   /// uploading device's clock (#350). Both cases touch nothing and leave
   /// the path to the caller.
   Future<_StateMerge> _mergeState(
-    _RunContext c,
+    SyncRunContext c,
     SyncDecision d,
     File remoteCopy,
     WebDavResource remote, {
@@ -1707,7 +1711,7 @@ final class SyncEngine {
   /// The task files always merge: their lines are records, merged one by
   /// one ([mergeRecords]), and without a base they are the union of both.
   Future<({bool changedLocally})?> _tryMerge(
-    _RunContext c,
+    SyncRunContext c,
     SyncDecision d,
     File remoteCopy,
     WebDavResource remote, {
@@ -1821,7 +1825,7 @@ final class SyncEngine {
   /// the calling isolate; an isolate costs more than the merge itself.
   static const _inlineMergeLimit = 20000;
 
-  Future<_Outcome> _moveRemote(_RunContext c, SyncDecision d) =>
+  Future<_Outcome> _moveRemote(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         final from = d.fromPath!;
         final local = (await _localStillAsPlanned(c, d.path))!;
@@ -1861,7 +1865,7 @@ final class SyncEngine {
         return _Outcome.done;
       });
 
-  Future<_Outcome> _moveLocal(_RunContext c, SyncDecision d) =>
+  Future<_Outcome> _moveLocal(SyncRunContext c, SyncDecision d) =>
       _guarded(() async {
         final from = d.fromPath!;
         await _localStillAsPlanned(c, from);
@@ -1924,30 +1928,6 @@ typedef _Scan = ({
   Set<String> folders,
   Map<String, SyncItem> rows,
 });
-
-final class _RunContext {
-  new({
-    required this.client,
-    required this.capabilities,
-    required this.local,
-    required this.remote,
-    required this.rows,
-    required this.localSha,
-    required this.remoteSha,
-    required this.folders,
-    required this.report,
-  });
-
-  final WebDavClient client;
-  final WebDavCapabilities capabilities;
-  final Map<String, LocalFileState> local;
-  final Map<String, WebDavResource> remote;
-  final Map<String, SyncItem> rows;
-  final Map<String, String> localSha;
-  final Map<String, String> remoteSha;
-  final Set<String> folders;
-  final SyncReport report;
-}
 
 final class _DiscardSink implements StreamConsumer<List<int>> {
   @override
