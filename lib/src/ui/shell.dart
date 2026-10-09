@@ -2081,22 +2081,28 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         }
       }
       if (!mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      if (imported == null) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(AppStrings.importFolderEmpty(name))),
-        );
-        return;
-      }
       // Asked for now rather than waiting for the watcher: the tree is
       // where the user looks next, and the notes have just been written.
-      await widget.controller.rescanNow();
+      if (imported != null) await widget.controller.rescanNow();
       if (!mounted) return;
-      _revealFolder(imported.folder);
-      messenger.showSnackBar(
-        SnackBar(content: Text(AppStrings.importFolderDone(imported.folder))),
-      );
+      _showImported(imported?.folder, name);
     });
+  }
+
+  /// Says how an import of [name] went: nothing to bring in when
+  /// [folder] is null, else the folder it landed in, shown in the tree.
+  void _showImported(String? folder, String name) {
+    final messenger = ScaffoldMessenger.of(context);
+    if (folder == null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(AppStrings.importFolderEmpty(name))),
+      );
+      return;
+    }
+    _revealFolder(folder);
+    messenger.showSnackBar(
+      SnackBar(content: Text(AppStrings.importFolderDone(folder))),
+    );
   }
 
   /// Runs [action]'s in-app flow: the same one the equivalent control
@@ -3581,13 +3587,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // UI isolate, so the count is awaited rather than read inline (#382).
     final count = (await markdownFilesIn(path)).length;
     if (!mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
-    if (count == 0) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(AppStrings.importFolderEmpty(name))),
-      );
-      return;
-    }
+    if (count == 0) return _showImported(null, name);
     final go = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -3617,10 +3617,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // The walk and the copy are off the UI isolate now (#382), and the
       // watcher finds what landed on its own: a rescan here would only block
       // the frame the reveal is drawn in, so it is left to converge.
-      _revealFolder(imported.folder);
-      messenger.showSnackBar(
-        SnackBar(content: Text(AppStrings.importFolderDone(imported.folder))),
-      );
+      _showImported(imported.folder, name);
     });
   }
 
