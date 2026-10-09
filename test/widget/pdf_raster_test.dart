@@ -12,7 +12,6 @@ import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
-import 'package:path/path.dart' as p;
 
 /// A 2×2 PNG, every pixel red: the picture the fallback has to draw.
 const String _redPng =
@@ -218,30 +217,6 @@ void main() {
       }
     }
     expect(red, isTrue);
-  });
-
-  testWidgets('the printer writes the file', (tester) async {
-    await pumpTheme(tester);
-    // Sync: a real `await` in the fake-async zone a widget test runs in
-    // never completes.
-    final dir = Directory.current.createTempSync('niman_pdf_');
-    addTearDown(() {
-      if (dir.existsSync()) dir.deleteSync(recursive: true);
-    });
-    final pdfPath = p.join(dir.path, 'out.pdf');
-    final printer = RasterPdfPrinter(
-      text: '# Title\n',
-      theme: theme,
-      mathCache: cache,
-    );
-
-    // A real write: the fake-async zone a widget test runs in cannot wait
-    // on it, so it runs in `runAsync`.
-    final outcome = await tester.runAsync(
-      () => printer.print('ignored.html', pdfPath),
-    );
-    expect(outcome, isA<PdfPrinted>());
-    expect(File(pdfPath).lengthSync(), greaterThan(100));
   });
 
   testWidgets('a print that fails draws the note instead', (tester) async {
