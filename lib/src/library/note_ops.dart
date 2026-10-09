@@ -454,8 +454,18 @@ final class NoteOps implements NoteOperations {
       final row = await _mustFind(path);
       final parent = parentOf(path);
       final parentDir = Directory(_abs(parent));
+      // A file keeps its extension: a note its `.md`, a picture or a book
+      // its own — a PDF renamed is still a PDF, not `book.pdf.md`. Typed
+      // again at the end of the new name, it is not doubled.
+      final ext = row.isDir
+          ? ''
+          : path.toLowerCase().endsWith('.md')
+          ? '.md'
+          : p.extension(path);
       var base = newName;
-      if (base.endsWith('.md')) base = base.substring(0, base.length - 3);
+      if (ext.isNotEmpty && base.toLowerCase().endsWith(ext.toLowerCase())) {
+        base = base.substring(0, base.length - ext.length);
+      }
       String target;
       if (row.isDir) {
         final clean = sanitizeName(base, fallback: defaultFolderName);
@@ -465,7 +475,7 @@ final class NoteOps implements NoteOperations {
         target = await uniqueFileName(
           parentDir,
           clean,
-          '.md',
+          ext,
           exclude: _abs(path),
         );
       }
