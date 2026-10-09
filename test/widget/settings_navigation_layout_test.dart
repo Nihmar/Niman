@@ -54,6 +54,35 @@ void main() {
     expect(previewed(tester), ['files', 'search', 'quicknote', 'settings']);
   });
 
+  testWidgets('the last destination shown besides Settings keeps its switch '
+      'on (#667)', (tester) async {
+    await pump(tester);
+    for (final name in ['todo', 'search', 'quicknote']) {
+      await tester.tap(find.byKey(Key('navigation-switch-$name')));
+      await tester.pumpAndSettle();
+    }
+    final files = find.byKey(const Key('navigation-switch-files'));
+    expect(tester.widget<Switch>(files).onChanged, isNull);
+
+    await tester.tap(files);
+    await tester.pumpAndSettle();
+
+    expect(previewed(tester), ['files', 'settings']);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('a layout that hides all but Settings shows the first back (#667)', () {
+    const layout = NavigationLayout(
+      order: ['files', 'todo', 'search', 'quicknote', 'settings'],
+      hidden: {'files', 'todo', 'search', 'quicknote'},
+    );
+
+    expect(
+      [for (final d in visibleDestinations(layout)) d.name],
+      ['files', 'settings'],
+    );
+  });
+
   testWidgets('dragging a row moves the destination', (tester) async {
     await pump(tester);
     final handle = find.descendant(
