@@ -55,18 +55,20 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:niman/src/markdown/edit/caret_spot.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
-import 'package:niman/src/markdown/edit/touch_selection.dart';
+import 'package:niman/src/markdown/edit/source_shortcuts.dart';
 import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
+import 'package:niman/src/markdown/render/caret_painters.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/focus_return.dart';
@@ -84,11 +86,14 @@ import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
+import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
+import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
+import 'package:niman/src/markdown/render/source_template_hint.dart';
+import 'package:niman/src/markdown/render/source_touch.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
-import 'package:niman/src/markdown/render/template_hint.dart';
-import 'package:niman/src/markdown/render/wikilink_panel.dart';
+import 'package:niman/src/markdown/render/wikilink_suggest.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
@@ -99,9 +104,7 @@ import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
-import 'package:niman/src/templates/checker.dart';
 import 'package:niman/src/templates/template_commands.dart';
-import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 
@@ -380,8 +383,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (line == null) return;
     final offset = widget.buffer.offsetOfLine(line);
     _focus.requestFocus();
-    _select(offset, offset);
-    _ensureCaretVisible();
+    _applySelection(
+      SelectionModel.at(offset),
+      rebuild: true,
+      reveal: true,
+      suggest: false,
+    );
   }
 
   /// The folded heading sections; the rows are the lines they leave.
@@ -532,30 +539,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   final ValueNotifier<bool> _caretOn = ValueNotifier<bool>(true);
   Timer? _blink;
 
-  /// The overlay the touch selection's handles and toolbar are drawn in.
-  final OverlayPortalController _touchOverlay = OverlayPortalController();
+  /// The selection by touch (#291): its handles, its toolbar, and the
+  /// gestures that bring them. Listened to from [initState]: the note
+  /// rebuilds when they come or go.
+  late final SourceTouchSelection _touch = SourceTouchSelection(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    select: select,
+    offsetAt: offsetAt,
+    requestKeyboard: _requestKeyboard,
+    caretRectAt: _caretRectAt,
+    followsLastClick: (global) => _followsLastClick(global, DateTime.now()),
+    clipboardItems: (dismiss) => _menu.clipboardItems(dismiss, touch: true),
+    spellingItems: (dismiss) => _menu.spellingItems(dismiss),
+    formats: _menuFormats,
+    structure: () => widget.editorMenu?.call(),
+    table: () => _tableCommands()?.menu(),
+  );
 
-  /// Ticks when the touch overlay should build again: its handles and
-  /// toolbar hang from the selected line's paragraph, and the frame that
-  /// shows them can find it detached — a rebuild (the keyboard coming up, a
-  /// reveal) in the same frame (#291).
-  final ValueNotifier<int> _touchTick = ValueNotifier<int>(0);
-
-  /// How many frames the overlay has asked to be built again, and whether
-  /// one such ask is already queued.
-  int _touchFrames = 0;
-  bool _touchScheduled = false;
-
-  /// How many frames the overlay keeps asking ([_showTouch] resets it):
-  /// enough for the keyboard's rise and a sliver's round of rebuilds, and
-  /// short enough that a selection off screen stops asking.
-  static const int _touchRetryFrames = 30;
-
-  /// Whether the selection was made by touch and shows its handles.
-  bool _touchHandles = false;
-
-  /// Whether the touch toolbar (copy, cut, paste, select all) is up.
-  bool _touchToolbar = false;
+  /// The touch selection's handles or toolbar came or went.
+  void _onTouchChanged() => setState(() {});
 
   /// The kind of the pointer that last went down: a long press or a tap by a
   /// finger is a touch gesture, by a mouse it is not.
@@ -568,8 +571,36 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Typewriter mode's glide to the caret, one per burst of moves.
   late final TypewriterFollow _typewriter = TypewriterFollow(_centerCaret);
 
-  /// The overlay the desktop context menu is drawn in.
-  final OverlayPortalController _menuOverlay = OverlayPortalController();
+  /// The desktop context menu, and the clipboard's and the spelling's
+  /// entries it shares with the touch toolbar. Listened to from [initState]:
+  /// the note rebuilds when it opens or closes.
+  late final SourceContextMenu _menu = SourceContextMenu(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    grouped: () => widget.editorMenu != null,
+    caretRect: () => caretRect,
+    hideTouch: () => _touch.hide(),
+    showTouch: ({required toolbar}) => _touch.show(toolbar: toolbar),
+    cut: cutSelection,
+    copy: copySelection,
+    paste: paste,
+    selectAll: selectAll,
+    replace: _replaceRange,
+    spellCheck: () => widget.spellCheck,
+    spellRanges: _spellRanges,
+    formats: _menuFormats,
+    table: () => _tableCommands()?.menu(),
+    structure: () => widget.editorMenu?.call(),
+  );
+
+  /// The context menu opened or closed.
+  void _onMenuChanged() => setState(() {});
+
+  /// The toolbar's formats a menu offers: none when the editor gives it a
+  /// grouped menu of its own, which holds them.
+  List<FormatMenuEntry> _menuFormats() => widget.editorMenu != null
+      ? const <FormatMenuEntry>[]
+      : widget.formatMenu?.call() ?? const <FormatMenuEntry>[];
 
   /// The `+` handles of the table in play (#261): the one under the mouse
   /// on the desktop, the caret's on a phone.
@@ -596,40 +627,38 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// handle, and letting go at once took the handle from under it.
   Timer? _tableHoverClear;
 
-  /// Where the context menu opens, in global coordinates, while it is up.
-  Offset? _menuAt;
-
-  /// The overlay the template checker's hint is drawn in (T-TPL-09).
-  ///
-  /// Always up, like the table's handles: it draws nothing while the caret is
-  /// not on a problem.
-  final OverlayPortalController _hintOverlay = OverlayPortalController();
-
-  /// The problem the hint is showing — the span the caret is in — or null.
-  /// A notifier rather than a rebuild of the note: moving onto a problem
-  /// must repaint the overlay alone.
-  final ValueNotifier<({int start, int end, TemplateSyntaxError error})?>
-  _hint = ValueNotifier<({int start, int end, TemplateSyntaxError error})?>(
-    null,
+  /// The template checker (T-TPL-09): the check run and armed on the note,
+  /// the problems on a line, and the hint under the span the caret is on.
+  late final TemplateHintController _hints = TemplateHintController(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    check: () => widget.templateCheck,
+    isTemplate: () => widget.templateCommands,
+    replace: _replaceRange,
+    spanRect: _templateSpanRect,
   );
 
-  /// The overlay the wikilink suggester panel is drawn in (#475).
-  final OverlayPortalController _suggestOverlay = OverlayPortalController();
+  /// The wikilink suggester (#475): the panel a `[[link]]` being typed opens,
+  /// its keys, and the edit that completes the link. Listened to from
+  /// [initState]: the note rebuilds when the panel changes.
+  late final WikilinkSuggestController _suggest = WikilinkSuggestController(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    suggester: () => widget.wikilinkSuggester,
+    lineRead: (line) => _tokensAt(line) != null,
+    inCodeAt: _inCodeAt,
+    headings: () => headings,
+    replace: (start, end, text, caret) =>
+        _replaceRange(start, end, text, caret: caret),
+    ensureCaretVisible: _ensureCaretVisible,
+    caretRect: () => _caretRectAt(_selection.extent) ?? caretRect,
+    noteBox: () => _noteBox,
+    caretMoves: () => Listenable.merge([_scroll, _caretRect]),
+  );
 
-  /// The open panel, or null while no wikilink is being typed.
-  _SuggestPanel? _suggest;
-
-  /// Counts the panel's queries, so a slower one a later query overtook is
-  /// dropped rather than shown.
-  int _suggestSeq = 0;
-
-  /// A line break already taken as the panel's `Enter`: the desktop embedders
-  /// send the break as text *after* the key, so the copy that follows is
-  /// swallowed instead of inserting a newline behind the completed link.
-  bool _swallowBreak = false;
-
-  /// How many rows the panel shows at once (the drawing's density).
-  static const int _suggestRows = 8;
+  /// The suggester's panel opened, closed or changed: the note is built
+  /// again, as it always was when the panel moved.
+  void _onSuggestChanged() => setState(() {});
 
   @override
   void initState() {
@@ -638,14 +667,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _tableOverlay.show();
-      _hintOverlay.show();
+      _hints.overlay.show();
       _codeOverlay.show();
       // The first check, off the build: the problem marks are on the note the
       // frame after it opens, and nothing waited for them (#316).
-      _refreshHint();
-      _runTemplateCheck();
+      _hints
+        ..refresh()
+        ..run();
     });
     _restyle();
+    _suggest.addListener(_onSuggestChanged);
+    _touch.addListener(_onTouchChanged);
+    _menu.addListener(_onMenuChanged);
     _scroll = widget.controller ?? ScrollController();
     _ownsScroll = widget.controller == null;
     _focus = widget.focusNode ?? FocusNode();
@@ -684,7 +717,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // two ends of the same `_replace` (#316) — and only when a profiling
       // round asked for the frame's parts (#362): a release build reads no
       // clock on the path it would be measuring.
-      if (nimanFrames) _editClock = Stopwatch()..start();
+      _cost.startEdit();
       _styleEdited(edit);
     },
     selection: () => _selection,
@@ -692,10 +725,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       setState(() => _ownSelection = next);
       widget.onSelection?.call(next);
       _scheduleCaret();
-      _refreshSuggest();
+      _suggest.refresh();
     },
     onEdited: (edit) {
-      _hideTouch();
+      _touch.hide();
       _syncLines(edit);
       setState(() {
         _ownSelection = _ownSelection.clampTo(widget.buffer.length);
@@ -703,8 +736,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _scheduleCaret();
       _ensureCaretVisible();
       _notifyChanged(edit);
-      _bookFrame();
-      _refreshSuggest(typed: true);
+      _cost.endEdit();
+      _suggest.refresh(typed: true);
     },
   );
 
@@ -723,72 +756,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// arrives in: a scroll or a window resize lays the same lines out again (a
   /// frame of `build 66.6 ms` with no keystroke and nothing else in the log,
   /// 12:25 session), and those are frames this has to be able to name.
-  final _FrameCost _cost = _FrameCost();
-
-  /// The clock over the synchronous part of an edit: the tokenizer callback
-  /// opens it and `onEdited` closes it.
-  Stopwatch? _editClock;
-
-  /// Where the frame's own report goes (#316).
-  static const AppLogger _log = AppLogger(name: 'edit');
-
-  /// Whether this frame's one report is already booked.
-  bool _costBooked = false;
-
-  /// The bar this view's own share of a frame is held to: half of 60 Hz, so
-  /// the line appears while the rest of the app still has room in the frame.
-  static const int _frameBarMicros = 8000;
-
-  /// The bar the edit path alone is held to: half of the view's own, because a
-  /// delta that costs four milliseconds before anything is drawn is worth
-  /// naming on its own.
-  static const int _editBarMicros = 4000;
-
-  /// Closes the edit path's clock, if one is open, and books this frame's
-  /// report.
-  void _bookFrame() {
-    if (!nimanFrames) return;
-    final clock = _editClock;
-    if (clock != null) {
-      _cost.edit += clock.elapsedMicroseconds;
-      _editClock = null;
-    }
-    _bookReport();
-  }
-
-  /// Books this frame's one report, to run after the frame.
   ///
-  /// Called from the edit path and from the render object that times the
-  /// layout and the paint: a frame no keystroke caused still has to be
-  /// bookable, and this widget does not build on a scroll.
-  void _bookReport() {
-    if (_costBooked) return;
-    _costBooked = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _costBooked = false;
-      _reportFrame();
-    });
-  }
-
-  /// Writes the measured parts of a frame this view drew, when they together
-  /// miss [_frameBarMicros], or when the edit path alone misses
-  /// [_editBarMicros].
-  ///
-  /// One line per frame, and only for the ones that missed it: a line per
-  /// frame would charge the frames it measures — the same reason
-  /// `_reportSlowFrames` (main.dart) logs the slow ones alone.
-  void _reportFrame() {
-    final cost = _cost;
-    final total = cost.total;
-    if (total >= _frameBarMicros || cost.edit >= _editBarMicros) {
-      _log.debug(
-        'frame: edit ${_editMs(cost.edit)}, build ${_editMs(cost.build)}, '
-        'layout ${_editMs(cost.layout)}, paint ${_editMs(cost.paint)} '
-        '(${_editMs(total)} here)',
-      );
-    }
-    cost.reset();
-  }
+  /// Held to half of 60 Hz ([FrameCost.frameBarMicros]), so the line appears
+  /// while the rest of the app still has room in the frame; written as
+  /// `[edit] frame: …`, the logger naming the view.
+  final FrameCost _cost = FrameCost(
+    label: '',
+    log: const AppLogger(name: 'edit'),
+  );
 
   /// The buffer revision this view last drew or edited, so an edit made
   /// behind its back is seen. (Comparing the old widget's buffer with the new
@@ -805,8 +780,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       setState(() {});
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _runTemplateCheck();
-        _refreshHint();
+        _hints
+          ..run()
+          ..refresh();
       });
     }
     if (!identical(oldWidget.surface, widget.surface)) {
@@ -826,8 +802,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // view too, and one of them may be the widget now rebuilding it.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _runTemplateCheck();
-        _refreshHint();
+        _hints
+          ..run()
+          ..refresh();
       });
     }
     if (!identical(oldWidget.findMatches, widget.findMatches)) {
@@ -844,7 +821,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // from the new text: it holds the offsets of the link it was opened in
       // and the rows that complete it, so `Enter` would write a note name
       // into the note that took its place (#494).
-      _dropSuggestInUpdate();
+      _suggest.dropInUpdate();
       final attached = _input.isAttached;
       _input.detach();
       _history = widget.history ?? widget.surface?.history ?? EditHistory();
@@ -859,7 +836,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // Another note to check: the first answer is read off it, not off the
       // one it replaced.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _runTemplateCheck();
+        if (mounted) _hints.run();
       });
       if (attached) _input.attach(viewId: View.of(context).viewId);
     } else if (widget.buffer.revision != _seenRevision) {
@@ -868,13 +845,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // follow. The link the panel stood in may be gone or moved — the caret
       // is clamped into whatever replaced it — and its offsets are the ones
       // read from the text that went, so the panel goes with them (#494).
-      _dropSuggestInUpdate();
+      _suggest.dropInUpdate();
       _restyle();
       _folds.clear();
       _heights = _map();
       _seenRevision = widget.buffer.revision;
       _ownSelection = _ownSelection.clampTo(widget.buffer.length);
-      _scheduleTemplateCheck();
+      _hints.schedule();
       // And the platform's copy is now of a note that is not there any more.
       _input.sendSelection();
     }
@@ -909,7 +886,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.templateCheck?.removeListener(_onSpellingChanged);
     widget.findMatches?.removeListener(_onSpellingChanged);
     widget.mathCache?.removeListener(_onMathTypeset);
-    _hint.dispose();
+    _hints.dispose();
+    _suggest
+      ..removeListener(_onSuggestChanged)
+      ..dispose();
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     WindowVisibility.shown.removeListener(_onWindowShown);
@@ -923,7 +903,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _footnoteMath.dispose();
     _caretSpot.dispose();
     _caretOn.dispose();
-    _touchTick.dispose();
+    _touch
+      ..removeListener(_onTouchChanged)
+      ..dispose();
+    _menu
+      ..removeListener(_onMenuChanged)
+      ..dispose();
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
   }
@@ -937,7 +922,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// and the hint is read off the problems as they now stand.
   void _onSpellingChanged() {
     if (!mounted) return;
-    _refreshHint();
+    _hints.refresh();
     setState(() {});
   }
 
@@ -1107,28 +1092,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer.replaceRange(0, buffer.length, text);
     _history.clear();
     // The panel holds offsets into the text that went (#494).
-    _closeSuggest();
+    _suggest.close();
     _restyle();
     _folds.clear();
     _heights = _map();
     _seenRevision = buffer.revision;
     setState(() => _ownSelection = _ownSelection.clampTo(buffer.length));
     _input.sendSelection();
-    _runTemplateCheck();
+    _hints.run();
     _scheduleCaret();
   }
 
   /// Selects [next], and tells whoever needs to know.
-  void select(SelectionModel next) {
-    final clamped = next.clampTo(widget.buffer.length);
-    _history.seal();
-    setState(() => _ownSelection = clamped);
-    widget.onSelection?.call(clamped);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
-    _refreshSuggest();
-  }
+  void select(SelectionModel next) =>
+      _applySelection(next, rebuild: true, reveal: true);
 
   /// Undoes the last edit, and says whether there was one.
   bool undo() => _applyHistory(_history.undo(widget.buffer), forwards: false);
@@ -1166,7 +1143,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // An undo is an edit no keystroke made: the panel is read again off the
     // text it left — it follows a link still there and closes on one gone
     // (#494).
-    _refreshSuggest();
+    _suggest.refresh();
     if (edit != null) _notifyChanged(edit);
     return true;
   }
@@ -1203,11 +1180,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           ? SelectionModel(anchor: next.anchor, extent: extent)
           : SelectionModel.at(extent);
     }
-    _publishSelection(next);
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
+    _applySelection(next, reveal: true);
   }
 
   /// The source line at the top of the view, and how far into its rows
@@ -1336,14 +1309,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// tells everyone who needs to know.
   void _moveCaretTo(int offset, {bool extend = false}) {
     final to = _inCell(offset, 0);
-    final next = extend
-        ? SelectionModel(anchor: _selection.anchor, extent: to)
-        : SelectionModel.at(to);
-    _publishSelection(next.clampTo(widget.buffer.length));
-    widget.onSelection?.call(_selection);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
+    _applySelection(
+      extend
+          ? SelectionModel(anchor: _selection.anchor, extent: to)
+          : SelectionModel.at(to),
+      reveal: true,
+    );
   }
 
   /// The selected text, or null when the selection is a caret.
@@ -1398,7 +1369,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     bool follow = true,
   }) {
     if (start < 0 || end < start || end > widget.buffer.length) return;
-    _hideTouch();
+    _touch.hide();
     final buffer = widget.buffer;
     final before = buffer.length;
     final removed = buffer.substring(start, end);
@@ -1427,7 +1398,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _notifyChanged(edit);
     // An edit made where the writer is looking rather than typing — a box
     // ticked — types no link.
-    _refreshSuggest(typed: follow);
+    _suggest.refresh(typed: follow);
   }
 
   /// Deletes the selection, or what is before the caret: one character, or a
@@ -1528,10 +1499,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The line break a completed link's `Enter` sent after the key: already
     // taken as the panel's `Enter`, so it is swallowed rather than written
     // behind the link (#475).
-    if (_swallowBreak) {
-      _swallowBreak = false;
-      return true;
-    }
+    if (_suggest.takeSwallowedBreak()) return true;
     // In a table in `live`: the cell below, or out of it.
     if (_tableEnter()) return true;
     if (start != end) return false;
@@ -1709,10 +1677,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       final next = extend
           ? SelectionModel(anchor: _selection.anchor, extent: offset)
           : SelectionModel.at(offset);
-      _publishSelection(next);
-      widget.onSelection?.call(next);
-      _input.sendSelection();
-      _scheduleCaret();
+      _applySelection(next);
     });
     WidgetsBinding.instance.scheduleFrame();
   }
@@ -1886,7 +1851,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _notifyChanged(SourceEdit edit) {
     // A template's problems are read off the text again, once the writer
     // pauses: the keystroke that led here pays for the timer alone (#316).
-    _scheduleTemplateCheck();
+    _hints.schedule();
     widget.onChanged?.call(edit);
   }
 
@@ -1898,6 +1863,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// How long two taps may be apart and still be one gesture.
   static const Duration _clickWindow = Duration(milliseconds: 400);
+
+  /// Whether a tap at [position], at [now], is the next of the last one's
+  /// gesture: near it in time *and* in place. Two quick taps on different
+  /// words are two carets, not a double click — counting time alone selected
+  /// a word under the second tap and the next keystroke replaced it.
+  bool _followsLastClick(Offset position, DateTime now) {
+    final last = _lastClick;
+    final lastAt = _lastClickAt;
+    return last != null &&
+        lastAt != null &&
+        now.difference(last) <= _clickWindow &&
+        (position - lastAt).distance <= kDoubleTapSlop;
+  }
 
   /// A tap: one places the caret, two take the word under it, three take the
   /// line.
@@ -1918,18 +1896,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _pressOffset = null;
     if (offset == null) return;
     final now = DateTime.now();
-    final last = _lastClick;
-    final lastAt = _lastClickAt;
-    // Near in time *and* in place: two quick taps on different words are two
-    // carets, not a double click — counting time alone selected a word under
-    // the second tap and the next keystroke replaced it.
-    _clicks =
-        last != null &&
-            lastAt != null &&
-            now.difference(last) <= _clickWindow &&
-            (position - lastAt).distance <= kDoubleTapSlop
-        ? _clicks + 1
-        : 1;
+    _clicks = _followsLastClick(position, now) ? _clicks + 1 : 1;
     _lastClick = now;
     _lastClickAt = position;
     switch (_clicks) {
@@ -1948,7 +1915,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           lineStart + math.min(start, text.length),
           lineStart + math.min(end, text.length),
         );
-        if (finger) _showTouch(toolbar: true);
+        if (finger) _touch.show(toolbar: true);
       default:
         final line = widget.buffer.lineOf(offset);
         _select(
@@ -1956,7 +1923,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           widget.buffer.offsetOfLine(line) + widget.buffer.lineLengthAt(line),
         );
         _clicks = 0;
-        if (finger) _showTouch(toolbar: true);
+        if (finger) _touch.show(toolbar: true);
     }
   }
 
@@ -2059,24 +2026,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return true;
   }
 
-  void _select(int start, int end) {
-    final next = SelectionModel(anchor: start, extent: end);
-    _history.seal();
-    setState(() => _ownSelection = next);
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-  }
+  /// Selects `[start, end)` by a click or a jump: the note rebuilt, and the
+  /// wikilink panel left as it is.
+  void _select(int start, int end) => _applySelection(
+    SelectionModel(anchor: start, extent: end),
+    rebuild: true,
+    suggest: false,
+  );
 
   /// Selects everything.
-  void selectAll() {
-    final next = SelectionModel(anchor: 0, extent: widget.buffer.length);
-    _history.seal();
-    setState(() => _ownSelection = next);
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-  }
+  void selectAll() => _select(0, widget.buffer.length);
 
   /// The offset a mouse drag started from, or null when no drag is running.
   int? _dragAnchor;
@@ -2109,7 +2068,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
       // only scrolls the note does not bring the keyboard up.
       if (event.kind != PointerDeviceKind.mouse) return;
-      _hideTouch();
+      _touch.hide();
       _requestKeyboard();
       if (_controlPress) {
         _controlPress = false;
@@ -2145,12 +2104,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (event.kind != PointerDeviceKind.mouse) return;
       final offset = offsetAt(event.position);
       if (offset == null) return;
-      final next = SelectionModel(anchor: anchor, extent: offset);
-      _history.seal();
-      setState(() => _ownSelection = next);
-      widget.onSelection?.call(next);
-      _input.sendSelection();
-      _scheduleCaret();
+      _select(anchor, offset);
     },
     onPointerUp: (_) => _endDrag(),
     onPointerCancel: (_) => _endDrag(),
@@ -2252,37 +2206,45 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.attach(viewId: View.of(context).viewId);
   }
 
-  /// Publishes [next] as the caret, repainting only what changed.
+  /// Makes [next] the selection — clamped into the note — and tells whoever
+  /// needs to know: the typing step ends, the shell and the platform hear of
+  /// it, and the caret is measured where it went. Every move the writer
+  /// makes comes through here; an edit's caret comes with the edit
+  /// ([_replaceRange], [_applyHistory]).
   ///
-  /// A caret that stays collapsed moves no text: the two lines involved — the
-  /// one
-  /// that lost it and the one that gained it — repaint through the notifier,
-  /// and
-  /// nothing else does. A move that creates or clears a *range* repaints the
-  /// note,
-  /// because a range is a background on the runs it covers.
-  void _publishSelection(SelectionModel next) {
+  /// Only what changed is repainted: a caret that stays collapsed moves no
+  /// text, so the two lines involved — the one that lost it and the one that
+  /// gained it — repaint through [_caretSpot] and nothing else does, while a
+  /// move that creates or clears a *range* rebuilds the note, a range being
+  /// a background on the runs it covers. [rebuild] rebuilds it whatever
+  /// moved.
+  ///
+  /// [reveal] scrolls the caret into view. [suggest] lets the wikilink panel
+  /// follow the caret — or close behind it.
+  void _applySelection(
+    SelectionModel next, {
+    bool rebuild = false,
+    bool reveal = false,
+    bool suggest = true,
+  }) {
+    final clamped = next.clampTo(widget.buffer.length);
     // A caret the writer moved ends the typing step: what is typed next is
     // undone on its own.
     _history.seal();
     final wasRange = !_selection.isCollapsed;
-    _ownSelection = next;
-    if (!next.isCollapsed || wasRange) {
-      setState(() {});
-    }
-    _caretSpot.value = _spotOf(next.extent);
-    _refreshSuggest();
+    _ownSelection = clamped;
+    if (rebuild || !clamped.isCollapsed || wasRange) setState(() {});
+    _caretSpot.value = _spotOf(clamped.extent);
+    if (suggest) _suggest.refresh();
+    widget.onSelection?.call(clamped);
+    _input.sendSelection();
+    _scheduleCaret();
+    if (reveal) _ensureCaretVisible();
   }
 
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
-  void placeCaret(int offset) {
-    final next = _selection.collapsedTo(offset).clampTo(widget.buffer.length);
-    _publishSelection(next);
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
-  }
+  void placeCaret(int offset) =>
+      _applySelection(_selection.collapsedTo(offset), reveal: true);
 
   /// Scrolls the caret's line into view when an edit or a jump left it out.
   ///
@@ -2387,71 +2349,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return _spellRanges(index, widget.buffer.lineAt(index));
   }
 
-  /// The checker's problems on line [index], as offsets local to it.
-  ///
-  /// Empty unless the note is a template — a `{{…}}` in an ordinary note is
-  /// text, and the checker never sees it (T-TPL-09).
-  List<TextRange> _templateProblemsIn(int index) {
-    final check = widget.templateCheck;
-    if (check == null || !widget.templateCommands) return const <TextRange>[];
-    final start = widget.buffer.offsetOfLine(index);
-    final end = start + widget.buffer.lineLengthAt(index);
-    return <TextRange>[
-      for (final (range, _) in check.inRange(start, end)) range,
-    ];
-  }
-
-  /// Runs the template check on the note as it stands, now.
-  ///
-  /// Nothing runs on a note that is not a template: its `{{…}}` are text.
-  void _runTemplateCheck() {
-    final check = widget.templateCheck;
-    if (check == null || !widget.templateCommands) return;
-    check.run(widget.buffer.text);
-  }
-
-  /// Arms the template check's debounce: the note is read and checked once
-  /// the writer pauses, never on the keystroke itself (#316).
-  void _scheduleTemplateCheck() {
-    if (!widget.templateCommands) return;
-    widget.templateCheck?.schedule(() => widget.buffer.text);
-  }
-
-  /// Reads the hint off the caret: the problem whose span holds it, or none.
-  ///
-  /// Only a collapsed caret points at a span; a selection is not a place.
-  void _refreshHint() {
-    final check = widget.templateCheck;
-    final selection = _selection;
-    if (check == null || !widget.templateCommands || !selection.isCollapsed) {
-      _hint.value = null;
-      return;
-    }
-    final error = check.at(selection.extent);
-    _hint.value = error == null
-        ? null
-        : (start: error.offset, end: error.end, error: error);
-  }
-
-  /// Applies the fix the checker offered for [error], as one undoable edit.
-  ///
-  /// The checker answers about the text it was given, which is a debounce
-  /// behind the note: the fix is matched again against what is written now,
-  /// so it lands on the span it was offered for and nowhere else.
-  void _applyTemplateFix(TemplateSyntaxError error) {
-    final text = widget.buffer.text;
-    TemplateSyntaxError? target;
-    for (final current in checkTemplateSyntax(text)) {
-      if (current.suggestion == null) continue;
-      if (current.offset <= error.offset && error.offset < current.end) {
-        target = current;
-        break;
-      }
-    }
-    if (target == null || target.suggestion == null) return;
-    _replaceRange(target.offset, target.end, target.suggestion!);
-  }
-
   /// The rectangle a problem's span covers, in global coordinates, or null
   /// while the piece that holds it is not built.
   ///
@@ -2490,32 +2387,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       boxes.first.bottom,
     ).shift(paragraph.localToGlobal(Offset.zero));
   }
-
-  /// The template checker's hint, drawn in its overlay under the span the
-  /// caret is on, or nothing.
-  Widget _templateHint(BuildContext context) => ValueListenableBuilder(
-    valueListenable: _hint,
-    builder: (context, hint, _) {
-      if (hint == null) return const SizedBox.shrink();
-      final anchor = _templateSpanRect(hint.start, hint.end);
-      if (anchor == null) return const SizedBox.shrink();
-      final overlay = Overlay.of(context).context.findRenderObject();
-      final at = overlay is RenderBox && overlay.hasSize
-          ? overlay.globalToLocal(anchor.topLeft)
-          : anchor.topLeft;
-      return Stack(
-        children: [
-          TemplateHint(
-            anchor: Rect.fromLTWH(at.dx, at.dy, anchor.width, anchor.height),
-            message: templateProblemSentence(hint.error),
-            suggestion: hint.error.suggestion,
-            onFix: () => _applyTemplateFix(hint.error),
-            onDismiss: () => _hint.value = null,
-          ),
-        ],
-      );
-    },
-  );
 
   /// The find bar's matches on line [index], as offsets local to it.
   List<(int, int, bool)> _foundIn(int index) {
@@ -3095,7 +2966,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _scheduleCaret() {
     _semanticsTick.value++;
     // The caret moved: the hint follows it off the problems as they stand.
-    _refreshHint();
+    _hints.refresh();
     _revealCaret();
     _restartBlink();
     _followCaret();
@@ -3297,13 +3168,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
   }
 
+  // Every frame the view builds is measured, for the report (#316) — when a
+  // profiling round asked for it: what a frame costs is read off a
+  // `Stopwatch` round the build and in the render object `timed` wraps it
+  // in, on the very path the report is about, and a release build runs
+  // neither (#362).
   @override
-  Widget build(BuildContext context) {
-    // Every frame the view builds is measured, for the report (#316) —
-    // when a profiling round asked for it: what a frame costs is read off
-    // a `Stopwatch` here and in the render object below, on the very path
-    // the report is about, and a release build runs neither (#362).
-    final clock = nimanFrames ? (Stopwatch()..start()) : null;
+  Widget build(BuildContext context) => _cost.timed(() => _buildView(context));
+
+  Widget _buildView(BuildContext context) {
     final syntax = widget.syntax ?? SyntaxColors.of(context);
     _syntax = syntax;
     _scaler = MediaQuery.textScalerOf(context);
@@ -3326,7 +3199,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             _input.attach(viewId: View.of(context).viewId);
           } else {
             _input.detach();
-            _hideTouch();
+            _touch.hide();
             hideContextMenu();
           }
         },
@@ -3393,7 +3266,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   }
                   _requestKeyboard();
                   if (details.kind != PointerDeviceKind.mouse &&
-                      _touchTap(details.globalPosition)) {
+                      _touch.tap(details.globalPosition)) {
                     return;
                   }
                   _tapUp(details.globalPosition);
@@ -3403,15 +3276,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 // the toolbar up. A mouse has its drag instead.
                 onLongPressStart: (details) {
                   if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _longPressAt(details.globalPosition, start: true);
+                  _touch.longPressAt(details.globalPosition, start: true);
                 },
                 onLongPressMoveUpdate: (details) {
                   if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _longPressAt(details.globalPosition, start: false);
+                  _touch.longPressAt(details.globalPosition, start: false);
                 },
                 onLongPressEnd: (details) {
                   if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _showTouch(toolbar: true);
+                  _touch.show(toolbar: true);
                 },
                 // The text's own pointer over the note; the gutter keeps the
                 // arrow (`_Line`), and a drawn task box the hand (#505).
@@ -3535,7 +3408,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 composing: _composingIn(index),
                                 misspelled: _misspelledIn(index),
                                 found: _foundIn(index),
-                                templateProblems: _templateProblemsIn(index),
+                                templateProblems: _hints.problemsIn(index),
                                 misspelledColor: Theme.of(context)
                                     .colorScheme
                                     .error,
@@ -3588,13 +3461,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // click was.
     note = _semantics(note);
     final content = OverlayPortal(
-      controller: _menuOverlay,
-      overlayChildBuilder: _desktopMenu,
+      controller: _menu.overlay,
+      overlayChildBuilder: _menu.buildOverlay,
       child: OverlayPortal(
-        controller: _touchOverlay,
+        controller: _touch.overlay,
         overlayChildBuilder: (context) => ListenableBuilder(
-          listenable: Listenable.merge([_scroll, _touchTick]),
-          builder: (context, _) => _touchSelectionOverlay(),
+          listenable: Listenable.merge([_scroll, _touch.tick]),
+          builder: (context, _) => _touch.buildOverlay(),
         ),
         child: OverlayPortal(
           controller: _tableOverlay,
@@ -3605,14 +3478,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           child: OverlayPortal(
             // The checker's hint draws nearest the note — over the text it
             // points at, under the handles, the toolbar and the menu.
-            controller: _hintOverlay,
+            controller: _hints.overlay,
             overlayChildBuilder: (context) => ListenableBuilder(
               listenable: _scroll,
-              builder: (context, _) => _templateHint(context),
+              builder: (context, _) => _hints.buildOverlay(context),
             ),
             child: OverlayPortal(
-              controller: _suggestOverlay,
-              overlayChildBuilder: _suggestOverlayChild,
+              controller: _suggest.overlay,
+              overlayChildBuilder: _suggest.buildOverlay,
               child: OverlayPortal(
                 // The code blocks' copy buttons ride the scroll, under all
                 // of the above.
@@ -3628,9 +3501,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ),
       ),
     );
-    if (clock == null) return content;
-    _cost.build += clock.elapsedMicroseconds;
-    return _TimedSubtree(cost: _cost, onSlow: _bookReport, child: content);
+    return content;
   }
 
   // ---------------------------------------------------------- table handles
@@ -3904,7 +3775,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       final start = math.max(0, selection.start - _semanticsReach);
       final end = math.min(buffer.length, selection.end + _semanticsReach);
       int local(int offset) => (offset - start).clamp(0, end - start);
-      return _NoteSemantics(
+      return NoteSemantics(
         value: buffer.substring(start, end),
         selection: TextSelection(
           baseOffset: local(selection.anchor),
@@ -3978,8 +3849,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (cells.isEmpty) return;
     final (start, end) = cells[column.clamp(0, cells.length - 1)];
     final lineStart = buffer.offsetOfLine(rows[row]);
-    _moveSelection(
+    _applySelection(
       SelectionModel(anchor: lineStart + start, extent: lineStart + end),
+      reveal: true,
     );
   }
 
@@ -4010,7 +3882,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return true;
     }
     final (_, end) = cells[commands.cell.column.clamp(0, cells.length - 1)];
-    _moveSelection(SelectionModel.at(buffer.offsetOfLine(rows[below]) + end));
+    _applySelection(
+      SelectionModel.at(buffer.offsetOfLine(rows[below]) + end),
+      reveal: true,
+    );
     return true;
   }
 
@@ -4042,21 +3917,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _caretOutOfTable(Block block) {
     final buffer = widget.buffer;
     if (block.endLine < buffer.lineCount) {
-      _moveSelection(SelectionModel.at(buffer.offsetOfLine(block.endLine)));
+      _applySelection(
+        SelectionModel.at(buffer.offsetOfLine(block.endLine)),
+        reveal: true,
+      );
       return;
     }
     final last = block.endLine - 1;
     final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
     _replaceRange(end, end, '\n');
-  }
-
-  /// Makes [next] the selection, and tells everyone who needs to know.
-  void _moveSelection(SelectionModel next) {
-    _publishSelection(next.clampTo(widget.buffer.length));
-    widget.onSelection?.call(_selection);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
   }
 
   /// The table the caret is in and what can be done to it, in `live`; null
@@ -4077,398 +3946,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Opens the context menu at [global], or at the caret without one (the
   /// menu key, Shift+F10).
-  void showContextMenu([Offset? global]) {
-    final at = global ?? caretRect?.bottomLeft;
-    if (at == null) return;
-    _hideTouch();
-    setState(() => _menuAt = at);
-    _menuOverlay.show();
-  }
+  void showContextMenu([Offset? global]) => _menu.show(global);
 
   /// Whether the context menu is up.
-  bool get isContextMenuShown => _menuAt != null;
+  bool get isContextMenuShown => _menu.isShown;
 
   /// Closes the context menu.
-  void hideContextMenu() {
-    if (_menuAt == null) return;
-    if (mounted) setState(() => _menuAt = null);
-    _menuOverlay.hide();
-  }
-
-  // --------------------------------------------------- wikilink suggester
-
-  /// The link the caret sits inside, or null when it sits inside none: a `[[`
-  /// before it on its own line with no `]]` between the two.
-  ///
-  /// The bracket pair writes the closing `]]` the moment `[[` is typed, so the
-  /// closer stands *after* the caret while the target is written: only a `]]`
-  /// between the `[[` and the caret closes the link, and typing through the
-  /// pair's own closer carries the caret past it and closes the panel (#475).
-  _LinkQuery? _linkQuery() {
-    final selection = _selection;
-    if (!selection.isCollapsed) return null;
-    final buffer = widget.buffer;
-    final caret = selection.extent.clamp(0, buffer.length);
-    final line = buffer.lineOf(caret);
-    final lineStart = buffer.offsetOfLine(line);
-    final text = buffer.lineAt(line);
-    final at = caret - lineStart;
-    final open = text.lastIndexOf('[[', at);
-    if (open < 0 || open + 2 > at) return null;
-    // A link is prose: in a fence, an indented block or display maths, or in
-    // an inline code or maths span, there is none to complete. The panel would
-    // list the library for text the note reads as code and write the note name
-    // it completed there (#494). Asked of the `[[` read above as well as of
-    // the caret: a link opened in a span is the span's, even once the caret
-    // has left it, and a caret made in a span completes nothing outside it.
-    //
-    // A line of a long note whose colours are still being read has no tokens
-    // to ask — [_tokensAt] is null, "nobody has read it yet", which [_inCodeAt]
-    // would answer as "no code here" — and its fence state is a scan of the
-    // lines above it: not something to guess at here. No panel opens until
-    // the reading lands; the next keystroke in the link opens it (#494).
-    if (_tokensAt(line) == null) return null;
-    if (_inCodeAt(line, at) || _inCodeAt(line, open)) return null;
-    final close = text.indexOf(']]', open + 2);
-    if (close != -1 && close < at) return null;
-    final content = text.substring(open + 2, at);
-    // A `|` starts the link's display alias: the panel completes the target,
-    // not the words shown.
-    if (content.contains('|')) return null;
-    final hash = content.indexOf('#');
-    // A link closed after the caret — one already written, typed into — has
-    // the rest of what is being completed there too: the target runs on to a
-    // `#`, a `|` or the `]]`, a heading to a `|` or the `]]`. A `]]` past
-    // another `[[` is that link's, and this one is still open.
-    var end = at;
-    var closeAt = -1;
-    final reopen = text.indexOf('[[', at);
-    if (close != -1 && (reopen == -1 || reopen > close)) {
-      closeAt = lineStart + close;
-      end = close;
-      for (final stop in hash == -1 ? const ['#', '|'] : const ['|']) {
-        final found = text.indexOf(stop, at);
-        if (found != -1 && found < end) end = found;
-      }
-    }
-    final query = _LinkQuery(
-      start: lineStart + open + 2,
-      caret: caret,
-      end: lineStart + end,
-      closeAt: closeAt,
-      target: hash == -1 ? content : content.substring(0, hash),
-      heading: hash == -1 ? '' : content.substring(hash + 1),
-      hasHash: hash != -1,
-      // An embed, `![[`, lists the attachments rather than the notes (#705).
-      embed: open > 0 && text.codeUnitAt(open - 1) == 0x21,
-    );
-    // A book's place is written through its `=` (`page=`): what follows is
-    // the number the form asked the writer for, and no row completes it. The
-    // key after it is the note's again, so the number stands (#494).
-    if (_modeOf(query) == WikilinkPanelKind.book &&
-        query.heading.contains('=')) {
-      return null;
-    }
-    return query;
-  }
-
-  /// Opens, filters or closes the panel for where the caret is now.
-  ///
-  /// Called from every caret move and edit; the text of the link is what
-  /// decides whether the library is asked again, so a caret that moves inside
-  /// an unchanged link does not.
-  ///
-  /// Only an edit — [typed] — opens the panel: it is for a link being typed,
-  /// and a caret moved into a link already written (an arrow, a click) is
-  /// just passing through, its keys still the note's. A move follows the
-  /// panel already open for as long as it stays in that link.
-  void _refreshSuggest({bool typed = false}) {
-    if (!mounted) return;
-    final suggester = widget.wikilinkSuggester;
-    if (suggester == null) {
-      _closeSuggest();
-      return;
-    }
-    final query = _linkQuery();
-    if (query == null) {
-      _closeSuggest();
-      return;
-    }
-    final panel = _suggest;
-    if (!typed && (panel == null || panel.query.start != query.start)) {
-      _closeSuggest();
-      return;
-    }
-    if (panel != null && panel.query.sameText(query)) {
-      // The same link, the caret somewhere else in it: keep the rows and
-      // follow the caret. A fresh object for the same text still names the
-      // load in flight, which the `sameText` guard below accepts.
-      if (!identical(panel.query, query)) {
-        setState(() => panel.query = query);
-      }
-      _suggestOverlay.show();
-      return;
-    }
-    _askSuggest(query, suggester);
-  }
-
-  /// Asks [suggester] what the link [query] can hold, and shows the answer.
-  void _askSuggest(_LinkQuery query, WikilinkSuggester suggester) {
-    final previous = _suggest;
-    final panel = _SuggestPanel(
-      query: query,
-      kind: _modeOf(query),
-      // The rows of the link just left stay until the answer lands: the
-      // panel does not flash its empty words between two keystrokes.
-      entries: previous?.entries ?? const <SuggestEntry>[],
-      named: query.target.isEmpty ? '' : query.target,
-    )..answers = previous?.answers;
-    setState(() => _suggest = panel);
-    _suggestOverlay.show();
-    final seq = ++_suggestSeq;
-    unawaited(_loadSuggest(seq, query, suggester));
-  }
-
-  Future<void> _loadSuggest(
-    int seq,
-    _LinkQuery query,
-    WikilinkSuggester suggester,
-  ) async {
-    final kind = _modeOf(query);
-    List<SuggestEntry> entries;
-    var named = query.target;
-    switch (kind) {
-      case WikilinkPanelKind.notes:
-        named = '';
-        entries = await suggester.notes(query.target);
-      case WikilinkPanelKind.embeds:
-        named = '';
-        entries = await suggester.embeds(query.target);
-      case WikilinkPanelKind.headings:
-        if (query.target.isEmpty) {
-          // The empty target is the note being edited: its own scan answers,
-          // so no read is paid for what is already on screen.
-          named = '';
-          entries = <SuggestEntry>[
-            for (final heading in headings ?? const <OutlineEntry>[])
-              HeadingSuggestion(heading.text),
-          ];
-        } else {
-          entries = await suggester.headings(query.target);
-        }
-      case WikilinkPanelKind.book:
-        entries = await suggester.bookPlaces(query.target);
-    }
-    if (!mounted || seq != _suggestSeq) return;
-    final panel = _suggest;
-    // The panel still stands in the same link text — the caret may have moved
-    // inside it since the read started, so this compares the text, not the
-    // object.
-    if (panel == null || !panel.query.sameText(query)) return;
-    setState(() {
-      panel
-        ..kind = kind
-        ..named = named
-        ..entries = _shown(entries, query)
-        ..answers = query
-        ..selected = 0;
-    });
-  }
-
-  /// [entries] as the panel shows them: filtered for a heading query (prefix
-  /// before contains), and cut to the rows it draws.
-  List<SuggestEntry> _shown(List<SuggestEntry> entries, _LinkQuery query) {
-    var matches = entries;
-    if (query.hasHash &&
-        matches.isNotEmpty &&
-        matches.first is HeadingSuggestion) {
-      final q = query.heading.toLowerCase();
-      if (q.isNotEmpty) {
-        final before = <SuggestEntry>[];
-        final within = <SuggestEntry>[];
-        for (final entry in matches) {
-          final text = (entry as HeadingSuggestion).heading.toLowerCase();
-          if (text.startsWith(q)) {
-            before.add(entry);
-          } else if (text.contains(q)) {
-            within.add(entry);
-          }
-        }
-        matches = <SuggestEntry>[...before, ...within];
-      }
-    }
-    return matches.take(_suggestRows).toList(growable: false);
-  }
-
-  /// What the link [query] is listing: the notes, a note's headings, or a
-  /// book's place forms.
-  static WikilinkPanelKind _modeOf(_LinkQuery query) {
-    if (!query.hasHash) {
-      return query.embed ? WikilinkPanelKind.embeds : WikilinkPanelKind.notes;
-    }
-    final target = query.target.toLowerCase();
-    return target.endsWith('.pdf') || target.endsWith('.epub')
-        ? WikilinkPanelKind.book
-        : WikilinkPanelKind.headings;
-  }
-
-  /// Closes the panel, dropping any answer still on its way.
-  void _closeSuggest() {
-    if (_suggest == null) return;
-    _suggestSeq++;
-    setState(() => _suggest = null);
-    _suggestOverlay.hide();
-  }
-
-  /// Drops the panel from a `didUpdateWidget`, which runs inside the build.
-  ///
-  /// The overlay portal refuses to be hidden there, so the panel is dropped
-  /// off the state the build that follows reads — no key and no draw of it
-  /// this frame — and the portal is hidden once the frame is over. A panel
-  /// opened in the meantime, for the text that replaced it, is left standing.
-  void _dropSuggestInUpdate() {
-    if (_suggest == null) return;
-    _suggestSeq++;
-    _suggest = null;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _suggest != null) return;
-      _suggestOverlay.hide();
-    });
-  }
-
-  /// Moves the panel's selection by [by], kept inside the rows.
-  void _moveSuggest(int by) {
-    final panel = _suggest;
-    if (panel == null || panel.entries.isEmpty) return;
-    final next = (panel.selected + by).clamp(0, panel.entries.length - 1);
-    if (next == panel.selected) return;
-    setState(() => panel.selected = next);
-  }
-
-  /// Completes the link with the row that is selected — one edit, one undo
-  /// step — and closes the panel. Nothing is written but the link.
-  void _acceptSuggest() {
-    final panel = _suggest;
-    if (panel == null || !panel.isCurrent) return;
-    final entry = panel.entries.elementAtOrNull(panel.selected);
-    if (entry == null) return;
-    final query = panel.query;
-    _closeSuggest();
-    switch (entry) {
-      case NoteSuggestion():
-        _completeSuggest(query, query.start, entry.target);
-      case HeadingSuggestion():
-        _completeSuggest(query, query.hashAt, entry.heading);
-      case BookSuggestion():
-        // A form, not a link: the number is typed after it, so the caret
-        // stops at the `=` and the link is left open.
-        _completeSuggest(query, query.hashAt, entry.form, form: true);
-    }
-  }
-
-  /// Replaces what [query] completes — from [from] to its end — with [text]
-  /// as one undoable edit. The caret lands past the link's `]]`: the one it
-  /// already has, whatever follows the text before it, or one written after
-  /// the text when it has none. A [form] leaves the caret after the text.
-  void _completeSuggest(
-    _LinkQuery query,
-    int from,
-    String text, {
-    bool form = false,
-  }) {
-    final to = query.end;
-    final closed = query.closeAt >= 0;
-    final insert = form || closed ? text : '$text]]';
-    final shift = text.length - (to - from);
-    final caret = form
-        ? from + text.length
-        : closed
-        ? query.closeAt + shift + 2
-        : from + insert.length;
-    _replaceRange(from, to, insert, caret: SelectionModel.at(caret));
-    _ensureCaretVisible();
-  }
-
-  /// Forgets the swallowed break after the frame the key was handled in, so a
-  /// later `Enter` is never eaten.
-  void _clearSwallowBreak() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _swallowBreak = false);
-  }
-
-  /// The panel where the caret is: under its rectangle, inside the pane.
-  Widget _suggestOverlayChild(BuildContext context) {
-    final panel = _suggest;
-    if (panel == null) return const SizedBox.shrink();
-    return ListenableBuilder(
-      // A keyboard plugged in while the panel is up brings its keys along.
-      listenable: Listenable.merge([
-        _scroll,
-        _caretRect,
-        KeyboardPresence.shared,
-      ]),
-      builder: (context, _) => _suggestAt(context, panel),
-    );
-  }
-
-  Widget _suggestAt(BuildContext context, _SuggestPanel panel) {
-    final overlay = Overlay.of(context).context.findRenderObject();
-    if (overlay is! RenderBox || !overlay.hasSize) {
-      return const SizedBox.shrink();
-    }
-    final caret = _caretRectAt(_selection.extent) ?? caretRect;
-    if (caret == null) return const SizedBox.shrink();
-    Rect toOverlay(Rect rect) => Rect.fromPoints(
-      overlay.globalToLocal(rect.topLeft),
-      overlay.globalToLocal(rect.bottomRight),
-    );
-    final box = _noteBox;
-    final pane = box == null
-        ? null
-        : toOverlay(box.localToGlobal(Offset.zero) & box.size);
-    // A row is tapped on a touch screen, and taller for it; the keys are
-    // named only where a keyboard has been seen to press them.
-    final touch = switch (Theme.of(context).platform) {
-      TargetPlatform.android || TargetPlatform.iOS => true,
-      _ => false,
-    };
-    final rowHeight = touch
-        ? wikilinkPanelTouchRowHeight
-        : wikilinkPanelRowHeight;
-    final keys = KeyboardPresence.shared.attached;
-    return WikilinkPanelPositioned(
-      caret: toOverlay(caret),
-      pane: pane,
-      height: wikilinkPanelHeight(
-        panel.entries.length,
-        panel.kind,
-        hasBodyNote: panel.kind == WikilinkPanelKind.book,
-        rowHeight: rowHeight,
-        keys: keys,
-      ),
-      child: WikilinkPanel(
-        kind: panel.kind,
-        entries: panel.entries,
-        selected: panel.selected,
-        query: panel.query.matchText,
-        named: panel.named,
-        onPick: _pickSuggest,
-        keys: keys,
-        rowHeight: rowHeight,
-      ),
-    );
-  }
-
-  /// Completes the link with the row at [index], tapped or clicked: the
-  /// same edit Enter makes on the selected one.
-  void _pickSuggest(int index) {
-    final panel = _suggest;
-    if (panel == null || index >= panel.entries.length) return;
-    panel.selected = index;
-    _acceptSuggest();
-  }
+  void hideContextMenu() => _menu.hide();
 
   /// Whether the suggester panel is up, for the shell's tour and the tests.
-  bool get isSuggesterShown => _suggest != null;
+  bool get isSuggesterShown => _suggest.isShown;
 
   /// The keys the menu answers while the note has the focus: Escape closes
   /// it (or the touch selection, or collapses a selection), and the menu key
@@ -4482,57 +3969,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final alt = HardwareKeyboard.instance.isAltPressed;
     final meta = HardwareKeyboard.instance.isMetaPressed;
     // The wikilink suggester owns its keys while it is open, and only then
-    // (#475): Escape closes, Up/Down move, Enter/Tab insert. A chord is left
-    // alone, and with no panel the keys fall through to the note's own table
+    // (#475); with no panel the keys fall through to the note's own table
     // exactly as they did.
-    final suggest = _suggest;
-    if (suggest != null) {
-      if (key == LogicalKeyboardKey.escape &&
-          !shift &&
-          !control &&
-          !alt &&
-          !meta) {
-        _closeSuggest();
-        return KeyEventResult.handled;
-      }
-      // Only rows that answer the link as it stands take a key: while the
-      // next answer is on its way the rows drawn are the last link's, and the
-      // key does what it does with no rows.
-      if (suggest.isCurrent &&
-          suggest.entries.isNotEmpty &&
-          !shift &&
-          !control &&
-          !alt &&
-          !meta) {
-        if (key == LogicalKeyboardKey.arrowUp) {
-          _moveSuggest(-1);
-          return KeyEventResult.handled;
-        }
-        if (key == LogicalKeyboardKey.arrowDown) {
-          _moveSuggest(1);
-          return KeyEventResult.handled;
-        }
-        if (key == LogicalKeyboardKey.tab) {
-          _acceptSuggest();
-          return KeyEventResult.handled;
-        }
-        if (key == LogicalKeyboardKey.enter ||
-            key == LogicalKeyboardKey.numpadEnter) {
-          _acceptSuggest();
-          // The embedders send the line break as text after the key too.
-          _swallowBreak = true;
-          _clearSwallowBreak();
-          return KeyEventResult.handled;
-        }
-      }
-    }
+    final taken = _suggest.handleKey(
+      key,
+      modified: shift || control || alt || meta,
+    );
+    if (taken != null) return taken;
     if (key == LogicalKeyboardKey.escape) {
-      if (_menuAt != null) {
+      if (_menu.isShown) {
         hideContextMenu();
         return KeyEventResult.handled;
       }
-      if (_touchHandles || _touchToolbar) {
-        _hideTouch();
+      if (_touch.isUp) {
+        _touch.hide();
         return KeyEventResult.handled;
       }
       // A selection takes the first press, as it did in the legacy editor;
@@ -4559,166 +4009,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return KeyEventResult.ignored;
   }
 
-  /// The desktop menu at the click, over a barrier that closes it.
-  ///
-  /// The barrier is the menu's own: one click anywhere else takes it down and
-  /// does nothing else, which is how a context menu behaves everywhere — and
-  /// what the legacy editor's menu learnt the hard way (a menu left up
-  /// through every click after it, 2026-09-10).
-  Widget _desktopMenu(BuildContext context) {
-    final at = _menuAt;
-    if (at == null) return const SizedBox.shrink();
-    final overlay = Overlay.of(context).context.findRenderObject();
-    final local = overlay is RenderBox && overlay.hasSize
-        ? overlay.globalToLocal(at)
-        : at;
-    return Stack(
-      children: <Widget>[
-        Positioned.fill(
-          child: GestureDetector(
-            key: const Key('editor-menu-barrier'),
-            behavior: HitTestBehavior.opaque,
-            onTapDown: (_) => hideContextMenu(),
-            onSecondaryTapDown: (_) => hideContextMenu(),
-          ),
-        ),
-        // Full-screen constraints on purpose: the toolbar places itself from
-        // the anchors inside the box it is given.
-        Positioned.fill(
-          child: EditorContextMenu(
-            anchors: TextSelectionToolbarAnchors(primaryAnchor: local),
-            clipboard: _clipboardItems(hideContextMenu),
-            formats: widget.editorMenu != null
-                ? const <FormatMenuEntry>[]
-                : widget.formatMenu?.call() ?? const <FormatMenuEntry>[],
-            extras: _spellingItems(hideContextMenu),
-            table: _tableCommands()?.menu(),
-            structure: widget.editorMenu?.call(),
-            onDismiss: hideContextMenu,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Cut, copy, paste and select all, as they apply to the selection; each
-  /// closes its menu through [dismiss] before it acts.
-  ///
-  /// Cut and copy of a caret are not offered: there is nothing to take.
-  List<ContextMenuButtonItem> _clipboardItems(
-    VoidCallback dismiss, {
-    bool touch = false,
-  }) {
-    final selection = _selection.clampTo(widget.buffer.length);
-    final collapsed = selection.isCollapsed;
-    // The grouped menu keeps what cannot run in its place, greyed out, so
-    // nothing moves under the pointer (#260); the flat one leaves it out.
-    final keep = widget.editorMenu != null;
-    return <ContextMenuButtonItem>[
-      if (!collapsed || keep)
-        ContextMenuButtonItem(
-          type: ContextMenuButtonType.cut,
-          onPressed: collapsed
-              ? null
-              : () {
-                  dismiss();
-                  unawaited(cutSelection());
-                },
-        ),
-      if (!collapsed || keep)
-        ContextMenuButtonItem(
-          type: ContextMenuButtonType.copy,
-          onPressed: collapsed
-              ? null
-              : () {
-                  unawaited(copySelection());
-                  // By touch the handles stay, so the selection can be
-                  // pasted over or extended; the toolbar goes.
-                  if (touch) {
-                    _showTouch(toolbar: false);
-                  } else {
-                    dismiss();
-                  }
-                },
-        ),
-      ContextMenuButtonItem(
-        type: ContextMenuButtonType.paste,
-        onPressed: () {
-          dismiss();
-          unawaited(paste());
-        },
-      ),
-      if (selection.start > 0 || selection.end < widget.buffer.length || keep)
-        ContextMenuButtonItem(
-          type: ContextMenuButtonType.selectAll,
-          onPressed:
-              selection.start == 0 && selection.end == widget.buffer.length
-              ? null
-              : () {
-                  selectAll();
-                  if (touch) {
-                    _showTouch(toolbar: true);
-                  } else {
-                    dismiss();
-                  }
-                },
-        ),
-    ];
-  }
-
-  /// The spelling's entries for the word under the caret or the selection:
-  /// what the checker suggests for it, then Add to dictionary.
-  ///
-  /// Only for a word the note underlines — the ranges come from the same
-  /// call that draws the underline — and only within one line.
-  List<ContextMenuButtonItem> _spellingItems(VoidCallback dismiss) {
-    final spell = widget.spellCheck;
-    if (spell == null) return const <ContextMenuButtonItem>[];
-    final buffer = widget.buffer;
-    final selection = _selection.clampTo(buffer.length);
-    final line = buffer.lineOf(selection.start);
-    if (line != buffer.lineOf(selection.end)) {
-      return const <ContextMenuButtonItem>[];
-    }
-    final lineStart = buffer.offsetOfLine(line);
-    final text = buffer.lineAt(line);
-    final start = selection.start - lineStart;
-    final end = selection.end - lineStart;
-    final items = <ContextMenuButtonItem>[];
-    for (final range in _spellRanges(line, text)) {
-      if (start < range.start || end > range.end) continue;
-      final word = text.substring(range.start, range.end);
-      for (final suggestion in spell.suggestionsFor(word).take(_suggestions)) {
-        items.add(
-          ContextMenuButtonItem(
-            label: suggestion,
-            onPressed: () {
-              dismiss();
-              _replaceRange(
-                lineStart + range.start,
-                lineStart + range.end,
-                suggestion,
-              );
-            },
-          ),
-        );
-      }
-      break;
-    }
-    final add = addToDictionaryItem(
-      spell: spell,
-      text: text,
-      start: start,
-      end: end,
-      onDismiss: dismiss,
-    );
-    if (add != null) items.add(add);
-    return items;
-  }
-
-  /// How many of the checker's suggestions the menu offers.
-  static const int _suggestions = 4;
-
   /// The misspelled ranges of line [index], whose text is [text]: the ranges
   /// the checker finds outside what the tokenizer says is not prose (code,
   /// maths, links, markers).
@@ -4734,41 +4024,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final tokens = _tokensAt(index);
     if (tokens == null) return const <TextRange>[];
     return spell.rangesFor(index, text, skip: spellSkipRanges(tokens));
-  }
-
-  // ------------------------------------------------------- touch selection
-
-  /// The handles and toolbar for the selection as it stands.
-  Widget _touchSelectionOverlay() {
-    final selection = _selection.clampTo(widget.buffer.length);
-    final collapsed = selection.isCollapsed;
-    final start = _caretRectAt(selection.start);
-    final end = _caretRectAt(selection.end);
-    // A line the frame has not laid out yet has no paragraph to hang from:
-    // the overlay is empty, and it asks again next frame (#291).
-    if ((_touchHandles || _touchToolbar) && (start == null || end == null)) {
-      _retryTouchOverlay();
-    }
-    // The toolbar is the context menu's phone face: the same clipboard, the
-    // toolbar's formats in its overflow, the spelling after them.
-    return TouchSelectionOverlay(
-      start: start,
-      end: end,
-      showHandles: _touchHandles && !collapsed,
-      showToolbar: _touchToolbar,
-      buttons: _clipboardItems(_hideTouch, touch: true),
-      formats: _touchToolbar && widget.editorMenu == null
-          ? widget.formatMenu?.call() ?? const <FormatMenuEntry>[]
-          : const <FormatMenuEntry>[],
-      structure: _touchToolbar ? widget.editorMenu?.call() : null,
-      extras: _touchToolbar
-          ? _spellingItems(_hideTouch)
-          : const <ContextMenuButtonItem>[],
-      table: _touchToolbar ? _tableCommands()?.menu() : null,
-      onDismiss: _hideTouch,
-      onHandleDrag: _dragHandle,
-      onHandleDragEnd: () => _showTouch(toolbar: true),
-    );
   }
 
   /// The caret rectangle at [offset] in global coordinates, from the piece of
@@ -4800,334 +4055,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     ).shift(paragraph.localToGlobal(Offset.zero));
   }
 
-  /// Shows the touch selection: the handles for a range, and the toolbar when
-  /// [toolbar] asks for it.
-  void _showTouch({required bool toolbar}) {
-    _touchFrames = 0;
-    setState(() {
-      _touchHandles = !_selection.isCollapsed;
-      _touchToolbar = toolbar;
-    });
-    _touchOverlay.show();
-    // The frame that shows the handles is the one the gesture landed in; the
-    // next one has the note laid out where the gesture left it.
-    _retryTouchOverlay();
-  }
-
-  /// Asks the touch overlay to build again after this frame: the handles and
-  /// the toolbar hang from the selected line's paragraph, and the frame that
-  /// shows them can find it detached — the keyboard rising relayouts the
-  /// pane and a reveal rebuilds the line — so the overlay is drawn once,
-  /// empty, with nothing to build it again when the paragraph is back
-  /// (#291). Bounded, so a selection that is off screen stops asking.
-  void _retryTouchOverlay() {
-    if (_touchScheduled || _touchFrames >= _touchRetryFrames) return;
-    _touchScheduled = true;
-    _touchFrames++;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _touchScheduled = false;
-      if (mounted && (_touchHandles || _touchToolbar)) {
-        _touchTick.value++;
-      }
-    });
-  }
-
-  /// Takes the touch selection's handles and toolbar away.
-  void _hideTouch() {
-    if (!_touchHandles && !_touchToolbar) return;
-    if (mounted) {
-      setState(() {
-        _touchHandles = false;
-        _touchToolbar = false;
-      });
-    }
-    _touchOverlay.hide();
-  }
-
-  /// A finger's tap, when it means something to the touch selection: a tap
-  /// on the caret brings the toolbar up (to paste), a tap anywhere else puts
-  /// it and the handles away. True when the tap was taken.
-  bool _touchTap(Offset global) {
-    final last = _lastClick;
-    final lastAt = _lastClickAt;
-    if (last != null &&
-        lastAt != null &&
-        DateTime.now().difference(last) <= _clickWindow &&
-        (global - lastAt).distance <= kDoubleTapSlop) {
-      // The second tap of a double tap: the word, not the toolbar.
-      _hideTouch();
-      return false;
-    }
-    final offset = offsetAt(global);
-    final selection = _selection;
-    if (offset != null &&
-        selection.isCollapsed &&
-        offset == selection.extent &&
-        !_touchToolbar) {
-      _showTouch(toolbar: true);
-      return true;
-    }
-    _hideTouch();
-    return false;
-  }
-
-  /// The word the long press started on, held while the finger moves.
-  (int, int)? _longPressWord;
-
-  /// A long press at [global]: the word under it, or — while the finger moves
-  /// — the selection from the first word to the word under it now.
-  void _longPressAt(Offset global, {required bool start}) {
-    final offset = offsetAt(global);
-    if (offset == null) return;
-    final buffer = widget.buffer;
-    final line = buffer.lineOf(offset);
-    final lineStart = buffer.offsetOfLine(line);
-    final text = buffer.lineAt(line);
-    final (from, to) = wordRangeAt(text, offset - lineStart);
-    final wordStart = lineStart + math.min<int>(from, text.length);
-    final wordEnd = lineStart + math.min<int>(to, text.length);
-    final word = (wordStart, wordEnd);
-    if (start) {
-      _longPressWord = word;
-      _requestKeyboard();
-      select(SelectionModel(anchor: word.$1, extent: word.$2));
-      _showTouch(toolbar: false);
-      return;
-    }
-    final first = _longPressWord ?? word;
-    final next = word.$2 >= first.$2
-        ? SelectionModel(anchor: first.$1, extent: word.$2)
-        : SelectionModel(anchor: first.$2, extent: word.$1);
-    select(next);
-    _showTouch(toolbar: false);
-  }
-
-  /// A handle dragged to [point]: that end of the selection follows the
-  /// finger, through the same hit test a tap uses.
-  void _dragHandle(SelectionHandle handle, Offset point) {
-    final offset = offsetAt(point);
-    if (offset == null) return;
-    final selection = _selection;
-    final next = handle == SelectionHandle.start
-        ? SelectionModel(anchor: selection.end, extent: offset)
-        : SelectionModel(anchor: selection.start, extent: offset);
-    // An empty selection has no handles to hold: the dragged end stops one
-    // character short of the other.
-    if (next.isCollapsed) return;
-    select(next);
-    setState(() {
-      _touchHandles = true;
-      _touchToolbar = false;
-    });
-  }
-
-  /// The keys the surface answers itself.
-  ///
-  /// The *logical* motions and undo/redo, which are this surface's own
-  /// business.
-  /// What the shell binds — the remappable command table, the toolbar, find —
-  /// is
-  /// dispatched to it by the shell, not captured here, so a user's rebinding
-  /// wins.
-  Widget _shortcuts(Widget child) => CallbackShortcuts(
-    bindings: <ShortcutActivator, VoidCallback>{
-      const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
-          moveCaretVertically(-1),
-      const SingleActivator(LogicalKeyboardKey.arrowDown): () {
-        if (!_downOutOfTable()) moveCaretVertically(1);
-      },
-      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): () =>
-          moveCaretVertically(-1, extend: true),
-      const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): () =>
-          moveCaretVertically(1, extend: true),
-      const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
-          moveCaretBy(CaretMotion.characterLeft),
-      const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
-          moveCaretBy(CaretMotion.characterRight),
-      const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () =>
-          moveCaretBy(CaretMotion.characterLeft, extend: true),
-      const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () =>
-          moveCaretBy(CaretMotion.characterRight, extend: true),
-      const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): () =>
-          moveCaretBy(CaretMotion.wordLeft),
-      const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): () =>
-          moveCaretBy(CaretMotion.wordRight),
-      const SingleActivator(
-        LogicalKeyboardKey.arrowLeft,
-        control: true,
-        shift: true,
-      ): () =>
-          moveCaretBy(CaretMotion.wordLeft, extend: true),
-      const SingleActivator(
-        LogicalKeyboardKey.arrowRight,
-        control: true,
-        shift: true,
-      ): () =>
-          moveCaretBy(CaretMotion.wordRight, extend: true),
-      const SingleActivator(LogicalKeyboardKey.home): () =>
-          moveCaretBy(CaretMotion.lineTextStart),
-      const SingleActivator(LogicalKeyboardKey.end): () =>
-          moveCaretBy(CaretMotion.lineEnd),
-      const SingleActivator(LogicalKeyboardKey.home, shift: true): () =>
-          moveCaretBy(CaretMotion.lineTextStart, extend: true),
-      const SingleActivator(LogicalKeyboardKey.end, shift: true): () =>
-          moveCaretBy(CaretMotion.lineEnd, extend: true),
-      const SingleActivator(LogicalKeyboardKey.home, control: true): () =>
-          moveCaretBy(CaretMotion.documentStart),
-      const SingleActivator(LogicalKeyboardKey.end, control: true): () =>
-          moveCaretBy(CaretMotion.documentEnd),
-      const SingleActivator(
-        LogicalKeyboardKey.home,
-        control: true,
-        shift: true,
-      ): () =>
-          moveCaretBy(CaretMotion.documentStart, extend: true),
-      const SingleActivator(
-        LogicalKeyboardKey.end,
-        control: true,
-        shift: true,
-      ): () =>
-          moveCaretBy(CaretMotion.documentEnd, extend: true),
-      const SingleActivator(LogicalKeyboardKey.pageUp): () => _page(-1),
-      const SingleActivator(LogicalKeyboardKey.pageDown): () => _page(1),
-      const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): () =>
-          _page(-1, extend: true),
-      const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): () =>
-          _page(1, extend: true),
-      // Tab is the note's: left to the app it moves the focus away, and the
-      // keyboard with it.
-      // In a table in `live` it goes from cell to cell instead (#261).
-      const SingleActivator(LogicalKeyboardKey.tab): () => _tab(forward: true),
-      const SingleActivator(LogicalKeyboardKey.tab, shift: true): () =>
-          _tab(forward: false),
-      const SingleActivator(LogicalKeyboardKey.keyC, control: true):
-          copySelection,
-      const SingleActivator(LogicalKeyboardKey.keyC, meta: true): copySelection,
-      const SingleActivator(LogicalKeyboardKey.keyX, control: true):
-          cutSelection,
-      const SingleActivator(LogicalKeyboardKey.keyX, meta: true): cutSelection,
-      const SingleActivator(LogicalKeyboardKey.keyV, control: true): paste,
-      const SingleActivator(LogicalKeyboardKey.keyV, meta: true): paste,
-      const SingleActivator(LogicalKeyboardKey.keyA, control: true): selectAll,
-      const SingleActivator(LogicalKeyboardKey.keyA, meta: true): selectAll,
-      // Backspace and Delete *are* bound: no embedder edits the text for them
-      // (Linux says so in its source, and Android's hardware key reaches the
-      // framework first), so a surface that leaves them to the platform is one
-      // that cannot delete. Handling the key stops it here, so it is never
-      // applied twice.
-      const SingleActivator(LogicalKeyboardKey.backspace): deleteBackward,
-      const SingleActivator(LogicalKeyboardKey.backspace, shift: true):
-          deleteBackward,
-      const SingleActivator(LogicalKeyboardKey.backspace, control: true): () =>
-          deleteBackward(word: true),
-      const SingleActivator(LogicalKeyboardKey.backspace, alt: true): () =>
-          deleteBackward(word: true),
-      const SingleActivator(LogicalKeyboardKey.delete): deleteForward,
-      const SingleActivator(LogicalKeyboardKey.delete, control: true): () =>
-          deleteForward(word: true),
-      const SingleActivator(LogicalKeyboardKey.delete, alt: true): () =>
-          deleteForward(word: true),
-      // Enter is deliberately *not* bound here. The platform already sends the
-      // line break as text — an IME commits it, and the Linux embedder inserts
-      // it and then calls the newline action, which inserts nothing (see
-      // `SourceInput.performAction`) — so the delta is the only source.
-      const SingleActivator(LogicalKeyboardKey.keyZ, control: true): undo,
-      const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): undo,
-      const SingleActivator(
-        LogicalKeyboardKey.keyZ,
-        control: true,
-        shift: true,
-      ): redo,
-      const SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true):
-          redo,
-      const SingleActivator(LogicalKeyboardKey.keyY, control: true): redo,
-    },
-    child: child,
+  /// What the surface's own keys do ([sourceShortcuts]).
+  late final SourceKeyActions _keyActions = SourceKeyActions(
+    moveVertically: moveCaretVertically,
+    moveBy: moveCaretBy,
+    downOutOfTable: _downOutOfTable,
+    page: _page,
+    tab: _tab,
+    copy: copySelection,
+    cut: cutSelection,
+    paste: paste,
+    selectAll: selectAll,
+    deleteBackward: deleteBackward,
+    deleteForward: deleteForward,
+    undo: undo,
+    redo: redo,
   );
-}
 
-/// The link the caret sits inside, while the suggester panel is open.
-///
-/// [start] is the offset after the opening `[[`; [target] is the text before a
-/// `#` and [heading] the text after it; [hashAt] is the offset after the `#`,
-/// where a heading (or a book form) is written. [sameText] compares the two
-/// halves alone, so a caret that moves inside an unchanged link does not make
-/// the panel ask the library again.
-final class _LinkQuery {
-  const new({
-    required this.start,
-    required this.caret,
-    required this.end,
-    required this.closeAt,
-    required this.target,
-    required this.heading,
-    required this.hasHash,
-    this.embed = false,
-  });
-
-  final int start;
-  final int caret;
-
-  /// Where the part being completed ends: the caret in a link still open,
-  /// the `#`, `|` or `]]` that ends it in a link closed after the caret.
-  final int end;
-
-  /// Where the link's closing `]]` stands, or -1 while it has none.
-  final int closeAt;
-
-  final String target;
-  final String heading;
-  final bool hasHash;
-
-  /// Whether a `!` stands before the `[[`: an embed (#705).
-  final bool embed;
-
-  /// The offset just past the `#`, where a heading or a book form is written.
-  int get hashAt => start + target.length + 1;
-
-  /// What the panel matches and bolds: the heading after a `#`, the target
-  /// before it.
-  String get matchText => hasHash ? heading : target;
-
-  /// Whether [other] names the same link text, however the caret moved.
-  bool sameText(_LinkQuery other) =>
-      target == other.target &&
-      heading == other.heading &&
-      hasHash == other.hasHash &&
-      embed == other.embed;
-}
-
-/// The suggester panel's own state: what is listed, and which row is picked.
-final class _SuggestPanel {
-  new({
-    required this.query,
-    required this.kind,
-    required this.entries,
-    required this.named,
-  });
-
-  /// The link the panel stands in.
-  _LinkQuery query;
-
-  /// What the rows are.
-  WikilinkPanelKind kind;
-
-  /// The rows, best match first.
-  List<SuggestEntry> entries;
-
-  /// The link text [entries] answer, or null for no query at all. It trails
-  /// [query] while the next answer is on its way: the rows of the link just
-  /// left stay drawn, but they are not this link's to complete.
-  _LinkQuery? answers;
-
-  /// Whether [entries] answer the link as it stands, so a key may take one.
-  bool get isCurrent => answers?.sameText(query) ?? false;
-
-  /// The note (or book) named before `#`; empty for the note being edited.
-  String named;
-
-  /// Which row `Enter` would take.
-  int selected = 0;
+  /// [child] with the keys the surface answers itself ([sourceShortcuts]).
+  Widget _shortcuts(Widget child) =>
+      CallbackShortcuts(bindings: sourceShortcuts(_keyActions), child: child);
 }
 
 /// One source line: its gutter number, its styled runs, and its caret.
@@ -5656,10 +4603,14 @@ final class _Line extends StatelessWidget {
     valueListenable: spot,
     builder: (context, at, child) => CustomPaint(
       painter: at.line == index && rowColor != null
-          ? _RowPainter(rect: caret, color: rowColor!, pieceShift: pieceShift)
+          ? CaretRowPainter(
+              rect: caret,
+              color: rowColor!,
+              pieceShift: pieceShift,
+            )
           : null,
       foregroundPainter: at.line == index
-          ? _CaretPainter(
+          ? CaretPainter(
               rect: caret,
               on: caretOn,
               shift: Offset(_indent(context, revealed: true), 0),
@@ -6383,92 +5334,6 @@ typedef _Ink = ({
 /// table row laid out in fitted columns.
 typedef _Piece = ({GlobalKey key, int start, int end, double x, double y});
 
-/// The note as a text field to the platform's accessibility: what
-/// `RenderEditable` tells it about a `TextField`, which the `Semantics`
-/// widget has no way to say — the selection inside the value above all.
-final class _NoteSemantics extends SingleChildRenderObjectWidget {
-  const new({
-    required this.value,
-    required this.selection,
-    required this.focused,
-    required this.onTap,
-    required this.onSetSelection,
-    required this.onMove,
-    required this.onCopy,
-    required this.onCut,
-    required this.onPaste,
-    super.child,
-  });
-
-  final String value;
-  final TextSelection selection;
-  final bool focused;
-  final VoidCallback onTap;
-  final ValueChanged<TextSelection> onSetSelection;
-  final void Function(CaretMotion motion, {required bool extend}) onMove;
-  final VoidCallback? onCopy;
-  final VoidCallback? onCut;
-  final VoidCallback onPaste;
-
-  @override
-  _RenderNoteSemantics createRenderObject(BuildContext context) =>
-      _RenderNoteSemantics(this);
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    _RenderNoteSemantics renderObject,
-  ) {
-    renderObject.semantics = this;
-  }
-}
-
-final class _RenderNoteSemantics extends RenderProxyBox {
-  new(this._semantics);
-
-  _NoteSemantics _semantics;
-
-  // A setter the widget pairs with, as every render object's are.
-  // ignore: avoid_setters_without_getters
-  set semantics(_NoteSemantics value) {
-    _semantics = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    final note = _semantics;
-    MoveCursorHandler move(CaretMotion motion) =>
-        (extend) => note.onMove(motion, extend: extend);
-    // Named first: a closure written in the cascade would swallow the rest of
-    // it into its body.
-    final characterRight = move(CaretMotion.characterRight);
-    final characterLeft = move(CaretMotion.characterLeft);
-    final wordRight = move(CaretMotion.wordRight);
-    final wordLeft = move(CaretMotion.wordLeft);
-    config
-      ..isSemanticBoundary = true
-      ..isTextField = true
-      ..isMultiline = true
-      ..isFocused = note.focused
-      ..isEnabled = true
-      ..value = note.value
-      // The note is written left to right, as every line of it is laid out.
-      ..textDirection = TextDirection.ltr
-      ..textSelection = note.selection
-      ..onTap = note.onTap
-      ..onSetSelection = note.onSetSelection
-      ..onPaste = note.onPaste
-      ..onMoveCursorForwardByCharacter = characterRight
-      ..onMoveCursorBackwardByCharacter = characterLeft
-      ..onMoveCursorForwardByWord = wordRight
-      ..onMoveCursorBackwardByWord = wordLeft;
-    if (note.onCopy != null) config.onCopy = note.onCopy;
-    if (note.onCut != null) config.onCut = note.onCut;
-  }
-}
-
 /// What a line's gutter shows for folding.
 enum _FoldMark {
   /// Nothing: not a heading, or nothing under it to fold.
@@ -6483,42 +5348,6 @@ enum _FoldMark {
 
 /// The style a hidden marker is drawn with ([liveHiddenMarker]).
 const TextStyle _hiddenMarker = liveHiddenMarker;
-
-/// Where the caret is, for the lines that draw it and the reveal that follows
-/// it: its line, and the run of non-whitespace it sits in on that line.
-///
-/// One value rather than a line and a word kept apart, because the property
-/// that matters is *equality*: a caret that moves inside a run produces an
-/// equal [CaretSpot], so no line rebuilds, and one that crosses a run boundary
-/// produces a different one, so exactly the two lines involved do
-/// (`docs/records/unified-surface.md` §8.6.2's budget).
-@immutable
-final class CaretSpot {
-  /// The caret's line and its run on it.
-  const new(this.line, this.runStart, this.runEnd);
-
-  /// The line the caret is on, or -1 for a caret the note cannot hold.
-  final int line;
-
-  /// Where the run of non-whitespace the caret is in starts.
-  final int runStart;
-
-  /// Where that run ends, exclusive.
-  final int runEnd;
-
-  @override
-  bool operator ==(Object other) =>
-      other is CaretSpot &&
-      other.line == line &&
-      other.runStart == runStart &&
-      other.runEnd == runEnd;
-
-  @override
-  int get hashCode => Object.hash(line, runStart, runEnd);
-
-  @override
-  String toString() => 'CaretSpot($line, $runStart..$runEnd)';
-}
 
 /// Whether [kind] is a *structural* marker: a mark that is the shape of the
 /// line rather than of a word.
@@ -6539,180 +5368,3 @@ bool _isMarker(TokenKind kind) => switch (kind) {
   TokenKind.taskBox => true,
   _ => false,
 };
-
-/// Lights the caret's row across the line, behind the text: typewriter mode's
-/// row being written. The row is the caret's own — its top and its height —
-/// so a wrapped paragraph lights the row the caret is on, not the paragraph.
-///
-/// A table row laid out in fitted columns is drawn a piece at a time, and the
-/// caret is measured inside the piece it is in: the light takes the piece's
-/// own shift, the way the caret does (`_CaretPainter`), so it stands on the
-/// visual line being written rather than a piece's height too high (#494).
-final class _RowPainter extends CustomPainter {
-  new({required this.rect, required this.color, this.pieceShift})
-    : super(repaint: Listenable.merge(<Listenable?>[rect, pieceShift]));
-
-  final ValueListenable<Rect?> rect;
-  final Color color;
-
-  /// Where the *piece* the caret is in sits in the same box, for a table row
-  /// laid out in fitted columns: its `y` is what the light has to move by.
-  final ValueListenable<Offset>? pieceShift;
-
-  /// The rectangle the row is lit across, in the box this paints over: the
-  /// caret's own row, shifted with the piece the caret is in — the same
-  /// answer `_CaretPainter` draws from.
-  Rect? drawnRect(Size size) {
-    final value = rect.value;
-    if (value == null) return null;
-    final dy = pieceShift?.value.dy ?? 0;
-    return Rect.fromLTRB(0, value.top + dy, size.width, value.bottom + dy);
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final drawn = drawnRect(size);
-    if (drawn == null) return;
-    canvas.drawRect(drawn, Paint()..color = color);
-  }
-
-  @override
-  bool shouldRepaint(_RowPainter oldDelegate) =>
-      oldDelegate.rect != rect ||
-      oldDelegate.color != color ||
-      oldDelegate.pieceShift != pieceShift;
-}
-
-/// Draws the caret: a thin vertical bar at the rectangle the line's own layout
-/// answered with.
-///
-/// It reads the rectangle and the blink at *paint* time and repaints when
-/// either changes, so neither rebuilds the line it is drawn over.
-final class _CaretPainter extends CustomPainter {
-  new({
-    required this.rect,
-    required this.on,
-    this.shift = Offset.zero,
-    this.pieceShift,
-  }) : super(repaint: Listenable.merge(<Listenable?>[rect, on, pieceShift]));
-
-  /// The caret, in its line's *paragraph's* coordinates.
-  final ValueListenable<Rect?> rect;
-  final ValueListenable<bool> on;
-
-  /// Where the paragraph sits in the box this paints over: `live` indents a
-  /// list item or a quote, and the caret drawn without it stood that far to
-  /// the left of the character it was at.
-  final Offset shift;
-
-  /// Where the *piece* the caret is in sits in the same box, for a table row
-  /// laid out in fitted columns: the caret is measured in the piece's own
-  /// coordinates, so it is drawn from theirs.
-  final ValueListenable<Offset>? pieceShift;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final value = rect.value;
-    if (!on.value || value == null) return;
-    canvas.drawRect(
-      value.shift(shift + (pieceShift?.value ?? Offset.zero)),
-      Paint()..color = const Color(0xFF7AA2F7),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_CaretPainter oldDelegate) =>
-      oldDelegate.rect != rect ||
-      oldDelegate.on != on ||
-      oldDelegate.shift != shift ||
-      oldDelegate.pieceShift != pieceShift;
-}
-
-/// What a frame this view draws costs it (#316).
-///
-/// Microseconds, accumulated while that frame is built, laid out and painted,
-/// and reported once by `MarkdownSourceViewState._reportFrame`. Together with
-/// the app's own `[frames] slow frame` line (main.dart) it splits a frame: what
-/// this view spent, and what the shell around it spent.
-final class _FrameCost {
-  /// The synchronous edit path: the delta applied to the buffer, the styler
-  /// told, the rows spliced, the caret scheduled. Zero on a frame no keystroke
-  /// arrived in.
-  int edit = 0;
-
-  /// The view's own `build`.
-  int build = 0;
-
-  /// Laying the view's lines out.
-  int layout = 0;
-
-  /// Recording their paint.
-  int paint = 0;
-
-  /// The four parts together.
-  int get total => edit + build + layout + paint;
-
-  /// Back to zero for the next frame.
-  void reset() {
-    edit = 0;
-    build = 0;
-    layout = 0;
-    paint = 0;
-  }
-}
-
-/// Times the layout and paint of the subtree under it into the cost it carries,
-/// and says so when a frame's own share of the work grows past the bar.
-final class _TimedSubtree extends SingleChildRenderObjectWidget {
-  const new({required this.cost, required this.onSlow, required super.child});
-
-  final _FrameCost cost;
-
-  /// Called during the frame when [cost] passes the view's own bar, so a frame
-  /// the widget did not build in — a scroll, a resize — still gets its report.
-  final VoidCallback onSlow;
-
-  @override
-  _RenderTimedSubtree createRenderObject(BuildContext context) =>
-      _RenderTimedSubtree(cost, onSlow);
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    _RenderTimedSubtree renderObject,
-  ) {
-    renderObject
-      ..cost = cost
-      ..onSlow = onSlow;
-  }
-}
-
-final class _RenderTimedSubtree extends RenderProxyBox {
-  new(this.cost, this.onSlow);
-
-  _FrameCost cost;
-  VoidCallback onSlow;
-
-  @override
-  void performLayout() {
-    final clock = Stopwatch()..start();
-    super.performLayout();
-    cost.layout += clock.elapsedMicroseconds;
-    _noteIfSlow();
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final clock = Stopwatch()..start();
-    super.paint(context, offset);
-    cost.paint += clock.elapsedMicroseconds;
-    _noteIfSlow();
-  }
-
-  void _noteIfSlow() {
-    if (cost.total >= MarkdownSourceViewState._frameBarMicros) onSlow();
-  }
-}
-
-/// Microseconds as the logs write milliseconds.
-String _editMs(int micros) => '${(micros / 1000).toStringAsFixed(1)} ms';

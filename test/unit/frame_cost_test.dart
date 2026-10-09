@@ -69,4 +69,21 @@ void main() {
     // Its own name, not the unnamed app-wide line it used to be left to.
     expect(line, isNot(contains('slow frame')), reason: line);
   });
+
+  test("a view with no label is named by its logger's name alone", () {
+    // The source view's line has always been `[edit] frame: …`: the logger
+    // names it, and a label would say it twice.
+    AppLog.clear();
+    addTearDown(AppLog.clear);
+
+    FrameCost(
+        label: '',
+        log: const AppLogger(name: 'edit'),
+      )
+      ..build = FrameCost.frameBarMicros
+      ..report();
+
+    final line = AppLog.lines().single;
+    expect(line, contains('[edit] frame: edit 0.0 ms, build 8.0 ms'));
+  });
 }

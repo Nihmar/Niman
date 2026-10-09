@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:niman/src/markdown/render/caret_painters.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -84,7 +85,7 @@ double _caretShare(WidgetTester tester, MarkdownSourceViewState state) {
 /// Whether a line paints the typewriter's row light.
 bool _rowLit(WidgetTester tester) => tester
     .widgetList<CustomPaint>(find.byType(CustomPaint))
-    .any((paint) => paint.painter?.runtimeType.toString() == '_RowPainter');
+    .any((paint) => paint.painter is CaretRowPainter);
 
 void main() {
   /// The same test in `source` and in `live` (#246).
@@ -240,14 +241,12 @@ void main() {
     expect(caret, isNotNull);
     final paints = tester
         .widgetList<CustomPaint>(find.byType(CustomPaint))
-        .where(
-          (paint) => paint.painter?.runtimeType.toString() == '_RowPainter',
-        )
+        .where((paint) => paint.painter is CaretRowPainter)
         .toList();
     expect(paints, hasLength(1), reason: "the caret's row is lit");
     final paint = paints.single;
     // The rectangle the highlight really draws, in the box it paints over.
-    final drawn = (paint.painter as dynamic).drawnRect(paint.size) as Rect?;
+    final drawn = (paint.painter! as CaretRowPainter).drawnRect(paint.size);
     expect(drawn, isNotNull);
     // The caret is on a piece below the row's first, so the shift under test
     // is not zero: without it the light stands a piece's height too high.

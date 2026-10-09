@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -67,9 +68,7 @@ Future<MarkdownSourceViewState> _pump(
 }
 
 SemanticsNode _field(WidgetTester tester) => tester.getSemantics(
-  find.byWidgetPredicate(
-    (widget) => widget.runtimeType.toString() == '_NoteSemantics',
-  ),
+  find.byWidgetPredicate((widget) => widget is NoteSemantics),
 );
 
 void main() {

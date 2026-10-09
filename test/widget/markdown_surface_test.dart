@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:katex/katex.dart' show boxSizePx;
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/render/caret_painters.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_inline_math.dart';
@@ -410,11 +411,7 @@ void main() {
         await tester.pump();
         final box = tester
             .renderObjectList<RenderCustomPaint>(find.byType(CustomPaint))
-            .singleWhere(
-              (paint) =>
-                  paint.foregroundPainter.runtimeType.toString() ==
-                  '_CaretPainter',
-            );
+            .singleWhere((paint) => paint.foregroundPainter is CaretPainter);
         final at = state.caretRect!;
         final expected = Rect.fromPoints(
           box.globalToLocal(at.topLeft),
