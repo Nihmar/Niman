@@ -40,6 +40,7 @@ import 'package:niman/src/export/pdf_webview.dart';
 import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/home/home_action.dart';
+import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -4213,6 +4214,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       recentCommands: _recentCommands,
       recentNotes: _workspace.recentNotes,
       settings: _paletteSettings(),
+      homeActions: _homeActionsOffered,
       onTogglePin: (command) =>
           unawaited(PinnedCommands.toggle(widget.controller, command)),
       searchNotes: (query) async => ops == null
@@ -4227,7 +4229,24 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _openNoteFromLink(path, null);
       case PaletteSettingChoice(:final setting):
         _openSettingsAt(setting.target);
+      case PaletteActionChoice(:final action):
+        unawaited(_homeActions.run(context, action));
     }
+  }
+
+  /// Every action of the Home on show (#535), for the palette: the
+  /// buttons of its shown actions tiles, the ones a later build wrote
+  /// left out. Hidden or not, the Home's tab is not asked for.
+  Future<List<HomeAction>> _homeActionsOffered() async {
+    final ops = widget.controller.ops;
+    if (ops == null) return const [];
+    final home = await ops.home;
+    final layout = home.device ?? home.library ?? HomeLayout.defaults;
+    return [
+      for (final tile in layout.column)
+        for (final action in tile.actions)
+          if (action.kind != null) action,
+    ];
   }
 
   /// The palette's commands: every one that can run now, but the
