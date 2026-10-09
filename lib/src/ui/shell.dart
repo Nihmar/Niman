@@ -85,7 +85,6 @@ import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
-import 'package:niman/src/ui/library_window.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
@@ -107,7 +106,6 @@ import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_tab.dart';
-import 'package:niman/src/ui/settings_window.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
@@ -127,9 +125,9 @@ import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
+import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
@@ -1852,12 +1850,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // A library closed or switched from a floating window: the window
     // goes with the shell it was over (#202, #203). Off the teardown, which
     // must not change the navigator it runs under.
-    final window = _floatingWindow;
-    if (window != null) {
-      scheduleMicrotask(() {
-        if (window.isActive) window.navigator?.removeRoute(window);
-      });
-    }
+    _windows.close();
     _markOpenNote(null, null);
     _searchRequests.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
@@ -2741,7 +2734,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onDestinationSelected: _onDestinationSelected,
       hiddenTab: !_shown(_tab),
       onLeaveHiddenTab: _leaveHiddenTab,
-      onSwitchLibrary: _switchLibrary,
+      onSwitchLibrary: () => _windows.switchLibrary(context),
       // The phone's way into the palette (#206); the desktop has a key.
       onOpenPalette: narrow ? () => unawaited(_palette.open(context)) : null,
       buildWideSlots: () => _wideSlots(controller),
@@ -3255,7 +3248,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // A wide window opens Settings over the note instead of in its place
     // (#202); the phone keeps it as a tab.
     if (tab == ShellTab.settings && _wide) {
-      unawaited(_openSettingsWindow());
+      unawaited(_windows.openSettings(context));
       return;
     }
     // Tapping the tab a note was opened from closes the note: the tab is
@@ -3265,61 +3258,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       return;
     }
     _selectShellTab(tab);
-  }
-
-  /// The floating window up over the shell (#202, #203), if any: its key
-  /// does not open a second, and a library that closes from inside it
-  /// takes it down.
-  Route<void>? _floatingWindow;
-
-  /// Pushes [route] as the shell's floating window, unless one is up.
-  Future<void> _showFloatingWindow(Route<void> route) async {
-    if (_floatingWindow != null) return;
-    _floatingWindow = route;
-    try {
-      await Navigator.of(context).push(route);
-    } finally {
-      if (identical(_floatingWindow, route)) _floatingWindow = null;
-    }
-  }
-
-  /// Settings as a floating window (#202).
-  Future<void> _openSettingsWindow() => _showFloatingWindow(
-    settingsWindowRoute(
-      context,
-      controller: widget.controller,
-      spellCheck: widget.spellCheck,
-      transcription: widget.transcription,
-      ocr: widget.ocr,
-    ),
-  );
-
-  /// The known libraries: a floating window on a wide window (#203), the
-  /// full screen on a phone.
-  void _switchLibrary() {
-    if (_wide) {
-      unawaited(
-        _showFloatingWindow(
-          libraryWindowRoute(
-            context,
-            controller: widget.controller,
-            unsaved: widget.unsavedTracker,
-          ),
-        ),
-      );
-      return;
-    }
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => SwitchLibraryScreen(
-          controller: widget.controller,
-          // The phone screen saves the open notes before it switches
-          // (#351), as the library window above does.
-          unsaved: widget.unsavedTracker,
-          onSwitched: () => Navigator.of(context).pop(),
-        ),
-      ),
-    );
   }
 
   /// The title bar's text: the app, and the open note when there is one.
@@ -3525,7 +3463,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // A picker for any file is a desktop thing: Android hands over a
       // copy, which could not be saved back (#77).
       AppCommand.openFile: () => unawaited(_openFile()),
-      AppCommand.switchLibrary: _switchLibrary,
+      AppCommand.switchLibrary: () => _windows.switchLibrary(context),
     };
   }
 
@@ -3738,6 +3676,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
   });
 
+  /// The floating windows over the shell: Settings, the libraries.
+  late final ShellWindows _windows = ShellWindows(
+    controller: widget.controller,
+    spellCheck: widget.spellCheck,
+    transcription: widget.transcription,
+    ocr: widget.ocr,
+    unsaved: widget.unsavedTracker,
+    wide: () => _wide,
+  );
+
   /// The command palette (#155).
   late final ShellPalette _palette = ShellPalette(
     controller: widget.controller,
@@ -3757,18 +3705,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// wide one, the Settings tab on a phone.
   void _openSettingsAt(SettingsTarget target) {
     if (_wide) {
-      unawaited(
-        _showFloatingWindow(
-          settingsWindowRoute(
-            context,
-            controller: widget.controller,
-            spellCheck: widget.spellCheck,
-            transcription: widget.transcription,
-            ocr: widget.ocr,
-            target: target,
-          ),
-        ),
-      );
+      unawaited(_windows.openSettings(context, target: target));
       return;
     }
     setState(() => _settingsTarget = target);
