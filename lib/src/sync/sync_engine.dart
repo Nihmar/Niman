@@ -20,6 +20,7 @@ import 'package:niman/src/sync/sync_failure.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_run_context.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
+import 'package:niman/src/sync/sync_sides.dart';
 import 'package:niman/src/sync/sync_step_failure.dart';
 import 'package:niman/src/sync/sync_step_outcome.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -98,6 +99,9 @@ final class SyncEngine {
 
   final WebDavClient Function(SyncDestination, String) _clientFactory;
   final DateTime Function() _now;
+
+  /// Reads, checks and records both sides of a path.
+  late final _sides = SyncSides(root: root, ops: ops, store: store, now: _now);
 
   static const _log = AppLogger(name: 'sync');
 
@@ -702,12 +706,12 @@ final class SyncEngine {
     shown: shown,
     (c, remote) async {
       await ops.syncMerge(path, text);
-      final local = await _stat(path);
+      final local = await _sides.stat(path);
       if (local == null) {
         throw SyncFailure(SyncAbort.failed, '$path is gone here');
       }
-      final sha = (await _hashLocal(root, [path]))[path]!;
-      await _uploadAndRecord(
+      final sha = (await _sides.hashLocal([path]))[path]!;
+      await _sides.uploadAndRecord(
         c,
         path,
         sha: sha,
@@ -737,12 +741,12 @@ final class SyncEngine {
     shown: shown,
     (c, remote) async {
       if (keepLocal) {
-        final local = await _stat(path);
+        final local = await _sides.stat(path);
         if (local == null) {
           throw SyncFailure(SyncAbort.failed, '$path is gone here');
         }
-        final sha = (await _hashLocal(root, [path]))[path]!;
-        await _uploadAndRecord(
+        final sha = (await _sides.hashLocal([path]))[path]!;
+        await _sides.uploadAndRecord(
           c,
           path,
           sha: sha,
@@ -758,24 +762,24 @@ final class SyncEngine {
         if (remote == null) {
           throw SyncFailure(SyncAbort.failed, '$path is gone on the server');
         }
-        final fetched = await _fetch(c, path);
+        final fetched = await _sides.fetch(c, path);
         if (shown != null && fetched.download.sha256 != shown.remoteSha256) {
           // Rewritten between the check and this read.
           await fetched.temp.delete();
           throw SyncFailure.stale('$path changed on the server');
         }
         await ops.syncReplace(path, fetched.temp.path);
-        final local = await _stat(path);
+        final local = await _sides.stat(path);
         if (local == null) {
           throw SyncFailure(SyncAbort.failed, '$path not on disk');
         }
         await store.putItems([
-          await _row(
+          await _sides.row(
             c,
             path,
             sha: fetched.download.sha256,
             local: local,
-            remote: _remoteFrom(c, path, fetched.download),
+            remote: _sides.remoteFrom(c, path, fetched.download),
           ),
         ]);
       }
@@ -836,7 +840,7 @@ final class SyncEngine {
     ConflictTexts shown,
     WebDavResource? remote,
   ) async {
-    final localSha = (await _hashLocal(root, [path]))[path];
+    final localSha = (await _sides.hashLocal([path]))[path];
     if (localSha != shown.localSha256) {
       _log.info('resolve $path: refused, changed here since it was shown');
       throw SyncFailure.stale('$path changed on this device');
@@ -847,7 +851,7 @@ final class SyncEngine {
     } else if (shown.remoteEtag != null && remote.etag != null) {
       remoteSha = remote.etag == shown.remoteEtag ? shown.remoteSha256 : null;
     } else {
-      remoteSha = (await client.download(path, _DiscardSink())).sha256;
+      remoteSha = await _sides.remoteSha(client, path);
     }
     if (remoteSha != shown.remoteSha256) {
       _log.info('resolve $path: refused, changed on the server since shown');
@@ -914,7 +918,7 @@ final class SyncEngine {
       if (localDir) {
         local.addAll(await _scanLocal(root, under: path));
       } else {
-        final state = await _stat(path);
+        final state = await _sides.stat(path);
         if (state != null && isSyncablePath(path)) local[path] = state;
       }
       final folderLike =
@@ -1003,7 +1007,7 @@ final class SyncEngine {
         if (d.kind == SyncActionKind.hashLocal) d.path,
     ];
     if (localPaths.isNotEmpty) {
-      localSha.addAll(await _hashLocal(root, localPaths));
+      localSha.addAll(await _sides.hashLocal(localPaths));
     }
     final remotePaths = [
       for (final d in plan.decisions)
@@ -1011,8 +1015,7 @@ final class SyncEngine {
     ];
     for (final path in remotePaths) {
       try {
-        final download = await client.download(path, _DiscardSink());
-        remoteSha[path] = download.sha256;
+        remoteSha[path] = await _sides.remoteSha(client, path);
       } on WebDavNotFound {
         // Gone since the listing: it stays unhashed and fails as a path,
         // not as a missing destination.
@@ -1024,11 +1027,6 @@ final class SyncEngine {
       '(${clock.elapsedMilliseconds} ms)',
     );
   }
-
-  static Future<Map<String, String>> _hashLocal(
-    String root,
-    List<String> paths,
-  ) => Isolate.run(() => hashLocalFiles(root, paths));
 
   // --- applying -------------------------------------------------------
 
@@ -1063,31 +1061,6 @@ final class SyncEngine {
     }
   }
 
-  /// The file at [path] still is what the scan saw (both absent counts).
-  Future<LocalFileState?> _localStillAsPlanned(
-    SyncRunContext c,
-    String path,
-  ) async {
-    final now = await _stat(path);
-    final planned = c.local[path];
-    final same = now == null
-        ? planned == null
-        : planned != null &&
-              planned.size == now.size &&
-              planned.mtimeMs == now.mtimeMs;
-    if (!same) throw const _ChangedDuringSync();
-    return now;
-  }
-
-  Future<LocalFileState?> _stat(String path) async {
-    final stat = await FileStat.stat(p.join(root, path));
-    if (stat.type != FileSystemEntityType.file) return null;
-    return LocalFileState(
-      size: stat.size,
-      mtimeMs: stat.modified.millisecondsSinceEpoch,
-    );
-  }
-
   /// The remote still is what the scan saw, checked with a PROPFIND when
   /// the write has no precondition to guard it.
   Future<void> _remoteStillAsPlanned(
@@ -1096,92 +1069,11 @@ final class SyncEngine {
     String? expectedSha,
   }) async {
     if (!d.checkRemoteFirst) return;
-    await _remoteUnchangedSince(
+    await _sides.remoteUnchangedSince(
       c,
       d.fromPath ?? d.path,
       expectedSha: expectedSha,
     );
-  }
-
-  /// The remote at [path] still holds what the plan saw it hold.
-  ///
-  /// A listing is only as good as its evidence: without file ETags a
-  /// same-second rewrite of the same size leaves ETag (null), size and the
-  /// one-second mtime all equal, so the listing alone reads as unchanged
-  /// and the write would destroy the rewrite. When the listing cannot rule
-  /// that out — the test [SyncItem.remoteUnverified] records, applied to
-  /// the mtime the server shows now — the content decides: the remote is
-  /// hashed and compared with [expectedSha] — the content the write is
-  /// based on, the agreed one for an upload or a delete, the fetched copy
-  /// for a merge — and a mismatch skips the path (#350).
-  ///
-  /// Not the row's own flag: the row describes the remote as last agreed,
-  /// which for a merge is the version being replaced, not the one the
-  /// merge was built from — a row recorded minutes ago reads as verified
-  /// while the listing is in the server's current second.
-  Future<void> _remoteUnchangedSince(
-    SyncRunContext c,
-    String path, {
-    String? expectedSha,
-  }) async {
-    final now = await c.client.stat(path);
-    final planned = c.remote[path];
-    final same = now == null
-        ? planned == null
-        : planned != null &&
-              now.etag == planned.etag &&
-              now.size == planned.size &&
-              now.modified == planned.modified;
-    if (!same) throw const _ChangedDuringSync();
-    if (now == null) return;
-    if (!_unverified(c, now.modified)) return;
-    final expected = expectedSha ?? c.rows[path]?.localSha256;
-    if (expected == null) return;
-    final download = await c.client.download(path, _DiscardSink());
-    if (download.sha256 != expected) throw const _ChangedDuringSync();
-  }
-
-  /// Guards a merge upload that carries no If-Match (#350): the merge was
-  /// built from the remote [expectedSha] holds, and the remote must still
-  /// hold it when the merged text is written over it. On a server that
-  /// honors ETags the upload carries If-Match instead, and this does
-  /// nothing — unless the ETag is weak, which the upload cannot carry.
-  Future<void> _guardMergeUpload(
-    SyncRunContext c,
-    SyncDecision d,
-    WebDavResource remote, {
-    required String expectedSha,
-  }) async {
-    if (c.capabilities.ifMatch && remote.guardEtag != null) return;
-    await _remoteUnchangedSince(c, d.path, expectedSha: expectedSha);
-  }
-
-  String _localShaOf(SyncRunContext c, String path) {
-    final sha =
-        c.local[path]?.sha256 ?? c.localSha[path] ?? c.rows[path]?.localSha256;
-    if (sha == null) throw SyncStepFailure('no hash for $path');
-    return sha;
-  }
-
-  /// Records [d]'s path as a conflict and touches neither side: the merge
-  /// screen is where it is resolved.
-  SyncStepOutcome _reportConflict(
-    SyncRunContext c,
-    SyncDecision d, {
-    required String localSha,
-    required String remoteSha,
-    required String why,
-  }) {
-    c.report.conflicts.add(
-      SyncConflict(
-        path: d.path,
-        localSha256: localSha,
-        remoteSha256: remoteSha,
-        baseVersion: d.baseVersion,
-      ),
-    );
-    _log.warning('conflict ${d.path}: $why; left for the merge');
-    return SyncStepOutcome.conflict;
   }
 
   /// Whether [file] holds a JSON object — what a [jsonStateFiles] side has to
@@ -1195,232 +1087,46 @@ final class SyncEngine {
     }
   }
 
-  /// Whether a listing of [modified] cannot rule out a second write within
-  /// the same second: no file ETags, and the mtime is the server's current
-  /// second (or the server sends no clock at all).
-  bool _unverified(SyncRunContext c, DateTime? modified) {
-    if (c.capabilities.fileEtags) return false;
-    final serverNow = c.client.serverDate;
-    if (modified == null || serverNow == null) return true;
-    return serverNow.difference(modified).inMilliseconds < 2000;
-  }
-
-  Future<SyncItem> _row(
+  Future<SyncStepOutcome> _upload(
     SyncRunContext c,
-    String path, {
-    required String sha,
-    required LocalFileState local,
-    required WebDavResource remote,
-    int? baseVersion,
-    bool pinBase = true,
-  }) async {
-    var base = baseVersion;
-    if (pinBase) {
-      try {
-        base = await ops.pinSyncBase(path, sha);
-      } on Object catch (e) {
-        _log.warning('sync base "$path" not pinned: $e');
-      }
-    }
-    return SyncItem(
-      baseText: await _agreedStateText(path, sha),
-      libraryPath: root,
-      path: path,
-      localSha256: sha,
-      localSize: local.size,
-      localMtimeMs: local.mtimeMs,
-      remoteEtag: remote.etag,
-      remoteSize: remote.size ?? local.size,
-      remoteMtimeMs: remote.modified?.millisecondsSinceEpoch ?? 0,
-      remoteUnverified: _unverified(c, remote.modified),
-      remoteFileId: remote.fileId,
-      baseVersion: base,
-      syncedAtMs: _now().millisecondsSinceEpoch,
-    );
-  }
-
-  /// For a library state file, its text on disk when it still is the
-  /// agreed content [sha] — the base of the next key-by-key merge; null
-  /// for every other file, or when the file moved on already.
-  Future<String?> _agreedStateText(String path, String sha) async {
-    if (!libraryStateFiles.contains(path)) return null;
-    try {
-      final bytes = await File(p.join(root, path)).readAsBytes();
-      if (sha256.convert(bytes).toString() != sha) return null;
-      return utf8.decode(bytes, allowMalformed: true);
-    } on FileSystemException {
-      return null;
-    }
-  }
-
-  Future<SyncStepOutcome> _guarded(
-    Future<SyncStepOutcome> Function() action,
-  ) async {
-    try {
-      return await action();
-    } on _ChangedDuringSync {
-      return SyncStepOutcome.skipped;
-    }
-  }
-
-  Future<SyncStepOutcome> _upload(SyncRunContext c, SyncDecision d) => _guarded(
-    () async {
-      final local = (await _localStillAsPlanned(c, d.path))!;
-      await _remoteStillAsPlanned(c, d);
-      final sha = _localShaOf(c, d.path);
-      // The #336 rule holds both ways: a JSON state file that does not parse
-      // here — a hand edit with a syntax error — is not a newer version of the
-      // remote copy either, and `.niman/*` has no history to bring that one
-      // back. Both sides stay, and the path is reported for the merge.
-      if (jsonStateFiles.contains(d.path) &&
-          c.remote[d.path] != null &&
-          !await _isJsonObject(File(p.join(root, d.path)))) {
-        return _reportConflict(
-          c,
-          d,
-          localSha: sha,
-          remoteSha: c.rows[d.path]?.localSha256 ?? '',
-          why: 'the local copy is not a JSON object',
-        );
-      }
-      await _uploadAndRecord(
+    SyncDecision d,
+  ) => _sides.guarded(() async {
+    final local = (await _sides.localStillAsPlanned(c, d.path))!;
+    await _remoteStillAsPlanned(c, d);
+    final sha = _sides.localShaOf(c, d.path);
+    // The #336 rule holds both ways: a JSON state file that does not parse
+    // here — a hand edit with a syntax error — is not a newer version of the
+    // remote copy either, and `.niman/*` has no history to bring that one
+    // back. Both sides stay, and the path is reported for the merge.
+    if (jsonStateFiles.contains(d.path) &&
+        c.remote[d.path] != null &&
+        !await _isJsonObject(File(p.join(root, d.path)))) {
+      return _sides.reportConflict(
         c,
-        d.path,
-        sha: sha,
-        local: local,
-        notListed: const SyncStepFailure('uploaded but not listed'),
-        ifMatch: d.ifMatch,
-        ifNoneMatch: d.ifNoneMatch,
-        modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
+        d,
+        localSha: sha,
+        remoteSha: c.rows[d.path]?.localSha256 ?? '',
+        why: 'the local copy is not a JSON object',
       );
-      return SyncStepOutcome.done;
-    },
-  );
-
-  /// Uploads the local file at [path] — content [sha], state [local] —
-  /// and records the row both sides now agree on, from the listing the
-  /// server gives after the upload; throws [notListed] when the file is
-  /// not listed then. [ifMatch], [ifNoneMatch] and [modified] go with the
-  /// upload as they are.
-  Future<void> _uploadAndRecord(
-    SyncRunContext c,
-    String path, {
-    required String sha,
-    required LocalFileState local,
-    required Exception notListed,
-    String? ifMatch,
-    bool ifNoneMatch = false,
-    DateTime? modified,
-  }) async {
-    await _ensureRemoteParent(c, path);
-    await c.client.uploadFile(
-      path,
-      File(p.join(root, path)),
-      ifMatch: ifMatch,
-      ifNoneMatch: ifNoneMatch,
-      modified: modified,
-    );
-    final listed = await c.client.stat(path);
-    if (listed == null) throw notListed;
-    await store.putItems([
-      await _row(c, path, sha: sha, local: local, remote: listed),
-    ]);
-  }
-
-  Future<void> _ensureRemoteParent(SyncRunContext c, String path) async {
-    final slash = path.lastIndexOf('/');
-    if (slash < 0) return;
-    final parent = path.substring(0, slash);
-    if (c.folders.contains(parent)) return;
-    await c.client.createFolders(parent);
-    var folder = parent;
-    while (folder.isNotEmpty) {
-      c.folders.add(folder);
-      final up = folder.lastIndexOf('/');
-      folder = up < 0 ? '' : folder.substring(0, up);
     }
-  }
-
-  /// GETs [path] into a temp file next to its target; returns it with the
-  /// response's metadata. The temp file is removed on failure.
-  Future<({File temp, WebDavDownload download})> _fetch(
-    SyncRunContext c,
-    String path,
-  ) async {
-    final target = p.join(root, path);
-    await Directory(p.dirname(target)).create(recursive: true);
-    final temp = File(
-      p.join(
-        p.dirname(target),
-        '.${p.basename(target)}.niman-tmp-sync-'
-        '${DateTime.now().microsecondsSinceEpoch}',
-      ),
+    await _sides.uploadAndRecord(
+      c,
+      d.path,
+      sha: sha,
+      local: local,
+      notListed: const SyncStepFailure('uploaded but not listed'),
+      ifMatch: d.ifMatch,
+      ifNoneMatch: d.ifNoneMatch,
+      modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
     );
-    try {
-      // The sink is ours, not the client's (issue #103). Handing
-      // `temp.openWrite()` straight in left its closing to whatever the
-      // consumer did with it, and the file the download had just written
-      // then went into a rename that never returned on Windows — where,
-      // unlike POSIX, a file with a handle still on it cannot be
-      // renamed. A note never hit it because its temp is written by
-      // `writeAsBytes`, which closes on its own.
-      final sink = temp.openWrite();
-      final WebDavDownload download;
-      try {
-        download = await c.client.download(path, sink);
-      } finally {
-        // The consumer closes the sink; closing a closed sink is a no-op
-        // that hands back the same `done`. Awaiting it is what says the
-        // bytes are on disk and the handle is gone before anyone renames.
-        // A sink the transfer still holds throws straight out of
-        // `close()`, though, and that StateError must not replace the
-        // transfer's own failure (#495).
-        try {
-          await sink.close();
-          await sink.done;
-        } on Object {
-          // The transfer's own failure is the one to report.
-        }
-      }
-      // The client already checked Content-Length. A chunked answer has none,
-      // so compare with the listing too — unless the ETag says the file was
-      // rewritten since, which makes a different size legitimate.
-      final listed = c.remote[path];
-      final expected = listed?.size;
-      final rewritten = download.etag != null && download.etag != listed?.etag;
-      if (expected != null && download.bytes != expected && !rewritten) {
-        throw WebDavProtocolFailure(
-          'GET $path: ${download.bytes} bytes, the listing said $expected',
-        );
-      }
-      return (temp: temp, download: download);
-    } on Object {
-      if (temp.existsSync()) await temp.delete();
-      rethrow;
-    }
-  }
-
-  WebDavResource _remoteFrom(
-    SyncRunContext c,
-    String path,
-    WebDavDownload download,
-  ) {
-    final listed = c.remote[path];
-    return WebDavResource(
-      path: path,
-      isCollection: false,
-      etag: download.etag ?? listed?.etag,
-      size: download.bytes,
-      modified: download.modified ?? listed?.modified,
-      fileId: listed?.fileId,
-    );
-  }
+    return SyncStepOutcome.done;
+  });
 
   Future<SyncStepOutcome> _download(SyncRunContext c, SyncDecision d) =>
-      _guarded(() async {
-        final fetched = await _fetch(c, d.path);
+      _sides.guarded(() async {
+        final fetched = await _sides.fetch(c, d.path);
         try {
-          await _localStillAsPlanned(c, d.path);
+          await _sides.localStillAsPlanned(c, d.path);
         } on Object {
           if (fetched.temp.existsSync()) await fetched.temp.delete();
           rethrow;
@@ -1437,7 +1143,7 @@ final class SyncEngine {
             await File(p.join(root, d.path)).exists() &&
             !await _isJsonObject(fetched.temp)) {
           await fetched.temp.delete();
-          return _reportConflict(
+          return _sides.reportConflict(
             c,
             d,
             localSha: c.rows[d.path]?.localSha256 ?? '',
@@ -1446,25 +1152,25 @@ final class SyncEngine {
           );
         }
         await ops.syncReplace(d.path, fetched.temp.path);
-        final local = await _stat(d.path);
+        final local = await _sides.stat(d.path);
         if (local == null) {
           throw const SyncStepFailure('downloaded but not on disk');
         }
         await store.putItems([
-          await _row(
+          await _sides.row(
             c,
             d.path,
             sha: fetched.download.sha256,
             local: local,
-            remote: _remoteFrom(c, d.path, fetched.download),
+            remote: _sides.remoteFrom(c, d.path, fetched.download),
           ),
         ]);
         return SyncStepOutcome.done;
       });
 
   Future<SyncStepOutcome> _deleteRemote(SyncRunContext c, SyncDecision d) =>
-      _guarded(() async {
-        await _localStillAsPlanned(c, d.path);
+      _sides.guarded(() async {
+        await _sides.localStillAsPlanned(c, d.path);
         await _remoteStillAsPlanned(c, d);
         await c.client.delete(d.path, ifMatch: d.ifMatch);
         await store.removeItems(root, [d.path]);
@@ -1472,22 +1178,22 @@ final class SyncEngine {
       });
 
   Future<SyncStepOutcome> _trashLocal(SyncRunContext c, SyncDecision d) =>
-      _guarded(() async {
-        await _localStillAsPlanned(c, d.path);
+      _sides.guarded(() async {
+        await _sides.localStillAsPlanned(c, d.path);
         await ops.syncTrash(d.path);
         await store.removeItems(root, [d.path]);
         return SyncStepOutcome.done;
       });
 
   Future<SyncStepOutcome> _record(SyncRunContext c, SyncDecision d) =>
-      _guarded(() async {
-        final local = (await _localStillAsPlanned(c, d.path))!;
-        final sha = _localShaOf(c, d.path);
+      _sides.guarded(() async {
+        final local = (await _sides.localStillAsPlanned(c, d.path))!;
+        final sha = _sides.localShaOf(c, d.path);
         final row = c.rows[d.path];
         final remote = c.remote[d.path]!;
         final contentChanged = row == null || row.localSha256 != sha;
         await store.putItems([
-          await _row(
+          await _sides.row(
             c,
             d.path,
             sha: sha,
@@ -1503,10 +1209,10 @@ final class SyncEngine {
   Future<SyncStepOutcome> _conflict(
     SyncRunContext c,
     SyncDecision d,
-  ) => _guarded(() async {
-    final local = (await _localStillAsPlanned(c, d.path))!;
-    final localSha = _localShaOf(c, d.path);
-    final fetched = await _fetch(c, d.path);
+  ) => _sides.guarded(() async {
+    final local = (await _sides.localStillAsPlanned(c, d.path))!;
+    final localSha = _sides.localShaOf(c, d.path);
+    final fetched = await _sides.fetch(c, d.path);
     // The fetch wrote the remote body into a temp next to the target,
     // and every end below — the swapped-in download, the merge's
     // write-back through the temp, the path left for the merge screen —
@@ -1517,12 +1223,18 @@ final class SyncEngine {
     // until the next open's sweep (#495). The temp is this method's to
     // clean up whatever it returns or throws.
     try {
-      final remote = _remoteFrom(c, d.path, fetched.download);
+      final remote = _sides.remoteFrom(c, d.path, fetched.download);
       final remoteSha = fetched.download.sha256;
 
       if (remoteSha == localSha) {
         await store.putItems([
-          await _row(c, d.path, sha: localSha, local: local, remote: remote),
+          await _sides.row(
+            c,
+            d.path,
+            sha: localSha,
+            local: local,
+            remote: remote,
+          ),
         ]);
         _log.info('conflict ${d.path}: same content on both sides, recorded');
         return SyncStepOutcome.done;
@@ -1546,7 +1258,7 @@ final class SyncEngine {
           case _StateMerge.merged:
             return SyncStepOutcome.done;
           case _StateMerge.notJson:
-            return _reportConflict(
+            return _sides.reportConflict(
               c,
               d,
               localSha: localSha,
@@ -1554,7 +1266,7 @@ final class SyncEngine {
               why: 'a side is not a JSON object',
             );
           case _StateMerge.clockDecides:
-            return _reportConflict(
+            return _sides.reportConflict(
               c,
               d,
               localSha: localSha,
@@ -1665,14 +1377,14 @@ final class SyncEngine {
     }
     final uploads = text != remoteText;
     if (uploads) {
-      await _guardMergeUpload(c, d, remote, expectedSha: remoteSha);
+      await _sides.guardMergeUpload(c, d, remote, expectedSha: remoteSha);
     }
     final changedLocally = text != localText;
     if (changedLocally) {
       // Through the temp the download left: syncReplace swaps it in the
       // way a download goes, reloading the settings.
       await remoteCopy.writeAsString(text);
-      await _localStillAsPlanned(c, d.path);
+      await _sides.localStillAsPlanned(c, d.path);
       await ops.syncReplace(d.path, remoteCopy.path);
       c.report.changedLocally.add(d.path);
     } else {
@@ -1689,12 +1401,12 @@ final class SyncEngine {
           await c.client.stat(d.path) ??
           (throw const SyncStepFailure('merged but not listed'));
     }
-    final after = await _stat(d.path);
+    final after = await _sides.stat(d.path);
     if (after == null) throw const SyncStepFailure('merged but not on disk');
-    final sha = (await _hashLocal(root, [d.path]))[d.path];
+    final sha = (await _sides.hashLocal([d.path]))[d.path];
     if (sha == null) throw const SyncStepFailure('merged but not hashed');
     await store.putItems([
-      await _row(c, d.path, sha: sha, local: after, remote: listed),
+      await _sides.row(c, d.path, sha: sha, local: after, remote: listed),
     ]);
     _log.info(
       'merge ${d.path}: ${base == null ? 'no base' : 'on the base'}'
@@ -1764,15 +1476,15 @@ final class SyncEngine {
     // Guarded before anything is written: a remote that moved since the
     // merge was built would be written over, and on a server without
     // preconditions this is the only guard there is (#350).
-    await _guardMergeUpload(c, d, remote, expectedSha: remoteSha);
+    await _sides.guardMergeUpload(c, d, remote, expectedSha: remoteSha);
     final changedLocally = text != localText;
     if (changedLocally) await ops.syncMerge(d.path, text);
     // The file on disk is the merge now: hash and stat it as written.
-    final local = await _stat(d.path);
+    final local = await _sides.stat(d.path);
     if (local == null) throw const SyncStepFailure('merged but not on disk');
-    final sha = (await _hashLocal(root, [d.path]))[d.path];
+    final sha = (await _sides.hashLocal([d.path]))[d.path];
     if (sha == null) throw const SyncStepFailure('merged but not hashed');
-    await _uploadAndRecord(
+    await _sides.uploadAndRecord(
       c,
       d.path,
       sha: sha,
@@ -1832,12 +1544,12 @@ final class SyncEngine {
   static const _inlineMergeLimit = 20000;
 
   Future<SyncStepOutcome> _moveRemote(SyncRunContext c, SyncDecision d) =>
-      _guarded(() async {
+      _sides.guarded(() async {
         final from = d.fromPath!;
-        final local = (await _localStillAsPlanned(c, d.path))!;
-        await _localStillAsPlanned(c, from);
+        final local = (await _sides.localStillAsPlanned(c, d.path))!;
+        await _sides.localStillAsPlanned(c, from);
         await _remoteStillAsPlanned(c, d);
-        await _ensureRemoteParent(c, d.path);
+        await _sides.ensureRemoteParent(c, d.path);
         try {
           await c.client.move(from, d.path);
         } on WebDavUnsupported {
@@ -1858,7 +1570,7 @@ final class SyncEngine {
         if (remote == null) throw const SyncStepFailure('moved but not listed');
         final row = c.rows[from]!;
         await store.putItems([
-          await _row(
+          await _sides.row(
             c,
             d.path,
             sha: row.localSha256,
@@ -1872,17 +1584,17 @@ final class SyncEngine {
       });
 
   Future<SyncStepOutcome> _moveLocal(SyncRunContext c, SyncDecision d) =>
-      _guarded(() async {
+      _sides.guarded(() async {
         final from = d.fromPath!;
-        await _localStillAsPlanned(c, from);
-        await _localStillAsPlanned(c, d.path);
+        await _sides.localStillAsPlanned(c, from);
+        await _sides.localStillAsPlanned(c, d.path);
         await ops.syncMove(from, d.path);
         await store.moveItems(root, from, d.path);
-        final local = await _stat(d.path);
+        final local = await _sides.stat(d.path);
         if (local == null) throw const SyncStepFailure('moved but not on disk');
         final row = c.rows[from]!;
         await store.putItems([
-          await _row(
+          await _sides.row(
             c,
             d.path,
             sha: row.localSha256,
@@ -1910,12 +1622,6 @@ enum _StateMerge {
   clockDecides,
 }
 
-/// Thrown inside an action when a side no longer looks like the plan: the
-/// path is skipped and the next run decides again.
-final class _ChangedDuringSync implements Exception {
-  const new();
-}
-
 /// What a scan found: files on both sides, the remote folders known to
 /// exist, and the agreed rows in scope.
 typedef _Scan = ({
@@ -1924,14 +1630,6 @@ typedef _Scan = ({
   Set<String> folders,
   Map<String, SyncItem> rows,
 });
-
-final class _DiscardSink implements StreamConsumer<List<int>> {
-  @override
-  Future<void> addStream(Stream<List<int>> stream) => stream.drain<void>();
-
-  @override
-  Future<void> close() async {}
-}
 
 String _short(String sha) => sha.length <= 8 ? sha : sha.substring(0, 8);
 
@@ -1974,21 +1672,4 @@ Future<Map<String, LocalFileState>> scanLocalFiles(
     }
   }
   return files;
-}
-
-/// The sha256 of each of [paths] under [root], streamed; a file that
-/// vanished is left out.
-///
-/// Top-level so `Isolate.run` can take it.
-Future<Map<String, String>> hashLocalFiles(
-  String root,
-  List<String> paths,
-) async {
-  final hashes = <String, String>{};
-  for (final path in paths) {
-    final file = File(p.join(root, path));
-    if (!file.existsSync()) continue;
-    hashes[path] = (await sha256.bind(file.openRead()).first).toString();
-  }
-  return hashes;
 }
