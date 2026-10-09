@@ -176,6 +176,34 @@ void main() {
     expect(find.text('1 / 1'), findsOneWidget);
   });
 
+  testWidgets('a long deck is split off the UI isolate, the old one shown '
+      'meanwhile (#695)', (tester) async {
+    final host = _Host('long.md');
+    slidePlaceOf('long.md').value = 0;
+    final pad = 'word ' * (SlidesNoteView.isolateFrom ~/ 5);
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: host),
+      const Size(1200, 800),
+    );
+    expect(find.text('1 / 2'), findsOneWidget);
+
+    await tester.pumpWidget(
+      _app(
+        SlidesNoteView(text: '$_deck\n---\n\n# Gamma\n\n$pad\n', host: host),
+      ),
+    );
+    expect(find.text('1 / 2'), findsOneWidget, reason: 'not split yet');
+
+    for (var i = 0; i < 250 && find.text('1 / 3').evaluate().isEmpty; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    expect(find.text('1 / 3'), findsOneWidget);
+  });
+
   testWidgets("a renamed note shows the new path's slide, swipe and count", (
     tester,
   ) async {

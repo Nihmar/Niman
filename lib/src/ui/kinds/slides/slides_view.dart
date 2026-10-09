@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,6 +35,12 @@ final class SlidesNoteView extends ConsumerStatefulWidget {
   /// The note's window: its path, pictures and links.
   final NoteKindHost host;
 
+  /// From this length on, an edit's split runs on a background isolate
+  /// (#695): a scan of every block per keystroke is a long deck's jank.
+  /// A short note splits in less than the hop costs.
+  @visibleForTesting
+  static const int isolateFrom = 64 * 1024;
+
   @override
   ConsumerState<SlidesNoteView> createState() => _SlidesNoteViewState();
 }
@@ -51,6 +58,26 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
 
   int get _index => _place.value.clamp(0, _slides.length - 1);
 
+  /// Bumped by every split: a background one that lands after a later
+  /// one is dropped.
+  int _splits = 0;
+
+  /// Splits [text], at once when it is short; otherwise the slides on
+  /// screen stay until the background split lands.
+  void _split(String text) {
+    final at = ++_splits;
+    if (text.length < SlidesNoteView.isolateFrom) {
+      _slides = splitSlides(text);
+      return;
+    }
+    unawaited(
+      _splitOff(text).then((slides) {
+        if (!mounted || at != _splits) return;
+        setState(() => _slides = slides);
+      }),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,7 +88,7 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
   @override
   void didUpdateWidget(covariant SlidesNoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text) _slides = splitSlides(widget.text);
+    if (oldWidget.text != widget.text) _split(widget.text);
     if (widget.host.notePath != _path) {
       _place.removeListener(_placeMoved);
       _path = widget.host.notePath;
@@ -271,3 +298,9 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
     );
   }
 }
+
+/// [text] split on a background isolate. Top level: a closure made in the
+/// state would carry the state, and the widget tree with it, to the
+/// isolate.
+Future<List<Slide>> _splitOff(String text) =>
+    Isolate.run(() => splitSlides(text));
