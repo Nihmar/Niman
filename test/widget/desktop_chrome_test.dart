@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
 
@@ -104,6 +105,29 @@ void main() {
       matching: find.byKey(const Key('note-menu')),
     );
     expect(menu, findsOne);
+  });
+
+  testWidgets('the notes leave the outline to the dock where it has room', (
+    tester,
+  ) async {
+    Future<bool> inDock(Size size) async {
+      await pumpShell(tester, size);
+      await controller.createNote(parentPath: '', name: 'beta');
+      await settle(tester);
+      await tester.tap(noteRow('beta.md'));
+      await settle(tester);
+      return tester
+          .widget<ShellDetailPane>(find.byType(ShellDetailPane).first)
+          .outlineInDock;
+    }
+
+    expect(await inDock(const Size(1200, 900)), isTrue);
+    controller = FakeLibrarySession();
+    expect(
+      await inDock(const Size(900, 900)),
+      isFalse,
+      reason: 'wide, but no room for the dock',
+    );
   });
 
   testWidgets('wide: the todo panel holds switch, add and help; no FAB', (

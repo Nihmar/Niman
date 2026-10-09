@@ -161,6 +161,7 @@ final class NoteView extends StatefulWidget {
     this.onEditedNoteClosed,
     this.onLoaded,
     this.kindMode = true,
+    this.outlineInDock = false,
     this.onNoteKindChanged,
     this.onKindMarkdown,
     this.onPasteAsMarkdown,
@@ -341,6 +342,12 @@ final class NoteView extends StatefulWidget {
   /// frontmatter declares a known `type` opens in its kind GUI instead of
   /// the editor. False = always the raw editor.
   final bool kindMode;
+
+  /// Whether the window's dock has the outline: the status row's own
+  /// outline button would then be a second way to the same list, and is
+  /// left out (desktop chrome, 2026-10-09). Off where nothing else has it
+  /// — a phone, a narrow window, a file outside the library.
+  final bool outlineInDock;
 
   /// Reports the loaded note's kind (the frontmatter `type` value, null =
   /// plain note); the shell shows the kind toggle for known kinds.
@@ -2590,6 +2597,7 @@ final class _NoteViewState extends State<NoteView>
                     listenable: _templateCheck,
                     builder: (context, _) => NoteStatusRow(
                       loading: _loading,
+                      showOutline: !widget.outlineInDock,
                       showPreview: showPreview,
                       showWysiwyg: _wysiwygIn(widget),
                       spellCheckAvailable:

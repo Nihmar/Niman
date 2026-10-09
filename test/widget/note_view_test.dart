@@ -21,7 +21,9 @@ NoteView _view({
   bool showPreview = false,
   ValueChanged<EditorKind>? onEditorKindChanged,
   int? initialCaretOffset,
+  bool outlineInDock = false,
 }) => NoteView(
+  outlineInDock: outlineInDock,
   showLineNumbers: showLineNumbers,
   autofocusEditor: autofocusEditor,
   showPreview: showPreview,
@@ -488,6 +490,24 @@ void main() {
       final between =
           tester.getTopLeft(findButton).dx - tester.getTopRight(outline).dx;
       expect(between, 6);
+    });
+
+    testWidgets('the outline button stays out where the dock has it', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => 'hello',
+            outlineInDock: true,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(const Key('outline-toggle')), findsNothing);
+      expect(find.byKey(const Key('editor-find-open')), findsOneWidget);
     });
 
     // The controls are on the left and what the note reads as is on the

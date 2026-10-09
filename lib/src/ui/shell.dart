@@ -4719,6 +4719,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             tabs: _deck(pane),
             onMemento: _workspace.remember,
             zen: _inZen,
+            // The dock's outline pane, where the window has room for it.
+            outlineInDock: _dockRoom && !_inZen,
             typewriter: _editorSettings.typewriter,
             cascadeChecklist: _editorSettings.cascadeChecklist,
             frontmatterPanel: _editorSettings.frontmatterPanel,
