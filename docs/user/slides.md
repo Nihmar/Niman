@@ -71,7 +71,8 @@ the slideshow icon on the bar brings the slides back.
   Space, Page Down, Enter or a click go forward; ← ↑ Backspace or Page Up
   go back; Home / End go to the first / last slide; `B` blacks the screen
   out and back; `O` opens the overview of every slide (arrows and Enter,
-  or a click, pick one); `Esc` stops, on the slide where the talk stopped.
+  or a click, pick one); `Esc` stops, on the slide where the talk stopped,
+  and gives the window back as it was (full screen stays full screen).
   Moving the mouse shows a bar — ‹ 3 / 7 › · Overview · Notes · Exit —
   that fades after two seconds of stillness, with the cursor. A clicker
   works as it is: it sends Page Up / Page Down.

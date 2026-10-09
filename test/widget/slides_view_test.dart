@@ -227,6 +227,25 @@ void presentingTests() {
     expect(window.fullScreen, isFalse);
   });
 
+  testWidgets('a window full screen before the talk stays so after (#669)', (
+    tester,
+  ) async {
+    final window = FakeWindowController()..fullScreen = true;
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: _Host('full.md')),
+      const Size(1200, 800),
+      window: window,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('slides-present')), findsNothing);
+    expect(window.fullScreen, isTrue);
+  });
+
   testWidgets('B blacks the slide alone out, held or not, and only there', (
     tester,
   ) async {
@@ -349,6 +368,9 @@ final class _SlowWindow extends Fake implements WindowController {
   final Completer<void> answer = Completer<void>();
   final List<bool> calls = [];
   bool fullScreen = false;
+
+  @override
+  Future<bool> isFullScreen() async => fullScreen;
 
   @override
   Future<void> setFullScreen({required bool on}) async {

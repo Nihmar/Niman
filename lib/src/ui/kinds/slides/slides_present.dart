@@ -35,7 +35,8 @@ bool? slidesPresentKey(KeyEvent event) {
 /// (#534): the whole screen for the slide alone, or the presenter view.
 ///
 /// The desktops take the window full screen, Android hides the system
-/// bars, and the screen stays on until the talk ends. A phone is turned
+/// bars, and the screen stays on until the talk ends. A window that was
+/// full screen already stays so (#669). A phone is turned
 /// to landscape for the talk, wherever it was started from — unless
 /// [byTurning], the talk the phone started by being turned sideways,
 /// which ends when it is turned upright again.
@@ -79,20 +80,28 @@ Future<void> presentSlides(
     // would otherwise have the taking land last (#668).
     unawaited(
       taken.then(
-        (_) => _takeScreen(window, on: false, lockLandscape: lockLandscape),
+        (wasFullScreen) => _takeScreen(
+          window,
+          on: false,
+          lockLandscape: lockLandscape,
+          keepFullScreen: wasFullScreen,
+        ),
       ),
     );
     _presenting = false;
   }
 }
 
-/// Takes the screen for the talk, or gives it back. A platform that
-/// refuses is logged, not thrown: giving it back still follows.
-Future<void> _takeScreen(
+/// Takes the screen for the talk, or gives it back; true when the window
+/// was full screen before it was taken. A platform that refuses is
+/// logged, not thrown: giving the screen back still follows.
+Future<bool> _takeScreen(
   WindowController window, {
   required bool on,
   required bool lockLandscape,
+  bool keepFullScreen = false,
 }) async {
+  var wasFullScreen = false;
   try {
     if (Platform.isAndroid) {
       await SystemChrome.setEnabledSystemUIMode(
@@ -109,7 +118,8 @@ Future<void> _takeScreen(
         );
       }
     } else {
-      await window.setFullScreen(on: on);
+      wasFullScreen = on && await window.isFullScreen();
+      await window.setFullScreen(on: on || keepFullScreen);
     }
   } on Exception catch (error) {
     const AppLogger(name: 'slides').warning('take the screen: $error');
@@ -117,4 +127,5 @@ Future<void> _takeScreen(
   // Sent, not waited on: one channel keeps its calls in order, and one
   // that never answers (as in tests) would hold up giving the screen back.
   unawaited(keepScreenOn(on: on));
+  return wasFullScreen;
 }
