@@ -1,5 +1,7 @@
 // #534: the slides kind's view — the slide on screen, its notes, the
 // thumbnail row and the keys on a wide window, the swipe on a phone.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,16 +59,21 @@ Finder _text(String text) => find.textContaining(text, findRichText: true);
 /// The window presenting takes full screen, recorded.
 final FakeWindowController _window = FakeWindowController();
 
-Widget _app(Widget view) => ProviderScope(
-  overrides: [windowControllerProvider.overrideWithValue(_window)],
+Widget _app(Widget view, {WindowController? window}) => ProviderScope(
+  overrides: [windowControllerProvider.overrideWithValue(window ?? _window)],
   child: MaterialApp(home: Scaffold(body: view)),
 );
 
-Future<void> _show(WidgetTester tester, Widget view, Size size) async {
+Future<void> _show(
+  WidgetTester tester,
+  Widget view,
+  Size size, {
+  WindowController? window,
+}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(_app(view));
+  await tester.pumpWidget(_app(view, window: window));
   await tester.pumpAndSettle();
 }
 
@@ -199,6 +206,27 @@ void presentingTests() {
     expect(_window.fullScreen, isFalse);
   });
 
+  testWidgets('a talk ended before the window went full screen gives it '
+      'back after (#668)', (tester) async {
+    final window = _SlowWindow();
+    await _show(
+      tester,
+      SlidesNoteView(text: _deck, host: _Host('quick.md')),
+      const Size(1200, 800),
+      window: window,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    window.answer.complete();
+    await tester.pumpAndSettle();
+
+    expect(window.calls, [true, false]);
+    expect(window.fullScreen, isFalse);
+  });
+
   testWidgets('B blacks the slide alone out, held or not, and only there', (
     tester,
   ) async {
@@ -314,4 +342,18 @@ void presentingTests() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
   });
+}
+
+/// A window that goes full screen only once [answer] is completed.
+final class _SlowWindow extends Fake implements WindowController {
+  final Completer<void> answer = Completer<void>();
+  final List<bool> calls = [];
+  bool fullScreen = false;
+
+  @override
+  Future<void> setFullScreen({required bool on}) async {
+    calls.add(on);
+    if (on) await answer.future;
+    fullScreen = on;
+  }
 }

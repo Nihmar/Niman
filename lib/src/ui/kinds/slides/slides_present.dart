@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/keep_awake.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
@@ -57,7 +58,7 @@ Future<void> presentSlides(
   _presenting = true;
   // The screen is asked for, not waited on: the slide shows at once, and a
   // platform that answers late (or never, as in tests) holds nothing up.
-  unawaited(_takeScreen(window, on: true, lockLandscape: lockLandscape));
+  final taken = _takeScreen(window, on: true, lockLandscape: lockLandscape);
   try {
     await navigator.push(
       PageRouteBuilder<void>(
@@ -74,32 +75,46 @@ Future<void> presentSlides(
       ),
     );
   } finally {
-    unawaited(_takeScreen(window, on: false, lockLandscape: lockLandscape));
+    // Given back once taken: a talk that ends before its screen was taken
+    // would otherwise have the taking land last (#668).
+    unawaited(
+      taken.then(
+        (_) => _takeScreen(window, on: false, lockLandscape: lockLandscape),
+      ),
+    );
     _presenting = false;
   }
 }
 
+/// Takes the screen for the talk, or gives it back. A platform that
+/// refuses is logged, not thrown: giving it back still follows.
 Future<void> _takeScreen(
   WindowController window, {
   required bool on,
   required bool lockLandscape,
 }) async {
-  if (Platform.isAndroid) {
-    await SystemChrome.setEnabledSystemUIMode(
-      on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
-    );
-    if (lockLandscape) {
-      await SystemChrome.setPreferredOrientations(
-        on
-            ? const [
-                DeviceOrientation.landscapeLeft,
-                DeviceOrientation.landscapeRight,
-              ]
-            : const [],
+  try {
+    if (Platform.isAndroid) {
+      await SystemChrome.setEnabledSystemUIMode(
+        on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
       );
+      if (lockLandscape) {
+        await SystemChrome.setPreferredOrientations(
+          on
+              ? const [
+                  DeviceOrientation.landscapeLeft,
+                  DeviceOrientation.landscapeRight,
+                ]
+              : const [],
+        );
+      }
+    } else {
+      await window.setFullScreen(on: on);
     }
-  } else {
-    await window.setFullScreen(on: on);
+  } on Exception catch (error) {
+    const AppLogger(name: 'slides').warning('take the screen: $error');
   }
-  await keepScreenOn(on: on);
+  // Sent, not waited on: one channel keeps its calls in order, and one
+  // that never answers (as in tests) would hold up giving the screen back.
+  unawaited(keepScreenOn(on: on));
 }
