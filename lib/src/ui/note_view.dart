@@ -465,7 +465,7 @@ final class _NoteViewState extends State<NoteView>
   ValueListenable<List<OutlineEntry>> get outline => _outlineNotifier;
 
   @override
-  String get currentText => _currentText;
+  String get currentText => _unifiedText;
 
   @override
   String get notePath => widget.path;
@@ -486,9 +486,9 @@ final class _NoteViewState extends State<NoteView>
   @override
   void setNoteKind(String? type) {
     final text = type == null
-        ? removeFrontmatterKey(_currentText, 'type')
-        : setFrontmatterKey(_currentText, 'type', type);
-    if (text == _currentText) return;
+        ? removeFrontmatterKey(_unifiedText, 'type')
+        : setFrontmatterKey(_unifiedText, 'type', type);
+    if (text == _unifiedText) return;
     _applyKindEdit(text);
     if (!mounted) return;
     setState(() => _noteKind = type);
@@ -614,9 +614,6 @@ final class _NoteViewState extends State<NoteView>
   /// The read pane's refresh (T-M2-08), after a pause in the typing.
   Timer? _previewTimer;
 
-  /// The note's current text.
-  String get _currentText => _unifiedText;
-
   /// The formats on at the caret: the toolbar's pressed state.
   ///
   /// Written by the surface, which reads them off the caret's line
@@ -685,10 +682,9 @@ final class _NoteViewState extends State<NoteView>
   SourceBuffer? _snapshotFrom;
   int _snapshotRevision = -1;
 
-  /// The note's text as the unified source surface has it, read by
-  /// [_currentText], which is where saving, the preview and the statistics all
-  /// get their text from — so this pane reaches every one of them through one
-  /// door.
+  /// The note's text as the unified source surface has it, which is where
+  /// saving, the preview and the statistics all get their text from — so
+  /// this pane reaches every one of them through one door.
   ///
   /// Joined from the surface's buffer when it is asked for, once per revision:
   /// the surface reports an edit without its text, because joining the note on
@@ -880,7 +876,7 @@ final class _NoteViewState extends State<NoteView>
     // The formatting keys, while this editor is the focused one (#205).
     _formatKeys.attach();
     _kindHost = NoteKindHostAdapter(
-      noteText: () => _currentText,
+      noteText: () => _unifiedText,
       applyNoteEdit: _applyKindEdit,
       noteFilePath: () => widget.path,
       rootDirectory: () => widget.libraryRoot,
@@ -1268,7 +1264,7 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final text = normalizedLineEndings(content);
-    if (text == _currentText) return;
+    if (text == _unifiedText) return;
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
     _loading = true;
@@ -1396,9 +1392,6 @@ final class _NoteViewState extends State<NoteView>
     });
   }
 
-  /// The editor pane: the unified surface, in `source` or `live`.
-  Widget _editorPane() => _unifiedSurfacePane();
-
   /// The editor pane as the unified surface (#245, #246).
   ///
   /// The same widget the read mode's engine is built from, in one of its
@@ -1412,7 +1405,7 @@ final class _NoteViewState extends State<NoteView>
   Widget _unifiedSurfacePane() {
     var surface = _surface;
     if (surface == null) {
-      final text = _currentText;
+      final text = _unifiedText;
       surface = _surface = _surfaceFor(text);
       _unifiedText = text;
     }
@@ -1576,32 +1569,31 @@ final class _NoteViewState extends State<NoteView>
   /// The app root put the interface scale on every MediaQuery below it;
   /// here it is replaced, so the same note reads the same size whichever
   /// pane shows it.
+  ///
+  /// The unified surface's read mode: one engine, the same theme as the editor
+  /// (docs/records/unified-surface.md).
   Widget _buildPreview(BuildContext context) => MediaQuery(
     data: MediaQuery.of(context)
         .copyWith(textScaler: noteTextScalerOf(context)),
-    child: _buildUnifiedPreview(context),
-  );
-
-  /// The unified surface's read mode: one engine, the same theme as the editor
-  /// (docs/records/unified-surface.md).
-  Widget _buildUnifiedPreview(BuildContext context) => MarkdownReadView(
-    key: _readViewKey,
-    buffer: _unifiedSource,
-    parser: _unifiedParser,
-    mathCache: _mathCache,
-    controller: _previewScroll,
-    onTapLink: (text, href) =>
-        unawaited(openHref(context, href ?? '', _linkTargets())),
-    onTapWikiLink: (inner) => unawaited(
-      // The same rule the parser and the preview use, so a wikilink means one
-      // thing however it is drawn. `inner` is the `[[…]]` content, and
-      // `parseWikiRef` reads it (#477 needs the target it names).
-      openWiki(context, parseWikiRef(inner), _linkTargets()),
+    child: MarkdownReadView(
+      key: _readViewKey,
+      buffer: _unifiedSource,
+      parser: _unifiedParser,
+      mathCache: _mathCache,
+      controller: _previewScroll,
+      onTapLink: (text, href) =>
+          unawaited(openHref(context, href ?? '', _linkTargets())),
+      onTapWikiLink: (inner) => unawaited(
+        // The same rule the parser and the preview use, so a wikilink means
+        // one thing however it is drawn. `inner` is the `[[…]]` content, and
+        // `parseWikiRef` reads it (#477 needs the target it names).
+        openWiki(context, parseWikiRef(inner), _linkTargets()),
+      ),
+      embedResolver: _resolveEmbed,
+      column: widget.noteColumn,
+      knownScan: _editorScanOf,
+      onToggleTask: _toggleTaskFromRead,
     ),
-    embedResolver: _resolveEmbed,
-    column: widget.noteColumn,
-    knownScan: _editorScanOf,
-    onToggleTask: _toggleTaskFromRead,
   );
 
   /// The read pane with the frontmatter fields panel over it (#157), or the
@@ -2233,7 +2225,7 @@ final class _NoteViewState extends State<NoteView>
   Future<void> _saveOutgoingAfter(Future<void>? waiting, String target) async {
     final session = _editSession;
     final stream = _takeStreamSave();
-    final text = stream == null ? _currentText : null;
+    final text = stream == null ? _unifiedText : null;
     if (waiting != null) {
       try {
         await waiting;
@@ -2284,7 +2276,7 @@ final class _NoteViewState extends State<NoteView>
     // The full-text join (O(n)) happens here only — the save path, never
     // the keystroke path.
     final joinClock = Stopwatch()..start();
-    final text = _currentText;
+    final text = _unifiedText;
     final joinMs = joinClock.elapsedMilliseconds;
     // Read with the text, before the first await: a note switch that
     // saves the outgoing note is followed by a _load that starts the next
@@ -2591,7 +2583,7 @@ final class _NoteViewState extends State<NoteView>
                                     ? 'pane-wysiwyg'
                                     : 'pane-editor',
                               ),
-                              child: _editorPane(),
+                              child: _unifiedSurfacePane(),
                             ),
                           ),
                           Offstage(
@@ -2826,7 +2818,7 @@ final class _NoteViewState extends State<NoteView>
     if (!mounted || tool == null) return;
     switch (tool) {
       case EditorTool.countList:
-        await _countList();
+        await _countListSource();
       case EditorTool.mindMap:
         convertListToMindMap();
     }
@@ -2853,14 +2845,12 @@ final class _NoteViewState extends State<NoteView>
     final buffer = _unifiedSurfaceBuffer;
     if (scanned != null) return blockList(scanned);
     if (buffer != null) return blockList(BlockScanner(buffer).index.blocks);
-    return blockList(scannedBlocksOf(_editText));
+    return blockList(scannedBlocksOf(_unifiedText));
   }
 
-  /// Counts a list into a checklist, on whichever surface is showing.
-  Future<void> _countList() => _countListSource();
-
+  /// Counts a list into a checklist.
   Future<void> _countListSource() async {
-    final text = _editText;
+    final text = _unifiedText;
     final targets = tallyTargetsIn(text);
     if (targets.isEmpty) return;
     final here = tallyTargetAt(text, _editCaretLine);
@@ -2905,9 +2895,6 @@ final class _NoteViewState extends State<NoteView>
     _surface?.applyEdit(edit.text, edit.selection);
     _focus.requestFocus();
   }
-
-  /// The source text a command works on.
-  String get _editText => _unifiedText;
 
   /// Runs a Markdown [command] on the source pane on screen.
   ///
