@@ -1620,7 +1620,11 @@ final class _FakeFieldSource implements FieldSource {
   }
 
   @override
-  Future<List<Note>> notesWithField(String key, String value) async {
+  Future<List<Note>> notesWithField(
+    String key,
+    String value, {
+    int? limit,
+  }) async {
     final wanted = value.trim().toLowerCase();
     final name = key.trim().toLowerCase();
     final out = <Note>[];
@@ -1631,7 +1635,8 @@ final class _FakeFieldSource implements FieldSource {
         out.add(note);
       }
     }
-    return out..sort((a, b) => a.path.compareTo(b.path));
+    out.sort((a, b) => a.path.compareTo(b.path));
+    return limit == null ? out : out.take(limit).toList();
   }
 
   @override

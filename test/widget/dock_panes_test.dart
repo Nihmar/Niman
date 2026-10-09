@@ -63,7 +63,7 @@ final class _Note implements NoteViewHandle {
 
 final class _Tags implements TagSource {
   @override
-  Future<List<TagCount>> tagCounts() async => const [];
+  Future<List<TagCount>> tagCounts({int? limit}) async => const [];
 
   @override
   Future<List<Note>> notesWithTag(String tag, {int limit = 0}) async => [

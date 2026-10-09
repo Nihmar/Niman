@@ -24,7 +24,9 @@ final class TopTagsTile extends StatelessWidget {
   static const int limit = 12;
 
   Future<List<TagCount>> _load() async {
-    final counts = await (await host.controller.tagSource)?.tagCounts();
+    final counts = await (await host.controller.tagSource)?.tagCounts(
+      limit: limit,
+    );
     return (counts ?? const <TagCount>[]).take(limit).toList();
   }
 
