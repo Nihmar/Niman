@@ -491,6 +491,10 @@ final class SerbianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Претходна отворена белешка';
   @override
+  String get shortcutNoteBack => 'Назад';
+  @override
+  String get shortcutNoteForward => 'Напред';
+  @override
   String get shortcutEditorSection => 'У уредитељу';
   @override
   String get shortcutFormatSection => 'Обликовање';

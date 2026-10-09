@@ -486,6 +486,10 @@ final class BasqueStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Aurreko ohar irekia';
   @override
+  String get shortcutNoteBack => 'Atzera';
+  @override
+  String get shortcutNoteForward => 'Aurrera';
+  @override
   String get shortcutEditorSection => 'Erreditoran';
   @override
   String get shortcutFormatSection => 'Formatua';

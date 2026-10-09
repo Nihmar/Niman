@@ -486,6 +486,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Fyrri opni minnispunktur';
   @override
+  String get shortcutNoteBack => 'Til baka';
+  @override
+  String get shortcutNoteForward => 'Áfram';
+  @override
   String get shortcutEditorSection => 'Í ritara';
   @override
   String get shortcutFormatSection => 'Snið';

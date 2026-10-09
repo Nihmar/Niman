@@ -493,6 +493,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Предишна отворена бележка';
   @override
+  String get shortcutNoteBack => 'Назад';
+  @override
+  String get shortcutNoteForward => 'Напред';
+  @override
   String get shortcutEditorSection => 'В редактора';
   @override
   String get shortcutFormatSection => 'Форматиране';

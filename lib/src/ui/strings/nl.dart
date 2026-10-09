@@ -493,6 +493,10 @@ final class DutchStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Vorige open notitie';
   @override
+  String get shortcutNoteBack => 'Terug';
+  @override
+  String get shortcutNoteForward => 'Vooruit';
+  @override
   String get shortcutEditorSection => 'In de editor';
   @override
   String get shortcutFormatSection => 'Opmaak';

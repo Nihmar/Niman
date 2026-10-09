@@ -455,6 +455,10 @@ final class ChineseStrings extends Strings {
   @override
   String get shortcutPreviousTab => '上一个打开的笔记';
   @override
+  String get shortcutNoteBack => '后退';
+  @override
+  String get shortcutNoteForward => '前进';
+  @override
   String get shortcutEditorSection => '编辑器内';
   @override
   String get shortcutFormatSection => '格式';

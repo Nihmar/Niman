@@ -487,6 +487,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Папярэдняя адкрытая нататка';
   @override
+  String get shortcutNoteBack => 'Назад';
+  @override
+  String get shortcutNoteForward => 'Наперад';
+  @override
   String get shortcutEditorSection => 'У рэдактары';
   @override
   String get shortcutFormatSection => 'Фарматаванне';

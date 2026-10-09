@@ -489,6 +489,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Shënimi i hapur paraardhës';
   @override
+  String get shortcutNoteBack => 'Prapa';
+  @override
+  String get shortcutNoteForward => 'Përpara';
+  @override
   String get shortcutEditorSection => 'Në redaktor';
   @override
   String get shortcutFormatSection => 'Formatimi';

@@ -62,6 +62,12 @@ enum AppCommand {
   /// Show the previous open note's tab.
   previousTab,
 
+  /// Go back to the note shown before (#700).
+  noteBack,
+
+  /// Go forward again, after going back (#700).
+  noteForward,
+
   /// Split the window right with the note on screen (#23).
   splitRight,
 
@@ -248,6 +254,14 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
     SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
   ),
   AppShortcut(
+    AppCommand.noteBack,
+    SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true),
+  ),
+  AppShortcut(
+    AppCommand.noteForward,
+    SingleActivator(LogicalKeyboardKey.arrowRight, alt: true),
+  ),
+  AppShortcut(
     AppCommand.splitRight,
     SingleActivator(LogicalKeyboardKey.backslash, control: true),
   ),
@@ -350,6 +364,8 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.closeTab => AppStrings.shortcutCloseTab,
   AppCommand.nextTab => AppStrings.shortcutNextTab,
   AppCommand.previousTab => AppStrings.shortcutPreviousTab,
+  AppCommand.noteBack => AppStrings.shortcutNoteBack,
+  AppCommand.noteForward => AppStrings.shortcutNoteForward,
   AppCommand.splitRight => AppStrings.splitRight,
   AppCommand.toggleDock => AppStrings.sidePanelTooltip,
   AppCommand.splitDown => AppStrings.splitDown,

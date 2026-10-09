@@ -482,6 +482,10 @@ final class TurkishStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Önceki açık not';
   @override
+  String get shortcutNoteBack => 'Geri';
+  @override
+  String get shortcutNoteForward => 'İleri';
+  @override
   String get shortcutEditorSection => 'Düzenleyicide';
   @override
   String get shortcutFormatSection => 'Biçimlendirme';

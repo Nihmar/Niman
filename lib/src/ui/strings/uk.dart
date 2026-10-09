@@ -488,6 +488,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Попередня відкрита нотатка';
   @override
+  String get shortcutNoteBack => 'Назад';
+  @override
+  String get shortcutNoteForward => 'Вперед';
+  @override
   String get shortcutEditorSection => 'У редакторі';
   @override
   String get shortcutFormatSection => 'Форматування';

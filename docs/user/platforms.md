@@ -214,6 +214,11 @@ On an Android phone the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen
 at a time, and the phone has no split: a phone's width holds one note.
 
+**Back and forward** through the notes looked at work everywhere from a
+keyboard (`Alt+←` / `Alt+→`). The mouse's side buttons do it on Linux and
+Windows; on Android a mouse's back button is the system's Back, which
+keeps its meaning — closing the note, leaving a screen.
+
 The **command palette** is `Ctrl+Shift+P` on the desktop. On a phone it
 is its own thing, apart from the library's search: **two fingers dragged
 down** anywhere open it, and so do the ⚡ on the Search tab's bar and

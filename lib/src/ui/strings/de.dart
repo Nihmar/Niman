@@ -492,6 +492,10 @@ final class GermanStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Vorherige offene Notiz';
   @override
+  String get shortcutNoteBack => 'Zurück';
+  @override
+  String get shortcutNoteForward => 'Vorwärts';
+  @override
   String get shortcutEditorSection => 'Im Editor';
   @override
   String get shortcutFormatSection => 'Formatierung';

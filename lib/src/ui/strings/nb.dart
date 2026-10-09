@@ -487,6 +487,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Forrige åpne notat';
   @override
+  String get shortcutNoteBack => 'Tilbake';
+  @override
+  String get shortcutNoteForward => 'Fremover';
+  @override
   String get shortcutEditorSection => 'I editoren';
   @override
   String get shortcutFormatSection => 'Formatering';

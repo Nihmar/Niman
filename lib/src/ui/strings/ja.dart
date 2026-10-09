@@ -457,6 +457,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get shortcutPreviousTab => '前の開いているノート';
   @override
+  String get shortcutNoteBack => '戻る';
+  @override
+  String get shortcutNoteForward => '進む';
+  @override
   String get shortcutEditorSection => 'エディタ内';
   @override
   String get shortcutFormatSection => '書式';

@@ -484,6 +484,10 @@ final class LatvianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Iepriekšējā atvērtā piezīme';
   @override
+  String get shortcutNoteBack => 'Atpakaļ';
+  @override
+  String get shortcutNoteForward => 'Uz priekšu';
+  @override
   String get shortcutEditorSection => 'Redaktorā';
   @override
   String get shortcutFormatSection => 'Formatējums';

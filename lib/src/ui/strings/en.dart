@@ -488,6 +488,10 @@ final class EnglishStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Previous open note';
   @override
+  String get shortcutNoteBack => 'Go back';
+  @override
+  String get shortcutNoteForward => 'Go forward';
+  @override
   String get shortcutEditorSection => 'In the editor';
   @override
   String get shortcutFormatSection => 'Formatting';

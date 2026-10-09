@@ -488,6 +488,10 @@ final class DanishStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Forrige åbne note';
   @override
+  String get shortcutNoteBack => 'Tilbage';
+  @override
+  String get shortcutNoteForward => 'Frem';
+  @override
   String get shortcutEditorSection => 'I editoren';
   @override
   String get shortcutFormatSection => 'Formatering';

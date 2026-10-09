@@ -488,6 +488,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Ankstesnis atvertas užrašas';
   @override
+  String get shortcutNoteBack => 'Atgal';
+  @override
+  String get shortcutNoteForward => 'Pirmyn';
+  @override
   String get shortcutEditorSection => 'Redaktoriuje';
   @override
   String get shortcutFormatSection => 'Formatavimas';

@@ -134,6 +134,7 @@ import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
+import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
@@ -1395,6 +1396,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// the one the shell shows, kept current and kept for the next launch.
   late final ShellWorkspace _workspace = ShellWorkspace(widget.controller);
 
+  /// Back and forward through the notes shown (#700).
+  late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
+    workspace: _workspace,
+    missing: widget.controller.missingPaths,
+    show: (path) {
+      if (mounted) _openSearchNote(path);
+    },
+  );
+
   /// The library's name: what the title bar reads over the tree, once the
   /// notes' names are on their tabs (#23).
   String get _libraryName {
@@ -1730,6 +1740,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     AppKeyMap.current.addListener(_onKeyMapChanged);
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
+    HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
     _zen.addListener(_onZenChanged);
     _epubFullScreen.addListener(_onEpubFullScreen);
     unawaited(_workspace.load());
@@ -1816,6 +1827,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
     FocusManager.instance.removeListener(_reclaimFocus);
+    HardwareKeyboard.instance.removeHandler(_historyKeyUnfocused);
     // A library switch tears the shell down: the window it maximized goes
     // back as it was.
     _zen.removeListener(_onZenChanged);
@@ -2739,12 +2751,46 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             (url) => unawaited(_captureFlow.capture(context, url: url)),
           ),
         },
-        child: narrow
-            ? NarrowShellLayout(props: props)
-            : WideShellLayout(props: props),
+        child: _mouseHistory(
+          narrow
+              ? NarrowShellLayout(props: props)
+              : WideShellLayout(props: props),
+        ),
       ),
     );
   }
+
+  /// Back and forward from a keyboard while nothing in the window has the
+  /// focus (#700): the phone's layout claims none, so a field keeps the
+  /// software keyboard (T-PP-10), and no binding of the shell hears a key
+  /// then. With a focus, the shell's bindings answer, and this does not.
+  bool _historyKeyUnfocused(KeyEvent event) {
+    if (event is! KeyDownEvent || !mounted) return false;
+    if (FocusManager.instance.primaryFocus is! FocusScopeNode) return false;
+    final keys = AppKeyMap.current.value;
+    final keyboard = HardwareKeyboard.instance;
+    if (keys.bindingOf(AppCommand.noteBack)?.accepts(event, keyboard) ??
+        false) {
+      unawaited(_noteHistory.back());
+      return true;
+    }
+    if (keys.bindingOf(AppCommand.noteForward)?.accepts(event, keyboard) ??
+        false) {
+      unawaited(_noteHistory.forward());
+      return true;
+    }
+    return false;
+  }
+
+  /// The mouse's side buttons over the window, on a desktop (#700). A
+  /// phone's back button is the system's Back, which keeps its meaning.
+  Widget _mouseHistory(Widget child) => Platform.isLinux || Platform.isWindows
+      ? MouseHistoryButtons(
+          onBack: () => unawaited(_noteHistory.back()),
+          onForward: () => unawaited(_noteHistory.forward()),
+          child: child,
+        )
+      : child;
 
   /// The open note's actions on the phone's note bar: the kind toggles,
   /// the editor/preview eye, and the ⋮ menu.
@@ -3436,6 +3482,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.closeTab: _workspace.closeActive,
       AppCommand.nextTab: () => _workspace.cycle(1),
       AppCommand.previousTab: () => _workspace.cycle(-1),
+      AppCommand.noteBack: () => unawaited(_noteHistory.back()),
+      AppCommand.noteForward: () => unawaited(_noteHistory.forward()),
       AppCommand.splitRight: () => _workspace.splitActive(SplitAxis.right),
       AppCommand.splitDown: () => _workspace.splitActive(SplitAxis.down),
       AppCommand.toggleDock: _toggleDock,
