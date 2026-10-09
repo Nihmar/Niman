@@ -65,6 +65,7 @@ import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
+import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
@@ -1552,7 +1553,7 @@ final class _NoteViewState extends State<NoteView>
   /// (`widget.frontmatterPanel`), so a library that wants none gets none.
   Widget? _frontmatterFields() {
     if (!widget.frontmatterPanel) return null;
-    final head = _frontmatterHeadOf(_surface?.buffer);
+    final head = frontmatterHeadOf(_surface?.buffer);
     if (head == null) return null;
     return FrontmatterFields(
       note: head,
@@ -1584,26 +1585,12 @@ final class _NoteViewState extends State<NoteView>
   /// the panel shows again — once per keystroke on a short note (#522). The
   /// caret's line does not move with the panel, so it decides instead.
   bool _headInView() {
-    if (widget.typewriter && !_previewIn(widget)) return _caretInHead();
+    if (widget.typewriter && !_previewIn(widget)) {
+      return caretInFrontmatterHead(_surface?.buffer, _surfaceCaretLine);
+    }
     final controller = _previewIn(widget) ? _previewScroll : _sourceScroll;
     return !controller.hasClients ||
         controller.offset <= _frontmatterHeadExtent;
-  }
-
-  /// Whether the editor's caret is on one of the note's head lines (#522):
-  /// with no caret reported yet — a note just opened — the head counts as
-  /// shown, as a pane not yet laid out does.
-  bool _caretInHead() {
-    final caret = _surfaceCaretLine;
-    if (caret == null) return true;
-    final buffer = _surface?.buffer;
-    final head = _frontmatterHeadOf(buffer);
-    if (buffer == null || head == null || head.isEmpty) return false;
-    // The head's last line, as the buffer counts it: the line its last
-    // character — a terminator, or the closing fence of a note that ends
-    // there — belongs to. Counting `\n`s instead missed that last fence, and
-    // any line a lone `\r` ends.
-    return caret <= buffer.lineOf(head.length - 1) + 1;
   }
 
   /// The panel follows the note's head (#157): away once the note is scrolled
@@ -1626,47 +1613,13 @@ final class _NoteViewState extends State<NoteView>
   /// is what the head costs, so any scroll past the top is past the head.
   double _headExtentOf(BuildContext context, {required bool showPreview}) {
     if (showPreview) return 0;
-    final buffer = _surface?.buffer;
-    if (buffer == null || buffer.lineCount == 0) return 0;
-    final head = _frontmatterHeadOf(buffer);
-    if (head == null) return 0;
+    final rows = frontmatterHeadRows(_surface?.buffer);
+    if (rows == 0) return 0;
     final scaler = noteTextScalerOf(context);
     final row = scaler.scale(
       markdownThemeOf(context, scaler: scaler).lineHeight,
     );
-    // The head's lines: one terminator closes each of them.
-    return row * '\n'.allMatches(head).length;
-  }
-
-  /// The note's leading frontmatter block as text — the fences included, and
-  /// the blank line after it — or null when [buffer] has no such block.
-  ///
-  /// The same head the other frontmatter edits work on: the closing fence's
-  /// line, plus the blank line the block's last key takes with it
-  /// (`frontmatter/edit.dart`). Only as far as the closing fence is read, and
-  /// never past [_frontmatterLookahead], so a huge note that opens `---` and
-  /// never closes it costs a few lines and not the file.
-  String? _frontmatterHeadOf(SourceBuffer? buffer) {
-    if (buffer == null || buffer.lineCount == 0) return null;
-    if (buffer.lineAt(0).trim() != '---') return null;
-    final head = StringBuffer();
-    for (var line = 0; line < buffer.lineCount; line++) {
-      final text = buffer.lineAt(line);
-      head
-        ..write(text)
-        ..write(buffer.terminatorAt(line));
-      if (head.length > _frontmatterLookahead) return null;
-      if (line > 0 && (text.trim() == '---' || text.trim() == '...')) {
-        final next = line + 1;
-        if (next < buffer.lineCount && buffer.lineAt(next).trim().isEmpty) {
-          head
-            ..write(buffer.lineAt(next))
-            ..write(buffer.terminatorAt(next));
-        }
-        return head.toString();
-      }
-    }
-    return null;
+    return row * rows;
   }
 
   /// Writes one frontmatter field through the editor's own door (#157).
@@ -1678,15 +1631,10 @@ final class _NoteViewState extends State<NoteView>
   /// second source of truth to keep in step.
   void _applyFieldEdit(String key, String? value) {
     final surface = _surface;
-    final buffer = surface?.buffer;
-    if (surface == null || buffer == null) return;
-    final head = _frontmatterHeadOf(buffer);
-    if (head == null) return;
-    final edited = value == null
-        ? removeFrontmatterKey(head, key)
-        : setFrontmatterKey(head, key, value);
-    if (edited == head) return;
-    surface.replaceRange(0, head.length, edited, caret: surface.selection);
+    if (surface == null) return;
+    final edit = frontmatterFieldEdit(surface.buffer, key, value);
+    if (edit == null) return;
+    surface.replaceRange(0, edit.end, edit.text, caret: surface.selection);
     _refreshPreview();
     _refreshStats();
   }
@@ -1894,7 +1842,7 @@ final class _NoteViewState extends State<NoteView>
         _statsTimer?.cancel();
         _statsTimer = Timer(_statsDelay, _refreshStats);
       }
-      final frontmatter = _frontmatterErrorOf(surface.buffer);
+      final frontmatter = frontmatterErrorOf(surface.buffer);
       setState(() {
         if (counted != null) _wordCount = counted;
         if (headings != null) _outline = headings;
@@ -1953,29 +1901,6 @@ final class _NoteViewState extends State<NoteView>
       surface.buffer.lineAt,
     );
   }
-
-  /// The frontmatter's error, from the note's first lines only.
-  ///
-  /// [frontmatterErrorIn] reads the leading block and stops; a note's
-  /// frontmatter is its first handful of lines, so it is handed those
-  /// rather than the joined note.
-  String? _frontmatterErrorOf(SourceBuffer buffer) {
-    if (buffer.lineCount == 0) return null;
-    final buffer0 = StringBuffer();
-    for (
-      var line = 0;
-      line < buffer.lineCount && buffer0.length < _frontmatterLookahead;
-      line++
-    ) {
-      buffer0
-        ..write(buffer.lineAt(line))
-        ..write(buffer.terminatorAt(line));
-    }
-    return frontmatterErrorIn(buffer0.toString());
-  }
-
-  /// How much of a note's head the frontmatter check is given.
-  static const int _frontmatterLookahead = 8 * 1024;
 
   static const int _syncWorkLimit = 64 * 1024;
 
