@@ -91,7 +91,7 @@ import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/markdown/render/template_hint.dart';
-import 'package:niman/src/markdown/render/wikilink_panel.dart';
+import 'package:niman/src/markdown/render/wikilink_suggest.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
@@ -104,7 +104,6 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/templates/checker.dart';
 import 'package:niman/src/templates/template_commands.dart';
-import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 
@@ -620,23 +619,27 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     null,
   );
 
-  /// The overlay the wikilink suggester panel is drawn in (#475).
-  final OverlayPortalController _suggestOverlay = OverlayPortalController();
+  /// The wikilink suggester (#475): the panel a `[[link]]` being typed opens,
+  /// its keys, and the edit that completes the link. Listened to from
+  /// [initState]: the note rebuilds when the panel changes.
+  late final WikilinkSuggestController _suggest = WikilinkSuggestController(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    suggester: () => widget.wikilinkSuggester,
+    lineRead: (line) => _tokensAt(line) != null,
+    inCodeAt: _inCodeAt,
+    headings: () => headings,
+    replace: (start, end, text, caret) =>
+        _replaceRange(start, end, text, caret: caret),
+    ensureCaretVisible: _ensureCaretVisible,
+    caretRect: () => _caretRectAt(_selection.extent) ?? caretRect,
+    noteBox: () => _noteBox,
+    caretMoves: () => Listenable.merge([_scroll, _caretRect]),
+  );
 
-  /// The open panel, or null while no wikilink is being typed.
-  _SuggestPanel? _suggest;
-
-  /// Counts the panel's queries, so a slower one a later query overtook is
-  /// dropped rather than shown.
-  int _suggestSeq = 0;
-
-  /// A line break already taken as the panel's `Enter`: the desktop embedders
-  /// send the break as text *after* the key, so the copy that follows is
-  /// swallowed instead of inserting a newline behind the completed link.
-  bool _swallowBreak = false;
-
-  /// How many rows the panel shows at once (the drawing's density).
-  static const int _suggestRows = 8;
+  /// The suggester's panel opened, closed or changed: the note is built
+  /// again, as it always was when the panel moved.
+  void _onSuggestChanged() => setState(() {});
 
   @override
   void initState() {
@@ -653,6 +656,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _runTemplateCheck();
     });
     _restyle();
+    _suggest.addListener(_onSuggestChanged);
     _scroll = widget.controller ?? ScrollController();
     _ownsScroll = widget.controller == null;
     _focus = widget.focusNode ?? FocusNode();
@@ -699,7 +703,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       setState(() => _ownSelection = next);
       widget.onSelection?.call(next);
       _scheduleCaret();
-      _refreshSuggest();
+      _suggest.refresh();
     },
     onEdited: (edit) {
       _hideTouch();
@@ -711,7 +715,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _ensureCaretVisible();
       _notifyChanged(edit);
       _cost.endEdit();
-      _refreshSuggest(typed: true);
+      _suggest.refresh(typed: true);
     },
   );
 
@@ -793,7 +797,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // from the new text: it holds the offsets of the link it was opened in
       // and the rows that complete it, so `Enter` would write a note name
       // into the note that took its place (#494).
-      _dropSuggestInUpdate();
+      _suggest.dropInUpdate();
       final attached = _input.isAttached;
       _input.detach();
       _history = widget.history ?? widget.surface?.history ?? EditHistory();
@@ -817,7 +821,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // follow. The link the panel stood in may be gone or moved — the caret
       // is clamped into whatever replaced it — and its offsets are the ones
       // read from the text that went, so the panel goes with them (#494).
-      _dropSuggestInUpdate();
+      _suggest.dropInUpdate();
       _restyle();
       _folds.clear();
       _heights = _map();
@@ -859,6 +863,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.findMatches?.removeListener(_onSpellingChanged);
     widget.mathCache?.removeListener(_onMathTypeset);
     _hint.dispose();
+    _suggest
+      ..removeListener(_onSuggestChanged)
+      ..dispose();
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     WindowVisibility.shown.removeListener(_onWindowShown);
@@ -1056,7 +1063,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer.replaceRange(0, buffer.length, text);
     _history.clear();
     // The panel holds offsets into the text that went (#494).
-    _closeSuggest();
+    _suggest.close();
     _restyle();
     _folds.clear();
     _heights = _map();
@@ -1107,7 +1114,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // An undo is an edit no keystroke made: the panel is read again off the
     // text it left — it follows a link still there and closes on one gone
     // (#494).
-    _refreshSuggest();
+    _suggest.refresh();
     if (edit != null) _notifyChanged(edit);
     return true;
   }
@@ -1362,7 +1369,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _notifyChanged(edit);
     // An edit made where the writer is looking rather than typing — a box
     // ticked — types no link.
-    _refreshSuggest(typed: follow);
+    _suggest.refresh(typed: follow);
   }
 
   /// Deletes the selection, or what is before the caret: one character, or a
@@ -1463,10 +1470,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The line break a completed link's `Enter` sent after the key: already
     // taken as the panel's `Enter`, so it is swallowed rather than written
     // behind the link (#475).
-    if (_swallowBreak) {
-      _swallowBreak = false;
-      return true;
-    }
+    if (_suggest.takeSwallowedBreak()) return true;
     // In a table in `live`: the cell below, or out of it.
     if (_tableEnter()) return true;
     if (start != end) return false;
@@ -2200,7 +2204,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _ownSelection = clamped;
     if (rebuild || !clamped.isCollapsed || wasRange) setState(() {});
     _caretSpot.value = _spotOf(clamped.extent);
-    if (suggest) _refreshSuggest();
+    if (suggest) _suggest.refresh();
     widget.onSelection?.call(clamped);
     _input.sendSelection();
     _scheduleCaret();
@@ -3540,8 +3544,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               builder: (context, _) => _templateHint(context),
             ),
             child: OverlayPortal(
-              controller: _suggestOverlay,
-              overlayChildBuilder: _suggestOverlayChild,
+              controller: _suggest.overlay,
+              overlayChildBuilder: _suggest.buildOverlay,
               child: OverlayPortal(
                 // The code blocks' copy buttons ride the scroll, under all
                 // of the above.
@@ -4020,380 +4024,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _menuOverlay.hide();
   }
 
-  // --------------------------------------------------- wikilink suggester
-
-  /// The link the caret sits inside, or null when it sits inside none: a `[[`
-  /// before it on its own line with no `]]` between the two.
-  ///
-  /// The bracket pair writes the closing `]]` the moment `[[` is typed, so the
-  /// closer stands *after* the caret while the target is written: only a `]]`
-  /// between the `[[` and the caret closes the link, and typing through the
-  /// pair's own closer carries the caret past it and closes the panel (#475).
-  _LinkQuery? _linkQuery() {
-    final selection = _selection;
-    if (!selection.isCollapsed) return null;
-    final buffer = widget.buffer;
-    final caret = selection.extent.clamp(0, buffer.length);
-    final line = buffer.lineOf(caret);
-    final lineStart = buffer.offsetOfLine(line);
-    final text = buffer.lineAt(line);
-    final at = caret - lineStart;
-    final open = text.lastIndexOf('[[', at);
-    if (open < 0 || open + 2 > at) return null;
-    // A link is prose: in a fence, an indented block or display maths, or in
-    // an inline code or maths span, there is none to complete. The panel would
-    // list the library for text the note reads as code and write the note name
-    // it completed there (#494). Asked of the `[[` read above as well as of
-    // the caret: a link opened in a span is the span's, even once the caret
-    // has left it, and a caret made in a span completes nothing outside it.
-    //
-    // A line of a long note whose colours are still being read has no tokens
-    // to ask — [_tokensAt] is null, "nobody has read it yet", which [_inCodeAt]
-    // would answer as "no code here" — and its fence state is a scan of the
-    // lines above it: not something to guess at here. No panel opens until
-    // the reading lands; the next keystroke in the link opens it (#494).
-    if (_tokensAt(line) == null) return null;
-    if (_inCodeAt(line, at) || _inCodeAt(line, open)) return null;
-    final close = text.indexOf(']]', open + 2);
-    if (close != -1 && close < at) return null;
-    final content = text.substring(open + 2, at);
-    // A `|` starts the link's display alias: the panel completes the target,
-    // not the words shown.
-    if (content.contains('|')) return null;
-    final hash = content.indexOf('#');
-    // A link closed after the caret — one already written, typed into — has
-    // the rest of what is being completed there too: the target runs on to a
-    // `#`, a `|` or the `]]`, a heading to a `|` or the `]]`. A `]]` past
-    // another `[[` is that link's, and this one is still open.
-    var end = at;
-    var closeAt = -1;
-    final reopen = text.indexOf('[[', at);
-    if (close != -1 && (reopen == -1 || reopen > close)) {
-      closeAt = lineStart + close;
-      end = close;
-      for (final stop in hash == -1 ? const ['#', '|'] : const ['|']) {
-        final found = text.indexOf(stop, at);
-        if (found != -1 && found < end) end = found;
-      }
-    }
-    final query = _LinkQuery(
-      start: lineStart + open + 2,
-      caret: caret,
-      end: lineStart + end,
-      closeAt: closeAt,
-      target: hash == -1 ? content : content.substring(0, hash),
-      heading: hash == -1 ? '' : content.substring(hash + 1),
-      hasHash: hash != -1,
-      // An embed, `![[`, lists the attachments rather than the notes (#705).
-      embed: open > 0 && text.codeUnitAt(open - 1) == 0x21,
-    );
-    // A book's place is written through its `=` (`page=`): what follows is
-    // the number the form asked the writer for, and no row completes it. The
-    // key after it is the note's again, so the number stands (#494).
-    if (_modeOf(query) == WikilinkPanelKind.book &&
-        query.heading.contains('=')) {
-      return null;
-    }
-    return query;
-  }
-
-  /// Opens, filters or closes the panel for where the caret is now.
-  ///
-  /// Called from every caret move and edit; the text of the link is what
-  /// decides whether the library is asked again, so a caret that moves inside
-  /// an unchanged link does not.
-  ///
-  /// Only an edit — [typed] — opens the panel: it is for a link being typed,
-  /// and a caret moved into a link already written (an arrow, a click) is
-  /// just passing through, its keys still the note's. A move follows the
-  /// panel already open for as long as it stays in that link.
-  void _refreshSuggest({bool typed = false}) {
-    if (!mounted) return;
-    final suggester = widget.wikilinkSuggester;
-    if (suggester == null) {
-      _closeSuggest();
-      return;
-    }
-    final query = _linkQuery();
-    if (query == null) {
-      _closeSuggest();
-      return;
-    }
-    final panel = _suggest;
-    if (!typed && (panel == null || panel.query.start != query.start)) {
-      _closeSuggest();
-      return;
-    }
-    if (panel != null && panel.query.sameText(query)) {
-      // The same link, the caret somewhere else in it: keep the rows and
-      // follow the caret. A fresh object for the same text still names the
-      // load in flight, which the `sameText` guard below accepts.
-      if (!identical(panel.query, query)) {
-        setState(() => panel.query = query);
-      }
-      _suggestOverlay.show();
-      return;
-    }
-    _askSuggest(query, suggester);
-  }
-
-  /// Asks [suggester] what the link [query] can hold, and shows the answer.
-  void _askSuggest(_LinkQuery query, WikilinkSuggester suggester) {
-    final previous = _suggest;
-    final panel = _SuggestPanel(
-      query: query,
-      kind: _modeOf(query),
-      // The rows of the link just left stay until the answer lands: the
-      // panel does not flash its empty words between two keystrokes.
-      entries: previous?.entries ?? const <SuggestEntry>[],
-      named: query.target.isEmpty ? '' : query.target,
-    )..answers = previous?.answers;
-    setState(() => _suggest = panel);
-    _suggestOverlay.show();
-    final seq = ++_suggestSeq;
-    unawaited(_loadSuggest(seq, query, suggester));
-  }
-
-  Future<void> _loadSuggest(
-    int seq,
-    _LinkQuery query,
-    WikilinkSuggester suggester,
-  ) async {
-    final kind = _modeOf(query);
-    List<SuggestEntry> entries;
-    var named = query.target;
-    switch (kind) {
-      case WikilinkPanelKind.notes:
-        named = '';
-        entries = await suggester.notes(query.target);
-      case WikilinkPanelKind.embeds:
-        named = '';
-        entries = await suggester.embeds(query.target);
-      case WikilinkPanelKind.headings:
-        if (query.target.isEmpty) {
-          // The empty target is the note being edited: its own scan answers,
-          // so no read is paid for what is already on screen.
-          named = '';
-          entries = <SuggestEntry>[
-            for (final heading in headings ?? const <OutlineEntry>[])
-              HeadingSuggestion(heading.text),
-          ];
-        } else {
-          entries = await suggester.headings(query.target);
-        }
-      case WikilinkPanelKind.book:
-        entries = await suggester.bookPlaces(query.target);
-    }
-    if (!mounted || seq != _suggestSeq) return;
-    final panel = _suggest;
-    // The panel still stands in the same link text — the caret may have moved
-    // inside it since the read started, so this compares the text, not the
-    // object.
-    if (panel == null || !panel.query.sameText(query)) return;
-    setState(() {
-      panel
-        ..kind = kind
-        ..named = named
-        ..entries = _shown(entries, query)
-        ..answers = query
-        ..selected = 0;
-    });
-  }
-
-  /// [entries] as the panel shows them: filtered for a heading query (prefix
-  /// before contains), and cut to the rows it draws.
-  List<SuggestEntry> _shown(List<SuggestEntry> entries, _LinkQuery query) {
-    var matches = entries;
-    if (query.hasHash &&
-        matches.isNotEmpty &&
-        matches.first is HeadingSuggestion) {
-      final q = query.heading.toLowerCase();
-      if (q.isNotEmpty) {
-        final before = <SuggestEntry>[];
-        final within = <SuggestEntry>[];
-        for (final entry in matches) {
-          final text = (entry as HeadingSuggestion).heading.toLowerCase();
-          if (text.startsWith(q)) {
-            before.add(entry);
-          } else if (text.contains(q)) {
-            within.add(entry);
-          }
-        }
-        matches = <SuggestEntry>[...before, ...within];
-      }
-    }
-    return matches.take(_suggestRows).toList(growable: false);
-  }
-
-  /// What the link [query] is listing: the notes, a note's headings, or a
-  /// book's place forms.
-  static WikilinkPanelKind _modeOf(_LinkQuery query) {
-    if (!query.hasHash) {
-      return query.embed ? WikilinkPanelKind.embeds : WikilinkPanelKind.notes;
-    }
-    final target = query.target.toLowerCase();
-    return target.endsWith('.pdf') || target.endsWith('.epub')
-        ? WikilinkPanelKind.book
-        : WikilinkPanelKind.headings;
-  }
-
-  /// Closes the panel, dropping any answer still on its way.
-  void _closeSuggest() {
-    if (_suggest == null) return;
-    _suggestSeq++;
-    setState(() => _suggest = null);
-    _suggestOverlay.hide();
-  }
-
-  /// Drops the panel from a `didUpdateWidget`, which runs inside the build.
-  ///
-  /// The overlay portal refuses to be hidden there, so the panel is dropped
-  /// off the state the build that follows reads — no key and no draw of it
-  /// this frame — and the portal is hidden once the frame is over. A panel
-  /// opened in the meantime, for the text that replaced it, is left standing.
-  void _dropSuggestInUpdate() {
-    if (_suggest == null) return;
-    _suggestSeq++;
-    _suggest = null;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _suggest != null) return;
-      _suggestOverlay.hide();
-    });
-  }
-
-  /// Moves the panel's selection by [by], kept inside the rows.
-  void _moveSuggest(int by) {
-    final panel = _suggest;
-    if (panel == null || panel.entries.isEmpty) return;
-    final next = (panel.selected + by).clamp(0, panel.entries.length - 1);
-    if (next == panel.selected) return;
-    setState(() => panel.selected = next);
-  }
-
-  /// Completes the link with the row that is selected — one edit, one undo
-  /// step — and closes the panel. Nothing is written but the link.
-  void _acceptSuggest() {
-    final panel = _suggest;
-    if (panel == null || !panel.isCurrent) return;
-    final entry = panel.entries.elementAtOrNull(panel.selected);
-    if (entry == null) return;
-    final query = panel.query;
-    _closeSuggest();
-    switch (entry) {
-      case NoteSuggestion():
-        _completeSuggest(query, query.start, entry.target);
-      case HeadingSuggestion():
-        _completeSuggest(query, query.hashAt, entry.heading);
-      case BookSuggestion():
-        // A form, not a link: the number is typed after it, so the caret
-        // stops at the `=` and the link is left open.
-        _completeSuggest(query, query.hashAt, entry.form, form: true);
-    }
-  }
-
-  /// Replaces what [query] completes — from [from] to its end — with [text]
-  /// as one undoable edit. The caret lands past the link's `]]`: the one it
-  /// already has, whatever follows the text before it, or one written after
-  /// the text when it has none. A [form] leaves the caret after the text.
-  void _completeSuggest(
-    _LinkQuery query,
-    int from,
-    String text, {
-    bool form = false,
-  }) {
-    final to = query.end;
-    final closed = query.closeAt >= 0;
-    final insert = form || closed ? text : '$text]]';
-    final shift = text.length - (to - from);
-    final caret = form
-        ? from + text.length
-        : closed
-        ? query.closeAt + shift + 2
-        : from + insert.length;
-    _replaceRange(from, to, insert, caret: SelectionModel.at(caret));
-    _ensureCaretVisible();
-  }
-
-  /// Forgets the swallowed break after the frame the key was handled in, so a
-  /// later `Enter` is never eaten.
-  void _clearSwallowBreak() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _swallowBreak = false);
-  }
-
-  /// The panel where the caret is: under its rectangle, inside the pane.
-  Widget _suggestOverlayChild(BuildContext context) {
-    final panel = _suggest;
-    if (panel == null) return const SizedBox.shrink();
-    return ListenableBuilder(
-      // A keyboard plugged in while the panel is up brings its keys along.
-      listenable: Listenable.merge([
-        _scroll,
-        _caretRect,
-        KeyboardPresence.shared,
-      ]),
-      builder: (context, _) => _suggestAt(context, panel),
-    );
-  }
-
-  Widget _suggestAt(BuildContext context, _SuggestPanel panel) {
-    final overlay = Overlay.of(context).context.findRenderObject();
-    if (overlay is! RenderBox || !overlay.hasSize) {
-      return const SizedBox.shrink();
-    }
-    final caret = _caretRectAt(_selection.extent) ?? caretRect;
-    if (caret == null) return const SizedBox.shrink();
-    Rect toOverlay(Rect rect) => Rect.fromPoints(
-      overlay.globalToLocal(rect.topLeft),
-      overlay.globalToLocal(rect.bottomRight),
-    );
-    final box = _noteBox;
-    final pane = box == null
-        ? null
-        : toOverlay(box.localToGlobal(Offset.zero) & box.size);
-    // A row is tapped on a touch screen, and taller for it; the keys are
-    // named only where a keyboard has been seen to press them.
-    final touch = switch (Theme.of(context).platform) {
-      TargetPlatform.android || TargetPlatform.iOS => true,
-      _ => false,
-    };
-    final rowHeight = touch
-        ? wikilinkPanelTouchRowHeight
-        : wikilinkPanelRowHeight;
-    final keys = KeyboardPresence.shared.attached;
-    return WikilinkPanelPositioned(
-      caret: toOverlay(caret),
-      pane: pane,
-      height: wikilinkPanelHeight(
-        panel.entries.length,
-        panel.kind,
-        hasBodyNote: panel.kind == WikilinkPanelKind.book,
-        rowHeight: rowHeight,
-        keys: keys,
-      ),
-      child: WikilinkPanel(
-        kind: panel.kind,
-        entries: panel.entries,
-        selected: panel.selected,
-        query: panel.query.matchText,
-        named: panel.named,
-        onPick: _pickSuggest,
-        keys: keys,
-        rowHeight: rowHeight,
-      ),
-    );
-  }
-
-  /// Completes the link with the row at [index], tapped or clicked: the
-  /// same edit Enter makes on the selected one.
-  void _pickSuggest(int index) {
-    final panel = _suggest;
-    if (panel == null || index >= panel.entries.length) return;
-    panel.selected = index;
-    _acceptSuggest();
-  }
-
   /// Whether the suggester panel is up, for the shell's tour and the tests.
-  bool get isSuggesterShown => _suggest != null;
+  bool get isSuggesterShown => _suggest.isShown;
 
   /// The keys the menu answers while the note has the focus: Escape closes
   /// it (or the touch selection, or collapses a selection), and the menu key
@@ -4407,50 +4039,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final alt = HardwareKeyboard.instance.isAltPressed;
     final meta = HardwareKeyboard.instance.isMetaPressed;
     // The wikilink suggester owns its keys while it is open, and only then
-    // (#475): Escape closes, Up/Down move, Enter/Tab insert. A chord is left
-    // alone, and with no panel the keys fall through to the note's own table
+    // (#475); with no panel the keys fall through to the note's own table
     // exactly as they did.
-    final suggest = _suggest;
-    if (suggest != null) {
-      if (key == LogicalKeyboardKey.escape &&
-          !shift &&
-          !control &&
-          !alt &&
-          !meta) {
-        _closeSuggest();
-        return KeyEventResult.handled;
-      }
-      // Only rows that answer the link as it stands take a key: while the
-      // next answer is on its way the rows drawn are the last link's, and the
-      // key does what it does with no rows.
-      if (suggest.isCurrent &&
-          suggest.entries.isNotEmpty &&
-          !shift &&
-          !control &&
-          !alt &&
-          !meta) {
-        if (key == LogicalKeyboardKey.arrowUp) {
-          _moveSuggest(-1);
-          return KeyEventResult.handled;
-        }
-        if (key == LogicalKeyboardKey.arrowDown) {
-          _moveSuggest(1);
-          return KeyEventResult.handled;
-        }
-        if (key == LogicalKeyboardKey.tab) {
-          _acceptSuggest();
-          return KeyEventResult.handled;
-        }
-        if (key == LogicalKeyboardKey.enter ||
-            key == LogicalKeyboardKey.numpadEnter) {
-          _acceptSuggest();
-          // The embedders send the line break as text after the key too.
-          _swallowBreak = true;
-          _clearSwallowBreak();
-          return KeyEventResult.handled;
-        }
-      }
-    }
+    final taken = _suggest.handleKey(
+      key,
+      modified: shift || control || alt || meta,
+    );
+    if (taken != null) return taken;
     if (key == LogicalKeyboardKey.escape) {
       if (_menuAt != null) {
         hideContextMenu();
@@ -4969,90 +4564,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     },
     child: child,
   );
-}
-
-/// The link the caret sits inside, while the suggester panel is open.
-///
-/// [start] is the offset after the opening `[[`; [target] is the text before a
-/// `#` and [heading] the text after it; [hashAt] is the offset after the `#`,
-/// where a heading (or a book form) is written. [sameText] compares the two
-/// halves alone, so a caret that moves inside an unchanged link does not make
-/// the panel ask the library again.
-final class _LinkQuery {
-  const new({
-    required this.start,
-    required this.caret,
-    required this.end,
-    required this.closeAt,
-    required this.target,
-    required this.heading,
-    required this.hasHash,
-    this.embed = false,
-  });
-
-  final int start;
-  final int caret;
-
-  /// Where the part being completed ends: the caret in a link still open,
-  /// the `#`, `|` or `]]` that ends it in a link closed after the caret.
-  final int end;
-
-  /// Where the link's closing `]]` stands, or -1 while it has none.
-  final int closeAt;
-
-  final String target;
-  final String heading;
-  final bool hasHash;
-
-  /// Whether a `!` stands before the `[[`: an embed (#705).
-  final bool embed;
-
-  /// The offset just past the `#`, where a heading or a book form is written.
-  int get hashAt => start + target.length + 1;
-
-  /// What the panel matches and bolds: the heading after a `#`, the target
-  /// before it.
-  String get matchText => hasHash ? heading : target;
-
-  /// Whether [other] names the same link text, however the caret moved.
-  bool sameText(_LinkQuery other) =>
-      target == other.target &&
-      heading == other.heading &&
-      hasHash == other.hasHash &&
-      embed == other.embed;
-}
-
-/// The suggester panel's own state: what is listed, and which row is picked.
-final class _SuggestPanel {
-  new({
-    required this.query,
-    required this.kind,
-    required this.entries,
-    required this.named,
-  });
-
-  /// The link the panel stands in.
-  _LinkQuery query;
-
-  /// What the rows are.
-  WikilinkPanelKind kind;
-
-  /// The rows, best match first.
-  List<SuggestEntry> entries;
-
-  /// The link text [entries] answer, or null for no query at all. It trails
-  /// [query] while the next answer is on its way: the rows of the link just
-  /// left stay drawn, but they are not this link's to complete.
-  _LinkQuery? answers;
-
-  /// Whether [entries] answer the link as it stands, so a key may take one.
-  bool get isCurrent => answers?.sameText(query) ?? false;
-
-  /// The note (or book) named before `#`; empty for the note being edited.
-  String named;
-
-  /// Which row `Enter` would take.
-  int selected = 0;
 }
 
 /// One source line: its gutter number, its styled runs, and its caret.
