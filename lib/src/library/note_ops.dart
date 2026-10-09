@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
-import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
@@ -21,16 +20,14 @@ import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_op_seams.dart';
+import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_trash.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/link_moves.dart';
-import 'package:niman/src/links/rewrite.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
-import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
 
@@ -96,6 +93,20 @@ final class NoteOps implements NoteOperations {
     serialize: _synchronized,
     hint: _hint,
     find: _mustFind,
+  );
+
+  /// Moves notes and folders and carries what named them along.
+  late final NoteRelocator _relocator = NoteRelocator(
+    root: root,
+    dao: _dao,
+    indexer: indexer,
+    history: history,
+    config: config,
+    writer: writer,
+    hint: _hint,
+    find: _mustFind,
+    readNote: readNote,
+    carryOutside: carryOutside,
   );
 
   /// What else, outside the library's own files, names a note by its path
@@ -469,7 +480,7 @@ final class NoteOps implements NoteOperations {
       }
       final newRel = resolvePath(parent, target);
       if (newRel == path) return row;
-      return await _relocate(row, path, newRel);
+      return await _relocator.relocate(row, path, newRel);
     });
   }
 
@@ -498,194 +509,8 @@ final class NoteOps implements NoteOperations {
         target = await uniqueFileName(targetDir, parts.base, parts.ext);
       }
       final newRel = resolvePath(targetParent, target);
-      return await _relocate(row, path, newRel);
+      return await _relocator.relocate(row, path, newRel);
     });
-  }
-
-  /// Renames what [row] holds at [path] to [newRel] on disk, and carries
-  /// everything that named it along: the sync hint, the history, the
-  /// reading positions, the settings, the Home, what lies outside the
-  /// library, the index and the links in the notes that pointed at it.
-  /// The shared tail of [rename] and [move]; returns the updated row.
-  Future<Note> _relocate(Note row, String path, String newRel) async {
-    final oldAbs = _abs(path);
-    if (row.isDir) {
-      await Directory(oldAbs).rename(_abs(newRel));
-    } else {
-      await File(oldAbs).rename(_abs(newRel));
-    }
-    _hint(newRel, SyncOpKind.moved, fromPath: path);
-    await history.moved(path, newRel, isDir: row.isDir);
-    await _carryReading(path, newRel, isDir: row.isDir);
-    await _carrySettings(path, newRel, isDir: row.isDir);
-    await _carryHome(path, newRel, isDir: row.isDir);
-    await _carryOutside(path, newRel, isDir: row.isDir);
-    // Before the index hears of the move: a folder's reindex re-creates
-    // its notes, and the edges that named them would be gone (#507).
-    final links = await _linksToMove(path, isDir: row.isDir);
-    await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-    await _rewriteLinks(
-      path,
-      newRel,
-      isDir: row.isDir,
-      oldPaths: links.oldPaths,
-      referrers: links.referrers,
-    );
-    return await _mustFind(newRel);
-  }
-
-  /// Rewrites every setting that pointed at what moved from [from] to [to]
-  /// (#506): the quick note, the list, template, attachments and annotations
-  /// folders, and the journal's folder and template. A folder carries its
-  /// subtree; a note only itself. Nothing pointed at it means no write.
-  Future<void> _carrySettings(String from, String to, {required bool isDir}) {
-    return config.update((c) => c.renamed(from, to, isDir: isDir));
-  }
-
-  /// Rewrites the Home actions that named what moved from [from] to [to]
-  /// (#535): the library's file and this device's own Home. The move is
-  /// already done on disk: a failure here is logged and leaves it standing.
-  Future<void> _carryHome(String from, String to, {required bool isDir}) async {
-    try {
-      if (await HomeFile(root).moved(from, to, isDir: isDir)) {
-        _hint(HomeFile.filePath, SyncOpKind.changed);
-      }
-      await config.update((c) {
-        final device = c.deviceHome;
-        if (device == null) return c;
-        final layout = HomeLayout.fromJson(device);
-        if (layout == null) return c;
-        final next = layout.renamed(from, to, isDir: isDir);
-        return identical(next, layout)
-            ? c
-            : c.copyWith(deviceHome: next.toJson());
-      });
-    } on Object catch (error) {
-      const AppLogger(name: 'home')
-          .warning('could not carry the Home past "$from" -> "$to": $error');
-    }
-  }
-
-  /// Hands the move to [carryOutside] (#506). The move is already done on
-  /// disk: a failure there is logged and leaves the rename standing.
-  Future<void> _carryOutside(
-    String from,
-    String to, {
-    required bool isDir,
-  }) async {
-    final carry = carryOutside;
-    if (carry == null) return;
-    try {
-      await carry(from, to, isDir: isDir);
-    } on Object catch (error) {
-      const AppLogger(
-        name: 'notes',
-      ).warning('could not carry "$from" -> "$to" outside the library: $error');
-    }
-  }
-
-  /// The referrers of what is about to move from [from] (#507), read from
-  /// the index *before* the move: the index's resolved link edges
-  /// (`note_links`, answered by its `links_to` index) and the moved files'
-  /// own old paths.
-  ///
-  /// Read first because a folder's rename re-creates the notes under it with
-  /// new ids, and the edges that pointed at them would be gone by the time
-  /// the move is done; the referrer's own path is what the rewrite needs, and
-  /// it is unchanged for anyone outside the subtree.
-  Future<({List<String> oldPaths, List<String> referrers})> _linksToMove(
-    String from, {
-    required bool isDir,
-  }) async {
-    final oldPaths = isDir ? await _dao.filePathsUnder(from) : <String>[from];
-    if (oldPaths.isEmpty) {
-      return (oldPaths: oldPaths, referrers: const <String>[]);
-    }
-    final rows = await _dao.byPaths(oldPaths);
-    if (rows.isEmpty) {
-      return (oldPaths: oldPaths, referrers: const <String>[]);
-    }
-    final referrers = await _dao.referrerPaths([
-      for (final row in rows.values) row.id,
-    ]);
-    return (oldPaths: oldPaths, referrers: referrers);
-  }
-
-  /// Rewrites the links in every note that pointed at what moved from [from]
-  /// to [to] (#507).
-  ///
-  /// [oldPaths] are the moved files' old library-relative paths and
-  /// [referrers] their referring notes' paths, as [_linksToMove] read them
-  /// before the move. Each changed note is written through the writer — the
-  /// normal save path — so its edit is a save with its own history version
-  /// and sync hint. The rewrite itself reads no index: it maps the written
-  /// targets through the old->new paths alone ([rewriteMovedLinks]).
-  Future<void> _rewriteLinks(
-    String from,
-    String to, {
-    required bool isDir,
-    required List<String> oldPaths,
-    required List<String> referrers,
-  }) async {
-    if (oldPaths.isEmpty || referrers.isEmpty) return;
-    // Indexed once for every referrer: a link is a lookup, not a walk of
-    // everything that moved.
-    final moves = LinkMoves({
-      for (final old in oldPaths)
-        old: pathAfterMove(old, from, to, isDir: isDir)!,
-    });
-    // A renamed file is the one case a bare-name wikilink follows.
-    String? renamedFrom;
-    String? renamedTo;
-    if (!isDir) {
-      final oldName = p.basename(from);
-      final newName = p.basename(to);
-      if (oldName != newName) {
-        renamedFrom = oldName;
-        renamedTo = newName;
-      }
-    }
-    var updated = 0;
-    final seen = <String>{};
-    for (final oldReferrer in referrers) {
-      // A referrer inside the moved subtree moved with it.
-      final path = pathAfterMove(oldReferrer, from, to, isDir: isDir)!;
-      if (!seen.add(path)) continue;
-      // One referrer that cannot be read or written must not stop the rest:
-      // the move is already done, and the others still need their links fixed.
-      try {
-        final text = await readNote(path);
-        final next = rewriteMovedLinks(
-          text,
-          // Its links were written where it stood; a relative one is
-          // written back from where it stands now.
-          from: oldReferrer,
-          at: path,
-          moves: moves,
-          renamedFrom: renamedFrom,
-          renamedTo: renamedTo,
-        );
-        if (next == text) continue;
-        await writer.save(path, next);
-        _hint(path, SyncOpKind.changed);
-        updated++;
-      } on Object catch (error) {
-        const AppLogger(name: 'links')
-            .warning('could not rewrite links in "$path": $error');
-      }
-    }
-    if (updated > 0) {
-      const AppLogger(name: 'links')
-          .info('$updated note(s) updated after "$from" -> "$to"');
-    }
-  }
-
-  /// Carries the reading positions of what moved from [from] to [to]
-  /// (#281): a book or a PDF, or a folder that may hold some. A note
-  /// keeps none, and costs no read of the file.
-  Future<void> _carryReading(String from, String to, {required bool isDir}) {
-    if (!isDir && isMarkdownNote(from)) return Future<void>.value();
-    return ReadingPositions(root).moved(from, to);
   }
 
   /// The text of the note at [path], decoded leniently (a note with a
