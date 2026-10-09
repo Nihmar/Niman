@@ -85,7 +85,6 @@ import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
-import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -111,6 +110,7 @@ import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
+import 'package:niman/src/ui/shell_fab.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_inbound.dart';
 import 'package:niman/src/ui/shell_layout.dart';
@@ -741,7 +741,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
     if (narrow &&
         _treeVisible &&
-        !_fabExpanded &&
+        !_fab.expanded &&
         _visitedTabs.contains(tab) &&
         _shown(_tab) &&
         _shown(tab)) {
@@ -752,7 +752,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _tab = tab;
         _visitedTabs.add(tab);
         _treeVisible = true;
-        _fabExpanded = false;
+        _fab.collapse();
         // Leaving any open note: the tabs show at once (issue #4).
         _noteClosed();
       });
@@ -1133,20 +1133,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _noteOpened();
     });
   }
-
-  /// Whether the FAB menu (New note / New folder minis) is expanded;
-  /// the shell owns it so the body can be scrimmed while it is open.
-  bool _fabExpanded = false;
-
-  /// The configured list folder, naming where the FAB's *New list
-  /// note* lands (issue #131): loaded when the menu opens, so the
-  /// label is honest without a session read on every build.
-  String? _fabListFolder;
-
-  /// Where the main FAB is, so [FabScrim]'s reveal circle is centered on
-  /// its icon (the shell owns it: the FAB slot and the scrim are
-  /// siblings). Written from the FAB's paint, read when the scrim builds.
-  Offset? _fabAnchor;
 
   /// Whether the window is wide: the tabs' layout (#23).
   bool get _wide => MediaQuery.sizeOf(context).width >= wideBreakpoint;
@@ -1873,6 +1859,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _todoController.removeListener(_homeWidgets.pushTodos);
     _todoController.dispose();
     _personalDictionary?.dispose();
+    _fab.dispose();
     _shellFocus.dispose();
     _tabListenable.dispose();
     super.dispose();
@@ -2970,96 +2957,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The expandable "+" FAB (bottom-right, above the bottom nav):
   /// reveals New note / New folder mini FABs; each creates in the
   /// selected folder, root if none (T-UI-05).
-  Widget _newItemFab() {
-    return TourTarget(
-      id: TourTargets.create,
-      child: NewItemFab(
-        onAnchor: (center) => _fabAnchor = center,
-        expanded: _fabExpanded,
-        listFolder: _fabListFolder,
-        onToggle: () {
-          // Opening the menu loads the list folder for the label; the
-          // setting is read once per opening, not once per build.
-          if (!_fabExpanded) unawaited(_loadFabListFolder());
-          setState(() => _fabExpanded = !_fabExpanded);
-        },
-        onNewNote: () {
-          _closeFab();
-          unawaited(_createFlow.createNote(context));
-        },
-        onJournalToday: () {
-          _closeFab();
-          unawaited(_journalFlow.openToday(context));
-        },
-        onNewListNote: () {
-          _closeFab();
-          unawaited(_createFlow.createListNote(context));
-        },
-        onNewAudioNote: () {
-          _closeFab();
-          unawaited(_createFlow.createAudioNote(context));
-        },
-        onNewSlides: () {
-          _closeFab();
-          unawaited(_createFlow.createSlidesNote(context));
-        },
-        onNewFromTemplate: () {
-          _closeFab();
-          unawaited(_templateFlow.createFromTemplate(context));
-        },
-        onNewFolder: () {
-          _closeFab();
-          unawaited(_createFlow.createFolder(context));
-        },
-        onCaptureWebPage: () {
-          _closeFab();
-          unawaited(_captureFlow.capture(context));
-        },
-      ),
-    );
-  }
-
-  /// Collapses the expanded FAB menu.
-  void _closeFab() => setState(() => _fabExpanded = false);
-
-  /// Reads the configured list folder for the FAB's *New list note*
-  /// label (issue #131).
-  Future<void> _loadFabListFolder() async {
-    final folder =
-        await widget.controller.ops?.listNoteFolder ?? defaultListFolder;
-    if (mounted) setState(() => _fabListFolder = folder);
-  }
-
-  /// Covers [child] with the FAB-menu scrim: a circle that grows out of
-  /// the main FAB icon, dims the body, and closes the menu on any tap
-  /// (the FABs live in the Scaffold's FAB slot, above this layer, so they
-  /// stay tappable). Always mounted; inert while collapsed.
-  /// Wraps [child] in the FAB menu's tap-to-dismiss scrim.
-  ///
-  /// [enabled] is false on the tabs that have no expandable FAB. Not an
-  /// optimisation: the scrim resolves the FAB's anchor key during layout,
-  /// and since the Files and Todo tabs now share one FAB slot, a scrim
-  /// left mounted on Todo reaches for an anchor that tab does not have.
-  ///
-  /// Never toggle this wrapper around a kept-alive subtree (like the tab
-  /// stack): swapping between the bare child and the [Stack] reparents it
-  /// and remounts every state inside. The Files slot below is always
-  /// wrapped; hiding it via [Offstage] skips layout, so the anchor is only
-  /// resolved while Files is visible.
-  Widget _withFabScrim(Widget child, {bool enabled = true}) {
-    if (!enabled) return child;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        child,
-        FabScrim(
-          anchor: _fabAnchor,
-          expanded: _fabExpanded,
-          onClose: _closeFab,
-        ),
-      ],
-    );
-  }
+  Widget _newItemFab() => TourTarget(
+    id: TourTargets.create,
+    child: _fab.button(
+      onNewNote: () => unawaited(_createFlow.createNote(context)),
+      onJournalToday: () => unawaited(_journalFlow.openToday(context)),
+      onNewListNote: () => unawaited(_createFlow.createListNote(context)),
+      onNewAudioNote: () => unawaited(_createFlow.createAudioNote(context)),
+      onNewSlides: () => unawaited(_createFlow.createSlidesNote(context)),
+      onNewFromTemplate: () =>
+          unawaited(_templateFlow.createFromTemplate(context)),
+      onNewFolder: () => unawaited(_createFlow.createFolder(context)),
+      onCaptureWebPage: () => unawaited(_captureFlow.capture(context)),
+    ),
+  );
 
   /// The sort-direction toggle (T-UI-03): the mockup's `unfold_more`
   /// chevrons; the icon reflects the current direction.
@@ -3675,6 +3586,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
   });
+
+  /// The phone's expandable "+" and the scrim its menu draws (T-UI-05):
+  /// the shell rebuilds as it opens and closes, for the FAB slot and the
+  /// body under the scrim are both the shell's.
+  late final ShellFab _fab = ShellFab(
+    listFolder: () async =>
+        await widget.controller.ops?.listNoteFolder ?? defaultListFolder,
+  )..addListener(_onFabChanged);
+
+  /// Rebuilds for the FAB menu opening or closing.
+  void _onFabChanged() {
+    if (mounted) setState(() {});
+  }
 
   /// The floating windows over the shell: Settings, the libraries.
   late final ShellWindows _windows = ShellWindows(
@@ -4296,8 +4220,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget _tabBodyFor(ShellTab tab, LibrarySession controller) {
     if (!_visitedTabs.contains(tab)) return const SizedBox.shrink();
     return switch (tab) {
-      // Always scrim-wrapped (never toggled): see [_withFabScrim].
-      ShellTab.files => _withFabScrim(_treePane(controller)),
+      // Always scrim-wrapped (never toggled): see [ShellFab.withScrim].
+      ShellTab.files => _fab.withScrim(_treePane(controller)),
       ShellTab.todo => TodoTab(
         controller: _todoController,
         reminders: widget.reminders,
