@@ -4,6 +4,7 @@ library;
 import 'dart:async';
 
 import 'package:drift/drift.dart';
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
@@ -96,10 +97,37 @@ final class Indexer {
   /// periodic rescan fallback, and for explicit re-index. Skips the write
   /// (and does not fire [onChanged]) when the index already mirrors the
   /// disk tree.
+  ///
+  /// It holds the mutex a directory at a time, not for the whole walk: a
+  /// note made, renamed or deleted meanwhile is written at once (#697), on
+  /// a phone's first index as on a million notes' rescan. Two scans still
+  /// run one after the other.
   Future<void> fullScan(String root) {
-    return _synchronized(
-      () => _scan.fullScan(root, onChanged: onChanged, onRemoved: onRemoved),
+    final next = _scans.then(
+      (_) => _scan.fullScan(
+        root,
+        step: _scanStep,
+        onChanged: onChanged,
+        onRemoved: onRemoved,
+      ),
     );
+    _scans = next.then<void>((_) {}, onError: (Object _) {});
+    return next;
+  }
+
+  /// The scans, one after the other: each takes the mutex a step at a
+  /// time, so the mutex alone no longer keeps two apart.
+  Future<void> _scans = Future<void>.value();
+
+  /// Runs before each of a scan's steps takes the mutex — after the walk
+  /// listed the directory the step writes. Tests make their writes here,
+  /// where a real one lands when a listing is older than it (#697).
+  @visibleForTesting
+  Future<void> Function()? beforeScanStep;
+
+  Future<T> _scanStep<T>(Future<T> Function() fn) async {
+    if (beforeScanStep case final hook?) await hook();
+    return await _synchronized(fn);
   }
 
   /// The first index of a library, the tree alone: when the index is empty,
@@ -149,6 +177,8 @@ final class Indexer {
         rels.add(rel);
       }
       if (absList.isEmpty) return;
+      // A scan between two of its directories leaves these to this write.
+      _scan.touches.add(rels);
 
       // One probe batch for the whole event set (each stat is a FUSE round
       // trip on Android, so they must be off the UI isolate and together).
@@ -308,6 +338,7 @@ final class Indexer {
         rels.add(rel);
       }
       if (absList.isEmpty) return;
+      _scan.touches.add(rels);
 
       final probes = await _tree.probeAll(absList);
       final live = <String, DiskProbe>{};
@@ -398,6 +429,7 @@ final class Indexer {
         );
         return;
       }
+      _scan.touches.add([rel]);
       final result = await _reconcile(root, abs, rel, 'resync');
       if (result.wrote) {
         final cb = onChanged;

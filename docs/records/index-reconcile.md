@@ -31,6 +31,17 @@ kill that recurs on every rescan.
   behind; a second pass after the walk pairs what is left, deletes the
   fresh row and repoints the orphan. Both tables are SQLite's, not Dart's:
   a mass delete costs disk, not heap.
+- **The indexer's lock is taken a step at a time (#697).** The setup, each
+  directory and the close each hold it; the walk's requests in between do
+  not. A note made, renamed or deleted during the scan is written at once
+  instead of after the walk — on a phone's first index that wait was 28 s
+  for 443 notes, and a million notes' rescan would make it minutes. Two
+  scans still run one after the other. A listing can then be older than a
+  write that went through before its step: what such a write touched
+  (`ScanTouches`) is the write's, so the scan neither writes a row for it
+  from the older listing nor prunes it, nor a folder above it, and pairs
+  no rename through it. The extra lock hops cost the disk fixture's first
+  scan about 5 %.
 - **Link edges are resolved after the walk.** Directory-at-a-time writing
   made the old inline resolution wrong twice over: a link to a note a later
   directory introduces found no row, and a link to a note moving into an
