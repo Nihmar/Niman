@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
@@ -100,6 +101,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('1 / 2'), findsOneWidget);
     expect(_text('Alpha'), findsWidgets);
+
+    final caches = {
+      for (final frame in tester.widgetList<SlideFrame>(
+        find.byType(SlideFrame),
+      ))
+        frame.mathCache,
+    };
+    expect(caches, hasLength(1), reason: 'one for the deck (#672)');
   });
 
   testWidgets('narrow: a swipe moves the slide; Markdown leaves the view', (
@@ -129,11 +138,14 @@ void main() {
 
   testWidgets('a link with no target is not followed (#674)', (tester) async {
     final links = <String>[];
+    final math = MathCache();
+    addTearDown(math.dispose);
     Future<void> slide(String markdown) => _show(
       tester,
       SlideFrame(
         markdown: markdown,
         resolveEmbed: (_) async => null,
+        mathCache: math,
         onTapLink: links.add,
       ),
       const Size(1600, 900),

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slide_stage.dart';
@@ -17,6 +18,7 @@ final class SlidesPresenterView extends StatefulWidget {
     required this.slides,
     required this.index,
     required this.resolveEmbed,
+    required this.mathCache,
     required this.elapsed,
     required this.paused,
     required this.onGo,
@@ -36,6 +38,9 @@ final class SlidesPresenterView extends StatefulWidget {
 
   /// Resolves a picture's target.
   final Future<String?> Function(String target) resolveEmbed;
+
+  /// The deck's formulas, typeset once for every slide drawn (#672).
+  final MathCache mathCache;
 
   /// The time the talk has run, read on every tick.
   final Duration Function() elapsed;
@@ -231,6 +236,7 @@ final class _SlidesPresenterViewState extends State<SlidesPresenterView> {
             key: ValueKey(slide),
             markdown: slide.markdown,
             resolveEmbed: widget.resolveEmbed,
+            mathCache: widget.mathCache,
             live: false,
           ),
         ),

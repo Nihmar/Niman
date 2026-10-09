@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slide_stage.dart';
@@ -13,6 +14,7 @@ final class SlidesOverview extends StatelessWidget {
     required this.slides,
     required this.selected,
     required this.resolveEmbed,
+    required this.mathCache,
     required this.onPick,
     super.key,
   });
@@ -25,6 +27,9 @@ final class SlidesOverview extends StatelessWidget {
 
   /// Resolves a picture's target.
   final Future<String?> Function(String target) resolveEmbed;
+
+  /// The deck's formulas, typeset once for every slide drawn (#672).
+  final MathCache mathCache;
 
   /// Goes to the slide picked.
   final ValueChanged<int> onPick;
@@ -67,6 +72,7 @@ final class SlidesOverview extends StatelessWidget {
                   child: SlideFrame(
                     markdown: slides[index].markdown,
                     resolveEmbed: resolveEmbed,
+                    mathCache: mathCache,
                     live: false,
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present_bar.dart';
@@ -13,6 +14,7 @@ final class SlidesAloneView extends StatelessWidget {
     required this.index,
     required this.count,
     required this.resolveEmbed,
+    required this.mathCache,
     required this.black,
     required this.bar,
     required this.touch,
@@ -37,6 +39,9 @@ final class SlidesAloneView extends StatelessWidget {
 
   /// Resolves a picture's target.
   final Future<String?> Function(String target) resolveEmbed;
+
+  /// The deck's formulas, typeset once for every slide drawn (#672).
+  final MathCache mathCache;
 
   /// Whether the screen is blacked out.
   final bool black;
@@ -95,6 +100,7 @@ final class SlidesAloneView extends StatelessWidget {
                     key: ValueKey(index),
                     markdown: slide.markdown,
                     resolveEmbed: resolveEmbed,
+                    mathCache: mathCache,
                     live: false,
                   ),
                 ),

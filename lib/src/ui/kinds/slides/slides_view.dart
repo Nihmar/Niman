@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show wideBreakpoint;
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/slides/slide_dots.dart';
 import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
@@ -44,6 +45,10 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
   late final PageController _pages = PageController(initialPage: _index);
   final ScrollController _strip = ScrollController();
 
+  /// The deck's formulas, shared by the slide, the row and the swipe
+  /// (#672).
+  final MathCache _mathCache = MathCache();
+
   int get _index => _place.value.clamp(0, _slides.length - 1);
 
   @override
@@ -76,6 +81,7 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
     _place.removeListener(_placeMoved);
     _pages.dispose();
     _strip.dispose();
+    _mathCache.dispose();
     super.dispose();
   }
 
@@ -163,6 +169,7 @@ final class _SlidesNoteViewState extends ConsumerState<SlidesNoteView> {
   SlideFrame _frame(Slide slide, {bool live = true}) => SlideFrame(
     markdown: slide.markdown,
     resolveEmbed: widget.host.resolveEmbed,
+    mathCache: _mathCache,
     onTapLink: live ? (href) => widget.host.openLink(context, href) : null,
     onTapWikiLink: live
         ? (inner) => widget.host.openWikiLink(context, inner)
