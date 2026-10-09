@@ -11,6 +11,7 @@ library;
 import 'dart:async';
 
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/workspace/note_history.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_controller.dart';
@@ -20,7 +21,9 @@ final class ShellWorkspace {
   /// The workspace of [session]'s library, kept through the session.
   new(LibrarySession session)
     : _session = session,
-      controller = WorkspaceController(save: session.saveWorkspace);
+      controller = WorkspaceController(save: session.saveWorkspace) {
+    controller.addListener(_track);
+  }
 
   final LibrarySession _session;
 
@@ -52,6 +55,15 @@ final class ShellWorkspace {
 
   /// What is open now.
   Workspace get value => controller.value;
+
+  /// The notes shown, one after the other, for back and forward (#700):
+  /// every note that becomes the active one, whichever pane and however
+  /// it was opened, is a step.
+  final NoteHistory history = NoteHistory();
+
+  void _track() {
+    if (value.activePath case final shown?) history.shown(shown);
+  }
 
   /// Reads back what was left open in the library on this device.
   ///
@@ -250,11 +262,15 @@ final class ShellWorkspace {
       final moved = remap(path);
       if (moved != path) _lengths[moved] = _lengths.remove(path)!;
     }
+    history.moved(from, to);
     controller.update((w) => w.renamed(from, to));
   }
 
   /// [path] is gone: a note, or a folder with notes under it.
-  void deleted(String path) => controller.update((w) => w.deleted(path));
+  void deleted(String path) {
+    history.forget(path);
+    controller.update((w) => w.deleted(path));
+  }
 
   /// Every path in [paths] is gone from disk: a re-index pruned them, or
   /// the library loaded without them (#289). Their tabs stay, flagged
@@ -295,5 +311,9 @@ final class ShellWorkspace {
   }
 
   /// Writes what is pending and lets go.
-  void dispose() => controller.dispose();
+  void dispose() {
+    controller
+      ..removeListener(_track)
+      ..dispose();
+  }
 }

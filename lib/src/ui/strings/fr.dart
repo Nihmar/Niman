@@ -497,6 +497,10 @@ final class FrenchStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Note ouverte précédente';
   @override
+  String get shortcutNoteBack => 'Précédent';
+  @override
+  String get shortcutNoteForward => 'Suivant';
+  @override
   String get shortcutEditorSection => 'Dans l’éditeur';
   @override
   String get shortcutFormatSection => 'Mise en forme';

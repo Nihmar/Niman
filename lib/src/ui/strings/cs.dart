@@ -488,6 +488,10 @@ final class CzechStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Předchozí otevřená poznámka';
   @override
+  String get shortcutNoteBack => 'Zpět';
+  @override
+  String get shortcutNoteForward => 'Vpřed';
+  @override
   String get shortcutEditorSection => 'V editoru';
   @override
   String get shortcutFormatSection => 'Formátování';

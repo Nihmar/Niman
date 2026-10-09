@@ -483,6 +483,10 @@ final class EstonianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Eelmine avatud märge';
   @override
+  String get shortcutNoteBack => 'Tagasi';
+  @override
+  String get shortcutNoteForward => 'Edasi';
+  @override
   String get shortcutEditorSection => 'Redaktoris';
   @override
   String get shortcutFormatSection => 'Vormindus';

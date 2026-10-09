@@ -490,6 +490,10 @@ final class SlovakStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Predchádzajúca otvorená poznámka';
   @override
+  String get shortcutNoteBack => 'Späť';
+  @override
+  String get shortcutNoteForward => 'Dopredu';
+  @override
   String get shortcutEditorSection => 'V editore';
   @override
   String get shortcutFormatSection => 'Formátovanie';

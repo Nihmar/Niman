@@ -496,6 +496,10 @@ final class ItalianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Nota aperta precedente';
   @override
+  String get shortcutNoteBack => 'Indietro';
+  @override
+  String get shortcutNoteForward => 'Avanti';
+  @override
   String get shortcutEditorSection => 'Nell’editor';
   @override
   String get shortcutFormatSection => 'Formattazione';

@@ -479,6 +479,10 @@ final class HindiStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'पिछला खुला नोट';
   @override
+  String get shortcutNoteBack => 'पीछे';
+  @override
+  String get shortcutNoteForward => 'आगे';
+  @override
   String get shortcutEditorSection => 'एडिटर में';
   @override
   String get shortcutFormatSection => 'फ़ॉर्मैटिंग';

@@ -493,6 +493,10 @@ final class PolishStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Poprzednia otwarta notatka';
   @override
+  String get shortcutNoteBack => 'Wstecz';
+  @override
+  String get shortcutNoteForward => 'Dalej';
+  @override
   String get shortcutEditorSection => 'W edytorze';
   @override
   String get shortcutFormatSection => 'Formatowanie';

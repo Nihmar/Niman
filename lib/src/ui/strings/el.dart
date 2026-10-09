@@ -500,6 +500,10 @@ final class GreekStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Προηγούμενη ανοιχτή σημείωση';
   @override
+  String get shortcutNoteBack => 'Πίσω';
+  @override
+  String get shortcutNoteForward => 'Εμπρός';
+  @override
   String get shortcutEditorSection => 'Στον επεξεργαστή';
   @override
   String get shortcutFormatSection => 'Μορφοποίηση';

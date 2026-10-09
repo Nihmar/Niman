@@ -494,6 +494,10 @@ final class GalicianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Nota aberta anterior';
   @override
+  String get shortcutNoteBack => 'Atrás';
+  @override
+  String get shortcutNoteForward => 'Adiante';
+  @override
   String get shortcutEditorSection => 'No editor';
   @override
   String get shortcutFormatSection => 'Formato';

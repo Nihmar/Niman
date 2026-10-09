@@ -489,6 +489,10 @@ final class HungarianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Előző megnyitott jegyzet';
   @override
+  String get shortcutNoteBack => 'Vissza';
+  @override
+  String get shortcutNoteForward => 'Előre';
+  @override
   String get shortcutEditorSection => 'A szerkesztőben';
   @override
   String get shortcutFormatSection => 'Formázás';

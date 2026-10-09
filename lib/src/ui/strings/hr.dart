@@ -490,6 +490,10 @@ final class CroatianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Prethodna otvorena bilješka';
   @override
+  String get shortcutNoteBack => 'Natrag';
+  @override
+  String get shortcutNoteForward => 'Naprijed';
+  @override
   String get shortcutEditorSection => 'U uređivaču';
   @override
   String get shortcutFormatSection => 'Oblikovanje';

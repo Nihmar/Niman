@@ -71,7 +71,9 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.zoomOut ||
   AppCommand.zoomReset ||
   AppCommand.nextTab ||
-  AppCommand.previousTab => PaletteGroup.view,
+  AppCommand.previousTab ||
+  AppCommand.noteBack ||
+  AppCommand.noteForward => PaletteGroup.view,
   AppCommand.reindexLibrary ||
   AppCommand.exportLibrary ||
   AppCommand.switchLibrary => PaletteGroup.library,

@@ -491,6 +491,10 @@ final class SwedishStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Föregående öppna anteckning';
   @override
+  String get shortcutNoteBack => 'Bakåt';
+  @override
+  String get shortcutNoteForward => 'Framåt';
+  @override
   String get shortcutEditorSection => 'I editorn';
   @override
   String get shortcutFormatSection => 'Formatering';

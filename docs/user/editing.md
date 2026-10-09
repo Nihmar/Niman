@@ -102,6 +102,12 @@ motion keeps the ellipsis instead.
 - **Switching** is by the tab, by `Ctrl+Tab` / `Ctrl+Shift+Tab`, or by
   the **▾** list, which shows every tab with its folder when the row is
   too full.
+- **Back and forward** go through the notes you looked at, in the order
+  you looked at them, as a browser goes through pages: the mouse's side
+  buttons, or `Alt+←` / `Alt+→` (remappable, and in the palette). One
+  history for the window, whichever pane showed the note. A note you
+  closed since opens again in a tab of its own; one deleted since is
+  skipped.
 - **Dragging a tab** along its row reorders it; a line shows where it
   will land. Dropped on the other pane's row or body it moves there,
   keeping everything, undo included. With the window not split, dropping

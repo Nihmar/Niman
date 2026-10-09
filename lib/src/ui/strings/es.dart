@@ -495,6 +495,10 @@ final class SpanishStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Nota abierta anterior';
   @override
+  String get shortcutNoteBack => 'Atrás';
+  @override
+  String get shortcutNoteForward => 'Adelante';
+  @override
   String get shortcutEditorSection => 'En el editor';
   @override
   String get shortcutFormatSection => 'Formato';

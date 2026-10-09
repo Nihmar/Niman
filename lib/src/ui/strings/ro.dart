@@ -495,6 +495,10 @@ final class RomanianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Nota deschisă anterioară';
   @override
+  String get shortcutNoteBack => 'Înapoi';
+  @override
+  String get shortcutNoteForward => 'Înainte';
+  @override
   String get shortcutEditorSection => 'În editor';
   @override
   String get shortcutFormatSection => 'Formatare';

@@ -495,6 +495,10 @@ final class CatalanStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Nota oberta anterior';
   @override
+  String get shortcutNoteBack => 'Enrere';
+  @override
+  String get shortcutNoteForward => 'Endavant';
+  @override
   String get shortcutEditorSection => 'A l’editor';
   @override
   String get shortcutFormatSection => 'Format';

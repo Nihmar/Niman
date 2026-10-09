@@ -492,6 +492,10 @@ final class BosnianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Prethodna otvorena bilješka';
   @override
+  String get shortcutNoteBack => 'Nazad';
+  @override
+  String get shortcutNoteForward => 'Naprijed';
+  @override
   String get shortcutEditorSection => 'U uređivaču';
   @override
   String get shortcutFormatSection => 'Formatiranje';

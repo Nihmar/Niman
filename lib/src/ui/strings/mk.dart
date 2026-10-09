@@ -493,6 +493,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Претходна отворена белешка';
   @override
+  String get shortcutNoteBack => 'Назад';
+  @override
+  String get shortcutNoteForward => 'Напред';
+  @override
   String get shortcutEditorSection => 'Во уредникот';
   @override
   String get shortcutFormatSection => 'Форматирање';

@@ -491,6 +491,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Prejšnji odprti zapisek';
   @override
+  String get shortcutNoteBack => 'Nazaj';
+  @override
+  String get shortcutNoteForward => 'Naprej';
+  @override
   String get shortcutEditorSection => 'V urejevalniku';
   @override
   String get shortcutFormatSection => 'Oblikovanje';

@@ -488,6 +488,10 @@ final class FinnishStrings extends Strings {
   @override
   String get shortcutPreviousTab => 'Edellinen avoin muistiinpano';
   @override
+  String get shortcutNoteBack => 'Takaisin';
+  @override
+  String get shortcutNoteForward => 'Eteenpäin';
+  @override
   String get shortcutEditorSection => 'Muokkainnissa';
   @override
   String get shortcutFormatSection => 'Muotoilu';
