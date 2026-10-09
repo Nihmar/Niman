@@ -5609,12 +5609,14 @@ final class _Line extends StatelessWidget {
           onTap: onFold,
           child: SizedBox(
             height: row,
-            child: Icon(
-              fold == _FoldMark.closed
-                  ? Icons.chevron_right
-                  : Icons.expand_more,
-              size: _gutterGap,
-              color: theme.markerDim,
+            child: Center(
+              child: Icon(
+                fold == _FoldMark.closed
+                    ? Icons.chevron_right
+                    : Icons.expand_more,
+                size: foldArrowSize,
+                color: theme.markerDim,
+              ),
             ),
           ),
         ),
