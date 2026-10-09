@@ -1135,7 +1135,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     bool preview = false,
     bool followsLink = false,
   }) {
-    if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
+    // A note opened right now shows only its preview: the IME has no
+    // target and must go before the transition, or its resize lands
+    // mid-fade.
+    if (_notePreview) FocusManager.instance.primaryFocus?.unfocus();
     // Reopening the already-open note (a widget header tap after a row
     // toggle): the path does not change, so the NoteView would keep its
     // buffer — ask it to re-read the file instead.
@@ -1247,11 +1250,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final show = !_notePreview;
     _updateShownTab((m) => m.copyWith(preview: show));
   }
-
-  /// Whether a note opened right now would show only the preview (the
-  /// editor hidden): the IME has no target and must go before the
-  /// transition, or its resize lands mid-fade.
-  bool _opensPreviewOnly() => _notePreview;
 
   /// Records a note open: the tabs stay painted under the fading note
   /// (issue #4, see [_noteHidingTabs]) and hide once it has covered them.
@@ -1750,7 +1748,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ),
       createParent: () => _createParent,
       guard: _guard,
-      opensPreviewOnly: _opensPreviewOnly,
+      opensPreviewOnly: () => _notePreview,
       onNoteFiled: _onTemplateNoteFiled,
     );
     _journalFlow = JournalFlow(
@@ -2252,7 +2250,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   void _select(Note note, {bool newTab = false}) {
     // A note opening in preview-only has no editable for the IME.
-    final previewOnly = !note.isDir && _opensPreviewOnly();
+    final previewOnly = !note.isDir && _notePreview;
     if (previewOnly) FocusManager.instance.primaryFocus?.unfocus();
     if (_wide) {
       if (note.isDir) {
@@ -2555,14 +2553,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     required int? caret,
   }) => _showNote(path, preview: preview, caret: caret);
 
-  /// Adds a task from the Todo tab's add FAB (T-TD-04).
-  Future<void> _addTodo() async {
+  /// Adds a task from the Todo tab's add FAB (T-TD-04), or from a Home
+  /// action with [text] written in.
+  Future<void> _addTodo({String text = ''}) async {
     const AppLogger(name: 'todo').debug('todo add pressed');
     final snapshot = _todoController.snapshot;
     final reminders = widget.reminders;
     final line = await showTodoTaskDialog(
       context,
       today: DateTime.now(),
+      text: text,
       knownTokens: snapshot == null
           ? const <String>{}
           : snapshotTokens(snapshot),
@@ -4560,26 +4560,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Adds a task from a Home action: its project and context are written
   /// in, the caret before them.
-  Future<void> _addHomeTask(HomeAction action) async {
-    final snapshot = _todoController.snapshot;
-    final line = await showTodoTaskDialog(
-      context,
-      today: DateTime.now(),
-      text: [
-        '',
-        if (action.project case final project? when project.isNotEmpty)
-          '+$project',
-        if (action.context case final where? when where.isNotEmpty) '@$where',
-      ].join(' '),
-      knownTokens: snapshot == null
-          ? const <String>{}
-          : snapshotTokens(snapshot),
-      health: widget.reminders.health.value,
-      onOpenReminderSettings: widget.reminders.openHealthSettings,
-    );
-    if (line == null || !mounted) return;
-    await _guard(() => _todoController.add(line));
-  }
+  Future<void> _addHomeTask(HomeAction action) => _addTodo(
+    text: [
+      '',
+      if (action.project case final project? when project.isNotEmpty)
+        '+$project',
+      if (action.context case final where? when where.isNotEmpty) '@$where',
+    ].join(' '),
+  );
 
   /// The desktop tree's controls at the base of its column (T-PP-22):
   /// creation, the trash and the sort order — the app-bar actions the
