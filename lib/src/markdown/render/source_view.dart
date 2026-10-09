@@ -380,8 +380,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (line == null) return;
     final offset = widget.buffer.offsetOfLine(line);
     _focus.requestFocus();
-    _select(offset, offset);
-    _ensureCaretVisible();
+    _applySelection(
+      SelectionModel.at(offset),
+      rebuild: true,
+      reveal: true,
+      suggest: false,
+    );
   }
 
   /// The folded heading sections; the rows are the lines they leave.
@@ -1119,16 +1123,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// Selects [next], and tells whoever needs to know.
-  void select(SelectionModel next) {
-    final clamped = next.clampTo(widget.buffer.length);
-    _history.seal();
-    setState(() => _ownSelection = clamped);
-    widget.onSelection?.call(clamped);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
-    _refreshSuggest();
-  }
+  void select(SelectionModel next) =>
+      _applySelection(next, rebuild: true, reveal: true);
 
   /// Undoes the last edit, and says whether there was one.
   bool undo() => _applyHistory(_history.undo(widget.buffer), forwards: false);
@@ -1203,11 +1199,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           ? SelectionModel(anchor: next.anchor, extent: extent)
           : SelectionModel.at(extent);
     }
-    _publishSelection(next);
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
+    _applySelection(next, reveal: true);
   }
 
   /// The source line at the top of the view, and how far into its rows
@@ -1336,18 +1328,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// tells everyone who needs to know.
   void _moveCaretTo(int offset, {bool extend = false}) {
     final to = _inCell(offset, 0);
-    final next =
-        (extend
-                ? SelectionModel(anchor: _selection.anchor, extent: to)
-                : SelectionModel.at(to))
-            .clampTo(widget.buffer.length);
-    _publishSelection(next);
-    // The selection made, not `_selection`: a caller that holds the caret
-    // still has the old one until it takes this.
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
+    _applySelection(
+      extend
+          ? SelectionModel(anchor: _selection.anchor, extent: to)
+          : SelectionModel.at(to),
+      reveal: true,
+    );
   }
 
   /// The selected text, or null when the selection is a caret.
@@ -1713,10 +1699,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       final next = extend
           ? SelectionModel(anchor: _selection.anchor, extent: offset)
           : SelectionModel.at(offset);
-      _publishSelection(next);
-      widget.onSelection?.call(next);
-      _input.sendSelection();
-      _scheduleCaret();
+      _applySelection(next);
     });
     WidgetsBinding.instance.scheduleFrame();
   }
@@ -2063,24 +2046,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return true;
   }
 
-  void _select(int start, int end) {
-    final next = SelectionModel(anchor: start, extent: end);
-    _history.seal();
-    setState(() => _ownSelection = next);
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-  }
+  /// Selects `[start, end)` by a click or a jump: the note rebuilt, and the
+  /// wikilink panel left as it is.
+  void _select(int start, int end) => _applySelection(
+    SelectionModel(anchor: start, extent: end),
+    rebuild: true,
+    suggest: false,
+  );
 
   /// Selects everything.
-  void selectAll() {
-    final next = SelectionModel(anchor: 0, extent: widget.buffer.length);
-    _history.seal();
-    setState(() => _ownSelection = next);
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-  }
+  void selectAll() => _select(0, widget.buffer.length);
 
   /// The offset a mouse drag started from, or null when no drag is running.
   int? _dragAnchor;
@@ -2149,12 +2124,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (event.kind != PointerDeviceKind.mouse) return;
       final offset = offsetAt(event.position);
       if (offset == null) return;
-      final next = SelectionModel(anchor: anchor, extent: offset);
-      _history.seal();
-      setState(() => _ownSelection = next);
-      widget.onSelection?.call(next);
-      _input.sendSelection();
-      _scheduleCaret();
+      _select(anchor, offset);
     },
     onPointerUp: (_) => _endDrag(),
     onPointerCancel: (_) => _endDrag(),
@@ -2256,37 +2226,45 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.attach(viewId: View.of(context).viewId);
   }
 
-  /// Publishes [next] as the caret, repainting only what changed.
+  /// Makes [next] the selection — clamped into the note — and tells whoever
+  /// needs to know: the typing step ends, the shell and the platform hear of
+  /// it, and the caret is measured where it went. Every move the writer
+  /// makes comes through here; an edit's caret comes with the edit
+  /// ([_replaceRange], [_applyHistory]).
   ///
-  /// A caret that stays collapsed moves no text: the two lines involved — the
-  /// one
-  /// that lost it and the one that gained it — repaint through the notifier,
-  /// and
-  /// nothing else does. A move that creates or clears a *range* repaints the
-  /// note,
-  /// because a range is a background on the runs it covers.
-  void _publishSelection(SelectionModel next) {
+  /// Only what changed is repainted: a caret that stays collapsed moves no
+  /// text, so the two lines involved — the one that lost it and the one that
+  /// gained it — repaint through [_caretSpot] and nothing else does, while a
+  /// move that creates or clears a *range* rebuilds the note, a range being
+  /// a background on the runs it covers. [rebuild] rebuilds it whatever
+  /// moved.
+  ///
+  /// [reveal] scrolls the caret into view. [suggest] lets the wikilink panel
+  /// follow the caret — or close behind it.
+  void _applySelection(
+    SelectionModel next, {
+    bool rebuild = false,
+    bool reveal = false,
+    bool suggest = true,
+  }) {
+    final clamped = next.clampTo(widget.buffer.length);
     // A caret the writer moved ends the typing step: what is typed next is
     // undone on its own.
     _history.seal();
     final wasRange = !_selection.isCollapsed;
-    _ownSelection = next;
-    if (!next.isCollapsed || wasRange) {
-      setState(() {});
-    }
-    _caretSpot.value = _spotOf(next.extent);
-    _refreshSuggest();
+    _ownSelection = clamped;
+    if (rebuild || !clamped.isCollapsed || wasRange) setState(() {});
+    _caretSpot.value = _spotOf(clamped.extent);
+    if (suggest) _refreshSuggest();
+    widget.onSelection?.call(clamped);
+    _input.sendSelection();
+    _scheduleCaret();
+    if (reveal) _ensureCaretVisible();
   }
 
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
-  void placeCaret(int offset) {
-    final next = _selection.collapsedTo(offset).clampTo(widget.buffer.length);
-    _publishSelection(next);
-    widget.onSelection?.call(next);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
-  }
+  void placeCaret(int offset) =>
+      _applySelection(_selection.collapsedTo(offset), reveal: true);
 
   /// Scrolls the caret's line into view when an edit or a jump left it out.
   ///
@@ -3982,8 +3960,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (cells.isEmpty) return;
     final (start, end) = cells[column.clamp(0, cells.length - 1)];
     final lineStart = buffer.offsetOfLine(rows[row]);
-    _moveSelection(
+    _applySelection(
       SelectionModel(anchor: lineStart + start, extent: lineStart + end),
+      reveal: true,
     );
   }
 
@@ -4014,7 +3993,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return true;
     }
     final (_, end) = cells[commands.cell.column.clamp(0, cells.length - 1)];
-    _moveSelection(SelectionModel.at(buffer.offsetOfLine(rows[below]) + end));
+    _applySelection(
+      SelectionModel.at(buffer.offsetOfLine(rows[below]) + end),
+      reveal: true,
+    );
     return true;
   }
 
@@ -4046,22 +4028,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _caretOutOfTable(Block block) {
     final buffer = widget.buffer;
     if (block.endLine < buffer.lineCount) {
-      _moveSelection(SelectionModel.at(buffer.offsetOfLine(block.endLine)));
+      _applySelection(
+        SelectionModel.at(buffer.offsetOfLine(block.endLine)),
+        reveal: true,
+      );
       return;
     }
     final last = block.endLine - 1;
     final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
     _replaceRange(end, end, '\n');
-  }
-
-  /// Makes [next] the selection, and tells everyone who needs to know.
-  void _moveSelection(SelectionModel next) {
-    final clamped = next.clampTo(widget.buffer.length);
-    _publishSelection(clamped);
-    widget.onSelection?.call(clamped);
-    _input.sendSelection();
-    _scheduleCaret();
-    _ensureCaretVisible();
   }
 
   /// The table the caret is in and what can be done to it, in `live`; null
