@@ -85,7 +85,8 @@ the slideshow icon on the bar brings the slides back.
   they are presented in landscape, or press **Present**. Tap the right
   third for the next slide and the left third for the one before, or
   swipe; swipe down to stop. A hint says where to tap each time
-  presenting starts. Turning the phone upright again stops a talk that
+  presenting starts. The presenter view is not laid out for a phone:
+  `Alt+F5` on a keyboard plugged into one presents the slide alone. Turning the phone upright again stops a talk that
   began by turning it.
 
 While slides are presented the screen stays on — no dimming, no lock —

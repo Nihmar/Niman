@@ -69,7 +69,9 @@ Future<void> presentSlides(
           slides: slides,
           place: slidePlaceOf(notePath),
           resolveEmbed: resolveEmbed,
-          presenter: presenter,
+          // Not laid out for a phone: a key that asks for it there (Alt+F5
+          // on a hardware keyboard) presents the slide alone (#673).
+          presenter: presenter && !phone,
           touch: Platform.isAndroid,
           exitWhenUpright: phone && byTurning,
         ),
