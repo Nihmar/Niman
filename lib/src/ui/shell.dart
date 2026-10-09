@@ -48,12 +48,10 @@ import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
-import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
-import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
@@ -78,10 +76,7 @@ import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_note_action.dart';
 import 'package:niman/src/ui/home/home_screen.dart';
 import 'package:niman/src/ui/island.dart';
-import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
-import 'package:niman/src/ui/journal/journal_screen.dart';
-import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
@@ -113,6 +108,7 @@ import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_fab.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_inbound.dart';
+import 'package:niman/src/ui/shell_journal_ui.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
@@ -1268,7 +1264,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The phone full-screen note body.
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
     final view = _phoneNoteView(controller, selectedPath);
-    final above = _journalHeader(selectedPath, compact: true);
+    final above = _journalUi.header(context, selectedPath, compact: true);
     final queue = widget.ocrQueue;
     if (above == null && queue == null) return view;
     return Column(
@@ -3000,7 +2996,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         key: const Key('open-journal'),
         tooltip: AppStrings.paletteGroupJournal,
         icon: const Icon(Icons.calendar_today_outlined),
-        onPressed: _showJournalCalendar,
+        onPressed: () => _journalUi.showCalendar(context),
       ),
       _syncActions.button(context, controller),
       IconButton(
@@ -3312,7 +3308,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_journalFlow.openPrevious(context, _shownJournalDay!)),
       AppCommand.journalNext: () =>
           unawaited(_journalFlow.openNext(context, _shownJournalDay!)),
-      AppCommand.journalCalendar: _showJournalCalendar,
+      AppCommand.journalCalendar: () => _journalUi.showCalendar(context),
       AppCommand.zenMode: _toggleZen,
       // Not among what Zen leaves out: in Zen the status row and its
       // switch are hidden, and this is the way to it (#70).
@@ -3600,6 +3596,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (mounted) setState(() {});
   }
 
+  /// The journal's calendar, strip and recent entries (#7).
+  late final ShellJournalUi _journalUi = ShellJournalUi(
+    controller: widget.controller,
+    journal: () => _journal,
+    flow: _journalFlow,
+    tasks: _todoController,
+    dockRoom: () => _dockRoom,
+    openDockJournal: () => _workspace.controller.update(
+      (w) => w.withDock(open: true, pane: DockPane.journal),
+    ),
+    openTasks: _openTodo,
+    showRowMenuAt: _showRowMenuAt,
+  );
+
   /// The floating windows over the shell: Settings, the libraries.
   late final ShellWindows _windows = ShellWindows(
     controller: widget.controller,
@@ -3792,77 +3802,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             if (path != null) unawaited(_openHistory(path));
           },
         ),
-        DockPane.journal => JournalBrowser(
-          today: _journal.today(DateTime.now()),
-          entryDays: _journalFlow.entryDays,
-          readEntry: _readJournalEntry,
-          revision: controller.revision,
-          onOpenDay: (day, {confirmed = false}) => unawaited(
-            _journalFlow.openDay(context, day, confirmed: confirmed),
-          ),
-          dueOn: _tasksDueOn,
-          tasksChanged: _todoController,
-          onOpenTasks: _openTodo,
+        DockPane.journal => _journalUi.browser(
+          context,
           focusDay: _shownJournalDay,
-          onEntryMenu: (day, position) =>
-              unawaited(_showJournalEntryMenuAt(day, position)),
         ),
       },
-    );
-  }
-
-  /// A recent journal entry's right-click menu (#619): the tree's own,
-  /// for the entry's note — a new tab and beside among its actions.
-  Future<void> _showJournalEntryMenuAt(DateTime day, Offset position) async {
-    final note = await widget.controller.ops?.find(_journal.entryPath(day));
-    if (note == null || !mounted) return;
-    await _showRowMenuAt(note, position);
-  }
-
-  /// The open tasks due on [day], as the task list reads them: what the
-  /// journal's calendar shows under the day (#7).
-  List<String> _tasksDueOn(DateTime day) => [
-    for (final entry in _todoController.snapshot?.todo ?? const <TodoEntry>[])
-      if (!entry.task.completed && entry.task.due == day)
-        taskDisplayText(entry.task.description),
-  ];
-
-  /// The text of [day]'s journal entry, for the calendar's recent list.
-  Future<String> _readJournalEntry(DateTime day) async {
-    final ops = widget.controller.ops;
-    if (ops == null) return '';
-    return await ops.readNote(_journal.entryPath(day));
-  }
-
-  /// The journal's calendar (#7): the dock's pane where the window has
-  /// room for the dock, the Journal screen everywhere else.
-  void _showJournalCalendar() {
-    if (_dockRoom) {
-      _workspace.controller.update(
-        (w) => w.withDock(open: true, pane: DockPane.journal),
-      );
-      return;
-    }
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (screen) => JournalScreen(
-          today: _journal.today(DateTime.now()),
-          entryDays: _journalFlow.entryDays,
-          readEntry: _readJournalEntry,
-          revision: widget.controller.revision,
-          dueOn: _tasksDueOn,
-          tasksChanged: _todoController,
-          onOpenTasks: () {
-            Navigator.of(screen).pop();
-            _openTodo();
-          },
-          onOpenDay: (day, {confirmed = false}) {
-            // The screen goes first: the entry opens in the shell.
-            Navigator.of(screen).pop();
-            unawaited(_journalFlow.openDay(context, day, confirmed: confirmed));
-          },
-        ),
-      ),
     );
   }
 
@@ -4030,7 +3974,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             saveNoteStream: _noteStreamSaver(controller),
             createMissingNote: _missingNoteCreator(controller),
             statusActions: _statusActionsFor(pane),
-            header: _journalHeader,
+            header: (path) => _journalUi.header(context, path),
             onEditEpubLook: () => _editEpubLook(controller),
             onEpubTextScale: (scale) =>
                 unawaited(keepEpubTextScale(controller, scale)),
@@ -4065,22 +4009,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Opens the sheet that sets how the books look (#280).
   void _editEpubLook(LibrarySession controller) =>
       unawaited(showEpubLookSheet(context, session: controller));
-
-  /// The journal's strip over [path] when it is an entry (#7), else null.
-  Widget? _journalHeader(String path, {bool compact = false}) {
-    final day = _journal.dayOfPath(path);
-    if (day == null) return null;
-    return JournalStrip(
-      day: day,
-      today: _journal.today(DateTime.now()),
-      entryDays: _journalFlow.entryDays,
-      onPrevious: () => unawaited(_journalFlow.openPrevious(context, day)),
-      onNext: () => unawaited(_journalFlow.openNext(context, day)),
-      onDay: _showJournalCalendar,
-      revision: widget.controller.revision,
-      compact: compact,
-    );
-  }
 
   /// The view controls in [pane]'s status row (T-PP-22): for the note
   /// that pane shows, so each pane's eye says what its own tab does.
