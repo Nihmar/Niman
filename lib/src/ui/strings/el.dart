@@ -1101,6 +1101,11 @@ final class GreekStrings extends Strings {
   @override
   String get actionRename => 'Μετανομασία';
   @override
+  String get renameNameInvalid =>
+      'Το όνομα περιέχει χαρακτήρα που το σύστημα αρχείων δεν δέχεται.';
+  @override
+  String renameNameTaken(String name) => 'Αυτός ο φάκελος έχει ήδη «$name».';
+  @override
   String get actionMove => 'Μετακίνηση';
   @override
   String get saveAndClose => 'Αποθήκευση και κλείσιμο';
@@ -2924,6 +2929,9 @@ final class GreekStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Καμία σημείωση δεν ταιριάζει με «$query».';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Κανένα αρχείο δεν ταιριάζει με «$query».';
+  @override
   String get wikilinkNoHeading =>
       'αυτή η σημείωση δεν έχει τίτλο με αυτό το όνομα';
   @override
@@ -3415,6 +3423,11 @@ final class GreekStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Πάντα ορατό';
+  @override
+  String get navigationStart => 'Ανοίγει σε';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      'Το $hidden είναι κρυφό: η εφαρμογή ανοίγει σε $start.';
 
   @override
   String get newSlidesTitle => 'Νέα παρουσίαση';

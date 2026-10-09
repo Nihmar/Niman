@@ -1085,6 +1085,11 @@ final class PolishStrings extends Strings {
   @override
   String get actionRename => 'Zmień nazwę';
   @override
+  String get renameNameInvalid =>
+      'Nazwa zawiera znak, którego system plików nie przyjmuje.';
+  @override
+  String renameNameTaken(String name) => 'Ten folder ma już „$name”.';
+  @override
   String get actionMove => 'Przenieś';
   @override
   String get saveAndClose => 'Zapisz i zamknij';
@@ -2884,6 +2889,9 @@ final class PolishStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Żadna notatka nie pasuje do „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Żaden plik nie pasuje do „$query”.';
+  @override
   String get wikilinkNoHeading => 'ta notatka nie ma nagłówka o tej nazwie';
   @override
   String get wikilinkNoNote => 'nic w bibliotece nie ma tej nazwy ani aliasu';
@@ -3361,6 +3369,11 @@ final class PolishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Zawsze widoczne';
+  @override
+  String get navigationStart => 'Otwiera się na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden jest ukryte: aplikacja otwiera się na $start.';
 
   @override
   String get newSlidesTitle => 'Nowa prezentacja';

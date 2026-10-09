@@ -1068,6 +1068,11 @@ final class DanishStrings extends Strings {
   @override
   String get actionRename => 'Omdøb';
   @override
+  String get renameNameInvalid =>
+      'Navnet indeholder et tegn, som filsystemet afviser.';
+  @override
+  String renameNameTaken(String name) => 'Mappen har allerede “$name”.';
+  @override
   String get actionMove => 'Flyt';
   @override
   String get saveAndClose => 'Gem og luk';
@@ -2816,6 +2821,8 @@ final class DanishStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => 'Ingen noter matcher “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) => 'Ingen fil matcher “$query”.';
+  @override
   String get wikilinkNoHeading =>
       'denne note har ingen overskrift med det navn';
   @override
@@ -3292,6 +3299,11 @@ final class DanishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Altid vist';
+  @override
+  String get navigationStart => 'Åbner på';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden er skjult: appen åbner på $start.';
 
   @override
   String get newSlidesTitle => 'Ny præsentation';

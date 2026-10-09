@@ -1091,6 +1091,11 @@ final class FrenchStrings extends Strings {
   @override
   String get actionRename => 'Renommer';
   @override
+  String get renameNameInvalid =>
+      'Le nom contient un caractère refusé par le système de fichiers.';
+  @override
+  String renameNameTaken(String name) => 'Ce dossier contient déjà « $name ».';
+  @override
   String get actionMove => 'Déplacer';
   @override
   String get saveAndClose => 'Enregistrer et fermer';
@@ -2913,6 +2918,9 @@ final class FrenchStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Aucune note ne correspond à « $query ».';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Aucun fichier ne correspond à « $query ».';
+  @override
   String get wikilinkNoHeading => 'cette note n’a aucun titre de ce nom';
   @override
   String get wikilinkNoNote =>
@@ -3404,6 +3412,11 @@ final class FrenchStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Toujours affiché';
+  @override
+  String get navigationStart => 'S’ouvre sur';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden est masqué : l’app s’ouvre sur $start.';
 
   @override
   String get newSlidesTitle => 'Nouvelle présentation';

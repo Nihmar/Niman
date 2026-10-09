@@ -1077,6 +1077,11 @@ final class AlbanianStrings extends Strings {
   @override
   String get actionRename => 'Rimëmbaj';
   @override
+  String get renameNameInvalid =>
+      'Emri përmban një shenjë që sistemi i skedarëve e refuzon.';
+  @override
+  String renameNameTaken(String name) => 'Kjo dosje e ka tashmë “$name”.';
+  @override
   String get actionMove => 'Lëviz';
   @override
   String get saveAndClose => 'Ruaj dhe mbyll';
@@ -2851,6 +2856,9 @@ final class AlbanianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Asnjë shënim nuk përputhet me „$query".';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Asnjë skedar nuk përputhet me “$query”.';
+  @override
   String get wikilinkNoHeading => 'ky shënim nuk ka titull me atë emër';
   @override
   String get wikilinkNoNote =>
@@ -3332,6 +3340,11 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Gjithmonë i dukshëm';
+  @override
+  String get navigationStart => 'Hapet në';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden është i fshehur: aplikacioni hapet në $start.';
 
   @override
   String get newSlidesTitle => 'Prezantim i ri';

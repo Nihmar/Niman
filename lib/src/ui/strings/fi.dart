@@ -1075,6 +1075,11 @@ final class FinnishStrings extends Strings {
   @override
   String get actionRename => 'Nimeä uudelleen';
   @override
+  String get renameNameInvalid =>
+      'Nimessä on merkki, jota tiedostojärjestelmä ei hyväksy.';
+  @override
+  String renameNameTaken(String name) => 'Kansiossa on jo ”$name”.';
+  @override
   String get actionMove => 'Siirrä';
   @override
   String get saveAndClose => 'Tallenna ja sulje';
@@ -2846,6 +2851,9 @@ final class FinnishStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Mikään muistiinpano ei vastaa hakua “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Mikään tiedosto ei vastaa hakua ”$query”.';
+  @override
   String get wikilinkNoHeading =>
       'tässä muistiinpanossa ei ole sen nimistä otsikkoa';
   @override
@@ -3327,6 +3335,11 @@ final class FinnishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Aina näkyvissä';
+  @override
+  String get navigationStart => 'Avautuu kohtaan';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden on piilotettu: sovellus avautuu kohtaan $start.';
 
   @override
   String get newSlidesTitle => 'Uusi esitys';

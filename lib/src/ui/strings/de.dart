@@ -1086,6 +1086,12 @@ final class GermanStrings extends Strings {
   @override
   String get actionRename => 'Umbenennen';
   @override
+  String get renameNameInvalid =>
+      'Der Name enthält ein Zeichen, das das Dateisystem ablehnt.';
+  @override
+  String renameNameTaken(String name) =>
+      'Dieser Ordner enthält bereits „$name“.';
+  @override
   String get actionMove => 'Verschieben';
   @override
   String get saveAndClose => 'Speichern und schließen';
@@ -2894,6 +2900,8 @@ final class GermanStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => 'Keine Notiz passt zu „$query“.';
   @override
+  String wikilinkNoMatchFile(String query) => 'Keine Datei passt zu „$query“.';
+  @override
   String get wikilinkNoHeading =>
       'diese Notiz hat keine Überschrift mit diesem Namen';
   @override
@@ -3383,6 +3391,11 @@ final class GermanStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Immer sichtbar';
+  @override
+  String get navigationStart => 'Startet mit';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden ist ausgeblendet: Die App startet mit $start.';
 
   @override
   String get newSlidesTitle => 'Neue Präsentation';

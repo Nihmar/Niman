@@ -1075,6 +1075,11 @@ final class PortugueseStrings extends Strings {
   @override
   String get actionRename => 'Renomear';
   @override
+  String get renameNameInvalid =>
+      'O nome contém um carácter que o sistema de ficheiros recusa.';
+  @override
+  String renameNameTaken(String name) => 'Esta pasta já tem «$name».';
+  @override
   String get actionMove => 'Mover';
   @override
   String get saveAndClose => 'Salvar e fechar';
@@ -2846,6 +2851,9 @@ final class PortugueseStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nenhuma nota corresponde a “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nenhum ficheiro corresponde a «$query».';
+  @override
   String get wikilinkNoHeading => 'esta nota não tem um título com esse nome';
   @override
   String get wikilinkNoNote => 'nada na biblioteca tem esse nome ou alias';
@@ -3328,6 +3336,11 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visível';
+  @override
+  String get navigationStart => 'Abre em';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden está oculto: a app abre em $start.';
 
   @override
   String get newSlidesTitle => 'Nova apresentação';

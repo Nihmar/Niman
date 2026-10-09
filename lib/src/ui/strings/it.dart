@@ -1081,6 +1081,11 @@ final class ItalianStrings extends Strings {
   @override
   String get actionRename => 'Rinomina';
   @override
+  String get renameNameInvalid =>
+      'Il nome contiene un carattere che il file system rifiuta.';
+  @override
+  String renameNameTaken(String name) => 'In questa cartella c’è già “$name”.';
+  @override
   String get actionMove => 'Sposta';
   @override
   String get saveAndClose => 'Salva e chiudi';
@@ -2849,6 +2854,9 @@ final class ItalianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nessuna nota corrisponde a “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nessun file corrisponde a “$query”.';
+  @override
   String get wikilinkNoHeading => 'questa nota non ha un titolo con quel nome';
   @override
   String get wikilinkNoNote => 'niente nella libreria ha quel nome o alias';
@@ -3331,6 +3339,11 @@ final class ItalianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visibile';
+  @override
+  String get navigationStart => 'Si apre su';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden è nascosta: l’app si apre su $start.';
 
   @override
   String get newSlidesTitle => 'Nuova presentazione';

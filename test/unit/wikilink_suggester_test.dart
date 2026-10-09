@@ -444,6 +444,66 @@ void main() {
     expect(rows, hasLength(IndexWikilinkSuggester.limit));
     expect(rows.every((r) => r.folder == 'Y'), isTrue);
   });
+
+  test("a file's target is its name, qualified when shared (#704)", () async {
+    await addNote('Work/Meeting.md', stems: ['meeting']);
+    await addNote('Home/Meeting.md', stems: ['meeting']);
+    await addNote('Solo.md', stems: ['solo']);
+    await addNote('Media/photo.png', stems: ['photo.png']);
+    final suggester = suggesterOver();
+
+    expect(await suggester.targetOf('Work/Meeting.md'), 'Work/Meeting');
+    expect(await suggester.targetOf('Solo.md'), 'Solo');
+    expect(await suggester.targetOf('Media/photo.png'), 'photo.png');
+  });
+
+  group('after ![[ (#705)', () {
+    IndexWikilinkSuggester embedder() => IndexWikilinkSuggester(
+      db,
+      readHeadings: (_) async => null,
+      attachmentsFolder: () async => 'Media',
+    );
+
+    test(
+      'the attachments folder first, then the rest, then the notes',
+      () async {
+        await addNote('Diary.md', stems: ['diary']);
+        await addNote('Archive/scan.pdf', stems: ['scan.pdf']);
+        await addNote('Media/photo.png', stems: ['photo.png']);
+        await addNote('Media/Audio/memo.m4a', stems: ['memo.m4a']);
+
+        final rows = await embedder().embeds('');
+
+        expect(rows.map((r) => r.name), [
+          'photo.png',
+          'memo.m4a',
+          'scan.pdf',
+          'Diary',
+        ], reason: 'its subfolders are the folder too');
+        expect(rows.map((r) => r.target), [
+          'photo.png',
+          'memo.m4a',
+          'scan.pdf',
+          'Diary',
+        ], reason: 'an attachment keeps its extension');
+      },
+    );
+
+    test('ranked by the query, a shared name qualified', () async {
+      await addNote('Media/photo.png', stems: ['photo.png']);
+      await addNote('Trip/photo.png', stems: ['photo.png']);
+      await addNote('Media/portrait.jpg', stems: ['portrait.jpg']);
+      await addNote('Photos.md', stems: ['photos']);
+
+      final rows = await embedder().embeds('pho');
+
+      expect(rows.map((r) => r.target), [
+        'Media/photo.png',
+        'Trip/photo.png',
+        'Photos',
+      ]);
+    });
+  });
 }
 
 /// Records every SELECT a suggester run issues, with its bound arguments, so

@@ -1075,6 +1075,11 @@ final class SerbianStrings extends Strings {
   @override
   String get actionRename => 'Промени име';
   @override
+  String get renameNameInvalid =>
+      'Назив садржи знак који систем датотека одбија.';
+  @override
+  String renameNameTaken(String name) => 'Ова фасцикла већ садржи „$name”.';
+  @override
   String get actionMove => 'Премести';
   @override
   String get saveAndClose => 'Сачувај и затвори';
@@ -2860,6 +2865,9 @@ final class SerbianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ниједна белешка се не поклапа са „$query".';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ниједна датотека не одговара „$query”.';
+  @override
   String get wikilinkNoHeading => 'ова белешка нема наслов с тим именом';
   @override
   String get wikilinkNoNote => 'ништа у библиотеци нема то име или алијас';
@@ -3331,6 +3339,11 @@ final class SerbianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Увек приказано';
+  @override
+  String get navigationStart => 'Отвара се на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden је скривено: апликација се отвара на $start.';
 
   @override
   String get newSlidesTitle => 'Нова презентација';

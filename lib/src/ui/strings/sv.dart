@@ -1074,6 +1074,11 @@ final class SwedishStrings extends Strings {
   @override
   String get actionRename => 'Byt namn';
   @override
+  String get renameNameInvalid =>
+      'Namnet innehåller ett tecken som filsystemet inte godtar.';
+  @override
+  String renameNameTaken(String name) => 'Mappen har redan ”$name”.';
+  @override
   String get actionMove => 'Flytta';
   @override
   String get saveAndClose => 'Spara och stäng';
@@ -2838,6 +2843,8 @@ final class SwedishStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ingen anteckning matchar “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) => 'Ingen fil matchar ”$query”.';
+  @override
   String get wikilinkNoHeading =>
       'den här anteckningen har ingen rubrik med det namnet';
   @override
@@ -3319,6 +3326,11 @@ final class SwedishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Visas alltid';
+  @override
+  String get navigationStart => 'Öppnas på';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden är dold: appen öppnas på $start.';
 
   @override
   String get newSlidesTitle => 'Ny presentation';

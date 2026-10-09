@@ -1071,6 +1071,11 @@ final class CzechStrings extends Strings {
   @override
   String get actionRename => 'Přejmenovat';
   @override
+  String get renameNameInvalid =>
+      'Název obsahuje znak, který souborový systém odmítá.';
+  @override
+  String renameNameTaken(String name) => 'Tato složka už obsahuje „$name“.';
+  @override
   String get actionMove => 'Přesunout';
   @override
   String get saveAndClose => 'Uložit a zavřít';
@@ -2834,6 +2839,9 @@ final class CzechStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Žádná poznámka neodpovídá „$query“.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Žádný soubor neodpovídá „$query“.';
+  @override
   String get wikilinkNoHeading => 'tato poznámka nemá nadpis s tímto názvem';
   @override
   String get wikilinkNoNote => 'nic v knihovně nemá tento název ani alias';
@@ -3307,6 +3315,11 @@ final class CzechStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vždy zobrazeno';
+  @override
+  String get navigationStart => 'Otevírá se na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skryto: aplikace se otevírá na $start.';
 
   @override
   String get newSlidesTitle => 'Nová prezentace';

@@ -1066,6 +1066,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get actionRename => 'Endre navn';
   @override
+  String get renameNameInvalid =>
+      'Navnet inneholder et tegn filsystemet avviser.';
+  @override
+  String renameNameTaken(String name) => 'Mappen har allerede «$name».';
+  @override
   String get actionMove => 'Flytt';
   @override
   String get saveAndClose => 'Lagre og lukk';
@@ -2813,6 +2818,9 @@ final class NorwegianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ingen notater samsvarer med “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ingen fil samsvarer med «$query».';
+  @override
   String get wikilinkNoHeading =>
       'dette notatet har ingen overskrift med det navnet';
   @override
@@ -3294,6 +3302,11 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alltid vist';
+  @override
+  String get navigationStart => 'Åpner på';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden er skjult: appen åpner på $start.';
 
   @override
   String get newSlidesTitle => 'Ny presentasjon';

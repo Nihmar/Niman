@@ -1009,6 +1009,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get actionRename => '名前変更';
   @override
+  String get renameNameInvalid => 'ファイルシステムで使えない文字が名前に含まれています。';
+  @override
+  String renameNameTaken(String name) => 'このフォルダーにはすでに「$name」があります。';
+  @override
   String get actionMove => '移動';
   @override
   String get saveAndClose => '保存して閉じる';
@@ -2578,6 +2582,8 @@ final class JapaneseStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => '「$query」 に一致するノートはありません。';
   @override
+  String wikilinkNoMatchFile(String query) => '「$query」に一致するファイルはありません。';
+  @override
   String get wikilinkNoHeading => 'このノートにその名前の見出しはありません';
   @override
   String get wikilinkNoNote => 'ライブラリにその名前または別名のものはありません';
@@ -3022,6 +3028,11 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => '常に表示';
+  @override
+  String get navigationStart => '起動時の画面';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden は非表示です。$start で起動します。';
 
   @override
   String get newSlidesTitle => '新しいスライド';

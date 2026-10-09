@@ -5,7 +5,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
-import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_failure.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/diff/merge_view.dart';
 import 'package:niman/src/ui/strings.dart';

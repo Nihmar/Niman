@@ -30,6 +30,15 @@ the note's. The panel lists:
   has no escape for them, and the row would write a link that reads back
   as another note — link to one of those with a Markdown link instead
   (`[C# tips](C%23%20tips.md)`);
+- after `![[` — an embed — the attachments instead: the files of the
+  attachments folder (**Settings → Folders and paths**) and its
+  subfolders first — pictures, audio, video, PDFs, whatever is there —
+  then the attachments kept elsewhere in the library (a picture beside
+  its note), then the notes, which an embed transcludes. They are
+  matched by the typed name as the notes are, and the row writes the
+  file's name with its extension (`![[photo.png]]`), with as much of its
+  folder as it takes when another file shares the name. A Markdown
+  embed, `![](…)`, has no panel, as a Markdown link has none;
 - after a `#` — the headings of the note just named, filtered the same
   way. `[[#` — no target — lists the headings of the note being edited;
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or
@@ -155,6 +164,21 @@ not notes: they are never created. External URLs keep their behavior.
 
 Notes opened without a library (editor-only mode) keep the old
 "link not found" outcome.
+
+## Dropping a file from the tree
+
+On Linux and Windows a row of the tree dragged onto an open note writes a
+link to that file where it is let go: the caret follows the pointer while
+the row is over the note, and the link goes in as one edit, undone in one
+step. It is written in the library's link format, as the link button and
+the panel write one — `[[Meeting]]`, with as much of the folder as another
+file of that name makes it take, or `[Meeting](../Work/Meeting.md)`,
+relative to the note. A picture or an audio file is embedded instead
+(`![[photo.png]]`, `![photo.png](Media/photo.png)`), as one added from the
+editor is; a PDF, a book or any other file is linked. A folder dragged
+onto the note writes nothing, and the read view, with no caret, takes no
+drop. The tree's own drops are unchanged: let go on a folder, the row
+moves into it.
 
 ## Link button
 

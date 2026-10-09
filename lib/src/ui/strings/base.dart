@@ -542,6 +542,8 @@ abstract base class Strings {
   String get actionChoose;
   String get actionDelete;
   String get actionRename;
+  String get renameNameInvalid;
+  String renameNameTaken(String name);
   String get actionMove;
   String get saveAndClose;
   String get closeUnsavedTitle;
@@ -1367,6 +1369,7 @@ abstract base class Strings {
 
   /// The panel's sentence when no note matched [query].
   String wikilinkNoMatchNote(String query);
+  String wikilinkNoMatchFile(String query);
 
   /// What stands under [wikilinkNoMatchHeading].
   String get wikilinkNoHeading;
@@ -1804,6 +1807,8 @@ abstract base class Strings {
   String get navigationScopeLibrary;
   String get navigationScopeDevice;
   String get navigationAlwaysShown;
+  String get navigationStart;
+  String navigationStartHidden(String hidden, String start);
 
   // Slide notes (#534).
   String get newSlidesTitle;

@@ -1083,6 +1083,11 @@ final class RomanianStrings extends Strings {
   @override
   String get actionRename => 'Redenumește';
   @override
+  String get renameNameInvalid =>
+      'Numele conține un caracter pe care sistemul de fișiere îl refuză.';
+  @override
+  String renameNameTaken(String name) => 'Acest dosar are deja „$name”.';
+  @override
   String get actionMove => 'Mută';
   @override
   String get saveAndClose => 'Salvează și închide';
@@ -2877,6 +2882,9 @@ final class RomanianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nicio notă nu corespunde cu “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Niciun fișier nu se potrivește cu „$query”.';
+  @override
   String get wikilinkNoHeading =>
       'această notă nu are niciun titlu cu acest nume';
   @override
@@ -3361,6 +3369,11 @@ final class RomanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Mereu vizibil';
+  @override
+  String get navigationStart => 'Se deschide pe';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden este ascuns: aplicația se deschide pe $start.';
 
   @override
   String get newSlidesTitle => 'Prezentare nouă';

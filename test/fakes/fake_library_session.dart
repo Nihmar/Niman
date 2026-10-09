@@ -1818,6 +1818,50 @@ final class _FakeWikilinkSuggester implements WikilinkSuggester {
   }
 
   @override
+  Future<String> targetOf(String path) async {
+    final name = p.basename(path);
+    final bare = name.toLowerCase().endsWith('.md')
+        ? p.basenameWithoutExtension(name)
+        : name;
+    final shared = _session._rows.where(
+      (row) => !row.trashed && p.basename(row.path) == name,
+    );
+    if (shared.length <= 1) return bare;
+    final folder = p.dirname(path);
+    return folder == '.' ? bare : '$folder/$bare';
+  }
+
+  @override
+  Future<List<NoteSuggestion>> embeds(String query) async {
+    final q = query.trim().toLowerCase();
+    final folder = '${await _session.attachmentsFolder}/';
+    final files = <NoteSuggestion>[];
+    for (final row in _session._rows) {
+      if (row.isDir || row.trashed || row.path.endsWith('.md')) continue;
+      final name = p.basename(row.path);
+      if (q.isNotEmpty && !name.toLowerCase().contains(q)) continue;
+      final dir = p.dirname(row.path);
+      files.add(
+        NoteSuggestion(name: name, folder: dir == '.' ? '' : dir, target: name),
+      );
+    }
+    int rank(NoteSuggestion f) => '${f.folder}/'.startsWith(folder) ? 0 : 1;
+    files.sort((a, b) {
+      final byPlace = rank(a) - rank(b);
+      return byPlace != 0 ? byPlace : a.name.compareTo(b.name);
+    });
+    final notes = {
+      for (final row in _session._rows)
+        if (row.path.endsWith('.md')) p.basenameWithoutExtension(row.path),
+    };
+    return [
+      ...files,
+      for (final note in await this.notes(query))
+        if (notes.contains(note.name)) note,
+    ];
+  }
+
+  @override
   Future<List<HeadingSuggestion>> headings(String target) async {
     final stem = p.basenameWithoutExtension(target).toLowerCase();
     final row = _session._rows

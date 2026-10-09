@@ -723,6 +723,8 @@ final class AppStrings {
   static String get actionChoose => _s.actionChoose;
   static String get actionDelete => _s.actionDelete;
   static String get actionRename => _s.actionRename;
+  static String get renameNameInvalid => _s.renameNameInvalid;
+  static String renameNameTaken(String name) => _s.renameNameTaken(name);
   static String get actionMove => _s.actionMove;
 
   /// The close-with-unsaved-edits ask (T-PP-11).
@@ -852,6 +854,8 @@ final class AppStrings {
       _s.wikilinkNoMatchHeading(query);
   static String wikilinkNoMatchNote(String query) =>
       _s.wikilinkNoMatchNote(query);
+  static String wikilinkNoMatchFile(String query) =>
+      _s.wikilinkNoMatchFile(query);
   static String get wikilinkNoHeading => _s.wikilinkNoHeading;
   static String get wikilinkNoNote => _s.wikilinkNoNote;
   static String wikilinkAlias(String alias) => _s.wikilinkAlias(alias);
@@ -1736,6 +1740,9 @@ final class AppStrings {
   static String get navigationScopeLibrary => _s.navigationScopeLibrary;
   static String get navigationScopeDevice => _s.navigationScopeDevice;
   static String get navigationAlwaysShown => _s.navigationAlwaysShown;
+  static String get navigationStart => _s.navigationStart;
+  static String navigationStartHidden(String hidden, String start) =>
+      _s.navigationStartHidden(hidden, start);
   // Slide notes (#534).
   static String get newSlidesTitle => _s.newSlidesTitle;
   static String get newSlidesDefault => _s.newSlidesDefault;

@@ -1062,6 +1062,10 @@ final class EstonianStrings extends Strings {
   @override
   String get actionRename => 'Nime muuda';
   @override
+  String get renameNameInvalid => 'Nimes on märk, mida failisüsteem ei luba.';
+  @override
+  String renameNameTaken(String name) => 'Selles kaustas on juba „$name“.';
+  @override
   String get actionMove => 'Liiguta';
   @override
   String get saveAndClose => 'Salvesta ja sulge';
@@ -2791,6 +2795,9 @@ final class EstonianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ükski märge ei vasta päringule „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ükski fail ei vasta päringule „$query“.';
+  @override
   String get wikilinkNoHeading => 'selles märkes pole sellenimelist pealkirja';
   @override
   String get wikilinkNoNote => 'kogus pole midagi selle nime või aliasega';
@@ -3259,6 +3266,11 @@ final class EstonianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alati nähtav';
+  @override
+  String get navigationStart => 'Avaneb vaates';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden on peidetud: rakendus avaneb vaates $start.';
 
   @override
   String get newSlidesTitle => 'Uus esitlus';

@@ -4159,6 +4159,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       target: hash == -1 ? content : content.substring(0, hash),
       heading: hash == -1 ? '' : content.substring(hash + 1),
       hasHash: hash != -1,
+      // An embed, `![[`, lists the attachments rather than the notes (#705).
+      embed: open > 0 && text.codeUnitAt(open - 1) == 0x21,
     );
     // A book's place is written through its `=` (`page=`): what follows is
     // the number the form asked the writer for, and no row completes it. The
@@ -4239,6 +4241,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       case WikilinkPanelKind.notes:
         named = '';
         entries = await suggester.notes(query.target);
+      case WikilinkPanelKind.embeds:
+        named = '';
+        entries = await suggester.embeds(query.target);
       case WikilinkPanelKind.headings:
         if (query.target.isEmpty) {
           // The empty target is the note being edited: its own scan answers,
@@ -4298,7 +4303,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// What the link [query] is listing: the notes, a note's headings, or a
   /// book's place forms.
   static WikilinkPanelKind _modeOf(_LinkQuery query) {
-    if (!query.hasHash) return WikilinkPanelKind.notes;
+    if (!query.hasHash) {
+      return query.embed ? WikilinkPanelKind.embeds : WikilinkPanelKind.notes;
+    }
     final target = query.target.toLowerCase();
     return target.endsWith('.pdf') || target.endsWith('.epub')
         ? WikilinkPanelKind.book
@@ -5055,6 +5062,7 @@ final class _LinkQuery {
     required this.target,
     required this.heading,
     required this.hasHash,
+    this.embed = false,
   });
 
   final int start;
@@ -5071,6 +5079,9 @@ final class _LinkQuery {
   final String heading;
   final bool hasHash;
 
+  /// Whether a `!` stands before the `[[`: an embed (#705).
+  final bool embed;
+
   /// The offset just past the `#`, where a heading or a book form is written.
   int get hashAt => start + target.length + 1;
 
@@ -5082,7 +5093,8 @@ final class _LinkQuery {
   bool sameText(_LinkQuery other) =>
       target == other.target &&
       heading == other.heading &&
-      hasHash == other.hasHash;
+      hasHash == other.hasHash &&
+      embed == other.embed;
 }
 
 /// The suggester panel's own state: what is listed, and which row is picked.

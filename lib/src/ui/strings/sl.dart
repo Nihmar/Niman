@@ -1073,6 +1073,11 @@ final class SlovenianStrings extends Strings {
   @override
   String get actionRename => 'Preimenuj';
   @override
+  String get renameNameInvalid =>
+      'Ime vsebuje znak, ki ga datotečni sistem zavrne.';
+  @override
+  String renameNameTaken(String name) => 'Ta mapa že vsebuje »$name«.';
+  @override
   String get actionMove => 'Prenesi';
   @override
   String get saveAndClose => 'Shrani in zapri';
@@ -2856,6 +2861,9 @@ final class SlovenianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nobena opomba se ne ujema s „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nobena datoteka se ne ujema z »$query«.';
+  @override
   String get wikilinkNoHeading => 'ta opomba nima naslova s tem imenom';
   @override
   String get wikilinkNoNote => 'nič v knjižnici nima tega imena ali vzdevka';
@@ -3330,6 +3338,11 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vedno prikazano';
+  @override
+  String get navigationStart => 'Odpre se na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skrito: aplikacija se odpre na $start.';
 
   @override
   String get newSlidesTitle => 'Nova predstavitev';

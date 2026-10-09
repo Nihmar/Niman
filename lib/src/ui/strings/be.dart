@@ -1072,6 +1072,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get actionRename => 'Перайменаваць';
   @override
+  String get renameNameInvalid =>
+      'Назва змяшчае знак, які файлавая сістэма не прымае.';
+  @override
+  String renameNameTaken(String name) => 'У гэтай папцы ўжо ёсць «$name».';
+  @override
   String get actionMove => 'Перамясціць';
   @override
   String get saveAndClose => 'Захаваць і зачыніць';
@@ -2871,6 +2876,9 @@ final class BelarusianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ніводная нататка не адпавядае „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Няма файла, які адпавядае «$query».';
+  @override
   String get wikilinkNoHeading =>
       'у гэтай нататцы няма загалоўка з такой назвай';
   @override
@@ -3350,6 +3358,11 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Заўсёды паказана';
+  @override
+  String get navigationStart => 'Адкрываецца на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden схавана: праграма адкрываецца на $start.';
 
   @override
   String get newSlidesTitle => 'Новая прэзентацыя';

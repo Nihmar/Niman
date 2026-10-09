@@ -1,5 +1,6 @@
-/// The order of the navigation and which of its destinations are hidden
-/// (#536): the phone's bottom bar and the desktop's rail, per library.
+/// The order of the navigation, which of its destinations are hidden
+/// (#536) and the one the app opens on (#706): the phone's bottom bar and
+/// the desktop's rail, per library.
 ///
 /// Kept by name, never by position: a destination's place is the user's,
 /// its identity is the app's, and a build that adds one (Home #535, Study
@@ -11,11 +12,12 @@ import 'package:meta/meta.dart';
 /// One destination as a layout places it.
 typedef PlacedDestination = ({String name, bool hidden});
 
-/// The navigation's order and its hidden destinations.
+/// The navigation's order, its hidden destinations and its start.
 @immutable
 final class NavigationLayout {
-  /// A layout with [order] and [hidden]; the empty one is the defaults.
-  const new({this.order = const [], this.hidden = const {}});
+  /// A layout with [order], [hidden] and [start]; the empty one is the
+  /// defaults.
+  const new({this.order = const [], this.hidden = const {}, this.start});
 
   /// Reads the `settings.json` value; anything else than the object
   /// [toJson] writes reads as the defaults, the settings file's rule.
@@ -23,6 +25,7 @@ final class NavigationLayout {
     if (json is! Map) return const NavigationLayout();
     final order = json['order'];
     final hidden = json['hidden'];
+    final start = json['start'];
     return NavigationLayout(
       order: [
         if (order is List)
@@ -34,6 +37,7 @@ final class NavigationLayout {
           for (final name in hidden)
             if (name is String) name,
       },
+      start: start is String && start.isNotEmpty ? start : null,
     );
   }
 
@@ -44,6 +48,15 @@ final class NavigationLayout {
 
   /// The names of the destinations turned off.
   final Set<String> hidden;
+
+  /// The name of the destination the app opens on, null for the default
+  /// (Files). Kept by name as the rest is, and kept while that
+  /// destination is hidden: showing it again brings the start back.
+  final String? start;
+
+  /// This layout opening on [name] (null: the default).
+  NavigationLayout withStart(String? name) =>
+      NavigationLayout(order: order, hidden: hidden, start: name);
 
   /// [defaults], in their default order, placed by this layout.
   ///
@@ -98,6 +111,7 @@ final class NavigationLayout {
         for (final name in hidden)
           if (!known.contains(name)) name,
       },
+      start: start,
     );
   }
 
@@ -108,6 +122,7 @@ final class NavigationLayout {
       for (final name in order)
         if (hidden.contains(name)) name,
     ],
+    if (start != null) 'start': start,
   };
 
   @override
@@ -115,11 +130,15 @@ final class NavigationLayout {
       other is NavigationLayout &&
       _sameList(order, other.order) &&
       hidden.length == other.hidden.length &&
-      hidden.containsAll(other.hidden);
+      hidden.containsAll(other.hidden) &&
+      start == other.start;
 
   @override
-  int get hashCode =>
-      Object.hash(Object.hashAll(order), Object.hashAllUnordered(hidden));
+  int get hashCode => Object.hash(
+    Object.hashAll(order),
+    Object.hashAllUnordered(hidden),
+    start,
+  );
 }
 
 bool _sameList(List<String> a, List<String> b) {

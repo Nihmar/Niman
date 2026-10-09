@@ -999,6 +999,10 @@ final class ChineseStrings extends Strings {
   @override
   String get actionRename => '重命名';
   @override
+  String get renameNameInvalid => '名称包含文件系统不接受的字符。';
+  @override
+  String renameNameTaken(String name) => '此文件夹中已有“$name”。';
+  @override
   String get actionMove => '移动';
   @override
   String get saveAndClose => '保存并关闭';
@@ -2497,6 +2501,8 @@ final class ChineseStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => '没有笔记与「$query」匹配。';
   @override
+  String wikilinkNoMatchFile(String query) => '没有与“$query”匹配的文件。';
+  @override
   String get wikilinkNoHeading => '本笔记没有该名称的标题';
   @override
   String get wikilinkNoNote => '资料库中没有这个名称或别名的内容';
@@ -2932,6 +2938,11 @@ final class ChineseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => '始终显示';
+  @override
+  String get navigationStart => '启动时打开';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden 已隐藏：应用将打开 $start。';
 
   @override
   String get newSlidesTitle => '新建幻灯片';

@@ -1054,6 +1054,11 @@ final class HindiStrings extends Strings {
   @override
   String get actionRename => 'नाम बदलें';
   @override
+  String get renameNameInvalid =>
+      'नाम में ऐसा वर्ण है जिसे फ़ाइल सिस्टम स्वीकार नहीं करता।';
+  @override
+  String renameNameTaken(String name) => 'इस फ़ोल्डर में पहले से “$name” है।';
+  @override
   String get actionMove => 'स्थानांतरित करें';
   @override
   String get saveAndClose => 'सहेजकर बंद करें';
@@ -2784,6 +2789,9 @@ final class HindiStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       '«$query» से मेल खाता कोई नोट नहीं।';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      '“$query” से कोई फ़ाइल मेल नहीं खाती।';
+  @override
   String get wikilinkNoHeading => 'इस नोट में उस नाम की कोई हेडिंग नहीं है';
   @override
   String get wikilinkNoNote => 'लाइब्रेरी में उस नाम या उपनाम वाला कुछ नहीं है';
@@ -3260,6 +3268,11 @@ final class HindiStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'हमेशा दिखाया गया';
+  @override
+  String get navigationStart => 'इस पर खुलता है';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden छिपा है: ऐप $start पर खुलता है।';
 
   @override
   String get newSlidesTitle => 'नई प्रस्तुति';

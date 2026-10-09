@@ -14,6 +14,7 @@ import 'package:niman/src/ui/ocr/ocr_tree_order.dart';
 import 'package:niman/src/ui/ocr/ocr_tree_ring.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_drag.dart';
+import 'package:niman/src/ui/tree_rename_field.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
@@ -57,8 +58,13 @@ final class NoteTree extends StatefulWidget {
     this.onMove,
     this.nameDesc = false,
     this.ocrQueue,
+    this.renaming,
     super.key,
   });
+
+  /// The row whose name is being edited in place (#707), and what its
+  /// field does; null while none is.
+  final TreeRename? renaming;
 
   /// The text recognition jobs: a file being read wears a ring (#595);
   /// null shows none.
@@ -140,6 +146,40 @@ final class _NoteTreeState extends State<NoteTree> {
 
   bool get _collapsed => _pinnedCollapsed ?? false;
 
+  /// The tree's scroll, which a rename in place moves to its row (#707).
+  final ScrollController _scroll = ScrollController();
+
+  /// The row a rename has scrolled to, so it is scrolled to once.
+  String? _revealed;
+
+  /// Brings the row being renamed into view: a row the list has not built
+  /// has no field to show. Rows are [height] tall, near enough for the
+  /// pinned block above them; the field puts itself fully in view once
+  /// it is built.
+  void _revealRenamed(_Rows rows, int header, double height) {
+    final path = widget.renaming?.path;
+    if (path == _revealed) return;
+    _revealed = path;
+    if (path == null) return;
+    final index = rows.tree.indexWhere((row) => row.note.path == path);
+    if (index < 0) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
+      final position = _scroll.position;
+      final top = (header + index) * height;
+      if (top >= position.pixels &&
+          top + height <= position.pixels + position.viewportDimension) {
+        return;
+      }
+      _scroll.jumpTo(
+        (top - position.viewportDimension / 2).clamp(
+          position.minScrollExtent,
+          position.maxScrollExtent,
+        ),
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -148,6 +188,7 @@ final class _NoteTreeState extends State<NoteTree> {
 
   @override
   void dispose() {
+    _scroll.dispose();
     const AppLogger(name: 'tree.ui').debug('dispose');
     super.dispose();
   }
@@ -280,8 +321,10 @@ final class _NoteTreeState extends State<NoteTree> {
             final header = rows.pinned.isEmpty
                 ? 0
                 : (_collapsed ? 2 : rows.pinned.length + 2);
+            _revealRenamed(rows, header, TreeRowMetrics.of(context).height);
             final list = ListView.builder(
               key: const Key('note-tree-list'),
+              controller: _scroll,
               itemCount: header + rows.tree.length,
               itemBuilder: (context, index) {
                 if (index < header) return _pinnedItem(rows.pinned, index);
@@ -299,6 +342,9 @@ final class _NoteTreeState extends State<NoteTree> {
                   onSecondaryTapDown: widget.onSecondaryTapDown,
                   onMiddleClick: widget.onOpenInNewTab,
                   onMove: widget.onMove,
+                  renaming: widget.renaming?.path == row.note.path
+                      ? widget.renaming
+                      : null,
                 );
               },
             );
@@ -405,6 +451,15 @@ bool _setEquals(Set<String> a, Set<String> b) {
 
 /// One row tile: chevron (folders) or doc icon (files), then the name —
 /// the name column is shared, per the mockup.
+/// A rename in place (#707): the row at `path` shows a field, which
+/// renames through `submit` — null once done, or why the name cannot be —
+/// or gives up through `cancel`.
+typedef TreeRename = ({
+  String path,
+  Future<String?> Function(String name) submit,
+  VoidCallback cancel,
+});
+
 final class _RowTile extends StatelessWidget {
   const new({
     required this.note,
@@ -420,8 +475,12 @@ final class _RowTile extends StatelessWidget {
     this.icon,
     this.sidecar = false,
     this.ocrQueue,
+    this.renaming,
     super.key,
   });
+
+  /// The rename under way on this row, or null.
+  final TreeRename? renaming;
 
   /// Moves this row by dragging it, and takes drops (#567).
   final TreeMove? onMove;
@@ -466,7 +525,10 @@ final class _RowTile extends StatelessWidget {
           ? null
           : (details) => onSecondaryTapDown!(note, details),
       child: Container(
-        height: metrics.height,
+        // A field with something to say under it takes the room it needs.
+        constraints: renaming == null
+            ? BoxConstraints.tightFor(height: metrics.height)
+            : BoxConstraints(minHeight: metrics.height),
         color: selected ? theme.highlightColor.withValues(alpha: 0.4) : null,
         padding: EdgeInsets.only(left: depth * metrics.indent + 8),
         child: Row(
@@ -503,14 +565,24 @@ final class _RowTile extends StatelessWidget {
                 ),
               ),
             Expanded(
-              child: MarqueeText(
-                text: displayNameOf(note),
-                style: sidecar
-                    ? theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      )
-                    : theme.textTheme.bodyMedium,
-              ),
+              child: renaming != null
+                  ? TreeRenameField(
+                      // On disk: the file is what is renamed, whatever the
+                      // row shows for its title.
+                      name: note.name,
+                      isDir: note.isDir,
+                      style: theme.textTheme.bodyMedium,
+                      onSubmit: renaming!.submit,
+                      onCancel: renaming!.cancel,
+                    )
+                  : MarqueeText(
+                      text: displayNameOf(note),
+                      style: sidecar
+                          ? theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            )
+                          : theme.textTheme.bodyMedium,
+                    ),
             ),
             if (ocrQueue case final queue?
                 when !note.isDir && isRecognizableFile(note.name))
@@ -529,7 +601,8 @@ final class _RowTile extends StatelessWidget {
         ),
       ),
     );
-    if (move != null) {
+    // A row being renamed is not dragged: a drag in its field selects text.
+    if (move != null && renaming == null) {
       row = TreeRowDrag(
         note: note,
         onMove: move,

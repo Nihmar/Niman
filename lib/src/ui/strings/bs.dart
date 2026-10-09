@@ -1075,6 +1075,11 @@ final class BosnianStrings extends Strings {
   @override
   String get actionRename => 'Promijeni ime';
   @override
+  String get renameNameInvalid =>
+      'Naziv sadrži znak koji sistem datoteka odbija.';
+  @override
+  String renameNameTaken(String name) => 'Ovaj folder već sadrži „$name”.';
+  @override
   String get actionMove => 'Premjesti';
   @override
   String get saveAndClose => 'Spremi i zatvori';
@@ -2863,6 +2868,9 @@ final class BosnianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nijedna bilješka se ne poklapa sa "$query".';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nijedna datoteka ne odgovara „$query”.';
+  @override
   String get wikilinkNoHeading => 'ova bilješka nema naslov s tim imenom';
   @override
   String get wikilinkNoNote => 'ništa u biblioteci nema to ime ni alias';
@@ -3335,6 +3343,11 @@ final class BosnianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Uvijek prikazano';
+  @override
+  String get navigationStart => 'Otvara se na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skriveno: aplikacija se otvara na $start.';
 
   @override
   String get newSlidesTitle => 'Nova prezentacija';

@@ -1089,6 +1089,11 @@ final class SpanishStrings extends Strings {
   @override
   String get actionRename => 'Renombrar';
   @override
+  String get renameNameInvalid =>
+      'El nombre contiene un carácter que el sistema de archivos rechaza.';
+  @override
+  String renameNameTaken(String name) => 'Esta carpeta ya tiene «$name».';
+  @override
   String get actionMove => 'Mover';
   @override
   String get saveAndClose => 'Guardar y cerrar';
@@ -2872,6 +2877,9 @@ final class SpanishStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ninguna nota coincide con «$query».';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ningún archivo coincide con «$query».';
+  @override
   String get wikilinkNoHeading => 'esta nota no tiene un título con ese nombre';
   @override
   String get wikilinkNoNote =>
@@ -3358,6 +3366,11 @@ final class SpanishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Siempre visible';
+  @override
+  String get navigationStart => 'Se abre en';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden está oculto: la app se abre en $start.';
 
   @override
   String get newSlidesTitle => 'Nueva presentación';

@@ -95,4 +95,31 @@ void main() {
     await controller.close();
     await controller.dispose();
   });
+
+  testWidgets('New slides makes the presentation in the root (#703)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+    await controller.createFolder(parentPath: '', name: 'Journal');
+    await settle(tester);
+    // A folder selected: a plain note would land in it, the slides not.
+    await tester.tap(noteRow('Journal'));
+    await settle(tester);
+
+    await openNewItemMenu(tester);
+    await tester.tap(find.byKey(const Key('new-slides-action')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Deck');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    expect(await controller.ops!.find('Deck.md'), isNotNull);
+    expect(await controller.ops!.find('Journal/Deck.md'), isNull);
+    expect(controller.contentOf('Deck.md'), contains('type: slides'));
+
+    await controller.close();
+    await controller.dispose();
+  });
 }

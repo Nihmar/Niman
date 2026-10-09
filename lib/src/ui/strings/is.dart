@@ -1072,6 +1072,11 @@ final class IcelandicStrings extends Strings {
   @override
   String get actionRename => 'Endurheita';
   @override
+  String get renameNameInvalid =>
+      'Nafnið inniheldur staf sem skráakerfið hafnar.';
+  @override
+  String renameNameTaken(String name) => 'Mappan inniheldur þegar „$name“.';
+  @override
   String get actionMove => 'Færa';
   @override
   String get saveAndClose => 'Vista og loka';
@@ -2829,6 +2834,8 @@ final class IcelandicStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Enginn minnispunktur passar við „$query".';
   @override
+  String wikilinkNoMatchFile(String query) => 'Engin skrá passar við „$query“.';
+  @override
   String get wikilinkNoHeading =>
       'þessi minnispunktur hefur engan titil með þessu nafni';
   @override
@@ -3303,6 +3310,11 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alltaf sýnt';
+  @override
+  String get navigationStart => 'Opnast á';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden er falið: forritið opnast á $start.';
 
   @override
   String get newSlidesTitle => 'Ný kynning';

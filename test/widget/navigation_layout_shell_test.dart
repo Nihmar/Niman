@@ -195,4 +195,55 @@ void main() {
     expect(find.byKey(const Key('tab-todo')), findsOne);
     expect(find.byKey(const Key('tab-search')), findsNothing);
   });
+
+  group('the start destination (#706)', () {
+    for (final (size, bar) in [
+      (const Size(390, 844), 'phone'),
+      (const Size(1400, 900), 'wide'),
+    ]) {
+      testWidgets('$bar: the shell opens on it', (tester) async {
+        await controller.setNavigation(
+          const NavigationLayout(start: 'home'),
+          onDevice: false,
+        );
+        await open(tester, size);
+        final current = size.width < 600
+            ? tester.widget<ShellTabBar>(find.byType(ShellTabBar)).current
+            : tester.widget<ShellRail>(find.byType(ShellRail)).current;
+        expect(current, ShellTab.home);
+      });
+    }
+
+    testWidgets('hidden, it gives way to Files', (tester) async {
+      await controller.setNavigation(
+        const NavigationLayout(
+          order: ['files', 'todo', 'search', 'quicknote', 'settings'],
+          hidden: {'todo'},
+          start: 'todo',
+        ),
+        onDevice: false,
+      );
+      await open(tester, const Size(390, 844));
+      expect(
+        tester.widget<ShellTabBar>(find.byType(ShellTabBar)).current,
+        ShellTab.files,
+      );
+    });
+
+    testWidgets("the device's own start wins", (tester) async {
+      await controller.setNavigation(
+        const NavigationLayout(start: 'home'),
+        onDevice: false,
+      );
+      await controller.setNavigation(
+        const NavigationLayout(start: 'search'),
+        onDevice: true,
+      );
+      await open(tester, const Size(390, 844));
+      expect(
+        tester.widget<ShellTabBar>(find.byType(ShellTabBar)).current,
+        ShellTab.search,
+      );
+    });
+  });
 }

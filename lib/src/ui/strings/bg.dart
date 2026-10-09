@@ -1079,6 +1079,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get actionRename => 'Презаглави';
   @override
+  String get renameNameInvalid =>
+      'Името съдържа знак, който файловата система отказва.';
+  @override
+  String renameNameTaken(String name) => 'Тази папка вече съдържа „$name“.';
+  @override
   String get actionMove => 'Премести';
   @override
   String get saveAndClose => 'Запази и затвори';
@@ -2846,6 +2851,9 @@ final class BulgarianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Никоя бележка не съвпада с „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Няма файл, който да съвпада с „$query“.';
+  @override
   String get wikilinkNoHeading => 'тази бележка няма заглавие с това име';
   @override
   String get wikilinkNoNote =>
@@ -3323,6 +3331,11 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Винаги показано';
+  @override
+  String get navigationStart => 'Отваря се на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden е скрито: приложението се отваря на $start.';
 
   @override
   String get newSlidesTitle => 'Нова презентация';

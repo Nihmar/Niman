@@ -68,6 +68,7 @@ abstract final class SettingsKeys {
   static const journalTemplate = Key('journal-template-setting');
   static const journalDayStart = Key('journal-day-start-setting');
   static const navigationScope = Key('navigation-scope-setting');
+  static const navigationStart = Key('navigation-start-setting');
 
   // Trash and history.
   static const trash = Key('trash-setting');

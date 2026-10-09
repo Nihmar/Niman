@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
-import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
@@ -20,45 +19,21 @@ import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
+import 'package:niman/src/library/note_op_seams.dart';
+import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_sync_writes.dart';
+import 'package:niman/src/library/note_trash.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/link_moves.dart';
-import 'package:niman/src/links/rewrite.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
-import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
 
-/// Hears what a user operation did to a library-relative path, for the
-/// sync queue (docs/records/sync.md, "Queue and triggers"). A hint, not a
-/// command: the reconcile decides what to do.
-typedef SyncHintSink = void Function(
-  String path,
-  SyncOpKind kind, {
-  String? fromPath,
-});
-
-/// One item in `.trash/`, mapped back to its library-relative origin.
-final class TrashItem {
-  /// Creates a trash listing entry.
-  const new({
-    required this.name,
-    required this.originalPath,
-    required this.deletedAt,
-  });
-
-  /// Name inside `.trash/` (timestamped when a collision was resolved).
-  final String name;
-
-  /// Library-relative path before the delete.
-  final String originalPath;
-
-  /// When the item was deleted.
-  final DateTime deletedAt;
-}
+export 'package:niman/src/library/note_op_seams.dart' show SyncHintSink;
+export 'package:niman/src/library/note_trash.dart' show TrashItem;
 
 /// Creates / renames / moves / deletes notes and folders on disk, and keeps
 /// the index in step through the shared [indexer] (T-M1-05, T-M1-07).
@@ -88,7 +63,7 @@ final class NoteOps implements NoteOperations {
   }
 
   /// The library settings file, library-relative.
-  static const settingsFilePath = '.niman/settings.json';
+  static const String settingsFilePath = NoteSyncWrites.settingsFilePath;
 
   /// Absolute path of the library root.
   final String root;
@@ -110,6 +85,31 @@ final class NoteOps implements NoteOperations {
 
   final NoteDao _dao;
 
+  /// The library's `.trash/` and its manifest.
+  late final NoteTrash _trash = NoteTrash(
+    root: root,
+    indexer: indexer,
+    history: history,
+    config: config,
+    serialize: _synchronized,
+    hint: _hint,
+    find: _mustFind,
+  );
+
+  /// Moves notes and folders and carries what named them along.
+  late final NoteRelocator _relocator = NoteRelocator(
+    root: root,
+    dao: _dao,
+    indexer: indexer,
+    history: history,
+    config: config,
+    writer: writer,
+    hint: _hint,
+    find: _mustFind,
+    readNote: readNote,
+    carryOutside: carryOutside,
+  );
+
   /// What else, outside the library's own files, names a note by its path
   /// and has to follow a rename or a move (#506): the home-screen note
   /// widgets, kept in the app's database rather than the library's. Null
@@ -123,32 +123,30 @@ final class NoteOps implements NoteOperations {
   /// server.
   SyncHintSink? syncHints;
 
-  /// When each path was last written by a sync operation.
-  final Map<String, DateTime> _syncWrites = {};
-
   /// How long a sync write keeps the file watcher's echo of it out of
   /// the queue.
-  static const syncEchoWindow = Duration(seconds: 10);
+  static const Duration syncEchoWindow = NoteSyncWrites.echoWindow;
+
+  /// The writes the sync makes, and the echo window they keep.
+  late final NoteSyncWrites _syncWrites = NoteSyncWrites(
+    root: root,
+    indexer: indexer,
+    history: history,
+    config: config,
+    writer: writer,
+    serialize: _synchronized,
+    moveIntoTrash: _trash.moveIntoTrash,
+  );
 
   void _hint(String path, SyncOpKind kind, {String? fromPath}) =>
       syncHints?.call(path, kind, fromPath: fromPath);
 
-  void _markSyncWrite(String path) {
-    final now = DateTime.now();
-    _syncWrites
-      ..removeWhere((_, at) => now.difference(at) > syncEchoWindow)
-      ..[path] = now;
-  }
-
   /// Whether a sync operation wrote, trashed or moved [path] within
   /// [syncEchoWindow]: the file watcher's event for it is an echo.
-  bool changedBySync(String path) {
-    final at = _syncWrites[path];
-    return at != null && DateTime.now().difference(at) <= syncEchoWindow;
-  }
+  bool changedBySync(String path) => _syncWrites.changedBySync(path);
 
   /// The name of the trash manifest inside `.trash/`.
-  static const manifestFileName = '.niman-trash.json';
+  static const String manifestFileName = NoteTrash.manifestFileName;
 
   Future<void> _chain = Future<void>.value();
 
@@ -454,8 +452,18 @@ final class NoteOps implements NoteOperations {
       final row = await _mustFind(path);
       final parent = parentOf(path);
       final parentDir = Directory(_abs(parent));
+      // A file keeps its extension: a note its `.md`, a picture or a book
+      // its own — a PDF renamed is still a PDF, not `book.pdf.md`. Typed
+      // again at the end of the new name, it is not doubled.
+      final ext = row.isDir
+          ? ''
+          : path.toLowerCase().endsWith('.md')
+          ? '.md'
+          : p.extension(path);
       var base = newName;
-      if (base.endsWith('.md')) base = base.substring(0, base.length - 3);
+      if (ext.isNotEmpty && base.toLowerCase().endsWith(ext.toLowerCase())) {
+        base = base.substring(0, base.length - ext.length);
+      }
       String target;
       if (row.isDir) {
         final clean = sanitizeName(base, fallback: defaultFolderName);
@@ -465,36 +473,13 @@ final class NoteOps implements NoteOperations {
         target = await uniqueFileName(
           parentDir,
           clean,
-          '.md',
+          ext,
           exclude: _abs(path),
         );
       }
       final newRel = resolvePath(parent, target);
       if (newRel == path) return row;
-      final oldAbs = _abs(path);
-      if (row.isDir) {
-        await Directory(oldAbs).rename(_abs(newRel));
-      } else {
-        await File(oldAbs).rename(_abs(newRel));
-      }
-      _hint(newRel, SyncOpKind.moved, fromPath: path);
-      await history.moved(path, newRel, isDir: row.isDir);
-      await _carryReading(path, newRel, isDir: row.isDir);
-      await _carrySettings(path, newRel, isDir: row.isDir);
-      await _carryHome(path, newRel, isDir: row.isDir);
-      await _carryOutside(path, newRel, isDir: row.isDir);
-      // Before the index hears of the move: a folder's reindex re-creates
-      // its notes, and the edges that named them would be gone (#507).
-      final links = await _linksToMove(path, isDir: row.isDir);
-      await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-      await _rewriteLinks(
-        path,
-        newRel,
-        isDir: row.isDir,
-        oldPaths: links.oldPaths,
-        referrers: links.referrers,
-      );
-      return await _mustFind(newRel);
+      return await _relocator.relocate(row, path, newRel);
     });
   }
 
@@ -523,185 +508,8 @@ final class NoteOps implements NoteOperations {
         target = await uniqueFileName(targetDir, parts.base, parts.ext);
       }
       final newRel = resolvePath(targetParent, target);
-      final oldAbs = _abs(path);
-      if (row.isDir) {
-        await Directory(oldAbs).rename(_abs(newRel));
-      } else {
-        await File(oldAbs).rename(_abs(newRel));
-      }
-      _hint(newRel, SyncOpKind.moved, fromPath: path);
-      await history.moved(path, newRel, isDir: row.isDir);
-      await _carryReading(path, newRel, isDir: row.isDir);
-      await _carrySettings(path, newRel, isDir: row.isDir);
-      await _carryHome(path, newRel, isDir: row.isDir);
-      await _carryOutside(path, newRel, isDir: row.isDir);
-      // Before the index hears of the move: a folder's reindex re-creates
-      // its notes, and the edges that named them would be gone (#507).
-      final links = await _linksToMove(path, isDir: row.isDir);
-      await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-      await _rewriteLinks(
-        path,
-        newRel,
-        isDir: row.isDir,
-        oldPaths: links.oldPaths,
-        referrers: links.referrers,
-      );
-      return await _mustFind(newRel);
+      return await _relocator.relocate(row, path, newRel);
     });
-  }
-
-  /// Rewrites every setting that pointed at what moved from [from] to [to]
-  /// (#506): the quick note, the list, template, attachments and annotations
-  /// folders, and the journal's folder and template. A folder carries its
-  /// subtree; a note only itself. Nothing pointed at it means no write.
-  Future<void> _carrySettings(String from, String to, {required bool isDir}) {
-    return config.update((c) => c.renamed(from, to, isDir: isDir));
-  }
-
-  /// Rewrites the Home actions that named what moved from [from] to [to]
-  /// (#535): the library's file and this device's own Home. The move is
-  /// already done on disk: a failure here is logged and leaves it standing.
-  Future<void> _carryHome(String from, String to, {required bool isDir}) async {
-    try {
-      if (await HomeFile(root).moved(from, to, isDir: isDir)) {
-        _hint(HomeFile.filePath, SyncOpKind.changed);
-      }
-      await config.update((c) {
-        final device = c.deviceHome;
-        if (device == null) return c;
-        final layout = HomeLayout.fromJson(device);
-        if (layout == null) return c;
-        final next = layout.renamed(from, to, isDir: isDir);
-        return identical(next, layout)
-            ? c
-            : c.copyWith(deviceHome: next.toJson());
-      });
-    } on Object catch (error) {
-      const AppLogger(name: 'home')
-          .warning('could not carry the Home past "$from" -> "$to": $error');
-    }
-  }
-
-  /// Hands the move to [carryOutside] (#506). The move is already done on
-  /// disk: a failure there is logged and leaves the rename standing.
-  Future<void> _carryOutside(
-    String from,
-    String to, {
-    required bool isDir,
-  }) async {
-    final carry = carryOutside;
-    if (carry == null) return;
-    try {
-      await carry(from, to, isDir: isDir);
-    } on Object catch (error) {
-      const AppLogger(
-        name: 'notes',
-      ).warning('could not carry "$from" -> "$to" outside the library: $error');
-    }
-  }
-
-  /// The referrers of what is about to move from [from] (#507), read from
-  /// the index *before* the move: the index's resolved link edges
-  /// (`note_links`, answered by its `links_to` index) and the moved files'
-  /// own old paths.
-  ///
-  /// Read first because a folder's rename re-creates the notes under it with
-  /// new ids, and the edges that pointed at them would be gone by the time
-  /// the move is done; the referrer's own path is what the rewrite needs, and
-  /// it is unchanged for anyone outside the subtree.
-  Future<({List<String> oldPaths, List<String> referrers})> _linksToMove(
-    String from, {
-    required bool isDir,
-  }) async {
-    final oldPaths = isDir ? await _dao.filePathsUnder(from) : <String>[from];
-    if (oldPaths.isEmpty) {
-      return (oldPaths: oldPaths, referrers: const <String>[]);
-    }
-    final rows = await _dao.byPaths(oldPaths);
-    if (rows.isEmpty) {
-      return (oldPaths: oldPaths, referrers: const <String>[]);
-    }
-    final referrers = await _dao.referrerPaths([
-      for (final row in rows.values) row.id,
-    ]);
-    return (oldPaths: oldPaths, referrers: referrers);
-  }
-
-  /// Rewrites the links in every note that pointed at what moved from [from]
-  /// to [to] (#507).
-  ///
-  /// [oldPaths] are the moved files' old library-relative paths and
-  /// [referrers] their referring notes' paths, as [_linksToMove] read them
-  /// before the move. Each changed note is written through the writer — the
-  /// normal save path — so its edit is a save with its own history version
-  /// and sync hint. The rewrite itself reads no index: it maps the written
-  /// targets through the old->new paths alone ([rewriteMovedLinks]).
-  Future<void> _rewriteLinks(
-    String from,
-    String to, {
-    required bool isDir,
-    required List<String> oldPaths,
-    required List<String> referrers,
-  }) async {
-    if (oldPaths.isEmpty || referrers.isEmpty) return;
-    // Indexed once for every referrer: a link is a lookup, not a walk of
-    // everything that moved.
-    final moves = LinkMoves({
-      for (final old in oldPaths)
-        old: pathAfterMove(old, from, to, isDir: isDir)!,
-    });
-    // A renamed file is the one case a bare-name wikilink follows.
-    String? renamedFrom;
-    String? renamedTo;
-    if (!isDir) {
-      final oldName = p.basename(from);
-      final newName = p.basename(to);
-      if (oldName != newName) {
-        renamedFrom = oldName;
-        renamedTo = newName;
-      }
-    }
-    var updated = 0;
-    final seen = <String>{};
-    for (final oldReferrer in referrers) {
-      // A referrer inside the moved subtree moved with it.
-      final path = pathAfterMove(oldReferrer, from, to, isDir: isDir)!;
-      if (!seen.add(path)) continue;
-      // One referrer that cannot be read or written must not stop the rest:
-      // the move is already done, and the others still need their links fixed.
-      try {
-        final text = await readNote(path);
-        final next = rewriteMovedLinks(
-          text,
-          // Its links were written where it stood; a relative one is
-          // written back from where it stands now.
-          from: oldReferrer,
-          at: path,
-          moves: moves,
-          renamedFrom: renamedFrom,
-          renamedTo: renamedTo,
-        );
-        if (next == text) continue;
-        await writer.save(path, next);
-        _hint(path, SyncOpKind.changed);
-        updated++;
-      } on Object catch (error) {
-        const AppLogger(name: 'links')
-            .warning('could not rewrite links in "$path": $error');
-      }
-    }
-    if (updated > 0) {
-      const AppLogger(name: 'links')
-          .info('$updated note(s) updated after "$from" -> "$to"');
-    }
-  }
-
-  /// Carries the reading positions of what moved from [from] to [to]
-  /// (#281): a book or a PDF, or a folder that may hold some. A note
-  /// keeps none, and costs no read of the file.
-  Future<void> _carryReading(String from, String to, {required bool isDir}) {
-    if (!isDir && isMarkdownNote(from)) return Future<void>.value();
-    return ReadingPositions(root).moved(from, to);
   }
 
   /// The text of the note at [path], decoded leniently (a note with a
@@ -842,122 +650,29 @@ final class NoteOps implements NoteOperations {
   /// Deletes [path]: into `.trash/` when the trash toggle is on, hard
   /// delete otherwise.
   @override
-  Future<void> delete(String path) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      final oldAbs = _abs(path);
-      final trash = await trashEnabled;
-      String? trashAbs;
-      if (trash) {
-        trashAbs = await _moveIntoTrash(path, isDir: row.isDir);
-      } else {
-        if (row.isDir) {
-          await Directory(oldAbs).delete(recursive: true);
-        } else {
-          await File(oldAbs).delete();
-        }
-        // No trash to come back from: the history goes with the note.
-        await history.deleted(path, isDir: row.isDir);
-      }
-      _hint(path, SyncOpKind.deleted);
-      final events = <String>[oldAbs];
-      if (trashAbs != null) events.add(trashAbs);
-      await indexer.applyEvents(root, events);
-    });
-  }
-
-  /// Moves [path] into `.trash/` under a collision-safe name and records
-  /// it in the manifest; returns the absolute trash path. The history
-  /// stays at [path] (a restore brings it back).
-  Future<String> _moveIntoTrash(String path, {required bool isDir}) async {
-    final trashDir = Directory(_abs('.trash'));
-    if (!trashDir.existsSync()) {
-      await trashDir.create(recursive: true);
-    }
-    final name = p.basename(path);
-    String target;
-    if (isDir) {
-      target = await trashDirName(trashDir, name);
-    } else {
-      final parts = splitFileName(name);
-      target = await trashFileName(trashDir, parts.base, parts.ext);
-    }
-    final trashAbs = _abs('.trash/$target');
-    if (isDir) {
-      await Directory(_abs(path)).rename(trashAbs);
-    } else {
-      await File(_abs(path)).rename(trashAbs);
-    }
-    await _manifestAdd(trashDir, target, path);
-    return trashAbs;
-  }
+  Future<void> delete(String path) => _trash.delete(path);
 
   // -- sync (docs/records/sync.md) -------------------------------------------
 
   /// Whether [path] keeps history: the text notes the editor saves.
-  static bool keepsHistory(String path) {
-    final lower = path.toLowerCase();
-    return lower.endsWith('.md') || lower.endsWith('.txt');
-  }
+  static bool keepsHistory(String path) => NoteSyncWrites.keepsHistory(path);
 
   /// Swaps the verified sync download at [tempAbs] in for the file at
-  /// [path] (new or existing): a note's replaced text becomes a `sync`
-  /// version first, and it runs in the note's save order so an editor
-  /// save never interleaves. Replacing `.niman/settings.json` drops the
-  /// cached settings.
-  Future<void> syncReplace(String path, String tempAbs) async {
-    _markSyncWrite(path);
-    await writer.replaceFromFile(
-      path,
-      tempAbs,
-      forced: keepsHistory(path) ? HistoryReason.sync : null,
-    );
-    if (path == settingsFilePath) await config.reload();
-  }
+  /// [path] (new or existing), as a `sync` version of a note.
+  Future<void> syncReplace(String path, String tempAbs) =>
+      _syncWrites.replace(path, tempAbs);
 
-  /// Writes [text] at [path] because the sync merged both sides of it:
-  /// the text being replaced becomes a `sync` history version, and the
-  /// write goes through the note's save order like any other.
-  Future<void> syncMerge(String path, String text) async {
-    _markSyncWrite(path);
-    await writer.save(path, text, forced: HistoryReason.sync);
-  }
+  /// Writes [text] at [path] because the sync merged both sides of it.
+  Future<void> syncMerge(String path, String text) =>
+      _syncWrites.merge(path, text);
 
-  /// Moves [path] into `.trash/` because the remote deleted it — always
-  /// the trash, whatever the trash toggle: a deletion that arrives from
-  /// another device must stay recoverable here.
-  Future<void> syncTrash(String path) {
-    return _synchronized(() async {
-      final abs = _abs(path);
-      final isDir = Directory(abs).existsSync();
-      if (!isDir && !File(abs).existsSync()) return;
-      _markSyncWrite(path);
-      final trashAbs = await _moveIntoTrash(path, isDir: isDir);
-      await indexer.applyEvents(root, [abs, trashAbs]);
-    });
-  }
+  /// Moves [path] into `.trash/` because the remote deleted it, whatever
+  /// the trash toggle.
+  Future<void> syncTrash(String path) => _syncWrites.trash(path);
 
-  /// Renames the file at [from] to [to] (any folder, created on demand)
-  /// because the remote renamed it; the history follows. Throws
-  /// [StateError] when [from] is gone or [to] is taken.
-  Future<void> syncMove(String from, String to) {
-    return _synchronized(() async {
-      final fromAbs = _abs(from);
-      final toAbs = _abs(to);
-      if (!File(fromAbs).existsSync()) {
-        throw FileSystemException('Nothing to move', fromAbs);
-      }
-      if (File(toAbs).existsSync() || Directory(toAbs).existsSync()) {
-        throw FileSystemException('Already taken', toAbs);
-      }
-      await Directory(p.dirname(toAbs)).create(recursive: true);
-      _markSyncWrite(from);
-      _markSyncWrite(to);
-      await File(fromAbs).rename(toAbs);
-      await history.moved(from, to, isDir: false);
-      await indexer.applyEvents(root, [fromAbs, toAbs]);
-    });
-  }
+  /// Renames the file at [from] to [to] because the remote renamed it;
+  /// the history follows.
+  Future<void> syncMove(String from, String to) => _syncWrites.move(from, to);
 
   /// Pins the sync base of [path] to the version holding content [sha];
   /// null for files without history, or when the content is gone.
@@ -968,209 +683,22 @@ final class NoteOps implements NoteOperations {
 
   /// Lists the managed trash items (manifest-backed), in deletion order.
   @override
-  Future<List<TrashItem>> trashItems() {
-    return _synchronized(() async {
-      final manifest = await _readManifest();
-      return [
-        for (final entry in manifest.entries)
-          if (_existsInTrash(entry.key))
-            TrashItem(
-              name: entry.key,
-              originalPath: entry.value.originalPath,
-              deletedAt: entry.value.deletedAt,
-            ),
-      ];
-    });
-  }
+  Future<List<TrashItem>> trashItems() => _trash.items();
 
   /// Restores the trash item [trashName] to its original parent when that
   /// folder still exists, otherwise to the library root.
-  ///
-  /// The item comes back under its original name (uniquified only on a
-  /// real collision), which is taken from the manifest's `originalPath` —
-  /// never from the name inside `.trash/`, which carries a collision
-  /// timestamp and would survive the restore.
   @override
-  Future<Note> restoreTrash(String trashName) {
-    return _synchronized(() async {
-      final manifest = await _readManifest();
-      final entry = manifest[trashName];
-      if (entry == null) {
-        throw StateError('Not a managed trash item: "$trashName"');
-      }
-      final trashAbs = _abs('.trash/$trashName');
-      final isDir = Directory(trashAbs).existsSync();
-      final originalName = p.basename(entry.originalPath);
-      final originalParent = parentOf(entry.originalPath);
-      final originalDir = Directory(_abs(originalParent));
-      final restoreParent = originalDir.existsSync() ? originalParent : '';
-      final parentDirObj = Directory(_abs(restoreParent));
-      String target;
-      if (isDir) {
-        target = await uniqueFolderName(parentDirObj, originalName);
-      } else {
-        final parts = splitFileName(originalName);
-        target = await uniqueFileName(parentDirObj, parts.base, parts.ext);
-      }
-      final newRel = resolvePath(restoreParent, target);
-      if (isDir) {
-        await Directory(trashAbs).rename(_abs(newRel));
-      } else {
-        await File(trashAbs).rename(_abs(newRel));
-      }
-      manifest.remove(trashName);
-      await _writeManifest(manifest);
-      _hint(newRel, SyncOpKind.changed);
-      // The history stayed at the original path while the item was in the
-      // trash; it follows only when the item came back somewhere else.
-      await history.moved(entry.originalPath, newRel, isDir: isDir);
-      await indexer.applyEvents(root, [trashAbs, _abs(newRel)]);
-      return await _mustFind(newRel);
-    });
-  }
+  Future<Note> restoreTrash(String trashName) => _trash.restore(trashName);
 
   /// Permanently deletes the trash item [trashName] (no restore possible).
   @override
-  Future<void> deleteTrashPermanently(String trashName) {
-    return _synchronized(() async {
-      final manifest = await _readManifest();
-      final entry = manifest.remove(trashName);
-      if (entry == null) {
-        throw StateError('Not a managed trash item: "$trashName"');
-      }
-      final trashAbs = _abs('.trash/$trashName');
-      final isDir = Directory(trashAbs).existsSync();
-      if (isDir) {
-        await Directory(trashAbs).delete(recursive: true);
-      } else if (File(trashAbs).existsSync()) {
-        await File(trashAbs).delete();
-      }
-      await _writeManifest(manifest);
-      await _dropTrashedHistory(entry.originalPath, isDir: isDir);
-    });
-  }
+  Future<void> deleteTrashPermanently(String trashName) =>
+      _trash.deletePermanently(trashName);
 
-  /// Permanently deletes every managed trash item.
-  @override
   /// Deletes every entry in `.trash/`, not just the items Niman put
-  /// there: the trash screen promises to empty the folder, and that
-  /// includes anything a user moved into it by hand. Ends with an empty
-  /// manifest.
-  Future<void> emptyTrash() {
-    return _synchronized(() async {
-      final trashDir = Directory(_abs('.trash'));
-      // Read before the items go: the manifest is what knows where each
-      // one came from, and so whose history is now orphaned.
-      final origins = [
-        for (final entry in (await _readManifest()).entries)
-          (
-            entry.value.originalPath,
-            Directory(_abs('.trash/${entry.key}')).existsSync(),
-          ),
-      ];
-      if (trashDir.existsSync()) {
-        for (final entry in trashDir.listSync()) {
-          if (entry is Directory) {
-            await entry.delete(recursive: true);
-          } else {
-            await entry.delete();
-          }
-        }
-      }
-      await _writeManifest(<String, _ManifestEntry>{});
-      for (final (originalPath, isDir) in origins) {
-        await _dropTrashedHistory(originalPath, isDir: isDir);
-      }
-    });
-  }
-
-  /// Removes the history a permanently deleted trash item left at
-  /// [originalPath] — unless a note lives there again, whose history it
-  /// now is.
-  Future<void> _dropTrashedHistory(
-    String originalPath, {
-    required bool isDir,
-  }) async {
-    final abs = _abs(originalPath);
-    if (File(abs).existsSync() || Directory(abs).existsSync()) return;
-    await history.deleted(originalPath, isDir: isDir);
-  }
-
-  bool _existsInTrash(String name) {
-    final abs = _abs('.trash/$name');
-    return Directory(abs).existsSync() || File(abs).existsSync();
-  }
-
-  // -- manifest --------------------------------------------------------
-
-  /// Reads the trash manifest, surviving a torn or partially corrupt file:
-  /// a whole file that is not a JSON object yields an empty manifest, and
-  /// individual entries that do not decode are skipped, so one bad entry
-  /// can never take the trash screen down.
-  Future<Map<String, _ManifestEntry>> _readManifest() async {
-    final file = File(_abs('.trash/$manifestFileName'));
-    if (!file.existsSync()) return <String, _ManifestEntry>{};
-    final raw = file.readAsStringSync();
-    if (raw.trim().isEmpty) return <String, _ManifestEntry>{};
-    Object? decoded;
-    try {
-      decoded = jsonDecode(raw);
-    } on FormatException {
-      return <String, _ManifestEntry>{};
-    }
-    if (decoded is! Map) return <String, _ManifestEntry>{};
-    final manifest = <String, _ManifestEntry>{};
-    for (final entry in decoded.entries) {
-      final name = entry.key;
-      if (name is! String) continue;
-      final parsed = _parseManifestEntry(entry.value);
-      if (parsed != null) manifest[name] = parsed;
-    }
-    return manifest;
-  }
-
-  static _ManifestEntry? _parseManifestEntry(Object? json) {
-    if (json is! Map) return null;
-    final originalPath = json['originalPath'];
-    final deletedAt = json['deletedAt'];
-    if (originalPath is! String || deletedAt is! int) return null;
-    return _ManifestEntry(
-      originalPath: originalPath,
-      deletedAt: DateTime.fromMillisecondsSinceEpoch(deletedAt),
-    );
-  }
-
-  /// Writes the manifest, dropping entries whose item is no longer on disk
-  /// so the file converges with `.trash/` even when something removed an
-  /// item without going through the ops.
-  Future<void> _writeManifest(Map<String, _ManifestEntry> manifest) async {
-    final trashDir = Directory(_abs('.trash'));
-    if (!trashDir.existsSync()) await trashDir.create(recursive: true);
-    final kept = {
-      for (final entry in manifest.entries)
-        if (_existsInTrash(entry.key)) entry.key: entry.value,
-    };
-    final payload = jsonEncode({
-      for (final entry in kept.entries) entry.key: entry.value.toJson(),
-    });
-    await writeFileAtomically(
-      File(_abs('.trash/$manifestFileName')),
-      utf8.encode(payload),
-    );
-  }
-
-  Future<void> _manifestAdd(
-    Directory trashDir,
-    String name,
-    String originalPath,
-  ) async {
-    final manifest = await _readManifest();
-    manifest[name] = _ManifestEntry(
-      originalPath: originalPath,
-      deletedAt: DateTime.now(),
-    );
-    await _writeManifest(manifest);
-  }
+  /// there. Ends with an empty manifest.
+  @override
+  Future<void> emptyTrash() => _trash.empty();
 }
 
 /// The heading texts of the note file at absolute [path], read as it lies.
@@ -1185,22 +713,4 @@ List<String> headingsOfNoteFile(String path) {
     text = text.substring(1);
   }
   return [for (final heading in outlineOfText(text)) heading.text];
-}
-
-/// One manifest entry: where a trash item came from.
-final class _ManifestEntry {
-  /// Creates a manifest entry.
-  const new({required this.originalPath, required this.deletedAt});
-
-  /// Library-relative path before the delete.
-  final String originalPath;
-
-  /// When the item was deleted.
-  final DateTime deletedAt;
-
-  /// Serializes the entry for the manifest file.
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'originalPath': originalPath,
-    'deletedAt': deletedAt.millisecondsSinceEpoch,
-  };
 }

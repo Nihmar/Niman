@@ -1076,6 +1076,11 @@ final class HungarianStrings extends Strings {
   @override
   String get actionRename => 'Átnevezés';
   @override
+  String get renameNameInvalid =>
+      'A név olyan karaktert tartalmaz, amelyet a fájlrendszer nem fogad el.';
+  @override
+  String renameNameTaken(String name) => 'Ebben a mappában már van „$name”.';
+  @override
   String get actionMove => 'Áthelyezés';
   @override
   String get saveAndClose => 'Mentés és bezárás';
@@ -2839,6 +2844,9 @@ final class HungarianStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => 'Nincs „$query” jegyzet.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Egy fájl sem egyezik ezzel: „$query”.';
+  @override
   String get wikilinkNoHeading => 'ennek a jegyzetnek nincs ilyen nevű címsora';
   @override
   String get wikilinkNoNote =>
@@ -3317,6 +3325,11 @@ final class HungarianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Mindig látható';
+  @override
+  String get navigationStart => 'Indításkor';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden rejtve van: az alkalmazás ezzel indul: $start.';
 
   @override
   String get newSlidesTitle => 'Új bemutató';

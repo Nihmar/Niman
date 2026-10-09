@@ -27,7 +27,9 @@ Ricordare che il PDF esce in 16:9.
 
 Create one with **New slides** in the Files FAB, the desktop's **New**
 menu under the tree, or the command palette. It asks for a name and
-starts with two slides, the second with a point and a speaker note.
+starts with two slides, the second with a point and a speaker note. A new
+presentation is made in the library's root, whatever folder or note is
+selected; move it from the tree if it belongs elsewhere.
 
 ## The format
 

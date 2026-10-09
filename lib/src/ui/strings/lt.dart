@@ -1071,6 +1071,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get actionRename => 'Pervadinti';
   @override
+  String get renameNameInvalid =>
+      'Pavadinime yra simbolis, kurio failų sistema neleidžia.';
+  @override
+  String renameNameTaken(String name) => 'Šiame aplanke jau yra „$name“.';
+  @override
   String get actionMove => 'Perkelti';
   @override
   String get saveAndClose => 'Išsaugoti ir uždaryti';
@@ -2868,6 +2873,9 @@ final class LithuanianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nė viena pastaba neatitinka „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Joks failas neatitinka „$query“.';
+  @override
   String get wikilinkNoHeading =>
       'šioje pastaboje nėra antraštės tokiu pavadinimu';
   @override
@@ -3350,6 +3358,11 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Visada rodoma';
+  @override
+  String get navigationStart => 'Atsidaro skiltyje';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden paslėpta: programa atsidaro skiltyje $start.';
 
   @override
   String get newSlidesTitle => 'Nauja pateiktis';

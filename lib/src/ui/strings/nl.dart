@@ -1077,6 +1077,11 @@ final class DutchStrings extends Strings {
   @override
   String get actionRename => 'Hernoemen';
   @override
+  String get renameNameInvalid =>
+      'De naam bevat een teken dat het bestandssysteem weigert.';
+  @override
+  String renameNameTaken(String name) => 'Deze map heeft al “$name”.';
+  @override
   String get actionMove => 'Verplaatsen';
   @override
   String get saveAndClose => 'Opslaan en sluiten';
@@ -2867,6 +2872,9 @@ final class DutchStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Geen notitie komt overeen met “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Geen bestand komt overeen met “$query”.';
+  @override
   String get wikilinkNoHeading => 'deze notitie heeft geen kop met die naam';
   @override
   String get wikilinkNoNote =>
@@ -3347,6 +3355,11 @@ final class DutchStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Altijd zichtbaar';
+  @override
+  String get navigationStart => 'Opent op';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden is verborgen: de app opent op $start.';
 
   @override
   String get newSlidesTitle => 'Nieuwe presentatie';

@@ -193,6 +193,16 @@ void main() {
       expect(File(p.join(root.path, 'New.md')).existsSync(), isTrue);
     });
 
+    test('an attachment keeps its own extension', () async {
+      File(p.join(root.path, 'book.pdf')).writeAsBytesSync(const [1]);
+      await indexer.fullScan(root.path);
+      await ops.rename('book.pdf', 'Dune');
+      expect(File(p.join(root.path, 'Dune.pdf')).existsSync(), isTrue);
+      await ops.rename('Dune.pdf', 'Dune 2.pdf');
+      expect(File(p.join(root.path, 'Dune 2.pdf')).existsSync(), isTrue);
+      expect(await dao.find('Dune 2.pdf'), isNotNull);
+    });
+
     test('renaming a folder reindexes its subtree', () async {
       await ops.createFolder(parentPath: '', name: 'Docs');
       await ops.createNote(parentPath: 'Docs', name: 'One');

@@ -8,8 +8,10 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/home/home_tile.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/note_view.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
@@ -310,5 +312,24 @@ void main() {
       actions,
       hasLength(HomeLayout.defaults['actions']!.actions.length + 1),
     );
+  });
+
+  testWidgets("today's journal entry brings Files forward on a desktop", (
+    tester,
+  ) async {
+    // #709: the entry opened in a tab while the window stayed on the Home,
+    // the note behind it.
+    controller.libraryHome = _withActions([
+      const HomeAction(id: 'j', label: '', kind: HomeActionKind.journal),
+    ]);
+    await open(tester);
+    await press(tester, 'j');
+
+    const journal = JournalSettings();
+    final today = journal.entryPath(journal.today(DateTime.now()));
+    expect(controller.contentOf(today), isNotNull);
+    expect(controller.workspace.activePath, today);
+    expect(find.byKey(const Key('home-action-j')).hitTestable(), findsNothing);
+    expect(find.byType(NoteView).hitTestable(), findsOne);
   });
 }

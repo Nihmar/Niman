@@ -557,6 +557,18 @@ it read and keeps the server's longest `Retry-After` on the report.
 Not yet: parallel transfers, skipping unchanged folders by collection
 ETag, pruning remote folders left empty.
 
+The engine keeps the lock, the connection and the run loop; the rest is
+in collaborators it owns, all in `lib/src/sync/` (#710):
+`SyncScanner` (`sync_scanner.dart`: capabilities, scans, hashing),
+`SyncStepRunner` (`sync_steps.dart`: one decision at a time),
+`SyncConflictMerger` (`sync_conflict_merge.dart`: the conflict step and
+its merges), `SyncResolver` (`sync_resolver.dart`: conflict texts and
+resolutions, in the engine's turn), and under them `SyncSides`
+(`sync_sides.dart`: the local stat and hashes, the still-as-planned
+guards, fetch, upload and the agreed row). A run's state is a
+`SyncRunContext`; `SyncReport`, `SyncConflict` and `SyncFailure` have
+files of their own.
+
 ### UI (`lib/src/ui/sync/`, mockups S1–S11)
 
 `LibrarySyncService` (`lib/src/sync/sync_service.dart`) is what the UI

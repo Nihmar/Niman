@@ -12,6 +12,7 @@ final class FakeWikilinkSuggester implements WikilinkSuggester {
     List<NoteSuggestion>? notes,
     Map<String, List<HeadingSuggestion>>? headings,
     this.places = const <BookSuggestion>[],
+    this.attachments = const <NoteSuggestion>[],
   }) : _notes = notes ?? const <NoteSuggestion>[],
        _headings = headings ?? const <String, List<HeadingSuggestion>>{};
 
@@ -73,6 +74,32 @@ final class FakeWikilinkSuggester implements WikilinkSuggester {
       }
     }
     return <NoteSuggestion>[...prefix, ...within];
+  }
+
+  /// The rows an `![[` embed lists (#705), before the notes.
+  final List<NoteSuggestion> attachments;
+
+  /// Every embed query the panel asked for, in order.
+  final List<String> embedQueries = <String>[];
+
+  @override
+  Future<List<NoteSuggestion>> embeds(String query) async {
+    embedQueries.add(query);
+    await _answer();
+    final q = query.toLowerCase();
+    return <NoteSuggestion>[
+      for (final file in attachments)
+        if (file.name.toLowerCase().contains(q)) file,
+      ...await notes(query),
+    ];
+  }
+
+  @override
+  Future<String> targetOf(String path) async {
+    final name = path.split('/').last;
+    return name.toLowerCase().endsWith('.md')
+        ? name.substring(0, name.length - 3)
+        : name;
   }
 
   @override

@@ -1082,6 +1082,11 @@ final class GalicianStrings extends Strings {
   @override
   String get actionRename => 'Cambiar o nome';
   @override
+  String get renameNameInvalid =>
+      'O nome contén un carácter que o sistema de ficheiros rexeita.';
+  @override
+  String renameNameTaken(String name) => 'Este cartafol xa ten «$name».';
+  @override
   String get actionMove => 'Mover';
   @override
   String get saveAndClose => 'Gardar e pechar';
@@ -2847,6 +2852,9 @@ final class GalicianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ningunha nota coincide con “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ningún ficheiro coincide con «$query».';
+  @override
   String get wikilinkNoHeading =>
       'esta nota non ten ningún título con ese nome';
   @override
@@ -3331,6 +3339,11 @@ final class GalicianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visible';
+  @override
+  String get navigationStart => 'Ábrese en';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden está oculto: a app ábrese en $start.';
 
   @override
   String get newSlidesTitle => 'Nova presentación';

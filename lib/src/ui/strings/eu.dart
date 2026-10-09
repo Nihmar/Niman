@@ -1076,6 +1076,12 @@ final class BasqueStrings extends Strings {
   @override
   String get actionRename => 'Izena aldatu';
   @override
+  String get renameNameInvalid =>
+      'Izenak fitxategi-sistemak onartzen ez duen karaktere bat du.';
+  @override
+  String renameNameTaken(String name) =>
+      'Karpeta honek badu «$name» dagoeneko.';
+  @override
   String get actionMove => 'Mugitu';
   @override
   String get saveAndClose => 'Gorde eta itxi';
@@ -2857,6 +2863,9 @@ final class BasqueStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ez dago oharrik “$query” izenarekin.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ez dago «$query»-rekin bat datorren fitxategirik.';
+  @override
   String get wikilinkNoHeading => 'ohar honek ez du izen hori duen izenbururik';
   @override
   String get wikilinkNoNote =>
@@ -3341,6 +3350,11 @@ final class BasqueStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Beti ikusgai';
+  @override
+  String get navigationStart => 'Hemen irekitzen da';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden ezkutatuta dago: aplikazioa hemen irekitzen da: $start.';
 
   @override
   String get newSlidesTitle => 'Aurkezpen berria';

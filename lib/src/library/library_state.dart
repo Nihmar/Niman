@@ -401,6 +401,7 @@ final class LibraryController implements LibrarySession {
     final reader = _ops;
     return IndexWikilinkSuggester(
       db,
+      attachmentsFolder: reader == null ? null : () => reader.attachmentsFolder,
       // A named note's headings are read off the note itself, on a
       // background isolate (a novel's read and outline is seconds of work);
       // a note gone since the panel named it answers null rather than

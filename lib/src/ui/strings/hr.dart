@@ -1070,6 +1070,11 @@ final class CroatianStrings extends Strings {
   @override
   String get actionRename => 'Preimenuj';
   @override
+  String get renameNameInvalid =>
+      'Naziv sadrži znak koji datotečni sustav odbija.';
+  @override
+  String renameNameTaken(String name) => 'Ova mapa već sadrži „$name”.';
+  @override
   String get actionMove => 'Premjesti';
   @override
   String get saveAndClose => 'Spremi i zatvori';
@@ -2863,6 +2868,9 @@ final class CroatianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Nijedna napomena se ne podudara s „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Nijedna datoteka ne odgovara „$query”.';
+  @override
   String get wikilinkNoHeading => 'ova napomena nema naslov s tim imenom';
   @override
   String get wikilinkNoNote => 'ništa u knjižnici nema to ime ni alias';
@@ -3336,6 +3344,11 @@ final class CroatianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Uvijek prikazano';
+  @override
+  String get navigationStart => 'Otvara se na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skriveno: aplikacija se otvara na $start.';
 
   @override
   String get newSlidesTitle => 'Nova prezentacija';

@@ -16,6 +16,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/name_dialog.dart';
+import 'package:niman/src/ui/rename_check.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -41,7 +42,12 @@ final class ShellRowActions {
     required this.onExport,
     required this.onExportFolder,
     this.onRecognize,
+    this.renameInPlace,
   });
+
+  /// Starts a rename in place in the tree (#707): true when it did — a
+  /// desktop with the tree on screen — false to ask in a dialog.
+  final bool Function(String path)? renameInPlace;
 
   /// The open library's session.
   final LibrarySession controller;
@@ -160,10 +166,12 @@ final class ShellRowActions {
     );
   }
 
-  /// Renames [path], or the selected row when none is given.
+  /// Renames [path], or the selected row when none is given: in place in
+  /// the tree when [renameInPlace] takes it, in a dialog otherwise.
   Future<void> rename(BuildContext context, [String? path]) async {
     final sel = path ?? selectedPath();
     if (sel == null) return;
+    if (renameInPlace?.call(sel) ?? false) return;
     final name = await showNameDialog(
       context,
       title: AppStrings.actionRename,
@@ -175,6 +183,23 @@ final class ShellRowActions {
       final row = await controller.ops!.rename(sel, name);
       onMoved(sel, row.path);
     });
+  }
+
+  /// Renames [path] to [name] from the tree's field (#707): null once
+  /// done, or why the name cannot be, the field left open to fix it.
+  Future<String?> renameTo(String path, String name) async {
+    final ops = controller.ops;
+    if (ops == null) return null;
+    final row = await ops.find(path);
+    if (row == null) return null;
+    final problem = await renameProblem(ops, path, name, isDir: row.isDir);
+    if (problem != null) return problem;
+    await guard(() async {
+      await saveOpen();
+      final renamed = await ops.rename(path, name);
+      onMoved(path, renamed.path);
+    });
+    return null;
   }
 
   /// Moves [path] into a folder chosen from a dialog.

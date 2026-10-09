@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/ui/settings_navigation_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
+import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
 
@@ -151,5 +152,38 @@ void main() {
     await pump(tester, size: const Size(1200, 800));
     expect(find.byType(ShellTabBar), findsNothing);
     expect(find.byType(ShellRail), findsOne);
+  });
+
+  testWidgets('the start is chosen among the shown, and a hidden one says '
+      'which took its place (#706)', (tester) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('navigation-start')));
+    await tester.pumpAndSettle();
+    // Settings and the quick note are no place to open on.
+    expect(find.byKey(const Key('navigation-start-settings')), findsNothing);
+    expect(find.byKey(const Key('navigation-start-quicknote')), findsNothing);
+    await tester.tap(find.byKey(const Key('navigation-start-home')).last);
+    await tester.pumpAndSettle();
+    expect((await session.navigation).library?.start, 'home');
+
+    await tester.tap(find.byKey(const Key('navigation-switch-home')));
+    await tester.pumpAndSettle();
+    final saved = (await session.navigation).library!;
+    expect(saved.start, 'home', reason: 'kept, to come back with Home');
+    expect(saved.hidden, {'home'});
+    expect(
+      find.text(
+        AppStrings.navigationStartHidden(
+          AppStrings.tabHome,
+          AppStrings.tabFiles,
+        ),
+      ),
+      findsOne,
+    );
+    expect(
+      find.byKey(const Key('navigation-start-home')),
+      findsNothing,
+      reason: 'a hidden destination cannot be picked',
+    );
   });
 }

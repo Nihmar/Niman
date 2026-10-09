@@ -1091,6 +1091,11 @@ final class CatalanStrings extends Strings {
   @override
   String get actionRename => 'Canvia el nom';
   @override
+  String get renameNameInvalid =>
+      'El nom conté un caràcter que el sistema de fitxers rebutja.';
+  @override
+  String renameNameTaken(String name) => 'Aquesta carpeta ja té «$name».';
+  @override
   String get actionMove => 'Mou';
   @override
   String get saveAndClose => 'Guarda i tanca';
@@ -2877,6 +2882,9 @@ final class CatalanStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Cap nota coincideix amb “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Cap fitxer coincideix amb «$query».';
+  @override
   String get wikilinkNoHeading => 'aquesta nota no té cap títol amb aquest nom';
   @override
   String get wikilinkNoNote =>
@@ -3367,6 +3375,11 @@ final class CatalanStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visible';
+  @override
+  String get navigationStart => 'S’obre a';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden està amagat: l’app s’obre a $start.';
 
   @override
   String get newSlidesTitle => 'Nova presentació';

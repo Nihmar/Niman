@@ -1081,6 +1081,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get actionRename => 'Промени име';
   @override
+  String get renameNameInvalid =>
+      'Името содржи знак што датотечниот систем го одбива.';
+  @override
+  String renameNameTaken(String name) => 'Оваа папка веќе содржи „$name“.';
+  @override
   String get actionMove => 'Премести';
   @override
   String get saveAndClose => 'Зачувај и затвори';
@@ -2857,6 +2862,9 @@ final class MacedonianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Ниту една белешка не се совпаѓа со „$query".';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Ниедна датотека не одговара на „$query“.';
+  @override
   String get wikilinkNoHeading => 'оваа белешка нема наслов со тоа име';
   @override
   String get wikilinkNoNote =>
@@ -3336,6 +3344,11 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Секогаш прикажано';
+  @override
+  String get navigationStart => 'Се отвора на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden е скриено: апликацијата се отвора на $start.';
 
   @override
   String get newSlidesTitle => 'Нова презентација';

@@ -11,6 +11,7 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/island.dart';
+import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -81,7 +82,7 @@ void main() {
       expect(rect.top, bar.bottom + gap);
       expect(rect.bottom, size.height - gap);
     }
-    expect(treeRect.left, ShellRail.width + 1 + gap);
+    expect(treeRect.left, ShellRail.panelStart);
     expect(dockRect.right, size.width - gap);
     // The rail's buttons stand off the tree by the islands' gap (and the
     // base's pixel), no more: the glyphs sit near the middle between the
@@ -139,6 +140,27 @@ void main() {
     variant: TargetPlatformVariant.desktop(),
   );
 
+  testWidgets(
+    "the bar's toggle stands over the rail's glyphs, its name over the "
+    "tree's edge",
+    (tester) async {
+      // #708: the toggle stood 3 px left of the column of icons under it,
+      // the library's name 6 px left of the panel.
+      await pumpAt(tester, size);
+      final toggle = tester.getRect(find.byKey(const Key('toggle-sidebar')));
+      final rail = tester.getRect(find.byKey(const Key('rail-files')));
+      expect(toggle.center.dx, rail.center.dx);
+      final title = find
+          .descendant(
+            of: find.byKey(const Key('title-bar')),
+            matching: find.byType(MarqueeText),
+          )
+          .first;
+      expect(tester.getRect(title).left, tester.getRect(tree).left);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
   testWidgets('the tree and the side panel come and go, and the panes keep '
       'every other edge', (tester) async {
     await pumpAt(tester, size);
@@ -148,7 +170,7 @@ void main() {
     await settle(tester);
     expect(tree, findsNothing);
     final noTree = tester.getRect(panes);
-    expect(noTree.left, ShellRail.width + 1 + gap);
+    expect(noTree.left, ShellRail.panelStart);
     expect(noTree.top, before.top);
     expect(noTree.right, before.right);
     expect(noTree.bottom, before.bottom);

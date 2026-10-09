@@ -1064,6 +1064,11 @@ final class TurkishStrings extends Strings {
   @override
   String get actionRename => 'Yeniden adlandır';
   @override
+  String get renameNameInvalid =>
+      'Ad, dosya sisteminin kabul etmediği bir karakter içeriyor.';
+  @override
+  String renameNameTaken(String name) => 'Bu klasörde zaten “$name” var.';
+  @override
   String get actionMove => 'Taşı';
   @override
   String get saveAndClose => 'Kaydet ve kapat';
@@ -2794,6 +2799,8 @@ final class TurkishStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => '“$query” ile eşleşen not yok.';
   @override
+  String wikilinkNoMatchFile(String query) => '“$query” ile eşleşen dosya yok.';
+  @override
   String get wikilinkNoHeading => 'bu notta o adı taşıyan başlık yok';
   @override
   String get wikilinkNoNote =>
@@ -3272,6 +3279,11 @@ final class TurkishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Her zaman gösterilir';
+  @override
+  String get navigationStart => 'Açılış ekranı';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden gizli: uygulama $start ile açılır.';
 
   @override
   String get newSlidesTitle => 'Yeni sunum';

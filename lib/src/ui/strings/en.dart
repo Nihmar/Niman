@@ -1065,6 +1065,11 @@ final class EnglishStrings extends Strings {
   @override
   String get actionRename => 'Rename';
   @override
+  String get renameNameInvalid =>
+      'The name holds a character the file system refuses.';
+  @override
+  String renameNameTaken(String name) => 'This folder already has “$name”.';
+  @override
   String get actionMove => 'Move';
   @override
   String get saveAndClose => 'Save and close';
@@ -2793,6 +2798,8 @@ final class EnglishStrings extends Strings {
   @override
   String wikilinkNoMatchNote(String query) => 'No note matches “$query”.';
   @override
+  String wikilinkNoMatchFile(String query) => 'No file matches “$query”.';
+  @override
   String get wikilinkNoHeading => 'this note has no heading with that name';
   @override
   String get wikilinkNoNote => 'nothing in the library has that name or alias';
@@ -3269,6 +3276,11 @@ final class EnglishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Always shown';
+  @override
+  String get navigationStart => 'Opens on';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden is hidden: the app opens on $start.';
 
   @override
   String get newSlidesTitle => 'New slides';

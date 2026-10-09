@@ -33,7 +33,7 @@ import 'dart:typed_data';
 
 import 'package:niman/src/markdown/source_buffer.dart';
 
-/// The editor's slice: `_NoteViewState.kSaveSliceLines`/`Chars`.
+/// The editor's slice: `NoteSavePipeline.kSaveSliceLines`/`Chars`.
 const int _sliceLines = 16384;
 const int _sliceChars = 4 << 20;
 

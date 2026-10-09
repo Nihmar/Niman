@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/marquee_text.dart';
+import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:window_manager/window_manager.dart' show DragToMoveArea;
@@ -57,7 +58,8 @@ final class AppTitleBar extends StatelessWidget {
   Widget _title(ThemeData theme) => Align(
     alignment: Alignment.centerLeft,
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      // The name starts at the panel's edge under it (#708).
+      padding: const EdgeInsets.only(left: _titleInset, right: 8),
       child: MarqueeText(
         text: title,
         style: theme.textTheme.labelMedium?.copyWith(
@@ -77,7 +79,7 @@ final class AppTitleBar extends StatelessWidget {
         height: 38,
         child: Row(
           children: [
-            const SizedBox(width: 4),
+            const SizedBox(width: _toggleGap),
             ValueListenableBuilder<KeyMap>(
               // The keys are remappable (#159), so the tooltip is built
               // from the map in force instead of a hard-coded pair (#498):
@@ -257,12 +259,20 @@ final class ZenTitleBar extends StatelessWidget {
 /// The sidebar toggle's side: what a desktop draws it at.
 const double _toggleSize = 34;
 
+/// The gap before the sidebar toggle: what centres its glyph on the
+/// rail's glyphs under it (#708).
+const double _toggleGap = ShellRail.glyphCentre - _toggleSize / 2;
+
 /// Left of the title: the leading gap and the sidebar toggle.
-const double _leading = 4 + _toggleSize;
+const double _leading = _toggleGap + _toggleSize;
+
+/// The title's room before the name: what puts it at the panel's left
+/// edge, past the toggle (#708).
+const double _titleInset = ShellRail.panelStart - _leading;
 
 /// The least room between the sidebar toggle and the first tab, a guard
 /// only: the tabs start at the panes' island, which with the tree hidden
-/// is 14 px past the toggle — room enough, and kept so the first tab
+/// is 11 px past the toggle — room enough, and kept so the first tab
 /// stands over the panel (0.0.8 test round asked for room; a 16 px floor
 /// once pushed the tab 8 px off the panel's edge).
 const double _tabsGap = 8;

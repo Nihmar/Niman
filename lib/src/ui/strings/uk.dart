@@ -1073,6 +1073,11 @@ final class UkrainianStrings extends Strings {
   @override
   String get actionRename => 'Перейменувати';
   @override
+  String get renameNameInvalid =>
+      'Назва містить символ, який файлова система не приймає.';
+  @override
+  String renameNameTaken(String name) => 'У цій теці вже є «$name».';
+  @override
   String get actionMove => 'Перемістити';
   @override
   String get saveAndClose => 'Зберегти і закрити';
@@ -2873,6 +2878,9 @@ final class UkrainianStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Жодна нотатка не відповідає „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Жоден файл не відповідає «$query».';
+  @override
   String get wikilinkNoHeading =>
       'у цій нотатці немає заголовка з такою назвою';
   @override
@@ -3351,6 +3359,11 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Завжди показано';
+  @override
+  String get navigationStart => 'Відкривається на';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden приховано: застосунок відкривається на $start.';
 
   @override
   String get newSlidesTitle => 'Нова презентація';

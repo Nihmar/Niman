@@ -1074,6 +1074,11 @@ final class SlovakStrings extends Strings {
   @override
   String get actionRename => 'Premenovať';
   @override
+  String get renameNameInvalid =>
+      'Názov obsahuje znak, ktorý súborový systém odmieta.';
+  @override
+  String renameNameTaken(String name) => 'Tento priečinok už obsahuje „$name“.';
+  @override
   String get actionMove => 'Presunúť';
   @override
   String get saveAndClose => 'Uložiť a uzavrieť';
@@ -2842,6 +2847,9 @@ final class SlovakStrings extends Strings {
   String wikilinkNoMatchNote(String query) =>
       'Žiadna poznámka nezodpovedá „$query”.';
   @override
+  String wikilinkNoMatchFile(String query) =>
+      'Žiadny súbor nezodpovedá „$query“.';
+  @override
   String get wikilinkNoHeading => 'táto poznámka nemá nadpis s týmto názvom';
   @override
   String get wikilinkNoNote => 'nič v knižnici nemá tento názov ani alias';
@@ -3319,6 +3327,11 @@ final class SlovakStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vždy zobrazené';
+  @override
+  String get navigationStart => 'Otvára sa na';
+  @override
+  String navigationStartHidden(String hidden, String start) =>
+      '$hidden je skryté: aplikácia sa otvára na $start.';
 
   @override
   String get newSlidesTitle => 'Nová prezentácia';
