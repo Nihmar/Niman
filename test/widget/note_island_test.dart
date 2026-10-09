@@ -83,6 +83,15 @@ void main() {
     }
     expect(treeRect.left, ShellRail.width + 1 + gap);
     expect(dockRect.right, size.width - gap);
+    // The rail's buttons stand off the tree by the islands' gap (and the
+    // base's pixel), no more: the glyphs sit near the middle between the
+    // window's edge and the panel.
+    final button = tester.getRect(find.byKey(const Key('rail-files')));
+    expect(treeRect.left - button.right, gap + 1);
+    expect(
+      (button.left - (treeRect.left - button.right)).abs(),
+      lessThanOrEqualTo(gap),
+    );
     // The dividers are the base between two islands.
     expect(panesRect.left, treeRect.right + ResizeDivider.width);
     expect(dockRect.left, panesRect.right + ResizeDivider.width);
