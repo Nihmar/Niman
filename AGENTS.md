@@ -13,6 +13,11 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 
 ## Commits
 - One logical change per commit; never bundle unrelated changes.
+- **Pull requests target `main` only**: a PR merges a branch into `main`,
+  never into another branch. Stacked PRs merged into their bases left
+  #661–#665 off `main` until #677 brought them in. Work in several steps
+  stays on one branch — commit and push each step there — and goes into
+  `main` with one PR.
 - **No co-authoring signatures**: a commit message carries no `Co-authored-by:`
   trailer — not a tool's, not another agent's. The history has none, and none
   is to be added.
