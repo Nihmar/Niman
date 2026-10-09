@@ -64,6 +64,24 @@ void main() {
       expect(saved('pinned').cell, (x: 2, y: 3, w: 2, h: 1));
     });
 
+    testWidgets('a drag the pointer cancels leaves the tile (#686)', (
+      tester,
+    ) async {
+      await open(tester, _desktop);
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const Key('home-drag-pinned'))),
+        kind: PointerDeviceKind.mouse,
+      );
+      for (var i = 0; i < 6; i++) {
+        await gesture.moveBy(const Offset(0, 24));
+        await tester.pump();
+      }
+      await gesture.cancel();
+      await settle(tester);
+
+      expect(controller.libraryHome, isNull, reason: 'nothing written');
+    });
+
     testWidgets('a corner dragged right makes the tile wider', (tester) async {
       await open(tester, _desktop);
       await tester.drag(
