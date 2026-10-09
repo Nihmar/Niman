@@ -481,30 +481,7 @@ final class NoteOps implements NoteOperations {
       }
       final newRel = resolvePath(parent, target);
       if (newRel == path) return row;
-      final oldAbs = _abs(path);
-      if (row.isDir) {
-        await Directory(oldAbs).rename(_abs(newRel));
-      } else {
-        await File(oldAbs).rename(_abs(newRel));
-      }
-      _hint(newRel, SyncOpKind.moved, fromPath: path);
-      await history.moved(path, newRel, isDir: row.isDir);
-      await _carryReading(path, newRel, isDir: row.isDir);
-      await _carrySettings(path, newRel, isDir: row.isDir);
-      await _carryHome(path, newRel, isDir: row.isDir);
-      await _carryOutside(path, newRel, isDir: row.isDir);
-      // Before the index hears of the move: a folder's reindex re-creates
-      // its notes, and the edges that named them would be gone (#507).
-      final links = await _linksToMove(path, isDir: row.isDir);
-      await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-      await _rewriteLinks(
-        path,
-        newRel,
-        isDir: row.isDir,
-        oldPaths: links.oldPaths,
-        referrers: links.referrers,
-      );
-      return await _mustFind(newRel);
+      return await _relocate(row, path, newRel);
     });
   }
 
@@ -533,31 +510,40 @@ final class NoteOps implements NoteOperations {
         target = await uniqueFileName(targetDir, parts.base, parts.ext);
       }
       final newRel = resolvePath(targetParent, target);
-      final oldAbs = _abs(path);
-      if (row.isDir) {
-        await Directory(oldAbs).rename(_abs(newRel));
-      } else {
-        await File(oldAbs).rename(_abs(newRel));
-      }
-      _hint(newRel, SyncOpKind.moved, fromPath: path);
-      await history.moved(path, newRel, isDir: row.isDir);
-      await _carryReading(path, newRel, isDir: row.isDir);
-      await _carrySettings(path, newRel, isDir: row.isDir);
-      await _carryHome(path, newRel, isDir: row.isDir);
-      await _carryOutside(path, newRel, isDir: row.isDir);
-      // Before the index hears of the move: a folder's reindex re-creates
-      // its notes, and the edges that named them would be gone (#507).
-      final links = await _linksToMove(path, isDir: row.isDir);
-      await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-      await _rewriteLinks(
-        path,
-        newRel,
-        isDir: row.isDir,
-        oldPaths: links.oldPaths,
-        referrers: links.referrers,
-      );
-      return await _mustFind(newRel);
+      return await _relocate(row, path, newRel);
     });
+  }
+
+  /// Renames what [row] holds at [path] to [newRel] on disk, and carries
+  /// everything that named it along: the sync hint, the history, the
+  /// reading positions, the settings, the Home, what lies outside the
+  /// library, the index and the links in the notes that pointed at it.
+  /// The shared tail of [rename] and [move]; returns the updated row.
+  Future<Note> _relocate(Note row, String path, String newRel) async {
+    final oldAbs = _abs(path);
+    if (row.isDir) {
+      await Directory(oldAbs).rename(_abs(newRel));
+    } else {
+      await File(oldAbs).rename(_abs(newRel));
+    }
+    _hint(newRel, SyncOpKind.moved, fromPath: path);
+    await history.moved(path, newRel, isDir: row.isDir);
+    await _carryReading(path, newRel, isDir: row.isDir);
+    await _carrySettings(path, newRel, isDir: row.isDir);
+    await _carryHome(path, newRel, isDir: row.isDir);
+    await _carryOutside(path, newRel, isDir: row.isDir);
+    // Before the index hears of the move: a folder's reindex re-creates
+    // its notes, and the edges that named them would be gone (#507).
+    final links = await _linksToMove(path, isDir: row.isDir);
+    await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
+    await _rewriteLinks(
+      path,
+      newRel,
+      isDir: row.isDir,
+      oldPaths: links.oldPaths,
+      referrers: links.referrers,
+    );
+    return await _mustFind(newRel);
   }
 
   /// Rewrites every setting that pointed at what moved from [from] to [to]
