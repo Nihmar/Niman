@@ -102,7 +102,9 @@ Future<void> openHref(
     'md link tap in ${p.basename(link.notePath)}: href="$href" '
     '(source ${source == null ? 'not loaded' : 'ready'})',
   );
-  if (source == null) return;
+  // A link with no target (`[x]()`) goes nowhere, in the preview as on a
+  // slide (#674): resolved, it offered to create a note named nothing.
+  if (source == null || href.trim().isEmpty) return;
   final resolved = await source.resolveMarkdown(
     href,
     from: link.notePathInLibrary,

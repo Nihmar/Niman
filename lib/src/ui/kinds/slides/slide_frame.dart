@@ -72,9 +72,13 @@ final class _SlideFrameState extends State<SlideFrame> {
         mathCache: _mathCache,
         padding: slidePadding,
         embedResolver: widget.resolveEmbed,
+        // A link with no target (`[x]()`) goes nowhere (#674): followed,
+        // it resolved as a note named nothing.
         onTapLink: onTapLink == null
             ? null
-            : (text, href) => onTapLink(href ?? ''),
+            : (text, href) {
+                if (href != null && href.trim().isNotEmpty) onTapLink(href);
+              },
         onTapWikiLink: widget.onTapWikiLink,
       ),
     );

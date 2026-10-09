@@ -10,6 +10,7 @@ import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/kinds/slides/slide_frame.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slides_view.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -53,7 +54,6 @@ final class _Host implements NoteKindHost {
 
 const String _deck =
     '---\ntype: slides\n---\n\n# Alpha\n\n---\n\n## Beta\n\nNote: say beta\n';
-
 Finder _text(String text) => find.textContaining(text, findRichText: true);
 
 /// The window presenting takes full screen, recorded.
@@ -125,6 +125,27 @@ void main() {
 
     await tester.tap(find.text(AppStrings.slidesMarkdown));
     expect(markdown, 1);
+  });
+
+  testWidgets('a link with no target is not followed (#674)', (tester) async {
+    final links = <String>[];
+    Future<void> slide(String markdown) => _show(
+      tester,
+      SlideFrame(
+        markdown: markdown,
+        resolveEmbed: (_) async => null,
+        onTapLink: links.add,
+      ),
+      const Size(1600, 900),
+    );
+
+    await slide('[nowhere]()');
+    await tester.tapOnText(find.textRange.ofSubstring('nowhere'));
+    expect(links, isEmpty);
+
+    await slide('[there](a.md)');
+    await tester.tapOnText(find.textRange.ofSubstring('there'));
+    expect(links, ['a.md'], reason: 'a link with one is');
   });
 
   testWidgets('an edit that removes the slide on screen falls back', (
