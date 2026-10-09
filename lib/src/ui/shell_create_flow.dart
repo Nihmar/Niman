@@ -105,7 +105,9 @@ final class ShellCreateFlow {
   }
 
   /// A slides note (#534): a note with `type: slides` frontmatter in the
-  /// FAB's target folder, two slides in it to start from.
+  /// library's root, whatever is selected (#703) — a presentation is a
+  /// thing of its own, not one more page of the folder that happens to
+  /// be open — two slides in it to start from.
   Future<void> createSlidesNote(BuildContext context) async {
     final name = await showNameDialog(
       context,
@@ -115,7 +117,7 @@ final class ShellCreateFlow {
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createNote(
-        parentPath: createParent(),
+        parentPath: '',
         name: name,
         content: slidesNoteContent(name),
       );
