@@ -138,7 +138,7 @@ final class TreeFooterBar extends StatelessWidget {
           IconButton(
             key: const Key('open-trash'),
             tooltip: AppStrings.trashTitle,
-            icon: const Icon(Icons.delete),
+            icon: const Icon(Icons.delete_outline),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute<void>(
