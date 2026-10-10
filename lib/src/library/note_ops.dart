@@ -136,6 +136,9 @@ final class NoteOps implements NoteOperations {
     writer: writer,
     serialize: _synchronized,
     moveIntoTrash: _trash.moveIntoTrash,
+    // A remote move carries the device-only state a local one does
+    // (#713): the device Home and the home-screen widgets.
+    carryOutside: carryOutside,
   );
 
   void _hint(String path, SyncOpKind kind, {String? fromPath}) =>

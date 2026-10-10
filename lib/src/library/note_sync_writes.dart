@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
+import 'package:niman/src/library/device_home_carry.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:path/path.dart' as p;
@@ -24,6 +26,7 @@ final class NoteSyncWrites {
     required this.writer,
     required this.serialize,
     required this.moveIntoTrash,
+    this.carryOutside,
   });
 
   /// The library settings file, library-relative.
@@ -56,6 +59,13 @@ final class NoteSyncWrites {
   /// inside the op chain.
   final Future<String> Function(String path, {required bool isDir})
   moveIntoTrash;
+
+  /// What else, outside the library's own files, names a note by its path
+  /// and has to follow a rename or a move (#506): the home-screen note
+  /// widgets, kept in the app's database rather than the library's. Null
+  /// carries nothing further.
+  final Future<void> Function(String from, String to, {required bool isDir})?
+  carryOutside;
 
   /// When each path was last written by a sync operation.
   final Map<String, DateTime> _syncWrites = {};
@@ -125,6 +135,12 @@ final class NoteSyncWrites {
   /// [FileSystemException] when [from] is gone or [to] is taken — the
   /// local half of a sync step, the type the step runner catches and
   /// reports as a local failure (#714).
+  ///
+  /// Carries what sync cannot: this device's own Home (#713) and what
+  /// [carryOutside] holds, the home-screen widgets. The settings, Home
+  /// file, reading positions and links that name the item arrive as
+  /// writes of their own and are not touched here — carrying them again
+  /// would race those writes.
   Future<void> move(String from, String to) {
     return serialize(() async {
       final fromAbs = _abs(from);
@@ -140,7 +156,23 @@ final class NoteSyncWrites {
       _markSyncWrite(to);
       await File(fromAbs).rename(toAbs);
       await history.moved(from, to, isDir: false);
+      await carryDeviceHome(config, from, to, isDir: false);
+      await _carryOutside(from, to);
       await indexer.applyEvents(root, [fromAbs, toAbs]);
     });
+  }
+
+  /// Hands the move to [carryOutside] (#506). The move is already done on
+  /// disk: a failure there is logged and leaves it standing.
+  Future<void> _carryOutside(String from, String to) async {
+    final carry = carryOutside;
+    if (carry == null) return;
+    try {
+      await carry(from, to, isDir: false);
+    } on Object catch (error) {
+      const AppLogger(
+        name: 'notes',
+      ).warning('could not carry "$from" -> "$to" outside the library: $error');
+    }
   }
 }
