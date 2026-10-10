@@ -98,9 +98,7 @@ final class AppTitleBar extends StatelessWidget {
                   dimension: _toggleSize,
                   child: IconButton(
                     key: const Key('toggle-sidebar'),
-                    tooltip: keys == null
-                        ? label
-                        : '$label (${describeActivator(keys)})',
+                    tooltip: tooltipWithKeys(label, keys),
                     icon: Icon(
                       sidebarVisible
                           ? Icons.vertical_split

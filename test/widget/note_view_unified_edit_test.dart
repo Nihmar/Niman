@@ -228,6 +228,7 @@ void main() {
         .widget<EditorToolbar>(find.byType(EditorToolbar))
         .buttons
         .firstWhere((item) => item.key == const Key('toolbar-bold'));
+    expect(button().tooltip, contains('Ctrl+B'), reason: '#712');
     expect(
       button().active,
       isFalse,

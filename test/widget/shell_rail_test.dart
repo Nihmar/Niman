@@ -16,6 +16,8 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/search_screen.dart';
@@ -94,6 +96,27 @@ void main() {
     // Files is selected and the tree is showing.
     expect(railIndex(tester), ShellTab.files);
     expect(find.text('No notes yet'), findsOne);
+  });
+
+  // #712: the rail's tooltips name the key that selects the destination,
+  // and follow a remap, so the tip cannot point at a key that does
+  // nothing.
+  testWidgets('wide: the rail tooltips carry the keys bound now (#712)', (
+    tester,
+  ) async {
+    final previous = AppKeyMap.current.value;
+    addTearDown(() => AppKeyMap.current.value = previous);
+    await pumpWide(tester);
+
+    IconButton files() => tester.widget<IconButton>(railDest('files'));
+    expect(files().tooltip, contains('Ctrl+1'));
+
+    AppKeyMap.current.value = previous.withBinding(
+      AppCommand.tabFiles,
+      const SingleActivator(LogicalKeyboardKey.keyB, alt: true),
+    );
+    await tester.pump();
+    expect(files().tooltip, contains('Alt+B'));
   });
 
   // #203: a floating window, like Settings, and not a destination: the
