@@ -120,6 +120,7 @@ import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
+import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
@@ -1296,7 +1297,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           onAnnotate: _annotate,
           marks: _annotations,
           ocr: _ocrActions,
-          fullScreen: _epubFullScreen,
+          fullScreen: _immersive.fullScreen,
         ),
       );
     }
@@ -1696,8 +1697,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
     HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
-    _zen.addListener(_onZenChanged);
-    _epubFullScreen.addListener(_onEpubFullScreen);
+    _immersive.addListener(_onImmersiveChanged);
     unawaited(_workspace.load());
     // Library session events (every note op bumps the revision): the
     // pinned notes follow the files, so each one refreshes the note
@@ -1792,10 +1792,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     HardwareKeyboard.instance.removeHandler(_historyKeyUnfocused);
     // A library switch tears the shell down: the window it maximized goes
     // back as it was.
-    _zen.removeListener(_onZenChanged);
-    unawaited(_zen.leave());
-    _zen.dispose();
-    _epubFullScreen.dispose();
+    _immersive.removeListener(_onImmersiveChanged);
+    _immersive.dispose();
     _tabsListenable.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -2673,7 +2671,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       buildWideSlots: () => _wideSlots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
-      onLeaveZen: () => unawaited(_zen.leave()),
+      onLeaveZen: _immersive.leaveZen,
       zenPreviewVisible: _notePreview,
       onZenTogglePreview: _previewToggleVisible ? _togglePreview : null,
       leaveZenOnEsc: _leaveZenOnEsc,
@@ -2969,8 +2967,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// in full screen (#621) only leaves full screen: Back steps out of it
   /// first.
   void _closeFullScreenNote() {
-    if (_epubFullScreen.value != null) {
-      _epubFullScreen.value = null;
+    if (_immersive.fullScreen.value != null) {
+      _immersive.fullScreen.value = null;
       return;
     }
     setState(() {
@@ -3139,12 +3137,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// nearer wanted the key: the find bar and a selection take the first
   /// press, a dialog or a menu its own.
   late final Action<DismissIntent> _leaveZenOnEsc = LeaveZenAction(
-    _zen,
+    _immersive.zen,
     () => _inZen,
   );
 
-  /// Zen mode (#69), per window and never stored.
-  late final ZenMode _zen = ZenMode(widget.window);
+  /// Zen mode (#69) and the book read in full screen (#621).
+  late final ShellImmersive _immersive = ShellImmersive(
+    window: widget.window,
+    possible: () => _zenPossible,
+  );
 
   /// Whether Zen can show: a desktop window wide enough for the panes,
   /// on the notes, with a note open in them.
@@ -3155,9 +3156,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _workspace.value.activePath != null;
 
   /// Whether Zen is what is on screen.
-  bool get _inZen => _zen.on && _zenPossible;
+  bool get _inZen => _immersive.inZen;
 
-  void _toggleZen() => unawaited(_zen.toggle());
+  void _toggleZen() => unawaited(_immersive.toggleZen());
 
   /// Switches typewriter mode (#70) for the library: the note on screen
   /// follows at once, and the setting keeps it. Zen is left as it is —
@@ -3171,19 +3172,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     }());
   }
 
-  void _onZenChanged() {
+  /// Repaints on a Zen or full-screen change.
+  void _onImmersiveChanged() {
     if (mounted) setState(() {});
   }
 
   /// Leaves Zen once there is nothing left for it to show — the last tab
   /// closed, another place of the rail chosen, the window narrowed — so
   /// the chrome and the window size come back rather than wait.
-  void _leaveZenIfEmpty() {
-    if (!_zen.on || _zenPossible) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _zen.on && !_zenPossible) unawaited(_zen.leave());
-    });
-  }
+  void _leaveZenIfEmpty() => _immersive.leaveIfEmpty();
 
   /// What each command does, for the ones that can run here and now: the
   /// keys run them, and the command palette lists exactly these (#155).
@@ -3205,7 +3202,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.dockRoom => _dockRoom,
     CommandNeed.desktop => Platform.isLinux || Platform.isWindows,
     CommandNeed.notInZen => !_inZen,
-    CommandNeed.zenRoom => _zen.on || _zenPossible,
+    CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
@@ -3611,7 +3608,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           ? AppStrings.switchToSourceTooltip
           : AppStrings.switchToWysiwygTooltip,
     AppCommand.zenMode =>
-      _zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
+      _immersive.zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
     AppCommand.typewriterMode =>
       _editorSettings.typewriter
           ? AppStrings.typewriterOff
@@ -3863,7 +3860,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             onEditEpubLook: () => _editEpubLook(controller),
             onEpubTextScale: (scale) =>
                 unawaited(keepEpubTextScale(controller, scale)),
-            epubFullScreen: _epubFullScreen,
+            epubFullScreen: _immersive.fullScreen,
           ),
         ),
       ),
@@ -3871,24 +3868,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     return _workspace.value.panes[pane].activeTab == null
         ? listener
         : TourTarget(id: TourTargets.note, child: listener);
-  }
-
-  /// Which book is read in full screen (#621): its pane, or null.
-  final ValueNotifier<Object?> _epubFullScreen = ValueNotifier<Object?>(null);
-
-  /// Takes the screen for the book read in full screen, or gives it back:
-  /// the window on the desktops, the system bars on Android.
-  void _onEpubFullScreen() {
-    final on = _epubFullScreen.value != null;
-    if (Platform.isAndroid) {
-      unawaited(
-        SystemChrome.setEnabledSystemUIMode(
-          on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
-        ),
-      );
-    } else {
-      unawaited(widget.window.setFullScreen(on: on));
-    }
   }
 
   /// Opens the sheet that sets how the books look (#280).
