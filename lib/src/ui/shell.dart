@@ -63,10 +63,7 @@ import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
-import 'package:niman/src/ui/dock/history_dock_pane.dart';
-import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
-import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
@@ -89,7 +86,6 @@ import 'package:niman/src/ui/ocr/ocr_job_status.dart';
 import 'package:niman/src/ui/ocr/ocr_notifier.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
-import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
@@ -102,6 +98,7 @@ import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
+import 'package:niman/src/ui/shell_dock.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_fab.dart';
@@ -1382,6 +1379,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The notes open in this library on this device (issue #23): for now
   /// the one the shell shows, kept current and kept for the next launch.
   late final ShellWorkspace _workspace = ShellWorkspace(widget.controller);
+
+  /// The right dock and the phone's panel sheets.
+  late final ShellDock _dock = ShellDock(
+    workspace: _workspace,
+    controller: widget.controller,
+    windowWidth: () => MediaQuery.sizeOf(context).width,
+    wide: () => _wide,
+    panelNote: () => _panelNote,
+    journalBrowser: (context) =>
+        _journalUi.browser(context, focusDay: _shownJournalDay),
+    onOpenHistory: (path) => unawaited(_openHistory(path)),
+    onOpenNoteFromLink: (path) => _openNoteFromLink(path, null),
+  );
 
   /// Back and forward through the notes shown (#700).
   late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
@@ -3702,11 +3712,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Whether the window has room for the right dock beside a note (#175):
   /// a desktop, a tablet, a phone in landscape — on the same rule.
-  bool get _dockRoom =>
-      MediaQuery.sizeOf(context).width >= RightDock.minWindowWidth;
+  bool get _dockRoom => _dock.room;
 
   /// Whether the dock shows: there is room, and it was not closed.
-  bool get _dockShown => _dockRoom && _workspace.value.dockOpen;
+  bool get _dockShown => _dock.shown;
 
   /// The note the dock and the sheets speak for: the focused pane's on a
   /// wide window, the one on screen on a phone.
@@ -3719,81 +3728,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// The right dock: the focused pane's note's outline, tags or history.
-  Widget _rightDock(LibrarySession controller) {
-    final w = _workspace.value;
-    final path = w.activePath;
-    return RightDock(
-      pane: w.dockPane,
-      onPane: (pane) =>
-          _workspace.controller.update((w) => w.withDock(pane: pane)),
-      onClose: () =>
-          _workspace.controller.update((w) => w.withDock(open: false)),
-      paneBuilder: (pane) => switch (pane) {
-        DockPane.outline => OutlineDockPane(note: _panelNote),
-        DockPane.tags => TagsDockPane(
-          note: _panelNote,
-          tags: controller.tagSource,
-          onOpenNote: _workspace.show,
-        ),
-        DockPane.history => HistoryDockPane(
-          ops: controller.ops,
-          path: path,
-          onOpenHistory: () {
-            if (path != null) unawaited(_openHistory(path));
-          },
-        ),
-        DockPane.journal => _journalUi.browser(
-          context,
-          focusDay: _shownJournalDay,
-        ),
-      },
-    );
-  }
+  Widget _rightDock(LibrarySession controller) => _dock.build(context);
 
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
-  void _toggleDock() =>
-      _workspace.controller.update((w) => w.withDock(open: !w.dockOpen));
+  void _toggleDock() => _dock.toggleOpen();
 
   /// The note row's dock button, where the window has room for a dock.
-  Widget _dockToggle() => IconButton(
-    key: const Key('dock-toggle'),
-    tooltip: AppStrings.sidePanelTooltip,
-    isSelected: _workspace.value.dockOpen,
-    icon: const Icon(Icons.view_sidebar_outlined),
-    selectedIcon: const Icon(Icons.view_sidebar),
-    onPressed: _toggleDock,
-  );
+  Widget _dockToggle() => _dock.toggle();
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
   /// sheet (the phone's way to the same three, #175).
-  Future<void> _showPanel(DockPane pane) async {
-    if (_wide && _dockRoom) {
-      _workspace.controller.update((w) => w.withDock(open: true, pane: pane));
-      return;
-    }
-    final note = _panelNote;
-    if (note == null) return;
-    if (pane == DockPane.outline) {
-      final line = await showOutlineSheet(context, entries: note.outline.value);
-      if (line != null) note.jumpToHeading(line);
-      return;
-    }
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheet) => SizedBox(
-        height: MediaQuery.sizeOf(sheet).height * 0.5,
-        child: TagsDockPane(
-          note: note,
-          tags: widget.controller.tagSource,
-          onOpenNote: (path) {
-            Navigator.pop(sheet);
-            _openNoteFromLink(path, null);
-          },
-        ),
-      ),
-    );
-  }
+  Future<void> _showPanel(DockPane pane) => _dock.showPanel(context, pane);
 
   /// The phone's one note view, so its sheets reach its outline.
   final GlobalKey _phoneNoteKey = GlobalKey();
