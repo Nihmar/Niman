@@ -122,7 +122,9 @@ final class NoteSyncWrites {
 
   /// Renames the file at [from] to [to] (any folder, created on demand)
   /// because the remote renamed it; the history follows. Throws
-  /// [StateError] when [from] is gone or [to] is taken.
+  /// [FileSystemException] when [from] is gone or [to] is taken — the
+  /// local half of a sync step, the type the step runner catches and
+  /// reports as a local failure (#714).
   Future<void> move(String from, String to) {
     return serialize(() async {
       final fromAbs = _abs(from);
