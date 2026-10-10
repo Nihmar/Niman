@@ -1826,8 +1826,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get deletedMessage => 'Ištrintas';
   @override
-  String deleteToTrashConfirm(String name) => '$name bus perkeltas į .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name bus nevildinamai ištrintas';
   @override

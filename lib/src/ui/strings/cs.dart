@@ -1816,8 +1816,6 @@ final class CzechStrings extends Strings {
   @override
   String get deletedMessage => 'Smazáno';
   @override
-  String deleteToTrashConfirm(String name) => '$name se přesune do .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name se trvale smaže';
   @override
   String get chooseDestination => 'Vybrat cíl';

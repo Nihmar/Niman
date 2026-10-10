@@ -1823,8 +1823,6 @@ final class SlovakStrings extends Strings {
   @override
   String get deletedMessage => 'Vymazané';
   @override
-  String deleteToTrashConfirm(String name) => '$name sa presunie do .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name sa trvalo vymaže';
   @override
   String get chooseDestination => 'Vybrať cieľ';

@@ -1666,8 +1666,6 @@ final class ChineseStrings extends Strings {
   @override
   String get deletedMessage => '已删除';
   @override
-  String deleteToTrashConfirm(String name) => '$name 将移入 .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name 将被永久删除';
   @override
   String get chooseDestination => '选择目标位置';

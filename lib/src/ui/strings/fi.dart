@@ -1838,8 +1838,6 @@ final class FinnishStrings extends Strings {
   @override
   String get deletedMessage => 'Poistettu';
   @override
-  String deleteToTrashConfirm(String name) => '$name siirtyy kansioon .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name poistetaan pysyvästi';
   @override
   String get chooseDestination => 'Valitse kohde';

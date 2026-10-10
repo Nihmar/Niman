@@ -1828,9 +1828,6 @@ final class BosnianStrings extends Strings {
   @override
   String get deletedMessage => 'Obrisano';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name će biti premješteno u .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name će biti trajno obrisano';
   @override
   String get chooseDestination => 'Odaberi odredište';

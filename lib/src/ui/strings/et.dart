@@ -1806,8 +1806,6 @@ final class EstonianStrings extends Strings {
   @override
   String get deletedMessage => 'Kustutatud';
   @override
-  String deleteToTrashConfirm(String name) => '$name liigutatakse .trash/-i';
-  @override
   String deleteForeverConfirm(String name) => '$name kustutatakse püsivalt';
   @override
   String get chooseDestination => 'Vali sihtkoht';

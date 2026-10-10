@@ -1817,8 +1817,6 @@ final class DanishStrings extends Strings {
   @override
   String get deletedMessage => 'Slettet';
   @override
-  String deleteToTrashConfirm(String name) => '$name flyttes til .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name slettes permanent';
   @override
   String get chooseDestination => 'Vælg destination';
