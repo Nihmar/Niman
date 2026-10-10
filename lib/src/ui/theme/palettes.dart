@@ -9,12 +9,14 @@
 // adding a mapping and one line in `_builtin`; no widget ever asks which
 // theme is on.
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/theme_colors.dart';
 import 'package:niman/src/core/theme_tokens.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/theme/catppuccin.dart';
 import 'package:niman/src/ui/theme/gruvbox.dart';
 import 'package:niman/src/ui/theme/niman.dart';
@@ -60,18 +62,36 @@ PaletteColors themeColors(AppTheme theme, Brightness brightness) {
 /// Cached, because the app root builds both brightnesses on every rebuild
 /// and each one seeds a Material scheme, which is real work. The key
 /// carries the device colors so the Material You theme is rebuilt when
-/// the platform finally answers, and the theme itself by value, so an
-/// edited custom theme misses the scheme its old colors built.
+/// the platform finally answers, and the platform itself — the theme is
+/// adaptive density, and the snackbar shape follows from it (#712) — plus
+/// the theme by value, so an edited custom theme misses the scheme its
+/// old colors built.
 ThemeData buildAppTheme(AppTheme theme, Brightness brightness) {
-  final key = (theme, brightness, AppThemes.deviceScheme(brightness));
+  final key = (
+    theme,
+    brightness,
+    AppThemes.deviceScheme(brightness),
+    defaultTargetPlatform,
+  );
   final cached = _themes[key];
   if (cached != null) return cached;
   final colors = themeColors(theme, brightness);
-  final data = ThemeData(
+  var data = ThemeData(
     brightness: brightness,
     colorScheme: colors.scheme,
     extensions: [colors.syntax],
   );
+  // A snackbar over a desktop window is a toast, not a bar across the
+  // whole bottom edge (#712): floating and capped where a pointer aims,
+  // the Material bar where a thumb does.
+  if (pointerDense(data)) {
+    data = data.copyWith(
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        width: 360,
+      ),
+    );
+  }
   // Two entries per theme, plus a stale pair per edit; a handful of
   // themes never comes near this, and one that did would only pay for
   // rebuilding what it wears.
@@ -80,7 +100,8 @@ ThemeData buildAppTheme(AppTheme theme, Brightness brightness) {
   return data;
 }
 
-final Map<(AppTheme, Brightness, ColorScheme?), ThemeData> _themes = {};
+final Map<(AppTheme, Brightness, ColorScheme?, TargetPlatform), ThemeData>
+_themes = {};
 
 /// A custom theme made from [theme]: the colors it wears at day and at
 /// night, under [id] and [name] (issue #269).
