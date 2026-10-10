@@ -64,16 +64,18 @@ void main() {
     expect(find.byKey(const Key('note-top-bar')), findsNothing);
   });
 
-  testWidgets('wide: the create menu offers and runs all four actions', (
+  testWidgets('wide: the create menu offers and runs all six actions', (
     tester,
   ) async {
     await pumpShell(tester, const Size(1200, 900));
 
     await tester.tap(find.byKey(const Key('new-item-menu')));
     await settle(tester);
+    expect(find.byKey(const Key('journal-today-action')), findsOne);
     expect(find.byKey(const Key('new-note-action')), findsOne);
     expect(find.byKey(const Key('new-list-note-action')), findsOne);
     expect(find.byKey(const Key('new-from-template-action')), findsOne);
+    expect(find.byKey(const Key('capture-web-page-action')), findsOne);
     expect(find.byKey(const Key('new-folder-action')), findsOne);
 
     await tester.tap(find.byKey(const Key('new-note-action')));

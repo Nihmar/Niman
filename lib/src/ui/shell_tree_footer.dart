@@ -14,6 +14,9 @@ import 'package:niman/src/ui/trash.dart';
 
 /// What the tree footer's create menu offers.
 enum NewShellItem {
+  /// Today's journal entry, made first when there is none (#7).
+  journal,
+
   /// A plain Markdown note.
   note,
 
@@ -28,6 +31,9 @@ enum NewShellItem {
 
   /// A note copied from a template.
   template,
+
+  /// A web page captured as a note (#531).
+  captureWebPage,
 
   /// A folder.
   folder,
@@ -82,6 +88,14 @@ final class TreeFooterBar extends StatelessWidget {
               curve: Curves.easeOut,
             ),
             itemBuilder: (context) => [
+              // The one thing done every day (#7), set apart like the FAB's.
+              _item(
+                NewShellItem.journal,
+                Icons.today_outlined,
+                AppStrings.journalFabToday,
+                key: const Key('journal-today-action'),
+              ),
+              const PopupMenuDivider(),
               _item(
                 NewShellItem.note,
                 Icons.note_add_outlined,
@@ -111,6 +125,12 @@ final class TreeFooterBar extends StatelessWidget {
                 Icons.file_copy_outlined,
                 AppStrings.newFromTemplateTitle,
                 key: const Key('new-from-template-action'),
+              ),
+              _item(
+                NewShellItem.captureWebPage,
+                Icons.language_outlined,
+                AppStrings.captureWebPage,
+                key: const Key('capture-web-page-action'),
               ),
               const PopupMenuDivider(),
               _item(

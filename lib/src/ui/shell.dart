@@ -4203,6 +4203,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Runs the create flow behind a tree-footer menu entry.
   void _onNewItem(NewShellItem item) {
     switch (item) {
+      case NewShellItem.journal:
+        unawaited(_journalFlow.openToday(context));
       case NewShellItem.note:
         unawaited(_createFlow.createNote(context));
       case NewShellItem.listNote:
@@ -4213,6 +4215,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unawaited(_createFlow.createSlidesNote(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
+      case NewShellItem.captureWebPage:
+        unawaited(_captureFlow.capture(context));
       case NewShellItem.folder:
         unawaited(_createFlow.createFolder(context));
     }
