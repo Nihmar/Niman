@@ -26,8 +26,13 @@ void main() {
   late FakeSearchSource source;
   final opened = <String>[];
 
-  Widget buildApp(SearchSource searchSource, {ReplaceSource? replace}) {
+  Widget buildApp(
+    SearchSource searchSource, {
+    ReplaceSource? replace,
+    bool dense = false,
+  }) {
     return MaterialApp(
+      theme: dense ? ThemeData(visualDensity: VisualDensity.compact) : null,
       home: Scaffold(
         body: SearchScreen(
           controller: session,
@@ -49,6 +54,21 @@ void main() {
     await tester.pumpWidget(buildApp(source));
     await tester.pump();
     expect(find.textContaining('Type to search the library'), findsOne);
+  });
+
+  testWidgets('a pointer gets words/contains as a field toggle (#712)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildApp(source, dense: true));
+    await tester.pump();
+    expect(find.byKey(const Key('search-mode')), findsNothing);
+    final toggle = find.byKey(const Key('search-mode-toggle'));
+    expect(toggle, findsOne);
+    expect(tester.widget<IconButton>(toggle).isSelected, isFalse);
+    await tester.tap(toggle);
+    await tester.pump();
+    expect(tester.widget<IconButton>(toggle).isSelected, isTrue);
+    expect(find.byKey(const Key('search-mode')), findsNothing);
   });
 
   testWidgets('query debounces: one search per pause, results appear', (

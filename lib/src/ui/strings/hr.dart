@@ -1824,8 +1824,6 @@ final class CroatianStrings extends Strings {
   @override
   String get deletedMessage => 'Obrisano';
   @override
-  String deleteToTrashConfirm(String name) => '$name se premješta u .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name se trajno briše';
   @override
   String get chooseDestination => 'Odaberi odredište';

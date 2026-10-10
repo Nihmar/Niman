@@ -1855,8 +1855,6 @@ final class SpanishStrings extends Strings {
   @override
   String get deletedMessage => 'Eliminado';
   @override
-  String deleteToTrashConfirm(String name) => '$name se moverá a .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name se eliminará permanentemente';
   @override

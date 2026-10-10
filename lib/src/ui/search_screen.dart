@@ -9,6 +9,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart' show displayNameOf;
@@ -350,6 +351,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final started = DateTime.now();
     final theme = Theme.of(context);
+    final dense = pointerDense(theme);
     final child = Column(
       children: [
         Padding(
@@ -367,13 +369,20 @@ final class _SearchScreenState extends State<SearchScreen> {
                   prefixIcon: Icon(
                     _inFieldMode ? Icons.filter_alt_outlined : Icons.search,
                   ),
-                  suffixIcon: _query.text.isEmpty
-                      ? null
-                      : IconButton(
-                          key: const Key('search-clear'),
-                          icon: const Icon(Icons.close),
-                          onPressed: _clearQuery,
-                        ),
+                  suffixIcon: dense || _query.text.isNotEmpty
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (dense) _modeToggle(),
+                            if (_query.text.isNotEmpty)
+                              IconButton(
+                                key: const Key('search-clear'),
+                                icon: const Icon(Icons.close),
+                                onPressed: _clearQuery,
+                              ),
+                          ],
+                        )
+                      : null,
                   border: const OutlineInputBorder(),
                   isDense: true,
                 ),
@@ -381,26 +390,29 @@ final class _SearchScreenState extends State<SearchScreen> {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  SegmentedButton<bool>(
-                    key: const Key('search-mode'),
-                    segments: [
-                      ButtonSegment(
-                        value: false,
-                        label: Text(AppStrings.searchModeWords),
+                  // Words or contains is a toggle inside the field where a
+                  // pointer aims (#712); a phone keeps the segmented row.
+                  if (!dense)
+                    SegmentedButton<bool>(
+                      key: const Key('search-mode'),
+                      segments: [
+                        ButtonSegment(
+                          value: false,
+                          label: Text(AppStrings.searchModeWords),
+                        ),
+                        ButtonSegment(
+                          value: true,
+                          label: Text(AppStrings.searchModeContains),
+                        ),
+                      ],
+                      selected: {_contains},
+                      onSelectionChanged: (selection) =>
+                          _setContains(selection.single),
+                      showSelectedIcon: false,
+                      style: const ButtonStyle(
+                        visualDensity: VisualDensity.compact,
                       ),
-                      ButtonSegment(
-                        value: true,
-                        label: Text(AppStrings.searchModeContains),
-                      ),
-                    ],
-                    selected: {_contains},
-                    onSelectionChanged: (selection) =>
-                        _setContains(selection.single),
-                    showSelectedIcon: false,
-                    style: const ButtonStyle(
-                      visualDensity: VisualDensity.compact,
                     ),
-                  ),
                   const Spacer(),
                   // Compact so the row stays inside a phone's width with
                   // the replace button showing: at standard density it
@@ -511,6 +523,19 @@ final class _SearchScreenState extends State<SearchScreen> {
     _highlight(theme, snippet),
     maxLines: 2,
     overflow: TextOverflow.ellipsis,
+  );
+
+  /// Words/contains as a toggle in the query field, where a pointer aims
+  /// (#712): selected means contains, unselected means whole words.
+  Widget _modeToggle() => IconButton(
+    key: const Key('search-mode-toggle'),
+    tooltip: _contains
+        ? AppStrings.searchModeContains
+        : AppStrings.searchModeWords,
+    isSelected: _contains,
+    visualDensity: VisualDensity.compact,
+    icon: const Icon(Icons.abc),
+    onPressed: () => _setContains(!_contains),
   );
 
   /// The result-row long-press menu (T-M3-10): the single-note replace.

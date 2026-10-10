@@ -1846,8 +1846,6 @@ final class ItalianStrings extends Strings {
   @override
   String get deletedMessage => 'Eliminato';
   @override
-  String deleteToTrashConfirm(String name) => '$name verrà spostato in .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name verrà eliminato definitivamente';
   @override

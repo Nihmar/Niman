@@ -7,6 +7,10 @@
 /// was up and the keyboard came back the moment it closed. Both are closed
 /// here: the mode is named, and on the touch platforms the focused field is
 /// dropped before the picker opens and again once it returns.
+///
+/// A desktop has no soft keyboard to keep down, and a mouse types a time
+/// into fields better than it turns a dial (#712): there the clock opens in
+/// its text-entry mode.
 library;
 
 import 'package:flutter/material.dart';
@@ -47,10 +51,13 @@ Future<TimeOfDay?> showClockPicker(
   final picked = await showTimePicker(
     context: context,
     initialTime: initialTime,
-    // The dial, never the text entry (#504). Named even though it matches
-    // today's default, so a changed default cannot start opening the keyboard.
-    // ignore: avoid_redundant_argument_values
-    initialEntryMode: TimePickerEntryMode.dial,
+    // The dial on a phone, where the text mode is the one that raises the
+    // keyboard (#504); HH:MM fields where a keyboard is already there
+    // (#712). Named even where it matches today's default, so a changed
+    // default cannot move it.
+    initialEntryMode: touch
+        ? TimePickerEntryMode.dial
+        : TimePickerEntryMode.input,
   );
   _dropKeyboard(touch: touch);
   return picked;

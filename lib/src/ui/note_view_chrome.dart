@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
@@ -385,7 +387,10 @@ final class NoteToolbarBar extends StatelessWidget {
           EditorToolbarButton(
             key: item.widgetKey,
             icon: item.icon,
-            tooltip: item.label,
+            tooltip: tooltipWithKeys(
+              item.label,
+              AppKeyMap.current.value.editorBindingOf(item),
+            ),
             active: active.contains(item),
             group: item.group,
             onPressed: actions[item]!,

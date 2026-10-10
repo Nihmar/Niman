@@ -8,7 +8,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/home/home_file.dart';
-import 'package:niman/src/home/home_layout.dart';
+import 'package:niman/src/library/device_home_carry.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/links/link_moves.dart';
@@ -124,20 +124,11 @@ final class NoteRelocator {
       if (await HomeFile(root).moved(from, to, isDir: isDir)) {
         hint(HomeFile.filePath, SyncOpKind.changed);
       }
-      await config.update((c) {
-        final device = c.deviceHome;
-        if (device == null) return c;
-        final layout = HomeLayout.fromJson(device);
-        if (layout == null) return c;
-        final next = layout.renamed(from, to, isDir: isDir);
-        return identical(next, layout)
-            ? c
-            : c.copyWith(deviceHome: next.toJson());
-      });
     } on Object catch (error) {
       const AppLogger(name: 'home')
           .warning('could not carry the Home past "$from" -> "$to": $error');
     }
+    await carryDeviceHome(config, from, to, isDir: isDir);
   }
 
   /// Hands the move to [carryOutside] (#506). The move is already done on

@@ -63,10 +63,7 @@ import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
-import 'package:niman/src/ui/dock/history_dock_pane.dart';
-import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
-import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
@@ -89,7 +86,6 @@ import 'package:niman/src/ui/ocr/ocr_job_status.dart';
 import 'package:niman/src/ui/ocr/ocr_notifier.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
-import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
@@ -102,6 +98,7 @@ import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
+import 'package:niman/src/ui/shell_dock.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_fab.dart';
@@ -123,6 +120,7 @@ import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
+import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
@@ -1299,7 +1297,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           onAnnotate: _annotate,
           marks: _annotations,
           ocr: _ocrActions,
-          fullScreen: _epubFullScreen,
+          fullScreen: _immersive.fullScreen,
         ),
       );
     }
@@ -1382,6 +1380,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The notes open in this library on this device (issue #23): for now
   /// the one the shell shows, kept current and kept for the next launch.
   late final ShellWorkspace _workspace = ShellWorkspace(widget.controller);
+
+  /// The right dock and the phone's panel sheets.
+  late final ShellDock _dock = ShellDock(
+    workspace: _workspace,
+    controller: widget.controller,
+    windowWidth: () => MediaQuery.sizeOf(context).width,
+    wide: () => _wide,
+    panelNote: () => _panelNote,
+    journalBrowser: (context) =>
+        _journalUi.browser(context, focusDay: _shownJournalDay),
+    onOpenHistory: (path) => unawaited(_openHistory(path)),
+    onOpenNoteFromLink: (path) => _openNoteFromLink(path, null),
+  );
 
   /// Back and forward through the notes shown (#700).
   late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
@@ -1686,8 +1697,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
     HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
-    _zen.addListener(_onZenChanged);
-    _epubFullScreen.addListener(_onEpubFullScreen);
+    _immersive.addListener(_onImmersiveChanged);
     unawaited(_workspace.load());
     // Library session events (every note op bumps the revision): the
     // pinned notes follow the files, so each one refreshes the note
@@ -1782,10 +1792,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     HardwareKeyboard.instance.removeHandler(_historyKeyUnfocused);
     // A library switch tears the shell down: the window it maximized goes
     // back as it was.
-    _zen.removeListener(_onZenChanged);
-    unawaited(_zen.leave());
-    _zen.dispose();
-    _epubFullScreen.dispose();
+    _immersive.removeListener(_onImmersiveChanged);
+    _immersive.dispose();
     _tabsListenable.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -2663,7 +2671,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       buildWideSlots: () => _wideSlots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
-      onLeaveZen: () => unawaited(_zen.leave()),
+      onLeaveZen: _immersive.leaveZen,
       zenPreviewVisible: _notePreview,
       onZenTogglePreview: _previewToggleVisible ? _togglePreview : null,
       leaveZenOnEsc: _leaveZenOnEsc,
@@ -2942,7 +2950,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       IconButton(
         key: const Key('open-trash'),
         tooltip: AppStrings.trashTitle,
-        icon: const Icon(Icons.delete),
+        icon: const Icon(Icons.delete_outline),
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute<void>(
@@ -2959,8 +2967,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// in full screen (#621) only leaves full screen: Back steps out of it
   /// first.
   void _closeFullScreenNote() {
-    if (_epubFullScreen.value != null) {
-      _epubFullScreen.value = null;
+    if (_immersive.fullScreen.value != null) {
+      _immersive.fullScreen.value = null;
       return;
     }
     setState(() {
@@ -3129,12 +3137,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// nearer wanted the key: the find bar and a selection take the first
   /// press, a dialog or a menu its own.
   late final Action<DismissIntent> _leaveZenOnEsc = LeaveZenAction(
-    _zen,
+    _immersive.zen,
     () => _inZen,
   );
 
-  /// Zen mode (#69), per window and never stored.
-  late final ZenMode _zen = ZenMode(widget.window);
+  /// Zen mode (#69) and the book read in full screen (#621).
+  late final ShellImmersive _immersive = ShellImmersive(
+    window: widget.window,
+    possible: () => _zenPossible,
+  );
 
   /// Whether Zen can show: a desktop window wide enough for the panes,
   /// on the notes, with a note open in them.
@@ -3145,9 +3156,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _workspace.value.activePath != null;
 
   /// Whether Zen is what is on screen.
-  bool get _inZen => _zen.on && _zenPossible;
+  bool get _inZen => _immersive.inZen;
 
-  void _toggleZen() => unawaited(_zen.toggle());
+  void _toggleZen() => unawaited(_immersive.toggleZen());
 
   /// Switches typewriter mode (#70) for the library: the note on screen
   /// follows at once, and the setting keeps it. Zen is left as it is —
@@ -3161,19 +3172,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     }());
   }
 
-  void _onZenChanged() {
+  /// Repaints on a Zen or full-screen change.
+  void _onImmersiveChanged() {
     if (mounted) setState(() {});
   }
 
   /// Leaves Zen once there is nothing left for it to show — the last tab
   /// closed, another place of the rail chosen, the window narrowed — so
   /// the chrome and the window size come back rather than wait.
-  void _leaveZenIfEmpty() {
-    if (!_zen.on || _zenPossible) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _zen.on && !_zenPossible) unawaited(_zen.leave());
-    });
-  }
+  void _leaveZenIfEmpty() => _immersive.leaveIfEmpty();
 
   /// What each command does, for the ones that can run here and now: the
   /// keys run them, and the command palette lists exactly these (#155).
@@ -3195,7 +3202,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.dockRoom => _dockRoom,
     CommandNeed.desktop => Platform.isLinux || Platform.isWindows,
     CommandNeed.notInZen => !_inZen,
-    CommandNeed.zenRoom => _zen.on || _zenPossible,
+    CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
@@ -3601,7 +3608,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           ? AppStrings.switchToSourceTooltip
           : AppStrings.switchToWysiwygTooltip,
     AppCommand.zenMode =>
-      _zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
+      _immersive.zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
     AppCommand.typewriterMode =>
       _editorSettings.typewriter
           ? AppStrings.typewriterOff
@@ -3702,11 +3709,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Whether the window has room for the right dock beside a note (#175):
   /// a desktop, a tablet, a phone in landscape — on the same rule.
-  bool get _dockRoom =>
-      MediaQuery.sizeOf(context).width >= RightDock.minWindowWidth;
+  bool get _dockRoom => _dock.room;
 
   /// Whether the dock shows: there is room, and it was not closed.
-  bool get _dockShown => _dockRoom && _workspace.value.dockOpen;
+  bool get _dockShown => _dock.shown;
 
   /// The note the dock and the sheets speak for: the focused pane's on a
   /// wide window, the one on screen on a phone.
@@ -3719,81 +3725,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// The right dock: the focused pane's note's outline, tags or history.
-  Widget _rightDock(LibrarySession controller) {
-    final w = _workspace.value;
-    final path = w.activePath;
-    return RightDock(
-      pane: w.dockPane,
-      onPane: (pane) =>
-          _workspace.controller.update((w) => w.withDock(pane: pane)),
-      onClose: () =>
-          _workspace.controller.update((w) => w.withDock(open: false)),
-      paneBuilder: (pane) => switch (pane) {
-        DockPane.outline => OutlineDockPane(note: _panelNote),
-        DockPane.tags => TagsDockPane(
-          note: _panelNote,
-          tags: controller.tagSource,
-          onOpenNote: _workspace.show,
-        ),
-        DockPane.history => HistoryDockPane(
-          ops: controller.ops,
-          path: path,
-          onOpenHistory: () {
-            if (path != null) unawaited(_openHistory(path));
-          },
-        ),
-        DockPane.journal => _journalUi.browser(
-          context,
-          focusDay: _shownJournalDay,
-        ),
-      },
-    );
-  }
+  Widget _rightDock(LibrarySession controller) => _dock.build(context);
 
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
-  void _toggleDock() =>
-      _workspace.controller.update((w) => w.withDock(open: !w.dockOpen));
+  void _toggleDock() => _dock.toggleOpen();
 
   /// The note row's dock button, where the window has room for a dock.
-  Widget _dockToggle() => IconButton(
-    key: const Key('dock-toggle'),
-    tooltip: AppStrings.sidePanelTooltip,
-    isSelected: _workspace.value.dockOpen,
-    icon: const Icon(Icons.view_sidebar_outlined),
-    selectedIcon: const Icon(Icons.view_sidebar),
-    onPressed: _toggleDock,
-  );
+  Widget _dockToggle() => _dock.toggle();
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
   /// sheet (the phone's way to the same three, #175).
-  Future<void> _showPanel(DockPane pane) async {
-    if (_wide && _dockRoom) {
-      _workspace.controller.update((w) => w.withDock(open: true, pane: pane));
-      return;
-    }
-    final note = _panelNote;
-    if (note == null) return;
-    if (pane == DockPane.outline) {
-      final line = await showOutlineSheet(context, entries: note.outline.value);
-      if (line != null) note.jumpToHeading(line);
-      return;
-    }
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheet) => SizedBox(
-        height: MediaQuery.sizeOf(sheet).height * 0.5,
-        child: TagsDockPane(
-          note: note,
-          tags: widget.controller.tagSource,
-          onOpenNote: (path) {
-            Navigator.pop(sheet);
-            _openNoteFromLink(path, null);
-          },
-        ),
-      ),
-    );
-  }
+  Future<void> _showPanel(DockPane pane) => _dock.showPanel(context, pane);
 
   /// The phone's one note view, so its sheets reach its outline.
   final GlobalKey _phoneNoteKey = GlobalKey();
@@ -3918,7 +3860,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             onEditEpubLook: () => _editEpubLook(controller),
             onEpubTextScale: (scale) =>
                 unawaited(keepEpubTextScale(controller, scale)),
-            epubFullScreen: _epubFullScreen,
+            epubFullScreen: _immersive.fullScreen,
           ),
         ),
       ),
@@ -3926,24 +3868,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     return _workspace.value.panes[pane].activeTab == null
         ? listener
         : TourTarget(id: TourTargets.note, child: listener);
-  }
-
-  /// Which book is read in full screen (#621): its pane, or null.
-  final ValueNotifier<Object?> _epubFullScreen = ValueNotifier<Object?>(null);
-
-  /// Takes the screen for the book read in full screen, or gives it back:
-  /// the window on the desktops, the system bars on Android.
-  void _onEpubFullScreen() {
-    final on = _epubFullScreen.value != null;
-    if (Platform.isAndroid) {
-      unawaited(
-        SystemChrome.setEnabledSystemUIMode(
-          on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
-        ),
-      );
-    } else {
-      unawaited(widget.window.setFullScreen(on: on));
-    }
   }
 
   /// Opens the sheet that sets how the books look (#280).
@@ -4203,6 +4127,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Runs the create flow behind a tree-footer menu entry.
   void _onNewItem(NewShellItem item) {
     switch (item) {
+      case NewShellItem.journal:
+        unawaited(_journalFlow.openToday(context));
       case NewShellItem.note:
         unawaited(_createFlow.createNote(context));
       case NewShellItem.listNote:
@@ -4213,6 +4139,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unawaited(_createFlow.createSlidesNote(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
+      case NewShellItem.captureWebPage:
+        unawaited(_captureFlow.capture(context));
       case NewShellItem.folder:
         unawaited(_createFlow.createFolder(context));
     }

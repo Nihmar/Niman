@@ -176,10 +176,44 @@ void main() {
       expect(await numbers('Deep/Down/b.md'), [1]);
       expect(await numbers('a.md'), isEmpty);
       expect(await ops.find('Deep/Down/b.md'), isNotNull);
-      await expectLater(
-        ops.syncMove('a.md', 'x.md'),
-        throwsA(isA<FileSystemException>()),
-      );
     });
+
+    test(
+      'syncMove throws a FileSystemException for a gone source (#714)',
+      () async {
+        await expectLater(
+          ops.syncMove('a.md', 'x.md'),
+          throwsA(
+            isA<FileSystemException>().having(
+              (e) => e.message,
+              'message',
+              'Nothing to move',
+            ),
+          ),
+        );
+        expect(File(p.join(root.path, 'x.md')).existsSync(), isFalse);
+      },
+    );
+
+    test(
+      'syncMove throws a FileSystemException for a taken target (#714)',
+      () async {
+        await ops.saveNote('a.md', 'one');
+        await ops.saveNote('b.md', 'two');
+        await ops.writer.indexed;
+        await expectLater(
+          ops.syncMove('a.md', 'b.md'),
+          throwsA(
+            isA<FileSystemException>().having(
+              (e) => e.message,
+              'message',
+              'Already taken',
+            ),
+          ),
+        );
+        expect(await ops.readNote('a.md'), 'one');
+        expect(await ops.readNote('b.md'), 'two');
+      },
+    );
   });
 }

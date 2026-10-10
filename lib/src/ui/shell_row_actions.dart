@@ -236,8 +236,10 @@ final class ShellRowActions {
     onMoved(path, row.path);
   });
 
-  /// Deletes [path] after asking, into the trash or for good depending on
-  /// the library's trash setting — which is also what the question says.
+  /// Deletes [path], into the trash or for good depending on the
+  /// library's trash setting. A move to the trash needs no question —
+  /// the snackbar's Undo takes it back — while a permanent delete still
+  /// asks (#712).
   Future<void> delete(BuildContext context, [String? path]) async {
     final sel = path ?? selectedPath();
     if (sel == null) return;
@@ -246,28 +248,26 @@ final class ShellRowActions {
     final trash = await ops.trashEnabled;
     if (!context.mounted) return;
     final name = p.basename(sel);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppStrings.actionDelete),
-        content: Text(
-          trash
-              ? AppStrings.deleteToTrashConfirm(name)
-              : AppStrings.deleteForeverConfirm(name),
+    if (!trash) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(AppStrings.actionDelete),
+          content: Text(AppStrings.deleteForeverConfirm(name)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppStrings.actionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(AppStrings.actionDelete),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.actionDelete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
+      );
+      if (confirmed != true) return;
+    }
     await guard(() async {
       await ops.delete(sel);
       onDeleted(sel);

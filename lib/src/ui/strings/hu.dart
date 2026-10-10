@@ -1837,8 +1837,6 @@ final class HungarianStrings extends Strings {
   @override
   String get deletedMessage => 'Törölve';
   @override
-  String deleteToTrashConfirm(String name) => '$name a .trash/ mappába kerül';
-  @override
   String deleteForeverConfirm(String name) => '$name véglegesen törlődik';
   @override
   String get chooseDestination => 'Cél kiválasztása';

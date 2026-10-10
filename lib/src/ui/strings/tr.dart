@@ -1810,9 +1810,6 @@ final class TurkishStrings extends Strings {
   @override
   String get deletedMessage => 'Silindi';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name .trash/ klasörüne taşınacak';
-  @override
   String deleteForeverConfirm(String name) => '$name kalıcı olarak silinecek';
   @override
   String get chooseDestination => 'Hedefi seç';

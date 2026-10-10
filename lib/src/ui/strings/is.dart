@@ -1823,8 +1823,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get deletedMessage => 'Eytt';
   @override
-  String deleteToTrashConfirm(String name) => '$name verður fært í .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name verður varanlega eytt';
   @override
   String get chooseDestination => 'Velja áfangastað';

@@ -1819,9 +1819,6 @@ final class LatvianStrings extends Strings {
   @override
   String get deletedMessage => 'Dzēsts';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name tiks pārvietots uz .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name tiks neatgriezeniski dzēsts';
   @override

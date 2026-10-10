@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// A command the shell can run from the keyboard.
@@ -416,6 +417,14 @@ String describeActivator(ShortcutActivator activation) {
     if (activation.shift) 'Shift',
     keyName(activation.trigger),
   ].join('+');
+}
+
+/// [label], with the key that runs it when [keys] names one and a
+/// keyboard is there to press it (#712): a tooltip that only repeats the
+/// icon teaches nothing.
+String tooltipWithKeys(String label, SingleActivator? keys) {
+  if (keys == null || !KeyboardPresence.shared.attached) return label;
+  return '$label (${describeActivator(keys)})';
 }
 
 /// Whether the platform's own shortcut modifier is Meta rather than

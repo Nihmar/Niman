@@ -137,15 +137,19 @@ void main() {
   test(
     'an entry past the byte budget is refused, and nothing is written',
     () async {
-      // The guard reads the expansion the entries declare, not the archive's
-      // size: this one declares 2 GiB while the zip holds a handful of bytes,
-      // the shape a zip bomb has. The old import inflated it whole (#382).
-      final archive = Archive()
-        ..add(
-          ArchiveFile.string('$workspace/Big ${id(1)}.md', 'x')..size = 2 << 30,
-        );
+      // The guard reads the expansion the central directory declares, not
+      // the archive's size: this one declares 2 GiB while the entry holds a
+      // handful of bytes, the shape a zip bomb has. Built by hand rather
+      // than by the encoder, whose handling of a lying `size` the package
+      // may change under it (#382).
       final source = File(p.join(tmp.path, 'Export ${id(99)}.zip'))
-        ..writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+        ..writeAsBytesSync(
+          rawDeflateZip(
+            '$workspace/Big ${id(1)}.md',
+            storedBlock(const [0x78]),
+            declared: 2 << 30,
+          ),
+        );
 
       await expectLater(
         importNotionZip(source: source.path, libraryRoot: library.path),

@@ -1829,9 +1829,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get deletedMessage => 'Выдалена';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name будзе перамешчана ў .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name будзе канчаткова выдалена';
   @override
   String get chooseDestination => 'Абраць месца';

@@ -1807,8 +1807,6 @@ final class EnglishStrings extends Strings {
   @override
   String get deletedMessage => 'Deleted';
   @override
-  String deleteToTrashConfirm(String name) => '$name will be moved to .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name will be permanently deleted';
   @override

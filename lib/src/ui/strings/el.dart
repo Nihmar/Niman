@@ -1885,9 +1885,6 @@ final class GreekStrings extends Strings {
   @override
   String get deletedMessage => 'Διαγράφηκε';
   @override
-  String deleteToTrashConfirm(String name) =>
-      'Το $name θα μεταφερθεί στο .trash/';
-  @override
   String deleteForeverConfirm(String name) => 'Το $name θα διαγραφεί μόνιμα';
   @override
   String get chooseDestination => 'Επιλογή προορισμού';
