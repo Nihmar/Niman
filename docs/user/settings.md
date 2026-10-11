@@ -174,8 +174,8 @@ tray* (default on: the window's × hides Niman and leaves it running).
 The app's colors have their own area: **Settings → Themes**. Brightness —
 day, night, or whatever the device says — is its first row, and under it
 sit the themes, each with its colors in front of you: the palettes Niman
-ships (System, Niman, Catppuccin, Solarized, Gruvbox) and the themes of
-your own.
+ships (System, Niman, Catppuccin, Solarized, Gruvbox, Sepia) and the
+themes of your own.
 
 Making one, editing its colors, renaming it, deleting it, exporting it
 into a `.json` file and importing one back are all there. The whole story

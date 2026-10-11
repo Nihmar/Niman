@@ -257,6 +257,9 @@ final class AppStrings {
   static String get themePaletteGruvbox => 'Gruvbox';
   static String get themePaletteNiman => 'Niman';
 
+  /// Sepia is the color's own name in every language the app speaks.
+  static String get themePaletteSepia => 'Sepia';
+
   // Settings: text size (T-M6-12).
   static String get uiTextScaleTitle => _s.uiTextScaleTitle;
   static String get uiTextScaleSubtitle => _s.uiTextScaleSubtitle;

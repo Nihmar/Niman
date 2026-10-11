@@ -53,6 +53,9 @@ enum AppPalette {
   /// Gruvbox — the medium light and dark variants.
   gruvbox('gruvbox'),
 
+  /// Sepia — warm paper by day, a dimmed brown at night.
+  sepia('sepia'),
+
   /// Niman — the app's own colors, taken from the logo.
   niman('niman');
 

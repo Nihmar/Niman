@@ -21,6 +21,7 @@ import 'package:niman/src/ui/theme/catppuccin.dart';
 import 'package:niman/src/ui/theme/gruvbox.dart';
 import 'package:niman/src/ui/theme/niman.dart';
 import 'package:niman/src/ui/theme/scheme.dart';
+import 'package:niman/src/ui/theme/sepia.dart';
 import 'package:niman/src/ui/theme/solarized.dart';
 
 /// The seed the app has shipped since M0, and what the `system` palette
@@ -141,6 +142,11 @@ PaletteColors _builtin(AppPalette palette, Brightness brightness) {
     AppPalette.gruvbox => _mapped(
       gruvboxTokens(brightness),
       gruvboxSyntax(brightness),
+      brightness,
+    ),
+    AppPalette.sepia => _mapped(
+      sepiaTokens(brightness),
+      sepiaSyntax(brightness),
       brightness,
     ),
     AppPalette.niman => _mapped(
