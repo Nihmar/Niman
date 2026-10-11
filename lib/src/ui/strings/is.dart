@@ -453,6 +453,9 @@ final class IcelandicStrings extends Strings {
   String get audioRecordingPaused => 'Í hléi';
   @override
   String get audioSavingRecording => 'Vistar…';
+
+  @override
+  String get audioSlideUpToLock => 'Renndu upp til að læsa';
   @override
   String get audioPlayFailed => 'Ekki tókst að spila hljóðið';
 

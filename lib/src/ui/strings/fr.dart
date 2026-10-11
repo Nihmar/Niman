@@ -463,6 +463,10 @@ final class FrenchStrings extends Strings {
   String get audioRecordingPaused => 'En pause';
   @override
   String get audioSavingRecording => 'Enregistrement du fichier…';
+
+  @override
+  String get audioSlideUpToLock =>
+      'Faites glisser vers le haut pour verrouiller';
   @override
   String get audioPlayFailed => 'Impossible de lire l’audio';
 

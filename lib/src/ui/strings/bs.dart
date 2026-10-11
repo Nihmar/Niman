@@ -459,6 +459,9 @@ final class BosnianStrings extends Strings {
   String get audioRecordingPaused => 'Pauzirano';
   @override
   String get audioSavingRecording => 'Spremanje…';
+
+  @override
+  String get audioSlideUpToLock => 'Povucite prema gore za zaključavanje';
   @override
   String get audioPlayFailed => 'Audio se nije mogao pustiti';
 

@@ -462,6 +462,9 @@ final class RomanianStrings extends Strings {
   String get audioRecordingPaused => 'În pauză';
   @override
   String get audioSavingRecording => 'Se salvează…';
+
+  @override
+  String get audioSlideUpToLock => 'Glisează în sus pentru a bloca';
   @override
   String get audioPlayFailed => 'Audio-ul nu a putut fi redat';
 

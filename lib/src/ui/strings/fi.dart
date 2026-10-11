@@ -455,6 +455,9 @@ final class FinnishStrings extends Strings {
   String get audioRecordingPaused => 'Tauolla';
   @override
   String get audioSavingRecording => 'Tallennetaan…';
+
+  @override
+  String get audioSlideUpToLock => 'Liu’uta ylös lukitaksesi';
   @override
   String get audioPlayFailed => 'Äänen toisto ei onnistunut';
 

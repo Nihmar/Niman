@@ -455,6 +455,9 @@ final class LithuanianStrings extends Strings {
   String get audioRecordingPaused => 'Pristabdyta';
   @override
   String get audioSavingRecording => 'Išsaugoma…';
+
+  @override
+  String get audioSlideUpToLock => 'Perbraukite aukštyn, kad užrakintumėte';
   @override
   String get audioPlayFailed => 'Nepavyko paleisti garso';
 

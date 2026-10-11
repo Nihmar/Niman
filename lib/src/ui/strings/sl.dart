@@ -458,6 +458,9 @@ final class SlovenianStrings extends Strings {
   String get audioRecordingPaused => 'Začasno ustavljeno';
   @override
   String get audioSavingRecording => 'Shranjevanje …';
+
+  @override
+  String get audioSlideUpToLock => 'Povlecite navzgor za zaklep';
   @override
   String get audioPlayFailed => 'Zvoka ni bilo mogoče predvajati';
 

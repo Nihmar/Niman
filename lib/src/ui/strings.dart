@@ -391,6 +391,8 @@ final class AppStrings {
   static String get audioResumeRecording => _s.audioResumeRecording;
   static String get audioRecordingPaused => _s.audioRecordingPaused;
   static String get audioSavingRecording => _s.audioSavingRecording;
+
+  static String get audioSlideUpToLock => _s.audioSlideUpToLock;
   static String get audioPlayFailed => _s.audioPlayFailed;
 
   // Launcher quick actions (T-SC-02), in the order they are published.

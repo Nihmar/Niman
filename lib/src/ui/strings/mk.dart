@@ -459,6 +459,9 @@ final class MacedonianStrings extends Strings {
   String get audioRecordingPaused => 'Паузирано';
   @override
   String get audioSavingRecording => 'Се зачувува…';
+
+  @override
+  String get audioSlideUpToLock => 'Лизнете нагоре за заклучување';
   @override
   String get audioPlayFailed => 'Аудиото не можеше да се пушти';
 

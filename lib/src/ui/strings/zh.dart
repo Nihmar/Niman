@@ -424,6 +424,9 @@ final class ChineseStrings extends Strings {
   String get audioRecordingPaused => '已暂停';
   @override
   String get audioSavingRecording => '正在保存…';
+
+  @override
+  String get audioSlideUpToLock => '上滑锁定';
   @override
   String get audioPlayFailed => '无法播放此音频';
 

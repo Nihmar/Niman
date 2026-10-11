@@ -458,6 +458,9 @@ final class PortugueseStrings extends Strings {
   String get audioRecordingPaused => 'Em pausa';
   @override
   String get audioSavingRecording => 'Salvando…';
+
+  @override
+  String get audioSlideUpToLock => 'Deslize para cima para bloquear';
   @override
   String get audioPlayFailed => 'Não foi possível reproduzir o áudio';
 

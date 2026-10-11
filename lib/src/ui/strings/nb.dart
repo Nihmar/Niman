@@ -454,6 +454,9 @@ final class NorwegianStrings extends Strings {
   String get audioRecordingPaused => 'Pauset';
   @override
   String get audioSavingRecording => 'Lagrer…';
+
+  @override
+  String get audioSlideUpToLock => 'Skyv opp for å låse';
   @override
   String get audioPlayFailed => 'Lyden kunne ikke spilles av';
 

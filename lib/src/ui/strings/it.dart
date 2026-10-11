@@ -463,6 +463,9 @@ final class ItalianStrings extends Strings {
   String get audioRecordingPaused => 'In pausa';
   @override
   String get audioSavingRecording => 'Salvataggio…';
+
+  @override
+  String get audioSlideUpToLock => 'Scorri su per bloccare';
   @override
   String get audioPlayFailed => 'Impossibile riprodurre l’audio';
 

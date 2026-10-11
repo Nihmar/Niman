@@ -459,6 +459,9 @@ final class DutchStrings extends Strings {
   String get audioRecordingPaused => 'Gepauzeerd';
   @override
   String get audioSavingRecording => 'Opslaan…';
+
+  @override
+  String get audioSlideUpToLock => 'Veeg omhoog om te vergrendelen';
   @override
   String get audioPlayFailed => 'Audio kon niet worden afgespeeld';
 

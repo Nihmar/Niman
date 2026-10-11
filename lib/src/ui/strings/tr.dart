@@ -448,6 +448,9 @@ final class TurkishStrings extends Strings {
   String get audioRecordingPaused => 'Duraklatıldı';
   @override
   String get audioSavingRecording => 'Kaydediliyor…';
+
+  @override
+  String get audioSlideUpToLock => 'Kilitlemek için yukarı kaydırın';
   @override
   String get audioPlayFailed => 'Ses çalınamadı';
 

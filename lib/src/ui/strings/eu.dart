@@ -453,6 +453,9 @@ final class BasqueStrings extends Strings {
   String get audioRecordingPaused => 'Pausatuta';
   @override
   String get audioSavingRecording => 'Gordetzen…';
+
+  @override
+  String get audioSlideUpToLock => 'Irristatu gora blokeatzeko';
   @override
   String get audioPlayFailed => 'Ezin izan da audioa erreproduzitu';
 
