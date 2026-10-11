@@ -747,6 +747,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _visitedTabs.add(tab);
         _treeVisible = true;
         _fab.collapse();
+        // A sidebar view has no island of its own: picking Search shows
+        // the sidebar island it lives in (#712).
+        if (!narrow && tab == ShellTab.search) _sidebarVisible = true;
         // Leaving any open note: the tabs show at once (issue #4).
         _noteClosed();
       });
@@ -2811,9 +2814,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _wideSlot(visible: _filesSlotVisible, child: _wideBody(controller)),
       // One slot per remaining tab, in tab order so a slot's identity
       // never moves. Unvisited tabs build the empty placeholder
-      // `_tabBodyFor` returns.
+      // `_tabBodyFor` returns. Search has no slot on a wide window: it
+      // lives in the sidebar island (#712).
       for (final tab in ShellTab.values)
-        if (tab != ShellTab.files && tab != ShellTab.quickNote)
+        if (tab != ShellTab.files &&
+            tab != ShellTab.quickNote &&
+            !(tab == ShellTab.search && _wide))
           _wideSlot(
             visible: _tab == tab,
             retainLayout: tab == ShellTab.search,
@@ -2828,11 +2834,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ];
   }
 
-  /// Whether the wide layout shows the tree and the panes: Files, or an
-  /// open quick note, which lives in the panes.
+  /// Whether the wide layout shows the tree and the panes: Files, an open
+  /// quick note, which lives in the panes, or the search sidebar, which
+  /// swaps what the left island shows and leaves the panes in place
+  /// (#712).
   bool get _filesSlotVisible =>
       _tab == ShellTab.files ||
+      (_wide && _tab == ShellTab.search) ||
       (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
+
+  /// Whether the left island shows the search in place of the tree
+  /// (#712): Search is a sidebar view on a wide window, so the panes and
+  /// the dock stay beside it. A phone keeps Search as a destination.
+  bool get _sidebarShowsSearch => _wide && _tab == ShellTab.search;
 
   /// A tab's screen on the wide layout: one island on the base, as the
   /// tree, the panes and the dock are on Files.
@@ -3629,12 +3643,36 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               width: _editorSettings.treeWidth,
               child: Island(
                 key: const Key('tree-island'),
-                child: Column(
+                // Both stay mounted across a sidebar switch (#712): the
+                // search keeps its query and results, and the tree its
+                // expansion and scroll, as they did when each had a slot
+                // of its own. The search keeps its layout too — it is the
+                // one whose show-layout costs frames (T-TS-10).
+                child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    Expanded(child: _treePane(controller)),
-                    if (controller.sync case final sync?)
-                      SyncProgressStrip(sync: sync),
-                    _treeFooter(controller),
+                    Offstage(
+                      offstage: _sidebarShowsSearch,
+                      child: Column(
+                        children: [
+                          Expanded(child: _treePane(controller)),
+                          if (controller.sync case final sync?)
+                            SyncProgressStrip(sync: sync),
+                          _treeFooter(controller),
+                        ],
+                      ),
+                    ),
+                    // Built on the first visit, as its slot was: the
+                    // search source (a background connection) is not
+                    // opened for a library no one searched in.
+                    if (_visitedTabs.contains(ShellTab.search))
+                      Visibility(
+                        visible: _sidebarShowsSearch,
+                        maintainState: true,
+                        maintainAnimation: true,
+                        maintainSize: true,
+                        child: _searchSlot(controller),
+                      ),
                   ],
                 ),
               ),
@@ -4173,7 +4211,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       TargetPlatform.linux || TargetPlatform.windows => true,
       _ => false,
     };
-    if (!desktop || !_wide || !_sidebarVisible || !_filesSlotVisible) {
+    // Renaming happens in the tree's row: the sidebar has to be showing
+    // it, not the search view it may hold instead (#712).
+    if (!desktop ||
+        !_wide ||
+        !_sidebarVisible ||
+        !_filesSlotVisible ||
+        _sidebarShowsSearch) {
       return false;
     }
     setState(() {

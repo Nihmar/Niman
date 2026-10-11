@@ -351,106 +351,116 @@ final class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final started = DateTime.now();
     final theme = Theme.of(context);
-    final dense = pointerDense(theme);
-    final child = Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-          child: Column(
-            children: [
-              TextField(
-                key: const Key('search-query'),
-                controller: _query,
-                textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  hintText: AppStrings.searchHint,
-                  // The icon says which of the two the box is doing, so a
-                  // filter that matched is visible before the results are.
-                  prefixIcon: Icon(
-                    _inFieldMode ? Icons.filter_alt_outlined : Icons.search,
-                  ),
-                  suffixIcon: dense || _query.text.isNotEmpty
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (dense) _modeToggle(),
-                            if (_query.text.isNotEmpty)
-                              IconButton(
-                                key: const Key('search-clear'),
-                                icon: const Icon(Icons.close),
-                                onPressed: _clearQuery,
-                              ),
-                          ],
-                        )
-                      : null,
-                  border: const OutlineInputBorder(),
-                  isDense: true,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // The field toggles where the platform is a pointer, and where
+        // the pane is too narrow for the segmented row — the sidebar
+        // island is, at around 300 px (#712).
+        final dense = pointerDense(theme) || constraints.maxWidth < 360;
+        final child = Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+              child: Column(
                 children: [
-                  // Words or contains is a toggle inside the field where a
-                  // pointer aims (#712); a phone keeps the segmented row.
-                  if (!dense)
-                    SegmentedButton<bool>(
-                      key: const Key('search-mode'),
-                      segments: [
-                        ButtonSegment(
-                          value: false,
-                          label: Text(AppStrings.searchModeWords),
+                  TextField(
+                    key: const Key('search-query'),
+                    controller: _query,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: AppStrings.searchHint,
+                      // The icon says which of the two the box is doing, so a
+                      // filter that matched is visible before the results are.
+                      prefixIcon: Icon(
+                        _inFieldMode ? Icons.filter_alt_outlined : Icons.search,
+                      ),
+                      suffixIcon: dense || _query.text.isNotEmpty
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (dense) _modeToggle(),
+                                if (_query.text.isNotEmpty)
+                                  IconButton(
+                                    key: const Key('search-clear'),
+                                    icon: const Icon(Icons.close),
+                                    onPressed: _clearQuery,
+                                  ),
+                              ],
+                            )
+                          : null,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      // Words or contains is a toggle inside the field where a
+                      // pointer aims (#712); a phone keeps the segmented row.
+                      if (!dense)
+                        SegmentedButton<bool>(
+                          key: const Key('search-mode'),
+                          segments: [
+                            ButtonSegment(
+                              value: false,
+                              label: Text(AppStrings.searchModeWords),
+                            ),
+                            ButtonSegment(
+                              value: true,
+                              label: Text(AppStrings.searchModeContains),
+                            ),
+                          ],
+                          selected: {_contains},
+                          onSelectionChanged: (selection) =>
+                              _setContains(selection.single),
+                          showSelectedIcon: false,
+                          style: const ButtonStyle(
+                            visualDensity: VisualDensity.compact,
+                          ),
                         ),
-                        ButtonSegment(
-                          value: true,
-                          label: Text(AppStrings.searchModeContains),
+                      const Spacer(),
+                      // Compact so the row stays inside a phone's width with
+                      // the replace button showing: at standard density it
+                      // overflows by a few pixels at 390 px.
+                      if (!_contains && !_inFieldMode && _hits.isNotEmpty)
+                        IconButton(
+                          key: const Key('search-replace'),
+                          tooltip: AppStrings.replaceTooltip,
+                          icon: const Icon(Icons.find_replace),
+                          style: const ButtonStyle(
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          onPressed: _openReplaceAll,
                         ),
-                      ],
-                      selected: {_contains},
-                      onSelectionChanged: (selection) =>
-                          _setContains(selection.single),
-                      showSelectedIcon: false,
-                      style: const ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ),
-                  const Spacer(),
-                  // Compact so the row stays inside a phone's width with
-                  // the replace button showing: at standard density it
-                  // overflows by a few pixels at 390 px.
-                  if (!_contains && !_inFieldMode && _hits.isNotEmpty)
-                    IconButton(
-                      key: const Key('search-replace'),
-                      tooltip: AppStrings.replaceTooltip,
-                      icon: const Icon(Icons.find_replace),
-                      style: const ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      onPressed: _openReplaceAll,
-                    ),
-                  if (widget.onOpenTags != null)
-                    IconButton(
-                      key: const Key('open-tags'),
-                      tooltip: AppStrings.openTagsTooltip,
-                      icon: const Icon(Icons.sell_outlined),
-                      style: const ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      onPressed: widget.onOpenTags,
-                    ),
+                      if (widget.onOpenTags != null)
+                        IconButton(
+                          key: const Key('open-tags'),
+                          tooltip: AppStrings.openTagsTooltip,
+                          icon: const Icon(Icons.sell_outlined),
+                          style: const ButtonStyle(
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          onPressed: widget.onOpenTags,
+                        ),
+                    ],
+                  ),
+                  if (_replaceMode) _replacePanel(theme),
                 ],
               ),
-              if (_replaceMode) _replacePanel(theme),
-            ],
-          ),
-        ),
-        Expanded(
-          child: _replaceMode ? _replacePreviewList(theme) : _results(theme),
-        ),
-      ],
+            ),
+            Expanded(
+              child: _replaceMode
+                  ? _replacePreviewList(theme)
+                  : _results(theme),
+            ),
+          ],
+        );
+        const AppLogger(name: 'search.ui').debug(
+          'build: ${DateTime.now().difference(started).inMilliseconds}ms',
+        );
+        return child;
+      },
     );
-    const AppLogger(name: 'search.ui')
-        .debug('build: ${DateTime.now().difference(started).inMilliseconds}ms');
-    return child;
   }
 
   Widget _results(ThemeData theme) {

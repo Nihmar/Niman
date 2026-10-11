@@ -393,7 +393,7 @@ void main() {
     expect(tester.state(find.byType(NoteView)), same(view));
   });
 
-  testWidgets('wide: opening a search result flips the rail to files', (
+  testWidgets('wide: a search result opens beside the results (#712)', (
     tester,
   ) async {
     await pumpWide(tester);
@@ -417,11 +417,28 @@ void main() {
     await tester.tap(find.byKey(const Key('search-hit-alpha.md')));
     await settle(tester);
 
-    // The rail is back on Files: the search pane is kept alive but no
-    // longer on screen (the wide bodies stay mounted, T-PP-22), the tree
-    // is showing and the note is open in the detail pane next to it.
+    // Search is a sidebar view on a wide window: the rail stays on it, the
+    // results stay on screen, and the note opens in the detail pane beside
+    // them. The tree is not on screen.
+    expect(railIndex(tester), ShellTab.search);
+    expect(find.byType(SearchScreen).hitTestable(), findsOne);
+    expect(find.byKey(const Key('panes-island')), findsOne);
+    expect(noteRow('alpha.md'), findsNothing);
+    expect(controller.workspace.activePath, 'alpha.md');
+  });
+
+  testWidgets('wide: Files brings the tree back from the search sidebar', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('search'));
+    await settle(tester);
+    expect(find.byType(SearchScreen), findsOne);
+    expect(find.byKey(const Key('tree-footer')), findsNothing);
+
+    await tester.tap(railDest('files'));
+    await settle(tester);
     expect(find.byType(SearchScreen).hitTestable(), findsNothing);
-    expect(noteRow('alpha.md'), findsOne);
-    expect(railIndex(tester), ShellTab.files);
+    expect(find.byKey(const Key('tree-footer')), findsOne);
   });
 }
