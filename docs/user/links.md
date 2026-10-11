@@ -10,10 +10,13 @@ Forms (target, heading, alias combine freely):
 - `[[note#heading|alias]]`
 - `[[#heading]]` / `[[|alias]]` — the current note
 
-Click (or Ctrl+click in the source editor) to navigate. What the editor
-highlights, the preview links, and the indexer records are the same set:
-links inside code fences, math blocks, inline code, and frontmatter are
-never links, everywhere.
+Click (or Ctrl+click in the source editor) to navigate. While the
+opening modifier is held over a link the pointer becomes a hand, so the
+click that would open it is announced before it is made; without the
+modifier it stays the text caret, a plain click placing the caret. What
+the editor highlights, the preview links, and the indexer records are
+the same set: links inside code fences, math blocks, inline code, and
+frontmatter are never links, everywhere.
 
 While a link is typed, a small panel lists what can go there, in both
 editors, under the caret. Only typing opens it: a caret moved into a link
