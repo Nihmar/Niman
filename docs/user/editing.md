@@ -336,7 +336,9 @@ from the note's ⋮ menu, *Editor: Markdown cheatsheet* in the palette, or
 Settings, next to the changelog. Every example can be copied; opened from
 a note, it can also be inserted at the caret — one line where the caret
 is, several on lines of their own. On a phone an example's source and its
-look are stacked.
+look are stacked, and the cheatsheet is a page. On a desktop it is a
+floating window that stays open, so several examples can be inserted one
+after another without reopening it.
 
 One thing to know when a note came from somewhere else: **a list marker has
 to start a line.** `- c)` written inside a sentence — after a formula, or

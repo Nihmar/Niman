@@ -105,4 +105,40 @@ void main() {
     await tester.pump();
     expect(inserted, [cheatsheetEntries.first.source]);
   });
+
+  testWidgets('a pointer gets a window that stays open while inserting '
+      '(#712)', (tester) async {
+    final inserted = <String>[];
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        // Pointer-dense, as a desktop's theme is.
+        theme: ThemeData(visualDensity: VisualDensity.compact),
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                showMarkdownCheatsheet(context, onInsert: inserted.add),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('cheatsheet-window')), findsOne);
+    // The window carries the title: no app bar.
+    expect(find.byType(AppBar), findsNothing);
+
+    await tester.tap(find.byKey(const Key('cheat-headings-insert')));
+    await tester.pumpAndSettle();
+    expect(inserted, [cheatsheetEntries.first.source]);
+    expect(
+      find.byKey(const Key('cheatsheet-window')),
+      findsOne,
+      reason: 'the window stays open for the next example',
+    );
+  });
 }

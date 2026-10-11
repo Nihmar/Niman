@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_entries.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_example.dart';
+import 'package:niman/src/ui/floating_window.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
@@ -12,29 +14,47 @@ import 'package:niman/src/ui/tour/tour_targets.dart';
 /// Opens the cheatsheet over the app. [onInsert] puts an example in the
 /// open note — the page closes first, so the note is what the writer sees
 /// it land in — and is null when no note is open to take one.
+///
+/// On a desktop it is a floating window that stays open while examples are
+/// inserted one after another (#712); a phone keeps the page.
 Future<void> showMarkdownCheatsheet(
   BuildContext context, {
   ValueChanged<String>? onInsert,
-}) => Navigator.of(context).push(
-  MaterialPageRoute<void>(
-    builder: (context) => CheatsheetScreen(
-      onInsert: onInsert == null
-          ? null
-          : (source) {
-              Navigator.of(context).pop();
-              onInsert(source);
-            },
+}) {
+  if (pointerDense(Theme.of(context))) {
+    return showFloatingWindow(
+      context,
+      title: AppStrings.cheatsheetTitle,
+      panelKey: const Key('cheatsheet-window'),
+      builder: (context) =>
+          CheatsheetScreen(onInsert: onInsert, embedded: true),
+    );
+  }
+  return Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (context) => CheatsheetScreen(
+        onInsert: onInsert == null
+            ? null
+            : (source) {
+                Navigator.of(context).pop();
+                onInsert(source);
+              },
+      ),
     ),
-  ),
-);
+  );
+}
 
 /// The cheatsheet's page.
 final class CheatsheetScreen extends StatefulWidget {
   /// Creates the page.
-  const new({this.onInsert, super.key});
+  const new({this.onInsert, this.embedded = false, super.key});
 
   /// Puts an example in the open note; null when none is open.
   final ValueChanged<String>? onInsert;
+
+  /// Whether the page is drawn inside a floating window (#712): the
+  /// window's header carries the title, so no app bar is drawn.
+  final bool embedded;
 
   @override
   State<CheatsheetScreen> createState() => _CheatsheetScreenState();
@@ -46,33 +66,32 @@ final class _CheatsheetScreenState extends State<CheatsheetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(AppStrings.cheatsheetTitle)),
-      body: SafeArea(
-        child: TourTarget(
-          id: TourTargets.cheatsheet,
-          child: Center(
-            child: ConstrainedBox(
-              // A page to read, not a row of the window's full width.
-              constraints: const BoxConstraints(maxWidth: 1000),
-              child: ListView.separated(
-                key: const Key('cheatsheet'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                itemCount: cheatsheetEntries.length,
-                separatorBuilder: (context, _) => const Divider(),
-                itemBuilder: (context, index) => CheatsheetExample(
-                  entry: cheatsheetEntries[index],
-                  mathCache: _math,
-                  onInsert: widget.onInsert,
-                ),
+    final body = SafeArea(
+      child: TourTarget(
+        id: TourTargets.cheatsheet,
+        child: Center(
+          child: ConstrainedBox(
+            // A page to read, not a row of the window's full width.
+            constraints: const BoxConstraints(maxWidth: 1000),
+            child: ListView.separated(
+              key: const Key('cheatsheet'),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              itemCount: cheatsheetEntries.length,
+              separatorBuilder: (context, _) => const Divider(),
+              itemBuilder: (context, index) => CheatsheetExample(
+                entry: cheatsheetEntries[index],
+                mathCache: _math,
+                onInsert: widget.onInsert,
               ),
             ),
           ),
         ),
       ),
+    );
+    if (widget.embedded) return body;
+    return Scaffold(
+      appBar: AppBar(title: Text(AppStrings.cheatsheetTitle)),
+      body: body,
     );
   }
 }
