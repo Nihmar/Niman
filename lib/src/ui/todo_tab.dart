@@ -314,6 +314,7 @@ final class _TodoTabState extends State<TodoTab> {
                         onToggle: (checked) => _toggle(entry, checked),
                         onEdit: () => _edit(entry),
                         onShowMenu: () => _showRowMenu(entry),
+                        onShowMenuAt: (at) => _showRowMenuAt(entry, at),
                       ),
                     );
                   },
@@ -476,9 +477,66 @@ final class _TodoTabState extends State<TodoTab> {
         ),
       ),
     );
-    if (action == null || !mounted) {
-      return;
-    }
+    await _runRowMenu(entry, action);
+  }
+
+  /// Right-click menu (T-PP-20): the same two actions at the cursor, the
+  /// shape a pointer gets (#712).
+  Future<void> _showRowMenuAt(TodoEntry entry, Offset at) async {
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final action = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        at & const Size(1, 1),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        _menuItem(
+          key: const Key('todo-menu-edit'),
+          icon: Icons.edit_outlined,
+          label: AppStrings.todoEditAction,
+          value: 'edit',
+        ),
+        _menuItem(
+          key: const Key('todo-menu-delete'),
+          icon: Icons.delete_outline,
+          label: AppStrings.todoDeleteAction,
+          value: 'delete',
+          destructive: true,
+        ),
+      ],
+    );
+    await _runRowMenu(entry, action);
+  }
+
+  /// One entry of the cursor menu, its icon left of its label.
+  PopupMenuItem<String> _menuItem({
+    required Key key,
+    required IconData icon,
+    required String label,
+    required String value,
+    bool destructive = false,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final colour = destructive ? scheme.error : null;
+    return PopupMenuItem<String>(
+      key: key,
+      value: value,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 20, color: colour),
+          const SizedBox(width: 12),
+          Text(label, style: colour == null ? null : TextStyle(color: colour)),
+        ],
+      ),
+    );
+  }
+
+  /// Runs what either row menu answered.
+  Future<void> _runRowMenu(TodoEntry entry, String? action) async {
+    if (action == null || !mounted) return;
     switch (action) {
       case 'edit':
         await _edit(entry);
