@@ -2530,6 +2530,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     session: widget.controller,
     unsaved: widget.unsavedTracker,
     path: path,
+    window: widget.window,
     onRestored: () {
       if (!mounted || _selected != path) return;
       setState(() => _noteReloadToken++);
