@@ -136,7 +136,14 @@ void main() {
 
     shortcuts.emit(ShortcutAction.newTodo);
     await settle(tester);
-    expect(find.text(AppStrings.todoAddTitle), findsOneWidget);
+    // Scoped to the dialog: the pane's Add button says the same words.
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text(AppStrings.todoAddTitle),
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('todo-dialog-field')), findsOneWidget);
     await close();
   });
@@ -209,7 +216,14 @@ void main() {
     await openLibrary(tester, filePicker);
     await settle(tester);
 
-    expect(find.text(AppStrings.todoAddTitle), findsOneWidget);
+    // Scoped to the dialog: the pane's Add button says the same words.
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text(AppStrings.todoAddTitle),
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('todo-dialog-field')), findsOneWidget);
     await close();
   });

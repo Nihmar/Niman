@@ -17,6 +17,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/home/home_screen.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
@@ -187,7 +188,7 @@ void main() {
     expect(controller.root, '/other');
   });
 
-  testWidgets('wide: the rail todo shows the list inline, rail stays', (
+  testWidgets('wide: the rail todo opens a pane tab, tree and rail stay', (
     tester,
   ) async {
     await pumpWide(tester);
@@ -195,9 +196,67 @@ void main() {
     await tester.tap(railDest('todo'));
     await settle(tester);
 
+    Offstage contentPane(String name) =>
+        tester.widget<Offstage>(find.byKey(Key('content-pane-$name')));
+
+    // The Todo rail entry is a content destination (#712): the list is
+    // the pane's body, the tree and the rail stay, and the pinned tab
+    // carries a chip in the row above the panes.
     expect(find.byType(TodoTab), findsOne);
+    expect(contentPane('todo').offstage, isFalse);
     expect(find.byKey(const Key('shell-rail')), findsOne);
+    expect(find.byKey(const Key('tree-island')), findsOne);
+    expect(find.byKey(const Key('panes-island')), findsOne);
+    expect(find.byKey(const Key('content-tab-todo')), findsOne);
     expect(railIndex(tester), ShellTab.todo);
+
+    // Files brings the notes back; the chip stays and brings Todo back.
+    await tester.tap(railDest('files'));
+    await settle(tester);
+    expect(contentPane('todo').offstage, isTrue);
+    expect(find.byKey(const Key('content-tab-todo')), findsOne);
+    await tester.tap(find.byKey(const Key('content-tab-todo')));
+    await settle(tester);
+    expect(contentPane('todo').offstage, isFalse);
+    expect(railIndex(tester), ShellTab.todo);
+
+    // The ✕ closes it: no chip, Files on the rail, the tree in place.
+    await tester.tap(find.byKey(const Key('content-tab-close-todo')));
+    await settle(tester);
+    expect(find.byKey(const Key('content-tab-todo')), findsNothing);
+    expect(find.byKey(const Key('content-pane-todo')), findsNothing);
+    expect(railIndex(tester), ShellTab.files);
+    expect(find.byKey(const Key('tree-island')), findsOne);
+  });
+
+  testWidgets('wide: the rail home opens a pane tab, tree and rail stay', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+
+    await tester.tap(railDest('home'));
+    await settle(tester);
+
+    Offstage contentPane(String name) =>
+        tester.widget<Offstage>(find.byKey(Key('content-pane-$name')));
+
+    expect(find.byType(HomeScreen), findsOne);
+    expect(contentPane('home').offstage, isFalse);
+    expect(find.byKey(const Key('tree-island')), findsOne);
+    expect(find.byKey(const Key('panes-island')), findsOne);
+    expect(find.byKey(const Key('content-tab-home')), findsOne);
+    expect(railIndex(tester), ShellTab.home);
+
+    // A note opened under the content tab takes the pane back: the
+    // content hides, its chip stays.
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    expect(contentPane('home').offstage, isTrue);
+    expect(find.byType(NoteView), findsOne);
+    expect(find.byKey(const Key('content-tab-home')), findsOne);
+    expect(railIndex(tester), ShellTab.files);
   });
 
   // #202: a floating window over what was on screen, which it closes

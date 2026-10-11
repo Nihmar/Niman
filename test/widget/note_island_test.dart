@@ -202,15 +202,25 @@ void main() {
     expect(tester.getRect(panes).left, greaterThan(gap));
   });
 
-  testWidgets('a tab other than Files is one island too', (tester) async {
+  // #712: Todo is a content destination now, not an island of its own:
+  // it opens in the panes, and the tree and the dock stay where Files
+  // has them.
+  testWidgets('a content tab keeps the tree, the panes and the dock', (
+    tester,
+  ) async {
     await pumpAt(tester, size);
     await tester.tap(find.byKey(const Key('rail-todo')));
     await settle(tester);
-    final islands = find.byType(Island).hitTestable();
-    expect(islands, findsOne);
-    final rect = tester.getRect(islands);
-    expect(rect.left, ShellRail.width + 1 + gap);
-    expect(rect.right, size.width - gap);
+
+    expect(tree.hitTestable(), findsOne);
+    expect(panes.hitTestable(), findsOne);
+    expect(dock.hitTestable(), findsOne);
+    expect(
+      tester
+          .widget<Offstage>(find.byKey(const Key('content-pane-todo')))
+          .offstage,
+      isFalse,
+    );
   });
 
   testWidgets('the phone has no islands', (tester) async {

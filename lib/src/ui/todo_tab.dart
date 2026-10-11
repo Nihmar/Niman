@@ -104,41 +104,65 @@ final class _TodoTabState extends State<TodoTab> {
 
   @override
   Widget build(BuildContext context) {
-    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
-    return ListenableBuilder(
-      listenable: widget.controller,
-      builder: (context, _) {
-        final controller = widget.controller;
-        final snapshot = controller.snapshot;
-        final reminders = widget.reminders;
-        return Column(
-          children: [
-            if (reminders != null) ReminderHealthBanner(service: reminders),
-            // The phone keeps the switch on its own row; the desktop folds
-            // it — and the help — into the filter panel below (T-PP-22).
-            if (!wide)
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  children: [_viewSwitch(), const Spacer(), _helpButton()],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // The pane the tab lives in decides the shape, and the shell
+        // too: a phone keeps its own switch row and the FAB adds, while a
+        // wide shell's pane (#712) folds the switch into the filter panel
+        // as long as the pane holds the panel's pills — under that it
+        // takes the phone's row, with Add in it, because the wide shell
+        // has no FAB at all.
+        final shellWide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
+        final wide = shellWide && constraints.maxWidth >= _minFoldWidth;
+        return ListenableBuilder(
+          listenable: widget.controller,
+          builder: (context, _) {
+            final controller = widget.controller;
+            final snapshot = controller.snapshot;
+            final reminders = widget.reminders;
+            return Column(
+              children: [
+                if (reminders != null) ReminderHealthBanner(service: reminders),
+                // The phone keeps the switch on its own row; the desktop folds
+                // it — and the help — into the filter panel below (T-PP-22).
+                if (!wide)
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    // A Wrap, not a Row: a wide shell's pane can be
+                    // narrower than the switch, Add and help together,
+                    // and they drop to a second line rather than clip.
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _viewSwitch(),
+                        if (shellWide && widget.onAddTask != null) _addButton(),
+                        _helpButton(),
+                      ],
+                    ),
+                  ),
+                if (controller.error != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      key: const Key('todo-error'),
+                      controller.error!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: NoteColumnPadding(
+                    column: _column,
+                    child: _body(snapshot, wide: wide),
+                  ),
                 ),
-              ),
-            if (controller.error != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  key: const Key('todo-error'),
-                  controller.error!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ),
-            Expanded(
-              child: NoteColumnPadding(
-                column: _column,
-                child: _body(snapshot, wide: wide),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );
@@ -154,6 +178,10 @@ final class _TodoTabState extends State<TodoTab> {
 
   static const double _minColumnWidth = 800;
 
+  /// The narrowest pane that holds the folded filter panel's own row: the
+  /// switch and the two pills. Under it the tab takes the phone's rows.
+  static const double _minFoldWidth = 420;
+
   /// The Open/Done switch: its own row on the phone, the leading control
   /// of the desktop filter panel.
   Widget _viewSwitch() {
@@ -165,6 +193,17 @@ final class _TodoTabState extends State<TodoTab> {
       ],
       selected: {_showDone},
       onSelectionChanged: (selected) => _selectView(selected.single),
+    );
+  }
+
+  /// Adds a task: the filter panel's Add on the desktop, and the row's
+  /// where a wide shell's pane is too narrow to fold it and has no FAB.
+  Widget _addButton() {
+    return TextButton.icon(
+      key: const Key('todo-add-button'),
+      onPressed: widget.onAddTask,
+      icon: const Icon(Icons.add, size: 18),
+      label: Text(AppStrings.todoAddTooltip),
     );
   }
 
@@ -279,13 +318,7 @@ final class _TodoTabState extends State<TodoTab> {
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (widget.onAddTask != null)
-                      TextButton.icon(
-                        key: const Key('todo-add-button'),
-                        onPressed: widget.onAddTask,
-                        icon: const Icon(Icons.add, size: 18),
-                        label: Text(AppStrings.todoAddTooltip),
-                      ),
+                    if (widget.onAddTask != null) _addButton(),
                     _helpButton(),
                   ],
                 )

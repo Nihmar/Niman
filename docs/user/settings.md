@@ -47,7 +47,12 @@ choices.
 
 **Settings → Navigation** orders the phone's bottom bar and the
 desktop's rail, and hides the destinations you do not use: drag a row by
-its handle to move it, flip its switch to hide it. Settings cannot be
+its handle to move it, flip its switch to hide it. The same entries mean
+different things on a wide window: Files, Search (and the tag tree behind
+it) are **sidebar views** — they swap what the left panel shows while the
+open notes and the right panel stay — and Home and Todo are **content
+destinations**, opening as a tab in the focused pane with the tree still
+beside them ([platforms](platforms.md#destinations)). Settings cannot be
 hidden (it shows a lock), but it can be moved; the rail keeps it at its
 foot with the library switcher either way. At least one destination
 besides Settings stays shown: its switch is off-limits while it is the

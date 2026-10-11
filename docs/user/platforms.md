@@ -209,6 +209,18 @@ is still driven by a mouse, and the desktop keeps its rail, tree and
 panes down to the floor; Android carries the narrow layout, so nothing
 is lost where a thumb is the pointer.
 
+## Destinations
+
+On a wide window the rail's destinations are not all the same shape.
+Files, Search and the tag tree are sidebar views: they swap what the left
+panel shows and leave the open notes, the panes and the right panel where
+they are. Home and Todo are content destinations: they open as a pinned
+tab in the focused pane — the chip at the head of its tab row — and the
+tree stays beside them, so a note is one click away while the list or the
+grid is up. Closing the tab (its ✕) leaves the notes. A phone keeps its
+one-screen-per-destination model, and the Search sidebar's tag tree is
+the two-level list there ([settings](settings.md#navigation)).
+
 ## Renaming
 
 On Linux and Windows a note or a folder is renamed in its tree row
