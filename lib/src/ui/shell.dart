@@ -3671,7 +3671,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                         maintainState: true,
                         maintainAnimation: true,
                         maintainSize: true,
-                        child: _searchSlot(controller),
+                        child: _searchSlot(controller, tree: true),
                       ),
                   ],
                 ),
@@ -4076,11 +4076,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The Search tab's body; the slot owns which of the two shows
   /// (issue #100 moved it into [SearchSlot]).
-  Widget _searchSlot(LibrarySession controller) {
+  Widget _searchSlot(LibrarySession controller, {bool tree = false}) {
     return SearchSlot(
       controller: controller,
       onOpenNote: _openSearchNote,
       requests: _searchRequests,
+      tree: tree,
     );
   }
 

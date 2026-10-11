@@ -155,6 +155,12 @@ Two places, both searchable:
 
 Search a single tag with `#tag` (see [search](search.md)).
 
+The tag list is behind Search's tag button. On a wide window it is a
+collapsible tree in the sidebar: `#work/meetings` sits under `#work`, and
+opening a tag lists its notes under it, each with the count the tag
+itself carries. A phone keeps the two-level list — every tag, then the
+tag's notes with a Back arrow.
+
 A tag's characters are letters and digits — any script's, so `#città` and
 `#идея` are one tag each — plus `-`, `_` and `/`. The frontmatter and the note
 body are read the same way, so the same tag written either way is one tag.

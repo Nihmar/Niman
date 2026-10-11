@@ -13,7 +13,7 @@ void main() {
   late FakeTagSource source;
   final opened = <String>[];
 
-  Widget buildApp() {
+  Widget buildApp({bool tree = false}) {
     return MaterialApp(
       home: Scaffold(
         body: TagsScreen(
@@ -21,6 +21,7 @@ void main() {
           onOpenNote: opened.add,
           onBack: () {},
           sourceOverride: source,
+          tree: tree,
         ),
       ),
     );
@@ -95,5 +96,46 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text('No tags yet — add a #tag or frontmatter tags'), findsOne);
+  });
+
+  testWidgets('wide: the tree nests tags and lists notes under them (#712)', (
+    tester,
+  ) async {
+    source.tags = {
+      'work': ['a.md'],
+      'work/meetings': ['b.md', 'c.md'],
+      'ideas': ['d.md'],
+    };
+    await tester.pumpWidget(buildApp(tree: true));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byKey(const Key('tags-tree')), findsOne);
+    expect(find.byKey(const Key('tag-node-work')), findsOne);
+    // The child starts hidden; opening the parent shows it and the
+    // parent's own note, not the child's.
+    expect(find.byKey(const Key('tag-node-work/meetings')), findsNothing);
+    await tester.tap(find.byKey(const Key('tag-node-work')));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('tag-node-work/meetings')), findsOne);
+    expect(find.byKey(const Key('tag-note-a.md')), findsOne);
+    expect(find.byKey(const Key('tag-note-b.md')), findsNothing);
+
+    // Opening the child lists its notes; a note opens on tap.
+    await tester.tap(find.byKey(const Key('tag-node-work/meetings')));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('tag-note-b.md')), findsOne);
+    await tester.tap(find.byKey(const Key('tag-note-c.md')));
+    expect(opened, ['c.md']);
+  });
+
+  testWidgets('a phone keeps the drill-down (#712)', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('tags-list')), findsOne);
+    expect(find.byKey(const Key('tags-tree')), findsNothing);
   });
 }
