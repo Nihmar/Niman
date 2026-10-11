@@ -1,20 +1,42 @@
-/// Brackets typed in pairs, in `source` and in `live`: `(` writes `()`, `[`
-/// writes `[]`, `{` writes `{}`, the caret between the two.
+/// Pairs typed in pairs, in `source` and in `live`: `(` writes `()`, `[`
+/// writes `[]`, `{` writes `{}`, `*` writes `**` (the caret between), `"`
+/// writes `""`, and so on.
 ///
 /// What every code editor does, and what a Markdown note wants as much: a
-/// link is `[text](target)`, a wikilink `[[note]]`, a task `- [ ] `. Four
-/// rules, each the one a writer expects:
+/// link is `[text](target)`, a wikilink `[[note]]`, a task `- [ ] `, bold
+/// `**bold**`, a quote `"an opening and its close"`. Four rules, each the
+/// one a writer expects:
 ///
-/// * an opening bracket closes itself when what follows is a space, the
-///   line's end or a closing bracket — not before a word, where the writer
+/// * an opening character closes itself when what follows is a space, the
+///   line's end or a closing character — not before a word, where the writer
 ///   is wrapping something already written, and not after a backslash, where
 ///   `\(` opens inline math and wants `\)`;
 /// * over a selection it wraps it instead, the selection kept inside;
-/// * a closing bracket typed where the one the pair wrote stands steps over
+/// * a closing character typed where the one the pair wrote stands steps over
 ///   it, so typing on through `(a)` does not leave `(a))`;
 /// * Backspace between an empty pair takes both.
+///
+/// Not every character is closed the same way (#718). The brackets pair
+/// whenever there is room; the Markdown punctuation only sometimes does, and
+/// each has its own rule:
+///
+/// * `*` — emphasis — pairs with one star, and the second typed over it
+///   steps over, so `**bold**` falls out of the same open-and-step as the
+///   brackets: `***bold italic***` too, three and three. A space right
+///   after it makes it a literal star, which is what `* ` at the start of
+///   a line — a list item — and `a * b` want; a second star right after
+///   the first is the bold one, not another pair;
+/// * `_` — emphasis too — opens only when no word stands before it:
+///   `snake_case` and a closing `word_` are what they are;
+/// * `"` (and `'`, `«`, `“`) open when no word stands before them: after a
+///   word the quote closes one already spoken, like the apostrophe in
+///   `don't`;
+/// * `<`, `>` and `` ` `` do not pair at all: `a < b` is a comparison and
+///   `<https://…>` an autolink — a pair would write `< >` in the first —
+///   while a fence is three backticks and a code span is typed whole.
 library;
 
+import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// An edit a bracket asks for: `[start, end)` replaced with `text`, and the
@@ -34,11 +56,21 @@ typedef _Closer = ({int line, int fromEnd, String char});
 
 /// The brackets of one note's surface, and the closing ones it wrote.
 final class BracketPairs {
-  /// Each opening bracket and the one that closes it.
+  /// Every character that pairs and the one that closes it (#718): the
+  /// brackets, and the punctuation a Markdown note is written with.
   static const Map<String, String> pairs = <String, String>{
     '(': ')',
     '[': ']',
     '{': '}',
+    // One star written and one closing it; the second typed over it, so
+    // `**bold**` falls out of the open-and-step the brackets use.
+    '*': '*',
+    '_': '_',
+    // The straight quotes, and the two pairs a note is written in.
+    '"': '"',
+    "'": "'",
+    '«': '»',
+    '“': '”',
   };
 
   static final Set<String> _closing = pairs.values.toSet();
@@ -48,47 +80,78 @@ final class BracketPairs {
   /// What typing [typed] over `[start, end)` of [buffer] does instead of
   /// inserting it; null when it is only typed.
   BracketEdit? typed(SourceBuffer buffer, int start, int end, String typed) {
-    final close = pairs[typed];
-    if (close != null) {
-      if (start != end) {
-        final inside = buffer.substring(start, end);
-        return (
-          start: start,
-          end: end,
-          text: '$typed$inside$close',
-          anchor: start + 1,
-          extent: end + 1,
-        );
-      }
-      if (!_closesBefore(buffer, start)) return null;
-      final line = buffer.lineOf(start);
-      final column = start - buffer.offsetOfLine(line);
-      _closers.add((
-        line: line,
-        fromEnd: buffer.lineLengthAt(line) - column + 1,
-        char: close,
-      ));
-      return (
-        start: start,
-        end: start,
-        text: '$typed$close',
-        anchor: start + 1,
-        extent: start + 1,
-      );
+    // A space between a `*` pair the pair wrote: a literal star with a
+    // space after it — `* ` at the start of a line is a list item, and
+    // `a * b` is a multiplication — so the closer is replaced by the
+    // space (#718).
+    if (start == end && typed == ' ') {
+      final star = _spaceAfterStarPair(buffer, start);
+      if (star != null) return star;
     }
+    // A closing character this pair wrote, standing where the caret is:
+    // stepped over, whichever character it is — the one that closes an
+    // emphasis written open and stepped, the brackets as ever.
     if (start == end && _closing.contains(typed)) {
       final closer = _closerAt(buffer, start, typed);
-      if (closer == null) return null;
-      _closers.remove(closer);
+      if (closer != null) {
+        _closers.remove(closer);
+        return (
+          start: start,
+          end: start,
+          text: '',
+          anchor: start + 1,
+          extent: start + 1,
+        );
+      }
+    }
+    final close = pairs[typed];
+    if (close == null) return null;
+    if (start != end) {
+      final inside = buffer.substring(start, end);
       return (
         start: start,
-        end: start,
-        text: '',
+        end: end,
+        text: '$typed$inside$close',
         anchor: start + 1,
-        extent: start + 1,
+        extent: end + 1,
       );
     }
-    return null;
+    if (!_opensAt(buffer, start, typed)) return null;
+    final line = buffer.lineOf(start);
+    final column = start - buffer.offsetOfLine(line);
+    _closers.add((
+      line: line,
+      fromEnd: buffer.lineLengthAt(line) - column + 1,
+      char: close,
+    ));
+    return (
+      start: start,
+      end: start,
+      text: '$typed$close',
+      anchor: start + 1,
+      extent: start + 1,
+    );
+  }
+
+  /// A space typed between a `*` pair the pair wrote: the closer goes and
+  /// the space takes its place, a literal star — `* ` a list item, `a * b`
+  /// a multiplication (#718).
+  BracketEdit? _spaceAfterStarPair(SourceBuffer buffer, int caret) {
+    if (caret <= 0 || caret >= buffer.length) return null;
+    if (buffer.substring(caret - 1, caret) != '*' ||
+        buffer.substring(caret, caret + 1) != '*') {
+      return null;
+    }
+    final closer = _closerAt(buffer, caret, '*');
+    if (closer == null) return null;
+    _closers.remove(closer);
+    return (
+      start: caret,
+      end: caret + 1,
+      text: ' ',
+      anchor: caret + 1,
+      extent: caret + 1,
+    );
   }
 
   /// What Backspace at [caret] does instead of taking one character; null
@@ -117,18 +180,51 @@ final class BracketPairs {
     );
   }
 
-  /// The caret is on [line]: the closing brackets written on other lines
-  /// are forgotten, and a bracket typed later is typed, not stepped over.
+  /// The caret is on [line]: the closing characters written on other lines
+  /// are forgotten, and one typed later is typed, not stepped over.
   void caretOnLine(int line) {
     if (_closers.isEmpty) return;
     _closers.removeWhere((closer) => closer.line != line);
   }
 
-  /// Forgets every closing bracket written: another note.
+  /// Forgets every closing character written: another note.
   void clear() => _closers.clear();
 
+  /// Whether [typed] opens a pair at [offset]: per character, because half
+  /// of these are ordinary punctuation most of the time (#718).
+  static bool _opensAt(SourceBuffer buffer, int offset, String typed) {
+    switch (typed) {
+      case '*':
+        // A second star right after the first is the bold one being
+        // written, not another pair (#718).
+        if (_charBefore(buffer, offset) == '*') return false;
+        return _closesBefore(buffer, offset);
+      case '_':
+        return _emphasisOpens(buffer, offset);
+      case '"':
+      case "'":
+      case '«':
+      case '“':
+        // After a word the quote closes one already spoken — `don't`,
+        // `word"` — and is only itself.
+        final before = _charBefore(buffer, offset);
+        if (before != null && isWordChar(before)) return false;
+        return _closesBefore(buffer, offset);
+      default:
+        return _closesBefore(buffer, offset);
+    }
+  }
+
+  /// `_` opens where no word stands before it and it is not the second of
+  /// two: `snake_case` and a closing `word_` are what they are.
+  static bool _emphasisOpens(SourceBuffer buffer, int offset) {
+    final before = _charBefore(buffer, offset);
+    if (before != null && isWordChar(before)) return false;
+    return _closesBefore(buffer, offset);
+  }
+
   /// Whether an opening bracket at [offset] closes itself: at the line's
-  /// end, before a space or a closing bracket, and not after a backslash.
+  /// end, before a space or a closing character, and not after a backslash.
   static bool _closesBefore(SourceBuffer buffer, int offset) {
     if (offset > 0 && buffer.substring(offset - 1, offset) == r'\') {
       return false;
@@ -141,7 +237,11 @@ final class BracketPairs {
         _closing.contains(next);
   }
 
-  /// The closing bracket [char] this pair wrote, standing at [offset].
+  /// The character before [offset], or null at the start of the note.
+  static String? _charBefore(SourceBuffer buffer, int offset) =>
+      offset <= 0 ? null : buffer.substring(offset - 1, offset);
+
+  /// The closing character [char] this pair wrote, standing at [offset].
   _Closer? _closerAt(SourceBuffer buffer, int offset, String char) {
     if (offset >= buffer.length ||
         buffer.substring(offset, offset + 1) != char) {
