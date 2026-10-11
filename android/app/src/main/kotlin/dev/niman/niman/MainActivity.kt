@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
@@ -16,6 +17,11 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 
 class MainActivity : FlutterActivity() {
+    private companion object {
+        /** The saved-state key that says the launching intent is done. */
+        const val STATE_LAUNCH_HANDLED = "niman.launchHandled"
+    }
+
     private var pendingResult: MethodChannel.Result? = null
     private val manageStorageRequestCode = 1
     private val shortcuts = ShortcutsBridge(this)
@@ -24,6 +30,21 @@ class MainActivity : FlutterActivity() {
     private val pageReader = PageReaderBridge(this)
     private val shares = ShareBridge(this)
     private val clipboard = ClipboardBridge(this)
+
+    /** The launching intent, handled once per task (#721). */
+    private val launch = LaunchIntent()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Before super.onCreate: that is what brings the engine up, and
+        // with it configureFlutterEngine (#721).
+        launch.restore(savedInstanceState?.getBoolean(STATE_LAUNCH_HANDLED) == true)
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(STATE_LAUNCH_HANDLED, launch.handled())
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -35,9 +56,18 @@ class MainActivity : FlutterActivity() {
         clipboard.attach(flutterEngine.dartExecutor.binaryMessenger)
         // Cold start: this runs while Dart is still booting, so the
         // launching intent's action waits until Dart asks for it.
-        shortcuts.handleIntent(intent, running = false)
-        widgets.handleIntent(intent, running = false)
-        shares.handleIntent(intent, running = false)
+        //
+        // Handled once per task (#721): Android hands the same intent
+        // back when it rebuilds the activity, and the share or widget tap
+        // that started the app must not run again. The intent is cleared
+        // where it is consumed, so nothing that reads it later sees it
+        // either. A fresh delivery arrives through onNewIntent.
+        if (launch.take(getTaskId(), intent?.toUri(Intent.URI_INTENT_SCHEME) ?: "")) {
+            shortcuts.handleIntent(intent, running = false)
+            widgets.handleIntent(intent, running = false)
+            shares.handleIntent(intent, running = false)
+            setIntent(Intent())
+        }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "niman/storage")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
