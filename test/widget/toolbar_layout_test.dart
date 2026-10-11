@@ -209,4 +209,40 @@ void main() {
       expect(await controller.editorToolbar, ToolbarLayout.defaults.encode());
     });
   });
+
+  testWidgets('a pointer toolbar overflows into a menu (#712)', (tester) async {
+    final pressed = <int>[];
+    await tester.pumpWidget(
+      _app(
+        SizedBox(
+          width: 120,
+          height: editorToolbarHeight,
+          child: EditorToolbar(
+            dense: true,
+            buttons: [
+              for (var i = 0; i < 6; i++)
+                EditorToolbarButton(
+                  key: Key('overflow-$i'),
+                  icon: Icons.abc,
+                  tooltip: 'Button $i',
+                  onPressed: () => pressed.add(i),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Two 30 px buttons fit beside the overflow button; the rest are
+    // behind it rather than off the edge.
+    expect(find.byKey(const Key('overflow-0')), findsOne);
+    expect(find.byKey(const Key('overflow-5')), findsNothing);
+    await tester.tap(find.byKey(const Key('editor-toolbar-overflow')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('overflow-5')), findsOne);
+    await tester.tap(find.byKey(const Key('overflow-5')));
+    await tester.pumpAndSettle();
+    expect(pressed, [5]);
+  });
 }
