@@ -82,6 +82,11 @@ final class JournalBrowser extends StatefulWidget {
 final class _JournalBrowserState extends State<JournalBrowser> {
   late DateTime _month = DateTime(widget.today.year, widget.today.month);
   late DateTime _selected = widget.today;
+
+  /// Whether the dock picked [_selected] itself (#712): an empty day is
+  /// picked, not opened, and the offer to make it sits under the calendar.
+  bool _picked = false;
+
   List<DateTime> _days = const [];
   Map<DateTime, String> _summaries = const {};
 
@@ -119,15 +124,26 @@ final class _JournalBrowserState extends State<JournalBrowser> {
   void _tap(DateTime day) {
     if (widget.large) {
       setState(() => _selected = day);
-    } else {
-      widget.onOpenDay(day);
+      return;
     }
+    if (day == widget.today || _days.contains(day)) {
+      widget.onOpenDay(day);
+      return;
+    }
+    // A dock tap on an empty day picks it instead of opening it: the
+    // question the phone answers with a dialog is answered here under the
+    // calendar (#712).
+    setState(() {
+      _selected = day;
+      _picked = true;
+    });
   }
 
   void _toToday() {
     setState(() {
       _month = DateTime(widget.today.year, widget.today.month);
       _selected = widget.today;
+      _picked = false;
     });
     if (!widget.large) widget.onOpenDay(widget.today);
   }
@@ -151,7 +167,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           month: _month,
           entries: entries,
           today: widget.today,
-          selected: widget.large ? _selected : null,
+          selected: widget.large || _picked ? _selected : null,
           cell: widget.large ? 44 : 34,
           onDay: _tap,
           onMonth: (month) => setState(() => _month = month),
@@ -169,6 +185,9 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         if (widget.large) ...[
           const SizedBox(height: 14),
           _dayCard(context, entries.contains(_selected)),
+        ] else if (_picked && !entries.contains(_selected)) ...[
+          const SizedBox(height: 12),
+          _dockCreateRow(context),
         ],
         if (widget.dueOn case final dueOn?)
           ListenableBuilder(
@@ -249,6 +268,46 @@ final class _JournalBrowserState extends State<JournalBrowser> {
             ),
         ],
       ],
+    );
+  }
+
+  /// The dock's offer for the empty day it picked (#712): the phone's
+  /// card and dialog in one row, under the calendar they belong to.
+  Widget _dockCreateRow(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card.filled(
+      key: const Key('journal-dock-create'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    journalDayLabel(_selected),
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  Text(
+                    AppStrings.journalNoEntry,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            FilledButton.icon(
+              key: const Key('journal-dock-create-button'),
+              onPressed: () => widget.onOpenDay(_selected, confirmed: true),
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(AppStrings.actionCreate),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
