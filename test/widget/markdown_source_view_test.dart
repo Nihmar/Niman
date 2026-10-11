@@ -60,6 +60,7 @@ void main() {
     SelectionModel? selection,
     ValueChanged<SelectionModel>? onSelection,
     Size size = const Size(500, 400),
+    bool hideMarkers = false,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -73,6 +74,7 @@ void main() {
             selection: selection,
             onSelection: onSelection,
             showLineNumbers: false,
+            hideMarkers: hideMarkers,
           ),
         ),
       ),
@@ -433,6 +435,133 @@ void main() {
       closeTo(_theme.lineHeight, 0.5),
       reason: 'one row went, and only one',
     );
+  });
+
+  // #728: the keyboard takes the bottom of the pane with it, and the line
+  // the writer selected — or tapped into, which is what raised it — has to
+  // come back into view.
+  group('the keyboard over the note', () {
+    /// A phone-sized editor over a note long enough to scroll, and the
+    /// offset of its last line.
+    Future<(MarkdownSourceViewState, int)> setup(WidgetTester tester) async {
+      final text = '${[for (var i = 0; i < 40; i++) 'line $i'].join('\n')}\n';
+      final state = await pump(tester, text, size: const Size(400, 500));
+      final line = state.widget.buffer.offsetOfLine(39);
+      return (state, line);
+    }
+
+    /// Opens the keyboard: the pane shrinks by its inset, and the reveal
+    /// waits for the animation to settle.
+    Future<void> keyboard(WidgetTester tester) async {
+      tester.view.viewInsets = const FakeViewPadding(bottom: 200);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump();
+      await tester.pump();
+    }
+
+    /// The line at [line] fits above the keyboard.
+    void onScreen(WidgetTester tester, String text) {
+      final surface = tester.getRect(find.byType(MarkdownSourceView));
+      expect(
+        tester.getRect(find.text(text)).bottom,
+        lessThanOrEqualTo(surface.bottom + 0.5),
+        reason: '$text is above the keyboard',
+      );
+    }
+
+    testWidgets('it brings the selected line back into view', (tester) async {
+      final (state, line) = await setup(tester);
+      state
+        ..select(SelectionModel(anchor: line, extent: line + 4))
+        ..placeCaret(line + 4);
+      await tester.pump();
+      await tester.pump();
+      final before = state.scrollOffset;
+
+      await keyboard(tester);
+
+      onScreen(tester, 'line 39');
+      expect(
+        state.scrollOffset,
+        greaterThan(before),
+        reason: 'the pane scrolled down to it',
+      );
+    });
+
+    testWidgets('it brings the caret in view too, not only a selection', (
+      tester,
+    ) async {
+      final (state, line) = await setup(tester);
+      state.placeCaret(line);
+      await tester.pump();
+      await tester.pump();
+      final before = state.scrollOffset;
+
+      await keyboard(tester);
+
+      onScreen(tester, 'line 39');
+      expect(state.scrollOffset, greaterThan(before));
+    });
+
+    testWidgets('a selection already in view is left where it is', (
+      tester,
+    ) async {
+      final (state, _) = await setup(tester);
+      final buffer = state.widget.buffer;
+      // Near the top, well above where the keyboard will reach.
+      state.placeCaret(buffer.offsetOfLine(2));
+      await tester.pump();
+      await tester.pump();
+      final before = state.scrollOffset;
+
+      await keyboard(tester);
+
+      expect(state.scrollOffset, before, reason: 'nothing moved');
+    });
+
+    testWidgets('the same rule holds in live', (tester) async {
+      final text = '${[for (var i = 0; i < 40; i++) 'line $i'].join('\n')}\n';
+      final state = await pump(
+        tester,
+        text,
+        size: const Size(400, 500),
+        hideMarkers: true,
+      );
+      final line = state.widget.buffer.offsetOfLine(39);
+      state.placeCaret(line);
+      await tester.pump();
+      await tester.pump();
+      final before = state.scrollOffset;
+
+      await keyboard(tester);
+
+      onScreen(tester, 'line 39');
+      expect(state.scrollOffset, greaterThan(before));
+    });
+
+    testWidgets('a selection longer than the pane keeps its caret end', (
+      tester,
+    ) async {
+      final (state, line) = await setup(tester);
+      final buffer = state.widget.buffer;
+      // From line 10 to the last: more than the pane can show whole, so
+      // the active end is what is kept.
+      state.select(
+        SelectionModel(anchor: buffer.offsetOfLine(10), extent: line + 4),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await keyboard(tester);
+
+      onScreen(tester, 'line 39');
+      expect(
+        find.text('line 10'),
+        findsNothing,
+        reason: 'the start of a too-long selection is not what is kept',
+      );
+    });
   });
 
   testWidgets('Ctrl+Z takes back what the keyboard typed', (tester) async {

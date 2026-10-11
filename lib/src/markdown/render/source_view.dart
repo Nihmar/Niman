@@ -397,6 +397,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late FocusNode _focus;
   bool _ownsFocus = false;
 
+  /// The viewport height the last metrics change left: a smaller one is the
+  /// keyboard opening over the note (#728).
+  double? _viewportHeight;
+
+  /// The reveal a shrunken viewport asked for, waiting for the keyboard's
+  /// animation to settle; a scroll the writer makes meanwhile calls it off.
+  Timer? _insetReveal;
+
   /// The edits that made the note what it is, and the way back.
   late EditHistory _history;
 
@@ -894,6 +902,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _menu
       ..removeListener(_onMenuChanged)
       ..dispose();
+    _insetReveal?.cancel();
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
   }
@@ -2233,6 +2242,34 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void placeCaret(int offset) =>
       _applySelection(_selection.collapsedTo(offset), reveal: true);
 
+  /// A metrics change that shrank the viewport: the keyboard opening over
+  /// the note (#728) — the reveal waits for its animation to settle, and
+  /// only when a selection is there to keep in view.
+  bool _onScrollMetrics(ScrollMetricsNotification notification) {
+    final height = notification.metrics.viewportDimension;
+    final last = _viewportHeight;
+    _viewportHeight = height;
+    if (last == null || height >= last) return false;
+    _insetReveal?.cancel();
+    _insetReveal = Timer(const Duration(milliseconds: 120), () {
+      _insetReveal = null;
+      if (mounted) _ensureCaretVisible();
+    });
+    return false;
+  }
+
+  /// The writer took the scroll: the inset reveal in flight is theirs to
+  /// finish, and nothing is moved under their finger (#728).
+  bool _onScroll(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
+    if (notification is ScrollStartNotification &&
+        notification.dragDetails != null) {
+      _insetReveal?.cancel();
+      _insetReveal = null;
+    }
+    return false;
+  }
+
   /// Scrolls the caret's line into view when an edit or a jump left it out.
   ///
   /// The jump is planned on the height map, and far from the viewport that
@@ -2250,16 +2287,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // and the last line takes the bottom padding with it. Without them every
     // jump down stopped the padding short, the caret's row cut by it.
     final row = _folds.rowOf(line);
-    final top = widget.padding.top + _heights.offsetOf(row);
-    final last = row == _heights.length - 1;
-    final bottom =
-        top + _heights.extentFor(row) + (last ? widget.padding.bottom : 0);
+    final extent = _rowBounds(row);
+    // A selection is kept whole when it fits the viewport, and its active
+    // end is kept when it does not — a selection longer than the screen
+    // cannot be shown whole, and the writer's next keystroke lands at the
+    // caret (#728).
+    final anchorRow = _folds.rowOf(widget.buffer.lineOf(_selection.anchor));
+    final anchor = _rowBounds(anchorRow);
+    final first = math.min(anchorRow, row);
+    final top = math.min(anchor.top, extent.top);
+    final bottom = math.max(anchor.bottom, extent.bottom);
     final viewport = _scroll.position.viewportDimension;
+    final whole = bottom - top <= viewport;
+    final edgeTop = whole ? top : extent.top;
+    final edgeBottom = whole ? bottom : extent.bottom;
     final double target;
-    if (top < _scroll.offset) {
-      target = line == 0 ? 0 : top;
-    } else if (bottom > _scroll.offset + viewport) {
-      target = (bottom - viewport).clamp(0.0, _scroll.position.maxScrollExtent);
+    if (edgeTop < _scroll.offset) {
+      target = first == 0 ? 0 : edgeTop;
+    } else if (edgeBottom > _scroll.offset + viewport) {
+      target = (edgeBottom - viewport).clamp(
+        0.0,
+        _scroll.position.maxScrollExtent,
+      );
     } else {
       return;
     }
@@ -2269,6 +2318,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _ensureCaretVisible(settle: settle - 1);
     });
+  }
+
+  /// Row [row] as the scroll view sees it: its top and its bottom, in the
+  /// view's coordinates — the map starts below the top padding, and the
+  /// last row takes the bottom padding with it.
+  ({double top, double bottom}) _rowBounds(int row) {
+    final top = widget.padding.top + _heights.offsetOf(row);
+    final last = row == _heights.length - 1;
+    return (
+      top: top,
+      bottom:
+          top + _heights.extentFor(row) + (last ? widget.padding.bottom : 0),
+    );
   }
 
   /// Line [index] as the view draws it: the **buffer's** text, with the
@@ -3285,156 +3347,163 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                     },
                     child: child,
                   ),
-                  child: CustomScrollView(
-                    key: _scrollKey,
-                    controller: _scroll,
-                    physics: const ContentClampPhysics(),
-                    slivers: <Widget>[
-                      SliverPadding(
-                        padding: EdgeInsets.only(
-                          left: _leftInset,
-                          right: _rightInset,
-                          top: widget.padding.top,
-                          // Typewriter mode: room for the last row to reach the
-                          // middle.
-                          bottom:
-                              widget.padding.bottom +
-                              (footnotes.isEmpty ? slack : 0),
-                        ),
-                        sliver: SliverMarkdownBlocks(
-                          heights: _heights,
-                          delegate: SliverChildBuilderDelegate(
-                            (context, row) {
-                              // A row is a line nobody folded away.
-                              final index = _folds.lineOf(row);
-                              final styled = _lineAt(index);
-                              final block = _styler?.blockOf(index);
-                              final quoted = widget.hideMarkers
-                                  ? _quotes.of(index, block, widget.buffer)
-                                  : null;
-                              return SourceLine(
-                                key: ValueKey<int>(index),
-                                fold: _foldMarkOf(index),
-                                onFold: () => toggleFold(index),
-                                onFoldDown: () => _controlPress = true,
-                                onDiagramDown: _diagramDown,
-                                onDiagramLine: _openDiagramLine,
-                                paragraphKey: _keyFor(index),
-                                styled: styled,
-                                shape: widget.hideMarkers
-                                    ? LineShape.of(
-                                        styled,
-                                        block,
-                                        index,
-                                        quoted: quoted,
-                                        callout: _calloutLine(index, block),
-                                      )
-                                    : LineShape.none,
-                                pictures:
-                                    widget.hideMarkers &&
-                                        widget.embedResolver != null
-                                    ? _styler?.picturesOf(index) ??
-                                          const <LinePicture>[]
-                                    : const <LinePicture>[],
-                                embedResolver: widget.embedResolver,
-                                formula:
-                                    widget.hideMarkers &&
-                                        widget.mathCache != null
-                                    ? _formulaOf(index)
-                                    : null,
-                                mathCache: widget.mathCache,
-                                diagram: widget.hideMarkers
-                                    ? _diagramOf(index)
-                                    : null,
-                                tableRow:
-                                    widget.hideMarkers &&
-                                        block?.kind == BlockKind.table
-                                    ? (at) => _tableRowAt(
-                                        context,
-                                        index,
-                                        block!,
-                                        at,
-                                      )
-                                    : null,
-                                tableHeader:
-                                    block?.kind == BlockKind.table &&
-                                    index == block!.startLine,
-                                pieceKey: block?.kind == BlockKind.table
-                                    ? (at) => at == 0
-                                          ? _keyFor(index)
-                                          : _fragmentKey(index, at)
-                                    : null,
-                                pieceShift: _caretShift,
-                                definition: widget.hideMarkers && block != null
-                                    ? _styler?.definitionRunOf(block)
-                                    : null,
-                                codeRuns: !widget.hideMarkers
-                                    ? null
-                                    : quoted != null
-                                    ? _codeColors.ofQuoted(
-                                        quoted,
-                                        block!.startLine,
-                                        widget.buffer,
-                                        widget.theme.codeHighlight,
-                                      )
-                                    : _codeColors.of(
-                                        index,
-                                        block,
-                                        widget.buffer,
-                                        widget.theme.codeHighlight,
-                                      ),
-                                number: widget.showLineNumbers
-                                    ? index + 1
-                                    : null,
-                                gutterWidth: _gutter,
-                                theme: widget.theme,
-                                syntax: syntax,
-                                dark: widget.dark,
-                                hideMarkers: widget.hideMarkers,
-                                selected: _selectionIn(index),
-                                composing: _composingIn(index),
-                                misspelled: _misspelledIn(index),
-                                found: _foundIn(index),
-                                templateProblems: _hints.problemsIn(index),
-                                misspelledColor: Theme.of(context)
-                                    .colorScheme
-                                    .error,
-                                width: available,
-                                index: index,
-                                spot: _caretSpot,
-                                caret: _caretRect,
-                                caretOn: _caretOn,
-                                rowColor: widget.typewriter
-                                    ? typewriterLineColor(context)
-                                    : null,
-                              );
-                            },
-                            childCount: _folds.rowCount(
-                              widget.buffer.lineCount,
+                  child: NotificationListener<ScrollMetricsNotification>(
+                    onNotification: _onScrollMetrics,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: _onScroll,
+                      child: CustomScrollView(
+                        key: _scrollKey,
+                        controller: _scroll,
+                        physics: const ContentClampPhysics(),
+                        slivers: <Widget>[
+                          SliverPadding(
+                            padding: EdgeInsets.only(
+                              left: _leftInset,
+                              right: _rightInset,
+                              top: widget.padding.top,
+                              // Typewriter mode: room for the last row to
+                              // reach the middle.
+                              bottom:
+                                  widget.padding.bottom +
+                                  (footnotes.isEmpty ? slack : 0),
+                            ),
+                            sliver: SliverMarkdownBlocks(
+                              heights: _heights,
+                              delegate: SliverChildBuilderDelegate(
+                                (context, row) {
+                                  // A row is a line nobody folded away.
+                                  final index = _folds.lineOf(row);
+                                  final styled = _lineAt(index);
+                                  final block = _styler?.blockOf(index);
+                                  final quoted = widget.hideMarkers
+                                      ? _quotes.of(index, block, widget.buffer)
+                                      : null;
+                                  return SourceLine(
+                                    key: ValueKey<int>(index),
+                                    fold: _foldMarkOf(index),
+                                    onFold: () => toggleFold(index),
+                                    onFoldDown: () => _controlPress = true,
+                                    onDiagramDown: _diagramDown,
+                                    onDiagramLine: _openDiagramLine,
+                                    paragraphKey: _keyFor(index),
+                                    styled: styled,
+                                    shape: widget.hideMarkers
+                                        ? LineShape.of(
+                                            styled,
+                                            block,
+                                            index,
+                                            quoted: quoted,
+                                            callout: _calloutLine(index, block),
+                                          )
+                                        : LineShape.none,
+                                    pictures:
+                                        widget.hideMarkers &&
+                                            widget.embedResolver != null
+                                        ? _styler?.picturesOf(index) ??
+                                              const <LinePicture>[]
+                                        : const <LinePicture>[],
+                                    embedResolver: widget.embedResolver,
+                                    formula:
+                                        widget.hideMarkers &&
+                                            widget.mathCache != null
+                                        ? _formulaOf(index)
+                                        : null,
+                                    mathCache: widget.mathCache,
+                                    diagram: widget.hideMarkers
+                                        ? _diagramOf(index)
+                                        : null,
+                                    tableRow:
+                                        widget.hideMarkers &&
+                                            block?.kind == BlockKind.table
+                                        ? (at) => _tableRowAt(
+                                            context,
+                                            index,
+                                            block!,
+                                            at,
+                                          )
+                                        : null,
+                                    tableHeader:
+                                        block?.kind == BlockKind.table &&
+                                        index == block!.startLine,
+                                    pieceKey: block?.kind == BlockKind.table
+                                        ? (at) => at == 0
+                                              ? _keyFor(index)
+                                              : _fragmentKey(index, at)
+                                        : null,
+                                    pieceShift: _caretShift,
+                                    definition:
+                                        widget.hideMarkers && block != null
+                                        ? _styler?.definitionRunOf(block)
+                                        : null,
+                                    codeRuns: !widget.hideMarkers
+                                        ? null
+                                        : quoted != null
+                                        ? _codeColors.ofQuoted(
+                                            quoted,
+                                            block!.startLine,
+                                            widget.buffer,
+                                            widget.theme.codeHighlight,
+                                          )
+                                        : _codeColors.of(
+                                            index,
+                                            block,
+                                            widget.buffer,
+                                            widget.theme.codeHighlight,
+                                          ),
+                                    number: widget.showLineNumbers
+                                        ? index + 1
+                                        : null,
+                                    gutterWidth: _gutter,
+                                    theme: widget.theme,
+                                    syntax: syntax,
+                                    dark: widget.dark,
+                                    hideMarkers: widget.hideMarkers,
+                                    selected: _selectionIn(index),
+                                    composing: _composingIn(index),
+                                    misspelled: _misspelledIn(index),
+                                    found: _foundIn(index),
+                                    templateProblems: _hints.problemsIn(index),
+                                    misspelledColor: Theme.of(context)
+                                        .colorScheme
+                                        .error,
+                                    width: available,
+                                    index: index,
+                                    spot: _caretSpot,
+                                    caret: _caretRect,
+                                    caretOn: _caretOn,
+                                    rowColor: widget.typewriter
+                                        ? typewriterLineColor(context)
+                                        : null,
+                                  );
+                                },
+                                childCount: _folds.rowCount(
+                                  widget.buffer.lineCount,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          if (footnotes.isNotEmpty)
+                            SliverPadding(
+                              // Where the read view puts its section: past the
+                              // note's own padding, the text's edges its edges.
+                              padding: EdgeInsets.only(
+                                left: _leftInset + _gutter,
+                                right: _rightInset,
+                                top: widget.padding.top,
+                                bottom: widget.padding.bottom + slack,
+                              ),
+                              sliver: footnoteSliver(
+                                footnotes: footnotes,
+                                theme: widget.theme,
+                                parser: _footnoteParser,
+                                mathCache: widget.mathCache ?? _footnoteMath,
+                                scope: _styler?.scope,
+                                onTap: _toDefinition,
+                              ),
+                            ),
+                        ],
                       ),
-                      if (footnotes.isNotEmpty)
-                        SliverPadding(
-                          // Where the read view puts its section: past the
-                          // note's own padding, the text's edges its edges.
-                          padding: EdgeInsets.only(
-                            left: _leftInset + _gutter,
-                            right: _rightInset,
-                            top: widget.padding.top,
-                            bottom: widget.padding.bottom + slack,
-                          ),
-                          sliver: footnoteSliver(
-                            footnotes: footnotes,
-                            theme: widget.theme,
-                            parser: _footnoteParser,
-                            mathCache: widget.mathCache ?? _footnoteMath,
-                            scope: _styler?.scope,
-                            onTap: _toDefinition,
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
                 ),
               ),

@@ -438,7 +438,12 @@ the read view: closed to one row until you open it, and away while the
 note is scrolled past its head (see [frontmatter](organization.md)).
 
 On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
-in the note's bar offers the same actions.
+in the note's bar offers the same actions. Opening the keyboard — a tap
+or a selection — takes the pane's bottom with it, and the note comes up
+just enough to keep what the keyboard was raised for above it: the whole
+selection where it fits, the caret's end where it does not. A selection
+already in view is left where it is, and so is a scroll you started
+yourself.
 
 The same formatting is also on the **context menu**: right-click in the
 editor (long-press on a phone). It is grouped by what you are doing, as
