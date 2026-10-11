@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
+import 'package:niman/src/ui/kinds/audio_chat_list.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/audio_player.dart';
 import 'package:niman/src/ui/kinds/audio_recorder.dart';
@@ -139,12 +140,144 @@ Future<void> _pump(
   await tester.pump();
 }
 
+/// Pumps an audio note that adopts its own edits, as the kind host does:
+/// the recording flow lands in the note and the view rebuilds around it,
+/// which is what the scroll tests for #735 need.
+Future<void> _pumpLive(
+  WidgetTester tester, {
+  required String text,
+  _FakeRecorder? recorder,
+}) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: _LiveAudioNote(
+          initialText: text,
+          recorder: recorder ?? _FakeRecorder(),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+}
+
+final class _LiveAudioNote extends StatefulWidget {
+  const new({required this.initialText, required this.recorder});
+
+  final String initialText;
+  final _FakeRecorder recorder;
+
+  @override
+  State<_LiveAudioNote> createState() => _LiveAudioNoteState();
+}
+
+final class _LiveAudioNoteState extends State<_LiveAudioNote> {
+  late String _text = widget.initialText;
+  final _FakePlayer _player = _FakePlayer();
+
+  @override
+  Widget build(BuildContext context) => AudioNoteView(
+    text: _text,
+    onChanged: (text) => setState(() => _text = text),
+    notePath: p.join('root', 'note.md'),
+    libraryRoot: p.join('root'),
+    recorder: widget.recorder,
+    player: _player,
+    importAudio: (_, _) async => p.join('assets', 'imported.wav'),
+    newRecordPath: () async => p.join('tmp', 'rec.wav'),
+    readLengths: (_) async => const <String, Duration>{},
+  );
+}
+
 Future<void> _openClipMenu(WidgetTester tester, int index) async {
   await tester.tap(find.byKey(ValueKey('audio-menu-$index')));
   await tester.pumpAndSettle();
 }
 
 void main() {
+  /// The scroll of an audio note long enough to scroll, and its position.
+  (Finder, ScrollPosition Function()) listOf(WidgetTester tester) {
+    final scrollable = find.descendant(
+      of: find.byType(AudioChatList),
+      matching: find.byType(Scrollable),
+    );
+    return (
+      scrollable,
+      () => tester.state<ScrollableState>(scrollable).position,
+    );
+  }
+
+  /// Records and stops once, as the composer's one button does.
+  Future<void> record(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pump();
+  }
+
+  // #735: ending a recording brings its turn to the bottom, where its
+  // play, rename and transcribe controls are.
+  testWidgets('ending a recording brings the new turn to the bottom', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final turns = [for (var i = 0; i < 40; i++) '> turn $i'].join('\n');
+    await _pumpLive(tester, text: '---\ntype: audio\n---\n$turns\n');
+    final (_, position) = listOf(tester);
+    expect(
+      position().pixels,
+      moreOrLessEquals(position().maxScrollExtent, epsilon: 1),
+      reason: 'a long note opens at its latest turn',
+    );
+
+    await record(tester);
+    // The row lands with its own grow animation, and the list keeps the
+    // bottom while it grows — and settles once the layout is final.
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+
+    expect(
+      position().pixels,
+      moreOrLessEquals(position().maxScrollExtent, epsilon: 1),
+      reason: 'the new turn left the list at the bottom',
+    );
+    final list = tester.getRect(find.byType(AudioChatList));
+    final play = tester.getRect(find.byKey(const ValueKey('audio-play-0')));
+    expect(
+      play.bottom,
+      lessThanOrEqualTo(list.bottom + 0.5),
+      reason: 'the new bubble is on screen',
+    );
+  });
+
+  testWidgets('a reader dragging during the landing is not yanked back', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final turns = [for (var i = 0; i < 40; i++) '> turn $i'].join('\n');
+    await _pumpLive(tester, text: '---\ntype: audio\n---\n$turns\n');
+    final (_, position) = listOf(tester);
+
+    await record(tester);
+    await tester.pump(const Duration(milliseconds: 40));
+    // The reader takes the list over while the turn grows, and it stays
+    // where they put it.
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(AudioChatList)),
+    );
+    await gesture.moveBy(const Offset(0, 80));
+    await tester.pump();
+    final held = position().pixels;
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(position().pixels, moreOrLessEquals(held, epsilon: 1));
+    await gesture.up();
+    await tester.pump();
+  });
+
   testWidgets('an empty audio note invites a first recording', (tester) async {
     await _pump(tester, text: '---\ntype: audio\n---\n', edits: []);
     expect(find.text('No recordings yet'), findsOneWidget);
