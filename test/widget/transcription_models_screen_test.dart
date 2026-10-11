@@ -25,7 +25,16 @@ void main() {
 
   tearDown(() async {
     models.dispose();
-    if (dir.existsSync()) await dir.delete(recursive: true);
+    // A settings write the UI fired may still be landing, and the delete
+    // races it: retried rather than done once, the same remedy the model
+    // tests' own tearDown uses (CI read "Directory not empty" without it).
+    for (var i = 0; i < 20 && dir.existsSync(); i++) {
+      try {
+        await dir.delete(recursive: true);
+      } on FileSystemException {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
   });
 
   /// Real files and isolates: everything that touches them runs outside

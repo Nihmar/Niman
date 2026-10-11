@@ -57,6 +57,18 @@ final class TranscriptionModels extends ChangeNotifier {
   Future<void>? _loading;
   bool _disposed = false;
 
+  /// The settings writes asked for so far, chained: they land in order,
+  /// and [settled] is what a caller waits for them.
+  Future<void> _writes = Future<void>.value();
+
+  /// Completes when every settings write asked for so far has settled —
+  /// the file has landed, or the write failed (an error is swallowed
+  /// here; the write that raised it reported it to its own caller).
+  ///
+  /// The screen's pick fires and forgets, so a caller that takes the
+  /// model directory away has to wait for this first.
+  Future<void> settled() => _writes;
+
   /// The models this device offers, smallest first.
   List<TranscriptionModel> get models =>
       offeredTranscriptionModels(phone: phone);
@@ -174,11 +186,17 @@ final class TranscriptionModels extends ChangeNotifier {
   Future<void> setLanguage(String language) =>
       _save(_settings.withLanguage(language));
 
-  Future<void> _save(TranscriptionSettings settings) async {
-    if (settings == _settings) return;
+  Future<void> _save(TranscriptionSettings settings) {
+    if (settings == _settings) return Future<void>.value();
     _settings = settings;
     notifyListeners();
-    await _store.save(settings);
+    // One at a time, in the order they were asked for: a quick series of
+    // changes must not land out of order.
+    final next = _writes
+        .then<void>((_) {}, onError: (Object _) {})
+        .then((_) => _store.save(settings));
+    _writes = next.then<void>((_) {}, onError: (Object _) {});
+    return next;
   }
 
   void _set(TranscriptionModel model, DownloadState state) {
