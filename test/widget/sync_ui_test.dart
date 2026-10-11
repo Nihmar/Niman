@@ -805,6 +805,33 @@ void main() {
       expect(find.text('Library library'), findsOneWidget);
     });
 
+    testWidgets('a pointer gets the settings in a floating window (#712)', (
+      tester,
+    ) async {
+      setSurfaceSize(tester, const Size(1200, 900));
+      await tester.pumpWidget(
+        MaterialApp(
+          // Pointer-dense, as a desktop's theme is.
+          theme: ThemeData(visualDensity: VisualDensity.compact),
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () =>
+                  openSyncSettings(context, sync: sync, libraryName: 'Notes'),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('sync-settings-window')), findsOne);
+      expect(find.byType(SyncSettingsScreen), findsOne);
+      // The window carries the title: the screen brings no app bar.
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.text(AppStrings.syncScreenSubtitle('Notes')), findsOne);
+    });
+
     testWidgets('the files bar shows the icon once a destination exists', (
       tester,
     ) async {

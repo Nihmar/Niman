@@ -53,6 +53,10 @@ tree; an automatic one only turns the icon. You can keep writing either
 way. Open notes are saved before a manual sync, and a note that sync
 updated is reloaded.
 
+On a desktop the sync settings open as a floating window over the note,
+so the tree and the open note stay where they are; on a phone they are a
+page.
+
 #### When to sync
 
 In Settings → Sync → WebDAV:

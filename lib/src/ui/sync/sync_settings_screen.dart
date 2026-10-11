@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_service.dart';
+import 'package:niman/src/ui/floating_window.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/spinning_sync_icon.dart';
@@ -24,6 +26,7 @@ final class SyncSettingsScreen extends StatefulWidget {
     required this.libraryName,
     this.unsaved,
     this.onShowTrash,
+    this.embedded = false,
     super.key,
   });
 
@@ -38,6 +41,11 @@ final class SyncSettingsScreen extends StatefulWidget {
 
   /// Opens the trash (from the snackbar after a sync).
   final VoidCallback? onShowTrash;
+
+  /// Whether the screen is drawn inside a floating window (#712): the
+  /// window's header carries the title, so the body brings the subtitle
+  /// line and no app bar.
+  final bool embedded;
 
   @override
   State<SyncSettingsScreen> createState() => _SyncSettingsScreenState();
@@ -375,6 +383,24 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final body = _formShown ? _form(theme) : _overview(theme);
+    if (widget.embedded) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Text(
+              AppStrings.syncScreenSubtitle(widget.libraryName),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(child: body),
+        ],
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -390,7 +416,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
           ],
         ),
       ),
-      body: _formShown ? _form(theme) : _overview(theme),
+      body: body,
     );
   }
 
@@ -835,4 +861,40 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
       ],
     );
   }
+}
+
+/// Opens the sync settings: a floating window where a pointer aims (#712),
+/// the page a phone keeps.
+Future<void> openSyncSettings(
+  BuildContext context, {
+  required SyncService sync,
+  required String libraryName,
+  UnsavedTracker? unsaved,
+  VoidCallback? onShowTrash,
+}) {
+  if (pointerDense(Theme.of(context))) {
+    return showFloatingWindow(
+      context,
+      title: AppStrings.syncWebDavTitle,
+      panelKey: const Key('sync-settings-window'),
+      builder: (context) => SyncSettingsScreen(
+        sync: sync,
+        libraryName: libraryName,
+        unsaved: unsaved,
+        onShowTrash: onShowTrash,
+        embedded: true,
+      ),
+    );
+  }
+  return Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+      builder: (context) => SyncSettingsScreen(
+        sync: sync,
+        libraryName: libraryName,
+        unsaved: unsaved,
+        onShowTrash: onShowTrash,
+      ),
+    ),
+  );
 }
