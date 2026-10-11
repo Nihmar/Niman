@@ -133,6 +133,9 @@ both sides, the sync icon gets a dot, and **Resolve** opens the merge:
 - or keep one whole copy: **Keep this device's** uploads yours, **Keep
   the server's** replaces yours (which stays in the history).
 
+On a desktop the merge opens as a floating window over the note, so the
+tree and the open note stay where they are; on a phone it is a page.
+
 If either copy changes while the screen is open (another device syncs
 again, or you keep typing in the note), nothing is written: the conflict
 is read again and you choose over what is there now.

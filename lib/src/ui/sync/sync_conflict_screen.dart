@@ -8,6 +8,8 @@ import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/sync_failure.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/diff/merge_view.dart';
+import 'package:niman/src/ui/floating_window.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One conflicted file (mockup S8, W7): with the version both sides came
@@ -23,6 +25,8 @@ final class SyncConflictScreen extends StatefulWidget {
     required this.sync,
     required this.path,
     this.merge = computeMerge,
+    this.embedded = false,
+    this.onResolved,
     super.key,
   });
 
@@ -34,6 +38,16 @@ final class SyncConflictScreen extends StatefulWidget {
 
   /// Merge computation (a test seam).
   final MergeComputer merge;
+
+  /// Whether the screen is drawn inside a floating window (#712): the
+  /// window's header carries the title, so the body brings it and no
+  /// app bar.
+  final bool embedded;
+
+  /// Called once the conflict is resolved, instead of popping the route
+  /// (#712): a screen on a window's first page has no route of its own to
+  /// pop, so the opener closes the window.
+  final VoidCallback? onResolved;
 
   @override
   State<SyncConflictScreen> createState() => _SyncConflictScreenState();
@@ -102,7 +116,13 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
           content: Text(AppStrings.syncResolved),
         ),
       );
-      if (mounted) Navigator.pop(context, true);
+      if (!mounted) return;
+      final resolved = widget.onResolved;
+      if (resolved != null) {
+        resolved();
+      } else {
+        Navigator.pop(context, true);
+      }
     } on SyncFailure catch (e) {
       _log.warning('conflict screen ${widget.path}: $what failed: $e');
       if (!mounted) return;
@@ -181,115 +201,152 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
         ],
       ),
     );
-    return Scaffold(
-      appBar: AppBar(
-        leading: const CloseButton(),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(AppStrings.syncConflictTitle),
-            Text(widget.path, style: muted, overflow: TextOverflow.ellipsis),
-          ],
-        ),
-      ),
-      body: Column(
+    final title = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(AppStrings.syncConflictTitle),
+        Text(widget.path, style: muted, overflow: TextOverflow.ellipsis),
+      ],
+    );
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (!_isText)
+          note(Icons.info_outline, AppStrings.syncConflictBinary)
+        else if (_failed)
+          note(Icons.error_outline, AppStrings.syncConflictLoadFailed)
+        else if (texts == null || merge == null)
+          const Expanded(child: Center(child: CircularProgressIndicator()))
+        else ...[
+          note(
+            Icons.merge_type,
+            texts.base == null
+                ? AppStrings.syncMergeNoBase
+                : merge.clean
+                ? AppStrings.syncMergeClean
+                : AppStrings.syncMergeIntro,
+          ),
+          Expanded(
+            child: MergeView(
+              key: const Key('sync-conflict-merge'),
+              merge: merge,
+              choices: _choices,
+              onChoice: (index, choice) => setState(() {
+                _choices = [..._choices]..[index] = choice;
+              }),
+              padding: const EdgeInsets.only(bottom: 16),
+            ),
+          ),
+        ],
+        if (!_isText || _failed) const Spacer(),
+        note(Icons.history, AppStrings.syncConflictKeepNote),
+      ],
+    );
+    final actions = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (!_isText)
-            note(Icons.info_outline, AppStrings.syncConflictBinary)
-          else if (_failed)
-            note(Icons.error_outline, AppStrings.syncConflictLoadFailed)
-          else if (texts == null || merge == null)
-            const Expanded(child: Center(child: CircularProgressIndicator()))
-          else ...[
-            note(
-              Icons.merge_type,
-              texts.base == null
-                  ? AppStrings.syncMergeNoBase
-                  : merge.clean
-                  ? AppStrings.syncMergeClean
-                  : AppStrings.syncMergeIntro,
+          if (merge != null) ...[
+            FilledButton.icon(
+              key: const Key('sync-save-merge'),
+              onPressed: _canSaveMerge ? _saveMerge : null,
+              icon: const Icon(Icons.merge_type),
+              label: Text(AppStrings.syncMergeSave),
             ),
-            Expanded(
-              child: MergeView(
-                key: const Key('sync-conflict-merge'),
-                merge: merge,
-                choices: _choices,
-                onChoice: (index, choice) => setState(() {
-                  _choices = [..._choices]..[index] = choice;
-                }),
-                padding: const EdgeInsets.only(bottom: 16),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 2),
+              child: Text(
+                AppStrings.syncMergeKeepWhole,
+                style: muted,
+                textAlign: TextAlign.center,
               ),
             ),
-          ],
-          if (!_isText || _failed) const Spacer(),
-          note(Icons.history, AppStrings.syncConflictKeepNote),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (merge != null) ...[
-                FilledButton.icon(
-                  key: const Key('sync-save-merge'),
-                  onPressed: _canSaveMerge ? _saveMerge : null,
-                  icon: const Icon(Icons.merge_type),
-                  label: Text(AppStrings.syncMergeSave),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 2),
-                  child: Text(
-                    AppStrings.syncMergeKeepWhole,
-                    style: muted,
-                    textAlign: TextAlign.center,
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    key: const Key('sync-keep-local'),
+                    onPressed: _resolving ? null : () => _keep(local: true),
+                    icon: const Icon(Icons.smartphone),
+                    label: Text(AppStrings.syncKeepLocal),
                   ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        key: const Key('sync-keep-local'),
-                        onPressed: _resolving ? null : () => _keep(local: true),
-                        icon: const Icon(Icons.smartphone),
-                        label: Text(AppStrings.syncKeepLocal),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        key: const Key('sync-keep-remote'),
-                        onPressed: _resolving
-                            ? null
-                            : () => _keep(local: false),
-                        icon: const Icon(Icons.dns_outlined),
-                        label: Text(AppStrings.syncKeepRemote),
-                      ),
-                    ),
-                  ],
-                ),
-              ] else ...[
-                FilledButton.icon(
-                  key: const Key('sync-keep-local'),
-                  onPressed: _resolving ? null : () => _keep(local: true),
-                  icon: const Icon(Icons.smartphone),
-                  label: Text(AppStrings.syncKeepLocal),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  key: const Key('sync-keep-remote'),
-                  onPressed: _resolving ? null : () => _keep(local: false),
-                  icon: const Icon(Icons.dns_outlined),
-                  label: Text(AppStrings.syncKeepRemote),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    key: const Key('sync-keep-remote'),
+                    onPressed: _resolving ? null : () => _keep(local: false),
+                    icon: const Icon(Icons.dns_outlined),
+                    label: Text(AppStrings.syncKeepRemote),
+                  ),
                 ),
               ],
-            ],
+            ),
+          ] else ...[
+            FilledButton.icon(
+              key: const Key('sync-keep-local'),
+              onPressed: _resolving ? null : () => _keep(local: true),
+              icon: const Icon(Icons.smartphone),
+              label: Text(AppStrings.syncKeepLocal),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              key: const Key('sync-keep-remote'),
+              onPressed: _resolving ? null : () => _keep(local: false),
+              icon: const Icon(Icons.dns_outlined),
+              label: Text(AppStrings.syncKeepRemote),
+            ),
+          ],
+        ],
+      ),
+    );
+    if (widget.embedded) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: title,
           ),
-        ),
+          Expanded(child: body),
+          SafeArea(child: actions),
+        ],
+      );
+    }
+    return Scaffold(
+      appBar: AppBar(leading: const CloseButton(), title: title),
+      body: body,
+      bottomNavigationBar: SafeArea(child: actions),
+    );
+  }
+}
+
+/// Opens the conflict screen for [path]: a floating window where a
+/// pointer aims (#712), the page a phone keeps.
+Future<void> openSyncConflict(
+  BuildContext context, {
+  required SyncService sync,
+  required String path,
+}) {
+  if (pointerDense(Theme.of(context))) {
+    return showFloatingWindow(
+      context,
+      title: AppStrings.syncConflictTitle,
+      panelKey: const Key('sync-conflict-window'),
+      builder: (context) => SyncConflictScreen(
+        sync: sync,
+        path: path,
+        embedded: true,
+        onResolved: () => Navigator.of(context, rootNavigator: true).pop(),
       ),
     );
   }
+  return Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+      builder: (context) => SyncConflictScreen(sync: sync, path: path),
+    ),
+  );
 }

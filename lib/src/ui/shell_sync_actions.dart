@@ -108,11 +108,6 @@ final class ShellSyncActions {
       const AppLogger(name: 'sync').warning('resolve: saving failed: $e');
     }
     if (!context.mounted) return;
-    await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SyncConflictScreen(sync: sync, path: path),
-      ),
-    );
+    await openSyncConflict(context, sync: sync, path: path);
   }
 }
