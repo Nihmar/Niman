@@ -764,8 +764,12 @@ final class AppStrings {
   static String get selectANote => _s.selectANote;
   static String get showListTooltip => _s.showListTooltip;
   static String get editRawTooltip => _s.editRawTooltip;
-  static String get sortAscTooltip => _s.sortAscTooltip;
-  static String get sortDescTooltip => _s.sortDescTooltip;
+
+  static String get sortLastModified => _s.sortLastModified;
+  static String get sortDateCreated => _s.sortDateCreated;
+  static String get sortSize => _s.sortSize;
+  static String get sortAscending => _s.sortAscending;
+  static String get sortDescending => _s.sortDescending;
   static String get newNoteTitle => _s.newNoteTitle;
   static String get newItemTooltip => _s.newItemTooltip;
   static String get closeMenuTooltip => _s.closeMenuTooltip;

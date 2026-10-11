@@ -1152,10 +1152,21 @@ final class FrenchStrings extends Strings {
   String get showListTooltip => 'Afficher la liste';
   @override
   String get editRawTooltip => 'Modifier le texte brut';
+
   @override
-  String get sortAscTooltip => 'Trier A-Z';
+  String get sortLastModified => 'Dernière modification';
+
   @override
-  String get sortDescTooltip => 'Trier Z-A';
+  String get sortDateCreated => 'Date de création';
+
+  @override
+  String get sortSize => 'Taille';
+
+  @override
+  String get sortAscending => 'Croissant';
+
+  @override
+  String get sortDescending => 'Décroissant';
   @override
   String get newNoteTitle => 'Nouvelle note';
   @override

@@ -1147,10 +1147,21 @@ final class GermanStrings extends Strings {
   String get showListTooltip => 'Liste anzeigen';
   @override
   String get editRawTooltip => 'Rohdaten bearbeiten';
+
   @override
-  String get sortAscTooltip => 'A-Z sortieren';
+  String get sortLastModified => 'Zuletzt geändert';
+
   @override
-  String get sortDescTooltip => 'Z-A sortieren';
+  String get sortDateCreated => 'Erstelldatum';
+
+  @override
+  String get sortSize => 'Größe';
+
+  @override
+  String get sortAscending => 'Aufsteigend';
+
+  @override
+  String get sortDescending => 'Absteigend';
   @override
   String get newNoteTitle => 'Neue Notiz';
   @override

@@ -1131,10 +1131,21 @@ final class IcelandicStrings extends Strings {
   String get showListTooltip => 'Sýna list';
   @override
   String get editRawTooltip => 'Breyta hrátt';
+
   @override
-  String get sortAscTooltip => 'Raða A-Ö';
+  String get sortLastModified => 'Síðast breytt';
+
   @override
-  String get sortDescTooltip => 'Raða Ö-A';
+  String get sortDateCreated => 'Stofndagur';
+
+  @override
+  String get sortSize => 'Stærð';
+
+  @override
+  String get sortAscending => 'Hækkandi';
+
+  @override
+  String get sortDescending => 'Lækkandi';
   @override
   String get newNoteTitle => 'Nýtt minnisblað';
   @override

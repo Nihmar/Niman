@@ -1055,10 +1055,21 @@ final class ChineseStrings extends Strings {
   String get showListTooltip => '显示列表';
   @override
   String get editRawTooltip => '编辑源码';
+
   @override
-  String get sortAscTooltip => '按 A-Z 排序';
+  String get sortLastModified => '最近修改';
+
   @override
-  String get sortDescTooltip => '按 Z-A 排序';
+  String get sortDateCreated => '创建日期';
+
+  @override
+  String get sortSize => '大小';
+
+  @override
+  String get sortAscending => '升序';
+
+  @override
+  String get sortDescending => '降序';
   @override
   String get newNoteTitle => '新建笔记';
   @override

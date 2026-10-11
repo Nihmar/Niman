@@ -1132,10 +1132,21 @@ final class BelarusianStrings extends Strings {
   String get showListTooltip => 'Паказаць спіс';
   @override
   String get editRawTooltip => 'Рэдагаваць сыры тэкст';
+
   @override
-  String get sortAscTooltip => 'Сартаваць А–Я';
+  String get sortLastModified => 'Апошняе змяненне';
+
   @override
-  String get sortDescTooltip => 'Сартаваць Я–А';
+  String get sortDateCreated => 'Дата стварэння';
+
+  @override
+  String get sortSize => 'Памер';
+
+  @override
+  String get sortAscending => 'Па ўзрастанні';
+
+  @override
+  String get sortDescending => 'Па змяншэнні';
   @override
   String get newNoteTitle => 'Новая заўвага';
   @override

@@ -1141,10 +1141,21 @@ final class GalicianStrings extends Strings {
   String get showListTooltip => 'Mostrar a lista';
   @override
   String get editRawTooltip => 'Editar a bruto';
+
   @override
-  String get sortAscTooltip => 'Ordenar A-Z';
+  String get sortLastModified => 'Última modificación';
+
   @override
-  String get sortDescTooltip => 'Ordenar Z-A';
+  String get sortDateCreated => 'Data de creación';
+
+  @override
+  String get sortSize => 'Tamaño';
+
+  @override
+  String get sortAscending => 'Ascendente';
+
+  @override
+  String get sortDescending => 'Descendente';
   @override
   String get newNoteTitle => 'Nota nova';
   @override

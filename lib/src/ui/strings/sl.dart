@@ -1132,10 +1132,21 @@ final class SlovenianStrings extends Strings {
   String get showListTooltip => 'Prikaži seznam';
   @override
   String get editRawTooltip => 'Uredi neobdelano';
+
   @override
-  String get sortAscTooltip => 'Razvrsti A–Ž';
+  String get sortLastModified => 'Zadnja sprememba';
+
   @override
-  String get sortDescTooltip => 'Razvrsti Ž–A';
+  String get sortDateCreated => 'Datum ustvarjanja';
+
+  @override
+  String get sortSize => 'Velikost';
+
+  @override
+  String get sortAscending => 'Naraščajoče';
+
+  @override
+  String get sortDescending => 'Padajoče';
   @override
   String get newNoteTitle => 'Nova opomba';
   @override

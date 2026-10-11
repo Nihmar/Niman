@@ -102,6 +102,7 @@ void main() {
             isDir: true,
             size: 0,
             modified: DateTime(2026),
+            created: DateTime(2026),
           ),
         );
       }
@@ -126,6 +127,7 @@ void main() {
             isDir: false,
             size: 200,
             modified: DateTime(2026),
+            created: DateTime(2026),
             title: Value('$name title'),
           ),
         );

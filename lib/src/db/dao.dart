@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 
 /// Paths per `WHERE path IN (…)` statement: SQLite binds 999 variables by
@@ -24,27 +25,27 @@ final class NoteDao {
         .get();
   }
 
-  /// Children of the row with id [parentId], directories first, then by
-  /// name (ascending, or descending with [nameDesc]).
-  Future<List<Note>> children(int parentId, {bool nameDesc = false}) {
+  /// Children of the row with id [parentId], in [sort]'s order (#726):
+  /// directories first whatever the field, then the field in its own
+  /// direction, the name breaking ties.
+  Future<List<Note>> children(
+    int parentId, {
+    TreeSort sort = TreeSort.nameAsc,
+  }) {
     return (_db.select(_db.notes)
           ..where((t) => t.parent.equals(parentId))
-          ..orderBy([
-            (t) => OrderingTerm.desc(t.isDir),
-            (t) =>
-                nameDesc ? OrderingTerm.desc(t.name) : OrderingTerm.asc(t.name),
-          ]))
+          ..orderBy(_treeOrder(sort)))
         .get();
   }
 
   /// Every note that belongs to the root or to one of the [expandedPaths],
-  /// in tree order (directories first, then name).
+  /// in tree order — [sort]'s order the same way [children] reads it.
   ///
   /// Used for single-query tree flattening: one round-trip to the database
   /// returns every potentially visible row.
   Future<List<Note>> tree(
     Iterable<String> expandedPaths, {
-    bool nameDesc = false,
+    TreeSort sort = TreeSort.nameAsc,
   }) {
     return (_db.select(_db.notes)
           ..where(
@@ -56,12 +57,29 @@ final class NoteDao {
                     ..where(_db.notes.path.isIn(expandedPaths)),
                 ),
           )
-          ..orderBy([
-            (t) => OrderingTerm.desc(t.isDir),
-            (t) =>
-                nameDesc ? OrderingTerm.desc(t.name) : OrderingTerm.asc(t.name),
-          ]))
+          ..orderBy(_treeOrder(sort)))
         .get();
+  }
+
+  /// The tree's own order terms for [sort] (#726): folders first, then the
+  /// field — the name breaking ties where the field cannot (a folder's
+  /// size is 0, two files saved in the same second share a time).
+  static List<OrderingTerm Function($NotesTable)> _treeOrder(TreeSort sort) {
+    OrderingTerm by(Expression<Object> column) => sort.descending
+        ? OrderingTerm.desc(column)
+        : OrderingTerm.asc(column);
+    return [
+      (t) => OrderingTerm.desc(t.isDir),
+      switch (sort.order) {
+        TreeOrder.name => (t) => by(t.name),
+        TreeOrder.modified => (t) => by(t.modified),
+        TreeOrder.created => (t) => by(t.created),
+        TreeOrder.size => (t) => by(t.size),
+      },
+      // The field already is the name once: a second, ascending term would
+      // undo a descending name order.
+      if (sort.order != TreeOrder.name) (t) => OrderingTerm.asc(t.name),
+    ];
   }
 
   /// The row at library-relative `path`, or null when absent.

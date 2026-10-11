@@ -271,6 +271,7 @@ final class IndexReconciler {
               isDir: true,
               size: 0,
               modified: listing.modified,
+              created: listing.created,
             ),
           ...listing.entries,
         ];
@@ -363,6 +364,7 @@ final class IndexReconciler {
           isDir: true,
           size: 0,
           modified: listing.modified,
+          created: listing.created,
         ),
       for (final e in listing.entries)
         if (!touches.owns(e.rel)) e,

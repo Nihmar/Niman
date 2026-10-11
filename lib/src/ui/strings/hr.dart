@@ -1130,10 +1130,21 @@ final class CroatianStrings extends Strings {
   String get showListTooltip => 'Prikaži popis';
   @override
   String get editRawTooltip => 'Uredi sirovo';
+
   @override
-  String get sortAscTooltip => 'Sortiraj A–Z';
+  String get sortLastModified => 'Posljednja izmjena';
+
   @override
-  String get sortDescTooltip => 'Sortiraj Z–A';
+  String get sortDateCreated => 'Datum stvaranja';
+
+  @override
+  String get sortSize => 'Veličina';
+
+  @override
+  String get sortAscending => 'Rastuće';
+
+  @override
+  String get sortDescending => 'Opadajuće';
   @override
   String get newNoteTitle => 'Nova napomena';
   @override

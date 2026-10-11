@@ -1123,10 +1123,21 @@ final class TurkishStrings extends Strings {
   String get showListTooltip => 'Listeyi göster';
   @override
   String get editRawTooltip => 'Ham olarak düzenle';
+
   @override
-  String get sortAscTooltip => 'A-Z sırala';
+  String get sortLastModified => 'Son değişiklik';
+
   @override
-  String get sortDescTooltip => 'Z-A sırala';
+  String get sortDateCreated => 'Oluşturulma tarihi';
+
+  @override
+  String get sortSize => 'Boyut';
+
+  @override
+  String get sortAscending => 'Artan';
+
+  @override
+  String get sortDescending => 'Azalan';
   @override
   String get newNoteTitle => 'Yeni not';
   @override

@@ -1130,10 +1130,21 @@ final class LithuanianStrings extends Strings {
   String get showListTooltip => 'Rodyti sąrašą';
   @override
   String get editRawTooltip => 'Redaguoti žalią';
+
   @override
-  String get sortAscTooltip => 'Rizuoti A–Z';
+  String get sortLastModified => 'Paskutinis keitimas';
+
   @override
-  String get sortDescTooltip => 'Rizuoti Z–A';
+  String get sortDateCreated => 'Sukūrimo data';
+
+  @override
+  String get sortSize => 'Dydis';
+
+  @override
+  String get sortAscending => 'Didėjančiai';
+
+  @override
+  String get sortDescending => 'Mažėjančiai';
   @override
   String get newNoteTitle => 'Nauja pastaba';
   @override

@@ -35,6 +35,7 @@ void main() {
             isDir: false,
             size: 1,
             modified: DateTime.fromMillisecondsSinceEpoch(0),
+            created: DateTime.fromMillisecondsSinceEpoch(0),
           ),
         );
     for (final stem in stems) {
@@ -183,6 +184,7 @@ void main() {
             isDir: true,
             size: 0,
             modified: DateTime.fromMillisecondsSinceEpoch(0),
+            created: DateTime.fromMillisecondsSinceEpoch(0),
           ),
         );
     await addNote('Guides/Notes.md', stems: ['notes']);

@@ -472,8 +472,14 @@ final class LibraryConfig {
       cascadeChecklist: _boolOr(json['cascadeChecklist'], true),
       frontmatterPanel: _boolOr(json['frontmatterPanel'], true),
       lintRulesOff: _lintRulesOffFrom(json['lintRulesOff']),
+      // The enum's name is the stored id (#726): a value a later build
+      // added reads back as the default here, which is what the setting
+      // has always done with an unknown one.
       treeSort: switch (json['treeSort']) {
-        'nameDesc' => TreeSort.nameDesc,
+        final String id => TreeSort.values.firstWhere(
+          (sort) => sort.name == id,
+          orElse: () => TreeSort.nameAsc,
+        ),
         _ => TreeSort.nameAsc,
       },
       linkType: switch (json['linkType']) {

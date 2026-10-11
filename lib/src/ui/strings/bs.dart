@@ -1135,10 +1135,21 @@ final class BosnianStrings extends Strings {
   String get showListTooltip => 'Prikaži popis';
   @override
   String get editRawTooltip => 'Uredi sirovo';
+
   @override
-  String get sortAscTooltip => 'Sortiraj A-Ž';
+  String get sortLastModified => 'Posljednja izmjena';
+
   @override
-  String get sortDescTooltip => 'Sortiraj Ž-A';
+  String get sortDateCreated => 'Datum kreiranja';
+
+  @override
+  String get sortSize => 'Veličina';
+
+  @override
+  String get sortAscending => 'Rastuće';
+
+  @override
+  String get sortDescending => 'Opadajuće';
   @override
   String get newNoteTitle => 'Nova bilješka';
   @override

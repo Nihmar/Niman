@@ -182,6 +182,24 @@ A tag's characters are letters and digits — any script's, so `#città` and
 `#идея` are one tag each — plus `-`, `_` and `/`. The frontmatter and the note
 body are read the same way, so the same tag written either way is one tag.
 
+## The tree
+
+The tree — the left column on a wide window, the Files tab on a phone —
+shows one row per note and folder, **folders first**. The chevron at its
+foot (in the Files app bar on a phone) opens what it is ordered by:
+**Name**, **Last modified**, **Date created** or **Size**, and the way:
+**Ascending** or **Descending**. Choosing an order keeps the way that is
+on; the two entries under the divider turn it over, and the chevron tips
+with it. Name is A→Z, or Z→A descending; the times run oldest first and
+newest first; size counts bytes and smallest first and largest first — a
+folder's own size is 0, and the folders keep the lead whichever field is
+chosen. Ties fall back to the name. The order and the way are one setting
+of this device, kept like the tree's width (see [settings](settings.md#library-settings-kept-on-this-device)).
+
+Windows reports a file's creation time and the index records it; Linux and
+macOS do not offer one through the file API the app uses, so **Date
+created** is the modification time there — the order above it.
+
 ## Renaming a note or a folder
 
 On Linux and Windows a rename happens in the tree, as in a file manager:

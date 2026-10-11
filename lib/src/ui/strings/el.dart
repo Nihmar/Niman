@@ -1160,10 +1160,21 @@ final class GreekStrings extends Strings {
   String get showListTooltip => 'Εμφάνιση λίστας';
   @override
   String get editRawTooltip => 'Επεξεργασία ως είναι';
+
   @override
-  String get sortAscTooltip => 'Ταξινόμηση Α-Ω';
+  String get sortLastModified => 'Τελευταία τροποποίηση';
+
   @override
-  String get sortDescTooltip => 'Ταξινόμηση Ω-Α';
+  String get sortDateCreated => 'Ημερομηνία δημιουργίας';
+
+  @override
+  String get sortSize => 'Μέγεθος';
+
+  @override
+  String get sortAscending => 'Αύξουσα';
+
+  @override
+  String get sortDescending => 'Φθίνουσα';
   @override
   String get newNoteTitle => 'Νέα σημείωση';
   @override

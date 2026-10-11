@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart' show kMiddleMouseButton;
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/library/session.dart';
@@ -56,7 +57,7 @@ final class NoteTree extends StatefulWidget {
     this.onOpenInNewTab,
     this.onBackgroundSecondaryTapUp,
     this.onMove,
-    this.nameDesc = false,
+    this.sort = TreeSort.nameAsc,
     this.ocrQueue,
     this.renaming,
     super.key,
@@ -77,8 +78,8 @@ final class NoteTree extends StatefulWidget {
   /// The session providing the index and the change-event stream.
   final LibrarySession controller;
 
-  /// Whether the rows sort by name descending (T-UI-03).
-  final bool nameDesc;
+  /// The order the rows come in (T-UI-03, #726).
+  final TreeSort sort;
 
   /// Library-relative path of the selected note/folder, or null.
   final String? selectedPath;
@@ -136,7 +137,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// order `_flatten` asks the index for, so a change of direction alone
   /// must rebuild the rows — a revision bump does not necessarily follow,
   /// and never does when the settings write that would have caused it fails.
-  bool _rowsNameDesc = false;
+  TreeSort _rowsSort = TreeSort.nameAsc;
 
   /// Whether the pinned section is rolled up, once the library has been
   /// asked. Null until then, and the section builds expanded — the common
@@ -215,13 +216,13 @@ final class _NoteTreeState extends State<NoteTree> {
     final cached = _rows;
     if (cached != null &&
         _rowsRevision == revision &&
-        _rowsNameDesc == widget.nameDesc &&
+        _rowsSort == widget.sort &&
         _setEquals(_rowsExpanded, widget.expanded)) {
       return cached;
     }
     _rowsRevision = revision;
     _rowsExpanded = Set<String>.of(widget.expanded);
-    _rowsNameDesc = widget.nameDesc;
+    _rowsSort = widget.sort;
     return _rows = _flatten();
   }
 
@@ -236,7 +237,7 @@ final class _NoteTreeState extends State<NoteTree> {
     final started = DateTime.now();
     final allNodes = await widget.controller.tree(
       widget.expanded,
-      nameDesc: widget.nameDesc,
+      sort: widget.sort,
     );
     final treeMs = DateTime.now().difference(started).inMilliseconds;
     final pinnedAt = DateTime.now();

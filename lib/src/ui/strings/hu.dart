@@ -1135,10 +1135,21 @@ final class HungarianStrings extends Strings {
   String get showListTooltip => 'Lista megjelenítése';
   @override
   String get editRawTooltip => 'Nyers szerkesztés';
+
   @override
-  String get sortAscTooltip => 'Rendezés A–Z';
+  String get sortLastModified => 'Utoljára módosítva';
+
   @override
-  String get sortDescTooltip => 'Rendezés Z–A';
+  String get sortDateCreated => 'Létrehozás dátuma';
+
+  @override
+  String get sortSize => 'Méret';
+
+  @override
+  String get sortAscending => 'Növekvő';
+
+  @override
+  String get sortDescending => 'Csökkenő';
   @override
   String get newNoteTitle => 'Új jegyzet';
   @override

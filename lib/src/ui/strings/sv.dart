@@ -1133,10 +1133,21 @@ final class SwedishStrings extends Strings {
   String get showListTooltip => 'Visa lista';
   @override
   String get editRawTooltip => 'Redigera rå';
+
   @override
-  String get sortAscTooltip => 'Sortera A-Ö';
+  String get sortLastModified => 'Senast ändrad';
+
   @override
-  String get sortDescTooltip => 'Sortera Ö-A';
+  String get sortDateCreated => 'Skapad';
+
+  @override
+  String get sortSize => 'Storlek';
+
+  @override
+  String get sortAscending => 'Stigande';
+
+  @override
+  String get sortDescending => 'Fallande';
   @override
   String get newNoteTitle => 'Ny anteckning';
   @override

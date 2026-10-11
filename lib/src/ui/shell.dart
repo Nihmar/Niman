@@ -2259,10 +2259,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// failure is swallowed rather than thrown: the flag stays flipped with
   /// the rows it already moved, and no revision bump comes to drag either
   /// of them back — the two stay consistent whatever the write did.
-  Future<void> _toggleTreeSort() async {
-    final next = _editorSettings.treeSort == TreeSort.nameAsc
-        ? TreeSort.nameDesc
-        : TreeSort.nameAsc;
+  Future<void> _setTreeSort(TreeSort next) async {
+    if (next == _editorSettings.treeSort) return;
     setState(() => _editorSettings = _editorSettings.copyWith(treeSort: next));
     try {
       await widget.controller.setTreeSort(next);
@@ -3066,12 +3064,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ),
   );
 
-  /// The sort-direction toggle (T-UI-03): the mockup's `unfold_more`
-  /// chevrons; the icon reflects the current direction.
+  /// The tree's sort control (T-UI-03, #726): the mockup's `unfold_more`
+  /// chevrons open the menu of orders, the icon saying the direction.
   Widget _sortToggle() {
     return TreeSortToggle(
-      ascending: _editorSettings.treeSort == TreeSort.nameAsc,
-      onToggle: () => unawaited(_toggleTreeSort()),
+      sort: _editorSettings.treeSort,
+      onSort: (sort) => unawaited(_setTreeSort(sort)),
     );
   }
 
@@ -4377,7 +4375,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       child: NoteTree(
         ocrQueue: widget.ocrQueue,
         controller: controller,
-        nameDesc: _editorSettings.treeSort == TreeSort.nameDesc,
+        sort: _editorSettings.treeSort,
         selectedPath: _selected,
         expanded: _expanded,
         onToggle: _toggle,

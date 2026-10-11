@@ -1142,10 +1142,21 @@ final class RomanianStrings extends Strings {
   String get showListTooltip => 'Afișează lista';
   @override
   String get editRawTooltip => 'Editează brut';
+
   @override
-  String get sortAscTooltip => 'Sortează A–Z';
+  String get sortLastModified => 'Ultima modificare';
+
   @override
-  String get sortDescTooltip => 'Sortează Z–A';
+  String get sortDateCreated => 'Data creării';
+
+  @override
+  String get sortSize => 'Dimensiune';
+
+  @override
+  String get sortAscending => 'Crescător';
+
+  @override
+  String get sortDescending => 'Descrescător';
   @override
   String get newNoteTitle => 'Notă nouă';
   @override

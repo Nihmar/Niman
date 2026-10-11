@@ -1130,10 +1130,21 @@ final class CzechStrings extends Strings {
   String get showListTooltip => 'Zobrazit seznam';
   @override
   String get editRawTooltip => 'Upravit surově';
+
   @override
-  String get sortAscTooltip => 'Seřadit A-Z';
+  String get sortLastModified => 'Poslední změna';
+
   @override
-  String get sortDescTooltip => 'Seřadit Z-A';
+  String get sortDateCreated => 'Datum vytvoření';
+
+  @override
+  String get sortSize => 'Velikost';
+
+  @override
+  String get sortAscending => 'Vzestupně';
+
+  @override
+  String get sortDescending => 'Sestupně';
   @override
   String get newNoteTitle => 'Nová poznámka';
   @override

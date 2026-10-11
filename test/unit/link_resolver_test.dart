@@ -27,6 +27,7 @@ void main() {
             isDir: false,
             size: 1,
             modified: DateTime.fromMillisecondsSinceEpoch(0),
+            created: DateTime.fromMillisecondsSinceEpoch(0),
           ),
         );
     if (stem != null) {

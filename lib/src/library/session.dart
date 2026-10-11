@@ -723,15 +723,19 @@ abstract interface class LibrarySession {
   /// Closes the session and releases resources; call exactly once.
   Future<void> dispose();
 
-  /// Children of the row with id [parentId] (0 = library root),
-  /// directories first, then by name (ascending, or descending with
-  /// [nameDesc]).
-  Future<List<Note>> children(int parentId, {bool nameDesc = false});
+  /// Children of the row with id [parentId] (0 = library root), in
+  /// [sort]'s order (#726): directories first whatever the field, then
+  /// the field in its own direction, the name breaking ties.
+  Future<List<Note>> children(
+    int parentId, {
+    TreeSort sort = TreeSort.nameAsc,
+  });
 
-  /// Every note that belongs to the root or to one of the [expandedPaths].
+  /// Every note that belongs to the root or to one of the [expandedPaths],
+  /// in [sort]'s order the same way [children] reads it.
   Future<List<Note>> tree(
     Iterable<String> expandedPaths, {
-    bool nameDesc = false,
+    TreeSort sort = TreeSort.nameAsc,
   });
 
   /// Every indexed folder, path-ordered (for move-target pickers).

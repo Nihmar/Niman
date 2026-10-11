@@ -774,36 +774,46 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     };
   }
 
+  /// The tree's order over two rows, as the DAO reads it (#726): folders
+  /// first, then the field in its direction, the name breaking ties.
+  static int _byTreeSort(_Row a, _Row b, TreeSort sort) {
+    if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
+    final byField = switch (sort.order) {
+      TreeOrder.name => a.name.compareTo(b.name),
+      TreeOrder.modified => a.modified.compareTo(b.modified),
+      TreeOrder.created => a.created.compareTo(b.created),
+      TreeOrder.size => a.size.compareTo(b.size),
+    };
+    final field = sort.descending ? -byField : byField;
+    if (field != 0) return field;
+    return a.name.compareTo(b.name);
+  }
+
   @override
-  Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
-    final kids =
-        <_Row>[
-          for (final row in _rows)
-            if (!row.trashed && _parentIdOf(row.path) == parentId) row,
-        ]..sort((a, b) {
-          if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
-          return nameDesc ? b.name.compareTo(a.name) : a.name.compareTo(b.name);
-        });
+  Future<List<Note>> children(
+    int parentId, {
+    TreeSort sort = TreeSort.nameAsc,
+  }) async {
+    final kids = <_Row>[
+      for (final row in _rows)
+        if (!row.trashed && _parentIdOf(row.path) == parentId) row,
+    ]..sort((a, b) => _byTreeSort(a, b, sort));
     return kids.map(_toNote).toList();
   }
 
   @override
   Future<List<Note>> tree(
     Iterable<String> expandedPaths, {
-    bool nameDesc = false,
+    TreeSort sort = TreeSort.nameAsc,
   }) async {
     final expanded = Set<String>.from(expandedPaths);
-    final results =
-        <_Row>[
-          for (final row in _rows)
-            if (!row.trashed &&
-                (parentOf(row.path).isEmpty ||
-                    expanded.contains(parentOf(row.path))))
-              row,
-        ]..sort((a, b) {
-          if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
-          return nameDesc ? b.name.compareTo(a.name) : a.name.compareTo(b.name);
-        });
+    final results = <_Row>[
+      for (final row in _rows)
+        if (!row.trashed &&
+            (parentOf(row.path).isEmpty ||
+                expanded.contains(parentOf(row.path))))
+          row,
+    ]..sort((a, b) => _byTreeSort(a, b, sort));
     return results.map(_toNote).toList();
   }
 
@@ -909,6 +919,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     for (var i = 0; i < count; i++) {
       _addRow('note_$i.md', isDir: false);
     }
+    _bump();
+  }
+
+  /// Test-only: gives the row at [path] the size and the times the tree's
+  /// orders read (#726). Each one given is set; a bumped revision makes
+  /// the tree read the new order.
+  void setNoteMetrics(
+    String path, {
+    int? size,
+    DateTime? modified,
+    DateTime? created,
+  }) {
+    final row = _requireRow(path);
+    if (size != null) row.size = size;
+    if (modified != null) row.modified = modified;
+    if (created != null) row.created = created;
     _bump();
   }
 
@@ -1461,8 +1487,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       parent: _parentIdOf(row.path),
       name: row.name,
       isDir: row.isDir,
-      size: 0,
-      modified: DateTime.fromMillisecondsSinceEpoch(0),
+      size: row.size,
+      modified: row.modified,
+      created: row.created,
       title: fm?.fields['title']?.first,
       date: fm?.date,
       pinned: fm?.pinned ?? false,
@@ -1547,8 +1574,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   bool _trashNameTaken(String name) =>
       _rows.any((row) => row.trashed && row.trashName == name);
 
+  /// The fake's clock: one millisecond per row made, so the orders by
+  /// time are the creation order (#726).
+  int _rowClock = 0;
+
   _Row _addRow(String path, {required bool isDir}) {
-    final row = _Row(id: _nextId++, path: path, isDir: isDir);
+    final now = DateTime.fromMillisecondsSinceEpoch(_rowClock++);
+    final row = _Row(id: _nextId++, path: path, isDir: isDir)
+      ..modified = now
+      ..created = now;
     _rows.add(row);
     return row;
   }
@@ -1756,6 +1790,15 @@ final class _Row {
 
   final int id;
   final bool isDir;
+
+  /// When the row was written by the fake, and when it was made: a
+  /// counter stamps each new row, so rows made in order sort in that
+  /// order (#726). A test may set them.
+  DateTime modified = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime created = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// The file's size in bytes; a test may set it (#726).
+  int size = 0;
 
   /// The note's content (created notes; the fake never edits it).
   String content = '';

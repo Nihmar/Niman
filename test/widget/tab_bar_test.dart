@@ -118,14 +118,18 @@ void main() {
 
     await tester.tap(find.byKey(const Key('toggle-sort')));
     await settle(tester);
+    await tester.tap(find.byKey(const Key('sort-descending')));
+    await settle(tester);
 
     // Descending now; persisted in the session.
     expect(topOf('charlie'), lessThan(topOf('bravo')));
     expect(topOf('bravo'), lessThan(topOf('alpha')));
     expect(await controller.treeSort, TreeSort.nameDesc);
 
-    // Tapping again returns to ascending.
+    // The menu's ascending entry returns it.
     await tester.tap(find.byKey(const Key('toggle-sort')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('sort-ascending')));
     await settle(tester);
     expect(topOf('alpha'), lessThan(topOf('charlie')));
     expect(await controller.treeSort, TreeSort.nameAsc);

@@ -1133,10 +1133,21 @@ final class UkrainianStrings extends Strings {
   String get showListTooltip => 'Показати список';
   @override
   String get editRawTooltip => 'Редагувати сирий';
+
   @override
-  String get sortAscTooltip => 'Сортувати А–Я';
+  String get sortLastModified => 'Остання зміна';
+
   @override
-  String get sortDescTooltip => 'Сортувати Я–А';
+  String get sortDateCreated => 'Дата створення';
+
+  @override
+  String get sortSize => 'Розмір';
+
+  @override
+  String get sortAscending => 'За зростанням';
+
+  @override
+  String get sortDescending => 'За спаданням';
   @override
   String get newNoteTitle => 'Нова нотатка';
   @override

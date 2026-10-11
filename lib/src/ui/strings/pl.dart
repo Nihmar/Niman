@@ -1144,10 +1144,21 @@ final class PolishStrings extends Strings {
   String get showListTooltip => 'Pokaż listę';
   @override
   String get editRawTooltip => 'Edytuj surowo';
+
   @override
-  String get sortAscTooltip => 'Sortuj A-Z';
+  String get sortLastModified => 'Ostatnia zmiana';
+
   @override
-  String get sortDescTooltip => 'Sortuj Z-A';
+  String get sortDateCreated => 'Data utworzenia';
+
+  @override
+  String get sortSize => 'Rozmiar';
+
+  @override
+  String get sortAscending => 'Rosnąco';
+
+  @override
+  String get sortDescending => 'Malejąco';
   @override
   String get newNoteTitle => 'Nowa notatka';
   @override

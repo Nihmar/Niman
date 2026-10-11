@@ -1135,10 +1135,21 @@ final class PortugueseStrings extends Strings {
   String get showListTooltip => 'Mostrar lista';
   @override
   String get editRawTooltip => 'Editar a fonte';
+
   @override
-  String get sortAscTooltip => 'Ordenar A-Z';
+  String get sortLastModified => 'Última modificação';
+
   @override
-  String get sortDescTooltip => 'Ordenar Z-A';
+  String get sortDateCreated => 'Data de criação';
+
+  @override
+  String get sortSize => 'Tamanho';
+
+  @override
+  String get sortAscending => 'Crescente';
+
+  @override
+  String get sortDescending => 'Decrescente';
   @override
   String get newNoteTitle => 'Nova nota';
   @override

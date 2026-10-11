@@ -1125,10 +1125,21 @@ final class NorwegianStrings extends Strings {
   String get showListTooltip => 'Vis liste';
   @override
   String get editRawTooltip => 'Rediger rå';
+
   @override
-  String get sortAscTooltip => 'Sorter A-Å';
+  String get sortLastModified => 'Sist endret';
+
   @override
-  String get sortDescTooltip => 'Sorter Å-A';
+  String get sortDateCreated => 'Opprettelsesdato';
+
+  @override
+  String get sortSize => 'Størrelse';
+
+  @override
+  String get sortAscending => 'Stigende';
+
+  @override
+  String get sortDescending => 'Synkende';
   @override
   String get newNoteTitle => 'Nytt notat';
   @override

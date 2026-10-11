@@ -1135,10 +1135,21 @@ final class SerbianStrings extends Strings {
   String get showListTooltip => 'Прикажи списак';
   @override
   String get editRawTooltip => 'Уреди сирово';
+
   @override
-  String get sortAscTooltip => 'Сортирај A-џ';
+  String get sortLastModified => 'Последња измена';
+
   @override
-  String get sortDescTooltip => 'Сортирај џ-A';
+  String get sortDateCreated => 'Датум креирања';
+
+  @override
+  String get sortSize => 'Величина';
+
+  @override
+  String get sortAscending => 'Растуће';
+
+  @override
+  String get sortDescending => 'Опадајуће';
   @override
   String get newNoteTitle => 'Нова белешка';
   @override

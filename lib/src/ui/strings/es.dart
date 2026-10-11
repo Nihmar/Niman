@@ -1148,10 +1148,21 @@ final class SpanishStrings extends Strings {
   String get showListTooltip => 'Mostrar lista';
   @override
   String get editRawTooltip => 'Editar la fuente';
+
   @override
-  String get sortAscTooltip => 'Ordenar A-Z';
+  String get sortLastModified => 'Última modificación';
+
   @override
-  String get sortDescTooltip => 'Ordenar Z-A';
+  String get sortDateCreated => 'Fecha de creación';
+
+  @override
+  String get sortSize => 'Tamaño';
+
+  @override
+  String get sortAscending => 'Ascendente';
+
+  @override
+  String get sortDescending => 'Descendente';
   @override
   String get newNoteTitle => 'Nueva nota';
   @override

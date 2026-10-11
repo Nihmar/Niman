@@ -1134,10 +1134,21 @@ final class FinnishStrings extends Strings {
   String get showListTooltip => 'Näytä lista';
   @override
   String get editRawTooltip => 'Muokkaa raakana';
+
   @override
-  String get sortAscTooltip => 'Järjestä A–Z';
+  String get sortLastModified => 'Viimeksi muokattu';
+
   @override
-  String get sortDescTooltip => 'Järjestä Z–A';
+  String get sortDateCreated => 'Luontipäivä';
+
+  @override
+  String get sortSize => 'Koko';
+
+  @override
+  String get sortAscending => 'Nouseva';
+
+  @override
+  String get sortDescending => 'Laskeva';
   @override
   String get newNoteTitle => 'Uusi muistiinpano';
   @override

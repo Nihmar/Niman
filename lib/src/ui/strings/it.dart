@@ -1140,10 +1140,21 @@ final class ItalianStrings extends Strings {
   String get showListTooltip => 'Mostra elenco';
   @override
   String get editRawTooltip => 'Modifica il sorgente';
+
   @override
-  String get sortAscTooltip => 'Ordina A-Z';
+  String get sortLastModified => 'Ultima modifica';
+
   @override
-  String get sortDescTooltip => 'Ordina Z-A';
+  String get sortDateCreated => 'Data di creazione';
+
+  @override
+  String get sortSize => 'Dimensione';
+
+  @override
+  String get sortAscending => 'Crescente';
+
+  @override
+  String get sortDescending => 'Decrescente';
   @override
   String get newNoteTitle => 'Nuova nota';
   @override

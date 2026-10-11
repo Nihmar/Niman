@@ -1067,10 +1067,21 @@ final class JapaneseStrings extends Strings {
   String get showListTooltip => 'リストを表示';
   @override
   String get editRawTooltip => 'ソースを編集';
+
   @override
-  String get sortAscTooltip => 'A-Z に並べ替え';
+  String get sortLastModified => '最終更新';
+
   @override
-  String get sortDescTooltip => 'Z-A に並べ替え';
+  String get sortDateCreated => '作成日';
+
+  @override
+  String get sortSize => 'サイズ';
+
+  @override
+  String get sortAscending => '昇順';
+
+  @override
+  String get sortDescending => '降順';
   @override
   String get newNoteTitle => '新しいノート';
   @override

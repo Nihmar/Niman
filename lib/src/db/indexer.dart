@@ -231,6 +231,7 @@ final class Indexer {
             isDir: const Value(false),
             size: Value(probe.size),
             modified: Value(probe.modified),
+            created: Value(probe.created),
           ),
         );
         await _store.replaceFileStems(oldRow.id, p.basename(pair.key));
@@ -368,6 +369,7 @@ final class Indexer {
               NotesCompanion(
                 size: Value(probe.size),
                 modified: Value(probe.modified),
+                created: Value(probe.created),
                 sha256: Value(content.sha256),
               ),
             );

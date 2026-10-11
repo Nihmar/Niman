@@ -12,13 +12,70 @@ enum EditorKind {
   wysiwyg,
 }
 
-/// The library tree sort order (T-UI-03).
+/// What the library tree is ordered by (#726).
+enum TreeOrder {
+  /// The row's name.
+  name,
+
+  /// When the file last changed.
+  modified,
+
+  /// When the file was created. Where the file system keeps no creation
+  /// time — on Linux and macOS through `dart:io` there is none — the
+  /// index records the modification time instead, so this order reads as
+  /// the one above.
+  created,
+
+  /// The file's size in bytes; a folder's is 0.
+  size,
+}
+
+/// The library tree sort order (T-UI-03, #726): the field, and the way.
+///
+/// One value holds both, and its name is what the device stores — the two
+/// name values have read back the same since the setting exists, and the
+/// orders added later join them.
 enum TreeSort {
   /// Name ascending (default).
-  nameAsc,
+  nameAsc(TreeOrder.name, descending: false),
 
   /// Name descending.
-  nameDesc,
+  nameDesc(TreeOrder.name, descending: true),
+
+  /// Last modified, oldest first.
+  modifiedAsc(TreeOrder.modified, descending: false),
+
+  /// Last modified, newest first.
+  modifiedDesc(TreeOrder.modified, descending: true),
+
+  /// Date created, oldest first.
+  createdAsc(TreeOrder.created, descending: false),
+
+  /// Date created, newest first.
+  createdDesc(TreeOrder.created, descending: true),
+
+  /// Size, smallest first.
+  sizeAsc(TreeOrder.size, descending: false),
+
+  /// Size, largest first.
+  sizeDesc(TreeOrder.size, descending: true);
+
+  new(this.order, {required this.descending});
+
+  /// The field this order sorts by.
+  final TreeOrder order;
+
+  /// Whether the field runs backwards (Z-A, newest first, largest first).
+  final bool descending;
+
+  /// [order] in the given direction.
+  static TreeSort of(TreeOrder order, {required bool descending}) =>
+      TreeSort.values.firstWhere(
+        (sort) => sort.order == order && sort.descending == descending,
+      );
+
+  /// The same order, the other way round.
+  TreeSort get flipped => of(order, descending: !descending);
 }
 
 /// The link format the editor's link button inserts.

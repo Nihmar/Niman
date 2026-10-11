@@ -1136,10 +1136,21 @@ final class AlbanianStrings extends Strings {
   String get showListTooltip => 'Shfaq listën';
   @override
   String get editRawTooltip => 'Ndrysho e thjeshtë';
+
   @override
-  String get sortAscTooltip => 'Rendit A-Z';
+  String get sortLastModified => 'Ndryshimi i fundit';
+
   @override
-  String get sortDescTooltip => 'Rendit Z-A';
+  String get sortDateCreated => 'Data e krijimit';
+
+  @override
+  String get sortSize => 'Madhësia';
+
+  @override
+  String get sortAscending => 'Në rritje';
+
+  @override
+  String get sortDescending => 'Në zbritje';
   @override
   String get newNoteTitle => 'Shënim i ri';
   @override

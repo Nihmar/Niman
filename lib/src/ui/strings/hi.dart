@@ -1113,10 +1113,21 @@ final class HindiStrings extends Strings {
   String get showListTooltip => 'सूची दिखाएँ';
   @override
   String get editRawTooltip => 'कच्चा संपादित करें';
+
   @override
-  String get sortAscTooltip => 'A-Z क्रम';
+  String get sortLastModified => 'अंतिम संशोधन';
+
   @override
-  String get sortDescTooltip => 'Z-A क्रम';
+  String get sortDateCreated => 'निर्माण दिनांक';
+
+  @override
+  String get sortSize => 'आकार';
+
+  @override
+  String get sortAscending => 'आरोही';
+
+  @override
+  String get sortDescending => 'अवरोही';
   @override
   String get newNoteTitle => 'नया नोट';
   @override

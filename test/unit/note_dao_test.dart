@@ -7,6 +7,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 
@@ -32,6 +33,7 @@ void main() {
             isDir: isDir,
             size: isDir ? 0 : 10,
             modified: DateTime(2026),
+            created: DateTime(2026),
           ),
         );
   }
@@ -83,5 +85,126 @@ void main() {
     expect(top.map((n) => n.path), ['a', 'a0', 'ab', 'a.md']);
     final a = await dao.find('a');
     expect((await dao.children(a!.id)).map((n) => n.path), ['a/x.md']);
+  });
+
+  // #726: the orders the tree offers, folders first in every one of them.
+  group('the tree orders', () {
+    late IndexDatabase orderDb;
+    late NoteDao orderDao;
+
+    Future<int> row(
+      String path, {
+      required bool isDir,
+      required DateTime modified,
+      required DateTime created,
+      int parent = 0,
+      int size = 0,
+    }) {
+      return orderDb
+          .into(orderDb.notes)
+          .insert(
+            NotesCompanion.insert(
+              path: path,
+              parent: parent,
+              name: path.split('/').last,
+              isDir: isDir,
+              size: size,
+              modified: modified,
+              created: created,
+            ),
+          );
+    }
+
+    setUp(() async {
+      orderDb = IndexDatabase(NativeDatabase.memory());
+      orderDao = NoteDao(orderDb);
+      await row(
+        'zed',
+        isDir: true,
+        modified: DateTime(2026, 3),
+        created: DateTime(2026),
+      );
+      await row(
+        'alba',
+        isDir: true,
+        modified: DateTime(2026),
+        created: DateTime(2026, 3),
+      );
+      await row(
+        'beta.md',
+        isDir: false,
+        size: 300,
+        modified: DateTime(2026, 2),
+        created: DateTime(2026, 4),
+      );
+      await row(
+        'alpha.md',
+        isDir: false,
+        size: 100,
+        modified: DateTime(2026, 4),
+        created: DateTime(2026, 2),
+      );
+      await row(
+        'gamma.md',
+        isDir: false,
+        size: 200,
+        modified: DateTime(2026),
+        created: DateTime(2026, 3),
+      );
+    });
+
+    tearDown(() async {
+      await orderDb.close();
+    });
+
+    Future<List<String>> names(TreeSort sort) async =>
+        (await orderDao.children(0, sort: sort)).map((n) => n.name).toList();
+
+    test('folders first in every order, then the field and the way', () async {
+      // Folders lead whatever the field is, and the field orders both
+      // groups; equal fields break by name.
+      expect(await names(TreeSort.nameAsc), [
+        'alba',
+        'zed',
+        'alpha.md',
+        'beta.md',
+        'gamma.md',
+      ]);
+      expect(await names(TreeSort.nameDesc), [
+        'zed',
+        'alba',
+        'gamma.md',
+        'beta.md',
+        'alpha.md',
+      ]);
+      expect(await names(TreeSort.modifiedDesc), [
+        'zed',
+        'alba',
+        'alpha.md',
+        'beta.md',
+        'gamma.md',
+      ]);
+      expect(await names(TreeSort.createdDesc), [
+        'alba',
+        'zed',
+        'beta.md',
+        'gamma.md',
+        'alpha.md',
+      ]);
+      expect(await names(TreeSort.sizeAsc), [
+        'alba',
+        'zed',
+        'alpha.md',
+        'gamma.md',
+        'beta.md',
+      ]);
+      expect(await names(TreeSort.sizeDesc), [
+        'alba',
+        'zed',
+        'beta.md',
+        'gamma.md',
+        'alpha.md',
+      ]);
+    });
   });
 }

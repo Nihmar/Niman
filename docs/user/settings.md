@@ -131,7 +131,7 @@ leave the file at its next write.
 |-----|---------|---------|
 | `editorKind` | `source` | `source` or `wysiwyg` |
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
-| `treeSort` | `nameAsc` | Tree order (`nameAsc`, `nameDesc`) |
+| `treeSort` | `nameAsc` | Tree order and the way (`nameAsc`, `nameDesc`, `modifiedAsc`, `modifiedDesc`, `createdAsc`, `createdDesc`, `sizeAsc`, `sizeDesc`) |
 | `pinnedCollapsed` | false | Tree's pinned section rolled up |
 | `lineNumbers` | true | Editor row-number column |
 | `readableLineLength` | true | Keep a note's text in a centred column |

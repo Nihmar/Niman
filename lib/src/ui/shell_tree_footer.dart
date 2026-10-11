@@ -10,6 +10,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/trash.dart';
@@ -192,34 +193,65 @@ final class TreeFooterBar extends StatelessWidget {
   }
 }
 
-/// The tree's sort chevron: name ascending, or name descending, with the
-/// arrow turning to say which.
+/// The tree's sort control: the orders in a menu, with the chevron turned
+/// to say the direction (#726).
 ///
 /// It sits in the footer and, on a phone, in the Files app bar; both show
-/// the same control over the same setting.
+/// the same control over the same setting. Choosing an order keeps the
+/// direction that is on — the two menu entries under the divider are how
+/// it turns over.
 final class TreeSortToggle extends StatelessWidget {
-  /// Creates the toggle; [ascending] is the order in force.
-  const new({required this.ascending, required this.onToggle, super.key});
+  /// Creates the control; [sort] is the order in force.
+  const new({required this.sort, required this.onSort, super.key});
 
-  /// Whether the tree is sorted by name ascending.
-  final bool ascending;
+  /// The order and direction in force.
+  final TreeSort sort;
 
-  /// Flips the order; the shell persists it.
-  final VoidCallback onToggle;
+  /// Applies what the menu chose; the shell persists it.
+  final ValueChanged<TreeSort> onSort;
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    return PopupMenuButton<TreeSort>(
       key: const Key('toggle-sort'),
-      tooltip: ascending
-          ? AppStrings.sortDescTooltip
-          : AppStrings.sortAscTooltip,
       icon: AnimatedRotation(
-        turns: ascending ? 0 : 0.5,
+        turns: sort.descending ? 0.5 : 0,
         duration: const Duration(milliseconds: 180),
         child: const Icon(Icons.unfold_more),
       ),
-      onPressed: onToggle,
+      onSelected: onSort,
+      itemBuilder: (context) => [
+        for (final order in TreeOrder.values)
+          CheckedPopupMenuItem(
+            key: Key('sort-${order.name}'),
+            value: TreeSort.of(order, descending: sort.descending),
+            checked: order == sort.order,
+            child: Text(sortOrderLabel(order)),
+          ),
+        const PopupMenuDivider(),
+        CheckedPopupMenuItem(
+          key: const Key('sort-ascending'),
+          value: TreeSort.of(sort.order, descending: false),
+          checked: !sort.descending,
+          child: Text(AppStrings.sortAscending),
+        ),
+        CheckedPopupMenuItem(
+          key: const Key('sort-descending'),
+          value: TreeSort.of(sort.order, descending: true),
+          checked: sort.descending,
+          child: Text(AppStrings.sortDescending),
+        ),
+      ],
     );
   }
 }
+
+/// What an order reads as in the sort menu.
+String sortOrderLabel(TreeOrder order) => switch (order) {
+  // The frames of the Home whose fields these names are (#535): one word
+  // each, in every language the app already speaks.
+  TreeOrder.name => AppStrings.homeSearchName,
+  TreeOrder.modified => AppStrings.sortLastModified,
+  TreeOrder.created => AppStrings.sortDateCreated,
+  TreeOrder.size => AppStrings.sortSize,
+};

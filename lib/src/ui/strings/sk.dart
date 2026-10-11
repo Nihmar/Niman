@@ -1133,10 +1133,21 @@ final class SlovakStrings extends Strings {
   String get showListTooltip => 'Zobraziť zoznam';
   @override
   String get editRawTooltip => 'Upraviť hrubo';
+
   @override
-  String get sortAscTooltip => 'Zoradiť A–Z';
+  String get sortLastModified => 'Posledná zmena';
+
   @override
-  String get sortDescTooltip => 'Zoradiť Z–A';
+  String get sortDateCreated => 'Dátum vytvorenia';
+
+  @override
+  String get sortSize => 'Veľkosť';
+
+  @override
+  String get sortAscending => 'Vzostupne';
+
+  @override
+  String get sortDescending => 'Zostupne';
   @override
   String get newNoteTitle => 'Nová poznámka';
   @override

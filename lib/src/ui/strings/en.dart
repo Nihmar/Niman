@@ -1124,10 +1124,21 @@ final class EnglishStrings extends Strings {
   String get showListTooltip => 'Show list';
   @override
   String get editRawTooltip => 'Edit raw';
+
   @override
-  String get sortAscTooltip => 'Sort A-Z';
+  String get sortLastModified => 'Last modified';
+
   @override
-  String get sortDescTooltip => 'Sort Z-A';
+  String get sortDateCreated => 'Date created';
+
+  @override
+  String get sortSize => 'Size';
+
+  @override
+  String get sortAscending => 'Ascending';
+
+  @override
+  String get sortDescending => 'Descending';
   @override
   String get newNoteTitle => 'New note';
   @override

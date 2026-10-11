@@ -64,9 +64,15 @@ void main() {
     expect(note1.parent, 0);
     expect(note1.size, 5);
     expect(note1.sha256, isNotNull);
+    final stat = File(p.join(root.path, 'note1.md')).statSync();
+    expect(note1.modified, toStoredSecond(stat.modified));
+    // The creation time the tree's order reads (#726): on Windows the
+    // stat's own, and the modification time where the file system keeps
+    // none — which is every other system this runs on.
     expect(
-      note1.modified,
-      toStoredSecond(File(p.join(root.path, 'note1.md')).statSync().modified),
+      note1.created,
+      toStoredSecond(createdOf(stat)),
+      reason: 'the creation time, or the fallback',
     );
 
     final docs = rows.firstWhere((n) => n.path == 'docs');
