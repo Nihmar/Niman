@@ -66,6 +66,8 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.toggleDock ||
   AppCommand.splitRight ||
   AppCommand.splitDown ||
+  AppCommand.searchNextHit ||
+  AppCommand.searchPreviousHit ||
   AppCommand.zenMode ||
   AppCommand.zoomIn ||
   AppCommand.zoomOut ||
@@ -81,6 +83,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.journalPrevious ||
   AppCommand.journalNext ||
   AppCommand.journalCalendar => PaletteGroup.journal,
+  AppCommand.focusSearch ||
   AppCommand.tabFiles ||
   AppCommand.tabTodo ||
   AppCommand.tabSearch ||

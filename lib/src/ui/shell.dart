@@ -3447,6 +3447,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ),
       // The selected row, which F2 renames (#707): on a desktop the note on
       // screen, or the folder clicked last.
+      AppCommand.searchNextHit: () => _stepSearchHits(1),
+      AppCommand.searchPreviousHit: () => _stepSearchHits(-1),
+      AppCommand.focusSearch: _focusSearchField,
       AppCommand.renameNote: () =>
           unawaited(_rowActions.rename(context, _selected ?? note)),
       AppCommand.moveNote: () => unawaited(_rowActions.move(context, note)),
@@ -4246,8 +4249,34 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       controller: controller,
       onOpenNote: _openSearchNote,
       requests: _searchRequests,
+      commands: _searchCommands,
       tree: tree,
     );
+  }
+
+  /// What the shell asks Search to do besides showing (#712): the field's
+  /// focus and the step through the hits.
+  final SearchCommands _searchCommands = SearchCommands();
+
+  /// Steps the sidebar's hits (#712), the way `F4` / `Shift+F4` do.
+  void _stepSearchHits(int direction) {
+    // Nothing to step: the sidebar keeps the last results, but only while
+    // it is the one showing.
+    if (_tab != ShellTab.search || !_visitedTabs.contains(ShellTab.search)) {
+      return;
+    }
+    _searchCommands.stepBy(direction);
+  }
+
+  /// Puts the cursor in the search field (`Ctrl+Shift+F`, #712), showing
+  /// the sidebar first on a wide window.
+  void _focusSearchField() {
+    _selectShellTab(ShellTab.search);
+    if (_wide && !_sidebarVisible) setState(() => _sidebarVisible = true);
+    // The screen may mount in this frame: ask once it has.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _searchCommands.focus();
+    });
   }
 
   /// What the Home asks Search to show (#535).

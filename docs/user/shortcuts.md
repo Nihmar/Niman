@@ -25,6 +25,10 @@ shortcuts lists them and lets you change them:
   there is none
 - `Ctrl/⌘+Shift+Page Up` / `Page Down` — the journal entry before / after
   the one on screen
+- `Ctrl/⌘+Shift+F` — the search sidebar: show it and put the cursor in
+  its field (see [search](search.md))
+- `F4` / `Shift+F4` — the next / previous hit of the search sidebar,
+  opening it in the pane (see [search](search.md))
 - `Ctrl/⌘+B` — show or hide the sidebar
 - `Ctrl/⌘+W` — close the note on screen (its tab)
 - `Ctrl/⌘+Tab` / `Ctrl/⌘+Shift+Tab` — next / previous open note

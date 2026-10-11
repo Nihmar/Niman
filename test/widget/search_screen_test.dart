@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_screen.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -487,6 +488,91 @@ void main() {
     await tester.pump();
     expect(find.text('First hit'), findsNothing);
     expect(find.text('Type at least 2 characters'), findsOne);
+  });
+
+  // #712: the shell steps the sidebar's hits with F4/Shift+F4 and focuses
+  // the field with Ctrl+Shift+F; the screen owns both, so the asks come
+  // through SearchCommands. The current hit stays marked.
+  testWidgets('F4/Shift+F4 step the hits, the current one marked (#712)', (
+    tester,
+  ) async {
+    final commands = SearchCommands();
+    addTearDown(commands.dispose);
+    source.hits = [_hit('a.md'), _hit('b.md'), _hit('c.md')];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SearchScreen(
+            controller: session,
+            onOpenNote: opened.add,
+            source: source,
+            commands: commands,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+
+    bool marked(String path) =>
+        tester.widget<ListTile>(find.byKey(Key('search-hit-$path'))).selected;
+
+    // The first step opens the first hit; the next the one after it.
+    commands.stepBy(1);
+    await settle(tester);
+    expect(opened, ['a.md']);
+    expect(marked('a.md'), isTrue);
+
+    commands.stepBy(1);
+    await settle(tester);
+    expect(opened, ['a.md', 'b.md']);
+    expect(marked('b.md'), isTrue);
+    expect(marked('a.md'), isFalse);
+
+    commands.stepBy(-1);
+    await settle(tester);
+    expect(opened.last, 'a.md');
+    expect(marked('a.md'), isTrue);
+
+    // And it wraps: back from the first is the last.
+    commands.stepBy(-1);
+    await settle(tester);
+    expect(opened.last, 'c.md');
+    expect(marked('c.md'), isTrue);
+
+    // A tap makes the same mark, so the steps continue from there.
+    await tester.tap(find.byKey(const Key('search-hit-b.md')));
+    await settle(tester);
+    expect(opened.last, 'b.md');
+    expect(marked('b.md'), isTrue);
+  });
+
+  testWidgets('the shell can give the query field the focus (#712)', (
+    tester,
+  ) async {
+    final commands = SearchCommands();
+    addTearDown(commands.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SearchScreen(
+            controller: session,
+            onOpenNote: opened.add,
+            source: source,
+            commands: commands,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    commands.focus();
+    await tester.pump();
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('search-query')),
+    );
+    expect(field.focusNode?.hasFocus, isTrue);
   });
 }
 

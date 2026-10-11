@@ -35,6 +35,7 @@ final class SearchScreen extends StatefulWidget {
     required this.onOpenNote,
     this.onOpenTags,
     this.requests,
+    this.commands,
     this.source,
     this.replaceSource,
     this.fieldSource,
@@ -55,6 +56,10 @@ final class SearchScreen extends StatefulWidget {
   /// typed into the box, as if by hand.
   final ValueListenable<SearchRequest?>? requests;
 
+  /// What the shell asks the screen to do besides showing a request
+  /// (#712): focus the field, step through the hits.
+  final SearchCommands? commands;
+
   /// Optional source override (widget tests inject a fake); when null the
   /// screen resolves it from [controller].
   final SearchSource? source;
@@ -74,8 +79,22 @@ final class SearchScreen extends StatefulWidget {
 final class _SearchScreenState extends State<SearchScreen> {
   static const int _pageSize = 50;
   static const Duration _debounce = Duration(milliseconds: 150);
+  static const Duration _stepScroll = Duration(milliseconds: 150);
 
   final TextEditingController _query = TextEditingController();
+
+  /// The query field's focus, for `Ctrl+Shift+F` (#712).
+  final FocusNode _queryFocus = FocusNode();
+
+  /// The hit last opened, from a tap or `F4`/`Shift+F4` (#712): the row
+  /// stays highlighted and the steps continue from it.
+  String? _currentHit;
+
+  /// The key of that row, to bring it back into view when the steps run.
+  final GlobalKey _currentHitKey = GlobalKey();
+
+  /// How many focus asks [_commanded] has answered.
+  int _seenFocus = 0;
 
   /// Replace mode (T-M3-10): the panel under the query box and the match
   /// preview replace the results list while active.
@@ -118,6 +137,15 @@ final class _SearchScreenState extends State<SearchScreen> {
       _query.text = text;
     }
     widget.requests?.addListener(_requested);
+    widget.commands?.addListener(_commanded);
+    // Asked before this screen mounted (Ctrl+Shift+F as the sidebar built
+    // it): take the focus once there is a frame to give it in.
+    if (widget.commands case final commands? when commands.focusRequests != 0) {
+      _seenFocus = commands.focusRequests;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _queryFocus.requestFocus();
+      });
+    }
     _query.addListener(_onQueryChanged);
     _replacement.addListener(_onReplacementChanged);
     if (widget.source == null) unawaited(_loadSource(since: started));
@@ -128,6 +156,8 @@ final class _SearchScreenState extends State<SearchScreen> {
   @override
   void dispose() {
     const AppLogger(name: 'search.ui').debug('dispose');
+    widget.commands?.removeListener(_commanded);
+    _queryFocus.dispose();
     _debounceTimer?.cancel();
     _replaceRefresh?.cancel();
     widget.requests?.removeListener(_requested);
@@ -340,6 +370,58 @@ final class _SearchScreenState extends State<SearchScreen> {
     ];
   }
 
+  /// The shell's `F4`/`Shift+F4` and `Ctrl+Shift+F` land here (#712): the
+  /// screen owns the hits and the field, so it acts on the ask.
+  void _commanded() {
+    final commands = widget.commands;
+    if (commands == null) return;
+    if (commands.focusRequests != _seenFocus) {
+      _seenFocus = commands.focusRequests;
+      _queryFocus.requestFocus();
+    }
+    if (commands.step != 0) _stepHit(commands.step);
+  }
+
+  /// Opens the hit at [index] in the shell (#712) and makes it the
+  /// current one: the list keeps it highlighted, and the steps continue
+  /// from it. A hit under the page's cut is listed first.
+  void _openHit(int index) {
+    final hit = _hits[index];
+    setState(() {
+      _currentHit = hit.path;
+      if (index >= _shown) _shown = index + 1;
+    });
+    _revealCurrentHit();
+    widget.onOpenNote(hit.path);
+  }
+
+  /// Opens the next ([direction] 1) or previous (-1) hit, wrapping at
+  /// either end; with no current hit the first (`F4`) or the last
+  /// (`Shift+F4`) is the one.
+  void _stepHit(int direction) {
+    if (_hits.isEmpty) return;
+    final current = _hits.indexWhere((hit) => hit.path == _currentHit);
+    final next = current < 0
+        ? (direction > 0 ? 0 : _hits.length - 1)
+        : (current + direction) % _hits.length;
+    _openHit(next);
+  }
+
+  /// Brings the current hit's row back into view when it is built: the
+  /// steps open notes, and the list should follow them.
+  void _revealCurrentHit() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _currentHitKey.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          alignment: 0.5,
+          duration: _stepScroll,
+        );
+      }
+    });
+  }
+
   void _loadMore() {
     setState(() {
       final next = _shown + _pageSize;
@@ -366,6 +448,7 @@ final class _SearchScreenState extends State<SearchScreen> {
                   TextField(
                     key: const Key('search-query'),
                     controller: _query,
+                    focusNode: _queryFocus,
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
                       hintText: AppStrings.searchHint,
@@ -488,42 +571,52 @@ final class _SearchScreenState extends State<SearchScreen> {
           );
         }
         final hit = _hits[index];
-        return ListTile(
-          key: Key('search-hit-${hit.path}'),
-          title: Text(hit.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                hit.path,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              if (hit.snippet.isNotEmpty)
-                _snippet(theme, hit.snippet)
-              else if ((_excerptWords, _source) case (
-                final words?,
-                final source?,
-              ))
-                FutureBuilder<String>(
-                  future: _excerpts.putIfAbsent(
-                    hit.path,
-                    () => source.excerpt(hit, words),
+        final current = hit.path == _currentHit;
+        return KeyedSubtree(
+          key: current ? _currentHitKey : null,
+          child: ListTile(
+            key: Key('search-hit-${hit.path}'),
+            selected: current,
+            selectedTileColor: theme.colorScheme.secondaryContainer,
+            title: Text(
+              hit.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hit.path,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  builder: (context, excerpt) {
-                    final text = excerpt.data ?? '';
-                    return text.isEmpty
-                        ? const SizedBox.shrink()
-                        : _snippet(theme, text);
-                  },
                 ),
-            ],
+                if (hit.snippet.isNotEmpty)
+                  _snippet(theme, hit.snippet)
+                else if ((_excerptWords, _source) case (
+                  final words?,
+                  final source?,
+                ))
+                  FutureBuilder<String>(
+                    future: _excerpts.putIfAbsent(
+                      hit.path,
+                      () => source.excerpt(hit, words),
+                    ),
+                    builder: (context, excerpt) {
+                      final text = excerpt.data ?? '';
+                      return text.isEmpty
+                          ? const SizedBox.shrink()
+                          : _snippet(theme, text);
+                    },
+                  ),
+              ],
+            ),
+            onTap: () => _openHit(index),
+            onLongPress: () => _showNoteActions(hit),
           ),
-          onTap: () => widget.onOpenNote(hit.path),
-          onLongPress: () => _showNoteActions(hit),
         );
       },
     );

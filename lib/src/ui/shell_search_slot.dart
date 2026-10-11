@@ -22,12 +22,17 @@ final class SearchSlot extends StatefulWidget {
     required this.controller,
     required this.onOpenNote,
     this.requests,
+    this.commands,
     this.tree = false,
     super.key,
   });
 
   /// What to show next, when asked from elsewhere.
   final ValueListenable<SearchRequest?>? requests;
+
+  /// What to do, besides showing: focus the field, step through the hits
+  /// (#712).
+  final SearchCommands? commands;
 
   /// The open library.
   final LibrarySession controller;
@@ -101,6 +106,7 @@ final class _SearchSlotState extends State<SearchSlot> {
               controller: widget.controller,
               onOpenNote: widget.onOpenNote,
               requests: widget.requests,
+              commands: widget.commands,
               onOpenTags: () => setState(() {
                 _showTags = true;
                 _tagsVisited = true;

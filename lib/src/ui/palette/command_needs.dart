@@ -118,7 +118,12 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.tabSettings ||
   AppCommand.tabHome ||
   AppCommand.noteBack ||
-  AppCommand.noteForward => const {},
+  AppCommand.noteForward ||
+  // The step and the focus no-op when there is no search on screen; the
+  // palette offering them is cheaper than a need that says so.
+  AppCommand.searchNextHit ||
+  AppCommand.searchPreviousHit ||
+  AppCommand.focusSearch => const {},
 };
 
 /// [need] in words, for the Commands page.

@@ -500,4 +500,82 @@ void main() {
     expect(find.byType(SearchScreen).hitTestable(), findsNothing);
     expect(find.byKey(const Key('tree-footer')), findsOne);
   });
+
+  // #712: F4/Shift+F4 step the sidebar's hits while the note is on screen,
+  // and the list keeps the current one marked.
+  testWidgets('wide: F4 steps the search hits from the note (#712)', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await controller.createNote(parentPath: '', name: 'beta');
+    controller.searchHits = [
+      const SearchHit(
+        noteId: 0,
+        path: 'alpha.md',
+        title: 'alpha',
+        snippet: 'x',
+      ),
+      const SearchHit(noteId: 0, path: 'beta.md', title: 'beta', snippet: 'x'),
+    ];
+    await settle(tester);
+
+    await tester.tap(railDest('search'));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('search-query')), 'al');
+    await settle(tester);
+
+    bool marked(String path) =>
+        tester.widget<ListTile>(find.byKey(Key('search-hit-$path'))).selected;
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+    await settle(tester);
+    expect(controller.workspace.activePath, 'alpha.md');
+    expect(railIndex(tester), ShellTab.search, reason: 'the list stays');
+    expect(marked('alpha.md'), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+    await settle(tester);
+    expect(controller.workspace.activePath, 'beta.md');
+    expect(marked('beta.md'), isTrue);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await settle(tester);
+    expect(controller.workspace.activePath, 'alpha.md');
+  });
+
+  // #712: Ctrl+Shift+F shows the sidebar and puts the cursor in its field,
+  // from wherever the window was.
+  testWidgets('wide: Ctrl+Shift+F gives the search field the focus (#712)', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('search'));
+    await settle(tester);
+    await tester.tap(railDest('files'));
+    await settle(tester);
+    expect(find.byType(SearchScreen).hitTestable(), findsNothing);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+
+    expect(railIndex(tester), ShellTab.search);
+    // The field, not the screen's center: with no results there the empty
+    // hint does not take a hit, and the field is what the ask is about.
+    expect(find.byKey(const Key('search-query')).hitTestable(), findsOne);
+    expect(find.byKey(const Key('tree-island')), findsOne);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('search-query')))
+          .focusNode
+          ?.hasFocus,
+      isTrue,
+    );
+  });
 }
