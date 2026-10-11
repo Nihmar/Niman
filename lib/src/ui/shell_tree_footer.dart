@@ -7,6 +7,8 @@
 /// builds because they are the shell's — sync and sort.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -159,12 +161,7 @@ final class TreeFooterBar extends StatelessWidget {
             key: const Key('open-trash'),
             tooltip: AppStrings.trashTitle,
             icon: const Icon(Icons.delete_outline),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => TrashScreen(controller: controller),
-              ),
-            ),
+            onPressed: () => unawaited(openTrash(context, controller)),
           ),
           sortToggle,
           const SizedBox(width: 4),

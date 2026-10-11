@@ -1,6 +1,7 @@
 // T-PP-22: the desktop chrome — no window app bar, the tree's controls
 // at the base of its column, and the open note's controls in the detail
 // pane header; the phone keeps its app bar and FAB.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,6 +10,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/window_controller.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -63,6 +65,30 @@ void main() {
     // No note is open, so there is no row of note chrome.
     expect(find.byKey(const Key('note-top-bar')), findsNothing);
   });
+
+  testWidgets(
+    'wide: the trash opens as a floating window on a pointer (#712)',
+    (tester) async {
+      // A desktop's theme is pointer-dense; the platform is overridden so the
+      // app builds one (tests default to Android). Reset before the test body
+      // ends: the binding checks the debug variables then, not in a tear-down.
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      try {
+        await pumpShell(tester, const Size(1200, 900));
+
+        await tester.tap(find.byKey(const Key('open-trash')));
+        await settle(tester);
+
+        expect(find.byKey(const Key('trash-window')), findsOne);
+        expect(find.byType(TrashScreen), findsOne);
+        // The window carries the title and close: no page app bar, no back.
+        expect(find.byType(AppBar), findsNothing);
+        expect(find.byKey(const Key('empty-trash-action')), findsOne);
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
 
   testWidgets('wide: the create menu offers and runs all six actions', (
     tester,

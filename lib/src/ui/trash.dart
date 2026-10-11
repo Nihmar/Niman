@@ -5,7 +5,9 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/floating_window.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_trash_history.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -20,10 +22,15 @@ import 'package:path/path.dart' as p;
 /// it governs.
 final class TrashScreen extends StatefulWidget {
   /// Creates the trash screen.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.embedded = false, super.key});
 
   /// The session of the library whose trash this screen lists.
   final LibrarySession controller;
+
+  /// Whether the screen is drawn inside a floating window (#712): the
+  /// window's header carries the title, so the body brings a compact
+  /// one of its own instead of a [Scaffold]'s app bar.
+  final bool embedded;
 
   @override
   State<TrashScreen> createState() => _TrashScreenState();
@@ -170,6 +177,7 @@ final class _TrashScreenState extends State<TrashScreen> {
     final items = _items;
     final canEmpty = !_busy && items != null && items.isNotEmpty;
     final library = p.basename(widget.controller.root ?? '');
+    if (widget.embedded) return _embedded(theme, items, canEmpty, library);
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -200,84 +208,152 @@ final class _TrashScreenState extends State<TrashScreen> {
           ),
         ],
       ),
-      body: items == null
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: items.isEmpty
-                      ? Center(child: Text(AppStrings.trashEmpty))
-                      : ListView.separated(
-                          itemCount: items.length,
-                          separatorBuilder: (context, _) =>
-                              const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final item = items[index];
-                            // The day, written the way the history screen
-                            // writes it (today, yesterday, "12 Sep")
-                            // rather than the ISO date the string happened
-                            // to start with.
-                            final deletedOn = historyDay(
-                              item.deletedAt,
-                              DateTime.now(),
-                            );
-                            return ListTile(
-                              title: Text(item.name),
-                              subtitle: Text(
-                                '${_wasAt(item.originalPath)}\n$deletedOn',
-                              ),
-                              isThreeLine: true,
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    tooltip: AppStrings.actionRestore,
-                                    icon: const Icon(Icons.restore),
-                                    onPressed: _busy
-                                        ? null
-                                        : () => _act(
-                                            (item) => widget.controller.ops!
-                                                .restoreTrash(item.name),
-                                            item,
-                                          ),
-                                  ),
-                                  IconButton(
-                                    tooltip: AppStrings.trashDeletePermanently,
-                                    icon: Icon(
-                                      Icons.delete_forever,
-                                      color: theme.colorScheme.error,
-                                    ),
-                                    onPressed: _busy
-                                        ? null
-                                        : () => _confirmPermanently(item),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('trash-auto-empty-row'),
-                  title: Text(AppStrings.trashAutoEmptyTitle),
-                  subtitle: Text(AppStrings.trashAutoEmptySubtitle),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        AppStrings.trashAutoEmptyValue(_autoEmptyDays),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right),
-                    ],
-                  ),
-                  onTap: _openAutoEmpty,
-                ),
-              ],
-            ),
+      body: _content(theme, items),
     );
   }
+
+  /// The same screen inside a floating window (#712). The window's header
+  /// carries the title and its close, so the count and Empty come along in
+  /// a compact row of their own instead of an app bar.
+  Widget _embedded(
+    ThemeData theme,
+    List<TrashItem>? items,
+    bool canEmpty,
+    String library,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  items == null
+                      ? AppStrings.trashTitle
+                      : '${AppStrings.trashTitle} · '
+                            '${AppStrings.trashItemCount(items.length)} · '
+                            '${AppStrings.settingsGroupLibrary(library)}',
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+              Tooltip(
+                message: AppStrings.trashEmptyAction,
+                child: TextButton(
+                  key: SettingsKeys.trashEmptyAction,
+                  onPressed: canEmpty ? _confirmEmptyTrash : null,
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.error,
+                  ),
+                  child: Text(AppStrings.actionEmpty),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: _content(theme, items)),
+      ],
+    );
+  }
+
+  /// The list, the divider and the auto-empty row: the body both shapes
+  /// draw, the page under its app bar and the window under its header.
+  Widget _content(ThemeData theme, List<TrashItem>? items) {
+    if (items == null) return const Center(child: CircularProgressIndicator());
+    return Column(
+      children: [
+        Expanded(
+          child: items.isEmpty
+              ? Center(child: Text(AppStrings.trashEmpty))
+              : ListView.separated(
+                  itemCount: items.length,
+                  separatorBuilder: (context, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    // The day, written the way the history screen
+                    // writes it (today, yesterday, "12 Sep")
+                    // rather than the ISO date the string happened
+                    // to start with.
+                    final deletedOn = historyDay(
+                      item.deletedAt,
+                      DateTime.now(),
+                    );
+                    return ListTile(
+                      title: Text(item.name),
+                      subtitle: Text(
+                        '${_wasAt(item.originalPath)}\n$deletedOn',
+                      ),
+                      isThreeLine: true,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: AppStrings.actionRestore,
+                            icon: const Icon(Icons.restore),
+                            onPressed: _busy
+                                ? null
+                                : () => _act(
+                                    (item) => widget.controller.ops!
+                                        .restoreTrash(item.name),
+                                    item,
+                                  ),
+                          ),
+                          IconButton(
+                            tooltip: AppStrings.trashDeletePermanently,
+                            icon: Icon(
+                              Icons.delete_forever,
+                              color: theme.colorScheme.error,
+                            ),
+                            onPressed: _busy
+                                ? null
+                                : () => _confirmPermanently(item),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        ),
+        const Divider(height: 1),
+        ListTile(
+          key: const Key('trash-auto-empty-row'),
+          title: Text(AppStrings.trashAutoEmptyTitle),
+          subtitle: Text(AppStrings.trashAutoEmptySubtitle),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                AppStrings.trashAutoEmptyValue(_autoEmptyDays),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+          onTap: _openAutoEmpty,
+        ),
+      ],
+    );
+  }
+}
+
+/// Opens the trash: a floating window where a pointer aims (#712), the
+/// page a phone keeps.
+Future<void> openTrash(BuildContext context, LibrarySession controller) {
+  if (pointerDense(Theme.of(context))) {
+    return showFloatingWindow(
+      context,
+      title: AppStrings.trashTitle,
+      panelKey: const Key('trash-window'),
+      builder: (context) => TrashScreen(controller: controller, embedded: true),
+    );
+  }
+  return Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+      builder: (context) => TrashScreen(controller: controller),
+    ),
+  );
 }

@@ -2925,14 +2925,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
   }
 
-  void _openTrash(LibrarySession controller) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => TrashScreen(controller: controller),
-      ),
-    );
-  }
+  void _openTrash(LibrarySession controller) =>
+      unawaited(openTrash(context, controller));
 
   /// Trash/sort actions of the Files-tab app bar (per mockup: trash +  /// sort chevrons; the settings gear moved to the Settings tab).
   List<Widget> _filesAppBarActions(LibrarySession controller) {
@@ -2951,12 +2945,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         key: const Key('open-trash'),
         tooltip: AppStrings.trashTitle,
         icon: const Icon(Icons.delete_outline),
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => TrashScreen(controller: controller),
-          ),
-        ),
+        onPressed: () => unawaited(openTrash(context, controller)),
       ),
       _sortToggle(),
     ];
