@@ -13,8 +13,10 @@ import '../fakes/shell_harness.dart';
 Future<void> _pumpOpener<T>(
   WidgetTester tester,
   Future<T?> Function(BuildContext context) open,
-  void Function(T? value) onDone,
-) async {
+  void Function(T? value) onDone, {
+  Size size = const Size(800, 600),
+}) async {
+  setSurfaceSize(tester, size);
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -102,6 +104,9 @@ void main() {
       );
 
       expect(find.byKey(const Key('list-tally-sheet')), findsOneWidget);
+      // A pointer's window: a dialog, not a sheet from the edge (#712).
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.byType(BottomSheet), findsNothing);
       // The cut was guessed from the rows, so the preview is already the
       // answer: three brioches, one of everything else.
       expect(find.text('brioche'), findsOneWidget);
@@ -118,6 +123,23 @@ void main() {
       expect(choice?.index, 0);
       expect(choice?.cut, TallyCut.dash);
       expect(choice?.sort, TallySort.count);
+    });
+
+    testWidgets('a phone keeps the sheet (#712)', (tester) async {
+      await _pumpOpener<TallyChoice>(
+        tester,
+        (context) => showListTallySheet(
+          context,
+          candidates: const <TallyCandidate>[TallyCandidate(rows: order)],
+          initialIndex: 0,
+        ),
+        (_) {},
+        size: const Size(390, 844),
+      );
+
+      expect(find.byKey(const Key('list-tally-sheet')), findsOneWidget);
+      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(find.byType(Dialog), findsNothing);
     });
 
     testWidgets('reading the rows another way recounts the preview', (

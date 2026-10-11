@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show wideBreakpoint;
 import 'package:niman/src/ui/strings.dart';
 
 /// A picture's text, as soon as it is read, on a phone (#595): the words
@@ -11,10 +13,8 @@ Future<void> showOcrResultSheet(
   required String savedAs,
   required String text,
   required VoidCallback onOpen,
-}) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
-  builder: (context) {
+}) {
+  Widget body(BuildContext context) {
     final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
@@ -98,5 +98,22 @@ Future<void> showOcrResultSheet(
         ),
       ),
     );
-  },
-);
+  }
+
+  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: body(context),
+        ),
+      ),
+    );
+  }
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: body,
+  );
+}

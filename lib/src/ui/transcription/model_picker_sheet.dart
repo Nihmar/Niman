@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show wideBreakpoint;
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -16,12 +18,23 @@ Future<TranscriptionModel?> showModelPickerSheet(
   BuildContext context,
   TranscriptionModels models,
 ) async {
-  final picked = await showModalBottomSheet<TranscriptionModel>(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder: (context) => _ModelPicker(models: models),
-  );
+  final body = _ModelPicker(models: models);
+  final picked = MediaQuery.sizeOf(context).width >= wideBreakpoint
+      ? await showDialog<TranscriptionModel>(
+          context: context,
+          builder: (context) => Dialog(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: body,
+            ),
+          ),
+        )
+      : await showModalBottomSheet<TranscriptionModel>(
+          context: context,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (context) => body,
+        );
   if (picked != null) await models.setDefault(picked);
   return picked;
 }
