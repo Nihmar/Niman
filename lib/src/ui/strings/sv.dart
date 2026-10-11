@@ -1832,6 +1832,11 @@ final class SwedishStrings extends Strings {
   String get deletedMessage => 'Togs bort';
   @override
   String deleteForeverConfirm(String name) => '$name tas bort permanent';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Ta bort den tillhörande anteckningen också'
+      : 'Ta bort de $count tillhörande anteckningarna också';
   @override
   String get chooseDestination => 'Välj mål';
   @override

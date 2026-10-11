@@ -6,6 +6,17 @@ Deletes go to `.trash/` (soft delete) or remove the file permanently
 (hard delete), depending on the library's `trashEnabled` setting
 (default true). Restore by moving the file back out of `.trash/`.
 
+Deleting a file that notes were written about — a PDF's annotations, a
+scan's recognized text — offers **Also delete the N notes about it**, one
+checkbox on the delete's own question, checked. Taken along, they are
+trash items of their own and the snackbar's **Undo** brings the file and
+them back together; untold, they stay where they are. A folder offers
+the same for the companions living outside it (its files' sidecars and
+any companions inside go with the folder itself), and a file with
+nothing written about it deletes without a question, as it always did.
+The notes are found through the index, so one written a moment ago may
+not be counted until it is indexed.
+
 On a desktop the trash opens as a floating window over the note, so the
 tree and the open note stay where they are; on a phone it is a page.
 Every feature is on every platform, only the shape of it differs
@@ -295,6 +306,9 @@ A sheet (a dialog on a wide window) shows the place and the passage and
 takes your comment, which may stay empty. **Save** writes it and leaves
 you where you were; the message that says so offers **Open note**, which
 opens the companion at the annotation.
+
+Companion notes are ordinary notes, deleted on their own; deleting the
+file they annotate offers to take them along — see [trash](#trash).
 
 Each annotation is a section of the companion: a heading naming the
 place, the passage quoted with a link back to it, and your comment:

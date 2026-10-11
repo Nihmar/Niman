@@ -1813,6 +1813,11 @@ final class NorwegianStrings extends Strings {
   String get deletedMessage => 'Slettet';
   @override
   String deleteForeverConfirm(String name) => '$name slettes permanent';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Slett også notatet om det'
+      : 'Slett også de $count notatene om det';
   @override
   String get chooseDestination => 'Velg mål';
   @override

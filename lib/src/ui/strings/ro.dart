@@ -1839,6 +1839,11 @@ final class RomanianStrings extends Strings {
   String get deletedMessage => 'Șters';
   @override
   String deleteForeverConfirm(String name) => '$name se șterge permanent';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Șterge și nota care îl descrie'
+      : 'Șterge și cele $count note care îl descriu';
   @override
   String get chooseDestination => 'Alege destinația';
   @override

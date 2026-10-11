@@ -1833,6 +1833,10 @@ final class UkrainianStrings extends Strings {
   String get deletedMessage => 'Видалено';
   @override
   String deleteForeverConfirm(String name) => '$name буде остаточно видалено';
+
+  @override
+  String deleteNotesToo(int count) =>
+      'Також видалити повʼязані нотатки ($count)';
   @override
   String get chooseDestination => 'Обрати призначення';
   @override

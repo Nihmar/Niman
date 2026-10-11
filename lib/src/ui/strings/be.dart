@@ -1830,6 +1830,10 @@ final class BelarusianStrings extends Strings {
   String get deletedMessage => 'Выдалена';
   @override
   String deleteForeverConfirm(String name) => '$name будзе канчаткова выдалена';
+
+  @override
+  String deleteNotesToo(int count) =>
+      'Таксама выдаліць звязаныя нататкі ($count)';
   @override
   String get chooseDestination => 'Абраць месца';
   @override

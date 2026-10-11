@@ -1828,6 +1828,10 @@ final class LithuanianStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name bus nevildinamai ištrintas';
+
+  @override
+  String deleteNotesToo(int count) =>
+      'Taip pat ištrinti susijusius užrašus ($count)';
   @override
   String get chooseDestination => 'Pasirinkti paskirtį';
   @override

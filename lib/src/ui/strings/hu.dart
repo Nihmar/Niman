@@ -1838,6 +1838,10 @@ final class HungarianStrings extends Strings {
   String get deletedMessage => 'Törölve';
   @override
   String deleteForeverConfirm(String name) => '$name véglegesen törlődik';
+
+  @override
+  String deleteNotesToo(int count) =>
+      'A kapcsolódó jegyzetek törlése is ($count)';
   @override
   String get chooseDestination => 'Cél kiválasztása';
   @override

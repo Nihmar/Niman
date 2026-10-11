@@ -1820,6 +1820,9 @@ final class SlovenianStrings extends Strings {
   String get deletedMessage => 'Izbrisano';
   @override
   String deleteForeverConfirm(String name) => '$name se trajno izbriše';
+
+  @override
+  String deleteNotesToo(int count) => 'Izbriši tudi povezane zapiske ($count)';
   @override
   String get chooseDestination => 'Izberi cilj';
   @override

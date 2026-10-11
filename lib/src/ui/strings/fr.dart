@@ -1872,6 +1872,11 @@ final class FrenchStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name sera définitivement supprimé';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Supprimer aussi la note associée'
+      : 'Supprimer aussi les $count notes associées';
   @override
   String get chooseDestination => 'Choisir la destination';
   @override

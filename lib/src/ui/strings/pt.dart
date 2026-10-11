@@ -1836,6 +1836,11 @@ final class PortugueseStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name será excluído permanentemente';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Eliminar também a nota sobre ele'
+      : 'Eliminar também as $count notas sobre ele';
   @override
   String get chooseDestination => 'Escolher o destino';
   @override

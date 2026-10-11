@@ -69,6 +69,20 @@ final class CompanionNotes {
     return out;
   }
 
+  /// Every companion by the path of the file it names (#717), in one
+  /// pass: [of] resolves every declared link each time it is asked, and a
+  /// delete asks about a whole folder at once.
+  Future<Map<String, List<String>>> all() async {
+    final out = <String, List<String>>{};
+    for (final (:note, :value) in await fields.fieldValues(key)) {
+      final resolved = await _resolve(value, from: note.path);
+      if (resolved is! ResolvedNote) continue;
+      final notes = out.putIfAbsent(resolved.note.path, () => <String>[]);
+      if (!notes.contains(note.path)) notes.add(note.path);
+    }
+    return out;
+  }
+
   /// Where the file at library-relative [path] was annotated (#285): every
   /// link of its companions to a place of it, in the companions' order and
   /// then their text's.

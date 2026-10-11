@@ -1840,6 +1840,11 @@ final class GalicianStrings extends Strings {
   String get deletedMessage => 'Borrado';
   @override
   String deleteForeverConfirm(String name) => '$name borraráse permanentemente';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Elimina tamén a nota que o describe'
+      : 'Elimina tamén as $count notas que o describen';
   @override
   String get chooseDestination => 'Escoller o destino';
   @override

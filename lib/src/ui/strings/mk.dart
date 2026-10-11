@@ -1842,6 +1842,10 @@ final class MacedonianStrings extends Strings {
   String get deletedMessage => 'Избришано';
   @override
   String deleteForeverConfirm(String name) => '$name ќе биде трајно избришано';
+
+  @override
+  String deleteNotesToo(int count) =>
+      'Избриши ги и поврзаните белешки ($count)';
   @override
   String get chooseDestination => 'Одбери одредиште';
   @override

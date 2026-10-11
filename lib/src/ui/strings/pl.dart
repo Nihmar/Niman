@@ -1850,6 +1850,9 @@ final class PolishStrings extends Strings {
   String get deletedMessage => 'Usunięto';
   @override
   String deleteForeverConfirm(String name) => '$name zostanie trwale usunięte';
+
+  @override
+  String deleteNotesToo(int count) => 'Usuń także powiązane notatki ($count)';
   @override
   String get chooseDestination => 'Wybierz cel';
   @override
