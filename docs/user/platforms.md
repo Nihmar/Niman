@@ -200,6 +200,15 @@ thumb-sized rows and the long-press sheet. The choice follows the
 platform's own density (compact on a desktop), not the window's width,
 so a tablet in landscape keeps the touch sizes.
 
+## Window size
+
+The Linux and Windows window cannot be made narrower than 600 px — the
+width at which the layout would switch to the phone's bottom bar and
+full-screen note — nor shorter than 400 px. A window snapped that small
+is still driven by a mouse, and the desktop keeps its rail, tree and
+panes down to the floor; Android carries the narrow layout, so nothing
+is lost where a thumb is the pointer.
+
 ## Renaming
 
 On Linux and Windows a note or a folder is renamed in its tree row
