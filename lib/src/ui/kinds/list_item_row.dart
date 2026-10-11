@@ -79,7 +79,8 @@ class ListItemRow extends StatefulWidget {
   State<ListItemRow> createState() => _ListItemRowState();
 }
 
-class _ListItemRowState extends State<ListItemRow> {
+class _ListItemRowState extends State<ListItemRow>
+    with AutomaticKeepAliveClientMixin {
   final FocusNode _focus = FocusNode();
   final TextEditingController _text = TextEditingController();
   final FocusNode _quantityFocus = FocusNode();
@@ -100,6 +101,9 @@ class _ListItemRowState extends State<ListItemRow> {
   @override
   void didUpdateWidget(ListItemRow old) {
     super.didUpdateWidget(old);
+    // The drag let go (or began): the keep-alive follows it, or the row
+    // would stay alive for the rest of the session (#720).
+    if (old.isDragSource != widget.isDragSource) updateKeepAlive();
     if (widget.isEditing && !old.isEditing) {
       _committed = false;
       _text
@@ -170,8 +174,17 @@ class _ListItemRowState extends State<ListItemRow> {
     super.dispose();
   }
 
+  /// The row being dragged is kept alive (#720): the edge scroll moves the
+  /// list under the finger, and the row the gesture lives on must not be
+  /// disposed when it scrolls out of the viewport — its recognizer would go
+  /// with it, and the drag would never end: no drop, the indicator stuck,
+  /// and every later drag refused.
+  @override
+  bool get wantKeepAlive => widget.isDragSource;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = Theme.of(context);
     final item = widget.item;
     final indent = 8.0 + item.depth * 24;

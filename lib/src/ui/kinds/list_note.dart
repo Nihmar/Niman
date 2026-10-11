@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,10 +61,12 @@ class ListNoteView extends StatefulWidget {
 
 /// The item being dragged (T-TK-09).
 final class _Drag {
-  new(this.index);
+  new(this.index, this.position);
 
   final int index;
-  Offset? position;
+
+  /// Where the pointer last was, in global coordinates.
+  Offset position;
 }
 
 /// Where a dragged item will land: the target item index in [mode], or
@@ -87,6 +90,13 @@ class _ListNoteViewState extends State<ListNoteView>
   final ScrollController _scroll = ScrollController();
   final GlobalKey _listKey = GlobalKey();
   final Map<int, GlobalKey> _rowKeys = {};
+
+  /// The first and last item index the last layout built: the drop is read
+  /// against those rows only, whatever the note's length (#720) — walking
+  /// every item a frame cost the list's own length.
+  int? _builtFirst;
+  int? _builtLast;
+
   int? _editingIndex;
 
   /// Whether the next rebuild is the one a just-added item landed in: the
@@ -99,6 +109,21 @@ class _ListNoteViewState extends State<ListNoteView>
   bool _cancelPendingCommit = false;
   _Drag? _drag;
   _DropTarget? _drop;
+
+  /// How deep into the list an edge reaches, and how fast a held drag
+  /// scrolls a frame at the very edge: the tree's own numbers (#580,
+  /// #720).
+  static const double _edge = 48;
+  static const double _maxEdgeSpeed = 16;
+
+  /// The signed scroll a frame while a drag is held at an edge; zero away
+  /// from the edges.
+  double _edgeSpeed = 0;
+
+  /// Runs the edge scroll a frame at a time while a dragged pointer stays
+  /// in an edge zone (#720): a held finger keeps the list moving, which a
+  /// jump per move event never did, and it stops with the drag.
+  Timer? _edgeTicker;
 
   /// Drives the add row's show/hide: it steps aside while a row is being
   /// edited in place, so the edited row is never hidden behind it.
@@ -224,6 +249,7 @@ class _ListNoteViewState extends State<ListNoteView>
 
   @override
   void dispose() {
+    _stopEdgeScroll();
     WidgetsBinding.instance.removeObserver(this);
     _newItem.dispose();
     _scroll.dispose();
@@ -330,9 +356,9 @@ class _ListNoteViewState extends State<ListNoteView>
   void _onDragStart(int index, Offset global) {
     if (_drag != null) return;
     unawaited(HapticFeedback.mediumImpact());
-    _drag = _Drag(index)..position = global;
+    _drag = _Drag(index, global);
     _drop = _dropAt(global);
-    _autoScroll(global);
+    _followEdge(global);
     setState(() {});
   }
 
@@ -340,16 +366,18 @@ class _ListNoteViewState extends State<ListNoteView>
     final drag = _drag;
     if (drag == null) return;
     drag.position = global;
-    _autoScroll(global);
-    final drop = _dropAt(global);
-    if (!_sameDrop(drop, _drop)) {
-      setState(() => _drop = drop);
-    }
+    _followEdge(global);
+    _readDrop();
   }
 
   void _onDragEnd() {
+    // The scroll stops with the drag, and the drop is read again before
+    // the drag is let go: the list may have moved since the last move
+    // event, so the remembered target is not the one under the pointer
+    // (#720).
+    _stopEdgeScroll();
     final drag = _drag;
-    final drop = _drop;
+    final drop = drag == null ? null : _dropAt(drag.position);
     setState(() {
       _drag = null;
       _drop = null;
@@ -376,16 +404,33 @@ class _ListNoteViewState extends State<ListNoteView>
   }
 
   void _onDragCancel() {
+    _stopEdgeScroll();
     setState(() {
       _drag = null;
       _drop = null;
     });
   }
 
+  /// Lights the drop under the drag's last position, when it changed: the
+  /// list scrolls under the finger, so the row a line falls on moves with
+  /// it.
+  void _readDrop() {
+    final drag = _drag;
+    if (drag == null) return;
+    final drop = _dropAt(drag.position);
+    if (!_sameDrop(drop, _drop)) setState(() => _drop = drop);
+  }
+
   bool _sameDrop(_DropTarget? a, _DropTarget? b) =>
       a == null ? b == null : b != null && a.item == b.item && a.mode == b.mode;
 
   /// The drop target under [global], or null (no indicator).
+  ///
+  /// Read against the rows as they stand (#720): with the list scrolled
+  /// under the finger, the row a line falls on is not the one the last
+  /// move saw. A pointer in the padding above the first row on screen, or
+  /// below the last, takes that row's own edge — before or after it —
+  /// rather than nothing, so a release at the edge lands.
   _DropTarget? _dropAt(Offset global) {
     final items = _items;
     final drag = _drag;
@@ -394,10 +439,24 @@ class _ListNoteViewState extends State<ListNoteView>
     if (listBox == null) return null;
     final listRect = listBox.localToGlobal(Offset.zero) & listBox.size;
     if (global.dx < listRect.left || global.dx > listRect.right) return null;
+    if (global.dy < listRect.top || global.dy > listRect.bottom) return null;
 
     final dragLine = items[drag.index].line;
     final dragEnd = subtreeEnd(items, drag.index, listLineCount(widget.text));
-    for (var j = 0; j < items.length; j++) {
+    final from = _builtFirst ?? 0;
+    final to = _builtLast ?? items.length - 1;
+    // Over the dragged row or one of its own children: no drop.
+    for (var j = from; j <= to; j++) {
+      final line = items[j].line;
+      if (j != drag.index && (line <= dragLine || line >= dragEnd)) continue;
+      final box = _rowBox(j);
+      if (box == null) continue;
+      final top = box.localToGlobal(Offset.zero).dy;
+      if (global.dy >= top && global.dy < top + box.size.height) return null;
+    }
+
+    _DropTarget? past;
+    for (var j = from; j <= to; j++) {
       if (j == drag.index) continue;
       final line = items[j].line;
       if (line > dragLine && line < dragEnd) continue; // own subtree
@@ -405,7 +464,14 @@ class _ListNoteViewState extends State<ListNoteView>
       if (box == null) continue;
       final top = box.localToGlobal(Offset.zero).dy;
       final height = box.size.height;
-      if (global.dy < top || global.dy >= top + height) continue;
+      if (global.dy < top) {
+        // The first row on screen below the pointer: before it.
+        return _DropTarget(j, ListDropMode.before);
+      }
+      if (global.dy >= top + height) {
+        past = _DropTarget(j, ListDropMode.after);
+        continue;
+      }
       final rel = (global.dy - top) / height;
       return _DropTarget(
         j,
@@ -416,24 +482,8 @@ class _ListNoteViewState extends State<ListNoteView>
             : ListDropMode.under,
       );
     }
-
-    final first = _rowBox(0);
-    if (first != null) {
-      final top = first.localToGlobal(Offset.zero).dy;
-      final bottom = top + first.size.height;
-      if (bottom >= listRect.top && global.dy < top) {
-        return const _DropTarget(-1, ListDropMode.before);
-      }
-    }
-    final last = _rowBox(items.length - 1);
-    if (last != null) {
-      final top = last.localToGlobal(Offset.zero).dy;
-      final bottom = top + last.size.height;
-      if (top <= listRect.bottom && global.dy >= bottom) {
-        return _DropTarget(items.length, ListDropMode.after);
-      }
-    }
-    return null;
+    // Below every row on screen: after the last one there.
+    return past;
   }
 
   RenderBox? _rowBox(int index) {
@@ -452,36 +502,60 @@ class _ListNoteViewState extends State<ListNoteView>
     return box is RenderBox ? box : null;
   }
 
-  /// Keeps the drop zone reachable: scrolls while the pointer is near a
-  /// list edge.
+  /// A dragged pointer at [global] near a list edge: the list scrolls
+  /// toward it a frame at a time, faster the closer it is — the tree's
+  /// treatment of the same edge (#580, #720).
   ///
   /// [ScrollPosition.jumpTo], not `correctBy`: the latter is a layout-time
   /// correction that moves the offset without notifying anyone, so the
   /// list only actually scrolled on the frames something else happened to
   /// rebuild it.
-  void _autoScroll(Offset global) {
+  void _followEdge(Offset global) {
     final box = _listBox();
-    if (box == null || !_scroll.hasClients) return;
+    if (box == null || !_scroll.hasClients) return _stopEdgeScroll();
     final local = box.globalToLocal(global);
-    const edge = 60.0;
+    final depth = local.dy < _edge
+        ? local.dy - _edge
+        : local.dy > box.size.height - _edge
+        ? local.dy - (box.size.height - _edge)
+        : 0.0;
+    if (depth == 0) return _stopEdgeScroll();
+    _edgeSpeed = (depth / _edge).clamp(-1.0, 1.0) * _maxEdgeSpeed;
+    _edgeTicker ??= Timer.periodic(
+      const Duration(milliseconds: 16),
+      (_) => _tickEdgeScroll(),
+    );
+  }
+
+  /// One frame of the edge scroll: the list moves a step, and the drop is
+  /// read again so the indicator follows the content under the finger.
+  void _tickEdgeScroll() {
+    if (!mounted || _drag == null) return _stopEdgeScroll();
+    if (!_scroll.hasClients) return _stopEdgeScroll();
     final position = _scroll.position;
-    var delta = 0.0;
-    if (local.dy < edge) {
-      delta = -(edge - local.dy) * 0.5;
-    } else if (local.dy > box.size.height - edge) {
-      delta = (local.dy - (box.size.height - edge)) * 0.5;
-    }
-    if (delta == 0) return;
-    final target = (position.pixels + delta).clamp(
-      0.0,
+    final target = (position.pixels + _edgeSpeed).clamp(
+      position.minScrollExtent,
       position.maxScrollExtent,
     );
-    if (target != position.pixels) _scroll.jumpTo(target);
+    if (target == position.pixels) return; // the end: nothing to scroll
+    _scroll.jumpTo(target);
+    _readDrop();
+  }
+
+  /// Ends the edge scroll: the drag let go, left the edge, or went.
+  void _stopEdgeScroll() {
+    _edgeTicker?.cancel();
+    _edgeTicker = null;
+    _edgeSpeed = 0;
   }
 
   @override
   Widget build(BuildContext context) {
     final items = _items;
+    // The window is filled again by the itemBuilder calls the layout makes
+    // after this build (#720).
+    _builtFirst = null;
+    _builtLast = null;
     return Padding(
       padding: EdgeInsets.only(
         // Raised above the bottom edge: phones with rounded screen
@@ -506,6 +580,12 @@ class _ListNoteViewState extends State<ListNoteView>
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
+                      _builtFirst = _builtFirst == null
+                          ? index
+                          : math.min(_builtFirst!, index);
+                      _builtLast = _builtLast == null
+                          ? index
+                          : math.max(_builtLast!, index);
                       final item = items[index];
                       ListDropMode? indicator;
                       final drop = _drop;
