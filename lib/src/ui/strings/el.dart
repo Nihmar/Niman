@@ -1890,6 +1890,9 @@ final class GreekStrings extends Strings {
   @override
   String deleteNotesToo(int count) =>
       'Διαγραφή και των σχετικών σημειώσεων ($count)';
+
+  @override
+  String get deleteFileOnly => 'Διαγραφή μόνο του αρχείου';
   @override
   String get chooseDestination => 'Επιλογή προορισμού';
   @override

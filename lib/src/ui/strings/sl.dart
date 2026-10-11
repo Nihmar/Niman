@@ -1823,6 +1823,9 @@ final class SlovenianStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => 'Izbriši tudi povezane zapiske ($count)';
+
+  @override
+  String get deleteFileOnly => 'Izbriši samo datoteko';
   @override
   String get chooseDestination => 'Izberi cilj';
   @override

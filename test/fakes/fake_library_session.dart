@@ -936,6 +936,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _trashEnabled = enabled;
   }
 
+  bool _deleteCarriesNotes = true;
+
+  @override
+  Future<bool> get deleteCarriesNotes async => _deleteCarriesNotes;
+
+  @override
+  Future<void> setDeleteCarriesNotes({required bool enabled}) async {
+    _deleteCarriesNotes = enabled;
+  }
+
   @override
   Future<String?> get quickNotePath async => _quickNotePath;
 

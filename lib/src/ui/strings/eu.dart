@@ -1840,6 +1840,9 @@ final class BasqueStrings extends Strings {
   @override
   String deleteNotesToo(int count) =>
       'Ezabatu harekin lotutako oharrak ere ($count)';
+
+  @override
+  String get deleteFileOnly => 'Ezabatu fitxategia bakarrik';
   @override
   String get chooseDestination => 'Hautatu helmuga';
   @override

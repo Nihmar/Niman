@@ -1853,6 +1853,9 @@ final class PolishStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => 'Usuń także powiązane notatki ($count)';
+
+  @override
+  String get deleteFileOnly => 'Usuń tylko plik';
   @override
   String get chooseDestination => 'Wybierz cel';
   @override

@@ -1810,6 +1810,9 @@ final class EstonianStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => 'Kustuta ka seotud märkmed ($count)';
+
+  @override
+  String get deleteFileOnly => 'Kustuta ainult fail';
   @override
   String get chooseDestination => 'Vali sihtkoht';
   @override

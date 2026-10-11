@@ -1837,6 +1837,9 @@ final class UkrainianStrings extends Strings {
   @override
   String deleteNotesToo(int count) =>
       'Також видалити повʼязані нотатки ($count)';
+
+  @override
+  String get deleteFileOnly => 'Видалити лише файл';
   @override
   String get chooseDestination => 'Обрати призначення';
   @override

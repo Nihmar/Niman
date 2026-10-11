@@ -60,8 +60,15 @@ void main() {
     await settle(tester);
   }
 
+  /// Confirms with the notes (the question's own action when there is one,
+  /// the plain Delete button otherwise).
   Future<void> confirmDelete(WidgetTester tester) async {
-    await tester.tap(find.widgetWithText(TextButton, AppStrings.actionDelete));
+    final carry = find.byKey(const Key('delete-carry-yes'));
+    await tester.tap(
+      carry.evaluate().isNotEmpty
+          ? carry
+          : find.widgetWithText(TextButton, AppStrings.actionDelete),
+    );
     await settle(tester);
   }
 
@@ -75,14 +82,13 @@ void main() {
     await settle(tester);
 
     await deleteRow(tester, 'Dune.pdf');
-    // One question, the count in it, checked: the notes go unless untold.
-    expect(find.byKey(const Key('delete-carry-notes')), findsOne);
+    // One question, the count on its action, taking the notes emphasised
+    // the first time.
+    expect(find.text(AppStrings.deleteFileOnly), findsOne);
     expect(find.text(AppStrings.deleteNotesToo(2)), findsOne);
     expect(
-      tester
-          .widget<CheckboxListTile>(find.byKey(const Key('delete-carry-notes')))
-          .value,
-      isTrue,
+      tester.widget(find.byKey(const Key('delete-carry-yes'))),
+      isA<FilledButton>(),
     );
 
     await confirmDelete(tester);
@@ -99,16 +105,15 @@ void main() {
     expect(await controller.ops!.trashItems(), isEmpty);
   });
 
-  testWidgets('unticking the box deletes the file alone', (tester) async {
+  testWidgets('choosing the file alone leaves the notes', (tester) async {
     await open(tester);
     await controller.seedFile('Dune.pdf');
     await seedCompanion('Dune.pdf');
     await settle(tester);
 
     await deleteRow(tester, 'Dune.pdf');
-    await tester.tap(find.byKey(const Key('delete-carry-notes')));
+    await tester.tap(find.byKey(const Key('delete-carry-no')));
     await settle(tester);
-    await confirmDelete(tester);
 
     expect(noteRow('Dune.pdf', offstage: true), findsNothing);
     expect(noteRow('Dune.pdf - Annotation.md', offstage: true), findsOne);
@@ -128,6 +133,38 @@ void main() {
     expect(noteRow('Dune.pdf', offstage: true), findsOne);
     expect(noteRow('Dune.pdf - Annotation.md', offstage: true), findsOne);
     expect(await controller.ops!.trashItems(), isEmpty);
+  });
+
+  testWidgets('the last choice is the one emphasised next time', (
+    tester,
+  ) async {
+    await open(tester);
+    await controller.seedFile('Dune.pdf');
+    await seedCompanion('Dune.pdf');
+    await settle(tester);
+
+    await deleteRow(tester, 'Dune.pdf');
+    await tester.tap(find.byKey(const Key('delete-carry-no')));
+    await settle(tester);
+    expect(await controller.ops!.deleteCarriesNotes, isFalse);
+
+    await controller.seedFile('Emma.pdf');
+    await seedCompanion('Emma.pdf');
+    await settle(tester);
+    await deleteRow(tester, 'Emma.pdf');
+    // Remembered: leaving the notes is the emphasised one now.
+    expect(
+      tester.widget(find.byKey(const Key('delete-carry-no'))),
+      isA<FilledButton>(),
+    );
+    expect(
+      tester.widget(find.byKey(const Key('delete-carry-yes'))),
+      isA<TextButton>(),
+    );
+    await tester.tap(find.byKey(const Key('delete-carry-no')));
+    await settle(tester);
+    expect(noteRow('Emma.pdf', offstage: true), findsNothing);
+    expect(noteRow('Emma.pdf - Annotation.md', offstage: true), findsOne);
   });
 
   testWidgets('a note with no notes of its own still deletes without asking', (
@@ -184,7 +221,7 @@ void main() {
 
     await deleteRow(tester, 'Dune.pdf');
     expect(find.text(AppStrings.deleteForeverConfirm('Dune.pdf')), findsOne);
-    expect(find.byKey(const Key('delete-carry-notes')), findsOne);
+    expect(find.text(AppStrings.deleteNotesToo(1)), findsOne);
     await confirmDelete(tester);
 
     expect(noteRow('Dune.pdf', offstage: true), findsNothing);

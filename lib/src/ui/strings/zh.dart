@@ -1670,6 +1670,9 @@ final class ChineseStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => '同时删除与之相关的 $count 条笔记';
+
+  @override
+  String get deleteFileOnly => '仅删除文件';
   @override
   String get chooseDestination => '选择目标位置';
   @override

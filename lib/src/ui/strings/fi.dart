@@ -1843,6 +1843,9 @@ final class FinnishStrings extends Strings {
   @override
   String deleteNotesToo(int count) =>
       'Poista myös siihen liittyvät muistiinpanot ($count)';
+
+  @override
+  String get deleteFileOnly => 'Poista vain tiedosto';
   @override
   String get chooseDestination => 'Valitse kohde';
   @override

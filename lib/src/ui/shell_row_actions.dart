@@ -258,45 +258,50 @@ final class ShellRowActions {
     final isDir = (await ops.find(sel))?.isDir ?? false;
     var carry = await _notesAbout(sel, isDir: isDir);
     if (!context.mounted) return;
-    var takeThem = true;
+    // The last answer is the emphasised one, so the usual choice is one
+    // Enter away (#717).
+    final takeNotesDefault = await ops.deleteCarriesNotes;
+    if (!context.mounted) return;
     if (carry.isNotEmpty || !trash) {
-      final confirmed = await showDialog<bool>(
+      final takeNotes = await showDialog<bool>(
         context: context,
-        builder: (context) => StatefulBuilder(
-          builder: (context, setDialogState) => AlertDialog(
-            title: Text(AppStrings.actionDelete),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (!trash) Text(AppStrings.deleteForeverConfirm(name)),
-                if (carry.isNotEmpty)
-                  CheckboxListTile(
-                    key: const Key('delete-carry-notes'),
-                    value: takeThem,
-                    onChanged: (value) =>
-                        setDialogState(() => takeThem = value ?? true),
-                    title: Text(AppStrings.deleteNotesToo(carry.length)),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-              ],
+        builder: (context) => AlertDialog(
+          title: Text(AppStrings.actionDelete),
+          content: Text(trash ? name : AppStrings.deleteForeverConfirm(name)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppStrings.actionCancel),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(AppStrings.actionCancel),
-              ),
+            if (carry.isEmpty)
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(AppStrings.actionDelete),
+              )
+            else ...[
+              _deleteChoice(
+                context,
+                key: const Key('delete-carry-no'),
+                label: AppStrings.deleteFileOnly,
+                primary: !takeNotesDefault,
+                choice: false,
+              ),
+              _deleteChoice(
+                context,
+                key: const Key('delete-carry-yes'),
+                label: AppStrings.deleteNotesToo(carry.length),
+                primary: takeNotesDefault,
+                choice: true,
               ),
             ],
-          ),
+          ],
         ),
       );
-      if (confirmed != true) return;
-      if (!takeThem) carry = const [];
+      if (takeNotes == null) return;
+      if (carry.isNotEmpty && takeNotes != takeNotesDefault) {
+        await ops.setDeleteCarriesNotes(enabled: takeNotes);
+      }
+      if (!takeNotes) carry = const [];
     }
     await guard(() async {
       await ops.delete(sel);
@@ -336,6 +341,26 @@ final class ShellRowActions {
     });
   }
 
+  /// One of the delete question's two actions (#717): the remembered one
+  /// is the filled button, waiting for Enter.
+  Widget _deleteChoice(
+    BuildContext context, {
+    required Key key,
+    required String label,
+    required bool primary,
+    required bool choice,
+  }) {
+    void pick() => Navigator.pop(context, choice);
+    return primary
+        ? FilledButton(
+            key: key,
+            autofocus: true,
+            onPressed: pick,
+            child: Text(label),
+          )
+        : TextButton(key: key, onPressed: pick, child: Text(label));
+  }
+
   /// The notes about [sel] (#717), from the library's own sources.
   Future<List<String>> _notesAbout(String sel, {required bool isDir}) async {
     final ops = controller.ops;
@@ -347,6 +372,8 @@ final class ShellRowActions {
       ops: ops,
       fields: fields,
       links: links,
+      root: controller.root,
+      annotationsFolder: await ops.annotationsFolder,
     ).of(sel, isDir: isDir);
     return carried;
   }

@@ -1818,6 +1818,9 @@ final class NorwegianStrings extends Strings {
   String deleteNotesToo(int count) => count == 1
       ? 'Slett også notatet om det'
       : 'Slett også de $count notatene om det';
+
+  @override
+  String get deleteFileOnly => 'Slett bare filen';
   @override
   String get chooseDestination => 'Velg mål';
   @override

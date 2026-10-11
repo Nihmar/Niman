@@ -1834,6 +1834,9 @@ final class BelarusianStrings extends Strings {
   @override
   String deleteNotesToo(int count) =>
       'Таксама выдаліць звязаныя нататкі ($count)';
+
+  @override
+  String get deleteFileOnly => 'Выдаліць толькі файл';
   @override
   String get chooseDestination => 'Абраць месца';
   @override

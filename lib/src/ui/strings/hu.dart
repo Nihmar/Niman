@@ -1842,6 +1842,9 @@ final class HungarianStrings extends Strings {
   @override
   String deleteNotesToo(int count) =>
       'A kapcsolódó jegyzetek törlése is ($count)';
+
+  @override
+  String get deleteFileOnly => 'Csak a fájl törlése';
   @override
   String get chooseDestination => 'Cél kiválasztása';
   @override

@@ -1844,6 +1844,9 @@ final class RomanianStrings extends Strings {
   String deleteNotesToo(int count) => count == 1
       ? 'Șterge și nota care îl descrie'
       : 'Șterge și cele $count note care îl descriu';
+
+  @override
+  String get deleteFileOnly => 'Șterge doar fișierul';
   @override
   String get chooseDestination => 'Alege destinația';
   @override

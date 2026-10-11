@@ -1833,6 +1833,9 @@ final class SerbianStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => 'Избриши и повезане белешке ($count)';
+
+  @override
+  String get deleteFileOnly => 'Избриши само датотеку';
   @override
   String get chooseDestination => 'Изабери одредиште';
   @override

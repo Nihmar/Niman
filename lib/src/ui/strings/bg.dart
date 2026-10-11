@@ -1846,6 +1846,9 @@ final class BulgarianStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => 'Изтрий и свързаните бележки ($count)';
+
+  @override
+  String get deleteFileOnly => 'Изтрий само файла';
   @override
   String get chooseDestination => 'Изберете дестинация';
   @override

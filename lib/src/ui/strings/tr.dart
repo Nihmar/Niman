@@ -1814,6 +1814,9 @@ final class TurkishStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => 'İlgili notları da sil ($count)';
+
+  @override
+  String get deleteFileOnly => 'Yalnızca dosyayı sil';
   @override
   String get chooseDestination => 'Hedefi seç';
   @override

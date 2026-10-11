@@ -1137,6 +1137,8 @@ final class AppStrings {
       _s.deleteForeverConfirm(name);
 
   static String deleteNotesToo(int count) => _s.deleteNotesToo(count);
+
+  static String get deleteFileOnly => _s.deleteFileOnly;
   static String get chooseDestination => _s.chooseDestination;
   static String get libraryRoot => _s.libraryRoot;
   static String moveTitle(String name) => _s.moveTitle(name);

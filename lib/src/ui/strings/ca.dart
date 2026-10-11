@@ -1864,6 +1864,9 @@ final class CatalanStrings extends Strings {
   String deleteNotesToo(int count) => count == 1
       ? 'Elimina també la nota que el descriu'
       : 'Elimina també les $count notes que el descriuen';
+
+  @override
+  String get deleteFileOnly => 'Elimina només el fitxer';
   @override
   String get chooseDestination => 'Tria el destí';
   @override

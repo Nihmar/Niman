@@ -925,9 +925,12 @@ abstract base class Strings {
   String get deletedMessage;
   String deleteForeverConfirm(String name);
 
-  /// Whether a delete takes the file's own notes with it (#717):
-  /// the checkbox beside the question, with how many there are.
+  /// The delete question's action that takes the file's own notes with it
+  /// (#717), with how many there are.
   String deleteNotesToo(int count);
+
+  /// The delete question's action that leaves the file's notes alone.
+  String get deleteFileOnly;
   String get chooseDestination;
   String get libraryRoot;
   String moveTitle(String name);

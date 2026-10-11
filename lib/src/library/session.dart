@@ -173,6 +173,11 @@ abstract interface class NoteOperations {
   /// Whether deletes move notes into `.trash/` (default true).
   Future<bool> get trashEnabled;
 
+  /// Whether a delete takes the file's own notes with it by default
+  /// (#717): which of the question's two actions is emphasised, the last
+  /// answer remembered.
+  Future<bool> get deleteCarriesNotes;
+
   /// The user-chosen quick note (library-relative path), or null while
   /// none has been chosen.
   Future<String?> get quickNotePath;
@@ -264,6 +269,9 @@ abstract interface class NoteOperations {
 
   /// Sets the trash toggle: `true` = deletes move into `.trash/`.
   Future<void> setTrashEnabled({required bool enabled});
+
+  /// Remembers the delete question's answer for the next one.
+  Future<void> setDeleteCarriesNotes({required bool enabled});
 
   /// Lists the managed trash items, in deletion order.
   Future<List<TrashItem>> trashItems();

@@ -1820,6 +1820,9 @@ final class CzechStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => 'Smazat i související poznámky ($count)';
+
+  @override
+  String get deleteFileOnly => 'Smazat jen soubor';
   @override
   String get chooseDestination => 'Vybrat cíl';
   @override

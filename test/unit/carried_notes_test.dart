@@ -36,6 +36,8 @@ void main() {
       ops: ops,
       fields: FieldRepo(db),
       links: LinkResolver(db),
+      root: root.path,
+      annotationsFolder: 'Annotations',
     );
   });
 
@@ -46,10 +48,16 @@ void main() {
     await dbDir.delete(recursive: true);
   });
 
-  Future<void> write(String path, [String text = '']) async {
+  /// Writes without indexing, as a companion is written a moment before
+  /// the index catches up.
+  Future<void> writeRaw(String path, [String text = '']) async {
     final file = File(p.joinAll([root.path, ...path.split('/')]));
     await file.parent.create(recursive: true);
     await file.writeAsString(text);
+  }
+
+  Future<void> write(String path, [String text = '']) async {
+    await writeRaw(path, text);
     await indexer.fullScan(root.path);
   }
 
@@ -95,6 +103,19 @@ void main() {
     );
 
     expect(await carried.of('Books', isDir: true), [
+      'Annotations/Dune - Annotation.md',
+    ]);
+  });
+
+  test('a companion the index has not seen yet is still carried', () async {
+    await write('Books/Dune.pdf');
+    // Written and not scanned: the index does not know it yet (#717).
+    await writeRaw(
+      'Annotations/Dune - Annotation.md',
+      '---\nannotates: "[[Books/Dune.pdf]]"\n---\n\nA note.\n',
+    );
+
+    expect(await carried.of('Books/Dune.pdf', isDir: false), [
       'Annotations/Dune - Annotation.md',
     ]);
   });

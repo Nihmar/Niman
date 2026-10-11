@@ -1711,6 +1711,9 @@ final class JapaneseStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => '関連するノート$count件も削除';
+
+  @override
+  String get deleteFileOnly => 'ファイルのみ削除';
   @override
   String get chooseDestination => '移動先を選ぶ';
   @override

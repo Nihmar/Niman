@@ -18,7 +18,13 @@ import 'package:niman/src/ocr/ocr_sidecar_finder.dart';
 /// Finds the notes about a path, for the delete that may carry them.
 final class CarriedNotes {
   /// Creates the finder over the library's own sources.
-  const new({required this.ops, required this.fields, required this.links});
+  const new({
+    required this.ops,
+    required this.fields,
+    required this.links,
+    this.root,
+    this.annotationsFolder = '',
+  });
 
   /// The file operations the sidecar is looked up through.
   final NoteOperations ops;
@@ -29,12 +35,21 @@ final class CarriedNotes {
   /// Resolves those declarations the way every link is resolved.
   final LinkSource links;
 
+  /// The library root, for the on-disk look at the annotations folder;
+  /// null when there is no open library.
+  final String? root;
+
+  /// The folder companions are written to (default `Annotations`): read
+  /// on disk too, so one written a moment ago — not indexed yet — is
+  /// still counted (#717).
+  final String annotationsFolder;
+
   /// The notes about [path], in path order.
   ///
   /// None of them is inside [path] when it is a folder: those go with the
-  /// delete itself. The lookup goes through the index, so a companion
-  /// written a moment ago may not be counted until it is indexed — the
-  /// same staleness every list of the app has.
+  /// delete itself. The lookup goes through the index, plus the
+  /// annotations folder read on disk for the companions it may not know
+  /// yet.
   Future<List<String>> of(String path, {required bool isDir}) async {
     final out = <String>{};
     if (!isDir) {
@@ -42,7 +57,12 @@ final class CarriedNotes {
       if (sidecar != null) out.add(sidecar.path);
     }
     final companions = CompanionNotes(fields: fields, links: links, ops: ops);
-    for (final entry in (await companions.all()).entries) {
+    final fresh = switch (root) {
+      final root? => await companions.freshIn(annotationsFolder, root: root),
+      null => const <String, List<String>>{},
+    };
+    final all = {...await companions.all(), ...fresh};
+    for (final entry in all.entries) {
       final names = entry.key == path || (isDir && _inside(entry.key, path));
       if (!names) continue;
       for (final note in entry.value) {

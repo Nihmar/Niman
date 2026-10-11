@@ -1877,6 +1877,9 @@ final class FrenchStrings extends Strings {
   String deleteNotesToo(int count) => count == 1
       ? 'Supprimer aussi la note associée'
       : 'Supprimer aussi les $count notes associées';
+
+  @override
+  String get deleteFileOnly => 'Supprimer uniquement le fichier';
   @override
   String get chooseDestination => 'Choisir la destination';
   @override

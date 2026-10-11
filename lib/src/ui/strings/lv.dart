@@ -1824,6 +1824,9 @@ final class LatvianStrings extends Strings {
 
   @override
   String deleteNotesToo(int count) => 'Dzēst arī saistītās piezīmes ($count)';
+
+  @override
+  String get deleteFileOnly => 'Dzēst tikai failu';
   @override
   String get chooseDestination => 'Izvēlēties mērķi';
   @override

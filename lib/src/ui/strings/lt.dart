@@ -1832,6 +1832,9 @@ final class LithuanianStrings extends Strings {
   @override
   String deleteNotesToo(int count) =>
       'Taip pat ištrinti susijusius užrašus ($count)';
+
+  @override
+  String get deleteFileOnly => 'Ištrinti tik failą';
   @override
   String get chooseDestination => 'Pasirinkti paskirtį';
   @override
