@@ -26,10 +26,12 @@ Create one with **New list note** in the Files FAB (or
   note and reads struck through; it is not removed.
 - **Tap the text** to edit it in place. A long text scrolls itself when
   it does not fit the row, as a note's name does in the tree.
-- **Drag the handle** on the left to reorder an item. Dropping it onto
-  the upper or lower edge of another row puts it before or after that
-  row; dropping it onto the middle makes it a child of that row. A
-  parent moves with its whole subtree, prose lines included.
+- **Drag the handle** on the left to reorder an item, or **press and
+  hold anywhere on the row** and drag from there — the gesture a phone
+  already knows, for a handle a thumb can miss. Dropping it onto the
+  upper or lower edge of another row puts it before or after that row;
+  dropping it onto the middle makes it a child of that row. A parent
+  moves with its whole subtree, prose lines included.
 - **Indentation is the nesting**: an item indented under another is its
   child, exactly as it reads in the raw note.
 - **The trash** at the end of a row deletes that item and its subtree at

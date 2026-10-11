@@ -1,5 +1,6 @@
 // T-TK-04/09: the list-kind GUI — checkable rows, nesting, the add row,
 // in-place text editing and drag reordering/sub-lists.
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/kinds/list_drag_handle.dart';
@@ -196,6 +197,56 @@ void main() {
       Offset(center.dx, center.dy + height * 0.4),
     );
     expect(out, isNull);
+  });
+
+  // #719: a phone picks the row up with a long press anywhere, and drags
+  // it from there; the handle below keeps its own tests and stays the
+  // affordance.
+  testWidgets('a long press anywhere picks the row up, and drags on', (
+    tester,
+  ) async {
+    String? out;
+    const text = '- [ ] one\n- [ ] two\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final center = tester.getCenter(_row(1));
+    final height = tester.getSize(_row(1)).height;
+    // The text, not the handle: anywhere on the row.
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('one')),
+    );
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    await gesture.moveTo(Offset(center.dx, center.dy + height * 0.4));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, 4));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(
+      out,
+      '- [ ] two\n- [ ] one\n',
+      reason: 'picked up and dropped below the other row',
+    );
+  });
+
+  testWidgets('the handle targets 48 dp while the grip stays small (#719)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(ListNoteView(text: '- [ ] one\n', onChanged: (_) {})),
+    );
+    final handle = tester.getRect(_rowHandle(0));
+    expect(handle.width, greaterThanOrEqualTo(48));
+    expect(handle.height, greaterThanOrEqualTo(48));
+    final icon = find.descendant(
+      of: _rowHandle(0),
+      matching: find.byIcon(Icons.drag_indicator),
+    );
+    final grip = tester.getRect(icon);
+    expect(grip.width, 20, reason: 'the grip drawn did not grow');
+    // Left-aligned in the target: the 20 px grip keeps the column it had.
+    expect(grip.left - handle.left, 8);
   });
 
   testWidgets('dragging a row onto another makes a sub-list', (tester) async {
