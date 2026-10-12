@@ -497,7 +497,9 @@ it a literal one — `* ` at the start of a line opens a list item, and
 before it, so `snake_case` and a closing `word_` are what they are. The
 quotes `"`, `'`, `«»` and `“”` open when no word stands before them
 either: after a word a quote closes one already spoken, like the
-apostrophe in `don't`. `<`, `>` and the backtick do not pair at all —
+apostrophe in `don't`. Backspace takes both stars or both quotes only
+when the closing one was written by the pair: between the two closing
+stars of an existing `**bold**`, or inside `''`, it takes one. `<`, `>` and the backtick do not pair at all —
 `a < b` is a comparison, an autolink has its own `>`, and a fence is
 three backticks.
 
