@@ -39,6 +39,10 @@ final class SourceFolds {
   /// How many lines the ranges before range *i* hide.
   List<int> _hiddenBefore = const <int>[];
 
+  /// The lines the folds alone hide, merged as [_hidden] is: what
+  /// [isHidden] answers from, a hosted line being no hidden one.
+  List<(int, int)> _foldedRanges = const <(int, int)>[];
+
   /// Whether nothing is folded and nothing hosted: every line is a row.
   bool get isEmpty => _folded.isEmpty && _hosted.isEmpty;
 
@@ -129,12 +133,8 @@ final class SourceFolds {
 
   /// Whether [line] is folded away.
   bool isHidden(int line) {
-    // The folds may nest: any one of them that covers the line hides it.
-    for (final MapEntry(key: start, value: end) in _folded.entries) {
-      if (start >= line) break;
-      if (line < end) return true;
-    }
-    return false;
+    final at = _startingAtOrBefore(_foldedRanges, line);
+    return at >= 0 && line < _foldedRanges[at].$2;
   }
 
   /// The row [line] is drawn in; a hidden line answers the row of the
@@ -249,12 +249,16 @@ final class SourceFolds {
   static int _length((int, int) range) => range.$2 - range.$1;
 
   /// The index of the last hidden range starting at or before [line], or -1.
-  int _rangeAtOrBefore(int line) {
+  int _rangeAtOrBefore(int line) => _startingAtOrBefore(_hidden, line);
+
+  /// The index of the last of [ranges] — sorted — starting at or before
+  /// [line], or -1.
+  static int _startingAtOrBefore(List<(int, int)> ranges, int line) {
     var low = 0;
-    var high = _hidden.length;
+    var high = ranges.length;
     while (low < high) {
       final mid = (low + high) >> 1;
-      if (_hidden[mid].$1 <= line) {
+      if (ranges[mid].$1 <= line) {
         low = mid + 1;
       } else {
         high = mid;
@@ -263,17 +267,10 @@ final class SourceFolds {
     return low - 1;
   }
 
-  void _merge() {
+  /// [ranges] — each an anchor and the end of the lines past it — sorted
+  /// by anchor, as the disjoint `[start, end)` ranges of lines they cover.
+  static List<(int, int)> _merged(Iterable<(int, int)> ranges) {
     final merged = <(int, int)>[];
-    final ranges = <(int, int)>[
-      for (final MapEntry(key: anchor, value: end) in _folded.entries)
-        (anchor, end),
-      for (final MapEntry(key: anchor, value: end) in _hosted.entries)
-        (anchor, end),
-    ];
-    if (_hosted.isNotEmpty && _folded.isNotEmpty) {
-      ranges.sort((a, b) => a.$1.compareTo(b.$1));
-    }
     for (final (anchor, end) in ranges) {
       final start = anchor + 1;
       if (merged.isNotEmpty && start <= merged.last.$2) {
@@ -282,13 +279,33 @@ final class SourceFolds {
         merged.add((start, end));
       }
     }
+    return merged;
+  }
+
+  void _merge() {
+    final folded = <(int, int)>[
+      for (final MapEntry(key: anchor, value: end) in _folded.entries)
+        (anchor, end),
+    ];
+    _foldedRanges = _merged(folded);
+    if (_hosted.isEmpty) {
+      _hidden = _foldedRanges;
+    } else {
+      final ranges = <(int, int)>[
+        ...folded,
+        for (final MapEntry(key: anchor, value: end) in _hosted.entries)
+          (anchor, end),
+      ];
+      if (folded.isNotEmpty) ranges.sort((a, b) => a.$1.compareTo(b.$1));
+      _hidden = _merged(ranges);
+    }
+    final merged = _hidden;
     final before = <int>[];
     var count = 0;
     for (final range in merged) {
       before.add(count);
       count += _length(range);
     }
-    _hidden = merged;
     _hiddenBefore = before;
   }
 }
