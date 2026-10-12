@@ -145,16 +145,16 @@ Future<String?> _showEntriesAt(
       position & const Size(1, 1),
       Offset.zero & overlay.size,
     ),
-    menuPadding: dense ? _denseMenuPadding : null,
+    menuPadding: dense ? pointerDenseMenuPadding : null,
     items: [
       for (final (index, group) in groups.indexed) ...[
         if (index > 0)
-          PopupMenuDivider(height: dense ? _denseDividerHeight : 16),
+          PopupMenuDivider(height: dense ? pointerDenseDividerHeight : 16),
         for (final entry in group)
           PopupMenuItem(
             key: entry.key,
             value: entry.value,
-            height: dense ? _denseItemHeight : kMinInteractiveDimension,
+            height: dense ? pointerDenseItemHeight : kMinInteractiveDimension,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -183,12 +183,9 @@ Future<String?> _showEntriesAt(
   );
 }
 
-// A pointer's menu (#296): the phone's 48 px items run thirteen entries
-// most of a screen tall, for a cursor that needs a third of the room. The
-// label drops the phone's medium weight for the tree's own body text.
-const double _denseItemHeight = 32;
-const double _denseDividerHeight = 9;
-const EdgeInsets _denseMenuPadding = EdgeInsets.symmetric(vertical: 4);
+// A pointer's menu (#296): the metrics are shared with the footer's own
+// menus (`pointer_density.dart`), and the label drops the phone's medium
+// weight for the tree's own body text.
 
 /// What the menu acts on: the row's icon, its name, and the folder it
 /// sits in.
