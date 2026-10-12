@@ -30,6 +30,10 @@ system.
 - **Tasks due** — the open tasks of `todo.txt`, due soonest first, in the
   order the Todo tab and the home-screen widget use. Check one off right
   there; a tap on a task opens the Todo tab.
+- **Events today** — today's events from the library's `calendar.txt`,
+  with the goals that cover the day over them (see
+  [journal](journal.md#the-days-events)); a row opens the event's line, a
+  tap opens the journal.
 - **Recently modified** — the notes changed last, newest first, the
   templates left out: the time for today, the day for older ones.
 - **Pinned** — the notes whose frontmatter says `pinned: true`.

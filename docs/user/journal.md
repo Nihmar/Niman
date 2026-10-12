@@ -67,6 +67,30 @@ and the date picker follow the same day.
 The **+** button on the phone's Files tab starts with *Today's journal
 entry*.
 
+## The day's events
+
+A `calendar.txt` at the library root (the plain-text calendar
+[terokarvinen.com/2021/calendar-txt](https://terokarvinen.com/2021/calendar-txt/))
+has its events shown where the day is read: in the dock's journal pane and
+in the phone's day card, in an **Events** section above **Due**, with the
+day's goals — the week's, the month's, the year's — as a header over them
+(`Week 42`, `October`, `2026`).
+
+Each event reads as it is written: its time (`9-12`, `08:15`, `0600Z`),
+its text with `+project`, `@context` and `#tag` picked out and a
+`( … )` aside dimmed, and a bell with the time of its `rem:`. On the
+calendar itself a day with events wears a second dot, amber beside the
+entry's. Tapping an event opens `calendar.txt` at that line.
+
+The file is read and nothing else: Niman does not write it in this
+release, so everything you see is what the file says — and the whole file
+stays yours to edit by hand or with any other tool. A day line whose week
+number or weekday does not match its date is flagged in the editor (a wavy
+underline) and never corrected: the date is what is read.
+
+The **Events today** tile on the Home shows today's goals over its
+events, and opens the journal on that day.
+
 ## The strip over an entry
 
 Any note that is an entry — wherever it was opened from — wears a strip
