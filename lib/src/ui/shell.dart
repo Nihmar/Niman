@@ -3815,6 +3815,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     openEvent: _openCalendarEvent,
     writeEvent: (day, event) =>
         unawaited(_guard(() => _calendarController.addEvent(day, event))),
+    editEvent: (entry, event) =>
+        unawaited(_guard(() => _calendarController.updateEvent(entry, event))),
+    deleteEvent: (entry) =>
+        unawaited(_guard(() => _calendarController.deleteEvent(entry))),
     addTask: (day) => unawaited(_addTodo(due: day)),
     knownTokens: () => _knownFileTokens,
     calendarFile: () => _calendarController.snapshot?.file,

@@ -293,6 +293,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Додај настан';
   @override
+  String get calendarOpenInFile => 'Отвори во calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Потсетник во $time';
+  @override
   String get themeEditorRolesHint =>
       'Секоја боја е именувана како во извезената датотека';
   @override

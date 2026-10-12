@@ -293,6 +293,10 @@ final class GermanStrings extends Strings {
   @override
   String get calendarAddEvent => 'Termin hinzufügen';
   @override
+  String get calendarOpenInFile => 'In calendar.txt öffnen';
+  @override
+  String calendarReminderAt(String time) => 'Erinnerung um $time';
+  @override
   String get themeEditorRolesHint =>
       'Jede Farbe heißt so, wie die exportierte Datei sie nennt';
   @override

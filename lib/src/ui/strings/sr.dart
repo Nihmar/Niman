@@ -294,6 +294,10 @@ final class SerbianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Додај догађај';
   @override
+  String get calendarOpenInFile => 'Отвори у calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Подсетник у $time';
+  @override
   String get themeEditorRolesHint =>
       'Свака боја носи име које користи извезена датотека';
   @override

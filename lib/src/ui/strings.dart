@@ -244,6 +244,8 @@ final class AppStrings {
       _s.calendarRemindBefore(minutes);
   static String get calendarLinePreview => _s.calendarLinePreview;
   static String get calendarAddEvent => _s.calendarAddEvent;
+  static String get calendarOpenInFile => _s.calendarOpenInFile;
+  static String calendarReminderAt(String time) => _s.calendarReminderAt(time);
   static String get themeEditorRolesHint => _s.themeEditorRolesHint;
   static String get themeEditorDiscardTitle => _s.themeEditorDiscardTitle;
   static String get themeEditorDiscardBody => _s.themeEditorDiscardBody;

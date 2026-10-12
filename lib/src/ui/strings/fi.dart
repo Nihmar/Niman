@@ -290,6 +290,10 @@ final class FinnishStrings extends Strings {
   @override
   String get calendarAddEvent => 'Lisää tapahtuma';
   @override
+  String get calendarOpenInFile => 'Avaa calendar.txt-tiedostossa';
+  @override
+  String calendarReminderAt(String time) => 'Muistutus klo $time';
+  @override
   String get themeEditorRolesHint =>
       'Jokainen väri on nimetty viedyn tiedoston mukaan';
   @override

@@ -280,6 +280,10 @@ final class HindiStrings extends Strings {
   @override
   String get calendarAddEvent => 'ईवेंट जोड़ें';
   @override
+  String get calendarOpenInFile => 'calendar.txt में खोलें';
+  @override
+  String calendarReminderAt(String time) => '$time पर रिमाइंडर';
+  @override
   String get themeEditorRolesHint =>
       'हर रंग का नाम वही है जो निर्यात की गई फ़ाइल में है';
   @override

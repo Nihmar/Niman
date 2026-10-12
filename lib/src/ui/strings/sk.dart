@@ -293,6 +293,10 @@ final class SlovakStrings extends Strings {
   @override
   String get calendarAddEvent => 'Pridať udalosť';
   @override
+  String get calendarOpenInFile => 'Otvoriť v calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Pripomienka o $time';
+  @override
   String get themeEditorRolesHint =>
       'Každá farba sa volá ako v exportovanom súbore';
   @override

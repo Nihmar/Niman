@@ -291,6 +291,10 @@ final class DutchStrings extends Strings {
   @override
   String get calendarAddEvent => 'Gebeurtenis toevoegen';
   @override
+  String get calendarOpenInFile => 'Openen in calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Herinnering om $time';
+  @override
   String get themeEditorRolesHint =>
       'Elke kleur heet zoals het geëxporteerde bestand hem noemt';
   @override

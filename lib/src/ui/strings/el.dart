@@ -295,6 +295,10 @@ final class GreekStrings extends Strings {
   @override
   String get calendarAddEvent => 'Προσθήκη συμβάντος';
   @override
+  String get calendarOpenInFile => 'Άνοιγμα στο calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Υπενθύμιση στις $time';
+  @override
   String get themeEditorRolesHint =>
       'Κάθε χρώμα έχει το όνομα που χρησιμοποιεί το εξαγόμενο αρχείο';
   @override

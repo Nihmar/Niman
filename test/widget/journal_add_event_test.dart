@@ -11,13 +11,43 @@ void main() {
   final today = DateTime(2026, 10, 12);
   final added = <(DateTime, CalendarEventDraft)>[];
   final addedTasks = <DateTime>[];
+  final edited = <(CalendarEntryEvent, CalendarEventDraft)>[];
+  final deleted = <CalendarEntryEvent>[];
+  final opened = <CalendarEntryEvent>[];
 
   setUp(() {
     added.clear();
     addedTasks.clear();
+    edited.clear();
+    deleted.clear();
+    opened.clear();
   });
 
+  /// The day's line, with two events on it.
+  const dayLine =
+      '2026-10-12 w42 Mon  9-12 thesis chapter 3 +thesis. '
+      '16 dentist @city rem:15:15.';
+
+  CalendarSnapshot snapshot() => calendarSnapshotOf(
+    const CalendarFileContent(lines: [CalendarRawLine(dayLine, '\n')]),
+  );
+
+  /// Brings an event's row into view and taps it: the pane is a list, and
+  /// the Events section sits below the calendar.
+  Future<void> tapEvent(WidgetTester tester, String text) async {
+    final row = find.textContaining(text);
+    await tester.scrollUntilVisible(
+      row,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+  }
+
   Widget buildApp({bool large = false}) {
+    final at = snapshot();
     return MaterialApp(
       home: Scaffold(
         body: JournalBrowser(
@@ -26,15 +56,14 @@ void main() {
           entryDays: () async => [today],
           readEntry: (day) async => '',
           onOpenDay: (day, {confirmed = false}) {},
-          eventsOn: (day) => const <CalendarEntryEvent>[],
+          eventsOn: at.eventsFor,
           knownTokens: const {'+thesis'},
-          calendarFile: const CalendarFileContent(
-            lines: [
-              CalendarRawLine('2026-10-12 w42  Writing week +thesis', '\n'),
-            ],
-          ),
+          calendarFile: at.file,
           onAddEvent: (day, event) => added.add((day, event)),
           onAddTask: addedTasks.add,
+          onOpenEvent: opened.add,
+          onEditEvent: (entry, event) => edited.add((entry, event)),
+          onDeleteEvent: deleted.add,
         ),
       ),
     );
@@ -102,6 +131,71 @@ void main() {
     await tester.pump();
 
     expect(addedTasks, [today]);
+  });
+
+  testWidgets('a phone edits and deletes an event from its sheet', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(buildApp(large: true));
+    await tester.pumpAndSettle();
+
+    // The dentist, with its reminder, under Events.
+    await tapEvent(tester, 'dentist');
+    expect(find.byKey(const Key('journal-event-sheet-grab')), findsOne);
+    expect(find.textContaining('12 October'), findsWidgets);
+    expect(find.text('Reminder at 15:15'), findsOne);
+
+    // Edit opens the form, filled from the event.
+    await tester.tap(find.byKey(const Key('journal-event-edit')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('calendar-event-form')), findsOne);
+    expect(find.text('Edit'), findsWidgets);
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('calendar-event-text')),
+    );
+    expect(field.controller!.text, contains('dentist'));
+
+    await tester.enterText(
+      find.byKey(const Key('calendar-event-text')),
+      'dentist @city',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('calendar-event-save')));
+    await tester.pumpAndSettle();
+
+    expect(edited, hasLength(1));
+    expect(edited.single.$2.text, 'dentist @city');
+    expect(edited.single.$2.startMinutes, 16 * 60);
+    expect(edited.single.$2.reminderMinutes, 15 * 60 + 15);
+
+    // Delete goes straight through.
+    await tapEvent(tester, 'dentist');
+    await tester.tap(find.byKey(const Key('journal-event-delete')));
+    await tester.pumpAndSettle();
+    expect(deleted, hasLength(1));
+    expect(deleted.single.event.text, contains('dentist'));
+
+    // And the file's own line is one tap away.
+    await tapEvent(tester, 'dentist');
+    await tester.tap(find.byKey(const Key('journal-event-open')));
+    await tester.pumpAndSettle();
+    expect(opened, hasLength(1));
+  });
+
+  testWidgets('a window taps an event straight into the file', (tester) async {
+    tester.view.physicalSize = const Size(900, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    await tapEvent(tester, 'dentist');
+
+    expect(opened, hasLength(1));
+    expect(find.byKey(const Key('journal-event-sheet-grab')), findsNothing);
   });
 
   testWidgets('a phone keeps the buttons in the day card, and a sheet opens', (

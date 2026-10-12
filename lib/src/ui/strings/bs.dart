@@ -294,6 +294,10 @@ final class BosnianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Dodaj događaj';
   @override
+  String get calendarOpenInFile => 'Otvori u calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Podsjetnik u $time';
+  @override
   String get themeEditorRolesHint =>
       'Svaka boja nosi ime koje koristi izvezena datoteka';
   @override

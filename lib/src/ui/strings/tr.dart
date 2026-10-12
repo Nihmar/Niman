@@ -284,6 +284,10 @@ final class TurkishStrings extends Strings {
   @override
   String get calendarAddEvent => 'Etkinlik ekle';
   @override
+  String get calendarOpenInFile => 'calendar.txt içinde aç';
+  @override
+  String calendarReminderAt(String time) => '$time hatırlatması';
+  @override
   String get themeEditorRolesHint =>
       'Her renk, dışa aktarılan dosyadaki adı taşır';
   @override

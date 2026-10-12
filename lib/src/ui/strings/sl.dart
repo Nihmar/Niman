@@ -294,6 +294,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Dodaj dogodek';
   @override
+  String get calendarOpenInFile => 'Odpri v calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Opomnik ob $time';
+  @override
   String get themeEditorRolesHint =>
       'Vsaka barva je poimenovana kot v izvoženi datoteki';
   @override

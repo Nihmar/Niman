@@ -288,6 +288,10 @@ final class LatvianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Pievienot notikumu';
   @override
+  String get calendarOpenInFile => 'Atvērt calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Atgādinājums plkst. $time';
+  @override
   String get themeEditorRolesHint =>
       'Katrai krāsai ir tāds nosaukums kā eksportētajā failā';
   @override

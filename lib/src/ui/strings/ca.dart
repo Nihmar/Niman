@@ -293,6 +293,10 @@ final class CatalanStrings extends Strings {
   @override
   String get calendarAddEvent => 'Afegeix esdeveniment';
   @override
+  String get calendarOpenInFile => 'Obre a calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Recordatori a les $time';
+  @override
   String get themeEditorRolesHint =>
       'Cada color porta el nom que fa servir el fitxer exportat';
   @override

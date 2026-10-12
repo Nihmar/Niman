@@ -290,6 +290,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Legg til hendelse';
   @override
+  String get calendarOpenInFile => 'Åpne i calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Påminnelse kl. $time';
+  @override
   String get themeEditorRolesHint =>
       'Hver farge heter det den eksporterte filen kaller den';
   @override

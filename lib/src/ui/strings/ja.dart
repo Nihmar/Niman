@@ -270,6 +270,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get calendarAddEvent => '予定を追加';
   @override
+  String get calendarOpenInFile => 'calendar.txt で開く';
+  @override
+  String calendarReminderAt(String time) => '$time にリマインド';
+  @override
   String get themeEditorRolesHint => '各色の名前は書き出したファイルと同じです';
   @override
   String get themeEditorDiscardTitle => '変更を破棄';

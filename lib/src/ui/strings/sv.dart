@@ -292,6 +292,10 @@ final class SwedishStrings extends Strings {
   @override
   String get calendarAddEvent => 'Lägg till händelse';
   @override
+  String get calendarOpenInFile => 'Öppna i calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Påminnelse kl. $time';
+  @override
   String get themeEditorRolesHint =>
       'Varje färg heter det den exporterade filen kallar den';
   @override

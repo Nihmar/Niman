@@ -290,6 +290,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get calendarAddEvent => 'Bæta við viðburði';
   @override
+  String get calendarOpenInFile => 'Opna í calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Áminning kl. $time';
+  @override
   String get themeEditorRolesHint =>
       'Hver litur heitir því sem útflutta skráin kallar hann';
   @override

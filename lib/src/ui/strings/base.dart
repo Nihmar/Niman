@@ -148,6 +148,13 @@ abstract base class Strings {
 
   /// The button that opens the form, `Add event`.
   String get calendarAddEvent;
+
+  /// A phone's event sheet: the way into the file itself, and the
+  /// reminder it carries (#730).
+  String get calendarOpenInFile;
+
+  /// The reminder's own clock time, `Reminder at 15:15`.
+  String calendarReminderAt(String time);
   String get themeEditorRolesHint;
   String get themeEditorDiscardTitle;
   String get themeEditorDiscardBody;

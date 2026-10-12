@@ -292,6 +292,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Додати подію';
   @override
+  String get calendarOpenInFile => 'Відкрити у calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Нагадування о $time';
+  @override
   String get themeEditorRolesHint =>
       'Кожен колір названо так, як у файлі експорту';
   @override

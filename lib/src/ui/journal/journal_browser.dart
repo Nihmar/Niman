@@ -43,6 +43,8 @@ final class JournalBrowser extends StatefulWidget {
     this.eventDays = const <DateTime>{},
     this.calendarChanged,
     this.onOpenEvent,
+    this.onEditEvent,
+    this.onDeleteEvent,
     this.dueOn,
     this.tasksChanged,
     this.onOpenTasks,
@@ -75,6 +77,15 @@ final class JournalBrowser extends StatefulWidget {
 
   /// Opens the event's line in `calendar.txt` (#730).
   final void Function(CalendarEntryEvent event)? onOpenEvent;
+
+  /// Replaces an entry's event with the draft the form handed over
+  /// (#730): the phone's sheet is where an event is edited without
+  /// leaving the journal.
+  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)?
+  onEditEvent;
+
+  /// Takes an entry's event out of the file (#730).
+  final void Function(CalendarEntryEvent entry)? onDeleteEvent;
 
   /// The open tasks due on a day, as they read in the task list; null
   /// shows no tasks at all.
@@ -140,6 +151,9 @@ final class _JournalBrowserState extends State<JournalBrowser> {
   /// The day the Add event form is open for, or null when it is closed: a
   /// window gets the form inline in this pane, a phone a sheet (#730).
   DateTime? _addingEvent;
+
+  /// The event the open form is editing, or null when it is adding one.
+  CalendarEntryEvent? _editingEvent;
 
   List<DateTime> _days = const [];
   Map<DateTime, String> _summaries = const {};
@@ -279,7 +293,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           // go over the very thing the day was picked on (#712).
           if (_addingEvent case final day?) ...[
             const SizedBox(height: 12),
-            _eventForm(context, day),
+            _eventForm(context, day, _editingEvent),
           ],
         ],
         if (widget.eventsOn case final eventsOn?)
@@ -473,11 +487,161 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                 Text(event.reminder!, style: theme.textTheme.bodySmall),
               ],
             ),
-      onTap: widget.onOpenEvent == null
-          ? null
-          : () => widget.onOpenEvent!(entry),
+      // A phone taps through to the sheet (Edit, Delete, the file); a
+      // window goes straight to the file, which is where it is edited
+      // (#730).
+      onTap: widget.large && _sheetOffered
+          ? () => _showEventSheet(entry)
+          : (widget.onOpenEvent == null
+                ? null
+                : () => widget.onOpenEvent!(entry)),
     );
   }
+
+  /// Whether the event sheet has anything to offer.
+  bool get _sheetOffered =>
+      widget.onEditEvent != null || widget.onDeleteEvent != null;
+
+  /// The phone's sheet for one event (#730): what it is, its day, its
+  /// reminder, and the three things to do with it.
+  void _showEventSheet(CalendarEntryEvent entry) {
+    final event = entry.event;
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (sheet) {
+          final theme = Theme.of(sheet);
+          final syntax = theme.extension<SyntaxColors>();
+          final time = syntax?.calendarTime ?? theme.colorScheme.tertiary;
+          final day = entry.line.date;
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      key: const Key('journal-event-sheet-grab'),
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.outline,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.event_outlined, size: 22, color: time),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            DefaultTextStyle(
+                              style:
+                                  theme.textTheme.titleMedium ??
+                                  const TextStyle(),
+                              child: Row(
+                                children: [
+                                  if (event.time != null) ...[
+                                    Text(
+                                      event.time!.raw,
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(color: time),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  Expanded(
+                                    child: calendarEventText(sheet, event),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (day != null)
+                              Text(
+                                journalDayLabel(day),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            if (event.reminder case final reminder?)
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.notifications_outlined,
+                                    size: 16,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    AppStrings.calendarReminderAt(reminder),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  if (widget.onEditEvent != null)
+                    ListTile(
+                      key: const Key('journal-event-edit'),
+                      leading: const Icon(Icons.edit_outlined),
+                      title: Text(AppStrings.todoEditAction),
+                      onTap: () {
+                        Navigator.of(sheet).pop();
+                        _openForm(day: _dayOfEntry(entry), editing: entry);
+                      },
+                    ),
+                  if (widget.onDeleteEvent != null)
+                    ListTile(
+                      key: const Key('journal-event-delete'),
+                      leading: Icon(
+                        Icons.delete_outline,
+                        color: theme.colorScheme.error,
+                      ),
+                      title: Text(
+                        AppStrings.todoDeleteAction,
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
+                      onTap: () {
+                        Navigator.of(sheet).pop();
+                        widget.onDeleteEvent!(entry);
+                      },
+                    ),
+                  if (widget.onOpenEvent != null)
+                    ListTile(
+                      key: const Key('journal-event-open'),
+                      leading: const Icon(Icons.description_outlined),
+                      title: Text(AppStrings.calendarOpenInFile),
+                      onTap: () {
+                        Navigator.of(sheet).pop();
+                        widget.onOpenEvent!(entry);
+                      },
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// The day an entry's line heads, for a write that needs one: the
+  /// line's own date, else the day the pane speaks for.
+  DateTime _dayOfEntry(CalendarEntryEvent entry) =>
+      entry.line.date ??
+      (widget.large ? _selected : widget.focusDay ?? widget.today);
 
   /// The dock's offer for the empty day it picked (#712): the phone's
   /// card and dialog in one row, under the calendar they belong to.
@@ -583,7 +747,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       if (widget.onAddEvent != null)
         TextButton.icon(
           key: const Key('journal-add-event'),
-          onPressed: () => _addEvent(_selected),
+          onPressed: () => _openForm(day: _selected),
           icon: const Icon(Icons.event_outlined, size: 18),
           label: Text(AppStrings.calendarAddEvent),
         ),
@@ -597,11 +761,15 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     ];
   }
 
-  /// Opens the Add event form for [day]: inline in the dock, where the
-  /// calendar is; a sheet on a phone, where the card is small (#730).
-  void _addEvent(DateTime day) {
+  /// Opens the Add event form for [day] — or the edit form for [editing]
+  /// — inline in the dock, where the calendar is; a sheet on a phone,
+  /// where the card is small (#730).
+  void _openForm({required DateTime day, CalendarEntryEvent? editing}) {
     if (!widget.large) {
-      setState(() => _addingEvent = day);
+      setState(() {
+        _addingEvent = day;
+        _editingEvent = editing;
+      });
       return;
     }
     unawaited(
@@ -614,44 +782,98 @@ final class _JournalBrowserState extends State<JournalBrowser> {
             right: 12,
             bottom: MediaQuery.viewInsetsOf(sheet).bottom + 12,
           ),
-          child: _eventForm(sheet, day),
+          child: _eventForm(sheet, day, editing),
         ),
       ),
     );
   }
 
   /// The form itself, writing when it is told to and closing either way.
-  Widget _eventForm(BuildContext context, DateTime day) {
+  Widget _eventForm(
+    BuildContext context,
+    DateTime day,
+    CalendarEntryEvent? editing,
+  ) {
     return CalendarEventForm(
       day: day,
       knownTokens: widget.knownTokens,
-      preview: (draft) => _previewLine(day, draft),
+      draft: editing == null ? null : _draftOf(editing.event),
+      preview: (draft) => _previewLine(day, draft, editing: editing),
       onCancel: () {
         if (widget.large) {
           Navigator.of(context).maybePop();
         } else {
-          setState(() => _addingEvent = null);
+          setState(() {
+            _addingEvent = null;
+            _editingEvent = null;
+          });
         }
       },
       onSave: (draft) {
-        widget.onAddEvent?.call(day, draft);
+        if (editing != null) {
+          widget.onEditEvent?.call(editing, draft);
+        } else {
+          widget.onAddEvent?.call(day, draft);
+        }
         if (widget.large) {
           Navigator.of(context).maybePop();
         } else {
-          setState(() => _addingEvent = null);
+          setState(() {
+            _addingEvent = null;
+            _editingEvent = null;
+          });
         }
       },
     );
   }
 
+  /// An event as the form fills itself from it: its text, its times and
+  /// its reminder.
+  CalendarEventDraft _draftOf(CalendarEvent event) {
+    final start = event.time?.first;
+    final end = event.time?.isRange == true ? event.time?.end : null;
+    return CalendarEventDraft(
+      text: event.text,
+      startMinutes: start?.minutes,
+      endMinutes: end?.minutes,
+      reminderMinutes: _reminderMinutes(event.reminder),
+    );
+  }
+
+  /// `HH:MM` as minutes from midnight, or null.
+  static int? _reminderMinutes(String? reminder) {
+    if (reminder == null) return null;
+    final parts = reminder.split(':');
+    if (parts.length != 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    return hour * 60 + minute;
+  }
+
   /// The day's line as an added [draft] would leave it, from the file as
   /// the shell last read it: the writer's own answer, so the preview
   /// promises exactly what the write does.
-  String _previewLine(DateTime day, CalendarEventDraft draft) {
+  String _previewLine(
+    DateTime day,
+    CalendarEventDraft draft, {
+    CalendarEntryEvent? editing,
+  }) {
     final file =
         widget.calendarFile ??
         const CalendarFileContent(lines: <CalendarRawLine>[]);
-    final next = addCalendarEvent(file, day, draft: draft);
+    final next = editing == null
+        ? addCalendarEvent(file, day, draft: draft)
+        : updateCalendarEvent(
+                file,
+                CalendarEventRef(
+                  line: editing.lineIndex,
+                  day: day,
+                  start: editing.event.start,
+                ),
+                draft,
+              ) ??
+              file;
     final body = calendarEventAsText(draft);
     for (final line in next.lines) {
       if (line.text.contains(body)) return line.text;

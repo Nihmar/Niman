@@ -290,6 +290,10 @@ final class EnglishStrings extends Strings {
   @override
   String get calendarAddEvent => 'Add event';
   @override
+  String get calendarOpenInFile => 'Open in calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Reminder at $time';
+  @override
   String get themeEditorRolesHint =>
       'Each color is named as the exported file names it';
   @override

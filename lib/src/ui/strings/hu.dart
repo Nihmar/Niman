@@ -289,6 +289,10 @@ final class HungarianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Esemény hozzáadása';
   @override
+  String get calendarOpenInFile => 'Megnyitás a calendar.txt fájlban';
+  @override
+  String calendarReminderAt(String time) => 'Emlékeztető $time-kor';
+  @override
   String get themeEditorRolesHint =>
       'Minden szín neve az exportált fájlban szereplő név';
   @override

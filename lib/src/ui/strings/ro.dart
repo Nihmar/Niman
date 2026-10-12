@@ -295,6 +295,10 @@ final class RomanianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Adaugă eveniment';
   @override
+  String get calendarOpenInFile => 'Deschide în calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Memento la $time';
+  @override
   String get themeEditorRolesHint =>
       'Fiecare culoare poartă numele din fișierul exportat';
   @override

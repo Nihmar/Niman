@@ -291,6 +291,10 @@ final class DanishStrings extends Strings {
   @override
   String get calendarAddEvent => 'Tilføj begivenhed';
   @override
+  String get calendarOpenInFile => 'Åbn i calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Påmindelse kl. $time';
+  @override
   String get themeEditorRolesHint =>
       'Hver farve hedder det, den eksporterede fil kalder den';
   @override

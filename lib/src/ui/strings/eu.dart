@@ -288,6 +288,10 @@ final class BasqueStrings extends Strings {
   @override
   String get calendarAddEvent => 'Gehitu gertaera';
   @override
+  String get calendarOpenInFile => 'Ireki calendar.txt fitxategian';
+  @override
+  String calendarReminderAt(String time) => 'Gogorarazpena $time';
+  @override
   String get themeEditorRolesHint =>
       'Kolore bakoitzak esportatutako fitxategiak duen izena du';
   @override

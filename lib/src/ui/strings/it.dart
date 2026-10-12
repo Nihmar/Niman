@@ -294,6 +294,10 @@ final class ItalianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Aggiungi evento';
   @override
+  String get calendarOpenInFile => 'Apri in calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Promemoria alle $time';
+  @override
   String get themeEditorRolesHint =>
       'Ogni colore porta il nome che usa il file esportato';
   @override

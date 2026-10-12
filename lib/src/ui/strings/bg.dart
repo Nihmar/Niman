@@ -295,6 +295,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Добави събитие';
   @override
+  String get calendarOpenInFile => 'Отвори в calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Напомняне в $time';
+  @override
   String get themeEditorRolesHint =>
       'Всеки цвят е с името, което използва експортираният файл';
   @override

@@ -294,6 +294,10 @@ final class SpanishStrings extends Strings {
   @override
   String get calendarAddEvent => 'Añadir evento';
   @override
+  String get calendarOpenInFile => 'Abrir en calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Recordatorio a las $time';
+  @override
   String get themeEditorRolesHint =>
       'Cada color lleva el nombre que usa el archivo exportado';
   @override

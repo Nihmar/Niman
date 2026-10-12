@@ -292,6 +292,10 @@ final class CzechStrings extends Strings {
   @override
   String get calendarAddEvent => 'Přidat událost';
   @override
+  String get calendarOpenInFile => 'Otevřít v calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Připomenutí v $time';
+  @override
   String get themeEditorRolesHint =>
       'Každá barva se jmenuje jako v exportovaném souboru';
   @override

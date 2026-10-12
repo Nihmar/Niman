@@ -271,6 +271,10 @@ final class ChineseStrings extends Strings {
   @override
   String get calendarAddEvent => '添加事件';
   @override
+  String get calendarOpenInFile => '在 calendar.txt 中打开';
+  @override
+  String calendarReminderAt(String time) => '$time 提醒';
+  @override
   String get themeEditorRolesHint => '每个颜色的名称与导出文件一致';
   @override
   String get themeEditorDiscardTitle => '放弃更改';

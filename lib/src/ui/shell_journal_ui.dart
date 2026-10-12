@@ -35,6 +35,8 @@ final class ShellJournalUi {
     required this.calendar,
     required this.openEvent,
     required this.writeEvent,
+    required this.editEvent,
+    required this.deleteEvent,
     required this.addTask,
     required this.knownTokens,
     required this.calendarFile,
@@ -66,6 +68,14 @@ final class ShellJournalUi {
   /// Writes a new event onto a day (#730): what the Add event form saves
   /// through.
   final void Function(DateTime day, CalendarEventDraft event) writeEvent;
+
+  /// Replaces an event with the draft the phone's sheet handed over
+  /// (#730).
+  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)
+  editEvent;
+
+  /// Takes an event out of the file (#730).
+  final void Function(CalendarEntryEvent entry) deleteEvent;
 
   /// Opens the todo add with a day as its due date (#730).
   final void Function(DateTime day) addTask;
@@ -108,6 +118,8 @@ final class ShellJournalUi {
     calendarFile: calendarFile(),
     onAddEvent: writeEvent,
     onAddTask: addTask,
+    onEditEvent: editEvent,
+    onDeleteEvent: deleteEvent,
     focusDay: focusDay,
     onEntryMenu: (day, position) => unawaited(_entryMenuAt(day, position)),
   );
@@ -184,6 +196,8 @@ final class ShellJournalUi {
             Navigator.of(screen).pop();
             addTask(day);
           },
+          onEditEvent: editEvent,
+          onDeleteEvent: deleteEvent,
           onOpenDay: (day, {confirmed = false}) {
             // The screen goes first: the entry opens in the shell.
             Navigator.of(screen).pop();

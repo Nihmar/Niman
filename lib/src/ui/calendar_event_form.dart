@@ -67,7 +67,11 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
   );
   final FocusNode _textFocus = FocusNode();
 
-  late int? _start = widget.draft?.startMinutes ?? _nextHour(DateTime.now());
+  /// An added event starts at the next whole hour; an edited one keeps
+  /// its own time, an untimed event its none.
+  late int? _start = widget.draft == null
+      ? _nextHour(DateTime.now())
+      : widget.draft!.startMinutes;
   late int? _end = widget.draft?.endMinutes;
   late bool _remind = widget.draft?.reminderMinutes != null;
   late int _lead = _leadOf(widget.draft);
@@ -83,17 +87,13 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
   /// changed.
   static int _nextHour(DateTime now) => ((now.hour + 1) % 24) * 60;
 
-  /// The lead time an edited event's reminder was set with, as near as the
-  /// offered ones come.
+  /// The lead time an edited event's reminder was set with — its own, even
+  /// when it is not one of the offered ones — or the default.
   static int _leadOf(CalendarEventDraft? draft) {
     final start = draft?.startMinutes;
     final reminder = draft?.reminderMinutes;
     if (start == null || reminder == null) return 15;
-    final lead = start - reminder;
-    for (final offered in calendarReminderLeads) {
-      if (offered >= lead) return offered;
-    }
-    return calendarReminderLeads.last;
+    return start - reminder;
   }
 
   /// What the form holds, as the writer takes it: null with nothing to
@@ -104,13 +104,13 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
     // line is for.
     if (text.isEmpty) return null;
     final start = _start;
-    final reminder = _remind && start != null
-        ? (start - _lead) % (24 * 60)
-        : null;
+    final reminder = _remind && start != null ? start - _lead : null;
     return CalendarEventDraft(
       text: text,
       startMinutes: start,
       endMinutes: _end,
+      // A lead that would land on the day before is not written: a
+      // calendar line's `rem:` is a clock time on its own day.
       reminderMinutes: reminder == null || reminder < 0 ? null : reminder,
     );
   }
@@ -180,7 +180,9 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
             Row(
               children: [
                 Text(
-                  AppStrings.calendarNewEvent,
+                  widget.draft == null
+                      ? AppStrings.calendarNewEvent
+                      : AppStrings.todoEditAction,
                   style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(width: 8),
@@ -290,7 +292,10 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                     value: _lead,
                     underline: const SizedBox.shrink(),
                     items: [
-                      for (final lead in calendarReminderLeads)
+                      // The event's own lead too, when it is not one of
+                      // the offered ones: editing must not quietly move a
+                      // reminder that was set elsewhere.
+                      for (final lead in {...calendarReminderLeads, _lead})
                         DropdownMenuItem(
                           value: lead,
                           child: Text(AppStrings.calendarRemindBefore(lead)),
@@ -332,7 +337,11 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                 FilledButton(
                   key: const Key('calendar-event-save'),
                   onPressed: draft == null ? null : _save,
-                  child: Text(AppStrings.calendarAdd),
+                  child: Text(
+                    widget.draft == null
+                        ? AppStrings.calendarAdd
+                        : AppStrings.todoSave,
+                  ),
                 ),
               ],
             ),

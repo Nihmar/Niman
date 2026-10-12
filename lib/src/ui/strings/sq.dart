@@ -289,6 +289,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Shto ngjarje';
   @override
+  String get calendarOpenInFile => 'Hap në calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Kujtesë në $time';
+  @override
   String get themeEditorRolesHint =>
       'Çdo ngjyrë mban emrin që përdor skedari i eksportuar';
   @override

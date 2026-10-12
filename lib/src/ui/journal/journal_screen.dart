@@ -31,6 +31,8 @@ final class JournalScreen extends StatelessWidget {
     this.calendarFile,
     this.onAddEvent,
     this.onAddTask,
+    this.onEditEvent,
+    this.onDeleteEvent,
     super.key,
   });
 
@@ -69,6 +71,13 @@ final class JournalScreen extends StatelessWidget {
 
   /// See [JournalBrowser.onAddTask].
   final void Function(DateTime day)? onAddTask;
+
+  /// See [JournalBrowser.onEditEvent].
+  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)?
+  onEditEvent;
+
+  /// See [JournalBrowser.onDeleteEvent].
+  final void Function(CalendarEntryEvent entry)? onDeleteEvent;
 
   /// See [JournalBrowser.today].
   final DateTime today;
@@ -109,6 +118,8 @@ final class JournalScreen extends StatelessWidget {
         calendarFile: calendarFile,
         onAddEvent: onAddEvent,
         onAddTask: onAddTask,
+        onEditEvent: onEditEvent,
+        onDeleteEvent: onDeleteEvent,
       ),
     );
   }

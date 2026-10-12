@@ -294,6 +294,10 @@ final class PolishStrings extends Strings {
   @override
   String get calendarAddEvent => 'Dodaj wydarzenie';
   @override
+  String get calendarOpenInFile => 'Otwórz w calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Przypomnienie o $time';
+  @override
   String get themeEditorRolesHint =>
       'Każdy kolor nazywa się tak jak w wyeksportowanym pliku';
   @override

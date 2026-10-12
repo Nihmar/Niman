@@ -294,6 +294,10 @@ final class GalicianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Engadir evento';
   @override
+  String get calendarOpenInFile => 'Abrir en calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Lembrete ás $time';
+  @override
   String get themeEditorRolesHint =>
       'Cada cor leva o nome que usa o ficheiro exportado';
   @override

@@ -288,6 +288,10 @@ final class EstonianStrings extends Strings {
   @override
   String get calendarAddEvent => 'Lisa sündmus';
   @override
+  String get calendarOpenInFile => 'Ava failis calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Meeldetuletus kell $time';
+  @override
   String get themeEditorRolesHint =>
       'Iga värv on nimetatud nii, nagu seda nimetab eksporditud fail';
   @override
