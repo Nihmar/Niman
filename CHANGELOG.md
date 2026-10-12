@@ -6,6 +6,61 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.0] - 2026-10-12
+
+Polish, Calendar, Grid and Columns.
+
+A wide window gets the polish of a desktop: Home and Todo open as tabs
+beside the note, search lives in the sidebar, the choices a pointer aims
+at are menus, and the screens that were sheets are floating windows.
+`calendar.txt`, the plain-text calendar, is read and written — a day's
+events beside its tasks, Add event and Add task on the day, reminders on
+the tasks' own alarms, and events that merge on sync. The Files pane gains
+a file manager's grid beside the tree, the tree sorts the ways an index
+can and renames in place, and a note can set its blocks in side-by-side
+columns.
+
+### Added
+- **`calendar.txt`, read** (#730): a plain-text calendar at the library root, its events under a day in the dock's journal pane and the phone's day card, above the tasks due, with the day's goals — the week's, the month's, the year's — over them and a second, amber dot on days that hold an event. Tapping an event on a phone opens its sheet — Edit, Delete, Open in `calendar.txt` — where a window goes straight to the file
+- **Add event, and Add task on a day** (#730): the form asks a start time (the next whole hour until it is changed) and an optional end, the text with the `+`, `@` and `#` tokens a tap away, **Remind me** with its lead time, and shows the line exactly as it will be written — the writer's own answer. It is inline under the calendar in the dock and a sheet on a phone; **Add task** opens the task dialog with the day as its due date, and an empty day offers **New journal** beside the two
+- **An event's own reminder** (#730): the line's `rem:16:30` feeds the same alarms `todo.txt`'s reminders do — one wanted set over both files — so moving or deleting an event takes its reminder with it, and tapping the notification opens the journal on that day. **Settings → Journal → Calendar → Event times** reads a time as the file writes it (`9-12`) or as a clock (`09:00–12:00`)
+- **An Events today tile on the Home** (#730), the day's goals over its events; and a lone `+project` or `@context` in search answers from the events, the goals and the open tasks, not the notes alone
+- **`calendar.txt` merges on sync** (#730): day lines pair by their date, their events merge as a set, and two devices that each add an event to one day keep both, nothing asked
+- **A folder grid** (#727): the Files pane's second shape, a file manager's grid of one folder's children, switched in place with **List | Grid** at the tree's foot. Tiles drawn from the index alone — an icon by kind, the name, the date the folder is sorted by, a pin for a pinned note and the scanner icon for an OCR sidecar — with breadcrumbs to walk up, a keyboard walk of its own, and the grid's own folder starting from the tree's selection and following a rename. The choice is this device's
+- **Note columns** (#729): two or more blocks on one row, written as Pandoc's and Quarto's fenced divs (`:::: columns`, `::: {.column width="40%"}`) — side by side in the read view and in live, each column windowed on its own, folded to and from its opener, and inserted from the formatting toolbar, the menus and the command palette. The index, the outline and Tidy read them, and the HTML, PDF and EPUB exports lay them out
+- **A file dragged from the tree into a note becomes a link** (#704) — or an embed, for a picture or an audio file — written where the pointer let go, in the library's own format
+- **After `![[` the suggester offers the attachments** (#705), subfolders included, then the notes, and writes the file with its extension
+- **Settings → Navigation → Opens on** (#706): the destination a library opens on, any shown one but Settings and the quick note; a hidden start falls back to Files and the row says so
+- **Renaming a tree row happens in place** on a desktop (#707), and the tree sorts by **name, modified, created or size**, folders first (#726)
+- **A Sepia palette** (#724): warm paper by day, a dimmed brown at night
+- **A voice note's recording locks** by holding the microphone and sliding up (#737), and an audio clip's ⋮ menu copies its transcription or its comment (#839)
+- **Delete with notes** (#717): deleting a PDF or a book asks, in the same question, to take the notes written about it along, and one Undo (or the trash) brings the file and them back together
+- **The Markdown punctuation pairs by its own rule** (#718): `*`, `_` and `"` close themselves as the brackets do, and a star after a word, in code or in maths, opens nothing (#762)
+- **A long press picks a list row up** on a phone, with a 48 dp handle that leaves the row where it stood (#719)
+- **F4 and Shift+F4** step the search hits, and `Ctrl+Shift+F` focuses the field (#712)
+
+### Changed
+- **The wide window, polished** (#712): Home and Todo open as pinned tabs in the focused pane with the tree and the dock staying; Search replaces the tree in the sidebar, its query and hits kept across a switch; the tags are a collapsible tree under it; a pointer's choices are a menu that grows from the control that opened it; a toolbar that does not fit overflows into a menu; tooltips name the key bound now. A note opened from the Home brings Files forward (#709)
+- **A desktop's screens are floating windows** (#712): the trash, the history pages, the sync conflict and its settings, the cheatsheet; the count, OCR, quantity and model sheets are dialogs on a wide window; and a desktop's snackbar is a floating toast, not a bar across the window
+- **A desktop types a reminder's time**, where a phone keeps the clock dial (#712); and deleting into the trash asks nothing — Undo is the way back — while a permanent delete still asks (#712)
+- **The tree footer's New menu offers today's journal entry and Capture web page**, as the phone's + does (#712), and the dock offers to make an empty journal day under the calendar, without a dialog (#712)
+- **The title bar** puts the sidebar toggle over the rail's glyphs and the library's name over the panel's edge (#708), and the wide chrome's insets are 4 px everywhere (#749)
+- **The tree footer's menus run the tree's dense rows** (#747); the resize dividers are grabbed over the islands' edges, not only in the 4 px gap (#786); the pinned tabs wear the note tabs' own rectangle (#712)
+- **The cheatsheet opened from Settings is a page in its column** (#772), the floating window for everywhere else
+
+### Fixed
+- **Android**: a reminder tapped while the app is closed opens its note again (#756); a share relaunched from Recents is not replayed, and a second alike share is taken (#757); the launching intent is handled once per task (#721); select all and delete take one pass (#753); the keyboard brings the selection it opened for into view (#728)
+- **Editor**: Backspace takes both stars or quotes only of a pair it wrote (#761); a selection that happens to equal the platform's whole window deletes only itself (#758); Shift+Up on a long selection no longer jumps to the note's top (#764); a viewport that shrinks no longer scrolls back to the old caret, and only the keyboard the editor asked for scrolls to its caret (#765); a save asked during one answers for its own text (#723); Ctrl after a drag shows the hand for what is under the mouse (#787); a format on at the caret shows as on in the overflow menu (#788); an audio note is never tidied, from the menu, the palette or the keys (#840)
+- **Sync**: a folder renamed on another device carries this device's Home actions, Home and widgets (#713, #774); a save during a resolution's upload fails as moved, not stuck (#763); the Resolved confirmation outlives its window (#773); an upload sends what its row describes (#723)
+- **Lists**: a drag that scrolled out from under itself cannot freeze the app (#720); a drop below the last row makes the last root item, and picking up an edge row scrolls nothing (#777); the 48 dp handle leaves the row as it was (#778)
+- **Audio**: ending a recording brings its turn into view, and a new turn reaches the bottom for a reader who had scrolled up (#735, #767); a hold released before the recording starts records nothing (#766)
+- **The wide layout**: Home or Todo stays on screen when the window crosses to wide (#770); Windows' minimum width counts the frame, keeping the wide layout (#771); clicking a note tab leaves the search sidebar in place (#769); the history pages name the note under a custom title bar (#783); the tags tree follows the index instead of its first read (#779); a book closed in full screen gives the screen back without rebuilding the shell (#784); the words/contains switch keeps its place when Clear appears (#782)
+- **Grid and panes** (#727): the grid keeps the folder it shows through a rename and starts from the tree's selection, the root is no row to select, an empty folder keeps the keys and its way up, and a read the grid has moved on from does not pull it back; a click on a note opens it with the caret in it, and a caret asked of another note leaves this one
+- **Tree, index and files**: a save that changes a note's title, date or pin redraws the tree (#760); a file an open view holds is renamed, moved or deleted after the view lets go (#833); a save keeps the note's creation time on Windows (#759); a renamed attachment keeps its own extension; a folder's delete question offers no impossible choice and remembers the last answer (#717)
+- **Annotations**: a delete carries every companion of the file, indexed or fresh, in the annotations folder or beside it (#775), and an up-to-date annotations folder is not read again (#776)
+- **Performance**: scrolling a note whose bulk is a table no longer stutters in live and preview (#722), and a save that moved nothing in the tree no longer flattens it (#751)
+- **Journal**: **Add task** opens over the calendar screen it was called from; the phone's Add event sheet keeps its head below the status bar and scrolls instead of climbing over it; an off-stage pane takes its copy buttons with it, instead of leaving the live pane's painted over the preview's; the dock lets an empty day's pick go when another day opens or the month turns (#788)
+
 ## [0.1.9] - 2026-10-09
 
 A Home, slides, and back and forward.
