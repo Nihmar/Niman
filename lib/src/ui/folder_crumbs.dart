@@ -70,14 +70,16 @@ final class FolderCrumbs extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final direction = Directionality.of(context);
           // The Up button and the gap after it lead the row: the crumbs
-          // are measured against what is left (#727).
+          // are measured against what is left (#727), at the size the
+          // text is drawn — the system's text scale included — and the
+          // folder shown in its own heavier style.
           final shown = _visible(
             crumbs,
             constraints.maxWidth - _upWidth - _upGap,
-            style,
-            direction,
+            (crumb) => crumb.path == folder ? current : muted,
+            Directionality.of(context),
+            MediaQuery.textScalerOf(context),
           );
           final folded = shown.length == crumbs.length
               ? const <_Crumb>[]
@@ -130,13 +132,14 @@ final class FolderCrumbs extends StatelessWidget {
   List<_Crumb> _visible(
     List<_Crumb> crumbs,
     double width,
-    TextStyle style,
+    TextStyle Function(_Crumb crumb) styleOf,
     TextDirection direction,
+    TextScaler scaler,
   ) {
     if (crumbs.length <= 2) return crumbs;
     final labels = [
       for (final crumb in crumbs)
-        _textWidth(crumb.label, style, direction) + 12,
+        _textWidth(crumb.label, styleOf(crumb), direction, scaler) + 12,
     ];
     final total =
         labels.reduce((a, b) => a + b) + _separatorWidth * (crumbs.length - 1);
@@ -229,12 +232,21 @@ final class FolderCrumbs extends StatelessWidget {
   }
 }
 
-/// The width [text] takes on one line in [style].
-double _textWidth(String text, TextStyle style, TextDirection direction) {
+/// The width [text] takes on one line in [style], scaled by [scaler] as a
+/// [Text] under the same [MediaQuery] is.
+double _textWidth(
+  String text,
+  TextStyle style,
+  TextDirection direction,
+  TextScaler scaler,
+) {
   final painter = TextPainter(
     text: TextSpan(text: text, style: style),
     maxLines: 1,
     textDirection: direction,
+    textScaler: scaler,
   )..layout();
-  return painter.width;
+  final width = painter.width;
+  painter.dispose();
+  return width;
 }

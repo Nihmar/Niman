@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/ui/folder_crumbs.dart';
 import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/tree.dart' show TreeRename;
 
@@ -431,6 +432,43 @@ void main() {
     await tester.tap(find.byKey(const Key('crumb-Projects/Niman')));
     await tester.pumpAndSettle();
     expect(opened, ['Projects/Niman']);
+  });
+
+  testWidgets('the crumbs fold at the size the system draws them', (
+    tester,
+  ) async {
+    Widget crumbsAt(double scale) => MaterialApp(
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+        child: Scaffold(
+          body: Align(
+            child: SizedBox(
+              width: 380,
+              child: FolderCrumbs(
+                folder: 'Projects/Niman',
+                onOpen: (_) {},
+                onUp: () {},
+                onMove: (_, _) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Unscaled, the three crumbs fit the pane.
+    await tester.pumpWidget(crumbsAt(1));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('crumbs-more')), findsNothing);
+    expect(find.text('Projects'), findsOneWidget);
+
+    // A system text scale draws them wider: they fold rather than spill
+    // out of the row.
+    await tester.pumpWidget(crumbsAt(1.5));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('crumbs-more')), findsOneWidget);
+    expect(find.text('Projects'), findsNothing);
   });
 
   testWidgets('a folder that is gone falls back to the nearest that is not', (
