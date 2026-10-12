@@ -277,6 +277,8 @@ final class SourceLine extends StatelessWidget {
                 alignment: fence.numberUp
                     ? Alignment.bottomCenter
                     : Alignment.topCenter,
+                // As short as it is: a gutter of nothing is no height.
+                minHeight: 0,
                 maxHeight: double.infinity,
                 child: child,
               ),

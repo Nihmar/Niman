@@ -417,6 +417,53 @@ void main() {
     }
   });
 
+  testWidgets("a note's columns stand where they do in live", (tester) async {
+    // #729: the read view and `live` draw a columns block with the same
+    // rule, the same bands and the same slivers, so a flip moves nothing.
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note = '''
+caret
+
+:::: columns
+::: {.column width="40%"}
+Left words
+
+more left
+:::
+
+::: column
+Right words
+- an item
+:::
+::::
+
+after
+''';
+    const words = [
+      'Left words',
+      'more left',
+      'Right words',
+      'an item',
+      'after',
+    ];
+    Future<List<Offset>> places({required bool read}) async {
+      await _pumpNote(tester, note, read: read);
+      final origin = _glyphOf(tester, 'caret');
+      return [for (final word in words) _glyphOf(tester, word) - origin];
+    }
+
+    final live = await places(read: false);
+    final read = await places(read: true);
+    // Side by side in both.
+    expect(live[2].dx, greaterThan(live[0].dx + 200));
+    for (var at = 0; at < words.length; at++) {
+      expect(read[at].dx, closeTo(live[at].dx, 0.01), reason: words[at]);
+      expect(read[at].dy, closeTo(live[at].dy, 0.01), reason: words[at]);
+    }
+  });
+
   testWidgets('an HTML block stands where it does in live', (tester) async {
     // The read view drew an HTML block's source in a box with a padding all
     // round, its lines four spaces short; `live` drew the source as rows on
