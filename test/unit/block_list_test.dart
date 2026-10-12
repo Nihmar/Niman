@@ -66,6 +66,10 @@ final class _Pair {
     ];
     expect(list.divCount, divs.length, reason: reason);
     expect(list.divBlocks.map(_describe).toList(), divs, reason: reason);
+    expect(list.quoteBlocks.map(_describe).toList(), [
+      for (final block in plain)
+        if (block.kind == BlockKind.quote) _describe(block),
+    ], reason: reason);
     // Out of order, as a binary search reads.
     final random = Random(plain.length);
     for (var ask = 0; ask < 200 && plain.isNotEmpty; ask++) {

@@ -350,6 +350,13 @@ final class SourceStyler {
       ? _scanner.divBlocks
       : null;
 
+  /// The note's quote blocks (#729), in order, or null while [divBlocks]
+  /// is.
+  Iterable<Block>? get quoteBlocks =>
+      revision == buffer.revision && _scanner.settled
+      ? _scanner.quoteBlocks
+      : null;
+
   /// How many lines the scan behind the colours has read, for the test that
   /// holds a tap on a task box to the work the tap may do: one that settled
   /// the scan read the rest of the note, and the count says so.

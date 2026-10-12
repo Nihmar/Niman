@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_heights.dart';
+import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 
 /// One column of a row: its share of the row's width after the gaps, and
@@ -34,6 +35,18 @@ typedef SliverColumn = ({double share, Widget sliver});
 /// `color`. What `live` draws beside a side-by-side block, whose columns'
 /// lines are not numbered.
 typedef ColumnsBracket = ({double x, double top, double bottom, Color color});
+
+/// The quotes around a block (#729): `depth` bars `barWidth` wide, one
+/// every `indent` from `left`, in `bar` — the first in `callout`, over a
+/// callout's box of it, when the block is in a callout.
+typedef ColumnsQuote = ({
+  double left,
+  int depth,
+  Color bar,
+  double barWidth,
+  double indent,
+  Color? callout,
+});
 
 /// A `columns` block, its columns side by side in [rows].
 final class SliverColumns extends StatelessWidget {
@@ -47,8 +60,12 @@ final class SliverColumns extends StatelessWidget {
     this.closer,
     this.indent = 0,
     this.bracket,
+    this.quote,
     super.key,
   });
+
+  /// The quotes the block stands in, drawn down its height, if any.
+  final ColumnsQuote? quote;
 
   /// The note's map, where the block's whole height goes.
   final BlockHeights heights;
@@ -101,6 +118,7 @@ final class SliverColumns extends StatelessWidget {
       heights: heights,
       index: index,
       bracket: bracket,
+      quote: quote,
       sliver: group,
     );
   }
@@ -143,8 +161,11 @@ final class _ExtentRecorder extends SingleChildRenderObjectWidget {
     required this.heights,
     required this.index,
     required this.bracket,
+    required this.quote,
     required Widget sliver,
   }) : super(child: sliver);
+
+  final ColumnsQuote? quote;
 
   final BlockHeights heights;
   final int index;
@@ -155,7 +176,9 @@ final class _ExtentRecorder extends SingleChildRenderObjectWidget {
 
   @override
   _RenderExtentRecorder createRenderObject(BuildContext context) =>
-      _RenderExtentRecorder(heights, index)..bracket = bracket;
+      _RenderExtentRecorder(heights, index)
+        ..bracket = bracket
+        ..quote = quote;
 
   @override
   void updateRenderObject(
@@ -165,7 +188,8 @@ final class _ExtentRecorder extends SingleChildRenderObjectWidget {
     renderObject
       ..heights = heights
       ..index = index
-      ..bracket = bracket;
+      ..bracket = bracket
+      ..quote = quote;
   }
 }
 
@@ -204,8 +228,50 @@ final class _RenderExtentRecorder extends RenderProxySliver {
     markNeedsPaint();
   }
 
+  ColumnsQuote? get quote => _quote;
+  ColumnsQuote? _quote;
+  set quote(ColumnsQuote? value) {
+    if (value == _quote) return;
+    _quote = value;
+    markNeedsPaint();
+  }
+
+  /// The quotes' bars, and a callout's box, down the part of the block on
+  /// screen, under its lines.
+  void _paintQuote(PaintingContext context, Offset offset) {
+    final quote = _quote;
+    final geometry = this.geometry;
+    if (quote == null || geometry == null || !geometry.visible) return;
+    final height = geometry.paintExtent;
+    final canvas = context.canvas;
+    final callout = quote.callout;
+    if (callout != null) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          offset.dx + quote.left,
+          offset.dy,
+          constraints.crossAxisExtent - quote.left,
+          height,
+        ),
+        Paint()..color = calloutBackground(callout),
+      );
+    }
+    for (var level = 0; level < quote.depth; level++) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          offset.dx + quote.left + level * quote.indent,
+          offset.dy,
+          quote.barWidth,
+          height,
+        ),
+        Paint()..color = level == 0 && callout != null ? callout : quote.bar,
+      );
+    }
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
+    _paintQuote(context, offset);
     super.paint(context, offset);
     final bracket = _bracket;
     final geometry = this.geometry;

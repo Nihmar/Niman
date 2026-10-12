@@ -391,7 +391,13 @@ final class LiveDecorationPainter extends CustomPainter {
     required this.revealed,
     required this.color,
     double? restingLeft,
+    this.quotesOutside = 0,
   }) : restingLeft = restingLeft ?? textLeft;
+
+  /// How many of the line's quotes are drawn outside it, by the side-by-side
+  /// `columns` block it is a line of (#729): their bars, and a callout's
+  /// box, are the block's, down its whole height.
+  final int quotesOutside;
 
   /// What to draw.
   final LineShape shape;
@@ -430,6 +436,7 @@ final class LiveDecorationPainter extends CustomPainter {
   }
 
   void _paintQuoteBars(Canvas canvas, Size size) {
+    if (quotesOutside > 0) return;
     final callout = shape.callout;
     // A callout's box, the whole row wide, behind its bar (#279).
     if (callout != null) {

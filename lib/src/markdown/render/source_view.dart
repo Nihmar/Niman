@@ -1992,9 +1992,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (revision == _runsRevision) return _runs;
     final styler = _styler;
     final fences = styler?.divBlocks;
-    _runs = styler == null || fences == null
-        ? const <LiveRun>[]
-        : LiveRun.of(fences, styler.blockOf, widget.buffer.lineAt);
+    final quotes = styler?.quoteBlocks;
+    if (styler == null || fences == null || quotes == null) {
+      _runs = const <LiveRun>[];
+    } else {
+      // The note's own, and the ones in its quotes and callouts, read off
+      // each quote's content.
+      _runs = [
+        ...LiveRun.of(fences, styler.blockOf, widget.buffer.lineAt),
+        ...LiveRun.inQuotes(quotes, widget.buffer),
+      ]..sort((a, b) => a.start.compareTo(b.start));
+    }
     _runsRevision = revision;
     return _runs;
   }
@@ -2053,9 +2061,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   double _hostEstimate(LiveLayout layout) =>
       LiveHosts.estimateOf(layout, _gap, layout.run.closed ? 2 * _band : _band);
 
-  /// How far the list items [run] stands in indent its columns.
+  /// How far the list items and the quote [run] stands in indent its
+  /// columns.
   double _itemsIndent(LiveRun run) =>
-      run.items * widget.theme.listIndentPerLevel;
+      run.items * widget.theme.listIndentPerLevel +
+      run.quoteDepth * widget.theme.quoteIndentPerLevel;
 
   /// The note box's x where [layout]'s columns start: past the gutter, and
   /// the indent of the list items the block stands in.
@@ -2144,12 +2154,23 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// null: a column's fence and a `columns` block's are bands, an unknown
   /// div's are the text they are.
   LiveFence? _fenceOf(int index, Block? block) {
-    if (!widget.hideMarkers || block == null || block.kind != BlockKind.div) {
+    if (!widget.hideMarkers || block == null) return null;
+    final DivRole role;
+    final LiveRun? run;
+    if (block.kind == BlockKind.div) {
+      role = block.divRole!;
+      if (!role.laysOut) return null;
+      run = LiveRun.holding(_liveRuns, index);
+    } else if (block.kind == BlockKind.quote) {
+      // A fence in a quote is no block of the note's: its block's content,
+      // read again, says what it does.
+      run = LiveRun.holding(_liveRuns, index);
+      final quoted = run?.fences?[index];
+      if (quoted == null) return null;
+      role = quoted;
+    } else {
       return null;
     }
-    final role = block.divRole!;
-    if (!role.laysOut) return null;
-    final run = LiveRun.holding(_liveRuns, index);
     if (run == null) return null;
     final chip = switch (role) {
       DivRole.opensColumns => 'columns',
@@ -4084,6 +4105,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     required double width,
     bool inColumn = false,
     double outerIndent = 0,
+    int outerQuotes = 0,
   }) {
     final styled = _lineAt(index);
     final block = _styler?.blockOf(index);
@@ -4163,6 +4185,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       rowColor: widget.typewriter ? typewriterLineColor(context) : null,
       fence: _fenceOf(index, block),
       outerIndent: outerIndent,
+      outerQuotes: outerQuotes,
     );
   }
 
@@ -4215,6 +4238,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       index: host,
       gap: _gap,
       indent: _gutter + _itemsIndent(run),
+      // A block in a quote or a callout: their bars, and a callout's box,
+      // down the block's whole height, as its rows draw them.
+      quote: run.quoteDepth == 0
+          ? null
+          : (
+              left: _gutter,
+              depth: run.quoteDepth,
+              bar: widget.theme.quoteBar,
+              barWidth: widget.theme.quoteBarWidth,
+              indent: widget.theme.quoteIndentPerLevel,
+              callout: run.callout == null
+                  ? null
+                  : calloutStyleOf(run.callout!.type).color,
+            ),
       // One gutter and several columns: the columns' lines are not
       // numbered, and a bracket down the gutter spans the block between
       // its outer fences, which are.
@@ -4226,9 +4263,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               color: widget.theme.markerDim,
             )
           : null,
-      opener: (context) => _lineWidget(context, run.start, width: _textWidth),
+      // Its outer fences are rows of its quote: the block draws the quote.
+      opener: (context) => _lineWidget(
+        context,
+        run.start,
+        width: _textWidth,
+        outerQuotes: run.quoteDepth,
+      ),
       closer: run.closed
-          ? (context) => _lineWidget(context, run.end - 1, width: _textWidth)
+          ? (context) => _lineWidget(
+              context,
+              run.end - 1,
+              width: _textWidth,
+              outerQuotes: run.quoteDepth,
+            )
           : null,
       rows: [
         for (final row in layout.rows)
@@ -4246,6 +4294,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                       width: layout.widths[at],
                       inColumn: true,
                       outerIndent: _itemsIndent(run),
+                      outerQuotes: run.quoteDepth,
                     ),
                     childCount: layout.maps[at].length,
                   ),

@@ -6,7 +6,10 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/callout.dart';
+import 'package:niman/src/markdown/quote_content.dart';
 import 'package:niman/src/markdown/render/columns_run.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 
 /// One column of a [LiveRun]: its lines `[start, end)`, its fences
 /// included, and its `width`, a percentage, or null.
@@ -22,7 +25,24 @@ final class LiveRun {
     required this.closed,
     required this.items,
     required this.columns,
+    this.quoteDepth = 0,
+    this.callout,
+    this.fences,
   });
+
+  /// How many quotes the block stands in: 0 for a block of the note's own,
+  /// 1 for one in a quote or a callout (#729), whose content is read again
+  /// for it.
+  final int quoteDepth;
+
+  /// The callout the block stands in, if it stands in one: what its box
+  /// is drawn in.
+  final Callout? callout;
+
+  /// What each of the block's fence lines does, for a block in a quote:
+  /// the note's scan sees the quote, not its fences. Null for a block of
+  /// the note's own, whose fences are blocks of the scan.
+  final Map<int, DivRole>? fences;
 
   /// Its opener's line.
   final int start;
@@ -59,6 +79,7 @@ final class LiveRun {
       other.end == end &&
       other.closed == closed &&
       other.items == items &&
+      other.quoteDepth == quoteDepth &&
       _sameColumns(other.columns, columns);
 
   static bool _sameColumns(List<LiveColumn> a, List<LiveColumn> b) {
@@ -122,6 +143,70 @@ final class LiveRun {
       after = runs.last.end;
     }
     return runs;
+  }
+
+  /// The outermost `columns` blocks inside [quotes] — the note's quote
+  /// blocks, in order — each read off its quote's content, read again
+  /// (`QuoteContent`). Only a quote of one level at the note's margin, and
+  /// of at most [maxLines] lines: a quote's content is scanned again at
+  /// each revision, and a quote is a few lines — a longer one draws its
+  /// columns stacked.
+  static List<LiveRun> inQuotes(
+    Iterable<Block> quotes,
+    SourceBuffer buffer, {
+    int maxLines = 2000,
+  }) {
+    final runs = <LiveRun>[];
+    for (final quote in quotes) {
+      if (quote.quoteDepth != 1 ||
+          quote.listDepth >= 0 ||
+          quote.footnote != 0 ||
+          quote.lineCount > maxLines ||
+          !_holdsFence(quote, buffer)) {
+        continue;
+      }
+      final content = QuoteContent.of(quote, buffer);
+      final base = quote.startLine + content.skipped;
+      final blocks = content.blocks;
+      for (final run in ColumnsRun.of(blocks, (line) => content.lines[line])) {
+        runs.add(
+          LiveRun(
+            start: base + blocks[run.start].startLine,
+            end: base + blocks[run.end - 1].endLine,
+            closed: run.closed,
+            items: 0,
+            quoteDepth: 1,
+            callout: content.callout,
+            fences: {
+              for (var at = run.start; at < run.end; at++)
+                if (blocks[at].kind == BlockKind.div &&
+                    blocks[at].divRole!.laysOut)
+                  base + blocks[at].startLine: blocks[at].divRole!,
+            },
+            columns: [
+              for (final column in run.columns)
+                (
+                  start: base + blocks[column.blocks.first].startLine,
+                  end: base + blocks[column.blocks.last].endLine,
+                  width: column.width,
+                ),
+            ],
+          ),
+        );
+      }
+    }
+    return runs;
+  }
+
+  /// Whether a line of [quote] — past its one `>` — opens with three
+  /// colons: one comparison a line, before its content is read again.
+  static bool _holdsFence(Block quote, SourceBuffer buffer) {
+    for (var line = quote.startLine; line < quote.endLine; line++) {
+      final text = buffer.lineAt(line).trimLeft();
+      final inside = text.startsWith('>') ? text.substring(1).trimLeft() : text;
+      if (inside.startsWith(':::')) return true;
+    }
+    return false;
   }
 
   /// The run of [runs] — in order — holding [line], or null.

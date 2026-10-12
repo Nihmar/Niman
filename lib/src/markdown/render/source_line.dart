@@ -76,8 +76,14 @@ final class SourceLine extends StatelessWidget {
     required this.caretOn,
     this.fence,
     this.outerIndent = 0,
+    this.outerQuotes = 0,
     super.key,
   });
+
+  /// How many of the line's quotes the sliver drawing it draws already: a
+  /// side-by-side column's in a quote or a callout (#729), whose bars and
+  /// box run down the block.
+  final int outerQuotes;
 
   /// How far the sliver drawing the line indents it already: a
   /// side-by-side column's, for the list items its block stands in
@@ -525,6 +531,7 @@ final class SourceLine extends StatelessWidget {
         restingLeft: mine ? _indent(context) : indent,
         revealed: mine,
         color: theme.markerDim,
+        quotesOutside: outerQuotes,
       ),
       child: row,
     );
@@ -538,7 +545,10 @@ final class SourceLine extends StatelessWidget {
     final scaler = MediaQuery.textScalerOf(context);
     final band = scaler.scale(theme.divBand);
     final inBlock = at.line >= fence.start && at.line < fence.end;
-    return CustomPaint(
+    // A fence in a quote is a row of the quote: its bars, as any row's,
+    // and its markers past them, over the quote's text.
+    final quotes = shape.quoteDepth;
+    final markers = CustomPaint(
       foregroundPainter: inBlock
           ? FenceBandPainter(
               fence: fence,
@@ -560,6 +570,24 @@ final class SourceLine extends StatelessWidget {
           forceStrutHeight: true,
         ),
         softWrap: false,
+      ),
+    );
+    if (quotes <= 0) return markers;
+    return CustomPaint(
+      painter: outerQuotes > 0
+          ? null
+          : LiveDecorationPainter(
+              shape: shape,
+              theme: theme,
+              paragraph: paragraphKey,
+              textLeft: 0,
+              revealed: false,
+              color: theme.markerDim,
+              quotesOutside: outerQuotes,
+            ),
+      child: Padding(
+        padding: EdgeInsets.only(left: quotes * theme.quoteIndentPerLevel),
+        child: markers,
       ),
     );
   }

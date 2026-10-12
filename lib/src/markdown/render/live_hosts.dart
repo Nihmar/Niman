@@ -158,7 +158,7 @@ final class LiveHosts {
     for (final layout in _layouts) {
       final run = layout.run;
       if (untouched <= run.start) {
-        next.add(_moved(layout, delta, from: 0));
+        next.add(_moved(layout, delta, from: 0, after: -1));
         continue;
       }
       if (first >= run.end) {
@@ -177,14 +177,20 @@ final class LiveHosts {
         edit.insertedLines,
         (line) => estimate(lines.start + line, layout.widths[column]),
       );
-      next.add(_moved(layout, delta, from: column));
+      next.add(_moved(layout, delta, from: column, after: first));
     }
     _layouts = next;
   }
 
   /// [layout] with its lines from column [from] on — its end, the start
-  /// of the columns after it — moved [delta] lines; from 0, all of it.
-  static LiveLayout _moved(LiveLayout layout, int delta, {required int from}) {
+  /// of the columns after it — moved [delta] lines; from 0, all of it. Its
+  /// fences past line [after] move too.
+  static LiveLayout _moved(
+    LiveLayout layout,
+    int delta, {
+    required int from,
+    required int after,
+  }) {
     if (delta == 0) return layout;
     final run = layout.run;
     return (
@@ -193,6 +199,15 @@ final class LiveHosts {
         end: run.end + delta,
         closed: run.closed,
         items: run.items,
+        quoteDepth: run.quoteDepth,
+        callout: run.callout,
+        fences: run.fences == null
+            ? null
+            : {
+                for (final MapEntry(key: line, value: role)
+                    in run.fences!.entries)
+                  line > after ? line + delta : line: role,
+              },
         columns: [
           for (var at = 0; at < run.columns.length; at++)
             if (at < from)

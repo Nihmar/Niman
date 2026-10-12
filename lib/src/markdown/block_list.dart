@@ -40,6 +40,7 @@ final class BlockList with ListMixin<Block> implements List<Block> {
       _shifts.add(0);
       _owned.add(true);
       _divs.add(_divsIn(_chunks.last));
+      _quotes.add(_quotesIn(_chunks.last));
     }
     _restart();
   }
@@ -50,6 +51,7 @@ final class BlockList with ListMixin<Block> implements List<Block> {
     _chunks.addAll(other._chunks);
     _shifts.addAll(other._shifts);
     _divs.addAll(other._divs);
+    _quotes.addAll(other._quotes);
     _starts = List<int>.of(other._starts);
     _owned.addAll(List<bool>.filled(other._owned.length, false));
     other._owned.fillRange(0, other._owned.length, false);
@@ -72,6 +74,30 @@ final class BlockList with ListMixin<Block> implements List<Block> {
   /// after a note's columns walks the chunks that have any, and a note
   /// with none answers in O(chunks).
   final List<int> _divs = <int>[];
+
+  /// How many quote blocks each chunk holds: a reader after the columns
+  /// inside quotes (#729) walks the chunks that have any.
+  final List<int> _quotes = <int>[];
+
+  static int _quotesIn(List<Block> blocks) {
+    var count = 0;
+    for (final block in blocks) {
+      if (block.kind == BlockKind.quote) count++;
+    }
+    return count;
+  }
+
+  /// The quote blocks, where they are, in order: the chunks that hold none
+  /// are not walked.
+  Iterable<Block> get quoteBlocks sync* {
+    for (var chunk = 0; chunk < _chunks.length; chunk++) {
+      if (_quotes[chunk] == 0) continue;
+      final shift = _shifts[chunk];
+      for (final block in _chunks[chunk]) {
+        if (block.kind == BlockKind.quote) yield block.shifted(shift);
+      }
+    }
+  }
 
   static int _divsIn(List<Block> blocks) {
     var count = 0;
@@ -205,6 +231,9 @@ final class BlockList with ListMixin<Block> implements List<Block> {
     _divs.replaceRange(first, last + 1, [
       for (final chunk in cut) _divsIn(chunk),
     ]);
+    _quotes.replaceRange(first, last + 1, [
+      for (final chunk in cut) _quotesIn(chunk),
+    ]);
     _restart();
   }
 
@@ -245,6 +274,7 @@ final class BlockList with ListMixin<Block> implements List<Block> {
       _shifts.add(0);
       _owned.add(true);
       _divs.add(0);
+      _quotes.add(0);
     }
     final starts = List<int>.filled(_chunks.length + 1, 0);
     for (var at = 0; at < _chunks.length; at++) {

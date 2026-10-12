@@ -373,4 +373,37 @@ Right
     final text = (cell.evaluate().first.widget as RichText).text;
     expect(text.toPlainText(), isNot(contains('wraps')));
   });
+
+  testWidgets('in a callout the columns sit side by side, and edit', (
+    tester,
+  ) async {
+    const note = '''
+> [!note]
+> :::: columns
+> ::: column
+> first left
+> :::
+>
+> ::: column
+> first right
+> :::
+> ::::
+After
+''';
+    final state = await _pump(tester, note, live: true);
+    final left = tester.getRect(find.text('> first left', findRichText: true));
+    final right = tester.getRect(
+      find.text('> first right', findRichText: true),
+    );
+    expect(right.left, greaterThan(left.left + 200));
+    expect((right.top - left.top).abs(), lessThan(2));
+    // Right at the left column's end goes to the right column's start,
+    // over the fences in the quote.
+    final end = note.indexOf('first left') + 'first left'.length;
+    state.placeCaret(end);
+    await tester.pump();
+    state.moveCaretBy(CaretMotion.characterRight);
+    await tester.pump();
+    expect(state.selection.extent, note.indexOf('> first right'));
+  });
 }
