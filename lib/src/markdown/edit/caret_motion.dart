@@ -56,7 +56,9 @@ enum CaretMotion {
 /// The rule editors share, and the one a writer expects: `snake_case_name`
 /// moves
 /// as one word, `due parole` as two, and punctuation belongs to neither side.
-bool _wordChar(String unit) => _wordPattern.hasMatch(unit);
+/// The bracket pairs read it too, for the characters that only sometimes
+/// pair (#718).
+bool isWordChar(String unit) => _wordPattern.hasMatch(unit);
 
 /// Compiled once: a keystroke-rate caller compiling it per character was the
 /// most expensive part of a word motion.
@@ -93,15 +95,15 @@ final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
   if (at < 0 || at >= text.length) return (fallback, fallback + 1);
   final (unitStart, unitEnd) = _clusterAt(text, at);
   final unit = text.substring(unitStart, unitEnd);
-  if (!_wordChar(unit)) return (unitStart, unitEnd);
+  if (!isWordChar(unit)) return (unitStart, unitEnd);
   var start = unitStart;
   var end = unitEnd;
   while (start > 0 &&
-      _wordChar(String.fromCharCode(text.codeUnitAt(start - 1)))) {
+      isWordChar(String.fromCharCode(text.codeUnitAt(start - 1)))) {
     start--;
   }
   while (end < text.length &&
-      _wordChar(String.fromCharCode(text.codeUnitAt(end)))) {
+      isWordChar(String.fromCharCode(text.codeUnitAt(end)))) {
     end++;
   }
   // A run that stopped inside a cluster — the accent after its letter, half a
@@ -243,10 +245,10 @@ int _wordLeft(SourceBuffer buffer, int at, int Function(int line) body) {
     return buffer.offsetOfLine(above) + buffer.lineLengthAt(above);
   }
   var index = at;
-  while (index > 0 && !_wordChar(_lastUnit(buffer, index))) {
+  while (index > 0 && !isWordChar(_lastUnit(buffer, index))) {
     index -= _unitLengthBefore(buffer, index);
   }
-  while (index > 0 && _wordChar(_lastUnit(buffer, index))) {
+  while (index > 0 && isWordChar(_lastUnit(buffer, index))) {
     index -= _unitLengthBefore(buffer, index);
   }
   return index;
@@ -269,10 +271,10 @@ int _wordRight(SourceBuffer buffer, int at, int Function(int line) body) {
     return body(line + 1);
   }
   var index = at;
-  while (index < buffer.length && !_wordChar(_firstUnit(buffer, index))) {
+  while (index < buffer.length && !isWordChar(_firstUnit(buffer, index))) {
     index += _unitLengthAt(buffer, index);
   }
-  while (index < buffer.length && _wordChar(_firstUnit(buffer, index))) {
+  while (index < buffer.length && isWordChar(_firstUnit(buffer, index))) {
     index += _unitLengthAt(buffer, index);
   }
   return index;

@@ -186,6 +186,28 @@ void main() {
           rig.agree('vedi (a)[x]]\n', reason: 'only the pair’s own is stepped');
         });
 
+        testWidgets('the Markdown pairs come in pairs, and are typed through', (
+          tester,
+        ) async {
+          final rig = _Rig(tester, profile, mode, 'vedi\n');
+          await rig.pump();
+          await rig.tapEnd(0);
+          // Bold: the first star opens and closes itself, the second typed
+          // where the closer stands steps over it (#718).
+          await rig.platform.type(' **bold**');
+          rig.agree('vedi **bold**\n');
+          await rig.platform.type(' "quote"');
+          rig.agree('vedi **bold** "quote"\n');
+          // `* ` opens a list item, not an empty emphasis.
+          await rig.platform.enter();
+          await tester.pump();
+          await rig.platform.type('* item');
+          rig.agree('vedi **bold** "quote"\n* item\n');
+          // A star with spaces around it is a multiplication, not a pair.
+          await rig.platform.type(' 5 * 3');
+          rig.agree('vedi **bold** "quote"\n* item 5 * 3\n');
+        });
+
         testWidgets('a bracket before a word is only itself', (tester) async {
           final rig = _Rig(tester, profile, mode, 'parola\n');
           await rig.pump();
