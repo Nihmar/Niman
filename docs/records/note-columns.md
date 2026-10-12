@@ -536,8 +536,10 @@ it paints the container's decoration down its whole height: the quote's
 bars, the callout's box and bar, the item's indent. `LineShape` draws
 those a line at a time today.
 
-**The cap.** A quote's content is scanned again at each revision, and its
-comment allows that because "a quote is a few lines". A quote or callout
+**The cap.** A quote's content is scanned again at each revision that
+touches it — the reading of the others is kept, and moves with the lines
+(`LiveQuoteRuns`) — and its comment allows that because "a quote is a few
+lines". A quote or callout
 of more than 2,000 lines draws the columns inside it stacked, which is
 the row model with no rescan of the host. The read view is not capped:
 it draws a quote whole already.
