@@ -109,7 +109,10 @@ final class TodoPriorityChips extends StatelessWidget {
               ],
             ),
           );
-    if (picked != null) onChanged(picked);
+    // The row may be gone by the time the grid closes (#784): the dialog
+    // that owned it closed under the grid, and its state is disposed.
+    if (picked == null || !context.mounted) return;
+    onChanged(picked);
   }
 
   /// One A-Z chip of [_pickOther]'s grid.

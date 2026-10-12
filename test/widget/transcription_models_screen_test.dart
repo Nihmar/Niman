@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -24,17 +25,10 @@ void main() {
   });
 
   tearDown(() async {
+    // A test that fires a settings write waits for it ([settle]): the
+    // delete has nothing left to race.
     models.dispose();
-    // A settings write the UI fired may still be landing, and the delete
-    // races it: retried rather than done once, the same remedy the model
-    // tests' own tearDown uses (CI read "Directory not empty" without it).
-    for (var i = 0; i < 20 && dir.existsSync(); i++) {
-      try {
-        await dir.delete(recursive: true);
-      } on FileSystemException {
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-      }
-    }
+    await dir.delete(recursive: true);
   });
 
   /// Real files and isolates: everything that touches them runs outside
@@ -52,6 +46,26 @@ void main() {
     models = TranscriptionModels(directory: () async => dir.path, phone: true);
     await models.load();
   });
+
+  /// Waits until every settings write the UI fired and forgot has landed
+  /// ([TranscriptionModels.settled]); a delete racing one read "Directory
+  /// not empty" on CI.
+  ///
+  /// The write was started in the test's fake zone: its file I/O needs
+  /// real time and its continuations need the fake zone pumped, so the
+  /// wait alternates the two until the model says the writes settled.
+  Future<void> settle(WidgetTester tester) async {
+    var settled = false;
+    unawaited(models.settled().then((_) => settled = true));
+    for (var i = 0; i < 100 && !settled; i++) {
+      await real(
+        tester,
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    expect(settled, isTrue, reason: 'the settings writes landed');
+  }
 
   testWidgets('groups the models and marks the default', (tester) async {
     await loadWith(tester, installed: [tiny]);
@@ -160,5 +174,6 @@ void main() {
       ),
       findsOne,
     );
+    await settle(tester);
   });
 }
