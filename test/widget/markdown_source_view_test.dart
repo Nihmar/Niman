@@ -562,6 +562,100 @@ void main() {
         reason: 'the start of a too-long selection is not what is kept',
       );
     });
+
+    testWidgets('a selection that fits is kept whole, not only its caret', (
+      tester,
+    ) async {
+      final (state, _) = await setup(tester);
+      final buffer = state.widget.buffer;
+      // Backwards, the caret on line 12: in view before the keyboard and
+      // after it, while line 20 — the anchor's — goes under it.
+      state.select(
+        SelectionModel(
+          anchor: buffer.offsetOfLine(20) + 4,
+          extent: buffer.offsetOfLine(12),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(state.scrollOffset, 0);
+
+      await keyboard(tester);
+
+      onScreen(tester, 'line 20');
+      expect(find.text('line 12'), findsOneWidget);
+    });
+  });
+
+  // #764: a caret move keeps the caret in view — not the selection's other
+  // end, and not the top of the note a too-long selection starts at.
+  group('a caret move with a selection', () {
+    Future<MarkdownSourceViewState> setup(WidgetTester tester) => pump(
+      tester,
+      '${[for (var i = 0; i < 300; i++) 'line $i'].join('\n')}\n',
+      size: const Size(400, 500),
+    );
+
+    /// Whether the line [text] is fully inside the pane.
+    bool shown(WidgetTester tester, String text) {
+      final found = find.text(text);
+      if (found.evaluate().isEmpty) return false;
+      final pane = tester.getRect(find.byType(MarkdownSourceView));
+      final rect = tester.getRect(found);
+      return rect.top >= pane.top - 0.5 && rect.bottom <= pane.bottom + 0.5;
+    }
+
+    testWidgets('Shift+Up on a selection from the top keeps the caret', (
+      tester,
+    ) async {
+      final state = await setup(tester);
+      final buffer = state.widget.buffer;
+      state.select(SelectionModel(anchor: 0, extent: buffer.offsetOfLine(200)));
+      await tester.pump();
+      await tester.pump();
+      // Wheel on, until line 200 is off the top.
+      state.jumpToLine(250);
+      await tester.pump();
+      expect(shown(tester, 'line 200'), isFalse);
+
+      state.select(SelectionModel(anchor: 0, extent: buffer.offsetOfLine(199)));
+      // The jump the move makes, before the frames that settle it: the top
+      // of the note was where it went, and only a later frame found the
+      // caret again.
+      expect(
+        state.scrollOffset,
+        greaterThan(150 * _theme.lineHeight),
+        reason: 'the view did not jump to the top of the note',
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(shown(tester, 'line 199'), isTrue, reason: 'the caret is shown');
+    });
+
+    testWidgets('Shift+Down does not pull the view back to the anchor', (
+      tester,
+    ) async {
+      final state = await setup(tester);
+      final buffer = state.widget.buffer;
+      state.jumpToLine(100);
+      await tester.pump();
+      expect(shown(tester, 'line 99'), isFalse);
+      expect(shown(tester, 'line 105'), isTrue);
+      final before = state.scrollOffset;
+
+      // The anchor on line 99, just above the pane; the caret in view.
+      state.select(
+        SelectionModel(
+          anchor: buffer.offsetOfLine(99),
+          extent: buffer.offsetOfLine(105),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(state.scrollOffset, before, reason: 'nothing moved');
+    });
   });
 
   testWidgets('Ctrl+Z takes back what the keyboard typed', (tester) async {

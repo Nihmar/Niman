@@ -2262,7 +2262,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _insetReveal?.cancel();
     _insetReveal = Timer(const Duration(milliseconds: 120), () {
       _insetReveal = null;
-      if (mounted) _ensureCaretVisible();
+      if (mounted) _ensureCaretVisible(wholeSelection: true);
     });
     return false;
   }
@@ -2288,7 +2288,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// wheel, scrolling against the measured extent, went the rest of the
   /// way. So a jump is checked again after the frames that follow it, for
   /// as long as each one still has to move — [settle] of them at most.
-  void _ensureCaretVisible({int settle = 3}) {
+  ///
+  /// [wholeSelection] keeps the whole selection in view when it fits, not
+  /// only the caret: what the keyboard opening asks for (#728). A caret move
+  /// does not — with the anchor just off the screen, every Shift+Down pulled
+  /// the view back to it (#764).
+  void _ensureCaretVisible({int settle = 3, bool wholeSelection = false}) {
     if (!_scroll.hasClients) return;
     final line = _caretLineIndex;
     if (line < 0) return;
@@ -2297,22 +2302,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // jump down stopped the padding short, the caret's row cut by it.
     final row = _folds.rowOf(line);
     final extent = _rowBounds(row);
-    // A selection is kept whole when it fits the viewport, and its active
-    // end is kept when it does not — a selection longer than the screen
+    final viewport = _scroll.position.viewportDimension;
+    // A selection is kept whole when it is asked for and fits the viewport;
+    // otherwise its active end is — a selection longer than the screen
     // cannot be shown whole, and the writer's next keystroke lands at the
     // caret (#728).
-    final anchorRow = _folds.rowOf(widget.buffer.lineOf(_selection.anchor));
-    final anchor = _rowBounds(anchorRow);
-    final first = math.min(anchorRow, row);
-    final top = math.min(anchor.top, extent.top);
-    final bottom = math.max(anchor.bottom, extent.bottom);
-    final viewport = _scroll.position.viewportDimension;
-    final whole = bottom - top <= viewport;
-    final edgeTop = whole ? top : extent.top;
-    final edgeBottom = whole ? bottom : extent.bottom;
+    var firstRow = row;
+    var edgeTop = extent.top;
+    var edgeBottom = extent.bottom;
+    if (wholeSelection) {
+      final anchorRow = _folds.rowOf(widget.buffer.lineOf(_selection.anchor));
+      final anchor = _rowBounds(anchorRow);
+      final top = math.min(anchor.top, extent.top);
+      final bottom = math.max(anchor.bottom, extent.bottom);
+      if (bottom - top <= viewport) {
+        firstRow = math.min(anchorRow, row);
+        edgeTop = top;
+        edgeBottom = bottom;
+      }
+    }
     final double target;
     if (edgeTop < _scroll.offset) {
-      target = first == 0 ? 0 : edgeTop;
+      // The first row takes the top padding with it. Only the row actually
+      // kept says so: a too-long selection that starts at the note's top
+      // keeps its caret, not the top of the note (#764).
+      target = firstRow == 0 ? 0 : edgeTop;
     } else if (edgeBottom > _scroll.offset + viewport) {
       target = (edgeBottom - viewport).clamp(
         0.0,
@@ -2325,7 +2339,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _scroll.jumpTo(target);
     if (settle <= 0) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _ensureCaretVisible(settle: settle - 1);
+      if (mounted) {
+        _ensureCaretVisible(settle: settle - 1, wholeSelection: wholeSelection);
+      }
     });
   }
 
