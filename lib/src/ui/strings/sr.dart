@@ -458,6 +458,9 @@ final class SerbianStrings extends Strings {
   String get audioRecordingPaused => 'Паузирано';
   @override
   String get audioSavingRecording => 'Чување…';
+
+  @override
+  String get audioSlideUpToLock => 'Повуците нагоре да закључате';
   @override
   String get audioPlayFailed => 'Звук није могао да се пусти';
 

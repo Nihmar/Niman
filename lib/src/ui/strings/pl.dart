@@ -460,6 +460,9 @@ final class PolishStrings extends Strings {
   String get audioRecordingPaused => 'Wstrzymano';
   @override
   String get audioSavingRecording => 'Zapisywanie…';
+
+  @override
+  String get audioSlideUpToLock => 'Przesuń w górę, aby zablokować';
   @override
   String get audioPlayFailed => 'Nie udało się odtworzyć dźwięku';
 

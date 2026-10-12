@@ -454,6 +454,9 @@ final class BelarusianStrings extends Strings {
   String get audioRecordingPaused => 'Прыпынена';
   @override
   String get audioSavingRecording => 'Захаванне…';
+
+  @override
+  String get audioSlideUpToLock => 'Правядзіце ўверх, каб зафіксаваць';
   @override
   String get audioPlayFailed => 'Не ўдалося прайграць гэтае аўдыё';
 

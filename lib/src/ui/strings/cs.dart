@@ -455,6 +455,9 @@ final class CzechStrings extends Strings {
   String get audioRecordingPaused => 'Pozastaveno';
   @override
   String get audioSavingRecording => 'Ukládání…';
+
+  @override
+  String get audioSlideUpToLock => 'Posunutím nahoru uzamknete';
   @override
   String get audioPlayFailed => 'Zvuk nešlo přehrát';
 

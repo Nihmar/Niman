@@ -466,6 +466,9 @@ final class GreekStrings extends Strings {
   String get audioRecordingPaused => 'Σε παύση';
   @override
   String get audioSavingRecording => 'Αποθήκευση…';
+
+  @override
+  String get audioSlideUpToLock => 'Σύρετε προς τα πάνω για κλείδωμα';
   @override
   String get audioPlayFailed => 'Δεν ήταν δυνατή η αναπαραγωγή του ήχου';
 

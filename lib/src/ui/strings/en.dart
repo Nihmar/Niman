@@ -455,6 +455,9 @@ final class EnglishStrings extends Strings {
   String get audioRecordingPaused => 'Paused';
   @override
   String get audioSavingRecording => 'Saving…';
+
+  @override
+  String get audioSlideUpToLock => 'Slide up to lock';
   @override
   String get audioPlayFailed => 'Could not play this audio';
 

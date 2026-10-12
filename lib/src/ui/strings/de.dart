@@ -459,6 +459,9 @@ final class GermanStrings extends Strings {
   String get audioRecordingPaused => 'Pausiert';
   @override
   String get audioSavingRecording => 'Wird gespeichert…';
+
+  @override
+  String get audioSlideUpToLock => 'Nach oben ziehen zum Sperren';
   @override
   String get audioPlayFailed => 'Audio konnte nicht abgespielt werden';
 

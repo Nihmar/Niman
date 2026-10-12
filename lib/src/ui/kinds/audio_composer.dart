@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/kinds/audio_recording_bar.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -8,7 +10,13 @@ import 'package:niman/src/ui/strings.dart';
 /// The round button is the microphone while the field is empty and
 /// becomes send as soon as there is text; while recording it is a red
 /// stop and the field gives way to [AudioRecordingBar].
-class AudioComposer extends StatelessWidget {
+///
+/// The microphone is the messenger's too (#737): **hold** it and the
+/// recording starts under the finger, **release** and it stops and saves,
+/// **slide up** past [lockDistance] and it locks — letting go then leaves
+/// it running, hands-free. A tap keeps the start/stop toggle it always
+/// had, and nothing is committed before the finger goes up.
+class AudioComposer extends StatefulWidget {
   /// Creates the composer.
   const new({
     required this.controller,
@@ -55,6 +63,94 @@ class AudioComposer extends StatelessWidget {
   /// Pauses or resumes the recording; null disables it.
   final VoidCallback? onPause;
 
+  /// How far up a held finger slides to lock the recording (#737).
+  static const double lockDistance = 40;
+
+  /// How long a press must last to become a hold: under it the press is
+  /// the tap it always was.
+  static const Duration holdDelay = Duration(milliseconds: 150);
+
+  @override
+  State<AudioComposer> createState() => _AudioComposerState();
+}
+
+class _AudioComposerState extends State<AudioComposer> {
+  /// Whether a press has become the hold: the recording was started by it
+  /// and the finger is still down (#737).
+  bool _holding = false;
+
+  /// Whether the hold is locked: the release then leaves the recording
+  /// running. Re-read on every move, so sliding back down unlocks.
+  bool _locked = false;
+
+  /// The press that becomes a hold after [AudioComposer.holdDelay].
+  Timer? _press;
+
+  /// Where the finger went down: the slide is measured from here.
+  Offset? _origin;
+
+  /// Whether the tap that follows a hold's release is the hold's own and
+  /// must be dropped. Cleared by the next press, so it cannot outlive it.
+  bool _suppressTap = false;
+
+  @override
+  void dispose() {
+    _press?.cancel();
+    super.dispose();
+  }
+
+  /// Whether the round button is the microphone now.
+  bool get _mic => !widget.recording && widget.controller.text.trim().isEmpty;
+
+  /// Wraps the round button with the hold's raw events (#737): a
+  /// [Listener], not a gesture detector, so the button's own tap stays in
+  /// charge of the quick press and nothing fights in the arena.
+  Widget _holdable(Widget button) {
+    return Listener(
+      onPointerDown: (event) {
+        // Every press is its own: whatever a hold left behind ends here.
+        _suppressTap = false;
+        if (!_mic || widget.onRecord == null || widget.saving) return;
+        _origin = event.position;
+        _press?.cancel();
+        _press = Timer(AudioComposer.holdDelay, () {
+          if (!mounted) return;
+          _press = null;
+          _suppressTap = true;
+          setState(() => _holding = true);
+          widget.onRecord?.call();
+        });
+      },
+      onPointerMove: (event) {
+        if (!_holding) return;
+        final origin = _origin;
+        if (origin == null) return;
+        final locked =
+            origin.dy - event.position.dy >= AudioComposer.lockDistance;
+        if (locked != _locked) setState(() => _locked = locked);
+      },
+      onPointerUp: (_) => _endHold(),
+      onPointerCancel: (_) => _endHold(),
+      child: button,
+    );
+  }
+
+  /// The finger went up (or the pointer was taken): a lock keeps the
+  /// recording, anything else stops and saves it — the messenger's send
+  /// (#737).
+  void _endHold() {
+    _press?.cancel();
+    _press = null;
+    _origin = null;
+    if (!_holding) return;
+    final locked = _locked;
+    setState(() {
+      _holding = false;
+      _locked = false;
+    });
+    if (!locked) widget.onRecord?.call();
+  }
+
   Widget _field(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -74,17 +170,17 @@ class AudioComposer extends StatelessWidget {
             icon: const Icon(Icons.attach_file),
             color: colorScheme.onSurfaceVariant,
             tooltip: AppStrings.audioImport,
-            onPressed: onImport,
+            onPressed: widget.onImport,
           ),
           Expanded(
             child: TextField(
               key: const Key('audio-message-field'),
-              controller: controller,
+              controller: widget.controller,
               minLines: 1,
               maxLines: 5,
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.send,
-              onSubmitted: (_) => onSend(),
+              onSubmitted: (_) => widget.onSend(),
               style: theme.textTheme.bodyLarge,
               decoration: InputDecoration(
                 hintText: AppStrings.audioMessageHint,
@@ -104,8 +200,13 @@ class AudioComposer extends StatelessWidget {
 
   /// One round button in three roles (mic, send, stop): only its icon
   /// and color change, so the control never doubles up mid-animation.
+  ///
+  /// The microphone carries the hold (#737): the tap stays the button's
+  /// own, the raw events around it only measure and release it.
   Widget _roundButton(BuildContext context, bool typing) {
     final colorScheme = Theme.of(context).colorScheme;
+    final recording = widget.recording;
+    final saving = widget.saving;
     final Icon icon;
     if (saving) {
       icon = Icon(
@@ -120,11 +221,11 @@ class AudioComposer extends StatelessWidget {
     } else {
       icon = const Icon(Icons.mic_outlined, key: ValueKey('audio-icon-mic'));
     }
-    return ScaleTransition(
+    final button = ScaleTransition(
       scale: TweenSequence<double>([
         TweenSequenceItem(tween: Tween(begin: 1, end: 1.12), weight: 0.4),
         TweenSequenceItem(tween: Tween(begin: 1.12, end: 1), weight: 0.6),
-      ]).animate(stopSwell),
+      ]).animate(widget.stopSwell),
       child: IconButton.filled(
         key: Key(typing ? 'audio-send-button' : 'audio-record-button'),
         style: IconButton.styleFrom(
@@ -141,7 +242,11 @@ class AudioComposer extends StatelessWidget {
             : typing
             ? AppStrings.audioSend
             : AppStrings.audioRecord,
-        onPressed: saving ? null : (typing ? onSend : onRecord),
+        onPressed: saving
+            ? null
+            : typing
+            ? widget.onSend
+            : _micPressed,
         icon: Stack(
           alignment: Alignment.center,
           children: [
@@ -164,27 +269,43 @@ class AudioComposer extends StatelessWidget {
         ),
       ),
     );
+    // Wrapped in every role (#720's lesson): the render object a press
+    // went down on must not be swapped out under the finger, or the
+    // release that follows never arrives.
+    return _holdable(button);
+  }
+
+  /// The microphone tapped: the toggle it always had, unless this tap is
+  /// the release of the hold that started the recording (#737).
+  void _micPressed() {
+    if (_suppressTap) {
+      _suppressTap = false;
+      return;
+    }
+    widget.onRecord?.call();
   }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<TextEditingValue>(
-      valueListenable: controller,
+      valueListenable: widget.controller,
       builder: (context, value, _) {
-        final typing = !recording && value.text.trim().isNotEmpty;
+        final typing = !widget.recording && value.text.trim().isNotEmpty;
         return Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                child: recording
+                child: widget.recording
                     ? AudioRecordingBar(
                         key: const ValueKey('audio-recording-bar'),
-                        onDiscard: onDiscard,
-                        onPause: onPause,
-                        paused: paused,
-                        saving: saving,
+                        onDiscard: widget.onDiscard,
+                        onPause: widget.onPause,
+                        paused: widget.paused,
+                        saving: widget.saving,
+                        holding: _holding,
+                        locked: _locked,
                       )
                     : _field(context),
               ),

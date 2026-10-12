@@ -457,6 +457,9 @@ final class SlovakStrings extends Strings {
   String get audioRecordingPaused => 'Pozastavené';
   @override
   String get audioSavingRecording => 'Ukladanie…';
+
+  @override
+  String get audioSlideUpToLock => 'Potiahnutím nahor uzamknete';
   @override
   String get audioPlayFailed => 'Zvuk sa nepodarilo prehrať';
 

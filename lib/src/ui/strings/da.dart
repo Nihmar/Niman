@@ -455,6 +455,9 @@ final class DanishStrings extends Strings {
   String get audioRecordingPaused => 'På pause';
   @override
   String get audioSavingRecording => 'Gemmer…';
+
+  @override
+  String get audioSlideUpToLock => 'Skub op for at låse';
   @override
   String get audioPlayFailed => 'Lyden kunne ikke afspilles';
 

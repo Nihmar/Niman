@@ -450,6 +450,9 @@ final class EstonianStrings extends Strings {
   String get audioRecordingPaused => 'Peatatud';
   @override
   String get audioSavingRecording => 'Salvestamine…';
+
+  @override
+  String get audioSlideUpToLock => 'Lukustamiseks libista üles';
   @override
   String get audioPlayFailed => 'Heli ei õnnestunud esitada';
 

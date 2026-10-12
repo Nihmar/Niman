@@ -7,6 +7,10 @@ import 'package:niman/src/ui/strings.dart';
 /// What the composer shows while the microphone is live: a red dot, the
 /// elapsed time, a pause/resume button and a button that discards the
 /// recording. After stop it reads "Saving…" until the clip is in the note.
+///
+/// A hold on the microphone shows itself here (#737): while the finger is
+/// down the bar says **Slide up to lock**, and once the slide went far
+/// enough it shows the lock.
 class AudioRecordingBar extends StatefulWidget {
   /// Creates the bar; the clock starts when it is first built.
   const new({
@@ -14,8 +18,17 @@ class AudioRecordingBar extends StatefulWidget {
     this.onPause,
     this.paused = false,
     this.saving = false,
+    this.holding = false,
+    this.locked = false,
     super.key,
   });
+
+  /// Whether a press became the messenger's hold and the finger is still
+  /// down (#737).
+  final bool holding;
+
+  /// Whether that hold is locked: the release leaves the recording going.
+  final bool locked;
 
   /// Throws the recording away; null disables the button.
   final VoidCallback? onDiscard;
@@ -133,12 +146,44 @@ class _AudioRecordingBarState extends State<AudioRecordingBar>
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              label,
-              key: const ValueKey('audio-recording-clock'),
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+            child: Row(
+              children: [
+                Text(
+                  label,
+                  key: const ValueKey('audio-recording-clock'),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                const Spacer(),
+                // The messenger's hint, where the eye already is (#737).
+                if (widget.holding && !widget.locked)
+                  Row(
+                    key: const ValueKey('audio-lock-hint'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.keyboard_arrow_up,
+                        size: 16,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        AppStrings.audioSlideUpToLock,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  )
+                else if (widget.locked)
+                  Padding(
+                    key: const ValueKey('audio-locked'),
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Icon(Icons.lock, size: 18, color: colorScheme.error),
+                  ),
+              ],
             ),
           ),
           IconButton(

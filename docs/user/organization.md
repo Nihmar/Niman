@@ -512,7 +512,13 @@ else in it that is not Markdown is kept as a file.
   plain lines (right bubbles); tap one to edit it, long-press or
   right-click it to delete it. The round button beside the field is the
   microphone while the field is empty and becomes send as soon as you
-  type; the paperclip inside the field attaches an audio file. While
+  type; the paperclip inside the field attaches an audio file. The
+  microphone is the messengers' too: **hold** it and the recording starts
+  under the finger, **slide up** past a thumb's width to lock it so the
+  finger can go free — the bar shows the lock — and let go before that to
+  stop and save, the way a hold is sent; the bar says *Slide up to lock*
+  while the hold is live. A **tap** keeps the start/stop toggle it always
+  had. While
   recording, the field shows a red bar with the elapsed time, a pause
   button (the clock holds and the dot breathes until you resume) and a
   discard button, and the round button stops and saves; the bar reads

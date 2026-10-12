@@ -455,6 +455,9 @@ final class UkrainianStrings extends Strings {
   String get audioRecordingPaused => 'Призупинено';
   @override
   String get audioSavingRecording => 'Збереження…';
+
+  @override
+  String get audioSlideUpToLock => 'Проведіть угору, щоб зафіксувати';
   @override
   String get audioPlayFailed => 'Не вдалося відтворити аудіо';
 

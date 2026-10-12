@@ -451,6 +451,9 @@ final class LatvianStrings extends Strings {
   String get audioRecordingPaused => 'Pauzēts';
   @override
   String get audioSavingRecording => 'Saglabā…';
+
+  @override
+  String get audioSlideUpToLock => 'Pavelciet uz augšu, lai aizslēgtu';
   @override
   String get audioPlayFailed => 'Neizdevās atskaņot audio';
 

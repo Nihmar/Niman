@@ -425,6 +425,9 @@ final class JapaneseStrings extends Strings {
   String get audioRecordingPaused => '一時停止中';
   @override
   String get audioSavingRecording => '保存中…';
+
+  @override
+  String get audioSlideUpToLock => '上にスライドしてロック';
   @override
   String get audioPlayFailed => '音声を再生できませんでした';
 

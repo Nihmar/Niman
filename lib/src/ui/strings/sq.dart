@@ -456,6 +456,9 @@ final class AlbanianStrings extends Strings {
   String get audioRecordingPaused => 'Në pauzë';
   @override
   String get audioSavingRecording => 'Po ruhet…';
+
+  @override
+  String get audioSlideUpToLock => 'Rrëshqit lart për të bllokuar';
   @override
   String get audioPlayFailed => 'Audioja nuk u luajt dot';
 

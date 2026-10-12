@@ -456,6 +456,9 @@ final class HungarianStrings extends Strings {
   String get audioRecordingPaused => 'Szüneteltetve';
   @override
   String get audioSavingRecording => 'Mentés…';
+
+  @override
+  String get audioSlideUpToLock => 'Csúsztasd fel a rögzítéshez';
   @override
   String get audioPlayFailed => 'A hangot nem sikerült lejátszani';
 

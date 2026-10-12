@@ -462,6 +462,9 @@ final class SpanishStrings extends Strings {
   String get audioRecordingPaused => 'En pausa';
   @override
   String get audioSavingRecording => 'Guardando…';
+
+  @override
+  String get audioSlideUpToLock => 'Desliza hacia arriba para bloquear';
   @override
   String get audioPlayFailed => 'No se pudo reproducir el audio';
 

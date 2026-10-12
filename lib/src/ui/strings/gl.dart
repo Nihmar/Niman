@@ -461,6 +461,9 @@ final class GalicianStrings extends Strings {
   String get audioRecordingPaused => 'En pausa';
   @override
   String get audioSavingRecording => 'Gardando…';
+
+  @override
+  String get audioSlideUpToLock => 'Desliza cara arriba para bloquear';
   @override
   String get audioPlayFailed => 'Non se puido reproducir o audio';
 

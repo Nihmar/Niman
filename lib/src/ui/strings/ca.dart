@@ -462,6 +462,9 @@ final class CatalanStrings extends Strings {
   String get audioRecordingPaused => 'En pausa';
   @override
   String get audioSavingRecording => 'Desant…';
+
+  @override
+  String get audioSlideUpToLock => 'Llisca cap amunt per bloquejar';
   @override
   String get audioPlayFailed => 'No s’ha pogut reproduir l’àudio';
 

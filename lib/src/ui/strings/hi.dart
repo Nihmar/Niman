@@ -446,6 +446,9 @@ final class HindiStrings extends Strings {
   String get audioRecordingPaused => 'रुकी हुई';
   @override
   String get audioSavingRecording => 'सहेजा जा रहा है…';
+
+  @override
+  String get audioSlideUpToLock => 'लॉक करने के लिए ऊपर स्लाइड करें';
   @override
   String get audioPlayFailed => 'ऑडियो चलाया नहीं जा सका';
 

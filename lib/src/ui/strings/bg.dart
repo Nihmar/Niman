@@ -460,6 +460,9 @@ final class BulgarianStrings extends Strings {
   String get audioRecordingPaused => 'На пауза';
   @override
   String get audioSavingRecording => 'Запазване…';
+
+  @override
+  String get audioSlideUpToLock => 'Плъзнете нагоре за заключване';
   @override
   String get audioPlayFailed => 'Аудиото не можа да се възпроизведе';
 

@@ -223,6 +223,9 @@ abstract base class Strings {
   String get audioRecordingPaused;
   String get audioSavingRecording;
 
+  /// The hint under a held record button (#737).
+  String get audioSlideUpToLock;
+
   /// A recording that would not play (#381): the error itself names a
   /// class and a stack, so it goes to the log and this sentence goes on
   /// screen.

@@ -414,6 +414,118 @@ void main() {
     expect(edits.single, contains('![[${p.join('assets', 'imported.wav')}]]'));
   });
 
+  // #737: the microphone is the messenger's — held to record, released to
+  // send, slid up to lock.
+  testWidgets('holding the microphone records, and the release saves it', (
+    tester,
+  ) async {
+    final edits = <String>[];
+    final recorder = _FakeRecorder();
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n',
+      edits: edits,
+      recorder: recorder,
+    );
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('audio-record-button'))),
+    );
+    // Under the press's own delay nothing has started: it may still be a
+    // tap.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(recorder.startedPath, isNull);
+    // Past it, the hold is the hold: the microphone is live and the bar
+    // says how to lock it.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(recorder.startedPath, isNotNull);
+    expect(find.byKey(const ValueKey('audio-recording-bar')), findsOneWidget);
+    expect(find.byKey(const ValueKey('audio-lock-hint')), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+    // The release before any slide is the send.
+    expect(edits.single, contains('![[${p.join('assets', 'imported.wav')}]]'));
+  });
+
+  testWidgets('a hold slid up locks, and the release leaves it recording', (
+    tester,
+  ) async {
+    final edits = <String>[];
+    final recorder = _FakeRecorder();
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n',
+      edits: edits,
+      recorder: recorder,
+    );
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('audio-record-button'))),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.moveBy(const Offset(0, -60));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('audio-locked')), findsOneWidget);
+    expect(find.byKey(const ValueKey('audio-lock-hint')), findsNothing);
+
+    await gesture.up();
+    await tester.pump();
+    expect(edits, isEmpty, reason: 'the lock kept the recording going');
+    expect(find.byKey(const ValueKey('audio-recording-bar')), findsOneWidget);
+
+    // The round button, now the stop, saves it on a tap.
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pump();
+    expect(edits.single, contains('![[${p.join('assets', 'imported.wav')}]]'));
+  });
+
+  testWidgets('sliding back down before the release does not lock', (
+    tester,
+  ) async {
+    final edits = <String>[];
+    final recorder = _FakeRecorder();
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n',
+      edits: edits,
+      recorder: recorder,
+    );
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('audio-record-button'))),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.moveBy(const Offset(0, -60));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('audio-locked')), findsOneWidget);
+    await gesture.moveBy(const Offset(0, 60));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('audio-lock-hint')), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+    // Nothing was committed until the finger went up.
+    expect(edits.single, contains('![[${p.join('assets', 'imported.wav')}]]'));
+  });
+
+  testWidgets('a quick tap keeps the start/stop toggle it had', (tester) async {
+    final edits = <String>[];
+    final recorder = _FakeRecorder();
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n',
+      edits: edits,
+      recorder: recorder,
+    );
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pump();
+    expect(recorder.startedPath, isNotNull);
+    expect(find.byKey(const ValueKey('audio-recording-bar')), findsOneWidget);
+    expect(find.byKey(const ValueKey('audio-lock-hint')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pump();
+    expect(edits.single, contains('![[${p.join('assets', 'imported.wav')}]]'));
+  });
+
   testWidgets('a Markdown library appends an image-style link', (tester) async {
     final edits = <String>[];
     await _pump(

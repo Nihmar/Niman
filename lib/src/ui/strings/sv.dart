@@ -458,6 +458,9 @@ final class SwedishStrings extends Strings {
   String get audioRecordingPaused => 'Pausad';
   @override
   String get audioSavingRecording => 'Sparar…';
+
+  @override
+  String get audioSlideUpToLock => 'Dra uppåt för att låsa';
   @override
   String get audioPlayFailed => 'Ljudet kunde inte spelas upp';
 
