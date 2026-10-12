@@ -1839,6 +1839,13 @@ final class FinnishStrings extends Strings {
   String get deletedMessage => 'Poistettu';
   @override
   String deleteForeverConfirm(String name) => '$name poistetaan pysyvästi';
+
+  @override
+  String deleteNotesToo(int count) =>
+      'Poista myös siihen liittyvät muistiinpanot ($count)';
+
+  @override
+  String get deleteFileOnly => 'Poista vain tiedosto';
   @override
   String get chooseDestination => 'Valitse kohde';
   @override

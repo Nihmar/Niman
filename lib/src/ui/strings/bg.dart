@@ -1843,6 +1843,12 @@ final class BulgarianStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name ще бъде изтрит окончателно';
+
+  @override
+  String deleteNotesToo(int count) => 'Изтрий и свързаните бележки ($count)';
+
+  @override
+  String get deleteFileOnly => 'Изтрий само файла';
   @override
   String get chooseDestination => 'Изберете дестинация';
   @override

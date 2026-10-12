@@ -1824,6 +1824,12 @@ final class SlovakStrings extends Strings {
   String get deletedMessage => 'Vymazané';
   @override
   String deleteForeverConfirm(String name) => '$name sa trvalo vymaže';
+
+  @override
+  String deleteNotesToo(int count) => 'Zmazať aj súvisiace poznámky ($count)';
+
+  @override
+  String get deleteFileOnly => 'Zmazať iba súbor';
   @override
   String get chooseDestination => 'Vybrať cieľ';
   @override

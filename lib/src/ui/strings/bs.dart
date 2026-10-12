@@ -1829,6 +1829,12 @@ final class BosnianStrings extends Strings {
   String get deletedMessage => 'Obrisano';
   @override
   String deleteForeverConfirm(String name) => '$name će biti trajno obrisano';
+
+  @override
+  String deleteNotesToo(int count) => 'Obriši i povezane bilješke ($count)';
+
+  @override
+  String get deleteFileOnly => 'Obriši samo datoteku';
   @override
   String get chooseDestination => 'Odaberi odredište';
   @override

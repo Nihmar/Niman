@@ -1830,6 +1830,12 @@ final class SerbianStrings extends Strings {
   String get deletedMessage => 'Обрисано';
   @override
   String deleteForeverConfirm(String name) => '$name ће бити трајно обрисано';
+
+  @override
+  String deleteNotesToo(int count) => 'Избриши и повезане белешке ($count)';
+
+  @override
+  String get deleteFileOnly => 'Избриши само датотеку';
   @override
   String get chooseDestination => 'Изабери одредиште';
   @override

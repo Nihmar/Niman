@@ -1886,6 +1886,13 @@ final class GreekStrings extends Strings {
   String get deletedMessage => 'Διαγράφηκε';
   @override
   String deleteForeverConfirm(String name) => 'Το $name θα διαγραφεί μόνιμα';
+
+  @override
+  String deleteNotesToo(int count) =>
+      'Διαγραφή και των σχετικών σημειώσεων ($count)';
+
+  @override
+  String get deleteFileOnly => 'Διαγραφή μόνο του αρχείου';
   @override
   String get chooseDestination => 'Επιλογή προορισμού';
   @override

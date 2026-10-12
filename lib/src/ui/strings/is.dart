@@ -1824,6 +1824,14 @@ final class IcelandicStrings extends Strings {
   String get deletedMessage => 'Eytt';
   @override
   String deleteForeverConfirm(String name) => '$name verður varanlega eytt';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Eyða líka tengdri athugasemd'
+      : 'Eyða líka $count tengdum athugasemdum';
+
+  @override
+  String get deleteFileOnly => 'Eyða aðeins skránni';
   @override
   String get chooseDestination => 'Velja áfangastað';
   @override

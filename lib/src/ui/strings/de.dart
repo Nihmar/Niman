@@ -1863,6 +1863,14 @@ final class GermanStrings extends Strings {
   String get deletedMessage => 'Gelöscht';
   @override
   String deleteForeverConfirm(String name) => '$name wird endgültig gelöscht';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Auch die zugehörige Notiz löschen'
+      : 'Auch die $count zugehörigen Notizen löschen';
+
+  @override
+  String get deleteFileOnly => 'Nur die Datei löschen';
   @override
   String get chooseDestination => 'Ziel wählen';
   @override

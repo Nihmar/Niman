@@ -874,8 +874,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<FieldSource?> get fieldSource async => _FakeFieldSource(this);
 
+  /// The link source the fake answers with: its own live notes, so a
+  /// companion's `annotates: "[[file]]"` resolves the way it will against
+  /// the library index (#717). A test can replace it to script the
+  /// answers instead.
+  FakeLinkSource? linkSourceOverride;
+
   @override
-  Future<LinkSource?> get linkSource async => FakeLinkSource();
+  Future<LinkSource?> get linkSource async =>
+      linkSourceOverride ??
+      FakeLinkSource(notes: [for (final note in _liveNotes()) note.path]);
 
   @override
   Future<WikilinkSuggester?> get wikilinkSuggester async =>
@@ -926,6 +934,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setTrashEnabled({required bool enabled}) async {
     _trashEnabled = enabled;
+  }
+
+  bool _deleteCarriesNotes = true;
+
+  @override
+  Future<bool> get deleteCarriesNotes async => _deleteCarriesNotes;
+
+  @override
+  Future<void> setDeleteCarriesNotes({required bool enabled}) async {
+    _deleteCarriesNotes = enabled;
   }
 
   @override

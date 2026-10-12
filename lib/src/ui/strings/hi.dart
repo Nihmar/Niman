@@ -1799,6 +1799,12 @@ final class HindiStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name को हमेशा के लिए हटाया जाएगा';
+
+  @override
+  String deleteNotesToo(int count) => 'इससे जुड़े नोट भी मिटाएँ ($count)';
+
+  @override
+  String get deleteFileOnly => 'केवल फ़ाइल मिटाएँ';
   @override
   String get chooseDestination => 'गंतव्य चुनें';
   @override

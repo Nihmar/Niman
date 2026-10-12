@@ -196,6 +196,16 @@ final class NoteOps implements NoteOperations {
   Future<void> setTrashEnabled({required bool enabled}) =>
       config.update((c) => c.copyWith(trashEnabled: enabled));
 
+  /// The remembered answer of the delete question (#717).
+  @override
+  Future<bool> get deleteCarriesNotes async =>
+      (await config.config).deleteCarriesNotes;
+
+  /// Remembers the answer of the delete question (#717).
+  @override
+  Future<void> setDeleteCarriesNotes({required bool enabled}) =>
+      config.update((c) => c.copyWith(deleteCarriesNotes: enabled));
+
   /// The list-note folder (library-relative).
   @override
   Future<String> get listNoteFolder async =>

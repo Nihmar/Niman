@@ -1840,6 +1840,12 @@ final class AlbanianStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name do të fshihet përfundimisht';
+
+  @override
+  String deleteNotesToo(int count) => 'Fshi edhe shënimet përkatëse ($count)';
+
+  @override
+  String get deleteFileOnly => 'Fshi vetëm skedarin';
   @override
   String get chooseDestination => 'Zgjidh destinacionin';
   @override

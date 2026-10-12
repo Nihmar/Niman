@@ -61,6 +61,10 @@ A file with a recognized text shows it with the scan:
 
 The pane reads the text again when a recognition rewrites it.
 
+The text note is a note like any other and is deleted on its own. When
+its file is deleted, the delete offers to take it along — see
+[trash](organization.md#trash).
+
 ## The lines on the scan
 
 On a PDF with a recognized text, each recognized line is a target on the

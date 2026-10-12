@@ -1836,6 +1836,13 @@ final class BasqueStrings extends Strings {
   String get deletedMessage => 'Ezabatua';
   @override
   String deleteForeverConfirm(String name) => '$name betirako ezabatuko da';
+
+  @override
+  String deleteNotesToo(int count) =>
+      'Ezabatu harekin lotutako oharrak ere ($count)';
+
+  @override
+  String get deleteFileOnly => 'Ezabatu fitxategia bakarrik';
   @override
   String get chooseDestination => 'Hautatu helmuga';
   @override

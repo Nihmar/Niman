@@ -1811,6 +1811,12 @@ final class TurkishStrings extends Strings {
   String get deletedMessage => 'Silindi';
   @override
   String deleteForeverConfirm(String name) => '$name kalıcı olarak silinecek';
+
+  @override
+  String deleteNotesToo(int count) => 'İlgili notları da sil ($count)';
+
+  @override
+  String get deleteFileOnly => 'Yalnızca dosyayı sil';
   @override
   String get chooseDestination => 'Hedefi seç';
   @override

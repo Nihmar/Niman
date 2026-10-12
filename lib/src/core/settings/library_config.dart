@@ -381,6 +381,7 @@ final class LibraryConfig {
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
     this.tidyOnClose = true,
+    this.deleteCarriesNotes = true,
     this.cascadeChecklist = true,
     this.frontmatterPanel = true,
     this.lintRulesOff = const <String>{},
@@ -467,6 +468,7 @@ final class LibraryConfig {
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
       tidyOnClose: _boolOr(json['tidyOnClose'], true),
+      deleteCarriesNotes: _boolOr(json['deleteCarriesNotes'], true),
       cascadeChecklist: _boolOr(json['cascadeChecklist'], true),
       frontmatterPanel: _boolOr(json['frontmatterPanel'], true),
       lintRulesOff: _lintRulesOffFrom(json['lintRulesOff']),
@@ -609,6 +611,13 @@ final class LibraryConfig {
   /// them.
   final bool tidyOnClose;
 
+  /// Whether the delete of a file or folder takes its own notes
+  /// (companions, an OCR sidecar) along by default (#717): which of the
+  /// question's two actions is emphasised, remembered from the last
+  /// answer. The notes are never taken silently — the question is still
+  /// asked.
+  final bool deleteCarriesNotes;
+
   /// Whether ticking a checklist item also ticks the tasks nested under it
   /// (default true, #326). Library-wide, and one-way: clearing a parent
   /// leaves its children as they are.
@@ -737,6 +746,7 @@ final class LibraryConfig {
     bool? editorAutofocus,
     bool? reminderShowTokens,
     bool? tidyOnClose,
+    bool? deleteCarriesNotes,
     bool? cascadeChecklist,
     bool? frontmatterPanel,
     Set<String>? lintRulesOff,
@@ -785,6 +795,7 @@ final class LibraryConfig {
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
+      deleteCarriesNotes: deleteCarriesNotes ?? this.deleteCarriesNotes,
       cascadeChecklist: cascadeChecklist ?? this.cascadeChecklist,
       frontmatterPanel: frontmatterPanel ?? this.frontmatterPanel,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
@@ -910,6 +921,7 @@ final class LibraryConfig {
     'editorAutofocus',
     'reminderShowTokens',
     'tidyOnClose',
+    'deleteCarriesNotes',
     'cascadeChecklist',
     'frontmatterPanel',
     'lintRulesOff',
@@ -973,6 +985,7 @@ final class LibraryConfig {
       'editorAutofocus': editorAutofocus,
       'reminderShowTokens': reminderShowTokens,
       'tidyOnClose': tidyOnClose,
+      'deleteCarriesNotes': deleteCarriesNotes,
       'cascadeChecklist': cascadeChecklist,
       'frontmatterPanel': frontmatterPanel,
       'treeSort': treeSort.name,
@@ -1084,6 +1097,7 @@ final class LibraryConfig {
         editorAutofocus == other.editorAutofocus &&
         reminderShowTokens == other.reminderShowTokens &&
         tidyOnClose == other.tidyOnClose &&
+        deleteCarriesNotes == other.deleteCarriesNotes &&
         cascadeChecklist == other.cascadeChecklist &&
         lintRulesOff.length == other.lintRulesOff.length &&
         lintRulesOff.containsAll(other.lintRulesOff) &&

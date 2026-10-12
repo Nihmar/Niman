@@ -1849,6 +1849,14 @@ final class DutchStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name wordt definitief verwijderd';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Verwijder ook de notitie erover'
+      : 'Verwijder ook de $count notities erover';
+
+  @override
+  String get deleteFileOnly => 'Alleen het bestand verwijderen';
   @override
   String get chooseDestination => 'Kies bestemming';
   @override

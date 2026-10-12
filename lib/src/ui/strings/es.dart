@@ -1857,6 +1857,14 @@ final class SpanishStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name se eliminará permanentemente';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Eliminar también la nota que lo describe'
+      : 'Eliminar también las $count notas que lo describen';
+
+  @override
+  String get deleteFileOnly => 'Eliminar solo el archivo';
   @override
   String get chooseDestination => 'Elegir el destino';
   @override

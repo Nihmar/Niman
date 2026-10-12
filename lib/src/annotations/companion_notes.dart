@@ -19,12 +19,14 @@
 /// after the file — `Annotations/Dune - Annotation.md`.
 library;
 
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -64,6 +66,81 @@ final class CompanionNotes {
       final resolved = await _resolve(value, from: note.path);
       if (resolved is ResolvedNote && resolved.note.path == path) {
         out.add(note.path);
+      }
+    }
+    return out;
+  }
+
+  /// Every companion by the path of the file it names (#717), in one
+  /// pass: [of] resolves every declared link each time it is asked, and a
+  /// delete asks about a whole folder at once.
+  Future<Map<String, List<String>>> all() async {
+    final out = <String, List<String>>{};
+    for (final (:note, :value) in await fields.fieldValues(key)) {
+      final resolved = await _resolve(value, from: note.path);
+      if (resolved is! ResolvedNote) continue;
+      final notes = out.putIfAbsent(resolved.note.path, () => <String>[]);
+      if (!notes.contains(note.path)) notes.add(note.path);
+    }
+    return out;
+  }
+
+  /// Every companion found by reading [folder]'s notes on disk (#717),
+  /// by the file each names.
+  ///
+  /// The index can lag a moment behind a companion just written, so the
+  /// folder Niman writes them to is looked at too — but only the notes
+  /// the index does not know, or holds an older row for: an up-to-date
+  /// folder costs one listing and no reads.
+  Future<Map<String, List<String>>> freshIn(
+    String folder, {
+    required String root,
+  }) async {
+    final dirPath = folder.isEmpty ? root : p.join(root, folder);
+    // One stat before the isolate: a library with no annotations folder —
+    // a widget test's fake among them — costs nothing, and the isolate is
+    // only worth spawning when there is a folder to list.
+    if (!Directory(dirPath).existsSync()) return const {};
+    final listed = await Isolate.run(() {
+      final dir = Directory(dirPath);
+      return [
+        for (final entry in dir.listSync())
+          if (entry is File && entry.path.toLowerCase().endsWith('.md'))
+            (
+              path: p.relative(entry.path, from: root).replaceAll(r'\', '/'),
+              modified: entry.statSync().modified.millisecondsSinceEpoch,
+            ),
+      ];
+    });
+    final stale = <({String path, int modified})>[];
+    for (final entry in listed) {
+      final indexed = await ops.find(entry.path);
+      if (indexed != null &&
+          indexed.modified.millisecondsSinceEpoch >= entry.modified) {
+        continue; // the index already answered for this note
+      }
+      stale.add(entry);
+    }
+    if (stale.isEmpty) return const {};
+    // Read in the isolate: the notes are not in the index yet, so the
+    // ops' own read (which goes through it) cannot find them.
+    final texts = await Isolate.run(
+      () => [
+        for (final entry in stale)
+          (
+            path: entry.path,
+            text: File(p.join(root, entry.path)).readAsStringSync(),
+          ),
+      ],
+    );
+    final out = <String, List<String>>{};
+    for (final entry in texts) {
+      final frontmatter = parseFrontmatter(entry.text);
+      for (final value in frontmatter?.fields[key] ?? const <String>[]) {
+        final resolved = await _resolve(value, from: entry.path);
+        if (resolved is! ResolvedNote) continue;
+        final notes = out.putIfAbsent(resolved.note.path, () => <String>[]);
+        if (!notes.contains(entry.path)) notes.add(entry.path);
       }
     }
     return out;

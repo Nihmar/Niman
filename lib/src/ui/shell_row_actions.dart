@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/carried_notes.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/name_dialog.dart';
@@ -240,6 +241,12 @@ final class ShellRowActions {
   /// library's trash setting. A move to the trash needs no question —
   /// the snackbar's Undo takes it back — while a permanent delete still
   /// asks (#712).
+  ///
+  /// Notes of its own — companions, an OCR sidecar — are the exception
+  /// (#717): the question appears to offer taking them along, checked by
+  /// default, and one Undo brings the file and its notes back together.
+  /// The question appears only when there is something to carry, so a
+  /// plain note still deletes without one.
   Future<void> delete(BuildContext context, [String? path]) async {
     final sel = path ?? selectedPath();
     if (sel == null) return;
@@ -248,29 +255,61 @@ final class ShellRowActions {
     final trash = await ops.trashEnabled;
     if (!context.mounted) return;
     final name = p.basename(sel);
-    if (!trash) {
-      final confirmed = await showDialog<bool>(
+    final isDir = (await ops.find(sel))?.isDir ?? false;
+    var carry = await _notesAbout(sel, isDir: isDir);
+    if (!context.mounted) return;
+    // The last answer is the emphasised one, so the usual choice is one
+    // Enter away (#717).
+    final takeNotesDefault = await ops.deleteCarriesNotes;
+    if (!context.mounted) return;
+    if (carry.isNotEmpty || !trash) {
+      final takeNotes = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           title: Text(AppStrings.actionDelete),
-          content: Text(AppStrings.deleteForeverConfirm(name)),
+          content: Text(trash ? name : AppStrings.deleteForeverConfirm(name)),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(context),
               child: Text(AppStrings.actionCancel),
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(AppStrings.actionDelete),
-            ),
+            if (carry.isEmpty)
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(AppStrings.actionDelete),
+              )
+            else ...[
+              _deleteChoice(
+                context,
+                key: const Key('delete-carry-no'),
+                label: AppStrings.deleteFileOnly,
+                primary: !takeNotesDefault,
+                choice: false,
+              ),
+              _deleteChoice(
+                context,
+                key: const Key('delete-carry-yes'),
+                label: AppStrings.deleteNotesToo(carry.length),
+                primary: takeNotesDefault,
+                choice: true,
+              ),
+            ],
           ],
         ),
       );
-      if (confirmed != true) return;
+      if (takeNotes == null) return;
+      if (carry.isNotEmpty && takeNotes != takeNotesDefault) {
+        await ops.setDeleteCarriesNotes(enabled: takeNotes);
+      }
+      if (!takeNotes) carry = const [];
     }
     await guard(() async {
       await ops.delete(sel);
       onDeleted(sel);
+      for (final note in carry) {
+        await ops.delete(note);
+        onDeleted(note);
+      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -286,10 +325,12 @@ final class ShellRowActions {
                     label: AppStrings.actionUndo,
                     onPressed: () async {
                       await guard(() async {
-                        final name = await _justDeleted(ops, sel);
-                        if (name == null) return;
-                        await ops.restoreTrash(name);
-                        onDeleted(sel);
+                        for (final restore in [sel, ...carry]) {
+                          final name = await _justDeleted(ops, restore);
+                          if (name == null) continue;
+                          await ops.restoreTrash(name);
+                          onDeleted(restore);
+                        }
                       });
                     },
                   )
@@ -298,6 +339,43 @@ final class ShellRowActions {
         );
       }
     });
+  }
+
+  /// One of the delete question's two actions (#717): the remembered one
+  /// is the filled button, waiting for Enter.
+  Widget _deleteChoice(
+    BuildContext context, {
+    required Key key,
+    required String label,
+    required bool primary,
+    required bool choice,
+  }) {
+    void pick() => Navigator.pop(context, choice);
+    return primary
+        ? FilledButton(
+            key: key,
+            autofocus: true,
+            onPressed: pick,
+            child: Text(label),
+          )
+        : TextButton(key: key, onPressed: pick, child: Text(label));
+  }
+
+  /// The notes about [sel] (#717), from the library's own sources.
+  Future<List<String>> _notesAbout(String sel, {required bool isDir}) async {
+    final ops = controller.ops;
+    if (ops == null) return const [];
+    final fields = await controller.fieldSource;
+    final links = await controller.linkSource;
+    if (fields == null || links == null) return const [];
+    final carried = await CarriedNotes(
+      ops: ops,
+      fields: fields,
+      links: links,
+      root: controller.root,
+      annotationsFolder: await ops.annotationsFolder,
+    ).of(sel, isDir: isDir);
+    return carried;
   }
 
   /// The trash name of [sel]'s freshest deletion: what Undo restores.

@@ -1809,6 +1809,14 @@ final class EnglishStrings extends Strings {
   @override
   String deleteForeverConfirm(String name) =>
       '$name will be permanently deleted';
+
+  @override
+  String deleteNotesToo(int count) => count == 1
+      ? 'Also delete the note about it'
+      : 'Also delete the $count notes about it';
+
+  @override
+  String get deleteFileOnly => 'Delete only the file';
   @override
   String get chooseDestination => 'Choose destination';
   @override

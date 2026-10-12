@@ -1708,6 +1708,12 @@ final class JapaneseStrings extends Strings {
   String get deletedMessage => '削除しました';
   @override
   String deleteForeverConfirm(String name) => '$name を完全に削除します';
+
+  @override
+  String deleteNotesToo(int count) => '関連するノート$count件も削除';
+
+  @override
+  String get deleteFileOnly => 'ファイルのみ削除';
   @override
   String get chooseDestination => '移動先を選ぶ';
   @override
