@@ -21,7 +21,9 @@ library;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_heights.dart';
+import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 
 /// One column of a row: its share of the row's width after the gaps, and
 /// the sliver that draws it.
@@ -60,11 +62,13 @@ final class SliverColumns extends StatelessWidget {
   /// The room between two columns, and between two rows.
   final double gap;
 
-  /// The outer opener's band, drawn above the rows.
-  final Widget? opener;
+  /// Builds the outer opener's band, drawn above the rows: built as a row
+  /// of the note is, when it comes near the screen — a note of hundreds of
+  /// blocks built every one of their fences on every build.
+  final WidgetBuilder? opener;
 
-  /// The outer closer's band, drawn below them.
-  final Widget? closer;
+  /// Builds the outer closer's band, drawn below them.
+  final WidgetBuilder? closer;
 
   /// The bracket down the block's gutter, if any.
   final ColumnsBracket? bracket;
@@ -85,12 +89,12 @@ final class SliverColumns extends StatelessWidget {
         : sliver;
     final group = SliverMainAxisGroup(
       slivers: [
-        if (opener != null) SliverToBoxAdapter(child: opener),
+        if (opener != null) _band(opener),
         for (var at = 0; at < rows.length; at++) ...[
           if (at > 0) SliverToBoxAdapter(child: SizedBox(height: gap)),
           rowsOf(SliverCrossAxisGroup(slivers: _row(rows[at]))),
         ],
-        if (closer != null) SliverToBoxAdapter(child: closer),
+        if (closer != null) _band(closer),
       ],
     );
     return _ExtentRecorder(
@@ -100,6 +104,19 @@ final class SliverColumns extends StatelessWidget {
       sliver: group,
     );
   }
+
+  /// A fence's band, built lazily: a sliver of one row, laid out — and
+  /// built — only near the screen, as any row is.
+  static Widget _band(WidgetBuilder builder) => SliverMarkdownBlocks(
+    // Some height before it is drawn: a run of no height is one no cache
+    // area meets, and it would never be laid out.
+    heights: BlockHeightMap(count: 1, estimate: (_) => 1),
+    segment: true,
+    delegate: SliverChildBuilderDelegate(
+      (context, _) => builder(context),
+      childCount: 1,
+    ),
+  );
 
   /// A row's slivers: its columns, each flexed by its share, with a gap of
   /// no flex between two of them.
@@ -134,6 +151,9 @@ final class _ExtentRecorder extends SingleChildRenderObjectWidget {
   final ColumnsBracket? bracket;
 
   @override
+  SingleChildRenderObjectElement createElement() => _RecorderElement(this);
+
+  @override
   _RenderExtentRecorder createRenderObject(BuildContext context) =>
       _RenderExtentRecorder(heights, index)..bracket = bracket;
 
@@ -149,6 +169,21 @@ final class _ExtentRecorder extends SingleChildRenderObjectWidget {
   }
 }
 
+/// [_ExtentRecorder]'s element: its child is on stage while the block is
+/// drawn — a block wholly outside the cache area lays nothing out, and its
+/// slivers have no geometry to ask.
+final class _RecorderElement extends SingleChildRenderObjectElement {
+  new(_ExtentRecorder super.widget);
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    final geometry = (renderObject as RenderSliver).geometry;
+    if (geometry != null && geometry.visible) {
+      super.debugVisitOnstageChildren(visitor);
+    }
+  }
+}
+
 /// The render object behind [_ExtentRecorder]: its child's geometry, its
 /// scroll extent written to the note's map as a measured block's height
 /// is, so the map's offsets past the block follow what it is.
@@ -157,6 +192,9 @@ final class _RenderExtentRecorder extends RenderProxySliver {
 
   BlockHeights heights;
   int index;
+
+  /// Whether the last layout drew the block, laying its columns out.
+  bool _drawn = false;
 
   ColumnsBracket? get bracket => _bracket;
   ColumnsBracket? _bracket;
@@ -206,9 +244,36 @@ final class _RenderExtentRecorder extends RenderProxySliver {
 
   @override
   void performLayout() {
+    // Wholly outside the cache area, the block is as tall as the map says
+    // and lays out nothing: a note of hundreds of blocks scrolled past
+    // them laid out every one of them, a frame at a time (the scroll bar
+    // in `columns_scroll_test`).
+    final constraints = this.constraints;
+    final known = heights.extentFor(index);
+    if (constraints.remainingCacheExtent <= 0 ||
+        constraints.scrollOffset + constraints.cacheOrigin >= known) {
+      // A block drawn before is laid out once more outside the cache area,
+      // so its columns let their lines go.
+      final child = this.child;
+      if (_drawn && child != null) {
+        child.layout(
+          constraints.copyWith(
+            scrollOffset: 0,
+            cacheOrigin: 0,
+            remainingPaintExtent: 0,
+            remainingCacheExtent: 0,
+          ),
+          parentUsesSize: true,
+        );
+        _drawn = false;
+      }
+      geometry = SliverGeometry(scrollExtent: known, maxPaintExtent: known);
+      return;
+    }
+    _drawn = true;
     super.performLayout();
-    final geometry = this.geometry;
-    if (geometry == null || geometry.scrollOffsetCorrection != null) return;
-    heights.measured(index, geometry.scrollExtent);
+    final laidOut = geometry;
+    if (laidOut == null || laidOut.scrollOffsetCorrection != null) return;
+    heights.measured(index, laidOut.scrollExtent);
   }
 }

@@ -92,6 +92,7 @@ import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/sliver_columns.dart';
+import 'package:niman/src/markdown/render/sliver_segments.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
@@ -4186,15 +4187,23 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final layouts = _hosts.layouts;
     if (layouts.isEmpty) return rows(0, _heights.length);
     final slivers = <Widget>[];
+    final starts = <int>[];
     var from = 0;
     for (final layout in layouts) {
       final host = _folds.rowOf(layout.run.start);
-      if (host > from) slivers.add(rows(from, host));
+      if (host > from) {
+        starts.add(from);
+        slivers.add(rows(from, host));
+      }
+      starts.add(host);
       slivers.add(_columnsSliver(context, layout, host));
       from = host + 1;
     }
-    if (from < _heights.length) slivers.add(rows(from, _heights.length));
-    return SliverMainAxisGroup(slivers: slivers);
+    if (from < _heights.length) {
+      starts.add(from);
+      slivers.add(rows(from, _heights.length));
+    }
+    return SliverSegments(heights: _heights, starts: starts, slivers: slivers);
   }
 
   /// [layout]'s block, its columns side by side, in row [host].
@@ -4217,9 +4226,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               color: widget.theme.markerDim,
             )
           : null,
-      opener: _lineWidget(context, run.start, width: _textWidth),
+      opener: (context) => _lineWidget(context, run.start, width: _textWidth),
       closer: run.closed
-          ? _lineWidget(context, run.end - 1, width: _textWidth)
+          ? (context) => _lineWidget(context, run.end - 1, width: _textWidth)
           : null,
       rows: [
         for (final row in layout.rows)
@@ -4229,6 +4238,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 share: layout.shares[at],
                 sliver: SliverMarkdownBlocks(
                   heights: layout.maps[at],
+                  segment: true,
                   delegate: SliverChildBuilderDelegate(
                     (context, line) => _lineWidget(
                       context,
