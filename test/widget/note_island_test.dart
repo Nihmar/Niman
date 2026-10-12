@@ -120,6 +120,32 @@ void main() {
     expect(ground.color, scheme.surface);
   });
 
+  testWidgets("a divider is grabbed over the islands' edges, not only in "
+      'the gap (#786)', (tester) async {
+    await pumpAt(tester, size);
+    final treeRect = tester.getRect(tree);
+    final dockRect = tester.getRect(dock);
+    for (final (divider, gapLeft) in [
+      ('tree-divider', treeRect.right),
+      ('dock-divider', dockRect.left - ResizeDivider.width),
+    ]) {
+      final grab = tester.getRect(find.byKey(Key(divider)));
+      expect(grab.width, ResizeDivider.grabWidth);
+      expect(grab.left, gapLeft - ResizeDivider.overhang);
+    }
+
+    // A drag that starts on the tree island's last pixel and on the side
+    // panel's first one moves the edge, as one in the gap does.
+    final y = treeRect.center.dy;
+    await tester.dragFrom(Offset(treeRect.right - 1, y), const Offset(40, 0));
+    await settle(tester);
+    expect(tester.getRect(tree).width, treeRect.width + 40);
+
+    await tester.dragFrom(Offset(dockRect.left + 1, y), const Offset(-40, 0));
+    await settle(tester);
+    expect(tester.getRect(dock).width, dockRect.width + 40);
+  });
+
   testWidgets(
     'the tabs start at the panes island, with the tree and without',
     (tester) async {
