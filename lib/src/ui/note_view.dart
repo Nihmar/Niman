@@ -940,8 +940,11 @@ final class _NoteViewState extends State<NoteView>
     // The pane opened the note (#727): the caret goes in it, whatever the
     // editor was showing before. Last, so a note opening in the preview is
     // not dismissed right after being asked for. The editor may still be
-    // loading, so the ask is remembered for when it is up.
-    if (widget.caretRequest != oldWidget.caretRequest) {
+    // loading, so the ask is remembered for when it is up. A drop to 0 is
+    // the ask going to another note — another pane's, another tab's — and
+    // asks this one for nothing.
+    if (widget.caretRequest != 0 &&
+        widget.caretRequest != oldWidget.caretRequest) {
       _caretPending = true;
       _refocus();
     }

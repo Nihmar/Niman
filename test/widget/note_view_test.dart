@@ -769,6 +769,38 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('a caret asked of another note leaves this one (#727)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => 'ciao\n',
+            caretRequest: 1,
+          ),
+        ),
+      );
+      await tester.pump();
+      final focus = tester
+          .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+          .focusNode!;
+      // Blink-timer teardown, as above; the focus then goes elsewhere.
+      await tester.pump(const Duration(milliseconds: 200));
+      focus.unfocus();
+      await tester.pump();
+      expect(focus.hasFocus, isFalse);
+
+      // The pane asked another note — another pane's, another tab's: this
+      // view's number drops to 0, which asks it for nothing.
+      await tester.pumpWidget(
+        _app(_view(path: '/notes/a.md', readNote: (_) async => 'ciao\n')),
+      );
+      await tester.pump();
+      expect(focus.hasFocus, isFalse, reason: 'the ask went to another note');
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('without a caret landing the editor takes no focus', (
       tester,
     ) async {
