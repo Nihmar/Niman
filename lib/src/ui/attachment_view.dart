@@ -80,7 +80,7 @@ final class AttachmentView extends StatelessWidget {
   final NoteColumn column;
 
   /// Opens the sheet that sets how the books look ([EpubPane.onEditLook]).
-  final VoidCallback? onEditEpubLook;
+  final ValueChanged<Rect?>? onEditEpubLook;
 
   /// Keeps the books' text size a pinch or a zoom key reached
   /// ([EpubPane.onTextScale]).

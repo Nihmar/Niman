@@ -8,16 +8,19 @@ import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Shows [document]'s contents, the entry at [top] (a line of its text)
-/// marked; the line of the entry picked, or null.
+/// marked; the line of the entry picked, or null. A pointer's menu grows
+/// from [anchor], the control that opened it.
 Future<int?> showEpubContents(
   BuildContext context,
   EpubDocument document,
-  int top,
-) {
+  int top, {
+  Rect? anchor,
+}) {
   final current = document.entryAt(top);
   return showActionSheet<int>(
     context,
     sheetKey: const Key('epub-contents'),
+    anchor: anchor,
     title: AppStrings.outlineTooltip,
     items: (context) => [
       for (final (index, entry) in document.contents.indexed)

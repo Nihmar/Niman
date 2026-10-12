@@ -53,17 +53,20 @@ String highlightColourName(HighlightColour colour) => switch (colour) {
 
 /// Opens the menu of the highlight [mark] of the file at [path], and does
 /// what is chosen through [source]; [linkType] is how a copied link is
-/// written. A change that fails says so.
+/// written. A change that fails says so. A pointer's menu grows from
+/// [anchor], where the mark was tapped.
 Future<void> showHighlightMenu(
   BuildContext context,
   AnnotationMark mark,
   AnnotationMarkSource source, {
   required String path,
   required LinkType linkType,
+  Rect? anchor,
 }) async {
   final choice = await showActionSheet<_Choice>(
     context,
     sheetKey: const Key('highlight-menu'),
+    anchor: anchor,
     items: (context) => [
       if (mark.quote.isNotEmpty)
         Padding(

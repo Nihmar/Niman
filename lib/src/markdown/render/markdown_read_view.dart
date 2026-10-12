@@ -70,8 +70,8 @@ final class MarkdownReadView extends StatefulWidget {
   final List<BlockMark> marks;
 
   /// Called with a marked block's lines, its first and one past its last,
-  /// when it is tapped.
-  final void Function(int startLine, int endLine)? onTapMark;
+  /// when it is tapped, and where on screen the tap landed.
+  final void Function(int startLine, int endLine, Rect at)? onTapMark;
 
   /// What the menu of a selection offers beside Copy and Select all; null
   /// leaves the text unselectable (#283).
@@ -966,7 +966,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
             marks: marks,
             onTap: tapMark == null
                 ? null
-                : () => tapMark(block.startLine, block.endLine),
+                : (at) => tapMark(block.startLine, block.endLine, at),
             child: view,
           );
     if (widget.selectionActions != null) {

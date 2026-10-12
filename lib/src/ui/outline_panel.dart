@@ -11,15 +11,18 @@ import 'package:niman/src/ui/strings.dart';
 /// the tree's long-press menu, and as a sheet it can be as tall as the
 /// note is deep without taking the room away from the editor underneath.
 ///
-/// Resolves to the chosen heading's line, or null when dismissed.
+/// Resolves to the chosen heading's line, or null when dismissed. A
+/// pointer's menu grows from [anchor], the control that opened it.
 Future<int?> showOutlineSheet(
   BuildContext context, {
   required List<OutlineEntry> entries,
   Set<int> foldedLines = const <int>{},
+  Rect? anchor,
 }) {
   return showActionSheet<int>(
     context,
     sheetKey: const Key('outline-sheet'),
+    anchor: anchor,
     title: AppStrings.outlineTooltip,
     items: (context) => [
       if (entries.isEmpty)

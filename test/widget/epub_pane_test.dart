@@ -41,7 +41,7 @@ void main() {
 
   Widget pane(
     String path, {
-    VoidCallback? onEditLook,
+    ValueChanged<Rect?>? onEditLook,
     ReadingPositions? positions,
     String? anchor,
     int reloadToken = 0,
@@ -68,7 +68,7 @@ void main() {
   Future<void> pump(
     WidgetTester tester,
     String path, {
-    VoidCallback? onEditLook,
+    ValueChanged<Rect?>? onEditLook,
     ReadingPositions? positions,
     String? anchor,
     void Function(Annotation annotation)? onAnnotate,
@@ -271,10 +271,12 @@ void main() {
   });
 
   testWidgets('its Aa button opens the look', (tester) async {
-    var opened = 0;
-    await pump(tester, twoChapters(), onEditLook: () => opened++);
-    await tester.tap(find.byKey(const Key('epub-look-button')));
-    expect(opened, 1);
+    final opened = <Rect?>[];
+    await pump(tester, twoChapters(), onEditLook: opened.add);
+    final button = find.byKey(const Key('epub-look-button'));
+    await tester.tap(button);
+    // Handed the button's place, for a pointer's menu to grow from (#780).
+    expect(opened, [tester.getRect(button)]);
     await tester.pumpWidget(const SizedBox());
   });
 

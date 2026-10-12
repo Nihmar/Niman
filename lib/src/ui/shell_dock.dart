@@ -113,8 +113,13 @@ final class ShellDock {
   );
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
-  /// sheet (the phone's way to the same three, #175).
-  Future<void> showPanel(BuildContext context, DockPane pane) async {
+  /// sheet (the phone's way to the same three, #175). The outline, as a
+  /// pointer's menu, grows from [anchor], the control that asked for it.
+  Future<void> showPanel(
+    BuildContext context,
+    DockPane pane, {
+    Rect? anchor,
+  }) async {
     if (wide() && room) {
       workspace.controller.update((w) => w.withDock(open: true, pane: pane));
       return;
@@ -122,7 +127,11 @@ final class ShellDock {
     final note = panelNote();
     if (note == null) return;
     if (pane == DockPane.outline) {
-      final line = await showOutlineSheet(context, entries: note.outline.value);
+      final line = await showOutlineSheet(
+        context,
+        entries: note.outline.value,
+        anchor: anchor,
+      );
       if (line != null) note.jumpToHeading(line);
       return;
     }

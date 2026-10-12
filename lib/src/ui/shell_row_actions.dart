@@ -89,23 +89,27 @@ final class ShellRowActions {
   /// Opens the note in the other pane, splitting first if need be.
   final void Function(String path) onOpenBeside;
 
-  /// Writes the note at `path` out as a file (#24).
-  final Future<void> Function(String path) onExport;
+  /// Writes the note at `path` out as a file (#24); a pointer's format
+  /// menu grows from `anchor`, where the row's menu was.
+  final Future<void> Function(String path, Rect? anchor) onExport;
 
-  /// Writes the folder at `path` out as one zip (#24).
-  final Future<void> Function(String path) onExportFolder;
+  /// Writes the folder at `path` out as one zip (#24); a pointer's format
+  /// menu grows from `anchor`, where the row's menu was.
+  final Future<void> Function(String path, Rect? anchor) onExportFolder;
 
   /// Recognizes the text of the file at `path` (#594); null offers none.
   final void Function(String path)? onRecognize;
 
   /// Runs [action] for [note], creating in [here] where the action makes
   /// something new. A null action (the menu was dismissed) does nothing.
+  /// [anchor] is where the row's menu opened, for a choice that asks more.
   Future<void> run(
     BuildContext context,
     String? action,
     Note note,
-    String here,
-  ) async {
+    String here, {
+    Rect? anchor,
+  }) async {
     if (action == null) return;
     switch (action) {
       case 'note':
@@ -128,9 +132,9 @@ final class ShellRowActions {
       case 'history':
         await onHistory(note.path);
       case 'export':
-        await onExport(note.path);
+        await onExport(note.path, anchor);
       case 'exportfolder':
-        await onExportFolder(note.path);
+        await onExportFolder(note.path, anchor);
       case 'recognize':
         onRecognize?.call(note.path);
       case 'newtab':

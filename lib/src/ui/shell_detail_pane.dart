@@ -79,8 +79,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// nothing: the journal's strip over an entry (#7).
   final Widget? Function(String path)? header;
 
-  /// Opens the sheet that sets how the books look (#280).
-  final VoidCallback? onEditEpubLook;
+  /// Opens the sheet that sets how the books look (#280), from the
+  /// button's place.
+  final ValueChanged<Rect?>? onEditEpubLook;
 
   /// Keeps the books' text size a pinch or a zoom key reached (#538).
   final ValueChanged<double>? onEpubTextScale;

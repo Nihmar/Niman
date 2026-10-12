@@ -101,6 +101,7 @@ final class ShellExportFlow {
     BuildContext context,
     String path, {
     bool slidesPdf = false,
+    Rect? anchor,
   }) async {
     // The theme is read while the context is certainly valid: the dialog
     // and the export itself both wait.
@@ -112,7 +113,7 @@ final class ShellExportFlow {
     );
     final format = slidesPdf
         ? ExportFormat.pdf
-        : await _chooseExportFormat(context);
+        : await _chooseExportFormat(context, anchor: anchor);
     if (format == null || !context.mounted) return;
     final ops = controller.ops;
     final root = controller.root;
@@ -298,8 +299,11 @@ final class ShellExportFlow {
   }
 
   /// Asks which format to export in: the wide window's dialog, the phone's
-  /// sheet.
-  Future<ExportFormat?> _chooseExportFormat(BuildContext context) {
+  /// sheet — a pointer's menu, from [anchor], in a narrow window.
+  Future<ExportFormat?> _chooseExportFormat(
+    BuildContext context, {
+    Rect? anchor,
+  }) {
     final formats = <Widget>[
       for (final format in ExportFormat.values)
         ListTile(
@@ -322,6 +326,7 @@ final class ShellExportFlow {
       context,
       title: AppStrings.exportTitle,
       sheetKey: const Key('export-sheet'),
+      anchor: anchor,
       items: (context) => formats,
     );
   }
@@ -340,6 +345,7 @@ final class ShellExportFlow {
     BuildContext context,
     String dir, {
     required bool library,
+    Rect? anchor,
   }) async {
     final root = controller.root;
     if (root == null) return;
@@ -355,6 +361,7 @@ final class ShellExportFlow {
       context,
       library: library,
       pdfAvailable: Platform.isAndroid || engine != null,
+      anchor: anchor,
     );
     if (format == null || !context.mounted) return;
     // A book's metadata is its folder's `index.md`: without one the book
@@ -541,11 +548,13 @@ final class ShellExportFlow {
 
   /// Asks which format a folder or the library is exported in: the wide
   /// window's dialog, the phone's sheet. [pdfAvailable] is decided by the
-  /// caller, after the engine search has answered.
+  /// caller, after the engine search has answered. A pointer's menu, in a
+  /// narrow window, grows from [anchor].
   Future<ExportTreeFormat?> _chooseExportTreeFormat(
     BuildContext context, {
     required bool library,
     required bool pdfAvailable,
+    Rect? anchor,
   }) {
     final title = library
         ? AppStrings.exportLibraryTitle
@@ -573,6 +582,7 @@ final class ShellExportFlow {
       context,
       title: title,
       sheetKey: const Key('export-tree-sheet'),
+      anchor: anchor,
       items: (context) => formats,
     );
   }

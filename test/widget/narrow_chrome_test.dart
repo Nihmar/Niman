@@ -39,7 +39,7 @@ NoteStatusRow _status() => NoteStatusRow(
   wordCount: 1234,
   statusText: 'Saved',
   statusActions: const [Icon(Icons.visibility), Icon(Icons.view_column)],
-  onOutline: () async {},
+  onOutline: (_) async {},
   onFind: () {},
   onSpellCheck: () async {},
   onToggleEditorKind: () {},

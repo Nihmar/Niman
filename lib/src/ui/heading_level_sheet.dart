@@ -7,11 +7,13 @@ import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Shows the heading-level picker (H1..H6); resolves to the chosen level
-/// (1..6) or null (dismissed).
-Future<int?> showHeadingLevelDialog(BuildContext context) {
+/// (1..6) or null (dismissed). A pointer's menu grows from [anchor], the
+/// control that opened it.
+Future<int?> showHeadingLevelDialog(BuildContext context, {Rect? anchor}) {
   return showActionSheet<int>(
     context,
     sheetKey: const Key('heading-level-sheet'),
+    anchor: anchor,
     title: AppStrings.headingDialogTitle,
     items: (context) => [
       for (var level = 1; level <= 6; level++)
