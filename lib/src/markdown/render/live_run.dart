@@ -93,6 +93,33 @@ final class LiveRun {
   @override
   int get hashCode => Object.hash(start, end, closed, items, columns.length);
 
+  /// The same block, [delta] lines further down.
+  LiveRun shifted(int delta) => delta == 0
+      ? this
+      : LiveRun(
+          start: start + delta,
+          end: end + delta,
+          closed: closed,
+          items: items,
+          quoteDepth: quoteDepth,
+          callout: callout,
+          fences: fences == null
+              ? null
+              : {
+                  for (final MapEntry(key: line, value: role)
+                      in fences!.entries)
+                    line + delta: role,
+                },
+          columns: [
+            for (final column in columns)
+              (
+                start: column.start + delta,
+                end: column.end + delta,
+                width: column.width,
+              ),
+          ],
+        );
+
   /// The outermost `columns` blocks among [fences] — the note's fence
   /// lines, in order — each read off the blocks [blockAt] gives from its
   /// opener on: O(fence lines + the blocks of each run). [lineAt] gives a

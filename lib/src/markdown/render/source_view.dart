@@ -81,6 +81,7 @@ import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_hosts.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
+import 'package:niman/src/markdown/render/live_quote_runs.dart';
 import 'package:niman/src/markdown/render/live_run.dart';
 import 'package:niman/src/markdown/render/live_table_commands.dart';
 import 'package:niman/src/markdown/render/live_table_handles.dart';
@@ -1950,7 +1951,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final lines = widget.buffer.lineCount;
     // The side-by-side blocks follow the edit: typing in a column splices
     // its map, and changes no row (#729).
-    if (edit != null) _hosts.edited(edit, _estimateAt);
+    if (edit != null) {
+      _hosts.edited(edit, _estimateAt);
+      _quoteRuns.edited(edit);
+    }
     if (!_folds.isEmpty) {
       // The folds follow the edit; when what they hide changed shape, the
       // rows are measured again rather than spliced.
@@ -2008,7 +2012,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // each quote's content.
     _runs = [
       ...LiveRun.of(fences, styler.blockOf, widget.buffer.lineAt),
-      ...LiveRun.inQuotes(quotes, widget.buffer),
+      ..._quoteRuns.of(quotes, widget.buffer),
     ]..sort((a, b) => a.start.compareTo(b.start));
     _runsRevision = revision;
     return _runs;
@@ -2016,6 +2020,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The blocks drawn side by side at the pane's width (#729).
   final LiveHosts _hosts = LiveHosts();
+
+  /// The `columns` blocks in the note's quotes, each quote read once until
+  /// an edit touches it.
+  final LiveQuoteRuns _quoteRuns = LiveQuoteRuns();
 
   /// An em of the note's text, as drawn: what a column's minimum and the
   /// gap between columns are counted in.
