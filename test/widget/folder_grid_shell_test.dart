@@ -3,6 +3,7 @@
 // selection and writing its folder back, the phone's Back walking up, and
 // the rename in place on a tile.
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/folder_grid.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -181,5 +183,113 @@ void main() {
     } finally {
       debugDefaultTargetPlatformOverride = null;
     }
+  });
+
+  testWidgets("the switch starts in the tree's selection every time", (
+    tester,
+  ) async {
+    await openShell(tester);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createFolder(parentPath: '', name: 'Archive');
+    await settle(tester);
+
+    await tester.tap(noteRow('Projects'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('view-grid-toggle')));
+    await settle(tester);
+    expect(gridFolder(tester), 'Projects');
+
+    // Back to the list, another folder selected: the grid follows it, not
+    // the folder it held last time.
+    await tester.tap(find.byKey(const Key('view-list-toggle')));
+    await settle(tester);
+    await tester.tap(noteRow('Archive'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('view-grid-toggle')));
+    await settle(tester);
+    expect(gridFolder(tester), 'Archive');
+  });
+
+  testWidgets('a middle click and Ctrl+click open a note in its own tab', (
+    tester,
+  ) async {
+    await openShell(tester);
+    for (final name in ['alpha', 'bravo', 'charlie']) {
+      await session.createNote(parentPath: '', name: name);
+    }
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('view-grid-toggle')));
+    await settle(tester);
+
+    List<String> tabs() => [for (final tab in session.workspace.tabs) tab.path];
+
+    await tester.tap(find.byKey(const Key('grid-tile-alpha.md')));
+    await settle(tester);
+    expect(tabs(), ['alpha.md']);
+
+    await tester.tapAt(
+      tester.getCenter(find.byKey(const Key('grid-tile-bravo.md'))),
+      buttons: kMiddleMouseButton,
+    );
+    await settle(tester);
+    expect(tabs(), ['alpha.md', 'bravo.md']);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(find.byKey(const Key('grid-tile-charlie.md')));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+    expect(tabs(), ['alpha.md', 'bravo.md', 'charlie.md']);
+  });
+
+  testWidgets('the background menu makes a folder in the folder shown', (
+    tester,
+  ) async {
+    await openShell(tester);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createNote(parentPath: 'Projects', name: 'Roadmap');
+    await settle(tester);
+
+    await tester.tap(find.byKey(const Key('view-grid-toggle')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('grid-tile-Projects')));
+    await settle(tester);
+    expect(gridFolder(tester), 'Projects');
+
+    // The empty space below the tiles is the folder shown.
+    final grid = tester.getRect(find.byKey(const Key('folder-grid-scroll')));
+    await tester.tapAt(
+      Offset(grid.center.dx, grid.bottom - 20),
+      buttons: kSecondaryMouseButton,
+    );
+    await settle(tester);
+    expect(find.byKey(const Key('tree-menu-new-folder')), findsOneWidget);
+    expect(
+      find.text(AppStrings.exportFolderTitle),
+      findsOneWidget,
+      reason: "the folder's export, not the library's",
+    );
+
+    await tester.tap(find.byKey(const Key('tree-menu-new-folder')));
+    await settle(tester);
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'Nested',
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(FilledButton),
+      ),
+    );
+    await settle(tester);
+    expect(await session.find('Projects/Nested'), isNotNull);
+    expect(
+      await session.find('Nested'),
+      isNull,
+      reason: 'inside the folder shown',
+    );
   });
 }

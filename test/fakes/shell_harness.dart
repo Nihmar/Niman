@@ -2,10 +2,9 @@
 // directory-picker stub the open flow goes through, the pump helpers for
 // a shell full of streams and animations, and the finders for its
 // dialogs and tree rows.
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/tree.dart';
 
@@ -129,6 +128,24 @@ Future<void> settle(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(seconds: 4));
   await tester.pump(const Duration(seconds: 1));
+}
+
+/// Sends [key] with [modifiers] held down, as an accelerator is pressed:
+/// the panes' keyboard walks read the modifier state for themselves and
+/// must leave a modified key to the app's own bindings (#727).
+Future<void> sendWithModifiers(
+  WidgetTester tester,
+  LogicalKeyboardKey key,
+  List<LogicalKeyboardKey> modifiers,
+) async {
+  for (final modifier in modifiers) {
+    await tester.sendKeyDownEvent(modifier);
+  }
+  await tester.sendKeyEvent(key);
+  for (final modifier in modifiers.reversed) {
+    await tester.sendKeyUpEvent(modifier);
+  }
+  await tester.pump();
 }
 
 /// Animates the FAB menu to its resting state (the minis take 150 ms).

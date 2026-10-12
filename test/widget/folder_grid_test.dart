@@ -1,6 +1,7 @@
 // The folder grid (#727): the folder's children as tiles, the breadcrumb
 // above them, and the ways a tile is opened, entered and renamed.
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +11,7 @@ import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/tree.dart' show TreeRename;
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/shell_harness.dart';
 
 void main() {
   late FakeLibrarySession session;
@@ -23,33 +25,52 @@ void main() {
   });
 
   /// A bare [FolderGrid] over [session], with the callbacks recorded.
+  ///
+  /// [width] draws it in a pane that narrow — the sidebar's own minimum,
+  /// near enough — so the breadcrumb's fold can be asked for.
   Widget gridFor({
     String folder = '',
     TreeSort sort = TreeSort.nameAsc,
     String? selectedPath,
+    double? width,
+    bool active = true,
     void Function(Note)? onOpen,
     ValueChanged<String>? onGoTo,
     VoidCallback? onUp,
     void Function(Note, Rect?)? onLongPress,
+    void Function(Note, TapDownDetails)? onSecondaryTapDown,
+    Future<void> Function(String, TapUpDetails)? onBackgroundSecondaryTapUp,
+    void Function(Note)? onOpenInNewTab,
+    ValueChanged<String>? onFolderResolved,
     ValueChanged<String>? onRename,
     ValueChanged<String>? onDelete,
     TreeRename? renaming,
   }) {
+    final grid = FolderGrid(
+      controller: session,
+      folder: folder,
+      sort: sort,
+      selectedPath: selectedPath,
+      active: active,
+      onOpen: onOpen ?? (_) {},
+      onGoTo: onGoTo ?? (_) {},
+      onUp: onUp ?? () {},
+      onLongPress: onLongPress,
+      onSecondaryTapDown: onSecondaryTapDown,
+      onBackgroundSecondaryTapUp: onBackgroundSecondaryTapUp,
+      onOpenInNewTab: onOpenInNewTab,
+      onFolderResolved: onFolderResolved,
+      onRename: onRename,
+      onDelete: onDelete,
+      renaming: renaming,
+    );
     return MaterialApp(
       home: Scaffold(
-        body: FolderGrid(
-          controller: session,
-          folder: folder,
-          sort: sort,
-          selectedPath: selectedPath,
-          onOpen: onOpen ?? (_) {},
-          onGoTo: onGoTo ?? (_) {},
-          onUp: onUp ?? () {},
-          onLongPress: onLongPress,
-          onRename: onRename,
-          onDelete: onDelete,
-          renaming: renaming,
-        ),
+        body: width == null
+            ? grid
+            : Align(
+                child: SizedBox(width: width, child: grid),
+              ),
       ),
     );
   }
@@ -322,5 +343,165 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(cancelled, 0);
+  });
+
+  testWidgets('a narrow pane folds the middle crumbs into a menu', (
+    tester,
+  ) async {
+    await session.open('/lib', create: false);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createFolder(parentPath: 'Projects', name: 'Niman');
+    await session.createFolder(parentPath: 'Projects/Niman', name: 'Docs');
+    final opened = <String>[];
+    await tester.pumpWidget(
+      gridFor(folder: 'Projects/Niman/Docs', width: 220, onGoTo: opened.add),
+    );
+    await tester.pumpAndSettle();
+
+    // The root and the folder shown stay; the middle folds away.
+    expect(find.byKey(const Key('crumbs-more')), findsOneWidget);
+    expect(find.text('Library'), findsOneWidget);
+    expect(find.text('Docs'), findsOneWidget);
+    expect(find.text('Projects'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('crumbs-more')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('crumb-Projects/Niman')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('crumb-Projects/Niman')));
+    await tester.pumpAndSettle();
+    expect(opened, ['Projects/Niman']);
+  });
+
+  testWidgets('a folder that is gone falls back to the nearest that is not', (
+    tester,
+  ) async {
+    await session.open('/lib', create: false);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createNote(parentPath: 'Projects', name: 'Roadmap');
+    String? resolved;
+    await tester.pumpWidget(
+      gridFor(
+        folder: 'Projects/Gone',
+        onFolderResolved: (path) => resolved = path,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(resolved, 'Projects');
+    expect(
+      find.byKey(const Key('grid-tile-Projects/Roadmap.md')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the empty space answers for the folder shown, a tile itself', (
+    tester,
+  ) async {
+    await session.open('/lib', create: false);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createNote(parentPath: 'Projects', name: 'Roadmap');
+    final background = <String>[];
+    final tileMenu = <String>[];
+    await tester.pumpWidget(
+      gridFor(
+        folder: 'Projects',
+        onSecondaryTapDown: (note, _) => tileMenu.add(note.path),
+        onBackgroundSecondaryTapUp: (folder, _) async => background.add(folder),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tapAt(
+      tester.getCenter(find.byKey(const Key('grid-tile-Projects/Roadmap.md'))),
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pumpAndSettle();
+    expect(tileMenu, ['Projects/Roadmap.md']);
+    expect(background, isEmpty, reason: 'a tile keeps its own menu');
+
+    // Below the tiles, inside the viewport: the folder shown is "here".
+    final grid = tester.getRect(find.byKey(const Key('folder-grid-scroll')));
+    await tester.tapAt(
+      Offset(grid.center.dx, grid.bottom - 20),
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pumpAndSettle();
+    expect(background, ['Projects']);
+  });
+
+  testWidgets('a modified key is left to the app accelerators', (tester) async {
+    await session.open('/lib', create: false);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createNote(parentPath: 'Projects', name: 'alpha');
+    await session.createNote(parentPath: 'Projects', name: 'bravo');
+    final opened = <String>[];
+    var ups = 0;
+    await tester.pumpWidget(
+      gridFor(
+        folder: 'Projects',
+        onOpen: (note) => opened.add(note.path),
+        onUp: () => ups++,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('grid-tile-Projects/alpha.md')));
+    await tester.pumpAndSettle();
+    opened.clear();
+
+    // Ctrl+Shift+PageDown is the journal's, Alt+Right the notes'
+    // history: the walk must not shadow either (#23).
+    await sendWithModifiers(tester, LogicalKeyboardKey.pageDown, [
+      LogicalKeyboardKey.controlLeft,
+      LogicalKeyboardKey.shiftLeft,
+    ]);
+    await sendWithModifiers(tester, LogicalKeyboardKey.arrowRight, [
+      LogicalKeyboardKey.altLeft,
+    ]);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(opened, ['Projects/alpha.md'], reason: 'the cursor did not move');
+
+    // Alt+Up is the pane's own way up, and keeps its key.
+    await sendWithModifiers(tester, LogicalKeyboardKey.arrowUp, [
+      LogicalKeyboardKey.altLeft,
+    ]);
+    expect(ups, 1);
+  });
+
+  testWidgets('a middle click opens a note in a tab of its own', (
+    tester,
+  ) async {
+    await session.open('/lib', create: false);
+    await session.createNote(parentPath: '', name: 'alpha');
+    final tabs = <String>[];
+    await tester.pumpWidget(gridFor(onOpenInNewTab: (n) => tabs.add(n.path)));
+    await tester.pumpAndSettle();
+
+    await tester.tapAt(
+      tester.getCenter(find.byKey(const Key('grid-tile-alpha.md'))),
+      buttons: kMiddleMouseButton,
+    );
+    await tester.pumpAndSettle();
+    expect(tabs, ['alpha.md']);
+  });
+
+  testWidgets('a hidden grid does not re-read its folder on a revision', (
+    tester,
+  ) async {
+    await session.open('/lib', create: false);
+    await session.createNote(parentPath: '', name: 'alpha');
+    await tester.pumpWidget(gridFor(active: false));
+    await tester.pumpAndSettle();
+    final reads = session.childrenCalls;
+
+    // A revision that adds a row: the pane on screen would read again.
+    await session.createNote(parentPath: '', name: 'bravo');
+    await tester.pumpAndSettle();
+    expect(session.childrenCalls, reads, reason: 'hidden, nothing asks again');
+
+    await tester.pumpWidget(gridFor());
+    await tester.pumpAndSettle();
+    expect(session.childrenCalls, greaterThan(reads));
   });
 }
