@@ -26,9 +26,11 @@ Create one with **New list note** in the Files FAB (or
   note and reads struck through; it is not removed.
 - **Tap the text** to edit it in place. A long text scrolls itself when
   it does not fit the row, as a note's name does in the tree.
-- **Drag the handle** on the left to reorder an item, or **press and
-  hold anywhere on the row** and drag from there — the gesture a phone
-  already knows, for a handle a thumb can miss. Dropping it onto the
+- **Drag the handle** on the left to reorder an item, or, with a finger,
+  **press and hold anywhere on the row** and drag from there — the
+  gesture a phone already knows, for a handle a thumb can miss. A mouse
+  or a pen drags by the handle only: holding a click on the row does
+  nothing, and a click edits as a tap does. Dropping it onto the
   upper or lower edge of another row puts it before or after that row;
   dropping it onto the middle makes it a child of that row. Dropped in the
   empty space below the last row it becomes the last top-level item, and

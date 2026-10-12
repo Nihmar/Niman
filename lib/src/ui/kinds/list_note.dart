@@ -420,7 +420,15 @@ class _ListNoteViewState extends State<ListNoteView>
     );
   }
 
-  void _onDragCancel() {
+  /// A press on the row at [index] ended without a drop.
+  ///
+  /// Flutter reports every press that ends before the long-press timeout
+  /// — every tap — as a cancelled long press (#778): only the drag
+  /// source's own cancel ends the drag. Any other row's is a tap, and a
+  /// second finger tapping another row mid-drag must not drop the drag,
+  /// nor any tap cost a rebuild of the list.
+  void _onDragCancel(int index) {
+    if (_drag?.index != index) return;
     _stopEdgeScroll();
     setState(() {
       _drag = null;
@@ -660,7 +668,7 @@ class _ListNoteViewState extends State<ListNoteView>
                         onDragStart: (global) => _onDragStart(index, global),
                         onDragMove: _onDragMove,
                         onDragEnd: _onDragEnd,
-                        onDragCancel: _onDragCancel,
+                        onDragCancel: () => _onDragCancel(index),
                       );
                     },
                   ),
