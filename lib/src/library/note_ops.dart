@@ -685,8 +685,13 @@ final class NoteOps implements NoteOperations {
 
   /// Renames the file at [from] to [to] because the remote renamed it;
   /// the history follows. Throws [FileSystemException] when [from] is gone
-  /// or [to] is taken (#714).
-  Future<void> syncMove(String from, String to) => _syncWrites.move(from, to);
+  /// or [to] is taken (#714). [folder] is the folder the server's rename
+  /// took with it, which this device's own Home follows (#774).
+  Future<void> syncMove(
+    String from,
+    String to, {
+    ({String from, String to})? folder,
+  }) => _syncWrites.move(from, to, folder: folder);
 
   /// Pins the sync base of [path] to the version holding content [sha];
   /// null for files without history, or when the content is gone.

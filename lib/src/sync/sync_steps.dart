@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/sync/moved_folder.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_conflict_merge.dart';
 import 'package:niman/src/sync/sync_run_context.dart';
@@ -270,7 +271,7 @@ final class SyncStepRunner {
         final from = d.fromPath!;
         await sides.localStillAsPlanned(c, from);
         await sides.localStillAsPlanned(c, d.path);
-        await ops.syncMove(from, d.path);
+        await ops.syncMove(from, d.path, folder: movedFolder(c, from, d.path));
         await store.moveItems(root, from, d.path);
         final local = await sides.stat(d.path);
         if (local == null) throw const SyncStepFailure('moved but not on disk');
