@@ -660,11 +660,13 @@ void main() {
         MaterialApp(
           // Pointer-dense, as a desktop's theme is.
           theme: ThemeData(visualDensity: VisualDensity.compact),
-          home: Builder(
-            builder: (context) => TextButton(
-              onPressed: () =>
-                  openSyncConflict(context, sync: sync, path: 'note.md'),
-              child: const Text('open'),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () =>
+                    openSyncConflict(context, sync: sync, path: 'note.md'),
+                child: const Text('open'),
+              ),
             ),
           ),
         ),
@@ -683,6 +685,44 @@ void main() {
       await tester.pumpAndSettle();
       expect(sync.calls.last, 'resolve note.md remote');
       expect(find.byKey(const Key('sync-conflict-window')), findsNothing);
+      // The confirmation did not go with the window's own messenger (#773).
+      expect(find.byKey(const Key('sync-resolved-snack')), findsOne);
+    });
+
+    testWidgets('a phone resolves on a page, confirmed once it pops (#773)', (
+      tester,
+    ) async {
+      sync.texts = conflictTextsOf(
+        base: note(['a', 'b']),
+        local: note(['a', 'mine']),
+        remote: note(['a', 'theirs']),
+      );
+      setSurfaceSize(tester, const Size(500, 1400));
+      await tester.pumpWidget(
+        MaterialApp(
+          // Touch-sized, as a phone's theme is.
+          theme: ThemeData(visualDensity: VisualDensity.standard),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () =>
+                    openSyncConflict(context, sync: sync, path: 'note.md'),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('sync-conflict-window')), findsNothing);
+      expect(find.byType(SyncConflictScreen), findsOne);
+
+      await tester.tap(find.byKey(const Key('sync-keep-remote')));
+      await tester.pumpAndSettle();
+      expect(sync.calls.last, 'resolve note.md remote');
+      expect(find.byType(SyncConflictScreen), findsNothing);
+      expect(find.byKey(const Key('sync-resolved-snack')), findsOne);
     });
 
     testWidgets('with a base, the overlaps are the only question (W7)', (

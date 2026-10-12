@@ -108,9 +108,15 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
     setState(() => _resolving = true);
     _log.info('conflict screen ${widget.path}: $what');
     final messenger = ScaffoldMessenger.of(context);
+    // The confirmation outlives the screen, so it goes on the app's own
+    // messenger: in a floating window the nearest one is the window's,
+    // and it goes with the window when the resolution closes it (#773).
+    final app = ScaffoldMessenger.of(
+      Navigator.of(context, rootNavigator: true).context,
+    );
     try {
       await action();
-      messenger.showSnackBar(
+      app.showSnackBar(
         SnackBar(
           key: const Key('sync-resolved-snack'),
           content: Text(AppStrings.syncResolved),
