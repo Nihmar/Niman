@@ -11,6 +11,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_screen.dart';
+import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -66,6 +67,30 @@ void main() {
     await settle(tester);
     expect(find.byType(JournalScreen), findsNothing);
     expect(controller.contentOf(todayPath()), startsWith('# '));
+    await controller.close();
+    await controller.dispose();
+  });
+
+  testWidgets('phone: Add task opens over the Journal screen, which stays', (
+    tester,
+  ) async {
+    await pumpAt(tester, const Size(390, 844));
+    await tester.tap(find.byKey(const Key('open-journal')));
+    await settle(tester);
+    expect(find.byType(JournalScreen), findsOne);
+
+    await tester.ensureVisible(find.byKey(const Key('journal-add-task')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('journal-add-task')));
+    await settle(tester);
+
+    // The dialog is over the calendar, which is still there: creating the
+    // task does not take the day it came from off screen.
+    expect(find.byType(JournalScreen), findsOne);
+    expect(find.byKey(const Key('todo-dialog-field')), findsOne);
+    await tester.tap(find.text(AppStrings.todoCancel));
+    await settle(tester);
+    expect(find.byType(JournalScreen), findsOne);
     await controller.close();
     await controller.dispose();
   });

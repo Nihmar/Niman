@@ -193,11 +193,7 @@ final class ShellJournalUi {
           eventTimesClock: journal().clockTimes,
           calendarFile: calendarFile(),
           onAddEvent: writeEvent,
-          onAddTask: (day) {
-            // The screen goes first: the dialog opens from the shell.
-            Navigator.of(screen).pop();
-            addTask(day);
-          },
+          onAddTask: addTask,
           onEditEvent: editEvent,
           onDeleteEvent: deleteEvent,
           onOpenDay: (day, {confirmed = false}) {
