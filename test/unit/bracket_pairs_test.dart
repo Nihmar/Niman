@@ -95,6 +95,39 @@ void main() {
       expect(BracketPairs().backspace(buffer, 1)?.text, '');
     });
 
+    test('a star after a word is only itself: 2*3, x*y (#762)', () {
+      expect(typedThrough('2*3'), '2*3');
+      expect(typedThrough('x*y'), 'x*y');
+    });
+
+    test('a star after a word closes an emphasis written around it (#762)', () {
+      // `make *this bold`, the caret after "this".
+      expect(
+        typedThrough('*', at: 10, text: 'make *this bold'),
+        'make *this* bold',
+      );
+    });
+
+    test('a star or quote already written is no closing character (#762)', () {
+      // `*` before an existing `"quote"`, `(` before an existing `*emph*`.
+      expect(typedThrough('*', text: '"quote"'), '*"quote"');
+      expect(typedThrough('(', text: '*emph*'), '(*emph*');
+      expect(typedThrough('"', text: "'word'"), '"\'word\'');
+    });
+
+    test('a closer the pair wrote still lets a pair open before it', () {
+      // `*`, then `(` inside the emphasis being written: `*(|)*`.
+      expect(typedThrough('*(a)b*'), '*(a)b*');
+      // Before a closing bracket, as ever.
+      expect(typedThrough('*', text: ')'), '**)');
+    });
+
+    test('after a decomposed accent a quote is only itself (#762)', () {
+      // `café` with the accent as a combining mark, U+0301.
+      const cafe = 'cafe\u0301';
+      expect(typedThrough("'", at: cafe.length, text: cafe), "$cafe'");
+    });
+
     test('after a backslash an emphasis is only itself', () {
       expect(typedThrough('*', at: 1, text: r'\'), r'\*');
     });

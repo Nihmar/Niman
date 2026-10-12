@@ -493,11 +493,15 @@ own rule (#718). `*` writes one star and closes it: the second star
 typed where it stands steps over, so `**bold**` and `***bold italic***`
 are typed straight through, three and three. A space after a star makes
 it a literal one — `* ` at the start of a line opens a list item, and
-`a * b` stays a multiplication. `_` opens only when no word stands
+`a * b` stays a multiplication. After a word a star is only itself:
+`2*3` stays a product, and a star typed after `this` in `make *this
+bold` closes the emphasis. `_` opens only when no word stands
 before it, so `snake_case` and a closing `word_` are what they are. The
 quotes `"`, `'`, `«»` and `“”` open when no word stands before them
 either: after a word a quote closes one already spoken, like the
-apostrophe in `don't`. `<`, `>` and the backtick do not pair at all —
+apostrophe in `don't`. A star or a quote already in the note does not
+count as a closing character, so typing `*` in front of `"quote"` or
+`(` in front of `*emph*` writes just that character. `<`, `>` and the backtick do not pair at all —
 `a < b` is a comparison, an autolink has its own `>`, and a fence is
 three backticks.
 
