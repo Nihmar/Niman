@@ -4476,32 +4476,37 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The folder the grid shows (#727): library-relative, `''` the root.
   ///
   /// In memory only, like the tree's expanded set: only the view itself
-  /// (list or grid) is remembered, and a library opened again starts the
-  /// grid from the tree's selection. Written through to the tree whenever
-  /// it moves, so switching back to the list finds the folder selected
-  /// and open.
+  /// (list or grid) is remembered. Written through to the tree whenever
+  /// it moves — entered folders are selected and expanded there — and
+  /// taken from the tree again on every switch to the grid, so the two
+  /// never drift apart while the pane is switched.
   String? _gridFolder;
 
   /// Whether the Files pane shows the grid rather than the tree.
   bool get _gridOn => _editorSettings.treeView == TreeView.grid;
 
-  /// The folder the grid shows: where it was left, or the tree's
-  /// selection — the selected folder, or the selected note's folder.
-  String get _gridStart {
-    final chosen = _gridFolder;
-    if (chosen != null) return chosen;
+  /// The folder the grid shows: where the grid last went, or — before it
+  /// has been anywhere — the tree's own folder.
+  String get _gridStart => _gridFolder ?? _treeFolder;
+
+  /// The folder the tree is on: the selected folder, or the selected
+  /// note's folder, or the root.
+  String get _treeFolder {
     final selected = _selected;
     if (selected == null) return '';
     return _selectedIsDir ? selected : parentOf(selected);
   }
 
   /// Switches the Files pane between the tree and the grid (#727), and
-  /// persists the choice for this device. The grid starts where the tree
-  /// is the first time it is shown, and keeps its own folder after that.
+  /// persists the choice for this device. The grid starts in the tree's
+  /// selection — the selected folder, or the selected note's folder —
+  /// every time it is switched to, and keeps that folder while it is the
+  /// pane on screen: a note opened from the search, a tab or the palette
+  /// does not move it.
   Future<void> _setTreeView(TreeView next) async {
     if (next == _editorSettings.treeView) return;
     setState(() {
-      if (next == TreeView.grid) _gridFolder ??= _gridStart;
+      if (next == TreeView.grid) _gridFolder = _treeFolder;
       _editorSettings = _editorSettings.copyWith(treeView: next);
     });
     try {

@@ -291,8 +291,13 @@ final class TreeSortToggle extends StatelessWidget {
       key: const Key('toggle-sort'),
       // Its name, as a tooltip and to a screen reader: without one both
       // fall back to Flutter's generic "Show menu" (#785). The to-do
-      // list's sort button already says it, in every language.
-      tooltip: AppStrings.todoSortTooltip,
+      // list's sort button already says it, in every language — and where
+      // the menu carries the view pair too (#727) the name says both,
+      // from the two words every locale already has: a third label for
+      // the one control would be a string nothing else reads.
+      tooltip: view == null
+          ? AppStrings.todoSortTooltip
+          : '${AppStrings.todoSortTooltip} · ${AppStrings.viewGroup}',
       menuPadding: dense ? pointerDenseMenuPadding : null,
       icon: AnimatedRotation(
         turns: sort.descending ? 0.5 : 0,

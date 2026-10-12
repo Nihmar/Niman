@@ -36,7 +36,8 @@ final class FolderCrumbs extends StatelessWidget {
   /// The folder shown, library-relative.
   final String folder;
 
-  /// Goes to the folder at the path given; the current one does nothing.
+  /// Goes to the folder at the path given; the current folder is a no-op
+  /// to the shell, which is already there.
   final ValueChanged<String> onOpen;
 
   /// Leaves for the parent folder; disabled at the root.
@@ -70,9 +71,11 @@ final class FolderCrumbs extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final direction = Directionality.of(context);
+          // The Up button and the gap after it lead the row: the crumbs
+          // are measured against what is left (#727).
           final shown = _visible(
             crumbs,
-            constraints.maxWidth,
+            constraints.maxWidth - _upWidth - _upGap,
             style,
             direction,
           );
@@ -87,15 +90,15 @@ final class FolderCrumbs extends StatelessWidget {
                 onPressed: folder.isEmpty ? null : onUp,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
-                  width: 28,
-                  height: 28,
+                  width: _upWidth,
+                  height: _upWidth,
                 ),
                 style: IconButton.styleFrom(
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 icon: const Icon(Icons.arrow_upward, size: 16),
               ),
-              const SizedBox(width: 2),
+              const SizedBox(width: _upGap),
               for (final (index, crumb) in shown.indexed) ...[
                 if (index > 0) _separator(theme),
                 if (crumb.path == _foldMarker)
@@ -117,8 +120,13 @@ final class FolderCrumbs extends StatelessWidget {
     );
   }
 
+  /// The Up button's width, and the gap between it and the crumbs.
+  static const double _upWidth = 28;
+  static const double _upGap = 2;
+
   /// The crumbs that fit [width], the full list or the root, the fold
-  /// marker and the folder shown.
+  /// marker and the folder shown. [width] is the room the crumbs have:
+  /// the pane less the padding and the Up button's slot.
   List<_Crumb> _visible(
     List<_Crumb> crumbs,
     double width,

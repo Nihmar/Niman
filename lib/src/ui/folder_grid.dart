@@ -211,13 +211,21 @@ final class _FolderGridState extends State<FolderGrid> {
 
   /// The rows for [revision], recomputed only when the index revision,
   /// the folder or the sort changed — the tree's own cache key (#371).
+  ///
+  /// Hidden under the tree — [FolderGrid.active] false — the revision is
+  /// not part of the key: the pane is kept for its scroll and its folder
+  /// (#727), not to keep a folder nobody is looking at fresh, and with a
+  /// field order (every save carries one) it would otherwise re-query on
+  /// every write. Becoming active again asks for the rows once, with the
+  /// revision of that moment.
   Future<_GridRows> _rowsFor(int revision, {required bool followsContents}) {
     final cached = _rows;
     if (cached != null &&
-        _rowsRevision == revision &&
-        _rowsFollowContents == followsContents &&
         _rowsSort == widget.sort &&
-        _rowsFolder == widget.folder) {
+        _rowsFolder == widget.folder &&
+        (!widget.active ||
+            (_rowsRevision == revision &&
+                _rowsFollowContents == followsContents))) {
       return cached;
     }
     _rowsRevision = revision;

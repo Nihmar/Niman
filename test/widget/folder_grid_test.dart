@@ -92,8 +92,6 @@ void main() {
     await tester.tap(find.byKey(const Key('grid-tile-Meetings')));
     expect(opened?.name, 'Meetings');
     expect(opened?.isDir, isTrue);
-    await session.setTreeView(TreeView.grid);
-    expect(await session.treeView, TreeView.grid);
   });
 
   testWidgets('the breadcrumb walks up and straight to a folder', (

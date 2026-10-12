@@ -94,9 +94,9 @@ Future<String?> showRowMenuAt(
 /// library's root. Resolves to `note`, `template` or `folder`, or null.
 ///
 /// With [here] given — the folder the grid shows (#727) — "here" means
-/// that folder: the entries create inside it, and the export is the
-/// folder's rather than the library's. Resolves to `exportfolder` for
-/// that one, `exportlibrary` at the root.
+/// that folder, and the caller creates inside it: the export entry is the
+/// folder's rather than the library's, and resolves to `exportfolder`
+/// instead of `exportlibrary`.
 Future<String?> showTreeBackgroundMenuAt(
   BuildContext context, {
   required Offset position,
