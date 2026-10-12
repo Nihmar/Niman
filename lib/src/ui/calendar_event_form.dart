@@ -175,6 +175,10 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
         child: Column(
+          // Wrapped, not filled: on a phone the form rides in a bottom
+          // sheet, whose loose height it would otherwise take in full and
+          // push its own head under the status bar.
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(

@@ -786,13 +786,17 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
+        // The sheet's head never goes under the status bar, and a
+        // keyboard that leaves no room scrolls the form instead of
+        // pushing it off the screen.
+        useSafeArea: true,
         builder: (sheet) => Padding(
           padding: EdgeInsets.only(
             left: 12,
             right: 12,
             bottom: MediaQuery.viewInsetsOf(sheet).bottom + 12,
           ),
-          child: _eventForm(sheet, day, editing),
+          child: SingleChildScrollView(child: _eventForm(sheet, day, editing)),
         ),
       ),
     );

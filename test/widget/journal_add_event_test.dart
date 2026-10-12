@@ -233,4 +233,29 @@ void main() {
     expect(added.single.$2.text, 'dentist');
     expect(find.byType(BottomSheet), findsNothing);
   });
+
+  testWidgets('a phone sheet keeps the form clear of the status bar', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 900);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(top: 40);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(buildApp(large: true));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('journal-add-event')));
+    await tester.pumpAndSettle();
+    final form = find.byKey(const Key('calendar-event-form'));
+    expect(form, findsOne);
+    // A wrapped sheet, bottom-anchored: its head is nowhere near the
+    // status bar, not stretched to the full screen.
+    expect(tester.getTopLeft(form).dy, greaterThanOrEqualTo(40));
+
+    // The keyboard takes what room is left: the form scrolls instead of
+    // climbing over the status bar under it.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 700);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(form).dy, greaterThanOrEqualTo(40));
+  });
 }
