@@ -74,3 +74,43 @@ jobs:
       # it (#363).
       - name: WebDAV sync end to end (Linux desktop)
         run: xvfb-run -a flutter test integration_test/sync_e2e_test.dart -d linux
+
+  # The JVM unit tests of the Android app module (android/app/src/test:
+  # LaunchIntentTest, ShareCopyTest) ran nowhere: the job above never starts
+  # Gradle, and the release build compiles the main sources only (#813).
+  # A job of its own, so it runs alongside the Dart one.
+  android-unit:
+    name: Android unit tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # The Java the release build uses; `cache: gradle` keeps the wrapper
+      # distribution and the dependencies between runs.
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      # android/gradlew and android/local.properties (which carries the
+      # flutter.sdk path settings.gradle.kts reads) are not in the
+      # repository: the Flutter tool writes them. --config-only writes the
+      # Gradle project and builds nothing.
+      - name: Generate the Gradle project
+        run: flutter build apk --config-only
+      # One variant is enough: the tests do not depend on the flavor. A unit
+      # test task compiles the Kotlin sources and runs JUnit on the JVM — no
+      # APK, no native build, no device.
+      - name: Kotlin unit tests
+        working-directory: android
+        run: ./gradlew :app:testBetaDebugUnitTest
