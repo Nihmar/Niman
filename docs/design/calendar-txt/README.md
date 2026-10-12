@@ -59,3 +59,22 @@ is the record [calendar-txt.md](../../records/calendar-txt.md).
   for the day, in a row of their own: beside Today in the dock, at the
   foot of the day card on a phone. The card's first row keeps one height
   whether the day has an entry or not.
+
+## Drawn here, and confirmed (2026-10-12)
+
+- **A reminder on a calendar line is `rem:HH:MM`**, its date taken from
+  the line. Whether the full `rem:YYYY-MM-DDTHH:MM` stamp is also read
+  (a reminder the day before) is settled when the reminders are built.
+- **Event times live in Settings › Journal**, under a Calendar heading,
+  for the whole library, beside a `calendar.txt` row with an Open button.
+- **The events dot is amber** (`#D8A56B`), the colour of the event times,
+  beside the entry's accent dot.
+- **Add event and Add task**: beside Today in the dock; on a phone a second
+  row of the day card, whose first row keeps one height.
+- **Add task is the todo add as it is** — a dialog on both phone and
+  desktop.
+- **New times are written compactly**: `15-16` for whole hours, `13:30`
+  otherwise.
+- **Line endings in the record merge**: the merge keeps each line's own
+  ending, as decided above; today's record merge takes the local side's,
+  and the write phase changes that.
