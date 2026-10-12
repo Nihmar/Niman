@@ -274,6 +274,37 @@ final class FinnishStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Tehtävälistat (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalenteri';
+  @override
+  String get calendarNewEvent => 'Uusi tapahtuma';
+  @override
+  String get calendarAdd => 'Lisää';
+  @override
+  String get calendarEndOptional => 'Loppu valinnainen';
+  @override
+  String get calendarRemindMe => 'Muistuta';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min aiemmin';
+  @override
+  String get calendarLinePreview => 'Rivi sellaisena kuin se kirjoitetaan';
+  @override
+  String get calendarAddEvent => 'Lisää tapahtuma';
+  @override
+  String get calendarOpenInFile => 'Avaa calendar.txt-tiedostossa';
+  @override
+  String calendarReminderAt(String time) => 'Muistutus klo $time';
+  @override
+  String get journalCalendarTitle => 'Kalenteri';
+  @override
+  String get journalEventTimesTitle => 'Tapahtumien ajat';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kuten tiedostoon kirjoitettu tai kellona omalla vyöhykkeelläsi';
+  @override
+  String get journalEventTimesWritten => 'Kuten kirjoitettu';
+  @override
+  String get journalEventTimesClock => 'Kello';
+  @override
   String get themeEditorRolesHint =>
       'Jokainen väri on nimetty viedyn tiedoston mukaan';
   @override
@@ -788,6 +819,12 @@ final class FinnishStrings extends Strings {
   String get searchNoMatches => 'Ei osumia';
   @override
   String get searchLoadMore => 'Näytä lisää';
+  @override
+  String searchTasksAndEvents(int count) => 'Tehtävät ja tapahtumat · $count';
+  @override
+  String searchNotes(int count) => 'Muistiinpanot · $count';
+  @override
+  String searchGoal(String scope) => 'Tavoite: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1561,6 +1598,10 @@ final class FinnishStrings extends Strings {
   String get journalShowCalendar => 'Näytä kalenteri';
   @override
   String get journalFabToday => 'Tämän päivän päiväkirjamerkintä';
+  @override
+  String get journalEvents => 'Tapahtumat';
+  @override
+  String journalWeek(int week) => 'Viikko $week';
   @override
   String journalDueOn(String day) => 'Erääntyy $day';
   @override
@@ -3507,6 +3548,10 @@ final class FinnishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ei avoimia tehtäviä.';
+  @override
+  String get homeTileEventsToday => 'Tämän päivän tapahtumat';
+  @override
+  String get homeEventsEmpty => 'Ei tapahtumia tänään';
 
   @override
   String get homeNotesEmpty => 'Ei vielä muistiinpanoja.';

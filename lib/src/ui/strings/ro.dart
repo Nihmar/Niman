@@ -279,6 +279,37 @@ final class RomanianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Liste de sarcini (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendar';
+  @override
+  String get calendarNewEvent => 'Eveniment nou';
+  @override
+  String get calendarAdd => 'Adaugă';
+  @override
+  String get calendarEndOptional => 'Sfârșit opțional';
+  @override
+  String get calendarRemindMe => 'Amintește-mi';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min înainte';
+  @override
+  String get calendarLinePreview => 'Linia, așa cum va fi scrisă';
+  @override
+  String get calendarAddEvent => 'Adaugă eveniment';
+  @override
+  String get calendarOpenInFile => 'Deschide în calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Memento la $time';
+  @override
+  String get journalCalendarTitle => 'Calendar';
+  @override
+  String get journalEventTimesTitle => 'Orele evenimentelor';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Așa cum sunt scrise în fișier sau ca un ceas în fusul dvs';
+  @override
+  String get journalEventTimesWritten => 'Așa cum sunt scrise';
+  @override
+  String get journalEventTimesClock => 'Ceas';
+  @override
   String get themeEditorRolesHint =>
       'Fiecare culoare poartă numele din fișierul exportat';
   @override
@@ -797,6 +828,12 @@ final class RomanianStrings extends Strings {
   String get searchNoMatches => 'Niciun rezultat';
   @override
   String get searchLoadMore => 'Afișează mai multe';
+  @override
+  String searchTasksAndEvents(int count) => 'Sarcini și evenimente · $count';
+  @override
+  String searchNotes(int count) => 'Note · $count';
+  @override
+  String searchGoal(String scope) => 'Obiectiv $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1562,6 +1599,10 @@ final class RomanianStrings extends Strings {
   String get journalShowCalendar => 'Arată calendarul';
   @override
   String get journalFabToday => 'Intrarea de azi din jurnal';
+  @override
+  String get journalEvents => 'Evenimente';
+  @override
+  String journalWeek(int week) => 'Săptămâna $week';
   @override
   String journalDueOn(String day) => 'Scadent $day';
   @override
@@ -3543,6 +3584,10 @@ final class RomanianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nicio sarcină deschisă.';
+  @override
+  String get homeTileEventsToday => 'Evenimentele de azi';
+  @override
+  String get homeEventsEmpty => 'Niciun eveniment azi';
 
   @override
   String get homeNotesEmpty => 'Încă nu există notițe.';

@@ -18,13 +18,14 @@ const int maxJournalDayStartHour = 6;
 /// The journal's settings.
 @immutable
 final class JournalSettings {
-  /// Settings with [folder], [entryName], [template] and [dayStartHour];
-  /// the defaults are a fresh library's.
+  /// Settings with [folder], [entryName], [template], [dayStartHour] and
+  /// [clockTimes]; the defaults are a fresh library's.
   const new({
     this.folder = defaultJournalFolder,
     this.entryName = defaultJournalEntryName,
     this.template,
     this.dayStartHour = 0,
+    this.clockTimes = false,
   });
 
   /// Reads the four keys out of `settings.json`. A value that is missing,
@@ -49,6 +50,7 @@ final class JournalSettings {
           start is int && start >= 0 && start <= maxJournalDayStartHour
           ? start
           : 0,
+      clockTimes: json[clockTimesKey] == true,
     );
   }
 
@@ -64,12 +66,16 @@ final class JournalSettings {
   /// See [folderKey].
   static const String dayStartKey = 'journalDayStart';
 
+  /// See [clockTimes].
+  static const String clockTimesKey = 'journalClockTimes';
+
   /// Every key, for the settings file's known-key list.
   static const Set<String> keys = {
     folderKey,
     entryNameKey,
     templateKey,
     dayStartKey,
+    clockTimesKey,
   };
 
   /// The library-relative folder the entries go in; empty is the root.
@@ -85,6 +91,11 @@ final class JournalSettings {
   /// The hour a new day begins, 0 to [maxJournalDayStartHour]: at 4,
   /// "today" until four in the morning is still the day before.
   final int dayStartHour;
+
+  /// Whether an event's time is read as a clock (`09:00–12:00`, a `Z`
+  /// time in the device's zone) rather than as the file writes it
+  /// (`9-12`) (#730). The file is never touched by it.
+  final bool clockTimes;
 
   /// The parsed [entryName].
   JournalPattern get pattern => JournalPattern.orDefault(entryName);
@@ -120,6 +131,7 @@ final class JournalSettings {
     entryNameKey: entryName,
     templateKey: ?template,
     dayStartKey: dayStartHour,
+    clockTimesKey: clockTimes,
   };
 
   /// These settings with the given fields replaced; [clearTemplate] goes
@@ -130,11 +142,13 @@ final class JournalSettings {
     String? template,
     bool clearTemplate = false,
     int? dayStartHour,
+    bool? clockTimes,
   }) => JournalSettings(
     folder: folder ?? this.folder,
     entryName: entryName ?? this.entryName,
     template: clearTemplate ? null : template ?? this.template,
     dayStartHour: dayStartHour ?? this.dayStartHour,
+    clockTimes: clockTimes ?? this.clockTimes,
   );
 
   @override
@@ -143,10 +157,12 @@ final class JournalSettings {
       other.folder == folder &&
       other.entryName == entryName &&
       other.template == template &&
-      other.dayStartHour == dayStartHour;
+      other.dayStartHour == dayStartHour &&
+      other.clockTimes == clockTimes;
 
   @override
-  int get hashCode => Object.hash(folder, entryName, template, dayStartHour);
+  int get hashCode =>
+      Object.hash(folder, entryName, template, dayStartHour, clockTimes);
 }
 
 /// [folder] trimmed, without empty, `.` or `..` segments or a leading

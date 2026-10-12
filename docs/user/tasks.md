@@ -51,6 +51,13 @@ Notification text is the task's prose without `key:value` tags (and
 without `+`/`@`/`#` markers unless the library's `reminderShowTokens`
 is true).
 
+An event in `calendar.txt` carries its reminder the same way — `17-18
+jogging @park rem:16:30.`, a clock time on the line's own day
+([journal](journal.md)) — and it feeds the same alarms: one wanted set
+over both files, so completing or deleting either takes its reminder
+with it. Tapping an event's notification opens the journal on that day;
+tapping a task's opens the task list.
+
 ## Home-screen widget
 
 Android: the **Niman Todos** widget mirrors the tab's open view —
@@ -61,7 +68,9 @@ closed or not. See [widgets](widgets.md).
 
 Adding or editing a task opens one dialog: the description, with
 completion for the `+project`, `@context` and `#tag` already in use, the
-priority, the due date and the reminder. A long description wraps and
+priority, the due date and the reminder. **Add task** from a day in the
+journal opens the same dialog with that day already set as the due date
+(see [journal](journal.md)). A long description wraps and
 the field grows downward, a few lines at most, then scrolls; it is still
 one line of `todo.txt`, so Enter saves and a pasted line break becomes a
 space. On a wide window the dialog is wider.

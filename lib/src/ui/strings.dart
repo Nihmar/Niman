@@ -104,6 +104,10 @@ final class AppStrings {
     AppLanguage.croatian: CroatianStrings(),
   };
 
+  /// The strings of every language the app ships, in [AppLanguage] order:
+  /// what the calendar file's parser reads weekday names from (#730).
+  static Iterable<Strings> get allStrings => _byLanguage.values;
+
   /// The strings of the language actually in use.
   static Strings get _s =>
       _byLanguage[AppLanguages.resolved] ?? const EnglishStrings();
@@ -229,6 +233,24 @@ final class AppStrings {
   static String get themeEditorChrome => _s.themeEditorChrome;
   static String get themeEditorMarkdown => _s.themeEditorMarkdown;
   static String get themeEditorTaskLists => _s.themeEditorTaskLists;
+  static String get themeEditorCalendar => _s.themeEditorCalendar;
+
+  // The Add event form (#730).
+  static String get calendarNewEvent => _s.calendarNewEvent;
+  static String get calendarAdd => _s.calendarAdd;
+  static String get calendarEndOptional => _s.calendarEndOptional;
+  static String get calendarRemindMe => _s.calendarRemindMe;
+  static String calendarRemindBefore(int minutes) =>
+      _s.calendarRemindBefore(minutes);
+  static String get calendarLinePreview => _s.calendarLinePreview;
+  static String get calendarAddEvent => _s.calendarAddEvent;
+  static String get calendarOpenInFile => _s.calendarOpenInFile;
+  static String calendarReminderAt(String time) => _s.calendarReminderAt(time);
+  static String get journalCalendarTitle => _s.journalCalendarTitle;
+  static String get journalEventTimesTitle => _s.journalEventTimesTitle;
+  static String get journalEventTimesSubtitle => _s.journalEventTimesSubtitle;
+  static String get journalEventTimesWritten => _s.journalEventTimesWritten;
+  static String get journalEventTimesClock => _s.journalEventTimesClock;
   static String get themeEditorRolesHint => _s.themeEditorRolesHint;
   static String get themeEditorDiscardTitle => _s.themeEditorDiscardTitle;
   static String get themeEditorDiscardBody => _s.themeEditorDiscardBody;
@@ -569,6 +591,12 @@ final class AppStrings {
   static String get searchTooShortHint => _s.searchTooShortHint;
   static String get searchNoMatches => _s.searchNoMatches;
   static String get searchLoadMore => _s.searchLoadMore;
+
+  /// The Tasks and events group of a lone `+project`/`@context` (#730).
+  static String searchTasksAndEvents(int count) =>
+      _s.searchTasksAndEvents(count);
+  static String searchNotes(int count) => _s.searchNotes(count);
+  static String searchGoal(String scope) => _s.searchGoal(scope);
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   static String get replaceTooltip => _s.replaceTooltip;
@@ -1016,6 +1044,8 @@ final class AppStrings {
   static String get journalShowCalendar => _s.journalShowCalendar;
   static String get journalFabToday => _s.journalFabToday;
   static String journalDueOn(String day) => _s.journalDueOn(day);
+  static String get journalEvents => _s.journalEvents;
+  static String journalWeek(int week) => _s.journalWeek(week);
   static String get commandsTitle => _s.commandsTitle;
   static String get commandsIntro => _s.commandsIntro;
   static String get commandsKeysNote => _s.commandsKeysNote;
@@ -1809,6 +1839,8 @@ final class AppStrings {
   static String get homeJournalEmpty => _s.homeJournalEmpty;
   static String get homeJournalWrite => _s.homeJournalWrite;
   static String get homeTasksEmpty => _s.homeTasksEmpty;
+  static String get homeTileEventsToday => _s.homeTileEventsToday;
+  static String get homeEventsEmpty => _s.homeEventsEmpty;
   static String get homeNotesEmpty => _s.homeNotesEmpty;
   static String get homePinnedEmpty => _s.homePinnedEmpty;
   static String get homeTagsEmpty => _s.homeTagsEmpty;

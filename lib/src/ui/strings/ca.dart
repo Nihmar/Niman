@@ -277,6 +277,37 @@ final class CatalanStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Llistes de tasques (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendari';
+  @override
+  String get calendarNewEvent => 'Esdeveniment nou';
+  @override
+  String get calendarAdd => 'Afegeix';
+  @override
+  String get calendarEndOptional => 'Fi opcional';
+  @override
+  String get calendarRemindMe => "Recorda-m'ho";
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min abans';
+  @override
+  String get calendarLinePreview => "La línia, tal com s'escriurà";
+  @override
+  String get calendarAddEvent => 'Afegeix esdeveniment';
+  @override
+  String get calendarOpenInFile => 'Obre a calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Recordatori a les $time';
+  @override
+  String get journalCalendarTitle => 'Calendari';
+  @override
+  String get journalEventTimesTitle => 'Hores dels esdeveniments';
+  @override
+  String get journalEventTimesSubtitle =>
+      "Tal com s'escriuen al fitxer, o com un rellotge a la vostra zona";
+  @override
+  String get journalEventTimesWritten => "Tal com s'escriuen";
+  @override
+  String get journalEventTimesClock => 'Rellotge';
+  @override
   String get themeEditorRolesHint =>
       'Cada color porta el nom que fa servir el fitxer exportat';
   @override
@@ -795,6 +826,12 @@ final class CatalanStrings extends Strings {
   String get searchNoMatches => 'Cap coincidència';
   @override
   String get searchLoadMore => 'Mostra més';
+  @override
+  String searchTasksAndEvents(int count) => 'Tasques i esdeveniments · $count';
+  @override
+  String searchNotes(int count) => 'Notes · $count';
+  @override
+  String searchGoal(String scope) => 'Objectiu $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1580,6 +1617,10 @@ final class CatalanStrings extends Strings {
   String get journalShowCalendar => 'Mostra el calendari';
   @override
   String get journalFabToday => 'Entrada d’avui del diari';
+  @override
+  String get journalEvents => 'Esdeveniments';
+  @override
+  String journalWeek(int week) => 'Setmana $week';
   @override
   String journalDueOn(String day) => 'Venç el $day';
   @override
@@ -3549,6 +3590,10 @@ final class CatalanStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'No hi ha tasques obertes.';
+  @override
+  String get homeTileEventsToday => "Esdeveniments d'avui";
+  @override
+  String get homeEventsEmpty => 'Cap esdeveniment avui';
 
   @override
   String get homeNotesEmpty => 'Encara no hi ha notes.';

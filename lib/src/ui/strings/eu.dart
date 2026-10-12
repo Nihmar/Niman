@@ -272,6 +272,37 @@ final class BasqueStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Zeregin-zerrendak (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Egutegia';
+  @override
+  String get calendarNewEvent => 'Gertaera berria';
+  @override
+  String get calendarAdd => 'Gehitu';
+  @override
+  String get calendarEndOptional => 'Amaiera aukerakoa';
+  @override
+  String get calendarRemindMe => 'Gogorarazi';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min lehenago';
+  @override
+  String get calendarLinePreview => 'Lerroa, idatziko den bezala';
+  @override
+  String get calendarAddEvent => 'Gehitu gertaera';
+  @override
+  String get calendarOpenInFile => 'Ireki calendar.txt fitxategian';
+  @override
+  String calendarReminderAt(String time) => 'Gogorarazpena $time';
+  @override
+  String get journalCalendarTitle => 'Egutegia';
+  @override
+  String get journalEventTimesTitle => 'Gertaeren orduak';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Fitxategian idatzita dauden bezala, edo erloju gisa zure ordu-eremuan';
+  @override
+  String get journalEventTimesWritten => 'Idatzita dauden bezala';
+  @override
+  String get journalEventTimesClock => 'Erlojua';
+  @override
   String get themeEditorRolesHint =>
       'Kolore bakoitzak esportatutako fitxategiak duen izena du';
   @override
@@ -786,6 +817,12 @@ final class BasqueStrings extends Strings {
   String get searchNoMatches => 'Ez dago emaitzarik';
   @override
   String get searchLoadMore => 'Ikusi gehiago';
+  @override
+  String searchTasksAndEvents(int count) => 'Zereginak eta gertaerak · $count';
+  @override
+  String searchNotes(int count) => 'Oharrak · $count';
+  @override
+  String searchGoal(String scope) => 'Helburua: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1558,6 +1595,10 @@ final class BasqueStrings extends Strings {
   String get journalShowCalendar => 'Erakutsi egutegia';
   @override
   String get journalFabToday => 'Egunkariko gaurko sarrera';
+  @override
+  String get journalEvents => 'Gertaerak';
+  @override
+  String journalWeek(int week) => '$week. astea';
   @override
   String journalDueOn(String day) => 'Epea: $day';
   @override
@@ -3524,6 +3565,10 @@ final class BasqueStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ez dago zeregin irekirik.';
+  @override
+  String get homeTileEventsToday => 'Gaurko gertaerak';
+  @override
+  String get homeEventsEmpty => 'Gaur ez dago gertaerarik';
 
   @override
   String get homeNotesEmpty => 'Ez dago oharrik oraindik.';

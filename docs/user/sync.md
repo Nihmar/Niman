@@ -153,6 +153,16 @@ goes, and a task edited differently on both keeps both edits, for you
 to tidy. Two lists started separately on two devices become one list
 with the tasks of both.
 
+The calendar (`calendar.txt`) never asks either, and it goes one further:
+the two devices' **day lines are paired by their date**, and the events
+of one day merge as a set. Two devices that each add an event to the same
+day end up with one line holding both events, in time order — an event
+added on either side is in, an event removed on either side is out, one
+added on both is in once. Every line keeps its own line ending, so a file
+written on Windows and Linux comes back with each line as it was. A goal
+line is prose, not a set of items: two devices that edit the same goal
+differently keep both lines, as two edits of one task do.
+
 Library settings (`.niman/settings.json`) never conflict: they merge
 setting by setting. A setting changed on one device only is kept; the
 same setting changed differently on both takes the device that saved

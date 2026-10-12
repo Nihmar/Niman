@@ -276,6 +276,37 @@ final class LithuanianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Užduočių sąrašai (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendorius';
+  @override
+  String get calendarNewEvent => 'Naujas įvykis';
+  @override
+  String get calendarAdd => 'Pridėti';
+  @override
+  String get calendarEndOptional => 'Pabaiga (nebūtina)';
+  @override
+  String get calendarRemindMe => 'Priminti';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min. prieš';
+  @override
+  String get calendarLinePreview => 'Eilutė, kaip bus įrašyta';
+  @override
+  String get calendarAddEvent => 'Pridėti įvykį';
+  @override
+  String get calendarOpenInFile => 'Atidaryti calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Priminimas $time';
+  @override
+  String get journalCalendarTitle => 'Kalendorius';
+  @override
+  String get journalEventTimesTitle => 'Įvykių laikai';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kaip įrašyta failo arba kaip laikrodis jūsų zonoje';
+  @override
+  String get journalEventTimesWritten => 'Kaip įrašyta';
+  @override
+  String get journalEventTimesClock => 'Laikrodis';
+  @override
   String get themeEditorRolesHint =>
       'Kiekviena spalva pavadinta taip, kaip eksportuotame faile';
   @override
@@ -792,6 +823,12 @@ final class LithuanianStrings extends Strings {
   String get searchNoMatches => 'Rezultatų nėra';
   @override
   String get searchLoadMore => 'Rodyti daugiau';
+  @override
+  String searchTasksAndEvents(int count) => 'Užduotys ir įvykiai · $count';
+  @override
+  String searchNotes(int count) => 'Užrašai · $count';
+  @override
+  String searchGoal(String scope) => 'Tikslas: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1551,6 +1588,10 @@ final class LithuanianStrings extends Strings {
   String get journalShowCalendar => 'Rodyti kalendorių';
   @override
   String get journalFabToday => 'Šiandienos dienoraščio įrašas';
+  @override
+  String get journalEvents => 'Įvykiai';
+  @override
+  String journalWeek(int week) => 'Savaitė $week';
   @override
   String journalDueOn(String day) => 'Terminas $day';
   @override
@@ -3531,6 +3572,10 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Atvirų užduočių nėra.';
+  @override
+  String get homeTileEventsToday => 'Šiandienos įvykiai';
+  @override
+  String get homeEventsEmpty => 'Šiandien įvykių nėra';
 
   @override
   String get homeNotesEmpty => 'Užrašų dar nėra.';

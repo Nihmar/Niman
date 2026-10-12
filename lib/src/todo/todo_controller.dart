@@ -18,6 +18,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/reminders.dart';
@@ -61,6 +62,7 @@ final class TodoController extends ChangeNotifier {
 
   TodoSource? _store;
   TodoSnapshot? _snapshot;
+  CalendarSnapshot? _calendar;
 
   /// Whether reminder text keeps the +project/@context/#tag markers.
   ///
@@ -158,6 +160,15 @@ final class TodoController extends ChangeNotifier {
     );
   }
 
+  /// The calendar file, whose own reminders (#730) join the tasks' in the
+  /// wanted set. The shell keeps it current — one listener on the calendar
+  /// controller. Setting it reconciles, the way a publish does.
+  CalendarSnapshot? get calendar => _calendar;
+  set calendar(CalendarSnapshot? snapshot) {
+    _calendar = snapshot;
+    unawaited(_syncReminders());
+  }
+
   /// Runs [op] on the current store and publishes the returned snapshot
   /// (no-op while no library is open; failures surface on [error]).
   /// [label] names the op in the debug log.
@@ -226,9 +237,17 @@ final class TodoController extends ChangeNotifier {
       return;
     }
     try {
-      await service.reconcile(
-        wantedReminders(snapshot, _clock(), showTokens: _reminderShowTokens),
-      );
+      // One wanted set over both files: an event's `rem:HH:MM` and a
+      // task's stamp are the same reminder to the OS, with ids salted
+      // apart and payloads that say which file a tap opens (#730).
+      await service.reconcile({
+        ...wantedReminders(snapshot, _clock(), showTokens: _reminderShowTokens),
+        ...calendarWantedReminders(
+          _calendar,
+          _clock(),
+          showTokens: _reminderShowTokens,
+        ),
+      });
     } on Object catch (error) {
       _log.warning('todo reminders sync failed: $error');
     }

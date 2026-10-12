@@ -8,6 +8,11 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/calendar/calendar_controller.dart';
+import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
+import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/session.dart';
@@ -27,6 +32,14 @@ final class ShellJournalUi {
     required this.journal,
     required this.flow,
     required this.tasks,
+    required this.calendar,
+    required this.openEvent,
+    required this.writeEvent,
+    required this.editEvent,
+    required this.deleteEvent,
+    required this.addTask,
+    required this.knownTokens,
+    required this.calendarFile,
     required this.dockRoom,
     required this.openDockJournal,
     required this.openTasks,
@@ -44,6 +57,34 @@ final class ShellJournalUi {
 
   /// The task list, whose due tasks the calendar shows under a day.
   final TodoController tasks;
+
+  /// The calendar file, whose events the journal shows a day's own beside
+  /// a day (#730).
+  final CalendarController calendar;
+
+  /// Opens an event's line in `calendar.txt`.
+  final void Function(CalendarEntryEvent event) openEvent;
+
+  /// Writes a new event onto a day (#730): what the Add event form saves
+  /// through.
+  final void Function(DateTime day, CalendarEventDraft event) writeEvent;
+
+  /// Replaces an event with the draft the phone's sheet handed over
+  /// (#730).
+  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)
+  editEvent;
+
+  /// Takes an event out of the file (#730).
+  final void Function(CalendarEntryEvent entry) deleteEvent;
+
+  /// Opens the todo add with a day as its due date (#730).
+  final void Function(DateTime day) addTask;
+
+  /// The `+`/`@`/`#` tokens the two files already use, as they stand.
+  final Set<String> Function() knownTokens;
+
+  /// The calendar file as the shell last read it, for the form's preview.
+  final CalendarFileContent? Function() calendarFile;
 
   /// Whether the window has room for the dock.
   final bool Function() dockRoom;
@@ -65,9 +106,21 @@ final class ShellJournalUi {
     revision: controller.revision,
     onOpenDay: (day, {confirmed = false}) =>
         unawaited(flow.openDay(context, day, confirmed: confirmed)),
+    eventsOn: _eventsOn,
+    goalsOn: _goalsOn,
+    eventDays: calendar.snapshot?.daysWithEvents ?? const <DateTime>{},
+    calendarChanged: calendar,
+    onOpenEvent: openEvent,
     dueOn: _tasksDueOn,
     tasksChanged: tasks,
     onOpenTasks: openTasks,
+    knownTokens: knownTokens(),
+    eventTimesClock: journal().clockTimes,
+    calendarFile: calendarFile(),
+    onAddEvent: writeEvent,
+    onAddTask: addTask,
+    onEditEvent: editEvent,
+    onDeleteEvent: deleteEvent,
     focusDay: focusDay,
     onEntryMenu: (day, position) => unawaited(_entryMenuAt(day, position)),
   );
@@ -79,6 +132,18 @@ final class ShellJournalUi {
     if (note == null) return;
     await showRowMenuAt(note, position);
   }
+
+  /// The events of [day] as the calendar file reads them (#730).
+  List<CalendarEntryEvent> _eventsOn(DateTime day) =>
+      calendar.snapshot?.eventsFor(day) ?? const <CalendarEntryEvent>[];
+
+  /// The goals that apply to [day]: the week's, the month's, the year's,
+  /// shown over its events (#730).
+  List<CalendarLine> _goalsOn(DateTime day) => [
+    for (final entry
+        in calendar.snapshot?.goalsFor(day) ?? const <CalendarEntry>[])
+      entry.line,
+  ];
 
   /// The open tasks due on [day], as the task list reads them: what the
   /// journal's calendar shows under the day (#7).
@@ -109,12 +174,32 @@ final class ShellJournalUi {
           entryDays: flow.entryDays,
           readEntry: _readEntry,
           revision: controller.revision,
+          eventsOn: _eventsOn,
+          goalsOn: _goalsOn,
+          eventDays: calendar.snapshot?.daysWithEvents ?? const <DateTime>{},
+          calendarChanged: calendar,
+          onOpenEvent: (event) {
+            // The screen goes first: the file opens in the shell.
+            Navigator.of(screen).pop();
+            openEvent(event);
+          },
           dueOn: _tasksDueOn,
           tasksChanged: tasks,
           onOpenTasks: () {
             Navigator.of(screen).pop();
             openTasks();
           },
+          knownTokens: knownTokens(),
+          eventTimesClock: journal().clockTimes,
+          calendarFile: calendarFile(),
+          onAddEvent: writeEvent,
+          onAddTask: (day) {
+            // The screen goes first: the dialog opens from the shell.
+            Navigator.of(screen).pop();
+            addTask(day);
+          },
+          onEditEvent: editEvent,
+          onDeleteEvent: deleteEvent,
           onOpenDay: (day, {confirmed = false}) {
             // The screen goes first: the entry opens in the shell.
             Navigator.of(screen).pop();

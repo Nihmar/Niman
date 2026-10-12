@@ -10,8 +10,10 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_screen.dart';
+import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/tags_screen.dart';
 
 /// Search, with Tags flipping in over it.
@@ -24,6 +26,9 @@ final class SearchSlot extends StatefulWidget {
     this.requests,
     this.commands,
     this.tree = false,
+    this.taskEvents,
+    this.onOpenTaskEvent,
+    this.eventTimesClock = false,
     super.key,
   });
 
@@ -39,6 +44,17 @@ final class SearchSlot extends StatefulWidget {
 
   /// Opens a hit: the shell's own search-result open.
   final void Function(String path) onOpenNote;
+
+  /// The tasks and events already in memory (#730), and what opens one of
+  /// their rows; both null in a host without the two files.
+  final TaskEvents? taskEvents;
+
+  /// Opens a row of the group: the shell's own open for a task, an event
+  /// or a goal.
+  final void Function(TaskEventHit hit)? onOpenTaskEvent;
+
+  /// See [SearchScreen.eventTimesClock].
+  final bool eventTimesClock;
 
   /// Whether Tags draws the wide sidebar's collapsible tree (#712);
   /// false keeps the phone's drill-down.
@@ -107,6 +123,9 @@ final class _SearchSlotState extends State<SearchSlot> {
               onOpenNote: widget.onOpenNote,
               requests: widget.requests,
               commands: widget.commands,
+              taskEvents: widget.taskEvents,
+              onOpenTaskEvent: widget.onOpenTaskEvent,
+              eventTimesClock: widget.eventTimesClock,
               onOpenTags: () => setState(() {
                 _showTags = true;
                 _tagsVisited = true;

@@ -273,6 +273,37 @@ final class HungarianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Feladatlisták (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Naptár';
+  @override
+  String get calendarNewEvent => 'Új esemény';
+  @override
+  String get calendarAdd => 'Hozzáadás';
+  @override
+  String get calendarEndOptional => 'Befejezés (nem kötelező)';
+  @override
+  String get calendarRemindMe => 'Emlékeztetés';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes perccel előbb';
+  @override
+  String get calendarLinePreview => 'A sor, ahogy íródni fog';
+  @override
+  String get calendarAddEvent => 'Esemény hozzáadása';
+  @override
+  String get calendarOpenInFile => 'Megnyitás a calendar.txt fájlban';
+  @override
+  String calendarReminderAt(String time) => 'Emlékeztető $time-kor';
+  @override
+  String get journalCalendarTitle => 'Naptár';
+  @override
+  String get journalEventTimesTitle => 'Eseményidők';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Ahogy a fájlban szerepel, vagy óraként az Ön időzónájában';
+  @override
+  String get journalEventTimesWritten => 'Ahogy szerepel';
+  @override
+  String get journalEventTimesClock => 'Óra';
+  @override
   String get themeEditorRolesHint =>
       'Minden szín neve az exportált fájlban szereplő név';
   @override
@@ -788,6 +819,12 @@ final class HungarianStrings extends Strings {
   String get searchNoMatches => 'Nincs találat';
   @override
   String get searchLoadMore => 'Több megjelenítése';
+  @override
+  String searchTasksAndEvents(int count) => 'Feladatok és események · $count';
+  @override
+  String searchNotes(int count) => 'Jegyzetek · $count';
+  @override
+  String searchGoal(String scope) => '$scope cél';
 
   // Replace (T-M3-10).
   @override
@@ -1557,6 +1594,10 @@ final class HungarianStrings extends Strings {
   String get journalShowCalendar => 'Naptár megjelenítése';
   @override
   String get journalFabToday => 'Mai naplóbejegyzés';
+  @override
+  String get journalEvents => 'Események';
+  @override
+  String journalWeek(int week) => 'Hét $week';
   @override
   String journalDueOn(String day) => 'Határidő: $day';
   @override
@@ -3498,6 +3539,10 @@ final class HungarianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nincs nyitott feladat.';
+  @override
+  String get homeTileEventsToday => 'Mai események';
+  @override
+  String get homeEventsEmpty => 'Ma nincs esemény';
 
   @override
   String get homeNotesEmpty => 'Még nincsenek jegyzetek.';

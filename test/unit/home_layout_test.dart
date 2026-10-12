@@ -172,7 +172,14 @@ void main() {
       expect(searches, hasLength(2));
       expect(searches[0].id, isNot(searches[1].id));
       expect(searches[0].id, startsWith('search-'));
-      expect(once['pinned']!.cell.y + 1, searches[0].cell.y);
+      // At the foot: at or below every tile the default Home already has.
+      for (final tile in once.tiles) {
+        expect(
+          searches[0].cell.y,
+          greaterThanOrEqualTo(tile.cell.y),
+          reason: 'below ${tile.id}',
+        );
+      }
     });
   });
 
@@ -184,6 +191,7 @@ void main() {
       'actions',
       'journalToday',
       'tasksDue',
+      'eventsToday',
     ]);
   });
 

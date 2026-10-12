@@ -85,17 +85,33 @@ void main() {
       expect(settings.dayStartHour, 0);
     });
 
+    test('the event times are read as written until they are not', () {
+      expect(const JournalSettings().clockTimes, isFalse);
+      expect(JournalSettings.fromJson(const {}).clockTimes, isFalse);
+      expect(
+        JournalSettings.fromJson(const {'journalClockTimes': 'yes'}).clockTimes,
+        isFalse,
+        reason: 'a value that is not a boolean reads as the default',
+      );
+      expect(
+        JournalSettings.fromJson(const {'journalClockTimes': true}).clockTimes,
+        isTrue,
+      );
+    });
+
     test('they travel in settings.json', () {
       final config = LibraryConfig.defaults.copyWith(
         journal: const JournalSettings(
           folder: 'Diary',
           template: 'Templates/Day.md',
           dayStartHour: 4,
+          clockTimes: true,
         ),
       );
       final json = config.toJsonMap();
       expect(json['journalFolder'], 'Diary');
       expect(json['journalTemplate'], 'Templates/Day.md');
+      expect(json['journalClockTimes'], isTrue);
       expect(LibraryConfig.fromJsonMap(json), config);
       expect(LibraryConfig.fromJsonMap(json).extra, isEmpty);
       expect(

@@ -278,6 +278,37 @@ final class BosnianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Liste zadataka (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendar';
+  @override
+  String get calendarNewEvent => 'Novi događaj';
+  @override
+  String get calendarAdd => 'Dodaj';
+  @override
+  String get calendarEndOptional => 'Kraj (opcionalno)';
+  @override
+  String get calendarRemindMe => 'Podsjeti me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min prije';
+  @override
+  String get calendarLinePreview => 'Red, kako će biti zapisan';
+  @override
+  String get calendarAddEvent => 'Dodaj događaj';
+  @override
+  String get calendarOpenInFile => 'Otvori u calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Podsjetnik u $time';
+  @override
+  String get journalCalendarTitle => 'Kalendar';
+  @override
+  String get journalEventTimesTitle => 'Vremena događaja';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kako su zapisana u datoteci ili kao sat u vašoj zoni';
+  @override
+  String get journalEventTimesWritten => 'Kako su zapisana';
+  @override
+  String get journalEventTimesClock => 'Sat';
+  @override
   String get themeEditorRolesHint =>
       'Svaka boja nosi ime koje koristi izvezena datoteka';
   @override
@@ -791,6 +822,12 @@ final class BosnianStrings extends Strings {
   String get searchNoMatches => 'Nema podudaranja';
   @override
   String get searchLoadMore => 'Prikaži više';
+  @override
+  String searchTasksAndEvents(int count) => 'Zadaci i događaji · $count';
+  @override
+  String searchNotes(int count) => 'Bilješke · $count';
+  @override
+  String searchGoal(String scope) => 'Cilj: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override
@@ -1553,6 +1590,10 @@ final class BosnianStrings extends Strings {
   String get journalShowCalendar => 'Prikaži kalendar';
   @override
   String get journalFabToday => 'Današnji unos u dnevnik';
+  @override
+  String get journalEvents => 'Događaji';
+  @override
+  String journalWeek(int week) => 'Sedmica $week';
   @override
   String journalDueOn(String day) => 'Rok $day';
   @override
@@ -3514,6 +3555,10 @@ final class BosnianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nema otvorenih zadataka.';
+  @override
+  String get homeTileEventsToday => 'Današnji događaji';
+  @override
+  String get homeEventsEmpty => 'Danas nema događaja';
 
   @override
   String get homeNotesEmpty => 'Još nema bilješki.';

@@ -274,6 +274,37 @@ final class EnglishStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Task lists (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendar';
+  @override
+  String get calendarNewEvent => 'New event';
+  @override
+  String get calendarAdd => 'Add';
+  @override
+  String get calendarEndOptional => 'End optional';
+  @override
+  String get calendarRemindMe => 'Remind me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min before';
+  @override
+  String get calendarLinePreview => 'The line, as it will be written';
+  @override
+  String get calendarAddEvent => 'Add event';
+  @override
+  String get calendarOpenInFile => 'Open in calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Reminder at $time';
+  @override
+  String get journalCalendarTitle => 'Calendar';
+  @override
+  String get journalEventTimesTitle => 'Event times';
+  @override
+  String get journalEventTimesSubtitle =>
+      'As written in the file, or as a clock in your own zone';
+  @override
+  String get journalEventTimesWritten => 'As written';
+  @override
+  String get journalEventTimesClock => 'Clock';
+  @override
   String get themeEditorRolesHint =>
       'Each color is named as the exported file names it';
   @override
@@ -783,6 +814,12 @@ final class EnglishStrings extends Strings {
   String get searchNoMatches => 'No matches';
   @override
   String get searchLoadMore => 'Show more';
+  @override
+  String searchTasksAndEvents(int count) => 'Tasks and events · $count';
+  @override
+  String searchNotes(int count) => 'Notes · $count';
+  @override
+  String searchGoal(String scope) => '$scope goal';
 
   // Replace (T-M3-10).
   @override
@@ -1541,6 +1578,10 @@ final class EnglishStrings extends Strings {
   String get journalShowCalendar => 'Show the calendar';
   @override
   String get journalFabToday => "Today's journal entry";
+  @override
+  String get journalEvents => 'Events';
+  @override
+  String journalWeek(int week) => 'Week $week';
   @override
   String journalDueOn(String day) => 'Due on $day';
   @override
@@ -3449,6 +3490,10 @@ final class EnglishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'No open tasks.';
+  @override
+  String get homeTileEventsToday => 'Events today';
+  @override
+  String get homeEventsEmpty => 'No events today';
 
   @override
   String get homeNotesEmpty => 'No notes yet.';

@@ -132,6 +132,37 @@ abstract base class Strings {
   String get themeEditorChrome;
   String get themeEditorMarkdown;
   String get themeEditorTaskLists;
+
+  /// The section heading over the calendar.txt roles (#730).
+  String get themeEditorCalendar;
+  // The Add event form (#730): a day's own event is written from it, in
+  // the dock's journal pane or a phone's sheet.
+  String get calendarNewEvent;
+  String get calendarAdd;
+  String get calendarEndOptional;
+  String get calendarRemindMe;
+
+  /// The lead time before an event, `15 min before`.
+  String calendarRemindBefore(int minutes);
+  String get calendarLinePreview;
+
+  /// The button that opens the form, `Add event`.
+  String get calendarAddEvent;
+
+  /// A phone's event sheet: the way into the file itself, and the
+  /// reminder it carries (#730).
+  String get calendarOpenInFile;
+
+  /// The reminder's own clock time, `Reminder at 15:15`.
+  String calendarReminderAt(String time);
+
+  /// Settings › Journal's calendar heading and its one setting (#730):
+  /// the times as written, or as a clock in the reader's own zone.
+  String get journalCalendarTitle;
+  String get journalEventTimesTitle;
+  String get journalEventTimesSubtitle;
+  String get journalEventTimesWritten;
+  String get journalEventTimesClock;
   String get themeEditorRolesHint;
   String get themeEditorDiscardTitle;
   String get themeEditorDiscardBody;
@@ -420,6 +451,19 @@ abstract base class Strings {
   String get searchTooShortHint;
   String get searchNoMatches;
   String get searchLoadMore;
+
+  // The Tasks and events group of a lone `+project`/`@context` (#730).
+
+  /// The heading over the group, with how many rows it holds:
+  /// `Tasks and events · 6`.
+  String searchTasksAndEvents(int count);
+
+  /// The heading over the notes below it (`Notes · 3`).
+  String searchNotes(int count);
+
+  /// What a goal's row covers, [scope] being `Week 42`, `October`,
+  /// `2026` (`Week 42 goal`).
+  String searchGoal(String scope);
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   String get replaceTooltip;
@@ -794,6 +838,12 @@ abstract base class Strings {
   String get journalShowCalendar;
   String get journalFabToday;
   String journalDueOn(String day);
+
+  /// The journal's own heading over a day's events (#730).
+  String get journalEvents;
+
+  /// The week a goal covers: `Week 42` (#730).
+  String journalWeek(int week);
   String get commandsTitle;
   String get commandsIntro;
   String get commandsKeysNote;
@@ -1899,6 +1949,12 @@ abstract base class Strings {
   String get homeJournalEmpty;
   String get homeJournalWrite;
   String get homeTasksEmpty;
+
+  /// The Home's events tile (#730).
+  String get homeTileEventsToday;
+
+  /// What the events tile says on a day with nothing on it.
+  String get homeEventsEmpty;
   String get homeNotesEmpty;
   String get homePinnedEmpty;
   String get homeTagsEmpty;

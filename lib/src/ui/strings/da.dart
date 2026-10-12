@@ -275,6 +275,37 @@ final class DanishStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Opgavelister (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalender';
+  @override
+  String get calendarNewEvent => 'Ny begivenhed';
+  @override
+  String get calendarAdd => 'Tilføj';
+  @override
+  String get calendarEndOptional => 'Slut valgfrit';
+  @override
+  String get calendarRemindMe => 'Påmind mig';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min før';
+  @override
+  String get calendarLinePreview => 'Linjen, som den skrives';
+  @override
+  String get calendarAddEvent => 'Tilføj begivenhed';
+  @override
+  String get calendarOpenInFile => 'Åbn i calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Påmindelse kl. $time';
+  @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Begivenhedstider';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Som skrevet i filen, eller som et ur i din tidszone';
+  @override
+  String get journalEventTimesWritten => 'Som skrevet';
+  @override
+  String get journalEventTimesClock => 'Ur';
+  @override
   String get themeEditorRolesHint =>
       'Hver farve hedder det, den eksporterede fil kalder den';
   @override
@@ -784,6 +815,12 @@ final class DanishStrings extends Strings {
   String get searchNoMatches => 'Ingen resultater';
   @override
   String get searchLoadMore => 'Vis mere';
+  @override
+  String searchTasksAndEvents(int count) => 'Opgaver og begivenheder · $count';
+  @override
+  String searchNotes(int count) => 'Noter · $count';
+  @override
+  String searchGoal(String scope) => 'Mål: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1546,6 +1583,10 @@ final class DanishStrings extends Strings {
   String get journalShowCalendar => 'Vis kalenderen';
   @override
   String get journalFabToday => 'Dagens dagbogsindlæg';
+  @override
+  String get journalEvents => 'Begivenheder';
+  @override
+  String journalWeek(int week) => 'Uge $week';
   @override
   String journalDueOn(String day) => 'Forfalder $day';
   @override
@@ -3473,6 +3514,10 @@ final class DanishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ingen åbne opgaver.';
+  @override
+  String get homeTileEventsToday => 'Dagens begivenheder';
+  @override
+  String get homeEventsEmpty => 'Ingen begivenheder i dag';
 
   @override
   String get homeNotesEmpty => 'Ingen noter endnu.';

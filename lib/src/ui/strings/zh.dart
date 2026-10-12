@@ -255,6 +255,36 @@ final class ChineseStrings extends Strings {
   @override
   String get themeEditorTaskLists => '任务列表 (todo.txt)';
   @override
+  String get themeEditorCalendar => '日历';
+  @override
+  String get calendarNewEvent => '新事件';
+  @override
+  String get calendarAdd => '添加';
+  @override
+  String get calendarEndOptional => '结束（可选）';
+  @override
+  String get calendarRemindMe => '提醒我';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes 分钟前';
+  @override
+  String get calendarLinePreview => '将写入的行';
+  @override
+  String get calendarAddEvent => '添加事件';
+  @override
+  String get calendarOpenInFile => '在 calendar.txt 中打开';
+  @override
+  String calendarReminderAt(String time) => '$time 提醒';
+  @override
+  String get journalCalendarTitle => '日历';
+  @override
+  String get journalEventTimesTitle => '事件时间';
+  @override
+  String get journalEventTimesSubtitle => '按文件中所写，或按你所在时区的时钟';
+  @override
+  String get journalEventTimesWritten => '按所写';
+  @override
+  String get journalEventTimesClock => '时钟';
+  @override
   String get themeEditorRolesHint => '每个颜色的名称与导出文件一致';
   @override
   String get themeEditorDiscardTitle => '放弃更改';
@@ -745,6 +775,12 @@ final class ChineseStrings extends Strings {
   String get searchNoMatches => '没有匹配结果';
   @override
   String get searchLoadMore => '显示更多';
+  @override
+  String searchTasksAndEvents(int count) => '任务和事件 · $count';
+  @override
+  String searchNotes(int count) => '笔记 · $count';
+  @override
+  String searchGoal(String scope) => '$scope 的目标';
 
   // Replace (T-M3-10).
   @override
@@ -1427,6 +1463,10 @@ final class ChineseStrings extends Strings {
   String get journalShowCalendar => '显示日历';
   @override
   String get journalFabToday => '今天的日记条目';
+  @override
+  String get journalEvents => '事件';
+  @override
+  String journalWeek(int week) => '第 $week 周';
   @override
   String journalDueOn(String day) => '$day 到期';
   @override
@@ -3109,6 +3149,10 @@ final class ChineseStrings extends Strings {
 
   @override
   String get homeTasksEmpty => '没有未完成的任务。';
+  @override
+  String get homeTileEventsToday => '今日事件';
+  @override
+  String get homeEventsEmpty => '今天没有事件';
 
   @override
   String get homeNotesEmpty => '还没有笔记。';

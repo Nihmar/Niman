@@ -30,6 +30,7 @@ library;
 import 'dart:math';
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/weeks.dart';
 import 'package:niman/src/links/slug.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -712,17 +713,6 @@ String _render(DateTime when, String token) => switch (token) {
   'Q' => (((when.month - 1) ~/ 3) + 1).toString(),
   _ => token,
 };
-
-/// The ISO-8601 week number of [when]: 1 .. 53.
-///
-/// A week belongs to the year owning its Thursday, which is why the
-/// calculation goes through that day rather than through 1 January.
-int isoWeekOf(DateTime when) {
-  final day = DateTime.utc(when.year, when.month, when.day);
-  final thursday = day.add(Duration(days: 4 - day.weekday));
-  final firstOfYear = DateTime.utc(thursday.year);
-  return thursday.difference(firstOfYear).inDays ~/ 7 + 1;
-}
 
 /// A version 4 UUID from the platform's secure random.
 String newUuidV4() {

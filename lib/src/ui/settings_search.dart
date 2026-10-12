@@ -432,6 +432,18 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushJournal(SettingsKeys.journalDayStart),
     ),
     SettingsSearchEntry(
+      title: AppStrings.journalEventTimesTitle,
+      area: journal,
+      rowKey: SettingsKeys.journalEventTimes,
+      value: () async => ops == null
+          ? null
+          : (await ops.journal).clockTimes
+          ? AppStrings.journalEventTimesClock
+          : AppStrings.journalEventTimesWritten,
+      areaId: SettingsAreaId.journal,
+      open: () => pushJournal(SettingsKeys.journalEventTimes),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.trashTitle,
       area: trashHistory,
       rowKey: SettingsKeys.trash,

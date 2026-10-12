@@ -276,6 +276,37 @@ final class UkrainianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Списки завдань (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Календар';
+  @override
+  String get calendarNewEvent => 'Нова подія';
+  @override
+  String get calendarAdd => 'Додати';
+  @override
+  String get calendarEndOptional => 'Кінець (необов’язково)';
+  @override
+  String get calendarRemindMe => 'Нагадати';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes хв. раніше';
+  @override
+  String get calendarLinePreview => 'Рядок, як він буде записаний';
+  @override
+  String get calendarAddEvent => 'Додати подію';
+  @override
+  String get calendarOpenInFile => 'Відкрити у calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Нагадування о $time';
+  @override
+  String get journalCalendarTitle => 'Календар';
+  @override
+  String get journalEventTimesTitle => 'Час подій';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Як записано у файлі або як годинник у вашому поясі';
+  @override
+  String get journalEventTimesWritten => 'Як записано';
+  @override
+  String get journalEventTimesClock => 'Годинник';
+  @override
   String get themeEditorRolesHint =>
       'Кожен колір названо так, як у файлі експорту';
   @override
@@ -791,6 +822,12 @@ final class UkrainianStrings extends Strings {
   String get searchNoMatches => 'Немає результатів';
   @override
   String get searchLoadMore => 'Показати ще';
+  @override
+  String searchTasksAndEvents(int count) => 'Завдання та події · $count';
+  @override
+  String searchNotes(int count) => 'Нотатки · $count';
+  @override
+  String searchGoal(String scope) => 'Мета: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1554,6 +1591,10 @@ final class UkrainianStrings extends Strings {
   String get journalShowCalendar => 'Показати календар';
   @override
   String get journalFabToday => 'Сьогоднішній запис щоденника';
+  @override
+  String get journalEvents => 'Події';
+  @override
+  String journalWeek(int week) => 'Тиждень $week';
   @override
   String journalDueOn(String day) => 'Термін $day';
   @override
@@ -3532,6 +3573,10 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Немає відкритих завдань.';
+  @override
+  String get homeTileEventsToday => 'Події сьогодні';
+  @override
+  String get homeEventsEmpty => 'Сьогодні подій немає';
 
   @override
   String get homeNotesEmpty => 'Нотаток ще немає.';

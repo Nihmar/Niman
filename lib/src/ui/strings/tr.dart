@@ -268,6 +268,37 @@ final class TurkishStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Görev listeleri (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Takvim';
+  @override
+  String get calendarNewEvent => 'Yeni etkinlik';
+  @override
+  String get calendarAdd => 'Ekle';
+  @override
+  String get calendarEndOptional => 'Bitiş (isteğe bağlı)';
+  @override
+  String get calendarRemindMe => 'Hatırlat';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes dk önce';
+  @override
+  String get calendarLinePreview => 'Yazılacağı haliyle satır';
+  @override
+  String get calendarAddEvent => 'Etkinlik ekle';
+  @override
+  String get calendarOpenInFile => 'calendar.txt içinde aç';
+  @override
+  String calendarReminderAt(String time) => '$time hatırlatması';
+  @override
+  String get journalCalendarTitle => 'Takvim';
+  @override
+  String get journalEventTimesTitle => 'Etkinlik saatleri';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Dosyada yazıldığı gibi veya kendi saat diliminizde bir saat olarak';
+  @override
+  String get journalEventTimesWritten => 'Yazıldığı gibi';
+  @override
+  String get journalEventTimesClock => 'Saat';
+  @override
   String get themeEditorRolesHint =>
       'Her renk, dışa aktarılan dosyadaki adı taşır';
   @override
@@ -781,6 +812,12 @@ final class TurkishStrings extends Strings {
   String get searchNoMatches => 'Eşleşme yok';
   @override
   String get searchLoadMore => 'Daha fazla göster';
+  @override
+  String searchTasksAndEvents(int count) => 'Görevler ve etkinlikler · $count';
+  @override
+  String searchNotes(int count) => 'Notlar · $count';
+  @override
+  String searchGoal(String scope) => '$scope hedefi';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override
@@ -1537,6 +1574,10 @@ final class TurkishStrings extends Strings {
   String get journalShowCalendar => 'Takvimi göster';
   @override
   String get journalFabToday => 'Bugünün günlük girdisi';
+  @override
+  String get journalEvents => 'Etkinlikler';
+  @override
+  String journalWeek(int week) => 'Hafta $week';
   @override
   String journalDueOn(String day) => 'Son tarih $day';
   @override
@@ -3451,6 +3492,10 @@ final class TurkishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Açık görev yok.';
+  @override
+  String get homeTileEventsToday => 'Bugünün etkinlikleri';
+  @override
+  String get homeEventsEmpty => 'Bugün etkinlik yok';
 
   @override
   String get homeNotesEmpty => 'Henüz not yok.';

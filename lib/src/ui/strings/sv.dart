@@ -276,6 +276,37 @@ final class SwedishStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Uppgiftslistor (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalender';
+  @override
+  String get calendarNewEvent => 'Ny händelse';
+  @override
+  String get calendarAdd => 'Lägg till';
+  @override
+  String get calendarEndOptional => 'Slut valfritt';
+  @override
+  String get calendarRemindMe => 'Påminn mig';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min innan';
+  @override
+  String get calendarLinePreview => 'Raden som den skrivs';
+  @override
+  String get calendarAddEvent => 'Lägg till händelse';
+  @override
+  String get calendarOpenInFile => 'Öppna i calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Påminnelse kl. $time';
+  @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Händelsetider';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Som skrivet i filen, eller som en klocka i din tidszon';
+  @override
+  String get journalEventTimesWritten => 'Som skrivet';
+  @override
+  String get journalEventTimesClock => 'Klocka';
+  @override
   String get themeEditorRolesHint =>
       'Varje färg heter det den exporterade filen kallar den';
   @override
@@ -790,6 +821,12 @@ final class SwedishStrings extends Strings {
   String get searchNoMatches => 'Inga träffar';
   @override
   String get searchLoadMore => 'Visa mer';
+  @override
+  String searchTasksAndEvents(int count) => 'Uppgifter och händelser · $count';
+  @override
+  String searchNotes(int count) => 'Anteckningar · $count';
+  @override
+  String searchGoal(String scope) => 'Mål: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1554,6 +1591,10 @@ final class SwedishStrings extends Strings {
   String get journalShowCalendar => 'Visa kalendern';
   @override
   String get journalFabToday => 'Dagens dagboksanteckning';
+  @override
+  String get journalEvents => 'Händelser';
+  @override
+  String journalWeek(int week) => 'Vecka $week';
   @override
   String journalDueOn(String day) => 'Förfaller $day';
   @override
@@ -3500,6 +3541,10 @@ final class SwedishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Inga öppna uppgifter.';
+  @override
+  String get homeTileEventsToday => 'Dagens händelser';
+  @override
+  String get homeEventsEmpty => 'Inga händelser i dag';
 
   @override
   String get homeNotesEmpty => 'Inga anteckningar än.';

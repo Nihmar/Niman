@@ -278,6 +278,37 @@ final class GalicianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Listas de tarefas (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendario';
+  @override
+  String get calendarNewEvent => 'Novo evento';
+  @override
+  String get calendarAdd => 'Engadir';
+  @override
+  String get calendarEndOptional => 'Fin opcional';
+  @override
+  String get calendarRemindMe => 'Lembrarme';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min antes';
+  @override
+  String get calendarLinePreview => 'A liña, como se escribirá';
+  @override
+  String get calendarAddEvent => 'Engadir evento';
+  @override
+  String get calendarOpenInFile => 'Abrir en calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Lembrete ás $time';
+  @override
+  String get journalCalendarTitle => 'Calendario';
+  @override
+  String get journalEventTimesTitle => 'Horas dos eventos';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Como se escriben no ficheiro, ou como un reloxo na túa zona';
+  @override
+  String get journalEventTimesWritten => 'Como se escriben';
+  @override
+  String get journalEventTimesClock => 'Reloxo';
+  @override
   String get themeEditorRolesHint =>
       'Cada cor leva o nome que usa o ficheiro exportado';
   @override
@@ -793,6 +824,12 @@ final class GalicianStrings extends Strings {
   String get searchNoMatches => 'Sen coincidencias';
   @override
   String get searchLoadMore => 'Mostrar máis';
+  @override
+  String searchTasksAndEvents(int count) => 'Tarefas e eventos · $count';
+  @override
+  String searchNotes(int count) => 'Notas · $count';
+  @override
+  String searchGoal(String scope) => 'Obxectivo $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1564,6 +1601,10 @@ final class GalicianStrings extends Strings {
   String get journalShowCalendar => 'Amosar o calendario';
   @override
   String get journalFabToday => 'Entrada de hoxe do diario';
+  @override
+  String get journalEvents => 'Eventos';
+  @override
+  String journalWeek(int week) => 'Semana $week';
   @override
   String journalDueOn(String day) => 'Vence o $day';
   @override
@@ -3513,6 +3554,10 @@ final class GalicianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Non hai tarefas abertas.';
+  @override
+  String get homeTileEventsToday => 'Eventos de hoxe';
+  @override
+  String get homeEventsEmpty => 'Sen eventos hoxe';
 
   @override
   String get homeNotesEmpty => 'Aínda non hai notas.';

@@ -272,6 +272,37 @@ final class EstonianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Ülesannete loendid (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalender';
+  @override
+  String get calendarNewEvent => 'Uus sündmus';
+  @override
+  String get calendarAdd => 'Lisa';
+  @override
+  String get calendarEndOptional => 'Lõpp valikuline';
+  @override
+  String get calendarRemindMe => 'Tuleta meelde';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min enne';
+  @override
+  String get calendarLinePreview => 'Rida, nagu see kirjutatakse';
+  @override
+  String get calendarAddEvent => 'Lisa sündmus';
+  @override
+  String get calendarOpenInFile => 'Ava failis calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Meeldetuletus kell $time';
+  @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Sündmuste ajad';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Nagu faili kirjutatud või kellana sinu ajavööndis';
+  @override
+  String get journalEventTimesWritten => 'Nagu kirjutatud';
+  @override
+  String get journalEventTimesClock => 'Kell';
+  @override
   String get themeEditorRolesHint =>
       'Iga värv on nimetatud nii, nagu seda nimetab eksporditud fail';
   @override
@@ -781,6 +812,12 @@ final class EstonianStrings extends Strings {
   String get searchNoMatches => 'Tulemusi pole';
   @override
   String get searchLoadMore => 'Kuva rohkem';
+  @override
+  String searchTasksAndEvents(int count) => 'Ülesanded ja sündmused · $count';
+  @override
+  String searchNotes(int count) => 'Märkmed · $count';
+  @override
+  String searchGoal(String scope) => 'Eesmärk: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1530,6 +1567,10 @@ final class EstonianStrings extends Strings {
   String get journalShowCalendar => 'Näita kalendrit';
   @override
   String get journalFabToday => 'Tänane päeviku sissekanne';
+  @override
+  String get journalEvents => 'Sündmused';
+  @override
+  String journalWeek(int week) => 'Nädal $week';
   @override
   String journalDueOn(String day) => 'Tähtaeg $day';
   @override
@@ -3437,6 +3478,10 @@ final class EstonianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Avatud ülesandeid pole.';
+  @override
+  String get homeTileEventsToday => 'Tänased sündmused';
+  @override
+  String get homeEventsEmpty => 'Täna sündmusi ei ole';
 
   @override
   String get homeNotesEmpty => 'Märkmeid veel pole.';

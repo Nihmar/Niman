@@ -7,6 +7,14 @@ library;
 
 import 'package:flutter/material.dart';
 
+/// A 4 px dot under a day.
+Widget _dot({required Key key, required Color color}) => Container(
+  key: key,
+  width: 4,
+  height: 4,
+  decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+);
+
 /// One month's grid.
 final class JournalCalendar extends StatelessWidget {
   /// [month] (any day in it), with [entries] dotted, [today] ringed and
@@ -20,6 +28,8 @@ final class JournalCalendar extends StatelessWidget {
     required this.onMonth,
     this.selected,
     this.cell = 34,
+    this.daysWithEvents = const <DateTime>{},
+    this.eventColour,
     super.key,
   });
 
@@ -40,6 +50,14 @@ final class JournalCalendar extends StatelessWidget {
 
   /// Called with the first day of the month to show instead.
   final ValueChanged<DateTime> onMonth;
+
+  /// The days with at least one event (#730): beside the entry's dot, an
+  /// amber one says "events here".
+  final Set<DateTime> daysWithEvents;
+
+  /// The colour of the events dot; the caller passes the theme's
+  /// `calendarTime`, so the dot and the times read as one.
+  final Color? eventColour;
 
   /// A day's side.
   final double cell;
@@ -69,6 +87,7 @@ final class JournalCalendar extends StatelessWidget {
       final isSelected = date == selected;
       final isToday = date == today;
       final hasEntry = entries.contains(date);
+      final hasEvents = daysWithEvents.contains(date);
       final future = date.isAfter(today);
       final ink = isSelected
           ? scheme.onPrimary
@@ -107,19 +126,28 @@ final class JournalCalendar extends StatelessWidget {
                         fontWeight: isToday ? FontWeight.w700 : null,
                       ),
                     ),
-                    if (hasEntry)
+                    if (hasEntry || hasEvents)
                       Positioned(
                         bottom: cell * 0.12,
-                        child: Container(
-                          key: Key('journal-dot-${date.day}'),
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isSelected
-                                ? scheme.onPrimary
-                                : scheme.tertiary,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (hasEntry)
+                              _dot(
+                                key: Key('journal-dot-${date.day}'),
+                                color: isSelected
+                                    ? scheme.onPrimary
+                                    : scheme.tertiary,
+                              ),
+                            if (hasEntry && hasEvents) const SizedBox(width: 2),
+                            if (hasEvents)
+                              _dot(
+                                key: Key('journal-events-dot-${date.day}'),
+                                color: isSelected
+                                    ? scheme.onPrimary
+                                    : (eventColour ?? scheme.tertiary),
+                              ),
+                          ],
                         ),
                       ),
                   ],

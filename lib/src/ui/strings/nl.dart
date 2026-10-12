@@ -275,6 +275,37 @@ final class DutchStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Takenlijsten (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalender';
+  @override
+  String get calendarNewEvent => 'Nieuwe gebeurtenis';
+  @override
+  String get calendarAdd => 'Toevoegen';
+  @override
+  String get calendarEndOptional => 'Einde optioneel';
+  @override
+  String get calendarRemindMe => 'Herinner me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min vooraf';
+  @override
+  String get calendarLinePreview => 'De regel, zoals die wordt geschreven';
+  @override
+  String get calendarAddEvent => 'Gebeurtenis toevoegen';
+  @override
+  String get calendarOpenInFile => 'Openen in calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Herinnering om $time';
+  @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Gebeurtenistijden';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Zoals geschreven in het bestand, of als een klok in uw tijdzone';
+  @override
+  String get journalEventTimesWritten => 'Zoals geschreven';
+  @override
+  String get journalEventTimesClock => 'Klok';
+  @override
   String get themeEditorRolesHint =>
       'Elke kleur heet zoals het geëxporteerde bestand hem noemt';
   @override
@@ -791,6 +822,12 @@ final class DutchStrings extends Strings {
   String get searchNoMatches => 'Geen overeenkomsten';
   @override
   String get searchLoadMore => 'Meer tonen';
+  @override
+  String searchTasksAndEvents(int count) => 'Taken en gebeurtenissen · $count';
+  @override
+  String searchNotes(int count) => 'Notities · $count';
+  @override
+  String searchGoal(String scope) => 'Doel: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1565,6 +1602,10 @@ final class DutchStrings extends Strings {
   String get journalShowCalendar => 'Kalender tonen';
   @override
   String get journalFabToday => 'Dagboeknotitie van vandaag';
+  @override
+  String get journalEvents => 'Gebeurtenissen';
+  @override
+  String journalWeek(int week) => 'Week $week';
   @override
   String journalDueOn(String day) => 'Vervalt op $day';
   @override
@@ -3527,6 +3568,10 @@ final class DutchStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Geen openstaande taken.';
+  @override
+  String get homeTileEventsToday => 'Gebeurtenissen vandaag';
+  @override
+  String get homeEventsEmpty => 'Geen gebeurtenissen vandaag';
 
   @override
   String get homeNotesEmpty => 'Nog geen notities.';

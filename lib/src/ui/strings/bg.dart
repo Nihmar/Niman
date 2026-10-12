@@ -279,6 +279,37 @@ final class BulgarianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Списъци със задачи (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Календар';
+  @override
+  String get calendarNewEvent => 'Ново събитие';
+  @override
+  String get calendarAdd => 'Добави';
+  @override
+  String get calendarEndOptional => 'Край (по избор)';
+  @override
+  String get calendarRemindMe => 'Напомни ми';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes мин. преди';
+  @override
+  String get calendarLinePreview => 'Редът, както ще бъде записан';
+  @override
+  String get calendarAddEvent => 'Добави събитие';
+  @override
+  String get calendarOpenInFile => 'Отвори в calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Напомняне в $time';
+  @override
+  String get journalCalendarTitle => 'Календар';
+  @override
+  String get journalEventTimesTitle => 'Часове на събитията';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Както са записани във файла, или като часовник във вашата зона';
+  @override
+  String get journalEventTimesWritten => 'Както са записани';
+  @override
+  String get journalEventTimesClock => 'Часовник';
+  @override
   String get themeEditorRolesHint =>
       'Всеки цвят е с името, което използва експортираният файл';
   @override
@@ -791,6 +822,12 @@ final class BulgarianStrings extends Strings {
   String get searchNoMatches => 'Няма резултати';
   @override
   String get searchLoadMore => 'Покажи още';
+  @override
+  String searchTasksAndEvents(int count) => 'Задачи и събития · $count';
+  @override
+  String searchNotes(int count) => 'Бележки · $count';
+  @override
+  String searchGoal(String scope) => 'Цел: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1563,6 +1600,10 @@ final class BulgarianStrings extends Strings {
   String get journalShowCalendar => 'Покажи календара';
   @override
   String get journalFabToday => 'Днешен запис в дневника';
+  @override
+  String get journalEvents => 'Събития';
+  @override
+  String journalWeek(int week) => 'Седмица $week';
   @override
   String journalDueOn(String day) => 'Срок $day';
   @override
@@ -3502,6 +3543,10 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Няма отворени задачи.';
+  @override
+  String get homeTileEventsToday => 'Днешни събития';
+  @override
+  String get homeEventsEmpty => 'Днес няма събития';
 
   @override
   String get homeNotesEmpty => 'Все още няма бележки.';

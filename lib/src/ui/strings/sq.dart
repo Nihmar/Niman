@@ -273,6 +273,37 @@ final class AlbanianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Lista detyrash (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendari';
+  @override
+  String get calendarNewEvent => 'Ngjarje e re';
+  @override
+  String get calendarAdd => 'Shto';
+  @override
+  String get calendarEndOptional => 'Fundi (opsionale)';
+  @override
+  String get calendarRemindMe => 'Më kujto';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min para';
+  @override
+  String get calendarLinePreview => 'Rreshti, si do të shkruhet';
+  @override
+  String get calendarAddEvent => 'Shto ngjarje';
+  @override
+  String get calendarOpenInFile => 'Hap në calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Kujtesë në $time';
+  @override
+  String get journalCalendarTitle => 'Kalendari';
+  @override
+  String get journalEventTimesTitle => 'Oret e ngjarjeve';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Siç janë shkruar në skedar ose si orë në zonën tuaj';
+  @override
+  String get journalEventTimesWritten => 'Siç janë shkruar';
+  @override
+  String get journalEventTimesClock => 'Ora';
+  @override
   String get themeEditorRolesHint =>
       'Çdo ngjyrë mban emrin që përdor skedari i eksportuar';
   @override
@@ -786,6 +817,12 @@ final class AlbanianStrings extends Strings {
   String get searchNoMatches => 'Nuk ka përputhje';
   @override
   String get searchLoadMore => 'Shfaq më shumë';
+  @override
+  String searchTasksAndEvents(int count) => 'Detyrat dhe ngjarjet · $count';
+  @override
+  String searchNotes(int count) => 'Shënime · $count';
+  @override
+  String searchGoal(String scope) => 'Objektivi: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override
@@ -1564,6 +1601,10 @@ final class AlbanianStrings extends Strings {
   String get journalShowCalendar => 'Shfaq kalendarin';
   @override
   String get journalFabToday => 'Hyrja e sotme e ditarit';
+  @override
+  String get journalEvents => 'Ngjarjet';
+  @override
+  String journalWeek(int week) => 'Java $week';
   @override
   String journalDueOn(String day) => 'Afati $day';
   @override
@@ -3512,6 +3553,10 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Asnjë detyrë e hapur.';
+  @override
+  String get homeTileEventsToday => 'Ngjarjet e sotme';
+  @override
+  String get homeEventsEmpty => 'Asnjë ngjarje sot';
 
   @override
   String get homeNotesEmpty => 'Ende nuk ka shënime.';

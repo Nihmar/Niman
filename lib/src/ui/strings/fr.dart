@@ -279,6 +279,37 @@ final class FrenchStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Listes de tâches (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendrier';
+  @override
+  String get calendarNewEvent => 'Nouvel événement';
+  @override
+  String get calendarAdd => 'Ajouter';
+  @override
+  String get calendarEndOptional => 'Fin facultative';
+  @override
+  String get calendarRemindMe => 'Me rappeler';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min avant';
+  @override
+  String get calendarLinePreview => "La ligne, telle qu'elle sera écrite";
+  @override
+  String get calendarAddEvent => 'Ajouter un événement';
+  @override
+  String get calendarOpenInFile => 'Ouvrir dans calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Rappel à $time';
+  @override
+  String get journalCalendarTitle => 'Calendrier';
+  @override
+  String get journalEventTimesTitle => 'Heures des événements';
+  @override
+  String get journalEventTimesSubtitle =>
+      "Telles qu'écrites, ou comme une horloge dans votre fuseau";
+  @override
+  String get journalEventTimesWritten => "Telles qu'écrites";
+  @override
+  String get journalEventTimesClock => 'Horloge';
+  @override
   String get themeEditorRolesHint =>
       'Chaque couleur porte le nom que lui donne le fichier exporté';
   @override
@@ -796,6 +827,12 @@ final class FrenchStrings extends Strings {
   String get searchNoMatches => 'Aucun résultat';
   @override
   String get searchLoadMore => 'Afficher plus';
+  @override
+  String searchTasksAndEvents(int count) => 'Tâches et événements · $count';
+  @override
+  String searchNotes(int count) => 'Notes · $count';
+  @override
+  String searchGoal(String scope) => 'Objectif $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1588,6 +1625,10 @@ final class FrenchStrings extends Strings {
   String get journalShowCalendar => 'Afficher le calendrier';
   @override
   String get journalFabToday => 'Entrée du journal d’aujourd’hui';
+  @override
+  String get journalEvents => 'Événements';
+  @override
+  String journalWeek(int week) => 'Semaine $week';
   @override
   String journalDueOn(String day) => 'À faire pour le $day';
   @override
@@ -3588,6 +3629,10 @@ final class FrenchStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Aucune tâche ouverte.';
+  @override
+  String get homeTileEventsToday => 'Événements du jour';
+  @override
+  String get homeEventsEmpty => "Aucun événement aujourd'hui";
 
   @override
   String get homeNotesEmpty => "Aucune note pour l'instant.";

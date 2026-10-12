@@ -274,6 +274,37 @@ final class IcelandicStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Verkefnalistar (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Dagatal';
+  @override
+  String get calendarNewEvent => 'Nýr viðburður';
+  @override
+  String get calendarAdd => 'Bæta við';
+  @override
+  String get calendarEndOptional => 'Lok (valfrjálst)';
+  @override
+  String get calendarRemindMe => 'Minn á mig';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes mín fyrr';
+  @override
+  String get calendarLinePreview => 'Línan eins og hún verður skrifuð';
+  @override
+  String get calendarAddEvent => 'Bæta við viðburði';
+  @override
+  String get calendarOpenInFile => 'Opna í calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Áminning kl. $time';
+  @override
+  String get journalCalendarTitle => 'Dagatal';
+  @override
+  String get journalEventTimesTitle => 'Tímar viðburða';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Eins og skrifað er í skránni eða sem klukka á þínu svæði';
+  @override
+  String get journalEventTimesWritten => 'Eins og skrifað';
+  @override
+  String get journalEventTimesClock => 'Klukka';
+  @override
   String get themeEditorRolesHint =>
       'Hver litur heitir því sem útflutta skráin kallar hann';
   @override
@@ -786,6 +817,12 @@ final class IcelandicStrings extends Strings {
   String get searchNoMatches => 'Engar samanburðar';
   @override
   String get searchLoadMore => 'Sýna fleiri';
+  @override
+  String searchTasksAndEvents(int count) => 'Verkefni og viðburðir · $count';
+  @override
+  String searchNotes(int count) => 'Nótur · $count';
+  @override
+  String searchGoal(String scope) => 'Markmið: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override
@@ -1550,6 +1587,10 @@ final class IcelandicStrings extends Strings {
   String get journalShowCalendar => 'Sýna dagatalið';
   @override
   String get journalFabToday => 'Dagbókarfærsla dagsins';
+  @override
+  String get journalEvents => 'Viðburðir';
+  @override
+  String journalWeek(int week) => 'Vika $week';
   @override
   String journalDueOn(String day) => 'Á gjalddaga $day';
   @override
@@ -3484,6 +3525,10 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Engin opin verkefni.';
+  @override
+  String get homeTileEventsToday => 'Dagsins viðburðir';
+  @override
+  String get homeEventsEmpty => 'Engir viðburðir í dag';
 
   @override
   String get homeNotesEmpty => 'Engar glósur enn.';

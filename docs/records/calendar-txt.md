@@ -43,14 +43,17 @@ four places, and the parser follows the page.
    - **(A)** `calendar.txt` joins the record-merge files
      (`lib/src/diff/record_merge.dart`, today `todo.txt` and `done.txt`):
      a line either side added is in, a line removed from the base is out.
-   - **(B)** a calendar-aware merge on top of it: lines are paired by
-     their **key** — the date for a day line, the head for a goal — and
-     the events of one key are merged **as a set**: an event added on
-     either side is in, one removed from the base on either side is out,
-     one added on both is in once. The merged set is spliced back into
-     one line, in time order. Lines with no key follow the record rule.
-     Two devices adding an event to the same day — the common collision —
-     then merge with nothing asked.
+   - **(B)** a calendar-aware merge on top of it: **day lines** are
+     paired by their date, and the events of one day are merged **as a
+     set**: an event added on either side is in, one removed from the base
+     on either side is out, one added on both is in once. The merged set
+     is spliced back into one line, in time order. Two devices adding an
+     event to the same day — the common collision — then merge with
+     nothing asked. *(As built, 2026-10-12: only day lines are paired.
+     A goal line is prose, not a set of items, so pairing goals by their
+     head would either drop one device's edit or leave two heads for one
+     goal; goal lines and lines with no key follow the record rule, which
+     keeps both edits, as two edits of one task do.)*
 
    The parser tolerates duplicate day lines anyway (a hand edit, another
    tool's merge): their events are shown together, and a write goes to the

@@ -275,6 +275,37 @@ final class BelarusianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Спісы заданняў (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Каляндар';
+  @override
+  String get calendarNewEvent => 'Новая падзея';
+  @override
+  String get calendarAdd => 'Дадаць';
+  @override
+  String get calendarEndOptional => 'Канец неабавязковы';
+  @override
+  String get calendarRemindMe => 'Напомніць';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes хв. раней';
+  @override
+  String get calendarLinePreview => 'Радок, як ён будзе запісаны';
+  @override
+  String get calendarAddEvent => 'Дадаць падзею';
+  @override
+  String get calendarOpenInFile => 'Адкрыць у calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Напамін у $time';
+  @override
+  String get journalCalendarTitle => 'Каляндар';
+  @override
+  String get journalEventTimesTitle => 'Час падзей';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Як запісана ў файле або як гадзіннік у вашай зоне';
+  @override
+  String get journalEventTimesWritten => 'Як запісана';
+  @override
+  String get journalEventTimesClock => 'Гадзіннік';
+  @override
   String get themeEditorRolesHint =>
       'Кожны колер названы так, як яго называе файл экспарту';
   @override
@@ -789,6 +820,12 @@ final class BelarusianStrings extends Strings {
   String get searchNoMatches => 'Няма вынікаў';
   @override
   String get searchLoadMore => 'Паказаць яшчэ';
+  @override
+  String searchTasksAndEvents(int count) => 'Задачы і падзеі · $count';
+  @override
+  String searchNotes(int count) => 'Нататкі · $count';
+  @override
+  String searchGoal(String scope) => 'Мэта: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1551,6 +1588,10 @@ final class BelarusianStrings extends Strings {
   String get journalShowCalendar => 'Паказаць каляндар';
   @override
   String get journalFabToday => 'Сённяшні запіс дзённіка';
+  @override
+  String get journalEvents => 'Падзеі';
+  @override
+  String journalWeek(int week) => 'Тыдзень $week';
   @override
   String journalDueOn(String day) => 'Тэрмін $day';
   @override
@@ -3530,6 +3571,10 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Няма адкрытых задач.';
+  @override
+  String get homeTileEventsToday => 'Падзеі сёння';
+  @override
+  String get homeEventsEmpty => 'Сёння падзей няма';
 
   @override
   String get homeNotesEmpty => 'Нататак пакуль няма.';

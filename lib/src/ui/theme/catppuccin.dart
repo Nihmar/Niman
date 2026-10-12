@@ -50,6 +50,12 @@ const SyntaxColors _mochaSyntax = SyntaxColors(
   todoContext: Color(0xFFB4BEFE), // lavender
   todoKeyValue: Color(0xFF94E2D5), // teal
   todoDone: Color(0xFF6C7086), // overlay0
+  calendarDate: Color(0xFF9399B2),
+  calendarHead: Color(0xFF6C7086),
+  calendarGoal: Color(0xFFA6E3A1), // green
+  calendarTime: Color(0xFFF9E2AF),
+  calendarAside: Color(0xFF6C7086),
+  calendarMismatch: Color(0xFFF38BA8),
 );
 
 // Latte (day). Latte has nothing lighter than base, so the ramp runs the
@@ -87,4 +93,10 @@ const SyntaxColors _latteSyntax = SyntaxColors(
   todoContext: Color(0xFF7287FD), // lavender
   todoKeyValue: Color(0xFF179299), // teal
   todoDone: Color(0xFF9CA0B0), // overlay0
+  calendarDate: Color(0xFF7C7F93),
+  calendarHead: Color(0xFF9CA0B0),
+  calendarGoal: Color(0xFF40A02B), // green
+  calendarTime: Color(0xFFDF8E1D),
+  calendarAside: Color(0xFF9CA0B0),
+  calendarMismatch: Color(0xFFD20F39),
 );

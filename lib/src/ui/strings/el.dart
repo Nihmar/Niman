@@ -279,6 +279,37 @@ final class GreekStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Λίστες καθηκόντων (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Ημερολόγιο';
+  @override
+  String get calendarNewEvent => 'Νέο συμβάν';
+  @override
+  String get calendarAdd => 'Προσθήκη';
+  @override
+  String get calendarEndOptional => 'Τέλος προαιρετικό';
+  @override
+  String get calendarRemindMe => 'Υπενθύμιση';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes λεπτά πριν';
+  @override
+  String get calendarLinePreview => 'Η γραμμή, όπως θα γραφτεί';
+  @override
+  String get calendarAddEvent => 'Προσθήκη συμβάντος';
+  @override
+  String get calendarOpenInFile => 'Άνοιγμα στο calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Υπενθύμιση στις $time';
+  @override
+  String get journalCalendarTitle => 'Ημερολόγιο';
+  @override
+  String get journalEventTimesTitle => 'Ώρες συμβάντων';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Όπως γράφονται στο αρχείο ή ως ρολόι στη ζώνη σας';
+  @override
+  String get journalEventTimesWritten => 'Όπως γράφονται';
+  @override
+  String get journalEventTimesClock => 'Ρολόι';
+  @override
   String get themeEditorRolesHint =>
       'Κάθε χρώμα έχει το όνομα που χρησιμοποιεί το εξαγόμενο αρχείο';
   @override
@@ -801,6 +832,12 @@ final class GreekStrings extends Strings {
   String get searchNoMatches => 'Δεν υπάρχουν ταυτοτήτες';
   @override
   String get searchLoadMore => 'Εμφάνιση περισσότερων';
+  @override
+  String searchTasksAndEvents(int count) => 'Εργασίες και συμβάντα · $count';
+  @override
+  String searchNotes(int count) => 'Σημειώσεις · $count';
+  @override
+  String searchGoal(String scope) => 'Στόχος: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override
@@ -1598,6 +1635,10 @@ final class GreekStrings extends Strings {
   String get journalShowCalendar => 'Εμφάνιση ημερολογίου';
   @override
   String get journalFabToday => 'Σημερινή καταχώριση ημερολογίου';
+  @override
+  String get journalEvents => 'Συμβάντα';
+  @override
+  String journalWeek(int week) => 'Εβδομάδα $week';
   @override
   String journalDueOn(String day) => 'Προθεσμία $day';
   @override
@@ -3595,6 +3636,10 @@ final class GreekStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Καμία ανοιχτή εργασία.';
+  @override
+  String get homeTileEventsToday => 'Σημερινά συμβάντα';
+  @override
+  String get homeEventsEmpty => 'Κανένα συμβάν σήμερα';
 
   @override
   String get homeNotesEmpty => 'Δεν υπάρχουν σημειώσεις ακόμη.';

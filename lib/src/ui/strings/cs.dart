@@ -276,6 +276,37 @@ final class CzechStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Seznamy úkolů (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendář';
+  @override
+  String get calendarNewEvent => 'Nová událost';
+  @override
+  String get calendarAdd => 'Přidat';
+  @override
+  String get calendarEndOptional => 'Konec (nepovinné)';
+  @override
+  String get calendarRemindMe => 'Připomenout';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min před';
+  @override
+  String get calendarLinePreview => 'Řádek, jak bude zapsán';
+  @override
+  String get calendarAddEvent => 'Přidat událost';
+  @override
+  String get calendarOpenInFile => 'Otevřít v calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Připomenutí v $time';
+  @override
+  String get journalCalendarTitle => 'Kalendář';
+  @override
+  String get journalEventTimesTitle => 'Časy událostí';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Jak jsou zapsané v souboru, nebo jako hodiny ve vašem pásmu';
+  @override
+  String get journalEventTimesWritten => 'Jak jsou zapsané';
+  @override
+  String get journalEventTimesClock => 'Hodiny';
+  @override
   String get themeEditorRolesHint =>
       'Každá barva se jmenuje jako v exportovaném souboru';
   @override
@@ -789,6 +820,12 @@ final class CzechStrings extends Strings {
   String get searchNoMatches => 'Žádná shoda';
   @override
   String get searchLoadMore => 'Zobrazit další';
+  @override
+  String searchTasksAndEvents(int count) => 'Úkoly a události · $count';
+  @override
+  String searchNotes(int count) => 'Poznámky · $count';
+  @override
+  String searchGoal(String scope) => 'Cíl: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1545,6 +1582,10 @@ final class CzechStrings extends Strings {
   String get journalShowCalendar => 'Zobrazit kalendář';
   @override
   String get journalFabToday => 'Dnešní záznam deníku';
+  @override
+  String get journalEvents => 'Události';
+  @override
+  String journalWeek(int week) => 'Týden $week';
   @override
   String journalDueOn(String day) => 'Termín $day';
   @override
@@ -3487,6 +3528,10 @@ final class CzechStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Žádné otevřené úkoly.';
+  @override
+  String get homeTileEventsToday => 'Dnešní události';
+  @override
+  String get homeEventsEmpty => 'Dnes žádné události';
 
   @override
   String get homeNotesEmpty => 'Zatím žádné poznámky.';

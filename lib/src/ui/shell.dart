@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/calendar/calendar_controller.dart';
+import 'package:niman/src/calendar/calendar_source.dart';
+import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/files.dart';
@@ -27,6 +30,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -45,6 +49,7 @@ import 'package:niman/src/ocr/ocr_installation_provider.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ocr/ocr_queue_provider.dart';
 import 'package:niman/src/reading/reading_positions.dart';
+import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
@@ -52,7 +57,7 @@ import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
-import 'package:niman/src/todo/todo_txt_tokens.dart';
+import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
@@ -96,6 +101,7 @@ import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/search_request.dart';
+import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
@@ -348,6 +354,9 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                     shareIn: ref.read(shareInServiceProvider),
                     capture: ref.read(captureServicesProvider),
                     todoSourceFactory: ref.read(todoSourceFactoryProvider),
+                    calendarSourceFactory: ref.read(
+                      calendarSourceFactoryProvider,
+                    ),
                     unsavedTracker: ref.watch(unsavedTrackerProvider),
                     saveExportFile: ref.read(saveExportFileProvider),
                     pickExportFolder: ref.read(pickExportFolderProvider),
@@ -403,6 +412,7 @@ final class _LibraryShell extends ConsumerStatefulWidget {
     required this.shareIn,
     required this.capture,
     required this.todoSourceFactory,
+    required this.calendarSourceFactory,
     required this.unsavedTracker,
     required this.saveExportFile,
     required this.pickExportFolder,
@@ -460,6 +470,10 @@ final class _LibraryShell extends ConsumerStatefulWidget {
   /// Builds the todo file source per library root (overridden with a
   /// fake in widget tests).
   final TodoSource Function(String root) todoSourceFactory;
+
+  /// Builds the calendar file source per library root (a widget-test seam,
+  /// as the todo one is).
+  final CalendarSource Function(String root) calendarSourceFactory;
 
   /// The open notes' unsaved edits, which the window's close guard reads
   /// (T-PP-11); passed down to every [NoteView].
@@ -900,6 +914,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The todo state (T-TD-04): owned here so the tab body and the tab's
   /// app-bar add action share one controller.
   late final TodoController _todoController;
+
+  /// The calendar file (#730): the journal's events, the Home tile and the
+  /// editor's colours all read it.
+  late final CalendarController _calendarController;
 
   /// Making new things in the library: the FAB, the tree footer's menu
   /// and the row menu all run these (issue #100 moved the how of them
@@ -1772,9 +1790,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The app-bar eye action: flips the editor/preview pane.
   Widget _previewToggleAction({bool compact = false}) {
-    // A todo.txt is read in its editor alone: the eye stays, off.
+    // A plain-text file is read in its editor alone: the eye stays, off.
     final shown = _shownNote;
-    final plain = shown != null && isTodoTxtFile(p.basename(shown));
+    final plain = shown != null && isPlainTextFile(p.basename(shown));
     return PreviewToggleAction(
       previewVisible: _notePreview && !plain,
       onToggle: plain ? null : _togglePreview,
@@ -1818,6 +1836,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // The todo widgets follow the snapshot: every mutation notifies, and
     // the initial open notifies too, so one listener covers both.
     _todoController.addListener(_homeWidgets.pushTodos);
+    _calendarController = CalendarController(
+      session: widget.controller,
+      sourceFactory: widget.calendarSourceFactory,
+    );
+    // The calendar's own reminders ride with the tasks' (#730): the file
+    // is pushed to the task controller, whose wanted set covers both.
+    _calendarController.addListener(_pushCalendarReminders);
     _templateFlow = ShellTemplateFlow(
       controller: widget.controller,
       origin: () => (
@@ -1843,6 +1868,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // otherwise never reconcile. The tab's own open() then takes the
     // probe-skip path instead of a second full read.
     unawaited(_todoController.open());
+    unawaited(_calendarController.open());
     // Notification taps while running: a todo tap opens the Todo tab, a
     // recognition's opens its text.
     _inbound.listen(widget.reminders.taps, (payload) {
@@ -1850,6 +1876,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (payload == todoReminderPayload && mounted) {
         const AppLogger(name: 'todo').debug('todo tap: opening the todo list');
         _openTodo();
+      } else if (journalReminderDayOf(payload) != null) {
+        unawaited(_openReminderPayload(payload!));
       } else if (payload != null &&
           payload.startsWith(ocrNotificationPrefix) &&
           mounted) {
@@ -1977,7 +2005,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unawaited(_homeWidgets.dispose());
     unawaited(_inbound.cancel());
     _todoController.removeListener(_homeWidgets.pushTodos);
+    _calendarController.removeListener(_pushCalendarReminders);
     _todoController.dispose();
+    _calendarController.dispose();
     _personalDictionary?.dispose();
     _fab.dispose();
     _shellFocus.dispose();
@@ -2013,6 +2043,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // unreliable, so no session event may arrive): re-read both surfaces
     // when clean instead of showing the pre-toggle state.
     unawaited(_todoController.open());
+    unawaited(_calendarController.open());
     if (_selected != null && !_selectedIsDir) {
       setState(() => _noteReloadToken++);
     }
@@ -2022,12 +2053,30 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _homeWidgets.pushAll();
   }
 
+  /// Hands the calendar file to the task controller, whose reminder set
+  /// covers both files (#730).
+  void _pushCalendarReminders() {
+    _todoController.calendar = _calendarController.snapshot;
+  }
+
+  /// A reminder's own destination: the journal on its day for an event
+  /// (#730), the Todo tab for a task.
+  Future<void> _openReminderPayload(String payload) async {
+    final day = journalReminderDayOf(payload);
+    if (day == null || !mounted) return;
+    const AppLogger(name: 'calendar').debug('event reminder tap: $payload');
+    _journalUi.showCalendar(context);
+    await _journalFlow.openDay(context, day);
+  }
+
   /// A notification tap that started the app lands on the Todo tab.
   Future<void> _applyReminderLaunch() async {
     final payload = await widget.reminders.consumeLaunchPayload();
     if (_followCaptureRoute(payload)) return;
     if (payload == todoReminderPayload && mounted) {
       _openTodo();
+    } else if (journalReminderDayOf(payload) != null) {
+      await _openReminderPayload(payload!);
     } else if (payload != null &&
         payload.startsWith(ocrNotificationPrefix) &&
         mounted) {
@@ -2644,7 +2693,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Adds a task from the Todo tab's add FAB (T-TD-04), or from a Home
   /// action with [text] written in.
-  Future<void> _addTodo({String text = ''}) async {
+  Future<void> _addTodo({String text = '', DateTime? due}) async {
     const AppLogger(name: 'todo').debug('todo add pressed');
     final snapshot = _todoController.snapshot;
     final reminders = widget.reminders;
@@ -2652,6 +2701,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       context,
       today: DateTime.now(),
       text: text,
+      due: due,
       knownTokens: snapshot == null
           ? const <String>{}
           : snapshotTokens(snapshot),
@@ -3780,12 +3830,62 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (mounted) setState(() {});
   }
 
+  /// Opens the event's line in `calendar.txt` (#730), the caret at the
+  /// line's start: the desktop's tap on an event (a phone's sheet, with
+  /// Edit and Delete, comes with the writing phase).
+  void _openCalendarEvent(CalendarEntryEvent event) {
+    _showNote(
+      calendarFileName,
+      caret: _calendarController.snapshot?.offsetOfLine(event.lineIndex),
+    );
+  }
+
+  /// Opens a row of Search's tasks-and-events group (#730): a task is the
+  /// task list's, an event or a goal is its line in `calendar.txt`.
+  void _openTaskEvent(TaskEventHit hit) {
+    switch (hit.kind) {
+      case TaskEventKind.task:
+        _openTodo();
+      case TaskEventKind.event:
+        _openCalendarEvent(hit.event!);
+      case TaskEventKind.goal:
+        _showNote(
+          calendarFileName,
+          caret: _calendarController.snapshot?.offsetOfLine(hit.lineIndex),
+        );
+    }
+  }
+
+  /// The tasks and events in memory, as Search's lone-token group reads
+  /// them (#730): the two controllers' own snapshots, walked in memory and
+  /// never indexed. The group re-reads them on every change to either.
+  late final TaskEvents _taskEvents = TaskEvents(
+    hits: (token) => taskEventHits(
+      token,
+      tasks: _todoController.snapshot?.todo ?? const <TodoEntry>[],
+      calendar:
+          _calendarController.snapshot?.entries ?? const <CalendarEntry>[],
+    ),
+    changes: Listenable.merge([_todoController, _calendarController]),
+  );
+
   /// The journal's calendar, strip and recent entries (#7).
   late final ShellJournalUi _journalUi = ShellJournalUi(
     controller: widget.controller,
     journal: () => _journal,
     flow: _journalFlow,
     tasks: _todoController,
+    calendar: _calendarController,
+    openEvent: _openCalendarEvent,
+    writeEvent: (day, event) =>
+        unawaited(_guard(() => _calendarController.addEvent(day, event))),
+    editEvent: (entry, event) =>
+        unawaited(_guard(() => _calendarController.updateEvent(entry, event))),
+    deleteEvent: (entry) =>
+        unawaited(_guard(() => _calendarController.deleteEvent(entry))),
+    addTask: (day) => unawaited(_addTodo(due: day)),
+    knownTokens: () => _knownFileTokens,
+    calendarFile: () => _calendarController.snapshot?.file,
     dockRoom: () => _dockRoom,
     openDockJournal: () => _workspace.controller.update(
       (w) => w.withDock(open: true, pane: DockPane.journal),
@@ -4212,7 +4312,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   List<Widget> _statusActionsFor(int pane) {
     final tab = _workspace.value.panes[pane].activeTab;
     if (tab == null || !_previewToggleVisible) return const [];
-    final plain = isTodoTxtFile(p.basename(tab.path));
+    final plain = isPlainTextFile(p.basename(tab.path));
     return [
       PreviewToggleAction(
         previewVisible: !plain && (tab.memento.preview ?? false),
@@ -4388,6 +4488,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       requests: _searchRequests,
       commands: _searchCommands,
       tree: tree,
+      taskEvents: _taskEvents,
+      onOpenTaskEvent: _openTaskEvent,
+      eventTimesClock: _journal.clockTimes,
     );
   }
 
@@ -4430,7 +4533,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   HomeHost _homeHost(LibrarySession controller) => HomeHost(
     controller: controller,
     todo: _todoController,
+    calendar: _calendarController,
     journal: _journalFlow,
+    clockEventTimes: () => _journal.clockTimes,
+    openEvent: _openCalendarEvent,
+    openJournal: () => _journalUi.showCalendar(context),
     openNote: _openSearchNote,
     openSearch: (query) => _showSearch(SearchRequest.forText(query)),
     openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),
@@ -4456,6 +4563,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(message))),
   );
+
+  /// The `+`/`@`/`#` tokens the two files already use (#730): the Add
+  /// event form suggests from them, both files at once, since `grep
+  /// +thesis` reads the two together.
+  Set<String> get _knownFileTokens => {
+    if (_todoController.snapshot case final todos?) ...snapshotTokens(todos),
+    if (_calendarController.snapshot case final calendar?)
+      ...calendarSnapshotTokens(calendar),
+  };
 
   /// Adds a task from a Home action: its project and context are written
   /// in, the caret before them.

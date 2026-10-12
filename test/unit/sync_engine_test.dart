@@ -1558,6 +1558,57 @@ void main() {
       expect(b.read('todo.txt'), merged);
     });
 
+    test(
+      'a calendar file created on both devices merges without a base',
+      () async {
+        // The first sync of a library two devices each started a calendar
+        // in: no base, and the day line is still one line.
+        a.write(
+          'calendar.txt',
+          note(['2026-10-12 w42 Mon  9-12 thesis. 15-16 meeting.']),
+        );
+        b.write('calendar.txt', note(['2026-10-12 w42 Mon  18-19 jogging.']));
+        await b.sync();
+        final report = await a.sync();
+        expect(report.conflicts, isEmpty, reason: report.summary());
+        expect(report.merged, ['calendar.txt']);
+        final merged = note([
+          '2026-10-12 w42 Mon  9-12 thesis. 15-16 meeting. 18-19 jogging.',
+        ]);
+        expect(a.read('calendar.txt'), merged);
+        expect(remoteText('calendar.txt'), merged);
+      },
+    );
+
+    test('calendar events added on both devices merge into one day', () async {
+      // The collision the calendar-aware merge exists for (#730): two
+      // devices each add an event to the same day line.
+      final one = note(['2026-10-12 w42 Mon  9-12 thesis.']);
+      a.write('calendar.txt', one);
+      await a.sync();
+      await b.sync();
+
+      a.write(
+        'calendar.txt',
+        note(['2026-10-12 w42 Mon  9-12 thesis. 15-16 meeting.']),
+      );
+      b.write(
+        'calendar.txt',
+        note(['2026-10-12 w42 Mon  9-12 thesis. 18-19 jogging.']),
+      );
+      await b.sync();
+      final report = await a.sync();
+      expect(report.conflicts, isEmpty, reason: report.summary());
+      expect(report.merged, ['calendar.txt']);
+      final merged = note([
+        '2026-10-12 w42 Mon  9-12 thesis. 15-16 meeting. 18-19 jogging.',
+      ]);
+      expect(a.read('calendar.txt'), merged);
+      expect(remoteText('calendar.txt'), merged);
+      await b.sync();
+      expect(b.read('calendar.txt'), merged);
+    });
+
     test('tasks checked on both devices all reach done.txt', () async {
       a.write('done.txt', note(['x 2026-09-20 old']));
       await a.sync();

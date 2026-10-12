@@ -6,6 +6,8 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/calendar/calendar_controller.dart';
+import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_controller.dart';
@@ -18,11 +20,15 @@ final class HomeHost {
   const new({
     required this.controller,
     required this.todo,
+    required this.calendar,
     required this.journal,
+    required this.clockEventTimes,
     required this.openNote,
     required this.openSearch,
     required this.openTag,
     required this.openTodo,
+    required this.openEvent,
+    required this.openJournal,
     required this.runAction,
   });
 
@@ -31,6 +37,13 @@ final class HomeHost {
 
   /// The todo list, as the Todo tab holds it.
   final TodoController todo;
+
+  /// The calendar file, as the journal holds it (#730).
+  final CalendarController calendar;
+
+  /// Whether an event's time is read as a clock rather than as written
+  /// (#730), the journal's own setting, asked as the tile builds.
+  final bool Function() clockEventTimes;
 
   /// Opens and makes journal entries.
   final JournalFlow journal;
@@ -46,6 +59,12 @@ final class HomeHost {
 
   /// Shows the todo list.
   final void Function() openTodo;
+
+  /// Opens an event's line in `calendar.txt` (#730).
+  final void Function(CalendarEntryEvent event) openEvent;
+
+  /// Shows the journal, today's day (#730).
+  final void Function() openJournal;
 
   /// Runs a Home action.
   final void Function(HomeAction action) runAction;

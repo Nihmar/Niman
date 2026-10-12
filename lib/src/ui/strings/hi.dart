@@ -264,6 +264,37 @@ final class HindiStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'कार्य सूचियाँ (todo.txt)';
   @override
+  String get themeEditorCalendar => 'कैलेंडर';
+  @override
+  String get calendarNewEvent => 'नया ईवेंट';
+  @override
+  String get calendarAdd => 'जोड़ें';
+  @override
+  String get calendarEndOptional => 'समाप्ति वैकल्पिक';
+  @override
+  String get calendarRemindMe => 'मुझे याद दिलाएँ';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes मिनट पहले';
+  @override
+  String get calendarLinePreview => 'पंक्ति, जैसी लिखी जाएगी';
+  @override
+  String get calendarAddEvent => 'ईवेंट जोड़ें';
+  @override
+  String get calendarOpenInFile => 'calendar.txt में खोलें';
+  @override
+  String calendarReminderAt(String time) => '$time पर रिमाइंडर';
+  @override
+  String get journalCalendarTitle => 'कैलेंडर';
+  @override
+  String get journalEventTimesTitle => 'ईवेंट के समय';
+  @override
+  String get journalEventTimesSubtitle =>
+      'फ़ाइल में लिखे अनुसार, या आपके क्षेत्र में घड़ी के रूप में';
+  @override
+  String get journalEventTimesWritten => 'लिखे अनुसार';
+  @override
+  String get journalEventTimesClock => 'घड़ी';
+  @override
   String get themeEditorRolesHint =>
       'हर रंग का नाम वही है जो निर्यात की गई फ़ाइल में है';
   @override
@@ -776,6 +807,12 @@ final class HindiStrings extends Strings {
   String get searchNoMatches => 'कोई मेल नहीं';
   @override
   String get searchLoadMore => 'और दिखाएँ';
+  @override
+  String searchTasksAndEvents(int count) => 'कार्य और ईवेंट · $count';
+  @override
+  String searchNotes(int count) => 'नोट्स · $count';
+  @override
+  String searchGoal(String scope) => '$scope का लक्ष्य';
 
   // Replace (T-M3-10).
   @override
@@ -1525,6 +1562,10 @@ final class HindiStrings extends Strings {
   String get journalShowCalendar => 'कैलेंडर दिखाएँ';
   @override
   String get journalFabToday => 'आज की डायरी प्रविष्टि';
+  @override
+  String get journalEvents => 'ईवेंट';
+  @override
+  String journalWeek(int week) => 'सप्ताह $week';
   @override
   String journalDueOn(String day) => 'नियत तिथि $day';
   @override
@@ -3439,6 +3480,10 @@ final class HindiStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'कोई खुला कार्य नहीं।';
+  @override
+  String get homeTileEventsToday => 'आज के ईवेंट';
+  @override
+  String get homeEventsEmpty => 'आज कोई ईवेंट नहीं';
 
   @override
   String get homeNotesEmpty => 'अभी कोई नोट नहीं।';

@@ -25,6 +25,29 @@ prefix matching, so search grows as you type. Accents do not matter:
 
 A word search asks the index, so it stays fast up to ~1M notes.
 
+## Tasks and events
+
+A query that is one lone `+project` or `@context` (`+thesis`, `@phone`)
+also answers from `todo.txt` and the library's `calendar.txt`, in a
+**Tasks and events** group above the notes:
+
+- the events whose line carries the token, with their time as written and
+the day they are on;
+- the week, month and year goals that carry it — `Week 42 goal`,
+`October goal`;
+- the open tasks that carry it, with their due date (`Due today`, `No
+date`).
+
+Each row names the day it is about and the file it comes from. Tapping one
+opens it: a task opens the task list, an event or a goal opens
+`calendar.txt` at its line. The group is read from the two files as they
+are already in memory, never from the index, so it appears the moment you
+type the token and follows the files as they change.
+
+The notes are still searched below — `+thesis` finds the notes that say
+*thesis*, in a **Notes** group of its own. Mixed input (`+thesis extra`),
+a `#tag` and Contains all stay a note search.
+
 ## Contains
 
 On a phone, **Words** and **Contains** are the two halves of the switch

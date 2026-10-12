@@ -3,6 +3,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
+import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -15,11 +19,38 @@ final class JournalScreen extends StatelessWidget {
     required this.readEntry,
     required this.onOpenDay,
     this.revision = 0,
+    this.eventsOn,
+    this.goalsOn,
+    this.eventDays = const <DateTime>{},
+    this.calendarChanged,
+    this.onOpenEvent,
     this.dueOn,
     this.tasksChanged,
     this.onOpenTasks,
+    this.knownTokens = const <String>{},
+    this.eventTimesClock = false,
+    this.calendarFile,
+    this.onAddEvent,
+    this.onAddTask,
+    this.onEditEvent,
+    this.onDeleteEvent,
     super.key,
   });
+
+  /// See [JournalBrowser.eventsOn].
+  final List<CalendarEntryEvent> Function(DateTime day)? eventsOn;
+
+  /// See [JournalBrowser.goalsOn].
+  final List<CalendarLine> Function(DateTime day)? goalsOn;
+
+  /// See [JournalBrowser.eventDays].
+  final Set<DateTime> eventDays;
+
+  /// See [JournalBrowser.calendarChanged].
+  final Listenable? calendarChanged;
+
+  /// See [JournalBrowser.onOpenEvent].
+  final void Function(CalendarEntryEvent event)? onOpenEvent;
 
   /// See [JournalBrowser.dueOn].
   final List<String> Function(DateTime day)? dueOn;
@@ -29,6 +60,28 @@ final class JournalScreen extends StatelessWidget {
 
   /// See [JournalBrowser.onOpenTasks].
   final VoidCallback? onOpenTasks;
+
+  /// See [JournalBrowser.knownTokens].
+  final Set<String> knownTokens;
+
+  /// See [JournalBrowser.eventTimesClock].
+  final bool eventTimesClock;
+
+  /// See [JournalBrowser.calendarFile].
+  final CalendarFileContent? calendarFile;
+
+  /// See [JournalBrowser.onAddEvent].
+  final void Function(DateTime day, CalendarEventDraft event)? onAddEvent;
+
+  /// See [JournalBrowser.onAddTask].
+  final void Function(DateTime day)? onAddTask;
+
+  /// See [JournalBrowser.onEditEvent].
+  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)?
+  onEditEvent;
+
+  /// See [JournalBrowser.onDeleteEvent].
+  final void Function(CalendarEntryEvent entry)? onDeleteEvent;
 
   /// See [JournalBrowser.today].
   final DateTime today;
@@ -57,9 +110,21 @@ final class JournalScreen extends StatelessWidget {
         onOpenDay: onOpenDay,
         revision: revision,
         large: true,
+        eventsOn: eventsOn,
+        goalsOn: goalsOn,
+        eventDays: eventDays,
+        calendarChanged: calendarChanged,
+        onOpenEvent: onOpenEvent,
         dueOn: dueOn,
         tasksChanged: tasksChanged,
         onOpenTasks: onOpenTasks,
+        knownTokens: knownTokens,
+        eventTimesClock: eventTimesClock,
+        calendarFile: calendarFile,
+        onAddEvent: onAddEvent,
+        onAddTask: onAddTask,
+        onEditEvent: onEditEvent,
+        onDeleteEvent: onDeleteEvent,
       ),
     );
   }

@@ -278,6 +278,37 @@ final class SerbianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Листе задатака (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Календар';
+  @override
+  String get calendarNewEvent => 'Нови догађај';
+  @override
+  String get calendarAdd => 'Додај';
+  @override
+  String get calendarEndOptional => 'Крај (опционо)';
+  @override
+  String get calendarRemindMe => 'Подсети ме';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes мин пре';
+  @override
+  String get calendarLinePreview => 'Ред, како ће бити записан';
+  @override
+  String get calendarAddEvent => 'Додај догађај';
+  @override
+  String get calendarOpenInFile => 'Отвори у calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Подсетник у $time';
+  @override
+  String get journalCalendarTitle => 'Календар';
+  @override
+  String get journalEventTimesTitle => 'Времена догађаја';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Како су записана у датотеци или као сат у вашој зони';
+  @override
+  String get journalEventTimesWritten => 'Како су записана';
+  @override
+  String get journalEventTimesClock => 'Сат';
+  @override
   String get themeEditorRolesHint =>
       'Свака боја носи име које користи извезена датотека';
   @override
@@ -790,6 +821,12 @@ final class SerbianStrings extends Strings {
   String get searchNoMatches => 'Нема поклапања';
   @override
   String get searchLoadMore => 'Прикажи више';
+  @override
+  String searchTasksAndEvents(int count) => 'Задаци и догађаји · $count';
+  @override
+  String searchNotes(int count) => 'Белешке · $count';
+  @override
+  String searchGoal(String scope) => 'Циљ: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override
@@ -1555,6 +1592,10 @@ final class SerbianStrings extends Strings {
   String get journalShowCalendar => 'Прикажи календар';
   @override
   String get journalFabToday => 'Данашњи унос у дневник';
+  @override
+  String get journalEvents => 'Догађаји';
+  @override
+  String journalWeek(int week) => 'Недеља $week';
   @override
   String journalDueOn(String day) => 'Рок $day';
   @override
@@ -3510,6 +3551,10 @@ final class SerbianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Нема отворених задатака.';
+  @override
+  String get homeTileEventsToday => 'Данашњи догађаји';
+  @override
+  String get homeEventsEmpty => 'Данас нема догађаја';
 
   @override
   String get homeNotesEmpty => 'Још нема белешки.';

@@ -1,18 +1,43 @@
-/// The reminder model: what a `rem:` tag becomes before anything
-/// platform-specific touches it (T-TD-07).
+/// The reminder model: what a `rem:` becomes before anything
+/// platform-specific touches it (T-TD-07, the calendar since #730).
 ///
-/// Pure and dependency-free on purpose. The scheduling half lives in
+/// Pure and device-free on purpose. The scheduling half lives in
 /// `reminders.dart` and the plugin half in `reminder_backend_plugin.dart`;
-/// keeping the model apart is what lets both be tested without a device.
+/// keeping the model apart is what lets them be tested without a device.
+///
+/// One set covers both files: `todo.txt`'s `rem:` is a stamp
+/// (`2026-10-12T16:30`), `calendar.txt`'s is a clock time on the day its
+/// line heads (`17-18 jogging @park rem:16:30.`), and both become the same
+/// [TodoReminder] — ids salted apart so the two files' ids never mean each
+/// other, and a payload that says which of the two a tap opens.
 library;
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/parser.dart';
+import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The notification payload routing taps to the Todo tab.
 const String todoReminderPayload = 'todo';
+
+/// The payload prefix routing a tap to the journal, on the day an event
+/// sits on (#730).
+const String journalReminderPrefix = 'journal:';
+
+/// The payload of an event's reminder on [day]: the journal, that day.
+String journalReminderPayload(DateTime day) =>
+    '$journalReminderPrefix${formatTodoDate(day)}';
+
+/// The day a journal payload points at, or null when it is not one.
+DateTime? journalReminderDayOf(String? payload) {
+  if (payload == null || !payload.startsWith(journalReminderPrefix)) {
+    return null;
+  }
+  return DateTime.tryParse(payload.substring(journalReminderPrefix.length));
+}
 
 /// The Android channel every reminder posts on.
 ///
@@ -56,6 +81,7 @@ final class TodoReminder {
     required this.title,
     required this.body,
     required this.when,
+    this.payload = todoReminderPayload,
   });
 
   /// The notification id, derived from the task text ([todoReminderId]).
@@ -69,6 +95,10 @@ final class TodoReminder {
 
   /// When to fire (local wall-clock time, from `rem:`).
   final DateTime when;
+
+  /// What a tap on the notification opens ([todoReminderPayload] for a
+  /// task, [journalReminderPayload] for an event).
+  final String payload;
 }
 
 /// A stable notification id for a task description.
@@ -88,6 +118,16 @@ int todoReminderId(String description) {
   return hash & 0x7FFFFFFF;
 }
 
+/// A stable notification id for an event on [day] (#730).
+///
+/// The same hash the tasks' ids come from, salted with the word and the
+/// day: an event's id can never be a task's, and an event that keeps its
+/// text keeps its id when the file's lines move — only the day and the
+/// text feed it.
+int calendarReminderId(DateTime day, String text) {
+  return todoReminderId('calendar ${formatTodoDate(day)} $text');
+}
+
 /// How long a reminder stays wanted after its own moment (T-RL-03).
 ///
 /// The wanted set is a full replace: anything outside it has its pending
@@ -103,6 +143,73 @@ int todoReminderId(String description) {
 /// that already fired is no longer pending, so the sweep skips it, and
 /// one the user completes or edits leaves the set on its own merits.
 const reminderGrace = Duration(hours: 1);
+
+/// The schedulable reminders of the calendar (#730): every event of
+/// [snapshot] whose line carries a `rem:HH:MM`, as a clock time on the day
+/// that line heads. A `Z` in the event's own time never moves it — the
+/// reminder is the clock time that was written next to it.
+///
+/// A missing snapshot is no calendar file, and nothing wanted from it.
+Map<int, TodoReminder> calendarWantedReminders(
+  CalendarSnapshot? snapshot,
+  DateTime now, {
+  bool showTokens = false,
+}) {
+  final wanted = <int, TodoReminder>{};
+  if (snapshot == null) return wanted;
+  for (final entry in snapshot.entries) {
+    final line = entry.line;
+    final day = line.date;
+    if (day == null || line.kind != CalendarLineKind.day) continue;
+    for (final event in line.events) {
+      final when = _eventReminderStamp(day, event.reminder);
+      if (when == null || when.isBefore(now.subtract(reminderGrace))) {
+        continue;
+      }
+      final id = calendarReminderId(day, event.text);
+      // The same two readings a task's title gets: the managed `rem:` (and
+      // any other `key:value`) is never shown, the `+`/`@`/`#` markers are
+      // the user's call.
+      final title = showTokens
+          ? withoutKeyValueTags(event.text)
+          : taskDisplayText(event.text);
+      wanted[id] = TodoReminder(
+        id: id,
+        title: title.isEmpty ? AppStrings.todoReminderFallbackTitle : title,
+        body: _eventReminderBody(day, event),
+        when: when,
+        payload: journalReminderPayload(day),
+      );
+    }
+  }
+  return wanted;
+}
+
+/// The day the event sits on, and the time it says, as one line — what a
+/// notification reads under the event's own text.
+String _eventReminderBody(DateTime day, CalendarEvent event) {
+  final label = formatDateTime(day, 'ddd D MMM');
+  final time = event.time?.raw;
+  return time == null || time.isEmpty ? label : '$label · $time';
+}
+
+/// A `rem:` value on [day] as a local stamp, or null when it is not a
+/// time at all. The format's own readings are accepted (`0530`, `5:30`,
+/// `5`), and a `Z` is the instant it names, not a clock time.
+DateTime? _eventReminderStamp(DateTime day, String? reminder) {
+  final moment = reminder == null ? null : parseCalendarMoment(reminder);
+  if (moment == null) return null;
+  if (!moment.utc) {
+    return DateTime(day.year, day.month, day.day, moment.hour, moment.minute);
+  }
+  return DateTime.utc(
+    day.year,
+    day.month,
+    day.day,
+    moment.hour,
+    moment.minute,
+  ).toLocal();
+}
 
 /// The schedulable reminders of [snapshot]: open (`todo.txt`) tasks with
 /// a `rem:` no more than [reminderGrace] before [now]. Completed tasks

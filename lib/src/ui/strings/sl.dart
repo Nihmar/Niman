@@ -278,6 +278,37 @@ final class SlovenianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Seznami nalog (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Koledar';
+  @override
+  String get calendarNewEvent => 'Nov dogodek';
+  @override
+  String get calendarAdd => 'Dodaj';
+  @override
+  String get calendarEndOptional => 'Konec (neobvezno)';
+  @override
+  String get calendarRemindMe => 'Opomni me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min prej';
+  @override
+  String get calendarLinePreview => 'Vrstica, kot bo zapisana';
+  @override
+  String get calendarAddEvent => 'Dodaj dogodek';
+  @override
+  String get calendarOpenInFile => 'Odpri v calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Opomnik ob $time';
+  @override
+  String get journalCalendarTitle => 'Koledar';
+  @override
+  String get journalEventTimesTitle => 'Časi dogodkov';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kot zapisano v datoteki ali kot ura v vašem pasu';
+  @override
+  String get journalEventTimesWritten => 'Kot zapisano';
+  @override
+  String get journalEventTimesClock => 'Ura';
+  @override
   String get themeEditorRolesHint =>
       'Vsaka barva je poimenovana kot v izvoženi datoteki';
   @override
@@ -792,6 +823,12 @@ final class SlovenianStrings extends Strings {
   String get searchNoMatches => 'Ni zadetkov';
   @override
   String get searchLoadMore => 'Prikaži več';
+  @override
+  String searchTasksAndEvents(int count) => 'Opravila in dogodki · $count';
+  @override
+  String searchNotes(int count) => 'Zapiski · $count';
+  @override
+  String searchGoal(String scope) => 'Cilj: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1546,6 +1583,10 @@ final class SlovenianStrings extends Strings {
   String get journalShowCalendar => 'Pokaži koledar';
   @override
   String get journalFabToday => 'Današnji vnos v dnevnik';
+  @override
+  String get journalEvents => 'Dogodki';
+  @override
+  String journalWeek(int week) => 'Teden $week';
   @override
   String journalDueOn(String day) => 'Rok $day';
   @override
@@ -3510,6 +3551,10 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ni odprtih nalog.';
+  @override
+  String get homeTileEventsToday => 'Današnji dogodki';
+  @override
+  String get homeEventsEmpty => 'Danes ni dogodkov';
 
   @override
   String get homeNotesEmpty => 'Še ni zapiskov.';

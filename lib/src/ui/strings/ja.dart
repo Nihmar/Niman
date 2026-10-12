@@ -254,6 +254,36 @@ final class JapaneseStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'タスクリスト (todo.txt)';
   @override
+  String get themeEditorCalendar => 'カレンダー';
+  @override
+  String get calendarNewEvent => '新しい予定';
+  @override
+  String get calendarAdd => '追加';
+  @override
+  String get calendarEndOptional => '終了（任意）';
+  @override
+  String get calendarRemindMe => 'リマインド';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes分前';
+  @override
+  String get calendarLinePreview => '書き込まれる行';
+  @override
+  String get calendarAddEvent => '予定を追加';
+  @override
+  String get calendarOpenInFile => 'calendar.txt で開く';
+  @override
+  String calendarReminderAt(String time) => '$time にリマインド';
+  @override
+  String get journalCalendarTitle => 'カレンダー';
+  @override
+  String get journalEventTimesTitle => '予定の時刻';
+  @override
+  String get journalEventTimesSubtitle => 'ファイルに書かれたまま、またはあなたの地域の時計で';
+  @override
+  String get journalEventTimesWritten => '書かれたまま';
+  @override
+  String get journalEventTimesClock => '時計';
+  @override
   String get themeEditorRolesHint => '各色の名前は書き出したファイルと同じです';
   @override
   String get themeEditorDiscardTitle => '変更を破棄';
@@ -747,6 +777,12 @@ final class JapaneseStrings extends Strings {
   String get searchNoMatches => '一致はありません';
   @override
   String get searchLoadMore => 'もっと表示';
+  @override
+  String searchTasksAndEvents(int count) => 'タスクと予定 · $count';
+  @override
+  String searchNotes(int count) => 'ノート · $count';
+  @override
+  String searchGoal(String scope) => '$scopeの目標';
 
   // Replace (T-M3-10).
   @override
@@ -1458,6 +1494,10 @@ final class JapaneseStrings extends Strings {
   String get journalShowCalendar => 'カレンダーを表示';
   @override
   String get journalFabToday => '今日の日記エントリ';
+  @override
+  String get journalEvents => 'イベント';
+  @override
+  String journalWeek(int week) => '第$week週';
   @override
   String journalDueOn(String day) => '$day が期限';
   @override
@@ -3199,6 +3239,10 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get homeTasksEmpty => '未完了のタスクはありません。';
+  @override
+  String get homeTileEventsToday => '今日のイベント';
+  @override
+  String get homeEventsEmpty => '今日のイベントはありません';
 
   @override
   String get homeNotesEmpty => 'まだノートがありません。';

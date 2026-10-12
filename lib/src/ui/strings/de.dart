@@ -277,6 +277,37 @@ final class GermanStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Aufgabenlisten (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalender';
+  @override
+  String get calendarNewEvent => 'Neuer Termin';
+  @override
+  String get calendarAdd => 'Hinzufügen';
+  @override
+  String get calendarEndOptional => 'Ende optional';
+  @override
+  String get calendarRemindMe => 'Erinnern';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes Min. vorher';
+  @override
+  String get calendarLinePreview => 'Die Zeile, wie sie geschrieben wird';
+  @override
+  String get calendarAddEvent => 'Termin hinzufügen';
+  @override
+  String get calendarOpenInFile => 'In calendar.txt öffnen';
+  @override
+  String calendarReminderAt(String time) => 'Erinnerung um $time';
+  @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Terminzeiten';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Wie in der Datei geschrieben oder als Uhr in Ihrer Zeitzone';
+  @override
+  String get journalEventTimesWritten => 'Wie geschrieben';
+  @override
+  String get journalEventTimesClock => 'Uhr';
+  @override
   String get themeEditorRolesHint =>
       'Jede Farbe heißt so, wie die exportierte Datei sie nennt';
   @override
@@ -791,6 +822,12 @@ final class GermanStrings extends Strings {
   String get searchNoMatches => 'Keine Treffer';
   @override
   String get searchLoadMore => 'Mehr anzeigen';
+  @override
+  String searchTasksAndEvents(int count) => 'Aufgaben und Termine · $count';
+  @override
+  String searchNotes(int count) => 'Notizen · $count';
+  @override
+  String searchGoal(String scope) => 'Ziel: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1574,6 +1611,10 @@ final class GermanStrings extends Strings {
   String get journalShowCalendar => 'Kalender zeigen';
   @override
   String get journalFabToday => 'Heutiger Tagebucheintrag';
+  @override
+  String get journalEvents => 'Termine';
+  @override
+  String journalWeek(int week) => 'Woche $week';
   @override
   String journalDueOn(String day) => 'Fällig am $day';
   @override
@@ -3564,6 +3605,10 @@ final class GermanStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Keine offenen Aufgaben.';
+  @override
+  String get homeTileEventsToday => 'Termine heute';
+  @override
+  String get homeEventsEmpty => 'Heute keine Termine';
 
   @override
   String get homeNotesEmpty => 'Noch keine Notizen.';

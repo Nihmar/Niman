@@ -272,6 +272,37 @@ final class LatvianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Uzdevumu saraksti (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendārs';
+  @override
+  String get calendarNewEvent => 'Jauns notikums';
+  @override
+  String get calendarAdd => 'Pievienot';
+  @override
+  String get calendarEndOptional => 'Beigas (nav obligāts)';
+  @override
+  String get calendarRemindMe => 'Atgādināt';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min. pirms';
+  @override
+  String get calendarLinePreview => 'Rinda, kā tā tiks ierakstīta';
+  @override
+  String get calendarAddEvent => 'Pievienot notikumu';
+  @override
+  String get calendarOpenInFile => 'Atvērt calendar.txt';
+  @override
+  String calendarReminderAt(String time) => 'Atgādinājums plkst. $time';
+  @override
+  String get journalCalendarTitle => 'Kalendārs';
+  @override
+  String get journalEventTimesTitle => 'Notikumu laiki';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kā ierakstīts failā vai kā pulkstenis jūsu laika joslā';
+  @override
+  String get journalEventTimesWritten => 'Kā ierakstīts';
+  @override
+  String get journalEventTimesClock => 'Pulkstenis';
+  @override
   String get themeEditorRolesHint =>
       'Katrai krāsai ir tāds nosaukums kā eksportētajā failā';
   @override
@@ -787,6 +818,12 @@ final class LatvianStrings extends Strings {
   String get searchNoMatches => 'Nav rezultātu';
   @override
   String get searchLoadMore => 'Rādīt vairāk';
+  @override
+  String searchTasksAndEvents(int count) => 'Uzdevumi un notikumi · $count';
+  @override
+  String searchNotes(int count) => 'Piezīmes · $count';
+  @override
+  String searchGoal(String scope) => 'Mērķis: $scope';
 
   // Replace (T-M3-10).
   @override
@@ -1547,6 +1584,10 @@ final class LatvianStrings extends Strings {
   String get journalShowCalendar => 'Rādīt kalendāru';
   @override
   String get journalFabToday => 'Šodienas dienasgrāmatas ieraksts';
+  @override
+  String get journalEvents => 'Notikumi';
+  @override
+  String journalWeek(int week) => 'Nedēļa $week';
   @override
   String journalDueOn(String day) => 'Termiņš $day';
   @override
@@ -3482,6 +3523,10 @@ final class LatvianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nav atvērtu uzdevumu.';
+  @override
+  String get homeTileEventsToday => 'Šodienas notikumi';
+  @override
+  String get homeEventsEmpty => 'Šodien nav notikumu';
 
   @override
   String get homeNotesEmpty => 'Piezīmju vēl nav.';
