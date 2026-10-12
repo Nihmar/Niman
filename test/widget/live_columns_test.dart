@@ -3,6 +3,7 @@
 // `source` line by line, `live` side by side where the pane allows.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -217,6 +218,99 @@ void main() {
       );
       expect(right.top, lessThan(60));
       expect(right.top, greaterThanOrEqualTo(-1));
+    });
+  });
+
+  group('caret motion', () {
+    int offsetOf(String text, {bool end = false}) =>
+        _two.indexOf(text) + (end ? text.length : 0);
+
+    testWidgets("Right at a column's end goes to the next column", (
+      tester,
+    ) async {
+      final state = await _pump(tester, _two, live: true);
+      state.placeCaret(offsetOf('second left', end: true));
+      await tester.pump();
+      state.moveCaretBy(CaretMotion.characterRight);
+      await tester.pump();
+      expect(state.selection.extent, offsetOf('## Right'));
+      state.moveCaretBy(CaretMotion.characterLeft);
+      await tester.pump();
+      expect(state.selection.extent, offsetOf('second left', end: true));
+    });
+
+    testWidgets("Home at a column's start steps onto its opener", (
+      tester,
+    ) async {
+      final state = await _pump(tester, _two, live: true);
+      state.placeCaret(offsetOf('## Left'));
+      await tester.pump();
+      state.moveCaretBy(CaretMotion.lineStart);
+      await tester.pump();
+      expect(state.selection.extent, offsetOf('## Left') - 1);
+    });
+
+    testWidgets("Down from a column's last line goes to the next one", (
+      tester,
+    ) async {
+      final state = await _pump(tester, _two, live: true);
+      state.placeCaret(offsetOf('second left'));
+      await tester.pump();
+      await tester.pump();
+      state.moveCaretVertically(1);
+      await tester.pump();
+      expect(
+        state.selection.extent,
+        inInclusiveRange(offsetOf('## Right'), offsetOf('## Right', end: true)),
+      );
+      // From the last column's last line, out of the block.
+      state.placeCaret(offsetOf('first right'));
+      await tester.pump();
+      await tester.pump();
+      state.moveCaretVertically(1);
+      await tester.pump();
+      expect(
+        state.selection.extent,
+        inInclusiveRange(offsetOf('After'), offsetOf('After', end: true)),
+      );
+      // Up from the first column's first line, out of it the other way.
+      state.placeCaret(offsetOf('## Left'));
+      await tester.pump();
+      await tester.pump();
+      state.moveCaretVertically(-1);
+      await tester.pump();
+      expect(
+        state.selection.extent,
+        lessThanOrEqualTo(offsetOf('# Top', end: true)),
+      );
+    });
+
+    testWidgets('Down inside a column stays in it', (tester) async {
+      final state = await _pump(tester, _two, live: true);
+      state.placeCaret(offsetOf('first left'));
+      await tester.pump();
+      await tester.pump();
+      state.moveCaretVertically(1);
+      await tester.pump();
+      expect(
+        state.selection.extent,
+        inInclusiveRange(
+          offsetOf('second left'),
+          offsetOf('second left', end: true),
+        ),
+      );
+    });
+
+    testWidgets('stacked, Right steps over a band and stops on a blank', (
+      tester,
+    ) async {
+      final state = await _pump(tester, _two, live: true, width: 400);
+      state.placeCaret(offsetOf('second left', end: true));
+      await tester.pump();
+      state.moveCaretBy(CaretMotion.characterRight);
+      await tester.pump();
+      // Past the closer's band, onto the blank line between the columns.
+      expect(state.selection.extent, offsetOf('second left', end: true) + 5);
     });
   });
 }

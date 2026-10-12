@@ -1221,13 +1221,74 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         motion == CaretMotion.lineStart ||
         motion == CaretMotion.lineTextStart ||
         motion == CaretMotion.lineEnd;
-    final extent = _inCell(next.extent, into, keepLine: line);
+    var extent = _inCell(next.extent, into, keepLine: line);
+    // A fence out of the caret's reach is no stop (#729): the caret steps
+    // over it, in the direction it travels — Right at a column's last
+    // character goes to the next column's first. Home at the start of a
+    // column's first line steps onto the column's opener, the keyboard's
+    // way to its width.
+    if (!line &&
+        motion != CaretMotion.documentStart &&
+        motion != CaretMotion.documentEnd) {
+      extent = _overFences(_selection.extent, extent, into);
+    } else if (motion == CaretMotion.lineStart ||
+        motion == CaretMotion.lineTextStart) {
+      extent = _homeOntoOpener(_selection.extent, extent);
+    }
     if (extent != next.extent) {
       next = extend
           ? SelectionModel(anchor: next.anchor, extent: extent)
           : SelectionModel.at(extent);
     }
     _applySelection(next, reveal: true);
+  }
+
+  /// Whether line [line] is one `live` draws as nothing to stop on (#729):
+  /// a fence line's band, or a blank line between two side-by-side
+  /// columns, which no column draws.
+  bool _passedOver(int line) {
+    if (!widget.hideMarkers || line < 0 || line >= lineCount) return false;
+    final block = _styler?.blockOf(line);
+    if (block == null) return false;
+    if (_fenceOf(line, block) != null) return true;
+    final host = _folds.hostOf(line);
+    final layout = host == null ? null : _hosts.openedOn(host);
+    return layout != null && layout.run.columnOf(line) < 0;
+  }
+
+  /// Where a caret going [direction]-wards from [from] to [to] lands: [to],
+  /// unless that is on a line [_passedOver] the caret was not on, and then
+  /// the first character past the run of such lines that way.
+  int _overFences(int from, int to, int direction) {
+    if (!widget.hideMarkers || direction == 0) return to;
+    final buffer = widget.buffer;
+    final start = buffer.lineOf(from);
+    var line = buffer.lineOf(to);
+    if (line == start || !_passedOver(line)) return to;
+    while (_passedOver(line) && line != start) {
+      final next = line + (direction > 0 ? 1 : -1);
+      if (next < 0 || next >= lineCount) return to;
+      line = next;
+    }
+    return direction > 0
+        ? buffer.offsetOfLine(line)
+        : buffer.offsetOfLine(line) + buffer.lineLengthAt(line);
+  }
+
+  /// Where Home from [from] lands, when [to] is where it would: the end of
+  /// a column's opener, revealed, when the caret is already at the start
+  /// of the column's first line (#729).
+  int _homeOntoOpener(int from, int to) {
+    if (!widget.hideMarkers) return to;
+    final buffer = widget.buffer;
+    final line = buffer.lineOf(from);
+    if (line == 0 || from != buffer.offsetOfLine(line)) return to;
+    final above = _styler?.blockOf(line - 1);
+    if (above?.divRole != DivRole.opensColumn ||
+        _fenceOf(line - 1, above) == null) {
+      return to;
+    }
+    return buffer.offsetOfLine(line - 1) + buffer.lineLengthAt(line - 1);
   }
 
   /// The source line at the top of the view, and how far into its rows
@@ -1285,11 +1346,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The caret's own row is the row height — its line's, at the scale it is
     // drawn at — and the point is the middle of the row [rows] away, so a
     // boundary never decides which row it is.
-    final point = Offset(
-      caret.center.dx,
-      caret.center.dy + rows * caret.height,
-    );
-    final offset = _paintedOffsetAt(point);
+    var point = Offset(caret.center.dx, caret.center.dy + rows * caret.height);
+    final caretLine = _caretLineIndex;
+    // At a side-by-side column's edge the motion follows the source: on
+    // to the next column, or out of the block (#729).
+    final edge = _acrossColumns(caretLine, point, rows, caret);
+    if (edge != null) {
+      _moveCaretTo(edge, extend: extend);
+      return;
+    }
+    var offset = _paintedOffsetAt(point);
+    // A fence's band is no row to stop on: the point goes on past it.
+    for (
+      var step = 0;
+      step < 4 &&
+          offset != null &&
+          widget.buffer.lineOf(offset) != caretLine &&
+          _passedOver(widget.buffer.lineOf(offset));
+      step++
+    ) {
+      point = point.translate(0, rows.sign * _band);
+      offset = _paintedOffsetAt(point);
+    }
     if (offset != null) {
       _moveCaretTo(offset, extend: extend);
       return;
@@ -1318,6 +1396,85 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (landed != null) _moveCaretTo(landed, extend: extend);
     });
     WidgetsBinding.instance.scheduleFrame();
+  }
+
+  /// Where Up or Down — [rows] rows, the point it asks being [point] —
+  /// takes a caret on [line], in [caret], when that line is in a
+  /// side-by-side column and the point is past the column's own lines: the
+  /// next column's first line going down, the previous one's last going
+  /// up, at the same distance from the column's left edge; past the last
+  /// column the line after the block, past the first the line before it.
+  /// Null when the motion stays in the column, or the line is in none.
+  int? _acrossColumns(int line, Offset point, int rows, Rect caret) {
+    final host = line < 0 ? null : _folds.hostOf(line);
+    final layout = host == null ? null : _hosts.openedOn(host);
+    final box = _noteBox;
+    if (layout == null || box == null) return null;
+    final run = layout.run;
+    final column = run.columnOf(line);
+    if (column < 0) return null;
+    final landed = _paintedOffsetAt(point);
+    if (landed != null) {
+      final at = widget.buffer.lineOf(landed);
+      if (run.columnOf(at) == column && !_passedOver(at)) return null;
+    } else {
+      // Not drawn: past the column's lines only if its first or last
+      // line is the caret's.
+      final lines = run.columns[column];
+      final first = _firstOf(lines, forward: true);
+      final last = _firstOf(lines, forward: false);
+      if (rows > 0 ? line != last : line != first) return null;
+    }
+    final down = rows > 0;
+    final next = column + (down ? 1 : -1);
+    final int target;
+    double? x;
+    if (next < 0 || next >= run.columns.length) {
+      target = down ? run.end : run.start - 1;
+      if (target < 0 || target >= lineCount) return null;
+      x = box.globalToLocal(caret.center).dx;
+    } else {
+      target = _firstOf(run.columns[next], forward: down);
+      final from = LiveHosts.leftOf(layout, column, _gap);
+      final to = LiveHosts.leftOf(layout, next, _gap);
+      x = box.globalToLocal(caret.center).dx - from + to;
+    }
+    return _offsetOnLine(target, x, top: down);
+  }
+
+  /// The first line of [column] a caret stops on, going [forward], or its
+  /// last going back: past its fences.
+  int _firstOf(LiveColumn column, {required bool forward}) {
+    if (forward) {
+      var line = column.start;
+      while (line < column.end - 1 && _passedOver(line)) {
+        line++;
+      }
+      return line;
+    }
+    var line = column.end - 1;
+    while (line > column.start && _passedOver(line)) {
+      line--;
+    }
+    return line;
+  }
+
+  /// The offset on [line] at [x], the note box's, on its first visual row
+  /// ([top]) or its last; the line's start or end when it is not drawn.
+  int _offsetOnLine(int line, double x, {required bool top}) {
+    final buffer = widget.buffer;
+    final paragraph = _paragraphAt(line);
+    final box = _noteBox;
+    if (paragraph == null || !paragraph.attached || box == null) {
+      return top
+          ? buffer.offsetOfLine(line)
+          : buffer.offsetOfLine(line) + buffer.lineLengthAt(line);
+    }
+    final global = box.localToGlobal(Offset(x, 0));
+    final local = paragraph.globalToLocal(global);
+    final y = top ? 1.0 : paragraph.size.height - 1;
+    return buffer.offsetOfLine(line) +
+        paragraph.getPositionForOffset(Offset(local.dx, y)).offset;
   }
 
   /// Where the caret goes from [offset] in `live`: [offset] itself, unless
