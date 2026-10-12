@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -322,5 +323,54 @@ void main() {
     expect(state.platformWindowStart, _two.indexOf('## Right'));
     final text = tester.testTextInput.editingState!['text']! as String;
     expect(text, '## Right${String.fromCharCode(10)}first right');
+  });
+
+  testWidgets("a code block's copy button stands at its column's edge", (
+    tester,
+  ) async {
+    const note = '''
+:::: columns
+::: column
+Left
+:::
+::: column
+```
+code
+```
+:::
+::::
+After
+''';
+    await _pump(tester, note, live: true);
+    final left = tester.getRect(find.text('Left', findRichText: true));
+    final code = tester.getRect(find.text('code', findRichText: true));
+    final button = tester.getRect(find.byType(CodeCopyButton));
+    expect(button.left, greaterThan(code.left));
+    expect(button.left, greaterThan(left.right));
+    final pane = tester.getRect(find.byType(MarkdownSourceView));
+    expect(button.right, lessThanOrEqualTo(pane.right));
+  });
+
+  testWidgets('a table in a column is fitted to the column', (tester) async {
+    const note = '''
+:::: columns
+::: {.column width="30%"}
+| A | B |
+|---|---|
+| a long cell of words that wraps | another long cell of words |
+:::
+::: column
+Right
+:::
+::::
+''';
+    await _pump(tester, note, live: true);
+    final right = tester.getRect(find.text('Right', findRichText: true));
+    final cell = find.textContaining('another', findRichText: true).first;
+    expect(tester.getRect(cell).right, lessThan(right.left));
+    // Fitted to the column, its cells wrap, each one a paragraph of its
+    // own; at the pane's width the row would be one line.
+    final text = (cell.evaluate().first.widget as RichText).text;
+    expect(text.toPlainText(), isNot(contains('wraps')));
   });
 }

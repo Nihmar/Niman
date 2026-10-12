@@ -2113,6 +2113,23 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
   }
 
+  /// The width line [line] is drawn at: its side-by-side column's, or the
+  /// text's.
+  double _widthOf(int line) {
+    final placed = _columnOfLine(line);
+    if (placed == null) return _textWidth;
+    return placed.layout.widths[placed.column];
+  }
+
+  /// The side-by-side block and column line [line] is drawn in, or null.
+  ({LiveLayout layout, int column})? _columnOfLine(int line) {
+    final host = _folds.hostOf(line);
+    final layout = host == null ? null : _hosts.openedOn(host);
+    if (layout == null) return null;
+    final column = layout.run.columnOf(line);
+    return column < 0 ? null : (layout: layout, column: column);
+  }
+
   /// What line [index], in [block], draws as a fence line in `live`, or
   /// null: a column's fence and a `columns` block's are bands, an unknown
   /// div's are the text they are.
@@ -3487,7 +3504,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       ),
       theme: widget.theme,
       scaler: _scaler,
-      budget: _textWidth,
+      // A table in a side-by-side column is fitted to the column (#729).
+      budget: _widthOf(index),
       reveal: inside ? at : null,
       revealLine: inside ? at.line : null,
       tokensFrom: _styler,
@@ -4412,12 +4430,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         line++;
         continue;
       }
-      final start = _heights.offsetOf(_folds.rowOf(block.startLine));
-      if (start >= bottom) break;
+      // A block of a side-by-side column is placed by its column (#729):
+      // the columns' blocks are not in the order they stand, so one below
+      // the pane ends nothing.
+      final placed = _columnOfLine(block.startLine);
+      final start = _lineBox(block.startLine).top - widget.padding.top;
+      if (start >= bottom) {
+        if (placed == null) break;
+        line = math.max(block.endLine, line + 1);
+        continue;
+      }
       final info = block.fenceInfo?.toLowerCase();
       if (block.kind == BlockKind.fencedCode && info != 'mermaid') {
-        final last = _folds.rowOf(block.endLine - 1);
-        final end = _heights.offsetOf(last) + _heights.extentFor(last);
+        final lastBox = _lineBox(block.endLine - 1);
+        final end = lastBox.top + lastBox.height - widget.padding.top;
         final y =
             math.min(
               math.max(start, top),
@@ -4428,7 +4454,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           final at = overlay.globalToLocal(
             note.localToGlobal(
               Offset(
-                note.size.width - _rightInset - codeCopySize - codeCopyMargin,
+                (placed == null
+                        ? note.size.width - _rightInset
+                        : _leftInset +
+                              _gutter +
+                              LiveHosts.leftOf(
+                                placed.layout,
+                                placed.column,
+                                _gap,
+                              ) +
+                              placed.layout.widths[placed.column]) -
+                    codeCopySize -
+                    codeCopyMargin,
                 y - top,
               ),
             ),
