@@ -207,14 +207,17 @@ do not offer one through the file API the app uses, so **Date created** is
 the modification time there — the order above it (see
 [platforms](platforms.md#date-created)).
 
-A click on a row puts the keyboard's cursor there, and the pane takes the
-keys: the arrows walk the rows, `Home`/`End` and `PgUp`/`PgDn` jump,
-`Enter` opens the note (or opens the folder) the cursor is on, `←` closes
-an open folder or steps out to the row that holds it, `→` opens a closed
-one or steps into the rows under it, `F2` renames and `Delete` deletes the
-row the cursor is on. A modified key is left to the app's own shortcuts —
-`Alt`+`←`/`→` walk the notes' history and `Ctrl`+`Shift`+`PgUp`/`PgDn`
-the journal — so the walk never shadows one.
+A click on a folder's row takes the keyboard — the pane is where the walk
+goes on from — and the arrows then walk the rows: `Home`/`End` and
+`PgUp`/`PgDn` jump, `Enter` opens the note (or opens the folder) the
+cursor is on, `←` closes an open folder or steps out to the row that holds
+it, `→` opens a closed one or steps into the rows under it, `F2` renames
+and `Delete` deletes the row the cursor is on. A click on a note is a note
+to write in: it opens and the caret goes into it, and the pane keeps no
+keys a note would need — on a desktop, where the keyboard is always there
+(a phone's is the **Keyboard on open** setting's). A modified key is left
+to the app's own shortcuts — `Alt`+`←`/`→` walk the notes' history and
+`Ctrl`+`Shift`+`PgUp`/`PgDn` the journal — so the walk never shadows one.
 
 ### The grid
 
@@ -244,10 +247,11 @@ pane folds the middle crumbs into a `…` that opens them as a menu.
 Nothing else changes: the row menu (long press, right-click) is the same
 one, a drag moves a tile onto another tile or a crumb as a row does, and
 a rename on Linux and Windows lays the tree's own field over the tile.
-A click puts the keyboard's cursor on a tile, as it does on a row, and
-the walk is the tree's own: the arrows, `Home`/`End` and `PgUp`/`PgDn`
-move it, `Enter` opens or enters, `F2` renames and `Delete` deletes the
-tile the cursor is on. A modified key stays the app's here too.
+A click on a folder's tile takes the keyboard, as a folder's row does; a
+click on a note's opens it with the caret in it. The walk is the tree's
+own: the arrows, `Home`/`End` and `PgUp`/`PgDn` move the cursor, `Enter`
+opens or enters, `F2` renames and `Delete` deletes the tile the cursor is
+on. A modified key stays the app's here too.
 
 Entering a folder writes the move through to the tree: the folder is
 selected and opened there, so switching back to the list finds it. The

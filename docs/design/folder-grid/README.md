@@ -97,14 +97,24 @@ tree; the tree itself does not change.
 
 - **The walk is the pane's, not the grid's.** The mockups gave the grid a
   keyboard and left the list view without one; that is a gap, not a shape.
-  Both views take the keyboard the same way — a click puts the cursor on
-  the row or the tile, the arrows and Home/End/PgUp/PgDn move it, Enter
-  opens, F2 and Delete act on it. The tree's left and right arrows close
-  and open folders, which a flat grid has no use for.
+  Both views take the keyboard the same way — a click on a folder's row or
+  tile, or Tab — and the arrows and Home/End/PgUp/PgDn move the cursor,
+  Enter opens, F2 and Delete act on it. The tree's left and right arrows
+  close and open folders, which a flat grid has no use for. A row or a
+  tile is not a focus stop of its own: the pane's node is, so the keys
+  always land on the walk.
+- **A note is for writing, not for walking.** A click on a note (or the
+  pane's Enter) opens it and the shell asks its editor for the caret, so
+  you can write where you clicked — on a desktop, where the keyboard is
+  always there; a phone's IME is the "keyboard on open" setting's. The
+  pane takes no keys a note would need.
 - **A modified key is the app's.** Alt+Left/Right walk the notes' history
   and Ctrl+Shift+PageUp/PageDown the journal, even while the pane holds
   the cursor, so the walk claims the plain key or none (Alt+Up stays the
   grid's own way up).
 - **The switch starts in the tree's selection every time**, not only the
   first: the grid's own folder is what it holds while it is the pane on
-  screen, and the two never drift apart across switches.
+  screen, so the two never drift apart across switches — a rename or a
+  move is the tree's selection following it, not the grid tracking it
+  itself, and a folder that is gone falls back to the nearest ancestor
+  that still exists.

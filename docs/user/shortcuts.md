@@ -101,7 +101,10 @@ engine), which takes the keyboard when you switch to it or click it:
 - `Home` / `End`, with `Ctrl` or without — start and end of the note
 
 The Files pane — the tree or the grid, whichever view is on — takes the
-keyboard when you click a row or a tile:
+keyboard when you click a folder's row or tile, or with `Tab`. A click on
+a note (or `Enter` on it) opens it and puts the caret in it, ready to
+write, on a desktop; a phone's keyboard follows its own **Keyboard on
+open** setting:
 
 - `↑` / `↓` — walk the rows; `Home` / `End` and `PageUp` / `PageDown`
   jump
