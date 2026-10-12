@@ -2,6 +2,7 @@
 // editor's T-M3-07): the link opens, a plain click stays a click.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
@@ -146,5 +147,48 @@ void main() {
     await _pump(tester, note, mode);
     await _click(tester, _atOffset(mode, 1), control: true);
     expect(_opened, isEmpty);
+  });
+
+  // #725: the pointer is the text caret over a link until the opening
+  // modifier is held — and then it is the hand, with the pointer standing
+  // still, because the key event is what changed.
+  both('the hand tells the link before the click', (tester, mode) async {
+    await _pump(tester, note, mode);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    MouseCursor? cursor() =>
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1);
+    final link = _atOffset(mode, 9);
+    await mouse.addPointer(location: link);
+    await mouse.moveTo(link);
+    await tester.pump();
+    expect(
+      cursor(),
+      SystemMouseCursors.text,
+      reason: 'no modifier: the click would only place the caret',
+    );
+
+    // The modifier goes down where the mouse is, and the cursor answers
+    // without a move.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(cursor(), SystemMouseCursors.click);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(cursor(), SystemMouseCursors.text);
+
+    // Plain text promises nothing, modifier or not.
+    await mouse.moveTo(_atOffset(mode, 1));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(cursor(), SystemMouseCursors.text);
+
+    // And moving onto the link with the modifier held shows the hand.
+    await mouse.moveTo(link);
+    await tester.pump();
+    expect(cursor(), SystemMouseCursors.click);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(cursor(), SystemMouseCursors.text);
   });
 }

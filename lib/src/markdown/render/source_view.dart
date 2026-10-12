@@ -612,6 +612,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     SystemMouseCursors.text,
   );
 
+  /// Where the mouse last was over the note, or null when it left: the
+  /// opening modifier going down re-asks the cursor about it (#725).
+  Offset? _hoverPosition;
+
   /// Whether the mouse is on one of the handles, off the table itself.
   bool _overTableHandles = false;
 
@@ -686,6 +690,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.templateCheck?.addListener(_onSpellingChanged);
     widget.findMatches?.addListener(_onSpellingChanged);
     widget.mathCache?.addListener(_onMathTypeset);
+    // The hand over a Ctrl-clickable link appears when the modifier goes
+    // down, and goes when it comes up, without waiting for a move (#725).
+    HardwareKeyboard.instance.addHandler(_modifierChanged);
     // A window hidden to the tray draws nothing (#512): the caret blink is
     // its own frame source and stops while it is off screen.
     WindowVisibility.shown.addListener(_onWindowShown);
@@ -903,6 +910,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       ..removeListener(_onMenuChanged)
       ..dispose();
     _insetReveal?.cancel();
+    HardwareKeyboard.instance.removeHandler(_modifierChanged);
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
   }
@@ -2052,8 +2060,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onPointerHover: (event) {
       // The offset under the pointer is one question, asked once and shared:
       // both the table and the cursor read it (#505). Outside `live` there is
-      // no box and no table, and neither the offset nor the note is touched.
-      final offset = widget.hideMarkers ? offsetAt(event.position) : null;
+      // no box and no table, and neither the offset nor the note is touched —
+      // unless the opening modifier is down, when the cursor asks about the
+      // link under the pointer (#725).
+      _hoverPosition = event.position;
+      final offset = widget.hideMarkers || _linkModifier()
+          ? offsetAt(event.position)
+          : null;
       _hoverTableAt(offset, event.position);
       _hoverCursorAt(offset, event.position);
     },
@@ -2112,11 +2125,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   bool _openLinkAt(int offset) {
     final open = widget.onOpenLink;
     if (open == null) return false;
-    final keyboard = HardwareKeyboard.instance;
-    final mac = defaultTargetPlatform == TargetPlatform.macOS;
-    if (!(mac ? keyboard.isMetaPressed : keyboard.isControlPressed)) {
-      return false;
-    }
+    if (!_linkModifier()) return false;
     final link = linkAt(offset);
     if (link == null) return false;
     placeCaret(offset);
@@ -3343,6 +3352,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                     cursor: cursor,
                     onExit: (_) {
                       _leaveTable();
+                      _hoverPosition = null;
                       _hoverCursor.value = SystemMouseCursors.text;
                     },
                     child: child,
@@ -3618,16 +3628,53 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _tableOverlay.show();
   }
 
+  /// Whether the opening modifier is held: Control, or Command on a Mac.
+  static bool _linkModifier() {
+    final keyboard = HardwareKeyboard.instance;
+    return defaultTargetPlatform == TargetPlatform.macOS
+        ? keyboard.isMetaPressed
+        : keyboard.isControlPressed;
+  }
+
+  /// The modifier went down or up while the pointer sat still: the cursor
+  /// answers it where it is, without a move to wait for (#725).
+  bool _modifierChanged(KeyEvent event) {
+    if (event.logicalKey != LogicalKeyboardKey.controlLeft &&
+        event.logicalKey != LogicalKeyboardKey.controlRight &&
+        event.logicalKey != LogicalKeyboardKey.metaLeft &&
+        event.logicalKey != LogicalKeyboardKey.metaRight) {
+      return false;
+    }
+    final point = _hoverPosition;
+    if (point != null && mounted) {
+      final offset = widget.hideMarkers || _linkModifier()
+          ? offsetAt(point)
+          : null;
+      _hoverCursorAt(offset, point);
+    }
+    return false;
+  }
+
   /// Points the mouse's cursor at what is under it: the hand over a drawn task
-  /// box, which a click ticks, the text's everywhere else (#505).
+  /// box, which a click ticks, or over a link the opening modifier would open
+  /// (#505, #725), the text's everywhere else.
   ///
   /// [offset] is the offset under the pointer, computed once by the hover
   /// handler and shared with [_hoverTableAt].
   void _hoverCursorAt(int? offset, Offset global) {
-    final cursor = _overTaskBox(offset, global)
+    final cursor = _overTaskBox(offset, global) || _overLink(offset)
         ? SystemMouseCursors.click
         : SystemMouseCursors.text;
     if (_hoverCursor.value != cursor) _hoverCursor.value = cursor;
+  }
+
+  /// Whether the opening modifier over [offset] would open a link: the very
+  /// predicate the Ctrl+click runs ([_openLinkAt]), so the hand and the click
+  /// cannot disagree (#725). [linkAt] reads the one line the offset is on.
+  bool _overLink(int? offset) {
+    if (offset == null || widget.onOpenLink == null) return false;
+    if (!_linkModifier()) return false;
+    return linkAt(offset) != null;
   }
 
   /// Whether a drawn task box is under [global]. Reads the one line the point
