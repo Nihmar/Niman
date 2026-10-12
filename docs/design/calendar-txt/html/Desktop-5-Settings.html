@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings, Journal, Event times</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fill{fill:currentColor;stroke:none}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A}
+.pj{color:#C08CD8}.cx{color:#7CA0E6}.tg{color:#6FB8CC}.kv{color:#7FD1C4}.tm{color:#D8A56B}.as{color:#6B7079;font-style:italic}
+.mono{font-family:'IBM Plex Mono',monospace}
+.tree{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB;white-space:nowrap}
+.tree.sel{background:#363B44;color:#F2EDE5}
+.tab{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 13px;border-radius:7px;font-size:13px;color:#C8C3BA}
+.tab.on{background:#383D46;color:#F2EDE5}
+.railbtn{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.railbtn.on{background:#363B44;color:#587CD3}
+.ibtn{width:32px;height:32px;border-radius:8px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.ibtn.on{background:#363B44;color:#F2EDE5}
+.obtn{height:32px;padding:0 12px;border-radius:16px;border:1px solid #4A4F59;background:transparent;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tbtn{height:32px;padding:0 10px;border-radius:16px;border:0;background:transparent;color:#A9C0F0;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.fbtn{height:32px;padding:0 16px;border-radius:16px;border:0;background:#587CD3;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px}
+.ev{display:flex;align-items:center;gap:10px;min-height:32px;border-radius:6px;font-size:13.5px;padding:0 4px}
+.ev .t{width:86px;flex:none;color:#D8A56B;font-variant-numeric:tabular-nums}
+.ev .x{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goal{display:flex;gap:10px;font-size:13px;line-height:22px}
+.goal .h{width:64px;flex:none;color:#A8C77A}
+.due{display:flex;align-items:center;gap:10px;height:32px;font-size:13.5px;padding:0 4px}
+.rec{display:flex;align-items:center;gap:12px;height:40px;padding:0 4px}
+.rec .d{width:40px;text-align:center;line-height:1.1}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;flex-direction:column;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+  <div style="height:40px;flex:none;background:#2C3037;display:flex;align-items:center;gap:6px;padding:0 0 0 4px">
+    <button class="ibtn" style="width:40px;height:40px;color:#587CD3" aria-label="Show the tree"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16" stroke-width="2.6"/></svg></button>
+    <div class="tab">2026-10-12</div><div class="tab on">Settings <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px;color:#A6A29A" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    <div style="flex:1"></div>
+    <button class="ibtn" aria-label="Side panel"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button>
+    <div style="width:12px"></div>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Minimize"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Maximize"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Close"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div style="flex:1;min-height:0;display:flex">
+    <nav style="width:48px;flex:none;background:#2C3037;display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px">
+      <div class="railbtn" title="Files"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg></div><div class="railbtn" title="Todo"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 12l3 3 5-6"/></svg></div><div class="railbtn" title="Search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></div><div class="railbtn" title="Home"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/></svg></div><div class="railbtn" title="Quick note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></div>
+      <div style="flex:1"></div>
+      <div class="railbtn on" title="Settings"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></div>
+    </nav>
+    
+    <main style="flex:1;min-width:0;display:flex;background:#23262B">
+      <nav style="width:236px;flex:none;padding:16px 8px;display:flex;flex-direction:column;gap:2px;border-right:1px solid #2C3037"><div class="lab" style="padding:4px 12px 8px">App</div><div class="tree" style="height:36px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>Appearance</div><div class="tree" style="height:36px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Editor</div><div class="tree" style="height:36px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>Text recognition</div><div class="lab" style="padding:16px 12px 2px">Library Notes</div><div class="sub" style="padding:0 12px 8px;font-size:12px">applies only to this library</div><div class="tree" style="height:36px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg>Folders and paths</div><div class="tree" style="height:36px;background:#363B44;color:#F2EDE5;font-weight:500"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#587CD3" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>Journal</div><div class="tree" style="height:36px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/></svg>Navigation</div><div class="tree" style="height:36px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Trash and history</div><div class="tree" style="height:36px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Reminders</div></nav>
+      <section style="flex:1;overflow:hidden;padding:24px 40px">
+        <div style="max-width:640px">
+          <h1 style="margin:0 0 6px;font-size:22px;font-weight:600">Journal</h1>
+          <p class="sub" style="margin:0 0 18px;font-size:14px;line-height:1.5">One note per day, made from a template the first time you open that day. These settings travel with the library.</p>
+          <div style="background:#2C3037;border-radius:14px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;min-height:44px;border-bottom:1px solid #23262B">
+              <div style="flex:1">Journal folder<div class="sub">Where the entries go</div></div>
+              <div style="display:flex;align-items:center;gap:6px;color:#D9D4CB">Journal</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;min-height:44px;border-bottom:1px solid #23262B">
+              <div style="flex:1">Entry name<div class="sub">Today’s entry: Journal/2026/2026-10-12.md</div></div>
+              <div style="display:flex;align-items:center;gap:6px;color:#D9D4CB">YYYY/YYYY-MM-DD</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;min-height:44px;border-bottom:1px solid #23262B">
+              <div style="flex:1">Template<div class="sub">What a new entry starts with</div></div>
+              <div style="display:flex;align-items:center;gap:6px;color:#D9D4CB">None: a heading with the date</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;min-height:44px;">
+              <div style="flex:1">A new day starts at<div class="sub">Up late? At 04:00 the night stays on the day before</div></div>
+              <div style="display:flex;align-items:center;gap:6px;color:#D9D4CB">04:00</div>
+            </div>
+          </div>
+          <div class="lab" style="margin:24px 16px 6px;font-size:12px">Calendar</div>
+          <div style="background:#2C3037;border-radius:14px;overflow:hidden">
+            <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid #23262B">
+              <div>Event times<div class="sub">How the journal and the Home show the times in calendar.txt. The file keeps what was written.</div></div>
+              <div style="display:flex;border:1px solid #4A4F59;border-radius:20px;overflow:hidden;width:max-content">
+                <button style="height:36px;padding:0 16px;border:0;background:#3A4A6E;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;gap:8px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>As written <span class="tm" style="font-weight:400">9-12</span></button>
+                <button style="height:36px;padding:0 16px;border:0;border-left:1px solid #4A4F59;background:transparent;color:#D9D4CB;font:500 13px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;gap:8px">Clock <span class="tm" style="font-weight:400">09:00–12:00</span></button>
+              </div>
+              <div class="sub" style="font-size:12.5px">Clock uses the app language’s 12- or 24-hour time; a time marked Z is shown in this device’s time zone.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;min-height:44px">
+              <svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 15h6M9 18h4"/></svg>
+              <div style="flex:1">calendar.txt<div class="sub">At the library root, beside todo.txt. Add event creates it.</div></div>
+              <button class="obtn">Open</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+  </div>
+</div>
+</body>
+</html>

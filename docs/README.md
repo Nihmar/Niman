@@ -15,7 +15,7 @@ Four folders, by what each holds:
   Markdown surface and its parity and huge-note measurements, the rejected
   editor alternatives, the workspace, the EPUB reader, annotations, the
   note history and WebDAV sync, the index scan, transcription, text
-  recognition, and web capture. See [records/README.md](records/README.md).
+  recognition, web capture, and `calendar.txt`. See [records/README.md](records/README.md).
 - **`design/`** — the mockups a round was agreed against, one folder per
   round, with the decision each screen records.
 
