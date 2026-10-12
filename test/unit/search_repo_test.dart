@@ -21,8 +21,9 @@ void main() {
   Future<void> indexNote(String path, String title, String body) async {
     File(p.join(root.path, path)).writeAsStringSync(body);
     await db.customStatement(
-      'INSERT INTO notes (path, parent, name, is_dir, size, modified, title) '
-      'VALUES (?1, 0, ?2, 0, ?3, 0, ?4)',
+      'INSERT INTO notes '
+      '(path, parent, name, is_dir, size, modified, created, title) '
+      'VALUES (?1, 0, ?2, 0, ?3, 0, 0, ?4)',
       [path, path.split('/').last, body.length, title],
     );
     final row = await db

@@ -1140,10 +1140,21 @@ final class MacedonianStrings extends Strings {
   String get showListTooltip => 'Прикажи листа';
   @override
   String get editRawTooltip => 'Уреди сурово';
+
   @override
-  String get sortAscTooltip => 'Сортирај А-Џ';
+  String get sortLastModified => 'Последна измена';
+
   @override
-  String get sortDescTooltip => 'Сортирај Џ-А';
+  String get sortDateCreated => 'Датум на создавање';
+
+  @override
+  String get sortSize => 'Големина';
+
+  @override
+  String get sortAscending => 'Растечки';
+
+  @override
+  String get sortDescending => 'Опаѓачки';
   @override
   String get newNoteTitle => 'Нова белешка';
   @override

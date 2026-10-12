@@ -26,6 +26,7 @@ final class _FakeFieldSource implements FieldSource {
     isDir: false,
     size: 0,
     modified: DateTime.fromMillisecondsSinceEpoch(0),
+    created: DateTime.fromMillisecondsSinceEpoch(0),
     pinned: false,
   );
 

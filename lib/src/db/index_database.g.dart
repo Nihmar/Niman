@@ -81,6 +81,17 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _createdMeta = const VerificationMeta(
+    'created',
+  );
+  @override
+  late final GeneratedColumn<DateTime> created = GeneratedColumn<DateTime>(
+    'created',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _sha256Meta = const VerificationMeta('sha256');
   @override
   late final GeneratedColumn<String> sha256 = GeneratedColumn<String>(
@@ -130,6 +141,7 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     isDir,
     size,
     modified,
+    created,
     sha256,
     title,
     date,
@@ -198,6 +210,14 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     } else if (isInserting) {
       context.missing(_modifiedMeta);
     }
+    if (data.containsKey('created')) {
+      context.handle(
+        _createdMeta,
+        created.isAcceptableOrUnknown(data['created']!, _createdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdMeta);
+    }
     if (data.containsKey('sha256')) {
       context.handle(
         _sha256Meta,
@@ -259,6 +279,10 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}modified'],
       )!,
+      created: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created'],
+      )!,
       sha256: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}sha256'],
@@ -306,6 +330,12 @@ class Note extends DataClass implements Insertable<Note> {
   /// Last modification time as seen on disk.
   final DateTime modified;
 
+  /// When the file was created (#726), as the file system reports it at
+  /// scan time: on Windows the stat's creation time, and where the system
+  /// keeps none — Linux and macOS through `dart:io` — the modification
+  /// time, so the order reads as "last modified" there.
+  final DateTime created;
+
   /// Content sha256, hex; files only (directories are null).
   final String? sha256;
 
@@ -330,6 +360,7 @@ class Note extends DataClass implements Insertable<Note> {
     required this.isDir,
     required this.size,
     required this.modified,
+    required this.created,
     this.sha256,
     this.title,
     this.date,
@@ -345,6 +376,7 @@ class Note extends DataClass implements Insertable<Note> {
     map['is_dir'] = Variable<bool>(isDir);
     map['size'] = Variable<int>(size);
     map['modified'] = Variable<DateTime>(modified);
+    map['created'] = Variable<DateTime>(created);
     if (!nullToAbsent || sha256 != null) {
       map['sha256'] = Variable<String>(sha256);
     }
@@ -367,6 +399,7 @@ class Note extends DataClass implements Insertable<Note> {
       isDir: Value(isDir),
       size: Value(size),
       modified: Value(modified),
+      created: Value(created),
       sha256: sha256 == null && nullToAbsent
           ? const Value.absent()
           : Value(sha256),
@@ -391,6 +424,7 @@ class Note extends DataClass implements Insertable<Note> {
       isDir: serializer.fromJson<bool>(json['isDir']),
       size: serializer.fromJson<int>(json['size']),
       modified: serializer.fromJson<DateTime>(json['modified']),
+      created: serializer.fromJson<DateTime>(json['created']),
       sha256: serializer.fromJson<String?>(json['sha256']),
       title: serializer.fromJson<String?>(json['title']),
       date: serializer.fromJson<DateTime?>(json['date']),
@@ -408,6 +442,7 @@ class Note extends DataClass implements Insertable<Note> {
       'isDir': serializer.toJson<bool>(isDir),
       'size': serializer.toJson<int>(size),
       'modified': serializer.toJson<DateTime>(modified),
+      'created': serializer.toJson<DateTime>(created),
       'sha256': serializer.toJson<String?>(sha256),
       'title': serializer.toJson<String?>(title),
       'date': serializer.toJson<DateTime?>(date),
@@ -423,6 +458,7 @@ class Note extends DataClass implements Insertable<Note> {
     bool? isDir,
     int? size,
     DateTime? modified,
+    DateTime? created,
     Value<String?> sha256 = const Value.absent(),
     Value<String?> title = const Value.absent(),
     Value<DateTime?> date = const Value.absent(),
@@ -435,6 +471,7 @@ class Note extends DataClass implements Insertable<Note> {
     isDir: isDir ?? this.isDir,
     size: size ?? this.size,
     modified: modified ?? this.modified,
+    created: created ?? this.created,
     sha256: sha256.present ? sha256.value : this.sha256,
     title: title.present ? title.value : this.title,
     date: date.present ? date.value : this.date,
@@ -449,6 +486,7 @@ class Note extends DataClass implements Insertable<Note> {
       isDir: data.isDir.present ? data.isDir.value : this.isDir,
       size: data.size.present ? data.size.value : this.size,
       modified: data.modified.present ? data.modified.value : this.modified,
+      created: data.created.present ? data.created.value : this.created,
       sha256: data.sha256.present ? data.sha256.value : this.sha256,
       title: data.title.present ? data.title.value : this.title,
       date: data.date.present ? data.date.value : this.date,
@@ -466,6 +504,7 @@ class Note extends DataClass implements Insertable<Note> {
           ..write('isDir: $isDir, ')
           ..write('size: $size, ')
           ..write('modified: $modified, ')
+          ..write('created: $created, ')
           ..write('sha256: $sha256, ')
           ..write('title: $title, ')
           ..write('date: $date, ')
@@ -483,6 +522,7 @@ class Note extends DataClass implements Insertable<Note> {
     isDir,
     size,
     modified,
+    created,
     sha256,
     title,
     date,
@@ -499,6 +539,7 @@ class Note extends DataClass implements Insertable<Note> {
           other.isDir == this.isDir &&
           other.size == this.size &&
           other.modified == this.modified &&
+          other.created == this.created &&
           other.sha256 == this.sha256 &&
           other.title == this.title &&
           other.date == this.date &&
@@ -513,6 +554,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
   final Value<bool> isDir;
   final Value<int> size;
   final Value<DateTime> modified;
+  final Value<DateTime> created;
   final Value<String?> sha256;
   final Value<String?> title;
   final Value<DateTime?> date;
@@ -525,6 +567,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.isDir = const Value.absent(),
     this.size = const Value.absent(),
     this.modified = const Value.absent(),
+    this.created = const Value.absent(),
     this.sha256 = const Value.absent(),
     this.title = const Value.absent(),
     this.date = const Value.absent(),
@@ -538,6 +581,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     required bool isDir,
     required int size,
     required DateTime modified,
+    required DateTime created,
     this.sha256 = const Value.absent(),
     this.title = const Value.absent(),
     this.date = const Value.absent(),
@@ -547,7 +591,8 @@ class NotesCompanion extends UpdateCompanion<Note> {
        name = Value(name),
        isDir = Value(isDir),
        size = Value(size),
-       modified = Value(modified);
+       modified = Value(modified),
+       created = Value(created);
   static Insertable<Note> custom({
     Expression<int>? id,
     Expression<String>? path,
@@ -556,6 +601,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Expression<bool>? isDir,
     Expression<int>? size,
     Expression<DateTime>? modified,
+    Expression<DateTime>? created,
     Expression<String>? sha256,
     Expression<String>? title,
     Expression<DateTime>? date,
@@ -569,6 +615,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
       if (isDir != null) 'is_dir': isDir,
       if (size != null) 'size': size,
       if (modified != null) 'modified': modified,
+      if (created != null) 'created': created,
       if (sha256 != null) 'sha256': sha256,
       if (title != null) 'title': title,
       if (date != null) 'date': date,
@@ -584,6 +631,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Value<bool>? isDir,
     Value<int>? size,
     Value<DateTime>? modified,
+    Value<DateTime>? created,
     Value<String?>? sha256,
     Value<String?>? title,
     Value<DateTime?>? date,
@@ -597,6 +645,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
       isDir: isDir ?? this.isDir,
       size: size ?? this.size,
       modified: modified ?? this.modified,
+      created: created ?? this.created,
       sha256: sha256 ?? this.sha256,
       title: title ?? this.title,
       date: date ?? this.date,
@@ -628,6 +677,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     if (modified.present) {
       map['modified'] = Variable<DateTime>(modified.value);
     }
+    if (created.present) {
+      map['created'] = Variable<DateTime>(created.value);
+    }
     if (sha256.present) {
       map['sha256'] = Variable<String>(sha256.value);
     }
@@ -653,6 +705,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
           ..write('isDir: $isDir, ')
           ..write('size: $size, ')
           ..write('modified: $modified, ')
+          ..write('created: $created, ')
           ..write('sha256: $sha256, ')
           ..write('title: $title, ')
           ..write('date: $date, ')
@@ -2215,6 +2268,7 @@ typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
   required bool isDir,
   required int size,
   required DateTime modified,
+  required DateTime created,
   Value<String?> sha256,
   Value<String?> title,
   Value<DateTime?> date,
@@ -2228,6 +2282,7 @@ typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<bool> isDir,
   Value<int> size,
   Value<DateTime> modified,
+  Value<DateTime> created,
   Value<String?> sha256,
   Value<String?> title,
   Value<DateTime?> date,
@@ -2275,6 +2330,11 @@ class $$NotesTableFilterComposer
 
   ColumnFilters<DateTime> get modified => $composableBuilder(
     column: $table.modified,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get created => $composableBuilder(
+    column: $table.created,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2343,6 +2403,11 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get created => $composableBuilder(
+    column: $table.created,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get sha256 => $composableBuilder(
     column: $table.sha256,
     builder: (column) => ColumnOrderings(column),
@@ -2394,6 +2459,9 @@ class $$NotesTableAnnotationComposer
   GeneratedColumn<DateTime> get modified =>
       $composableBuilder(column: $table.modified, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get created =>
+      $composableBuilder(column: $table.created, builder: (column) => column);
+
   GeneratedColumn<String> get sha256 =>
       $composableBuilder(column: $table.sha256, builder: (column) => column);
 
@@ -2442,6 +2510,7 @@ class $$NotesTableTableManager
                 Value<bool> isDir = const Value.absent(),
                 Value<int> size = const Value.absent(),
                 Value<DateTime> modified = const Value.absent(),
+                Value<DateTime> created = const Value.absent(),
                 Value<String?> sha256 = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<DateTime?> date = const Value.absent(),
@@ -2454,6 +2523,7 @@ class $$NotesTableTableManager
                 isDir: isDir,
                 size: size,
                 modified: modified,
+                created: created,
                 sha256: sha256,
                 title: title,
                 date: date,
@@ -2468,6 +2538,7 @@ class $$NotesTableTableManager
                 required bool isDir,
                 required int size,
                 required DateTime modified,
+                required DateTime created,
                 Value<String?> sha256 = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<DateTime?> date = const Value.absent(),
@@ -2480,6 +2551,7 @@ class $$NotesTableTableManager
                 isDir: isDir,
                 size: size,
                 modified: modified,
+                created: created,
                 sha256: sha256,
                 title: title,
                 date: date,

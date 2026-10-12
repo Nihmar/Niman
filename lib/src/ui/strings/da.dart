@@ -1127,10 +1127,21 @@ final class DanishStrings extends Strings {
   String get showListTooltip => 'Vis liste';
   @override
   String get editRawTooltip => 'Rediger rå';
+
   @override
-  String get sortAscTooltip => 'Sortér A-Æ';
+  String get sortLastModified => 'Senest ændret';
+
   @override
-  String get sortDescTooltip => 'Sortér Æ-A';
+  String get sortDateCreated => 'Oprettelsesdato';
+
+  @override
+  String get sortSize => 'Størrelse';
+
+  @override
+  String get sortAscending => 'Stigende';
+
+  @override
+  String get sortDescending => 'Faldende';
   @override
   String get newNoteTitle => 'Ny note';
   @override

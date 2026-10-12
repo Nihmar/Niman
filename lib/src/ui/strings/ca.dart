@@ -1150,10 +1150,21 @@ final class CatalanStrings extends Strings {
   String get showListTooltip => 'Mostra la llista';
   @override
   String get editRawTooltip => 'Edita en brut';
+
   @override
-  String get sortAscTooltip => 'Ordena A-Z';
+  String get sortLastModified => 'Darrera modificació';
+
   @override
-  String get sortDescTooltip => 'Ordena Z-A';
+  String get sortDateCreated => 'Data de creació';
+
+  @override
+  String get sortSize => 'Mida';
+
+  @override
+  String get sortAscending => 'Ascendent';
+
+  @override
+  String get sortDescending => 'Descendent';
   @override
   String get newNoteTitle => 'Nota nova';
   @override

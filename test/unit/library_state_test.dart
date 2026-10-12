@@ -439,8 +439,21 @@ void main() {
     // Descending flips the name sort (dirs stay first).
     await first.setTreeSort(TreeSort.nameDesc);
     expect(
-      (await first.children(0, nameDesc: true)).map((n) => n.name).toList(),
+      (await first.children(
+        0,
+        sort: TreeSort.nameDesc,
+      )).map((n) => n.name).toList(),
       ['c.md', 'b.md', 'a.md'],
+    );
+    // A later order round-trips as its own id, direction and all (#726).
+    await first.setTreeSort(TreeSort.sizeDesc);
+    expect(
+      (await first.children(
+        0,
+        sort: TreeSort.sizeDesc,
+      )).map((n) => n.name).toList(),
+      ['a.md', 'b.md', 'c.md'],
+      reason: 'the three size 1, the name breaking ties',
     );
     await first.close();
     await first.dispose();
@@ -448,7 +461,7 @@ void main() {
     // A fresh controller (an app restart) sees the persisted choice.
     final second = makeController();
     await second.open(root.path, create: false);
-    expect(await second.treeSort, TreeSort.nameDesc);
+    expect(await second.treeSort, TreeSort.sizeDesc);
     await second.close();
     await second.dispose();
   });

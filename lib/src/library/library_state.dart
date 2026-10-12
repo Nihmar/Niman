@@ -291,10 +291,13 @@ final class LibraryController implements LibrarySession {
   /// Empty while no library is open: there is no index to read, and the
   /// tree UI asks for the root's children before the first open.
   @override
-  Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
+  Future<List<Note>> children(
+    int parentId, {
+    TreeSort sort = TreeSort.nameAsc,
+  }) async {
     final db = _indexDb;
     if (db == null) return const [];
-    return await NoteDao(db).children(parentId, nameDesc: nameDesc);
+    return await NoteDao(db).children(parentId, sort: sort);
   }
 
   @override
@@ -307,11 +310,11 @@ final class LibraryController implements LibrarySession {
   @override
   Future<List<Note>> tree(
     Iterable<String> expandedPaths, {
-    bool nameDesc = false,
+    TreeSort sort = TreeSort.nameAsc,
   }) async {
     final db = _indexDb;
     if (db == null) return const [];
-    return await NoteDao(db).tree(expandedPaths, nameDesc: nameDesc);
+    return await NoteDao(db).tree(expandedPaths, sort: sort);
   }
 
   /// Every indexed folder, path-ordered (for move-target pickers).

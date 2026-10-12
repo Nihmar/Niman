@@ -29,14 +29,17 @@ void main() {
 
   /// A bare [NoteTree] over the given controller — the cache is the unit
   /// under test, so the shell around it is not.
-  Widget treeFor(FakeLibrarySession controller, {bool nameDesc = false}) {
+  Widget treeFor(
+    FakeLibrarySession controller, {
+    TreeSort sort = TreeSort.nameAsc,
+  }) {
     return MaterialApp(
       home: Scaffold(
         body: NoteTree(
           controller: controller,
           selectedPath: null,
           expanded: const <String>{},
-          nameDesc: nameDesc,
+          sort: sort,
           onToggle: (_) {},
           onSelect: (_) {},
         ),
@@ -63,7 +66,7 @@ void main() {
 
     // Only the direction changes: same controller, same revision, same
     // expanded set. The chevron's flag flips and the rows have to follow it.
-    await tester.pumpWidget(treeFor(session, nameDesc: true));
+    await tester.pumpWidget(treeFor(session, sort: TreeSort.nameDesc));
     await tester.pumpAndSettle();
 
     expect(topOf(tester, 'charlie'), lessThan(topOf(tester, 'bravo')));
@@ -134,6 +137,39 @@ void main() {
     await settle(tester);
   }
 
+  // #726: the chevron opens the orders; choosing one keeps the direction
+  // that is on, and the two entries under the divider turn it over.
+  testWidgets('the menu chooses the order and the way', (tester) async {
+    await openShell(tester);
+    session
+      ..setNoteMetrics('charlie.md', size: 300)
+      ..setNoteMetrics('bravo.md', size: 200)
+      ..setNoteMetrics('alpha.md', size: 100);
+    await settle(tester);
+    expect(topOf(tester, 'alpha'), lessThan(topOf(tester, 'bravo')));
+
+    // A different field, in the direction that was on.
+    await tester.tap(find.byKey(const Key('toggle-sort')));
+    await settle(tester);
+    expect(find.byKey(const Key('sort-size')), findsOneWidget);
+    expect(find.byKey(const Key('sort-created')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('sort-size')));
+    await settle(tester);
+    expect(await session.treeSort, TreeSort.sizeAsc);
+    expect(topOf(tester, 'alpha'), lessThan(topOf(tester, 'bravo')));
+    expect(topOf(tester, 'bravo'), lessThan(topOf(tester, 'charlie')));
+
+    // The way turns over from the same menu, the chevron with it.
+    await tester.tap(find.byKey(const Key('toggle-sort')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('sort-descending')));
+    await settle(tester);
+    expect(await session.treeSort, TreeSort.sizeDesc);
+    expect(chevronTurns(tester), 0.5);
+    expect(topOf(tester, 'charlie'), lessThan(topOf(tester, 'bravo')));
+    expect(topOf(tester, 'bravo'), lessThan(topOf(tester, 'alpha')));
+  });
+
   testWidgets('a settings write that fails leaves the two consistent', (
     tester,
   ) async {
@@ -145,6 +181,8 @@ void main() {
     // order the index already answered.
     session.failTreeSort = true;
     await tester.tap(find.byKey(const Key('toggle-sort')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('sort-descending')));
     await settle(tester);
 
     expect(await session.treeSort, TreeSort.nameAsc, reason: 'write failed');

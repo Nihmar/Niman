@@ -75,6 +75,7 @@ final class _Tags implements TagSource {
       isDir: false,
       size: 0,
       modified: DateTime(2026),
+      created: DateTime(2026),
       pinned: false,
     ),
   ];

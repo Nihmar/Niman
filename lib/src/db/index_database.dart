@@ -40,6 +40,12 @@ class Notes extends Table {
   /// Last modification time as seen on disk.
   DateTimeColumn get modified => dateTime()();
 
+  /// When the file was created (#726), as the file system reports it at
+  /// scan time: on Windows the stat's creation time, and where the system
+  /// keeps none — Linux and macOS through `dart:io` — the modification
+  /// time, so the order reads as "last modified" there.
+  DateTimeColumn get created => dateTime()();
+
   /// Content sha256, hex; files only (directories are null).
   TextColumn get sha256 => text().nullable()();
 
@@ -240,8 +246,10 @@ class IndexDatabase extends _$IndexDatabase {
   /// end of its walk (#302). v6: embeds and images are edges too, so a
   /// rename finds the notes that cite an attachment (#507) — an index
   /// written before holds none for them, and is wiped and rescanned.
+  /// v7: the created column, for the tree's date-created order (#726) —
+  /// the same wipe and rescan.
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the

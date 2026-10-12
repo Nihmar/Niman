@@ -1120,10 +1120,21 @@ final class EstonianStrings extends Strings {
   String get showListTooltip => 'Kuva loetelu';
   @override
   String get editRawTooltip => 'Muuda toorelt';
+
   @override
-  String get sortAscTooltip => 'Sorteeri A–Z';
+  String get sortLastModified => 'Viimati muudetud';
+
   @override
-  String get sortDescTooltip => 'Sorteeri Z–A';
+  String get sortDateCreated => 'Loomiskuupäev';
+
+  @override
+  String get sortSize => 'Suurus';
+
+  @override
+  String get sortAscending => 'Kasvavalt';
+
+  @override
+  String get sortDescending => 'Kahanevalt';
   @override
   String get newNoteTitle => 'Uus märge';
   @override

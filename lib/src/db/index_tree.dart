@@ -405,6 +405,8 @@ final class IndexTree {
             isDir: Value(e.isDir),
             size: Value(e.size),
             modified: Value(e.modified),
+            created: Value(e.created),
+
             sha256: Value(shas[e.rel]),
           ),
         );
@@ -444,6 +446,8 @@ final class IndexTree {
             isDir: const Value(false),
             size: Value(e.size),
             modified: Value(e.modified),
+            created: Value(e.created),
+
             sha256: Value(sha),
           ),
         );
@@ -471,6 +475,8 @@ final class IndexTree {
               isDir: e.isDir,
               size: e.size,
               modified: e.modified,
+              created: e.created,
+
               sha256: Value(shas[e.rel]),
             ),
           );
@@ -632,6 +638,7 @@ final class IndexTree {
                 isDir: true,
                 size: 0,
                 modified: probe.modified,
+                created: probe.created,
               ),
             );
       } else {
@@ -696,6 +703,8 @@ final class IndexTree {
               isDir: false,
               size: probe.size,
               modified: probe.modified,
+              created: probe.created,
+
               sha256: Value(sha),
             ),
           );
@@ -721,6 +730,8 @@ final class IndexTree {
         isDir: const Value(false),
         size: Value(probe.size),
         modified: Value(probe.modified),
+        created: Value(probe.created),
+
         sha256: Value(sha),
       ),
     );

@@ -574,8 +574,13 @@ abstract base class Strings {
   String get selectANote;
   String get showListTooltip;
   String get editRawTooltip;
-  String get sortAscTooltip;
-  String get sortDescTooltip;
+
+  /// The tree's sort menu (#726): the orders and the way.
+  String get sortLastModified;
+  String get sortDateCreated;
+  String get sortSize;
+  String get sortAscending;
+  String get sortDescending;
   String get newNoteTitle;
   String get newItemTooltip;
   String get closeMenuTooltip;

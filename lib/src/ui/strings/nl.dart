@@ -1136,10 +1136,21 @@ final class DutchStrings extends Strings {
   String get showListTooltip => 'Lijst tonen';
   @override
   String get editRawTooltip => 'Ruwe tekst bewerken';
+
   @override
-  String get sortAscTooltip => 'Sorteren A-Z';
+  String get sortLastModified => 'Laatst gewijzigd';
+
   @override
-  String get sortDescTooltip => 'Sorteren Z-A';
+  String get sortDateCreated => 'Aanmaakdatum';
+
+  @override
+  String get sortSize => 'Grootte';
+
+  @override
+  String get sortAscending => 'Oplopend';
+
+  @override
+  String get sortDescending => 'Aflopend';
   @override
   String get newNoteTitle => 'Nieuwe notitie';
   @override

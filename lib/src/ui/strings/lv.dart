@@ -1129,10 +1129,21 @@ final class LatvianStrings extends Strings {
   String get showListTooltip => 'Rādīt sarakstu';
   @override
   String get editRawTooltip => 'Rediģēt neapstrādātu';
+
   @override
-  String get sortAscTooltip => 'Kārtot A–Z';
+  String get sortLastModified => 'Pēdējās izmaiņas';
+
   @override
-  String get sortDescTooltip => 'Kārtot Z–A';
+  String get sortDateCreated => 'Izveides datums';
+
+  @override
+  String get sortSize => 'Izmērs';
+
+  @override
+  String get sortAscending => 'Augošā';
+
+  @override
+  String get sortDescending => 'Dilstošā';
   @override
   String get newNoteTitle => 'Jauna piezīme';
   @override

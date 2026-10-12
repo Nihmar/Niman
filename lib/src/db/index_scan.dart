@@ -23,6 +23,7 @@ final class DiskEntry {
     required this.isDir,
     required this.size,
     required this.modified,
+    required this.created,
   });
 
   /// Library-relative slash-separated path.
@@ -39,6 +40,10 @@ final class DiskEntry {
 
   /// Last modification time.
   final DateTime modified;
+
+  /// Creation time as the file system reports it (#726); the modification
+  /// time where it reports none ([createdOf]).
+  final DateTime created;
 }
 
 /// One disk walk's result: the entries found, plus the log lines the walk
@@ -89,6 +94,7 @@ void _walkDir(
         isDir: true,
         size: 0,
         modified: st.modified,
+        created: createdOf(st),
       ),
     );
   }
@@ -109,6 +115,7 @@ void _walkDir(
           isDir: false,
           size: st.size,
           modified: st.modified,
+          created: createdOf(st),
         ),
       );
     } else {
@@ -129,6 +136,7 @@ final class DirListing {
     required this.rel,
     required this.name,
     required this.modified,
+    required this.created,
     required this.entries,
     required this.logs,
     this.failed = false,
@@ -142,6 +150,9 @@ final class DirListing {
 
   /// The directory's own last-modification time.
   final DateTime modified;
+
+  /// The directory's own creation time (#726), read like a file's.
+  final DateTime created;
 
   /// The direct children — files and folders — by name. Hidden entries are
   /// not here; the walk skips them and says so in [logs].
@@ -194,7 +205,9 @@ DirListing _listOne(String root, String abs, List<String> pending) {
   final entries = <DiskEntry>[];
   final subdirs = <DiskEntry>[];
   try {
-    final modified = Directory(abs).statSync().modified;
+    final stat = Directory(abs).statSync();
+    final modified = stat.modified;
+    final created = createdOf(stat);
     final children = Directory(abs).listSync(followLinks: false)
       ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
     for (final ent in children) {
@@ -211,6 +224,7 @@ DirListing _listOne(String root, String abs, List<String> pending) {
           isDir: true,
           size: 0,
           modified: st.modified,
+          created: createdOf(st),
         );
         entries.add(entry);
         subdirs.add(entry);
@@ -223,6 +237,7 @@ DirListing _listOne(String root, String abs, List<String> pending) {
             isDir: false,
             size: st.size,
             modified: st.modified,
+            created: createdOf(st),
           ),
         );
       } else {
@@ -238,6 +253,7 @@ DirListing _listOne(String root, String abs, List<String> pending) {
       rel: rel,
       name: name,
       modified: modified,
+      created: created,
       entries: entries,
       logs: logs,
     );
@@ -247,6 +263,7 @@ DirListing _listOne(String root, String abs, List<String> pending) {
       rel: rel,
       name: name,
       modified: DateTime.fromMillisecondsSinceEpoch(0),
+      created: DateTime.fromMillisecondsSinceEpoch(0),
       entries: const [],
       logs: logs,
       failed: true,
@@ -355,6 +372,7 @@ final class DiskProbe {
     required this.exists,
     required this.isDir,
     required this.modified,
+    required this.created,
     this.size = 0,
   });
 
@@ -369,7 +387,19 @@ final class DiskProbe {
 
   /// The last-modification time.
   final DateTime modified;
+
+  /// The creation time (#726) where the file system reports one — on
+  /// Windows the stat's `changed` is the creation time — and the
+  /// modification time where it does not, which is Linux and macOS
+  /// through `dart:io`.
+  final DateTime created;
 }
+
+/// When [st] says the file was created (#726): Windows keeps a birth
+/// time — `dart:io` exposes it as the stat's `changed` — and the other
+/// systems keep none, so the modification time stands in there.
+DateTime createdOf(FileStat st) =>
+    Platform.isWindows ? st.changed : st.modified;
 
 /// Probes [paths] (exists? directory? size? mtime?) — top-level so it can
 /// run on a background isolate via Isolate.run: on Android every stat is
@@ -392,6 +422,7 @@ DiskProbe _probePath(String path) {
     isDir: isDir,
     size: type == FileSystemEntityType.file ? st.size : 0,
     modified: st.modified,
+    created: createdOf(st),
   );
 }
 

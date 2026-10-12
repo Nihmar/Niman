@@ -1136,10 +1136,21 @@ final class BasqueStrings extends Strings {
   String get showListTooltip => 'Erakutsi zerrenda';
   @override
   String get editRawTooltip => 'Editatu krudoa';
+
   @override
-  String get sortAscTooltip => 'Ordenatu A-Z';
+  String get sortLastModified => 'Azken aldaketa';
+
   @override
-  String get sortDescTooltip => 'Ordenatu Z-A';
+  String get sortDateCreated => 'Sorrera-data';
+
+  @override
+  String get sortSize => 'Tamaina';
+
+  @override
+  String get sortAscending => 'Gorantz';
+
+  @override
+  String get sortDescending => 'Beherantz';
   @override
   String get newNoteTitle => 'Ohar berria';
   @override

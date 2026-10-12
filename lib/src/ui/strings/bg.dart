@@ -1139,10 +1139,21 @@ final class BulgarianStrings extends Strings {
   String get showListTooltip => 'Покажи списъка';
   @override
   String get editRawTooltip => 'Редактирай изходен код';
+
   @override
-  String get sortAscTooltip => 'Сортирай А–Я';
+  String get sortLastModified => 'Последна промяна';
+
   @override
-  String get sortDescTooltip => 'Сортирай Я–А';
+  String get sortDateCreated => 'Дата на създаване';
+
+  @override
+  String get sortSize => 'Размер';
+
+  @override
+  String get sortAscending => 'По възходящ ред';
+
+  @override
+  String get sortDescending => 'По низходящ ред';
   @override
   String get newNoteTitle => 'Нова бележка';
   @override
