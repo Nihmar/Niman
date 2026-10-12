@@ -24,6 +24,7 @@ import 'dart:isolate';
 
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark.dart';
+import 'package:niman/src/core/files.dart' show toStoredSecond;
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';
@@ -106,31 +107,36 @@ final class CompanionNotes {
       return [
         for (final entry in dir.listSync())
           if (entry is File && entry.path.toLowerCase().endsWith('.md'))
-            (
-              path: p.relative(entry.path, from: root).replaceAll(r'\', '/'),
-              modified: entry.statSync().modified.millisecondsSinceEpoch,
-            ),
+            if (entry.statSync() case final stat)
+              (
+                path: p.relative(entry.path, from: root).replaceAll(r'\', '/'),
+                size: stat.size,
+                modified: stat.modified,
+              ),
       ];
     });
-    final stale = <({String path, int modified})>[];
+    final stale = <String>[];
     for (final entry in listed) {
       final indexed = await ops.find(entry.path);
+      // The index's own test of a row against the disk (`index_tree.dart`):
+      // the same size, and the mtime in whole seconds — the precision the
+      // row keeps it at. Against the stat's milliseconds, any file written
+      // off a whole second read as newer than its row, and every delete
+      // re-read the whole folder (#776).
       if (indexed != null &&
-          indexed.modified.millisecondsSinceEpoch >= entry.modified) {
+          indexed.size == entry.size &&
+          indexed.modified == toStoredSecond(entry.modified)) {
         continue; // the index already answered for this note
       }
-      stale.add(entry);
+      stale.add(entry.path);
     }
     if (stale.isEmpty) return const {};
     // Read in the isolate: the notes are not in the index yet, so the
     // ops' own read (which goes through it) cannot find them.
     final texts = await Isolate.run(
       () => [
-        for (final entry in stale)
-          (
-            path: entry.path,
-            text: File(p.join(root, entry.path)).readAsStringSync(),
-          ),
+        for (final path in stale)
+          (path: path, text: File(p.join(root, path)).readAsStringSync()),
       ],
     );
     final out = <String, List<String>>{};
