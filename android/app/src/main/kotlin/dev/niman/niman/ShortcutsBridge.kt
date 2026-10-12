@@ -57,16 +57,20 @@ class ShortcutsBridge(private val activity: Activity) :
      * delivered straight away. The extra is removed either way, so the
      * action is not replayed when the activity is recreated with the same
      * intent (a rotation, a process restore).
+     *
+     * Returns whether [intent] was a shortcut's, so the caller knows the
+     * intent was Niman's own rather than another component's.
      */
-    fun handleIntent(intent: Intent?, running: Boolean) {
-        if (intent == null || intent.action != ACTION) return
-        val id = intent.getStringExtra(EXTRA_ID) ?: return
+    fun handleIntent(intent: Intent?, running: Boolean): Boolean {
+        if (intent == null || intent.action != ACTION) return false
+        val id = intent.getStringExtra(EXTRA_ID) ?: return true
         intent.removeExtra(EXTRA_ID)
         if (running) {
             channel?.invokeMethod("shortcut", id)
         } else {
             launchAction = id
         }
+        return true
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
