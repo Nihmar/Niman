@@ -502,11 +502,23 @@ final class _NoteViewState extends State<NoteView>
   @override
   void convertListToMindMap() => _commands.convertListToMindMap();
 
+  /// Gives the editor the keyboard back after a command — unless a window
+  /// or a dialog stands over the note (#772). The cheatsheet's window
+  /// inserts while it stays open; Flutter lets a route below take the focus
+  /// when asked, and the window's Esc and the typing would then go to the
+  /// note behind its barrier. When the window closes, its route hands the
+  /// focus back to the one below.
+  void _refocus() {
+    if (!mounted) return;
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+    _focus.requestFocus();
+  }
+
   /// The note's editing commands: the toolbar's, the format keys', the
   /// context menu's, the Tools sheet's and the spelling review's.
   late final NoteEditCommands _commands = NoteEditCommands(
     surface: () => _surface,
-    focus: _focus.requestFocus,
+    focus: _refocus,
     context: () => context,
     mounted: () => mounted,
     canInsert: () => canInsert,
