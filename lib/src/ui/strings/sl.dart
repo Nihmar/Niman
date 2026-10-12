@@ -1819,8 +1819,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get deletedMessage => 'Izbrisano';
   @override
-  String deleteToTrashConfirm(String name) => '$name se prenese v .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name se trajno izbriše';
   @override
   String get chooseDestination => 'Izberi cilj';

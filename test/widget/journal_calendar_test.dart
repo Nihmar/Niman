@@ -96,6 +96,22 @@ void main() {
       expect(find.byKey(const Key('journal-day-card')), findsNothing);
     });
 
+    testWidgets('in the dock an empty day is picked, then made there '
+        '(#712)', (tester) async {
+      final opened = await pump(tester, large: false);
+      await tester.tap(find.byKey(const Key('journal-day-20')));
+      await tester.pump();
+
+      // No dialog, no immediate open: the offer sits under the calendar.
+      expect(opened, isEmpty);
+      expect(find.byKey(const Key('journal-dock-create')), findsOne);
+      expect(find.text('No entry for this day'), findsOne);
+      expect(find.text('Sunday 20 September 2026'), findsOne);
+
+      await tester.tap(find.byKey(const Key('journal-dock-create-button')));
+      expect(opened, [(DateTime(2026, 9, 20), true)]);
+    });
+
     testWidgets('on the phone a day is picked, then opened or made', (
       tester,
     ) async {

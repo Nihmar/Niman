@@ -13,8 +13,30 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/island.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/strings.dart';
+
+/// The command a destination runs on a key, if any.
+AppCommand? _tabCommand(ShellTab tab) => switch (tab) {
+  ShellTab.files => AppCommand.tabFiles,
+  ShellTab.todo => AppCommand.tabTodo,
+  ShellTab.search => AppCommand.tabSearch,
+  ShellTab.quickNote => AppCommand.tabQuickNote,
+  ShellTab.settings => AppCommand.tabSettings,
+  ShellTab.home => AppCommand.tabHome,
+};
+
+/// [destination]'s label, with the key that selects it when a keyboard is
+/// there to press it (#712).
+String _railLabel(ShellDestination destination) {
+  final command = _tabCommand(destination.tab);
+  return tooltipWithKeys(
+    destination.label,
+    command == null ? null : AppKeyMap.current.value.bindingOf(command),
+  );
+}
 
 /// The app tabs: the bottom navigation bar on the narrow layout, the
 /// fixed left rail on the wide layout (T-PP-14).
@@ -299,7 +321,7 @@ final class ShellRail extends StatelessWidget {
               buttonKey: Key('rail-${destination.name}'),
               icon: destination.icon,
               selectedIcon: destination.selectedIcon,
-              label: destination.label,
+              label: _railLabel(destination),
               selected: current == destination.tab,
               onPressed: () => onDestinationSelected(destination.tab),
             ),
@@ -316,7 +338,7 @@ final class ShellRail extends StatelessWidget {
             buttonKey: Key('rail-${settings.name}'),
             icon: settings.icon,
             selectedIcon: settings.selectedIcon,
-            label: settings.label,
+            label: _railLabel(settings),
             selected: current == ShellTab.settings,
             onPressed: () => onDestinationSelected(ShellTab.settings),
           ),

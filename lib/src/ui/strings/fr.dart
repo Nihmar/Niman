@@ -1870,8 +1870,6 @@ final class FrenchStrings extends Strings {
   @override
   String get deletedMessage => 'Supprimé';
   @override
-  String deleteToTrashConfirm(String name) => '$name sera déplacé dans .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name sera définitivement supprimé';
   @override

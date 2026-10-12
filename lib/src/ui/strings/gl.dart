@@ -1839,8 +1839,6 @@ final class GalicianStrings extends Strings {
   @override
   String get deletedMessage => 'Borrado';
   @override
-  String deleteToTrashConfirm(String name) => '$name moverase a .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name borraráse permanentemente';
   @override
   String get chooseDestination => 'Escoller o destino';

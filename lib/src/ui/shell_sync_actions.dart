@@ -73,23 +73,20 @@ final class ShellSyncActions {
     );
   }
 
-  /// Opens the library's sync settings (destination, credentials, rules).
+  /// Opens the library's sync settings (destination, credentials, rules):
+  /// a floating window on a desktop (#712), a page on a phone.
   Future<void> openSettings(
     BuildContext context,
     LibrarySession controller,
   ) async {
     final sync = controller.sync;
     if (sync == null) return;
-    await Navigator.push(
+    await openSyncSettings(
       context,
-      MaterialPageRoute<void>(
-        builder: (context) => SyncSettingsScreen(
-          sync: sync,
-          libraryName: p.basename(controller.root ?? ''),
-          unsaved: unsaved,
-          onShowTrash: () => onShowTrash(controller),
-        ),
-      ),
+      sync: sync,
+      libraryName: p.basename(controller.root ?? ''),
+      unsaved: unsaved,
+      onShowTrash: () => onShowTrash(controller),
     );
   }
 
@@ -111,11 +108,6 @@ final class ShellSyncActions {
       const AppLogger(name: 'sync').warning('resolve: saving failed: $e');
     }
     if (!context.mounted) return;
-    await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SyncConflictScreen(sync: sync, path: path),
-      ),
-    );
+    await openSyncConflict(context, sync: sync, path: path);
   }
 }

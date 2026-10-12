@@ -1849,9 +1849,6 @@ final class PolishStrings extends Strings {
   @override
   String get deletedMessage => 'Usunięto';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name zostanie przeniesione do .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name zostanie trwale usunięte';
   @override
   String get chooseDestination => 'Wybierz cel';

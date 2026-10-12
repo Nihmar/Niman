@@ -16,6 +16,9 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/home/home_screen.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/search_screen.dart';
@@ -96,6 +99,27 @@ void main() {
     expect(find.text('No notes yet'), findsOne);
   });
 
+  // #712: the rail's tooltips name the key that selects the destination,
+  // and follow a remap, so the tip cannot point at a key that does
+  // nothing.
+  testWidgets('wide: the rail tooltips carry the keys bound now (#712)', (
+    tester,
+  ) async {
+    final previous = AppKeyMap.current.value;
+    addTearDown(() => AppKeyMap.current.value = previous);
+    await pumpWide(tester);
+
+    IconButton files() => tester.widget<IconButton>(railDest('files'));
+    expect(files().tooltip, contains('Ctrl+1'));
+
+    AppKeyMap.current.value = previous.withBinding(
+      AppCommand.tabFiles,
+      const SingleActivator(LogicalKeyboardKey.keyB, alt: true),
+    );
+    await tester.pump();
+    expect(files().tooltip, contains('Alt+B'));
+  });
+
   // #203: a floating window, like Settings, and not a destination: the
   // selection stays where it was.
   testWidgets('wide: the rail foot opens the library window', (tester) async {
@@ -164,7 +188,7 @@ void main() {
     expect(controller.root, '/other');
   });
 
-  testWidgets('wide: the rail todo shows the list inline, rail stays', (
+  testWidgets('wide: the rail todo opens a pane tab, tree and rail stay', (
     tester,
   ) async {
     await pumpWide(tester);
@@ -172,9 +196,67 @@ void main() {
     await tester.tap(railDest('todo'));
     await settle(tester);
 
+    Offstage contentPane(String name) =>
+        tester.widget<Offstage>(find.byKey(Key('content-pane-$name')));
+
+    // The Todo rail entry is a content destination (#712): the list is
+    // the pane's body, the tree and the rail stay, and the pinned tab
+    // carries a chip in the row above the panes.
     expect(find.byType(TodoTab), findsOne);
+    expect(contentPane('todo').offstage, isFalse);
     expect(find.byKey(const Key('shell-rail')), findsOne);
+    expect(find.byKey(const Key('tree-island')), findsOne);
+    expect(find.byKey(const Key('panes-island')), findsOne);
+    expect(find.byKey(const Key('content-tab-todo')), findsOne);
     expect(railIndex(tester), ShellTab.todo);
+
+    // Files brings the notes back; the chip stays and brings Todo back.
+    await tester.tap(railDest('files'));
+    await settle(tester);
+    expect(contentPane('todo').offstage, isTrue);
+    expect(find.byKey(const Key('content-tab-todo')), findsOne);
+    await tester.tap(find.byKey(const Key('content-tab-todo')));
+    await settle(tester);
+    expect(contentPane('todo').offstage, isFalse);
+    expect(railIndex(tester), ShellTab.todo);
+
+    // The ✕ closes it: no chip, Files on the rail, the tree in place.
+    await tester.tap(find.byKey(const Key('content-tab-close-todo')));
+    await settle(tester);
+    expect(find.byKey(const Key('content-tab-todo')), findsNothing);
+    expect(find.byKey(const Key('content-pane-todo')), findsNothing);
+    expect(railIndex(tester), ShellTab.files);
+    expect(find.byKey(const Key('tree-island')), findsOne);
+  });
+
+  testWidgets('wide: the rail home opens a pane tab, tree and rail stay', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+
+    await tester.tap(railDest('home'));
+    await settle(tester);
+
+    Offstage contentPane(String name) =>
+        tester.widget<Offstage>(find.byKey(Key('content-pane-$name')));
+
+    expect(find.byType(HomeScreen), findsOne);
+    expect(contentPane('home').offstage, isFalse);
+    expect(find.byKey(const Key('tree-island')), findsOne);
+    expect(find.byKey(const Key('panes-island')), findsOne);
+    expect(find.byKey(const Key('content-tab-home')), findsOne);
+    expect(railIndex(tester), ShellTab.home);
+
+    // A note opened under the content tab takes the pane back: the
+    // content hides, its chip stays.
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    expect(contentPane('home').offstage, isTrue);
+    expect(find.byType(NoteView), findsOne);
+    expect(find.byKey(const Key('content-tab-home')), findsOne);
+    expect(railIndex(tester), ShellTab.files);
   });
 
   // #202: a floating window over what was on screen, which it closes
@@ -370,7 +452,7 @@ void main() {
     expect(tester.state(find.byType(NoteView)), same(view));
   });
 
-  testWidgets('wide: opening a search result flips the rail to files', (
+  testWidgets('wide: a search result opens beside the results (#712)', (
     tester,
   ) async {
     await pumpWide(tester);
@@ -394,11 +476,106 @@ void main() {
     await tester.tap(find.byKey(const Key('search-hit-alpha.md')));
     await settle(tester);
 
-    // The rail is back on Files: the search pane is kept alive but no
-    // longer on screen (the wide bodies stay mounted, T-PP-22), the tree
-    // is showing and the note is open in the detail pane next to it.
+    // Search is a sidebar view on a wide window: the rail stays on it, the
+    // results stay on screen, and the note opens in the detail pane beside
+    // them. The tree is not on screen.
+    expect(railIndex(tester), ShellTab.search);
+    expect(find.byType(SearchScreen).hitTestable(), findsOne);
+    expect(find.byKey(const Key('panes-island')), findsOne);
+    expect(noteRow('alpha.md'), findsNothing);
+    expect(controller.workspace.activePath, 'alpha.md');
+  });
+
+  testWidgets('wide: Files brings the tree back from the search sidebar', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('search'));
+    await settle(tester);
+    expect(find.byType(SearchScreen), findsOne);
+    expect(find.byKey(const Key('tree-footer')), findsNothing);
+
+    await tester.tap(railDest('files'));
+    await settle(tester);
     expect(find.byType(SearchScreen).hitTestable(), findsNothing);
-    expect(noteRow('alpha.md'), findsOne);
-    expect(railIndex(tester), ShellTab.files);
+    expect(find.byKey(const Key('tree-footer')), findsOne);
+  });
+
+  // #712: F4/Shift+F4 step the sidebar's hits while the note is on screen,
+  // and the list keeps the current one marked.
+  testWidgets('wide: F4 steps the search hits from the note (#712)', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await controller.createNote(parentPath: '', name: 'beta');
+    controller.searchHits = [
+      const SearchHit(
+        noteId: 0,
+        path: 'alpha.md',
+        title: 'alpha',
+        snippet: 'x',
+      ),
+      const SearchHit(noteId: 0, path: 'beta.md', title: 'beta', snippet: 'x'),
+    ];
+    await settle(tester);
+
+    await tester.tap(railDest('search'));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('search-query')), 'al');
+    await settle(tester);
+
+    bool marked(String path) =>
+        tester.widget<ListTile>(find.byKey(Key('search-hit-$path'))).selected;
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+    await settle(tester);
+    expect(controller.workspace.activePath, 'alpha.md');
+    expect(railIndex(tester), ShellTab.search, reason: 'the list stays');
+    expect(marked('alpha.md'), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+    await settle(tester);
+    expect(controller.workspace.activePath, 'beta.md');
+    expect(marked('beta.md'), isTrue);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await settle(tester);
+    expect(controller.workspace.activePath, 'alpha.md');
+  });
+
+  // #712: Ctrl+Shift+F shows the sidebar and puts the cursor in its field,
+  // from wherever the window was.
+  testWidgets('wide: Ctrl+Shift+F gives the search field the focus (#712)', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('search'));
+    await settle(tester);
+    await tester.tap(railDest('files'));
+    await settle(tester);
+    expect(find.byType(SearchScreen).hitTestable(), findsNothing);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+
+    expect(railIndex(tester), ShellTab.search);
+    // The field, not the screen's center: with no results there the empty
+    // hint does not take a hit, and the field is what the ask is about.
+    expect(find.byKey(const Key('search-query')).hitTestable(), findsOne);
+    expect(find.byKey(const Key('tree-island')), findsOne);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('search-query')))
+          .focusNode
+          ?.hasFocus,
+      isTrue,
+    );
   });
 }

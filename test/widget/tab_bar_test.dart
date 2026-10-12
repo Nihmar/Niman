@@ -444,8 +444,6 @@ void main() {
     await settle(tester);
     await tester.tap(delete);
     await settle(tester);
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
-    await settle(tester);
     expect(await controller.ops!.find('Docs/Renamed.md'), isNull);
   });
 

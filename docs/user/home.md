@@ -13,9 +13,12 @@ other destination (see [settings](settings.md#navigation)). A library
 still opens where it always did.
 
 On a wide window the tiles sit on a grid of four columns, each tile one
-to four cells wide and tall. On a phone they stand one under the other,
-in an order of their own. An Android tablet in landscape gets the grid:
-the shape follows the room on screen, not the system.
+to four cells wide and tall. That grid needs the room: Home opens as a
+tab in the focused pane there (#712), and a pane narrower than the grid
+falls back to the column. On a phone the tiles stand one under the other,
+in an order of their own. An Android tablet in landscape gets the grid —
+when its content area is wide enough: the shape follows the room, not the
+system.
 
 ## Tiles
 

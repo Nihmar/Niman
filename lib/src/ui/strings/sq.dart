@@ -1838,8 +1838,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get deletedMessage => 'U fshi';
   @override
-  String deleteToTrashConfirm(String name) => '$name do të lëvizet te .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name do të fshihet përfundimisht';
   @override

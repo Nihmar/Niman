@@ -134,8 +134,6 @@ void main() {
     await tester.tap(noteRow('alpha.md'));
     await settle(tester);
     await rowMenu(tester, 'alpha.md', 'delete');
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
-    await settle(tester);
     expect(controller.workspace.tabs, isEmpty);
   });
 

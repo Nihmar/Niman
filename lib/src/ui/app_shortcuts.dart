@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// A command the shell can run from the keyboard.
@@ -181,6 +182,15 @@ enum AppCommand {
 
   /// Select the Home tab (#535).
   tabHome,
+
+  /// Open the next search sidebar hit (#712).
+  searchNextHit,
+
+  /// Open the previous search sidebar hit (#712).
+  searchPreviousHit,
+
+  /// Put the cursor in the search sidebar's field (#712).
+  focusSearch,
 }
 
 /// One accelerator and the command it runs.
@@ -345,6 +355,17 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
     AppCommand.tabHome,
     SingleActivator(LogicalKeyboardKey.digit6, control: true),
   ),
+  // F4/Shift+F4, the key every editor's "find next" sits on (#712).
+  AppShortcut(AppCommand.searchNextHit, SingleActivator(LogicalKeyboardKey.f4)),
+  AppShortcut(
+    AppCommand.searchPreviousHit,
+    SingleActivator(LogicalKeyboardKey.f4, shift: true),
+  ),
+  // Ctrl+Shift+F, the search-everywhere chord (#712).
+  AppShortcut(
+    AppCommand.focusSearch,
+    SingleActivator(LogicalKeyboardKey.keyF, control: true, shift: true),
+  ),
 ]);
 
 /// The command's localized name, for the reference.
@@ -404,6 +425,10 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.tabQuickNote => AppStrings.quickNoteTitle,
   AppCommand.tabSettings => AppStrings.tabSettings,
   AppCommand.tabHome => AppStrings.tabHome,
+  // The find bar's own words: the same step, through the hits.
+  AppCommand.searchNextHit => AppStrings.editorFindNextTooltip,
+  AppCommand.searchPreviousHit => AppStrings.editorFindPreviousTooltip,
+  AppCommand.focusSearch => AppStrings.searchHint,
 };
 
 /// The keys as a human reads them ("Ctrl+Shift+N").
@@ -416,6 +441,14 @@ String describeActivator(ShortcutActivator activation) {
     if (activation.shift) 'Shift',
     keyName(activation.trigger),
   ].join('+');
+}
+
+/// [label], with the key that runs it when [keys] names one and a
+/// keyboard is there to press it (#712): a tooltip that only repeats the
+/// icon teaches nothing.
+String tooltipWithKeys(String label, SingleActivator? keys) {
+  if (keys == null || !KeyboardPresence.shared.attached) return label;
+  return '$label (${describeActivator(keys)})';
 }
 
 /// Whether the platform's own shortcut modifier is Meta rather than

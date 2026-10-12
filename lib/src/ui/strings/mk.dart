@@ -1841,9 +1841,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get deletedMessage => 'Избришано';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name ќе биде преместено во .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name ќе биде трајно избришано';
   @override
   String get chooseDestination => 'Одбери одредиште';

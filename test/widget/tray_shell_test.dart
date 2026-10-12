@@ -93,7 +93,14 @@ void main() {
 
     tray.emit(ShortcutAction.newTodo);
     await settle(tester);
-    expect(find.text(AppStrings.todoAddTitle), findsOneWidget);
+    // Scoped to the dialog: the pane's Add button says the same words.
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text(AppStrings.todoAddTitle),
+      ),
+      findsOneWidget,
+    );
     await close();
   });
 

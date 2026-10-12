@@ -20,7 +20,9 @@ import '../fakes/fake_todo_source.dart';
 import '../fakes/shell_harness.dart';
 
 const _phone = Size(390, 844);
-const _desktop = Size(1280, 800);
+// Wide enough that the Home's pane holds the grid (#712: Home is a pane
+// tab on a wide window, and the grid needs HomeGridMetrics.minWidth).
+const _desktop = Size(1600, 900);
 
 void main() {
   late FakeLibrarySession controller;

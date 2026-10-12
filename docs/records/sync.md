@@ -509,7 +509,13 @@ one runs joins it and gets the same report, saying that it joined.
      `NoteOps.syncTrash`, which uses `.trash/` whatever the trash toggle.
    - *moveRemote*: `MOVE`, then the row moves; a server that turns out
      not to support it gets `move: false` stored. *moveLocal*:
-     `NoteOps.syncMove`, history included.
+     `NoteOps.syncMove`, history included. A remote move carries the
+     state sync cannot carry for itself — this device's own Home
+     (`deviceHome`) and the home-screen note widgets (`carryOutside`),
+     both local to this device — and nothing else: the settings,
+     `home.json`, `reading.json` and the rewritten links arrive as
+     writes of their own, and carrying them again would race them
+     (#713).
    - *conflict*: the remote is downloaded and hashed. Equal content is
      recorded. A note whose bytes one side is not valid UTF-8 is not
      merged: a lossy decode would write U+FFFD over bytes nobody touched,

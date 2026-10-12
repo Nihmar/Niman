@@ -1841,9 +1841,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get deletedMessage => 'Изтрито';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name ще бъде преместен в .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name ще бъде изтрит окончателно';
   @override

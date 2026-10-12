@@ -1707,8 +1707,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get deletedMessage => '削除しました';
   @override
-  String deleteToTrashConfirm(String name) => '$name を .trash/ に移動します';
-  @override
   String deleteForeverConfirm(String name) => '$name を完全に削除します';
   @override
   String get chooseDestination => '移動先を選ぶ';

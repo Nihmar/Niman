@@ -1831,8 +1831,6 @@ final class SwedishStrings extends Strings {
   @override
   String get deletedMessage => 'Togs bort';
   @override
-  String deleteToTrashConfirm(String name) => '$name flyttas till .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name tas bort permanent';
   @override
   String get chooseDestination => 'Välj mål';

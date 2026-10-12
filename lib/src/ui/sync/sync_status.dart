@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show wideBreakpoint;
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_service.dart';
@@ -154,28 +156,40 @@ Future<void> showSyncPanel(
     '${sync.status.failures.length} failed, '
     'paused ${sync.status.autoPaused?.name ?? 'no'})',
   );
+  final body = ListenableBuilder(
+    listenable: sync,
+    builder: (context, _) => _SyncPanel(
+      status: sync.status,
+      onSyncNow: () {
+        Navigator.pop(context);
+        onSyncNow();
+      },
+      onOpenSettings: () {
+        Navigator.pop(context);
+        onOpenSettings();
+      },
+      onResolve: (path) {
+        Navigator.pop(context);
+        onResolve(path);
+      },
+    ),
+  );
+  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: body,
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (context) => ListenableBuilder(
-      listenable: sync,
-      builder: (context, _) => _SyncPanel(
-        status: sync.status,
-        onSyncNow: () {
-          Navigator.pop(context);
-          onSyncNow();
-        },
-        onOpenSettings: () {
-          Navigator.pop(context);
-          onOpenSettings();
-        },
-        onResolve: (path) {
-          Navigator.pop(context);
-          onResolve(path);
-        },
-      ),
-    ),
+    builder: (context) => body,
   );
 }
 

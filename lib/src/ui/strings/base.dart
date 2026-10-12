@@ -923,7 +923,6 @@ abstract base class Strings {
   String get annotationFailed;
   String get movedToTrash;
   String get deletedMessage;
-  String deleteToTrashConfirm(String name);
   String deleteForeverConfirm(String name);
   String get chooseDestination;
   String get libraryRoot;

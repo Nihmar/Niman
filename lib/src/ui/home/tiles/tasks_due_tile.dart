@@ -70,7 +70,12 @@ final class TasksDueTile extends StatelessWidget {
                       ),
                       if (entry.task.due case final due?) ...[
                         const SizedBox(width: 8),
-                        TodoDueLabel(due: due, today: today),
+                        // Flexible: a narrow tile (a pane on a wide
+                        // window, #712) squeezes the label instead of
+                        // running past its edge.
+                        Flexible(
+                          child: TodoDueLabel(due: due, today: today),
+                        ),
                       ],
                     ],
                   ),

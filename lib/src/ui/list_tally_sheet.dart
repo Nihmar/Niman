@@ -12,6 +12,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show wideBreakpoint;
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -63,13 +65,25 @@ Future<TallyChoice?> showListTallySheet(
   required int initialIndex,
 }) {
   assert(candidates.isNotEmpty, 'the tool is unavailable without a list');
+  final body = _ListTallySheet(
+    candidates: candidates,
+    initialIndex: initialIndex.clamp(0, candidates.length - 1),
+  );
+  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+    return showDialog<TallyChoice>(
+      context: context,
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: body,
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet<TallyChoice>(
     context: context,
     isScrollControlled: true,
-    builder: (context) => _ListTallySheet(
-      candidates: candidates,
-      initialIndex: initialIndex.clamp(0, candidates.length - 1),
-    ),
+    builder: (context) => body,
   );
 }
 

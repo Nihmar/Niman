@@ -20,3 +20,32 @@ final class SearchRequest {
   /// The tag, when it is one.
   final String? tag;
 }
+
+/// What the shell asks the search screen to do, besides showing something
+/// (#712): give the query field the focus, or step through the hits.
+///
+/// A channel like [SearchRequest] because the screen's state is its own —
+/// the sidebar builds it — so the shell says what to do and the screen,
+/// which owns the hits and the field, does it.
+final class SearchCommands extends ChangeNotifier {
+  /// Asks for the query field's focus (`Ctrl+Shift+F`).
+  void focus() {
+    _focusRequests++;
+    notifyListeners();
+  }
+
+  /// Asks to open the next hit ([direction] 1) or the previous (-1)
+  /// (`F4` / `Shift+F4`), from the current one.
+  void stepBy(int direction) {
+    _step = direction;
+    notifyListeners();
+  }
+
+  /// How many focus asks have been made: a listener acts on the last one.
+  int get focusRequests => _focusRequests;
+  int _focusRequests = 0;
+
+  /// The last step ask: 1 for the next hit, -1 for the previous.
+  int get step => _step;
+  int _step = 0;
+}

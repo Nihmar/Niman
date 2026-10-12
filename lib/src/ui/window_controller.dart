@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:ui' show Rect;
+import 'dart:ui' show Rect, Size;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,7 +115,14 @@ final class WindowManagerController implements WindowController {
   Future<void> init() async {
     await _manager.ensureInitialized();
     _manager.addListener(_listener);
-    if (customTitleBar) await applyCustomTitleBar();
+    if (customTitleBar) {
+      await applyCustomTitleBar();
+      // Under the wide breakpoint (600) the layout turns into the phone's
+      // — bottom bar and a full-screen note — and a desktop window that
+      // small is still driven by a mouse: the window is not allowed to go
+      // there (#712). The height only keeps it usable.
+      await _manager.setMinimumSize(const Size(600, 400));
+    }
     _log.info('window controller ready');
   }
 

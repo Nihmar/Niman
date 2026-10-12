@@ -8,6 +8,8 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/diff/diff_view.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/title_bar.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
 /// One history version of a note against the note as it is now (mockups
 /// H4–H5): the changes as a diff, or the version's whole text, and the
@@ -24,6 +26,7 @@ final class NoteVersionScreen extends StatefulWidget {
     required this.ops,
     required this.path,
     required this.version,
+    this.window,
     this.now = DateTime.now,
     this.compute = computeDiff,
     super.key,
@@ -37,6 +40,11 @@ final class NoteVersionScreen extends StatefulWidget {
 
   /// The version shown.
   final HistoryVersion version;
+
+  /// The window this page runs in, when it has one (#712): a custom title
+  /// bar is drawn over the page, so the window keeps its drag area and its
+  /// buttons while the page is up.
+  final WindowController? window;
 
   /// The clock the day labels are read against (a test seam).
   final DateTime Function() now;
@@ -179,21 +187,34 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
     final theme = Theme.of(context);
     final versionText = _versionText;
     final currentText = _currentText;
+    final window = widget.window;
+    final custom = window != null && window.customTitleBar;
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(_capitalized(_when)),
-            Text(
-              AppStrings.historyCompareSubtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+      appBar: custom
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(38),
+              child: SlimTitleBar(
+                title: _capitalized(_when),
+                window: window,
+                leading: BackButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+              ),
+            )
+          : AppBar(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_capitalized(_when)),
+                  Text(
+                    AppStrings.historyCompareSubtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
       body: _error != null
           ? Center(child: Text(AppStrings.historyLoadFailed))
           : versionText == null || currentText == null

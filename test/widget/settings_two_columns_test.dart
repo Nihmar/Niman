@@ -14,6 +14,7 @@ import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/settings_trash_history.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
+import 'package:niman/src/ui/trash.dart';
 
 import '../fakes/fake_library_session.dart';
 
@@ -118,6 +119,25 @@ void main() {
       await tester.tap(find.backButton());
       await tester.pumpAndSettle();
       expect(find.byType(SettingsEditorScreen), findsOne);
+    });
+
+    testWidgets('the trash row stays in the right column too (#712)', (
+      tester,
+    ) async {
+      // The trash screen reads the open library: without one it spins.
+      await controller.open('/fake/library', create: true);
+      await pumpAt(tester, 1200);
+      await tester.tap(find.byKey(const Key('settings-area-trash-history')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('open-trash-setting')));
+      await tester.pumpAndSettle();
+      expect(find.byType(TrashScreen), findsOne);
+      // The areas list stayed: the trash did not take the window over.
+      expect(find.byKey(const Key('settings-area-editor')), findsOne);
+      // And back leads to the area, not out of Settings.
+      await tester.tap(find.backButton());
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsTrashHistoryScreen), findsOne);
     });
   });
 

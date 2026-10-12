@@ -2,6 +2,7 @@
 // produce a readable theme, the shipped palettes have to be mappings and
 // nothing else, a custom theme has to wear its own colors at both
 // brightnesses, and the device's own colors have to reach `system`.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/app_theme.dart';
@@ -376,6 +377,26 @@ void main() {
         themeColors(solarized, Brightness.dark).syntax,
         isNot(themeColors(_gruvbox, Brightness.dark).syntax),
       );
+    });
+  });
+
+  group('the snackbars (#712)', () {
+    tearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    test('a desktop gets a floating, width-capped toast', () {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      final theme = buildAppTheme(_gruvbox, Brightness.light);
+      expect(theme.snackBarTheme.behavior, SnackBarBehavior.floating);
+      expect(theme.snackBarTheme.width, 360);
+    });
+
+    test('a phone keeps the Material bar', () {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      final theme = buildAppTheme(_gruvbox, Brightness.light);
+      expect(theme.snackBarTheme.behavior, isNull);
+      expect(theme.snackBarTheme.width, isNull);
     });
   });
 }

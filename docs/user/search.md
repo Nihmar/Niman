@@ -2,6 +2,16 @@
 
 Full-text search across titles, body, and tags, powered by SQLite FTS5.
 
+On a wide window Search is a **sidebar view** beside the note: picking it
+shows the field and the results in the left island, with the tree, the
+panes and the dock where they were, and opening a result keeps the
+results on screen while the note takes the pane (#712). The result you
+opened stays highlighted in the list, and `F4` / `Shift+F4` step to the
+next / previous one from wherever the keyboard is, wrapping at either
+end. `Ctrl/⌘+Shift+F` shows the sidebar and puts the cursor in the field,
+from any destination. Choosing *Files* brings the tree back. A phone
+keeps Search as a tab of its own.
+
 The index keeps the words of every note, not a copy of its text: it stays
 small, whatever the size of your notes. The text shown under a result is
 read from the note itself, when its row comes on screen.

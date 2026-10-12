@@ -195,5 +195,33 @@ void main() {
         meeting(template: 'Models/Meeting.md', folder: 'Models/Work'),
       );
     });
+
+    test(
+      'a remote move carries the device Home and the widgets (#713)',
+      () async {
+        await ops.createFolder(parentPath: '', name: 'Work');
+        await ops.createNote(parentPath: 'Work', name: 'Meeting');
+        await ops.setHome(meeting(template: 'Work/Meeting.md'), onDevice: true);
+        final settings = File(p.join(root.path, '.niman', 'settings.json'));
+        final settingsBefore = settings.readAsStringSync();
+        final carried = <String>[];
+        final remote = NoteOps(
+          root: root.path,
+          db: db,
+          indexer: ops.indexer,
+          config: ops.config,
+          carryOutside: (from, to, {required isDir}) async =>
+              carried.add('$from -> $to ${isDir ? 'dir' : 'file'}'),
+        );
+
+        await remote.syncMove('Work/Meeting.md', 'Work/Notes/Meeting.md');
+
+        final home = await ops.home;
+        expect(home.device, meeting(template: 'Work/Notes/Meeting.md'));
+        expect(carried, ['Work/Meeting.md -> Work/Notes/Meeting.md file']);
+        expect(homeFile().existsSync(), isFalse);
+        expect(settings.readAsStringSync(), settingsBefore);
+      },
+    );
   });
 }

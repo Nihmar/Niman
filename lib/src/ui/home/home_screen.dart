@@ -204,43 +204,57 @@ final class _GridHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 48,
-            child: Row(
-              children: [
-                Text(
-                  editing ? AppStrings.homeEdit : AppStrings.tabHome,
-                  style: theme.textTheme.titleLarge,
-                ),
-                const SizedBox(width: 12),
-                if (!editing) Text(_today(), style: muted),
-                const Spacer(),
-                if (editing) ...[
-                  HomeScopeSwitch(editing: home),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    key: const Key('home-reset'),
-                    onPressed: () async {
-                      if (await confirmHomeReset(context)) await home.reset();
-                    },
-                    child: Text(AppStrings.homeReset),
+          // A Wrap, not a Row: the Home can be a pane on a wide window
+          // (#712), and the edit controls drop to a second line rather
+          // than run the header past a narrow pane's edge.
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    editing ? AppStrings.homeEdit : AppStrings.tabHome,
+                    style: theme.textTheme.titleLarge,
                   ),
-                  const SizedBox(width: 8),
-                  FilledButton.icon(
-                    key: const Key('home-edit-done'),
-                    onPressed: () => onEdit(false),
-                    icon: const Icon(Icons.check),
-                    label: Text(AppStrings.homeEditDone),
-                  ),
-                ] else
-                  TextButton.icon(
-                    key: const Key('home-edit'),
-                    onPressed: () => onEdit(true),
-                    icon: const Icon(Icons.edit_outlined),
-                    label: Text(AppStrings.homeEdit),
-                  ),
-              ],
-            ),
+                  const SizedBox(width: 12),
+                  if (!editing) Text(_today(), style: muted),
+                ],
+              ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (editing) ...[
+                    HomeScopeSwitch(editing: home),
+                    TextButton(
+                      key: const Key('home-reset'),
+                      onPressed: () async {
+                        if (await confirmHomeReset(context)) await home.reset();
+                      },
+                      child: Text(AppStrings.homeReset),
+                    ),
+                    FilledButton.icon(
+                      key: const Key('home-edit-done'),
+                      onPressed: () => onEdit(false),
+                      icon: const Icon(Icons.check),
+                      label: Text(AppStrings.homeEditDone),
+                    ),
+                  ] else
+                    TextButton.icon(
+                      key: const Key('home-edit'),
+                      onPressed: () => onEdit(true),
+                      icon: const Icon(Icons.edit_outlined),
+                      label: Text(AppStrings.homeEdit),
+                    ),
+                ],
+              ),
+            ],
           ),
           if (editing) Text(AppStrings.homeGridHint, style: muted),
         ],

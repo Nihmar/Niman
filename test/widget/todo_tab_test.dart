@@ -196,6 +196,7 @@ void main() {
     await pumpTab(tester, todo: ['doomed', 'kept']);
     await tester.longPress(find.text('doomed'));
     await settle(tester);
+    expect(find.byType(BottomSheet), findsOneWidget);
     await tester.tap(find.byKey(const Key('todo-menu-delete')));
     await settle(tester);
     expect(find.text('doomed'), findsNothing);
@@ -231,6 +232,8 @@ void main() {
     await pumpTab(tester, todo: ['doomed', 'kept']);
     await tester.tap(find.text('doomed'), buttons: kSecondaryMouseButton);
     await settle(tester);
+    // A pointer's shape: a menu at the cursor, not a sheet (#712).
+    expect(find.byType(BottomSheet), findsNothing);
     await tester.tap(find.byKey(const Key('todo-menu-delete')));
     await settle(tester);
     expect(source.todoLines, ['kept']);

@@ -9,6 +9,8 @@ import 'package:niman/src/ui/diff/diff_view.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/history/note_version_screen.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/title_bar.dart';
+import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
 
 /// The kept versions of one note (issue #55, mockup H3): the current
@@ -25,6 +27,7 @@ final class NoteHistoryScreen extends StatefulWidget {
     required this.ops,
     required this.path,
     required this.limit,
+    this.window,
     this.now = DateTime.now,
     this.compute = computeDiff,
     super.key,
@@ -38,6 +41,11 @@ final class NoteHistoryScreen extends StatefulWidget {
 
   /// How many versions the library keeps.
   final int limit;
+
+  /// The window this page runs in, when it has one (#712): a custom title
+  /// bar is drawn over the page, so the window keeps its drag area and its
+  /// buttons while the page is up.
+  final WindowController? window;
 
   /// The clock the day labels are read against (a test seam).
   final DateTime Function() now;
@@ -119,6 +127,7 @@ final class _NoteHistoryScreenState extends State<NoteHistoryScreen> {
           ops: widget.ops,
           path: widget.path,
           version: version,
+          window: widget.window,
           now: widget.now,
           compute: widget.compute,
         ),
@@ -130,23 +139,36 @@ final class _NoteHistoryScreenState extends State<NoteHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final window = widget.window;
+    final custom = window != null && window.customTitleBar;
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(AppStrings.noteHistoryTitle),
-            Text(
-              p.basename(widget.path),
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
-                color: theme.colorScheme.onSurfaceVariant,
+      appBar: custom
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(38),
+              child: SlimTitleBar(
+                title: AppStrings.noteHistoryTitle,
+                window: window,
+                leading: BackButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+              ),
+            )
+          : AppBar(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(AppStrings.noteHistoryTitle),
+                  Text(
+                    p.basename(widget.path),
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontFamily: 'monospace',
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
       body: _body(context),
     );
   }

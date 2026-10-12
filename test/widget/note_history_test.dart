@@ -9,8 +9,10 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/diff/diff_view.dart';
 import 'package:niman/src/ui/history/note_history_screen.dart';
 import 'package:niman/src/ui/history/note_version_screen.dart';
+import 'package:niman/src/ui/title_bar.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/fake_window_controller.dart';
 import '../fakes/shell_harness.dart';
 
 void main() {
@@ -347,6 +349,29 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('history-empty')), findsOneWidget);
+    });
+
+    testWidgets('a custom title bar keeps the window draggable (#712)', (
+      tester,
+    ) async {
+      await session.seedFile('bar.md', content: 'x');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: NoteHistoryScreen(
+            ops: session,
+            path: 'bar.md',
+            limit: 10,
+            now: () => now,
+            window: FakeWindowController(customTitleBar: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The page draws the window's own bar, so the window stays draggable
+      // and keeps its buttons while history is up.
+      expect(find.byType(SlimTitleBar), findsOne);
+      expect(find.byType(AppBar), findsNothing);
     });
   });
 

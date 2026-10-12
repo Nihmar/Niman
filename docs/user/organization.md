@@ -6,6 +6,11 @@ Deletes go to `.trash/` (soft delete) or remove the file permanently
 (hard delete), depending on the library's `trashEnabled` setting
 (default true). Restore by moving the file back out of `.trash/`.
 
+On a desktop the trash opens as a floating window over the note, so the
+tree and the open note stay where they are; on a phone it is a page.
+Every feature is on every platform, only the shape of it differs
+(`platforms.md`).
+
 **Emptying it on its own.** *Settings → Trash and history → Auto-empty
 trash* is **Never** until you set it: pick a wait (a week, a month, a
 year) and every deletion that has sat in `.trash/` longer than that is
@@ -149,6 +154,12 @@ Two places, both searchable:
 - Inline `#tags` in the note body.
 
 Search a single tag with `#tag` (see [search](search.md)).
+
+The tag list is behind Search's tag button. On a wide window it is a
+collapsible tree in the sidebar: `#work/meetings` sits under `#work`, and
+opening a tag lists its notes under it, each with the count the tag
+itself carries. A phone keeps the two-level list — every tag, then the
+tag's notes with a Back arrow.
 
 A tag's characters are letters and digits — any script's, so `#città` and
 `#идея` are one tag each — plus `-`, `_` and `/`. The frontmatter and the note

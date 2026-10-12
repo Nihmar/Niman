@@ -340,6 +340,22 @@ void main() {
     expect(controller.settings.modelId, null);
   });
 
+  test('a settings write is landed when settled', () async {
+    final controller = models();
+    addTearDown(controller.dispose);
+    await controller.load();
+    unawaited(controller.setLanguage(TranscriptionSettings.detect));
+
+    await controller.settled();
+
+    final file = File(p.join(dir.path, TranscriptionSettingsStore.fileName));
+    expect(file.existsSync(), isTrue, reason: 'the write landed');
+    final stored = TranscriptionSettings.fromJson(
+      jsonDecode(await file.readAsString()) as Map<String, Object?>,
+    );
+    expect(stored.language, TranscriptionSettings.detect);
+  });
+
   test('the model file name is the one whisper_ggml loads', () {
     expect(tiny.fileName, 'ggml-tiny.bin');
     expect(transcriptionModelById('large-v3')!.fileName, 'ggml-large-v3.bin');

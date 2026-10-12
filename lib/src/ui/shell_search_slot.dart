@@ -22,17 +22,27 @@ final class SearchSlot extends StatefulWidget {
     required this.controller,
     required this.onOpenNote,
     this.requests,
+    this.commands,
+    this.tree = false,
     super.key,
   });
 
   /// What to show next, when asked from elsewhere.
   final ValueListenable<SearchRequest?>? requests;
 
+  /// What to do, besides showing: focus the field, step through the hits
+  /// (#712).
+  final SearchCommands? commands;
+
   /// The open library.
   final LibrarySession controller;
 
   /// Opens a hit: the shell's own search-result open.
   final void Function(String path) onOpenNote;
+
+  /// Whether Tags draws the wide sidebar's collapsible tree (#712);
+  /// false keeps the phone's drill-down.
+  final bool tree;
 
   @override
   State<SearchSlot> createState() => _SearchSlotState();
@@ -96,6 +106,7 @@ final class _SearchSlotState extends State<SearchSlot> {
               controller: widget.controller,
               onOpenNote: widget.onOpenNote,
               requests: widget.requests,
+              commands: widget.commands,
               onOpenTags: () => setState(() {
                 _showTags = true;
                 _tagsVisited = true;
@@ -112,6 +123,7 @@ final class _SearchSlotState extends State<SearchSlot> {
                 controller: widget.controller,
                 onOpenNote: widget.onOpenNote,
                 requests: widget.requests,
+                tree: widget.tree,
                 onBack: () => setState(() => _showTags = false),
               ),
             ),

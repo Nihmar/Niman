@@ -1862,9 +1862,6 @@ final class GermanStrings extends Strings {
   @override
   String get deletedMessage => 'Gelöscht';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name wird nach .trash/ verschoben';
-  @override
   String deleteForeverConfirm(String name) => '$name wird endgültig gelöscht';
   @override
   String get chooseDestination => 'Ziel wählen';

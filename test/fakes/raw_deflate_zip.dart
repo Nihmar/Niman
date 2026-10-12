@@ -86,3 +86,17 @@ Uint8List storedZerosThenInvalid({required int blocks, required int size}) {
   out.addByte(0x07);
   return out.toBytes();
 }
+
+/// One valid stored deflate block holding [bytes] (BFINAL = 1, BTYPE = 0):
+/// the smallest legal stream, for a zip whose central directory lies about
+/// how much it expands to (a bomb's shape).
+Uint8List storedBlock(List<int> bytes) {
+  final out = BytesBuilder()
+    ..addByte(1)
+    ..addByte(bytes.length & 0xff)
+    ..addByte((bytes.length >> 8) & 0xff)
+    ..addByte(~bytes.length & 0xff)
+    ..addByte((~bytes.length >> 8) & 0xff)
+    ..add(bytes);
+  return out.toBytes();
+}

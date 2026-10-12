@@ -3,6 +3,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show wideBreakpoint;
 import 'package:niman/src/ui/kinds/shopping_parser.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -17,10 +19,22 @@ Future<int?> showShoppingQuantitySheet(
   BuildContext context, {
   required int quantity,
 }) {
+  final body = _QuantitySheet(quantity: quantity);
+  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+    return showDialog<int>(
+      context: context,
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: body,
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet<int>(
     context: context,
     showDragHandle: true,
-    builder: (context) => _QuantitySheet(quantity: quantity),
+    builder: (context) => body,
   );
 }
 

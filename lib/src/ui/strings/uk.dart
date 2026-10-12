@@ -1832,8 +1832,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get deletedMessage => 'Видалено';
   @override
-  String deleteToTrashConfirm(String name) => '$name буде переміщено в .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name буде остаточно видалено';
   @override
   String get chooseDestination => 'Обрати призначення';

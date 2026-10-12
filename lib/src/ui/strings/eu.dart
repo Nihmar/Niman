@@ -1835,8 +1835,6 @@ final class BasqueStrings extends Strings {
   @override
   String get deletedMessage => 'Ezabatua';
   @override
-  String deleteToTrashConfirm(String name) => '$name .trash/-ra mugituko da';
-  @override
   String deleteForeverConfirm(String name) => '$name betirako ezabatuko da';
   @override
   String get chooseDestination => 'Hautatu helmuga';

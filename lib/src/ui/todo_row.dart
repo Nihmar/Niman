@@ -56,6 +56,7 @@ final class TodoRow extends StatelessWidget {
     required this.onToggle,
     required this.onEdit,
     required this.onShowMenu,
+    required this.onShowMenuAt,
     this.today,
     super.key,
   });
@@ -69,8 +70,11 @@ final class TodoRow extends StatelessWidget {
   /// Opens the edit dialog.
   final VoidCallback onEdit;
 
-  /// Opens the long-press (or right-click) bottom sheet.
+  /// Opens the long-press bottom sheet.
   final VoidCallback onShowMenu;
+
+  /// Opens the cursor menu at the pressed point (right-click).
+  final ValueChanged<Offset> onShowMenuAt;
 
   /// The wall-clock day for the due state (defaults to now).
   final DateTime? today;
@@ -83,9 +87,9 @@ final class TodoRow extends StatelessWidget {
     final now = today ?? DateTime.now();
     final display = taskDisplayText(task.description);
     return GestureDetector(
-      onSecondaryTap: () {
+      onSecondaryTapDown: (details) {
         _log.debug('todo row menu (right-click): line ${entry.lineIndex}');
-        onShowMenu();
+        onShowMenuAt(details.globalPosition);
       },
       child: _tile(task, display, now),
     );

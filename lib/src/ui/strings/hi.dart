@@ -1797,8 +1797,6 @@ final class HindiStrings extends Strings {
   @override
   String get deletedMessage => 'हटाया गया';
   @override
-  String deleteToTrashConfirm(String name) => '$name को .trash/ में भेजा जाएगा';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name को हमेशा के लिए हटाया जाएगा';
   @override

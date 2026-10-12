@@ -6,6 +6,7 @@ import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/history/note_history_screen.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
 const _log = AppLogger(name: 'history');
 
@@ -15,12 +16,16 @@ const _log = AppLogger(name: 'history');
 /// Open editors are saved first, so "Current version" is what is on
 /// screen. After a restore, [onRestored] reloads the open note and a
 /// snackbar offers Undo, which restores the text the restore replaced.
+///
+/// [window] is the desktop window the page is drawn in, when it has one:
+/// its custom title bar stays over the page (#712).
 Future<void> openNoteHistory(
   BuildContext context, {
   required LibrarySession session,
   required UnsavedTracker unsaved,
   required String path,
   required VoidCallback onRestored,
+  WindowController? window,
 }) async {
   final ops = session.ops;
   if (ops == null) return;
@@ -37,7 +42,7 @@ Future<void> openNoteHistory(
     context,
     MaterialPageRoute(
       builder: (context) =>
-          NoteHistoryScreen(ops: ops, path: path, limit: limit),
+          NoteHistoryScreen(ops: ops, path: path, limit: limit, window: window),
     ),
   );
   if (restored == null || !context.mounted) return;

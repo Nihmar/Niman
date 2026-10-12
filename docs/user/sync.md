@@ -53,6 +53,10 @@ tree; an automatic one only turns the icon. You can keep writing either
 way. Open notes are saved before a manual sync, and a note that sync
 updated is reloaded.
 
+On a desktop the sync settings open as a floating window over the note,
+so the tree and the open note stay where they are; on a phone they are a
+page.
+
 #### When to sync
 
 In Settings → Sync → WebDAV:
@@ -128,6 +132,9 @@ both sides, the sync icon gets a dot, and **Resolve** opens the merge:
 - **Save the merge** writes the result here and on the server;
 - or keep one whole copy: **Keep this device's** uploads yours, **Keep
   the server's** replaces yours (which stays in the history).
+
+On a desktop the merge opens as a floating window over the note, so the
+tree and the open note stay where they are; on a phone it is a page.
 
 If either copy changes while the screen is open (another device syncs
 again, or you keep typing in the note), nothing is written: the conflict

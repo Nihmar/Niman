@@ -1834,8 +1834,6 @@ final class PortugueseStrings extends Strings {
   @override
   String get deletedMessage => 'Excluído';
   @override
-  String deleteToTrashConfirm(String name) => '$name será movido para .trash/';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name será excluído permanentemente';
   @override

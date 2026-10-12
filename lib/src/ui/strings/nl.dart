@@ -1847,9 +1847,6 @@ final class DutchStrings extends Strings {
   @override
   String get deletedMessage => 'Verwijderd';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name wordt naar .trash/ verplaatst';
-  @override
   String deleteForeverConfirm(String name) =>
       '$name wordt definitief verwijderd';
   @override

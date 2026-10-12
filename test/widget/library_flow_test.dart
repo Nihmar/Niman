@@ -168,8 +168,6 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(const Key('menu-delete')));
-    await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await settle(tester);
     expect(noteRow('Sacrifice.md', offstage: true), findsNothing);
     expect(find.text('No notes yet'), findsOne);
@@ -209,8 +207,6 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(const Key('menu-delete')));
-    await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await settle(tester);
     expect(noteRow('Sacrifice.md', offstage: true), findsNothing);
 
@@ -323,15 +319,73 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(const Key('menu-delete')));
-    await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await settle(tester);
+    // A move to the trash asks nothing (#712): the row is gone and the
+    // snackbar offers the way back.
+    expect(find.byType(AlertDialog), findsNothing);
     expect(noteRow('Comeback.md', offstage: true), findsNothing);
 
     await tester.tap(find.text(AppStrings.actionUndo));
     await settle(tester);
     expect(noteRow('Comeback.md', offstage: true), findsOne);
     expect(await controller.ops!.trashItems(), isEmpty);
+
+    await controller.close();
+    await controller.dispose();
+  });
+
+  testWidgets('deleting for good still asks (#712)', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    filePicker.directory = '/fake';
+    await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'library');
+    await tester.pump();
+    await tester.tap(find.text('Create'));
+    await settle(tester);
+
+    await controller.ops!.setTrashEnabled(enabled: false);
+    await openNewItemMenu(tester);
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await tester.pump();
+    await tester.enterText(dialogField(), 'Gone');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    await tester.longPress(noteRow('Gone.md', offstage: true));
+    await settle(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('menu-delete')),
+      100,
+      scrollable: find.ancestor(
+        of: find.byKey(const Key('menu-delete')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('menu-delete')));
+    await settle(tester);
+
+    expect(find.text(AppStrings.deleteForeverConfirm('Gone.md')), findsOne);
+    await tester.tap(find.widgetWithText(TextButton, AppStrings.actionCancel));
+    await settle(tester);
+    expect(noteRow('Gone.md', offstage: true), findsOne);
+
+    await tester.longPress(noteRow('Gone.md', offstage: true));
+    await settle(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('menu-delete')),
+      100,
+      scrollable: find.ancestor(
+        of: find.byKey(const Key('menu-delete')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('menu-delete')));
+    await settle(tester);
+    await tester.tap(find.widgetWithText(TextButton, AppStrings.actionDelete));
+    await settle(tester);
+    expect(noteRow('Gone.md', offstage: true), findsNothing);
 
     await controller.close();
     await controller.dispose();
@@ -370,8 +424,6 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(const Key('menu-delete')));
-    await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await settle(tester);
 
     await tapTreeFooterAction(tester, find.byKey(const Key('open-trash')));

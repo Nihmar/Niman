@@ -63,10 +63,7 @@ import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
-import 'package:niman/src/ui/dock/history_dock_pane.dart';
-import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
-import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
@@ -89,7 +86,6 @@ import 'package:niman/src/ui/ocr/ocr_job_status.dart';
 import 'package:niman/src/ui/ocr/ocr_notifier.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
-import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
@@ -102,6 +98,7 @@ import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
+import 'package:niman/src/ui/shell_dock.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_fab.dart';
@@ -123,6 +120,7 @@ import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
+import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
@@ -663,6 +661,51 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
+  /// The content destination pinned in a pane (#712): Home or Todo on a
+  /// wide window, shown in [_contentPane] with the tree, the panes and
+  /// the dock beside it. Null when none is open; a phone keeps both as
+  /// full-screen destinations.
+  ShellTab? _contentTab;
+
+  /// Which pane holds [_contentTab]: the focused one when it opened.
+  int _contentPane = 0;
+
+  /// Whether a note opened now would land in a pane the user can see:
+  /// the panes are the files slot, and no content tab paints over them
+  /// (#712).
+  bool get _panesShowNotes => _filesSlotVisible && !_contentTabShows;
+
+  /// Whether a content tab (Home or Todo) is what the panes show (#712).
+  bool get _contentTabShows =>
+      _wide && _contentTab != null && _tab == _contentTab;
+
+  /// Which pane draws [_contentTab]: the one it opened in, or pane 0 when
+  /// the window is not split and that pane is not on screen.
+  int get _contentPaneShown => _workspace.value.isSplit ? _contentPane : 0;
+
+  /// Shows [tab] in the focused pane (#712), where it is already open or
+  /// not; the tree and dock stay put.
+  void _showContentTab(ShellTab tab, int pane) {
+    setState(() {
+      _tab = tab;
+      _visitedTabs.add(tab);
+      _contentTab = tab;
+      _contentPane = pane;
+      _workspace.focus(pane);
+      _noteClosed();
+    });
+  }
+
+  /// Closes the pinned content tab (#712): the tree keeps the rail.
+  void _closeContentTab() {
+    setState(() {
+      _contentTab = null;
+      if (_tab == ShellTab.home || _tab == ShellTab.todo) {
+        _tab = ShellTab.files;
+      }
+    });
+  }
+
   /// The open library's personal dictionary (issue #60), attached to the
   /// spell state: loaded once per root, the old one disposed and swapped
   /// when the library changes, detached on close.
@@ -735,7 +778,18 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // A hidden tab on either side of the switch changes the back key's
     // meaning (#536), which only a rebuild hands the layout.
     final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
-    if (narrow &&
+    // Home and Todo are content destinations on a wide window (#712):
+    // they open as a pinned tab in the focused pane and the tree, the
+    // panes and the dock stay, instead of taking a whole slot.
+    if (!narrow && (tab == ShellTab.home || tab == ShellTab.todo)) {
+      setState(() {
+        _tab = tab;
+        _visitedTabs.add(tab);
+        _contentTab = tab;
+        _contentPane = _workspace.value.focused;
+        _noteClosed();
+      });
+    } else if (narrow &&
         _treeVisible &&
         !_fab.expanded &&
         _visitedTabs.contains(tab) &&
@@ -749,6 +803,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _visitedTabs.add(tab);
         _treeVisible = true;
         _fab.collapse();
+        // A sidebar view has no island of its own: picking Search shows
+        // the sidebar island it lives in (#712).
+        if (!narrow && tab == ShellTab.search) _sidebarVisible = true;
         // Leaving any open note: the tabs show at once (issue #4).
         _noteClosed();
       });
@@ -1117,7 +1174,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _selectedIsDir = false;
       _treeVisible = false;
       _noteFromTab = _tab;
-      if (wide && !_filesSlotVisible) {
+      if (wide && !_panesShowNotes) {
         _tab = ShellTab.files;
         _visitedTabs.add(ShellTab.files);
       }
@@ -1299,7 +1356,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           onAnnotate: _annotate,
           marks: _annotations,
           ocr: _ocrActions,
-          fullScreen: _epubFullScreen,
+          fullScreen: _immersive.fullScreen,
         ),
       );
     }
@@ -1383,6 +1440,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// the one the shell shows, kept current and kept for the next launch.
   late final ShellWorkspace _workspace = ShellWorkspace(widget.controller);
 
+  /// The right dock and the phone's panel sheets.
+  late final ShellDock _dock = ShellDock(
+    workspace: _workspace,
+    controller: widget.controller,
+    windowWidth: () => MediaQuery.sizeOf(context).width,
+    wide: () => _wide,
+    panelNote: () => _panelNote,
+    journalBrowser: (context) =>
+        _journalUi.browser(context, focusDay: _shownJournalDay),
+    onOpenHistory: (path) => unawaited(_openHistory(path)),
+    onOpenNoteFromLink: (path) => _openNoteFromLink(path, null),
+  );
+
   /// Back and forward through the notes shown (#700).
   late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
     workspace: _workspace,
@@ -1442,14 +1512,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ShellRail.panelStart +
       (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
-  /// [pane]'s tab row.
+  /// [pane]'s tab row, with the pinned content tab's chip (#712) at its
+  /// head when that pane holds one.
   Widget _paneTabs(int pane, Widget filler) {
     final w = _workspace.value;
     final tabs = w.panes[pane];
-    return NoteTabBar(
+    final bar = NoteTabBar(
       key: ValueKey('pane-tabs-$pane'),
       tabs: tabs.tabs,
-      active: tabs.active,
+      // A note tab does not read as selected while the content tab shows:
+      // the chip is what the pane is showing.
+      active: _contentTabShows && pane == _contentPaneShown ? -1 : tabs.active,
       focused: !w.isSplit || w.focused == pane,
       unsaved: _unsavedRelPaths(),
       onActivate: (index) => _activateTab(pane, index),
@@ -1469,6 +1542,69 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       pane: pane,
       onDrop: (drag, at) => _dropTab(drag, pane, at),
       filler: filler,
+    );
+    final content = _contentTab;
+    if (content == null || pane != _contentPaneShown) return bar;
+    return Row(
+      children: [
+        _contentTabChip(content, pane),
+        Expanded(child: bar),
+      ],
+    );
+  }
+
+  /// The pinned content tab's chip (#712), at the head of [pane]'s row: a
+  /// click shows it again, the ✕ closes it.
+  Widget _contentTabChip(ShellTab tab, int pane) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final selected = _tab == tab;
+    final home = tab == ShellTab.home;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(start: 6, top: 6, bottom: 6),
+      child: Material(
+        key: Key('content-tab-${tab.name}'),
+        color: selected ? scheme.surfaceContainerHighest : Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(6),
+          onTap: () => _showContentTab(tab, pane),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(start: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  home ? Icons.home_outlined : Icons.check_box_outlined,
+                  size: 15,
+                  color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  home ? AppStrings.tabHome : AppStrings.todoTitle,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: selected
+                        ? scheme.onSurface
+                        : scheme.onSurfaceVariant,
+                  ),
+                ),
+                IconButton(
+                  key: Key('content-tab-close-${tab.name}'),
+                  tooltip: AppStrings.closeTabTooltip,
+                  onPressed: _closeContentTab,
+                  icon: const Icon(Icons.close, size: 14),
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 26,
+                    height: 26,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1686,8 +1822,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
     HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
-    _zen.addListener(_onZenChanged);
-    _epubFullScreen.addListener(_onEpubFullScreen);
+    _immersive.addListener(_onImmersiveChanged);
     unawaited(_workspace.load());
     // Library session events (every note op bumps the revision): the
     // pinned notes follow the files, so each one refreshes the note
@@ -1782,10 +1917,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     HardwareKeyboard.instance.removeHandler(_historyKeyUnfocused);
     // A library switch tears the shell down: the window it maximized goes
     // back as it was.
-    _zen.removeListener(_onZenChanged);
-    unawaited(_zen.leave());
-    _zen.dispose();
-    _epubFullScreen.dispose();
+    _immersive.removeListener(_onImmersiveChanged);
+    _immersive.dispose();
     _tabsListenable.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -2197,6 +2330,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// [treeClickClockProvider]: a test that scripts the two clicks decides
   /// the gap between them rather than racing the machine (#437).
   void _showFromTree(String path, {required bool newTab}) {
+    // A note shows in the panes on a wide window: a content tab painting
+    // over them (#712) or another destination would leave it out of
+    // sight, as a note opened from the search is brought forward.
+    if (_wide && !_panesShowNotes) {
+      setState(() {
+        _tab = ShellTab.files;
+        _visitedTabs.add(ShellTab.files);
+      });
+    }
     final keys = HardwareKeyboard.instance;
     final now = ref.read(treeClickClockProvider)();
     final last = _lastTreeClick;
@@ -2522,6 +2664,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     session: widget.controller,
     unsaved: widget.unsavedTracker,
     path: path,
+    window: widget.window,
     onRestored: () {
       if (!mounted || _selected != path) return;
       setState(() => _noteReloadToken++);
@@ -2663,7 +2806,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       buildWideSlots: () => _wideSlots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
-      onLeaveZen: () => unawaited(_zen.leave()),
+      onLeaveZen: _immersive.leaveZen,
       zenPreviewVisible: _notePreview,
       onZenTogglePreview: _previewToggleVisible ? _togglePreview : null,
       leaveZenOnEsc: _leaveZenOnEsc,
@@ -2802,9 +2945,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _wideSlot(visible: _filesSlotVisible, child: _wideBody(controller)),
       // One slot per remaining tab, in tab order so a slot's identity
       // never moves. Unvisited tabs build the empty placeholder
-      // `_tabBodyFor` returns.
+      // `_tabBodyFor` returns. Search has no slot on a wide window: it
+      // lives in the sidebar island (#712).
       for (final tab in ShellTab.values)
-        if (tab != ShellTab.files && tab != ShellTab.quickNote)
+        if (tab != ShellTab.files &&
+            tab != ShellTab.quickNote &&
+            !(tab == ShellTab.search && _wide) &&
+            // Home and Todo are content destinations on a wide window
+            // (#712): they live in a pane, not in a slot of their own.
+            !(_wide && (tab == ShellTab.home || tab == ShellTab.todo)))
           _wideSlot(
             visible: _tab == tab,
             retainLayout: tab == ShellTab.search,
@@ -2819,11 +2968,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ];
   }
 
-  /// Whether the wide layout shows the tree and the panes: Files, or an
-  /// open quick note, which lives in the panes.
+  /// Whether the wide layout shows the tree and the panes: Files, an open
+  /// quick note, which lives in the panes, or the search sidebar, which
+  /// swaps what the left island shows and leaves the panes in place
+  /// (#712).
   bool get _filesSlotVisible =>
       _tab == ShellTab.files ||
+      (_wide && _tab == ShellTab.search) ||
+      _contentTabShows ||
       (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
+
+  /// Whether the left island shows the search in place of the tree
+  /// (#712): Search is a sidebar view on a wide window, so the panes and
+  /// the dock stay beside it. A phone keeps Search as a destination.
+  bool get _sidebarShowsSearch => _wide && _tab == ShellTab.search;
 
   /// A tab's screen on the wide layout: one island on the base, as the
   /// tree, the panes and the dock are on Files.
@@ -2917,14 +3075,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
   }
 
-  void _openTrash(LibrarySession controller) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => TrashScreen(controller: controller),
-      ),
-    );
-  }
+  void _openTrash(LibrarySession controller) =>
+      unawaited(openTrash(context, controller));
 
   /// Trash/sort actions of the Files-tab app bar (per mockup: trash +  /// sort chevrons; the settings gear moved to the Settings tab).
   List<Widget> _filesAppBarActions(LibrarySession controller) {
@@ -2942,13 +3094,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       IconButton(
         key: const Key('open-trash'),
         tooltip: AppStrings.trashTitle,
-        icon: const Icon(Icons.delete),
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => TrashScreen(controller: controller),
-          ),
-        ),
+        icon: const Icon(Icons.delete_outline),
+        onPressed: () => unawaited(openTrash(context, controller)),
       ),
       _sortToggle(),
     ];
@@ -2959,8 +3106,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// in full screen (#621) only leaves full screen: Back steps out of it
   /// first.
   void _closeFullScreenNote() {
-    if (_epubFullScreen.value != null) {
-      _epubFullScreen.value = null;
+    if (_immersive.fullScreen.value != null) {
+      _immersive.fullScreen.value = null;
       return;
     }
     setState(() {
@@ -3129,12 +3276,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// nearer wanted the key: the find bar and a selection take the first
   /// press, a dialog or a menu its own.
   late final Action<DismissIntent> _leaveZenOnEsc = LeaveZenAction(
-    _zen,
+    _immersive.zen,
     () => _inZen,
   );
 
-  /// Zen mode (#69), per window and never stored.
-  late final ZenMode _zen = ZenMode(widget.window);
+  /// Zen mode (#69) and the book read in full screen (#621).
+  late final ShellImmersive _immersive = ShellImmersive(
+    window: widget.window,
+    possible: () => _zenPossible,
+  );
 
   /// Whether Zen can show: a desktop window wide enough for the panes,
   /// on the notes, with a note open in them.
@@ -3145,9 +3295,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _workspace.value.activePath != null;
 
   /// Whether Zen is what is on screen.
-  bool get _inZen => _zen.on && _zenPossible;
+  bool get _inZen => _immersive.inZen;
 
-  void _toggleZen() => unawaited(_zen.toggle());
+  void _toggleZen() => unawaited(_immersive.toggleZen());
 
   /// Switches typewriter mode (#70) for the library: the note on screen
   /// follows at once, and the setting keeps it. Zen is left as it is —
@@ -3161,19 +3311,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     }());
   }
 
-  void _onZenChanged() {
+  /// Repaints on a Zen or full-screen change.
+  void _onImmersiveChanged() {
     if (mounted) setState(() {});
   }
 
   /// Leaves Zen once there is nothing left for it to show — the last tab
   /// closed, another place of the rail chosen, the window narrowed — so
   /// the chrome and the window size come back rather than wait.
-  void _leaveZenIfEmpty() {
-    if (!_zen.on || _zenPossible) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _zen.on && !_zenPossible) unawaited(_zen.leave());
-    });
-  }
+  void _leaveZenIfEmpty() => _immersive.leaveIfEmpty();
 
   /// What each command does, for the ones that can run here and now: the
   /// keys run them, and the command palette lists exactly these (#155).
@@ -3195,7 +3341,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.dockRoom => _dockRoom,
     CommandNeed.desktop => Platform.isLinux || Platform.isWindows,
     CommandNeed.notInZen => !_inZen,
-    CommandNeed.zenRoom => _zen.on || _zenPossible,
+    CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
@@ -3301,6 +3447,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ),
       // The selected row, which F2 renames (#707): on a desktop the note on
       // screen, or the folder clicked last.
+      AppCommand.searchNextHit: () => _stepSearchHits(1),
+      AppCommand.searchPreviousHit: () => _stepSearchHits(-1),
+      AppCommand.focusSearch: _focusSearchField,
       AppCommand.renameNote: () =>
           unawaited(_rowActions.rename(context, _selected ?? note)),
       AppCommand.moveNote: () => unawaited(_rowActions.move(context, note)),
@@ -3601,7 +3750,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           ? AppStrings.switchToSourceTooltip
           : AppStrings.switchToWysiwygTooltip,
     AppCommand.zenMode =>
-      _zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
+      _immersive.zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
     AppCommand.typewriterMode =>
       _editorSettings.typewriter
           ? AppStrings.typewriterOff
@@ -3632,12 +3781,36 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               width: _editorSettings.treeWidth,
               child: Island(
                 key: const Key('tree-island'),
-                child: Column(
+                // Both stay mounted across a sidebar switch (#712): the
+                // search keeps its query and results, and the tree its
+                // expansion and scroll, as they did when each had a slot
+                // of its own. The search keeps its layout too — it is the
+                // one whose show-layout costs frames (T-TS-10).
+                child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    Expanded(child: _treePane(controller)),
-                    if (controller.sync case final sync?)
-                      SyncProgressStrip(sync: sync),
-                    _treeFooter(controller),
+                    Offstage(
+                      offstage: _sidebarShowsSearch,
+                      child: Column(
+                        children: [
+                          Expanded(child: _treePane(controller)),
+                          if (controller.sync case final sync?)
+                            SyncProgressStrip(sync: sync),
+                          _treeFooter(controller),
+                        ],
+                      ),
+                    ),
+                    // Built on the first visit, as its slot was: the
+                    // search source (a background connection) is not
+                    // opened for a library no one searched in.
+                    if (_visitedTabs.contains(ShellTab.search))
+                      Visibility(
+                        visible: _sidebarShowsSearch,
+                        maintainState: true,
+                        maintainAnimation: true,
+                        maintainSize: true,
+                        child: _searchSlot(controller, tree: true),
+                      ),
                   ],
                 ),
               ),
@@ -3702,11 +3875,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Whether the window has room for the right dock beside a note (#175):
   /// a desktop, a tablet, a phone in landscape — on the same rule.
-  bool get _dockRoom =>
-      MediaQuery.sizeOf(context).width >= RightDock.minWindowWidth;
+  bool get _dockRoom => _dock.room;
 
   /// Whether the dock shows: there is room, and it was not closed.
-  bool get _dockShown => _dockRoom && _workspace.value.dockOpen;
+  bool get _dockShown => _dock.shown;
 
   /// The note the dock and the sheets speak for: the focused pane's on a
   /// wide window, the one on screen on a phone.
@@ -3719,81 +3891,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// The right dock: the focused pane's note's outline, tags or history.
-  Widget _rightDock(LibrarySession controller) {
-    final w = _workspace.value;
-    final path = w.activePath;
-    return RightDock(
-      pane: w.dockPane,
-      onPane: (pane) =>
-          _workspace.controller.update((w) => w.withDock(pane: pane)),
-      onClose: () =>
-          _workspace.controller.update((w) => w.withDock(open: false)),
-      paneBuilder: (pane) => switch (pane) {
-        DockPane.outline => OutlineDockPane(note: _panelNote),
-        DockPane.tags => TagsDockPane(
-          note: _panelNote,
-          tags: controller.tagSource,
-          onOpenNote: _workspace.show,
-        ),
-        DockPane.history => HistoryDockPane(
-          ops: controller.ops,
-          path: path,
-          onOpenHistory: () {
-            if (path != null) unawaited(_openHistory(path));
-          },
-        ),
-        DockPane.journal => _journalUi.browser(
-          context,
-          focusDay: _shownJournalDay,
-        ),
-      },
-    );
-  }
+  Widget _rightDock(LibrarySession controller) => _dock.build(context);
 
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
-  void _toggleDock() =>
-      _workspace.controller.update((w) => w.withDock(open: !w.dockOpen));
+  void _toggleDock() => _dock.toggleOpen();
 
   /// The note row's dock button, where the window has room for a dock.
-  Widget _dockToggle() => IconButton(
-    key: const Key('dock-toggle'),
-    tooltip: AppStrings.sidePanelTooltip,
-    isSelected: _workspace.value.dockOpen,
-    icon: const Icon(Icons.view_sidebar_outlined),
-    selectedIcon: const Icon(Icons.view_sidebar),
-    onPressed: _toggleDock,
-  );
+  Widget _dockToggle() => _dock.toggle();
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
   /// sheet (the phone's way to the same three, #175).
-  Future<void> _showPanel(DockPane pane) async {
-    if (_wide && _dockRoom) {
-      _workspace.controller.update((w) => w.withDock(open: true, pane: pane));
-      return;
-    }
-    final note = _panelNote;
-    if (note == null) return;
-    if (pane == DockPane.outline) {
-      final line = await showOutlineSheet(context, entries: note.outline.value);
-      if (line != null) note.jumpToHeading(line);
-      return;
-    }
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheet) => SizedBox(
-        height: MediaQuery.sizeOf(sheet).height * 0.5,
-        child: TagsDockPane(
-          note: note,
-          tags: widget.controller.tagSource,
-          onOpenNote: (path) {
-            Navigator.pop(sheet);
-            _openNoteFromLink(path, null);
-          },
-        ),
-      ),
-    );
-  }
+  Future<void> _showPanel(DockPane pane) => _dock.showPanel(context, pane);
 
   /// The phone's one note view, so its sheets reach its outline.
   final GlobalKey _phoneNoteKey = GlobalKey();
@@ -3852,6 +3960,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// claims nothing, so the step is skipped rather than pointing at a
   /// blank.
   Widget _detailPane(LibrarySession controller, int pane) {
+    final content = _contentTabShows && pane == _contentPaneShown
+        ? _contentTab
+        : null;
     final listener = Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => _workspace.focus(pane),
@@ -3861,64 +3972,91 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         onDrop: (drag, kind) => _dropTabOnPane(drag, pane, kind),
         child: _pinchToZoom(
           enabled: !isBook(_workspace.value.panes[pane].activeTab?.path ?? ''),
-          ShellDetailPane(
-            root: controller.root,
-            tabs: _deck(pane),
-            onMemento: _workspace.remember,
-            zen: _inZen,
-            // The dock's outline pane, where the window has room for it.
-            outlineInDock: _dockRoom && !_inZen,
-            typewriter: _editorSettings.typewriter,
-            cascadeChecklist: _editorSettings.cascadeChecklist,
-            frontmatterPanel: _editorSettings.frontmatterPanel,
-            onToggleTypewriter: _toggleTypewriter,
-            onLoaded: _workspace.noteLoaded,
-            onEditedNoteClosed: _tidyClosedNote,
-            showLineNumbers: _editorSettings.lineNumbers,
-            noteColumn: _editorSettings.noteColumn,
-            // The kind toggles and ⋮ sit at the end of the note's
-            // one row of chrome (#173); there is no header above.
-            barActions: [
-              ..._kindActions,
-              if (_dockRoom) _dockToggle(),
-              _noteMenu(),
+          // A pinned content tab (#712) paints over the deck, which stays
+          // mounted and laid out behind it: the notes keep their undo and
+          // their place for the way back.
+          Stack(
+            fit: StackFit.expand,
+            children: [
+              Offstage(
+                offstage: content != null,
+                child: TickerMode(
+                  enabled: content == null,
+                  child: ShellDetailPane(
+                    root: controller.root,
+                    tabs: _deck(pane),
+                    onMemento: _workspace.remember,
+                    zen: _inZen,
+                    // The dock's outline pane, where the window has room.
+                    outlineInDock: _dockRoom && !_inZen,
+                    typewriter: _editorSettings.typewriter,
+                    cascadeChecklist: _editorSettings.cascadeChecklist,
+                    frontmatterPanel: _editorSettings.frontmatterPanel,
+                    onToggleTypewriter: _toggleTypewriter,
+                    onLoaded: _workspace.noteLoaded,
+                    onEditedNoteClosed: _tidyClosedNote,
+                    showLineNumbers: _editorSettings.lineNumbers,
+                    noteColumn: _editorSettings.noteColumn,
+                    // The kind toggles and ⋮ sit at the end of the note's
+                    // one row of chrome (#173); there is no header above.
+                    barActions: [
+                      ..._kindActions,
+                      if (_dockRoom) _dockToggle(),
+                      _noteMenu(),
+                    ],
+                    autofocusEditor: _editorSettings.autofocusEditor,
+                    linkType: _editorSettings.linkType,
+                    missingNoteLocation: _editorSettings.missingNoteLocation,
+                    attachmentsFolder: _editorSettings.attachmentsFolder,
+                    templateFolder: _editorSettings.templateFolder,
+                    indentWidth: _editorSettings.indentWidth,
+                    sourceFont: _editorSettings.sourceFont,
+                    toolbarLayout: _editorSettings.toolbarLayout,
+                    // A single enabled editor has nowhere to switch to:
+                    // the note hides its switch instead of offering a
+                    // dead toggle.
+                    onEditorKindChanged:
+                        _editorSettings.editorsEnabled.length > 1
+                        ? _setEditorKind
+                        : null,
+                    linkSource: _linkSource,
+                    wikilinkSuggester: _wikilinkSuggester,
+                    onOpenNote: _openNoteFromLink,
+                    kindMode: !_kindRawMode,
+                    onNoteKindChanged: _onNoteKindChanged,
+                    onPasteAsMarkdown: _pasteAsMarkdown,
+                    unsavedTracker: widget.unsavedTracker,
+                    spellCheck: widget.spellCheck,
+                    reloadToken: _noteReloadToken,
+                    linksFollowed: _linksFollowed,
+                    onAnnotate: _annotate,
+                    ocr: _ocrActions,
+                    marks: _annotations,
+                    saveNote: noteSaverFor(controller),
+                    saveNoteStream: noteStreamSaverFor(controller),
+                    createMissingNote: missingNoteCreatorFor(controller),
+                    statusActions: _statusActionsFor(pane),
+                    header: (path) => _journalUi.header(context, path),
+                    onEditEpubLook: () => _editEpubLook(controller),
+                    onEpubTextScale: (scale) =>
+                        unawaited(keepEpubTextScale(controller, scale)),
+                    epubFullScreen: _immersive.fullScreen,
+                  ),
+                ),
+              ),
+              // The content tab stays mounted while a note shows: its
+              // filter, its scroll and its place are kept, as a note
+              // tab's are.
+              if (_contentTab case final tab? when pane == _contentPaneShown)
+                Offstage(
+                  key: Key('content-pane-${tab.name}'),
+                  offstage: content == null,
+                  child: TickerMode(
+                    enabled: content != null,
+                    child: _tabBodyFor(tab, controller),
+                  ),
+                ),
             ],
-            autofocusEditor: _editorSettings.autofocusEditor,
-            linkType: _editorSettings.linkType,
-            missingNoteLocation: _editorSettings.missingNoteLocation,
-            attachmentsFolder: _editorSettings.attachmentsFolder,
-            templateFolder: _editorSettings.templateFolder,
-            indentWidth: _editorSettings.indentWidth,
-            sourceFont: _editorSettings.sourceFont,
-            toolbarLayout: _editorSettings.toolbarLayout,
-            // A single enabled editor has nowhere to switch to:
-            // the note hides its switch instead of offering a
-            // dead toggle.
-            onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
-                ? _setEditorKind
-                : null,
-            linkSource: _linkSource,
-            wikilinkSuggester: _wikilinkSuggester,
-            onOpenNote: _openNoteFromLink,
-            kindMode: !_kindRawMode,
-            onNoteKindChanged: _onNoteKindChanged,
-            onPasteAsMarkdown: _pasteAsMarkdown,
-            unsavedTracker: widget.unsavedTracker,
-            spellCheck: widget.spellCheck,
-            reloadToken: _noteReloadToken,
-            linksFollowed: _linksFollowed,
-            onAnnotate: _annotate,
-            ocr: _ocrActions,
-            marks: _annotations,
-            saveNote: noteSaverFor(controller),
-            saveNoteStream: noteStreamSaverFor(controller),
-            createMissingNote: missingNoteCreatorFor(controller),
-            statusActions: _statusActionsFor(pane),
-            header: (path) => _journalUi.header(context, path),
-            onEditEpubLook: () => _editEpubLook(controller),
-            onEpubTextScale: (scale) =>
-                unawaited(keepEpubTextScale(controller, scale)),
-            epubFullScreen: _epubFullScreen,
           ),
         ),
       ),
@@ -3926,24 +4064,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     return _workspace.value.panes[pane].activeTab == null
         ? listener
         : TourTarget(id: TourTargets.note, child: listener);
-  }
-
-  /// Which book is read in full screen (#621): its pane, or null.
-  final ValueNotifier<Object?> _epubFullScreen = ValueNotifier<Object?>(null);
-
-  /// Takes the screen for the book read in full screen, or gives it back:
-  /// the window on the desktops, the system bars on Android.
-  void _onEpubFullScreen() {
-    final on = _epubFullScreen.value != null;
-    if (Platform.isAndroid) {
-      unawaited(
-        SystemChrome.setEnabledSystemUIMode(
-          on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
-        ),
-      );
-    } else {
-      unawaited(widget.window.setFullScreen(on: on));
-    }
   }
 
   /// Opens the sheet that sets how the books look (#280).
@@ -4124,12 +4244,39 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The Search tab's body; the slot owns which of the two shows
   /// (issue #100 moved it into [SearchSlot]).
-  Widget _searchSlot(LibrarySession controller) {
+  Widget _searchSlot(LibrarySession controller, {bool tree = false}) {
     return SearchSlot(
       controller: controller,
       onOpenNote: _openSearchNote,
       requests: _searchRequests,
+      commands: _searchCommands,
+      tree: tree,
     );
+  }
+
+  /// What the shell asks Search to do besides showing (#712): the field's
+  /// focus and the step through the hits.
+  final SearchCommands _searchCommands = SearchCommands();
+
+  /// Steps the sidebar's hits (#712), the way `F4` / `Shift+F4` do.
+  void _stepSearchHits(int direction) {
+    // Nothing to step: the sidebar keeps the last results, but only while
+    // it is the one showing.
+    if (_tab != ShellTab.search || !_visitedTabs.contains(ShellTab.search)) {
+      return;
+    }
+    _searchCommands.stepBy(direction);
+  }
+
+  /// Puts the cursor in the search field (`Ctrl+Shift+F`, #712), showing
+  /// the sidebar first on a wide window.
+  void _focusSearchField() {
+    _selectShellTab(ShellTab.search);
+    if (_wide && !_sidebarVisible) setState(() => _sidebarVisible = true);
+    // The screen may mount in this frame: ask once it has.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _searchCommands.focus();
+    });
   }
 
   /// What the Home asks Search to show (#535).
@@ -4203,6 +4350,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Runs the create flow behind a tree-footer menu entry.
   void _onNewItem(NewShellItem item) {
     switch (item) {
+      case NewShellItem.journal:
+        unawaited(_journalFlow.openToday(context));
       case NewShellItem.note:
         unawaited(_createFlow.createNote(context));
       case NewShellItem.listNote:
@@ -4213,6 +4362,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unawaited(_createFlow.createSlidesNote(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
+      case NewShellItem.captureWebPage:
+        unawaited(_captureFlow.capture(context));
       case NewShellItem.folder:
         unawaited(_createFlow.createFolder(context));
     }
@@ -4255,7 +4406,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       TargetPlatform.linux || TargetPlatform.windows => true,
       _ => false,
     };
-    if (!desktop || !_wide || !_sidebarVisible || !_filesSlotVisible) {
+    // Renaming happens in the tree's row: the sidebar has to be showing
+    // it, not the search view it may hold instead (#712).
+    if (!desktop ||
+        !_wide ||
+        !_sidebarVisible ||
+        !_filesSlotVisible ||
+        _sidebarShowsSearch) {
       return false;
     }
     setState(() {

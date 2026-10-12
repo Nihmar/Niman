@@ -1838,8 +1838,6 @@ final class RomanianStrings extends Strings {
   @override
   String get deletedMessage => 'Șters';
   @override
-  String deleteToTrashConfirm(String name) => '$name se mută în .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name se șterge permanent';
   @override
   String get chooseDestination => 'Alege destinația';

@@ -1133,8 +1133,6 @@ final class AppStrings {
   static String get annotationFailed => _s.annotationFailed;
   static String get movedToTrash => _s.movedToTrash;
   static String get deletedMessage => _s.deletedMessage;
-  static String deleteToTrashConfirm(String name) =>
-      _s.deleteToTrashConfirm(name);
   static String deleteForeverConfirm(String name) =>
       _s.deleteForeverConfirm(name);
   static String get chooseDestination => _s.chooseDestination;

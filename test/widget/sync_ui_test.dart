@@ -648,6 +648,43 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    testWidgets('a pointer gets the conflict in a window, closed on resolve '
+        '(#712)', (tester) async {
+      sync.texts = conflictTextsOf(
+        base: note(['a', 'b']),
+        local: note(['a', 'mine']),
+        remote: note(['a', 'theirs']),
+      );
+      setSurfaceSize(tester, const Size(1200, 900));
+      await tester.pumpWidget(
+        MaterialApp(
+          // Pointer-dense, as a desktop's theme is.
+          theme: ThemeData(visualDensity: VisualDensity.compact),
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () =>
+                  openSyncConflict(context, sync: sync, path: 'note.md'),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('sync-conflict-window')), findsOne);
+      expect(find.byType(SyncConflictScreen), findsOne);
+      // The window carries the title and the close: no app bar.
+      expect(find.byType(AppBar), findsNothing);
+
+      // Resolving closes the window itself (there is no page route under
+      // it to pop), and the conflict still went through the sync.
+      await tester.tap(find.byKey(const Key('sync-keep-remote')));
+      await tester.pumpAndSettle();
+      expect(sync.calls.last, 'resolve note.md remote');
+      expect(find.byKey(const Key('sync-conflict-window')), findsNothing);
+    });
+
     testWidgets('with a base, the overlaps are the only question (W7)', (
       tester,
     ) async {
@@ -803,6 +840,33 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(SyncSettingsScreen), findsOneWidget);
       expect(find.text('Library library'), findsOneWidget);
+    });
+
+    testWidgets('a pointer gets the settings in a floating window (#712)', (
+      tester,
+    ) async {
+      setSurfaceSize(tester, const Size(1200, 900));
+      await tester.pumpWidget(
+        MaterialApp(
+          // Pointer-dense, as a desktop's theme is.
+          theme: ThemeData(visualDensity: VisualDensity.compact),
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () =>
+                  openSyncSettings(context, sync: sync, libraryName: 'Notes'),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('sync-settings-window')), findsOne);
+      expect(find.byType(SyncSettingsScreen), findsOne);
+      // The window carries the title: the screen brings no app bar.
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.text(AppStrings.syncScreenSubtitle('Notes')), findsOne);
     });
 
     testWidgets('the files bar shows the icon once a destination exists', (

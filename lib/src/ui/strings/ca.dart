@@ -1858,8 +1858,6 @@ final class CatalanStrings extends Strings {
   @override
   String get deletedMessage => 'Esborrat';
   @override
-  String deleteToTrashConfirm(String name) => '$name es mourà a .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name s’esborrarà permanentment';
   @override
   String get chooseDestination => 'Tria el destí';

@@ -16,7 +16,9 @@ import '../fakes/fake_todo_source.dart';
 import '../fakes/shell_harness.dart';
 
 const _phone = Size(390, 844);
-const _desktop = Size(1280, 800);
+// Wide enough that the Home's pane holds the grid (#712: Home is a pane
+// tab on a wide window, and the grid needs HomeGridMetrics.minWidth).
+const _desktop = Size(1600, 900);
 
 void main() {
   late FakeLibrarySession controller;
@@ -108,9 +110,14 @@ void main() {
 
     testWidgets('a corner dragged right makes the tile wider', (tester) async {
       await open(tester, _desktop);
+      // A column and its gap, whatever the pane the Home is drawn in is
+      // wide (#712): the drag is a column, not a fixed number of pixels.
+      final column = tester
+          .getSize(find.byKey(const Key('home-tile-recent')))
+          .width;
       await tester.drag(
         find.byKey(const Key('home-resize-recent')),
-        const Offset(231, 0),
+        Offset(column + 12, 0),
         kind: PointerDeviceKind.mouse,
       );
       await settle(tester);

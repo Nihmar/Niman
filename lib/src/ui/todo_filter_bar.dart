@@ -49,6 +49,12 @@ final class TodoFilterBar extends StatelessWidget {
 
   static const AppLogger _log = AppLogger(name: 'todo');
 
+  /// What one line of the row needs at the least: the leading control,
+  /// the two pills and the count. Under it the count and the trailing
+  /// controls drop to a second line rather than run the row past its
+  /// edge (#712: the panel lives in a pane, which can be narrow).
+  static const double _oneLineMin = 700;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -58,49 +64,63 @@ final class TodoFilterBar extends StatelessWidget {
         : '$count ${AppStrings.todoCountOpen}';
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Row(
-        children: [
-          if (leading case final lead?) ...[lead, const SizedBox(width: 12)],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
           // Flexible with an ellipsized label: two icon-label-chevron
           // pills plus the count must fit a 360 dp row in every
           // language, so the pills shrink before anything clips.
-          Flexible(
-            child: _PillButton(
-              key: const Key('todo-due-menu'),
-              icon: Icons.calendar_today_outlined,
-              label: _DueRangeMenu.label(filter.dueRange),
-              onPressed: (buttonContext) => _DueRangeMenu.open(
-                buttonContext,
-                filter.dueRange,
-                onDueRange,
+          final pills = <Widget>[
+            if (leading case final lead?) ...[lead, const SizedBox(width: 12)],
+            Flexible(
+              child: _PillButton(
+                key: const Key('todo-due-menu'),
+                icon: Icons.calendar_today_outlined,
+                label: _DueRangeMenu.label(filter.dueRange),
+                onPressed: (buttonContext) => _DueRangeMenu.open(
+                  buttonContext,
+                  filter.dueRange,
+                  onDueRange,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: _PillButton(
-              key: const Key('todo-filter-button'),
-              icon: Icons.filter_alt_outlined,
-              label: AppStrings.todoFilter,
-              onPressed: (_) {
-                _log.debug('todo filter sheet: open');
-                onOpenFilter();
-              },
+            const SizedBox(width: 8),
+            Flexible(
+              child: _PillButton(
+                key: const Key('todo-filter-button'),
+                icon: Icons.filter_alt_outlined,
+                label: AppStrings.todoFilter,
+                onPressed: (_) {
+                  _log.debug('todo filter sheet: open');
+                  onOpenFilter();
+                },
+              ),
             ),
-          ),
-          const Spacer(),
-          // On the pills' line: the same text style, centered in the
-          // row, so the count shares the chips' baseline instead of
-          // sitting on its own (issue #131).
-          Text(
-            key: const Key('todo-count'),
-            countText,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+          ];
+          // On the pills' line when it fits: the same text style,
+          // centered in the row, so the count shares the chips' baseline
+          // instead of sitting on its own (issue #131).
+          final tail = <Widget>[
+            Text(
+              key: const Key('todo-count'),
+              countText,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
             ),
-          ),
-          if (trailing case final tail?) ...[const SizedBox(width: 8), tail],
-        ],
+            if (trailing case final tail?) ...[const SizedBox(width: 8), tail],
+          ];
+          if (constraints.maxWidth >= _oneLineMin) {
+            return Row(children: [...pills, const Spacer(), ...tail]);
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(children: pills),
+              const SizedBox(height: 8),
+              Row(children: [const Spacer(), ...tail]),
+            ],
+          );
+        },
       ),
     );
   }

@@ -1829,9 +1829,6 @@ final class SerbianStrings extends Strings {
   @override
   String get deletedMessage => 'Обрисано';
   @override
-  String deleteToTrashConfirm(String name) =>
-      '$name ће бити премештено у .trash/';
-  @override
   String deleteForeverConfirm(String name) => '$name ће бити трајно обрисано';
   @override
   String get chooseDestination => 'Изабери одредиште';
