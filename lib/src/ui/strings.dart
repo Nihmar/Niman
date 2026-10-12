@@ -772,6 +772,14 @@ final class AppStrings {
   static String get sortSize => _s.sortSize;
   static String get sortAscending => _s.sortAscending;
   static String get sortDescending => _s.sortDescending;
+  static String get viewList => _s.viewList;
+  static String get viewGrid => _s.viewGrid;
+  static String get viewGroup => _s.viewGroup;
+  static String get folderUpTooltip => _s.folderUpTooltip;
+  static String get breadcrumbMoreTooltip => _s.breadcrumbMoreTooltip;
+  static String get libraryCrumb => _s.libraryCrumb;
+  static String folderEmpty(String name) => _s.folderEmpty(name);
+  static String get folderEmptyHint => _s.folderEmptyHint;
   static String get newNoteTitle => _s.newNoteTitle;
   static String get newItemTooltip => _s.newItemTooltip;
   static String get closeMenuTooltip => _s.closeMenuTooltip;

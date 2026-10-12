@@ -1155,6 +1155,23 @@ final class SerbianStrings extends Strings {
   @override
   String get sortDescending => 'Опадајуће';
   @override
+  String get viewList => 'Листа';
+  @override
+  String get viewGrid => 'Мрежа';
+  @override
+  String get viewGroup => 'Приказ';
+  @override
+  String get folderUpTooltip => 'Горе (Alt+Горе)';
+  @override
+  String get breadcrumbMoreTooltip => 'Још фасцикли';
+  @override
+  String get libraryCrumb => 'Библиотека';
+  @override
+  String folderEmpty(String name) => 'У $name још нема ничега';
+  @override
+  String get folderEmptyHint =>
+      'Додирните + да направите белешку или фасциклу.';
+  @override
   String get newNoteTitle => 'Нова белешка';
   @override
   String get newItemTooltip => 'Ново';

@@ -1153,6 +1153,23 @@ final class SwedishStrings extends Strings {
   @override
   String get sortDescending => 'Fallande';
   @override
+  String get viewList => 'Lista';
+  @override
+  String get viewGrid => 'Rutnät';
+  @override
+  String get viewGroup => 'Vy';
+  @override
+  String get folderUpTooltip => 'Upp (Alt+Upp)';
+  @override
+  String get breadcrumbMoreTooltip => 'Fler mappar';
+  @override
+  String get libraryCrumb => 'Bibliotek';
+  @override
+  String folderEmpty(String name) => 'Inget i $name ännu';
+  @override
+  String get folderEmptyHint =>
+      'Tryck + för att skapa en anteckning eller mapp här.';
+  @override
   String get newNoteTitle => 'Ny anteckning';
   @override
   String get newItemTooltip => 'Ny';

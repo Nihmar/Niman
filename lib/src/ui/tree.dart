@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show kMiddleMouseButton;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -40,6 +42,34 @@ final class _Rows {
   bool get isEmpty => pinned.isEmpty && tree.isEmpty;
 }
 
+/// One row the tree's keyboard walks (#727): the note it draws, where the
+/// list puts it, and what a key on it acts on.
+final class _WalkRow {
+  const new({
+    required this.note,
+    required this.path,
+    required this.pinned,
+    required this.depth,
+    required this.top,
+    required this.height,
+  });
+
+  final Note note;
+  final String path;
+
+  /// The pinned block's copy of the note, rather than its own row in the
+  /// tree: a pinned note is drawn twice, and the cursor is on one of them.
+  final bool pinned;
+
+  /// How deep the row sits, for the left arrow's walk out to its parent.
+  /// A pinned row is drawn at the root: its depth means nothing there.
+  final int depth;
+
+  /// Where the list draws the row, and how tall it is.
+  final double top;
+  final double height;
+}
+
 /// Lazy tree of the library's folders/notes.
 ///
 /// Rows are flattened from per-level `NoteDao.children` queries and rendered
@@ -53,6 +83,9 @@ final class NoteTree extends StatefulWidget {
     required this.expanded,
     required this.onToggle,
     required this.onSelect,
+    this.active = true,
+    this.onRename,
+    this.onDelete,
     this.onLongPress,
     this.onSecondaryTapDown,
     this.onOpenInNewTab,
@@ -63,6 +96,17 @@ final class NoteTree extends StatefulWidget {
     this.renaming,
     super.key,
   });
+
+  /// Whether the tree is the pane on screen. Hidden under the grid (#727)
+  /// it keeps its expansion and its scroll, but lets go of the keyboard.
+  final bool active;
+
+  /// Starts renaming the row at `path`: `F2` on the keyboard's cursor, as
+  /// the grid's tiles do (#727). Null leaves the rename to the menu.
+  final ValueChanged<String>? onRename;
+
+  /// Deletes the row at `path`: `Delete` on the keyboard's cursor (#727).
+  final ValueChanged<String>? onDelete;
 
   /// The row whose name is being edited in place (#707), and what its
   /// field does; null while none is.
@@ -160,6 +204,31 @@ final class _NoteTreeState extends State<NoteTree> {
   /// The row a rename has scrolled to, so it is scrolled to once.
   String? _revealed;
 
+  /// The keyboard's own focus (#727): the pane takes it when a row is
+  /// clicked, and the arrows walk the rows while it holds it.
+  final FocusNode _focus = FocusNode(debugLabel: 'note-tree');
+
+  /// The row the keyboard's cursor is on, by path, and whether that is the
+  /// pinned block's copy of the note. Held by path rather than by place:
+  /// the walk follows the row while the tree grows and shrinks around it.
+  String? _cursorPath;
+  bool _cursorPinned = false;
+
+  /// Whether the ring is on the cursor — the keyboard put it there, a
+  /// pointer takes it away — as on a grid tile (#727).
+  bool _keyboardFocus = false;
+
+  /// The rows of the last build, the height each pinned item takes and the
+  /// height of a row: what the keyboard walks (#727). The walk itself is
+  /// built when a key is pressed, not on every frame.
+  _Rows? _current;
+  List<double> _pinnedHeights = const <double>[];
+  double _rowHeight = 0;
+
+  /// The room the divider that closes the pinned block takes: its hairline
+  /// and the breathing space under it.
+  static const double _pinnedDividerHeight = 9;
+
   /// Brings the row being renamed into view: a row the list has not built
   /// has no field to show. Rows are [height] tall, near enough for the
   /// pinned block above them; the field puts itself fully in view once
@@ -188,17 +257,299 @@ final class _NoteTreeState extends State<NoteTree> {
     });
   }
 
+  /// The heights of the pinned block's items, in the order the list draws
+  /// them: the heading, the notes (none when it is rolled up) and the
+  /// divider that closes it off. Empty when nothing is pinned.
+  List<double> _pinnedHeightsOf(_Rows rows, double rowHeight) {
+    if (rows.pinned.isEmpty) return const <double>[];
+    return [
+      editorToolbarHeight,
+      if (!_collapsed)
+        for (final _ in rows.pinned) rowHeight,
+      _pinnedDividerHeight,
+    ];
+  }
+
+  /// What the keyboard walks at the list's [index] (#727): the item's place
+  /// and height, and the row it draws — null for the pinned heading and its
+  /// divider, which are not rows. Reads the rows of the last build.
+  _WalkRow? _walkAt(int index) {
+    final rows = _current;
+    if (rows == null) return null;
+    final header = _pinnedHeights.length;
+    var top = 0.0;
+    if (index < header) {
+      final note = index > 0 && index < header - 1
+          ? rows.pinned[index - 1]
+          : null;
+      if (note == null) return null;
+      for (var at = 0; at < index; at++) {
+        top += _pinnedHeights[at];
+      }
+      return _WalkRow(
+        note: note,
+        path: note.path,
+        pinned: true,
+        // The pinned block draws every note at the root: its own depth
+        // would say nothing there.
+        depth: 0,
+        top: top,
+        height: _pinnedHeights[index],
+      );
+    }
+    final at = index - header;
+    if (at >= rows.tree.length) return null;
+    for (final height in _pinnedHeights) {
+      top += height;
+    }
+    final row = rows.tree[at];
+    return _WalkRow(
+      note: row.note,
+      path: row.note.path,
+      pinned: false,
+      depth: row.depth,
+      top: top + at * _rowHeight,
+      height: _rowHeight,
+    );
+  }
+
+  /// How many of the pinned block's items are rows the keyboard walks: its
+  /// notes, without the heading and the divider — none while rolled up.
+  int get _pinnedWalked =>
+      _pinnedHeights.isEmpty ? 0 : _pinnedHeights.length - 2;
+
+  /// How many rows the keyboard walks, in the order the list draws them:
+  /// the pinned notes first, then the tree's own rows (#727).
+  int get _walkLength {
+    final rows = _current;
+    return rows == null ? 0 : _pinnedWalked + rows.tree.length;
+  }
+
+  /// The walk's row at [index]: the list's item it is, read as
+  /// [_walkAt] reads it. Only the rows a key reaches are made — a tree of
+  /// a million rows is not copied for each key press.
+  _WalkRow _walkRow(int index) {
+    final pinned = _pinnedWalked;
+    return _walkAt(
+      index < pinned ? index + 1 : _pinnedHeights.length + index - pinned,
+    )!;
+  }
+
+  /// The cursor's place in the walk: the row it is on, or the selected
+  /// row — a walk begun with the keyboard starts where the tree already
+  /// is — or the first row.
+  int _cursorAt() {
+    final rows = _current!;
+    final pinned = _pinnedWalked;
+    int? find(String path, {bool? inPinned}) {
+      if (inPinned != false) {
+        for (var at = 0; at < pinned; at++) {
+          if (rows.pinned[at].path == path) return at;
+        }
+      }
+      if (inPinned != true) {
+        final at = rows.tree.indexWhere((row) => row.note.path == path);
+        if (at >= 0) return pinned + at;
+      }
+      return null;
+    }
+
+    final path = _cursorPath;
+    final selected = widget.selectedPath;
+    return (path == null ? null : find(path, inPinned: _cursorPinned)) ??
+        (selected == null ? null : find(selected)) ??
+        0;
+  }
+
+  /// Whether the keyboard's ring is on [row] (#727): the cursor's own look,
+  /// apart from the selection's fill, so the two are told apart and can be
+  /// worn together.
+  bool _isCursor(_WalkRow? row) =>
+      row != null &&
+      _keyboardFocus &&
+      _focus.hasPrimaryFocus &&
+      row.path == _cursorPath &&
+      row.pinned == _cursorPinned;
+
+  /// The keyboard (#727): the arrows walk the rows, `Home`/`End` and
+  /// `PgUp`/`PgDn` jump, `Enter` opens a note or expands a folder, the left
+  /// and right arrows close and open folders, and `F2` and `Delete` act on
+  /// the cursor — the grid's own walk, in the tree's shape.
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    if (!widget.active) return KeyEventResult.ignored;
+    // Ancestor of the rows' own rename field too: keys reach here from it,
+    // and a Backspace in a name must not walk the tree.
+    if (!_focus.hasPrimaryFocus) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    // A modified key belongs to the app's accelerators (#23): Alt+Left and
+    // Alt+Right walk the notes' history, Ctrl+Shift+PageUp/Down the
+    // journal — the walk claims the plain key or none.
+    final keys = HardwareKeyboard.instance;
+    if (keys.isControlPressed ||
+        keys.isAltPressed ||
+        keys.isMetaPressed ||
+        keys.isShiftPressed) {
+      return KeyEventResult.ignored;
+    }
+    if (_walkLength == 0) return KeyEventResult.ignored;
+    final handled = _walkKey(_cursorAt(), event.logicalKey);
+    // The keyboard is in use: the ring comes back if a pointer had put it
+    // away — and stays off for a key the walk does not own.
+    if (handled == KeyEventResult.handled && !_keyboardFocus) {
+      setState(() => _keyboardFocus = true);
+    }
+    return handled;
+  }
+
+  /// One key of the walk: [at] is the cursor's place in it, and what the
+  /// key does is decided here.
+  KeyEventResult _walkKey(int at, LogicalKeyboardKey key) {
+    final row = _walkRow(at);
+    final length = _walkLength;
+    if (key == LogicalKeyboardKey.arrowUp) return _move(at - 1);
+    if (key == LogicalKeyboardKey.arrowDown) return _move(at + 1);
+    if (key == LogicalKeyboardKey.home) return _move(0);
+    if (key == LogicalKeyboardKey.end) return _move(length - 1);
+    if (key == LogicalKeyboardKey.pageUp ||
+        key == LogicalKeyboardKey.pageDown) {
+      final viewport = _scroll.hasClients
+          ? _scroll.position.viewportDimension
+          : 0.0;
+      final page = math.max(1, viewport ~/ math.max(1.0, row.height));
+      return _move(at + (key == LogicalKeyboardKey.pageUp ? -page : page));
+    }
+    if (key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.numpadEnter) {
+      widget.onSelect(row.note);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.arrowRight) {
+      // A closed folder opens; anything else steps into the rows drawn
+      // under it, as a file manager's right arrow does.
+      if (row.note.isDir && !widget.expanded.contains(row.path)) {
+        widget.onToggle(row.path);
+        return KeyEventResult.handled;
+      }
+      if (!row.pinned &&
+          at + 1 < length &&
+          _walkRow(at + 1).depth > row.depth) {
+        return _move(at + 1);
+      }
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.arrowLeft) {
+      // An open folder closes; anything else steps out to the row that
+      // holds it.
+      if (row.note.isDir && widget.expanded.contains(row.path)) {
+        widget.onToggle(row.path);
+        return KeyEventResult.handled;
+      }
+      if (!row.pinned) {
+        // The tree's own rows only: the pinned block above them is no
+        // folder of theirs.
+        final rows = _current!.tree;
+        final pinned = _pinnedWalked;
+        for (var i = at - pinned - 1; i >= 0; i--) {
+          if (rows[i].depth < row.depth) return _move(pinned + i);
+        }
+      }
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.f2) {
+      final rename = widget.onRename;
+      if (rename == null) return KeyEventResult.ignored;
+      rename(row.path);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.delete) {
+      final delete = widget.onDelete;
+      if (delete == null) return KeyEventResult.ignored;
+      delete(row.path);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  /// Puts the cursor on the row at [index], clamped to the rows there are,
+  /// and brings it into view.
+  KeyEventResult _move(int index) {
+    final row = _walkRow(index.clamp(0, _walkLength - 1));
+    setState(() {
+      _cursorPath = row.path;
+      _cursorPinned = row.pinned;
+      _keyboardFocus = true;
+    });
+    _ensureCursorVisible(row);
+    return KeyEventResult.handled;
+  }
+
+  /// A row's own click: the cursor follows it — the arrows go on from where
+  /// the pointer left — and a folder takes the keyboard for the walk. A note
+  /// does not: it opens for writing, and the shell gives the caret to it
+  /// (#727) — taking the keys here would leave the note unable to be typed
+  /// into.
+  void _rowActivated(Note note, _WalkRow? row) {
+    setState(() {
+      _cursorPath = row?.path ?? note.path;
+      _cursorPinned = row?.pinned ?? false;
+      _keyboardFocus = false;
+    });
+    if (note.isDir) _focus.requestFocus();
+    widget.onSelect(note);
+  }
+
+  /// A folder's chevron: the cursor follows the folder that was opened or
+  /// closed, and the pane takes the keyboard.
+  void _rowToggled(String path, {required bool pinned}) {
+    setState(() {
+      _cursorPath = path;
+      _cursorPinned = pinned;
+      _keyboardFocus = false;
+    });
+    _focus.requestFocus();
+    widget.onToggle(path);
+  }
+
+  /// Scrolls [row] into view, as the grid's walk does.
+  void _ensureCursorVisible(_WalkRow row) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
+      final position = _scroll.position;
+      if (row.top >= position.pixels &&
+          row.top + row.height <=
+              position.pixels + position.viewportDimension) {
+        return;
+      }
+      _scroll.jumpTo(
+        (row.top - position.viewportDimension / 2).clamp(
+          position.minScrollExtent,
+          position.maxScrollExtent,
+        ),
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _focus.addListener(_onFocusChanged);
     const AppLogger(name: 'tree.ui').debug('mount');
   }
 
   @override
   void dispose() {
+    _focus.removeListener(_onFocusChanged);
+    _focus.dispose();
     _scroll.dispose();
     const AppLogger(name: 'tree.ui').debug('dispose');
     super.dispose();
+  }
+
+  /// The ring follows the focus, so the pane redraws as it comes and goes.
+  void _onFocusChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -211,6 +562,9 @@ final class _NoteTreeState extends State<NoteTree> {
       _rows = null;
       _pinnedCollapsed = null;
     }
+    // Hidden under the grid the pane lets the keyboard go: the rows it
+    // would walk are not the ones on screen (#727).
+    if (!widget.active && oldWidget.active) _focus.unfocus();
   }
 
   /// The flattened rows for [revision], recomputed only when the index
@@ -341,6 +695,7 @@ final class _NoteTreeState extends State<NoteTree> {
             }
             final rows = snap.data!;
             if (rows.isEmpty) {
+              _current = null;
               return Center(child: Text(AppStrings.treeEmpty));
             }
             // The pinned notes sit above the tree with a heading of their
@@ -348,16 +703,23 @@ final class _NoteTreeState extends State<NoteTree> {
             // note appears twice — once where it is kept, once where it
             // is wanted. Rolled up, the heading and the divider stay: the
             // count is still worth seeing, and the tree keeps the room.
-            final header = rows.pinned.isEmpty
-                ? 0
-                : (_collapsed ? 2 : rows.pinned.length + 2);
-            _revealRenamed(rows, header, TreeRowMetrics.of(context).height);
+            final rowHeight = TreeRowMetrics.of(context).height;
+            _current = rows;
+            _pinnedHeights = _pinnedHeightsOf(rows, rowHeight);
+            _rowHeight = rowHeight;
+            final header = _pinnedHeights.length;
+            _revealRenamed(rows, header, rowHeight);
             final list = ListView.builder(
               key: const Key('note-tree-list'),
               controller: _scroll,
               itemCount: header + rows.tree.length,
               itemBuilder: (context, index) {
-                if (index < header) return _pinnedItem(rows.pinned, index);
+                // What the keyboard walks on this item: its place, and the
+                // row a key on it acts upon (#727).
+                final walked = _walkAt(index);
+                if (index < header) {
+                  return _pinnedItem(rows.pinned, index, walked);
+                }
                 final row = rows.tree[index - header];
                 return _RowTile(
                   note: row.note,
@@ -366,8 +728,9 @@ final class _NoteTreeState extends State<NoteTree> {
                   ocrQueue: widget.ocrQueue,
                   isExpanded: widget.expanded.contains(row.note.path),
                   selected: row.note.path == widget.selectedPath,
-                  onSelect: widget.onSelect,
-                  onToggle: widget.onToggle,
+                  focused: _isCursor(walked),
+                  onSelect: (note) => _rowActivated(note, walked),
+                  onToggle: (path) => _rowToggled(path, pinned: false),
                   onLongPress: widget.onLongPress,
                   onSecondaryTapDown: widget.onSecondaryTapDown,
                   onMiddleClick: widget.onOpenInNewTab,
@@ -379,9 +742,10 @@ final class _NoteTreeState extends State<NoteTree> {
               },
             );
             final move = widget.onMove;
-            return move == null
+            final tree = move == null
                 ? list
                 : TreeRootDrop(onMove: move, child: list);
+            return Focus(focusNode: _focus, onKeyEvent: _onKey, child: tree);
           },
         );
       },
@@ -389,8 +753,9 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// One item of the pinned block: the heading, a pinned note, or the
-  /// divider that closes it off from the tree.
-  Widget _pinnedItem(List<Note> pinned, int index) {
+  /// divider that closes it off from the tree. [walked] is what the
+  /// keyboard walks on it, for the row's ring and its cursor (#727).
+  Widget _pinnedItem(List<Note> pinned, int index, _WalkRow? walked) {
     if (index == 0) return _pinnedHeading(pinned.length);
     if (index == (_collapsed ? 1 : pinned.length + 1)) {
       // The hairline sits directly under the heading — aligned with the
@@ -412,8 +777,9 @@ final class _NoteTreeState extends State<NoteTree> {
       depth: 0,
       isExpanded: false,
       selected: note.path == widget.selectedPath,
-      onSelect: widget.onSelect,
-      onToggle: widget.onToggle,
+      focused: _isCursor(walked),
+      onSelect: (note) => _rowActivated(note, walked),
+      onToggle: (path) => _rowToggled(path, pinned: true),
       onLongPress: widget.onLongPress,
       onSecondaryTapDown: widget.onSecondaryTapDown,
       onMiddleClick: widget.onOpenInNewTab,
@@ -498,6 +864,7 @@ final class _RowTile extends StatelessWidget {
     required this.selected,
     required this.onSelect,
     required this.onToggle,
+    this.focused = false,
     this.onLongPress,
     this.onSecondaryTapDown,
     this.onMiddleClick,
@@ -511,6 +878,10 @@ final class _RowTile extends StatelessWidget {
 
   /// The rename under way on this row, or null.
   final TreeRename? renaming;
+
+  /// Whether the keyboard's cursor is on this row (#727): a ring of its
+  /// own, apart from the selection's fill, as a grid tile's is.
+  final bool focused;
 
   /// Moves this row by dragging it, and takes drops (#567).
   final TreeMove? onMove;
@@ -551,6 +922,11 @@ final class _RowTile extends StatelessWidget {
     // long press: the drag gives it back.
     final held = move != null && TreeRowDrag.holdToDrag;
     Widget row = InkWell(
+      // The walk owns the keyboard here (#727): a row that took the focus
+      // itself would leave the arrows to nobody — a key pressed with the
+      // scope focused lands on the first focusable descendant, and that
+      // would be a row rather than the pane's own node.
+      canRequestFocus: false,
       onTap: () => onSelect(note),
       onLongPress: held ? null : longPress,
       onSecondaryTapDown: onSecondaryTapDown == null
@@ -562,6 +938,13 @@ final class _RowTile extends StatelessWidget {
             ? BoxConstraints.tightFor(height: metrics.height)
             : BoxConstraints(minHeight: metrics.height),
         color: selected ? theme.highlightColor.withValues(alpha: 0.4) : null,
+        // Over the child, and no part of its size: the rows keep the
+        // height the list and the walk measured them at (#727).
+        foregroundDecoration: focused
+            ? BoxDecoration(
+                border: Border.all(color: theme.colorScheme.primary, width: 2),
+              )
+            : null,
         padding: EdgeInsets.only(left: depth * metrics.indent + 8),
         child: Row(
           children: [

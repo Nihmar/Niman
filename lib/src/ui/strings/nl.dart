@@ -1156,6 +1156,22 @@ final class DutchStrings extends Strings {
   @override
   String get sortDescending => 'Aflopend';
   @override
+  String get viewList => 'Lijst';
+  @override
+  String get viewGrid => 'Raster';
+  @override
+  String get viewGroup => 'Weergave';
+  @override
+  String get folderUpTooltip => 'Omhoog (Alt+Omhoog)';
+  @override
+  String get breadcrumbMoreTooltip => 'Meer mappen';
+  @override
+  String get libraryCrumb => 'Bibliotheek';
+  @override
+  String folderEmpty(String name) => 'Nog niets in $name';
+  @override
+  String get folderEmptyHint => 'Tik op + om hier een notitie of map te maken.';
+  @override
   String get newNoteTitle => 'Nieuwe notitie';
   @override
   String get newItemTooltip => 'Nieuw';

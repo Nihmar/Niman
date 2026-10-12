@@ -1168,6 +1168,23 @@ final class SpanishStrings extends Strings {
   @override
   String get sortDescending => 'Descendente';
   @override
+  String get viewList => 'Lista';
+  @override
+  String get viewGrid => 'Cuadrícula';
+  @override
+  String get viewGroup => 'Vista';
+  @override
+  String get folderUpTooltip => 'Subir (Alt+Subir)';
+  @override
+  String get breadcrumbMoreTooltip => 'Más carpetas';
+  @override
+  String get libraryCrumb => 'Biblioteca';
+  @override
+  String folderEmpty(String name) => 'Nada en $name todavía';
+  @override
+  String get folderEmptyHint =>
+      'Toca + para crear aquí una nota o una carpeta.';
+  @override
   String get newNoteTitle => 'Nueva nota';
   @override
   String get newItemTooltip => 'Nuevo';

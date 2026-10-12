@@ -11,6 +11,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         LinkType,
         SourceFont,
         TreeSort,
+        TreeView,
         defaultAnnotationsFolder,
         defaultAttachmentsFolder,
         defaultCaptureFolder,
@@ -386,6 +387,7 @@ final class LibraryConfig {
     this.frontmatterPanel = true,
     this.lintRulesOff = const <String>{},
     this.treeSort = TreeSort.nameAsc,
+    this.treeView = TreeView.list,
     this.linkType = LinkType.wikilink,
     this.weekStart = WeekStart.system,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
@@ -481,6 +483,12 @@ final class LibraryConfig {
           orElse: () => TreeSort.nameAsc,
         ),
         _ => TreeSort.nameAsc,
+      },
+      // The enum's name is the stored id, as the sort's is: an unknown
+      // value reads back as the list view (#727).
+      treeView: switch (json['treeView']) {
+        'grid' => TreeView.grid,
+        _ => TreeView.list,
       },
       linkType: switch (json['linkType']) {
         'markdown' => LinkType.markdown,
@@ -647,6 +655,14 @@ final class LibraryConfig {
   /// The tree's sort order (default [TreeSort.nameAsc]).
   final TreeSort treeSort;
 
+  /// How the Files pane shows a folder, the tree or the grid (default
+  /// [TreeView.list], #727).
+  ///
+  /// Kept on the device ([deviceKeys]): a wide window wants the grid, a
+  /// phone the tree it always had, and a library opened on both keeps an
+  /// answer per screen.
+  final TreeView treeView;
+
   /// What the editor's link button inserts (default a wikilink).
   final LinkType linkType;
 
@@ -757,6 +773,7 @@ final class LibraryConfig {
     bool? frontmatterPanel,
     Set<String>? lintRulesOff,
     TreeSort? treeSort,
+    TreeView? treeView,
     LinkType? linkType,
     WeekStart? weekStart,
     MissingNoteLocation? missingNoteLocation,
@@ -806,6 +823,7 @@ final class LibraryConfig {
       frontmatterPanel: frontmatterPanel ?? this.frontmatterPanel,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
       treeSort: treeSort ?? this.treeSort,
+      treeView: treeView ?? this.treeView,
       linkType: linkType ?? this.linkType,
       weekStart: weekStart ?? this.weekStart,
       missingNoteLocation: missingNoteLocation ?? this.missingNoteLocation,
@@ -864,6 +882,7 @@ final class LibraryConfig {
     'noteColumnWidth',
     'editorAutofocus',
     'treeSort',
+    'treeView',
     'editorToolbar',
     'uiTextScale',
     'noteTextScale',
@@ -932,6 +951,7 @@ final class LibraryConfig {
     'frontmatterPanel',
     'lintRulesOff',
     'treeSort',
+    'treeView',
     'linkType',
     'weekStart',
     'missingNoteLocation',
@@ -995,6 +1015,7 @@ final class LibraryConfig {
       'cascadeChecklist': cascadeChecklist,
       'frontmatterPanel': frontmatterPanel,
       'treeSort': treeSort.name,
+      'treeView': treeView.name,
       'linkType': linkType.name,
       'weekStart': weekStart.name,
       'missingNoteLocation': missingNoteLocation.name,
@@ -1108,6 +1129,7 @@ final class LibraryConfig {
         lintRulesOff.length == other.lintRulesOff.length &&
         lintRulesOff.containsAll(other.lintRulesOff) &&
         treeSort == other.treeSort &&
+        treeView == other.treeView &&
         linkType == other.linkType &&
         weekStart == other.weekStart &&
         missingNoteLocation == other.missingNoteLocation &&

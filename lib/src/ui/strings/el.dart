@@ -1180,6 +1180,23 @@ final class GreekStrings extends Strings {
   @override
   String get sortDescending => 'Φθίνουσα';
   @override
+  String get viewList => 'Λίστα';
+  @override
+  String get viewGrid => 'Πλέγμα';
+  @override
+  String get viewGroup => 'Προβολή';
+  @override
+  String get folderUpTooltip => 'Πάνω (Alt+Πάνω)';
+  @override
+  String get breadcrumbMoreTooltip => 'Περισσότεροι φάκελοι';
+  @override
+  String get libraryCrumb => 'Βιβλιοθήκη';
+  @override
+  String folderEmpty(String name) => 'Τίποτα ακόμα στον $name';
+  @override
+  String get folderEmptyHint =>
+      'Πατήστε + για να δημιουργήσετε σημείωση ή φάκελο.';
+  @override
   String get newNoteTitle => 'Νέα σημείωση';
   @override
   String get newItemTooltip => 'Νέο';

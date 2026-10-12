@@ -37,6 +37,7 @@ final class ShellEditorSettings {
     this.indentWidth = 2,
     this.sourceFont = defaultSourceFont,
     this.treeSort = TreeSort.nameAsc,
+    this.treeView = TreeView.list,
     this.treeWidth = defaultTreeWidth,
     this.dockWidth = defaultDockWidth,
     this.toolbarLayout = ToolbarLayout.defaults,
@@ -89,6 +90,9 @@ final class ShellEditorSettings {
 
   /// The library tree's sort order (T-UI-03).
   final TreeSort treeSort;
+
+  /// How the Files pane shows a folder on this device (#727).
+  final TreeView treeView;
 
   /// The tree pane's width in the wide layout, dragged and persisted per
   /// library (T-PP-21).
@@ -160,6 +164,9 @@ final class ShellEditorSettings {
       session.editorKind,
       session.enabledEditors,
     ).wait;
+    // Started with the rest, awaited below: a record's `wait` covers nine
+    // futures, and this one makes the group ten (#727).
+    final treeView = session.treeView;
     final folders = (
       ops?.attachmentsFolder ?? Future<String>.value(defaultAttachmentsFolder),
       ops?.templateFolder ?? Future<String>.value(defaultTemplateFolder),
@@ -212,6 +219,7 @@ final class ShellEditorSettings {
       indentWidth: indentWidth,
       sourceFont: sourceFont,
       treeSort: treeSort,
+      treeView: await treeView,
       treeWidth: treeWidth,
       dockWidth: dockWidth,
       toolbarLayout: ToolbarLayout.parse(toolbar),
@@ -232,6 +240,7 @@ final class ShellEditorSettings {
   ShellEditorSettings copyWith({
     EditorKind? editorKind,
     TreeSort? treeSort,
+    TreeView? treeView,
     double? treeWidth,
     double? dockWidth,
     bool? typewriter,
@@ -253,6 +262,7 @@ final class ShellEditorSettings {
       indentWidth: indentWidth,
       sourceFont: sourceFont ?? this.sourceFont,
       treeSort: treeSort ?? this.treeSort,
+      treeView: treeView ?? this.treeView,
       treeWidth: treeWidth ?? this.treeWidth,
       dockWidth: dockWidth ?? this.dockWidth,
       toolbarLayout: toolbarLayout,
@@ -280,6 +290,7 @@ final class ShellEditorSettings {
         indentWidth == other.indentWidth &&
         sourceFont == other.sourceFont &&
         treeSort == other.treeSort &&
+        treeView == other.treeView &&
         treeWidth == other.treeWidth &&
         dockWidth == other.dockWidth &&
         tidyOnClose == other.tidyOnClose &&
@@ -305,7 +316,9 @@ final class ShellEditorSettings {
     templateFolder,
     indentWidth,
     sourceFont,
-    treeSort,
+    // One slot for the pair past [Object.hash]'s twenty: the two enums
+    // travel together.
+    Object.hash(treeSort, treeView),
     treeWidth,
     dockWidth,
     toolbarLayout.encode(),

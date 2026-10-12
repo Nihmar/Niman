@@ -1145,6 +1145,23 @@ final class NorwegianStrings extends Strings {
   @override
   String get sortDescending => 'Synkende';
   @override
+  String get viewList => 'Liste';
+  @override
+  String get viewGrid => 'Rutenett';
+  @override
+  String get viewGroup => 'Visning';
+  @override
+  String get folderUpTooltip => 'Opp (Alt+Opp)';
+  @override
+  String get breadcrumbMoreTooltip => 'Flere mapper';
+  @override
+  String get libraryCrumb => 'Bibliotek';
+  @override
+  String folderEmpty(String name) => 'Ingenting i $name ennå';
+  @override
+  String get folderEmptyHint =>
+      'Trykk + for å lage et notat eller en mappe her.';
+  @override
   String get newNoteTitle => 'Nytt notat';
   @override
   String get newItemTooltip => 'Ny';

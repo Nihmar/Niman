@@ -83,6 +83,19 @@ enum TreeSort {
   bool get contentMovesRows => order != TreeOrder.name;
 }
 
+/// How the Files pane shows a folder (#727): the tree, or a grid of the
+/// folder's own children.
+///
+/// Kept on the device (`LibraryConfig.deviceKeys`): the room a screen has
+/// — and the pointer it has it with — is the screen's own answer.
+enum TreeView {
+  /// The flattened tree (the default).
+  list,
+
+  /// The folder's children as tiles.
+  grid,
+}
+
 /// The link format the editor's link button inserts.
 enum LinkType {
   /// A wikilink `[[…]]` (the default).

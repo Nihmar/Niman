@@ -1150,6 +1150,23 @@ final class LithuanianStrings extends Strings {
   @override
   String get sortDescending => 'Mažėjančiai';
   @override
+  String get viewList => 'Sąrašas';
+  @override
+  String get viewGrid => 'Tinklelis';
+  @override
+  String get viewGroup => 'Rodinys';
+  @override
+  String get folderUpTooltip => 'Aukštyn (Alt+Aukštyn)';
+  @override
+  String get breadcrumbMoreTooltip => 'Daugiau aplankų';
+  @override
+  String get libraryCrumb => 'Biblioteka';
+  @override
+  String folderEmpty(String name) => '$name kol kas tuščias';
+  @override
+  String get folderEmptyHint =>
+      'Bakstelėkite +, kad čia sukurtumėte pastabą ar aplanką.';
+  @override
   String get newNoteTitle => 'Nauja pastaba';
   @override
   String get newItemTooltip => 'Naujas';

@@ -21,6 +21,7 @@ NoteView _view({
   bool showPreview = false,
   ValueChanged<EditorKind>? onEditorKindChanged,
   int? initialCaretOffset,
+  int caretRequest = 0,
   bool outlineInDock = false,
 }) => NoteView(
   outlineInDock: outlineInDock,
@@ -32,6 +33,7 @@ NoteView _view({
   readNote: readNote,
   writeNote: writeNote,
   initialCaretOffset: initialCaretOffset,
+  caretRequest: caretRequest,
 );
 
 /// The note's source pane.
@@ -693,6 +695,109 @@ void main() {
           .focusNode!
           .unfocus();
       await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a caret the pane asked for lands in the note (#727)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => 'ciao\n',
+            caretRequest: 1,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(
+        tester
+            .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+            .focusNode!
+            .hasFocus,
+        isTrue,
+        reason: 'the Files pane opened the note',
+      );
+      // And you can write: through the platform's own path, as the
+      // keyboard does.
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'Xciao\n',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await tester.pump();
+      expect(_editorText(tester), 'Xciao\n');
+      // Same blink-timer teardown as above.
+      await tester.pump(const Duration(milliseconds: 200));
+      tester
+          .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+          .focusNode!
+          .unfocus();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a caret asked for while the note is open takes it (#727)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(_view(path: '/notes/a.md', readNote: (_) async => 'ciao\n')),
+      );
+      await tester.pump();
+      final focus = tester
+          .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+          .focusNode!;
+      expect(focus.hasFocus, isFalse, reason: 'nobody asked yet');
+
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => 'ciao\n',
+            caretRequest: 1,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focus.hasFocus, isTrue, reason: 'the pane asked for it');
+      // Same blink-timer teardown as above.
+      await tester.pump(const Duration(milliseconds: 200));
+      focus.unfocus();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a caret asked of another note leaves this one (#727)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => 'ciao\n',
+            caretRequest: 1,
+          ),
+        ),
+      );
+      await tester.pump();
+      final focus = tester
+          .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+          .focusNode!;
+      // Blink-timer teardown, as above; the focus then goes elsewhere.
+      await tester.pump(const Duration(milliseconds: 200));
+      focus.unfocus();
+      await tester.pump();
+      expect(focus.hasFocus, isFalse);
+
+      // The pane asked another note — another pane's, another tab's: this
+      // view's number drops to 0, which asks it for nothing.
+      await tester.pumpWidget(
+        _app(_view(path: '/notes/a.md', readNote: (_) async => 'ciao\n')),
+      );
+      await tester.pump();
+      expect(focus.hasFocus, isFalse, reason: 'the ask went to another note');
       expect(tester.takeException(), isNull);
     });
 

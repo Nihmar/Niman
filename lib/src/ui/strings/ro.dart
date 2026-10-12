@@ -1162,6 +1162,23 @@ final class RomanianStrings extends Strings {
   @override
   String get sortDescending => 'Descrescător';
   @override
+  String get viewList => 'Listă';
+  @override
+  String get viewGrid => 'Grilă';
+  @override
+  String get viewGroup => 'Vizualizare';
+  @override
+  String get folderUpTooltip => 'Sus (Alt+Sus)';
+  @override
+  String get breadcrumbMoreTooltip => 'Mai multe foldere';
+  @override
+  String get libraryCrumb => 'Bibliotecă';
+  @override
+  String folderEmpty(String name) => 'Încă nimic în $name';
+  @override
+  String get folderEmptyHint =>
+      'Atinge + pentru a crea aici o notă sau un folder.';
+  @override
   String get newNoteTitle => 'Notă nouă';
   @override
   String get newItemTooltip => 'Nou';

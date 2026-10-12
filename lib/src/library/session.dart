@@ -557,6 +557,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the library tree sort order.
   Future<void> setTreeSort(TreeSort sort);
 
+  /// How the Files pane shows a folder on this device (default
+  /// [TreeView.list], #727).
+  Future<TreeView> get treeView;
+
+  /// Sets (and persists) the Files pane's view on this device.
+  Future<void> setTreeView(TreeView view);
+
   /// The tree pane's width in logical pixels (default
   /// [defaultTreeWidth]).
   Future<double> get treeWidth;

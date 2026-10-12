@@ -92,9 +92,15 @@ Future<String?> showRowMenuAt(
 
 /// The right-click menu on the tree's empty space: what can be made at the
 /// library's root. Resolves to `note`, `template` or `folder`, or null.
+///
+/// With [here] given — the folder the grid shows (#727) — "here" means
+/// that folder, and the caller creates inside it: the export entry is the
+/// folder's rather than the library's, and resolves to `exportfolder`
+/// instead of `exportlibrary`.
 Future<String?> showTreeBackgroundMenuAt(
   BuildContext context, {
   required Offset position,
+  String? here,
 }) => _showEntriesAt(
   context,
   position: position,
@@ -124,8 +130,10 @@ Future<String?> showTreeBackgroundMenuAt(
       (
         key: const Key('tree-menu-export'),
         icon: Icons.save_alt_outlined,
-        label: AppStrings.exportLibraryTitle,
-        value: 'exportlibrary',
+        label: here == null
+            ? AppStrings.exportLibraryTitle
+            : AppStrings.exportFolderTitle,
+        value: here == null ? 'exportlibrary' : 'exportfolder',
         destructive: false,
       ),
     ],

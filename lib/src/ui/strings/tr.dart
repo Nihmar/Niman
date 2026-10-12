@@ -1143,6 +1143,23 @@ final class TurkishStrings extends Strings {
   @override
   String get sortDescending => 'Azalan';
   @override
+  String get viewList => 'Liste';
+  @override
+  String get viewGrid => 'Izgara';
+  @override
+  String get viewGroup => 'Görünüm';
+  @override
+  String get folderUpTooltip => 'Yukarı (Alt+Yukarı)';
+  @override
+  String get breadcrumbMoreTooltip => 'Daha fazla klasör';
+  @override
+  String get libraryCrumb => 'Kitaplık';
+  @override
+  String folderEmpty(String name) => '$name henüz boş';
+  @override
+  String get folderEmptyHint =>
+      'Burada not veya klasör oluşturmak için + simgesine dokunun.';
+  @override
   String get newNoteTitle => 'Yeni not';
   @override
   String get newItemTooltip => 'Yeni';

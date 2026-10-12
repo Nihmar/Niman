@@ -1155,6 +1155,23 @@ final class PortugueseStrings extends Strings {
   @override
   String get sortDescending => 'Decrescente';
   @override
+  String get viewList => 'Lista';
+  @override
+  String get viewGrid => 'Grelha';
+  @override
+  String get viewGroup => 'Vista';
+  @override
+  String get folderUpTooltip => 'Subir (Alt+Subir)';
+  @override
+  String get breadcrumbMoreTooltip => 'Mais pastas';
+  @override
+  String get libraryCrumb => 'Biblioteca';
+  @override
+  String folderEmpty(String name) => 'Ainda nada em $name';
+  @override
+  String get folderEmptyHint =>
+      'Toca em + para criar aqui uma nota ou uma pasta.';
+  @override
   String get newNoteTitle => 'Nova nota';
   @override
   String get newItemTooltip => 'Novo';

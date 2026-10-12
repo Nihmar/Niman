@@ -200,6 +200,18 @@ thumb-sized rows and the long-press sheet. The choice follows the
 platform's own density (compact on a desktop), not the window's width,
 so a tablet in landscape keeps the touch sizes.
 
+## The folder grid
+
+The grid of a folder ships on every platform; the shape adapts to the
+surface. A wide window shows the breadcrumb where the tree's first row
+would be, three or four columns in the sidebar — two at its 200 px
+minimum — and the **List | Grid** pair at the foot, beside the sort
+chevron. A phone fills the screen with the same tiles, three or four
+columns, puts the breadcrumb under the app bar, keeps the switch at the
+top of the sort menu, walks up one folder with the system Back, and
+opens the row sheet on a long press — renaming stays the dialog there,
+as it does in the tree.
+
 ## Window size
 
 The Linux and Windows window cannot be made narrower than 600 px — the

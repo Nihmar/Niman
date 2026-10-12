@@ -1147,6 +1147,23 @@ final class DanishStrings extends Strings {
   @override
   String get sortDescending => 'Faldende';
   @override
+  String get viewList => 'Liste';
+  @override
+  String get viewGrid => 'Gitter';
+  @override
+  String get viewGroup => 'Visning';
+  @override
+  String get folderUpTooltip => 'Op (Alt+Op)';
+  @override
+  String get breadcrumbMoreTooltip => 'Flere mapper';
+  @override
+  String get libraryCrumb => 'Bibliotek';
+  @override
+  String folderEmpty(String name) => 'Intet i $name endnu';
+  @override
+  String get folderEmptyHint =>
+      'Tryk på + for at oprette en note eller mappe her.';
+  @override
   String get newNoteTitle => 'Ny note';
   @override
   String get newItemTooltip => 'Ny';

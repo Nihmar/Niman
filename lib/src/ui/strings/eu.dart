@@ -1156,6 +1156,23 @@ final class BasqueStrings extends Strings {
   @override
   String get sortDescending => 'Beherantz';
   @override
+  String get viewList => 'Zerrenda';
+  @override
+  String get viewGrid => 'Sareta';
+  @override
+  String get viewGroup => 'Ikuspegia';
+  @override
+  String get folderUpTooltip => 'Gora (Alt+Gora)';
+  @override
+  String get breadcrumbMoreTooltip => 'Karpeta gehiago';
+  @override
+  String get libraryCrumb => 'Liburutegia';
+  @override
+  String folderEmpty(String name) => 'Oraindik ez dago ezer $name(e)an';
+  @override
+  String get folderEmptyHint =>
+      'Sakatu + hemen ohar bat edo karpeta bat sortzeko.';
+  @override
   String get newNoteTitle => 'Ohar berria';
   @override
   String get newItemTooltip => 'Berria';

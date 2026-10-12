@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         LinkType,
         SourceFont,
         TreeSort,
+        TreeView,
         defaultAnnotationsFolder,
         defaultAttachmentsFolder,
         defaultCaptureFolder,
@@ -682,6 +683,22 @@ void main() {
       expect(LibraryConfig.deviceKeys, isNot(contains('tidyOnClose')));
       expect(off.libraryJsonMap()['tidyOnClose'], isFalse);
       expect(off.deviceJsonMap().containsKey('tidyOnClose'), isFalse);
+    });
+
+    test('the Files pane view is a device key, list by default (#727)', () {
+      expect(LibraryConfig.defaults.treeView, TreeView.list);
+      expect(LibraryConfig.deviceKeys, contains('treeView'));
+      final grid = LibraryConfig.defaults.copyWith(treeView: TreeView.grid);
+      expect(grid.deviceJsonMap()['treeView'], 'grid');
+      expect(grid.libraryJsonMap().containsKey('treeView'), isFalse);
+      expect(LibraryConfig.fromJsonMap(grid.toJsonMap()), grid);
+      // A value this build does not know is no more informative than a
+      // missing key.
+      expect(
+        LibraryConfig.fromJsonMap(const {'treeView': 'mosaic'}).treeView,
+        TreeView.list,
+      );
+      expect(LibraryConfig.fromJsonMap(const {}).treeView, TreeView.list);
     });
 
     test('an out-of-range indentWidth is brought into range', () {

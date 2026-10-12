@@ -140,6 +140,7 @@ final class NoteView extends StatefulWidget {
     this.statusActions = const <Widget>[],
     this.spellCheck,
     this.reloadToken = 0,
+    this.caretRequest = 0,
     super.key,
   });
 
@@ -151,6 +152,16 @@ final class NoteView extends StatefulWidget {
 
   /// Whether the editor shows the keyboard on open (settings toggle).
   final bool autofocusEditor;
+
+  /// A counter the shell bumps when the note was opened from the Files pane
+  /// — a click on a row or a tile, or the pane's `Enter` — and the caret
+  /// should be in it (#727).
+  ///
+  /// The editor is the same widget across notes, so opening one does not
+  /// remount it and `autofocusEditor` — a fresh mount's — says nothing
+  /// here. A click on a note is an invitation to write in it, so the shell
+  /// asks for the caret; 0 is "nobody asked".
+  final int caretRequest;
 
   /// Whether the note's frontmatter is drawn as the properties panel above it
   /// (settings toggle, #157). Off, the note is its own text in both surfaces.
@@ -382,6 +393,11 @@ final class _NoteViewState extends State<NoteView>
   static const AppLogger _log = AppLogger(name: 'editor');
 
   late final FocusNode _focus;
+
+  /// Whether the Files pane asked for the caret in this note and it has not
+  /// been given yet (#727): the editor is not up until the note has loaded,
+  /// and a focus asked for before that goes nowhere.
+  bool _caretPending = false;
 
   /// The unified source pane's find & replace, over [_surface]'s buffer.
   late final SourceFindController _sourceFind = SourceFindController(
@@ -824,6 +840,9 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
+    // The pane opened the note before this editor was mounted (#727): the
+    // surface is built this frame, so the caret is asked for after it.
+    _caretPending = widget.caretRequest != 0;
     // The fields panel rides the note's head (#157), in whichever pane is on
     // stage: both scrolls are watched, and [_headInView] reads the one that is.
     _previewScroll.addListener(_frontmatterScrolled);
@@ -917,6 +936,17 @@ final class _NoteViewState extends State<NoteView>
     final wasPreviewOnly = _previewIn(oldWidget);
     if (_previewOnly && (widget.path != oldWidget.path || !wasPreviewOnly)) {
       _dismissKeyboardForPreview();
+    }
+    // The pane opened the note (#727): the caret goes in it, whatever the
+    // editor was showing before. Last, so a note opening in the preview is
+    // not dismissed right after being asked for. The editor may still be
+    // loading, so the ask is remembered for when it is up. A drop to 0 is
+    // the ask going to another note — another pane's, another tab's — and
+    // asks this one for nothing.
+    if (widget.caretRequest != 0 &&
+        widget.caretRequest != oldWidget.caretRequest) {
+      _caretPending = true;
+      _refocus();
     }
   }
 
@@ -1075,12 +1105,14 @@ final class _NoteViewState extends State<NoteView>
       });
       // Opened straight into the preview: the IME has no target here.
       _dismissKeyboardForPreview();
-      // A template `{{cursor}}` landing takes the keyboard (#53), and asks
-      // for it: the surface's `autofocus` gives way to whatever its scope
-      // already focused — the tree, the button the template was picked
-      // from — and the caret was drawn where no key went. Once the frame
-      // has put the surface under its focus node.
-      if (widget.initialCaretOffset != null) {
+      // A template `{{cursor}}` landing takes the keyboard (#53), and so
+      // does a note the Files pane opened (#727), and asks for it: the
+      // surface's `autofocus` gives way to whatever its scope already
+      // focused — the tree, the button the template was picked from — and
+      // the caret was drawn where no key went. Once the frame has put the
+      // surface under its focus node.
+      if (widget.initialCaretOffset != null || _caretPending) {
+        _caretPending = false;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted && widget.path == path) _focus.requestFocus();
         });

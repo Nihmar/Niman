@@ -1164,6 +1164,23 @@ final class PolishStrings extends Strings {
   @override
   String get sortDescending => 'Malejąco';
   @override
+  String get viewList => 'Lista';
+  @override
+  String get viewGrid => 'Siatka';
+  @override
+  String get viewGroup => 'Widok';
+  @override
+  String get folderUpTooltip => 'W górę (Alt+W górę)';
+  @override
+  String get breadcrumbMoreTooltip => 'Więcej folderów';
+  @override
+  String get libraryCrumb => 'Biblioteka';
+  @override
+  String folderEmpty(String name) => 'Nic jeszcze w $name';
+  @override
+  String get folderEmptyHint =>
+      'Stuknij +, aby utworzyć tu notatkę lub folder.';
+  @override
   String get newNoteTitle => 'Nowa notatka';
   @override
   String get newItemTooltip => 'Nowy';

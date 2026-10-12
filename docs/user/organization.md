@@ -207,6 +207,59 @@ do not offer one through the file API the app uses, so **Date created** is
 the modification time there — the order above it (see
 [platforms](platforms.md#date-created)).
 
+A click on a folder's row takes the keyboard — the pane is where the walk
+goes on from — and the arrows then walk the rows: `Home`/`End` and
+`PgUp`/`PgDn` jump, `Enter` opens the note (or opens the folder) the
+cursor is on, `←` closes an open folder or steps out to the row that holds
+it, `→` opens a closed one or steps into the rows under it, `F2` renames
+and `Delete` deletes the row the cursor is on. A click on a note is a note
+to write in: it opens and the caret goes into it, and the pane keeps no
+keys a note would need — on a desktop, where the keyboard is always there
+(a phone's is the **Keyboard on open** setting's). A modified key is left
+to the app's own shortcuts — `Alt`+`←`/`→` walk the notes' history and
+`Ctrl`+`Shift`+`PgUp`/`PgDn` the journal — so the walk never shadows one.
+
+### The grid
+
+The Files pane has a second shape: a **grid** of one folder's children,
+as a file manager's main pane shows them. The **List | Grid** pair at the
+tree's foot, beside the sort chevron, switches in place — the icon of the
+view that is on is filled. On a phone, where the app bar has no room for
+the pair, the switch rides at the top of the sort menu. The view is
+remembered on this device, like the sort order.
+
+Each tile is its icon, its name on up to two lines and the date of the
+field the folder is sorted by: the modified day, or the created day when
+**Date created** is the order in force — **Name** and **Size** show the
+modified day. A pinned note wears a pin in its own folder; a text
+recognition sidecar follows its file, dimmed with the scanner icon.
+Nothing is read from disk to draw a tile — there are no thumbnails, so a
+picture wears its outline icon and a large folder costs the index alone.
+`index.md` is an ordinary note, as everywhere else.
+
+A tap opens a note or enters a folder; `Ctrl`+click or a middle click
+opens a note in a tab of its own. The breadcrumb above the tiles shows
+the way from the library — `Library › Projects › Niman`; **Up** (also
+`Backspace` or `Alt+Up`) leaves for the parent, and a crumb goes straight
+to its folder. At the library's root Up is disabled, not hidden; a narrow
+pane folds the middle crumbs into a `…` that opens them as a menu.
+
+Nothing else changes: the row menu (long press, right-click) is the same
+one, a drag moves a tile onto another tile or a crumb as a row does, and
+a rename on Linux and Windows lays the tree's own field over the tile.
+A click on a folder's tile takes the keyboard, as a folder's row does; a
+click on a note's opens it with the caret in it. The walk is the tree's
+own: the arrows, `Home`/`End` and `PgUp`/`PgDn` move the cursor, `Enter`
+opens or enters, `F2` renames and `Delete` deletes the tile the cursor is
+on. A modified key stays the app's here too.
+
+Entering a folder writes the move through to the tree: the folder is
+selected and opened there, so switching back to the list finds it. The
+grid's own folder lives while the library is open, not in a file: every
+switch to the grid starts from the tree's selection — the folder
+selected, or the folder the selected note sits in — and the grid keeps
+that folder while it is the pane on screen.
+
 ## Renaming a note or a folder
 
 On Linux and Windows a rename happens in the tree, as in a file manager:

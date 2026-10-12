@@ -1155,6 +1155,23 @@ final class BosnianStrings extends Strings {
   @override
   String get sortDescending => 'Opadajuće';
   @override
+  String get viewList => 'Lista';
+  @override
+  String get viewGrid => 'Mreža';
+  @override
+  String get viewGroup => 'Prikaz';
+  @override
+  String get folderUpTooltip => 'Gore (Alt+Gore)';
+  @override
+  String get breadcrumbMoreTooltip => 'Više fascikli';
+  @override
+  String get libraryCrumb => 'Biblioteka';
+  @override
+  String folderEmpty(String name) => 'U $name još nema ničega';
+  @override
+  String get folderEmptyHint =>
+      'Dodirnite + da ovdje napravite bilješku ili fasciklu.';
+  @override
   String get newNoteTitle => 'Nova bilješka';
   @override
   String get newItemTooltip => 'Novo';

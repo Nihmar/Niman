@@ -1140,6 +1140,22 @@ final class EstonianStrings extends Strings {
   @override
   String get sortDescending => 'Kahanevalt';
   @override
+  String get viewList => 'Loend';
+  @override
+  String get viewGrid => 'Ruudustik';
+  @override
+  String get viewGroup => 'Vaade';
+  @override
+  String get folderUpTooltip => 'Üles (Alt+Üles)';
+  @override
+  String get breadcrumbMoreTooltip => 'Rohkem kaustu';
+  @override
+  String get libraryCrumb => 'Teek';
+  @override
+  String folderEmpty(String name) => '$name on veel tühi';
+  @override
+  String get folderEmptyHint => 'Puuduta +, et luua siia märge või kaust.';
+  @override
   String get newNoteTitle => 'Uus märge';
   @override
   String get newItemTooltip => 'Uus';

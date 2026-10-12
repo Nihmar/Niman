@@ -1156,6 +1156,23 @@ final class AlbanianStrings extends Strings {
   @override
   String get sortDescending => 'Në zbritje';
   @override
+  String get viewList => 'Listë';
+  @override
+  String get viewGrid => 'Rrjetë';
+  @override
+  String get viewGroup => 'Pamje';
+  @override
+  String get folderUpTooltip => 'Lart (Alt+Lart)';
+  @override
+  String get breadcrumbMoreTooltip => 'Më shumë dosje';
+  @override
+  String get libraryCrumb => 'Bibliotekë';
+  @override
+  String folderEmpty(String name) => 'Asgjë në $name ende';
+  @override
+  String get folderEmptyHint =>
+      'Trokit + për të krijuar këtu një shënim ose dosje.';
+  @override
   String get newNoteTitle => 'Shënim i ri';
   @override
   String get newItemTooltip => 'I ri';
