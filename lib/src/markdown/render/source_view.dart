@@ -726,6 +726,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The keyboard for the buffer this view shows.
   SourceInput _makeInput() => SourceInput(
     buffer: widget.buffer,
+    reach: _inputReach,
     onRecord: _history.record,
     onNewline: _newline,
     onTyped: _typed,
@@ -2087,6 +2088,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           LiveHosts.topOf(layout, column, _gap) +
           map.offsetOf(local),
       height: map.extentFor(local),
+    );
+  }
+
+  /// The note's offsets the platform's input window may reach around a
+  /// caret at [caret]: a side-by-side column's lines past its fences, when
+  /// the caret is in one (#729); the whole note otherwise.
+  (int, int) _inputReach(int caret) {
+    final buffer = widget.buffer;
+    final whole = (0, buffer.length);
+    if (_hosts.layouts.isEmpty) return whole;
+    final line = buffer.lineOf(caret.clamp(0, buffer.length));
+    final host = _folds.hostOf(line);
+    final layout = host == null ? null : _hosts.openedOn(host);
+    if (layout == null) return whole;
+    final column = layout.run.columnOf(line);
+    if (column < 0 || _passedOver(line)) return whole;
+    final lines = layout.run.columns[column];
+    final first = _firstOf(lines, forward: true);
+    final last = _firstOf(lines, forward: false);
+    return (
+      buffer.offsetOfLine(first),
+      buffer.offsetOfLine(last) + buffer.lineLengthAt(last),
     );
   }
 

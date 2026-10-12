@@ -55,7 +55,15 @@ final class SourceInput implements DeltaTextInputClient {
     this.onRecord,
     this.onNewline,
     this.onTyped,
+    this.reach,
   });
+
+  /// How far the platform's window may reach around a caret at an offset:
+  /// the note's offsets `[start, end)` it stays inside — a side-by-side
+  /// column's (#729), so a keyboard reading the words before the caret
+  /// finds the column's and not the fences or the column beside it. Null,
+  /// or an answer of the whole note, for no bound.
+  final (int, int) Function(int caret)? reach;
 
   /// The frames this surface's edits are logged under.
   static const AppLogger _log = AppLogger(name: 'edit');
@@ -256,6 +264,10 @@ final class SourceInput implements DeltaTextInputClient {
     final end = _windowStart + (_remote?.text.length ?? 0);
     final at = caret.extent;
     if (at < _windowStart || at > end) return false;
+    final bounds = reach?.call(at);
+    if (bounds != null && (_windowStart < bounds.$1 || end > bounds.$2)) {
+      return false;
+    }
     if (_validComposing().isValid && !_validComposing().isCollapsed) {
       return true;
     }
@@ -268,6 +280,14 @@ final class SourceInput implements DeltaTextInputClient {
   /// other end too when it is near, widened to whole lines when they are not
   /// long, and never splitting a line break or a surrogate pair.
   (int, int) _windowAround(SelectionModel caret) {
+    final (from, to) = _unboundedAround(caret);
+    final bounds = reach?.call(caret.extent);
+    if (bounds == null) return (from, to);
+    return (math.max(from, bounds.$1), math.min(to, bounds.$2));
+  }
+
+  /// [_windowAround] before [reach] bounds it.
+  (int, int) _unboundedAround(SelectionModel caret) {
     final length = buffer.length;
     if (length <= 2 * windowReach) return (0, length);
     var from = caret.extent - windowReach;

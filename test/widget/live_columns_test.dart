@@ -313,4 +313,14 @@ void main() {
       expect(state.selection.extent, offsetOf('second left', end: true) + 5);
     });
   });
+
+  testWidgets('the keyboard reads the column, not the fences', (tester) async {
+    final state = await _pump(tester, _two, live: true);
+    final right = find.text('first right', findRichText: true);
+    await tester.tapAt(tester.getRect(right).center);
+    await tester.pump();
+    expect(state.platformWindowStart, _two.indexOf('## Right'));
+    final text = tester.testTextInput.editingState!['text']! as String;
+    expect(text, '## Right${String.fromCharCode(10)}first right');
+  });
 }
