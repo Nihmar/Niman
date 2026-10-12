@@ -341,7 +341,7 @@ final class CalendarLine {
 /// [weekdays] maps a recognised weekday name (lowercased, its trailing
 /// period kept or dropped) to the ISO weekday number the app counts in
 /// (1 = Monday). English's names are always known; the app adds its own
-/// locales' names on top ([calendarWeekdayNames]).
+/// locales' names on top ([weekdayNamesFrom]).
 ///
 /// A head Niman cannot read — a third token that is not a weekday it
 /// knows — is read as that week's goal whose text starts with the token,
@@ -641,9 +641,10 @@ int? weekdayNumberFor(String name, [Map<String, int> weekdays = const {}]) {
   return weekdays[withoutPeriod] ?? _englishWeekdays[lower];
 }
 
-/// The names the app's own locales use, English included, mapped to ISO
-/// weekday numbers (1 = Monday): what [parseCalendarLine] should be given.
-Map<String, int> calendarWeekdayNames(Iterable<List<String>> locales) {
+/// The names a set of locales uses, English included, mapped to ISO
+/// weekday numbers (1 = Monday): what [parseCalendarLine] should be given
+/// (`lib/src/calendar/weekdays.dart` builds it for the app's own).
+Map<String, int> weekdayNamesFrom(Iterable<List<String>> locales) {
   final names = <String, int>{..._englishWeekdays};
   for (final names_ in locales) {
     for (var at = 0; at < names_.length && at < 7; at++) {
@@ -757,20 +758,13 @@ final RegExp _day = RegExp(r'(\d{4})-(\d{2})-(\d{2})(?: w(\d{1,2}))?(?=\s|$)');
 /// English's three-letter weekday names, the spec's own and the mockups'.
 const Map<String, int> _englishWeekdays = {
   'mon': 1,
-  'monday': 1,
   'tue': 2,
   'tues': 2,
-  'tuesday': 2,
   'wed': 3,
-  'wednesday': 3,
   'thu': 4,
   'thur': 4,
   'thurs': 4,
-  'thursday': 4,
   'fri': 5,
-  'friday': 5,
   'sat': 6,
-  'saturday': 6,
   'sun': 7,
-  'sunday': 7,
 };

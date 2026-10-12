@@ -70,7 +70,7 @@ void main() {
     });
 
     test("a locale's own weekday names are recognised", () {
-      final weekdays = calendarWeekdayNames(const [
+      final weekdays = weekdayNamesFrom(const [
         ['lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'],
       ]);
       final line = parseCalendarLine(
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('a weekday with a trailing period is recognised', () {
-      final weekdays = calendarWeekdayNames(const [
+      final weekdays = weekdayNamesFrom(const [
         ['lun.', 'mar.', 'mer.', 'gio.', 'ven.', 'sam.', 'dim.'],
       ]);
       final line = parseCalendarLine(

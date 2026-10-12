@@ -104,6 +104,10 @@ final class AppStrings {
     AppLanguage.croatian: CroatianStrings(),
   };
 
+  /// The strings of every language the app ships, in [AppLanguage] order:
+  /// what the calendar file's parser reads weekday names from (#730).
+  static Iterable<Strings> get allStrings => _byLanguage.values;
+
   /// The strings of the language actually in use.
   static Strings get _s =>
       _byLanguage[AppLanguages.resolved] ?? const EnglishStrings();
