@@ -2124,6 +2124,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onPointerDown: (event) {
       _lastPointerKind = event.kind;
       _pressOffset = null;
+      _trackMouse(event);
       // A mouse asks for the keyboard as it goes down, which is where a click
       // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
       // only scrolls the note does not bring the keyboard up.
@@ -2159,6 +2160,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _input.holdSync = true;
     },
     onPointerMove: (event) {
+      _trackMouse(event);
       final anchor = _dragAnchor;
       if (anchor == null) return;
       if (event.kind != PointerDeviceKind.mouse) return;
@@ -2166,10 +2168,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (offset == null) return;
       _select(anchor, offset);
     },
-    onPointerUp: (_) => _endDrag(),
+    onPointerUp: (event) {
+      _trackMouse(event);
+      _endDrag();
+    },
     onPointerCancel: (_) => _endDrag(),
     child: child,
   );
+
+  /// Keeps [_hoverPosition] where the mouse is while a button is down too:
+  /// a press and a drag send no hover, and the modifier going down after a
+  /// drag asked the cursor about where the drag began — the hand over plain
+  /// text, where a click opens nothing (#787).
+  void _trackMouse(PointerEvent event) {
+    if (event.kind == PointerDeviceKind.mouse) _hoverPosition = event.position;
+  }
 
   /// A Ctrl+click (Cmd on a Mac) on a link at [offset]: the caret goes there
   /// and the link opens, the legacy editor's T-M3-07. True when it did.

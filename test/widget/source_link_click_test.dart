@@ -191,4 +191,46 @@ void main() {
     await tester.pump();
     expect(cursor(), SystemMouseCursors.text);
   });
+
+  // #787: a press and a drag send no hover, and the modifier asked the cursor
+  // about where the mouse last hovered — before the drag — so it showed the
+  // hand over plain text, where a Ctrl+click opens nothing; and the other way
+  // round.
+  both('after a drag, the modifier asks where the mouse is', (
+    tester,
+    mode,
+  ) async {
+    await _pump(tester, note, mode);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    MouseCursor? cursor() =>
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1);
+    final link = _atOffset(mode, 9);
+    final plain = _atOffset(mode, 1);
+
+    Future<void> dragFromTo(Offset from, Offset to) async {
+      await mouse.moveTo(from);
+      await tester.pump();
+      await mouse.down(from);
+      await mouse.moveTo(to);
+      await mouse.up();
+      await tester.pump();
+    }
+
+    await mouse.addPointer(location: link);
+    await dragFromTo(link, plain);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(cursor(), SystemMouseCursors.text, reason: 'plain text is under it');
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+
+    await dragFromTo(plain, link);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(cursor(), SystemMouseCursors.click, reason: 'the link is under it');
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(_opened, isEmpty, reason: 'no click was made with the modifier');
+  });
 }
