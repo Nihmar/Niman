@@ -26,10 +26,13 @@ import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
+import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/block_heights.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/code_piece_view.dart';
+import 'package:niman/src/markdown/render/columns_run.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
@@ -37,9 +40,11 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/marked_block.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/range_highlight.dart';
+import 'package:niman/src/markdown/render/read_column_hosts.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
+import 'package:niman/src/markdown/render/sliver_columns.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -243,7 +248,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     }
     final index = _blockIndexAt(line);
     if (index == null) return;
-    _jumpToIndex(index, attempt: 0);
+    // A block of a side-by-side `columns` block is drawn in it: the jump
+    // lands on the block's top.
+    _jumpToIndex(_hosts.entryOf(index), attempt: 0);
   }
 
   /// How many frames a line jump may take to settle.
@@ -377,11 +384,14 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final heights = _heights;
     final scroll = _scroll;
     if (heights == null || !scroll.hasClients) return;
-    final index = _blockIndexAt(anchor.line);
-    if (index == null) return;
+    final found = _blockIndexAt(anchor.line);
+    if (found == null) return;
+    final index = _hosts.entryOf(found);
     final block = _blocks[index];
     final lines = block.endLine - block.startLine;
-    final into = lines > 0
+    final into = index != found
+        ? 0.0
+        : lines > 0
         ? ((anchor.line - block.startLine) + anchor.fraction) / lines
         : 0.0;
     final atTop = anchor.line == 0 && anchor.fraction == 0;
@@ -543,6 +553,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final changes = scan.changes;
     if (!_follow(changes, scan.blocks)) {
       _blocks = _pieced(scan.blocks);
+      // A new map assumes no block side by side, until a layout says.
+      _hosts.flags = null;
+      _hostsStale = true;
       // A block's estimate when a frame first comes near it: every block of
       // the 246 MB stress note, 2.4 M, was most of the frame that showed it.
       _heights = BlockHeightMap.lazy(
@@ -595,6 +608,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     // The estimates are asked with the new indices, of the new list.
     _blocks = blocks;
     for (final stretch in stretches) {
+      // The side-by-side flags move with the entries; the new ones are
+      // ordinary until the next layout says otherwise.
+      _hosts.flags = _hosts.spliced(
+        stretch.start,
+        stretch.removed,
+        stretch.inserted,
+      );
       heights.splice(
         stretch.start,
         stretch.removed,
@@ -602,6 +622,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         _estimateOf,
       );
     }
+    _hostsStale = true;
     return true;
   }
 
@@ -614,6 +635,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     _heights = null;
     _built = 0;
     _handed = null;
+    _hosts.flags = null;
+    _hostsStale = true;
   }
 
   /// The lines a code block is drawn in pieces of, past twice as many.
@@ -662,6 +685,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
             quoteDepth: block.quoteDepth,
             listDepth: block.listDepth,
             fenceInfo: block.fenceInfo,
+            footnote: block.footnote,
+            divDepth: block.divDepth,
           ),
         );
       }
@@ -709,6 +734,22 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// A wrong estimate only costs a jump that lands slightly off before the
   /// block is measured.
   double _estimateOf(int index) {
+    switch (_hosts.flagOf(index)) {
+      case ReadColumnHosts.hosted:
+        // Drawn in its `columns` block, whose entry is the whole height.
+        return 0;
+      case ReadColumnHosts.host:
+        final theme = _theme ?? _fallbackTheme;
+        final run = _hosts.runAt(index)!;
+        final band = _textScaler.scale(theme.divBand);
+        return _hosts.estimateOf(run, _gap, run.closed ? 2 * band : band);
+    }
+    return _rawEstimateOf(index);
+  }
+
+  /// Block [index]'s height as a block of its own, drawn in the note's
+  /// run of blocks or in a column's.
+  double _rawEstimateOf(int index) {
     final block = _blocks[index];
     final theme = _theme ?? _fallbackTheme;
     // A line at the size the text is read at: the theme's is the text's own.
@@ -746,6 +787,49 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   }
 
   MarkdownTheme? _theme;
+
+  /// The note's side-by-side `columns` blocks (#729).
+  final ReadColumnHosts _hosts = ReadColumnHosts();
+
+  /// Whether the blocks changed since [_hosts] last laid them out.
+  bool _hostsStale = true;
+
+  /// The width [_hosts] last laid the blocks out in.
+  double? _hostWidth;
+
+  /// An em of the note's text, as read: what a column's minimum and the
+  /// gap between columns are counted in.
+  double get _em =>
+      _textScaler.scale((_theme ?? _fallbackTheme).body.fontSize ?? 14);
+
+  /// The room between two columns, and between two rows of them.
+  double get _gap => ColumnLayout.gapEms * _em;
+
+  /// Lays the `columns` blocks out in [width], when it or the blocks
+  /// changed: the entries whose drawing changed — into a side-by-side
+  /// block or out of one — are estimated again.
+  void _layOutHosts(double width) {
+    if (!_hostsStale && _hostWidth == width) return;
+    final heights = _heights;
+    final shown = _shown;
+    if (heights == null || shown == null) return;
+    _hostsStale = false;
+    _hostWidth = width;
+    final theme = _theme ?? _fallbackTheme;
+    final changed = _hosts.layOut(
+      _blocks,
+      shown.lineAt,
+      width: width,
+      em: _em,
+      listIndent: theme.listIndentPerLevel,
+      enabled: widget.selectionActions == null,
+      rawEstimate: _rawEstimateOf,
+      previous: _hosts.flags,
+    );
+    for (final index in changed) {
+      heights.reestimate(index, _estimateOf(index));
+    }
+  }
 
   /// The scaler the note's text is read at, as of the last build.
   TextScaler _textScaler = TextScaler.noScaling;
@@ -867,6 +951,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// [pane] wide.
   Widget _scrollView(BlockHeightMap heights, EdgeInsets padding, double pane) {
     final availableWidth = pane - padding.horizontal;
+    _layOutHosts(availableWidth);
     return _cost.timed(
       () => CustomScrollView(
         controller: _scroll,
@@ -879,13 +964,18 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
             // every extent and clipped what was taller than its estimate
             // (#250), and `SliverList` measured them all and made a far jump
             // cost the note (#251).
-            sliver: SliverMarkdownBlocks(
-              heights: heights,
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _blockAt(context, index, availableWidth),
-                childCount: heights.length,
-              ),
-            ),
+            sliver: _hosts.isEmpty
+                ? SliverMarkdownBlocks(
+                    heights: heights,
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) =>
+                          _blockAt(context, index, availableWidth),
+                      childCount: heights.length,
+                    ),
+                  )
+                : SliverMainAxisGroup(
+                    slivers: _segments(heights, availableWidth),
+                  ),
           ),
           // The top of the note is all there is yet: said where the reader
           // runs out of it, rather than a page that just ends.
@@ -920,6 +1010,74 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     );
   }
 
+  /// The note cut at its side-by-side `columns` blocks (#729): a sliver for
+  /// each run of blocks between two of them, placed by its part of the
+  /// note's map, and a [SliverColumns] for each of them.
+  List<Widget> _segments(BlockHeightMap heights, double width) {
+    final slivers = <Widget>[];
+    void run(int start, int end) {
+      if (end <= start) return;
+      slivers.add(
+        SliverMarkdownBlocks(
+          key: ValueKey<String>('blocks-$start'),
+          heights: BlockHeightRange(heights, start, end),
+          segment: true,
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => _blockAt(context, start + index, width),
+            childCount: end - start,
+          ),
+        ),
+      );
+    }
+
+    var from = 0;
+    for (final columns in _hosts.sideBySide) {
+      run(from, columns.start);
+      slivers.add(_columns(heights, columns, width));
+      from = columns.end;
+    }
+    run(from, heights.length);
+    return slivers;
+  }
+
+  /// [run], its columns side by side in [width].
+  Widget _columns(BlockHeightMap heights, ColumnsRun run, double width) {
+    final layout = _hosts.layoutOf(run);
+    final theme = _theme ?? _fallbackTheme;
+    return SliverColumns(
+      key: ValueKey<String>('columns-${run.start}'),
+      heights: heights,
+      index: run.start,
+      gap: _gap,
+      indent: run.items * theme.listIndentPerLevel,
+      opener: _blockAt(context, run.start, width, outerItems: run.items),
+      closer: run.closed
+          ? _blockAt(context, run.end - 1, width, outerItems: run.items)
+          : null,
+      rows: [
+        for (final row in layout.rows)
+          [
+            for (final at in row)
+              (
+                share: layout.shares[at],
+                sliver: SliverMarkdownBlocks(
+                  heights: layout.maps[at],
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _blockAt(
+                      context,
+                      run.columns[at].blocks[index],
+                      layout.widths[at],
+                      outerItems: run.items,
+                    ),
+                    childCount: run.columns[at].blocks.length,
+                  ),
+                ),
+              ),
+          ],
+      ],
+    );
+  }
+
   /// The footnotes, one row per sliver child.
   Widget _footnoteSliver() => footnoteSliver(
     footnotes: widget.parser.footnotesOf(_shown!),
@@ -933,7 +1091,15 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ///
   /// How tall it comes out is the sliver's business: a `RenderSliver` lays its
   /// own children out, and this one records what it measures (#251).
-  Widget _blockAt(BuildContext context, int index, double availableWidth) {
+  ///
+  /// [outerItems] is how many list items the sliver drawing it already
+  /// stands in: a column of a `columns` block opened in an item.
+  Widget _blockAt(
+    BuildContext context,
+    int index,
+    double availableWidth, {
+    int outerItems = 0,
+  }) {
     final block = _blocks[index];
     _built++;
     _traceFirstContent();
@@ -957,6 +1123,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       onTapWikiLink: widget.onTapWikiLink,
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
+      outerItems: outerItems,
     );
     final marks = _marksIn(block);
     final tapMark = widget.onTapMark;

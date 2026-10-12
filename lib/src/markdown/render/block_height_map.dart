@@ -26,9 +26,10 @@ library;
 import 'dart:typed_data';
 
 import 'package:niman/src/markdown/prefix_sums.dart';
+import 'package:niman/src/markdown/render/block_heights.dart';
 
 /// The height of every block of a note.
-final class BlockHeightMap {
+final class BlockHeightMap implements BlockHeights {
   /// Creates a map over [count] items, estimating item `index` with
   /// `estimate`.
   new({required int count, required double Function(int index) estimate})
@@ -104,6 +105,7 @@ final class BlockHeightMap {
 
   /// Bumped whenever the blocks themselves change (a [splice]), so a sliver
   /// holding this same map knows its layout is out of date.
+  @override
   int get generation => _generation;
   int _generation = 0;
 
@@ -116,6 +118,7 @@ final class BlockHeightMap {
   final PrefixSums _extents;
 
   /// How many blocks the map covers.
+  @override
   int get length => _measured.length;
 
   /// How many blocks have a height a frame laid out.
@@ -124,12 +127,14 @@ final class BlockHeightMap {
 
   /// The height of the whole note: what has been drawn for real, and the
   /// estimator's answer for the rest.
+  @override
   double get totalExtent => _extents.total;
 
   /// Where block [index] starts, from the note's own top.
   ///
   /// One past the last block is the total, which is what a layout asks when it
   /// wants to know where the note ends.
+  @override
   double offsetOf(int index) {
     if (index <= 0) return 0;
     if (index >= _measured.length) return totalExtent;
@@ -140,6 +145,7 @@ final class BlockHeightMap {
   ///
   /// The boundary belongs to the block that starts there: an offset exactly at
   /// a block's top is inside that block, not the one above it.
+  @override
   int? indexAt(double offset) {
     if (_measured.isEmpty || offset < 0) return null;
     if (offset >= totalExtent) return null;
@@ -148,9 +154,20 @@ final class BlockHeightMap {
 
   /// Block [index]'s height: what a frame laid it out at, or the estimator's
   /// answer while none has.
+  @override
   double extentFor(int index) {
     if (index < 0 || index >= _measured.length) return 0;
     return _extents.valueAt(index);
+  }
+
+  /// Gives block [index] the estimate [height], measured or not: a block
+  /// whose drawing changed — one taken into a side-by-side `columns` block
+  /// or out of one (#729) — is estimated again until a frame draws it.
+  void reestimate(int index, double height) {
+    if (index < 0 || index >= _measured.length || !(height >= 0)) return;
+    if (_measured[index] != 0) _measuredCount--;
+    _measured[index] = 0;
+    _extents.setValue(index, height);
   }
 
   /// Records that block [index] was drawn [height] pixels tall.
@@ -163,6 +180,7 @@ final class BlockHeightMap {
   /// its first take no room in `live`, and a definition none in the read
   /// view. Refused, as it was when 0 meant "not measured", each kept its
   /// estimate — a row of nothing apiece on the page.
+  @override
   void measured(int index, double height) {
     if (index < 0 || index >= _measured.length || !(height >= 0)) return;
     if (_measured[index] == 0) _measuredCount++;
