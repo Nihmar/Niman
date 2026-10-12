@@ -306,9 +306,19 @@ final class ShellRowActions {
     await guard(() async {
       await ops.delete(sel);
       onDeleted(sel);
+      // Each note on its own (#775): one that will not go must not leave
+      // the file and the notes before it in the trash with no Undo — the
+      // notice comes first, and the failure is reported after it.
+      final taken = <String>[];
+      (Object, StackTrace)? failure;
       for (final note in carry) {
-        await ops.delete(note);
-        onDeleted(note);
+        try {
+          await ops.delete(note);
+          onDeleted(note);
+          taken.add(note);
+        } on Object catch (error, stack) {
+          failure ??= (error, stack);
+        }
       }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -325,7 +335,7 @@ final class ShellRowActions {
                     label: AppStrings.actionUndo,
                     onPressed: () async {
                       await guard(() async {
-                        for (final restore in [sel, ...carry]) {
+                        for (final restore in [sel, ...taken]) {
                           final name = await _justDeleted(ops, restore);
                           if (name == null) continue;
                           await ops.restoreTrash(name);
@@ -337,6 +347,9 @@ final class ShellRowActions {
                 : null,
           ),
         );
+      }
+      if (failure case (final error, final stack)?) {
+        Error.throwWithStackTrace(error, stack);
       }
     });
   }
