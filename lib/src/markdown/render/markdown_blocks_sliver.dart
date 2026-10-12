@@ -24,24 +24,36 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/block_heights.dart';
 
 /// The read view's sliver: children placed by [heights], measured as they are
 /// laid out.
 final class SliverMarkdownBlocks extends SliverMultiBoxAdaptorWidget {
   /// Creates the sliver; [delegate] builds the blocks lazily.
-  const new({required super.delegate, required this.heights, super.key});
+  const new({
+    required super.delegate,
+    required this.heights,
+    this.segment = false,
+    super.key,
+  });
 
   /// The heights: the positions this sliver places its children at, and where
   /// the heights it measures go.
-  final BlockHeightMap heights;
+  final BlockHeights heights;
+
+  /// Whether the sliver is one run of a note cut at its side-by-side
+  /// `columns` blocks (#729), which lays out nothing while it is wholly
+  /// outside the cache area.
+  final bool segment;
 
   @override
   RenderSliverMarkdownBlocks createRenderObject(BuildContext context) {
     return RenderSliverMarkdownBlocks(
-      childManager: context as SliverMultiBoxAdaptorElement,
-      heights: heights,
-    )..generation = heights.generation;
+        childManager: context as SliverMultiBoxAdaptorElement,
+        heights: heights,
+      )
+      ..generation = heights.generation
+      ..segment = segment;
   }
 
   @override
@@ -51,6 +63,7 @@ final class SliverMarkdownBlocks extends SliverMultiBoxAdaptorWidget {
   ) {
     // The same map spliced (a line added or removed) is a layout out of date
     // just as much as a new map is.
+    renderObject.segment = segment;
     if (identical(renderObject.heights, heights) &&
         renderObject.generation == heights.generation) {
       return;
@@ -70,10 +83,13 @@ final class RenderSliverMarkdownBlocks extends RenderSliverMultiBoxAdaptor {
   /// The heights this layout places its children by, and the record of what it
   /// measured — set from [SliverMarkdownBlocks.updateRenderObject], which also
   /// asks for the layout that reads it.
-  BlockHeightMap heights;
+  BlockHeights heights;
 
   /// The map's generation this render object last laid out against.
   int generation = 0;
+
+  /// [SliverMarkdownBlocks.segment].
+  bool segment = false;
 
   @override
   void performLayout() {
@@ -101,6 +117,21 @@ final class RenderSliverMarkdownBlocks extends RenderSliverMultiBoxAdaptor {
         constraints.scrollOffset +
         constraints.cacheOrigin +
         constraints.remainingCacheExtent;
+
+    // A run of blocks between two side-by-side `columns` blocks (#729),
+    // wholly outside the cache area: nothing is laid out, and the run is as
+    // tall as its map says. `indexAt` falls back to the last block past
+    // the end, which was one layout a frame for every such run. A whole
+    // note's sliver keeps laying out its last block there, as it always
+    // has: past its end is where a shrinking map leaves the scroll.
+    final extent = heights.totalExtent;
+    if (segment &&
+        (constraints.remainingCacheExtent <= 0 || rangeStart >= extent)) {
+      if (firstChild != null) collectGarbage(childCount, 0);
+      geometry = SliverGeometry(scrollExtent: extent, maxPaintExtent: extent);
+      childManager.didFinishLayout();
+      return;
+    }
 
     // Above the note's top is the note's first block, not its last: `indexAt`
     // has no block for a negative offset, and falling back to the end put a

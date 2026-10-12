@@ -67,6 +67,13 @@ const List<String> _pieces = <String>[
   '"t"',
   '[^f]:',
   '    more',
+  ':::: columns',
+  '::: column',
+  '::: {.column width="40%"}',
+  ':::',
+  '::::',
+  '  :::',
+  '::: note',
 ];
 
 /// Divergences found over [rounds] documents from each seed in [seeds],

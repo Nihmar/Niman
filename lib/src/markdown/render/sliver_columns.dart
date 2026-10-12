@@ -1,0 +1,345 @@
+/// A `columns` block laid out side by side (#729,
+/// `docs/records/note-columns.md`): one sliver per column, the columns of
+/// a row beside each other, the rows one under the other, and the whole
+/// block one entry of the note's height map.
+///
+/// ```text
+/// SliverColumns                    records its extent in the note's map
+/// └─ SliverMainAxisGroup           the rows, one under the other
+///    ├─ the outer opener's band
+///    ├─ SliverCrossAxisGroup       a row: a sliver per column, the gaps
+///    ├─ the gap between two rows
+///    ├─ SliverCrossAxisGroup       the next row, when the columns wrap
+///    └─ the outer closer's band
+/// ```
+///
+/// Each column is windowed by a sliver of its own, so a block of thousands
+/// of lines builds what the viewport shows. The cross group gives each
+/// column the same scroll constraints at its own width and takes the
+/// tallest one's geometry: the block is as tall as its tallest column.
+library;
+
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/block_heights.dart';
+import 'package:niman/src/markdown/render/callout_style.dart';
+import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
+
+/// One column of a row: its share of the row's width after the gaps, and
+/// the sliver that draws it.
+typedef SliverColumn = ({double share, Widget sliver});
+
+/// A bracket down a block's gutter (#729): at `x`, from `top` below the
+/// block's top to `bottom` above its end — its outer fences' bands — in
+/// `color`. What `live` draws beside a side-by-side block, whose columns'
+/// lines are not numbered.
+typedef ColumnsBracket = ({double x, double top, double bottom, Color color});
+
+/// The quotes around a block (#729): `depth` bars `barWidth` wide, one
+/// every `indent` from `left`, in `bar` — the first in `callout`, over a
+/// callout's box of it, when the block is in a callout.
+typedef ColumnsQuote = ({
+  double left,
+  int depth,
+  Color bar,
+  double barWidth,
+  double indent,
+  Color? callout,
+});
+
+/// A `columns` block, its columns side by side in [rows].
+final class SliverColumns extends StatelessWidget {
+  /// The block that is entry [index] of [heights], the note's map.
+  const new({
+    required this.heights,
+    required this.index,
+    required this.rows,
+    required this.gap,
+    this.opener,
+    this.closer,
+    this.indent = 0,
+    this.bracket,
+    this.quote,
+    super.key,
+  });
+
+  /// The quotes the block stands in, drawn down its height, if any.
+  final ColumnsQuote? quote;
+
+  /// The note's map, where the block's whole height goes.
+  final BlockHeights heights;
+
+  /// The block's entry in [heights].
+  final int index;
+
+  /// Its rows of columns, in order.
+  final List<List<SliverColumn>> rows;
+
+  /// The room between two columns, and between two rows.
+  final double gap;
+
+  /// Builds the outer opener's band, drawn above the rows: built as a row
+  /// of the note is, when it comes near the screen — a note of hundreds of
+  /// blocks built every one of their fences on every build.
+  final WidgetBuilder? opener;
+
+  /// Builds the outer closer's band, drawn below them.
+  final WidgetBuilder? closer;
+
+  /// The bracket down the block's gutter, if any.
+  final ColumnsBracket? bracket;
+
+  /// How far in the columns stand: the list items around the block, or
+  /// the gutter beside them. The fences are as wide as the block's row.
+  final double indent;
+
+  @override
+  Widget build(BuildContext context) {
+    final opener = this.opener;
+    final closer = this.closer;
+    Widget rowsOf(Widget sliver) => indent > 0
+        ? SliverPadding(
+            padding: EdgeInsets.only(left: indent),
+            sliver: sliver,
+          )
+        : sliver;
+    final group = SliverMainAxisGroup(
+      slivers: [
+        if (opener != null) _band(opener),
+        for (var at = 0; at < rows.length; at++) ...[
+          if (at > 0) SliverToBoxAdapter(child: SizedBox(height: gap)),
+          rowsOf(SliverCrossAxisGroup(slivers: _row(rows[at]))),
+        ],
+        if (closer != null) _band(closer),
+      ],
+    );
+    return _ExtentRecorder(
+      heights: heights,
+      index: index,
+      bracket: bracket,
+      quote: quote,
+      sliver: group,
+    );
+  }
+
+  /// A fence's band, built lazily: a sliver of one row, laid out — and
+  /// built — only near the screen, as any row is.
+  static Widget _band(WidgetBuilder builder) => SliverMarkdownBlocks(
+    // Some height before it is drawn: a run of no height is one no cache
+    // area meets, and it would never be laid out.
+    heights: BlockHeightMap(count: 1, estimate: (_) => 1),
+    segment: true,
+    delegate: SliverChildBuilderDelegate(
+      (context, _) => builder(context),
+      childCount: 1,
+    ),
+  );
+
+  /// A row's slivers: its columns, each flexed by its share, with a gap of
+  /// no flex between two of them.
+  List<Widget> _row(List<SliverColumn> row) => [
+    for (var at = 0; at < row.length; at++) ...[
+      if (at > 0)
+        SliverConstrainedCrossAxis(
+          maxExtent: gap,
+          sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
+        ),
+      SliverCrossAxisExpanded(
+        // Integers, a hundredth of a percent each: the shares split the
+        // width after the gaps, as the CSS's `flex-grow` does.
+        flex: (row[at].share * 100).round().clamp(1, 1 << 30),
+        sliver: row[at].sliver,
+      ),
+    ],
+  ];
+}
+
+/// Records its sliver's extent at [index] of [heights].
+final class _ExtentRecorder extends SingleChildRenderObjectWidget {
+  const new({
+    required this.heights,
+    required this.index,
+    required this.bracket,
+    required this.quote,
+    required Widget sliver,
+  }) : super(child: sliver);
+
+  final ColumnsQuote? quote;
+
+  final BlockHeights heights;
+  final int index;
+  final ColumnsBracket? bracket;
+
+  @override
+  SingleChildRenderObjectElement createElement() => _RecorderElement(this);
+
+  @override
+  _RenderExtentRecorder createRenderObject(BuildContext context) =>
+      _RenderExtentRecorder(heights, index)
+        ..bracket = bracket
+        ..quote = quote;
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderExtentRecorder renderObject,
+  ) {
+    renderObject
+      ..heights = heights
+      ..index = index
+      ..bracket = bracket
+      ..quote = quote;
+  }
+}
+
+/// [_ExtentRecorder]'s element: its child is on stage while the block is
+/// drawn — a block wholly outside the cache area lays nothing out, and its
+/// slivers have no geometry to ask.
+final class _RecorderElement extends SingleChildRenderObjectElement {
+  new(_ExtentRecorder super.widget);
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    final geometry = (renderObject as RenderSliver).geometry;
+    if (geometry != null && geometry.visible) {
+      super.debugVisitOnstageChildren(visitor);
+    }
+  }
+}
+
+/// The render object behind [_ExtentRecorder]: its child's geometry, its
+/// scroll extent written to the note's map as a measured block's height
+/// is, so the map's offsets past the block follow what it is.
+final class _RenderExtentRecorder extends RenderProxySliver {
+  new(this.heights, this.index);
+
+  BlockHeights heights;
+  int index;
+
+  /// Whether the last layout drew the block, laying its columns out.
+  bool _drawn = false;
+
+  ColumnsBracket? get bracket => _bracket;
+  ColumnsBracket? _bracket;
+  set bracket(ColumnsBracket? value) {
+    if (value == _bracket) return;
+    _bracket = value;
+    markNeedsPaint();
+  }
+
+  ColumnsQuote? get quote => _quote;
+  ColumnsQuote? _quote;
+  set quote(ColumnsQuote? value) {
+    if (value == _quote) return;
+    _quote = value;
+    markNeedsPaint();
+  }
+
+  /// The quotes' bars, and a callout's box, down the part of the block on
+  /// screen, under its lines.
+  void _paintQuote(PaintingContext context, Offset offset) {
+    final quote = _quote;
+    final geometry = this.geometry;
+    if (quote == null || geometry == null || !geometry.visible) return;
+    final height = geometry.paintExtent;
+    final canvas = context.canvas;
+    final callout = quote.callout;
+    if (callout != null) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          offset.dx + quote.left,
+          offset.dy,
+          constraints.crossAxisExtent - quote.left,
+          height,
+        ),
+        Paint()..color = calloutBackground(callout),
+      );
+    }
+    for (var level = 0; level < quote.depth; level++) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          offset.dx + quote.left + level * quote.indent,
+          offset.dy,
+          quote.barWidth,
+          height,
+        ),
+        Paint()..color = level == 0 && callout != null ? callout : quote.bar,
+      );
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    _paintQuote(context, offset);
+    super.paint(context, offset);
+    final bracket = _bracket;
+    final geometry = this.geometry;
+    if (bracket == null || geometry == null || !geometry.visible) return;
+    final scroll = constraints.scrollOffset;
+    final visible = geometry.paintExtent;
+    double clamped(double y) => y.clamp(0.0, visible);
+    final top = bracket.top - scroll;
+    final bottom = geometry.scrollExtent - bracket.bottom - scroll;
+    final from = clamped(top);
+    final to = clamped(bottom);
+    if (to <= from) return;
+    final paint = Paint()
+      ..color = bracket.color
+      ..strokeWidth = 1;
+    final x = offset.dx + bracket.x;
+    final canvas = context.canvas
+      ..drawLine(Offset(x, offset.dy + from), Offset(x, offset.dy + to), paint);
+    // Its ends, where they are on screen: a `[` the block's height.
+    const tick = 3.0;
+    if (top >= 0 && top <= visible) {
+      canvas.drawLine(
+        Offset(x, offset.dy + top),
+        Offset(x + tick, offset.dy + top),
+        paint,
+      );
+    }
+    if (bottom >= 0 && bottom <= visible) {
+      canvas.drawLine(
+        Offset(x, offset.dy + bottom),
+        Offset(x + tick, offset.dy + bottom),
+        paint,
+      );
+    }
+  }
+
+  @override
+  void performLayout() {
+    // Wholly outside the cache area, the block is as tall as the map says
+    // and lays out nothing: a note of hundreds of blocks scrolled past
+    // them laid out every one of them, a frame at a time (the scroll bar
+    // in `columns_scroll_test`).
+    final constraints = this.constraints;
+    final known = heights.extentFor(index);
+    if (constraints.remainingCacheExtent <= 0 ||
+        constraints.scrollOffset + constraints.cacheOrigin >= known) {
+      // A block drawn before is laid out once more outside the cache area,
+      // so its columns let their lines go.
+      final child = this.child;
+      if (_drawn && child != null) {
+        child.layout(
+          constraints.copyWith(
+            scrollOffset: 0,
+            cacheOrigin: 0,
+            remainingPaintExtent: 0,
+            remainingCacheExtent: 0,
+          ),
+          parentUsesSize: true,
+        );
+        _drawn = false;
+      }
+      geometry = SliverGeometry(scrollExtent: known, maxPaintExtent: known);
+      return;
+    }
+    _drawn = true;
+    super.performLayout();
+    final laidOut = geometry;
+    if (laidOut == null || laidOut.scrollOffsetCorrection != null) return;
+    heights.measured(index, laidOut.scrollExtent);
+  }
+}

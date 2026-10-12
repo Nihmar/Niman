@@ -559,6 +559,15 @@ final class LatvianStrings extends Strings {
   String get toolbarImage => 'Ievietot attēlu';
   @override
   String get toolbarTable => 'Tabula';
+
+  @override
+  String get toolbarColumns => 'Kolonnas';
+
+  @override
+  String get columnsLeft => 'Kreisā kolonna';
+
+  @override
+  String get columnsRight => 'Labā kolonna';
   @override
   String get tableRow => 'Rinda';
   @override
@@ -644,6 +653,9 @@ final class LatvianStrings extends Strings {
   String get cheatMath => 'Matemātika';
   @override
   String get cheatTables => 'Tabulas';
+
+  @override
+  String get cheatColumns => 'Kolonnas';
   @override
   String get cheatFootnotes => 'Vēres';
   @override
@@ -2955,6 +2967,9 @@ final class LatvianStrings extends Strings {
   String get fullScreen => 'Pilnekrāns';
   @override
   String get commandInsertDiagram => 'Ievietot diagrammu (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Ievietot kolonnas';
 
   @override
   String get commandInsertMindMap => 'Ievietot prāta karti';

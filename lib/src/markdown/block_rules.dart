@@ -65,6 +65,8 @@ final class BlockRules {
           ? Block.opensDefinition
           : 0,
       reach: read.reach,
+      divRole: read.divRole,
+      divDepth: read.divDepth,
     );
   }
 
@@ -93,8 +95,10 @@ final class BlockRules {
     switch (open.kind) {
       case BlockKind.heading:
       case BlockKind.thematicBreak:
+      case BlockKind.div:
         // An ATX heading is its own line, and a setext one ends with its
-        // underline: nothing goes on with either.
+        // underline: nothing goes on with either, nor with a div's fence
+        // line, a block a line.
         return false;
       case BlockKind.listItem:
         // A lazy line of a quote its marker line opened (`- > q` / `   r`)

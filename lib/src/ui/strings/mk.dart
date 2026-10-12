@@ -566,6 +566,15 @@ final class MacedonianStrings extends Strings {
   String get toolbarImage => 'Вметни слика';
   @override
   String get toolbarTable => 'Табела';
+
+  @override
+  String get toolbarColumns => 'Колони';
+
+  @override
+  String get columnsLeft => 'Лева колона';
+
+  @override
+  String get columnsRight => 'Десна колона';
   @override
   String get tableRow => 'Ред';
   @override
@@ -651,6 +660,9 @@ final class MacedonianStrings extends Strings {
   String get cheatMath => 'Математика';
   @override
   String get cheatTables => 'Табели';
+
+  @override
+  String get cheatColumns => 'Колони';
   @override
   String get cheatFootnotes => 'Фусноти';
   @override
@@ -2983,6 +2995,9 @@ final class MacedonianStrings extends Strings {
   String get fullScreen => 'Целосен екран';
   @override
   String get commandInsertDiagram => 'Вметни дијаграм (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Вметни колони';
 
   @override
   String get commandInsertMindMap => 'Вметни ментална мапа';

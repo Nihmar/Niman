@@ -569,6 +569,15 @@ final class RomanianStrings extends Strings {
   String get toolbarImage => 'Inserează imagine';
   @override
   String get toolbarTable => 'Tabel';
+
+  @override
+  String get toolbarColumns => 'Coloane';
+
+  @override
+  String get columnsLeft => 'Coloana din stânga';
+
+  @override
+  String get columnsRight => 'Coloana din dreapta';
   @override
   String get tableRow => 'Rând';
   @override
@@ -654,6 +663,9 @@ final class RomanianStrings extends Strings {
   String get cheatMath => 'Matematică';
   @override
   String get cheatTables => 'Tabele';
+
+  @override
+  String get cheatColumns => 'Coloane';
   @override
   String get cheatFootnotes => 'Note de subsol';
   @override
@@ -3009,6 +3021,9 @@ final class RomanianStrings extends Strings {
   String get fullScreen => 'Ecran complet';
   @override
   String get commandInsertDiagram => 'Inserează diagramă (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Inserează coloane';
 
   @override
   String get commandInsertMindMap => 'Inserează hartă mentală';

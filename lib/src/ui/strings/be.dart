@@ -562,6 +562,15 @@ final class BelarusianStrings extends Strings {
   String get toolbarImage => 'Уставіць выяву';
   @override
   String get toolbarTable => 'Табліца';
+
+  @override
+  String get toolbarColumns => 'Слупкі';
+
+  @override
+  String get columnsLeft => 'Левы слупок';
+
+  @override
+  String get columnsRight => 'Правы слупок';
   @override
   String get tableRow => 'Радок';
   @override
@@ -647,6 +656,9 @@ final class BelarusianStrings extends Strings {
   String get cheatMath => 'Матэматыка';
   @override
   String get cheatTables => 'Табліцы';
+
+  @override
+  String get cheatColumns => 'Слупкі';
   @override
   String get cheatFootnotes => 'Зноскі';
   @override
@@ -3000,6 +3012,9 @@ final class BelarusianStrings extends Strings {
   String get fullScreen => 'Поўны экран';
   @override
   String get commandInsertDiagram => 'Уставіць дыяграму (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Уставіць слупкі';
 
   @override
   String get commandInsertMindMap => 'Уставіць карту думак';

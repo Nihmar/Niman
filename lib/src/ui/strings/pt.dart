@@ -561,6 +561,15 @@ final class PortugueseStrings extends Strings {
   String get toolbarImage => 'Inserir imagem';
   @override
   String get toolbarTable => 'Tabela';
+
+  @override
+  String get toolbarColumns => 'Colunas';
+
+  @override
+  String get columnsLeft => 'Coluna esquerda';
+
+  @override
+  String get columnsRight => 'Coluna direita';
   @override
   String get tableRow => 'Linha';
   @override
@@ -646,6 +655,9 @@ final class PortugueseStrings extends Strings {
   String get cheatMath => 'Matemática';
   @override
   String get cheatTables => 'Tabelas';
+
+  @override
+  String get cheatColumns => 'Colunas';
   @override
   String get cheatFootnotes => 'Notas de rodapé';
   @override
@@ -2976,6 +2988,9 @@ final class PortugueseStrings extends Strings {
   String get fullScreen => 'Tela cheia';
   @override
   String get commandInsertDiagram => 'Inserir diagrama (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Inserir colunas';
 
   @override
   String get commandInsertMindMap => 'Inserir mapa mental';

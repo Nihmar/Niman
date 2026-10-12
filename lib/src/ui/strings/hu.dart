@@ -559,6 +559,15 @@ final class HungarianStrings extends Strings {
   String get toolbarImage => 'Kép beszúrása';
   @override
   String get toolbarTable => 'Táblázat';
+
+  @override
+  String get toolbarColumns => 'Hasábok';
+
+  @override
+  String get columnsLeft => 'Bal hasáb';
+
+  @override
+  String get columnsRight => 'Jobb hasáb';
   @override
   String get tableRow => 'Sor';
   @override
@@ -644,6 +653,9 @@ final class HungarianStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Táblázatok';
+
+  @override
+  String get cheatColumns => 'Hasábok';
   @override
   String get cheatFootnotes => 'Lábjegyzetek';
   @override
@@ -2965,6 +2977,9 @@ final class HungarianStrings extends Strings {
   String get fullScreen => 'Teljes képernyő';
   @override
   String get commandInsertDiagram => 'Diagram beszúrása (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Hasábok beszúrása';
 
   @override
   String get commandInsertMindMap => 'Elmetérkép beszúrása';

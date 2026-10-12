@@ -563,6 +563,15 @@ final class SlovakStrings extends Strings {
   String get toolbarImage => 'Vložiť obrázok';
   @override
   String get toolbarTable => 'Tabuľka';
+
+  @override
+  String get toolbarColumns => 'Stĺpce';
+
+  @override
+  String get columnsLeft => 'Ľavý stĺpec';
+
+  @override
+  String get columnsRight => 'Pravý stĺpec';
   @override
   String get tableRow => 'Riadok';
   @override
@@ -648,6 +657,9 @@ final class SlovakStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Tabuľky';
+
+  @override
+  String get cheatColumns => 'Stĺpce';
   @override
   String get cheatFootnotes => 'Poznámky pod čiarou';
   @override
@@ -2968,6 +2980,9 @@ final class SlovakStrings extends Strings {
   String get fullScreen => 'Celá obrazovka';
   @override
   String get commandInsertDiagram => 'Vložiť diagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Vložiť stĺpce';
 
   @override
   String get commandInsertMindMap => 'Vložiť myšlienkovú mapu';

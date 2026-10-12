@@ -342,6 +342,21 @@ final class SourceStyler {
       ? _scanner.index.blocks
       : null;
 
+  /// The fence lines of the note's fenced divs (#729), in order, or null
+  /// while the scan is of an earlier revision or still owes part of the
+  /// note, as [blocks] is. O(chunks) for a note with none.
+  Iterable<Block>? get divBlocks =>
+      revision == buffer.revision && _scanner.settled
+      ? _scanner.divBlocks
+      : null;
+
+  /// The note's quote blocks (#729), in order, or null while [divBlocks]
+  /// is.
+  Iterable<Block>? get quoteBlocks =>
+      revision == buffer.revision && _scanner.settled
+      ? _scanner.quoteBlocks
+      : null;
+
   /// How many lines the scan behind the colours has read, for the test that
   /// holds a tap on a task box to the work the tap may do: one that settled
   /// the scan read the rest of the note, and the count says so.
@@ -427,6 +442,10 @@ final class SourceStyler {
       case BlockKind.blank:
       case BlockKind.html:
         return const <Token>[];
+      case BlockKind.div:
+        // A column's fence is coloured as a code fence's; an unknown
+        // div's is the text it is.
+        if (block.divRole!.laysOut) return _divTokens(text);
       case BlockKind.heading:
       case BlockKind.paragraph:
       case BlockKind.listItem:
@@ -448,6 +467,30 @@ final class SourceStyler {
   }
 
   // ----------------------------------------------------------------- structure
+
+  /// A fenced div's fence line (#729): its colons as a fence's, and its
+  /// attributes as a fence's language.
+  static List<Token> _divTokens(String text) {
+    final start = text.indexOf(':');
+    if (start < 0) return const <Token>[];
+    var end = start;
+    while (end < text.length && text.codeUnitAt(end) == 0x3A) {
+      end++;
+    }
+    final rest = text.substring(end);
+    final attributes = rest.trim().replaceFirst(RegExp(r'[:\s]*$'), '');
+    if (attributes.isEmpty) {
+      return <Token>[Token(TokenKind.codeFence, start, end)];
+    }
+    final at = end + rest.indexOf(attributes);
+    final after = at + attributes.length;
+    final closing = text.trimRight().length;
+    return <Token>[
+      Token(TokenKind.codeFence, start, end),
+      Token(TokenKind.codeLanguage, at, after),
+      if (closing > after) Token(TokenKind.codeFence, after, closing),
+    ];
+  }
 
   /// A fence's line: all of it code, and the opening line's language.
   ///

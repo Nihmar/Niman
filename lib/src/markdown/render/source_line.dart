@@ -18,8 +18,10 @@ import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/render/caret_painters.dart';
+import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_inline_math.dart';
@@ -72,8 +74,26 @@ final class SourceLine extends StatelessWidget {
     required this.spot,
     required this.caret,
     required this.caretOn,
+    this.fence,
+    this.outerIndent = 0,
+    this.outerQuotes = 0,
     super.key,
   });
+
+  /// How many of the line's quotes the sliver drawing it draws already: a
+  /// side-by-side column's in a quote or a callout (#729), whose bars and
+  /// box run down the block.
+  final int outerQuotes;
+
+  /// How far the sliver drawing the line indents it already: a
+  /// side-by-side column's, for the list items its block stands in
+  /// (#729). The line's own indent for them is that much less.
+  final double outerIndent;
+
+  /// In `live`, what the line draws as a fenced div's fence line (#729):
+  /// a band out of the caret's reach, its markers with the caret in its
+  /// block. Null for any other line.
+  final LiveFence? fence;
 
   /// The key of the line's own paragraph, so the surface can ask it for a caret
   /// offset or a caret rectangle.
@@ -216,34 +236,67 @@ final class SourceLine extends StatelessWidget {
           // out put the text at the pane's edge while the right side still
           // kept the column's room.
           // The gutter is no text: the arrow, not the text's pointer.
-          if (gutterWidth > 0)
-            SizedBox(
-              width: gutterWidth,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.basic,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      child: number == null
-                          ? const SizedBox.shrink()
-                          : ValueListenableBuilder<CaretSpot>(
-                              valueListenable: spot,
-                              builder: (context, at, _) => _takesNoRoom(at)
-                                  ? const SizedBox.shrink()
-                                  : _number()!,
-                            ),
-                    ),
-                    // The gap between the numbers and the text is where the
-                    // fold arrows live, as in the legacy gutter.
-                    SizedBox(width: _gutterGap, child: _foldArrow(context)),
-                  ],
-                ),
-              ),
-            ),
+          if (gutterWidth > 0) _bandGutter(context, _gutter(context)),
           Expanded(child: _caretBox(_listeningToFormulas())),
         ],
       ),
+    );
+  }
+
+  /// The gutter: the line's number, and the fold arrow in the gap between
+  /// the numbers and the text, as in the legacy gutter.
+  Widget _gutter(BuildContext context) => SizedBox(
+    width: gutterWidth,
+    child: MouseRegion(
+      cursor: SystemMouseCursors.basic,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: number == null
+                ? const SizedBox.shrink()
+                : ValueListenableBuilder<CaretSpot>(
+                    valueListenable: spot,
+                    builder: (context, at, _) =>
+                        _takesNoRoom(at) ||
+                            (hideMarkers &&
+                                fence != null &&
+                                at.line != index &&
+                                !fence!.numbered)
+                        ? const SizedBox.shrink()
+                        : _number()!,
+                  ),
+          ),
+          SizedBox(width: _gutterGap, child: _foldArrow(context)),
+        ],
+      ),
+    ),
+  );
+
+  /// [gutter], on a fence line's band (#729): as tall as the band, what it
+  /// draws standing out of it — down from an opener, up from a closer —
+  /// into the gutter beside the columns, which has no numbers of its own.
+  Widget _bandGutter(BuildContext context, Widget gutter) {
+    final fence = this.fence;
+    if (!hideMarkers || fence == null) return gutter;
+    return ValueListenableBuilder<CaretSpot>(
+      valueListenable: spot,
+      builder: (context, at, child) => at.line == index
+          ? child!
+          : SizedBox(
+              width: gutterWidth,
+              height: MediaQuery.textScalerOf(context).scale(theme.divBand),
+              child: OverflowBox(
+                alignment: fence.numberUp
+                    ? Alignment.bottomCenter
+                    : Alignment.topCenter,
+                // As short as it is: a gutter of nothing is no height.
+                minHeight: 0,
+                maxHeight: double.infinity,
+                child: child,
+              ),
+            ),
+      child: gutter,
     );
   }
 
@@ -294,6 +347,8 @@ final class SourceLine extends StatelessWidget {
 
   Widget _content(BuildContext context, CaretSpot at) {
     final mine = at.line == index;
+    final fence = this.fence;
+    if (hideMarkers && fence != null && !mine) return _band(context, at, fence);
     final math = formula;
     // A formula is edited as a block: the caret anywhere in it shows all of
     // its source, and out of it none.
@@ -476,8 +531,64 @@ final class SourceLine extends StatelessWidget {
         restingLeft: mine ? _indent(context) : indent,
         revealed: mine,
         color: theme.markerDim,
+        quotesOutside: outerQuotes,
       ),
       child: row,
+    );
+  }
+
+  /// A fence line out of the caret's reach (#729): a band of half an em,
+  /// its text set in glyphs of no size so its paragraph is the band — a
+  /// click on it lands on the line, which reveals it — and the markers the
+  /// caret in its block brings, drawn in its own room.
+  Widget _band(BuildContext context, CaretSpot at, LiveFence fence) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final band = scaler.scale(theme.divBand);
+    final inBlock = at.line >= fence.start && at.line < fence.end;
+    // A fence in a quote is a row of the quote: its bars, as any row's,
+    // and its markers past them, over the quote's text.
+    final quotes = shape.quoteDepth;
+    final markers = CustomPaint(
+      foregroundPainter: inBlock
+          ? FenceBandPainter(
+              fence: fence,
+              color: theme.markerDim,
+              chipColor: theme.codeBackground,
+              chipStyle: theme.body.copyWith(
+                fontSize: scaler.scale((theme.body.fontSize ?? 14) * 0.75),
+                height: 1.3,
+              ),
+            )
+          : null,
+      child: Text.rich(
+        TextSpan(text: styled.text),
+        key: paragraphKey,
+        style: theme.body.copyWith(fontSize: 0.01, height: 1),
+        strutStyle: StrutStyle(
+          fontSize: band,
+          height: 1,
+          forceStrutHeight: true,
+        ),
+        softWrap: false,
+      ),
+    );
+    if (quotes <= 0) return markers;
+    return CustomPaint(
+      painter: outerQuotes > 0
+          ? null
+          : LiveDecorationPainter(
+              shape: shape,
+              theme: theme,
+              paragraph: paragraphKey,
+              textLeft: 0,
+              revealed: false,
+              color: theme.markerDim,
+              quotesOutside: outerQuotes,
+            ),
+      child: Padding(
+        padding: EdgeInsets.only(left: quotes * theme.quoteIndentPerLevel),
+        child: markers,
+      ),
     );
   }
 
@@ -670,10 +781,13 @@ final class SourceLine extends StatelessWidget {
     final listed = shape.listed
         ? (shape.listDepth + 1) * theme.listIndentPerLevel
         : 0.0;
-    final base =
-        listed +
-        shape.quoteDepth * theme.quoteIndentPerLevel +
-        (shape.code == null ? 0 : theme.codePadding);
+    final base = math.max<double>(
+      0,
+      listed +
+          shape.quoteDepth * theme.quoteIndentPerLevel +
+          (shape.code == null ? 0 : theme.codePadding) -
+          outerIndent,
+    );
     if (base == 0 && _prefixEnd == 0) return 0;
     final marks =
         _textStart(context, revealed: revealed) -
@@ -707,7 +821,11 @@ final class SourceLine extends StatelessWidget {
           ? marks + _codeIndentEnd(text.substring(marks))
           : marks;
     }
-    if (!shape.listed && shape.quoteDepth == 0 && !_heading) return 0;
+    if (!shape.listed && shape.quoteDepth == 0 && !_heading) {
+      // A line of a column drawn at its list items' indent already (#729):
+      // the spaces that put it in the items are that indent, hidden.
+      return outerIndent > 0 ? LineSyntax.indentOf(styled.text) : 0;
+    }
     final text = styled.text;
     var at = 0;
     var tokens = 0;

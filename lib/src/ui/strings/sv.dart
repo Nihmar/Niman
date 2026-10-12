@@ -562,6 +562,15 @@ final class SwedishStrings extends Strings {
   String get toolbarImage => 'Infoga bild';
   @override
   String get toolbarTable => 'Tabell';
+
+  @override
+  String get toolbarColumns => 'Kolumner';
+
+  @override
+  String get columnsLeft => 'Vänster kolumn';
+
+  @override
+  String get columnsRight => 'Höger kolumn';
   @override
   String get tableRow => 'Rad';
   @override
@@ -647,6 +656,9 @@ final class SwedishStrings extends Strings {
   String get cheatMath => 'Matematik';
   @override
   String get cheatTables => 'Tabeller';
+
+  @override
+  String get cheatColumns => 'Kolumner';
   @override
   String get cheatFootnotes => 'Fotnoter';
   @override
@@ -2967,6 +2979,9 @@ final class SwedishStrings extends Strings {
   String get fullScreen => 'Helskärm';
   @override
   String get commandInsertDiagram => 'Infoga diagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Infoga kolumner';
 
   @override
   String get commandInsertMindMap => 'Infoga tankekarta';

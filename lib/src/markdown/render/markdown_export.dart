@@ -33,9 +33,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/columns_run.dart';
+import 'package:niman/src/markdown/render/columns_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -84,6 +87,21 @@ final class MarkdownExportView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final blocks = BlockScanner(buffer).index.blocks;
+    // The note's outermost `columns` blocks (#729), laid out as the page's
+    // width allows, as the HTML page's CSS lays them out.
+    final runs = ColumnsRun.of(blocks, buffer.lineAt);
+    final children = <Widget>[];
+    var at = 0;
+    for (final run in runs) {
+      for (; at < run.start; at++) {
+        children.add(_block(blocks[at]));
+      }
+      children.add(_columns(blocks, run));
+      at = run.end;
+    }
+    for (; at < blocks.length; at++) {
+      children.add(_block(blocks[at]));
+    }
     return SizedBox(
       width: width,
       child: Padding(
@@ -91,19 +109,60 @@ final class MarkdownExportView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            for (final block in blocks)
-              BlockView(
-                read: parser.of(block, buffer),
-                theme: theme,
-                mathCache: mathCache,
-                embedImages: embedImages,
-                printed: true,
-              ),
-          ],
+          children: children,
         ),
       ),
     );
+  }
+
+  /// [block], drawn on the page; [outerItems] list items in, when its
+  /// parent stands at their indent already, and [availableWidth] wide.
+  Widget _block(Block block, {int outerItems = 0, double? availableWidth}) =>
+      BlockView(
+        read: parser.of(block, buffer),
+        theme: theme,
+        mathCache: mathCache,
+        embedImages: embedImages,
+        printed: true,
+        outerItems: outerItems,
+        availableWidth: availableWidth,
+      );
+
+  /// [run], a `columns` block of [blocks], its columns side by side where
+  /// the page allows.
+  Widget _columns(List<Block> blocks, ColumnsRun run) {
+    final indent = run.items * theme.listIndentPerLevel;
+    final view = ColumnsView(
+      width: width - padding.horizontal - indent,
+      em: theme.body.fontSize ?? 14,
+      top: _block(blocks[run.start], outerItems: run.items),
+      bottom: run.closed
+          ? _block(blocks[run.end - 1], outerItems: run.items)
+          : null,
+      columns: [
+        for (final column in run.columns)
+          (
+            width: column.width,
+            build: (inner) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final index in column.blocks)
+                  _block(
+                    blocks[index],
+                    outerItems: run.items,
+                    availableWidth: inner,
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+    return indent == 0
+        ? view
+        : Padding(
+            padding: EdgeInsets.only(left: indent),
+            child: view,
+          );
   }
 }
 

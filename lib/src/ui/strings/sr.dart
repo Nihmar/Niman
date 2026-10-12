@@ -563,6 +563,15 @@ final class SerbianStrings extends Strings {
   String get toolbarImage => 'Уметни слику';
   @override
   String get toolbarTable => 'Табела';
+
+  @override
+  String get toolbarColumns => 'Колоне';
+
+  @override
+  String get columnsLeft => 'Лева колона';
+
+  @override
+  String get columnsRight => 'Десна колона';
   @override
   String get tableRow => 'Ред';
   @override
@@ -648,6 +657,9 @@ final class SerbianStrings extends Strings {
   String get cheatMath => 'Математика';
   @override
   String get cheatTables => 'Табеле';
+
+  @override
+  String get cheatColumns => 'Колоне';
   @override
   String get cheatFootnotes => 'Фусноте';
   @override
@@ -2985,6 +2997,9 @@ final class SerbianStrings extends Strings {
   String get fullScreen => 'Цео екран';
   @override
   String get commandInsertDiagram => 'Убаци дијаграм (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Убаци колоне';
 
   @override
   String get commandInsertMindMap => 'Убаци мапу ума';

@@ -557,6 +557,15 @@ final class NorwegianStrings extends Strings {
   String get toolbarImage => 'Sett inn bilde';
   @override
   String get toolbarTable => 'Tabell';
+
+  @override
+  String get toolbarColumns => 'Kolonner';
+
+  @override
+  String get columnsLeft => 'Venstre kolonne';
+
+  @override
+  String get columnsRight => 'Høyre kolonne';
   @override
   String get tableRow => 'Rad';
   @override
@@ -642,6 +651,9 @@ final class NorwegianStrings extends Strings {
   String get cheatMath => 'Matematikk';
   @override
   String get cheatTables => 'Tabeller';
+
+  @override
+  String get cheatColumns => 'Kolonner';
   @override
   String get cheatFootnotes => 'Fotnoter';
   @override
@@ -2944,6 +2956,9 @@ final class NorwegianStrings extends Strings {
   String get fullScreen => 'Fullskjerm';
   @override
   String get commandInsertDiagram => 'Sett inn diagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Sett inn kolonner';
 
   @override
   String get commandInsertMindMap => 'Sett inn tankekart';

@@ -7,6 +7,8 @@ import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/callout.dart';
+import 'package:niman/src/markdown/div_stack.dart';
+import 'package:niman/src/markdown/div_syntax.dart';
 import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -100,6 +102,8 @@ final class BlockTree {
     // The items open where the scan is, outermost first: a block at list
     // depth `d` stands in the first `d + 1`.
     final open = <ItemNode>[];
+    // The fenced divs open there, which a block in a column goes into.
+    final divs = DivStack();
     for (final block in scanner.index.blocks) {
       if (block.footnote == Block.opensFootnote) {
         final label = FootnoteSyntax.opening(buffer.lineAt(block.startLine))!
@@ -113,17 +117,67 @@ final class BlockTree {
         note.add(footnote);
         roots = footnote.children;
         open.clear();
+        divs.leaveFootnote();
       } else if (block.footnote == 0 && footnote != null) {
         footnote = null;
         roots = note;
         open.clear();
+        divs.leaveFootnote();
       }
+      final inFootnote = footnote != null;
       final (local, starts) = contentOf(block, buffer, origin);
+      // The list a block standing in [items] items goes into: the
+      // innermost div's, when one is the innermost container there — an
+      // implicit column started for it when it is a `columns` div — or the
+      // innermost item's.
+      List<BlockNode> containerOf(int items) {
+        divs.settle(items, inFootnote: inFootnote);
+        return divs.into(items, block.kind, inFootnote: inFootnote) ??
+            divs.startImplicit(
+              items,
+              block.startLine,
+              inFootnote: inFootnote,
+            ) ??
+            (items == 0 ? roots : open[items - 1].children);
+      }
+
+      if (block.kind == BlockKind.div) {
+        open.length = (block.listDepth + 1).clamp(0, open.length);
+        final items = open.length;
+        final role = block.divRole!;
+        final span = _spans(local, starts).single;
+        if (role.opens) {
+          divs.settle(items, inFootnote: inFootnote);
+          // A column opens in its `columns` div, not in a column of it.
+          final into = role == DivRole.opensColumn
+              ? <BlockNode>[]
+              : containerOf(items);
+          // An unknown div's opener is text where it stands.
+          if (!role.laysOut) into.add(_node(block, local, starts));
+          divs.open(
+            role,
+            span,
+            into,
+            items,
+            inFootnote: inFootnote,
+            width: DivSyntax.opening(local.single)?.width,
+          );
+        } else {
+          divs
+            ..settle(items, inFootnote: inFootnote)
+            ..close(span, items, inFootnote: inFootnote);
+          // An unknown div's closer is text where it stands.
+          if (!role.laysOut) {
+            containerOf(items).add(_node(block, local, starts));
+          }
+        }
+        continue;
+      }
       if (block.kind == BlockKind.listItem) {
         final parents = block.listDepth.clamp(0, open.length);
         open.length = parents;
         final item = _item(block, local, starts);
-        _addItem(parents == 0 ? roots : open[parents - 1].children, item);
+        _addItem(containerOf(parents), item);
         // Items its marker line opens inside it (`- - a`) are open after it.
         for (var inner = item; ;) {
           open.add(inner);
@@ -134,7 +188,7 @@ final class BlockTree {
         continue;
       }
       open.length = (block.listDepth + 1).clamp(0, open.length);
-      final into = open.isEmpty ? roots : open.last.children;
+      final into = containerOf(open.length);
       // The scanner opens a footnote definition at the margin only: one
       // standing in an item past its first line is read again at the
       // item's margin, as the item's marker line is.
@@ -296,7 +350,10 @@ final class BlockTree {
       return _quote(block.quoteDepth, local, starts);
     }
     return LeafNode(
-      kind: block.kind,
+      // An unknown div's fence line is text; a column's is a fence.
+      kind: block.kind == BlockKind.div && !block.divRole!.laysOut
+          ? BlockKind.paragraph
+          : block.kind,
       lines: _spans(local, starts),
       headingLevel: block.headingLevel,
       fenceInfo: block.fenceInfo,

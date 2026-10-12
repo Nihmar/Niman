@@ -164,6 +164,10 @@ final class _Reader {
         children.forEach(_visit);
       case FootnoteNode(:final children):
         children.forEach(_visit);
+      case ColumnsNode(:final columns):
+        columns.forEach(_visit);
+      case ColumnNode(:final children):
+        children.forEach(_visit);
       case ItemNode(:final children):
         for (var at = 0; at < children.length; at++) {
           _visit(children[at], item: at == 0 ? node : null);
@@ -247,6 +251,7 @@ final class _Reader {
         );
       case BlockKind.thematicBreak ||
           BlockKind.blank ||
+          BlockKind.div ||
           BlockKind.frontmatter ||
           BlockKind.quote ||
           BlockKind.listItem:

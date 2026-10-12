@@ -563,6 +563,15 @@ final class GermanStrings extends Strings {
   String get toolbarImage => 'Bild einfügen';
   @override
   String get toolbarTable => 'Tabelle';
+
+  @override
+  String get toolbarColumns => 'Spalten';
+
+  @override
+  String get columnsLeft => 'Linke Spalte';
+
+  @override
+  String get columnsRight => 'Rechte Spalte';
   @override
   String get tableRow => 'Zeile';
   @override
@@ -648,6 +657,9 @@ final class GermanStrings extends Strings {
   String get cheatMath => 'Mathematik';
   @override
   String get cheatTables => 'Tabellen';
+
+  @override
+  String get cheatColumns => 'Spalten';
   @override
   String get cheatFootnotes => 'Fußnoten';
   @override
@@ -3027,6 +3039,9 @@ final class GermanStrings extends Strings {
   String get fullScreen => 'Vollbild';
   @override
   String get commandInsertDiagram => 'Diagramm einfügen (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Spalten einfügen';
 
   @override
   String get commandInsertMindMap => 'Mindmap einfügen';

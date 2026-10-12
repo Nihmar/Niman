@@ -559,6 +559,15 @@ final class FinnishStrings extends Strings {
   String get toolbarImage => 'Lisää kuva';
   @override
   String get toolbarTable => 'Taulukko';
+
+  @override
+  String get toolbarColumns => 'Sarakkeet';
+
+  @override
+  String get columnsLeft => 'Vasen sarake';
+
+  @override
+  String get columnsRight => 'Oikea sarake';
   @override
   String get tableRow => 'Rivi';
   @override
@@ -644,6 +653,9 @@ final class FinnishStrings extends Strings {
   String get cheatMath => 'Matematiikka';
   @override
   String get cheatTables => 'Taulukot';
+
+  @override
+  String get cheatColumns => 'Sarakkeet';
   @override
   String get cheatFootnotes => 'Alaviitteet';
   @override
@@ -2975,6 +2987,9 @@ final class FinnishStrings extends Strings {
   String get fullScreen => 'Koko näyttö';
   @override
   String get commandInsertDiagram => 'Lisää kaavio (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Lisää sarakkeet';
 
   @override
   String get commandInsertMindMap => 'Lisää miellekartta';

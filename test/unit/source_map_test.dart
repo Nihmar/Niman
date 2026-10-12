@@ -22,10 +22,13 @@ List<ReadInline> _inlines(String text) {
       switch (node) {
         case QuoteNode(:final children) ||
             ItemNode(:final children) ||
-            FootnoteNode(:final children):
+            FootnoteNode(:final children) ||
+            ColumnNode(:final children):
           children.forEach(visit);
         case ListNode(:final items):
           items.forEach(visit);
+        case ColumnsNode(:final columns):
+          columns.forEach(visit);
         case LeafNode():
           final leaf = read.leaf(node);
           if (leaf.inline != null) out.add(leaf.inline!);

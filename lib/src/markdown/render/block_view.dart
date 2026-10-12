@@ -28,6 +28,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/render/callout_box.dart';
+import 'package:niman/src/markdown/render/columns_view.dart';
 import 'package:niman/src/markdown/render/inline_spans.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/leaf_view.dart';
@@ -48,6 +49,7 @@ final class BlockView extends StatelessWidget {
     this.embedImages,
     this.onToggleTask,
     this.printed = false,
+    this.outerItems = 0,
     super.key,
   });
 
@@ -87,6 +89,11 @@ final class BlockView extends StatelessWidget {
   /// screen.
   final bool printed;
 
+  /// How many of the list items the block stands in its parent already
+  /// indents it by: the items around a `columns` block (#729), whose
+  /// columns are drawn at their indent.
+  final int outerItems;
+
   /// Past this many containers inside one another, one is drawn as its
   /// blocks alone, with no bar or marker column of its own: a pathological
   /// note's thousand quotes would be a page of indent.
@@ -103,9 +110,11 @@ final class BlockView extends StatelessWidget {
     }
     // The items the block stands in: an item's own block stands in its
     // parents, any other block in its item too.
-    final items = block.kind == BlockKind.listItem
-        ? block.listDepth
-        : block.listDepth + 1;
+    final items =
+        (block.kind == BlockKind.listItem
+            ? block.listDepth
+            : block.listDepth + 1) -
+        outerItems;
     final indent = items <= 0 ? 0.0 : items * theme.listIndentPerLevel;
     final width = availableWidth;
     final drawn = _Drawer(
@@ -149,6 +158,8 @@ final class _Drawer {
       for (final item in items) _item(item, theme, width, nesting),
     ]),
     ItemNode() => _item(node, theme, width, nesting),
+    ColumnsNode() => _columns(node, theme, width, nesting),
+    ColumnNode() => _columnOf(node, theme, width, nesting),
     // A definition's blocks are the footnotes' (see [BlockView.build]).
     FootnoteNode() => const SizedBox.shrink(),
     LeafNode() => LeafView(
@@ -161,6 +172,53 @@ final class _Drawer {
       printed: view.printed,
     ),
   };
+
+  /// How many columns the node being drawn stands in: only the outermost
+  /// `columns` level sits side by side, and deeper ones stack.
+  int _inColumns = 0;
+
+  /// A fence line's band: the room a column's opener takes above it, and
+  /// the block's margins (#729).
+  Widget _band(MarkdownTheme theme) =>
+      SizedBox(height: scaler.scale(theme.divBand));
+
+  /// A `columns` block inside a container (#729): its columns side by side
+  /// where [width] allows, stacked otherwise, and inside a column.
+  Widget _columns(
+    ColumnsNode columns,
+    MarkdownTheme theme,
+    double? width,
+    int nesting,
+  ) => ColumnsView(
+    width: _inColumns > 0 ? null : width,
+    em: scaler.scale(theme.body.fontSize ?? 14),
+    top: _band(theme),
+    bottom: columns.closer == null ? null : _band(theme),
+    columns: [
+      for (final column in columns.columns)
+        (
+          width: column.width,
+          build: (inner) => _columnOf(column, theme, inner, nesting),
+        ),
+    ],
+  );
+
+  /// One column: its opener's band, its blocks, its closer's band.
+  Widget _columnOf(
+    ColumnNode column,
+    MarkdownTheme theme,
+    double? width,
+    int nesting,
+  ) {
+    _inColumns++;
+    final children = _all(column.children, theme, width, nesting);
+    _inColumns--;
+    return _column([
+      if (column.opener != null) _band(theme),
+      ...children,
+      if (column.closer != null) _band(theme),
+    ]);
+  }
 
   /// [nodes], one under the other.
   List<Widget> _all(

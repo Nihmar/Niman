@@ -156,6 +156,17 @@ final class BlockScanner {
     );
   }
 
+  /// The fence lines of the note's fenced divs (#729), in order, as the
+  /// list has them: current when [settled]. O(chunks) for a note with none.
+  Iterable<Block> get divBlocks => _blocks.divBlocks;
+
+  /// The note's quote blocks, in order, as the list has them: the ones a
+  /// `columns` block may stand in (#729). O(chunks) for a note with none.
+  Iterable<Block> get quoteBlocks => _blocks.quoteBlocks;
+
+  /// How many fence lines of fenced divs the note has, as the list has it.
+  int get divCount => _blocks.divCount;
+
   /// The line count at the last scan.
   int _lineCount = 0;
 

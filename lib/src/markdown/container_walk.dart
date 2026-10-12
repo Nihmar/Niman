@@ -14,6 +14,7 @@
 /// order makes each measure where its parent left the line.
 library;
 
+import 'package:niman/src/markdown/div_syntax.dart';
 import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/html_block_syntax.dart';
 import 'package:niman/src/markdown/line_state.dart';
@@ -30,7 +31,8 @@ final class ContainerWalk {
     this.quote,
     this.next,
     this.remaining,
-    this.footnote, {
+    this.footnote,
+    this.divs, {
     this.quoteLazy = false,
   });
 
@@ -65,7 +67,8 @@ final class ContainerWalk {
       } else if (blank ||
           footnote == LineState.footnoteAfterBlank ||
           !paragraphOpen(entering) ||
-          startsBlock(LineSyntax.expandIndent(line))) {
+          startsBlock(LineSyntax.expandIndent(line)) ||
+          _closesDiv(line, entering.divs, (div) => !div.footnote)) {
         return ContainerWalk._(
           const <OpenItem>[],
           true,
@@ -75,6 +78,7 @@ final class ContainerWalk {
           next,
           leftOver,
           0,
+          _divsIn(entering.divs, 0, inFootnote: false),
         );
       } else {
         footnote = LineState.footnoteOpen;
@@ -93,6 +97,7 @@ final class ContainerWalk {
         below,
         carried,
         footnote,
+        entering.divs,
       );
     }
     final blank = LineSyntax.indentOf(line) == line.length;
@@ -151,7 +156,8 @@ final class ContainerWalk {
       // ends the item.
       if (item.lastBlank ||
           !paragraphOpen(entering) ||
-          startsBlock(LineSyntax.expandIndent(text))) {
+          startsBlock(LineSyntax.expandIndent(text)) ||
+          _closesDiv(text, entering.divs, (div) => div.items <= at)) {
         kept = at;
         break;
       }
@@ -168,7 +174,8 @@ final class ContainerWalk {
       final columns = LineSyntax.expandIndent(text);
       if (LineSyntax.quoteDepth(columns) > 0) {
         quote = LineSyntax.quoteChild(text);
-      } else if (_quoteTakesLazily(columns, entering.quoteLast)) {
+      } else if (_quoteTakesLazily(columns, entering.quoteLast) &&
+          !_closesDiv(columns, entering.divs, (_) => true)) {
         quote = text;
         quoteLazy = true;
       }
@@ -182,9 +189,45 @@ final class ContainerWalk {
       after,
       remaining,
       footnote,
+      _divsIn(entering.divs, items.length, inFootnote: footnote != 0),
       quoteLazy: quoteLazy,
     );
   }
+
+  /// Whether [text], a line short of a container, is a div's closer for a
+  /// div open outside that container — one [outside] says is: it ends the
+  /// container, as Pandoc ends a paragraph and an item at a div's closer,
+  /// and then closes the div.
+  static bool _closesDiv(
+    String text,
+    List<OpenDiv> divs,
+    bool Function(OpenDiv div) outside,
+  ) => divs.isNotEmpty && DivSyntax.closes(text) && divs.any(outside);
+
+  /// The divs of [divs] a line stays in when it stands in [items] list
+  /// items, inside a footnote definition or not: a div ends with the item
+  /// and the footnote definition it opened in. [divs] itself when it loses
+  /// none.
+  static List<OpenDiv> _divsIn(
+    List<OpenDiv> divs,
+    int items, {
+    required bool inFootnote,
+  }) {
+    var kept = divs.length;
+    for (var at = 0; at < divs.length; at++) {
+      final div = divs[at];
+      if (div.items > items || (div.footnote && !inFootnote)) {
+        kept = at;
+        break;
+      }
+    }
+    return kept == divs.length ? divs : divs.sublist(0, kept);
+  }
+
+  /// The fenced divs the line stays in, outermost first (#729): the ones
+  /// open before it, less those that ended with an item or the footnote
+  /// definition the line ends. Not one the line opens or closes itself.
+  final List<OpenDiv> divs;
 
   /// The items the line stays in, outermost first: the ones open before it,
   /// less the ones it ends, each with the line taken into account. Not an

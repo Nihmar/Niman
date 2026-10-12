@@ -287,6 +287,15 @@ abstract base class Strings {
   String get toolbarCode;
   String get toolbarImage;
   String get toolbarTable;
+
+  /// The Columns button and menu entry (#729).
+  String get toolbarColumns;
+
+  /// The text Insert columns writes in its first column, selected.
+  String get columnsLeft;
+
+  /// The text Insert columns writes in its second column.
+  String get columnsRight;
   String get tableRow;
   String get tableColumn;
   String get tableAddRowAbove;
@@ -329,6 +338,9 @@ abstract base class Strings {
   String get cheatCodeBlocks;
   String get cheatMath;
   String get cheatTables;
+
+  /// The cheatsheet's note columns (#729).
+  String get cheatColumns;
   String get cheatFootnotes;
   String get cheatRule;
   String get cheatFrontmatter;
@@ -369,6 +381,9 @@ abstract base class Strings {
   String get diagramTitle;
   String get fullScreen;
   String get commandInsertDiagram;
+
+  /// The palette's Insert columns (#729).
+  String get commandInsertColumns;
   String get commandInsertMindMap;
   String get commandConvertListToMindMap;
   String get tallySourceLabel;

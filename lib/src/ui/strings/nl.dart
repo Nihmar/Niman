@@ -563,6 +563,15 @@ final class DutchStrings extends Strings {
   String get toolbarImage => 'Afbeelding invoegen';
   @override
   String get toolbarTable => 'Tabel';
+
+  @override
+  String get toolbarColumns => 'Kolommen';
+
+  @override
+  String get columnsLeft => 'Linkerkolom';
+
+  @override
+  String get columnsRight => 'Rechterkolom';
   @override
   String get tableRow => 'Rij';
   @override
@@ -648,6 +657,9 @@ final class DutchStrings extends Strings {
   String get cheatMath => 'Wiskunde';
   @override
   String get cheatTables => 'Tabellen';
+
+  @override
+  String get cheatColumns => 'Kolommen';
   @override
   String get cheatFootnotes => 'Voetnoten';
   @override
@@ -2993,6 +3005,9 @@ final class DutchStrings extends Strings {
   String get fullScreen => 'Volledig scherm';
   @override
   String get commandInsertDiagram => 'Diagram invoegen (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Kolommen invoegen';
 
   @override
   String get commandInsertMindMap => 'Mindmap invoegen';

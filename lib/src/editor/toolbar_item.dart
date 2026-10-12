@@ -43,6 +43,9 @@ enum ToolbarItem {
   /// An empty table at the caret, on lines of its own (#262).
   table('table', 'toolbar-table', Icons.table_chart_outlined),
 
+  /// Two columns at the caret, on lines of their own (#729).
+  columns('columns', 'toolbar-columns', Icons.view_column_outlined),
+
   /// The heading-level dialog.
   heading('heading', 'toolbar-heading', Icons.title),
 
@@ -102,6 +105,7 @@ enum ToolbarItem {
     ToolbarItem.code => AppStrings.toolbarCode,
     ToolbarItem.image => AppStrings.toolbarImage,
     ToolbarItem.table => AppStrings.toolbarTable,
+    ToolbarItem.columns => AppStrings.toolbarColumns,
     ToolbarItem.heading => AppStrings.toolbarHeading,
     ToolbarItem.list => AppStrings.toolbarList,
     ToolbarItem.orderedList => AppStrings.toolbarOrderedList,
@@ -133,6 +137,7 @@ enum ToolbarItem {
     ToolbarItem.code ||
     ToolbarItem.image ||
     ToolbarItem.table ||
+    ToolbarItem.columns ||
     ToolbarItem.tools => ToolbarGroup.insert,
   };
 

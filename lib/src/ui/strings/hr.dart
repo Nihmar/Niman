@@ -561,6 +561,15 @@ final class CroatianStrings extends Strings {
   String get toolbarImage => 'Umetni sliku';
   @override
   String get toolbarTable => 'Tablica';
+
+  @override
+  String get toolbarColumns => 'Stupci';
+
+  @override
+  String get columnsLeft => 'Lijevi stupac';
+
+  @override
+  String get columnsRight => 'Desni stupac';
   @override
   String get tableRow => 'Redak';
   @override
@@ -646,6 +655,9 @@ final class CroatianStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Tablice';
+
+  @override
+  String get cheatColumns => 'Stupci';
   @override
   String get cheatFootnotes => 'Fusnote';
   @override
@@ -2988,6 +3000,9 @@ final class CroatianStrings extends Strings {
   String get fullScreen => 'Cijeli zaslon';
   @override
   String get commandInsertDiagram => 'Umetni dijagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Umetni stupce';
 
   @override
   String get commandInsertMindMap => 'Umetni mentalnu mapu';

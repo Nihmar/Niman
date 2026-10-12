@@ -61,10 +61,13 @@ List<String> leafTexts(String note) {
       switch (node) {
         case QuoteNode(:final children) ||
             ItemNode(:final children) ||
-            FootnoteNode(:final children):
+            FootnoteNode(:final children) ||
+            ColumnNode(:final children):
           walk(children);
         case ListNode(:final items):
           walk(items);
+        case ColumnsNode(:final columns):
+          walk(columns);
         case LeafNode(:final kind) when kind == BlockKind.paragraph:
           texts.add(LeafText.paragraph(LeafText.linesOf(node, lines)));
         case LeafNode(:final kind) when kind == BlockKind.heading:

@@ -447,6 +447,9 @@ final class AppStrings {
   static String get toolbarCode => _s.toolbarCode;
   static String get toolbarImage => _s.toolbarImage;
   static String get toolbarTable => _s.toolbarTable;
+  static String get toolbarColumns => _s.toolbarColumns;
+  static String get columnsLeft => _s.columnsLeft;
+  static String get columnsRight => _s.columnsRight;
   static String get tableRow => _s.tableRow;
   static String get tableColumn => _s.tableColumn;
   static String get tableAddRowAbove => _s.tableAddRowAbove;
@@ -489,6 +492,7 @@ final class AppStrings {
   static String get cheatCodeBlocks => _s.cheatCodeBlocks;
   static String get cheatMath => _s.cheatMath;
   static String get cheatTables => _s.cheatTables;
+  static String get cheatColumns => _s.cheatColumns;
   static String get cheatFootnotes => _s.cheatFootnotes;
   static String get cheatRule => _s.cheatRule;
   static String get cheatFrontmatter => _s.cheatFrontmatter;
@@ -526,6 +530,7 @@ final class AppStrings {
   static String get diagramTitle => _s.diagramTitle;
   static String get fullScreen => _s.fullScreen;
   static String get commandInsertDiagram => _s.commandInsertDiagram;
+  static String get commandInsertColumns => _s.commandInsertColumns;
   static String get commandInsertMindMap => _s.commandInsertMindMap;
   static String get commandConvertListToMindMap =>
       _s.commandConvertListToMindMap;

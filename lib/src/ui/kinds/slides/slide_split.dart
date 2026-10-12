@@ -63,7 +63,10 @@ List<Slide> splitSlides(String text) {
   }
 
   for (final block in blocks) {
-    final topLevel = block.quoteDepth == 0 && block.listDepth < 0;
+    // Not in a quote, an item or a note's columns (#729): a rule in a
+    // column is the column's.
+    final topLevel =
+        block.quoteDepth == 0 && block.listDepth < 0 && block.divDepth == 0;
     if (block.kind == BlockKind.frontmatter) {
       start = block.endLine;
     } else if (block.kind == BlockKind.thematicBreak && topLevel) {

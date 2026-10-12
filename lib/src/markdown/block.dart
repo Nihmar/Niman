@@ -48,6 +48,39 @@ enum BlockKind {
   /// One or more blank lines, which take space and separate what is around
   /// them.
   blank,
+
+  /// One fence line of a fenced div (#729): what it does is the block's
+  /// [Block.divRole].
+  div,
+}
+
+/// What a fence line of a fenced div does ([BlockKind.div]).
+enum DivRole {
+  /// Opens a `columns` div.
+  opensColumns,
+
+  /// Opens a `column` div, directly inside a `columns` one.
+  opensColumn,
+
+  /// Opens another div inside a `columns` one: tracked for its closer, and
+  /// drawn as text where it stands.
+  opensOther,
+
+  /// Closes a `columns` div.
+  closesColumns,
+
+  /// Closes a `column` div.
+  closesColumn,
+
+  /// Closes another div: text, as its opener is.
+  closesOther;
+
+  /// Whether the line opens a div.
+  bool get opens =>
+      this == opensColumns || this == opensColumn || this == opensOther;
+
+  /// Whether the div is one Niman lays out: `columns` or `column`.
+  bool get laysOut => this != opensOther && this != closesOther;
 }
 
 /// One block: a kind, a line range, and the container depths it sits at.
@@ -67,6 +100,8 @@ final class Block {
     this.footnote = 0,
     this.definition = 0,
     this.reach = 0,
+    this.divRole,
+    this.divDepth = 0,
   });
 
   /// [definition] for a link reference definition's block.
@@ -129,6 +164,13 @@ final class Block {
   /// and a rescan reads the block again from its start.
   final int reach;
 
+  /// What the block's fence line does, when [kind] is [BlockKind.div].
+  final DivRole? divRole;
+
+  /// How many fenced divs the block stands in: for a fence line, the ones
+  /// around the div it opens or closes.
+  final int divDepth;
+
   /// How many lines it covers.
   int get lineCount => endLine - startLine;
 
@@ -146,7 +188,9 @@ final class Block {
       fenceInfo == other.fenceInfo &&
       footnote == other.footnote &&
       definition == other.definition &&
-      reach == other.reach;
+      reach == other.reach &&
+      divRole == other.divRole &&
+      divDepth == other.divDepth;
 
   /// The same block, [delta] lines further down.
   ///
@@ -168,6 +212,8 @@ final class Block {
       footnote: footnote,
       definition: definition,
       reach: reach,
+      divRole: divRole,
+      divDepth: divDepth,
     );
   }
 
@@ -186,6 +232,8 @@ final class Block {
     footnote: footnote,
     definition: definition,
     reach: reach,
+    divRole: divRole,
+    divDepth: divDepth,
   );
 
   /// The block from [start] on, to [end]: what is left of a block a scan
@@ -203,6 +251,8 @@ final class Block {
     footnote: footnote == opensFootnote && start != startLine
         ? inFootnote
         : footnote,
+    divRole: divRole,
+    divDepth: divDepth,
   );
 
   /// The block, a paragraph or an item's first one, as the setext heading
@@ -221,6 +271,7 @@ final class Block {
           headingLevel: level,
           entering: entering,
           footnote: footnote,
+          divDepth: divDepth,
         )
       : Block(
           kind: BlockKind.heading,
@@ -231,6 +282,7 @@ final class Block {
           headingLevel: level,
           entering: entering,
           footnote: footnote,
+          divDepth: divDepth,
         );
 
   @override
@@ -239,5 +291,7 @@ final class Block {
       '${quoteDepth > 0 ? ' quote:$quoteDepth' : ''}'
       '${listDepth >= 0 ? ' list:$listDepth' : ''}'
       '${footnote > 0 ? ' footnote:$footnote' : ''}'
-      '${definition > 0 ? ' definition' : ''})';
+      '${definition > 0 ? ' definition' : ''}'
+      '${divRole != null ? ' ${divRole!.name}' : ''}'
+      '${divDepth > 0 ? ' div:$divDepth' : ''})';
 }

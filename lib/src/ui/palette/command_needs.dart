@@ -73,6 +73,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.formatNote => const {CommandNeed.textNote, CommandNeed.proseNote},
   AppCommand.insertDiagram ||
   AppCommand.insertMindMap ||
+  AppCommand.insertColumns ||
   AppCommand.convertListToMindMap ||
   AppCommand.pasteAsMarkdown ||
   AppCommand.exportNote ||

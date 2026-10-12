@@ -565,6 +565,15 @@ final class SlovenianStrings extends Strings {
   String get toolbarImage => 'Vstavi sliko';
   @override
   String get toolbarTable => 'Tabela';
+
+  @override
+  String get toolbarColumns => 'Stolpci';
+
+  @override
+  String get columnsLeft => 'Levi stolpec';
+
+  @override
+  String get columnsRight => 'Desni stolpec';
   @override
   String get tableRow => 'Vrstica';
   @override
@@ -650,6 +659,9 @@ final class SlovenianStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Tabele';
+
+  @override
+  String get cheatColumns => 'Stolpci';
   @override
   String get cheatFootnotes => 'Opombe';
   @override
@@ -2980,6 +2992,9 @@ final class SlovenianStrings extends Strings {
   String get fullScreen => 'Celoten zaslon';
   @override
   String get commandInsertDiagram => 'Vstavi diagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Vstavi stolpce';
 
   @override
   String get commandInsertMindMap => 'Vstavi miselni vzorec';

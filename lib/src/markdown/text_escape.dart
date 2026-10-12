@@ -13,9 +13,10 @@ String escapeMarkdownText(String text) =>
 
 final RegExp _syntax = RegExp(r'[\\`*_\[\]<>#$|~=^&!]');
 
-/// [text], where a line opening a block would open a list, a quote or a
-/// heading: its first character escaped. (A quote and a heading are
-/// already, their `>` and `#` escaped by [escapeMarkdownText].)
+/// [text], where a line opening a block would open a list, a quote, a
+/// heading or a note's columns: its first character escaped. (A quote and
+/// a heading are already, their `>` and `#` escaped by
+/// [escapeMarkdownText].)
 String escapeMarkdownLineStart(String text) {
   final ordered = _orderedStart.firstMatch(text);
   if (ordered != null) {
@@ -23,6 +24,8 @@ String escapeMarkdownLineStart(String text) {
         '${text.substring(ordered.end)}';
   }
   if (text.startsWith('-') || text.startsWith('+')) return '\\$text';
+  // A fenced div's fence (#729): `\:::` opens nothing, in Niman or Pandoc.
+  if (text.startsWith(':::')) return '\\$text';
   return text;
 }
 

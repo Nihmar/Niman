@@ -553,6 +553,15 @@ final class EstonianStrings extends Strings {
   String get toolbarImage => 'Sisesta pilt';
   @override
   String get toolbarTable => 'Tabel';
+
+  @override
+  String get toolbarColumns => 'Veerud';
+
+  @override
+  String get columnsLeft => 'Vasak veerg';
+
+  @override
+  String get columnsRight => 'Parem veerg';
   @override
   String get tableRow => 'Rida';
   @override
@@ -638,6 +647,9 @@ final class EstonianStrings extends Strings {
   String get cheatMath => 'Matemaatika';
   @override
   String get cheatTables => 'Tabelid';
+
+  @override
+  String get cheatColumns => 'Veerud';
   @override
   String get cheatFootnotes => 'Joonealused märkused';
   @override
@@ -2912,6 +2924,9 @@ final class EstonianStrings extends Strings {
   String get fullScreen => 'Täisekraan';
   @override
   String get commandInsertDiagram => 'Lisa diagramm (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Lisa veerud';
 
   @override
   String get commandInsertMindMap => 'Lisa mõttemap';

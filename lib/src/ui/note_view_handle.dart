@@ -35,6 +35,10 @@ abstract interface class NoteViewHandle {
   /// it is one line, on lines of its own when it is more (#265).
   void insertAtCaret(String markdown);
 
+  /// Puts two columns at the caret, on lines of their own, one undo step,
+  /// the first column's text selected (#729).
+  void insertColumns();
+
   /// Puts [text] in place of the selection, as a paste does, one undo
   /// step; what the note stored, and where, or null when the note takes
   /// no text there ([canInsert]).

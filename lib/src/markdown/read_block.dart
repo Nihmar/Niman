@@ -175,6 +175,10 @@ final class ReadBlock {
           children.forEach(add);
         case ListNode(:final items):
           items.forEach(add);
+        case ColumnsNode(:final columns):
+          columns.forEach(add);
+        case ColumnNode(:final children):
+          children.forEach(add);
         case LeafNode():
           final read = leaf(node);
           final inline = read.inline;

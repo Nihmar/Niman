@@ -62,6 +62,10 @@ final class LiveInlines {
           children.forEach(visit);
         case ListNode(:final items):
           items.forEach(visit);
+        case ColumnsNode(:final columns):
+          columns.forEach(visit);
+        case ColumnNode(:final children):
+          children.forEach(visit);
         case LeafNode():
           final leaf = read.leaf(node);
           final inline = leaf.inline;

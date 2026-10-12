@@ -557,6 +557,15 @@ final class DanishStrings extends Strings {
   String get toolbarImage => 'Indsæt billede';
   @override
   String get toolbarTable => 'Tabel';
+
+  @override
+  String get toolbarColumns => 'Kolonner';
+
+  @override
+  String get columnsLeft => 'Venstre kolonne';
+
+  @override
+  String get columnsRight => 'Højre kolonne';
   @override
   String get tableRow => 'Række';
   @override
@@ -642,6 +651,9 @@ final class DanishStrings extends Strings {
   String get cheatMath => 'Matematik';
   @override
   String get cheatTables => 'Tabeller';
+
+  @override
+  String get cheatColumns => 'Kolonner';
   @override
   String get cheatFootnotes => 'Fodnoter';
   @override
@@ -2943,6 +2955,9 @@ final class DanishStrings extends Strings {
   String get fullScreen => 'Fuld skærm';
   @override
   String get commandInsertDiagram => 'Indsæt diagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Indsæt kolonner';
 
   @override
   String get commandInsertMindMap => 'Indsæt mindmap';

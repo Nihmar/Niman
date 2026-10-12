@@ -559,6 +559,15 @@ final class AlbanianStrings extends Strings {
   String get toolbarImage => 'Vendos foto';
   @override
   String get toolbarTable => 'Tabelë';
+
+  @override
+  String get toolbarColumns => 'Kolona';
+
+  @override
+  String get columnsLeft => 'Kolona e majtë';
+
+  @override
+  String get columnsRight => 'Kolona e djathtë';
   @override
   String get tableRow => 'Rresht';
   @override
@@ -644,6 +653,9 @@ final class AlbanianStrings extends Strings {
   String get cheatMath => 'Matematikë';
   @override
   String get cheatTables => 'Tabelat';
+
+  @override
+  String get cheatColumns => 'Kolona';
   @override
   String get cheatFootnotes => 'Shënimet në fund';
   @override
@@ -2980,6 +2992,9 @@ final class AlbanianStrings extends Strings {
   String get fullScreen => 'Ekran i plotë';
   @override
   String get commandInsertDiagram => 'Fut diagramë (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Fut kolona';
 
   @override
   String get commandInsertMindMap => 'Fut hartë mendore';

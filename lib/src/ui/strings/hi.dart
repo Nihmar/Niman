@@ -548,6 +548,15 @@ final class HindiStrings extends Strings {
   String get toolbarImage => 'छवि डालें';
   @override
   String get toolbarTable => 'तालिका';
+
+  @override
+  String get toolbarColumns => 'स्तंभ';
+
+  @override
+  String get columnsLeft => 'बायाँ स्तंभ';
+
+  @override
+  String get columnsRight => 'दायाँ स्तंभ';
   @override
   String get tableRow => 'पंक्ति';
   @override
@@ -633,6 +642,9 @@ final class HindiStrings extends Strings {
   String get cheatMath => 'गणित';
   @override
   String get cheatTables => 'तालिकाएँ';
+
+  @override
+  String get cheatColumns => 'स्तंभ';
   @override
   String get cheatFootnotes => 'फ़ुटनोट';
   @override
@@ -2911,6 +2923,9 @@ final class HindiStrings extends Strings {
   String get fullScreen => 'पूर्ण स्क्रीन';
   @override
   String get commandInsertDiagram => 'आरेख डालें (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'स्तंभ डालें';
 
   @override
   String get commandInsertMindMap => 'माइंड मैप डालें';

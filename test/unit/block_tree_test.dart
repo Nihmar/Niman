@@ -21,6 +21,12 @@ String _shape(String text, List<BlockNode> nodes) {
       '${ordered ? 'ol$start' : 'ul'}[${items.map(of).join(' ')}]',
     ItemNode(:final delimiter, :final children) =>
       '$delimiter[${children.map(of).join(' ')}]',
+    ColumnsNode(:final columns, :final closer) =>
+      'cols${closer == null ? '…' : ''}[${columns.map(of).join(' | ')}]',
+    ColumnNode(:final children, :final width, :final implicit, :final closer) =>
+      '${implicit ? 'i' : 'c'}${width == null ? '' : '${width.round()}%'}'
+          '${!implicit && closer == null ? '…' : ''}'
+          '[${children.map(of).join(' ')}]',
     LeafNode(:final kind, lines: final spans) =>
       '${kind.name}"${spanned(spans)}"',
   };

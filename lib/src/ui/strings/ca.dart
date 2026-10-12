@@ -566,6 +566,15 @@ final class CatalanStrings extends Strings {
   String get toolbarImage => 'Insereix imatge';
   @override
   String get toolbarTable => 'Taula';
+
+  @override
+  String get toolbarColumns => 'Columnes';
+
+  @override
+  String get columnsLeft => 'Columna esquerra';
+
+  @override
+  String get columnsRight => 'Columna dreta';
   @override
   String get tableRow => 'Fila';
   @override
@@ -651,6 +660,9 @@ final class CatalanStrings extends Strings {
   String get cheatMath => 'Matemàtiques';
   @override
   String get cheatTables => 'Taules';
+
+  @override
+  String get cheatColumns => 'Columnes';
   @override
   String get cheatFootnotes => 'Notes al peu';
   @override
@@ -3008,6 +3020,9 @@ final class CatalanStrings extends Strings {
   String get fullScreen => 'Pantalla completa';
   @override
   String get commandInsertDiagram => 'Insereix diagrama (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Insereix columnes';
 
   @override
   String get commandInsertMindMap => 'Insereix mapa mental';

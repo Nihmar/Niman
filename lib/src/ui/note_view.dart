@@ -486,6 +486,12 @@ final class _NoteViewState extends State<NoteView>
   }
 
   @override
+  void insertColumns() {
+    if (!canInsert) return;
+    _commands.insertColumnsAtCaret();
+  }
+
+  @override
   PastedText? pasteText(String text) {
     final surface = _surface;
     if (!canInsert || surface == null) return null;

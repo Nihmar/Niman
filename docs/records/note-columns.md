@@ -536,8 +536,10 @@ it paints the container's decoration down its whole height: the quote's
 bars, the callout's box and bar, the item's indent. `LineShape` draws
 those a line at a time today.
 
-**The cap.** A quote's content is scanned again at each revision, and its
-comment allows that because "a quote is a few lines". A quote or callout
+**The cap.** A quote's content is scanned again at each revision that
+touches it — the reading of the others is kept, and moves with the lines
+(`LiveQuoteRuns`) — and its comment allows that because "a quote is a few
+lines". A quote or callout
 of more than 2,000 lines draws the columns inside it stacked, which is
 the row model with no rescan of the host. The read view is not capped:
 it draws a quote whole already.
@@ -754,3 +756,68 @@ One PR, on one branch, a commit per step:
   closer longer than its opener, closes the same divs. A note relying on
   djot's length matching to close an *outer* div with a long closer would
   not. Insert writes fences that read the same under both.
+
+## As built (2026-10-12)
+
+The plan above is what was built, on one branch, a commit per step. Where
+the code parted from it, here is where and why.
+
+- **A fence stands at its container's margin, with no indent.** The
+  syntax section says up to three spaces, as for a code fence. Pandoc,
+  the oracle, reads ` ::: column` as text
+  (`test/fixtures/columns/pandoc-divs.json`, written by
+  `tool/pandoc_divs.py`; `note_columns_pandoc_test` holds the tree to
+  Pandoc's reading of 21 notes). Following Pandoc keeps a note that
+  renders as columns here rendering as columns there.
+- **`LineState.divs` holds `({DivKind kind, int items, bool footnote})`.**
+  The colons and the width do not change how a later line is read, and a
+  field that differs where reading does not makes the scan converge
+  later. The width is read off the opener when the block is laid out.
+  `footnote` is what ends a div with the footnote definition it opened
+  in.
+- **An opener on a list item's marker line, or after a footnote's label,
+  is text.** The item's content is read again from its own block, and a
+  div opened there would cross from that reading into the blocks after
+  it. A columns block in an item opens on a line of its own, at the
+  item's indent.
+- **The read view's segments are one sliver, `SliverSegments`.** A group
+  of slivers lays every child out every frame: past 500 blocks a scroll
+  frame cost eight times a note's without columns. `SliverSegments`
+  finds the children at the cache area's edges from the note's map and
+  lays out only those; a block wholly outside lays out nothing, and its
+  fences' bands are built lazily, as rows are. `live` draws its rows the
+  same way.
+- **A selectable read view stacks its columns.** Flutter's selection
+  orders its selectables by where they are drawn, and the Scrollable's
+  own selection container, which the blocks register with, cannot be
+  given another order: a `SelectionContainer` needs a box, and the
+  columns are slivers. The selectable read views are a book's and a
+  recognized text's, whose text is escaped (`\:::`) and holds no
+  columns.
+- **`LiveRows` is `SourceFolds` with a second kind of range.** A
+  side-by-side block's lines past its opener are hosted: they answer the
+  opener's row, as a folded line its heading's, and are not hidden. An
+  edit inside the block grows it and changes no row. `NoteGeometry` is
+  the view's `_lineBox`, the one function every reader of a line's place
+  goes through.
+- **Quotes and callouts in `live`.** A quote of one level at the note's
+  margin, of at most 2 000 lines, sets its columns side by side; a
+  nested quote, one in a list item, and a longer one keep them stacked.
+  The block's sliver paints the quote's bars and the callout's box down
+  its height. The quote blocks are counted per chunk of the block list,
+  as the fence lines are, so a note without them pays nothing.
+- **Folds in a side-by-side block.** A block with a folded section in it
+  is stacked: a fold hides rows, and a column has none. A heading in a
+  side-by-side column has no fold arrow — the gutter has one row for
+  several columns — and folds inside its column where the columns stack.
+  The block's own opener folds the whole block.
+- **The performance bars hold ratios.** Every run asserts the counts the
+  table names. The time is a debug harness's, where the absolutes the
+  table sets do not hold for any note (a jump in the read view to a
+  plain note's middle is 50 ms there), so `NIMAN_PERF` holds each to the
+  same work without columns: a block built in a column within 1.3 times
+  one built outside; a keystroke in a column within 1.5 times one
+  outside; a scroll frame's cost a line built within 1.5 times; the scan
+  of prose in a column within 3 % of the same prose outside. The scan
+  before the change, the table's bar, was an A/B of two builds with
+  `tool/block_scanner_bench.dart`: fixture-1mb at 22–24 ms on both.

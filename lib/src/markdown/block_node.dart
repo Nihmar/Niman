@@ -152,3 +152,75 @@ final class LeafNode extends BlockNode {
   @override
   int get line => lines.first.line;
 }
+
+/// A `columns` div (#729): its columns, which sit side by side where the
+/// width allows (`docs/records/note-columns.md`).
+final class ColumnsNode extends BlockNode {
+  /// The div opened by [opener], closed by [closer].
+  const new({
+    required this.line,
+    required this.opener,
+    required this.columns,
+    this.closer,
+  });
+
+  @override
+  final int line;
+
+  /// Where its opening fence stands.
+  final SourceSpan opener;
+
+  /// Where its closing fence stands; null when it runs to the end of its
+  /// container, as an unclosed code fence does.
+  final SourceSpan? closer;
+
+  /// Its columns, in source order; the builder adds to them.
+  final List<ColumnNode> columns;
+
+  /// The same div, closed by [closer].
+  ColumnsNode closedBy(SourceSpan closer) =>
+      ColumnsNode(line: line, opener: opener, columns: columns, closer: closer);
+}
+
+/// One column of a [ColumnsNode]: a `column` div, or a run of blocks the
+/// `columns` div holds outside any — an implicit column.
+final class ColumnNode extends BlockNode {
+  /// A column starting on [line].
+  const new({
+    required this.line,
+    required this.children,
+    this.width,
+    this.opener,
+    this.closer,
+  });
+
+  @override
+  final int line;
+
+  /// Its `width`, as a percentage of the row; null when it shares what the
+  /// widths leave.
+  final double? width;
+
+  /// Where its opening fence stands; null for an implicit column.
+  final SourceSpan? opener;
+
+  /// Where its closing fence stands; null for an implicit column, and for
+  /// one that runs to the end of its container.
+  final SourceSpan? closer;
+
+  /// Whether no `column` div opened it: blocks inside `columns` outside
+  /// any column.
+  bool get implicit => opener == null;
+
+  /// The blocks inside it; the builder adds to them.
+  final List<BlockNode> children;
+
+  /// The same column, closed by [closer].
+  ColumnNode closedBy(SourceSpan closer) => ColumnNode(
+    line: line,
+    children: children,
+    width: width,
+    opener: opener,
+    closer: closer,
+  );
+}

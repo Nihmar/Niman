@@ -17,6 +17,7 @@ library;
 import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/container_walk.dart';
+import 'package:niman/src/markdown/div_syntax.dart';
 import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/html_block_syntax.dart';
 import 'package:niman/src/markdown/line_read.dart';
@@ -208,12 +209,16 @@ final class LineRules {
       int definitionRead = 0,
       int reach = 0,
       bool definitionsOnly = false,
+      List<OpenDiv>? divs,
+      DivRole? divRole,
     }) => _made(
       kind,
       state,
       walk,
       carried: carried,
       items: items ?? base,
+      divs: divs,
+      divRole: divRole,
       definition: definition,
       definitionRead: definitionRead,
       reach: reach,
@@ -299,6 +304,16 @@ final class LineRules {
     if (open.indentedCode && !blank && indent >= 4) {
       return made(BlockKind.indentedCode, indentedCode: true);
     }
+    // A fenced div's fence line (#729), read before a table's row: a
+    // closer ends a table as it ends a paragraph.
+    final divs = walk.divs;
+    if (appSyntax && content == null && indent == 0) {
+      final fence = _divFence(text, open, divs, base.length, walk.footnote);
+      if (fence != null) {
+        final (role, after) = fence;
+        return made(BlockKind.div, divs: after, divRole: role);
+      }
+    }
     // A table, as GFM reads one: its rows run on until a line that would
     // start a block of its own. A line heading one is tried before anything
     // but a fence — and before a paragraph goes on: the paragraph's lines
@@ -334,6 +349,7 @@ final class LineRules {
         exit: _footnoted(inner.exit),
         heads: inner.heads,
         footnote: Block.opensFootnote,
+        divDepth: walk.divs.length,
       );
     }
     final paragraph = open.openParagraph && !heads;
@@ -451,6 +467,7 @@ final class LineRules {
         exit: inner.exit,
         footnote: walk.footnote == 0 ? 0 : Block.inFootnote,
         reach: inner.reach,
+        divDepth: walk.divs.length,
       );
     }
     // A link reference definition, where no paragraph is open or one of
@@ -467,7 +484,7 @@ final class LineRules {
         if (at >= buffer.lineCount) return null;
         examined = at;
         final walked = ContainerWalk.of(
-          LineState(listStack: base, footnote: walk.footnote),
+          LineState(listStack: base, footnote: walk.footnote, divs: divs),
           lineText(at),
           at + 1 < buffer.lineCount ? lineText(at + 1) : null,
           _leftOverAt(at),
@@ -478,7 +495,8 @@ final class LineRules {
         // for definitions: no part of one.
         if (LineSyntax.indentOf(columns) == columns.length ||
             LineSyntax.setextLevel(columns) > 0 ||
-            ContainerWalk.interruptsParagraph(columns, walked.next)) {
+            ContainerWalk.interruptsParagraph(columns, walked.next) ||
+            (appSyntax && divs.isNotEmpty && DivSyntax.closes(columns))) {
           return null;
         }
         return walked.text;
@@ -513,6 +531,66 @@ final class LineRules {
         !lazyAt(line) &&
         LineSyntax.setextLevel(text) > 0;
     return made(BlockKind.paragraph, openParagraph: !underline);
+  }
+
+  /// What [text] does to the fenced divs when it is a fence line that
+  /// counts where it stands — its role, and the divs open after it — or
+  /// null when it is text.
+  ///
+  /// [open] is what is open in the line's container, [divs] the divs it
+  /// stands in, [items] how many list items, and [footnote] whether a
+  /// footnote definition is around it. A div of the line's own container
+  /// is one opened in as many items, in a footnote definition or out of
+  /// one as the line is.
+  ///
+  /// * A closer — colons alone — closes the innermost div when that one is
+  ///   the container's; it may end a paragraph.
+  /// * An opener needs no paragraph or table open before it. `columns`
+  ///   opens anywhere; `column` opens a column directly inside a `columns`
+  ///   div of the container; anything else inside a `columns` div is
+  ///   tracked for its closer. Outside every `columns` div, an opener of
+  ///   anything but `columns` is text, and not tracked.
+  static (DivRole, List<OpenDiv>)? _divFence(
+    String text,
+    LineState open,
+    List<OpenDiv> divs,
+    int items,
+    int footnote,
+  ) {
+    final inFootnote = footnote != 0;
+    final innermost = divs.isEmpty ? null : divs.last;
+    final own =
+        innermost != null &&
+        innermost.items == items &&
+        innermost.footnote == inFootnote;
+    if (DivSyntax.closes(text)) {
+      if (!own) return null;
+      final role = switch (innermost.kind) {
+        DivKind.columns => DivRole.closesColumns,
+        DivKind.column => DivRole.closesColumn,
+        DivKind.other => DivRole.closesOther,
+      };
+      return (role, divs.sublist(0, divs.length - 1));
+    }
+    if (open.openParagraph || open.table) return null;
+    final opening = DivSyntax.opening(text);
+    if (opening == null) return null;
+    final kind = switch (opening.kind) {
+      DivKind.columns => DivKind.columns,
+      DivKind.column when own && innermost.kind == DivKind.columns =>
+        DivKind.column,
+      _ when divs.isNotEmpty => DivKind.other,
+      _ => null,
+    };
+    if (kind == null) return null;
+    return (
+      switch (kind) {
+        DivKind.columns => DivRole.opensColumns,
+        DivKind.column => DivRole.opensColumn,
+        DivKind.other => DivRole.opensOther,
+      },
+      [...divs, (kind: kind, items: items, footnote: inFootnote)],
+    );
   }
 
   /// Whether line [line] stays in [items], the items of the line before it:
@@ -559,8 +637,12 @@ final class LineRules {
     int reach = 0,
     bool definitionsOnly = false,
     bool tableTried = false,
+    List<OpenDiv>? divs,
+    DivRole? divRole,
   }) {
     final stack = items ?? walk.items;
+    final around = walk.divs;
+    final after = divs ?? around;
     return LineRead(
       kind: kind,
       walk: walk,
@@ -571,9 +653,13 @@ final class LineRules {
       footnote: walk.footnote == 0 ? 0 : Block.inFootnote,
       definition: definitionRead,
       reach: reach,
+      divRole: divRole,
+      // A fence line stands in the divs around the one it opens or closes.
+      divDepth: after.length < around.length ? after.length : around.length,
       exit: _exit(
         state,
         stack,
+        divs: after,
         footnote: walk.footnote,
         definition: definition,
         quoteDepth: quoteDepth,
@@ -597,6 +683,7 @@ final class LineRules {
   static LineState _exit(
     LineState state,
     List<OpenItem> items, {
+    required List<OpenDiv> divs,
     required int footnote,
     required int definition,
     required int quoteDepth,
@@ -631,13 +718,24 @@ final class LineRules {
         !table &&
         !definitionsOnly &&
         !tableTried) {
-      return openParagraph ? LineState.paragraphOpen : LineState.initial;
+      if (divs.isEmpty) {
+        return openParagraph ? LineState.paragraphOpen : LineState.initial;
+      }
+      // The same two in a column, one pair for each stack of divs: a long
+      // column of prose allocates no state a line either.
+      if (!identical(divs, _sharedDivs)) {
+        _sharedDivs = divs;
+        _initialIn = LineState(divs: divs);
+        _paragraphIn = LineState(openParagraph: true, divs: divs);
+      }
+      return openParagraph ? _paragraphIn! : _initialIn!;
     }
     // Inside a construct, a line that leaves the state as it found it — the
     // next line of an item's paragraph, of a quote, of a code block — hands
     // on the state it entered in, for the same reason: the run's lines share
     // one object.
     if (identical(state.listStack, items) &&
+        identical(state.divs, divs) &&
         state.footnote == footnote &&
         state.definition == definition &&
         state.quoteDepth == quoteDepth &&
@@ -670,8 +768,18 @@ final class LineRules {
       definition: definition,
       definitionsOnly: definitionsOnly,
       tableTried: tableTried,
+      divs: divs,
     );
   }
+
+  /// The divs [_initialIn] and [_paragraphIn] stand in.
+  static List<OpenDiv>? _sharedDivs;
+
+  /// [LineState.initial] inside [_sharedDivs].
+  static LineState? _initialIn;
+
+  /// [LineState.paragraphOpen] inside [_sharedDivs].
+  static LineState? _paragraphIn;
 
   /// [state] inside the footnote definition its line opened.
   static LineState _footnoted(LineState state) => LineState(
@@ -690,5 +798,6 @@ final class LineRules {
     definition: state.definition,
     definitionsOnly: state.definitionsOnly,
     tableTried: state.tableTried,
+    divs: state.divs,
   );
 }
