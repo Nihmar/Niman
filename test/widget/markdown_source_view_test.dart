@@ -443,20 +443,42 @@ void main() {
   group('the keyboard over the note', () {
     /// A phone-sized editor over a note long enough to scroll, and the
     /// offset of its last line.
-    Future<(MarkdownSourceViewState, int)> setup(WidgetTester tester) async {
+    /// Gives the editor the focus, which connects it to the platform: the
+    /// keyboard that comes up is the one it asked for.
+    Future<void> focus(
+      WidgetTester tester,
+      MarkdownSourceViewState state,
+    ) async {
+      state.focusNode.requestFocus();
+      await tester.pump();
+      expect(state.isKeyboardAttached, isTrue);
+    }
+
+    Future<(MarkdownSourceViewState, int)> setup(
+      WidgetTester tester, {
+      bool focused = true,
+    }) async {
       final text = '${[for (var i = 0; i < 40; i++) 'line $i'].join('\n')}\n';
       final state = await pump(tester, text, size: const Size(400, 500));
+      if (focused) await focus(tester, state);
       final line = state.widget.buffer.offsetOfLine(39);
       return (state, line);
     }
 
-    /// Opens the keyboard: the pane shrinks by its inset, and the reveal
-    /// waits for the animation to settle.
-    Future<void> keyboard(WidgetTester tester) async {
-      tester.view.viewInsets = const FakeViewPadding(bottom: 200);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 150));
-      await tester.pump();
+    /// Opens the keyboard, step by step as its animation does: the pane
+    /// shrinks by the inset at every frame. [during] runs after the first
+    /// step, while the keyboard is still coming up.
+    Future<void> keyboard(
+      WidgetTester tester, {
+      Future<void> Function()? during,
+    }) async {
+      for (final bottom in <double>[50, 100, 150, 200]) {
+        tester.view.viewInsets = FakeViewPadding(bottom: bottom);
+        await tester.pump();
+        if (bottom == 50) await during?.call();
+      }
+      // The keyboard at rest, and time going on: nothing waits for a clock.
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.pump();
     }
 
@@ -528,6 +550,7 @@ void main() {
         size: const Size(400, 500),
         hideMarkers: true,
       );
+      await focus(tester, state);
       final line = state.widget.buffer.offsetOfLine(39);
       state.placeCaret(line);
       await tester.pump();
@@ -561,6 +584,74 @@ void main() {
         findsNothing,
         reason: 'the start of a too-long selection is not what is kept',
       );
+    });
+
+    // #765: only the keyboard this editor asked for brings the caret back.
+
+    /// The caret on the last line, then the note read from its top: the
+    /// caret is far off the screen, as when reading away from it.
+    Future<MarkdownSourceViewState> readingAway(
+      WidgetTester tester, {
+      bool focused = true,
+    }) async {
+      final (state, line) = await setup(tester, focused: focused);
+      state.placeCaret(line);
+      await tester.pump();
+      state.jumpToOffset(0);
+      await tester.pump();
+      expect(state.scrollOffset, 0);
+      return state;
+    }
+
+    testWidgets('a keyboard raised for another field moves nothing', (
+      tester,
+    ) async {
+      final state = await readingAway(tester, focused: false);
+      expect(state.isKeyboardAttached, isFalse);
+
+      await keyboard(tester);
+
+      expect(state.scrollOffset, 0, reason: 'the note stayed where it is');
+    });
+
+    testWidgets('a window made shorter moves nothing', (tester) async {
+      final state = await readingAway(tester);
+
+      // No inset: the window itself got shorter, or the phone was turned.
+      tester.view.physicalSize = const Size(400, 300);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+
+      expect(state.scrollOffset, 0, reason: 'the note stayed where it is');
+    });
+
+    testWidgets('a drag while the keyboard comes up calls the reveal off', (
+      tester,
+    ) async {
+      final state = await readingAway(tester);
+      late TestGesture drag;
+      late double dragged;
+
+      await keyboard(
+        tester,
+        during: () async {
+          drag = await tester.startGesture(
+            tester.getCenter(find.byType(MarkdownSourceView)),
+          );
+          await drag.moveBy(const Offset(0, 30));
+          await drag.moveBy(const Offset(0, 30));
+          await tester.pump();
+          dragged = state.scrollOffset;
+        },
+      );
+
+      expect(
+        state.scrollOffset,
+        dragged,
+        reason: 'the steps after the drag did not chase the caret',
+      );
+      await drag.up();
     });
   });
 
