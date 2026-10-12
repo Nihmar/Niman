@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/kinds/audio_chat_row.dart';
 
@@ -23,6 +25,13 @@ class _AudioChatListState extends State<AudioChatList> {
   // scratch instead of replaying stale insert/remove animations.
   GlobalKey<AnimatedListState> _listKey = GlobalKey();
   final ScrollController _scroll = ScrollController();
+
+  /// Whether the list keeps the bottom while the last turn grows (#735):
+  /// a recording landing brings its own grow animation, and the extent an
+  /// animation to the bottom read before it is short by the time it ends.
+  /// A reader's own scroll turns this off, and it comes back when they
+  /// scroll to the bottom again.
+  bool _followBottom = false;
 
   @override
   void initState() {
@@ -59,6 +68,9 @@ class _AudioChatListState extends State<AudioChatList> {
     }
     final oldKeys = _keysOf(_rows);
     final newKeys = _keysOf(next);
+    final wasAtBottom =
+        _scroll.hasClients &&
+        _scroll.position.pixels >= _scroll.position.maxScrollExtent - 1;
     for (var i = _rows.length - 1; i >= 0; i--) {
       if (!newKeys.contains(oldKeys[i])) {
         final row = _rows[i];
@@ -79,7 +91,15 @@ class _AudioChatListState extends State<AudioChatList> {
       _listKey = GlobalKey();
     }
     _rows = List.of(next);
-    if (next.length > oldKeys.length) _scrollToBottom();
+    // A new turn is always brought into view; a change that grows a turn
+    // in place — the transcript of one, arriving later — keeps the bottom
+    // only for a reader who was already there (#735).
+    if (next.length > oldKeys.length) {
+      _followBottom = true;
+      _scrollToBottom();
+    } else {
+      _followBottom = wasAtBottom;
+    }
   }
 
   List<String> _keysOf(List<AudioChatRow> rows) =>
@@ -96,12 +116,62 @@ class _AudioChatListState extends State<AudioChatList> {
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scroll.hasClients) return;
-      _scroll.animateTo(
-        _scroll.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+      final position = _scroll.position;
+      if (position.pixels >= position.maxScrollExtent) return;
+      unawaited(
+        _scroll
+            .animateTo(
+              position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            )
+            // The extent the glide aimed at was an estimate while the
+            // inserted row is growing: the rest is a jump, not a second
+            // animation (#735).
+            .whenComplete(() {
+              if (!mounted || !_scroll.hasClients || !_followBottom) return;
+              final landed = _scroll.position;
+              if (landed.pixels < landed.maxScrollExtent) {
+                landed.jumpTo(landed.maxScrollExtent);
+              }
+            }),
       );
     });
+  }
+
+  /// The list grew while it follows the bottom — the inserted row's own
+  /// grow animation, mostly (#735): the bottom is taken again once the
+  /// frame is over, and while an animation or a drag is running the
+  /// gesture keeps its say.
+  bool _onMetrics(ScrollMetricsNotification notification) {
+    if (!_followBottom || !mounted) return false;
+    final position = _scroll.hasClients ? _scroll.position : null;
+    if (position == null || position.isScrollingNotifier.value) return false;
+    if (position.pixels >= position.maxScrollExtent) return false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_followBottom || !_scroll.hasClients) return;
+      final landed = _scroll.position;
+      if (landed.isScrollingNotifier.value) return;
+      if (landed.pixels < landed.maxScrollExtent) {
+        landed.jumpTo(landed.maxScrollExtent);
+      }
+    });
+    return false;
+  }
+
+  /// A reader taking the list over ends the following; letting go at the
+  /// bottom starts it again.
+  bool _onScroll(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
+    if (notification is ScrollStartNotification &&
+        notification.dragDetails != null) {
+      _followBottom = false;
+    } else if (notification is ScrollEndNotification) {
+      _followBottom =
+          notification.metrics.pixels >=
+          notification.metrics.maxScrollExtent - 1;
+    }
+    return false;
   }
 
   Widget _animated(AudioChatRow row, Animation<double> animation) {
@@ -117,13 +187,19 @@ class _AudioChatListState extends State<AudioChatList> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedList(
-      key: _listKey,
-      controller: _scroll,
-      initialItemCount: _rows.length,
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-      itemBuilder: (context, index, animation) =>
-          _animated(_rows[index], animation),
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: _onMetrics,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _onScroll,
+        child: AnimatedList(
+          key: _listKey,
+          controller: _scroll,
+          initialItemCount: _rows.length,
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+          itemBuilder: (context, index, animation) =>
+              _animated(_rows[index], animation),
+        ),
+      ),
     );
   }
 }

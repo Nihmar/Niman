@@ -516,7 +516,10 @@ else in it that is not Markdown is kept as a file.
   recording, the field shows a red bar with the elapsed time, a pause
   button (the clock holds and the dot breathes until you resume) and a
   discard button, and the round button stops and saves; the bar reads
-  `Saving…` until the new vocal is in the note. Recording
+  `Saving…` until the new vocal is in the note, and the chat comes to it
+  as it lands — the new bubble is brought into view, so its play button
+  and ⋮ menu are in reach at once (a scroll you make yourself is left
+  alone). Recording
   writes WAV (PCM 16-bit: playable on Android, Linux and Windows with no
   extra codec); attaching keeps the file's own format (`.mp3`, `.m4a`,
   `.ogg`, `.opus`, `.aac`, `.flac`, …). On Linux recording needs
