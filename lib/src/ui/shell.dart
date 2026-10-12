@@ -4501,8 +4501,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Whether the Files pane shows the grid rather than the tree.
   bool get _gridOn => _editorSettings.treeView == TreeView.grid;
 
-  /// The folder the grid shows: where the grid last went, or — before it
-  /// has been anywhere — the tree's own folder.
+  /// The folder the grid shows: where the grid last went, or — before the
+  /// pane has been built in the grid, which pins it — the tree's own
+  /// folder.
   String get _gridStart => _gridFolder ?? _treeFolder;
 
   /// The folder the tree is on: the selected folder, or the selected
@@ -4650,7 +4651,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// library no one switched to the grid pays no queries for one.
   Widget _treePane(LibrarySession controller) {
     final showGrid = _gridOn || _gridVisited;
-    if (_gridOn) _gridVisited = true;
+    if (_gridOn) {
+      _gridVisited = true;
+      // A library opened in the grid starts it in the tree's selection, as
+      // a switch does — once: from then on a note opened from the search,
+      // a tab or the palette does not move it.
+      _gridFolder ??= _treeFolder;
+    }
     return TourTarget(
       id: TourTargets.tree,
       child: Stack(

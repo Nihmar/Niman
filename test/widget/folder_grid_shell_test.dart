@@ -14,6 +14,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart';
+import 'package:niman/src/workspace/workspace.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -261,6 +262,29 @@ void main() {
     } finally {
       debugDefaultTargetPlatformOverride = null;
     }
+  });
+
+  testWidgets('a library opened in the grid keeps its folder', (tester) async {
+    await session.setTreeView(TreeView.grid);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createNote(parentPath: 'Projects', name: 'Roadmap');
+    await session.createNote(parentPath: '', name: 'Ideas');
+    // Two tabs kept from last time, the root's note on screen.
+    session.workspace = Workspace.empty
+        .open('Projects/Roadmap.md')
+        .open('Ideas.md');
+    await openShell(tester);
+    expect(gridFolder(tester), '', reason: "the tree's selection, at open");
+
+    // Another tab brought forward — as the search or the palette would
+    // open a note — does not move the grid, before its first move as
+    // after.
+    await sendWithModifiers(tester, LogicalKeyboardKey.tab, [
+      LogicalKeyboardKey.controlLeft,
+    ]);
+    await settle(tester);
+    expect(session.workspace.activePath, 'Projects/Roadmap.md');
+    expect(gridFolder(tester), '');
   });
 
   testWidgets("the switch starts in the tree's selection every time", (
