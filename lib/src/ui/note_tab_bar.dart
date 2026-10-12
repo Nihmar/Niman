@@ -322,7 +322,11 @@ final class _NoteTabBarState extends State<NoteTabBar> {
                       ),
                     // Past the last tab: a drop here puts the tab at the
                     // end of the row, and an empty pane's row is all this.
-                    _dropSlot(tabs.length, width: 40),
+                    // With tabs in the row the place is narrow: the last
+                    // tab's own right half is the target a drop to the end
+                    // aims at, and the room between the last tab and `+`
+                    // reads as a hole otherwise (#712).
+                    _dropSlot(tabs.length, width: tabs.isEmpty ? 40 : 8),
                   ],
                 ),
               ),
