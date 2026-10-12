@@ -127,7 +127,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       return;
     }
     if (day == widget.today || _days.contains(day)) {
-      widget.onOpenDay(day);
+      _open(day);
       return;
     }
     // A dock tap on an empty day picks it instead of opening it: the
@@ -136,6 +136,24 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     setState(() {
       _selected = day;
       _picked = true;
+    });
+  }
+
+  /// Opens [day], letting go of an empty day the dock picked before
+  /// (#788): the pick is a question about that day, and opening another
+  /// one answers it — its highlight and its Create row go.
+  void _open(DateTime day) {
+    if (_picked) setState(() => _picked = false);
+    widget.onOpenDay(day);
+  }
+
+  /// Shows [month]. In the dock, a pick in the month left behind goes
+  /// with it (#788): the Create row would speak for a day no longer on
+  /// screen.
+  void _showMonth(DateTime month) {
+    setState(() {
+      _month = month;
+      if (!widget.large) _picked = false;
     });
   }
 
@@ -170,7 +188,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           selected: widget.large || _picked ? _selected : null,
           cell: widget.large ? 44 : 34,
           onDay: _tap,
-          onMonth: (month) => setState(() => _month = month),
+          onMonth: _showMonth,
         ),
         const SizedBox(height: 8),
         Align(
@@ -263,7 +281,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                onTap: () => widget.onOpenDay(day),
+                onTap: () => _open(day),
               ),
             ),
         ],

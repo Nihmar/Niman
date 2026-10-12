@@ -54,7 +54,8 @@ and the date picker follow the same day.
 - **Desktop** (a window wide enough for the side panel): the *Journal*
   pane of the side panel, beside the note. Clicking a day with an entry
   opens it; an empty day is picked, and a row under the calendar offers
-  **Create** — no dialog over a calendar that has the day in it.
+  **Create** — no dialog over a calendar that has the day in it. Opening
+  another day, or turning the month, lets the pick go.
   Right-clicking one of the latest
   entries opens the same menu as its row in the file tree: open it in
   a new tab or beside the note, rename it, move it, and the rest.
