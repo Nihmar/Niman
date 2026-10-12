@@ -223,7 +223,8 @@ void main() {
     tester.view.physicalSize = const Size(400, 500);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final turns = [for (var i = 0; i < 40; i++) '> turn $i'].join('\n');
+    // Written notes, one turn each: the clip lands as a turn of its own.
+    final turns = [for (var i = 0; i < 40; i++) 'turn $i'].join('\n\n');
     await _pumpLive(tester, text: '---\ntype: audio\n---\n$turns\n');
     final (_, position) = listOf(tester);
     expect(
@@ -258,24 +259,78 @@ void main() {
     tester.view.physicalSize = const Size(400, 500);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final turns = [for (var i = 0; i < 40; i++) '> turn $i'].join('\n');
+    // Written notes, one turn each: the clip lands as a turn of its own.
+    final turns = [for (var i = 0; i < 40; i++) 'turn $i'].join('\n\n');
     await _pumpLive(tester, text: '---\ntype: audio\n---\n$turns\n');
-    final (_, position) = listOf(tester);
+    final (scrollable, position) = listOf(tester);
+    // A little above the bottom, so the new turn comes with a glide
+    // (#767): at the bottom there is nothing to glide.
+    await tester.drag(scrollable, const Offset(0, 150));
+    await tester.pumpAndSettle();
 
     await record(tester);
     await tester.pump(const Duration(milliseconds: 40));
-    // The reader takes the list over while the turn grows, and it stays
-    // where they put it.
+    expect(
+      position().isScrollingNotifier.value,
+      isTrue,
+      reason: 'the glide to the new turn is under way',
+    );
+    // The reader takes the list over mid-glide, and it stays where they
+    // put it.
+    final before = position().pixels;
     final gesture = await tester.startGesture(
       tester.getCenter(find.byType(AudioChatList)),
     );
     await gesture.moveBy(const Offset(0, 80));
     await tester.pump();
     final held = position().pixels;
+    expect(
+      held,
+      lessThan(before),
+      reason:
+          'the drag moved the list up from where the glide had it, '
+          'not from the bottom it was snapped to',
+    );
     await tester.pump(const Duration(milliseconds: 500));
     expect(position().pixels, moreOrLessEquals(held, epsilon: 1));
     await gesture.up();
-    await tester.pump();
+    // And once the finger is off, with the landing over (#767): the
+    // glide's end is not taken for the reader's, nor pulls them down.
+    await tester.pumpAndSettle();
+    expect(position().pixels, moreOrLessEquals(held, epsilon: 1));
+    expect(position().pixels, lessThan(position().maxScrollExtent - 40));
+  });
+
+  // #767: the glide's end is not the reader's, so the jump that finishes
+  // it runs for a reader who had scrolled up too.
+  testWidgets('a reader scrolled up still gets the new turn at the bottom', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final turns = [for (var i = 0; i < 40; i++) 'turn $i'].join('\n\n');
+    await _pumpLive(tester, text: '---\ntype: audio\n---\n$turns\n');
+    final (scrollable, position) = listOf(tester);
+    await tester.drag(scrollable, const Offset(0, 300));
+    await tester.pumpAndSettle();
+    expect(
+      position().pixels,
+      lessThan(position().maxScrollExtent - 200),
+      reason: 'the reader is well above the bottom',
+    );
+
+    await record(tester);
+    await tester.pumpAndSettle();
+
+    expect(
+      position().pixels,
+      moreOrLessEquals(position().maxScrollExtent, epsilon: 1),
+      reason: 'the glide was finished by the jump',
+    );
+    final list = tester.getRect(find.byType(AudioChatList));
+    final play = tester.getRect(find.byKey(const ValueKey('audio-play-0')));
+    expect(play.bottom, lessThanOrEqualTo(list.bottom + 0.5));
   });
 
   testWidgets('an empty audio note invites a first recording', (tester) async {
