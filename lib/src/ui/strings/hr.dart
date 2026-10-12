@@ -434,6 +434,10 @@ final class CroatianStrings extends Strings {
   @override
   String get audioEditDescription => 'Uredi opis';
   @override
+  String get audioCopyDescription => 'Kopiraj opis';
+  @override
+  String get audioDescriptionCopied => 'Opis kopiran';
+  @override
   String get audioDeleteNote => 'Obriši napomenu';
   @override
   String get audioEditNote => 'Uredi napomenu';
@@ -1542,6 +1546,8 @@ final class CroatianStrings extends Strings {
   String get commandNeedOpenNote => 'Potrebna je otvorena bilješka';
   @override
   String get commandNeedTextNote => 'Potrebna je otvorena tekstualna bilješka';
+  @override
+  String get commandNeedProseNote => 'Potrebna je prozna bilješka';
   @override
   String get commandNeedWideWindow => 'Samo u širokom prozoru';
   @override

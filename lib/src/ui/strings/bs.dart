@@ -436,6 +436,10 @@ final class BosnianStrings extends Strings {
   @override
   String get audioEditDescription => 'Uredi opis';
   @override
+  String get audioCopyDescription => 'Kopiraj opis';
+  @override
+  String get audioDescriptionCopied => 'Opis kopiran';
+  @override
   String get audioDeleteNote => 'Obriši bilješku';
   @override
   String get audioEditNote => 'Uredi bilješku';
@@ -1548,6 +1552,8 @@ final class BosnianStrings extends Strings {
   String get commandNeedOpenNote => 'Potrebna je otvorena bilješka';
   @override
   String get commandNeedTextNote => 'Potrebna je otvorena tekstualna bilješka';
+  @override
+  String get commandNeedProseNote => 'Potrebna je prozna bilješka';
   @override
   String get commandNeedWideWindow => 'Samo u širokom prozoru';
   @override

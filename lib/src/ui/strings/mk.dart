@@ -436,6 +436,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get audioEditDescription => 'Уреди опис';
   @override
+  String get audioCopyDescription => 'Копирај опис';
+  @override
+  String get audioDescriptionCopied => 'Описот е копиран';
+  @override
   String get audioDeleteNote => 'Избриши белешка';
   @override
   String get audioEditNote => 'Уреди белешка';
@@ -1561,6 +1565,8 @@ final class MacedonianStrings extends Strings {
   String get commandNeedOpenNote => 'Потребна е отворена белешка';
   @override
   String get commandNeedTextNote => 'Потребна е отворена текстуална белешка';
+  @override
+  String get commandNeedProseNote => 'Потребна е прозна белешка';
   @override
   String get commandNeedWideWindow => 'Само во широк прозорец';
   @override

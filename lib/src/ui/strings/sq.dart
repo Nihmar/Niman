@@ -433,6 +433,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get audioEditDescription => 'Ndrysho përshkrimin';
   @override
+  String get audioCopyDescription => 'Kopjo përshkrimin';
+  @override
+  String get audioDescriptionCopied => 'Përshkrimi u kopjua';
+  @override
   String get audioDeleteNote => 'Fshi shënimin';
   @override
   String get audioEditNote => 'Ndrysho shënimin';
@@ -1559,6 +1563,8 @@ final class AlbanianStrings extends Strings {
   String get commandNeedOpenNote => 'Kërkon një shënim të hapur';
   @override
   String get commandNeedTextNote => 'Kërkon një shënim teksti të hapur';
+  @override
+  String get commandNeedProseNote => 'Kërkon një shënim në prozë';
   @override
   String get commandNeedWideWindow => 'Vetëm në dritare të gjerë';
   @override

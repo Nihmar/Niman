@@ -423,6 +423,10 @@ final class HindiStrings extends Strings {
   @override
   String get audioEditDescription => 'वर्णन संपादित करें';
   @override
+  String get audioCopyDescription => 'वर्णन कॉपी करें';
+  @override
+  String get audioDescriptionCopied => 'वर्णन कॉपी हो गया';
+  @override
   String get audioDeleteNote => 'नोट हटाएँ';
   @override
   String get audioEditNote => 'नोट संपादित करें';
@@ -1519,6 +1523,8 @@ final class HindiStrings extends Strings {
   String get commandNeedOpenNote => 'खुला नोट चाहिए';
   @override
   String get commandNeedTextNote => 'खुला टेक्स्ट नोट चाहिए';
+  @override
+  String get commandNeedProseNote => 'गद्य नोट चाहिए';
   @override
   String get commandNeedWideWindow => 'केवल चौड़ी विंडो में';
   @override

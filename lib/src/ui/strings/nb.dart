@@ -431,6 +431,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get audioEditDescription => 'Rediger beskrivelse';
   @override
+  String get audioCopyDescription => 'Kopier beskrivelse';
+  @override
+  String get audioDescriptionCopied => 'Beskrivelse kopiert';
+  @override
   String get audioDeleteNote => 'Slett notat';
   @override
   String get audioEditNote => 'Rediger notat';
@@ -1535,6 +1539,8 @@ final class NorwegianStrings extends Strings {
   String get commandNeedOpenNote => 'Krever et åpent notat';
   @override
   String get commandNeedTextNote => 'Krever et åpent tekstnotat';
+  @override
+  String get commandNeedProseNote => 'Krever et prosanotat';
   @override
   String get commandNeedWideWindow => 'Bare i bredt vindu';
   @override

@@ -30,6 +30,7 @@ import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
@@ -2724,6 +2725,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget _noteMenuButton(BuildContext button) => NoteMenuButton(
     typewriter: _editorSettings.typewriter,
     textNote: !_shownIsAttachment,
+    // An audio note's body is the clip document, not prose (#840).
+    tidy: _noteKind != 'audio',
     recognize:
         _ocrFlow != null &&
         _shownIsAttachment &&
@@ -3398,6 +3401,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.notInZen => !_inZen,
     CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
+    CommandNeed.proseNote => _noteKind != 'audio',
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
     CommandNeed.slidesNote => _noteKind == 'slides',
@@ -3668,12 +3672,21 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final path = _shownNote;
     final ops = widget.controller.ops;
     if (path == null || ops == null) return;
+    // An audio note's body is the clip document (#840): the menu does not
+    // offer the tidy, and the palette and the key never reach here (the
+    // proseNote need keeps them off it). This remains for a direct call,
+    // and the frontmatter check below for a kind the bar still lags on:
+    // no write, and nothing to say about a tidy that never was one.
+    if (_noteKind == 'audio') return;
     await _guard(() async {
       // The buffer's own edits land first: what is tidied is the note as
       // it stands, not the note as it was last written.
       await widget.unsavedTracker.saveAll();
       // The shell's paths are the library's own, relative to its root.
       final text = await ops.readNote(path);
+      // The shell's kind as the bar last heard it can lag the file; the
+      // note's own frontmatter is the authority.
+      if (frontmatterTypeOf(text) == 'audio') return;
       final tidied = formatMarkdown(text, rules: _editorSettings.lintRules);
       if (!mounted) return;
       if (tidied == text) {

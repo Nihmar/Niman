@@ -436,6 +436,10 @@ final class GermanStrings extends Strings {
   @override
   String get audioEditDescription => 'Beschreibung bearbeiten';
   @override
+  String get audioCopyDescription => 'Beschreibung kopieren';
+  @override
+  String get audioDescriptionCopied => 'Beschreibung kopiert';
+  @override
   String get audioDeleteNote => 'Notiz löschen';
   @override
   String get audioEditNote => 'Notiz bearbeiten';
@@ -1568,6 +1572,8 @@ final class GermanStrings extends Strings {
   String get commandNeedOpenNote => 'Braucht eine offene Notiz';
   @override
   String get commandNeedTextNote => 'Braucht eine offene Textnotiz';
+  @override
+  String get commandNeedProseNote => 'Braucht eine Prosa-Notiz';
   @override
   String get commandNeedWideWindow => 'Nur in breiten Fenstern';
   @override

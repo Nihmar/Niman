@@ -440,6 +440,10 @@ final class FrenchStrings extends Strings {
   @override
   String get audioEditDescription => 'Modifier la description';
   @override
+  String get audioCopyDescription => 'Copier la description';
+  @override
+  String get audioDescriptionCopied => 'Description copiée';
+  @override
   String get audioDeleteNote => 'Supprimer la note';
   @override
   String get audioEditNote => 'Modifier la note';
@@ -1584,6 +1588,8 @@ final class FrenchStrings extends Strings {
   String get commandNeedOpenNote => 'Nécessite une note ouverte';
   @override
   String get commandNeedTextNote => 'Nécessite une note texte ouverte';
+  @override
+  String get commandNeedProseNote => 'Nécessite une note en prose';
   @override
   String get commandNeedWideWindow => 'Fenêtre large uniquement';
   @override

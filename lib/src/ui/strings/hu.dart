@@ -433,6 +433,10 @@ final class HungarianStrings extends Strings {
   @override
   String get audioEditDescription => 'Leírás szerkesztése';
   @override
+  String get audioCopyDescription => 'Leírás másolása';
+  @override
+  String get audioDescriptionCopied => 'Leírás másolva';
+  @override
   String get audioDeleteNote => 'Jegyzet törlése';
   @override
   String get audioEditNote => 'Jegyzet szerkesztése';
@@ -1553,6 +1557,8 @@ final class HungarianStrings extends Strings {
   String get commandNeedOpenNote => 'Nyitott jegyzet kell hozzá';
   @override
   String get commandNeedTextNote => 'Nyitott szöveges jegyzet kell hozzá';
+  @override
+  String get commandNeedProseNote => 'Prózai jegyzet szükséges';
   @override
   String get commandNeedWideWindow => 'Csak széles ablakban';
   @override

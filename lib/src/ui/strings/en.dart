@@ -432,6 +432,10 @@ final class EnglishStrings extends Strings {
   @override
   String get audioEditDescription => 'Edit description';
   @override
+  String get audioCopyDescription => 'Copy description';
+  @override
+  String get audioDescriptionCopied => 'Description copied';
+  @override
   String get audioDeleteNote => 'Delete note';
   @override
   String get audioEditNote => 'Edit note';
@@ -1535,6 +1539,8 @@ final class EnglishStrings extends Strings {
   String get commandNeedOpenNote => 'Needs an open note';
   @override
   String get commandNeedTextNote => 'Needs an open text note';
+  @override
+  String get commandNeedProseNote => 'Needs a prose note';
   @override
   String get commandNeedWideWindow => 'Wide window only';
   @override

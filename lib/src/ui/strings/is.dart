@@ -430,6 +430,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get audioEditDescription => 'Breyta lýsingu';
   @override
+  String get audioCopyDescription => 'Afrita lýsingu';
+  @override
+  String get audioDescriptionCopied => 'Lýsing afrituð';
+  @override
   String get audioDeleteNote => 'Eyða athugasröfu';
   @override
   String get audioEditNote => 'Breyta athugasröfu';
@@ -1543,6 +1547,8 @@ final class IcelandicStrings extends Strings {
   String get commandNeedOpenNote => 'Krefst opinnar glósu';
   @override
   String get commandNeedTextNote => 'Krefst opinnar textaglósu';
+  @override
+  String get commandNeedProseNote => 'Krefst prósa-glósu';
   @override
   String get commandNeedWideWindow => 'Aðeins í breiðum glugga';
   @override

@@ -440,6 +440,10 @@ final class ItalianStrings extends Strings {
   @override
   String get audioEditDescription => 'Modifica descrizione';
   @override
+  String get audioCopyDescription => 'Copia descrizione';
+  @override
+  String get audioDescriptionCopied => 'Descrizione copiata';
+  @override
   String get audioDeleteNote => 'Elimina nota';
   @override
   String get audioEditNote => 'Modifica nota';
@@ -1563,6 +1567,8 @@ final class ItalianStrings extends Strings {
   String get commandNeedOpenNote => 'Serve una nota aperta';
   @override
   String get commandNeedTextNote => 'Serve una nota di testo aperta';
+  @override
+  String get commandNeedProseNote => 'Serve una nota in prosa';
   @override
   String get commandNeedWideWindow => 'Solo con finestra larga';
   @override

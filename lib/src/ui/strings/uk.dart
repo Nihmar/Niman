@@ -432,6 +432,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get audioEditDescription => 'Редагувати опис';
   @override
+  String get audioCopyDescription => 'Копіювати опис';
+  @override
+  String get audioDescriptionCopied => 'Опис скопійовано';
+  @override
   String get audioDeleteNote => 'Видалити нотатку';
   @override
   String get audioEditNote => 'Редагувати нотатку';
@@ -1549,6 +1553,8 @@ final class UkrainianStrings extends Strings {
   String get commandNeedOpenNote => 'Потрібна відкрита нотатка';
   @override
   String get commandNeedTextNote => 'Потрібна відкрита текстова нотатка';
+  @override
+  String get commandNeedProseNote => 'Потрібна прозова нотатка';
   @override
   String get commandNeedWideWindow => 'Лише в широкому вікні';
   @override

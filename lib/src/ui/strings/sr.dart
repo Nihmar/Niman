@@ -435,6 +435,10 @@ final class SerbianStrings extends Strings {
   @override
   String get audioEditDescription => 'Уреди опис';
   @override
+  String get audioCopyDescription => 'Копирај опис';
+  @override
+  String get audioDescriptionCopied => 'Опис је копиран';
+  @override
   String get audioDeleteNote => 'Обриши белешку';
   @override
   String get audioEditNote => 'Уреди белешку';
@@ -1550,6 +1554,8 @@ final class SerbianStrings extends Strings {
   String get commandNeedOpenNote => 'Потребна је отворена белешка';
   @override
   String get commandNeedTextNote => 'Потребна је отворена текстуална белешка';
+  @override
+  String get commandNeedProseNote => 'Потребна је прозна белешка';
   @override
   String get commandNeedWideWindow => 'Само у широком прозору';
   @override

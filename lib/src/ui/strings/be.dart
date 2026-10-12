@@ -431,6 +431,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get audioEditDescription => 'Рэдагаваць апісанне';
   @override
+  String get audioCopyDescription => 'Капіяваць апісанне';
+  @override
+  String get audioDescriptionCopied => 'Апісанне скапіявана';
+  @override
   String get audioDeleteNote => 'Выдаліць заўвагу';
   @override
   String get audioEditNote => 'Рэдагаваць заўвагу';
@@ -1546,6 +1550,8 @@ final class BelarusianStrings extends Strings {
   String get commandNeedOpenNote => 'Патрэбна адкрытая нататка';
   @override
   String get commandNeedTextNote => 'Патрэбна адкрытая тэкставая нататка';
+  @override
+  String get commandNeedProseNote => 'Патрэбна празаічная нататка';
   @override
   String get commandNeedWideWindow => 'Толькі ў шырокім акне';
   @override

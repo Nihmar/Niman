@@ -428,6 +428,10 @@ final class LatvianStrings extends Strings {
   @override
   String get audioEditDescription => 'Rediģēt aprakstu';
   @override
+  String get audioCopyDescription => 'Kopēt aprakstu';
+  @override
+  String get audioDescriptionCopied => 'Apraksts nokopēts';
+  @override
   String get audioDeleteNote => 'Dzēst piezīmi';
   @override
   String get audioEditNote => 'Rediģēt piezīmi';
@@ -1542,6 +1546,8 @@ final class LatvianStrings extends Strings {
   String get commandNeedOpenNote => 'Nepieciešama atvērta piezīme';
   @override
   String get commandNeedTextNote => 'Nepieciešama atvērta teksta piezīme';
+  @override
+  String get commandNeedProseNote => 'Nepieciešama prozas piezīme';
   @override
   String get commandNeedWideWindow => 'Tikai platā logā';
   @override

@@ -436,6 +436,10 @@ final class DutchStrings extends Strings {
   @override
   String get audioEditDescription => 'Omschrijving bewerken';
   @override
+  String get audioCopyDescription => 'Omschrijving kopiëren';
+  @override
+  String get audioDescriptionCopied => 'Omschrijving gekopieerd';
+  @override
   String get audioDeleteNote => 'Notitie verwijderen';
   @override
   String get audioEditNote => 'Notitie bewerken';
@@ -1561,6 +1565,8 @@ final class DutchStrings extends Strings {
   String get commandNeedOpenNote => 'Vereist een geopende notitie';
   @override
   String get commandNeedTextNote => 'Vereist een geopende tekstnotitie';
+  @override
+  String get commandNeedProseNote => 'Vereist een prosanotitie';
   @override
   String get commandNeedWideWindow => 'Alleen in een breed venster';
   @override

@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/ui/kinds/audio_chat_list.dart';
@@ -204,6 +205,27 @@ final class _LiveAudioNoteState extends State<_LiveAudioNote> {
 Future<void> _openClipMenu(WidgetTester tester, int index) async {
   await tester.tap(find.byKey(ValueKey('audio-menu-$index')));
   await tester.pumpAndSettle();
+}
+
+/// What the app puts on the clipboard, as it is put there.
+List<String> _clipboard(WidgetTester tester) {
+  final copied = <String>[];
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    SystemChannels.platform,
+    (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copied.add((call.arguments as Map)['text'] as String);
+      }
+      return null;
+    },
+  );
+  addTearDown(
+    () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    ),
+  );
+  return copied;
 }
 
 void main() {
@@ -904,6 +926,37 @@ void main() {
       edits.single,
       '---\ntype: audio\n---\n> Meeting\n![](assets/a.wav)\n> said\n',
     );
+  });
+
+  testWidgets("the ⋮ menu copies a clip's description", (tester) async {
+    final copied = _clipboard(tester);
+    final edits = <String>[];
+    await _pump(
+      tester,
+      text:
+          '---\ntype: audio\n---\n> title\n![](assets/a.wav)\n> said it all\n',
+      edits: edits,
+    );
+    await _openClipMenu(tester, 0);
+    await tester.tap(find.byKey(const ValueKey('audio-copy-0')));
+    await tester.pumpAndSettle();
+
+    expect(copied, ['said it all'], reason: 'the description, as it stands');
+    expect(find.text(AppStrings.audioDescriptionCopied), findsOneWidget);
+    expect(edits, isEmpty, reason: 'copying is not an edit');
+  });
+
+  testWidgets('a clip with no description offers no copy', (tester) async {
+    final edits = <String>[];
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n![](assets/a.wav)\n',
+      edits: edits,
+    );
+    await _openClipMenu(tester, 0);
+
+    expect(find.byKey(const ValueKey('audio-delete-0')), findsOneWidget);
+    expect(find.byKey(const ValueKey('audio-copy-0')), findsNothing);
   });
 
   testWidgets('rename updates the embed through the file seam', (tester) async {

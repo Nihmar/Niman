@@ -540,8 +540,10 @@ else in it that is not Markdown is kept as a file.
   the elapsed and total time (WAV lengths are read from the file before
   playing; other formats show theirs once played). Its ⋮ menu — also
   opened by a long press or a right click — edits the title and the
-  description, renames the audio file (updating its link) and deletes
-  the vocal. Written notes are sent from the field at the bottom as
+  description, copies the description (a transcript or a hand-written
+  comment) to the clipboard, renames the audio file (updating its link)
+  and deletes the vocal. Written notes are sent from the field at the
+  bottom as
   plain lines (right bubbles); tap one to edit it, long-press or
   right-click it to delete it. The round button beside the field is the
   microphone while the field is empty and becomes send as soon as you

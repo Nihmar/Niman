@@ -439,6 +439,10 @@ final class RomanianStrings extends Strings {
   @override
   String get audioEditDescription => 'Editează descrierea';
   @override
+  String get audioCopyDescription => 'Copiază descrierea';
+  @override
+  String get audioDescriptionCopied => 'Descriere copiată';
+  @override
   String get audioDeleteNote => 'Șterge nota';
   @override
   String get audioEditNote => 'Editează nota';
@@ -1556,6 +1560,8 @@ final class RomanianStrings extends Strings {
   String get commandNeedOpenNote => 'Necesită o notă deschisă';
   @override
   String get commandNeedTextNote => 'Necesită o notă text deschisă';
+  @override
+  String get commandNeedProseNote => 'Necesită o notă în proză';
   @override
   String get commandNeedWideWindow => 'Doar în fereastră lată';
   @override

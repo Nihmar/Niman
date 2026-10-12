@@ -438,6 +438,10 @@ final class GalicianStrings extends Strings {
   @override
   String get audioEditDescription => 'Editar a descrición';
   @override
+  String get audioCopyDescription => 'Copiar a descrición';
+  @override
+  String get audioDescriptionCopied => 'Descrición copiada';
+  @override
   String get audioDeleteNote => 'Borrar a nota';
   @override
   String get audioEditNote => 'Editar a nota';
@@ -1558,6 +1562,8 @@ final class GalicianStrings extends Strings {
   String get commandNeedOpenNote => 'Precisa unha nota aberta';
   @override
   String get commandNeedTextNote => 'Precisa unha nota de texto aberta';
+  @override
+  String get commandNeedProseNote => 'Precisa unha nota en prosa';
   @override
   String get commandNeedWideWindow => 'Só con xanela ancha';
   @override

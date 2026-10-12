@@ -402,7 +402,10 @@ It also runs by itself: a note you edited is tidied when it is closed.
 That is a setting of the library (**Settings → Editor → Tidy the
 Markdown on close**, on by default), so every device writes the
 library's notes the same way. **Markdown rules**, right below it, picks
-which of the rules above run; notes over 4 MB are left as they are.
+which of the rules above run; notes over 4 MB are left as they are. A
+voice note is never tidied: its body is the clip document, not prose. The
+command is not offered on it — not in its ⋮, not in the command palette
+or on a key bound to it — and the on-close tidy leaves it as it is.
 
 The **checkbox list** button (beside the bulleted and numbered lists)
 makes the selected lines — or the caret's — tasks: a bulleted item gains

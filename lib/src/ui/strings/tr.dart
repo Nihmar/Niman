@@ -425,6 +425,10 @@ final class TurkishStrings extends Strings {
   @override
   String get audioEditDescription => 'Açıklamayı düzenle';
   @override
+  String get audioCopyDescription => 'Açıklamayı kopyala';
+  @override
+  String get audioDescriptionCopied => 'Açıklama kopyalandı';
+  @override
   String get audioDeleteNote => 'Notu sil';
   @override
   String get audioEditNote => 'Notu düzenle';
@@ -1532,6 +1536,8 @@ final class TurkishStrings extends Strings {
   String get commandNeedOpenNote => 'Açık bir not gerekir';
   @override
   String get commandNeedTextNote => 'Açık bir metin notu gerekir';
+  @override
+  String get commandNeedProseNote => 'Düz yazı bir not gerekir';
   @override
   String get commandNeedWideWindow => 'Yalnızca geniş pencerede';
   @override

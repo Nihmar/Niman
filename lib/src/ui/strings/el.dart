@@ -443,6 +443,10 @@ final class GreekStrings extends Strings {
   @override
   String get audioEditDescription => 'Επεξεργασία περιγραφής';
   @override
+  String get audioCopyDescription => 'Αντιγραφή περιγραφής';
+  @override
+  String get audioDescriptionCopied => 'Η περιγραφή αντιγράφηκε';
+  @override
   String get audioDeleteNote => 'Διαγραφή σημείωσης';
   @override
   String get audioEditNote => 'Επεξεργασία σημείωσης';
@@ -1594,6 +1598,8 @@ final class GreekStrings extends Strings {
   String get commandNeedOpenNote => 'Χρειάζεται ανοιχτή σημείωση';
   @override
   String get commandNeedTextNote => 'Χρειάζεται ανοιχτή σημείωση κειμένου';
+  @override
+  String get commandNeedProseNote => 'Χρειάζεται σημείωση πεζού λόγου';
   @override
   String get commandNeedWideWindow => 'Μόνο σε φαρδύ παράθυρο';
   @override

@@ -435,6 +435,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get audioEditDescription => 'Uredi opis';
   @override
+  String get audioCopyDescription => 'Kopiraj opis';
+  @override
+  String get audioDescriptionCopied => 'Opis kopiran';
+  @override
   String get audioDeleteNote => 'Izbriši opombo';
   @override
   String get audioEditNote => 'Uredi opombo';
@@ -1539,6 +1543,8 @@ final class SlovenianStrings extends Strings {
   String get commandNeedOpenNote => 'Potrebuje odprt zapisek';
   @override
   String get commandNeedTextNote => 'Potrebuje odprt besedilni zapisek';
+  @override
+  String get commandNeedProseNote => 'Potrebuje prozni zapisek';
   @override
   String get commandNeedWideWindow => 'Samo v širokem oknu';
   @override

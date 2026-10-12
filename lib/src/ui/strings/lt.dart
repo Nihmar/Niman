@@ -432,6 +432,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get audioEditDescription => 'Redaguoti aprašą';
   @override
+  String get audioCopyDescription => 'Kopijuoti aprašą';
+  @override
+  String get audioDescriptionCopied => 'Aprašas nukopijuotas';
+  @override
   String get audioDeleteNote => 'Ištrinti pastabą';
   @override
   String get audioEditNote => 'Redaguoti pastabą';
@@ -1546,6 +1550,8 @@ final class LithuanianStrings extends Strings {
   String get commandNeedOpenNote => 'Reikia atidarytos pastabos';
   @override
   String get commandNeedTextNote => 'Reikia atidarytos tekstinės pastabos';
+  @override
+  String get commandNeedProseNote => 'Reikia prozinės pastabos';
   @override
   String get commandNeedWideWindow => 'Tik plačiame lange';
   @override

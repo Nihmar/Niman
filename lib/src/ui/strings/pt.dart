@@ -435,6 +435,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get audioEditDescription => 'Editar descrição';
   @override
+  String get audioCopyDescription => 'Copiar descrição';
+  @override
+  String get audioDescriptionCopied => 'Descrição copiada';
+  @override
   String get audioDeleteNote => 'Excluir nota';
   @override
   String get audioEditNote => 'Editar nota';
@@ -1554,6 +1558,8 @@ final class PortugueseStrings extends Strings {
   String get commandNeedOpenNote => 'Precisa de uma nota aberta';
   @override
   String get commandNeedTextNote => 'Precisa de uma nota de texto aberta';
+  @override
+  String get commandNeedProseNote => 'Precisa de uma nota em prosa';
   @override
   String get commandNeedWideWindow => 'Apenas com janela larga';
   @override

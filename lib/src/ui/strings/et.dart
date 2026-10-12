@@ -427,6 +427,10 @@ final class EstonianStrings extends Strings {
   @override
   String get audioEditDescription => 'Muuda kirjeldust';
   @override
+  String get audioCopyDescription => 'Kopeeri kirjeldus';
+  @override
+  String get audioDescriptionCopied => 'Kirjeldus kopeeritud';
+  @override
   String get audioDeleteNote => 'Kustuta märge';
   @override
   String get audioEditNote => 'Muuda märget';
@@ -1526,6 +1530,8 @@ final class EstonianStrings extends Strings {
   String get commandNeedOpenNote => 'Vajab avatud märget';
   @override
   String get commandNeedTextNote => 'Vajab avatud tekstimärget';
+  @override
+  String get commandNeedProseNote => 'Vajab proosamärget';
   @override
   String get commandNeedWideWindow => 'Ainult laias aknas';
   @override

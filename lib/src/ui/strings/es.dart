@@ -439,6 +439,10 @@ final class SpanishStrings extends Strings {
   @override
   String get audioEditDescription => 'Editar la descripción';
   @override
+  String get audioCopyDescription => 'Copiar la descripción';
+  @override
+  String get audioDescriptionCopied => 'Descripción copiada';
+  @override
   String get audioDeleteNote => 'Eliminar la nota';
   @override
   String get audioEditNote => 'Editar la nota';
@@ -1573,6 +1577,8 @@ final class SpanishStrings extends Strings {
   String get commandNeedOpenNote => 'Necesita una nota abierta';
   @override
   String get commandNeedTextNote => 'Necesita una nota de texto abierta';
+  @override
+  String get commandNeedProseNote => 'Necesita una nota en prosa';
   @override
   String get commandNeedWideWindow => 'Solo con ventana ancha';
   @override

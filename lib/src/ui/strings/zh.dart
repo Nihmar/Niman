@@ -401,6 +401,10 @@ final class ChineseStrings extends Strings {
   @override
   String get audioEditDescription => '编辑描述';
   @override
+  String get audioCopyDescription => '复制描述';
+  @override
+  String get audioDescriptionCopied => '描述已复制';
+  @override
   String get audioDeleteNote => '删除备注';
   @override
   String get audioEditNote => '编辑备注';
@@ -1417,6 +1421,8 @@ final class ChineseStrings extends Strings {
   String get commandNeedOpenNote => '需要打开一条笔记';
   @override
   String get commandNeedTextNote => '需要打开一条文本笔记';
+  @override
+  String get commandNeedProseNote => '需要一条散文笔记';
   @override
   String get commandNeedWideWindow => '仅限宽窗口';
   @override

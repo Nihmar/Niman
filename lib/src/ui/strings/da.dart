@@ -432,6 +432,10 @@ final class DanishStrings extends Strings {
   @override
   String get audioEditDescription => 'Rediger beskrivelse';
   @override
+  String get audioCopyDescription => 'Kopiér beskrivelse';
+  @override
+  String get audioDescriptionCopied => 'Beskrivelse kopieret';
+  @override
   String get audioDeleteNote => 'Slet note';
   @override
   String get audioEditNote => 'Rediger note';
@@ -1539,6 +1543,8 @@ final class DanishStrings extends Strings {
   String get commandNeedOpenNote => 'Kræver en åben note';
   @override
   String get commandNeedTextNote => 'Kræver en åben tekstnote';
+  @override
+  String get commandNeedProseNote => 'Kræver en prosanote';
   @override
   String get commandNeedWideWindow => 'Kun i bredt vindue';
   @override

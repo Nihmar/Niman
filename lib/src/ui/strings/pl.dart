@@ -437,6 +437,10 @@ final class PolishStrings extends Strings {
   @override
   String get audioEditDescription => 'Edytuj opis';
   @override
+  String get audioCopyDescription => 'Kopiuj opis';
+  @override
+  String get audioDescriptionCopied => 'Opis skopiowany';
+  @override
   String get audioDeleteNote => 'Usuń notatkę';
   @override
   String get audioEditNote => 'Edytuj notatkę';
@@ -1565,6 +1569,8 @@ final class PolishStrings extends Strings {
   String get commandNeedOpenNote => 'Wymaga otwartej notatki';
   @override
   String get commandNeedTextNote => 'Wymaga otwartej notatki tekstowej';
+  @override
+  String get commandNeedProseNote => 'Wymaga prozatorskiej notatki';
   @override
   String get commandNeedWideWindow => 'Tylko w szerokim oknie';
   @override

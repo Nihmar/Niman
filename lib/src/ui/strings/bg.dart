@@ -437,6 +437,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get audioEditDescription => 'Редактирай описанието';
   @override
+  String get audioCopyDescription => 'Копирай описанието';
+  @override
+  String get audioDescriptionCopied => 'Описанието е копирано';
+  @override
   String get audioDeleteNote => 'Изтрий бележката';
   @override
   String get audioEditNote => 'Редактирай бележката';
@@ -1558,6 +1562,8 @@ final class BulgarianStrings extends Strings {
   String get commandNeedOpenNote => 'Изисква отворена бележка';
   @override
   String get commandNeedTextNote => 'Изисква отворена текстова бележка';
+  @override
+  String get commandNeedProseNote => 'Нужна е прозаична бележка';
   @override
   String get commandNeedWideWindow => 'Само в широк прозорец';
   @override

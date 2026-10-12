@@ -435,6 +435,10 @@ final class SwedishStrings extends Strings {
   @override
   String get audioEditDescription => 'Redigera beskrivning';
   @override
+  String get audioCopyDescription => 'Kopiera beskrivning';
+  @override
+  String get audioDescriptionCopied => 'Beskrivning kopierad';
+  @override
   String get audioDeleteNote => 'Ta bort anteckning';
   @override
   String get audioEditNote => 'Redigera anteckning';
@@ -1549,6 +1553,8 @@ final class SwedishStrings extends Strings {
   String get commandNeedOpenNote => 'Kräver en öppen anteckning';
   @override
   String get commandNeedTextNote => 'Kräver en öppen textanteckning';
+  @override
+  String get commandNeedProseNote => 'Kräver en prosaanteckning';
   @override
   String get commandNeedWideWindow => 'Bara i brett fönster';
   @override

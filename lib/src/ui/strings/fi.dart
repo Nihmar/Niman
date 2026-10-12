@@ -432,6 +432,10 @@ final class FinnishStrings extends Strings {
   @override
   String get audioEditDescription => 'Muokkaa kuvausta';
   @override
+  String get audioCopyDescription => 'Kopioi kuvaus';
+  @override
+  String get audioDescriptionCopied => 'Kuvaus kopioitu';
+  @override
   String get audioDeleteNote => 'Poista muistiinpano';
   @override
   String get audioEditNote => 'Muokkaa muistiinpanoa';
@@ -1558,6 +1562,8 @@ final class FinnishStrings extends Strings {
   String get commandNeedOpenNote => 'Vaatii avoimen muistiinpanon';
   @override
   String get commandNeedTextNote => 'Vaatii avoimen tekstimuistiinpanon';
+  @override
+  String get commandNeedProseNote => 'Vaatii proosamuistiinpanon';
   @override
   String get commandNeedWideWindow => 'Vain leveässä ikkunassa';
   @override
