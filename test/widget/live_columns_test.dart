@@ -180,6 +180,48 @@ void main() {
     expect((right.top - left.top).abs(), lessThan(2));
   });
 
+  testWidgets('a long note with columns asks only the rows a frame reaches', (
+    tester,
+  ) async {
+    final note = [
+      _two,
+      for (var at = 0; at < 20000; at++) 'line $at',
+    ].join('\n');
+    final state = await _pump(tester, note, live: true);
+    final left = tester.getRect(find.text('first left', findRichText: true));
+    final right = tester.getRect(find.text('first right', findRichText: true));
+    expect(right.left, greaterThan(left.right), reason: 'side by side');
+    // The rows past the first chunks stand at their estimate from the
+    // characters until a frame comes near them.
+    expect(state.lineEstimates, lessThan(5000));
+  });
+
+  testWidgets('blocks going side by side and back keep the rows counted', (
+    tester,
+  ) async {
+    // Two blocks in a long note, each a chunk of rows apart.
+    final note = [
+      _two,
+      for (var at = 0; at < 3000; at++) 'line $at',
+      _two,
+      for (var at = 0; at < 3000; at++) 'more $at',
+    ].join('\n');
+    final state = await _pump(tester, note, live: true, width: 400);
+    expect(state.lineEstimates, lessThan(3000));
+    for (final width in <double>[1000, 400, 1000]) {
+      tester.view.physicalSize = Size(width, 700);
+      await tester.pump();
+      final left = tester.getRect(find.text('first left', findRichText: true));
+      final right = tester.getRect(
+        find.text('first right', findRichText: true),
+      );
+      expect(right.left > left.right, width > 500, reason: 'at $width');
+    }
+    state.jumpToLine(note.split('\n').length - 1);
+    await tester.pump();
+    expect(_drawn('more 2999'), isTrue);
+  });
+
   testWidgets('in source the columns stay line by line', (tester) async {
     await _pump(tester, _two);
     final left = tester.getRect(find.text('first left', findRichText: true));

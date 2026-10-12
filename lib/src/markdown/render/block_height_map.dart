@@ -160,6 +160,12 @@ final class BlockHeightMap implements BlockHeights {
     return _extents.valueAt(index);
   }
 
+  /// Whether a frame drew block [index]: its height is the one it was
+  /// drawn at, not an estimate — which, in a map that works a chunk out
+  /// when first asked, may not be worked out yet.
+  bool isMeasured(int index) =>
+      index >= 0 && index < _measured.length && _measured[index] != 0;
+
   /// Gives block [index] the estimate [height], measured or not: a block
   /// whose drawing changed — one taken into a side-by-side `columns` block
   /// or out of one (#729) — is estimated again until a frame draws it.

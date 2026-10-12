@@ -2044,13 +2044,58 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // Not a block a fold hides, nor one with a fold inside.
       allowed: (run) =>
           !_folds.isHidden(run.start) &&
-          !_folds.anchors.any(
-            (anchor) => anchor >= run.start && anchor < run.end,
-          ),
+          !_folds.foldsWithin(run.start, run.end),
     );
     final hosts = _hosts.hosts;
     if (_sameHosts(hosts, _folds.hosts)) return;
-    _reshapeRows(() => _folds.setHosts(hosts));
+    _reshapeHosts(hosts);
+  }
+
+  /// Makes [hosts] the side-by-side blocks, and splices the rows of each
+  /// block that went into one row or came out of it: every other row keeps
+  /// the height a frame measured, and a map that asks a chunk only when a
+  /// frame reaches it still does — a block hosted on the frame that opens
+  /// the note asks no other row.
+  void _reshapeHosts(Map<int, int> hosts) {
+    final was = Map<int, int>.of(_folds.hosts);
+    // The lines whose rows change: each block hosted before and not now
+    // with the same end, or now and not before, merged where they meet.
+    final changed = <(int, int)>[
+      for (final MapEntry(key: start, value: end) in was.entries)
+        if (hosts[start] != end) (start, end),
+      for (final MapEntry(key: start, value: end) in hosts.entries)
+        if (was[start] != end) (start, end),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
+    final ranges = <(int, int)>[];
+    for (final (start, end) in changed) {
+      if (ranges.isNotEmpty && start < ranges.last.$2) {
+        if (end > ranges.last.$2) ranges.last = (ranges.last.$1, end);
+      } else {
+        ranges.add((start, end));
+      }
+    }
+    final lines = lineCount;
+    int rowAt(int line) =>
+        line < lines ? _folds.rowOf(line) : _folds.rowCount(lines);
+    // From the top down, a range at a time, the folds saying what the map
+    // holds at each splice — the blocks above as they are now, the ones
+    // below as they were — so a chunk a splice works out, and the rows it
+    // inserts, are read by the rows the map has.
+    for (final (start, end) in ranges) {
+      final from = rowAt(start);
+      final removed = rowAt(end) - from;
+      _folds.setHosts({
+        for (final MapEntry(key: opener, value: close) in hosts.entries)
+          if (opener < end) opener: close,
+        for (final MapEntry(key: opener, value: close) in was.entries)
+          if (opener >= end) opener: close,
+      });
+      _heights.splice(from, removed, rowAt(end) - from, _estimateRow);
+    }
+    _folds.setHosts(hosts);
+    final rows = _folds.rowCount(lines);
+    assert(_heights.length == rows, 'the splices left the rows miscounted');
+    if (_heights.length != rows) _heights = _map();
   }
 
   static bool _sameHosts(Map<int, int> a, Map<int, int> b) =>
@@ -2253,10 +2298,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Runs [change] on the folds and, when it says it changed them, gives the
   /// rows new heights — each line that was drawn before keeps the height it
   /// was drawn at, so unfolding a section does not move the rest.
+  ///
+  /// Only a drawn row's height is read off the old map: a chunk of it no
+  /// frame reached is worked out when first asked, by the rows as they are
+  /// then, which [change] has already moved.
   void _reshapeRows(bool Function() change) {
     final before = _folds.copy();
     final old = _heights;
     if (!change()) return;
+    double? drawn(int line) {
+      final was = before.rowOf(line);
+      return old.isMeasured(was) ? old.extentFor(was) : null;
+    }
+
     _heights = BlockHeightMap(
       count: _folds.rowCount(lineCount),
       estimate: (row) {
@@ -2267,16 +2321,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         final hosted = _hosts.openedOn(line);
         if (_folds.isHost(line) && hosted != null) {
           if (before.isHost(line) && before.hosts[line] == _folds.hosts[line]) {
-            final was = before.rowOf(line);
-            if (was < old.length) return old.extentFor(was);
+            final height = drawn(line);
+            if (height != null) return height;
           }
           return _hostEstimate(hosted);
         }
         if (!before.isHidden(line) &&
             !before.isHost(line) &&
             before.hostOf(line) == null) {
-          final was = before.rowOf(line);
-          if (was < old.length) return old.extentFor(was);
+          final height = drawn(line);
+          if (height != null) return height;
         }
         return _estimate(line);
       },
@@ -3486,22 +3540,35 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final columns = _columnsPerLine;
     final row = _rowHeight;
     final buffer = widget.buffer;
-    if (_folds.isEmpty) {
-      // A line's estimate when a frame first comes near it, a chunk of lines
-      // at a time: the map is built on the frame that opens the note, and
-      // asking every line was 2.9 M estimates on the 246 MB stress note.
-      return BlockHeightMap.lazy(
-        count: lineCount,
-        estimate: (line) =>
-            _estimateOf(buffer.lineLengthAt(line), columns, row),
-        estimateSpan: (first, end) =>
-            _estimateSpanOf(buffer, first, end, columns, row),
-      );
-    }
-    return BlockHeightMap(
+    // A row's estimate when a frame first comes near it, a chunk of rows at
+    // a time: the map is built on the frame that opens the note, and asking
+    // every line was 2.9 M estimates on the 246 MB stress note. A chunk is
+    // asked with the rows as they are then — folds and side-by-side blocks
+    // (#729) may have come since — so with any, a row is read as its line.
+    return BlockHeightMap.lazy(
       count: _folds.rowCount(lineCount),
-      estimate: _estimateRow,
+      estimate: (index) => _folds.isEmpty
+          ? _estimateOf(buffer.lineLengthAt(index), columns, row)
+          : _estimateRow(index),
+      estimateSpan: (first, end) => _folds.isEmpty
+          ? _estimateSpanOf(buffer, first, end, columns, row)
+          : _estimateRowSpan(first, end, columns, row),
     );
+  }
+
+  /// Rows `[first, end)`'s height as best known without asking each: the
+  /// lines they draw, less the ones a fold hides — a side-by-side block's
+  /// counted as its lines one under the other.
+  double _estimateRowSpan(int first, int end, double columns, double row) {
+    if (end <= first) return 0;
+    final from = _folds.lineOf(first);
+    final last = _folds.lineOf(end - 1);
+    final to = _folds.hosts[last] ?? last + 1;
+    var total = 0.0;
+    for (final (start, stop) in _folds.unfoldedSpans(from, to)) {
+      total += _estimateSpanOf(widget.buffer, start, stop, columns, row);
+    }
+    return total;
   }
 
   /// Row [row]'s height before a frame has drawn it: its line's, or a
@@ -3558,16 +3625,24 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// A line's height before a frame has drawn it: its character count over the
   /// width a line holds, which is the same shape the read view's estimator has
   /// and is corrected by the sliver's own measurement.
-  double _estimate(int index) => _estimateOf(
-    // The *buffer*, never the tokenizer: `HighlightDocument.lineAt`
-    // materializes the line, so asking it for every line of a 10 000-line
-    // note to fill the height map is a whole-note tokenize on every
-    // keystroke. And the line's length, not the line: a line is cut out of
-    // the text it was read from when it is asked for (`LineChunk`).
-    widget.buffer.lineLengthAt(index),
-    _columnsPerLine,
-    _rowHeight,
-  );
+  /// How many lines [_estimate] was asked about, for the test that holds a
+  /// note with a side-by-side block (#729) to the chunks a frame reaches.
+  @visibleForTesting
+  int lineEstimates = 0;
+
+  double _estimate(int index) {
+    lineEstimates++;
+    return _estimateOf(
+      // The *buffer*, never the tokenizer: `HighlightDocument.lineAt`
+      // materializes the line, so asking it for every line of a 10 000-line
+      // note to fill the height map is a whole-note tokenize on every
+      // keystroke. And the line's length, not the line: a line is cut out of
+      // the text it was read from when it is asked for (`LineChunk`).
+      widget.buffer.lineLengthAt(index),
+      _columnsPerLine,
+      _rowHeight,
+    );
+  }
 
   /// The height of a line [length] long, [columns] to a row of [row].
   static double _estimateOf(int length, double columns, double row) =>

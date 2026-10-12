@@ -165,6 +165,23 @@ void main() {
       expect(folds.hosts, isEmpty);
     });
 
+    test('the lines no fold hides count a hosted one', () {
+      final folds = SourceFolds()
+        ..fold(0, 4)
+        ..fold(10, 12)
+        ..setHosts({6: 9});
+      expect(folds.unfoldedSpans(0, 14), <(int, int)>[
+        (0, 1),
+        (4, 11),
+        (12, 14),
+      ]);
+      expect(folds.unfoldedSpans(2, 11), <(int, int)>[(4, 11)]);
+      expect(folds.unfoldedSpans(5, 8), <(int, int)>[(5, 8)]);
+      expect(folds.foldsWithin(6, 10), isFalse);
+      expect(folds.foldsWithin(6, 11), isTrue);
+      expect(folds.foldsWithin(0, 1), isTrue);
+    });
+
     test('setting the same hosts again changes nothing', () {
       final folds = SourceFolds()..setHosts({2: 7});
       expect(folds.setHosts({2: 7}), isFalse);

@@ -87,6 +87,28 @@ final class SourceFolds {
   /// The folded heading lines, in order.
   Iterable<int> get anchors => _folded.keys;
 
+  /// Whether a folded heading stands on a line of `[start, end)`.
+  bool foldsWithin(int start, int end) {
+    final anchor = _folded.firstKeyAfter(start - 1);
+    return anchor != null && anchor < end;
+  }
+
+  /// The lines of `[from, to)` no fold hides, as `[start, end)` spans in
+  /// order: a hosted line is no hidden one.
+  Iterable<(int, int)> unfoldedSpans(int from, int to) sync* {
+    var line = from;
+    var at = _startingAtOrBefore(_foldedRanges, from);
+    if (at < 0) at = 0;
+    for (; at < _foldedRanges.length && line < to; at++) {
+      final (start, end) = _foldedRanges[at];
+      if (end <= line) continue;
+      if (start >= to) break;
+      if (start > line) yield (line, start);
+      if (end > line) line = end;
+    }
+    if (line < to) yield (line, to);
+  }
+
   /// The merged hidden ranges.
   List<(int, int)> get hidden => _hidden;
 
