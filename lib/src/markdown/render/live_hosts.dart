@@ -158,7 +158,7 @@ final class LiveHosts {
     for (final layout in _layouts) {
       final run = layout.run;
       if (untouched <= run.start) {
-        next.add(_moved(layout, delta, from: 0, after: -1));
+        next.add(_moved(layout, delta, after: run.start - 1));
         continue;
       }
       if (first >= run.end) {
@@ -177,26 +177,23 @@ final class LiveHosts {
         edit.insertedLines,
         (line) => estimate(lines.start + line, layout.widths[column]),
       );
-      next.add(_moved(layout, delta, from: column, after: first));
+      next.add(_moved(layout, delta, after: first));
     }
     _layouts = next;
   }
 
-  /// [layout] with its lines from column [from] on — its end, the start
-  /// of the columns after it — moved [delta] lines; from 0, all of it. Its
-  /// fences past line [after] move too.
-  static LiveLayout _moved(
-    LiveLayout layout,
-    int delta, {
-    required int from,
-    required int after,
-  }) {
+  /// [layout] with its lines past line [after] moved [delta] lines: its
+  /// opener, the starts and ends of its columns, its end and its fences,
+  /// each by where it stands — an edit in the first column moves neither
+  /// the opener above it nor that column's start.
+  static LiveLayout _moved(LiveLayout layout, int delta, {required int after}) {
     if (delta == 0) return layout;
     final run = layout.run;
+    int moved(int line) => line > after ? line + delta : line;
     return (
       run: LiveRun(
-        start: from == 0 ? run.start + delta : run.start,
-        end: run.end + delta,
+        start: moved(run.start),
+        end: moved(run.end),
         closed: run.closed,
         items: run.items,
         quoteDepth: run.quoteDepth,
@@ -206,20 +203,15 @@ final class LiveHosts {
             : {
                 for (final MapEntry(key: line, value: role)
                     in run.fences!.entries)
-                  line > after ? line + delta : line: role,
+                  moved(line): role,
               },
         columns: [
-          for (var at = 0; at < run.columns.length; at++)
-            if (at < from)
-              run.columns[at]
-            else
-              (
-                start: at == from && from > 0
-                    ? run.columns[at].start
-                    : run.columns[at].start + delta,
-                end: run.columns[at].end + delta,
-                width: run.columns[at].width,
-              ),
+          for (final column in run.columns)
+            (
+              start: moved(column.start),
+              end: moved(column.end),
+              width: column.width,
+            ),
         ],
       ),
       rows: layout.rows,
