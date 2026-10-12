@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/place_link_button.dart';
@@ -39,11 +40,13 @@ final class EpubBar extends StatelessWidget {
   /// How the library writes links.
   final LinkType linkType;
 
-  /// Opens the sheet that sets how the books look.
-  final VoidCallback? onEditLook;
+  /// Opens the sheet that sets how the books look; a pointer's menu
+  /// grows from the button's place, handed over.
+  final ValueChanged<Rect?>? onEditLook;
 
-  /// Opens the book's contents.
-  final VoidCallback? onContents;
+  /// Opens the book's contents, from the button's place, as
+  /// [onEditLook].
+  final ValueChanged<Rect?>? onContents;
 
   /// The place being read, for the link to it.
   final PlaceToLink? Function()? here;
@@ -62,19 +65,29 @@ final class EpubBar extends StatelessWidget {
     path: path,
     launcher: launcher,
     actions: [
-      IconButton(
-        key: const Key('epub-look-button'),
-        tooltip: AppStrings.epubLookTitle,
-        icon: const Icon(Icons.format_size),
-        visualDensity: VisualDensity.compact,
-        onPressed: onEditLook,
+      Builder(
+        builder: (context) => IconButton(
+          key: const Key('epub-look-button'),
+          tooltip: AppStrings.epubLookTitle,
+          icon: const Icon(Icons.format_size),
+          visualDensity: VisualDensity.compact,
+          onPressed: switch (onEditLook) {
+            final edit? => () => edit(menuAnchorOf(context)),
+            null => null,
+          },
+        ),
       ),
-      IconButton(
-        key: const Key('epub-contents-button'),
-        tooltip: AppStrings.outlineTooltip,
-        icon: const Icon(Icons.toc),
-        visualDensity: VisualDensity.compact,
-        onPressed: onContents,
+      Builder(
+        builder: (context) => IconButton(
+          key: const Key('epub-contents-button'),
+          tooltip: AppStrings.outlineTooltip,
+          icon: const Icon(Icons.toc),
+          visualDensity: VisualDensity.compact,
+          onPressed: switch (onContents) {
+            final open? => () => open(menuAnchorOf(context)),
+            null => null,
+          },
+        ),
       ),
       PlaceLinkButton(here: here, linkType: linkType),
       IconButton(

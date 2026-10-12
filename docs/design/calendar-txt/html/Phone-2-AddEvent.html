@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, Add event sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fill{fill:currentColor;stroke:none}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A}
+.pj{color:#C08CD8}.cx{color:#7CA0E6}.tg{color:#6FB8CC}.kv{color:#7FD1C4}.tm{color:#D8A56B}.as{color:#6B7079;font-style:italic}
+.mono{font-family:'IBM Plex Mono',monospace}
+.ico{width:22px;height:22px}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.obtn{height:40px;padding:0 16px;border-radius:20px;border:1px solid #4A4F59;background:transparent;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.fbtn{height:40px;padding:0 18px;border-radius:20px;border:0;background:#587CD3;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.tbtn{height:40px;padding:0 12px;border-radius:20px;border:0;background:transparent;color:#A9C0F0;font:500 14px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:8px}
+.ev{display:flex;align-items:center;gap:12px;min-height:48px;font-size:15px}
+.ev .t{width:92px;flex:none;color:#D8A56B;font-variant-numeric:tabular-nums}
+.ev .x{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goal{display:flex;gap:10px;font-size:14px;line-height:24px}
+.goal .h{width:70px;flex:none;color:#A8C77A}
+.due{display:flex;align-items:center;gap:12px;height:48px;font-size:15px}
+.chip{height:32px;padding:0 12px;border-radius:8px;border:1px solid #4A4F59;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:#D9D4CB}
+.sel{height:48px;padding:0 14px;border:1px solid #4A4F59;border-radius:12px;display:flex;align-items:center;gap:8px;background:#23262B}
+</style>
+</head>
+<body>
+
+<div style="width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+  <div style="height:64px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none">
+    <button class="ibtn" aria-label="Back"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <div style="flex:1;font-size:20px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Journal</div>
+    
+  </div>
+  <div style="flex:1;overflow:hidden;padding:2px 18px 18px">
+    <div style="display:flex;align-items:center;height:44px">
+      <div style="flex:1;font-size:15px;font-weight:500">October 2026</div>
+      <button class="ibtn" aria-label="Previous month"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="ibtn" aria-label="Next month"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin:2px 0 2px"><div style="width:44px;text-align:center;font-size:13px;color:#A6A29A">M</div><div style="width:44px;text-align:center;font-size:13px;color:#A6A29A">T</div><div style="width:44px;text-align:center;font-size:13px;color:#A6A29A">W</div><div style="width:44px;text-align:center;font-size:13px;color:#A6A29A">T</div><div style="width:44px;text-align:center;font-size:13px;color:#A6A29A">F</div><div style="width:44px;text-align:center;font-size:13px;color:#A6A29A">S</div><div style="width:44px;text-align:center;font-size:13px;color:#A6A29A">S</div></div>
+    <div style="display:flex;justify-content:space-between"><div style="width:44px;height:44px"></div><div style="width:44px;height:44px"></div><div style="width:44px;height:44px"></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">1<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#587CD3;display:block" title="Entry"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">2<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#587CD3;display:block" title="Entry"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">3</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">4</div></div>
+    <div style="display:flex;justify-content:space-between"><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">5<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#587CD3;display:block" title="Entry"></i><i style="width:4px;height:4px;border-radius:2px;background:#D8A56B;display:block" title="Events"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">6<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#587CD3;display:block" title="Entry"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">7<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#587CD3;display:block" title="Entry"></i><i style="width:4px;height:4px;border-radius:2px;background:#D8A56B;display:block" title="Events"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">8<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#587CD3;display:block" title="Entry"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">9<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#587CD3;display:block" title="Entry"></i><i style="width:4px;height:4px;border-radius:2px;background:#D8A56B;display:block" title="Events"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">10</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">11</div></div>
+    <div style="display:flex;justify-content:space-between"><div style="width:44px;height:44px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #587CD3;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;font-weight:700;">12<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#587CD3;display:block" title="Entry"></i><i style="width:4px;height:4px;border-radius:2px;background:#D8A56B;display:block" title="Events"></i></span></div><div style="width:44px;height:44px;border-radius:50%;background:#587CD3;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#F2EDE5;">13<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#F5D3A8;display:block" title="Events"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">14</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">15<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#D8A56B;display:block" title="Events"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">16</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">17</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">18</div></div>
+    <div style="display:flex;justify-content:space-between"><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">19</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">20<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#D8A56B;display:block" title="Events"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">21</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">22<span style="position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px"><i style="width:4px;height:4px;border-radius:2px;background:#D8A56B;display:block" title="Events"></i></span></div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">23</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">24</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">25</div></div>
+    <div style="display:flex;justify-content:space-between"><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">26</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">27</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">28</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">29</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">30</div><div style="width:44px;height:44px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;color:#A6A29A;">31</div><div style="width:44px;height:44px"></div></div>
+    <div style="margin-top:8px"><button class="obtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><rect x="7" y="13" width="4" height="4" rx=".5"/></svg>Today</button></div>
+    <div style="margin-top:14px;background:#363B44;border-radius:12px;padding:0 12px 6px 16px">
+      <div style="height:60px;display:flex;align-items:center;gap:8px">
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:500">Tuesday 13 October</div><div class="sub">No entry for this day</div></div>
+        <button class="fbtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create</button>
+      </div>
+      <div style="display:flex;gap:4px;margin-left:-12px">
+        <button class="tbtn"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M12 12.5v5M9.5 15h5"/></svg>Add event</button>
+        <button class="tbtn"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px" aria-hidden="true"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8"/><path d="M8 12l3 3 4-5M19 3v6M16 6h6"/></svg>Add task</button>
+      </div>
+    </div>
+    <div style="border-left:2px solid #A8C77A;padding:4px 0 4px 12px;margin:10px 0 4px"><div class="goal"><span class="h">Week 42</span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Writing week <span class="pj">+thesis</span></span></div><div class="goal"><span class="h">October</span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Finish the thesis draft <span class="pj">+thesis</span></span></div><div class="goal"><span class="h">2026</span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">The year of the move <span class="pj">+home</span></span></div></div>
+    <div class="lab" style="margin-top:10px">Events</div>
+    <div class="ev" style="" title="Open calendar.txt at this line"><span class="t">0600Z</span><span class="x">call with Tokyo <span class="cx">@phone</span></span></div>
+      <div class="ev" style="" title="Open calendar.txt at this line"><span class="t">10-1130</span><span class="x">seminar v1.2 review <span class="pj">+thesis</span></span></div>
+      <div class="ev" style="" title="Open calendar.txt at this line"><span class="t">16</span><span class="x">dentist <span class="cx">@city</span></span><span class="sub" style="display:flex;align-items:center;gap:3px;flex:none" title="Reminder at 15:15"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>15:15</span></div>
+    <div class="lab" style="margin-top:8px">Due on Tue 13</div>
+    <div class="due"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg><span>Print chapter 2 <span class="pj">+thesis</span></span></div>
+  </div>
+<div style="position:absolute;inset:0;background:rgba(10,11,13,.55);display:flex;flex-direction:column;justify-content:flex-end">
+  <div role="dialog" aria-label="New event" style="background:#2C3037;border-radius:28px 28px 0 0;padding:10px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="width:36px;height:4px;border-radius:2px;background:#4A4F59;align-self:center"></div>
+    <div style="display:flex;align-items:center;gap:10px"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;color:#587CD3" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M12 12.5v5M9.5 15h5"/></svg><div style="font-size:20px;font-weight:600;flex:1">New event</div><div class="sub">Tue 13 October</div></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="sel" style="flex:1;border-color:#587CD3"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg><div><div class="sub" style="font-size:11.5px;line-height:1">Start</div><div style="font-variant-numeric:tabular-nums">14:00</div></div></div>
+      <span class="sub">–</span>
+      <div class="sel" style="flex:1"><div style="flex:1"><div class="sub" style="font-size:11.5px;line-height:1">End (optional)</div><div style="font-variant-numeric:tabular-nums">15:00</div></div><button class="ibtn" style="width:32px;height:32px" aria-label="No end time"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    </div>
+    <div style="height:52px;background:#23262B;border-radius:8px 8px 0 0;border-bottom:2px solid #587CD3;display:flex;align-items:center;padding:0 14px;font-size:15px;white-space:nowrap;overflow:hidden">office hours with Bianchi&nbsp;<span class="pj">+thesis</span>&nbsp;<span class="cx">@uni</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <span class="chip"><span class="pj">+thesis</span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M9 9l6 6M15 9l-6 6"/></svg></span>
+      <span class="chip"><span class="cx">@uni</span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M9 9l6 6M15 9l-6 6"/></svg></span>
+      <span class="chip">+ Project</span><span class="chip">@ Context</span><span class="chip"># Tag</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;min-height:48px">
+      <svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;color:#A6A29A" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><div style="flex:1">Remind me<div class="sub">15 min before · 13:45</div></div>
+      <span style="width:52px;height:32px;border-radius:16px;background:#587CD3;position:relative;flex:none"><i style="position:absolute;right:4px;top:4px;width:24px;height:24px;border-radius:12px;background:#F2EDE5"></i></span>
+    </div>
+    <div>
+      <div class="lab" style="margin-bottom:6px">The line, as it will be written</div>
+      <div class="mono" style="background:#23262B;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6;color:#D9D4CB;word-break:break-word"><span style="color:#9A968E">2026-10-13</span> <span style="color:#6B7079">w42 Tue</span>  <span class="tm">0600Z</span> call with Tokyo <span class="cx">@phone</span>. <span class="tm">10-1130</span> seminar v1.2 review <span class="pj">+thesis</span>. <span style="background:rgba(88,124,211,.28);border-radius:3px;padding:0 2px"><span class="tm">14-15</span> office hours with Bianchi <span class="pj">+thesis</span> <span class="cx">@uni</span> <span class="kv">rem:13:45</span>.</span> <span class="tm">16</span> dentist <span class="cx">@city</span> <span class="kv">rem:15:15</span>.</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button class="tbtn">Cancel</button>
+      <button class="fbtn" style="padding:0 28px">Add</button>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

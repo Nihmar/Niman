@@ -27,15 +27,18 @@ typedef RowMenuEntry = ({
 });
 
 /// The phone's long-press sheet (T-UI-05): the note actions, scoped to
-/// the pressed row. Resolves to the chosen action, or null.
+/// the pressed row. Resolves to the chosen action, or null. A pointer's
+/// menu grows from [anchor], the row held.
 Future<String?> showRowMenuSheet(
   BuildContext context, {
   required Note note,
   required bool isQuickNote,
   bool offersRecognize = false,
+  Rect? anchor,
 }) {
   return showActionSheet<String>(
     context,
+    anchor: anchor,
     items: (context) {
       final theme = Theme.of(context);
       return [

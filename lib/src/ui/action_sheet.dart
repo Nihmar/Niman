@@ -63,15 +63,23 @@ Future<T?> showActionSheet<T>(
 
 /// [context]'s widget as a rectangle on screen, for [showActionSheet]'s
 /// `anchor`: the button a menu should grow from, where there is one.
+///
+/// In global coordinates, as a tap's `globalPosition` is: the menu turns
+/// it into its own overlay's space, which inside a floating window is not
+/// the screen's (#780).
 Rect? menuAnchorOf(BuildContext context) {
   final box = context.findRenderObject();
   if (box is! RenderBox || !box.attached) return null;
   return box.localToGlobal(Offset.zero) & box.size;
 }
 
+/// A point on screen — where a tap landed — as an `anchor`.
+Rect menuAnchorAt(Offset globalPosition) => globalPosition & Size.zero;
+
 /// The pointer's shape of [showActionSheet]: the same rows in a pop-up
 /// menu at [anchor], or a third of the way down the window when nothing
-/// anchors it.
+/// anchors it — a key or the palette opened it, and there is no control
+/// to grow from.
 Future<T?> _showActionSheetMenu<T>(
   BuildContext context, {
   required List<Widget> Function(BuildContext context) items,
@@ -79,14 +87,20 @@ Future<T?> _showActionSheetMenu<T>(
   required Key? menuKey,
   required Rect? anchor,
 }) {
-  final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
-  final at =
-      anchor ??
-      Rect.fromCenter(
-        center: Offset(overlay.size.width / 2, overlay.size.height / 3),
-        width: 1,
-        height: 1,
-      );
+  // The overlay the menu's route is drawn in: the navigator's, which
+  // `showMenu` pushes on.
+  final overlay =
+      Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+  final at = anchor == null
+      ? Rect.fromCenter(
+          center: Offset(overlay.size.width / 2, overlay.size.height / 3),
+          width: 1,
+          height: 1,
+        )
+      : Rect.fromPoints(
+          overlay.globalToLocal(anchor.topLeft),
+          overlay.globalToLocal(anchor.bottomRight),
+        );
   return showMenu<T>(
     context: context,
     position: RelativeRect.fromRect(at, Offset.zero & overlay.size),

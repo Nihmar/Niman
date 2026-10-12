@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/annotations/annotation_mark.dart';
 import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/reading/book_location.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 /// The rectangles of characters [start]..[end] of [text], one per run of
@@ -66,13 +67,13 @@ final class PdfMarkLayer {
   }
 
   /// The marks over [page], drawn at [pageRect]'s scale; [onTap] opens
-  /// the marks tapped.
+  /// the marks tapped, handed where on screen the tap landed.
   List<Widget> overlays(
     BuildContext context,
     Rect pageRect,
     PdfPage page,
     List<AnnotationMark> marks, {
-    required void Function(List<AnnotationMark> marks) onTap,
+    required void Function(List<AnnotationMark> marks, Rect? at) onTap,
   }) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final pinned = <AnnotationMark>[];
@@ -109,7 +110,10 @@ final class PdfMarkLayer {
               rect: rect.toRect(page: page, scaledPageSize: pageRect.size),
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () => onTap(_marksAt(mark, rects, marks)),
+                onTapUp: (details) => onTap(
+                  _marksAt(mark, rects, marks),
+                  menuAnchorAt(details.globalPosition),
+                ),
                 child: box,
               ),
             ),
@@ -122,10 +126,12 @@ final class PdfMarkLayer {
         Positioned(
           top: 4,
           right: 4,
-          child: IconButton.filledTonal(
-            key: Key('pdf-page-mark-${page.pageNumber}'),
-            icon: const Icon(Icons.sticky_note_2_outlined),
-            onPressed: () => onTap(pinned),
+          child: Builder(
+            builder: (context) => IconButton.filledTonal(
+              key: Key('pdf-page-mark-${page.pageNumber}'),
+              icon: const Icon(Icons.sticky_note_2_outlined),
+              onPressed: () => onTap(pinned, menuAnchorOf(context)),
+            ),
           ),
         ),
       );

@@ -13,14 +13,17 @@ import 'package:niman/src/ui/strings.dart';
 /// now is greyed, with the reason under it, rather than left out: a row
 /// that comes and goes is a row nobody learns is there, and the writer
 /// is owed the reason at the moment they look for it rather than after
-/// they tap.
+/// they tap. A pointer's menu grows from [anchor], the control that
+/// opened it.
 Future<EditorTool?> showEditorToolsSheet(
   BuildContext context, {
   required Set<EditorTool> available,
+  Rect? anchor,
 }) {
   return showActionSheet<EditorTool>(
     context,
     sheetKey: const Key('editor-tools-sheet'),
+    anchor: anchor,
     title: AppStrings.editorToolsTitle,
     items: (context) => [
       for (final tool in EditorTool.values)

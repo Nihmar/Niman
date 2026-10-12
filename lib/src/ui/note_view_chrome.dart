@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -124,8 +125,9 @@ final class NoteStatusRow extends StatelessWidget {
   /// Extra actions after the status text.
   final List<Widget> statusActions;
 
-  /// Opens the outline sheet.
-  final Future<void> Function() onOutline;
+  /// Opens the outline sheet; a pointer's menu grows from the button's
+  /// place, handed over.
+  final Future<void> Function(Rect? anchor) onOutline;
 
   /// Whether the outline button shows: the dock has the outline where
   /// there is room for it, and the row leaves it out there. Fixed for a
@@ -192,14 +194,16 @@ final class NoteStatusRow extends StatelessWidget {
         if (!loading && showOutline)
           Padding(
             padding: iconPadding,
-            child: IconButton(
-              key: const Key('outline-toggle'),
-              tooltip: AppStrings.outlineTooltip,
-              icon: const Icon(Icons.toc),
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              onPressed: () => unawaited(onOutline()),
+            child: Builder(
+              builder: (button) => IconButton(
+                key: const Key('outline-toggle'),
+                tooltip: AppStrings.outlineTooltip,
+                icon: const Icon(Icons.toc),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                onPressed: () => unawaited(onOutline(menuAnchorOf(button))),
+              ),
             ),
           ),
         // Find & replace lives in the editor pane, so preview-only mode
@@ -361,6 +365,7 @@ final class NoteToolbarBar extends StatelessWidget {
     required this.actions,
     required this.active,
     required this.layout,
+    this.menus = const {},
     this.dense = false,
     super.key,
   });
@@ -370,6 +375,9 @@ final class NoteToolbarBar extends StatelessWidget {
 
   /// What each toolbar button does.
   final Map<ToolbarItem, VoidCallback> actions;
+
+  /// The buttons that open a menu, handed the button's place (#780).
+  final Map<ToolbarItem, ValueChanged<Rect?>> menus;
 
   /// The formats on at the caret.
   final Set<ToolbarItem> active;
@@ -394,6 +402,7 @@ final class NoteToolbarBar extends StatelessWidget {
             active: active.contains(item),
             group: item.group,
             onPressed: actions[item]!,
+            onPressedAt: menus[item],
           ),
       ],
     ),

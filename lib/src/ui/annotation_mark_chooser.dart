@@ -14,13 +14,15 @@ import 'package:path/path.dart' as p;
 
 /// Opens what [marks] of the file at [path] stand for, through [source];
 /// asks which when there are several. [linkType] is how a highlight's link
-/// is copied.
+/// is copied. A pointer's menus grow from [anchor], where the marks were
+/// tapped.
 Future<void> openAnnotationMarks(
   BuildContext context,
   List<AnnotationMark> marks,
   AnnotationMarkSource source, {
   required String path,
   required LinkType linkType,
+  Rect? anchor,
 }) async {
   if (marks.isEmpty) return;
   final picked = marks.length == 1
@@ -28,6 +30,7 @@ Future<void> openAnnotationMarks(
       : await showActionSheet<AnnotationMark>(
           context,
           sheetKey: const Key('annotation-marks'),
+          anchor: anchor,
           items: (context) => [
             for (final (index, mark) in marks.indexed)
               _MarkRow(
@@ -45,6 +48,7 @@ Future<void> openAnnotationMarks(
       source,
       path: path,
       linkType: linkType,
+      anchor: anchor,
     );
   } else {
     source.open(picked);

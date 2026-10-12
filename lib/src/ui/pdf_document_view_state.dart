@@ -108,8 +108,8 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
     if (mounted && load == _layerLoads) setState(() {});
   }
 
-  /// Opens the annotations [marks] stand for.
-  void _openMarks(List<AnnotationMark> marks) {
+  /// Opens the annotations [marks] stand for, tapped at [anchor].
+  void _openMarks(List<AnnotationMark> marks, Rect? anchor) {
     final source = widget.marks;
     final key = widget.positions?.keyOf(widget.path);
     if (source == null || key == null) return;
@@ -121,6 +121,7 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
         source,
         path: key,
         linkType: widget.linkType,
+        anchor: anchor,
       ).then((_) => following?.refresh()),
     );
   }

@@ -69,8 +69,9 @@ final class EpubPane extends StatefulWidget {
   final Future<String> Function() cacheDir;
 
   /// Opens the sheet that sets how the books look; null leaves its button
-  /// on the row, disabled.
-  final VoidCallback? onEditLook;
+  /// on the row, disabled. It is handed the button's place on screen, for
+  /// a pointer's menu to grow from.
+  final ValueChanged<Rect?>? onEditLook;
 
   /// Keeps the books' text size a pinch or a zoom key reached (#538), the
   /// size the look sheet sets; null leaves the text unzoomed by either.

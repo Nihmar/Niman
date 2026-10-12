@@ -19,8 +19,9 @@ final class MarkedBlock extends StatelessWidget {
   /// The block's marks.
   final List<BlockMark> marks;
 
-  /// Called when the block is tapped.
-  final VoidCallback? onTap;
+  /// Called when the block is tapped, with where on screen the tap landed
+  /// (a point, as a rectangle a menu can grow from).
+  final ValueChanged<Rect>? onTap;
 
   /// The block.
   final Widget child;
@@ -74,6 +75,12 @@ final class MarkedBlock extends StatelessWidget {
         child: marked,
       );
     }
-    return GestureDetector(onTap: onTap, child: marked);
+    final tap = onTap;
+    return GestureDetector(
+      onTapUp: tap == null
+          ? null
+          : (details) => tap(details.globalPosition & Size.zero),
+      child: marked,
+    );
   }
 }

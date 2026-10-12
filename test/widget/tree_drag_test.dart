@@ -133,7 +133,7 @@ void main() {
             expanded: const <String>{},
             onToggle: (_) {},
             onSelect: (_) {},
-            onLongPress: (note) => menus.add(note.path),
+            onLongPress: (note, _) => menus.add(note.path),
             onMove: (path, folder) => moves.add('$path -> $folder'),
           ),
         ),

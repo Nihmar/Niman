@@ -205,11 +205,11 @@ final class EpubPaneState extends State<EpubPane> {
     if (here != null) _reading.moved(here);
   }
 
-  Future<void> _showContents() async {
+  Future<void> _showContents(Rect? anchor) async {
     final document = _document;
     if (document == null) return;
     final top = _readKey.currentState?.topAnchor?.line ?? 0;
-    final line = await showEpubContents(context, document, top);
+    final line = await showEpubContents(context, document, top, anchor: anchor);
     if (line != null) _readKey.currentState?.jumpToLine(line);
   }
 
@@ -223,8 +223,9 @@ final class EpubPaneState extends State<EpubPane> {
     _marks = FileMarks(source, key)..addListener(() => setState(() {}));
   }
 
-  /// Opens the annotations of the paragraph over [start]..[end].
-  void _openMarks(EpubDocument document, int start, int end) {
+  /// Opens the annotations of the paragraph over [start]..[end], tapped at
+  /// [anchor].
+  void _openMarks(EpubDocument document, int start, int end, Rect anchor) {
     final source = widget.marks;
     final marks = _marks?.marks;
     final key = widget.positions?.keyOf(widget.path);
@@ -238,6 +239,7 @@ final class EpubPaneState extends State<EpubPane> {
         source,
         path: key,
         linkType: widget.linkType,
+        anchor: anchor,
       ).then((_) => following?.refresh()),
     );
   }
@@ -360,7 +362,7 @@ final class EpubPaneState extends State<EpubPane> {
             onEditLook: widget.onEditLook,
             onContents: document == null || document.contents.isEmpty
                 ? null
-                : () => unawaited(_showContents()),
+                : (anchor) => unawaited(_showContents(anchor)),
             here: document == null || widget.positions == null
                 ? null
                 : () => _places.here(),
@@ -425,7 +427,8 @@ final class EpubPaneState extends State<EpubPane> {
       // A paragraph links, and annotates, only in a library.
       selectionActions: _selectionActions(),
       marks: epubBlockMarks(document, _marks?.marks ?? const []),
-      onTapMark: (start, end) => _openMarks(document, start, end),
+      onTapMark: (start, end, anchor) =>
+          _openMarks(document, start, end, anchor),
     ),
   );
 }
