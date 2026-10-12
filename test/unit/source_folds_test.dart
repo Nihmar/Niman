@@ -116,4 +116,59 @@ void main() {
       expect(folds.hidden, <(int, int)>[(6, 15)]);
     });
   });
+
+  group('a side-by-side block hosts its lines (#729)', () {
+    test("its lines are its opener's row, and not hidden", () {
+      final folds = SourceFolds()..setHosts({2: 7});
+      expect(folds.isEmpty, isFalse);
+      expect(folds.rowCount(10), 6);
+      expect(folds.rowOf(2), 2);
+      expect(folds.rowOf(5), 2, reason: "a hosted line is its host's row");
+      expect(folds.lineOf(3), 7);
+      expect(folds.isHidden(5), isFalse);
+      expect(folds.hostOf(5), 2);
+      expect(folds.hostOf(2), isNull);
+      expect(folds.hostOf(7), isNull);
+      expect(folds.isHost(2), isTrue);
+      expect(folds.reveal(5), isFalse, reason: 'nothing folded to reveal');
+    });
+
+    test('a fold and a host merge their rows', () {
+      final folds = SourceFolds()
+        ..fold(0, 4)
+        ..setHosts({6: 9});
+      expect(folds.hidden, <(int, int)>[(1, 4), (7, 9)]);
+      expect(folds.rowCount(12), 7);
+      expect(folds.isHidden(8), isFalse);
+      expect(folds.isHidden(2), isTrue);
+    });
+
+    test('an edit inside the block changes no row', () {
+      final folds = SourceFolds()..setHosts({2: 7});
+      // An Enter in a column: a line more, in the block.
+      expect(folds.edited(_edit(4, 1, 2), 11, (_) => null), isFalse);
+      expect(folds.hosts, <int, int>{2: 8});
+      expect(folds.rowCount(11), 6);
+    });
+
+    test('an edit above the block moves it', () {
+      final folds = SourceFolds()
+        ..setHosts({2: 7})
+        ..edited(_edit(0, 1, 3), 12, (_) => null);
+      expect(folds.hosts, <int, int>{4: 9});
+    });
+
+    test('an edit across its edge lets it go', () {
+      final folds = SourceFolds()
+        ..setHosts({2: 7})
+        ..edited(_edit(6, 2, 1), 9, (_) => null);
+      expect(folds.hosts, isEmpty);
+    });
+
+    test('setting the same hosts again changes nothing', () {
+      final folds = SourceFolds()..setHosts({2: 7});
+      expect(folds.setHosts({2: 7}), isFalse);
+      expect(folds.setHosts({2: 8}), isTrue);
+    });
+  });
 }

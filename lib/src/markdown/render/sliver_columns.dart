@@ -59,29 +59,30 @@ final class SliverColumns extends StatelessWidget {
   /// The outer closer's band, drawn below them.
   final Widget? closer;
 
-  /// How far in the block stands: the list items around it.
+  /// How far in the columns stand: the list items around the block, or
+  /// the gutter beside them. The fences are as wide as the block's row.
   final double indent;
 
   @override
   Widget build(BuildContext context) {
     final opener = this.opener;
     final closer = this.closer;
-    Widget group = SliverMainAxisGroup(
+    Widget rowsOf(Widget sliver) => indent > 0
+        ? SliverPadding(
+            padding: EdgeInsets.only(left: indent),
+            sliver: sliver,
+          )
+        : sliver;
+    final group = SliverMainAxisGroup(
       slivers: [
         if (opener != null) SliverToBoxAdapter(child: opener),
         for (var at = 0; at < rows.length; at++) ...[
           if (at > 0) SliverToBoxAdapter(child: SizedBox(height: gap)),
-          SliverCrossAxisGroup(slivers: _row(rows[at])),
+          rowsOf(SliverCrossAxisGroup(slivers: _row(rows[at]))),
         ],
         if (closer != null) SliverToBoxAdapter(child: closer),
       ],
     );
-    if (indent > 0) {
-      group = SliverPadding(
-        padding: EdgeInsets.only(left: indent),
-        sliver: group,
-      );
-    }
     return _ExtentRecorder(heights: heights, index: index, sliver: group);
   }
 

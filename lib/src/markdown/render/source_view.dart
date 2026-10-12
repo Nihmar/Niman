@@ -53,6 +53,7 @@ import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/callout.dart';
+import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/div_syntax.dart';
 import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
@@ -68,6 +69,7 @@ import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/block_heights.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
@@ -77,6 +79,7 @@ import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
+import 'package:niman/src/markdown/render/live_hosts.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/live_run.dart';
 import 'package:niman/src/markdown/render/live_table_commands.dart';
@@ -88,6 +91,7 @@ import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
+import 'package:niman/src/markdown/render/sliver_columns.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
@@ -1012,9 +1016,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// themselves — their paragraphs know where they were painted, so no map
   /// has to agree with them — or null when no drawn line is under it.
   int? _paintedOffsetAt(Offset global) {
+    final x = _hosts.layouts.isEmpty
+        ? null
+        : _noteBox?.globalToLocal(global).dx;
     for (final entry in _lineKeys.entries) {
       final line = entry.key;
       if (line >= widget.buffer.lineCount) continue;
+      // Side by side, two columns' lines hold the same height: a line of a
+      // column holds a point only across its column (#729).
+      if (x != null && !_inColumnOf(line, x)) continue;
       final pieces = _piecesOf(line);
       if (pieces.length == 1) {
         final object = _renderOf(pieces.first.key);
@@ -1039,6 +1049,27 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return null;
   }
 
+  /// Whether [x], the note box's, is across the column line [line] is
+  /// drawn in, when it is a side-by-side column's: the gap between two
+  /// columns is split between them, and a row's first and last columns
+  /// reach its edges.
+  bool _inColumnOf(int line, double x) {
+    final host = _folds.hostOf(line);
+    final layout = host == null ? null : _hosts.openedOn(host);
+    if (layout == null) return true;
+    final column = layout.run.columnOf(line);
+    if (column < 0) return true;
+    final row = layout.rows.firstWhere((row) => row.contains(column));
+    final left = _leftInset + _gutter + LiveHosts.leftOf(layout, column, _gap);
+    final from = column == row.first
+        ? double.negativeInfinity
+        : left - _gap / 2;
+    final to = column == row.last
+        ? double.infinity
+        : left + layout.widths[column] + _gap / 2;
+    return x >= from && x < to;
+  }
+
   /// The offset under [global] as the height map places the lines: for a
   /// point no drawn line is under — above the first, below the last.
   int? _mappedOffsetAt(Offset global) {
@@ -1047,10 +1078,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The map says which line a y falls in — above the first line is the
     // first, below the last is the last, so a tap under a short note puts the
     // caret at its end rather than nowhere.
-    final y =
-        box.globalToLocal(global).dy - widget.padding.top + _scroll.offset;
-    final row = y < 0 ? 0 : _heights.indexAt(y) ?? _heights.length - 1;
-    final line = _folds.lineOf(row);
+    final point = box.globalToLocal(global);
+    final line = _lineAtY(point.dy + _scroll.offset, point.dx);
     final pieces = _piecesOf(line);
     // The point in the *paragraph's own* coordinates, from its own transform:
     // the insets, the gutter and a live-mode indent are all in that transform,
@@ -1079,9 +1108,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (line < 0 || line >= lineCount || !_scroll.hasClients) return;
     _reshapeRows(() => _folds.reveal(line));
     _scroll.jumpTo(
-      _heights
-          .offsetOf(_folds.rowOf(line))
-          .clamp(0.0, _scroll.position.maxScrollExtent),
+      (_lineBox(line).top - widget.padding.top).clamp(
+        0.0,
+        _scroll.position.maxScrollExtent,
+      ),
     );
     _scheduleCaret();
   }
@@ -1206,10 +1236,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!_scroll.hasClients || _heights.length == 0) return null;
     final y = _scroll.offset - widget.padding.top;
     if (y <= 0) return (line: 0, fraction: 0.0);
-    final row = _heights.indexAt(y) ?? _heights.length - 1;
-    final extent = _heights.extentFor(row);
-    final into = extent > 0 ? (y - _heights.offsetOf(row)) / extent : 0.0;
-    return (line: _folds.lineOf(row), fraction: into.clamp(0.0, 1.0));
+    final line = _lineAtY(_scroll.offset);
+    final box = _lineBox(line);
+    final into = box.height > 0 ? (_scroll.offset - box.top) / box.height : 0.0;
+    return (line: line, fraction: into.clamp(0.0, 1.0));
   }
 
   /// Scrolls the view so [anchor]'s line is at its top, as far into it as
@@ -1218,14 +1248,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// again after each frame that measured them, as long as that moves it.
   void showAnchor(ScrollAnchor anchor, {int attempt = 0}) {
     if (!_scroll.hasClients || lineCount == 0) return;
-    final row = _folds.rowOf(anchor.line.clamp(0, lineCount - 1));
+    final box = _lineBox(anchor.line.clamp(0, lineCount - 1));
     final atTop = anchor.line == 0 && anchor.fraction == 0;
     final offset = atTop
         ? 0.0
-        : (widget.padding.top +
-                  _heights.offsetOf(row) +
-                  anchor.fraction * _heights.extentFor(row))
-              .clamp(0.0, _scroll.position.maxScrollExtent);
+        : (box.top + anchor.fraction * box.height).clamp(
+            0.0,
+            _scroll.position.maxScrollExtent,
+          );
     if ((_scroll.position.pixels - offset).abs() > 0.5) {
       _scroll.jumpTo(offset);
     } else if (attempt > 0) {
@@ -1759,6 +1789,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _syncLines([SourceEdit? edit]) {
     _seenRevision = widget.buffer.revision;
     final lines = widget.buffer.lineCount;
+    // The side-by-side blocks follow the edit: typing in a column splices
+    // its map, and changes no row (#729).
+    if (edit != null) _hosts.edited(edit, _estimateAt);
     if (!_folds.isEmpty) {
       // The folds follow the edit; when what they hide changed shape, the
       // rows are measured again rather than spliced.
@@ -1807,6 +1840,95 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return _runs;
   }
 
+  /// The blocks drawn side by side at the pane's width (#729).
+  final LiveHosts _hosts = LiveHosts();
+
+  /// An em of the note's text, as drawn: what a column's minimum and the
+  /// gap between columns are counted in.
+  double get _em => _textScaler.scale(widget.theme.body.fontSize ?? 14);
+
+  /// The room between two columns, and between two rows of them.
+  double get _gap => ColumnLayout.gapEms * _em;
+
+  /// A fence line's band, as drawn.
+  double get _band => _textScaler.scale(widget.theme.divBand);
+
+  /// Lays the note's `columns` blocks out in [width], the text's: the ones
+  /// that sit side by side there are hosted, each in its opener's row, and
+  /// the rows are reshaped when that changed which. A block a fold hides or
+  /// holds stays stacked, as do they all in `source`.
+  void _layOutHosts(double width) {
+    _hosts.layOut(
+      _liveRuns,
+      width: width,
+      em: _em,
+      estimate: _estimateAt,
+      // Not a block a fold hides, nor one with a fold inside.
+      allowed: (run) =>
+          !_folds.isHidden(run.start) &&
+          !_folds.anchors.any(
+            (anchor) => anchor >= run.start && anchor < run.end,
+          ),
+    );
+    final hosts = _hosts.hosts;
+    if (_sameHosts(hosts, _folds.hosts)) return;
+    _reshapeRows(() => _folds.setHosts(hosts));
+  }
+
+  static bool _sameHosts(Map<int, int> a, Map<int, int> b) =>
+      a.length == b.length &&
+      a.entries.every((entry) => b[entry.key] == entry.value);
+
+  /// Line [line]'s height before a frame has drawn it, [width] wide.
+  double _estimateAt(int line, double width) {
+    final advance = _em * 0.6;
+    final columns = advance <= 0 ? 1.0 : width / advance;
+    return _estimateOf(widget.buffer.lineLengthAt(line), columns, _rowHeight);
+  }
+
+  /// [layout]'s block's height before a frame has drawn it.
+  double _hostEstimate(LiveLayout layout) =>
+      LiveHosts.estimateOf(layout, _gap, layout.run.closed ? 2 * _band : _band);
+
+  /// Where line [line] is drawn, in the scroll view's coordinates: its top
+  /// and its height (#729). A row's, from the note's map; a line of a
+  /// side-by-side column's, from its host row, its row of columns and its
+  /// column's own map.
+  ({double top, double height}) _lineBox(int line) {
+    final host = _folds.hostOf(line);
+    final layout = host == null ? null : _hosts.openedOn(host);
+    if (host == null || layout == null) {
+      final row = _folds.rowOf(line);
+      return (
+        top: widget.padding.top + _heights.offsetOf(row),
+        height: _heights.extentFor(row),
+      );
+    }
+    final hostRow = _folds.rowOf(host);
+    final top = widget.padding.top + _heights.offsetOf(hostRow);
+    final run = layout.run;
+    final column = run.columnOf(line);
+    if (column < 0) {
+      // The closer is the block's bottom band; a blank line between two
+      // columns is drawn nowhere, and stands at the block's top.
+      final closing = run.closed && line == run.end - 1;
+      final extent = _heights.extentFor(hostRow);
+      return closing
+          ? (top: top + extent - _band, height: _band)
+          : (top: top, height: 0);
+    }
+    final map = layout.maps[column];
+    final local = line - run.columns[column].start;
+    return (
+      top:
+          top +
+          _band +
+          LiveHosts.topOf(layout, column, _gap) +
+          map.offsetOf(local),
+      height: map.extentFor(local),
+    );
+  }
+
   /// What line [index], in [block], draws as a fence line in `live`, or
   /// null: a column's fence and a `columns` block's are bands, an unknown
   /// div's are the text they are.
@@ -1823,14 +1945,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       DivRole.opensColumn => _columnChip(index),
       _ => null,
     };
+    final hosted = _folds.isHost(run.start);
+    final outer = index == run.start || (run.closed && index == run.end - 1);
     return (
       start: run.start,
       end: run.end,
       chip: chip,
       chipLeft: role == DivRole.opensColumns,
       hairline: role == DivRole.opensColumn,
-      numbered: false,
-      numberUp: false,
+      numbered: hosted && outer,
+      numberUp: index != run.start,
     );
   }
 
@@ -1898,7 +2022,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       count: _folds.rowCount(lineCount),
       estimate: (row) {
         final line = _folds.lineOf(row);
-        if (!before.isHidden(line)) {
+        // A side-by-side block's row is the block (#729): one drawn as it
+        // was keeps its height, any other row in or out of one is
+        // estimated again.
+        final hosted = _hosts.openedOn(line);
+        if (_folds.isHost(line) && hosted != null) {
+          if (before.isHost(line) && before.hosts[line] == _folds.hosts[line]) {
+            final was = before.rowOf(line);
+            if (was < old.length) return old.extentFor(was);
+          }
+          return _hostEstimate(hosted);
+        }
+        if (!before.isHidden(line) &&
+            !before.isHost(line) &&
+            before.hostOf(line) == null) {
           final was = before.rowOf(line);
           if (was < old.length) return old.extentFor(was);
         }
@@ -2486,7 +2623,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // and the last line takes the bottom padding with it. Without them every
     // jump down stopped the padding short, the caret's row cut by it.
     final row = _folds.rowOf(line);
-    final extent = _rowBounds(row);
+    final extent = _lineBounds(line);
     final viewport = _scroll.position.viewportDimension;
     // A selection is kept whole when it is asked for and fits the viewport;
     // otherwise its active end is — a selection longer than the screen
@@ -2496,8 +2633,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     var edgeTop = extent.top;
     var edgeBottom = extent.bottom;
     if (wholeSelection) {
-      final anchorRow = _folds.rowOf(widget.buffer.lineOf(_selection.anchor));
-      final anchor = _rowBounds(anchorRow);
+      final anchorLine = widget.buffer.lineOf(_selection.anchor);
+      final anchorRow = _folds.rowOf(anchorLine);
+      final anchor = _lineBounds(anchorLine);
       final top = math.min(anchor.top, extent.top);
       final bottom = math.max(anchor.bottom, extent.bottom);
       if (bottom - top <= viewport) {
@@ -2531,17 +2669,70 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     });
   }
 
-  /// Row [row] as the scroll view sees it: its top and its bottom, in the
-  /// view's coordinates — the map starts below the top padding, and the
-  /// last row takes the bottom padding with it.
-  ({double top, double bottom}) _rowBounds(int row) {
-    final top = widget.padding.top + _heights.offsetOf(row);
-    final last = row == _heights.length - 1;
+  /// Line [line] as the scroll view sees it: its top and its bottom, in the
+  /// view's coordinates ([_lineBox]) — the map starts below the top
+  /// padding, and the last row takes the bottom padding with it. A line of
+  /// a side-by-side column is its own line, not its block's row, which can
+  /// be taller than the screen.
+  ({double top, double bottom}) _lineBounds(int line) {
+    final box = _lineBox(line);
+    final last =
+        _folds.hostOf(line) == null &&
+        _folds.rowOf(line) == _heights.length - 1;
     return (
-      top: top,
-      bottom:
-          top + _heights.extentFor(row) + (last ? widget.padding.bottom : 0),
+      top: box.top,
+      bottom: box.top + box.height + (last ? widget.padding.bottom : 0),
     );
+  }
+
+  /// The line drawn at [y], in the scroll view's coordinates, and at [x],
+  /// the note box's, when a side-by-side block is there: its column's line
+  /// at that height, the first column's when [x] is null.
+  int _lineAtY(double y, [double? x]) {
+    final local = y - widget.padding.top;
+    final row = local < 0
+        ? 0
+        : _heights.indexAt(local) ?? math.max(0, _heights.length - 1);
+    final line = _folds.lineOf(row);
+    final layout = _folds.isHost(line) ? _hosts.openedOn(line) : null;
+    if (layout == null) return line;
+    final run = layout.run;
+    final inside = local - _heights.offsetOf(row) - _band;
+    if (inside < 0) return run.start;
+    // The row of columns at that height, and the column nearest [x].
+    var top = 0.0;
+    for (final columns in layout.rows) {
+      var tallest = 0.0;
+      for (final at in columns) {
+        tallest = math.max(tallest, layout.maps[at].totalExtent);
+      }
+      if (inside < top + tallest + _gap) {
+        final column = _columnNearest(layout, columns, x);
+        final map = layout.maps[column];
+        final at = map.indexAt(inside - top) ?? math.max(0, map.length - 1);
+        return run.columns[column].start + at;
+      }
+      top += tallest + _gap;
+    }
+    return run.closed ? run.end - 1 : run.columns.last.end - 1;
+  }
+
+  /// Which column of [columns], a row of [layout]'s, [x] — the note box's —
+  /// is nearest; the first when [x] is null. The gap between two is split
+  /// between them.
+  int _columnNearest(LiveLayout layout, List<int> columns, double? x) {
+    if (x == null) return columns.first;
+    final left = _leftInset + _gutter;
+    for (var at = 0; at < columns.length; at++) {
+      final column = columns[at];
+      final right =
+          left +
+          LiveHosts.leftOf(layout, column, _gap) +
+          layout.widths[column] +
+          _gap / 2;
+      if (x < right) return column;
+    }
+    return columns.last;
   }
 
   /// Line [index] as the view draws it: the **buffer's** text, with the
@@ -3069,8 +3260,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
   }
 
-  /// Row [row]'s height before a frame has drawn it: its line's.
-  double _estimateRow(int row) => _estimate(_folds.lineOf(row));
+  /// Row [row]'s height before a frame has drawn it: its line's, or a
+  /// side-by-side block's.
+  double _estimateRow(int row) {
+    final line = _folds.lineOf(row);
+    final hosted = _folds.isHost(line) ? _hosts.openedOn(line) : null;
+    return hosted == null ? _estimate(line) : _hostEstimate(hosted);
+  }
 
   /// How line [index] of table [block] is laid out with the caret at [at]:
   /// as every line of it is at rest, but for the run the caret is in, whose
@@ -3507,6 +3703,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             // Kept here so every caller that lays a table out reads the same
             // number, the gesture path included.
             _textWidth = available;
+            // The `columns` blocks that sit side by side at this width.
+            _layOutHosts(available);
             // Typewriter mode: room for the last row to reach the middle,
             // under whatever the note ends with.
             final slack = widget.typewriter
@@ -3586,121 +3784,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                   widget.padding.bottom +
                                   (footnotes.isEmpty ? slack : 0),
                             ),
-                            sliver: SliverMarkdownBlocks(
-                              heights: _heights,
-                              delegate: SliverChildBuilderDelegate(
-                                (context, row) {
-                                  // A row is a line nobody folded away.
-                                  final index = _folds.lineOf(row);
-                                  final styled = _lineAt(index);
-                                  final block = _styler?.blockOf(index);
-                                  final quoted = widget.hideMarkers
-                                      ? _quotes.of(index, block, widget.buffer)
-                                      : null;
-                                  return SourceLine(
-                                    key: ValueKey<int>(index),
-                                    fold: _foldMarkOf(index),
-                                    onFold: () => toggleFold(index),
-                                    onFoldDown: () => _controlPress = true,
-                                    onDiagramDown: _diagramDown,
-                                    onDiagramLine: _openDiagramLine,
-                                    paragraphKey: _keyFor(index),
-                                    styled: styled,
-                                    shape: widget.hideMarkers
-                                        ? LineShape.of(
-                                            styled,
-                                            block,
-                                            index,
-                                            quoted: quoted,
-                                            callout: _calloutLine(index, block),
-                                          )
-                                        : LineShape.none,
-                                    pictures:
-                                        widget.hideMarkers &&
-                                            widget.embedResolver != null
-                                        ? _styler?.picturesOf(index) ??
-                                              const <LinePicture>[]
-                                        : const <LinePicture>[],
-                                    embedResolver: widget.embedResolver,
-                                    formula:
-                                        widget.hideMarkers &&
-                                            widget.mathCache != null
-                                        ? _formulaOf(index)
-                                        : null,
-                                    mathCache: widget.mathCache,
-                                    diagram: widget.hideMarkers
-                                        ? _diagramOf(index)
-                                        : null,
-                                    tableRow:
-                                        widget.hideMarkers &&
-                                            block?.kind == BlockKind.table
-                                        ? (at) => _tableRowAt(
-                                            context,
-                                            index,
-                                            block!,
-                                            at,
-                                          )
-                                        : null,
-                                    tableHeader:
-                                        block?.kind == BlockKind.table &&
-                                        index == block!.startLine,
-                                    pieceKey: block?.kind == BlockKind.table
-                                        ? (at) => at == 0
-                                              ? _keyFor(index)
-                                              : _fragmentKey(index, at)
-                                        : null,
-                                    pieceShift: _caretShift,
-                                    definition:
-                                        widget.hideMarkers && block != null
-                                        ? _styler?.definitionRunOf(block)
-                                        : null,
-                                    codeRuns: !widget.hideMarkers
-                                        ? null
-                                        : quoted != null
-                                        ? _codeColors.ofQuoted(
-                                            quoted,
-                                            block!.startLine,
-                                            widget.buffer,
-                                            widget.theme.codeHighlight,
-                                          )
-                                        : _codeColors.of(
-                                            index,
-                                            block,
-                                            widget.buffer,
-                                            widget.theme.codeHighlight,
-                                          ),
-                                    number: widget.showLineNumbers
-                                        ? index + 1
-                                        : null,
-                                    gutterWidth: _gutter,
-                                    theme: widget.theme,
-                                    syntax: syntax,
-                                    dark: widget.dark,
-                                    hideMarkers: widget.hideMarkers,
-                                    selected: _selectionIn(index),
-                                    composing: _composingIn(index),
-                                    misspelled: _misspelledIn(index),
-                                    found: _foundIn(index),
-                                    templateProblems: _hints.problemsIn(index),
-                                    misspelledColor: Theme.of(context)
-                                        .colorScheme
-                                        .error,
-                                    width: available,
-                                    index: index,
-                                    spot: _caretSpot,
-                                    caret: _caretRect,
-                                    caretOn: _caretOn,
-                                    rowColor: widget.typewriter
-                                        ? typewriterLineColor(context)
-                                        : null,
-                                    fence: _fenceOf(index, block),
-                                  );
-                                },
-                                childCount: _folds.rowCount(
-                                  widget.buffer.lineCount,
-                                ),
-                              ),
-                            ),
+                            sliver: _rowSlivers(context, available),
                           ),
                           if (footnotes.isNotEmpty)
                             SliverPadding(
@@ -3778,6 +3862,163 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       ),
     );
     return content;
+  }
+
+  /// Line [index] drawn [width] wide: a row of the note, or a line of a
+  /// side-by-side column ([inColumn]), which has no gutter of its own.
+  Widget _lineWidget(
+    BuildContext context,
+    int index, {
+    required double width,
+    bool inColumn = false,
+  }) {
+    final styled = _lineAt(index);
+    final block = _styler?.blockOf(index);
+    final quoted = widget.hideMarkers
+        ? _quotes.of(index, block, widget.buffer)
+        : null;
+    return SourceLine(
+      key: ValueKey<int>(index),
+      fold: inColumn ? SourceFoldMark.none : _foldMarkOf(index),
+      onFold: () => toggleFold(index),
+      onFoldDown: () => _controlPress = true,
+      onDiagramDown: _diagramDown,
+      onDiagramLine: _openDiagramLine,
+      paragraphKey: _keyFor(index),
+      styled: styled,
+      shape: widget.hideMarkers
+          ? LineShape.of(
+              styled,
+              block,
+              index,
+              quoted: quoted,
+              callout: _calloutLine(index, block),
+            )
+          : LineShape.none,
+      pictures: widget.hideMarkers && widget.embedResolver != null
+          ? _styler?.picturesOf(index) ?? const <LinePicture>[]
+          : const <LinePicture>[],
+      embedResolver: widget.embedResolver,
+      formula: widget.hideMarkers && widget.mathCache != null
+          ? _formulaOf(index)
+          : null,
+      mathCache: widget.mathCache,
+      diagram: widget.hideMarkers ? _diagramOf(index) : null,
+      tableRow: widget.hideMarkers && block?.kind == BlockKind.table
+          ? (at) => _tableRowAt(context, index, block!, at)
+          : null,
+      tableHeader: block?.kind == BlockKind.table && index == block!.startLine,
+      pieceKey: block?.kind == BlockKind.table
+          ? (at) => at == 0 ? _keyFor(index) : _fragmentKey(index, at)
+          : null,
+      pieceShift: _caretShift,
+      definition: widget.hideMarkers && block != null
+          ? _styler?.definitionRunOf(block)
+          : null,
+      codeRuns: !widget.hideMarkers
+          ? null
+          : quoted != null
+          ? _codeColors.ofQuoted(
+              quoted,
+              block!.startLine,
+              widget.buffer,
+              widget.theme.codeHighlight,
+            )
+          : _codeColors.of(
+              index,
+              block,
+              widget.buffer,
+              widget.theme.codeHighlight,
+            ),
+      number: widget.showLineNumbers && !inColumn ? index + 1 : null,
+      gutterWidth: inColumn ? 0 : _gutter,
+      theme: widget.theme,
+      syntax: _syntax ?? SyntaxColors.of(context),
+      dark: widget.dark,
+      hideMarkers: widget.hideMarkers,
+      selected: _selectionIn(index),
+      composing: _composingIn(index),
+      misspelled: _misspelledIn(index),
+      found: _foundIn(index),
+      templateProblems: _hints.problemsIn(index),
+      misspelledColor: Theme.of(context).colorScheme.error,
+      width: width,
+      index: index,
+      spot: _caretSpot,
+      caret: _caretRect,
+      caretOn: _caretOn,
+      rowColor: widget.typewriter ? typewriterLineColor(context) : null,
+      fence: _fenceOf(index, block),
+    );
+  }
+
+  /// The note's rows (#729): one sliver over all of them, or — with
+  /// side-by-side `columns` blocks — a sliver for each run of rows between
+  /// two, placed by its part of the note's map, and a [SliverColumns] for
+  /// each block, in its host row.
+  Widget _rowSlivers(BuildContext context, double width) {
+    Widget rows(int start, int end) => SliverMarkdownBlocks(
+      key: start == 0 ? null : ValueKey<String>('rows-$start'),
+      heights: start == 0 && end == _heights.length
+          ? _heights
+          : BlockHeightRange(_heights, start, end),
+      segment: _hosts.layouts.isNotEmpty,
+      delegate: SliverChildBuilderDelegate(
+        // A row is a line nobody folded away.
+        (context, row) =>
+            _lineWidget(context, _folds.lineOf(start + row), width: width),
+        childCount: end - start,
+      ),
+    );
+    final layouts = _hosts.layouts;
+    if (layouts.isEmpty) return rows(0, _heights.length);
+    final slivers = <Widget>[];
+    var from = 0;
+    for (final layout in layouts) {
+      final host = _folds.rowOf(layout.run.start);
+      if (host > from) slivers.add(rows(from, host));
+      slivers.add(_columnsSliver(context, layout, host));
+      from = host + 1;
+    }
+    if (from < _heights.length) slivers.add(rows(from, _heights.length));
+    return SliverMainAxisGroup(slivers: slivers);
+  }
+
+  /// [layout]'s block, its columns side by side, in row [host].
+  Widget _columnsSliver(BuildContext context, LiveLayout layout, int host) {
+    final run = layout.run;
+    return SliverColumns(
+      key: ValueKey<String>('columns-${run.start}'),
+      heights: _heights,
+      index: host,
+      gap: _gap,
+      indent: _gutter,
+      opener: _lineWidget(context, run.start, width: _textWidth),
+      closer: run.closed
+          ? _lineWidget(context, run.end - 1, width: _textWidth)
+          : null,
+      rows: [
+        for (final row in layout.rows)
+          [
+            for (final at in row)
+              (
+                share: layout.shares[at],
+                sliver: SliverMarkdownBlocks(
+                  heights: layout.maps[at],
+                  delegate: SliverChildBuilderDelegate(
+                    (context, line) => _lineWidget(
+                      context,
+                      run.columns[at].start + line,
+                      width: layout.widths[at],
+                      inColumn: true,
+                    ),
+                    childCount: layout.maps[at].length,
+                  ),
+                ),
+              ),
+          ],
+      ],
+    );
   }
 
   // ---------------------------------------------------------- table handles

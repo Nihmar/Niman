@@ -122,7 +122,9 @@ void main() {
   testWidgets('in live a fence line is a band of half an em', (tester) async {
     await _pump(tester, _two, live: true, width: 500);
     // 0.5 em of the 14 px body text.
-    final opener = tester.getRect(find.text(':::: columns', findRichText: true));
+    final opener = tester.getRect(
+      find.text(':::: columns', findRichText: true),
+    );
     expect(opener.height, closeTo(7, 0.5));
     final closer = tester.getRect(find.text('::::', findRichText: true));
     expect(closer.height, closeTo(7, 0.5));
@@ -137,5 +139,84 @@ void main() {
       find.text('::: {.column width="40%"}', findRichText: true),
     );
     expect(opener.height, greaterThan(14));
+  });
+
+  testWidgets('in live on a wide pane the columns sit side by side', (
+    tester,
+  ) async {
+    await _pump(tester, _two, live: true);
+    final left = tester.getRect(find.text('first left', findRichText: true));
+    final right = tester.getRect(find.text('first right', findRichText: true));
+    expect(right.left, greaterThan(left.right));
+    expect((right.top - left.top).abs(), lessThan(2));
+    final after = tester.getRect(find.text('After', findRichText: true));
+    final second = tester.getRect(find.text('second left', findRichText: true));
+    expect(after.top, greaterThanOrEqualTo(second.bottom));
+  });
+
+  testWidgets('in source the columns stay line by line', (tester) async {
+    await _pump(tester, _two);
+    final left = tester.getRect(find.text('first left', findRichText: true));
+    final right = tester.getRect(find.text('first right', findRichText: true));
+    expect(right.top, greaterThan(left.bottom));
+  });
+
+  group('editing side by side', () {
+    testWidgets('a tap in a column puts the caret in that column', (
+      tester,
+    ) async {
+      final state = await _pump(tester, _two, live: true);
+      final right = find.text('first right', findRichText: true);
+      await tester.tapAt(tester.getRect(right).centerLeft + const Offset(2, 0));
+      await tester.pump();
+      final start = _two.indexOf('first right');
+      expect(state.selection.extent, inInclusiveRange(start, start + 1));
+      final left = find.text('first left', findRichText: true);
+      await tester.tapAt(tester.getRect(left).centerRight - const Offset(2, 0));
+      await tester.pump(const Duration(milliseconds: 500));
+      final end = _two.indexOf('first left') + 'first left'.length;
+      expect(state.selection.extent, inInclusiveRange(end - 1, end));
+    });
+
+    testWidgets('typing in a column keeps the columns side by side', (
+      tester,
+    ) async {
+      final state = await _pump(tester, _two, live: true);
+      final at = _two.indexOf('first right');
+      state.replaceText(at, at, 'new\nlines\n');
+      await tester.pump();
+      await tester.pump();
+      final left = tester.getRect(find.text('first left', findRichText: true));
+      final right = tester.getRect(
+        find.text('first right', findRichText: true),
+      );
+      final added = tester.getRect(find.text('new', findRichText: true));
+      expect(added.left, greaterThan(left.right));
+      expect(right.top, greaterThan(added.bottom));
+      // The caret is drawn where it is, in the right column.
+      final caret = state.caretRect!;
+      expect(caret.left, greaterThan(left.right));
+    });
+
+    testWidgets('a jump to a line in a column scrolls to it', (tester) async {
+      final note = StringBuffer();
+      for (var at = 0; at < 80; at++) {
+        note.writeln('line $at');
+      }
+      note.write(_two);
+      for (var at = 0; at < 80; at++) {
+        note.writeln('more $at');
+      }
+      final state = await _pump(tester, note.toString(), live: true);
+      // "first right" is line 80 + 10.
+      state.jumpToLine(90);
+      await tester.pump();
+      await tester.pump();
+      final right = tester.getRect(
+        find.text('first right', findRichText: true),
+      );
+      expect(right.top, lessThan(60));
+      expect(right.top, greaterThanOrEqualTo(-1));
+    });
   });
 }
