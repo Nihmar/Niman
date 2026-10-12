@@ -112,6 +112,29 @@ void main() {
       expect(opened, [(DateTime(2026, 9, 20), true)]);
     });
 
+    // #788: opening another day answers the pick; leaving the month
+    // takes it too.
+    testWidgets('in the dock a pick goes when a day opens or the month '
+        'turns', (tester) async {
+      final opened = await pump(tester, large: false);
+      await tester.tap(find.byKey(const Key('journal-day-20')));
+      await tester.pump();
+      expect(find.byKey(const Key('journal-dock-create')), findsOne);
+
+      await tester.tap(find.byKey(const Key('journal-day-21')));
+      await tester.pump();
+      expect(opened, [(DateTime(2026, 9, 21), false)]);
+      expect(find.byKey(const Key('journal-dock-create')), findsNothing);
+      expect(find.text('Sunday 20 September 2026'), findsNothing);
+
+      await tester.tap(find.byKey(const Key('journal-day-20')));
+      await tester.pump();
+      expect(find.byKey(const Key('journal-dock-create')), findsOne);
+      await tester.tap(find.byKey(const Key('journal-month-next')));
+      await tester.pump();
+      expect(find.byKey(const Key('journal-dock-create')), findsNothing);
+    });
+
     testWidgets('on the phone a day is picked, then opened or made', (
       tester,
     ) async {
