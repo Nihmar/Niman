@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Columns exported</title>
+<style>
+:root{--base:#1B1D21;--surface:#23262B;--chrome:#2C3037;--high:#363B44;--text:#F2EDE5;--muted:#A6A29A;
+--outline:#4A4F59;--accent:#587CD3;--dim:#6B7079;--code:#7FD1C4;--link:#7CA0E6;--sel:rgba(59,130,246,.33)}
+body{margin:0;padding:28px;font-family:"Segoe UI",Roboto,system-ui,sans-serif;background:#14161A;color:var(--text)}
+h1.page{font-size:20px;font-weight:600;margin:0 0 4px}
+p.lead{margin:0 0 14px;color:var(--muted);font-size:13px;max-width:900px;line-height:1.5}
+p.caption{font-size:12.5px;color:var(--muted);margin:12px 0 0;max-width:1280px;line-height:1.55}
+code{font-family:"DejaVu Sans Mono",Consolas,monospace;font-size:12px}
+.ico{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+/* the note's own typography: body 14 px / 1.5, h1 1.8 em, h2 1.5 em, h3 1.3 em */
+.doc{font-size:14px;line-height:21px;color:var(--text)}
+.doc p{margin:0}
+.doc .blank{height:21px}
+.doc h1{font-size:25.2px;line-height:1.3;font-weight:700;margin:0}
+.doc h2{font-size:21px;line-height:1.3;font-weight:700;margin:0}
+.doc h3{font-size:18.2px;line-height:1.3;font-weight:600;margin:0}
+.doc ul{margin:0;padding-left:22.4px}
+.doc li{margin:0}
+.doc .wl{color:var(--accent);text-decoration:underline;text-decoration-color:rgba(88,124,211,.5)}
+.doc .tag{color:var(--accent)}
+.doc table{border-collapse:collapse;font-size:14px;line-height:1.3}
+.doc td,.doc th{border:1px solid var(--high);padding:4.2px 7px;text-align:left;vertical-align:top}
+.doc th{font-weight:600}
+.callout{border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);padding:0 0 0 12.6px}
+.callout .ct{display:flex;align-items:center;gap:6.7px;color:var(--c);font-weight:600;height:21px}
+/* columns: shares by flex-grow over a zero basis, 16 em minimum, 1.5 em gap */
+.cols{display:flex;flex-wrap:wrap;column-gap:21px;row-gap:21px}
+.col{flex:1 1 0;min-width:224px;box-sizing:border-box;position:relative}
+.band{height:7px;position:relative}
+.band.mk::after{content:"";position:absolute;left:0;right:0;top:3px;border-top:1px solid var(--outline)}
+.chip{position:absolute;right:0;top:-6px;height:14px;padding:0 6px;border-radius:7px;background:var(--high);color:var(--muted);font-size:10.5px;line-height:14px;z-index:1}
+.chip.l{left:0;right:auto}
+.revealed{color:var(--muted)}
+.revealed .colons{color:var(--dim)}
+.sel{background:var(--sel)}
+.caret{display:inline-block;width:1.5px;height:19px;background:var(--accent);vertical-align:-4px;margin:0 -0.75px}
+.pic{border-radius:2px;overflow:hidden;display:block}
+
+.canvas{width:1280px;height:800px;display:flex;gap:24px;background:#1B1D21;border-radius:6px;padding:24px;box-sizing:border-box}
+.browser{width:760px;flex:none;background:#2C3037;border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.bbar{height:40px;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:12px;color:#A6A29A}
+.url{flex:1;height:26px;border-radius:13px;background:#1B1D21;display:flex;align-items:center;padding:0 12px;color:#D9D4CB;font-size:12px}
+.web{flex:1;background:#FFFFFF;overflow:hidden;padding:28px 40px;color:#1F2328;font-size:15px;line-height:1.6;font-family:"Segoe UI",Roboto,system-ui,sans-serif}
+.web h1{font-size:28px;margin:0 0 .5em}
+.web h2{font-size:21px;margin:1em 0 .4em}
+.web p{margin:0 0 1em}
+.web table{border-collapse:collapse;font-size:13.5px;margin:0 0 1em;width:100%}
+.web td,.web th{border:1px solid #D0D7DE;padding:4px 8px;text-align:left}
+.ecols{display:flex;flex-wrap:wrap;gap:1.5em;margin:0 0 1em}
+.ecol{flex:1 1 0;min-width:min(16em,100%)}
+.ecol>:last-child{margin-bottom:0}
+.ecallout{border-left:4px solid #00A8A6;background:#E6F6F6;padding:.5em .9em;margin:0 0 1em}
+.ecallout .t{font-weight:600;color:#00807E}
+.pdfv{flex:1;background:#2C3037;border-radius:10px;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.a4{width:390px;height:552px;background:#fff;margin-top:16px;box-shadow:0 4px 18px rgba(0,0,0,.45);padding:26px 26px;box-sizing:border-box;color:#1F2328;font-size:8.6px;line-height:1.5;font-family:"Segoe UI",Roboto,system-ui,sans-serif;overflow:hidden}
+.a4 h1{font-size:16px;margin:0 0 .5em}.a4 h2{font-size:12px;margin:.8em 0 .3em}.a4 p{margin:0 0 .8em}
+.a4 table{border-collapse:collapse;width:100%;margin:0 0 .8em}.a4 td,.a4 th{border:.6px solid #D0D7DE;padding:2px 4px;text-align:left}
+.a4 .ecallout{padding:.4em .7em}
+</style>
+</head>
+<body>
+<h1 class="page">Note columns — 6 · Exported: HTML and an A4 PDF</h1>
+<p class="lead">The same note exported. Left, the HTML page in a browser 680 px wide; right, the PDF, an A4 page printed from that page.</p>
+<div class="canvas">
+<div class="browser">
+<div class="bbar"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.2 3.5 5 3.5 8s-1 5.8-3.5 8M12 4c-2.5 2.2-3.5 5-3.5 8s1 5.8 3.5 8"/></svg><div class="url">file:///home/ana/Exports/Monte%20Baldo.html</div></div>
+<div class="web"><h1>Monte Baldo</h1>
+<div class="ecols">
+<div class="ecol" style="flex-grow:40"><svg class="pic" width="100%" height="150" viewBox="0 0 272 150" preserveAspectRatio="xMidYMid slice">
+<rect width="272" height="150" fill="#2F4A3E"/>
+<path d="M0 100 C60 60 120 20 170 40 S250 90 272 70 V150 H0Z" fill="#3E5C48"/>
+<path d="M0 130 C70 100 130 60 180 75 S240 120 272 110 V150 H0Z" fill="#4E6B52"/>
+<g fill="none" stroke="#7E9A7A" stroke-width=".8" opacity=".7">
+<path d="M40 110 q40 -30 80 -50 q30 -14 60 4"/><path d="M60 120 q40 -26 70 -40 q24 -10 50 6"/><path d="M90 128 q30 -18 50 -26 q16 -6 32 4"/></g>
+<path d="M0 150 L0 90 Q40 120 70 150Z" fill="#3D6A8C"/>
+<circle cx="150" cy="44" r="3.5" fill="#E8E3DA"/><text x="158" y="40" font-size="10" fill="#E8E3DA" font-family="Segoe UI,Roboto,sans-serif">Cima Valdritta</text>
+<text x="8" y="142" font-size="10" fill="#BFD6E6" font-family="Segoe UI,Roboto,sans-serif">Lake Garda</text>
+</svg><p style="color:#57606A;font-size:.85em;margin-top:.3em">The ridge from the south, from the Ferrara road.</p>
+<table><tr><th>Fact</th><th>Value</th></tr><tr><td>Highest point</td><td>Cima Valdritta, 2,218 m</td></tr><tr><td>Range</td><td>Garda Prealps</td></tr><tr><td>Cable car</td><td>Malcesine, 1,760 m</td></tr></table></div>
+<div class="ecol" style="flex-grow:60"><p>Monte Baldo is the long ridge on the eastern shore of <a href="#">Lake Garda</a>, some forty kilometres from Malcesine to the Adige valley. Botanists call it <i>hortus Europae</i>.</p>
+<div class="ecallout"><div class="t">Go early</div>The first car leaves Malcesine at 8:00.</div>
+<p>The crest path runs from the top station to Cima Valdritta in about three hours.</p></div>
+</div>
+<h2>Seasons</h2>
+<div class="ecols">
+<div class="ecol" style="flex-grow:1"><b>Spring</b><br>Orchids on the Bocca di Navene; snow above 1,800 m until May.</div>
+<div class="ecol" style="flex-grow:1"><b>Summer</b><br>Start before eight; water at Rifugio Telegrafo only.</div>
+<div class="ecol" style="flex-grow:1"><b>Autumn</b><br>The clearest views of the year; the larches turn mid-October.</div>
+</div></div>
+</div>
+<div class="pdfv">
+<div class="bbar" style="width:100%;box-sizing:border-box"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 16h4"/></svg><span style="flex:1;color:#D9D4CB">Monte Baldo.pdf · A4 · page 1 of 1</span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M7 9V4h10v5M7 17H5v-7h14v7h-2"/><rect x="7" y="14" width="10" height="6"/></svg><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M12 4v11M7 10l5 5 5-5M5 19h14"/></svg></div>
+<div class="a4"><h1>Monte Baldo</h1>
+<div class="ecols">
+<div class="ecol" style="flex-grow:40"><svg class="pic" width="100%" height="96" viewBox="0 0 272 96" preserveAspectRatio="xMidYMid slice">
+<rect width="272" height="96" fill="#2F4A3E"/>
+<path d="M0 46 C60 6 120 20 170 40 S250 90 272 70 V96 H0Z" fill="#3E5C48"/>
+<path d="M0 76 C70 46 130 60 180 75 S240 120 272 110 V96 H0Z" fill="#4E6B52"/>
+<g fill="none" stroke="#7E9A7A" stroke-width=".8" opacity=".7">
+<path d="M40 56 q40 -30 80 -50 q30 -14 60 4"/><path d="M60 66 q40 -26 70 -40 q24 -10 50 6"/><path d="M90 74 q30 -18 50 -26 q16 -6 32 4"/></g>
+<path d="M0 96 L0 36 Q40 66 70 96Z" fill="#3D6A8C"/>
+<circle cx="150" cy="44" r="3.5" fill="#E8E3DA"/><text x="158" y="40" font-size="10" fill="#E8E3DA" font-family="Segoe UI,Roboto,sans-serif">Cima Valdritta</text>
+<text x="8" y="88" font-size="10" fill="#BFD6E6" font-family="Segoe UI,Roboto,sans-serif">Lake Garda</text>
+</svg><p style="color:#57606A;font-size:.85em;margin-top:.3em">The ridge from the south, from the Ferrara road.</p>
+<table><tr><th>Fact</th><th>Value</th></tr><tr><td>Highest point</td><td>Cima Valdritta, 2,218 m</td></tr><tr><td>Range</td><td>Garda Prealps</td></tr><tr><td>Cable car</td><td>Malcesine, 1,760 m</td></tr></table></div>
+<div class="ecol" style="flex-grow:60"><p>Monte Baldo is the long ridge on the eastern shore of <a href="#">Lake Garda</a>, some forty kilometres from Malcesine to the Adige valley. Botanists call it <i>hortus Europae</i>.</p>
+<div class="ecallout"><div class="t">Go early</div>The first car leaves Malcesine at 8:00.</div>
+<p>The crest path runs from the top station to Cima Valdritta in about three hours.</p></div>
+</div>
+<h2>Seasons</h2>
+<div class="ecols">
+<div class="ecol" style="flex-grow:1"><b>Spring</b><br>Orchids on the Bocca di Navene; snow above 1,800 m until May.</div>
+<div class="ecol" style="flex-grow:1"><b>Summer</b><br>Start before eight; water at Rifugio Telegrafo only.</div>
+<div class="ecol" style="flex-grow:1"><b>Autumn</b><br>The clearest views of the year; the larches turn mid-October.</div>
+</div></div>
+</div>
+</div>
+<p class="caption"><code>TreeHtml</code> writes <code>&lt;div class="columns"&gt;&lt;div class="column" style="flex-grow:40"&gt;</code>; <code>pageStyle</code> gains <code>.columns{display:flex;flex-wrap:wrap;gap:1.5em}</code> and <code>.column{flex:1 1 0;min-width:min(16em,100%)}</code>. A column’s <code>flex-grow</code> is its share; over a basis of 0 the room after the gaps is split by share, and the 16 em minimum makes a column that does not fit wrap — the app’s own rule. The seasons wrap two and one in both: three columns of 16 em and two gaps are wider than the 600 px the page gives its text at 15 px, and wider than the 174 mm of an A4 page at 11 pt, where the 40 % / 60 % pair still fits side by side. Print adds no <code>break-inside: avoid</code> on <code>.columns</code>, so a block taller than a page crosses it. EPUB chapters carry the same CSS; a reader without flexbox stacks the columns in source order.</p>
+</body>
+</html>

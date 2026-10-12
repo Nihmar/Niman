@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A selection across two columns</title>
+<style>
+:root{--base:#1B1D21;--surface:#23262B;--chrome:#2C3037;--high:#363B44;--text:#F2EDE5;--muted:#A6A29A;
+--outline:#4A4F59;--accent:#587CD3;--dim:#6B7079;--code:#7FD1C4;--link:#7CA0E6;--sel:rgba(59,130,246,.33)}
+body{margin:0;padding:28px;font-family:"Segoe UI",Roboto,system-ui,sans-serif;background:#14161A;color:var(--text)}
+h1.page{font-size:20px;font-weight:600;margin:0 0 4px}
+p.lead{margin:0 0 14px;color:var(--muted);font-size:13px;max-width:900px;line-height:1.5}
+p.caption{font-size:12.5px;color:var(--muted);margin:12px 0 0;max-width:1280px;line-height:1.55}
+code{font-family:"DejaVu Sans Mono",Consolas,monospace;font-size:12px}
+.ico{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+/* the note's own typography: body 14 px / 1.5, h1 1.8 em, h2 1.5 em, h3 1.3 em */
+.doc{font-size:14px;line-height:21px;color:var(--text)}
+.doc p{margin:0}
+.doc .blank{height:21px}
+.doc h1{font-size:25.2px;line-height:1.3;font-weight:700;margin:0}
+.doc h2{font-size:21px;line-height:1.3;font-weight:700;margin:0}
+.doc h3{font-size:18.2px;line-height:1.3;font-weight:600;margin:0}
+.doc ul{margin:0;padding-left:22.4px}
+.doc li{margin:0}
+.doc .wl{color:var(--accent);text-decoration:underline;text-decoration-color:rgba(88,124,211,.5)}
+.doc .tag{color:var(--accent)}
+.doc table{border-collapse:collapse;font-size:14px;line-height:1.3}
+.doc td,.doc th{border:1px solid var(--high);padding:4.2px 7px;text-align:left;vertical-align:top}
+.doc th{font-weight:600}
+.callout{border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);padding:0 0 0 12.6px}
+.callout .ct{display:flex;align-items:center;gap:6.7px;color:var(--c);font-weight:600;height:21px}
+/* columns: shares by flex-grow over a zero basis, 16 em minimum, 1.5 em gap */
+.cols{display:flex;flex-wrap:wrap;column-gap:21px;row-gap:21px}
+.col{flex:1 1 0;min-width:224px;box-sizing:border-box;position:relative}
+.band{height:7px;position:relative}
+.band.mk::after{content:"";position:absolute;left:0;right:0;top:3px;border-top:1px solid var(--outline)}
+.chip{position:absolute;right:0;top:-6px;height:14px;padding:0 6px;border-radius:7px;background:var(--high);color:var(--muted);font-size:10.5px;line-height:14px;z-index:1}
+.chip.l{left:0;right:auto}
+.revealed{color:var(--muted)}
+.revealed .colons{color:var(--dim)}
+.sel{background:var(--sel)}
+.caret{display:inline-block;width:1.5px;height:19px;background:var(--accent);vertical-align:-4px;margin:0 -0.75px}
+.pic{border-radius:2px;overflow:hidden;display:block}
+
+.window{width:1280px;height:800px;box-sizing:border-box;display:flex;flex-direction:column;background:var(--chrome);overflow:hidden;border-radius:6px;position:relative}
+.titlebar{height:38px;flex:none;display:flex;align-items:center}
+.tb-toggle{width:34px;height:34px;margin-left:4px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.tb-title{font-size:12px;color:var(--muted);width:268px;padding-left:4px}
+.tab{height:30px;display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;border-radius:7px;font-size:12px;color:var(--muted);margin-right:4px;box-sizing:border-box;max-width:190px}
+.tab.on{background:var(--surface);border:1px solid var(--accent);color:var(--text)}
+.tab .x{width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+.grow{flex:1}
+.wb{width:44px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.workspace{flex:1;min-height:0;display:flex;gap:4px;padding:0 4px 4px 0}
+.rail{width:42px;flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0 4px 4px;box-sizing:border-box}
+.rb{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.rb.on{background:var(--high);color:var(--accent)}
+.island{background:var(--surface);border-radius:10px;overflow:hidden}
+.tree{width:260px;flex:none;padding:8px 6px;box-sizing:border-box;font-size:13px}
+.trow{height:28px;display:flex;align-items:center;gap:6px;padding:0 6px;border-radius:6px;color:#D9D4CB}
+.trow.sel{background:var(--high);color:var(--text)}
+.trow .lead{width:16px;display:flex;justify-content:center;color:var(--muted)}
+.notepane{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.topbar{height:38px;flex:none;display:flex;align-items:center;border-bottom:1px solid var(--high);padding:0 117px;box-sizing:border-box}
+.tbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--muted);border-radius:6px}
+.tbtn.on{background:var(--high);color:var(--text)}
+.tdiv{width:1px;height:16px;background:var(--high);margin:0 5px}
+.content{flex:1;min-height:0;overflow:hidden;position:relative}
+.text{position:absolute;left:133px;width:700px;top:20px}
+.gutter{position:absolute;left:60px;width:62px;top:20px;text-align:right;font-size:12px;line-height:21px;color:var(--dim)}
+.status{height:44px;flex:none;display:flex;align-items:center;gap:2px;padding:0 117px;box-sizing:border-box;font-size:11px;color:var(--muted)}
+.sbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.switch{display:flex;align-items:center;gap:6px;padding:0 8px;height:30px;color:var(--muted)}
+.scrim{position:absolute;inset:0;background:rgba(10,11,13,.55)}
+</style>
+</head>
+<body>
+<h1 class="page">Note columns — 4 · A selection from one column into the next</h1>
+<p class="lead">Dragged from the caption under the map to the first words of the right column.</p>
+<div class="window">
+<div class="titlebar">
+  <div class="tb-toggle"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></div>
+  <div class="tb-title">Notes</div>
+  <div class="tab on">Monte Baldo<span class="x"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M7 7l10 10M17 7L7 17"/></svg></span></div><div class="tab">Lake Garda<span class="x"></span></div>
+  <div class="tbtn" style="width:26px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"/></svg></div>
+  <div class="tbtn" style="width:26px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M7 10l5 5 5-5"/></svg></div>
+  <div class="grow"></div>
+  <div class="wb"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 12h12"/></svg></div><div class="wb"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></div><div class="wb"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M7 7l10 10M17 7L7 17"/></svg></div>
+</div>
+<div class="workspace">
+<div class="rail"><div class="rb on"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg></div><div class="rb"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg></div><div class="rb"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></div><div class="rb"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg></div><div class="rb"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></div><div class="grow"></div>
+  <div class="rb"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M12 4l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4M4 16l8 4 8-4"/></svg></div><div class="rb"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></div></div>
+<div class="island tree"><div class="trow " style="padding-left:6px"><span class="lead"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M9 6l6 6-6 6"/></svg></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>Journal</div><div class="trow " style="padding-left:6px"><span class="lead"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M9 6l6 6-6 6"/></svg></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>Projects</div><div class="trow " style="padding-left:6px"><span class="lead"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M6 9l6 6 6-6"/></svg></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>Travel</div><div class="trow " style="padding-left:18px"><span class="lead"></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Lake Garda.md</div><div class="trow sel" style="padding-left:18px"><span class="lead"></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Monte Baldo.md</div><div class="trow " style="padding-left:18px"><span class="lead"></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Packing list.md</div><div class="trow " style="padding-left:18px"><span class="lead"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M6 9l6 6 6-6"/></svg></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>assets</div><div class="trow " style="padding-left:30px"><span class="lead"></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M20 16l-5-5-8 8"/></svg>baldo-map.png</div><div class="trow " style="padding-left:6px"><span class="lead"></span><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Reading list.md</div></div>
+<div class="island notepane">
+<div class="topbar"><div class="tbtn" title="Bold (Ctrl+B)"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/></svg></div><div class="tbtn" title="Italic (Ctrl+I)"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M10 5h8M6 19h8M14 5l-4 14"/></svg></div><div class="tbtn" title="Strikethrough"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M5 12h14M16 7.5C15.5 6 14 5 12 5c-2.5 0-4 1.3-4 3M8 16.5c.5 1.5 2 2.5 4 2.5 2.5 0 4-1.3 4-3"/></svg></div><div class="tbtn" title="Highlight"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 20h16M8 16l9-9 3 3-9 9H8z"/></svg></div><div class="tbtn" title="Superscript"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 8l8 10M12 8L4 18M16 4h4l-4 5h4"/></svg></div><div class="tbtn" title="Underline"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M7 4v7a5 5 0 0 0 10 0V4M5 20h14"/></svg></div><div class="tdiv"></div><div class="tbtn" title="Link"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg></div><div class="tbtn" title="Code block"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></svg></div><div class="tbtn" title="Insert image"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M17 13l-4-4-7 8"/><path d="M20 3v6M17 6h6"/></svg></div><div class="tbtn" title="Table"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M4 10h16M4 14.5h16M10 5v14"/></svg></div><div class="tbtn" title="Columns"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M9.33 5v14M14.67 5v14"/></svg></div><div class="tdiv"></div><div class="tbtn" title="Heading"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 5v14M18 5v14M6 12h12"/></svg></div><div class="tbtn" title="List"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M9 7h11M9 12h11M9 17h11"/><circle cx="5" cy="7" r=".8"/><circle cx="5" cy="12" r=".8"/><circle cx="5" cy="17" r=".8"/></svg></div><div class="tbtn" title="Numbered list"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M10 7h10M10 12h10M10 17h10M4 5.5l1.5-.5v4M4 15h2.5L4 18.5h2.5"/></svg></div><div class="tbtn" title="Checkbox list"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M3 7l2 2 3-4M3 16l2 2 3-4M11 7h10M11 16h10"/></svg></div><div class="tbtn" title="Quote"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M5 17l2-5H5V7h5v5l-2 5zM14 17l2-5h-2V7h5v5l-2 5z"/></svg></div><div class="tbtn" title="Outdent"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 5h16M11 10h9M11 14h9M4 19h16M8 9l-3 3 3 3"/></svg></div><div class="tbtn" title="Indent"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 5h16M11 10h9M11 14h9M4 19h16M5 9l3 3-3 3"/></svg></div><div class="tdiv"></div><div class="tbtn" title="Tools"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M14.5 6.5a4 4 0 0 0 5 5l-9 9-3-3 9-9a4 4 0 0 0-2-2z"/></svg></div><div class="grow"></div>
+  <div class="tbtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></div><div class="tbtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></div></div>
+<div class="content"><div class="text doc"><h1>Monte Baldo</h1>
+<div class="blank"></div>
+<div class="band"><span class="chip l">columns</span></div>
+<div class="cols">
+<div class="col" style="flex-grow:40"><div class="band mk"><span class="chip">column · 40%</span></div><svg class="pic" width="100%" height="118" viewBox="0 0 272 118" preserveAspectRatio="xMidYMid slice">
+<rect width="272" height="118" fill="#2F4A3E"/>
+<path d="M0 68 C60 28 120 20 170 40 S250 90 272 70 V118 H0Z" fill="#3E5C48"/>
+<path d="M0 98 C70 68 130 60 180 75 S240 120 272 110 V118 H0Z" fill="#4E6B52"/>
+<g fill="none" stroke="#7E9A7A" stroke-width=".8" opacity=".7">
+<path d="M40 78 q40 -30 80 -50 q30 -14 60 4"/><path d="M60 88 q40 -26 70 -40 q24 -10 50 6"/><path d="M90 96 q30 -18 50 -26 q16 -6 32 4"/></g>
+<path d="M0 118 L0 58 Q40 88 70 118Z" fill="#3D6A8C"/>
+<circle cx="150" cy="44" r="3.5" fill="#E8E3DA"/><text x="158" y="40" font-size="10" fill="#E8E3DA" font-family="Segoe UI,Roboto,sans-serif">Cima Valdritta</text>
+<text x="8" y="110" font-size="10" fill="#BFD6E6" font-family="Segoe UI,Roboto,sans-serif">Lake Garda</text>
+</svg>
+<p style="color:var(--muted);font-size:12.5px;line-height:19px;margin-top:4px">The ridge from the south, <span class="sel">from the Ferrara road.</span></p>
+<div class="blank sel" style="height:10px"></div>
+<table style="width:100%"><tr><th class="sel">Fact</th><th class="sel">Value</th></tr><tr><td class="sel">Highest point</td><td class="sel">Cima Valdritta, 2,218 m</td></tr><tr><td class="sel">Range</td><td class="sel">Garda Prealps</td></tr><tr><td class="sel">Cable car</td><td class="sel">Malcesine, 1,760 m</td></tr></table><div class="band sel"></div></div>
+<div class="col" style="flex-grow:60"><div class="band mk sel"><span class="chip">column</span></div><p><span class="sel">Monte Baldo is the long ridge</span><span class="caret"></span> on the eastern shore of
+<span class="wl">Lake Garda</span>, some forty kilometres from Malcesine to the Adige valley.
+Botanists call it <i>hortus Europae</i>: the ice left its summits uncovered, and plants survived there that grow
+nowhere else.</p>
+<div class="blank"></div>
+<div class="callout" style="--c:#00A8A6">
+<div class="ct"><svg class="ico" viewBox="0 0 24 24" style="width:16.8px;height:16.8px;color:#00A8A6"><path d="M12 21c-3.5 0-6-2.4-6-5.6C6 11 11 9 10 3c3 1.5 8 5.5 8 11.4 0 3.2-2.5 6.6-6 6.6z"/><path d="M12 21c-1.5 0-2.5-1-2.5-2.5 0-2 2.5-3 2.5-5 1.5 1.5 2.5 3 2.5 5 0 1.5-1 2.5-2.5 2.5z"/></svg>Go early</div>
+<p>The first car leaves Malcesine at 8:00. By ten the queue reaches the lake road.</p>
+</div>
+<div class="blank"></div>
+<p>The crest path runs from the top station to Cima Valdritta in about three hours. <span class="tag">#hiking</span></p><div class="band"></div></div>
+</div>
+<div class="band"></div>
+<div class="blank"></div>
+<h2>Getting there</h2>
+<p>From Verona, the A22 to Affi and the lake road north to Malcesine; the cable car climbs in two stages.</p>
+<div class="blank"></div>
+<h2>Seasons</h2>
+<div class="band"></div><div class="cols"><div class="col"><div class="band"></div><h3>Spring</h3><ul><li>Orchids on the Bocca di Navene</li><li>Snow above 1,800 m until May</li><li>Huts open from 1 May</li></ul><div class="band"></div></div><div class="col"><div class="band"></div><h3>Summer</h3><ul><li>Start before eight</li><li>Water at Rifugio Telegrafo only</li><li>Storms most afternoons</li></ul><div class="band"></div></div><div class="col"><div class="band"></div><h3>Autumn</h3><ul><li>The clearest views of the year</li><li>Cable car until early November</li><li>Larches turn mid-October</li></ul><div class="band"></div></div></div><div class="band"></div></div></div>
+<div class="status">
+  <div class="sbtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 7h12M4 12h12M4 17h8M19 7h1M19 12h1"/></svg></div><div class="sbtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></div>
+  <div class="sbtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M4 15l3.5-9 3.5 9M5.3 12h4.4M13 13l3 3 5-6"/></svg></div><div class="sbtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 4v5M9 7l3 3 3-3M12 20v-5M9 17l3-3 3 3M4 12h16"/></svg></div><div class="switch"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></svg>Source</div>
+  <div class="grow"></div><span>412 words</span><span style="width:10px"></span><span>Saved</span>
+  <div class="sbtn" style="margin-left:6px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div></div>
+
+</div>
+</div>
+</div><div style="display:flex;gap:16px;margin-top:14px;align-items:flex-start">
+<div style="width:420px;background:#23262B;border:1px solid #2C3037;border-radius:10px;padding:12px 14px">
+<div style="font-size:12px;font-weight:600;color:#A6A29A;letter-spacing:.04em;margin-bottom:8px">CLIPBOARD AFTER CTRL+C</div>
+<pre style="margin:0;font-family:'DejaVu Sans Mono',Consolas,monospace;font-size:12px;line-height:1.55;color:#D9D4CB;white-space:pre-wrap">from the Ferrara road.
+
+| Fact | Value |
+|---|---|
+| Highest point | Cima Valdritta, 2,218 m |
+| Range | Garda Prealps |
+| Cable car | Malcesine, 1,760 m |
+<span style="color:#7FD1C4">:::</span>
+
+<span style="color:#7FD1C4">::: column</span>
+Monte Baldo is the long ridge</pre></div>
+<p class="caption" style="margin:0;max-width:820px">The selection runs in source order: from the anchor to the end of the left
+column, across its closer and the right column’s opener — their bands are painted as selected — and on to the caret.
+Nothing below the pointer in the left column is skipped and nothing above it in the right one is taken, as a selection
+ordered by where lines are drawn would do. Copy is the source between the two ends, fences included, so pasting it back
+gives the same Markdown; the read view orders its selection by source line too. Delete takes the fences with the text,
+one undo step.</p></div>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Columns inside a callout, phone</title>
+<style>
+:root{--base:#1B1D21;--surface:#23262B;--chrome:#2C3037;--high:#363B44;--text:#F2EDE5;--muted:#A6A29A;
+--outline:#4A4F59;--accent:#587CD3;--dim:#6B7079;--code:#7FD1C4;--link:#7CA0E6;--sel:rgba(59,130,246,.33)}
+body{margin:0;padding:28px;font-family:"Segoe UI",Roboto,system-ui,sans-serif;background:#14161A;color:var(--text)}
+h1.page{font-size:20px;font-weight:600;margin:0 0 4px}
+p.lead{margin:0 0 14px;color:var(--muted);font-size:13px;max-width:900px;line-height:1.5}
+p.caption{font-size:12.5px;color:var(--muted);margin:12px 0 0;max-width:1280px;line-height:1.55}
+code{font-family:"DejaVu Sans Mono",Consolas,monospace;font-size:12px}
+.ico{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+/* the note's own typography: body 14 px / 1.5, h1 1.8 em, h2 1.5 em, h3 1.3 em */
+.doc{font-size:14px;line-height:21px;color:var(--text)}
+.doc p{margin:0}
+.doc .blank{height:21px}
+.doc h1{font-size:25.2px;line-height:1.3;font-weight:700;margin:0}
+.doc h2{font-size:21px;line-height:1.3;font-weight:700;margin:0}
+.doc h3{font-size:18.2px;line-height:1.3;font-weight:600;margin:0}
+.doc ul{margin:0;padding-left:22.4px}
+.doc li{margin:0}
+.doc .wl{color:var(--accent);text-decoration:underline;text-decoration-color:rgba(88,124,211,.5)}
+.doc .tag{color:var(--accent)}
+.doc table{border-collapse:collapse;font-size:14px;line-height:1.3}
+.doc td,.doc th{border:1px solid var(--high);padding:4.2px 7px;text-align:left;vertical-align:top}
+.doc th{font-weight:600}
+.callout{border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);padding:0 0 0 12.6px}
+.callout .ct{display:flex;align-items:center;gap:6.7px;color:var(--c);font-weight:600;height:21px}
+/* columns: shares by flex-grow over a zero basis, 16 em minimum, 1.5 em gap */
+.cols{display:flex;flex-wrap:wrap;column-gap:21px;row-gap:21px}
+.col{flex:1 1 0;min-width:224px;box-sizing:border-box;position:relative}
+.band{height:7px;position:relative}
+.band.mk::after{content:"";position:absolute;left:0;right:0;top:3px;border-top:1px solid var(--outline)}
+.chip{position:absolute;right:0;top:-6px;height:14px;padding:0 6px;border-radius:7px;background:var(--high);color:var(--muted);font-size:10.5px;line-height:14px;z-index:1}
+.chip.l{left:0;right:auto}
+.revealed{color:var(--muted)}
+.revealed .colons{color:var(--dim)}
+.sel{background:var(--sel)}
+.caret{display:inline-block;width:1.5px;height:19px;background:var(--accent);vertical-align:-4px;margin:0 -0.75px}
+.pic{border-radius:2px;overflow:hidden;display:block}
+
+.phone{width:390px;height:844px;box-sizing:border-box;border-radius:22px;background:var(--surface);border:1px solid var(--chrome);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.pstatus{height:26px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;color:var(--text)}
+.appbar{height:56px;flex:none;display:flex;align-items:center;padding:0 4px;gap:0}
+.ab{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#D9D4CB;position:relative}
+.ab .badge{position:absolute;right:7px;top:7px;min-width:14px;height:14px;border-radius:7px;background:var(--accent);color:var(--text);font-size:9px;line-height:14px;text-align:center}
+.abtitle{flex:1;font-size:17px;font-weight:500;padding-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcontent{flex:1;min-height:0;overflow:hidden;padding:8px 16px 0;position:relative}
+.pstat{height:44px;flex:none;display:flex;align-items:center;gap:0;padding:0 8px;font-size:11px;color:var(--muted);border-top:1px solid var(--chrome)}
+.ptool{height:40px;flex:none;display:flex;align-items:center;overflow:hidden;background:var(--surface);padding:0 4px}
+.pt{width:36px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.kbd{height:262px;flex:none;background:#2A2D33;padding:8px 4px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px}
+.krow{display:flex;gap:5px;justify-content:center}
+.k{width:32px;height:44px;border-radius:6px;background:#41464F;color:#E8E3DA;font-size:17px;display:flex;align-items:center;justify-content:center}
+.k.w{background:#353A42;font-size:12px}
+</style>
+</head>
+<body>
+<h1 class="page">Note columns — Phone 3 · Columns inside a callout, stacked</h1>
+<p class="lead">A <code>:::: columns</code> block inside a <code>&gt; [!info]</code> callout: every line of it starts with <code>&gt; </code>, and the scanner reads the columns in the callout’s content.</p>
+<div class="phone">
+<div class="pstatus"><span>9:41</span><span>▴ ◔ ▮</span></div>
+<div class="appbar">
+  <div class="ab"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></div><div class="abtitle">Packing list</div>
+  <div class="ab"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></div><div class="ab"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px"><rect x="6" y="6" width="12" height="14" rx="2"/><path d="M9 3h10a2 2 0 0 1 2 2v12"/></svg><span class="badge">2</span></div><div class="ab"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></div>
+</div>
+<div class="pcontent"><div class="doc"><h1>Packing list</h1>
+<div class="blank"></div>
+<p>Two lists, side by side on the desktop.</p>
+<div class="blank"></div>
+<div class="callout" style="--c:#086DDD">
+<div class="ct"><svg class="ico" viewBox="0 0 24 24" style="width:16.8px;height:16.8px;color:#086DDD"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.5"/></svg>For the crest, in October</div>
+<div class="band"></div>
+<div class="cols">
+<div class="col"><div class="band"></div><h3>Day pack</h3><ul><li>Two litres of water</li><li>Windproof shell</li><li>Map 1:25,000, sheet 129</li><li>Cable car return ticket</li></ul><div class="band"></div></div>
+<div class="col"><div class="band"></div><h3>Overnight</h3><ul><li>Booking at Rifugio Telegrafo</li><li>Sleeping-bag liner</li><li>Head torch</li><li>Cash: the hut takes no cards</li></ul><div class="band"></div></div>
+</div>
+<div class="band"></div>
+</div>
+<div class="blank"></div>
+<p>Weather: <span class="wl">Monte Baldo</span> forecast page, checked the night before.</p></div></div>
+<div class="pstat">
+  <div class="ab" style="width:40px"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M4 7h12M4 12h12M4 17h8M19 7h1M19 12h1"/></svg></div><div class="ab" style="width:40px"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></div>
+  <div style="flex:1"></div><span>412 words</span><span style="width:8px"></span><span>Saved</span></div>
+</div>
+<p class="caption">This is the outermost <code>columns</code> level, so on a desktop the two lists sit side by side inside the box; here the callout’s content is 342 px wide inside its bar and indent, and they stack. The callout’s bar and tint run unbroken down the whole block. Columns inside a column would stack at any width: only the outermost level is side by side.</p>
+</body>
+</html>
