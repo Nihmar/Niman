@@ -33,3 +33,31 @@ Future<void> carryDeviceHome(
     ).warning('could not carry the device Home past "$from" -> "$to": $error');
   }
 }
+
+/// What, outside the library's own files, names a note by its path and
+/// has to follow a rename or a move (#506): the home-screen note widgets,
+/// kept in the app's database rather than the library's.
+typedef CarryOutside = Future<void> Function(
+  String from,
+  String to, {
+  required bool isDir,
+});
+
+/// Hands the move of [from] to [to] to [carry] (#506), when there is one.
+/// The move is already done on disk: a failure there is logged and leaves
+/// it standing.
+Future<void> carryOutsideLibrary(
+  CarryOutside? carry,
+  String from,
+  String to, {
+  required bool isDir,
+}) async {
+  if (carry == null) return;
+  try {
+    await carry(from, to, isDir: isDir);
+  } on Object catch (error) {
+    const AppLogger(
+      name: 'notes',
+    ).warning('could not carry "$from" -> "$to" outside the library: $error');
+  }
+}

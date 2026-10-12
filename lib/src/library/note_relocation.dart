@@ -69,8 +69,7 @@ final class NoteRelocator {
   /// What else, outside the library's own files, names a note by its path
   /// and has to follow a rename or a move (#506); null carries nothing
   /// further.
-  final Future<void> Function(String from, String to, {required bool isDir})?
-  carryOutside;
+  final CarryOutside? carryOutside;
 
   /// The absolute path for library-relative [rel] ('' = root).
   String _abs(String rel) => p.join(root, rel);
@@ -93,7 +92,7 @@ final class NoteRelocator {
     await _carryReading(path, newRel, isDir: row.isDir);
     await _carrySettings(path, newRel, isDir: row.isDir);
     await _carryHome(path, newRel, isDir: row.isDir);
-    await _carryOutside(path, newRel, isDir: row.isDir);
+    await carryOutsideLibrary(carryOutside, path, newRel, isDir: row.isDir);
     // Before the index hears of the move: a folder's reindex re-creates
     // its notes, and the edges that named them would be gone (#507).
     final links = await _linksToMove(path, isDir: row.isDir);
@@ -129,24 +128,6 @@ final class NoteRelocator {
           .warning('could not carry the Home past "$from" -> "$to": $error');
     }
     await carryDeviceHome(config, from, to, isDir: isDir);
-  }
-
-  /// Hands the move to [carryOutside] (#506). The move is already done on
-  /// disk: a failure there is logged and leaves the rename standing.
-  Future<void> _carryOutside(
-    String from,
-    String to, {
-    required bool isDir,
-  }) async {
-    final carry = carryOutside;
-    if (carry == null) return;
-    try {
-      await carry(from, to, isDir: isDir);
-    } on Object catch (error) {
-      const AppLogger(
-        name: 'notes',
-      ).warning('could not carry "$from" -> "$to" outside the library: $error');
-    }
   }
 
   /// The referrers of what is about to move from [from] (#507), read from

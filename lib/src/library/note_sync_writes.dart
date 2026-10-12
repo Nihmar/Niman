@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -64,8 +63,7 @@ final class NoteSyncWrites {
   /// and has to follow a rename or a move (#506): the home-screen note
   /// widgets, kept in the app's database rather than the library's. Null
   /// carries nothing further.
-  final Future<void> Function(String from, String to, {required bool isDir})?
-  carryOutside;
+  final CarryOutside? carryOutside;
 
   /// When each path was last written by a sync operation.
   final Map<String, DateTime> _syncWrites = {};
@@ -157,22 +155,8 @@ final class NoteSyncWrites {
       await File(fromAbs).rename(toAbs);
       await history.moved(from, to, isDir: false);
       await carryDeviceHome(config, from, to, isDir: false);
-      await _carryOutside(from, to);
+      await carryOutsideLibrary(carryOutside, from, to, isDir: false);
       await indexer.applyEvents(root, [fromAbs, toAbs]);
     });
-  }
-
-  /// Hands the move to [carryOutside] (#506). The move is already done on
-  /// disk: a failure there is logged and leaves it standing.
-  Future<void> _carryOutside(String from, String to) async {
-    final carry = carryOutside;
-    if (carry == null) return;
-    try {
-      await carry(from, to, isDir: false);
-    } on Object catch (error) {
-      const AppLogger(
-        name: 'notes',
-      ).warning('could not carry "$from" -> "$to" outside the library: $error');
-    }
   }
 }
