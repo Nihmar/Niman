@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -163,4 +164,104 @@ void main() {
       expect(await at.probe(), await at.probe());
     },
   );
+
+  group('the writes (#730 phase 3)', () {
+    String onDisk() =>
+        File(p.join(root.path, calendarFileName)).readAsStringSync();
+
+    test('an add writes the file, making it when it is missing', () async {
+      final at = await store();
+      final snapshot = await at.addEvent(
+        DateTime(2026, 10, 12),
+        const CalendarEventDraft(
+          text: 'thesis chapter 3 +thesis',
+          startMinutes: 9 * 60,
+          endMinutes: 12 * 60,
+          reminderMinutes: 8 * 60 + 45,
+        ),
+      );
+      expect(
+        onDisk(),
+        '2026-10-12 w42 Mon  9-12 thesis chapter 3 +thesis rem:08:45.\n',
+      );
+      expect(snapshot.entries.single.line.kind.name, 'day');
+      expect(snapshot.exists, isTrue);
+    });
+
+    test('an add joins the day that is already there', () async {
+      write('2026-10-12 w42 Mon  9-12 thesis.\n');
+      final at = await store();
+      await at.addEvent(
+        DateTime(2026, 10, 12),
+        const CalendarEventDraft(text: 'lunch', startMinutes: 13 * 60),
+      );
+      expect(onDisk(), '2026-10-12 w42 Mon  9-12 thesis. 13 lunch.\n');
+    });
+
+    test('an edit rewrites only its own event', () async {
+      write('2026-10-05 w41 Mon  9-12 a.\n2026-10-12 w42 Mon  9-12 thesis.\n');
+      final at = await store();
+      final snapshot = await at.load();
+      final event = snapshot.eventsFor(DateTime(2026, 10, 12)).single;
+      await at.updateEvent(
+        CalendarEventRef(
+          line: event.lineIndex,
+          day: DateTime(2026, 10, 12),
+          start: event.event.start,
+        ),
+        const CalendarEventDraft(
+          text: 'thesis chapter 4',
+          startMinutes: 9 * 60,
+          endMinutes: 12 * 60,
+        ),
+      );
+      expect(
+        onDisk(),
+        '2026-10-05 w41 Mon  9-12 a.\n'
+        '2026-10-12 w42 Mon  9-12 thesis chapter 4.\n',
+        reason: 'the first line came back byte for byte',
+      );
+    });
+
+    test('a delete takes the event, and the file with it', () async {
+      write('2026-10-12 w42 Mon  9-12 thesis. 13 lunch.\n');
+      final at = await store();
+      final event = (await at.load()).eventsFor(DateTime(2026, 10, 12)).first;
+      final snapshot = await at.deleteEvent(
+        CalendarEventRef(
+          line: event.lineIndex,
+          day: DateTime(2026, 10, 12),
+          start: event.event.start,
+        ),
+      );
+      expect(onDisk(), '2026-10-12 w42 Mon  13 lunch.\n');
+      expect(snapshot.eventsFor(DateTime(2026, 10, 12)), hasLength(1));
+    });
+
+    test('an event the file no longer holds is left alone', () async {
+      write('2026-10-12 w42 Mon  9-12 thesis.\n');
+      final before = onDisk();
+      final at = await store();
+      await at.deleteEvent(
+        CalendarEventRef(line: 0, day: DateTime(2026, 10, 13), start: 20),
+      );
+      expect(onDisk(), before);
+    });
+
+    test('a file that is not UTF-8 is never written to', () async {
+      File(
+        p.join(root.path, calendarFileName),
+      ).writeAsBytesSync([...'2026-10-05 w41 Mon  9-12 a.\n'.codeUnits, 0xFF]);
+      final at = await store();
+      final snapshot = await at.load();
+      expect(snapshot.validUtf8, isFalse);
+      expect(
+        () => at.addEvent(
+          DateTime(2026, 10, 12),
+          const CalendarEventDraft(text: 'lunch', startMinutes: 13 * 60),
+        ),
+        throwsStateError,
+      );
+    });
+  });
 }

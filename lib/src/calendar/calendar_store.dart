@@ -18,8 +18,10 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/calendar/weekdays.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:path/path.dart' as p;
 
@@ -226,10 +228,13 @@ CalendarFileContent calendarFileOf(
   bom: bom,
 );
 
-/// Reads `calendar.txt` under [root].
+/// Reads and writes `calendar.txt` under [root].
 ///
-/// Stateless and read-only in phase 1; the write phase re-reads the file
-/// inside its writer chain, as the todo store does.
+/// Stateless: every write re-reads the file inside its own chain, applies
+/// the splice to what is there then and writes the result in one atomic
+/// rename, as the todo store does — an external writer's change between a
+/// read and a write is last-write-wins, and a file the app cannot write
+/// (not UTF-8, or unreadable) is refused rather than guessed at.
 final class CalendarStore implements CalendarSource {
   /// Creates a store over the library root at [root] (absolute path).
   new({required this.root});
@@ -255,7 +260,71 @@ final class CalendarStore implements CalendarSource {
     final raw = await Isolate.run(() => _probeCalendarFile(root));
     return _fileProbe(raw[0], raw[1]);
   }
+
+  /// Adds [event] to [day], making the file and the day's line when they
+  /// are missing.
+  @override
+  Future<CalendarSnapshot> addEvent(DateTime day, CalendarEventDraft event) {
+    return _splice(
+      'add@${_dayText(day)}',
+      (file) => addCalendarEvent(file, day, draft: event),
+    );
+  }
+
+  /// Replaces the event [ref] names with [event].
+  @override
+  Future<CalendarSnapshot> updateEvent(
+    CalendarEventRef ref,
+    CalendarEventDraft event,
+  ) {
+    return _splice(
+      'edit@${ref.line}:${ref.start}',
+      (file) => updateCalendarEvent(file, ref, event),
+    );
+  }
+
+  /// Takes the event [ref] names out.
+  @override
+  Future<CalendarSnapshot> deleteEvent(CalendarEventRef ref) {
+    return _splice(
+      'delete@${ref.line}:${ref.start}',
+      (file) => deleteCalendarEvent(file, ref),
+    );
+  }
+
+  /// Reads the file, applies [splice] to it and writes the result back —
+  /// unless the splice found nothing to do (the file moved under the
+  /// screen, or was never there), in which case nothing is written.
+  /// Answers the file as it stands after the call.
+  Future<CalendarSnapshot> _splice(
+    String label,
+    CalendarFileContent? Function(CalendarFileContent) splice,
+  ) async {
+    final file = splitCalendarFile(await _isolateRead(root));
+    if (!file.validUtf8) {
+      // Shown, never written: a lossy decode would drop the bytes a write
+      // did not mean to drop.
+      throw StateError('$calendarFileName is not UTF-8');
+    }
+    final next = splice(file);
+    if (next == null) {
+      _log.warning('calendar $label: the file no longer holds it');
+      return calendarSnapshotOf(file);
+    }
+    await writeFileAtomically(
+      File(p.join(root, calendarFileName)),
+      encodeCalendarFile(next),
+    );
+    final snapshot = calendarSnapshotOf(next);
+    _log.info('calendar $label: written (${snapshot.entries.length} lines)');
+    return snapshot;
+  }
 }
+
+/// [day] as `YYYY-MM-DD`, for a log line.
+String _dayText(DateTime day) =>
+    '${day.year}-${day.month.toString().padLeft(2, '0')}'
+    '-${day.day.toString().padLeft(2, '0')}';
 
 /// Reads the file's bytes on the isolate it is called on: top-level and
 /// fully synchronous so it can be handed to [Isolate.run], capturing only

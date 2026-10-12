@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/calendar/calendar_controller.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
@@ -104,6 +105,73 @@ void main() {
       expect(failing.error, isNotNull);
     },
   );
+
+  group('the writes (#730 phase 3)', () {
+    test('an add publishes the file the store wrote', () async {
+      await controller.open();
+      await controller.addEvent(
+        DateTime(2026, 10, 12),
+        const CalendarEventDraft(text: 'thesis', startMinutes: 9 * 60),
+      );
+      expect(
+        controller.snapshot!
+            .eventsFor(DateTime(2026, 10, 12))
+            .single
+            .event
+            .text,
+        'thesis',
+      );
+      expect(controller.error, isNull);
+      expect(
+        File(p.join(root.path, calendarFileName)).readAsStringSync(),
+        '2026-10-12 w42 Mon  9 thesis.\n',
+      );
+    });
+
+    test('an edit and a delete go through the same door', () async {
+      write('2026-10-12 w42 Mon  9-12 thesis.\n');
+      await controller.open();
+      final event = controller.snapshot!
+          .eventsFor(DateTime(2026, 10, 12))
+          .single;
+      await controller.updateEvent(
+        event,
+        const CalendarEventDraft(
+          text: 'thesis chapter 4',
+          startMinutes: 9 * 60,
+          endMinutes: 12 * 60,
+        ),
+      );
+      expect(
+        controller.snapshot!
+            .eventsFor(DateTime(2026, 10, 12))
+            .single
+            .event
+            .text,
+        'thesis chapter 4',
+      );
+
+      final edited = controller.snapshot!
+          .eventsFor(DateTime(2026, 10, 12))
+          .single;
+      await controller.deleteEvent(edited);
+      expect(controller.snapshot!.eventsFor(DateTime(2026, 10, 12)), isEmpty);
+    });
+
+    test('a write on a closed library is dropped', () async {
+      await controller.open();
+      await session.close();
+      await controller.addEvent(
+        DateTime(2026, 10, 12),
+        const CalendarEventDraft(text: 'thesis', startMinutes: 9 * 60),
+      );
+      expect(
+        File(p.join(root.path, calendarFileName)).existsSync(),
+        isFalse,
+        reason: 'nothing was written into a library that closed',
+      );
+    });
+  });
 }
 
 /// A source whose reads always fail: the error path.
@@ -114,4 +182,20 @@ final class _FailingSource implements CalendarSource {
   @override
   Future<CalendarFileProbe> probe() async =>
       const CalendarFileProbe(exists: false, size: -1, modified: null);
+
+  @override
+  Future<CalendarSnapshot> addEvent(
+    DateTime day,
+    CalendarEventDraft event,
+  ) async => throw StateError('no disk today');
+
+  @override
+  Future<CalendarSnapshot> updateEvent(
+    CalendarEventRef ref,
+    CalendarEventDraft event,
+  ) async => throw StateError('no disk today');
+
+  @override
+  Future<CalendarSnapshot> deleteEvent(CalendarEventRef ref) async =>
+      throw StateError('no disk today');
 }

@@ -7,8 +7,10 @@
 /// exactly as they would from disk.
 library;
 
+import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
 
 /// A `calendar.txt` held in memory.
 final class FakeCalendarSource implements CalendarSource {
@@ -40,6 +42,41 @@ final class FakeCalendarSource implements CalendarSource {
   @override
   Future<CalendarSnapshot> load() async =>
       calendarSnapshotOf(calendarFileOf(_lines, exists: _exists));
+
+  @override
+  Future<CalendarSnapshot> addEvent(
+    DateTime day,
+    CalendarEventDraft event,
+  ) async {
+    return _adopt(addCalendarEvent(_file, day, draft: event));
+  }
+
+  @override
+  Future<CalendarSnapshot> updateEvent(
+    CalendarEventRef ref,
+    CalendarEventDraft event,
+  ) async {
+    return _adopt(updateCalendarEvent(_file, ref, event) ?? _file);
+  }
+
+  @override
+  Future<CalendarSnapshot> deleteEvent(CalendarEventRef ref) async {
+    return _adopt(deleteCalendarEvent(_file, ref) ?? _file);
+  }
+
+  /// The fake's file as the writer sees it.
+  CalendarFileContent get _file => calendarFileOf(_lines, exists: _exists);
+
+  /// Adopts [file] as the fake's content, the way the store answers a
+  /// write with the file it just wrote.
+  CalendarSnapshot _adopt(CalendarFileContent file) {
+    _lines
+      ..clear()
+      ..addAll([for (final line in file.lines) line.text]);
+    _exists = true;
+    _version++;
+    return calendarSnapshotOf(file);
+  }
 
   @override
   Future<CalendarFileProbe> probe() async {

@@ -8,8 +8,11 @@
 /// first probes the file's `(size, mtime)` and skips the content read when
 /// it did not move — this file rarely does.
 ///
-/// Phase 1 is read-only. The write ops (add, edit, delete an event) land
-/// here in phase 3, with the same shape the todo controller's have.
+/// The three writes — add an event, edit one, delete one — run the way
+/// the todo controller's do: off the source factory, publishing whatever
+/// file comes back, and never on a library that has closed. Each one bumps
+/// the generation, so a reload already in flight cannot publish the file
+/// as it was before the write.
 library;
 
 import 'dart:async';
@@ -17,6 +20,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/session.dart';
 
@@ -118,6 +122,69 @@ final class CalendarController extends ChangeNotifier {
       _log.warning('calendar reload failed: $error');
       notifyListeners();
     }
+  }
+
+  /// Adds [event] to [day], creating the file and the day's line when
+  /// they are missing.
+  Future<void> addEvent(DateTime day, CalendarEventDraft event) {
+    return _apply('add', (store) => store.addEvent(day, event));
+  }
+
+  /// Replaces the event [entry] holds with [event].
+  Future<void> updateEvent(CalendarEntryEvent entry, CalendarEventDraft event) {
+    return _apply(
+      'edit@${entry.lineIndex}:${entry.event.start}',
+      (store) => store.updateEvent(_refOf(entry), event),
+    );
+  }
+
+  /// Takes the event [entry] holds out of the file.
+  Future<void> deleteEvent(CalendarEntryEvent entry) {
+    return _apply(
+      'delete@${entry.lineIndex}:${entry.event.start}',
+      (store) => store.deleteEvent(_refOf(entry)),
+    );
+  }
+
+  /// Where [entry]'s event is, for a write that re-reads the file first.
+  static CalendarEventRef _refOf(CalendarEntryEvent entry) {
+    final day = entry.line.date;
+    if (day == null) {
+      throw ArgumentError('an event off a day line: $entry');
+    }
+    return CalendarEventRef(
+      line: entry.lineIndex,
+      day: day,
+      start: entry.event.start,
+    );
+  }
+
+  /// Runs [op] on a fresh source for the open library and publishes the
+  /// file it hands back (nothing while no library is open; a failure
+  /// surfaces on [error]).
+  Future<void> _apply(
+    String label,
+    Future<CalendarSnapshot> Function(CalendarSource store) op,
+  ) async {
+    final root = session.root;
+    if (root == null || _disposed) {
+      _log.debug('calendar $label dropped (no library)');
+      return;
+    }
+    // A reload already in flight was reading the file as it was before
+    // this write: supersede it, so it cannot put the old file back.
+    _generation++;
+    try {
+      final store = _sourceFactory(root);
+      _snapshot = await op(store);
+      _probe = await store.probe();
+      _error = null;
+      _log.debug('calendar $label ok: ${_snapshot!.entries.length} lines');
+    } on Object catch (error) {
+      _error = '$error';
+      _log.warning('calendar $label failed: $error');
+    }
+    if (!_disposed) notifyListeners();
   }
 
   @override
