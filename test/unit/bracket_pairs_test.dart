@@ -47,6 +47,26 @@ void main() {
     expect(edit, (start: 0, end: 6, text: '*parola*', anchor: 1, extent: 7));
   });
 
+  group('in code and maths (#762)', () {
+    bool code(int _) => true;
+
+    test('the punctuation neither pairs nor wraps a selection', () {
+      final buffer = SourceBuffer.fromText('char  x\n');
+      final pairs = BracketPairs();
+      for (final char in ['*', '_', '"', "'", '«', '“']) {
+        expect(pairs.typed(buffer, 5, 5, char, verbatimAt: code), isNull);
+        expect(pairs.typed(buffer, 0, 4, char, verbatimAt: code), isNull);
+      }
+    });
+
+    test('the brackets pair and wrap as anywhere', () {
+      final buffer = SourceBuffer.fromText('f \n');
+      final pairs = BracketPairs();
+      expect(pairs.typed(buffer, 2, 2, '(', verbatimAt: code)?.text, '()');
+      expect(pairs.typed(buffer, 0, 1, '[', verbatimAt: code)?.text, '[f]');
+    });
+  });
+
   group('the Markdown pairs (#718)', () {
     test('* opens an emphasis and the second star steps over it', () {
       expect(typedThrough('**bold**'), '**bold**');
@@ -120,6 +140,39 @@ void main() {
     test('an empty bracket pair goes whole whoever wrote it', () {
       final buffer = SourceBuffer.fromText('()\n');
       expect(BracketPairs().backspace(buffer, 1)?.text, '');
+    });
+
+    test('a star after a word is only itself: 2*3, x*y (#762)', () {
+      expect(typedThrough('2*3'), '2*3');
+      expect(typedThrough('x*y'), 'x*y');
+    });
+
+    test('a star after a word closes an emphasis written around it (#762)', () {
+      // `make *this bold`, the caret after "this".
+      expect(
+        typedThrough('*', at: 10, text: 'make *this bold'),
+        'make *this* bold',
+      );
+    });
+
+    test('a star or quote already written is no closing character (#762)', () {
+      // `*` before an existing `"quote"`, `(` before an existing `*emph*`.
+      expect(typedThrough('*', text: '"quote"'), '*"quote"');
+      expect(typedThrough('(', text: '*emph*'), '(*emph*');
+      expect(typedThrough('"', text: "'word'"), '"\'word\'');
+    });
+
+    test('a closer the pair wrote still lets a pair open before it', () {
+      // `*`, then `(` inside the emphasis being written: `*(|)*`.
+      expect(typedThrough('*(a)b*'), '*(a)b*');
+      // Before a closing bracket, as ever.
+      expect(typedThrough('*', text: ')'), '**)');
+    });
+
+    test('after a decomposed accent a quote is only itself (#762)', () {
+      // `café` with the accent as a combining mark, U+0301.
+      const cafe = 'cafe\u0301';
+      expect(typedThrough("'", at: cafe.length, text: cafe), "$cafe'");
     });
 
     test('after a backslash an emphasis is only itself', () {

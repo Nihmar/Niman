@@ -216,6 +216,95 @@ void main() {
           rig.agree('{parola\n');
         });
 
+        group('in code and maths the punctuation is only itself', () {
+          /// The rig over [text], the keyboard attached, the caret at
+          /// [caret]: placed by offset, which a hidden `live` marker does
+          /// not shift as it does a tapped column.
+          Future<_Rig> at(WidgetTester tester, String text, int caret) async {
+            final rig = _Rig(tester, profile, mode, text);
+            await rig.pump();
+            await rig.tapAt(0, 0);
+            tester
+                .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+                .placeCaret(caret);
+            await tester.pump();
+            return rig;
+          }
+
+          testWidgets('a fenced code block: char *p, and brackets pair', (
+            tester,
+          ) async {
+            const fence = '```c\n\n```\n';
+            final rig = await at(tester, fence, 5);
+            await rig.platform.type('char *p = "x";');
+            rig.agree('```c\nchar *p = "x";\n```\n');
+            await rig.platform.type(' f(');
+            rig.agree(
+              '```c\nchar *p = "x"; f()\n```\n',
+              reason: 'a bracket pairs in code as anywhere',
+            );
+            await rig.platform.backspace();
+            await tester.pump();
+            rig.agree(
+              '```c\nchar *p = "x"; f\n```\n',
+              reason: 'and Backspace takes its empty pair',
+            );
+          });
+
+          testWidgets('an indented code block', (tester) async {
+            final rig = await at(tester, 'testo\n\n    int x\n', 16);
+            await rig.platform.type(' *_p');
+            rig.agree('testo\n\n    int x *_p\n');
+          });
+
+          testWidgets('an inline code span', (tester) async {
+            // Caret after `char `, a space after it: where a star pairs.
+            final rig = await at(tester, 'vedi `char  = 0` qui\n', 11);
+            await rig.platform.type('*p');
+            rig.agree('vedi `char *p = 0` qui\n');
+          });
+
+          testWidgets(r'inline maths: $a * b$', (tester) async {
+            // Caret after `$a `, before `b$`.
+            final rig = await at(
+              tester,
+              r'vedi $a  b$ qui'
+              '\n',
+              8,
+            );
+            await rig.platform.type('*');
+            rig.agree(
+              r'vedi $a * b$ qui'
+              '\n',
+            );
+          });
+
+          testWidgets(r'a $$ block, and brackets pair there', (tester) async {
+            final rig = await at(tester, '\$\$\nx\n\$\$\n', 4);
+            await rig.platform.type(' *b "c (');
+            rig.agree('\$\$\nx *b "c ()\n\$\$\n');
+          });
+
+          testWidgets('Backspace takes one of two stars typed in code', (
+            tester,
+          ) async {
+            final rig = await at(tester, 'vedi `a  b` qui\n', 8);
+            await rig.platform.type('**');
+            rig.agree('vedi `a ** b` qui\n');
+            await rig.platform.backspace();
+            await tester.pump();
+            rig.agree('vedi `a * b` qui\n', reason: 'no pair: one star');
+          });
+
+          testWidgets('right after a span the star pairs again', (
+            tester,
+          ) async {
+            final rig = await at(tester, 'vedi `x`\n', 8);
+            await rig.platform.type(' *');
+            rig.agree('vedi `x` **\n');
+          });
+        });
+
         testWidgets('Enter is one line', (tester) async {
           final rig = _Rig(tester, profile, mode, 'unofine\n');
           await rig.pump();
