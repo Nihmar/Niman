@@ -27,6 +27,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -51,7 +52,6 @@ import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
-import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
@@ -1760,9 +1760,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The app-bar eye action: flips the editor/preview pane.
   Widget _previewToggleAction({bool compact = false}) {
-    // A todo.txt is read in its editor alone: the eye stays, off.
+    // A plain-text file is read in its editor alone: the eye stays, off.
     final shown = _shownNote;
-    final plain = shown != null && isTodoTxtFile(p.basename(shown));
+    final plain = shown != null && isPlainTextFile(p.basename(shown));
     return PreviewToggleAction(
       previewVisible: _notePreview && !plain,
       onToggle: plain ? null : _togglePreview,
@@ -4168,7 +4168,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   List<Widget> _statusActionsFor(int pane) {
     final tab = _workspace.value.panes[pane].activeTab;
     if (tab == null || !_previewToggleVisible) return const [];
-    final plain = isTodoTxtFile(p.basename(tab.path));
+    final plain = isPlainTextFile(p.basename(tab.path));
     return [
       PreviewToggleAction(
         previewVisible: !plain && (tab.memento.preview ?? false),

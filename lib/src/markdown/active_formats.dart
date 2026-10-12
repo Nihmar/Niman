@@ -85,6 +85,13 @@ Set<ToolbarItem> activeFormatsOf({
           TokenKind.todoContext ||
           TokenKind.todoKeyValue ||
           TokenKind.todoDone:
+      // The calendar's own runs (#730), which no toolbar button makes
+      // either.
+      case TokenKind.calendarDate ||
+          TokenKind.calendarHead ||
+          TokenKind.calendarTime ||
+          TokenKind.calendarAside ||
+          TokenKind.calendarMismatch:
         break;
     }
     // The constructs around the caret's text are on too: in `<u>**x**</u>`

@@ -122,6 +122,22 @@ enum TokenKind {
 
   /// A completed task, the whole line.
   todoDone,
+
+  /// The date at a calendar.txt head (`2026-10-12`, `2026-10`, `2026`).
+  calendarDate,
+
+  /// The week and the weekday of a calendar.txt head (`w42 Mon`).
+  calendarHead,
+
+  /// An event's time (`9-12`, `0600Z`).
+  calendarTime,
+
+  /// A `( … )` aside in a calendar.txt event, shown dimmed.
+  calendarAside,
+
+  /// A week number or a weekday that does not match the line's date: the
+  /// text keeps [calendarHead]'s colour and wears a wavy flag.
+  calendarMismatch,
 }
 
 /// One styled run of a line; offsets are relative to [StyledLine.text].

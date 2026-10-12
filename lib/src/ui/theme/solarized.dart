@@ -71,6 +71,11 @@ const SyntaxColors _darkSyntax = SyntaxColors(
   todoContext: _blue,
   todoKeyValue: _cyan,
   todoDone: _base01,
+  calendarDate: _base0,
+  calendarHead: _base01,
+  calendarTime: _yellow,
+  calendarAside: _base01,
+  calendarMismatch: _red,
 );
 
 // Light. Only two monotones sit above base1, so the raised surfaces run
@@ -106,4 +111,9 @@ const SyntaxColors _lightSyntax = SyntaxColors(
   todoContext: _blue,
   todoKeyValue: _cyan,
   todoDone: _base1,
+  calendarDate: _base00,
+  calendarHead: _base1,
+  calendarTime: _yellow,
+  calendarAside: _base1,
+  calendarMismatch: _red,
 );

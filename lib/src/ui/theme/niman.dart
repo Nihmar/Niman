@@ -58,6 +58,11 @@ const SyntaxColors _darkSyntax = SyntaxColors(
   todoContext: Color(0xFF7CA0E6),
   todoKeyValue: Color(0xFF7FD1C4),
   todoDone: Color(0xFF6B7079),
+  calendarDate: Color(0xFF9A968E),
+  calendarHead: Color(0xFF6B7079),
+  calendarTime: Color(0xFFD8A56B),
+  calendarAside: Color(0xFF6B7079),
+  calendarMismatch: Color(0xFFE0687A),
 );
 
 // Day — the same three colors turned over: the cream is the ground and
@@ -96,4 +101,9 @@ const SyntaxColors _lightSyntax = SyntaxColors(
   todoContext: Color(0xFF3E63C7),
   todoKeyValue: Color(0xFF2E8C86),
   todoDone: Color(0xFF9B968C),
+  calendarDate: Color(0xFF6E7178),
+  calendarHead: Color(0xFF9B968C),
+  calendarTime: Color(0xFFB26A25),
+  calendarAside: Color(0xFF9B968C),
+  calendarMismatch: Color(0xFFC0392B),
 );

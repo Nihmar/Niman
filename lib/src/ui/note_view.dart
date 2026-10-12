@@ -16,6 +16,7 @@ import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/editor/word_count_index.dart';
@@ -44,7 +45,6 @@ import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
-import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
@@ -1260,11 +1260,12 @@ final class _NoteViewState extends State<NoteView>
       view.showPreview && !_plainTextIn(view);
 
   /// Whether [view] holds a file of a syntax of its own rather than
-  /// Markdown — the Todo tab's todo.txt and done.txt — drawn in the source
-  /// pane with its own colours and nowhere else: the preview and `live`
-  /// read Markdown, and would run its lines together into paragraphs.
+  /// Markdown — the Todo tab's todo.txt and done.txt, and calendar.txt
+  /// (#730) — drawn in the source pane with its own colours and nowhere
+  /// else: the preview and `live` read Markdown, and would run its lines
+  /// together into paragraphs.
   static bool _plainTextIn(NoteView view) =>
-      isTodoTxtFile(p.basename(view.path));
+      isPlainTextFile(p.basename(view.path));
 
   /// Whether [view] holds a template: a note of the library's template
   /// folder, whose `{{…}}` commands the source colours.
@@ -1329,7 +1330,7 @@ final class _NoteViewState extends State<NoteView>
         viewKey: _sourceViewKey,
         buffer: buffer,
         surface: surface,
-        lineTokens: _plainTextIn(widget) ? todoTxtTokens : null,
+        lineTokens: plainTextTokensOf(p.basename(widget.path)),
         templateCommands: _templateIn(widget),
         wikilinkSuggester: widget.wikilinkSuggester,
         // The shell's own focus node: the phone toolbar, the format keys,

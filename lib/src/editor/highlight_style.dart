@@ -141,5 +141,23 @@ TextStyle? markdownTokenStyle(
       color: syntax.todoDone,
       decoration: TextDecoration.lineThrough,
     ),
+    // The calendar's own runs (#730). Its `+`/`@`/`#`/`key:value` tokens
+    // are todo.txt's roles — the two files share the vocabulary, and the
+    // format's own promise is that `grep +thesis` reads them together — so
+    // only what is the calendar's own has a role here.
+    TokenKind.calendarDate => TextStyle(color: syntax.calendarDate),
+    TokenKind.calendarHead => TextStyle(color: syntax.calendarHead),
+    TokenKind.calendarTime => TextStyle(color: syntax.calendarTime),
+    TokenKind.calendarAside => TextStyle(
+      color: syntax.calendarAside,
+      fontStyle: FontStyle.italic,
+    ),
+    // The head keeps its colour; the flag is the wavy line under it.
+    TokenKind.calendarMismatch => TextStyle(
+      color: syntax.calendarHead,
+      decoration: TextDecoration.underline,
+      decorationStyle: TextDecorationStyle.wavy,
+      decorationColor: syntax.calendarMismatch,
+    ),
   };
 }

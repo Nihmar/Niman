@@ -80,6 +80,15 @@ ThemeColors _variant({required double hue, required bool dark}) {
     todoContext: _hsl(hue + 330, 0.45, distant),
     todoKeyValue: code,
     todoDone: _blend(ink, ground, 0.55),
+    // The calendar's own roles (#730), taken from the ones above: the
+    // date sits with the task dates, the head and the asides recede, an
+    // event's time is the warm role, and a mismatched head wears the
+    // error.
+    calendarDate: _blend(ink, ground, 0.38),
+    calendarHead: _blend(ink, ground, 0.45),
+    calendarTime: _hsl(hue + 60, 0.50, distant),
+    calendarAside: _blend(ink, ground, 0.45),
+    calendarMismatch: dark ? _hsl(8, 0.62, 0.72) : _hsl(8, 0.72, 0.38),
   );
   return ThemeColors(tokens: tokens, syntax: syntax);
 }

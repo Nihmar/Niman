@@ -16,7 +16,7 @@ void main() {
     test('every role is there, in the order a file lists them', () {
       final json = _colors().toJson();
       expect(json.keys.toList(), ThemeColors.roleNames);
-      expect(json.length, 27);
+      expect(json.length, 32);
     });
 
     test('the task-list roles are the last of the Markdown ones', () {
@@ -32,6 +32,41 @@ void main() {
         expect(ThemeColors.taskListRoles, isNot(contains(source)));
         expect(ThemeColors.roleNames, contains(source));
       }
+    });
+
+    test('the calendar roles are the last of them (#730)', () {
+      expect(
+        ThemeColors.roleNames.sublist(
+          ThemeColors.roleNames.length - ThemeColors.calendarRoles.length,
+        ),
+        ThemeColors.calendarRoles,
+      );
+      expect(ThemeColors.calendarRoleSources.keys, ThemeColors.calendarRoles);
+      for (final source in ThemeColors.calendarRoleSources.values) {
+        expect(ThemeColors.calendarRoles, isNot(contains(source)));
+        expect(ThemeColors.roleNames, contains(source));
+      }
+    });
+
+    test('a theme from before the calendar roles reads them from the '
+        'colours the app was drawing with', () {
+      final colors = _colors();
+      final json = colors.toJson()
+        ..removeWhere((role, _) => ThemeColors.calendarRoles.contains(role));
+
+      final read = ThemeColors.fromJson(json)!;
+      final syntax = colors.syntax;
+      expect(read.tokens, colors.tokens);
+      expect(read.syntax.calendarDate, syntax.dim);
+      expect(read.syntax.calendarHead, syntax.dim);
+      expect(read.syntax.calendarTime, syntax.image);
+      expect(read.syntax.calendarAside, syntax.quote);
+      expect(read.syntax.calendarMismatch, colors.tokens.error);
+      expect(
+        read.syntax.todoProject,
+        syntax.todoProject,
+        reason: 'and nothing else moved',
+      );
     });
 
     test('a theme survives the round trip', () {

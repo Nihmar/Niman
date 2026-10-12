@@ -63,6 +63,30 @@ final class ThemeColors {
     'todoDone',
   ];
 
+  /// The calendar's own roles (#730): `calendar.txt` as the editor colours
+  /// it. Its `+`/`@`/`#`/`key:value` tokens are todo.txt's roles — the two
+  /// files share the vocabulary — so only what is the calendar's own is
+  /// here.
+  static const List<String> calendarRoles = [
+    'calendarDate',
+    'calendarHead',
+    'calendarTime',
+    'calendarAside',
+    'calendarMismatch',
+  ];
+
+  /// The role each of [calendarRoles] is read from when a theme does not
+  /// name it: the calendar was plain text before, and these are the
+  /// colours the app was drawing it with. Every source is a role the first
+  /// themes already had.
+  static const Map<String, String> calendarRoleSources = {
+    'calendarDate': 'dim',
+    'calendarHead': 'dim',
+    'calendarTime': 'image',
+    'calendarAside': 'quote',
+    'calendarMismatch': 'error',
+  };
+
   /// The role each of [taskListRoles] is read from when a theme does not
   /// name it.
   ///
@@ -93,10 +117,15 @@ final class ThemeColors {
   static const Map<String, String> laterRoleSources = {
     ...taskListRoleSources,
     'template': 'code',
+    ...calendarRoleSources,
   };
 
   /// Every role, chrome first, in the order a theme file lists them.
-  static const List<String> roleNames = [...chromeRoles, ...markdownRoles];
+  static const List<String> roleNames = [
+    ...chromeRoles,
+    ...markdownRoles,
+    ...calendarRoles,
+  ];
 
   /// The color [role] holds, or null when this build does not know the
   /// role.
@@ -144,6 +173,11 @@ final class ThemeColors {
     'todoContext': colorToHex(syntax.todoContext),
     'todoKeyValue': colorToHex(syntax.todoKeyValue),
     'todoDone': colorToHex(syntax.todoDone),
+    'calendarDate': colorToHex(syntax.calendarDate),
+    'calendarHead': colorToHex(syntax.calendarHead),
+    'calendarTime': colorToHex(syntax.calendarTime),
+    'calendarAside': colorToHex(syntax.calendarAside),
+    'calendarMismatch': colorToHex(syntax.calendarMismatch),
   };
 
   /// The colors [json] describes, or null when a role is missing or is
@@ -196,6 +230,11 @@ final class ThemeColors {
         todoContext: colors['todoContext']!,
         todoKeyValue: colors['todoKeyValue']!,
         todoDone: colors['todoDone']!,
+        calendarDate: colors['calendarDate']!,
+        calendarHead: colors['calendarHead']!,
+        calendarTime: colors['calendarTime']!,
+        calendarAside: colors['calendarAside']!,
+        calendarMismatch: colors['calendarMismatch']!,
       ),
     );
   }
