@@ -18,6 +18,7 @@ import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/render/caret_painters.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
@@ -74,8 +75,14 @@ final class SourceLine extends StatelessWidget {
     required this.caret,
     required this.caretOn,
     this.fence,
+    this.outerIndent = 0,
     super.key,
   });
+
+  /// How far the sliver drawing the line indents it already: a
+  /// side-by-side column's, for the list items its block stands in
+  /// (#729). The line's own indent for them is that much less.
+  final double outerIndent;
 
   /// In `live`, what the line draws as a fenced div's fence line (#729):
   /// a band out of the caret's reach, its markers with the caret in its
@@ -746,10 +753,13 @@ final class SourceLine extends StatelessWidget {
     final listed = shape.listed
         ? (shape.listDepth + 1) * theme.listIndentPerLevel
         : 0.0;
-    final base =
-        listed +
-        shape.quoteDepth * theme.quoteIndentPerLevel +
-        (shape.code == null ? 0 : theme.codePadding);
+    final base = math.max<double>(
+      0,
+      listed +
+          shape.quoteDepth * theme.quoteIndentPerLevel +
+          (shape.code == null ? 0 : theme.codePadding) -
+          outerIndent,
+    );
     if (base == 0 && _prefixEnd == 0) return 0;
     final marks =
         _textStart(context, revealed: revealed) -
@@ -783,7 +793,11 @@ final class SourceLine extends StatelessWidget {
           ? marks + _codeIndentEnd(text.substring(marks))
           : marks;
     }
-    if (!shape.listed && shape.quoteDepth == 0 && !_heading) return 0;
+    if (!shape.listed && shape.quoteDepth == 0 && !_heading) {
+      // A line of a column drawn at its list items' indent already (#729):
+      // the spaces that put it in the items are that indent, hidden.
+      return outerIndent > 0 ? LineSyntax.indentOf(styled.text) : 0;
+    }
     final text = styled.text;
     var at = 0;
     var tokens = 0;

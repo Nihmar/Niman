@@ -1061,7 +1061,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final column = layout.run.columnOf(line);
     if (column < 0) return true;
     final row = layout.rows.firstWhere((row) => row.contains(column));
-    final left = _leftInset + _gutter + LiveHosts.leftOf(layout, column, _gap);
+    final left = _columnsLeft(layout) + LiveHosts.leftOf(layout, column, _gap);
     final from = column == row.first
         ? double.negativeInfinity
         : left - _gap / 2;
@@ -2022,7 +2022,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _layOutHosts(double width) {
     _hosts.layOut(
       _liveRuns,
-      width: width,
+      widthOf: (run) => width - _itemsIndent(run),
       em: _em,
       estimate: _estimateAt,
       // Not a block a fold hides, nor one with a fold inside.
@@ -2051,6 +2051,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// [layout]'s block's height before a frame has drawn it.
   double _hostEstimate(LiveLayout layout) =>
       LiveHosts.estimateOf(layout, _gap, layout.run.closed ? 2 * _band : _band);
+
+  /// How far the list items [run] stands in indent its columns.
+  double _itemsIndent(LiveRun run) =>
+      run.items * widget.theme.listIndentPerLevel;
+
+  /// The note box's x where [layout]'s columns start: past the gutter, and
+  /// the indent of the list items the block stands in.
+  double _columnsLeft(LiveLayout layout) =>
+      _leftInset + _gutter + _itemsIndent(layout.run);
 
   /// Where line [line] is drawn, in the scroll view's coordinates: its top
   /// and its height (#729). A row's, from the note's map; a line of a
@@ -2923,7 +2932,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// between them.
   int _columnNearest(LiveLayout layout, List<int> columns, double? x) {
     if (x == null) return columns.first;
-    final left = _leftInset + _gutter;
+    final left = _columnsLeft(layout);
     for (var at = 0; at < columns.length; at++) {
       final column = columns[at];
       final right =
@@ -4073,6 +4082,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     int index, {
     required double width,
     bool inColumn = false,
+    double outerIndent = 0,
   }) {
     final styled = _lineAt(index);
     final block = _styler?.blockOf(index);
@@ -4151,6 +4161,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       caretOn: _caretOn,
       rowColor: widget.typewriter ? typewriterLineColor(context) : null,
       fence: _fenceOf(index, block),
+      outerIndent: outerIndent,
     );
   }
 
@@ -4194,7 +4205,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       heights: _heights,
       index: host,
       gap: _gap,
-      indent: _gutter,
+      indent: _gutter + _itemsIndent(run),
       // One gutter and several columns: the columns' lines are not
       // numbered, and a bracket down the gutter spans the block between
       // its outer fences, which are.
@@ -4224,6 +4235,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                       run.columns[at].start + line,
                       width: layout.widths[at],
                       inColumn: true,
+                      outerIndent: _itemsIndent(run),
                     ),
                     childCount: layout.maps[at].length,
                   ),
@@ -4456,8 +4468,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               Offset(
                 (placed == null
                         ? note.size.width - _rightInset
-                        : _leftInset +
-                              _gutter +
+                        : _columnsLeft(placed.layout) +
                               LiveHosts.leftOf(
                                 placed.layout,
                                 placed.column,

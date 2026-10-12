@@ -58,14 +58,15 @@ final class LiveHosts {
     return layout.run.contains(line) ? layout : null;
   }
 
-  /// Lays [runs] out in [width], text of [em]: the ones whose columns sit
-  /// side by side there and that [allowed] lets, each column's map
-  /// estimating line `l` at `estimate(l, columnWidth)`. A column whose
-  /// lines and width are the ones it had keeps its map, and the heights
-  /// a frame measured in it.
+  /// Lays [runs] out, each in the width [widthOf] gives it — the text's,
+  /// less the list items it stands in — text of [em]: the ones whose
+  /// columns sit side by side there and that [allowed] lets, each column's
+  /// map estimating line `l` at `estimate(l, columnWidth)`. A column whose
+  /// lines and width are the ones it had keeps its map, and the heights a
+  /// frame measured in it.
   void layOut(
     List<LiveRun> runs, {
-    required double width,
+    required double Function(LiveRun run) widthOf,
     required double em,
     required double Function(int line, double width) estimate,
     required bool Function(LiveRun run) allowed,
@@ -77,7 +78,8 @@ final class LiveHosts {
     };
     final next = <LiveLayout>[];
     for (final run in runs) {
-      if (run.items != 0 || run.columns.length < 2 || !allowed(run)) continue;
+      if (run.columns.length < 2 || !allowed(run)) continue;
+      final width = widthOf(run);
       final rows = ColumnLayout.rows(
         run.columns.length,
         width: width,
