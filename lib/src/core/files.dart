@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/creation_time.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:path/path.dart' as p;
 
@@ -124,10 +125,13 @@ void pinWorkingDirectory(Directory directory) {
 /// Bytes are first written to a temporary file in the same directory,
 /// which is then renamed over [file]. A rename within one filesystem is
 /// atomic on Android and Linux, so readers never observe a partial write.
+/// On Windows [file]'s creation time is carried onto the temp file first,
+/// or the rename would make it the temp's (#759).
 Future<void> writeFileAtomically(File file, List<int> data) async {
   final tmp = atomicTempPath(file, DateTime.now().microsecondsSinceEpoch);
   try {
     await tmp.writeAsBytes(data, flush: true);
+    keepCreationTime(target: file.path, replacement: tmp.path);
     await tmp.rename(file.path);
   } catch (_) {
     if (tmp.existsSync()) {

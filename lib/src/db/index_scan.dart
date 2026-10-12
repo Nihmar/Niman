@@ -390,7 +390,7 @@ final class DiskProbe {
 
   /// The creation time (#726) where the file system reports one — on
   /// Windows the stat's `changed` is the creation time — and the
-  /// modification time where it does not, which is Linux and macOS
+  /// modification time where it does not, which is Linux and Android
   /// through `dart:io`.
   final DateTime created;
 }

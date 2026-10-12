@@ -221,6 +221,17 @@ grid is up. Closing the tab (its ✕) leaves the notes. A phone keeps its
 one-screen-per-destination model, and the Search sidebar's tag tree is
 the two-level list there ([settings](settings.md#navigation)).
 
+## Date created
+
+The tree's **Date created** order reads the creation time Windows keeps
+for every file. A save writes the note to a temporary file and renames
+it over the note; Windows would give the note the temporary file's
+creation time, so the save first copies the note's own onto it, and an
+edited note keeps the date it was created. Linux and Android report no
+creation time through the file API the app uses, so there **Date
+created** is the last modification time — a decision, not an omission
+(#726, #759).
+
 ## Renaming
 
 On Linux and Windows a note or a folder is renamed in its tree row
