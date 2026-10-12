@@ -20,6 +20,7 @@ String builtinThemeLabel(AppPalette palette) => switch (palette) {
   AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
   AppPalette.solarized => AppStrings.themePaletteSolarized,
   AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
+  AppPalette.sepia => AppStrings.themePaletteSepia,
   AppPalette.niman => AppStrings.themePaletteNiman,
 };
 

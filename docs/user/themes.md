@@ -17,6 +17,7 @@ at once, everywhere, and the choice is remembered on this device.
 | Catppuccin | Latte by day, Mocha by night |
 | Solarized | Schoonover's light and dark |
 | Gruvbox | The medium light and dark variants |
+| Sepia | Warm paper by day, a dimmed brown at night |
 
 The Markdown colors — code, links, quotes, tags — travel with the theme:
 the editor and the preview always agree with the interface around them.
