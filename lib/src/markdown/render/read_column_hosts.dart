@@ -11,9 +11,8 @@
 /// which ones a new width or an edit changed.
 library;
 
-import 'dart:typed_data';
-
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_list.dart';
 import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/columns_run.dart';
@@ -27,6 +26,10 @@ typedef RunLayout = ({
   List<BlockHeightMap> maps,
 });
 
+/// A stretch of entries `[start, end)` that share one flag other than
+/// [ReadColumnHosts.ordinary].
+typedef FlagSpan = ({int start, int end, int flag});
+
 /// The side-by-side `columns` blocks of a block list.
 final class ReadColumnHosts {
   /// An entry drawn in the note's run of blocks.
@@ -38,29 +41,42 @@ final class ReadColumnHosts {
   /// A side-by-side block's own entry, as tall as the block.
   static const int host = 2;
 
-  List<ColumnsRun> _runs = const <ColumnsRun>[];
-
   /// The runs side by side at the last width, in order.
   List<ColumnsRun> get sideBySide => _sideBySide;
   List<ColumnsRun> _sideBySide = const <ColumnsRun>[];
 
   final Map<int, RunLayout> _layouts = <int, RunLayout>{};
 
-  /// Each entry's flag: [ordinary], [hosted] or [host]; null while no run
-  /// is side by side. Set to the flags an edit moved ([spliced]), or to
-  /// null for a new map, which assumes no block side by side.
-  Uint8List? flags;
+  /// The entries that are not [ordinary], as spans in order — a run's
+  /// host, then its hosted entries — so that neither a lookup nor an edit
+  /// costs an entry of the note apiece: O(log spans) and O(spans). Null
+  /// while no run is side by side. Set to the flags an edit moved
+  /// ([spliced]), or to null for a new map, which assumes no block side by
+  /// side.
+  List<FlagSpan>? flags;
 
   /// Whether no run is side by side: the note is one run of blocks.
   bool get isEmpty => _sideBySide.isEmpty;
 
   /// Entry [index]'s flag.
-  int flagOf(int index) {
-    final current = flags;
-    if (current == null || index < 0 || index >= current.length) {
-      return ordinary;
+  int flagOf(int index) => _flagIn(flags, index);
+
+  /// Entry [index]'s flag in [spans].
+  static int _flagIn(List<FlagSpan>? spans, int index) {
+    if (spans == null) return ordinary;
+    var low = 0;
+    var high = spans.length;
+    while (low < high) {
+      final middle = (low + high) >> 1;
+      if (spans[middle].start <= index) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
     }
-    return current[index];
+    if (low == 0) return ordinary;
+    final span = spans[low - 1];
+    return index < span.end ? span.flag : ordinary;
   }
 
   /// The run hosted at [index], its opener's entry.
@@ -109,14 +125,20 @@ final class ReadColumnHosts {
     required double listIndent,
     required bool enabled,
     required double Function(int index) rawEstimate,
-    Uint8List? previous,
+    List<FlagSpan>? previous,
   }) {
-    _runs = ColumnsRun.of(blocks, lineAt);
+    // A block list knows where its fence lines are: a note without any
+    // answers in O(chunks), and one with them in O(their runs).
+    final runs = ColumnsRun.of(
+      blocks,
+      lineAt,
+      fences: blocks is BlockList ? blocks.divIndices : null,
+    );
     final old = Map<int, RunLayout>.of(_layouts);
     _layouts.clear();
     final side = <ColumnsRun>[];
     if (enabled) {
-      for (final run in _runs) {
+      for (final run in runs) {
         final inner = width - run.items * listIndent;
         final layout = _layout(run, inner, em, rawEstimate, old);
         if (layout != null) {
@@ -126,39 +148,54 @@ final class ReadColumnHosts {
       }
     }
     _sideBySide = side;
-    final laid = side.isEmpty ? null : Uint8List(blocks.length);
-    if (laid != null) {
-      for (final run in side) {
-        laid[run.start] = host;
-        laid.fillRange(run.start + 1, run.end, hosted);
-      }
-    }
+    final laid = side.isEmpty
+        ? null
+        : <FlagSpan>[
+            for (final run in side) ...[
+              (start: run.start, end: run.start + 1, flag: host),
+              if (run.end > run.start + 1)
+                (start: run.start + 1, end: run.end, flag: hosted),
+            ],
+          ];
     flags = laid;
-    if (laid == null && previous == null) return const <int>[];
+    return _changed(previous, laid);
+  }
+
+  /// The entries whose flag differs between [before] and [after]: only
+  /// where either has a span is there any to compare.
+  static List<int> _changed(List<FlagSpan>? before, List<FlagSpan>? after) {
+    final edges = <int>{
+      for (final span in [...?before, ...?after]) ...[span.start, span.end],
+    }.toList()..sort();
     return [
-      for (var at = 0; at < blocks.length; at++)
-        if ((laid?[at] ?? ordinary) !=
-            (previous != null && at < previous.length
-                ? previous[at]
-                : ordinary))
-          at,
+      for (var at = 0; at + 1 < edges.length; at++)
+        if (_flagIn(before, edges[at]) != _flagIn(after, edges[at]))
+          for (var entry = edges[at]; entry < edges[at + 1]; entry++) entry,
     ];
   }
 
   /// The flags, moved by an edit that replaced [removed] entries from
   /// [start] with [inserted] ones, which are ordinary until laid out.
-  Uint8List? spliced(int start, int removed, int inserted) {
+  List<FlagSpan>? spliced(int start, int removed, int inserted) {
     final current = flags;
     if (current == null) return null;
-    final end = (start + removed).clamp(start, current.length);
-    return Uint8List(current.length - (end - start) + inserted)
-      ..setRange(0, start, current)
-      ..setRange(
-        start + inserted,
-        current.length - end + start + inserted,
-        current,
-        end,
+    final end = start + removed;
+    final delta = inserted - removed;
+    final out = <FlagSpan>[];
+    void add(int from, int to, int flag) {
+      if (to > from) out.add((start: from, end: to, flag: flag));
+    }
+
+    for (final span in current) {
+      // What stood before the edit stays; what stood after it moves.
+      add(span.start, span.end < start ? span.end : start, span.flag);
+      add(
+        (span.start > end ? span.start : end) + delta,
+        span.end + delta,
+        span.flag,
       );
+    }
+    return out;
   }
 
   /// [run]'s layout in [width], or null when its columns would each be a

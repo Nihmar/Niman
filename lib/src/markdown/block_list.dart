@@ -116,6 +116,18 @@ final class BlockList with ListMixin<Block> implements List<Block> {
     return count;
   }
 
+  /// The indices of the fence lines of fenced divs, in order: the chunks
+  /// that hold none are not walked.
+  Iterable<int> get divIndices sync* {
+    for (var chunk = 0; chunk < _chunks.length; chunk++) {
+      if (_divs[chunk] == 0) continue;
+      final blocks = _chunks[chunk];
+      for (var at = 0; at < blocks.length; at++) {
+        if (blocks[at].kind == BlockKind.div) yield _starts[chunk] + at;
+      }
+    }
+  }
+
   /// The fence lines of fenced divs, where they are, in order: the chunks
   /// that hold none are not walked.
   Iterable<Block> get divBlocks sync* {

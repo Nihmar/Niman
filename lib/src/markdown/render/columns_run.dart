@@ -5,6 +5,7 @@
 library;
 
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_list.dart';
 import 'package:niman/src/markdown/div_syntax.dart';
 
 /// One column of a [ColumnsRun]: the indices of its blocks in the list —
@@ -100,10 +101,19 @@ final class ColumnsRun {
   bool contains(int index) => index >= start && index < end;
 
   /// All the runs of [blocks], in order; [lineAt] gives a line's text, a
-  /// column's opener its width.
-  static List<ColumnsRun> of(List<Block> blocks, String Function(int) lineAt) {
+  /// column's opener its width. [fences] are the indices of the fence
+  /// lines among [blocks], in order, when the list knows them
+  /// ([BlockList.divIndices]): only those are looked at, and not every
+  /// block.
+  static List<ColumnsRun> of(
+    List<Block> blocks,
+    String Function(int) lineAt, {
+    Iterable<int>? fences,
+  }) {
     final runs = <ColumnsRun>[];
-    for (var at = 0; at < blocks.length; at++) {
+    var after = 0;
+    for (final at in fences ?? Iterable<int>.generate(blocks.length)) {
+      if (at < after) continue;
       final block = blocks[at];
       if (block.divRole != DivRole.opensColumns ||
           block.divDepth != 0 ||
@@ -112,7 +122,7 @@ final class ColumnsRun {
       }
       final run = ColumnsRun._from(blocks, at, lineAt);
       runs.add(run);
-      at = run.end - 1;
+      after = run.end;
     }
     return runs;
   }
