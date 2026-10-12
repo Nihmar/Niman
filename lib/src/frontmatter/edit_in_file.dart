@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:niman/src/core/creation_time.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
@@ -61,6 +62,7 @@ Future<String?> editFrontmatterKeyInFile(
     await sink.addStream(file.openRead(head.bom ? skip + 3 : skip));
     await sink.flush();
     await sink.close();
+    keepCreationTime(target: file.path, replacement: tmp.path);
     await tmp.rename(file.path);
   } catch (_) {
     if (tmp.existsSync()) await tmp.delete();

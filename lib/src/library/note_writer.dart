@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
+import 'package:niman/src/core/creation_time.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
@@ -513,6 +514,7 @@ const Duration _renameGrace = Duration(seconds: 3);
 Future<void> _renameOrCopy(String abs, String tempAbs) async {
   const log = AppLogger(name: 'swap');
   final temp = File(tempAbs);
+  keepCreationTime(target: abs, replacement: tempAbs);
   try {
     await temp.rename(abs).timeout(_renameGrace);
     return;
@@ -578,6 +580,7 @@ Future<void> copyFileOver(
     if (copied != expected) {
       throw FileSystemException('copied $copied of $expected bytes', abs);
     }
+    keepCreationTime(target: abs, replacement: staged.path);
     try {
       await rename(staged, abs).timeout(grace);
     } on TimeoutException {
@@ -640,7 +643,11 @@ replaceFileFrom(
   final file = File(abs);
   final created = !file.existsSync();
   try {
-    if (created) await file.parent.create(recursive: true);
+    if (created) {
+      await file.parent.create(recursive: true);
+    } else {
+      keepCreationTime(target: abs, replacement: tempAbs);
+    }
     await File(tempAbs).rename(abs);
   } on Object {
     final temp = File(tempAbs);
