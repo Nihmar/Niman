@@ -561,6 +561,61 @@ void main() {
     expect(controller.workspace.activePath, 'alpha.md');
   });
 
+  // #769: a note tab clicked with the search sidebar showing switches the
+  // note, not the sidebar: the hits stay, and F4 still steps them.
+  testWidgets('wide: a note tab leaves the search sidebar on screen (#769)', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await controller.createNote(parentPath: '', name: 'beta');
+    await controller.createNote(parentPath: '', name: 'gamma');
+    controller.searchHits = [
+      const SearchHit(
+        noteId: 0,
+        path: 'alpha.md',
+        title: 'alpha',
+        snippet: 'x',
+      ),
+      const SearchHit(noteId: 0, path: 'beta.md', title: 'beta', snippet: 'x'),
+      const SearchHit(
+        noteId: 0,
+        path: 'gamma.md',
+        title: 'gamma',
+        snippet: 'x',
+      ),
+    ];
+    await settle(tester);
+    // Two tabs, the second opened with Ctrl from the tree.
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(noteRow('beta.md'));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+    expect(find.byKey(const Key('note-tab-1')), findsOne);
+
+    await tester.tap(railDest('search'));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('search-query')), 'al');
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('search-hit-beta.md')));
+    await settle(tester);
+    expect(controller.workspace.activePath, 'beta.md');
+
+    await tester.tap(find.byKey(const Key('note-tab-0')));
+    await settle(tester);
+    expect(controller.workspace.activePath, 'alpha.md');
+    expect(railIndex(tester), ShellTab.search);
+    expect(find.byType(SearchScreen).hitTestable(), findsOne);
+    expect(find.byKey(const Key('tree-footer')), findsNothing);
+
+    // The steps continue from the hit last opened, beta.
+    await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+    await settle(tester);
+    expect(controller.workspace.activePath, 'gamma.md');
+  });
+
   // #712: Ctrl+Shift+F shows the sidebar and puts the cursor in its field,
   // from wherever the window was.
   testWidgets('wide: Ctrl+Shift+F gives the search field the focus (#712)', (

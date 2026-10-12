@@ -1689,9 +1689,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     });
   }
 
-  /// Shows the tab at [index], and the Files tab it lives in.
+  /// Shows the tab at [index], and the Files tab it lives in. A sidebar
+  /// view (the search, the tags tree in it) is left alone on a wide
+  /// window (#769): the panes are on screen beside it, and its hits stay
+  /// there to step through.
   void _activateTab(int pane, int index) {
-    if (_tab != ShellTab.files) _onDestinationSelected(ShellTab.files);
+    if (_tab != ShellTab.files && !_sidebarShowsSearch) {
+      _onDestinationSelected(ShellTab.files);
+    }
     _workspace.activate(pane, index);
   }
 
