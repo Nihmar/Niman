@@ -167,7 +167,7 @@ void main() {
         ..setLastModifiedSync(DateTime(2026, 1, 2, 3, 4, 9, 123));
 
       expect(await companions.freshIn('Annotations', root: root.path), {
-        'Books/Dune.pdf': ['Annotations/Dune.md'],
+        'Annotations/Dune.md': ['Books/Dune.pdf'],
       });
     });
 
@@ -175,7 +175,7 @@ void main() {
       companion(p.join('Annotations', 'Dune.md'));
 
       expect(await companions.freshIn('Annotations', root: root.path), {
-        'Books/Dune.pdf': ['Annotations/Dune.md'],
+        'Annotations/Dune.md': ['Books/Dune.pdf'],
       });
     });
   });
