@@ -10,6 +10,7 @@ import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/title_bar.dart';
 import 'package:niman/src/ui/window_controller.dart';
+import 'package:path/path.dart' as p;
 
 /// One history version of a note against the note as it is now (mockups
 /// H4–H5): the changes as a diff, or the version's whole text, and the
@@ -193,8 +194,10 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
       appBar: custom
           ? PreferredSize(
               preferredSize: const Size.fromHeight(38),
+              // One line: the version, and the note it is a version of
+              // (#783).
               child: SlimTitleBar(
-                title: _capitalized(_when),
+                title: '${_capitalized(_when)} · ${p.basename(widget.path)}',
                 window: window,
                 leading: BackButton(
                   onPressed: () => Navigator.of(context).maybePop(),
