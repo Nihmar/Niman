@@ -1148,6 +1148,23 @@ final class BelarusianStrings extends Strings {
   @override
   String get sortDescending => 'Па змяншэнні';
   @override
+  String get viewList => 'Спіс';
+  @override
+  String get viewGrid => 'Сетка';
+  @override
+  String get viewGroup => 'Выгляд';
+  @override
+  String get folderUpTooltip => 'Уверх (Alt+Уверх)';
+  @override
+  String get breadcrumbMoreTooltip => 'Больш папак';
+  @override
+  String get libraryCrumb => 'Бібліятэка';
+  @override
+  String folderEmpty(String name) => 'У $name пакуль нічога няма';
+  @override
+  String get folderEmptyHint =>
+      'Дакраніцеся +, каб стварыць тут нататку або папку.';
+  @override
   String get newNoteTitle => 'Новая заўвага';
   @override
   String get newItemTooltip => 'Новае';

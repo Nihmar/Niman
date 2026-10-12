@@ -1163,6 +1163,23 @@ final class GermanStrings extends Strings {
   @override
   String get sortDescending => 'Absteigend';
   @override
+  String get viewList => 'Liste';
+  @override
+  String get viewGrid => 'Raster';
+  @override
+  String get viewGroup => 'Ansicht';
+  @override
+  String get folderUpTooltip => 'Auf (Alt+Auf)';
+  @override
+  String get breadcrumbMoreTooltip => 'Weitere Ordner';
+  @override
+  String get libraryCrumb => 'Bibliothek';
+  @override
+  String folderEmpty(String name) => 'Noch nichts in $name';
+  @override
+  String get folderEmptyHint =>
+      'Tippe auf +, um hier eine Notiz oder einen Ordner anzulegen.';
+  @override
   String get newNoteTitle => 'Neue Notiz';
   @override
   String get newItemTooltip => 'Neu';

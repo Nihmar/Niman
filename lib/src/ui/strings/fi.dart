@@ -1150,6 +1150,22 @@ final class FinnishStrings extends Strings {
   @override
   String get sortDescending => 'Laskeva';
   @override
+  String get viewList => 'Luettelo';
+  @override
+  String get viewGrid => 'Ruudukko';
+  @override
+  String get viewGroup => 'Näkymä';
+  @override
+  String get folderUpTooltip => 'Ylös (Alt+Ylös)';
+  @override
+  String get breadcrumbMoreTooltip => 'Lisää kansioita';
+  @override
+  String get libraryCrumb => 'Kirjasto';
+  @override
+  String folderEmpty(String name) => 'Ei vielä mitään kansiossa $name';
+  @override
+  String get folderEmptyHint => 'Luo muistiinpano tai kansio napauttamalla +.';
+  @override
   String get newNoteTitle => 'Uusi muistiinpano';
   @override
   String get newItemTooltip => 'Uusi';

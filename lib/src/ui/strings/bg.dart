@@ -1155,6 +1155,23 @@ final class BulgarianStrings extends Strings {
   @override
   String get sortDescending => 'По низходящ ред';
   @override
+  String get viewList => 'Списък';
+  @override
+  String get viewGrid => 'Мрежа';
+  @override
+  String get viewGroup => 'Изглед';
+  @override
+  String get folderUpTooltip => 'Нагоре (Alt+Нагоре)';
+  @override
+  String get breadcrumbMoreTooltip => 'Още папки';
+  @override
+  String get libraryCrumb => 'Библиотека';
+  @override
+  String folderEmpty(String name) => 'Още няма нищо в $name';
+  @override
+  String get folderEmptyHint =>
+      'Докоснете +, за да създадете бележка или папка.';
+  @override
   String get newNoteTitle => 'Нова бележка';
   @override
   String get newItemTooltip => 'Ново';

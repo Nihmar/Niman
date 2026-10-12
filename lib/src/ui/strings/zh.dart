@@ -1071,6 +1071,22 @@ final class ChineseStrings extends Strings {
   @override
   String get sortDescending => '降序';
   @override
+  String get viewList => '列表';
+  @override
+  String get viewGrid => '网格';
+  @override
+  String get viewGroup => '视图';
+  @override
+  String get folderUpTooltip => '向上 (Alt+向上)';
+  @override
+  String get breadcrumbMoreTooltip => '更多文件夹';
+  @override
+  String get libraryCrumb => '资料库';
+  @override
+  String folderEmpty(String name) => '$name 中暂无内容';
+  @override
+  String get folderEmptyHint => '点按 + 在此新建笔记或文件夹。';
+  @override
   String get newNoteTitle => '新建笔记';
   @override
   String get newItemTooltip => '新建';

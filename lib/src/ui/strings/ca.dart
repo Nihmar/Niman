@@ -1166,6 +1166,23 @@ final class CatalanStrings extends Strings {
   @override
   String get sortDescending => 'Descendent';
   @override
+  String get viewList => 'Llista';
+  @override
+  String get viewGrid => 'Quadrícula';
+  @override
+  String get viewGroup => 'Visualització';
+  @override
+  String get folderUpTooltip => 'Amunt (Alt+Amunt)';
+  @override
+  String get breadcrumbMoreTooltip => 'Més carpetes';
+  @override
+  String get libraryCrumb => 'Biblioteca';
+  @override
+  String folderEmpty(String name) => 'Encara no hi ha res a $name';
+  @override
+  String get folderEmptyHint =>
+      'Toqueu + per crear una nota o una carpeta aquí.';
+  @override
   String get newNoteTitle => 'Nota nova';
   @override
   String get newItemTooltip => 'Nou';

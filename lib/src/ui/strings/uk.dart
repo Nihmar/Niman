@@ -1149,6 +1149,23 @@ final class UkrainianStrings extends Strings {
   @override
   String get sortDescending => 'За спаданням';
   @override
+  String get viewList => 'Список';
+  @override
+  String get viewGrid => 'Сітка';
+  @override
+  String get viewGroup => 'Вигляд';
+  @override
+  String get folderUpTooltip => 'Вгору (Alt+Вгору)';
+  @override
+  String get breadcrumbMoreTooltip => 'Більше папок';
+  @override
+  String get libraryCrumb => 'Бібліотека';
+  @override
+  String folderEmpty(String name) => 'У $name ще нічого немає';
+  @override
+  String get folderEmptyHint =>
+      'Торкніться +, щоб створити тут нотатку або папку.';
+  @override
   String get newNoteTitle => 'Нова нотатка';
   @override
   String get newItemTooltip => 'Нове';

@@ -1156,6 +1156,23 @@ final class ItalianStrings extends Strings {
   @override
   String get sortDescending => 'Decrescente';
   @override
+  String get viewList => 'Elenco';
+  @override
+  String get viewGrid => 'Griglia';
+  @override
+  String get viewGroup => 'Vista';
+  @override
+  String get folderUpTooltip => 'Su (Alt+Su)';
+  @override
+  String get breadcrumbMoreTooltip => 'Altre cartelle';
+  @override
+  String get libraryCrumb => 'Libreria';
+  @override
+  String folderEmpty(String name) => 'Ancora niente in $name';
+  @override
+  String get folderEmptyHint =>
+      'Tocca + per creare qui una nota o una cartella.';
+  @override
   String get newNoteTitle => 'Nuova nota';
   @override
   String get newItemTooltip => 'Nuovo';

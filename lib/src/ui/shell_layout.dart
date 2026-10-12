@@ -51,6 +51,8 @@ final class ShellLayoutProps {
     required this.onDestinationSelected,
     required this.hiddenTab,
     required this.onLeaveHiddenTab,
+    required this.backStepAvailable,
+    required this.onBackStep,
     required this.onSwitchLibrary,
     required this.buildWideSlots,
     this.onOpenPalette,
@@ -144,6 +146,13 @@ final class ShellLayoutProps {
   /// Leaves that hidden tab for the one it was opened from.
   final VoidCallback onLeaveHiddenTab;
 
+  /// Phone only: whether Back takes a step inside the tab first — the
+  /// grid's folder, when the Files tab shows the grid inside one (#727).
+  final bool backStepAvailable;
+
+  /// Takes that step: up one folder in the grid.
+  final VoidCallback onBackStep;
+
   /// The rail's library button (#170): the library window (#203).
   final VoidCallback onSwitchLibrary;
 
@@ -233,13 +242,15 @@ final class NarrowShellLayout extends StatelessWidget {
     return CallbackShortcuts(
       bindings: props.shortcutBindings,
       child: PopScope(
-        canPop: !fullNote && !props.hiddenTab,
+        canPop: !fullNote && !props.hiddenTab && !props.backStepAvailable,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
           if (fullNote) {
             props.onCloseFullScreenNote();
-          } else {
+          } else if (props.hiddenTab) {
             props.onLeaveHiddenTab();
+          } else if (props.backStepAvailable) {
+            props.onBackStep();
           }
         },
         child: PaletteSwipe(

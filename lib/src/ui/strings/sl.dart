@@ -1148,6 +1148,23 @@ final class SlovenianStrings extends Strings {
   @override
   String get sortDescending => 'Padajoče';
   @override
+  String get viewList => 'Seznam';
+  @override
+  String get viewGrid => 'Mreža';
+  @override
+  String get viewGroup => 'Pogled';
+  @override
+  String get folderUpTooltip => 'Gor (Alt+Gor)';
+  @override
+  String get breadcrumbMoreTooltip => 'Več map';
+  @override
+  String get libraryCrumb => 'Knjižnica';
+  @override
+  String folderEmpty(String name) => 'V $name še ni ničesar';
+  @override
+  String get folderEmptyHint =>
+      'Dotaknite se + za ustvarjanje zapiska ali mape.';
+  @override
   String get newNoteTitle => 'Nova opomba';
   @override
   String get newItemTooltip => 'Novo';

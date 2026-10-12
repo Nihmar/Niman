@@ -1151,6 +1151,23 @@ final class HungarianStrings extends Strings {
   @override
   String get sortDescending => 'Csökkenő';
   @override
+  String get viewList => 'Lista';
+  @override
+  String get viewGrid => 'Rács';
+  @override
+  String get viewGroup => 'Nézet';
+  @override
+  String get folderUpTooltip => 'Fel (Alt+Fel)';
+  @override
+  String get breadcrumbMoreTooltip => 'További mappák';
+  @override
+  String get libraryCrumb => 'Könyvtár';
+  @override
+  String folderEmpty(String name) => 'Még nincs semmi itt: $name';
+  @override
+  String get folderEmptyHint =>
+      'Koppints a + gombra jegyzet vagy mappa létrehozásához.';
+  @override
   String get newNoteTitle => 'Új jegyzet';
   @override
   String get newItemTooltip => 'Új';

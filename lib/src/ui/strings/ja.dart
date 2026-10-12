@@ -1083,6 +1083,22 @@ final class JapaneseStrings extends Strings {
   @override
   String get sortDescending => '降順';
   @override
+  String get viewList => 'リスト';
+  @override
+  String get viewGrid => 'グリッド';
+  @override
+  String get viewGroup => '表示';
+  @override
+  String get folderUpTooltip => '上へ (Alt+上)';
+  @override
+  String get breadcrumbMoreTooltip => 'その他のフォルダ';
+  @override
+  String get libraryCrumb => 'ライブラリ';
+  @override
+  String folderEmpty(String name) => '$name にはまだ何もありません';
+  @override
+  String get folderEmptyHint => 'ここでノートやフォルダを作るには + をタップ。';
+  @override
   String get newNoteTitle => '新しいノート';
   @override
   String get newItemTooltip => '新規';

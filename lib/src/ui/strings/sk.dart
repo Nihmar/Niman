@@ -1149,6 +1149,23 @@ final class SlovakStrings extends Strings {
   @override
   String get sortDescending => 'Zostupne';
   @override
+  String get viewList => 'Zoznam';
+  @override
+  String get viewGrid => 'Mriežka';
+  @override
+  String get viewGroup => 'Zobrazenie';
+  @override
+  String get folderUpTooltip => 'Nahor (Alt+Nahor)';
+  @override
+  String get breadcrumbMoreTooltip => 'Ďalšie priečinky';
+  @override
+  String get libraryCrumb => 'Knižnica';
+  @override
+  String folderEmpty(String name) => 'V $name zatiaľ nič nie je';
+  @override
+  String get folderEmptyHint =>
+      'Ťuknutím na + vytvoríte poznámku alebo priečinok.';
+  @override
   String get newNoteTitle => 'Nová poznámka';
   @override
   String get newItemTooltip => 'Nový';

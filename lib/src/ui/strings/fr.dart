@@ -1168,6 +1168,23 @@ final class FrenchStrings extends Strings {
   @override
   String get sortDescending => 'Décroissant';
   @override
+  String get viewList => 'Liste';
+  @override
+  String get viewGrid => 'Grille';
+  @override
+  String get viewGroup => 'Affichage';
+  @override
+  String get folderUpTooltip => 'Haut (Alt+Haut)';
+  @override
+  String get breadcrumbMoreTooltip => 'Autres dossiers';
+  @override
+  String get libraryCrumb => 'Bibliothèque';
+  @override
+  String folderEmpty(String name) => "Rien dans $name pour l'instant";
+  @override
+  String get folderEmptyHint =>
+      'Touchez + pour créer une note ou un dossier ici.';
+  @override
   String get newNoteTitle => 'Nouvelle note';
   @override
   String get newItemTooltip => 'Nouveau';

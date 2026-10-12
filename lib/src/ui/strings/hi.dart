@@ -1129,6 +1129,22 @@ final class HindiStrings extends Strings {
   @override
   String get sortDescending => 'अवरोही';
   @override
+  String get viewList => 'सूची';
+  @override
+  String get viewGrid => 'ग्रिड';
+  @override
+  String get viewGroup => 'दृश्य';
+  @override
+  String get folderUpTooltip => 'ऊपर (Alt+ऊपर)';
+  @override
+  String get breadcrumbMoreTooltip => 'और फ़ोल्डर';
+  @override
+  String get libraryCrumb => 'लाइब्रेरी';
+  @override
+  String folderEmpty(String name) => '$name में अभी कुछ नहीं है';
+  @override
+  String get folderEmptyHint => 'यहाँ नोट या फ़ोल्डर बनाने के लिए + दबाएँ।';
+  @override
   String get newNoteTitle => 'नया नोट';
   @override
   String get newItemTooltip => 'नया';

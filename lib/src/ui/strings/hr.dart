@@ -1146,6 +1146,22 @@ final class CroatianStrings extends Strings {
   @override
   String get sortDescending => 'Opadajuće';
   @override
+  String get viewList => 'Popis';
+  @override
+  String get viewGrid => 'Mreža';
+  @override
+  String get viewGroup => 'Prikaz';
+  @override
+  String get folderUpTooltip => 'Gore (Alt+Gore)';
+  @override
+  String get breadcrumbMoreTooltip => 'Više mapa';
+  @override
+  String get libraryCrumb => 'Knjižnica';
+  @override
+  String folderEmpty(String name) => 'U $name još nema ničega';
+  @override
+  String get folderEmptyHint => 'Dodirnite + za stvaranje bilješke ili mape.';
+  @override
   String get newNoteTitle => 'Nova napomena';
   @override
   String get newItemTooltip => 'Novo';

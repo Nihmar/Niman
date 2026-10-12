@@ -1146,6 +1146,23 @@ final class CzechStrings extends Strings {
   @override
   String get sortDescending => 'Sestupně';
   @override
+  String get viewList => 'Seznam';
+  @override
+  String get viewGrid => 'Mřížka';
+  @override
+  String get viewGroup => 'Zobrazení';
+  @override
+  String get folderUpTooltip => 'Nahoru (Alt+Nahoru)';
+  @override
+  String get breadcrumbMoreTooltip => 'Další složky';
+  @override
+  String get libraryCrumb => 'Knihovna';
+  @override
+  String folderEmpty(String name) => 'V $name zatím nic není';
+  @override
+  String get folderEmptyHint =>
+      'Klepnutím na + vytvoříte poznámku nebo složku.';
+  @override
   String get newNoteTitle => 'Nová poznámka';
   @override
   String get newItemTooltip => 'Nový';

@@ -1145,6 +1145,23 @@ final class LatvianStrings extends Strings {
   @override
   String get sortDescending => 'Dilstošā';
   @override
+  String get viewList => 'Saraksts';
+  @override
+  String get viewGrid => 'Režģis';
+  @override
+  String get viewGroup => 'Skats';
+  @override
+  String get folderUpTooltip => 'Augšup (Alt+Augšup)';
+  @override
+  String get breadcrumbMoreTooltip => 'Vairāk mapju';
+  @override
+  String get libraryCrumb => 'Bibliotēka';
+  @override
+  String folderEmpty(String name) => '$name vēl ir tukša';
+  @override
+  String get folderEmptyHint =>
+      'Pieskarieties +, lai šeit izveidotu piezīmi vai mapi.';
+  @override
   String get newNoteTitle => 'Jauna piezīme';
   @override
   String get newItemTooltip => 'Jauns';

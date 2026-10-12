@@ -1140,6 +1140,22 @@ final class EnglishStrings extends Strings {
   @override
   String get sortDescending => 'Descending';
   @override
+  String get viewList => 'List';
+  @override
+  String get viewGrid => 'Grid';
+  @override
+  String get viewGroup => 'View';
+  @override
+  String get folderUpTooltip => 'Up (Alt+Up)';
+  @override
+  String get breadcrumbMoreTooltip => 'More folders';
+  @override
+  String get libraryCrumb => 'Library';
+  @override
+  String folderEmpty(String name) => 'Nothing in $name yet';
+  @override
+  String get folderEmptyHint => 'Tap + to make a note or a folder here.';
+  @override
   String get newNoteTitle => 'New note';
   @override
   String get newItemTooltip => 'New';

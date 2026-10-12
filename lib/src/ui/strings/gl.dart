@@ -1157,6 +1157,23 @@ final class GalicianStrings extends Strings {
   @override
   String get sortDescending => 'Descendente';
   @override
+  String get viewList => 'Lista';
+  @override
+  String get viewGrid => 'Grella';
+  @override
+  String get viewGroup => 'Vista';
+  @override
+  String get folderUpTooltip => 'Arriba (Alt+Arriba)';
+  @override
+  String get breadcrumbMoreTooltip => 'Máis cartafoles';
+  @override
+  String get libraryCrumb => 'Biblioteca';
+  @override
+  String folderEmpty(String name) => 'Aínda nada en $name';
+  @override
+  String get folderEmptyHint =>
+      'Toca + para crear aquí unha nota ou un cartafol.';
+  @override
   String get newNoteTitle => 'Nota nova';
   @override
   String get newItemTooltip => 'Novo';

@@ -581,6 +581,17 @@ abstract base class Strings {
   String get sortSize;
   String get sortAscending;
   String get sortDescending;
+
+  /// The Files pane's view switch (#727): the pair's tooltips, the sort
+  /// menu's group header, and the grid's own words.
+  String get viewList;
+  String get viewGrid;
+  String get viewGroup;
+  String get folderUpTooltip;
+  String get breadcrumbMoreTooltip;
+  String get libraryCrumb;
+  String folderEmpty(String name);
+  String get folderEmptyHint;
   String get newNoteTitle;
   String get newItemTooltip;
   String get closeMenuTooltip;

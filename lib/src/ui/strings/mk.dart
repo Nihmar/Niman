@@ -1156,6 +1156,22 @@ final class MacedonianStrings extends Strings {
   @override
   String get sortDescending => 'Опаѓачки';
   @override
+  String get viewList => 'Листа';
+  @override
+  String get viewGrid => 'Мрежа';
+  @override
+  String get viewGroup => 'Приказ';
+  @override
+  String get folderUpTooltip => 'Горе (Alt+Горе)';
+  @override
+  String get breadcrumbMoreTooltip => 'Повеќе папки';
+  @override
+  String get libraryCrumb => 'Библиотека';
+  @override
+  String folderEmpty(String name) => 'Сè уште нема ништо во $name';
+  @override
+  String get folderEmptyHint => 'Допрете + за да создадете белешка или папка.';
+  @override
   String get newNoteTitle => 'Нова белешка';
   @override
   String get newItemTooltip => 'Ново';

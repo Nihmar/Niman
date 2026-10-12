@@ -1147,6 +1147,23 @@ final class IcelandicStrings extends Strings {
   @override
   String get sortDescending => 'Lækkandi';
   @override
+  String get viewList => 'Listi';
+  @override
+  String get viewGrid => 'Hnitanet';
+  @override
+  String get viewGroup => 'Sýn';
+  @override
+  String get folderUpTooltip => 'Upp (Alt+Upp)';
+  @override
+  String get breadcrumbMoreTooltip => 'Fleiri möppur';
+  @override
+  String get libraryCrumb => 'Safn';
+  @override
+  String folderEmpty(String name) => 'Ekkert í $name ennþá';
+  @override
+  String get folderEmptyHint =>
+      'Ýttu á + til að búa til skýrslu eða möppu hér.';
+  @override
   String get newNoteTitle => 'Nýtt minnisblað';
   @override
   String get newItemTooltip => 'Nýtt';
