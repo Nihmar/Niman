@@ -135,15 +135,20 @@ void main() {
   });
 
   testWidgets('Remind me is a lead time before the start', (tester) async {
-    await tester.pumpWidget(buildApp());
-    await tester.enterText(find.byKey(const Key('calendar-event-text')), 'a');
-    await tester.pump();
+    // A start with room for the lead: at 23:00 the next whole hour is
+    // midnight, and a reminder that lands on the day before is not
+    // written, so the wall clock must not decide this case.
+    await tester.pumpWidget(
+      buildApp(
+        draft: const CalendarEventDraft(text: 'a', startMinutes: 9 * 60),
+      ),
+    );
     await tester.tap(find.byKey(const Key('calendar-event-remind')));
     await tester.pump();
     await tester.tap(saveButton());
 
-    final start = saved!.startMinutes!;
-    expect(saved!.reminderMinutes, start - 15);
+    expect(saved!.startMinutes, 9 * 60);
+    expect(saved!.reminderMinutes, 9 * 60 - 15);
   });
 
   testWidgets('an edit starts from the event it edits', (tester) async {
