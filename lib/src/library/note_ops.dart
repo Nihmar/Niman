@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:niman/src/core/file_holds.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/settings/library_config.dart';
@@ -53,7 +54,9 @@ final class NoteOps implements NoteOperations {
     required this.indexer,
     required this.config,
     this.carryOutside,
-  }) : _dao = NoteDao(db),
+    FileHolds? holds,
+  }) : holds = holds ?? FileHolds.instance,
+       _dao = NoteDao(db),
        history = NoteHistory(root: root, config: config) {
     writer = NoteWriter(root: root, indexer: indexer, history: history);
     // A note the writer is about to read into the index is left to it by
@@ -84,6 +87,16 @@ final class NoteOps implements NoteOperations {
   final NoteHistory history;
 
   final NoteDao _dao;
+
+  /// The views holding files open (#833): a rename, a move, a delete or a
+  /// sync's swap waits for every view of the file, or of a file under the
+  /// folder, to let go of it, and hands it back after.
+  final FileHolds holds;
+
+  /// Runs [operation] on [path] (library-relative) once no view holds
+  /// it, or anything under it, open ([FileHolds.around]).
+  Future<T> _released<T>(String path, Future<T> Function() operation) =>
+      holds.around([_abs(path)], operation);
 
   /// The library's `.trash/` and its manifest.
   late final NoteTrash _trash = NoteTrash(
@@ -461,6 +474,10 @@ final class NoteOps implements NoteOperations {
   /// (self excluded). Returns the updated row.
   @override
   Future<Note> rename(String path, String newName) {
+    return _released(path, () => _rename(path, newName));
+  }
+
+  Future<Note> _rename(String path, String newName) {
     return _synchronized(() async {
       final row = await _mustFind(path);
       final parent = parentOf(path);
@@ -503,6 +520,10 @@ final class NoteOps implements NoteOperations {
   /// it — a folder cannot be renamed onto its own subtree.
   @override
   Future<Note> move(String path, String targetParent) {
+    return _released(path, () => _move(path, targetParent));
+  }
+
+  Future<Note> _move(String path, String targetParent) {
     return _synchronized(() async {
       final row = await _mustFind(path);
       if (resolvePath(targetParent, p.basename(path)) == path) return row;
@@ -663,7 +684,8 @@ final class NoteOps implements NoteOperations {
   /// Deletes [path]: into `.trash/` when the trash toggle is on, hard
   /// delete otherwise.
   @override
-  Future<void> delete(String path) => _trash.delete(path);
+  Future<void> delete(String path) =>
+      _released(path, () => _trash.delete(path));
 
   // -- sync (docs/records/sync.md) -------------------------------------------
 
@@ -673,7 +695,7 @@ final class NoteOps implements NoteOperations {
   /// Swaps the verified sync download at [tempAbs] in for the file at
   /// [path] (new or existing), as a `sync` version of a note.
   Future<void> syncReplace(String path, String tempAbs) =>
-      _syncWrites.replace(path, tempAbs);
+      _released(path, () => _syncWrites.replace(path, tempAbs));
 
   /// Writes [text] at [path] because the sync merged both sides of it.
   Future<void> syncMerge(String path, String text) =>
@@ -681,7 +703,8 @@ final class NoteOps implements NoteOperations {
 
   /// Moves [path] into `.trash/` because the remote deleted it, whatever
   /// the trash toggle.
-  Future<void> syncTrash(String path) => _syncWrites.trash(path);
+  Future<void> syncTrash(String path) =>
+      _released(path, () => _syncWrites.trash(path));
 
   /// Renames the file at [from] to [to] because the remote renamed it;
   /// the history follows. Throws [FileSystemException] when [from] is gone
@@ -691,7 +714,7 @@ final class NoteOps implements NoteOperations {
     String from,
     String to, {
     ({String from, String to})? folder,
-  }) => _syncWrites.move(from, to, folder: folder);
+  }) => _released(from, () => _syncWrites.move(from, to, folder: folder));
 
   /// Pins the sync base of [path] to the version holding content [sha];
   /// null for files without history, or when the content is gone.

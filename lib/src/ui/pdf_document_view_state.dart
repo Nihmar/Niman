@@ -19,6 +19,7 @@ import 'package:niman/src/ui/ocr/ocr_file_controls.dart';
 import 'package:niman/src/ui/ocr/ocr_line_layer.dart';
 import 'package:niman/src/ui/ocr/ocr_lines_scope.dart';
 import 'package:niman/src/ui/pdf_document_view.dart';
+import 'package:niman/src/ui/pdf_held_document.dart';
 import 'package:niman/src/ui/pdf_mark_layer.dart';
 import 'package:niman/src/ui/place_link_button.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -29,6 +30,9 @@ import 'package:pdfrx/pdfrx.dart';
 /// points, followed as it is read, annotated, and marked where it was.
 final class PdfDocumentViewState extends State<PdfDocumentView> {
   final PdfViewerController _controller = PdfViewerController();
+
+  /// The PDF, open while no operation has its file let go of (#833).
+  late PdfHeldDocument _document;
   late ReadingTracker _reading;
   late Future<BookLocation?> _left;
 
@@ -52,7 +56,25 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
   void initState() {
     super.initState();
     _follow();
+    _document = _hold();
     _controller.addListener(_onMove);
+  }
+
+  PdfHeldDocument _hold() => PdfHeldDocument(widget.path)..addListener(_onHeld);
+
+  /// The file let go of for an operation, or taken back after it: the
+  /// reader's place is kept, and found again in the PDF opened anew.
+  void _onHeld() {
+    setState(() {
+      if (_document.ref == null) {
+        _reading.flush();
+        _ready = false;
+        _selection = null;
+      } else {
+        _reading = ReadingTracker(widget.positions, widget.path);
+        _left = _reading.read();
+      }
+    });
   }
 
   @override
@@ -78,10 +100,13 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
     _reading.flush();
     _ready = false;
     _follow();
+    _document.dispose();
+    _document = _hold();
   }
 
   @override
   void dispose() {
+    _document.dispose();
     _marks?.dispose();
     _controller.removeListener(_onMove);
     _reading.flush();
@@ -343,43 +368,47 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
   String _label(int page) =>
       AppStrings.pdfPageLabel(p.basenameWithoutExtension(widget.path), page);
 
+  /// The PDF's pages, from the document [ref] opens.
+  Widget _viewer(PdfDocumentRef ref) => PdfViewer(
+    ref,
+    key: const Key('attachment-pdf'),
+    controller: _controller,
+    params: PdfViewerParams(
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+      onViewerReady: (document, controller) => unawaited(_place(controller)),
+      pageOverlaysBuilder: (context, pageRect, page) => [
+        ..._layer.overlays(
+          context,
+          pageRect,
+          page,
+          _marks?.marks ?? const [],
+          onTap: _openMarks,
+        ),
+        ...ocrLineOverlays(
+          context,
+          pageRect,
+          page.pageNumber,
+          onPick: (line, at) => unawaited(_lineMenu(context, line, at)),
+        ),
+      ],
+      errorBannerBuilder: (context, error, stack, documentRef) =>
+          const AttachmentUnreadable(),
+      textSelectionParams: PdfTextSelectionParams(
+        onTextSelectionChange: (selection) => _selection = selection,
+      ),
+      customizeContextMenuItems: _selectionMenu,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) => Column(
     children: [
       Expanded(
-        child: PdfViewer.file(
-          widget.path,
-          key: const Key('attachment-pdf'),
-          controller: _controller,
-          params: PdfViewerParams(
-            backgroundColor: Theme.of(context)
-                .colorScheme
-                .surfaceContainerLowest,
-            onViewerReady: (document, controller) =>
-                unawaited(_place(controller)),
-            pageOverlaysBuilder: (context, pageRect, page) => [
-              ..._layer.overlays(
-                context,
-                pageRect,
-                page,
-                _marks?.marks ?? const [],
-                onTap: _openMarks,
-              ),
-              ...ocrLineOverlays(
-                context,
-                pageRect,
-                page.pageNumber,
-                onPick: (line, at) => unawaited(_lineMenu(context, line, at)),
-              ),
-            ],
-            errorBannerBuilder: (context, error, stack, documentRef) =>
-                const AttachmentUnreadable(),
-            textSelectionParams: PdfTextSelectionParams(
-              onTextSelectionChange: (selection) => _selection = selection,
-            ),
-            customizeContextMenuItems: _selectionMenu,
-          ),
-        ),
+        child: switch (_document.ref) {
+          // Let go of while its file is renamed, moved or deleted.
+          null => const SizedBox.expand(),
+          final ref => _viewer(ref),
+        },
       ),
       AttachmentBar(
         path: widget.path,

@@ -281,6 +281,14 @@ library.
   desktop where the phone stopped. Only reading moves it: opening a
   book and closing it again changes nothing. A file moved or renamed in
   Niman, or a folder holding it, keeps its place.
+- **A PDF on screen can be renamed, moved or deleted** like any other
+  file, on every platform — Windows included, which refuses to move a
+  file a program still has open. The PDF lets go of its file first (the
+  pane goes blank for a moment), and after a rename or a move it opens
+  again at the new place; a deleted PDF closes its tab. The same goes
+  for a folder holding an open PDF and for a voice-note clip being
+  played (it stops); and the sync can replace, move or trash a PDF that
+  is open.
 - **EPUB books** open in the note pane too, on every platform, and read
   like a note, in the note column. The book's own styles are not used —
   its headings, emphasis, lists, quotes, tables and pictures are, in
