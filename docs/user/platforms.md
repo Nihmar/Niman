@@ -207,7 +207,9 @@ width at which the layout would switch to the phone's bottom bar and
 full-screen note — nor shorter than 400 px. A window snapped that small
 is still driven by a mouse, and the desktop keeps its rail, tree and
 panes down to the floor; Android carries the narrow layout, so nothing
-is lost where a thumb is the pointer.
+is lost where a thumb is the pointer. On Windows the floor counts the
+window's thin frame on top of those 600 px, so the app's own area keeps
+all of them at any display scale.
 
 ## Destinations
 
