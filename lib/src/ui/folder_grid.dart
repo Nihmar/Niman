@@ -607,21 +607,7 @@ final class _FolderGridState extends State<FolderGrid> {
     final path = widget.renaming?.path;
     if (path == null || path == _revealed) return;
     _revealed = path;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scroll.hasClients) return;
-      final top = _padding + (index ~/ columns) * (_tileHeight + _gap);
-      final position = _scroll.position;
-      if (top >= position.pixels &&
-          top + _tileHeight <= position.pixels + position.viewportDimension) {
-        return;
-      }
-      _scroll.jumpTo(
-        (top - position.viewportDimension / 3).clamp(
-          position.minScrollExtent,
-          position.maxScrollExtent,
-        ),
-      );
-    });
+    _ensureVisible(index, columns);
   }
 
   /// The keyboard: the arrows, Home/End and PgUp/PgDn walk the tiles,
@@ -727,7 +713,8 @@ final class _FolderGridState extends State<FolderGrid> {
     return rows.rows[index].$1.path;
   }
 
-  /// Scrolls the focused tile into view.
+  /// Scrolls the tile at [index] into view, a third down the pane when it
+  /// has to move: the focused tile, or the one being renamed.
   void _ensureVisible(int index, int columns) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scroll.hasClients) return;
