@@ -31,7 +31,7 @@ class MainActivity : FlutterActivity() {
     private val shares = ShareBridge(this)
     private val clipboard = ClipboardBridge(this)
 
-    /** The launching intent, handled once per task (#721). */
+    /** The launching intent, handled once (#721). */
     private val launch = LaunchIntent()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,12 +57,15 @@ class MainActivity : FlutterActivity() {
         // Cold start: this runs while Dart is still booting, so the
         // launching intent's action waits until Dart asks for it.
         //
-        // Handled once per task (#721): Android hands the same intent
-        // back when it rebuilds the activity, and the share or widget tap
-        // that started the app must not run again. The intent is cleared
-        // where it is consumed, so nothing that reads it later sees it
-        // either. A fresh delivery arrives through onNewIntent.
-        if (launch.take(getTaskId(), intent?.toUri(Intent.URI_INTENT_SCHEME) ?: "")) {
+        // Handled once (#721): Android hands the same intent back when it
+        // rebuilds the activity or relaunches it from Recents, and the
+        // share or widget tap that started the app must not run again.
+        // The intent is cleared where it is consumed, so nothing that
+        // reads it later sees it either. A delivery to a live activity
+        // arrives through onNewIntent.
+        val history = Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+        val fromHistory = ((intent?.flags ?: 0) and history) != 0
+        if (launch.take(fromHistory)) {
             shortcuts.handleIntent(intent, running = false)
             widgets.handleIntent(intent, running = false)
             shares.handleIntent(intent, running = false)
