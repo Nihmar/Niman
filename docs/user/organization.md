@@ -535,8 +535,11 @@ else in it that is not Markdown is kept as a file.
   under the finger, **slide up** past a thumb's width to lock it so the
   finger can go free — the bar shows the lock — and let go before that to
   stop and save, the way a hold is sent; the bar says *Slide up to lock*
-  while the hold is live. A **tap** keeps the start/stop toggle it always
-  had. While
+  while the hold is live, and keeps the lock showing once the finger is
+  off. Let go before the microphone is ready (the first recording can take
+  a moment, and Android may ask for the permission mid-hold) and the
+  recording is thrown away as soon as it starts: nothing was said. A
+  **tap** keeps the start/stop toggle it always had. While
   recording, the field shows a red bar with the elapsed time, a pause
   button (the clock holds and the dot breathes until you resume) and a
   discard button, and the round button stops and saves; the bar reads
