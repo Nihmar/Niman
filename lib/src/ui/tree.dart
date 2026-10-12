@@ -313,33 +313,52 @@ final class _NoteTreeState extends State<NoteTree> {
     );
   }
 
-  /// The rows the keyboard walks, in the order the list draws them: the
-  /// pinned notes first, then the tree's own rows (#727). Built when a key
-  /// is pressed, not on every frame.
-  List<_WalkRow> _walkRows() {
+  /// How many of the pinned block's items are rows the keyboard walks: its
+  /// notes, without the heading and the divider — none while rolled up.
+  int get _pinnedWalked =>
+      _pinnedHeights.isEmpty ? 0 : _pinnedHeights.length - 2;
+
+  /// How many rows the keyboard walks, in the order the list draws them:
+  /// the pinned notes first, then the tree's own rows (#727).
+  int get _walkLength {
     final rows = _current;
-    if (rows == null) return const <_WalkRow>[];
-    final count = _pinnedHeights.length + rows.tree.length;
-    return [for (var index = 0; index < count; index++) ?_walkAt(index)];
+    return rows == null ? 0 : _pinnedWalked + rows.tree.length;
   }
 
-  /// The cursor's place in [walk]: the row it is on, or the selected row —
-  /// a walk begun with the keyboard starts where the tree already is — or
-  /// the first row.
-  int _cursorAt(List<_WalkRow> walk) {
+  /// The walk's row at [index]: the list's item it is, read as
+  /// [_walkAt] reads it. Only the rows a key reaches are made — a tree of
+  /// a million rows is not copied for each key press.
+  _WalkRow _walkRow(int index) {
+    final pinned = _pinnedWalked;
+    return _walkAt(
+      index < pinned ? index + 1 : _pinnedHeights.length + index - pinned,
+    )!;
+  }
+
+  /// The cursor's place in the walk: the row it is on, or the selected
+  /// row — a walk begun with the keyboard starts where the tree already
+  /// is — or the first row.
+  int _cursorAt() {
+    final rows = _current!;
+    final pinned = _pinnedWalked;
+    int? find(String path, {bool? inPinned}) {
+      if (inPinned != false) {
+        for (var at = 0; at < pinned; at++) {
+          if (rows.pinned[at].path == path) return at;
+        }
+      }
+      if (inPinned != true) {
+        final at = rows.tree.indexWhere((row) => row.note.path == path);
+        if (at >= 0) return pinned + at;
+      }
+      return null;
+    }
+
     final path = _cursorPath;
-    if (path != null) {
-      final at = walk.indexWhere(
-        (row) => row.path == path && row.pinned == _cursorPinned,
-      );
-      if (at >= 0) return at;
-    }
     final selected = widget.selectedPath;
-    if (selected != null) {
-      final at = walk.indexWhere((row) => row.path == selected);
-      if (at >= 0) return at;
-    }
-    return 0;
+    return (path == null ? null : find(path, inPinned: _cursorPinned)) ??
+        (selected == null ? null : find(selected)) ??
+        0;
   }
 
   /// Whether the keyboard's ring is on [row] (#727): the cursor's own look,
@@ -374,10 +393,8 @@ final class _NoteTreeState extends State<NoteTree> {
         keys.isShiftPressed) {
       return KeyEventResult.ignored;
     }
-    final walk = _walkRows();
-    if (walk.isEmpty) return KeyEventResult.ignored;
-    final at = _cursorAt(walk);
-    final handled = _walkKey(walk, at, event.logicalKey);
+    if (_walkLength == 0) return KeyEventResult.ignored;
+    final handled = _walkKey(_cursorAt(), event.logicalKey);
     // The keyboard is in use: the ring comes back if a pointer had put it
     // away — and stays off for a key the walk does not own.
     if (handled == KeyEventResult.handled && !_keyboardFocus) {
@@ -386,24 +403,22 @@ final class _NoteTreeState extends State<NoteTree> {
     return handled;
   }
 
-  /// One key of the walk: [at] is the cursor's place in [walk], and what the
+  /// One key of the walk: [at] is the cursor's place in it, and what the
   /// key does is decided here.
-  KeyEventResult _walkKey(List<_WalkRow> walk, int at, LogicalKeyboardKey key) {
-    final row = walk[at];
-    if (key == LogicalKeyboardKey.arrowUp) return _move(walk, at - 1);
-    if (key == LogicalKeyboardKey.arrowDown) return _move(walk, at + 1);
-    if (key == LogicalKeyboardKey.home) return _move(walk, 0);
-    if (key == LogicalKeyboardKey.end) return _move(walk, walk.length - 1);
+  KeyEventResult _walkKey(int at, LogicalKeyboardKey key) {
+    final row = _walkRow(at);
+    final length = _walkLength;
+    if (key == LogicalKeyboardKey.arrowUp) return _move(at - 1);
+    if (key == LogicalKeyboardKey.arrowDown) return _move(at + 1);
+    if (key == LogicalKeyboardKey.home) return _move(0);
+    if (key == LogicalKeyboardKey.end) return _move(length - 1);
     if (key == LogicalKeyboardKey.pageUp ||
         key == LogicalKeyboardKey.pageDown) {
       final viewport = _scroll.hasClients
           ? _scroll.position.viewportDimension
           : 0.0;
       final page = math.max(1, viewport ~/ math.max(1.0, row.height));
-      return _move(
-        walk,
-        at + (key == LogicalKeyboardKey.pageUp ? -page : page),
-      );
+      return _move(at + (key == LogicalKeyboardKey.pageUp ? -page : page));
     }
     if (key == LogicalKeyboardKey.enter ||
         key == LogicalKeyboardKey.numpadEnter) {
@@ -418,9 +433,9 @@ final class _NoteTreeState extends State<NoteTree> {
         return KeyEventResult.handled;
       }
       if (!row.pinned &&
-          at + 1 < walk.length &&
-          walk[at + 1].depth > row.depth) {
-        return _move(walk, at + 1);
+          at + 1 < length &&
+          _walkRow(at + 1).depth > row.depth) {
+        return _move(at + 1);
       }
       return KeyEventResult.handled;
     }
@@ -432,10 +447,12 @@ final class _NoteTreeState extends State<NoteTree> {
         return KeyEventResult.handled;
       }
       if (!row.pinned) {
-        for (var i = at - 1; i >= 0; i--) {
-          if (!walk[i].pinned && walk[i].depth < row.depth) {
-            return _move(walk, i);
-          }
+        // The tree's own rows only: the pinned block above them is no
+        // folder of theirs.
+        final rows = _current!.tree;
+        final pinned = _pinnedWalked;
+        for (var i = at - pinned - 1; i >= 0; i--) {
+          if (rows[i].depth < row.depth) return _move(pinned + i);
         }
       }
       return KeyEventResult.handled;
@@ -457,8 +474,8 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// Puts the cursor on the row at [index], clamped to the rows there are,
   /// and brings it into view.
-  KeyEventResult _move(List<_WalkRow> walk, int index) {
-    final row = walk[index.clamp(0, walk.length - 1)];
+  KeyEventResult _move(int index) {
+    final row = _walkRow(index.clamp(0, _walkLength - 1));
     setState(() {
       _cursorPath = row.path;
       _cursorPinned = row.pinned;

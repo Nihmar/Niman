@@ -236,6 +236,33 @@ void main() {
     expect(ringOn(tester, 'Zulu'), isTrue);
   });
 
+  testWidgets('under a pinned block the arrows still step in and out', (
+    tester,
+  ) async {
+    await session.open('/lib', create: false);
+    await session.createNote(
+      parentPath: '',
+      name: 'a',
+      content: '---\npinned: true\n---\nbody',
+    );
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createNote(parentPath: 'Projects', name: 'Roadmap');
+    await tester.pumpWidget(treeFor());
+    await tester.pumpAndSettle();
+
+    await tester.tap(noteRow('Projects'));
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(ringOn(tester, 'Roadmap.md'), isTrue);
+
+    // Out to the folder that holds it — not into the pinned block above.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(ringOn(tester, 'Projects'), isTrue);
+    expect(ringOnPinned(tester, 'a.md'), isFalse);
+  });
+
   testWidgets('the cursor follows its row when the tree is rebuilt', (
     tester,
   ) async {
