@@ -1,9 +1,10 @@
-// The tree's keyboard walk (#727): a click puts the cursor on the row, the
-// arrows walk it, Home/End and PgUp/PgDn jump, Enter opens and the left and
-// right arrows close and open folders — the grid's own walk, in the tree's
-// shape. F2 and Delete act on the cursor (through the callbacks the shell
-// wires to its row actions), and a modified key is left to the app's own
-// accelerators.
+// The tree's keyboard walk (#727): a click on a folder takes the keys and
+// the arrows walk the rows, Home/End and PgUp/PgDn jump, Enter opens and
+// the left and right arrows close and open folders — the grid's own walk,
+// in the tree's shape. A click on a note opens it for writing and leaves
+// the keys where they are, F2 and Delete act on the cursor (through the
+// callbacks the shell wires to its row actions), and a modified key is left
+// to the app's own accelerators.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -64,31 +65,64 @@ void main() {
         .first,
   );
 
-  testWidgets('a click puts the cursor on the row, and the arrows walk it', (
-    tester,
+  /// Sends [key] with [modifiers] held down, as the accelerators are
+  /// pressed.
+  Future<void> sendWith(
+    WidgetTester tester,
+    LogicalKeyboardKey key,
+    List<LogicalKeyboardKey> modifiers,
   ) async {
+    for (final modifier in modifiers) {
+      await tester.sendKeyDownEvent(modifier);
+    }
+    await tester.sendKeyEvent(key);
+    for (final modifier in modifiers.reversed) {
+      await tester.sendKeyUpEvent(modifier);
+    }
+    await tester.pump();
+  }
+
+  /// Opens the tree over a folder — `Zulu`, which leads the rows — and the
+  /// notes given.
+  Future<void> openWith(
+    WidgetTester tester, {
+    List<String> notes = const ['alpha', 'bravo', 'charlie'],
+  }) async {
     await session.open('/lib', create: false);
-    for (final name in ['alpha', 'bravo', 'charlie']) {
+    await session.createFolder(parentPath: '', name: 'Zulu');
+    for (final name in notes) {
       await session.createNote(parentPath: '', name: name);
     }
+  }
+
+  /// Takes the keys the way a person does with the pointer: a click on a
+  /// folder's row, which is a place rather than a note to write in.
+  Future<void> takeKeys(WidgetTester tester) async {
+    await tester.tap(noteRow('Zulu'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('a folder takes the keys, and the arrows walk the rows', (
+    tester,
+  ) async {
+    await openWith(tester);
     final opened = <String>[];
     await tester.pumpWidget(treeFor(opened: opened));
     await tester.pumpAndSettle();
 
-    await tester.tap(noteRow('alpha.md'));
-    await tester.pumpAndSettle();
-    expect(opened, ['alpha.md']);
+    await takeKeys(tester);
+    expect(opened, ['Zulu']);
     // A pointer's click leaves no ring: the ring is the keyboard's.
-    expect(ringOn(tester, 'alpha.md'), isFalse);
+    expect(ringOn(tester, 'Zulu'), isFalse);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
-    expect(ringOn(tester, 'bravo.md'), isTrue);
-    expect(ringOn(tester, 'alpha.md'), isFalse);
+    expect(ringOn(tester, 'alpha.md'), isTrue);
+    expect(ringOn(tester, 'Zulu'), isFalse);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
-    expect(opened, ['alpha.md', 'bravo.md']);
+    expect(opened, ['Zulu', 'alpha.md']);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.end);
     await tester.pumpAndSettle();
@@ -100,9 +134,28 @@ void main() {
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(ringOn(tester, 'Zulu'), isTrue, reason: 'up at the first row stays');
+  });
+
+  testWidgets('a click on a note leaves the keyboard where it is', (
+    tester,
+  ) async {
+    await openWith(tester, notes: const ['alpha', 'bravo']);
+    final opened = <String>[];
+    await tester.pumpWidget(treeFor(opened: opened));
     await tester.pumpAndSettle();
-    expect(opened.last, 'alpha.md', reason: 'up at the first row stays');
+
+    // A note opens for writing: the pane must not hold the keys it takes
+    // for the walk, or the note could not be typed into (#727). The shell
+    // gives the caret to the note itself.
+    await tester.tap(noteRow('alpha.md'));
+    await tester.pumpAndSettle();
+    expect(opened, ['alpha.md']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(ringOn(tester, 'bravo.md'), isFalse, reason: 'no cursor to move');
+    expect(ringOn(tester, 'alpha.md'), isFalse);
   });
 
   testWidgets('the left and right arrows close and open folders', (
@@ -158,62 +211,66 @@ void main() {
         content: '---\npinned: true\n---\nbody',
       );
     }
-    await session.createNote(parentPath: '', name: 'c');
-    final opened = <String>[];
-    await tester.pumpWidget(treeFor(opened: opened));
+    await session.createFolder(parentPath: '', name: 'Zulu');
+    await tester.pumpWidget(treeFor());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('pinned-b.md')));
+    await takeKeys(tester);
+    // Up from the first row of the tree: the pinned block, last pinned
+    // note first, as the list draws it.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
-    expect(ringOnPinned(tester, 'b.md'), isFalse);
+    expect(ringOnPinned(tester, 'b.md'), isTrue);
 
-    // Down from the last pinned row: the tree's own rows come next, in
-    // their order (a.md first), not another pinned one.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(ringOnPinned(tester, 'a.md'), isTrue);
+
+    // And down from the last pinned note: the tree's own rows, not another
+    // pinned one.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(ringOnPinned(tester, 'b.md'), isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
-    expect(opened.last, 'a.md');
+    expect(ringOn(tester, 'Zulu'), isTrue);
   });
 
   testWidgets('the cursor follows its row when the tree is rebuilt', (
     tester,
   ) async {
-    await session.open('/lib', create: false);
-    for (final name in ['alpha', 'bravo']) {
-      await session.createNote(parentPath: '', name: name);
-    }
+    await openWith(tester, notes: const ['alpha', 'bravo']);
     final opened = <String>[];
     await tester.pumpWidget(treeFor(opened: opened));
     await tester.pumpAndSettle();
 
-    await tester.tap(noteRow('bravo.md'));
+    await takeKeys(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(ringOn(tester, 'bravo.md'), isTrue);
+
     // A note that sorts before the cursor's row arrives: the place moved,
     // the row did not.
     await session.createNote(parentPath: '', name: 'aaa');
     await tester.pumpAndSettle();
+    expect(ringOn(tester, 'bravo.md'), isTrue);
+
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(opened.last, 'bravo.md');
-    expect(
-      ringOn(tester, 'bravo.md'),
-      isTrue,
-      reason: 'the keyboard put the ring back',
-    );
   });
 
   testWidgets('F2 and Delete act on the cursor', (tester) async {
-    await session.open('/lib', create: false);
-    for (final name in ['alpha', 'bravo']) {
-      await session.createNote(parentPath: '', name: name);
-    }
+    await openWith(tester, notes: const ['alpha', 'bravo']);
     final renamed = <String>[];
     final deleted = <String>[];
     await tester.pumpWidget(treeFor(renamed: renamed, deleted: deleted));
     await tester.pumpAndSettle();
 
-    await tester.tap(noteRow('alpha.md'));
+    await takeKeys(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
@@ -228,15 +285,13 @@ void main() {
   });
 
   testWidgets('a modified key is left to the app accelerators', (tester) async {
-    await session.open('/lib', create: false);
-    for (final name in ['alpha', 'bravo']) {
-      await session.createNote(parentPath: '', name: name);
-    }
+    await openWith(tester, notes: const ['alpha', 'bravo']);
     final opened = <String>[];
     await tester.pumpWidget(treeFor(opened: opened));
     await tester.pumpAndSettle();
 
-    await tester.tap(noteRow('alpha.md'));
+    await takeKeys(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
@@ -244,13 +299,13 @@ void main() {
 
     // Ctrl+Shift+PageUp is the journal's, Alt+Right the notes' history:
     // the walk must not shadow either (#23).
-    await sendWithModifiers(tester, LogicalKeyboardKey.pageUp, [
+    await sendWith(tester, LogicalKeyboardKey.pageUp, [
       LogicalKeyboardKey.controlLeft,
       LogicalKeyboardKey.shiftLeft,
     ]);
     expect(ringOn(tester, 'bravo.md'), isTrue, reason: 'the journal moves');
 
-    await sendWithModifiers(tester, LogicalKeyboardKey.arrowRight, [
+    await sendWith(tester, LogicalKeyboardKey.arrowRight, [
       LogicalKeyboardKey.altLeft,
     ]);
     expect(ringOn(tester, 'bravo.md'), isTrue, reason: 'the history moves');
@@ -261,16 +316,12 @@ void main() {
   });
 
   testWidgets('hidden under the grid the tree keeps no keys', (tester) async {
-    await session.open('/lib', create: false);
-    for (final name in ['alpha', 'bravo']) {
-      await session.createNote(parentPath: '', name: name);
-    }
+    await openWith(tester, notes: const ['alpha', 'bravo']);
     final opened = <String>[];
     await tester.pumpWidget(treeFor(opened: opened));
     await tester.pumpAndSettle();
 
-    await tester.tap(noteRow('alpha.md'));
-    await tester.pumpAndSettle();
+    await takeKeys(tester);
 
     // The grid takes the pane: the tree is offstage, and lets go.
     await tester.pumpWidget(treeFor(active: false, opened: opened));
@@ -280,13 +331,13 @@ void main() {
 
     await tester.pumpWidget(treeFor(opened: opened));
     await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
-    expect(opened.last, 'alpha.md', reason: 'the hidden walk moved nothing');
+    expect(ringOn(tester, 'alpha.md'), isFalse, reason: 'the hidden walk ran');
+    expect(ringOn(tester, 'Zulu'), isFalse);
   });
 
   testWidgets('the page keys jump by a viewport', (tester) async {
     await session.open('/lib', create: false);
+    await session.createFolder(parentPath: '', name: 'Zulu');
     for (var i = 0; i < 30; i++) {
       await session.createNote(
         parentPath: '',
@@ -297,15 +348,15 @@ void main() {
     await tester.pumpWidget(treeFor(opened: opened));
     await tester.pumpAndSettle();
 
-    await tester.tap(noteRow('n00.md'));
-    await tester.pumpAndSettle();
+    await takeKeys(tester);
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
 
-    // A 600 px pane of 40 px rows: fifteen rows, not one.
-    expect(opened.last, 'n15.md');
+    // A 600 px pane of 40 px rows: fifteen rows, not one — from the
+    // folder's own row (0) to the fifteenth (n14).
+    expect(opened.last, 'n14.md');
   });
 }
 

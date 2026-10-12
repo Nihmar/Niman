@@ -46,6 +46,8 @@ final class ShellDetailPane extends StatelessWidget {
     required this.unsavedTracker,
     required this.statusActions,
     required this.spellCheck,
+    this.caretPath,
+    this.caretRequest = 0,
     this.onPasteAsMarkdown,
     this.reloadToken = 0,
     this.templateFolder,
@@ -126,6 +128,14 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Whether the editor takes focus on open.
   final bool autofocusEditor;
+
+  /// The note the Files pane last opened (#727): only that tab's note view
+  /// is asked, so a tab kept alive behind, or the other pane, is left
+  /// where it is.
+  final String? caretPath;
+
+  /// How many times the pane has asked that note for the caret.
+  final int caretRequest;
 
   /// The link format the link button inserts.
   final LinkType linkType;
@@ -305,6 +315,7 @@ final class ShellDetailPane extends StatelessWidget {
     noteColumn: noteColumn,
     barActions: barActions,
     autofocusEditor: autofocusEditor,
+    caretRequest: tab.path == caretPath ? caretRequest : 0,
     linkType: linkType,
     missingNoteLocation: missingNoteLocation,
     attachmentsFolder: attachmentsFolder,

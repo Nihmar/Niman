@@ -1421,6 +1421,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           // Settings and the Search tab's commands reach it there.
           noteColumn: _editorSettings.noteColumn,
           autofocusEditor: _editorSettings.autofocusEditor,
+          // The Files pane opened this note (#727): the caret goes in it.
+          caretRequest: selectedPath == _caretPath ? _caretRequest : 0,
           linkType: _editorSettings.linkType,
           missingNoteLocation: _editorSettings.missingNoteLocation,
           attachmentsFolder: _editorSettings.attachmentsFolder,
@@ -4111,6 +4113,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                       _noteMenu(),
                     ],
                     autofocusEditor: _editorSettings.autofocusEditor,
+                    // The Files pane opened a note (#727): that tab's own
+                    // view is asked for the caret, and no other.
+                    caretPath: _caretPath,
+                    caretRequest: _caretRequest,
                     linkType: _editorSettings.linkType,
                     missingNoteLocation: _editorSettings.missingNoteLocation,
                     attachmentsFolder: _editorSettings.attachmentsFolder,
@@ -4469,6 +4475,22 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// never drift apart while the pane is switched.
   String? _gridFolder;
 
+  /// The note the Files pane last opened, and how many times it has asked
+  /// for the caret in it (#727): the note view takes the caret when the
+  /// number changes for its own path, so another pane's editor, or a tab
+  /// kept alive behind, is left where it is.
+  String? _caretPath;
+  int _caretRequest = 0;
+
+  /// Whether this is a desktop: the keyboard is always there, and a click
+  /// on a note can put the caret in it (#727). On a phone the tap that
+  /// opens a note is also what raises the IME, and the "keyboard on open"
+  /// setting decides that — so the caret is asked for on a desktop only.
+  static bool get _desktop => switch (defaultTargetPlatform) {
+    TargetPlatform.linux || TargetPlatform.windows => true,
+    _ => false,
+  };
+
   /// Whether the Files pane shows the grid rather than the tree.
   bool get _gridOn => _editorSettings.treeView == TreeView.grid;
 
@@ -4518,10 +4540,28 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// Activates a tile: a folder is entered, a note opens as a tree row
-  /// does.
+  /// does — and takes the caret (#727).
   void _gridOpen(Note note) {
     if (note.isDir) setState(() => _gridFolder = note.path);
+    _selectFromPane(note);
+  }
+
+  /// A row or a tile activated in the Files pane (#727): the note opens as
+  /// it does from anywhere else, and on a desktop it also takes the caret.
+  /// A click on a note is an invitation to write in it, and the pane is
+  /// not where the keyboard should end up: the row's own click leaves the
+  /// keys where they are for a note, and this is what puts them in it.
+  void _selectFromPane(Note note) {
+    if (!note.isDir && _desktop) _requestCaret(note.path);
     _select(note);
+  }
+
+  /// Asks the note at [path] for the caret: the Files pane opened it.
+  void _requestCaret(String path) {
+    setState(() {
+      _caretPath = path;
+      _caretRequest++;
+    });
   }
 
   /// The grid's Up, and the phone's Back inside a folder: up one level,
@@ -4617,7 +4657,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               // pane, and while the search holds the sidebar's slot.
               active: !_gridOn && !_sidebarShowsSearch,
               onToggle: _toggle,
-              onSelect: _select,
+              onSelect: _selectFromPane,
               onOpenInNewTab: (note) => _select(note, newTab: true),
               onLongPress: _showRowMenu,
               onSecondaryTapDown: (note, details) =>
@@ -4678,10 +4718,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// rename to a dialog: a phone, a desktop with the pane hidden, or a
   /// grid tile outside the folder the grid shows.
   bool _startRenameInPlace(String path) {
-    final desktop = switch (defaultTargetPlatform) {
-      TargetPlatform.linux || TargetPlatform.windows => true,
-      _ => false,
-    };
+    final desktop = _desktop;
     // Renaming happens in the pane's own row: the sidebar has to be
     // showing it, not the search view it may hold instead (#712).
     if (!desktop ||

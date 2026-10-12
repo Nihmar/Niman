@@ -248,32 +248,62 @@ void main() {
     );
   });
 
-  testWidgets('the keyboard walks the tiles, Enter opens', (tester) async {
+  testWidgets('a folder takes the keys, and the arrows walk the tiles', (
+    tester,
+  ) async {
     await session.open('/lib', create: false);
+    // Folders lead the tiles: Zulu takes the keys above the notes.
+    await session.createFolder(parentPath: '', name: 'Zulu');
     await session.createNote(parentPath: '', name: 'alpha');
     await session.createNote(parentPath: '', name: 'bravo');
     final opened = <String>[];
     await tester.pumpWidget(gridFor(onOpen: (note) => opened.add(note.name)));
     await tester.pumpAndSettle();
 
-    // A click puts the focus on the tile it opened.
-    await tester.tap(find.byKey(const Key('grid-tile-alpha.md')));
-    expect(opened, ['alpha.md']);
+    // A folder's click takes the keys for the walk (#727).
+    await tester.tap(find.byKey(const Key('grid-tile-Zulu')));
+    await tester.pumpAndSettle();
+    expect(opened, ['Zulu']);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-    expect(opened, ['alpha.md', 'bravo.md']);
+    await tester.pumpAndSettle();
+    expect(opened, ['Zulu', 'alpha.md']);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.home);
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-    expect(opened.last, 'alpha.md');
+    await tester.pumpAndSettle();
+    expect(opened.last, 'Zulu');
   });
 
-  testWidgets('F2 and Delete act on the focused tile', (tester) async {
+  testWidgets('a click on a note tile leaves the keyboard where it is', (
+    tester,
+  ) async {
     await session.open('/lib', create: false);
+    await session.createNote(parentPath: '', name: 'alpha');
+    await session.createNote(parentPath: '', name: 'bravo');
+    await tester.pumpWidget(gridFor());
+    await tester.pumpAndSettle();
+
+    // A note opens for writing: the grid must not hold the keys it takes
+    // for the walk, or the note could not be typed into (#727).
+    await tester.tap(find.byKey(const Key('grid-tile-alpha.md')));
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.f2);
+    await tester.pumpAndSettle();
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'nothing took the arrow, and nothing renamed',
+    );
+  });
+
+  testWidgets('F2 and Delete act on the cursor', (tester) async {
+    await session.open('/lib', create: false);
+    await session.createFolder(parentPath: '', name: 'Zulu');
     await session.createNote(parentPath: '', name: 'alpha');
     final renamed = <String>[];
     final deleted = <String>[];
@@ -282,12 +312,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('grid-tile-alpha.md')));
+    await tester.tap(find.byKey(const Key('grid-tile-Zulu')));
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.f2);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(renamed, ['alpha.md']);
     await tester.sendKeyEvent(LogicalKeyboardKey.delete);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(deleted, ['alpha.md']);
   });
 
@@ -431,7 +464,10 @@ void main() {
 
   testWidgets('a modified key is left to the app accelerators', (tester) async {
     await session.open('/lib', create: false);
+    // The grid shows Projects, with a folder of its own to take the keys
+    // from, and a parent to go up to.
     await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createFolder(parentPath: 'Projects', name: 'Zulu');
     await session.createNote(parentPath: 'Projects', name: 'alpha');
     await session.createNote(parentPath: 'Projects', name: 'bravo');
     final opened = <String>[];
@@ -445,7 +481,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('grid-tile-Projects/alpha.md')));
+    await tester.tap(find.byKey(const Key('grid-tile-Projects/Zulu')));
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
     opened.clear();
 
@@ -460,7 +500,7 @@ void main() {
     ]);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
-    expect(opened, ['Projects/alpha.md'], reason: 'the cursor did not move');
+    expect(opened, ['Projects/bravo.md'], reason: 'the cursor did not move');
 
     // Alt+Up is the pane's own way up, and keeps its key.
     await sendWithModifiers(tester, LogicalKeyboardKey.arrowUp, [

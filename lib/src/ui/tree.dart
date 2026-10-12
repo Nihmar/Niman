@@ -469,15 +469,17 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// A row's own click: the cursor follows it — the arrows go on from where
-  /// the pointer left — and the pane takes the keyboard, as a grid tile does
-  /// (#727).
+  /// the pointer left — and a folder takes the keyboard for the walk. A note
+  /// does not: it opens for writing, and the shell gives the caret to it
+  /// (#727) — taking the keys here would leave the note unable to be typed
+  /// into.
   void _rowActivated(Note note, _WalkRow? row) {
     setState(() {
       _cursorPath = row?.path ?? note.path;
       _cursorPinned = row?.pinned ?? false;
       _keyboardFocus = false;
     });
-    _focus.requestFocus();
+    if (note.isDir) _focus.requestFocus();
     widget.onSelect(note);
   }
 
@@ -903,6 +905,11 @@ final class _RowTile extends StatelessWidget {
     // long press: the drag gives it back.
     final held = move != null && TreeRowDrag.holdToDrag;
     Widget row = InkWell(
+      // The walk owns the keyboard here (#727): a row that took the focus
+      // itself would leave the arrows to nobody — a key pressed with the
+      // scope focused lands on the first focusable descendant, and that
+      // would be a row rather than the pane's own node.
+      canRequestFocus: false,
       onTap: () => onSelect(note),
       onLongPress: held ? null : longPress,
       onSecondaryTapDown: onSecondaryTapDown == null

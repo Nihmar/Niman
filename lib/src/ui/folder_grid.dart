@@ -453,12 +453,18 @@ final class _FolderGridState extends State<FolderGrid> {
     }
     Widget tile = InkWell(
       key: Key('grid-tile-${note.path}'),
+      // The walk owns the keyboard here (#727), as in the tree: a tile
+      // that took the focus itself would leave the arrows to nobody.
+      canRequestFocus: false,
       onTap: () {
         setState(() {
           _focusIndex = index;
           _keyboardFocus = false;
         });
-        _focus.requestFocus();
+        // A folder takes the keyboard for the walk; a note opens for
+        // writing and the shell gives the caret to it (#727), so taking
+        // the keys here would leave the note unable to be typed into.
+        if (note.isDir) _focus.requestFocus();
         widget.onOpen(note);
       },
       onLongPress: TreeRowDrag.holdToDrag ? null : longPress,
