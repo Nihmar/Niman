@@ -52,7 +52,8 @@ final class Indexer {
 
   /// Callback invoked after each successful index mutation, with what the
   /// change did to the tree's rows (#751): a save reindexing a note is
-  /// [IndexChange.contents], a rename, a create or a pin [IndexChange.tree].
+  /// [IndexChange.contents], a rename, a create, a pin — or a save that
+  /// changed the note's title, date or pin (#760) — [IndexChange.tree].
   void Function(IndexChange change)? onChanged;
 
   /// Callback invoked with the library-relative paths a scan or a batch
@@ -296,7 +297,11 @@ final class Indexer {
       // rows.
       changed.addAll(retitled);
       for (final c in changed) {
-        await _store.applyContent({c.rel: c}, paired: pairedKeep);
+        // A new title, date or pin is drawn by the tree (#760).
+        if (await _store.applyContent({c.rel: c}, paired: pairedKeep)) {
+          wrote = true;
+          tree = true;
+        }
       }
       // A pair that keeps its rows still reads its links from a new folder,
       // maybe: the edges of the ones that depend on it are written again
@@ -384,13 +389,14 @@ final class Indexer {
         changed.add(content);
       }
       if (changed.isEmpty) return;
-      // Content rows (FTS, tags, stems, links) follow the forced read.
-      await _store.applyContent({
+      // Content rows (FTS, tags, stems, links) follow the forced read; a
+      // new title, date or pin among them is drawn by the tree (#760).
+      final drawn = await _store.applyContent({
         for (final c in changed) c.rel: c,
       }, paired: const {});
-      if (wrote) {
+      if (wrote || drawn) {
         final cb = onChanged;
-        if (cb != null) cb(IndexChange.contents);
+        if (cb != null) cb(drawn ? IndexChange.tree : IndexChange.contents);
       }
     });
   }

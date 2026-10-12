@@ -216,7 +216,12 @@ final class IndexContentStore {
   /// With [pendingLink] set, the link edges are handed to it instead of
   /// resolved here: the caller collects them and writes them once its tree
   /// is final. The note's stale edges are still dropped now.
-  Future<void> applyContent(
+  ///
+  /// Answers whether a note's title, date or pin changed (#760): the tree
+  /// draws all three — the title as the row's name, the date at its right,
+  /// the pin in the pinned block — so a save that changed one has moved
+  /// what the tree draws, not only the note's size and time.
+  Future<bool> applyContent(
     Map<String, NoteContent> contents, {
     required Set<String> paired,
     bool repair = true,
@@ -249,7 +254,9 @@ final class IndexContentStore {
     // (T-M3-09 device report: `![[…]]` images stayed placeholders).
     // A directory-at-a-time scan asks for them once, not per directory.
     if (repair) await repairDerivedRows();
-    if (items.isEmpty && moved.isEmpty) return;
+    if (items.isEmpty && moved.isEmpty) return false;
+    // The rows were read before the write: what the tree draws now.
+    final drawn = items.any((item) => _drawsDifferently(item.$1, item.$2));
 
     // Link targets resolve once per pass — one stems lookup per distinct
     // stem and one notes lookup, via [LinkResolver.resolveBatch] — instead
@@ -298,6 +305,21 @@ final class IndexContentStore {
       });
       if (end < moved.length) await Future<void>.delayed(Duration.zero);
     }
+    return drawn;
+  }
+
+  /// Whether [c] gives [row] another title, date or pin than the one the
+  /// tree draws now (#760) — the three fields [writeFields] puts on the row.
+  static bool _drawsDifferently(Note row, NoteContent c) =>
+      row.title != c.fields['title']?.first ||
+      row.pinned != c.pinned ||
+      !_sameSecond(row.date, c.date);
+
+  /// Whether [a] and [b] are the same second: the index keeps seconds, and
+  /// the stored date comes back local where the parsed one may be UTC.
+  static bool _sameSecond(DateTime? a, DateTime? b) {
+    if (a == null || b == null) return a == b;
+    return a.millisecondsSinceEpoch ~/ 1000 == b.millisecondsSinceEpoch ~/ 1000;
   }
 
   /// Whether [link] resolves from the folder of the note it is written in,
