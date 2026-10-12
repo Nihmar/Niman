@@ -137,6 +137,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.showLineNumbers = true,
     this.indentWidth = 2,
     this.hideMarkers = false,
+    this.onStage = true,
     this.syntax,
     this.dark = false,
     this.formatMenu,
@@ -225,6 +226,15 @@ final class MarkdownSourceView extends StatefulWidget {
   /// flag rather than a second renderer — the marker's width is paid for, and
   /// what it buys is that every offset stays true.
   final bool hideMarkers;
+
+  /// Whether this pane is the one on stage.
+  ///
+  /// Off stage the view keeps everything it has — the parent keeps it
+  /// mounted for that — but its overlay children must not paint: an
+  /// `Offstage` ancestor hides the pane's own painting, not an
+  /// `OverlayPortal`'s child, which lives in the app's overlay and would
+  /// draw the code blocks' copy buttons over the pane that is on stage.
+  final bool onStage;
 
   /// The token palette; null takes it from the ambient theme.
   final SyntaxColors? syntax;
@@ -684,7 +694,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (!mounted) return;
       _tableOverlay.show();
       _hints.overlay.show();
-      _codeOverlay.show();
+      // The copy buttons ride the note's paint: off stage the pane hides,
+      // and they go with it rather than drawing over the pane that is on.
+      _syncCodeOverlay();
       // The first check, off the build: the problem marks are on the note the
       // frame after it opens, and nothing waited for them (#316).
       _hints
@@ -790,9 +802,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// one's could not see it: it is the same object.)
   int _seenRevision = 0;
 
+  /// Shows or hides the code blocks' copy buttons with the pane: they are
+  /// overlay children, so an off stage pane must take them away itself.
+  void _syncCodeOverlay() {
+    if (widget.onStage) {
+      _codeOverlay.show();
+    } else {
+      _codeOverlay.hide();
+    }
+  }
+
   @override
   void didUpdateWidget(MarkdownSourceView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.onStage != widget.onStage) {
+      // Show and hide are a rebuild of the overlay portal, and the portal
+      // refuses one during a build: the pane's frame is enough to wait.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _syncCodeOverlay();
+      });
+    }
     // The note became a template, or stopped being one: its lines are
     // coloured again at the build this update is part of, and a template is
     // checked off the build (the answer notifies listeners outside this one).

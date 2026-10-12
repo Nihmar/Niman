@@ -79,6 +79,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.surface,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
+    this.onStage = true,
     this.indentWidth = 2,
     this.sourceFont = defaultSourceFont,
     this.syntax,
@@ -199,6 +200,9 @@ final class MarkdownSurface extends StatelessWidget {
   /// Where an embed's target is on disk, for the pictures `live` draws.
   final Future<String?> Function(String target)? embedResolver;
 
+  /// See [MarkdownSourceView.onStage].
+  final bool onStage;
+
   /// The caret's width; null keeps the surface's own.
   final double? caretWidth;
 
@@ -244,6 +248,7 @@ final class MarkdownSurface extends StatelessWidget {
     column: column,
     padding: padding,
     showLineNumbers: showLineNumbers,
+    onStage: onStage,
     indentWidth: indentWidth,
     syntax: syntax,
     dark: dark,

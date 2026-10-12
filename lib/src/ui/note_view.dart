@@ -1383,6 +1383,10 @@ final class _NoteViewState extends State<NoteView>
         // set just around the surface.
         theme: markdownThemeOf(context, scaler: noteTextScalerOf(context)),
         showLineNumbers: widget.showLineNumbers && !widget.zen,
+        // The live pane's overlay children (the code blocks' copy
+        // buttons) draw over the whole app: only the pane on stage keeps
+        // them.
+        onStage: widget.active && !_previewIn(widget),
         caretWidth: widget.zen ? zenCaretWidth : null,
         typewriter: widget.typewriter,
         cascadeChecklist: widget.cascadeChecklist,

@@ -2,6 +2,7 @@
 // note in it. What it draws is the block view's business, tested next door.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
@@ -136,6 +137,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(MarkdownSurface), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the live pane takes its copy buttons off screen with it', (
+    tester,
+  ) async {
+    // The source pane stays mounted off stage, and its copy buttons are
+    // children of the app's overlay, not of the pane: an `Offstage`
+    // ancestor hid the pane's own painting, not theirs, and the live
+    // button kept painting over the preview's — a darker double where the
+    // two met.
+    const note = 'Before.\n\n```dart\nx = 5;\n```\n\nAfter.\n';
+    Widget app({required bool showPreview}) => MaterialApp(
+      home: Scaffold(
+        body: NoteView(
+          path: '/tmp/niman-copy-buttons-test.md',
+          showLineNumbers: true,
+          autofocusEditor: false,
+          showWysiwyg: true,
+          showPreview: showPreview,
+          readNote: (_) async => note,
+          writeNote: (_, _) async {},
+        ),
+      ),
+    );
+    await tester.pumpWidget(app(showPreview: false));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('code-copy')), findsOneWidget);
+
+    await tester.pumpWidget(app(showPreview: true));
+    await tester.pumpAndSettle();
+    // The preview's button, and only it: the live pane's is gone from the
+    // overlay, not merely hidden with the pane.
+    expect(find.byKey(const Key('code-copy')), findsOneWidget);
+    expect(find.byType(CodeCopyButton, skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('the read pane takes the blocks the editor already has', (

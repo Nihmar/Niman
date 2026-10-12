@@ -183,4 +183,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(_button, findsNothing);
   });
+
+  testWidgets('an offstage pane shows no copy button', (tester) async {
+    tester.view.physicalSize = const Size(500, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    Widget app({required bool onStage}) => MaterialApp(
+      home: Scaffold(
+        body: MarkdownSourceView(
+          buffer: SourceBuffer.fromText(_note(3)),
+          theme: _theme,
+          showLineNumbers: false,
+          hideMarkers: true,
+          onStage: onStage,
+        ),
+      ),
+    );
+    await tester.pumpWidget(app(onStage: false));
+    await tester.pumpAndSettle();
+    expect(_button, findsNothing);
+
+    await tester.pumpWidget(app(onStage: true));
+    await tester.pumpAndSettle();
+    expect(_button, findsOneWidget);
+  });
 }
