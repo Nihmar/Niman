@@ -64,6 +64,7 @@ final class ExportHooks extends HtmlHooks {
           BlockKind.table ||
           BlockKind.thematicBreak ||
           BlockKind.blank ||
+          BlockKind.div ||
           BlockKind.frontmatter ||
           BlockKind.quote ||
           BlockKind.listItem:

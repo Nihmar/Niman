@@ -19,7 +19,9 @@ String _text(String document, int index) {
     node = switch (node) {
       QuoteNode(:final children) ||
       ItemNode(:final children) ||
-      FootnoteNode(:final children) => children.first,
+      FootnoteNode(:final children) ||
+      ColumnNode(:final children) => children.first,
+      ColumnsNode(:final columns) => columns.first,
       ListNode(:final items) => items.first,
       LeafNode() => node,
     };

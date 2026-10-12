@@ -38,6 +38,10 @@ String joinWrappedLines(
           walk(children, inItem: true);
         case ListNode(:final items):
           walk(items, inItem: inItem);
+        case ColumnsNode(:final columns):
+          walk(columns, inItem: inItem);
+        case ColumnNode(:final children):
+          walk(children, inItem: inItem);
         case QuoteNode(:final children) || FootnoteNode(:final children):
           walk(children, inItem: inItem);
         case LeafNode(:final kind, :final lines, :final definition):

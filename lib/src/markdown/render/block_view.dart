@@ -149,6 +149,12 @@ final class _Drawer {
       for (final item in items) _item(item, theme, width, nesting),
     ]),
     ItemNode() => _item(node, theme, width, nesting),
+    ColumnsNode(:final columns) => _column(
+      _all(columns, theme, width, nesting),
+    ),
+    ColumnNode(:final children) => _column(
+      _all(children, theme, width, nesting),
+    ),
     // A definition's blocks are the footnotes' (see [BlockView.build]).
     FootnoteNode() => const SizedBox.shrink(),
     LeafNode() => LeafView(

@@ -130,6 +130,10 @@ final class TreeHtml {
           _collect(children);
         case ListNode(:final items):
           _collect(items);
+        case ColumnsNode(:final columns):
+          _collect(columns);
+        case ColumnNode(:final children):
+          _collect(children);
         case LeafNode(:final kind) when kind == BlockKind.paragraph:
           final text = LeafText.paragraph(LeafText.linesOf(node, _lines));
           final rest = LinkReferences.parseInto(text, _references);
@@ -189,6 +193,10 @@ final class TreeHtml {
           _list(node);
         case ItemNode():
           _item(node, tight: tight);
+        case ColumnsNode(:final columns):
+          _blocks(columns, tight: false);
+        case ColumnNode(:final children):
+          _blocks(children, tight: false);
         case FootnoteNode(:final children):
           _bodies[node] = _captured(
             () => _blocks(children, tight: false, tail: _backrefs),
@@ -375,6 +383,7 @@ final class TreeHtml {
         TableHtml.write(out, lines, (text) => _inlineInto(out, text));
         _write(out.toString());
       case BlockKind.blank ||
+          BlockKind.div ||
           BlockKind.frontmatter ||
           BlockKind.quote ||
           BlockKind.listItem:

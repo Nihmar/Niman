@@ -91,6 +91,28 @@ enum HtmlBlockKind {
 ///   short of its indent after one is not lazy, and ends the list.
 typedef OpenItem = ({int indent, int content, int? blanks, bool lastBlank});
 
+/// What a fenced div is to the note's columns (#729).
+enum DivKind {
+  /// `columns`: its columns sit side by side.
+  columns,
+
+  /// `column`: one of them, directly inside a `columns` div.
+  column,
+
+  /// Any other div inside a `columns` one, tracked only so that its closer
+  /// closes it and not the column around it: it lays nothing out.
+  other,
+}
+
+/// One open fenced div.
+///
+/// * `kind` is what it is to the columns ([DivKind]).
+/// * `items` is how many list items were open where it opened: it ends
+///   with the item it opened in, as a fence does.
+/// * `footnote` is whether it opened inside a footnote definition, which
+///   it ends with.
+typedef OpenDiv = ({DivKind kind, int items, bool footnote});
+
 /// The block state entering a line.
 @immutable
 final class LineState {
@@ -111,6 +133,7 @@ final class LineState {
     this.definition = 0,
     this.definitionsOnly = false,
     this.tableTried = false,
+    this.divs = const <OpenDiv>[],
   });
 
   /// [footnote] when a footnote definition is open.
@@ -224,6 +247,14 @@ final class LineState {
   /// (`w` / `|---|---|---|` / `x | y` / `|---|---|` is all text).
   final bool tableTried;
 
+  /// The fenced divs open around the line, outermost first (#729). Empty
+  /// outside a `columns` div: an unknown div there is text, and not
+  /// tracked.
+  ///
+  /// Like [listStack], one list object for as long as no div opens or
+  /// closes, so the lines of a column hand on one state.
+  final List<OpenDiv> divs;
+
   /// Whether the line is anywhere a block-level construct can still start —
   /// outside every fence, math block, frontmatter, HTML block and indented
   /// code.
@@ -247,12 +278,13 @@ final class LineState {
       other.footnote == footnote &&
       other.definition == definition &&
       other.definitionsOnly == definitionsOnly &&
-      other.tableTried == tableTried;
+      other.tableTried == tableTried &&
+      _sameStack(other.divs, divs);
 
-  /// Whether two stacks hold the same items: records compare by value, so a
-  /// plain element-wise walk is the whole of it (the engine has no
+  /// Whether two stacks hold the same entries: records compare by value, so
+  /// a plain element-wise walk is the whole of it (the engine has no
   /// `package:collection`).
-  static bool _sameStack(List<OpenItem> a, List<OpenItem> b) {
+  static bool _sameStack<T>(List<T> a, List<T> b) {
     if (identical(a, b)) return true;
     if (a.length != b.length) return false;
     for (var at = 0; at < a.length; at++) {
@@ -278,6 +310,7 @@ final class LineState {
     definition,
     definitionsOnly,
     tableTried,
+    Object.hashAll(divs),
   );
 
   @override
@@ -288,5 +321,6 @@ final class LineState {
       'list: $listDepth at $listIndent, table: $table, '
       'paragraph: $openParagraph, footnote: $footnote, '
       'definition: $definition, definitionsOnly: $definitionsOnly, '
-      'tableTried: $tableTried)';
+      'tableTried: $tableTried'
+      '${divs.isEmpty ? '' : ', divs: ${divs.map((d) => d.kind.name)}'})';
 }

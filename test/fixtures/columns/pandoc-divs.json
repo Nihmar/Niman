@@ -1,0 +1,107 @@
+[
+  {
+    "about": "two columns, one with a width",
+    "markdown": ":::: columns\n::: {.column width=\"40%\"}\nLeft\n:::\n\n::: column\nRight\n:::\n::::\n",
+    "pandoc": "cols[col40%[P\"Left\"] col[P\"Right\"]]"
+  },
+  {
+    "about": "three columns, no blank lines between",
+    "markdown": ":::: columns\n::: column\na\n:::\n::: column\nb\n:::\n::: column\nc\n:::\n::::\n",
+    "pandoc": "cols[col[P\"a\"] col[P\"b\"] col[P\"c\"]]"
+  },
+  {
+    "about": "trailing colons on an opener",
+    "markdown": ":::: columns ::::\n::: column :::\na\n:::\n::::\n",
+    "pandoc": "cols[col[P\"a\"]]"
+  },
+  {
+    "about": "an unquoted width",
+    "markdown": "::::: columns\n::: {.column width=25%}\na\n:::\n::: column\nb\n:::\n:::::\n",
+    "pandoc": "cols[col25%[P\"a\"] col[P\"b\"]]"
+  },
+  {
+    "about": "a closer closes the innermost div whatever its length",
+    "markdown": ":::: columns\n::: column\na\n::::::\n::: column\nb\n:::\n::::\n",
+    "pandoc": "cols[col[P\"a\"] col[P\"b\"]]"
+  },
+  {
+    "about": "a closer ends a paragraph",
+    "markdown": ":::: columns\n::: column\nline one\nline two\n:::\n::::\n",
+    "pandoc": "cols[col[P\"line one line two\"]]"
+  },
+  {
+    "about": "an opener does not interrupt a paragraph",
+    "markdown": ":::: columns\nProse\n::: column\nx\n:::\n::::\n",
+    "pandoc": "cols[P\"Prose ::: column x\"] P\"::::\""
+  },
+  {
+    "about": "an unknown div inside a column is matched",
+    "markdown": ":::: columns\n::: column\n::: warning\nCareful.\n:::\nMore.\n:::\n::::\n",
+    "pandoc": "cols[col[P\"Careful.\" P\"More.\"]]"
+  },
+  {
+    "about": "columns inside a column",
+    "markdown": ":::::: columns\n::: column\n:::: columns\n::: column\nin\n:::\n::: column\nside\n:::\n::::\n:::\n::: column\nout\n:::\n::::::\n",
+    "pandoc": "cols[col[cols[col[P\"in\"] col[P\"side\"]]] col[P\"out\"]]"
+  },
+  {
+    "about": "columns directly inside columns",
+    "markdown": "::::: columns\n:::: columns\n::: column\na\n:::\n::::\n:::::\n",
+    "pandoc": "cols[cols[col[P\"a\"]]]"
+  },
+  {
+    "about": "a list inside a column",
+    "markdown": ":::: columns\n::: column\n- a\n- b\n:::\n::: column\n1. one\n2. two\n:::\n::::\n",
+    "pandoc": "cols[col[L[I[P\"a\"] I[P\"b\"]]] col[L[I[P\"one\"] I[P\"two\"]]]]"
+  },
+  {
+    "about": "a closer short of an item ends it",
+    "markdown": ":::: columns\n::: column\n- a\n:::\n::::\nafter\n",
+    "pandoc": "cols[col[L[I[P\"a\"]]]] P\"after\""
+  },
+  {
+    "about": "columns inside a list item",
+    "markdown": "- item\n\n  :::: columns\n  ::: column\n  a\n  :::\n  ::: column\n  b\n  :::\n  ::::\n\nafter\n",
+    "pandoc": "L[I[P\"item\" cols[col[P\"a\"] col[P\"b\"]]]] P\"after\""
+  },
+  {
+    "about": "columns inside a quote",
+    "markdown": "> :::: columns\n> ::: column\n> a\n> :::\n> ::: column\n> b\n> :::\n> ::::\n",
+    "pandoc": "Q[cols[col[P\"a\"] col[P\"b\"]]]"
+  },
+  {
+    "about": "a heading and a rule in a column",
+    "markdown": ":::: columns\n::: column\n# Title\n\n---\n\ntext\n:::\n::::\n",
+    "pandoc": "cols[col[H1\"Title\" HR P\"text\"]]"
+  },
+  {
+    "about": "a code fence holding fence lines",
+    "markdown": ":::: columns\n::: column\n```\n:::\n```\n:::\n::::\n",
+    "pandoc": "cols[col[Code]]"
+  },
+  {
+    "about": "an indented fence is text",
+    "markdown": ":::: columns\n::: column\na\n :::\n:::\n ::::\n::::\n",
+    "pandoc": "cols[col[P\"a :::\"] P\"::::\"]"
+  },
+  {
+    "about": "a quote in a column, ended by the closer",
+    "markdown": ":::: columns\n::: column\n> quoted\n:::\n::::\n",
+    "pandoc": "cols[col[Q[P\"quoted\"]]]"
+  },
+  {
+    "about": "an unclosed columns div",
+    "markdown": ":::: columns\n::: column\na\n\nb\n",
+    "pandoc": "cols[col[P\"a\" P\"b\"]]"
+  },
+  {
+    "about": "Quarto's layout",
+    "markdown": ":::: {.columns}\n\n::: {.column width=\"40%\"}\nContents...\n:::\n\n::: {.column width=\"60%\"}\nContents...\n:::\n\n::::\n",
+    "pandoc": "cols[col40%[P\"Contents...\"] col60%[P\"Contents...\"]]"
+  },
+  {
+    "about": "a fence at an item's margin",
+    "markdown": "- item\n\n  :::: columns\n  a\n   ::::\n  ::::\n",
+    "pandoc": "L[I[P\"item\" cols[P\"a ::::\"]]]"
+  }
+]

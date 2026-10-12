@@ -79,6 +79,9 @@ final class LeafView extends StatelessWidget {
     BlockKind.thematicBreak => _rule(context),
     BlockKind.blank => SizedBox(height: leaf.lines.length * _row(context)),
     BlockKind.html => _html(),
+    BlockKind.div => SizedBox(
+      height: MediaQuery.textScalerOf(context).scale(theme.divBand),
+    ),
     BlockKind.frontmatter ||
     BlockKind.quote ||
     BlockKind.listItem => const SizedBox.shrink(),

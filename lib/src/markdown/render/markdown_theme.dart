@@ -164,6 +164,12 @@ final class MarkdownTheme {
   /// scaled already.
   final double lineHeight;
 
+  /// How tall a fenced div's fence line is drawn (#729): half an em of
+  /// the body text, at its own size — a reader scales it as it scales
+  /// [lineHeight]. The room above a column's first block, and the
+  /// margins of a `columns` block.
+  double get divBand => (body.fontSize ?? 14) / 2;
+
   /// The heading style for [level], clamped to 1..6.
   TextStyle heading(int level) => switch (level.clamp(1, 6)) {
     1 => heading1,

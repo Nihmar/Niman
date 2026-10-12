@@ -720,6 +720,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       BlockKind.thematicBreak => line,
       BlockKind.heading => line * 1.3,
       BlockKind.math => block.lineCount * line * 1.6,
+      BlockKind.div => _textScaler.scale(theme.divBand),
       BlockKind.fencedCode ||
       BlockKind.indentedCode ||
       BlockKind.blank ||

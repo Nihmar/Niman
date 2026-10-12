@@ -21,6 +21,8 @@ final class LineRead {
     this.footnote = 0,
     this.definition = 0,
     this.reach = 0,
+    this.divRole,
+    this.divDepth = 0,
   });
 
   /// What the line is.
@@ -63,6 +65,13 @@ final class LineRead {
   /// How many lines, from this one, reading whether it opens a link
   /// reference definition looked at ([Block.reach]); 0 when it did not.
   final int reach;
+
+  /// What the line does to a fenced div, when it is a fence line
+  /// ([Block.divRole]).
+  final DivRole? divRole;
+
+  /// How many fenced divs the line stands in ([Block.divDepth]).
+  final int divDepth;
 
   /// The line as its innermost item reads it ([ContainerWalk.text]), its
   /// leading tabs four columns each, as the parser's patterns count them.
