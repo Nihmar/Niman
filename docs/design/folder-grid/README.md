@@ -77,7 +77,7 @@ tree; the tree itself does not change.
   chevron; the icon of the view that is on is filled, per the icon rule
   (a filled icon says a state is on).
 
-## Drawn here, to confirm
+## Drawn here, and confirmed (2026-10-12)
 
 - **The background menu of the grid** is the tree's, with "here" meaning
   the folder shown: New note here, New from template here, New folder here,
