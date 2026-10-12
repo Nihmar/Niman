@@ -118,4 +118,24 @@ void main() {
       expect(_drawn('After'), isFalse);
     });
   }
+
+  testWidgets('in live a fence line is a band of half an em', (tester) async {
+    await _pump(tester, _two, live: true, width: 500);
+    // 0.5 em of the 14 px body text.
+    final opener = tester.getRect(find.text(':::: columns', findRichText: true));
+    expect(opener.height, closeTo(7, 0.5));
+    final closer = tester.getRect(find.text('::::', findRichText: true));
+    expect(closer.height, closeTo(7, 0.5));
+  });
+
+  testWidgets('the caret on a fence line shows its source', (tester) async {
+    final state = await _pump(tester, _two, live: true, width: 500);
+    // Line 2, the column's opener.
+    state.placeCaret(_two.indexOf('::: {.column'));
+    await tester.pump();
+    final opener = tester.getRect(
+      find.text('::: {.column width="40%"}', findRichText: true),
+    );
+    expect(opener.height, greaterThan(14));
+  });
 }

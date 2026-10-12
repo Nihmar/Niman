@@ -53,6 +53,7 @@ import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/callout.dart';
+import 'package:niman/src/markdown/div_syntax.dart';
 import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
@@ -70,12 +71,14 @@ import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
+import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/focus_return.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
+import 'package:niman/src/markdown/render/live_run.dart';
 import 'package:niman/src/markdown/render/live_table_commands.dart';
 import 'package:niman/src/markdown/render/live_table_handles.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
@@ -1779,6 +1782,67 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     } else {
       _heights = _map();
     }
+  }
+
+  // ---------------------------------------------------------------- columns
+
+  /// The note's outermost `columns` blocks, by line (#729), as of
+  /// [_runsRevision]; read again when the buffer moves on.
+  List<LiveRun> _runs = const <LiveRun>[];
+  int _runsRevision = -1;
+
+  /// The outermost `columns` blocks `live` draws, read off the scan's fence
+  /// lines: none in `source`, and none while the scan owes part of the note
+  /// — its blocks there are hints.
+  List<LiveRun> get _liveRuns {
+    if (!widget.hideMarkers) return const <LiveRun>[];
+    final revision = widget.buffer.revision;
+    if (revision == _runsRevision) return _runs;
+    final styler = _styler;
+    final fences = styler?.divBlocks;
+    _runs = styler == null || fences == null
+        ? const <LiveRun>[]
+        : LiveRun.of(fences, styler.blockOf, widget.buffer.lineAt);
+    _runsRevision = revision;
+    return _runs;
+  }
+
+  /// What line [index], in [block], draws as a fence line in `live`, or
+  /// null: a column's fence and a `columns` block's are bands, an unknown
+  /// div's are the text they are.
+  LiveFence? _fenceOf(int index, Block? block) {
+    if (!widget.hideMarkers || block == null || block.kind != BlockKind.div) {
+      return null;
+    }
+    final role = block.divRole!;
+    if (!role.laysOut) return null;
+    final run = LiveRun.holding(_liveRuns, index);
+    if (run == null) return null;
+    final chip = switch (role) {
+      DivRole.opensColumns => 'columns',
+      DivRole.opensColumn => _columnChip(index),
+      _ => null,
+    };
+    return (
+      start: run.start,
+      end: run.end,
+      chip: chip,
+      chipLeft: role == DivRole.opensColumns,
+      hairline: role == DivRole.opensColumn,
+      numbered: false,
+      numberUp: false,
+    );
+  }
+
+  /// The chip a column's opener on [line] draws: `column`, and its width.
+  String _columnChip(int line) {
+    final width = DivSyntax.opening(widget.buffer.lineAt(line).trimLeft())
+        ?.width;
+    if (width == null) return 'column';
+    final share = width == width.roundToDouble()
+        ? width.round().toString()
+        : width.toString();
+    return 'column · $share%';
   }
 
   // --------------------------------------------------------------- folding
@@ -3629,6 +3693,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                     rowColor: widget.typewriter
                                         ? typewriterLineColor(context)
                                         : null,
+                                    fence: _fenceOf(index, block),
                                   );
                                 },
                                 childCount: _folds.rowCount(
