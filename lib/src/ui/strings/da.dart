@@ -1544,6 +1544,8 @@ final class DanishStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Kræver en åben tekstnote';
   @override
+  String get commandNeedProseNote => 'Kræver en prosanote';
+  @override
   String get commandNeedWideWindow => 'Kun i bredt vindue';
   @override
   String get commandNeedDockRoom =>

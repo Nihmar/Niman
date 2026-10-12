@@ -1599,6 +1599,8 @@ final class GreekStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Χρειάζεται ανοιχτή σημείωση κειμένου';
   @override
+  String get commandNeedProseNote => 'Χρειάζεται σημείωση πεζού λόγου';
+  @override
   String get commandNeedWideWindow => 'Μόνο σε φαρδύ παράθυρο';
   @override
   String get commandNeedDockRoom =>

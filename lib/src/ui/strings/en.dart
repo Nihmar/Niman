@@ -1540,6 +1540,8 @@ final class EnglishStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Needs an open text note';
   @override
+  String get commandNeedProseNote => 'Needs a prose note';
+  @override
   String get commandNeedWideWindow => 'Wide window only';
   @override
   String get commandNeedDockRoom => 'Needs a window wide enough for the dock';

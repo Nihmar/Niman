@@ -1573,6 +1573,8 @@ final class GermanStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Braucht eine offene Textnotiz';
   @override
+  String get commandNeedProseNote => 'Braucht eine Prosa-Notiz';
+  @override
   String get commandNeedWideWindow => 'Nur in breiten Fenstern';
   @override
   String get commandNeedDockRoom =>

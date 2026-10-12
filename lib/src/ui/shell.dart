@@ -3401,6 +3401,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.notInZen => !_inZen,
     CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
+    CommandNeed.proseNote => _noteKind != 'audio',
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
     CommandNeed.slidesNote => _noteKind == 'slides',
@@ -3672,9 +3673,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final ops = widget.controller.ops;
     if (path == null || ops == null) return;
     // An audio note's body is the clip document (#840): the menu does not
-    // offer the tidy, and the palette and the key come here, where the
-    // refusal is — no write, and nothing to say about a tidy that never
-    // was one.
+    // offer the tidy, and the palette and the key never reach here (the
+    // proseNote need keeps them off it). This remains for a direct call,
+    // and the frontmatter check below for a kind the bar still lags on:
+    // no write, and nothing to say about a tidy that never was one.
     if (_noteKind == 'audio') return;
     await _guard(() async {
       // The buffer's own edits land first: what is tidied is the note as

@@ -1,7 +1,8 @@
 // #840: Tidy the Markdown never runs on a `type: audio` note — its body is
-// the clip document, not prose. The ⋮ does not offer it, and the palette
-// and the key reach `_formatNote`, which refuses with no write and no
-// snackbar. The tidy on close is refused where it is worked out
+// the clip document, not prose. The ⋮ does not offer it, the palette and a
+// user-bound key never reach `_formatNote` (the `proseNote` need keeps them
+// off it), and the command itself refuses with no write and no snackbar.
+// The tidy on close is refused where it is worked out
 // (`tidiedNoteText`/`NoteWriter.tidy`), for every caller.
 import 'dart:io';
 
@@ -12,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/palette/command_palette.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
@@ -75,21 +78,22 @@ void main() {
     await settle(tester);
   }
 
-  Future<void> runFromPalette(WidgetTester tester) async {
+  Future<void> openPalette(WidgetTester tester, String query) async {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyP);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await settle(tester);
-    await tester.enterText(
-      find.byKey(const Key('palette-field')),
-      AppStrings.formatNoteTitle,
-    );
-    await settle(tester);
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.enterText(find.byKey(const Key('palette-field')), query);
     await settle(tester);
   }
+
+  Set<AppCommand> offered(WidgetTester tester) => {
+    for (final command
+        in tester.widget<CommandPalette>(find.byType(CommandPalette)).commands)
+      command.command,
+  };
 
   testWidgets('the ⋮ offers no Tidy the Markdown on an audio note', (
     tester,
@@ -102,14 +106,48 @@ void main() {
     expect(find.byKey(const Key('note-menu-format')), findsNothing);
   });
 
-  testWidgets('the command leaves an audio note byte for byte', (tester) async {
+  testWidgets('the palette does not offer Tidy the Markdown on an audio note', (
+    tester,
+  ) async {
     await openAudioNote(tester, _untidy);
     final savesBefore = controller.saves.length;
-    await runFromPalette(tester);
+    await openPalette(tester, AppStrings.formatNoteTitle);
 
-    expect(await controller.readNote('Take.md'), _untidy);
+    // The palette is open — Export is still there — and the tidy is not.
+    expect(offered(tester), contains(AppCommand.exportNote));
+    expect(offered(tester), isNot(contains(AppCommand.formatNote)));
     expect(controller.saves.length, savesBefore, reason: 'nothing written');
+    expect(await controller.readNote('Take.md'), _untidy);
     expect(find.text(AppStrings.formatNoteDone), findsNothing);
     expect(find.text(AppStrings.formatNoteAlreadyTidy), findsNothing);
+  });
+
+  testWidgets('a plain note still offers it', (tester) async {
+    setSurfaceSize(tester, const Size(1200, 900));
+    await controller.open(dir.path, create: true);
+    await controller.createNote(
+      parentPath: '',
+      name: 'Plain',
+      content: 'one\ntwo\n',
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          librarySessionProvider.overrideWithValue(controller),
+          todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
+          windowControllerProvider.overrideWithValue(
+            FakeWindowController(customTitleBar: true),
+          ),
+        ],
+        child: const NimanApp(),
+      ),
+    );
+    await tester.pump();
+    await settle(tester);
+    await tester.tap(noteRow('Plain.md'));
+    await settle(tester);
+    await openPalette(tester, AppStrings.formatNoteTitle);
+
+    expect(offered(tester), contains(AppCommand.formatNote));
   });
 }

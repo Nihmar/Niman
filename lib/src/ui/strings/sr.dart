@@ -1555,6 +1555,8 @@ final class SerbianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Потребна је отворена текстуална белешка';
   @override
+  String get commandNeedProseNote => 'Потребна је прозна белешка';
+  @override
   String get commandNeedWideWindow => 'Само у широком прозору';
   @override
   String get commandNeedDockRoom =>

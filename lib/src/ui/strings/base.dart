@@ -778,6 +778,7 @@ abstract base class Strings {
   String get commandNeedNone;
   String get commandNeedOpenNote;
   String get commandNeedTextNote;
+  String get commandNeedProseNote;
   String get commandNeedWideWindow;
   String get commandNeedDockRoom;
   String get commandNeedDesktop;

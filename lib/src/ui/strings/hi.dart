@@ -1524,6 +1524,8 @@ final class HindiStrings extends Strings {
   @override
   String get commandNeedTextNote => 'खुला टेक्स्ट नोट चाहिए';
   @override
+  String get commandNeedProseNote => 'गद्य नोट चाहिए';
+  @override
   String get commandNeedWideWindow => 'केवल चौड़ी विंडो में';
   @override
   String get commandNeedDockRoom =>

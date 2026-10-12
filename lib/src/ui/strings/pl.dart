@@ -1570,6 +1570,8 @@ final class PolishStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Wymaga otwartej notatki tekstowej';
   @override
+  String get commandNeedProseNote => 'Wymaga prozatorskiej notatki';
+  @override
   String get commandNeedWideWindow => 'Tylko w szerokim oknie';
   @override
   String get commandNeedDockRoom =>

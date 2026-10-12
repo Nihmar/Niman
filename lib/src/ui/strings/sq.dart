@@ -1564,6 +1564,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Kërkon një shënim teksti të hapur';
   @override
+  String get commandNeedProseNote => 'Kërkon një shënim në prozë';
+  @override
   String get commandNeedWideWindow => 'Vetëm në dritare të gjerë';
   @override
   String get commandNeedDockRoom =>

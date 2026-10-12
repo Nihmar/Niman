@@ -39,6 +39,10 @@ enum CommandNeed {
   /// a voice note in its own view.
   previewToggle,
 
+  /// The note on screen is prose: not a voice note, whose body is its
+  /// clip document and which the tidy rules would rewrite (#840).
+  proseNote,
+
   /// Both editors are enabled, so there is another to switch to.
   twoEditors,
 
@@ -66,7 +70,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.renameNote ||
   AppCommand.moveNote ||
   AppCommand.deleteNote => const {CommandNeed.openNote},
-  AppCommand.formatNote ||
+  AppCommand.formatNote => const {CommandNeed.textNote, CommandNeed.proseNote},
   AppCommand.insertDiagram ||
   AppCommand.insertMindMap ||
   AppCommand.convertListToMindMap ||
@@ -136,6 +140,7 @@ String commandNeedLabel(CommandNeed need) => switch (need) {
   CommandNeed.notInZen => AppStrings.commandNeedNotInZen,
   CommandNeed.zenRoom => AppStrings.commandNeedZenRoom,
   CommandNeed.previewToggle => AppStrings.commandNeedPreview,
+  CommandNeed.proseNote => AppStrings.commandNeedProseNote,
   CommandNeed.twoEditors => AppStrings.commandNeedTwoEditors,
   CommandNeed.journalEntry => AppStrings.commandNeedJournalEntry,
   CommandNeed.ocrFile => AppStrings.commandNeedOcrFile,

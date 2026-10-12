@@ -1563,6 +1563,8 @@ final class GalicianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Precisa unha nota de texto aberta';
   @override
+  String get commandNeedProseNote => 'Precisa unha nota en prosa';
+  @override
   String get commandNeedWideWindow => 'Só con xanela ancha';
   @override
   String get commandNeedDockRoom =>

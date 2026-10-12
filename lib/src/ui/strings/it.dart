@@ -1568,6 +1568,8 @@ final class ItalianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Serve una nota di testo aperta';
   @override
+  String get commandNeedProseNote => 'Serve una nota in prosa';
+  @override
   String get commandNeedWideWindow => 'Solo con finestra larga';
   @override
   String get commandNeedDockRoom =>

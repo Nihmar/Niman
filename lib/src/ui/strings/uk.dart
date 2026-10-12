@@ -1554,6 +1554,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Потрібна відкрита текстова нотатка';
   @override
+  String get commandNeedProseNote => 'Потрібна прозова нотатка';
+  @override
   String get commandNeedWideWindow => 'Лише в широкому вікні';
   @override
   String get commandNeedDockRoom =>

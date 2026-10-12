@@ -140,6 +140,7 @@ void main() {
         CommandNeed.dockRoom,
         CommandNeed.notInZen,
         CommandNeed.desktop,
+        CommandNeed.proseNote,
       }),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -160,6 +161,7 @@ void main() {
         CommandNeed.zenRoom,
         CommandNeed.previewToggle,
         CommandNeed.twoEditors,
+        CommandNeed.proseNote,
       }),
     );
   });
@@ -185,6 +187,7 @@ void main() {
         CommandNeed.desktop,
         CommandNeed.zenRoom,
         CommandNeed.twoEditors,
+        CommandNeed.proseNote,
       }),
     );
   });

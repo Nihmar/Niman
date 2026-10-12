@@ -1422,6 +1422,8 @@ final class ChineseStrings extends Strings {
   @override
   String get commandNeedTextNote => '需要打开一条文本笔记';
   @override
+  String get commandNeedProseNote => '需要一条散文笔记';
+  @override
   String get commandNeedWideWindow => '仅限宽窗口';
   @override
   String get commandNeedDockRoom => '需要足够容纳侧边面板的宽窗口';

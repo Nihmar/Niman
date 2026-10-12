@@ -1537,6 +1537,8 @@ final class TurkishStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Açık bir metin notu gerekir';
   @override
+  String get commandNeedProseNote => 'Düz yazı bir not gerekir';
+  @override
   String get commandNeedWideWindow => 'Yalnızca geniş pencerede';
   @override
   String get commandNeedDockRoom =>

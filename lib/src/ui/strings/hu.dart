@@ -1558,6 +1558,8 @@ final class HungarianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Nyitott szöveges jegyzet kell hozzá';
   @override
+  String get commandNeedProseNote => 'Prózai jegyzet szükséges';
+  @override
   String get commandNeedWideWindow => 'Csak széles ablakban';
   @override
   String get commandNeedDockRoom =>

@@ -1531,6 +1531,8 @@ final class EstonianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Vajab avatud tekstimärget';
   @override
+  String get commandNeedProseNote => 'Vajab proosamärget';
+  @override
   String get commandNeedWideWindow => 'Ainult laias aknas';
   @override
   String get commandNeedDockRoom =>

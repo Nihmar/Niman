@@ -1563,6 +1563,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Изисква отворена текстова бележка';
   @override
+  String get commandNeedProseNote => 'Нужна е прозаична бележка';
+  @override
   String get commandNeedWideWindow => 'Само в широк прозорец';
   @override
   String get commandNeedDockRoom =>

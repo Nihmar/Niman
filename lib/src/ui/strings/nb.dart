@@ -1540,6 +1540,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Krever et åpent tekstnotat';
   @override
+  String get commandNeedProseNote => 'Krever et prosanotat';
+  @override
   String get commandNeedWideWindow => 'Bare i bredt vindu';
   @override
   String get commandNeedDockRoom =>

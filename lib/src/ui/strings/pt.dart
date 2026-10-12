@@ -1559,6 +1559,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get commandNeedTextNote => 'Precisa de uma nota de texto aberta';
   @override
+  String get commandNeedProseNote => 'Precisa de uma nota em prosa';
+  @override
   String get commandNeedWideWindow => 'Apenas com janela larga';
   @override
   String get commandNeedDockRoom =>
