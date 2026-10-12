@@ -1396,6 +1396,10 @@ final class ChineseStrings extends Strings {
   @override
   String get journalFabToday => '今天的日记条目';
   @override
+  String get journalEvents => '事件';
+  @override
+  String journalWeek(int week) => '第 $week 周';
+  @override
   String journalDueOn(String day) => '$day 到期';
   @override
   String get commandsTitle => '命令';

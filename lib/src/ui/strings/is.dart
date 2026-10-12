@@ -1518,6 +1518,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get journalFabToday => 'Dagbókarfærsla dagsins';
   @override
+  String get journalEvents => 'Viðburðir';
+  @override
+  String journalWeek(int week) => 'Vika $week';
+  @override
   String journalDueOn(String day) => 'Á gjalddaga $day';
   @override
   String get commandsTitle => 'Skipanir';

@@ -1536,6 +1536,10 @@ final class ItalianStrings extends Strings {
   @override
   String get journalFabToday => 'Voce di oggi del diario';
   @override
+  String get journalEvents => 'Eventi';
+  @override
+  String journalWeek(int week) => 'Settimana $week';
+  @override
   String journalDueOn(String day) => 'In scadenza $day';
   @override
   String get commandsTitle => 'Comandi';

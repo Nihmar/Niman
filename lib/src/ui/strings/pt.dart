@@ -1528,6 +1528,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get journalFabToday => 'Entrada de hoje do diário';
   @override
+  String get journalEvents => 'Eventos';
+  @override
+  String journalWeek(int week) => 'Semana $week';
+  @override
   String journalDueOn(String day) => 'Vence a $day';
   @override
   String get commandsTitle => 'Comandos';

@@ -1534,6 +1534,10 @@ final class DutchStrings extends Strings {
   @override
   String get journalFabToday => 'Dagboeknotitie van vandaag';
   @override
+  String get journalEvents => 'Gebeurtenissen';
+  @override
+  String journalWeek(int week) => 'Week $week';
+  @override
   String journalDueOn(String day) => 'Vervalt op $day';
   @override
   String get commandsTitle => 'Opdrachten';

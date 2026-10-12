@@ -1514,6 +1514,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get journalFabToday => 'Današnji vnos v dnevnik';
   @override
+  String get journalEvents => 'Dogodki';
+  @override
+  String journalWeek(int week) => 'Teden $week';
+  @override
   String journalDueOn(String day) => 'Rok $day';
   @override
   String get commandsTitle => 'Ukazi';

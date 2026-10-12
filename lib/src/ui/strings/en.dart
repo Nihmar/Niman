@@ -1510,6 +1510,10 @@ final class EnglishStrings extends Strings {
   @override
   String get journalFabToday => "Today's journal entry";
   @override
+  String get journalEvents => 'Events';
+  @override
+  String journalWeek(int week) => 'Week $week';
+  @override
   String journalDueOn(String day) => 'Due on $day';
   @override
   String get commandsTitle => 'Commands';

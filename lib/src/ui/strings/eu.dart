@@ -1526,6 +1526,10 @@ final class BasqueStrings extends Strings {
   @override
   String get journalFabToday => 'Egunkariko gaurko sarrera';
   @override
+  String get journalEvents => 'Gertaerak';
+  @override
+  String journalWeek(int week) => '$week. astea';
+  @override
   String journalDueOn(String day) => 'Epea: $day';
   @override
   String get commandsTitle => 'Komandoak';

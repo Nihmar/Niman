@@ -1539,6 +1539,10 @@ final class PolishStrings extends Strings {
   @override
   String get journalFabToday => 'Dzisiejszy wpis w dzienniku';
   @override
+  String get journalEvents => 'Wydarzenia';
+  @override
+  String journalWeek(int week) => 'Tydzień $week';
+  @override
   String journalDueOn(String day) => 'Termin: $day';
   @override
   String get commandsTitle => 'Polecenia';

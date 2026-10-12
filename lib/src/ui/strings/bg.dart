@@ -1531,6 +1531,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get journalFabToday => 'Днешен запис в дневника';
   @override
+  String get journalEvents => 'Събития';
+  @override
+  String journalWeek(int week) => 'Седмица $week';
+  @override
   String journalDueOn(String day) => 'Срок $day';
   @override
   String get commandsTitle => 'Команди';

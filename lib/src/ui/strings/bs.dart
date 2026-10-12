@@ -1521,6 +1521,10 @@ final class BosnianStrings extends Strings {
   @override
   String get journalFabToday => 'Današnji unos u dnevnik';
   @override
+  String get journalEvents => 'Događaji';
+  @override
+  String journalWeek(int week) => 'Sedmica $week';
+  @override
   String journalDueOn(String day) => 'Rok $day';
   @override
   String get commandsTitle => 'Komande';

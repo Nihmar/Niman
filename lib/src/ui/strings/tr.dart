@@ -1505,6 +1505,10 @@ final class TurkishStrings extends Strings {
   @override
   String get journalFabToday => 'Bugünün günlük girdisi';
   @override
+  String get journalEvents => 'Etkinlikler';
+  @override
+  String journalWeek(int week) => 'Hafta $week';
+  @override
   String journalDueOn(String day) => 'Son tarih $day';
   @override
   String get commandsTitle => 'Komutlar';

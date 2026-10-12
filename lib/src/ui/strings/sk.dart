@@ -1519,6 +1519,10 @@ final class SlovakStrings extends Strings {
   @override
   String get journalFabToday => 'Dnešný záznam denníka';
   @override
+  String get journalEvents => 'Udalosti';
+  @override
+  String journalWeek(int week) => 'Týždeň $week';
+  @override
   String journalDueOn(String day) => 'Termín $day';
   @override
   String get commandsTitle => 'Príkazy';

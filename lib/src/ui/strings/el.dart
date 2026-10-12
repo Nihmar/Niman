@@ -1566,6 +1566,10 @@ final class GreekStrings extends Strings {
   @override
   String get journalFabToday => 'Σημερινή καταχώριση ημερολογίου';
   @override
+  String get journalEvents => 'Συμβάντα';
+  @override
+  String journalWeek(int week) => 'Εβδομάδα $week';
+  @override
   String journalDueOn(String day) => 'Προθεσμία $day';
   @override
   String get commandsTitle => 'Εντολές';

@@ -39,7 +39,7 @@ final class FakeCalendarSource implements CalendarSource {
 
   @override
   Future<CalendarSnapshot> load() async =>
-      calendarSnapshotOf(_lines, exists: _exists);
+      calendarSnapshotOf(calendarFileOf(_lines, exists: _exists));
 
   @override
   Future<CalendarFileProbe> probe() async {

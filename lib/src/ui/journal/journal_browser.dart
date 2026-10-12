@@ -8,6 +8,10 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/parser.dart';
+import 'package:niman/src/core/theme_tokens.dart';
+import 'package:niman/src/core/weeks.dart';
 import 'package:niman/src/journal/journal_summary.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
@@ -30,6 +34,11 @@ final class JournalBrowser extends StatefulWidget {
     required this.onOpenDay,
     this.revision = 0,
     this.large = false,
+    this.eventsOn,
+    this.goalsOn,
+    this.eventDays = const <DateTime>{},
+    this.calendarChanged,
+    this.onOpenEvent,
     this.dueOn,
     this.tasksChanged,
     this.onOpenTasks,
@@ -41,6 +50,23 @@ final class JournalBrowser extends StatefulWidget {
   /// Opens a recent entry's menu at a right click's global position (#619):
   /// the tree's own menu for that note. Null offers none.
   final void Function(DateTime day, Offset position)? onEntryMenu;
+
+  /// The events of a day, in the order the journal shows them — an event
+  /// with no time written last; null shows none at all (#730).
+  final List<CalendarEntryEvent> Function(DateTime day)? eventsOn;
+
+  /// The goals that apply to a day (the week's, the month's, the year's),
+  /// shown over its events; null shows none.
+  final List<CalendarLine> Function(DateTime day)? goalsOn;
+
+  /// The days with at least one event: the calendar's second dot (#730).
+  final Set<DateTime> eventDays;
+
+  /// Fires when the calendar file changes, so the events follow.
+  final Listenable? calendarChanged;
+
+  /// Opens the event's line in `calendar.txt` (#730).
+  final void Function(CalendarEntryEvent event)? onOpenEvent;
 
   /// The open tasks due on a day, as they read in the task list; null
   /// shows no tasks at all.
@@ -184,6 +210,10 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         JournalCalendar(
           month: _month,
           entries: entries,
+          daysWithEvents: widget.eventDays,
+          eventColour: Theme.of(context)
+              .extension<SyntaxColors>()
+              ?.calendarTime,
           today: widget.today,
           selected: widget.large || _picked ? _selected : null,
           cell: widget.large ? 44 : 34,
@@ -207,6 +237,37 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           const SizedBox(height: 12),
           _dockCreateRow(context),
         ],
+        if (widget.eventsOn case final eventsOn?)
+          ListenableBuilder(
+            listenable: widget.calendarChanged ?? const _Never(),
+            builder: (context, _) {
+              final day = widget.large
+                  ? _selected
+                  : widget.focusDay ?? widget.today;
+              final goals = widget.goalsOn?.call(day) ?? const <CalendarLine>[];
+              final events = eventsOn(day);
+              if (goals.isEmpty && events.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                key: const Key('journal-events'),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 12),
+                  for (final goal in goals) _goalRow(context, goal, heading),
+                  if (events.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      AppStrings.journalEvents.toUpperCase(),
+                      style: heading,
+                    ),
+                    for (final event in events)
+                      _eventRow(context, event, heading),
+                  ],
+                ],
+              );
+            },
+          ),
         if (widget.dueOn case final dueOn?)
           ListenableBuilder(
             listenable: widget.tasksChanged ?? const _Never(),
@@ -288,6 +349,224 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       ],
     );
   }
+
+  /// One of the day's goals (#730): what it covers, and what it says. The
+  /// goal's own tokens wear the editor's colours, so a line reads the same
+  /// in both places.
+  Widget _goalRow(BuildContext context, CalendarLine goal, TextStyle? style) {
+    final text = goal.goalText;
+    if (text == null) return const SizedBox.shrink();
+    return Padding(
+      key: Key('journal-goal-${goal.key}'),
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 64,
+            child: Text(
+              _goalLabel(goal),
+              style: style,
+              textAlign: TextAlign.end,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(child: _goalText(context, text, goal.tokens)),
+        ],
+      ),
+    );
+  }
+
+  /// What a goal covers: the week's number, the month's name, the year.
+  String _goalLabel(CalendarLine goal) {
+    final date = goal.date;
+    if (date == null) return '';
+    return switch (goal.kind) {
+      CalendarLineKind.weekGoal => AppStrings.journalWeek(
+        goal.week ?? isoWeekOf(date),
+      ),
+      CalendarLineKind.monthGoal => AppStrings.monthNames[date.month - 1],
+      CalendarLineKind.yearGoal => '${date.year}',
+      _ => '',
+    };
+  }
+
+  /// An event's row (#730): its time as written, then its text with the
+  /// tokens coloured and an aside dimmed, and a bell for its reminder.
+  Widget _eventRow(
+    BuildContext context,
+    CalendarEntryEvent entry,
+    TextStyle? heading,
+  ) {
+    final theme = Theme.of(context);
+    final syntax = theme.extension<SyntaxColors>();
+    final event = entry.event;
+    return ListTile(
+      key: Key('journal-event-${entry.lineIndex}-${event.start}'),
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      leading: SizedBox(
+        width: 56,
+        child: Text(
+          event.time?.raw ?? '',
+          textAlign: TextAlign.end,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: syntax?.calendarTime ?? theme.colorScheme.tertiary,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+      ),
+      title: _eventText(context, event),
+      trailing: event.reminder == null
+          ? null
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.notifications_outlined,
+                  size: 14,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 2),
+                Text(event.reminder!, style: theme.textTheme.bodySmall),
+              ],
+            ),
+      onTap: widget.onOpenEvent == null
+          ? null
+          : () => widget.onOpenEvent!(entry),
+    );
+  }
+
+  /// The event's text with its tokens and asides in the editor's colours
+  /// (#730): the same runs, from the same parse.
+  Widget _eventText(BuildContext context, CalendarEvent event) {
+    final theme = Theme.of(context);
+    final syntax = theme.extension<SyntaxColors>();
+    final base = theme.textTheme.bodyMedium ?? const TextStyle();
+    final text = event.text;
+    final runs = <({int start, int end, TextStyle style})>[];
+    if (syntax != null) {
+      for (final token in event.tokens) {
+        final start = token.start - event.textStart;
+        final end = token.end - event.textStart;
+        if (start < 0 || end > text.length || start >= end) {
+          continue;
+        }
+        runs.add((
+          start: start,
+          end: end,
+          style: _tokenStyle(syntax, token.kind),
+        ));
+      }
+      for (final aside in event.asides) {
+        final start = aside.start - event.textStart;
+        final end = aside.end - event.textStart;
+        if (start < 0 || end > text.length || start >= end) {
+          continue;
+        }
+        runs.add((
+          start: start,
+          end: end,
+          style: TextStyle(
+            color: syntax.calendarAside,
+            fontStyle: FontStyle.italic,
+          ),
+        ));
+      }
+    }
+    runs.sort((a, b) => a.start.compareTo(b.start));
+    final spans = <TextSpan>[];
+    var at = 0;
+    for (final run in runs) {
+      if (run.start < at) {
+        continue;
+      }
+      if (run.start > at) {
+        spans.add(TextSpan(text: text.substring(at, run.start), style: base));
+      }
+      spans.add(
+        TextSpan(text: text.substring(run.start, run.end), style: run.style),
+      );
+      at = run.end;
+    }
+    if (at < text.length) {
+      spans.add(TextSpan(text: text.substring(at), style: base));
+    }
+    return Text.rich(
+      TextSpan(children: spans),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  /// A goal's text with its tokens coloured: found by the token's own
+  /// spelling, since a goal's text is what the line holds after its head.
+  Widget _goalText(
+    BuildContext context,
+    String text,
+    List<CalendarToken> tokens,
+  ) {
+    final theme = Theme.of(context);
+    final syntax = theme.extension<SyntaxColors>();
+    final base = theme.textTheme.bodyMedium ?? const TextStyle();
+    if (syntax == null || tokens.isEmpty) {
+      return Text(text, maxLines: 2, overflow: TextOverflow.ellipsis);
+    }
+    final runs = <({int start, int end, TextStyle style})>[];
+    var from = 0;
+    for (final token in tokens) {
+      final spelling = switch (token.kind) {
+        CalendarTokenKind.project => '+${token.value}',
+        CalendarTokenKind.context => '@${token.value}',
+        CalendarTokenKind.tag => '#${token.value}',
+        CalendarTokenKind.keyValue => token.value,
+      };
+      final start = text.indexOf(spelling, from);
+      if (start < 0) {
+        continue;
+      }
+      final end = start + spelling.length;
+      runs.add((
+        start: start,
+        end: end,
+        style: _tokenStyle(syntax, token.kind),
+      ));
+      from = end;
+    }
+    runs.sort((a, b) => a.start.compareTo(b.start));
+    final spans = <TextSpan>[];
+    var at = 0;
+    for (final run in runs) {
+      if (run.start < at) {
+        continue;
+      }
+      if (run.start > at) {
+        spans.add(TextSpan(text: text.substring(at, run.start), style: base));
+      }
+      spans.add(
+        TextSpan(text: text.substring(run.start, run.end), style: run.style),
+      );
+      at = run.end;
+    }
+    if (at < text.length) {
+      spans.add(TextSpan(text: text.substring(at), style: base));
+    }
+    return Text.rich(
+      TextSpan(children: spans),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  /// The editor's own colour for a calendar token (#730): the two files
+  /// share the vocabulary, so they share the roles.
+  TextStyle _tokenStyle(SyntaxColors syntax, CalendarTokenKind kind) =>
+      switch (kind) {
+        CalendarTokenKind.project => TextStyle(color: syntax.todoProject),
+        CalendarTokenKind.context => TextStyle(color: syntax.todoContext),
+        CalendarTokenKind.tag => TextStyle(color: syntax.tag),
+        CalendarTokenKind.keyValue => TextStyle(color: syntax.todoKeyValue),
+      };
 
   /// The dock's offer for the empty day it picked (#712): the phone's
   /// card and dialog in one row, under the calendar they belong to.

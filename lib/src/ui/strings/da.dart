@@ -1514,6 +1514,10 @@ final class DanishStrings extends Strings {
   @override
   String get journalFabToday => 'Dagens dagbogsindlæg';
   @override
+  String get journalEvents => 'Begivenheder';
+  @override
+  String journalWeek(int week) => 'Uge $week';
+  @override
   String journalDueOn(String day) => 'Forfalder $day';
   @override
   String get commandsTitle => 'Kommandoer';

@@ -110,27 +110,37 @@ final class CalendarEntryEvent {
 
 /// The parsed contents of `calendar.txt`.
 final class CalendarSnapshot {
-  /// Creates a snapshot of [entries] (the file's lines, in order).
-  new({
-    required this.entries,
-    this.exists = true,
-    this.validUtf8 = true,
-    this.bom = false,
-  }) : daysWithEvents = _daysWithEvents(entries);
+  /// Creates a snapshot of [file]'s [entries] (its lines, in order).
+  new({required this.file, required this.entries})
+    : daysWithEvents = _daysWithEvents(entries);
+
+  /// The file as it is on disk: the raw lines with their own endings, which
+  /// a write splices into and [offsetOfLine] measures.
+  final CalendarFileContent file;
 
   /// The file's lines, in order (blank and unrecognised ones included:
   /// the editor and the writer address them by index).
   final List<CalendarEntry> entries;
 
   /// Whether the file exists on disk.
-  final bool exists;
+  bool get exists => file.exists;
 
   /// Whether the file decoded as UTF-8 (false means it is shown and never
   /// written).
-  final bool validUtf8;
+  bool get validUtf8 => file.validUtf8;
 
   /// Whether the file starts with a byte-order mark (kept on a rewrite).
-  final bool bom;
+  bool get bom => file.bom;
+
+  /// The character offset line [index] starts at: where the editor's caret
+  /// goes when an event's line is opened (#730).
+  int offsetOfLine(int index) {
+    var at = 0;
+    for (var line = 0; line < index && line < file.lines.length; line++) {
+      at += file.lines[line].raw.length;
+    }
+    return at;
+  }
 
   /// The days with at least one event, for the calendar's second dot —
   /// computed once with the snapshot, not per build.
@@ -184,27 +194,37 @@ final class CalendarSnapshot {
   bool hasEventsOn(DateTime date) => daysWithEvents.contains(_dayOf(date));
 }
 
-/// Parses [lines] into a snapshot: the store's own parse, and what an
+/// Parses [file] into a snapshot: the store's own parse, and what an
 /// in-memory fake source answers a widget test with.
-CalendarSnapshot calendarSnapshotOf(
+CalendarSnapshot calendarSnapshotOf(CalendarFileContent file) {
+  return CalendarSnapshot(
+    file: file,
+    entries: [
+      for (var at = 0; at < file.lines.length; at++)
+        CalendarEntry(
+          lineIndex: at,
+          line: parseCalendarLine(
+            file.lines[at].text,
+            weekdays: calendarWeekdays,
+          ),
+        ),
+    ],
+  );
+}
+
+/// A file of plain [lines], each ending in `\n`: what a test writes and a
+/// fake source holds.
+CalendarFileContent calendarFileOf(
   List<String> lines, {
   bool exists = true,
   bool validUtf8 = true,
   bool bom = false,
-}) {
-  return CalendarSnapshot(
-    entries: [
-      for (var at = 0; at < lines.length; at++)
-        CalendarEntry(
-          lineIndex: at,
-          line: parseCalendarLine(lines[at], weekdays: calendarWeekdays),
-        ),
-    ],
-    exists: exists,
-    validUtf8: validUtf8,
-    bom: bom,
-  );
-}
+}) => CalendarFileContent(
+  lines: [for (final line in lines) CalendarRawLine(line, '\n')],
+  exists: exists,
+  validUtf8: validUtf8,
+  bom: bom,
+);
 
 /// Reads `calendar.txt` under [root].
 ///
@@ -224,12 +244,7 @@ final class CalendarStore implements CalendarSource {
   Future<CalendarSnapshot> load() async {
     final bytes = await _isolateRead(root);
     final file = splitCalendarFile(bytes);
-    final snapshot = calendarSnapshotOf(
-      [for (final line in file.lines) line.text],
-      exists: file.exists,
-      validUtf8: file.validUtf8,
-      bom: file.bom,
-    );
+    final snapshot = calendarSnapshotOf(file);
     _log.debug('calendar load: ${snapshot.entries.length} lines');
     return snapshot;
   }

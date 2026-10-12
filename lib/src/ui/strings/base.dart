@@ -760,6 +760,12 @@ abstract base class Strings {
   String get journalShowCalendar;
   String get journalFabToday;
   String journalDueOn(String day);
+
+  /// The journal's own heading over a day's events (#730).
+  String get journalEvents;
+
+  /// The week a goal covers: `Week 42` (#730).
+  String journalWeek(int week);
   String get commandsTitle;
   String get commandsIntro;
   String get commandsKeysNote;

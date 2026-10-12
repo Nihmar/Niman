@@ -1530,6 +1530,10 @@ final class FinnishStrings extends Strings {
   @override
   String get journalFabToday => 'Tämän päivän päiväkirjamerkintä';
   @override
+  String get journalEvents => 'Tapahtumat';
+  @override
+  String journalWeek(int week) => 'Viikko $week';
+  @override
   String journalDueOn(String day) => 'Erääntyy $day';
   @override
   String get commandsTitle => 'Komennot';

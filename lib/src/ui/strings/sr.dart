@@ -1523,6 +1523,10 @@ final class SerbianStrings extends Strings {
   @override
   String get journalFabToday => 'Данашњи унос у дневник';
   @override
+  String get journalEvents => 'Догађаји';
+  @override
+  String journalWeek(int week) => 'Недеља $week';
+  @override
   String journalDueOn(String day) => 'Рок $day';
   @override
   String get commandsTitle => 'Команде';

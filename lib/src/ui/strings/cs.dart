@@ -1513,6 +1513,10 @@ final class CzechStrings extends Strings {
   @override
   String get journalFabToday => 'Dnešní záznam deníku';
   @override
+  String get journalEvents => 'Události';
+  @override
+  String journalWeek(int week) => 'Týden $week';
+  @override
   String journalDueOn(String day) => 'Termín $day';
   @override
   String get commandsTitle => 'Příkazy';

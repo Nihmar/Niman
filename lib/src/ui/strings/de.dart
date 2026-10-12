@@ -1542,6 +1542,10 @@ final class GermanStrings extends Strings {
   @override
   String get journalFabToday => 'Heutiger Tagebucheintrag';
   @override
+  String get journalEvents => 'Termine';
+  @override
+  String journalWeek(int week) => 'Woche $week';
+  @override
   String journalDueOn(String day) => 'Fällig am $day';
   @override
   String get commandsTitle => 'Befehle';

@@ -1494,6 +1494,10 @@ final class HindiStrings extends Strings {
   @override
   String get journalFabToday => 'आज की डायरी प्रविष्टि';
   @override
+  String get journalEvents => 'ईवेंट';
+  @override
+  String journalWeek(int week) => 'सप्ताह $week';
+  @override
   String journalDueOn(String day) => 'नियत तिथि $day';
   @override
   String get commandsTitle => 'कमांड';

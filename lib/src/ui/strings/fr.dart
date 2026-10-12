@@ -1556,6 +1556,10 @@ final class FrenchStrings extends Strings {
   @override
   String get journalFabToday => 'Entrée du journal d’aujourd’hui';
   @override
+  String get journalEvents => 'Événements';
+  @override
+  String journalWeek(int week) => 'Semaine $week';
+  @override
   String journalDueOn(String day) => 'À faire pour le $day';
   @override
   String get commandsTitle => 'Commandes';

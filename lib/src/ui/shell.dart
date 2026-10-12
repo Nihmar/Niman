@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/calendar/calendar_controller.dart';
+import 'package:niman/src/calendar/calendar_source.dart';
+import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/files.dart';
@@ -345,6 +348,9 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                     shareIn: ref.read(shareInServiceProvider),
                     capture: ref.read(captureServicesProvider),
                     todoSourceFactory: ref.read(todoSourceFactoryProvider),
+                    calendarSourceFactory: ref.read(
+                      calendarSourceFactoryProvider,
+                    ),
                     unsavedTracker: ref.watch(unsavedTrackerProvider),
                     saveExportFile: ref.read(saveExportFileProvider),
                     pickExportFolder: ref.read(pickExportFolderProvider),
@@ -400,6 +406,7 @@ final class _LibraryShell extends ConsumerStatefulWidget {
     required this.shareIn,
     required this.capture,
     required this.todoSourceFactory,
+    required this.calendarSourceFactory,
     required this.unsavedTracker,
     required this.saveExportFile,
     required this.pickExportFolder,
@@ -457,6 +464,10 @@ final class _LibraryShell extends ConsumerStatefulWidget {
   /// Builds the todo file source per library root (overridden with a
   /// fake in widget tests).
   final TodoSource Function(String root) todoSourceFactory;
+
+  /// Builds the calendar file source per library root (a widget-test seam,
+  /// as the todo one is).
+  final CalendarSource Function(String root) calendarSourceFactory;
 
   /// The open notes' unsaved edits, which the window's close guard reads
   /// (T-PP-11); passed down to every [NoteView].
@@ -897,6 +908,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The todo state (T-TD-04): owned here so the tab body and the tab's
   /// app-bar add action share one controller.
   late final TodoController _todoController;
+
+  /// The calendar file (#730): the journal's events, the Home tile and the
+  /// editor's colours all read it.
+  late final CalendarController _calendarController;
 
   /// Making new things in the library: the FAB, the tree footer's menu
   /// and the row menu all run these (issue #100 moved the how of them
@@ -1806,6 +1821,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // The todo widgets follow the snapshot: every mutation notifies, and
     // the initial open notifies too, so one listener covers both.
     _todoController.addListener(_homeWidgets.pushTodos);
+    _calendarController = CalendarController(
+      session: widget.controller,
+      sourceFactory: widget.calendarSourceFactory,
+    );
     _templateFlow = ShellTemplateFlow(
       controller: widget.controller,
       origin: () => (
@@ -1831,6 +1850,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // otherwise never reconcile. The tab's own open() then takes the
     // probe-skip path instead of a second full read.
     unawaited(_todoController.open());
+    unawaited(_calendarController.open());
     // Notification taps while running: a todo tap opens the Todo tab, a
     // recognition's opens its text.
     _inbound.listen(widget.reminders.taps, (payload) {
@@ -1966,6 +1986,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unawaited(_inbound.cancel());
     _todoController.removeListener(_homeWidgets.pushTodos);
     _todoController.dispose();
+    _calendarController.dispose();
     _personalDictionary?.dispose();
     _fab.dispose();
     _shellFocus.dispose();
@@ -2001,6 +2022,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // unreliable, so no session event may arrive): re-read both surfaces
     // when clean instead of showing the pre-toggle state.
     unawaited(_todoController.open());
+    unawaited(_calendarController.open());
     if (_selected != null && !_selectedIsDir) {
       setState(() => _noteReloadToken++);
     }
@@ -3740,12 +3762,24 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (mounted) setState(() {});
   }
 
+  /// Opens the event's line in `calendar.txt` (#730), the caret at the
+  /// line's start: the desktop's tap on an event (a phone's sheet, with
+  /// Edit and Delete, comes with the writing phase).
+  void _openCalendarEvent(CalendarEntryEvent event) {
+    _showNote(
+      calendarFileName,
+      caret: _calendarController.snapshot?.offsetOfLine(event.lineIndex),
+    );
+  }
+
   /// The journal's calendar, strip and recent entries (#7).
   late final ShellJournalUi _journalUi = ShellJournalUi(
     controller: widget.controller,
     journal: () => _journal,
     flow: _journalFlow,
     tasks: _todoController,
+    calendar: _calendarController,
+    openEvent: _openCalendarEvent,
     dockRoom: () => _dockRoom,
     openDockJournal: () => _workspace.controller.update(
       (w) => w.withDock(open: true, pane: DockPane.journal),
