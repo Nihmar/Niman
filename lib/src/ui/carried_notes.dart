@@ -61,12 +61,22 @@ final class CarriedNotes {
       final root? => await companions.freshIn(annotationsFolder, root: root),
       null => const <String, List<String>>{},
     };
-    final all = {...await companions.all(), ...fresh};
-    for (final entry in all.entries) {
-      final names = entry.key == path || (isDir && _inside(entry.key, path));
-      if (!names) continue;
-      for (final note in entry.value) {
-        if (note == path || (isDir && _inside(note, path))) continue;
+    // What each companion names, by note: the index's answer, and in place
+    // of it, for a note read on disk, what the note says now. Merged by
+    // file, a note read on disk replaced every other companion of the file
+    // it names, and one that stopped naming a file stayed listed under it
+    // (#775).
+    final named = <String, List<String>>{};
+    for (final MapEntry(key: file, value: notes)
+        in (await companions.all()).entries) {
+      for (final note in notes) {
+        (named[note] ??= []).add(file);
+      }
+    }
+    named.addAll(fresh);
+    for (final MapEntry(key: note, value: files) in named.entries) {
+      if (note == path || (isDir && _inside(note, path))) continue;
+      if (files.any((file) => file == path || (isDir && _inside(file, path)))) {
         out.add(note);
       }
     }

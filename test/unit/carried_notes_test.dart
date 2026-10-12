@@ -120,6 +120,46 @@ void main() {
     ]);
   });
 
+  // #775: what the annotations folder says on disk is merged by note, not
+  // by file — a note read there must not hide the file's other companions.
+  test('a fresh companion joins the indexed ones elsewhere', () async {
+    await write('Books/Dune.epub');
+    await write(
+      'Notes/Dune.md',
+      '---\nannotates: "[[Books/Dune.epub]]"\n---\n\nMine.\n',
+    );
+    await writeRaw(
+      'Annotations/Dune - Annotation.md',
+      '---\nannotates: "[[Books/Dune.epub]]"\n---\n\nA highlight.\n',
+    );
+
+    expect(await carried.of('Books/Dune.epub', isDir: false), [
+      'Annotations/Dune - Annotation.md',
+      'Notes/Dune.md',
+    ]);
+  });
+
+  test('a companion that names another file now is not carried', () async {
+    await write('Books/Dune.epub');
+    await write('Books/Emma.epub');
+    await write(
+      'Annotations/Notes.md',
+      '---\nannotates: "[[Books/Dune.epub]]"\n---\n',
+    );
+    // Rewritten since the index read it, and not read again yet.
+    await writeRaw(
+      'Annotations/Notes.md',
+      '---\nannotates: "[[Books/Emma.epub]]"\n---\n',
+    );
+    File(p.join(root.path, 'Annotations', 'Notes.md'))
+        .setLastModifiedSync(DateTime.now().add(const Duration(minutes: 1)));
+
+    expect(await carried.of('Books/Dune.epub', isDir: false), isEmpty);
+    expect(await carried.of('Books/Emma.epub', isDir: false), [
+      'Annotations/Notes.md',
+    ]);
+  });
+
   test('a companion naming a note elsewhere is not carried', () async {
     await write('Books/Dune.pdf');
     await write('Books/Emma.epub');

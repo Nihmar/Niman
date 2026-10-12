@@ -85,13 +85,15 @@ final class CompanionNotes {
     return out;
   }
 
-  /// Every companion found by reading [folder]'s notes on disk (#717),
-  /// by the file each names.
+  /// What [folder]'s notes declare on disk (#717): for each note read,
+  /// the files it names — none, for a note that names no file (any more).
   ///
   /// The index can lag a moment behind a companion just written, so the
   /// folder Niman writes them to is looked at too — but only the notes
   /// the index does not know, or holds an older row for: an up-to-date
-  /// folder costs one listing and no reads.
+  /// folder costs one listing and no reads. By note, not by file: a note
+  /// read here answers for itself in place of its row, and a file keeps
+  /// the companions the index knows elsewhere (#775).
   Future<Map<String, List<String>>> freshIn(
     String folder, {
     required String root,
@@ -135,12 +137,12 @@ final class CompanionNotes {
     );
     final out = <String, List<String>>{};
     for (final entry in texts) {
+      final files = out[entry.path] = <String>[];
       final frontmatter = parseFrontmatter(entry.text);
       for (final value in frontmatter?.fields[key] ?? const <String>[]) {
         final resolved = await _resolve(value, from: entry.path);
         if (resolved is! ResolvedNote) continue;
-        final notes = out.putIfAbsent(resolved.note.path, () => <String>[]);
-        if (!notes.contains(entry.path)) notes.add(entry.path);
+        if (!files.contains(resolved.note.path)) files.add(resolved.note.path);
       }
     }
     return out;
