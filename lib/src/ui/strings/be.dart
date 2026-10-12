@@ -1585,6 +1585,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Адкрыць';
   @override
+  String get journalNewEntry => 'Новы запіс дзённіка';
+  @override
   String get journalShowCalendar => 'Паказаць каляндар';
   @override
   String get journalFabToday => 'Сённяшні запіс дзённіка';

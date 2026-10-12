@@ -1579,6 +1579,8 @@ final class CzechStrings extends Strings {
   @override
   String get journalOpenEntry => 'Otevřít';
   @override
+  String get journalNewEntry => 'Nový záznam deníku';
+  @override
   String get journalShowCalendar => 'Zobrazit kalendář';
   @override
   String get journalFabToday => 'Dnešní záznam deníku';

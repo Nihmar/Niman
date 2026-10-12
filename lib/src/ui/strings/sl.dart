@@ -1580,6 +1580,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Odpri';
   @override
+  String get journalNewEntry => 'Nov vnos v dnevnik';
+  @override
   String get journalShowCalendar => 'Pokaži koledar';
   @override
   String get journalFabToday => 'Današnji vnos v dnevnik';

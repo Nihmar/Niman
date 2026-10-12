@@ -1585,6 +1585,8 @@ final class SlovakStrings extends Strings {
   @override
   String get journalOpenEntry => 'Otvoriť';
   @override
+  String get journalNewEntry => 'Nový záznam denníka';
+  @override
   String get journalShowCalendar => 'Zobraziť kalendár';
   @override
   String get journalFabToday => 'Dnešný záznam denníka';

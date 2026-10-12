@@ -1632,6 +1632,8 @@ final class GreekStrings extends Strings {
   @override
   String get journalOpenEntry => 'Άνοιγμα';
   @override
+  String get journalNewEntry => 'Νέα καταχώριση ημερολογίου';
+  @override
   String get journalShowCalendar => 'Εμφάνιση ημερολογίου';
   @override
   String get journalFabToday => 'Σημερινή καταχώριση ημερολογίου';

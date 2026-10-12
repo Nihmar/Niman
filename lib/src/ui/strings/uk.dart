@@ -1588,6 +1588,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Відкрити';
   @override
+  String get journalNewEntry => 'Новий запис щоденника';
+  @override
   String get journalShowCalendar => 'Показати календар';
   @override
   String get journalFabToday => 'Сьогоднішній запис щоденника';

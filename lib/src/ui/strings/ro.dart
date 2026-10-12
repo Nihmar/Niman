@@ -1596,6 +1596,8 @@ final class RomanianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Deschide';
   @override
+  String get journalNewEntry => 'Intrare nouă în jurnal';
+  @override
   String get journalShowCalendar => 'Arată calendarul';
   @override
   String get journalFabToday => 'Intrarea de azi din jurnal';

@@ -1598,6 +1598,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Hap';
   @override
+  String get journalNewEntry => 'Hyrje e re në ditar';
+  @override
   String get journalShowCalendar => 'Shfaq kalendarin';
   @override
   String get journalFabToday => 'Hyrja e sotme e ditarit';

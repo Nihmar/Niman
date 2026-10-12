@@ -284,7 +284,8 @@ final class _JournalBrowserState extends State<JournalBrowser> {
             ),
             // Beside Today in the dock; a phone gets them in the day card's
             // own second row, where the thumb already is (#730).
-            if (!widget.large) ..._dayActions(context),
+            if (!widget.large)
+              ..._dayActions(context, hasEntry: entries.contains(_selected)),
           ],
         ),
         if (widget.large) ...[
@@ -741,18 +742,23 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                 ),
               ],
             ),
-            if (_dayActions(context).isNotEmpty)
-              Wrap(spacing: 4, children: _dayActions(context)),
+            if (_dayActions(context, hasEntry: hasEntry).isNotEmpty)
+              Wrap(
+                spacing: 4,
+                children: _dayActions(context, hasEntry: hasEntry),
+              ),
           ],
         ),
       ),
     );
   }
 
-  /// Add event and Add task for the picked day (#730), each only when the
-  /// shell gave the way to write it: the buttons never promise a write the
-  /// app cannot make.
-  List<Widget> _dayActions(BuildContext context) {
+  /// New journal, Add event and Add task for the picked day (#730), each
+  /// only when the shell gave the way to write it: the buttons never
+  /// promise a write the app cannot make. New journal shows only while the
+  /// day has no entry to open, and rides last so its coming and going
+  /// moves nothing before it.
+  List<Widget> _dayActions(BuildContext context, {required bool hasEntry}) {
     return [
       if (widget.onAddEvent != null)
         TextButton.icon(
@@ -767,6 +773,13 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           onPressed: () => widget.onAddTask!(_selected),
           icon: const Icon(Icons.check_box_outlined, size: 18),
           label: Text(AppStrings.todoAddTooltip),
+        ),
+      if (!hasEntry)
+        TextButton.icon(
+          key: const Key('journal-new-entry'),
+          onPressed: () => widget.onOpenDay(_selected, confirmed: true),
+          icon: const Icon(Icons.note_add_outlined, size: 18),
+          label: Text(AppStrings.journalNewEntry),
         ),
     ];
   }

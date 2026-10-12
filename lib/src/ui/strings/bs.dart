@@ -1587,6 +1587,8 @@ final class BosnianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Otvori';
   @override
+  String get journalNewEntry => 'Novi unos u dnevnik';
+  @override
   String get journalShowCalendar => 'Prikaži kalendar';
   @override
   String get journalFabToday => 'Današnji unos u dnevnik';

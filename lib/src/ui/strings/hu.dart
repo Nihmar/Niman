@@ -1591,6 +1591,8 @@ final class HungarianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Megnyitás';
   @override
+  String get journalNewEntry => 'Új naplóbejegyzés';
+  @override
   String get journalShowCalendar => 'Naptár megjelenítése';
   @override
   String get journalFabToday => 'Mai naplóbejegyzés';

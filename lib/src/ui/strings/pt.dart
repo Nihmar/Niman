@@ -1594,6 +1594,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get journalOpenEntry => 'Abrir';
   @override
+  String get journalNewEntry => 'Nova entrada do diário';
+  @override
   String get journalShowCalendar => 'Mostrar o calendário';
   @override
   String get journalFabToday => 'Entrada de hoje do diário';

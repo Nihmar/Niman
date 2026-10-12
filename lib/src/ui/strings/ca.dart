@@ -1614,6 +1614,8 @@ final class CatalanStrings extends Strings {
   @override
   String get journalOpenEntry => 'Obre';
   @override
+  String get journalNewEntry => 'Nova entrada del diari';
+  @override
   String get journalShowCalendar => 'Mostra el calendari';
   @override
   String get journalFabToday => 'Entrada d’avui del diari';

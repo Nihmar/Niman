@@ -1605,6 +1605,8 @@ final class PolishStrings extends Strings {
   @override
   String get journalOpenEntry => 'Otwórz';
   @override
+  String get journalNewEntry => 'Nowy wpis w dzienniku';
+  @override
   String get journalShowCalendar => 'Pokaż kalendarz';
   @override
   String get journalFabToday => 'Dzisiejszy wpis w dzienniku';

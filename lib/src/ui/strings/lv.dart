@@ -1581,6 +1581,8 @@ final class LatvianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Atvērt';
   @override
+  String get journalNewEntry => 'Jauns dienasgrāmatas ieraksts';
+  @override
   String get journalShowCalendar => 'Rādīt kalendāru';
   @override
   String get journalFabToday => 'Šodienas dienasgrāmatas ieraksts';

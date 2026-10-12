@@ -1602,6 +1602,8 @@ final class ItalianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Apri';
   @override
+  String get journalNewEntry => 'Nuova voce del diario';
+  @override
   String get journalShowCalendar => 'Mostra il calendario';
   @override
   String get journalFabToday => 'Voce di oggi del diario';

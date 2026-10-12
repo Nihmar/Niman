@@ -1589,6 +1589,8 @@ final class SerbianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Отвори';
   @override
+  String get journalNewEntry => 'Нови унос у дневник';
+  @override
   String get journalShowCalendar => 'Прикажи календар';
   @override
   String get journalFabToday => 'Данашњи унос у дневник';

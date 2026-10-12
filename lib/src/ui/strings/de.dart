@@ -1608,6 +1608,8 @@ final class GermanStrings extends Strings {
   @override
   String get journalOpenEntry => 'Öffnen';
   @override
+  String get journalNewEntry => 'Neuer Tagebucheintrag';
+  @override
   String get journalShowCalendar => 'Kalender zeigen';
   @override
   String get journalFabToday => 'Heutiger Tagebucheintrag';

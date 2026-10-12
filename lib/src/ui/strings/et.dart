@@ -1564,6 +1564,8 @@ final class EstonianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Ava';
   @override
+  String get journalNewEntry => 'Uus päeviku sissekanne';
+  @override
   String get journalShowCalendar => 'Näita kalendrit';
   @override
   String get journalFabToday => 'Tänane päeviku sissekanne';

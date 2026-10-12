@@ -1613,6 +1613,8 @@ final class SpanishStrings extends Strings {
   @override
   String get journalOpenEntry => 'Abrir';
   @override
+  String get journalNewEntry => 'Nueva entrada del diario';
+  @override
   String get journalShowCalendar => 'Mostrar el calendario';
   @override
   String get journalFabToday => 'Entrada de hoy del diario';

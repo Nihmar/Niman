@@ -835,6 +835,7 @@ abstract base class Strings {
   String get journalRecent;
   String get journalNoEntry;
   String get journalOpenEntry;
+  String get journalNewEntry;
   String get journalShowCalendar;
   String get journalFabToday;
   String journalDueOn(String day);

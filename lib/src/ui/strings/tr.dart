@@ -1571,6 +1571,8 @@ final class TurkishStrings extends Strings {
   @override
   String get journalOpenEntry => 'Aç';
   @override
+  String get journalNewEntry => 'Yeni günlük girdisi';
+  @override
   String get journalShowCalendar => 'Takvimi göster';
   @override
   String get journalFabToday => 'Bugünün günlük girdisi';

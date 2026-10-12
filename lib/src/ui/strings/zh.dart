@@ -1460,6 +1460,8 @@ final class ChineseStrings extends Strings {
   @override
   String get journalOpenEntry => '打开';
   @override
+  String get journalNewEntry => '新的日记条目';
+  @override
   String get journalShowCalendar => '显示日历';
   @override
   String get journalFabToday => '今天的日记条目';

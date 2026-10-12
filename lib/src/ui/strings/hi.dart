@@ -1559,6 +1559,8 @@ final class HindiStrings extends Strings {
   @override
   String get journalOpenEntry => 'खोलें';
   @override
+  String get journalNewEntry => 'नई डायरी प्रविष्टि';
+  @override
   String get journalShowCalendar => 'कैलेंडर दिखाएँ';
   @override
   String get journalFabToday => 'आज की डायरी प्रविष्टि';

@@ -1588,6 +1588,8 @@ final class SwedishStrings extends Strings {
   @override
   String get journalOpenEntry => 'Öppna';
   @override
+  String get journalNewEntry => 'Ny dagboksanteckning';
+  @override
   String get journalShowCalendar => 'Visa kalendern';
   @override
   String get journalFabToday => 'Dagens dagboksanteckning';

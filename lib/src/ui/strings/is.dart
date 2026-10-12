@@ -1584,6 +1584,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get journalOpenEntry => 'Opna';
   @override
+  String get journalNewEntry => 'Ný dagbókarfærsla';
+  @override
   String get journalShowCalendar => 'Sýna dagatalið';
   @override
   String get journalFabToday => 'Dagbókarfærsla dagsins';

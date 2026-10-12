@@ -92,7 +92,8 @@ text — with the `+project`, `@context` and `#tag` tokens both files
 already use a tap away — **Remind me** with its lead time, and the exact
 line that will be written, so what is about to be added is read before it
 is. **Add task** opens the task dialog with the day as its due date; the
-task then shows under the day's **Due**.
+task then shows under the day's **Due**. A day with no entry yet offers
+**New journal** beside them, which makes the day's entry and opens it.
 
 A reminder rides on the event's own line (`rem:16:30`), so moving or
 deleting the event moves or deletes it, and it feeds the same alarms a

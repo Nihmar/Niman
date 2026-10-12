@@ -1597,6 +1597,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Отвори';
   @override
+  String get journalNewEntry => 'Нов запис в дневника';
+  @override
   String get journalShowCalendar => 'Покажи календара';
   @override
   String get journalFabToday => 'Днешен запис в дневника';

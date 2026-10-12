@@ -14,6 +14,7 @@ void main() {
   final edited = <(CalendarEntryEvent, CalendarEventDraft)>[];
   final deleted = <CalendarEntryEvent>[];
   final opened = <CalendarEntryEvent>[];
+  final openedDays = <(DateTime, bool)>[];
 
   setUp(() {
     added.clear();
@@ -21,6 +22,7 @@ void main() {
     edited.clear();
     deleted.clear();
     opened.clear();
+    openedDays.clear();
   });
 
   /// The day's line, with two events on it.
@@ -46,16 +48,18 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Widget buildApp({bool large = false}) {
+  Widget buildApp({bool large = false, List<DateTime>? entries}) {
     final at = snapshot();
     return MaterialApp(
       home: Scaffold(
         body: JournalBrowser(
           today: today,
           large: large,
-          entryDays: () async => [today],
+          // An explicit empty list is a library with no entry at all.
+          entryDays: () async => entries ?? [today],
           readEntry: (day) async => '',
-          onOpenDay: (day, {confirmed = false}) {},
+          onOpenDay: (day, {confirmed = false}) =>
+              openedDays.add((day, confirmed)),
           eventsOn: at.eventsFor,
           knownTokens: const {'+thesis'},
           calendarFile: at.file,
@@ -183,6 +187,38 @@ void main() {
     await tester.tap(find.byKey(const Key('journal-event-open')));
     await tester.pumpAndSettle();
     expect(opened, hasLength(1));
+  });
+
+  testWidgets('an empty day offers New journal beside the adds', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(buildApp(large: true, entries: const []));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('journal-new-entry')), findsOne);
+    expect(find.byKey(const Key('journal-add-event')), findsOne);
+    expect(find.byKey(const Key('journal-add-task')), findsOne);
+
+    await tester.ensureVisible(find.byKey(const Key('journal-new-entry')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('journal-new-entry')));
+    await tester.pump();
+
+    // Making the entry is the day's own answer: confirmed, no question.
+    expect(openedDays, [(today, true)]);
+  });
+
+  testWidgets('a day with its entry offers no New journal', (tester) async {
+    tester.view.physicalSize = const Size(420, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(buildApp(large: true));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('journal-new-entry')), findsNothing);
   });
 
   testWidgets('a window taps an event straight into the file', (tester) async {

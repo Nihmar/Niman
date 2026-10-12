@@ -1041,6 +1041,7 @@ final class AppStrings {
   static String get journalRecent => _s.journalRecent;
   static String get journalNoEntry => _s.journalNoEntry;
   static String get journalOpenEntry => _s.journalOpenEntry;
+  static String get journalNewEntry => _s.journalNewEntry;
   static String get journalShowCalendar => _s.journalShowCalendar;
   static String get journalFabToday => _s.journalFabToday;
   static String journalDueOn(String day) => _s.journalDueOn(day);

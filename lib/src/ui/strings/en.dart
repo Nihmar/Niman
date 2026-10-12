@@ -1575,6 +1575,8 @@ final class EnglishStrings extends Strings {
   @override
   String get journalOpenEntry => 'Open';
   @override
+  String get journalNewEntry => 'New journal';
+  @override
   String get journalShowCalendar => 'Show the calendar';
   @override
   String get journalFabToday => "Today's journal entry";

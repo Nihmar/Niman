@@ -1595,6 +1595,8 @@ final class FinnishStrings extends Strings {
   @override
   String get journalOpenEntry => 'Avaa';
   @override
+  String get journalNewEntry => 'Uusi päiväkirjamerkintä';
+  @override
   String get journalShowCalendar => 'Näytä kalenteri';
   @override
   String get journalFabToday => 'Tämän päivän päiväkirjamerkintä';

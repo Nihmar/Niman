@@ -1598,6 +1598,8 @@ final class GalicianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Abrir';
   @override
+  String get journalNewEntry => 'Nova entrada do diario';
+  @override
   String get journalShowCalendar => 'Amosar o calendario';
   @override
   String get journalFabToday => 'Entrada de hoxe do diario';

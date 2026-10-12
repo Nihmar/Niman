@@ -1599,6 +1599,8 @@ final class DutchStrings extends Strings {
   @override
   String get journalOpenEntry => 'Openen';
   @override
+  String get journalNewEntry => 'Nieuwe dagboeknotitie';
+  @override
   String get journalShowCalendar => 'Kalender tonen';
   @override
   String get journalFabToday => 'Dagboeknotitie van vandaag';

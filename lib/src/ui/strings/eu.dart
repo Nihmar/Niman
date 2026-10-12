@@ -1592,6 +1592,8 @@ final class BasqueStrings extends Strings {
   @override
   String get journalOpenEntry => 'Ireki';
   @override
+  String get journalNewEntry => 'Egunkariko sarrera berria';
+  @override
   String get journalShowCalendar => 'Erakutsi egutegia';
   @override
   String get journalFabToday => 'Egunkariko gaurko sarrera';

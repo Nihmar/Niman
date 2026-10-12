@@ -1576,6 +1576,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Åpne';
   @override
+  String get journalNewEntry => 'Nytt dagbokinnlegg';
+  @override
   String get journalShowCalendar => 'Vis kalenderen';
   @override
   String get journalFabToday => 'Dagens dagbokinnlegg';

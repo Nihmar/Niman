@@ -1580,6 +1580,8 @@ final class DanishStrings extends Strings {
   @override
   String get journalOpenEntry => 'Åbn';
   @override
+  String get journalNewEntry => 'Nyt dagbogsindlæg';
+  @override
   String get journalShowCalendar => 'Vis kalenderen';
   @override
   String get journalFabToday => 'Dagens dagbogsindlæg';

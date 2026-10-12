@@ -1622,6 +1622,8 @@ final class FrenchStrings extends Strings {
   @override
   String get journalOpenEntry => 'Ouvrir';
   @override
+  String get journalNewEntry => 'Nouvelle entrée du journal';
+  @override
   String get journalShowCalendar => 'Afficher le calendrier';
   @override
   String get journalFabToday => 'Entrée du journal d’aujourd’hui';

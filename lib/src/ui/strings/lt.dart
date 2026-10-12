@@ -1585,6 +1585,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get journalOpenEntry => 'Atverti';
   @override
+  String get journalNewEntry => 'Naujas dienoraščio įrašas';
+  @override
   String get journalShowCalendar => 'Rodyti kalendorių';
   @override
   String get journalFabToday => 'Šiandienos dienoraščio įrašas';
