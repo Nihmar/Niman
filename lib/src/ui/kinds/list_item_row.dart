@@ -246,6 +246,17 @@ class _ListItemRowState extends State<ListItemRow> {
         : GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.onBeginEdit,
+            // A long press anywhere picks the row up (#719): the reorder
+            // a phone knows, where the handle was easy to miss. The handle
+            // stays the affordance and the pointer's own way in; once the
+            // press has picked the row up, the finger drags it from there,
+            // with no second hold.
+            onLongPressStart: (details) =>
+                widget.onDragStart(details.globalPosition),
+            onLongPressMoveUpdate: (details) =>
+                widget.onDragMove(details.globalPosition),
+            onLongPressEnd: (_) => widget.onDragEnd(),
+            onLongPressCancel: widget.onDragCancel,
             child: body,
           );
     return Opacity(
