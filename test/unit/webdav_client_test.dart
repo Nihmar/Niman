@@ -96,15 +96,21 @@ void main() {
       await expectLater(put('No/a.md', 'x'), throwsA(isA<WebDavNotFound>()));
     });
 
-    test('uploadFile streams a file from disk', () async {
-      final dir = await Directory.systemTemp.createTemp('niman_webdav_');
-      addTearDown(() => dir.delete(recursive: true));
-      final file = File('${dir.path}/big.bin');
-      final bytes = List<int>.generate(300000, (i) => i % 251);
-      await file.writeAsBytes(bytes);
-      await client.uploadFile('big.bin', file);
-      expect(server.file('big.bin'), bytes);
-    });
+    test(
+      'uploadFile streams a file from disk, and says what it sent',
+      () async {
+        final dir = await Directory.systemTemp.createTemp('niman_webdav_');
+        addTearDown(() => dir.delete(recursive: true));
+        final file = File('${dir.path}/big.bin');
+        final bytes = List<int>.generate(300000, (i) => i % 251);
+        await file.writeAsBytes(bytes);
+        final uploaded = await client.uploadFile('big.bin', file);
+        expect(server.file('big.bin'), bytes);
+        // The digest of the bytes that went up, for a plan to hold the write
+        // it planned against the write the server got (#723).
+        expect(uploaded.sha256, sha256.convert(bytes).toString());
+      },
+    );
 
     test('If-Match with a stale ETag and If-None-Match on an existing file '
         'are WebDavPrecondition and leave the file alone', () async {

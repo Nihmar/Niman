@@ -636,6 +636,38 @@ void main() {
     },
   );
 
+  // #723: a note rewritten while the run reads it — after the scan hashed
+  // it, with the same size and the same mtime, so the state guard cannot
+  // tell — must not be recorded as if the planned bytes had gone up. What
+  // the upload sent is what the row would describe, and it is not the plan.
+  test('a rewrite inside the upload is skipped, not recorded', () async {
+    a.write('a.md', 'one');
+    final file = File(p.join(a.root.path, 'a.md'));
+    final before = file.statSync();
+    var rewritten = false;
+    final report = (await a.engine.run(
+      onProgress: (stage, _, _) {
+        if (stage != SyncStage.applying || rewritten) return;
+        rewritten = true;
+        file
+          ..writeAsStringSync('two')
+          ..setLastModifiedSync(before.modified);
+      },
+    )).report;
+
+    expect(rewritten, isTrue);
+    expect(report.skipped, ['a.md'], reason: report.summary());
+    expect(
+      report.done[SyncActionKind.upload],
+      isNull,
+      reason: 'the upload of the planned bytes was not recorded',
+    );
+    // The server holds the bytes that were read; no row claims they are
+    // the plan, so the next run decides the path again.
+    expect(remoteText('a.md'), 'two');
+    expect(await a.store.items(a.path), isEmpty, reason: 'no row recorded');
+  });
+
   // A weak ETag cannot carry If-Match, so the client drops it: an upload
   // planned as guarded by one went out with no guard and no look first,
   // and wrote over a rewrite made while the plan was applied.
