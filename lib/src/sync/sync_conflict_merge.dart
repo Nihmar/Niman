@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/diff/calendar_merge.dart';
 import 'package:niman/src/diff/record_merge.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/home/home_file.dart';
@@ -301,7 +303,14 @@ final class SyncConflictMerger {
     }
     final String text;
     final String how;
-    if (records) {
+    if (_isCalendarFile(d.path)) {
+      // The calendar's own merge (#730): day lines paired by their date,
+      // their events merged as a set, so two devices that each add an
+      // event to the same day agree without the user.
+      text = await _mergeCalendarTexts(baseText, localText, remoteText);
+      how =
+          'calendar lines, ${base == null ? 'no base: union' : 'base v$base'}';
+    } else if (records) {
       text = await _mergeRecordTexts(baseText, localText, remoteText);
       how = 'task lines, ${base == null ? 'no base: union' : 'base v$base'}';
     } else {
@@ -377,10 +386,31 @@ final class SyncConflictMerger {
     return Isolate.run(() => mergeRecords(base, local, remote));
   }
 
+  /// Merges three versions of `calendar.txt`, off the UI isolate when
+  /// long.
+  static Future<String> _mergeCalendarTexts(
+    String base,
+    String local,
+    String remote,
+  ) {
+    final size = base.length + local.length + remote.length;
+    if (size <= _inlineMergeLimit) {
+      return Future.value(mergeCalendar(base, local, remote));
+    }
+    return Isolate.run(() => mergeCalendar(base, local, remote));
+  }
+
   /// Whether [path] is one of the library's task files, whose lines are
   /// records rather than prose.
+  ///
+  /// `calendar.txt` counts: its lines are records too, and it is merged
+  /// without a base — a day added on either side is a day that exists.
   static bool _isRecordFile(String path) =>
-      path == todoFileName || path == doneFileName;
+      path == todoFileName || path == doneFileName || _isCalendarFile(path);
+
+  /// Whether [path] is the calendar file, whose lines merge
+  /// calendar-aware ([mergeCalendar], #730).
+  static bool _isCalendarFile(String path) => path == calendarFileName;
 
   /// Texts up to this many characters (all three together) are merged on
   /// the calling isolate; an isolate costs more than the merge itself.
