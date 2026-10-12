@@ -47,6 +47,26 @@ void main() {
     expect(edit, (start: 0, end: 6, text: '*parola*', anchor: 1, extent: 7));
   });
 
+  group('in code and maths (#762)', () {
+    bool code(int _) => true;
+
+    test('the punctuation neither pairs nor wraps a selection', () {
+      final buffer = SourceBuffer.fromText('char  x\n');
+      final pairs = BracketPairs();
+      for (final char in ['*', '_', '"', "'", '«', '“']) {
+        expect(pairs.typed(buffer, 5, 5, char, verbatimAt: code), isNull);
+        expect(pairs.typed(buffer, 0, 4, char, verbatimAt: code), isNull);
+      }
+    });
+
+    test('the brackets pair and wrap as anywhere', () {
+      final buffer = SourceBuffer.fromText('f \n');
+      final pairs = BracketPairs();
+      expect(pairs.typed(buffer, 2, 2, '(', verbatimAt: code)?.text, '()');
+      expect(pairs.typed(buffer, 0, 1, '[', verbatimAt: code)?.text, '[f]');
+    });
+  });
+
   group('the Markdown pairs (#718)', () {
     test('* opens an emphasis and the second star steps over it', () {
       expect(typedThrough('**bold**'), '**bold**');

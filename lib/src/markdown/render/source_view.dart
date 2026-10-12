@@ -1473,7 +1473,55 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return _applyBracket(_brackets.backspace(widget.buffer, end));
     }
     if (inserted.length != 1) return false;
-    return _applyBracket(_brackets.typed(widget.buffer, start, end, inserted));
+    return _applyBracket(
+      _brackets.typed(
+        widget.buffer,
+        start,
+        end,
+        inserted,
+        verbatimAt: _caretInCode,
+      ),
+    );
+  }
+
+  /// Whether a caret at [offset] stands in code or maths: on a line of a
+  /// fenced or indented code block or of a `$$` block, or inside an inline
+  /// code or maths span — between its delimiters, not before the opening one
+  /// nor after the closing one.
+  ///
+  /// Answered by the scan behind the colours — the line's block, O(log
+  /// blocks), and that one line's runs — so a keystroke never reads the note
+  /// again. The block answers for an empty line of a fence, which has no
+  /// runs; the runs answer while there is no block scan.
+  bool _caretInCode(int offset) {
+    final buffer = widget.buffer;
+    final line = buffer.lineOf(offset);
+    final block = _styler?.blockOf(line)?.kind;
+    if (block == BlockKind.fencedCode ||
+        block == BlockKind.indentedCode ||
+        block == BlockKind.math) {
+      return true;
+    }
+    final local = offset - buffer.offsetOfLine(line);
+    TokenKind? before;
+    TokenKind? at;
+    for (final token in _lineAt(line).tokens) {
+      final kind = token.kind;
+      if (kind == TokenKind.codeFence ||
+          kind == TokenKind.codeBlock ||
+          kind == TokenKind.mathBlock) {
+        return true;
+      }
+      if (kind != TokenKind.codeInline && kind != TokenKind.mathInline) {
+        continue;
+      }
+      if (local - 1 >= token.start && local - 1 < token.end) before = kind;
+      if (local >= token.start && local < token.end) at = kind;
+    }
+    // A span's delimiters are runs of its own kind: a caret with the span on
+    // both sides of it is inside, one with a delimiter on one side only is
+    // at its edge, outside.
+    return before != null && before == at;
   }
 
   /// Makes [edit], when there is one; answers whether there was.

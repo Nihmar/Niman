@@ -39,6 +39,12 @@
 /// * `<`, `>` and `` ` `` do not pair at all: `a < b` is a comparison and
 ///   `<https://…>` an autolink — a pair would write `< >` in the first —
 ///   while a fence is three backticks and a code span is typed whole.
+///
+/// In code and maths — a fenced or indented code block, a code span, a `$$`
+/// block or `$…$` — the Markdown punctuation is only itself: `char *p` is a
+/// pointer, `$a * b$` a product and `'c'` a character, none of them an
+/// emphasis or a quote. The brackets pair there as anywhere: code and
+/// formulas are written with them.
 library;
 
 import 'package:niman/src/markdown/edit/caret_motion.dart';
@@ -80,6 +86,10 @@ final class BracketPairs {
 
   static final Set<String> _closing = pairs.values.toSet();
 
+  /// The brackets: the pairs that pair in code and maths too. The rest is
+  /// the Markdown punctuation, which there is only itself.
+  static const Set<String> _brackets = {'(', '[', '{'};
+
   /// The closing characters that close only: the brackets' and the
   /// language's own quotes'. A star, an underscore or a straight quote
   /// opens as often as it closes (#762).
@@ -92,7 +102,17 @@ final class BracketPairs {
 
   /// What typing [typed] over `[start, end)` of [buffer] does instead of
   /// inserting it; null when it is only typed.
-  BracketEdit? typed(SourceBuffer buffer, int start, int end, String typed) {
+  ///
+  /// [verbatimAt] answers whether a caret at an offset stands in code or
+  /// maths, where the Markdown punctuation neither opens a pair nor wraps a
+  /// selection: asked only for that punctuation, once a keystroke.
+  BracketEdit? typed(
+    SourceBuffer buffer,
+    int start,
+    int end,
+    String typed, {
+    bool Function(int offset)? verbatimAt,
+  }) {
     // A space between a `*` pair the pair wrote: a literal star with a
     // space after it — `* ` at the start of a line is a list item, and
     // `a * b` is a multiplication — so the closer is replaced by the
@@ -119,6 +139,9 @@ final class BracketPairs {
     }
     final close = pairs[typed];
     if (close == null) return null;
+    if (!_brackets.contains(typed) && (verbatimAt?.call(start) ?? false)) {
+      return null;
+    }
     if (start != end) {
       final inside = buffer.substring(start, end);
       return (

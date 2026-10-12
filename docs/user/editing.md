@@ -508,6 +508,14 @@ it takes one. `<`, `>` and the backtick do not pair at all —
 `a < b` is a comparison, an autolink has its own `>`, and a fence is
 three backticks.
 
+In code and maths — a fenced or indented code block, an inline code
+span, a `$$` block or inline `$…$` — none of that punctuation pairs, nor
+wraps a selection: `*` in `char *p` writes one star, `$a * b$` stays a
+product and a quote is just a quote. The brackets `()`, `[]` and `{}`
+still pair there, as everywhere else: code and formulas are written
+with them. A code span counts once both of its backticks are written;
+while only the opening one is, the text after it is not code yet.
+
 ### Tables in live mode
 
 A table in live mode is drawn as the read view draws it, and edited as a
