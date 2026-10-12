@@ -686,6 +686,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Shows [tab] in the focused pane (#712), where it is already open or
   /// not; the tree and dock stay put.
   void _showContentTab(ShellTab tab, int pane) {
+    // The note behind is only hidden, and a hidden editor keeps its focus
+    // and its keys (#770): the shell takes them back, as a rail switch
+    // does.
+    FocusManager.instance.primaryFocus?.unfocus();
+    _shellFocus.requestFocus();
     setState(() {
       _tab = tab;
       _visitedTabs.add(tab);
@@ -1190,6 +1195,30 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Whether the window is wide: the tabs' layout (#23).
   bool get _wide => MediaQuery.sizeOf(context).width >= wideBreakpoint;
 
+  /// Whether the window was wide when the dependencies last changed: a
+  /// crossing of the breakpoint is told by it (#770).
+  bool? _wasWide;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final wide = _wide;
+    if (wide && _wasWide == false) _becameWide();
+    _wasWide = wide;
+  }
+
+  /// The window crossed from narrow to wide (#770). A phone keeps the
+  /// Home and the Todo list as whole destinations, where a wide window
+  /// pins them in a pane: the one on screen becomes that pinned tab, or
+  /// the panes would show neither it nor the notes.
+  void _becameWide() {
+    if ((_tab == ShellTab.home || _tab == ShellTab.todo) &&
+        _contentTab != _tab) {
+      _contentTab = _tab;
+      _contentPane = _workspace.value.focused;
+    }
+  }
+
   /// The note on screen: on a wide window the showing tab, whatever the
   /// tree has selected (a folder leaves the tabs alone); on a phone the
   /// selection.
@@ -1513,7 +1542,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
   /// [pane]'s tab row, with the pinned content tab's chip (#712) at its
-  /// head when that pane holds one.
+  /// end when that pane holds one.
   Widget _paneTabs(int pane, Widget filler) {
     final w = _workspace.value;
     final tabs = w.panes[pane];
@@ -1545,15 +1574,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
     final content = _contentTab;
     if (content == null || pane != _contentPaneShown) return bar;
+    // At the row's far end, where it comes and goes without moving a note
+    // tab under the pointer (#770).
     return Row(
       children: [
-        _contentTabChip(content, pane),
         Expanded(child: bar),
+        _contentTabChip(content, pane),
       ],
     );
   }
 
-  /// The pinned content tab's chip (#712), at the head of [pane]'s row: the
+  /// The pinned content tab's chip (#712), at the end of [pane]'s row: the
   /// rectangle the note tabs wear, a click shows it again, the ✕ closes it.
   Widget _contentTabChip(ShellTab tab, int pane) {
     final theme = Theme.of(context);
