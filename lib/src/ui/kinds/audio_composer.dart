@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/kinds/audio_recording_bar.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -38,8 +39,9 @@ class AudioComposer extends StatefulWidget {
   /// Whether the microphone is live.
   final bool recording;
 
-  /// Starts or stops the recording; null disables it.
-  final VoidCallback? onRecord;
+  /// Starts or stops the recording, completing with whether the
+  /// microphone is live once it is done; null disables it.
+  final Future<bool> Function()? onRecord;
 
   /// Sends the typed note.
   final VoidCallback onSend;
@@ -80,11 +82,17 @@ class _AudioComposerState extends State<AudioComposer> {
   bool _holding = false;
 
   /// Whether the hold is locked: the release then leaves the recording
-  /// running. Re-read on every move, so sliding back down unlocks.
+  /// running. Re-read on every move while the finger is down, so sliding
+  /// back down unlocks; kept after the release, so a locked recording
+  /// still says so until it ends (#766).
   bool _locked = false;
 
   /// The press that becomes a hold after [AudioComposer.holdDelay].
   Timer? _press;
+
+  /// The pointer the press or hold belongs to: another finger on the
+  /// button neither starts a second one nor ends this one (#766).
+  int? _pointer;
 
   /// Where the finger went down: the slide is measured from here.
   Offset? _origin;
@@ -92,6 +100,27 @@ class _AudioComposerState extends State<AudioComposer> {
   /// Whether the tap that follows a hold's release is the hold's own and
   /// must be dropped. Cleared by the next press, so it cannot outlive it.
   bool _suppressTap = false;
+
+  /// The start the hold sent, completing with whether the microphone went
+  /// live: the release acts on what the start did, not on what the
+  /// composer showed at that moment (#766).
+  Future<bool>? _start;
+
+  /// Whether [_start] had completed.
+  bool _startLanded = false;
+
+  /// The toggle and the discard as they were when the hold started: while
+  /// the start runs the view disables both, and the release still has to
+  /// reach them once it is done.
+  Future<bool> Function()? _toggle;
+  VoidCallback? _discard;
+
+  @override
+  void didUpdateWidget(AudioComposer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The lock belongs to the recording it kept going.
+    if (oldWidget.recording && !widget.recording) _locked = false;
+  }
 
   @override
   void dispose() {
@@ -108,47 +137,97 @@ class _AudioComposerState extends State<AudioComposer> {
   Widget _holdable(Widget button) {
     return Listener(
       onPointerDown: (event) {
+        // A second finger joins nothing: the first one's press goes on.
+        if (_pointer != null) return;
         // Every press is its own: whatever a hold left behind ends here.
         _suppressTap = false;
         if (!_mic || widget.onRecord == null || widget.saving) return;
+        // The primary button only, as for the tap: a right-button hold
+        // does not record (#766).
+        if (event.buttons & kPrimaryButton == 0) return;
+        if (_locked) setState(() => _locked = false);
+        _pointer = event.pointer;
         _origin = event.position;
         _press?.cancel();
-        _press = Timer(AudioComposer.holdDelay, () {
-          if (!mounted) return;
-          _press = null;
-          _suppressTap = true;
-          setState(() => _holding = true);
-          widget.onRecord?.call();
-        });
+        _press = Timer(AudioComposer.holdDelay, _beginHold);
       },
       onPointerMove: (event) {
-        if (!_holding) return;
+        if (!_holding || event.pointer != _pointer) return;
         final origin = _origin;
         if (origin == null) return;
         final locked =
             origin.dy - event.position.dy >= AudioComposer.lockDistance;
         if (locked != _locked) setState(() => _locked = locked);
       },
-      onPointerUp: (_) => _endHold(),
-      onPointerCancel: (_) => _endHold(),
+      onPointerUp: (event) => _endHold(event.pointer),
+      onPointerCancel: (event) => _endHold(event.pointer),
       child: button,
+    );
+  }
+
+  /// The press lasted [AudioComposer.holdDelay]: the hold starts the
+  /// recording.
+  void _beginHold() {
+    _press = null;
+    final toggle = widget.onRecord;
+    if (!mounted || toggle == null) return;
+    _suppressTap = true;
+    setState(() => _holding = true);
+    _toggle = toggle;
+    _discard = widget.onDiscard;
+    _startLanded = false;
+    final start = _start = toggle();
+    unawaited(
+      start.whenComplete(() {
+        if (identical(_start, start)) _startLanded = true;
+      }),
     );
   }
 
   /// The finger went up (or the pointer was taken): a lock keeps the
   /// recording, anything else stops and saves it — the messenger's send
   /// (#737).
-  void _endHold() {
+  ///
+  /// The release acts on the start once it is done (#766). A start still
+  /// running when the finger left — a recorder slow to set up on first
+  /// use, the permission dialog that took the pointer — is thrown away as
+  /// soon as it lands: nothing was said while the finger was down. A
+  /// start that never went live (permission refused) is left alone rather
+  /// than toggled into a second start.
+  void _endHold(int pointer) {
+    if (pointer != _pointer) return;
+    _pointer = null;
     _press?.cancel();
     _press = null;
     _origin = null;
     if (!_holding) return;
-    final locked = _locked;
-    setState(() {
-      _holding = false;
-      _locked = false;
-    });
-    if (!locked) widget.onRecord?.call();
+    setState(() => _holding = false);
+    final start = _start;
+    final toggle = _toggle;
+    final landed = _startLanded;
+    final discard = _discard;
+    _start = null;
+    _toggle = null;
+    _discard = null;
+    if (_locked || start == null || toggle == null) return;
+    unawaited(_release(start, landed ? toggle : null, discard));
+  }
+
+  /// Ends the hold's recording once [start] is done: stopped and saved by
+  /// [toggle] when given (the start had landed before the release),
+  /// otherwise thrown away by [discard].
+  Future<void> _release(
+    Future<bool> start,
+    Future<bool> Function()? toggle,
+    VoidCallback? discard,
+  ) async {
+    final live = await start;
+    if (!live || !mounted) return;
+    if (toggle != null) {
+      await toggle();
+    } else {
+      discard?.call();
+    }
   }
 
   Widget _field(BuildContext context) {
@@ -242,10 +321,15 @@ class _AudioComposerState extends State<AudioComposer> {
             : typing
             ? AppStrings.audioSend
             : AppStrings.audioRecord,
+        // The microphone (and the stop) is disabled whenever recording is
+        // — no library, another operation running — and looks and
+        // announces it (#766).
         onPressed: saving
             ? null
             : typing
             ? widget.onSend
+            : widget.onRecord == null
+            ? null
             : _micPressed,
         icon: Stack(
           alignment: Alignment.center,
@@ -272,7 +356,20 @@ class _AudioComposerState extends State<AudioComposer> {
     // Wrapped in every role (#720's lesson): the render object a press
     // went down on must not be swapped out under the finger, or the
     // release that follows never arrives.
-    return _holdable(button);
+    //
+    // A touch held on the microphone is the recording, not a request for
+    // the tooltip: its long press fired mid-hold, with a vibration, right
+    // where the thumb slides to lock (#766). A mouse still gets it on
+    // hover, and the label is still announced.
+    final tooltips = TooltipTheme.of(context);
+    return _holdable(
+      TooltipTheme(
+        data: _mic
+            ? tooltips.copyWith(triggerMode: TooltipTriggerMode.manual)
+            : tooltips,
+        child: button,
+      ),
+    );
   }
 
   /// The microphone tapped: the toggle it always had, unless this tap is
@@ -282,7 +379,8 @@ class _AudioComposerState extends State<AudioComposer> {
       _suppressTap = false;
       return;
     }
-    widget.onRecord?.call();
+    final toggle = widget.onRecord;
+    if (toggle != null) unawaited(toggle());
   }
 
   @override
