@@ -289,25 +289,33 @@ final class _FolderGridState extends State<FolderGrid> {
           onUp: widget.onUp,
           onMove: widget.onMove ?? (_, _) {},
         ),
+        // The walk's focus holds the pane whatever it shows: an empty
+        // folder, or one still loading, keeps the keyboard and its way up.
         Expanded(
-          child: StreamBuilder<int>(
-            key: ValueKey<bool>(followsContents),
-            stream: followsContents ? controller.events : controller.treeEvents,
-            initialData: revision,
-            builder: (context, snapshot) => FutureBuilder<_GridRows>(
-              future: _rowsFor(
-                snapshot.data ?? revision,
-                followsContents: followsContents,
+          child: Focus(
+            focusNode: _focus,
+            onKeyEvent: _onKey,
+            child: StreamBuilder<int>(
+              key: ValueKey<bool>(followsContents),
+              stream: followsContents
+                  ? controller.events
+                  : controller.treeEvents,
+              initialData: revision,
+              builder: (context, snapshot) => FutureBuilder<_GridRows>(
+                future: _rowsFor(
+                  snapshot.data ?? revision,
+                  followsContents: followsContents,
+                ),
+                builder: (context, snap) {
+                  final rows = snap.data;
+                  if (rows == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  _current = rows;
+                  if (rows.rows.isEmpty) return _empty(context, rows.folder);
+                  return _grid(context, rows);
+                },
               ),
-              builder: (context, snap) {
-                final rows = snap.data;
-                if (rows == null) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                _current = rows;
-                if (rows.rows.isEmpty) return _empty(context, rows.folder);
-                return _grid(context, rows);
-              },
             ),
           ),
         ),
@@ -405,19 +413,15 @@ final class _FolderGridState extends State<FolderGrid> {
         onPointerDown: (_) {
           if (_keyboardFocus) setState(() => _keyboardFocus = false);
         },
-        child: Focus(
-          focusNode: _focus,
-          onKeyEvent: _onKey,
-          child: move == null
-              ? grid
-              : DragTarget<String>(
-                  onWillAcceptWithDetails: (details) =>
-                      treeDropMoves(details.data, rows.folder),
-                  onAcceptWithDetails: (details) =>
-                      move(details.data, rows.folder),
-                  builder: (context, _, _) => grid,
-                ),
-        ),
+        child: move == null
+            ? grid
+            : DragTarget<String>(
+                onWillAcceptWithDetails: (details) =>
+                    treeDropMoves(details.data, rows.folder),
+                onAcceptWithDetails: (details) =>
+                    move(details.data, rows.folder),
+                builder: (context, _, _) => grid,
+              ),
       ),
     );
   }
@@ -631,8 +635,6 @@ final class _FolderGridState extends State<FolderGrid> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    final rows = _current;
-    if (rows == null || rows.rows.isEmpty) return KeyEventResult.ignored;
     final key = event.logicalKey;
     final keys = HardwareKeyboard.instance;
     // Alt+Up is the pane's own way up (#727) — the one modified key the
@@ -647,6 +649,10 @@ final class _FolderGridState extends State<FolderGrid> {
         keys.isShiftPressed) {
       return KeyEventResult.ignored;
     }
+    // The way up needs no tile: an empty folder is left as a full one is.
+    if (key == LogicalKeyboardKey.backspace) return _up();
+    final rows = _current;
+    if (rows == null || rows.rows.isEmpty) return KeyEventResult.ignored;
     final count = rows.rows.length;
     final columns = _columns;
     int? next;
@@ -672,8 +678,6 @@ final class _FolderGridState extends State<FolderGrid> {
       next =
           (_focusIndex ?? 0) +
           (key == LogicalKeyboardKey.pageUp ? -step : step);
-    } else if (key == LogicalKeyboardKey.backspace) {
-      return _up();
     } else if (key == LogicalKeyboardKey.enter ||
         key == LogicalKeyboardKey.numpadEnter) {
       return _activate(rows);

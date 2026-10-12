@@ -279,6 +279,32 @@ void main() {
     expect(opened.last, 'Zulu');
   });
 
+  testWidgets('an empty folder keeps the keys and its way up', (tester) async {
+    await session.open('/lib', create: false);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createFolder(parentPath: 'Projects', name: 'Empty');
+    var ups = 0;
+    await tester.pumpWidget(gridFor(folder: 'Projects'));
+    await tester.pumpAndSettle();
+
+    // The folder's click takes the keys, and the shell enters it.
+    await tester.tap(find.byKey(const Key('grid-tile-Projects/Empty')));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      gridFor(folder: 'Projects/Empty', onUp: () => ups++),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('grid-tile-Projects/Empty')), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pumpAndSettle();
+    expect(ups, 1, reason: 'Backspace leaves an empty folder');
+    await sendWithModifiers(tester, LogicalKeyboardKey.arrowUp, [
+      LogicalKeyboardKey.altLeft,
+    ]);
+    expect(ups, 2, reason: 'and so does Alt+Up');
+  });
+
   testWidgets('a click on a note tile leaves the keyboard where it is', (
     tester,
   ) async {
