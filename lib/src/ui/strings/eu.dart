@@ -430,6 +430,10 @@ final class BasqueStrings extends Strings {
   @override
   String get audioEditDescription => 'Editatu deskribapena';
   @override
+  String get audioCopyDescription => 'Kopiatu deskribapena';
+  @override
+  String get audioDescriptionCopied => 'Deskribapena kopiatuta';
+  @override
   String get audioDeleteNote => 'Ezabatu oharra';
   @override
   String get audioEditNote => 'Editatu oharra';

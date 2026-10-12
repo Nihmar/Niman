@@ -7,9 +7,9 @@ import 'package:niman/src/ui/strings.dart';
 /// button with the progress track and times, its description, and the
 /// progress of its transcription while one runs.
 ///
-/// The per-clip actions (transcribe, title, description, rename, delete)
-/// live in the ⋮ menu ([AudioClipMenu]), which a long press or a right
-/// click also opens, so the bubble
+/// The per-clip actions (transcribe, title, description, copy, rename,
+/// delete) live in the ⋮ menu ([AudioClipMenu]), which a long press or a
+/// right click also opens, so the bubble
 /// itself carries only what is read and played. Keys end with [suffix]:
 /// `audio-play-0`, `audio-menu-0`, `audio-delete-0`, …
 class AudioClipBubble extends StatefulWidget {
@@ -29,6 +29,7 @@ class AudioClipBubble extends StatefulWidget {
     required this.onEditTitle,
     required this.onEditDescription,
     required this.onDelete,
+    this.onCopy,
     this.onRename,
     this.onTranscribe,
     this.transcribeHint,
@@ -74,6 +75,9 @@ class AudioClipBubble extends StatefulWidget {
 
   /// Opens the description editor.
   final VoidCallback onEditDescription;
+
+  /// Copies the clip's description; see [AudioClipMenu.onCopy].
+  final VoidCallback? onCopy;
 
   /// Deletes the clip from the note.
   final VoidCallback onDelete;
@@ -156,6 +160,7 @@ class _AudioClipBubbleState extends State<AudioClipBubble> {
                         fileName: widget.fileName,
                         onEditTitle: widget.onEditTitle,
                         onEditDescription: widget.onEditDescription,
+                        onCopy: widget.onCopy,
                         onDelete: widget.onDelete,
                         onRename: widget.onRename,
                         onTranscribe: widget.onTranscribe,

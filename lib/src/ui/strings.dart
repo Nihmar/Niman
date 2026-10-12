@@ -382,6 +382,8 @@ final class AppStrings {
   static String get audioRename => _s.audioRename;
   static String get audioDescriptionHint => _s.audioDescriptionHint;
   static String get audioEditDescription => _s.audioEditDescription;
+  static String get audioCopyDescription => _s.audioCopyDescription;
+  static String get audioDescriptionCopied => _s.audioDescriptionCopied;
   static String get audioDeleteNote => _s.audioDeleteNote;
   static String get audioEditNote => _s.audioEditNote;
   static String get audioPause => _s.audioPause;

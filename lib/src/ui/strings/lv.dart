@@ -428,6 +428,10 @@ final class LatvianStrings extends Strings {
   @override
   String get audioEditDescription => 'Rediģēt aprakstu';
   @override
+  String get audioCopyDescription => 'Kopēt aprakstu';
+  @override
+  String get audioDescriptionCopied => 'Apraksts nokopēts';
+  @override
   String get audioDeleteNote => 'Dzēst piezīmi';
   @override
   String get audioEditNote => 'Rediģēt piezīmi';

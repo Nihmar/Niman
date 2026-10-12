@@ -436,6 +436,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get audioEditDescription => 'Уреди опис';
   @override
+  String get audioCopyDescription => 'Копирај опис';
+  @override
+  String get audioDescriptionCopied => 'Описот е копиран';
+  @override
   String get audioDeleteNote => 'Избриши белешка';
   @override
   String get audioEditNote => 'Уреди белешка';

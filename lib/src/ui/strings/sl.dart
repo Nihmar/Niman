@@ -435,6 +435,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get audioEditDescription => 'Uredi opis';
   @override
+  String get audioCopyDescription => 'Kopiraj opis';
+  @override
+  String get audioDescriptionCopied => 'Opis kopiran';
+  @override
   String get audioDeleteNote => 'Izbriši opombo';
   @override
   String get audioEditNote => 'Uredi opombo';

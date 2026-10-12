@@ -210,6 +210,14 @@ abstract base class Strings {
   String get audioRename;
   String get audioDescriptionHint;
   String get audioEditDescription;
+
+  /// The clip ⋮ menu's copy entry (#839): the transcript a transcription
+  /// wrote, or the comment typed by hand, as it stands. The label names
+  /// neither — the model does not tell them apart.
+  String get audioCopyDescription;
+
+  /// The confirmation [audioCopyDescription] shows.
+  String get audioDescriptionCopied;
   String get audioDeleteNote;
   String get audioEditNote;
   String get audioPause;

@@ -438,6 +438,10 @@ final class GalicianStrings extends Strings {
   @override
   String get audioEditDescription => 'Editar a descrición';
   @override
+  String get audioCopyDescription => 'Copiar a descrición';
+  @override
+  String get audioDescriptionCopied => 'Descrición copiada';
+  @override
   String get audioDeleteNote => 'Borrar a nota';
   @override
   String get audioEditNote => 'Editar a nota';

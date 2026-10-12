@@ -434,6 +434,10 @@ final class CroatianStrings extends Strings {
   @override
   String get audioEditDescription => 'Uredi opis';
   @override
+  String get audioCopyDescription => 'Kopiraj opis';
+  @override
+  String get audioDescriptionCopied => 'Opis kopiran';
+  @override
   String get audioDeleteNote => 'Obriši napomenu';
   @override
   String get audioEditNote => 'Uredi napomenu';

@@ -435,6 +435,10 @@ final class SerbianStrings extends Strings {
   @override
   String get audioEditDescription => 'Уреди опис';
   @override
+  String get audioCopyDescription => 'Копирај опис';
+  @override
+  String get audioDescriptionCopied => 'Опис је копиран';
+  @override
   String get audioDeleteNote => 'Обриши белешку';
   @override
   String get audioEditNote => 'Уреди белешку';

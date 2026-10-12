@@ -432,6 +432,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get audioEditDescription => 'Редагувати опис';
   @override
+  String get audioCopyDescription => 'Копіювати опис';
+  @override
+  String get audioDescriptionCopied => 'Опис скопійовано';
+  @override
   String get audioDeleteNote => 'Видалити нотатку';
   @override
   String get audioEditNote => 'Редагувати нотатку';

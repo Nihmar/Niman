@@ -401,6 +401,10 @@ final class ChineseStrings extends Strings {
   @override
   String get audioEditDescription => '编辑描述';
   @override
+  String get audioCopyDescription => '复制描述';
+  @override
+  String get audioDescriptionCopied => '描述已复制';
+  @override
   String get audioDeleteNote => '删除备注';
   @override
   String get audioEditNote => '编辑备注';

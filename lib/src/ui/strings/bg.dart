@@ -437,6 +437,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get audioEditDescription => 'Редактирай описанието';
   @override
+  String get audioCopyDescription => 'Копирай описанието';
+  @override
+  String get audioDescriptionCopied => 'Описанието е копирано';
+  @override
   String get audioDeleteNote => 'Изтрий бележката';
   @override
   String get audioEditNote => 'Редактирай бележката';

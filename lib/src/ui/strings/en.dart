@@ -432,6 +432,10 @@ final class EnglishStrings extends Strings {
   @override
   String get audioEditDescription => 'Edit description';
   @override
+  String get audioCopyDescription => 'Copy description';
+  @override
+  String get audioDescriptionCopied => 'Description copied';
+  @override
   String get audioDeleteNote => 'Delete note';
   @override
   String get audioEditNote => 'Edit note';

@@ -427,6 +427,10 @@ final class EstonianStrings extends Strings {
   @override
   String get audioEditDescription => 'Muuda kirjeldust';
   @override
+  String get audioCopyDescription => 'Kopeeri kirjeldus';
+  @override
+  String get audioDescriptionCopied => 'Kirjeldus kopeeritud';
+  @override
   String get audioDeleteNote => 'Kustuta märge';
   @override
   String get audioEditNote => 'Muuda märget';

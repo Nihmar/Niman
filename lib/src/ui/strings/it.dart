@@ -440,6 +440,10 @@ final class ItalianStrings extends Strings {
   @override
   String get audioEditDescription => 'Modifica descrizione';
   @override
+  String get audioCopyDescription => 'Copia descrizione';
+  @override
+  String get audioDescriptionCopied => 'Descrizione copiata';
+  @override
   String get audioDeleteNote => 'Elimina nota';
   @override
   String get audioEditNote => 'Modifica nota';

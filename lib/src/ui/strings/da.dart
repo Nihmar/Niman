@@ -432,6 +432,10 @@ final class DanishStrings extends Strings {
   @override
   String get audioEditDescription => 'Rediger beskrivelse';
   @override
+  String get audioCopyDescription => 'Kopiér beskrivelse';
+  @override
+  String get audioDescriptionCopied => 'Beskrivelse kopieret';
+  @override
   String get audioDeleteNote => 'Slet note';
   @override
   String get audioEditNote => 'Rediger note';

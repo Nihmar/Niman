@@ -431,6 +431,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get audioEditDescription => 'Рэдагаваць апісанне';
   @override
+  String get audioCopyDescription => 'Капіяваць апісанне';
+  @override
+  String get audioDescriptionCopied => 'Апісанне скапіявана';
+  @override
   String get audioDeleteNote => 'Выдаліць заўвагу';
   @override
   String get audioEditNote => 'Рэдагаваць заўвагу';

@@ -436,6 +436,10 @@ final class GermanStrings extends Strings {
   @override
   String get audioEditDescription => 'Beschreibung bearbeiten';
   @override
+  String get audioCopyDescription => 'Beschreibung kopieren';
+  @override
+  String get audioDescriptionCopied => 'Beschreibung kopiert';
+  @override
   String get audioDeleteNote => 'Notiz löschen';
   @override
   String get audioEditNote => 'Notiz bearbeiten';

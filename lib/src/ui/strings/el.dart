@@ -443,6 +443,10 @@ final class GreekStrings extends Strings {
   @override
   String get audioEditDescription => 'Επεξεργασία περιγραφής';
   @override
+  String get audioCopyDescription => 'Αντιγραφή περιγραφής';
+  @override
+  String get audioDescriptionCopied => 'Η περιγραφή αντιγράφηκε';
+  @override
   String get audioDeleteNote => 'Διαγραφή σημείωσης';
   @override
   String get audioEditNote => 'Επεξεργασία σημείωσης';

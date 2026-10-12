@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What the menu of a clip bubble can do.
-enum _ClipAction { transcribe, title, description, rename, delete }
+enum _ClipAction { transcribe, title, description, copy, rename, delete }
 
-/// The ⋮ menu of a clip bubble: transcribe, title, description, rename,
-/// delete, under the file name.
+/// The ⋮ menu of a clip bubble: transcribe, title, description, copy,
+/// rename, delete, under the file name.
 ///
 /// [AudioClipMenuState.show] opens it from elsewhere (the bubble's long
 /// press and right click). Item keys end with [suffix]: `audio-title-0`,
@@ -18,6 +18,7 @@ final class AudioClipMenu extends StatefulWidget {
     required this.onEditTitle,
     required this.onEditDescription,
     required this.onDelete,
+    this.onCopy,
     this.onRename,
     this.onTranscribe,
     this.transcribeHint,
@@ -35,6 +36,10 @@ final class AudioClipMenu extends StatefulWidget {
 
   /// Opens the description editor.
   final VoidCallback onEditDescription;
+
+  /// Copies the clip's description (#839); null hides the action when
+  /// there is nothing to copy.
+  final VoidCallback? onCopy;
 
   /// Deletes the clip from the note.
   final VoidCallback onDelete;
@@ -69,6 +74,8 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
         widget.onEditTitle();
       case _ClipAction.description:
         widget.onEditDescription();
+      case _ClipAction.copy:
+        widget.onCopy?.call();
       case _ClipAction.rename:
         widget.onRename?.call();
       case _ClipAction.delete:
@@ -152,6 +159,13 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
         Icons.notes,
         AppStrings.audioEditDescription,
       ),
+      if (widget.onCopy != null)
+        _item(
+          _ClipAction.copy,
+          'copy',
+          Icons.copy_outlined,
+          AppStrings.audioCopyDescription,
+        ),
       if (widget.onRename != null)
         _item(
           _ClipAction.rename,

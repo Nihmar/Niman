@@ -434,6 +434,10 @@ final class SlovakStrings extends Strings {
   @override
   String get audioEditDescription => 'Upraviť popis';
   @override
+  String get audioCopyDescription => 'Kopírovať popis';
+  @override
+  String get audioDescriptionCopied => 'Popis skopírovaný';
+  @override
   String get audioDeleteNote => 'Vymazať poznámku';
   @override
   String get audioEditNote => 'Upraviť poznámku';

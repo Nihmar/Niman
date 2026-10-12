@@ -402,6 +402,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get audioEditDescription => '説明を編集';
   @override
+  String get audioCopyDescription => '説明をコピー';
+  @override
+  String get audioDescriptionCopied => '説明をコピーしました';
+  @override
   String get audioDeleteNote => 'メモを削除';
   @override
   String get audioEditNote => 'メモを編集';

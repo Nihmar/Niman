@@ -435,6 +435,10 @@ final class SwedishStrings extends Strings {
   @override
   String get audioEditDescription => 'Redigera beskrivning';
   @override
+  String get audioCopyDescription => 'Kopiera beskrivning';
+  @override
+  String get audioDescriptionCopied => 'Beskrivning kopierad';
+  @override
   String get audioDeleteNote => 'Ta bort anteckning';
   @override
   String get audioEditNote => 'Redigera anteckning';

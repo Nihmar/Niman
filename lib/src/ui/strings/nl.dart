@@ -436,6 +436,10 @@ final class DutchStrings extends Strings {
   @override
   String get audioEditDescription => 'Omschrijving bewerken';
   @override
+  String get audioCopyDescription => 'Omschrijving kopiëren';
+  @override
+  String get audioDescriptionCopied => 'Omschrijving gekopieerd';
+  @override
   String get audioDeleteNote => 'Notitie verwijderen';
   @override
   String get audioEditNote => 'Notitie bewerken';

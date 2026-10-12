@@ -439,6 +439,10 @@ final class CatalanStrings extends Strings {
   @override
   String get audioEditDescription => 'Edita la descripció';
   @override
+  String get audioCopyDescription => 'Copia la descripció';
+  @override
+  String get audioDescriptionCopied => 'Descripció copiada';
+  @override
   String get audioDeleteNote => 'Esborra la nota';
   @override
   String get audioEditNote => 'Edita la nota';

@@ -423,6 +423,10 @@ final class HindiStrings extends Strings {
   @override
   String get audioEditDescription => 'वर्णन संपादित करें';
   @override
+  String get audioCopyDescription => 'वर्णन कॉपी करें';
+  @override
+  String get audioDescriptionCopied => 'वर्णन कॉपी हो गया';
+  @override
   String get audioDeleteNote => 'नोट हटाएँ';
   @override
   String get audioEditNote => 'नोट संपादित करें';

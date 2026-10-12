@@ -436,6 +436,10 @@ final class BosnianStrings extends Strings {
   @override
   String get audioEditDescription => 'Uredi opis';
   @override
+  String get audioCopyDescription => 'Kopiraj opis';
+  @override
+  String get audioDescriptionCopied => 'Opis kopiran';
+  @override
   String get audioDeleteNote => 'Obriši bilješku';
   @override
   String get audioEditNote => 'Uredi bilješku';

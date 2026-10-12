@@ -432,6 +432,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get audioEditDescription => 'Redaguoti aprašą';
   @override
+  String get audioCopyDescription => 'Kopijuoti aprašą';
+  @override
+  String get audioDescriptionCopied => 'Aprašas nukopijuotas';
+  @override
   String get audioDeleteNote => 'Ištrinti pastabą';
   @override
   String get audioEditNote => 'Redaguoti pastabą';

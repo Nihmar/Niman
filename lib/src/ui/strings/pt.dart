@@ -435,6 +435,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get audioEditDescription => 'Editar descrição';
   @override
+  String get audioCopyDescription => 'Copiar descrição';
+  @override
+  String get audioDescriptionCopied => 'Descrição copiada';
+  @override
   String get audioDeleteNote => 'Excluir nota';
   @override
   String get audioEditNote => 'Editar nota';

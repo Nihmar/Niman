@@ -433,6 +433,10 @@ final class HungarianStrings extends Strings {
   @override
   String get audioEditDescription => 'Leírás szerkesztése';
   @override
+  String get audioCopyDescription => 'Leírás másolása';
+  @override
+  String get audioDescriptionCopied => 'Leírás másolva';
+  @override
   String get audioDeleteNote => 'Jegyzet törlése';
   @override
   String get audioEditNote => 'Jegyzet szerkesztése';

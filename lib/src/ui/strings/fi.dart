@@ -432,6 +432,10 @@ final class FinnishStrings extends Strings {
   @override
   String get audioEditDescription => 'Muokkaa kuvausta';
   @override
+  String get audioCopyDescription => 'Kopioi kuvaus';
+  @override
+  String get audioDescriptionCopied => 'Kuvaus kopioitu';
+  @override
   String get audioDeleteNote => 'Poista muistiinpano';
   @override
   String get audioEditNote => 'Muokkaa muistiinpanoa';

@@ -433,6 +433,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get audioEditDescription => 'Ndrysho përshkrimin';
   @override
+  String get audioCopyDescription => 'Kopjo përshkrimin';
+  @override
+  String get audioDescriptionCopied => 'Përshkrimi u kopjua';
+  @override
   String get audioDeleteNote => 'Fshi shënimin';
   @override
   String get audioEditNote => 'Ndrysho shënimin';

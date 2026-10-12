@@ -432,6 +432,10 @@ final class CzechStrings extends Strings {
   @override
   String get audioEditDescription => 'Upravit popis';
   @override
+  String get audioCopyDescription => 'Kopírovat popis';
+  @override
+  String get audioDescriptionCopied => 'Popis zkopírován';
+  @override
   String get audioDeleteNote => 'Smazat poznámku';
   @override
   String get audioEditNote => 'Upravit poznámku';

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
@@ -333,6 +334,17 @@ class _AudioNoteViewState extends State<AudioNoteView>
     widget.onChanged(setClipDescription(widget.text, item.clip, saved));
   }
 
+  /// Puts the clip's description on the clipboard, as the bubble holds it
+  /// (#839): the transcript a transcription wrote or a comment typed by
+  /// hand, whichever it is.
+  Future<void> _copyDescription(String description) async {
+    await Clipboard.setData(ClipboardData(text: description));
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(AppStrings.audioDescriptionCopied)));
+  }
+
   Future<void> _renameClip(AudioClip clip) async {
     final renamed = await AudioPromptDialog.show(
       context,
@@ -447,6 +459,9 @@ class _AudioNoteViewState extends State<AudioNoteView>
           onSeek: _playback.seekTo,
           onEditTitle: () => _editTitle(vocal),
           onEditDescription: () => _editDescription(vocal),
+          onCopy: vocal.description.trim().isEmpty
+              ? null
+              : () => unawaited(_copyDescription(vocal.description)),
           onRename: canRename ? () => _renameClip(vocal.clip) : null,
           onDelete: () => _deleteClip(row, vocal.clip),
           transcribeHint: transcription?.menuHint(clip),

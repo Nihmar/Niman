@@ -430,6 +430,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get audioEditDescription => 'Breyta lýsingu';
   @override
+  String get audioCopyDescription => 'Afrita lýsingu';
+  @override
+  String get audioDescriptionCopied => 'Lýsing afrituð';
+  @override
   String get audioDeleteNote => 'Eyða athugasröfu';
   @override
   String get audioEditNote => 'Breyta athugasröfu';
