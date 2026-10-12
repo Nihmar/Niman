@@ -322,7 +322,11 @@ final class _NoteTabBarState extends State<NoteTabBar> {
                       ),
                     // Past the last tab: a drop here puts the tab at the
                     // end of the row, and an empty pane's row is all this.
-                    _dropSlot(tabs.length, width: 40),
+                    // With tabs in the row the place is narrow: the last
+                    // tab's own right half is the target a drop to the end
+                    // aims at, and the room between the last tab and `+`
+                    // reads as a hole otherwise (#712).
+                    _dropSlot(tabs.length, width: tabs.isEmpty ? 40 : 8),
                   ],
                 ),
               ),
@@ -353,7 +357,85 @@ final class _NoteTabBarState extends State<NoteTabBar> {
 }
 
 /// One tab.
-final class _NoteTab extends StatefulWidget {
+/// The rectangle a tab is drawn in (#23, #712): the open note tabs and the
+/// pinned content tabs (Home, Todo) wear one fill, outline and radius.
+///
+/// Showing takes the surface and an outline — the accent on the pane that
+/// has the focus, the outline variant on the other — and a tab that is not
+/// showing is transparent, hovered under the pointer. [builder] is handed
+/// the hover, because a tab's own close button appears with it.
+final class TabSurface extends StatefulWidget {
+  /// Creates the surface for one tab.
+  const new({
+    required this.selected,
+    required this.focused,
+    required this.onTap,
+    required this.builder,
+    super.key,
+  });
+
+  /// Whether this is the tab its pane is showing.
+  final bool selected;
+
+  /// Whether this tab's pane has the focus: a showing tab is outlined in
+  /// the accent here, and in the outline variant elsewhere.
+  final bool focused;
+
+  /// Shows the tab.
+  final VoidCallback onTap;
+
+  /// The tab, handed whether the pointer is on it.
+  final Widget Function(BuildContext context, {required bool hover}) builder;
+
+  /// The corner radius every tab wears.
+  static const double radius = 7;
+
+  /// The height of a tab.
+  static const double height = 30;
+
+  @override
+  State<TabSurface> createState() => _TabSurfaceState();
+}
+
+final class _TabSurfaceState extends State<TabSurface> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: Material(
+        color: widget.selected
+            ? scheme.surface
+            : _hover
+            ? scheme.surfaceContainerHighest
+            : Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(TabSurface.radius),
+          side: widget.selected
+              ? BorderSide(
+                  color: widget.focused
+                      ? scheme.primary
+                      : scheme.outlineVariant,
+                )
+              : BorderSide.none,
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(TabSurface.radius),
+          onTap: widget.onTap,
+          child: SizedBox(
+            height: TabSurface.height,
+            child: widget.builder(context, hover: _hover),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+final class _NoteTab extends StatelessWidget {
   const new({
     required this.tab,
     required this.index,
@@ -388,121 +470,87 @@ final class _NoteTab extends StatefulWidget {
   final ValueChanged<Offset> onMenu;
 
   @override
-  State<_NoteTab> createState() => _NoteTabState();
-}
-
-final class _NoteTabState extends State<_NoteTab> {
-  bool _hover = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final active = widget.active;
-    final missing = widget.tab.missing;
-    // The dot says "not saved yet"; under the pointer the close takes its
-    // place, the way the hand expects to find it.
-    final showDot = widget.unsaved && !_hover;
-    final showClose = !showDot && (active || _hover);
+    final missing = tab.missing;
     return Padding(
       padding: const EdgeInsets.only(right: 4),
       child: Tooltip(
-        message: widget.tab.path,
+        message: tab.path,
         waitDuration: const Duration(milliseconds: 600),
-        child: MouseRegion(
-          onEnter: (_) => setState(() => _hover = true),
-          onExit: (_) => setState(() => _hover = false),
-          child: Listener(
-            // A middle click closes, as everywhere else tabs exist.
-            onPointerDown: (event) {
-              if (event.buttons == kMiddleMouseButton) widget.onClose();
-              if (event.buttons == kSecondaryMouseButton) {
-                widget.onMenu(event.position);
-              }
-            },
-            child: Material(
-              key: Key('note-tab-${widget.index}'),
-              color: active
-                  ? scheme.surface
-                  : _hover
-                  ? scheme.surfaceContainerHighest
-                  : Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(7),
-                side: active
-                    ? BorderSide(
-                        color: widget.focused
-                            ? scheme.primary
-                            : scheme.outlineVariant,
-                      )
-                    : BorderSide.none,
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(7),
-                onTap: widget.onActivate,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: math.min(90, widget.maxWidth),
-                    maxWidth: widget.maxWidth,
-                  ),
-                  child: SizedBox(
-                    height: 30,
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        12,
-                        0,
-                        6,
-                        0,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: MarqueeText(
-                              text: noteTabLabel(widget.tab.path),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: active
-                                    ? scheme.onSurface
-                                    : scheme.onSurfaceVariant,
-                                decoration: missing
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          SizedBox.square(
-                            dimension: 20,
-                            child: showDot
-                                ? Center(
-                                    child: Container(
-                                      key: Key('note-tab-dot-${widget.index}'),
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: scheme.tertiary,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  )
-                                : showClose
-                                ? IconButton(
-                                    key: Key('note-tab-close-${widget.index}'),
-                                    tooltip: AppStrings.closeTabTooltip,
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 14,
-                                    icon: const Icon(Icons.close),
-                                    onPressed: widget.onClose,
-                                  )
+        child: Listener(
+          // A middle click closes, as everywhere else tabs exist.
+          onPointerDown: (event) {
+            if (event.buttons == kMiddleMouseButton) onClose();
+            if (event.buttons == kSecondaryMouseButton) {
+              onMenu(event.position);
+            }
+          },
+          child: TabSurface(
+            key: Key('note-tab-$index'),
+            selected: active,
+            focused: focused,
+            onTap: onActivate,
+            builder: (context, {required hover}) {
+              // The dot says "not saved yet"; under the pointer the close
+              // takes its place, the way the hand expects to find it.
+              final showDot = unsaved && !hover;
+              final showClose = !showDot && (active || hover);
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: math.min(90, maxWidth),
+                  maxWidth: maxWidth,
+                ),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 6, 0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: MarqueeText(
+                          text: noteTabLabel(tab.path),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: active
+                                ? scheme.onSurface
+                                : scheme.onSurfaceVariant,
+                            decoration: missing
+                                ? TextDecoration.lineThrough
                                 : null,
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 6),
+                      SizedBox.square(
+                        dimension: 20,
+                        child: showDot
+                            ? Center(
+                                child: Container(
+                                  key: Key('note-tab-dot-$index'),
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: scheme.tertiary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              )
+                            : showClose
+                            ? IconButton(
+                                key: Key('note-tab-close-$index'),
+                                tooltip: AppStrings.closeTabTooltip,
+                                padding: EdgeInsets.zero,
+                                iconSize: 14,
+                                icon: const Icon(Icons.close),
+                                onPressed: onClose,
+                              )
+                            : null,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ),

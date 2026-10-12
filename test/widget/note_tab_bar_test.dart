@@ -60,6 +60,33 @@ void main() {
     expect(noteTabLabel('todo.txt'), 'todo.txt');
   });
 
+  // The pinned content tabs (Home, Todo) wear the same [TabSurface] (#712):
+  // the showing tab takes the surface and an outline — the accent on the
+  // focused pane — and a tab that is not showing is transparent.
+  testWidgets('the showing tab wears the surface, the others nothing', (
+    tester,
+  ) async {
+    await pump(tester);
+    Material materialOf(int index) => tester.widget<Material>(
+      find
+          .descendant(
+            of: find.byKey(Key('note-tab-$index')),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+    final scheme = Theme.of(tester.element(find.byType(NoteTabBar)))
+        .colorScheme;
+    final showing = materialOf(0);
+    final idle = materialOf(1);
+    final shape = showing.shape! as RoundedRectangleBorder;
+    expect(showing.color, scheme.surface);
+    expect(shape.side.color, scheme.primary);
+    expect(shape.borderRadius, BorderRadius.circular(TabSurface.radius));
+    expect(idle.color, Colors.transparent);
+    expect((idle.shape! as RoundedRectangleBorder).side, BorderSide.none);
+  });
+
   testWidgets('a tab is its name; a click shows it', (tester) async {
     await pump(tester);
     expect(find.text('alpha'), findsOne);

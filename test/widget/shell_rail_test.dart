@@ -19,6 +19,7 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/home/home_screen.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/search_screen.dart';
@@ -208,6 +209,13 @@ void main() {
     expect(find.byKey(const Key('tree-island')), findsOne);
     expect(find.byKey(const Key('panes-island')), findsOne);
     expect(find.byKey(const Key('content-tab-todo')), findsOne);
+    // The pinned tab is a [TabSurface] like the note tabs (#712): showing
+    // takes the surface and the focused pane's outline.
+    final chip = tester.widget<TabSurface>(
+      find.byKey(const Key('content-tab-todo')),
+    );
+    expect(chip.selected, isTrue, reason: 'the pane shows it');
+    expect(chip.focused, isTrue, reason: 'its pane has the focus');
     expect(railIndex(tester), ShellTab.todo);
 
     // Files brings the notes back; the chip stays and brings Todo back.
@@ -215,6 +223,13 @@ void main() {
     await settle(tester);
     expect(contentPane('todo').offstage, isTrue);
     expect(find.byKey(const Key('content-tab-todo')), findsOne);
+    expect(
+      tester
+          .widget<TabSurface>(find.byKey(const Key('content-tab-todo')))
+          .selected,
+      isFalse,
+      reason: 'nothing is showing it',
+    );
     await tester.tap(find.byKey(const Key('content-tab-todo')));
     await settle(tester);
     expect(contentPane('todo').offstage, isFalse);
