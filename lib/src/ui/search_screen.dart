@@ -93,8 +93,9 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// The key of that row, to bring it back into view when the steps run.
   final GlobalKey _currentHitKey = GlobalKey();
 
-  /// How many focus asks [_commanded] has answered.
-  int _seenFocus = 0;
+  /// The results list's scroll, to bring a row that is not built yet into
+  /// range by its index (#768).
+  final ScrollController _resultsScroll = ScrollController();
 
   /// Replace mode (T-M3-10): the panel under the query box and the match
   /// preview replace the results list while active.
@@ -139,12 +140,16 @@ final class _SearchScreenState extends State<SearchScreen> {
     widget.requests?.addListener(_requested);
     widget.commands?.addListener(_commanded);
     // Asked before this screen mounted (Ctrl+Shift+F as the sidebar built
-    // it): take the focus once there is a frame to give it in.
-    if (widget.commands case final commands? when commands.focusRequests != 0) {
-      _seenFocus = commands.focusRequests;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _queryFocus.requestFocus();
-      });
+    // it): take the focus once there is a frame to give it in. The ask is
+    // taken, so a later remount does not answer it again (#768); a step
+    // asked of no screen has no hits to step and is dropped.
+    if (widget.commands case final commands?) {
+      commands.takeStep();
+      if (commands.takeFocus()) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _queryFocus.requestFocus();
+        });
+      }
     }
     _query.addListener(_onQueryChanged);
     _replacement.addListener(_onReplacementChanged);
@@ -158,6 +163,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     const AppLogger(name: 'search.ui').debug('dispose');
     widget.commands?.removeListener(_commanded);
     _queryFocus.dispose();
+    _resultsScroll.dispose();
     _debounceTimer?.cancel();
     _replaceRefresh?.cancel();
     widget.requests?.removeListener(_requested);
@@ -375,11 +381,9 @@ final class _SearchScreenState extends State<SearchScreen> {
   void _commanded() {
     final commands = widget.commands;
     if (commands == null) return;
-    if (commands.focusRequests != _seenFocus) {
-      _seenFocus = commands.focusRequests;
-      _queryFocus.requestFocus();
-    }
-    if (commands.step != 0) _stepHit(commands.step);
+    if (commands.takeFocus()) _queryFocus.requestFocus();
+    final step = commands.takeStep();
+    if (step != 0) _stepHit(step);
   }
 
   /// Opens the hit at [index] in the shell (#712) and makes it the
@@ -391,7 +395,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       _currentHit = hit.path;
       if (index >= _shown) _shown = index + 1;
     });
-    _revealCurrentHit();
+    unawaited(_revealHit(index));
     widget.onOpenNote(hit.path);
   }
 
@@ -407,20 +411,45 @@ final class _SearchScreenState extends State<SearchScreen> {
     _openHit(next);
   }
 
-  /// Brings the current hit's row back into view when it is built: the
-  /// steps open notes, and the list should follow them.
-  void _revealCurrentHit() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final context = _currentHitKey.currentContext;
-      if (context != null) {
-        Scrollable.ensureVisible(
-          context,
+  /// Brings the hit at [index] into view (#768). A row outside the
+  /// list's built range has no context to reveal, so the list first jumps
+  /// to where the index is estimated to sit — the list's own estimate of
+  /// its length, shared out by row — and the row, built there or near it,
+  /// is then scrolled to. Each jump lays out real rows around the target,
+  /// which sharpens the estimate, so the target is built within a few.
+  Future<void> _revealHit(int index) async {
+    for (var jump = 0; jump < _revealJumps; jump++) {
+      await WidgetsBinding.instance.endOfFrame;
+      // Another step or a new search since: that one reveals its own.
+      if (!mounted ||
+          index >= _hits.length ||
+          _currentHit != _hits[index].path) {
+        return;
+      }
+      if (_currentHitKey.currentContext case final row?) {
+        if (!row.mounted) return;
+        await Scrollable.ensureVisible(
+          row,
           alignment: 0.5,
           duration: _stepScroll,
         );
+        return;
       }
-    });
+      if (!_resultsScroll.hasClients) return;
+      final position = _resultsScroll.position;
+      final rows = _shown + (_shown < _hits.length ? 1 : 0);
+      final length = position.maxScrollExtent + position.viewportDimension;
+      final offset = length * index / rows - position.viewportDimension / 2;
+      position.jumpTo(
+        offset.clamp(position.minScrollExtent, position.maxScrollExtent),
+      );
+    }
   }
+
+  /// How many jumps [_revealHit] makes at most: the estimate converges
+  /// in one or two, and a bound keeps a list that keeps changing under it
+  /// from holding the reveal open.
+  static const int _revealJumps = 8;
 
   void _loadMore() {
     setState(() {
@@ -560,6 +589,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     return ListView.builder(
       key: const Key('search-results'),
+      controller: _resultsScroll,
       itemCount: _shown + (_shown < _hits.length ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= _shown) {
