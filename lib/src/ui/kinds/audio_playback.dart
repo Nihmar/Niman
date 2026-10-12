@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/core/file_holds.dart';
 import 'package:niman/src/ui/kinds/audio_player.dart';
 
 /// The playback state of an audio note: which clip is loaded, whether it
@@ -12,10 +13,17 @@ import 'package:niman/src/ui/kinds/audio_player.dart';
 /// should open instantly.
 final class AudioPlayback extends ChangeNotifier {
   /// Creates the state over the player the factory makes on first use;
-  /// [ownsPlayer] disposes it with this object.
-  new(this._create, {required this.ownsPlayer});
+  /// [ownsPlayer] disposes it with this object. The clip loaded is held
+  /// in [holds] (#833): renaming, moving or deleting it stops it first,
+  /// the player letting go of the file.
+  new(this._create, {required this.ownsPlayer, FileHolds? holds})
+    : _holds = holds ?? FileHolds.instance;
 
   final ClipPlayer Function() _create;
+  final FileHolds _holds;
+
+  /// The loaded clip's hold on its file.
+  FileHold? _hold;
 
   /// Whether [dispose] releases the player (false for an injected one).
   final bool ownsPlayer;
@@ -90,6 +98,8 @@ final class AudioPlayback extends ChangeNotifier {
       return;
     }
     await player.play(absolutePath);
+    _hold?.drop();
+    _hold = _holds.hold(absolutePath, release: stop);
     _activeKey = key;
     _activePath = absolutePath;
     _paused = false;
@@ -116,6 +126,8 @@ final class AudioPlayback extends ChangeNotifier {
   }
 
   void _unload() {
+    _hold?.drop();
+    _hold = null;
     _activeKey = null;
     _activePath = null;
     _paused = false;
@@ -125,6 +137,7 @@ final class AudioPlayback extends ChangeNotifier {
 
   @override
   void dispose() {
+    _hold?.drop();
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
