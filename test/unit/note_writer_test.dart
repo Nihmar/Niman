@@ -65,6 +65,16 @@ void main() {
       expect(await writer.tidy('a.md'), isFalse, reason: 'tidy already');
     });
 
+    test('an audio note is left as it was (#840)', () async {
+      // The note closed after an edit: this is the tidy on close. An audio
+      // note's body is the clip document — embeds and the `>` runs around
+      // them — which a tidy would rewrite, so it is skipped byte for byte.
+      const body = '---\ntype: audio\n---\n> title\n![](a.wav)\n> said\n';
+      File(p.join(root.path, 'take.md')).writeAsStringSync(body);
+      expect(await writer.tidy('take.md'), isFalse);
+      expect(read('take.md'), body);
+    });
+
     test('a save asked for after the tidy is not written over', () async {
       // The tidy of a closed note, and the note opened again and typed in
       // before the tidy lands: the typing is what the note says after.

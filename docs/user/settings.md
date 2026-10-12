@@ -101,7 +101,7 @@ sync) in `.niman/settings.json`.
 | `weekStart` | `system` | The day every calendar starts the week on (**Settings → Appearance → First day of the week**): `system` — the system's region's first day, not the app language's (on Linux `LC_ALL`, `LC_TIME`, `LANG`; on Windows the region settings' first day) — or `monday`, `saturday`, `sunday`, the same on every device of the library |
 | `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
-| `tidyOnClose` | true | Tidy the Markdown of a note closed after an edit (**Settings → Editor → Tidy the Markdown on close**); notes over 4 MB are left as they are |
+| `tidyOnClose` | true | Tidy the Markdown of a note closed after an edit (**Settings → Editor → Tidy the Markdown on close**); notes over 4 MB are left as they are, and a `type: audio` note's clip document is never tidied |
 | `cascadeChecklist` | true | Ticking a checklist item ticks the tasks nested under it (**Settings → Editor → Tick nested checkboxes**); clearing a parent leaves its children as they are |
 | `frontmatterPanel` | true | Whether a note's frontmatter is drawn as the properties panel above it (**Settings → Editor → Properties panel**): closed until it is opened, away while the note is scrolled past its head. Off, a note is its own text everywhere (see [frontmatter](organization.md)) |
 | `lintRulesOff` | [] (= all rules) | The #72 rules turned off, by id (`tight-lists`, `task-marker`, `list-spacing`, `closing-fence`, `fence-language`, `join-wrapped-items`, `join-paragraph-lines`), chosen in **Settings → Editor → Markdown rules**; a rule added in a later build runs unless it is turned off |

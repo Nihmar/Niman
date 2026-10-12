@@ -6,12 +6,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_load.dart';
 
 /// The note at [abs] tidied, or null when there is nothing to write: it is
-/// tidy already, it is longer than [limit] bytes, it is not text, or it is
-/// gone.
+/// tidy already, it is longer than [limit] bytes, it is not text, it is an
+/// audio note (whose body is the clip document, #840), or it is gone.
 ///
 /// The note is compared as the editor holds it — its line endings `\n` —
 /// so a note whose only untidiness is a Windows line ending is left alone,
@@ -36,6 +37,11 @@ String? tidiedNoteText(String abs, {required int limit, Set<LintRule>? rules}) {
     return null;
   }
   final text = normalizedLineEndings(read);
+  // An audio note's body is the clip document — embeds and the `>` runs
+  // around them (#840) — and a tidy rewrites exactly that shape. The
+  // kind is caught here, whichever caller asked: this is the one place
+  // the on-close tidy cannot go around.
+  if (frontmatterTypeOf(text) == 'audio') return null;
   final tidied = formatMarkdown(text, rules: rules);
   if (tidied == text) return null;
   return read.contains('\r\n') ? tidied.replaceAll('\n', '\r\n') : tidied;

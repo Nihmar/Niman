@@ -80,6 +80,7 @@ final class NoteMenuButton extends StatelessWidget {
     this.typewriter = false,
     this.palette = false,
     this.textNote = true,
+    this.tidy = true,
     this.recognize = false,
     this.kindSwitch,
     this.slides = false,
@@ -116,6 +117,11 @@ final class NoteMenuButton extends StatelessWidget {
   /// headings, tags, Markdown or versions to offer: its menu keeps the
   /// file's own actions, and the palette where it is offered.
   final bool textNote;
+
+  /// Whether *Tidy the Markdown* may be offered (#227, #840): false for a
+  /// kind whose body is not prose (an audio note's clip document), the way
+  /// a slides deck never offers it.
+  final bool tidy;
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +181,7 @@ final class NoteMenuButton extends StatelessWidget {
             AppStrings.commandPaletteTitle,
           ),
         if (textNote) ...[
-          if (!slides)
+          if (!slides && tidy)
             _item(
               NoteMenuAction.format,
               Icons.cleaning_services_outlined,
