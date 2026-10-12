@@ -1553,56 +1553,52 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
   }
 
-  /// The pinned content tab's chip (#712), at the head of [pane]'s row: a
-  /// click shows it again, the ✕ closes it.
+  /// The pinned content tab's chip (#712), at the head of [pane]'s row: the
+  /// rectangle the note tabs wear, a click shows it again, the ✕ closes it.
   Widget _contentTabChip(ShellTab tab, int pane) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final selected = _tab == tab;
+    final w = _workspace.value;
+    final focused = !w.isSplit || w.focused == pane;
     final home = tab == ShellTab.home;
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 6, top: 6, bottom: 6),
-      child: Material(
+      padding: const EdgeInsetsDirectional.only(start: 6, end: 4),
+      child: TabSurface(
         key: Key('content-tab-${tab.name}'),
-        color: selected ? scheme.surfaceContainerHighest : Colors.transparent,
-        borderRadius: BorderRadius.circular(6),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(6),
-          onTap: () => _showContentTab(tab, pane),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.only(start: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  home ? Icons.home_outlined : Icons.check_box_outlined,
-                  size: 15,
-                  color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  home ? AppStrings.tabHome : AppStrings.todoTitle,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: selected
-                        ? scheme.onSurface
-                        : scheme.onSurfaceVariant,
-                  ),
-                ),
-                IconButton(
-                  key: Key('content-tab-close-${tab.name}'),
-                  tooltip: AppStrings.closeTabTooltip,
-                  onPressed: _closeContentTab,
-                  icon: const Icon(Icons.close, size: 14),
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                  constraints: const BoxConstraints.tightFor(
-                    width: 26,
-                    height: 26,
-                  ),
-                ),
-              ],
+        selected: selected,
+        focused: focused,
+        onTap: () => _showContentTab(tab, pane),
+        builder: (context, {required hover}) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 12),
+            Icon(
+              home ? Icons.home_outlined : Icons.check_box_outlined,
+              size: 15,
+              color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
             ),
-          ),
+            const SizedBox(width: 6),
+            Text(
+              home ? AppStrings.tabHome : AppStrings.todoTitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 6),
+            SizedBox.square(
+              dimension: 20,
+              child: IconButton(
+                key: Key('content-tab-close-${tab.name}'),
+                tooltip: AppStrings.closeTabTooltip,
+                padding: EdgeInsets.zero,
+                iconSize: 14,
+                icon: const Icon(Icons.close),
+                onPressed: _closeContentTab,
+              ),
+            ),
+            const SizedBox(width: 6),
+          ],
         ),
       ),
     );
