@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -60,6 +61,10 @@ class ListDragHandle extends StatelessWidget {
         // Swallows the tap so grabbing the handle never opens the row's
         // in-place edit.
         onTap: () {},
+        // The drag starts where the pointer went down, and the slop it
+        // crossed arrives as the first move: the list reads the pickup
+        // where the press was, and the way to the edge as a move (#777).
+        dragStartBehavior: DragStartBehavior.down,
         onPanStart: (d) => onDragStart(d.globalPosition),
         onPanUpdate: (d) => onDragMove(d.globalPosition),
         onPanEnd: (_) => onDragEnd(),
