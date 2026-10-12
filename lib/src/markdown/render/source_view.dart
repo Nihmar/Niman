@@ -859,7 +859,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         oldWidget.caretWidth != widget.caretWidth) {
       _scheduleCaret();
     } else if (oldWidget.hideMarkers != widget.hideMarkers ||
-        !identical(oldWidget.theme, widget.theme) ||
+        // By value (#789): source mode with a chosen face builds its theme
+        // in every build (`surfaceThemeFor`), and a copy of the same values
+        // moves no caret.
+        oldWidget.theme != widget.theme ||
         oldWidget.showLineNumbers != widget.showLineNumbers ||
         oldWidget.column != widget.column ||
         oldWidget.padding != widget.padding) {
@@ -3162,8 +3165,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     });
   }
 
+  /// How many times the caret was measured, for the test that holds a
+  /// rebuild with a theme of the same values to measuring nothing (#789).
+  @visibleForTesting
+  int get caretMeasures => _caretMeasures;
+  int _caretMeasures = 0;
+
   /// Where the caret is, from the caret line's own layout.
   void _measureCaret() {
+    _caretMeasures++;
     final line = _caretLineIndex;
     // Every selection change comes through here, so this is the one place the
     // lines hear which of them holds the caret and which of its words, and the
