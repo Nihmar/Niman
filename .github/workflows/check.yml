@@ -101,6 +101,27 @@ jobs:
           channel: stable
           cache: true
 
+      # Configuring :app asks for the app's NDK (ndkVersion) whatever the
+      # task: the Gradle plugin installs it when missing, and NDK 29 is only
+      # on sdkmanager's beta channel, so that install fails (reported as a
+      # licence not accepted). release.yml's step, for the same reason; drop
+      # both once whisper_ggml moves to a stable NDK.
+      - name: Android NDK (beta channel)
+        run: |
+          NDK="$(grep -oP 'ndkVersion\s*=\s*"\K[^"]+' android/app/build.gradle.kts)"
+          echo "installing ndk;$NDK"
+          # No pipefail here: sdkmanager exits before `yes` does, `yes`
+          # dies of SIGPIPE with 141, and under pipefail that sinks the
+          # step even though the install worked. The directory check
+          # below is what actually says whether it did.
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            --channel=1 "ndk;$NDK"
+          if [ ! -d "$ANDROID_HOME/ndk/$NDK" ]; then
+            echo "error: ndk;$NDK is not under $ANDROID_HOME/ndk" >&2
+            ls -1 "$ANDROID_HOME/ndk" 2>/dev/null >&2 || true
+            exit 1
+          fi
+
       - run: flutter pub get
       # android/gradlew and android/local.properties (which carries the
       # flutter.sdk path settings.gradle.kts reads) are not in the
@@ -110,7 +131,7 @@ jobs:
         run: flutter build apk --config-only
       # One variant is enough: the tests do not depend on the flavor. A unit
       # test task compiles the Kotlin sources and runs JUnit on the JVM — no
-      # APK, no native build, no device.
+      # APK, no native build (the NDK is only asked for), no device.
       - name: Kotlin unit tests
         working-directory: android
         run: ./gradlew :app:testBetaDebugUnitTest
