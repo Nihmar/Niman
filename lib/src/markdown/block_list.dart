@@ -39,6 +39,7 @@ final class BlockList with ListMixin<Block> implements List<Block> {
       _chunks.add(List<Block>.of(blocks.getRange(at, end)));
       _shifts.add(0);
       _owned.add(true);
+      _divs.add(_divsIn(_chunks.last));
     }
     _restart();
   }
@@ -48,6 +49,7 @@ final class BlockList with ListMixin<Block> implements List<Block> {
   new sharing(BlockList other) : _length = other._length {
     _chunks.addAll(other._chunks);
     _shifts.addAll(other._shifts);
+    _divs.addAll(other._divs);
     _starts = List<int>.of(other._starts);
     _owned.addAll(List<bool>.filled(other._owned.length, false));
     other._owned.fillRange(0, other._owned.length, false);
@@ -65,6 +67,40 @@ final class BlockList with ListMixin<Block> implements List<Block> {
   /// Whether this list may write to chunk *c* in place: false for a chunk it
   /// shares with a copy.
   final List<bool> _owned = <bool>[];
+
+  /// How many fence lines of fenced divs each chunk holds (#729): a reader
+  /// after a note's columns walks the chunks that have any, and a note
+  /// with none answers in O(chunks).
+  final List<int> _divs = <int>[];
+
+  static int _divsIn(List<Block> blocks) {
+    var count = 0;
+    for (final block in blocks) {
+      if (block.kind == BlockKind.div) count++;
+    }
+    return count;
+  }
+
+  /// How many fence lines of fenced divs the list holds.
+  int get divCount {
+    var count = 0;
+    for (final chunk in _divs) {
+      count += chunk;
+    }
+    return count;
+  }
+
+  /// The fence lines of fenced divs, where they are, in order: the chunks
+  /// that hold none are not walked.
+  Iterable<Block> get divBlocks sync* {
+    for (var chunk = 0; chunk < _chunks.length; chunk++) {
+      if (_divs[chunk] == 0) continue;
+      final shift = _shifts[chunk];
+      for (final block in _chunks[chunk]) {
+        if (block.kind == BlockKind.div) yield block.shifted(shift);
+      }
+    }
+  }
 
   /// Where each chunk starts, and the length after the last.
   List<int> _starts = <int>[0];
@@ -166,6 +202,9 @@ final class BlockList with ListMixin<Block> implements List<Block> {
     _chunks.replaceRange(first, last + 1, cut);
     _shifts.replaceRange(first, last + 1, List<int>.filled(cut.length, 0));
     _owned.replaceRange(first, last + 1, List<bool>.filled(cut.length, true));
+    _divs.replaceRange(first, last + 1, [
+      for (final chunk in cut) _divsIn(chunk),
+    ]);
     _restart();
   }
 
@@ -205,6 +244,7 @@ final class BlockList with ListMixin<Block> implements List<Block> {
       _chunks.add(<Block>[]);
       _shifts.add(0);
       _owned.add(true);
+      _divs.add(0);
     }
     final starts = List<int>.filled(_chunks.length + 1, 0);
     for (var at = 0; at < _chunks.length; at++) {

@@ -59,6 +59,13 @@ final class _Pair {
     for (var at = 0; at < plain.length; at++) {
       expect(_describe(list[at]), _describe(plain[at]), reason: '$reason @$at');
     }
+    // The fence lines of fenced divs (#729), counted per chunk.
+    final divs = [
+      for (final block in plain)
+        if (block.kind == BlockKind.div) _describe(block),
+    ];
+    expect(list.divCount, divs.length, reason: reason);
+    expect(list.divBlocks.map(_describe).toList(), divs, reason: reason);
     // Out of order, as a binary search reads.
     final random = Random(plain.length);
     for (var ask = 0; ask < 200 && plain.isNotEmpty; ask++) {

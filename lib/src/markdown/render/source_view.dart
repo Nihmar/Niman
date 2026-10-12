@@ -1878,20 +1878,51 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _sectionEndsRevision = revision;
     }
     if (_sectionEnds.containsKey(line)) return _sectionEnds[line];
+    final block = blockAt?.call(line);
+    if (block?.divRole == DivRole.opensColumns) {
+      return _sectionEnds[line] = _columnsEnd(line, block!.divDepth);
+    }
     final level = _headingLevel(line);
     int? end;
     if (level != null) {
       final count = widget.buffer.lineCount;
+      // A heading in a column folds its section inside the column (#729):
+      // a block in fewer divs ends it, and a heading in more does not.
+      final depth = block?.divDepth ?? 0;
       end = count;
       for (var at = line + 1; at < count; at++) {
+        final within = blockAt?.call(at)?.divDepth ?? 0;
+        if (within < depth) {
+          end = at;
+          break;
+        }
         final other = _headingLevel(at);
-        if (other != null && other <= level) {
+        if (other != null && other <= level && within == depth) {
           end = at;
           break;
         }
       }
     }
     return _sectionEnds[line] = end;
+  }
+
+  /// Where the `columns` block opened on [line], [depth] divs in, ends
+  /// (#729): past its closer, or at the first line outside it when its
+  /// container ends it.
+  int _columnsEnd(int line, int depth) {
+    final count = widget.buffer.lineCount;
+    var at = line + 1;
+    while (at < count) {
+      final block = blockAt?.call(at);
+      if (block == null) break;
+      if (block.divDepth <= depth) {
+        return block.divRole == DivRole.closesColumns && block.divDepth == depth
+            ? block.endLine
+            : block.startLine;
+      }
+      at = block.endLine;
+    }
+    return count;
   }
 
   /// Where the heading on [line] would fold to, when it has a section worth

@@ -342,6 +342,14 @@ final class SourceStyler {
       ? _scanner.index.blocks
       : null;
 
+  /// The fence lines of the note's fenced divs (#729), in order, or null
+  /// while the scan is of an earlier revision or still owes part of the
+  /// note, as [blocks] is. O(chunks) for a note with none.
+  Iterable<Block>? get divBlocks =>
+      revision == buffer.revision && _scanner.settled
+      ? _scanner.divBlocks
+      : null;
+
   /// How many lines the scan behind the colours has read, for the test that
   /// holds a tap on a task box to the work the tap may do: one that settled
   /// the scan read the rest of the note, and the count says so.
