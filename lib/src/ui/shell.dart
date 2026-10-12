@@ -969,12 +969,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // an open one re-reads its file, which a clean buffer adopts — and
       // every buffer is clean, the move having saved them first.
       setState(() => _noteReloadToken++);
-      // The grid's own folder follows a rename or a move of it, or of a
-      // folder above it (#727).
-      final grid = _gridFolder;
-      if (grid != null && (grid == from || grid.startsWith('$from/'))) {
-        setState(() => _gridFolder = to + grid.substring(from.length));
-      }
       // The selection follows only a rename that is about it: the note
       // itself, or a folder it sits in. Renaming another row — a folder
       // above nothing selected — used to select that row while the shell
@@ -987,13 +981,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     },
     onDeleted: (path) {
       _workspace.deleted(path);
-      // Deleted, the grid falls back to the nearest ancestor that still
-      // exists (#727): the deleted item's parent, which did not go with
-      // it.
-      final grid = _gridFolder;
-      if (grid != null && (grid == path || grid.startsWith('$path/'))) {
-        setState(() => _gridFolder = parentOf(path));
-      }
       if (_wide) {
         // The workspace moved the showing tab on already; the tree only
         // lets go of a selected folder that went with it.
