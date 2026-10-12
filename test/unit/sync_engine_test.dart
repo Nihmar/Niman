@@ -1236,6 +1236,53 @@ void main() {
       },
     );
 
+    // #763: a save landing after the resolution hashed the note and before
+    // its upload read it sends bytes the hash does not describe. Outside a
+    // run's guard that must still come out as a SyncFailure — the screen
+    // catches nothing else and would spin for ever — and as a moved one, so
+    // the screen reads both sides again.
+    for (final merged in [true, false]) {
+      test('a save during the ${merged ? 'merged' : 'kept'} upload fails '
+          'as moved', () async {
+        a.write('sub/a.md', 'base');
+        await a.sync();
+        await b.sync();
+        a.write('sub/a.md', 'mine');
+        b.write('sub/a.md', 'theirs');
+        await b.sync();
+        expect((await a.sync()).conflicts.single.path, 'sub/a.md');
+        final shown = await a.engine.conflictTexts('sub/a.md');
+        // The resolution's run context knows no folder but the root, so
+        // the upload creates `sub` first: the save lands there, after the
+        // hash and before the file is opened.
+        var saved = false;
+        server.beforeAnswer = (request) {
+          if (request.method != 'MKCOL' || saved) return;
+          saved = true;
+          a.write('sub/a.md', 'typed on during the upload');
+        };
+        await expectLater(
+          merged
+              ? a.engine.resolveMerged('sub/a.md', 'merged', shown: shown)
+              : a.engine.resolveConflict(
+                  'sub/a.md',
+                  keepLocal: true,
+                  shown: shown,
+                ),
+          throwsA(isA<SyncFailure>().having((f) => f.moved, 'moved', isTrue)),
+        );
+        server.beforeAnswer = null;
+        expect(saved, isTrue);
+        expect(a.read('sub/a.md'), 'typed on during the upload');
+        // The server got the save; read again, both sides are that save,
+        // and the next run agrees on it with nothing to resolve.
+        expect(remoteText('sub/a.md'), 'typed on during the upload');
+        final report = await a.sync();
+        expect(report.conflicts, isEmpty, reason: report.summary());
+        expect(remoteText('sub/a.md'), 'typed on during the upload');
+      });
+    }
+
     test('unchanged sides resolve as shown', () async {
       await makeConflict();
       final shown = await a.engine.conflictTexts('a.md');
