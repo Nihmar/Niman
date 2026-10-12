@@ -238,7 +238,7 @@ void main() {
           statusText: 'Saved',
           statusActions: const <Widget>[],
           templateProblems: problems,
-          onOutline: () async {},
+          onOutline: (_) async {},
           onFind: () {},
           onSpellCheck: () async {},
           onToggleEditorKind: () {},

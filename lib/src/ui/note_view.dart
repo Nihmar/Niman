@@ -1754,9 +1754,14 @@ final class _NoteViewState extends State<NoteView>
   /// fallback is the comparison this stands in front of.
   bool _unchangedOnDisk(String path) => _diskStat?.matches(path) ?? false;
 
-  /// Opens the outline sheet and jumps to whatever was picked.
-  Future<void> _openOutline() async {
-    final line = await showOutlineSheet(context, entries: _stats.outline.value);
+  /// Opens the outline sheet and jumps to whatever was picked; a pointer's
+  /// menu grows from [anchor], the outline button.
+  Future<void> _openOutline(Rect? anchor) async {
+    final line = await showOutlineSheet(
+      context,
+      entries: _stats.outline.value,
+      anchor: anchor,
+    );
     if (line == null || !mounted) return;
     _jumpToHeading(line);
   }
@@ -2063,9 +2068,11 @@ final class _NoteViewState extends State<NoteView>
   /// (T-M2-09) it already had in the status row.
   Widget _toolbar(BuildContext context, {bool dense = false}) {
     final actions = _commands.toolbarActions();
+    final menus = _commands.toolbarMenus();
     Widget bar(Set<ToolbarItem> active) => NoteToolbarBar(
       dense: dense,
       actions: actions,
+      menus: menus,
       active: active,
       layout: widget.toolbarLayout,
     );

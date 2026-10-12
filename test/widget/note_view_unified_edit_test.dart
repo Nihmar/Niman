@@ -67,6 +67,33 @@ void main() {
     expect(writes.single, startsWith('**word** word'));
   });
 
+  testWidgets("a pointer's heading menu grows from the toolbar button "
+      '(#780)', (tester) async {
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        // Pointer-dense, as a desktop's theme is: the picker is a menu.
+        theme: ThemeData(visualDensity: VisualDensity.compact),
+        home: Scaffold(
+          body: _view(readNote: (_) async => 'una riga\n', writes: []),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final button = find.byKey(const Key('toolbar-heading'));
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    final menu = tester.getRect(find.byKey(const Key('heading-level-sheet')));
+    final at = tester.getRect(button);
+    // From the button's corner — kept off the window's top edge, the
+    // menu's own padding above its rows — not the third of the window down
+    // it opened at with no anchor.
+    expect(menu.left, closeTo(at.left, 1));
+    expect(menu.top, lessThan(at.bottom + 16));
+  });
+
   testWidgets('a toolbar command edits the note and the note is saved', (
     tester,
   ) async {

@@ -54,6 +54,7 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
@@ -994,9 +995,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onOpenInNewTab: (path) => _workspace.show(path, newTab: true),
     onOpenBeside: (path) => _workspace.openBeside(path, SplitAxis.right),
     onHistory: _openHistory,
-    onExport: (path) => _exportFlow.runNoteExport(context, path),
-    onExportFolder: (path) =>
-        _exportFlow.runFolderExport(context, path, library: false),
+    onExport: (path, anchor) =>
+        _exportFlow.runNoteExport(context, path, anchor: anchor),
+    onExportFolder: (path, anchor) => _exportFlow.runFolderExport(
+      context,
+      path,
+      library: false,
+      anchor: anchor,
+    ),
     onRecognize: _recognize,
   );
 
@@ -1343,7 +1349,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           key: _phoneNoteKey,
           path: p.join(controller.root ?? '', selectedPath),
           column: _editorSettings.noteColumn,
-          onEditEpubLook: () => _editEpubLook(controller),
+          onEditEpubLook: (anchor) => _editEpubLook(controller, anchor),
           onEpubTextScale: (scale) =>
               unawaited(keepEpubTextScale(controller, scale)),
           positions: switch (controller.root) {
@@ -2612,7 +2618,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Long-press context menu on a tree row (T-UI-05): the note actions,
   /// scoped to the pressed row. New note/folder target the row's folder
   /// (issue #100 moved the menu itself into `shell_row_menu.dart`).
-  Future<void> _showRowMenu(Note note) async {
+  /// A pointer's menu grows from [anchor], the row held.
+  Future<void> _showRowMenu(Note note, Rect? anchor) async {
     final here = note.isDir ? note.path : parentOf(note.path);
     final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
     if (!mounted) return;
@@ -2621,9 +2628,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       note: note,
       isQuickNote: isQuickNote,
       offersRecognize: _ocrFlow != null,
+      anchor: anchor,
     );
     if (!mounted) return;
-    await _rowActions.run(context, action, note, here);
+    await _rowActions.run(context, action, note, here, anchor: anchor);
   }
 
   /// The tree's right-click menus, which one opened and when: a row's and
@@ -2647,7 +2655,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
     _treeMenuLog.debug('row menu closed: "${note.path}" -> $action');
     if (!mounted) return;
-    await _rowActions.run(context, action, note, here);
+    await _rowActions.run(
+      context,
+      action,
+      note,
+      here,
+      anchor: menuAnchorAt(position),
+    );
     _treeMenuLog.debug('row menu action done: "${note.path}" $action');
   }
 
@@ -2666,8 +2680,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   );
 
   /// The open note's ⋮ menu (mockup H2), on the phone's note bar and in
-  /// the wide layout's editor header.
-  Widget _noteMenu() => NoteMenuButton(
+  /// the wide layout's editor header. A choice that asks more — the
+  /// outline, the export's format — grows its menu from the ⋮ button.
+  Widget _noteMenu() => Builder(builder: _noteMenuButton);
+
+  Widget _noteMenuButton(BuildContext button) => NoteMenuButton(
     typewriter: _editorSettings.typewriter,
     textNote: !_shownIsAttachment,
     recognize:
@@ -2686,13 +2703,18 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onSelected: (action) {
       final path = _selected;
       if (path == null) return;
+      final anchor = menuAnchorOf(button);
       unawaited(switch (action) {
-        NoteMenuAction.outline => _showPanel(DockPane.outline),
+        NoteMenuAction.outline => _showPanel(DockPane.outline, anchor: anchor),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _palette.open(context),
         NoteMenuAction.format => _formatNote(),
-        NoteMenuAction.export => _exportFlow.runNoteExport(context, path),
+        NoteMenuAction.export => _exportFlow.runNoteExport(
+          context,
+          path,
+          anchor: anchor,
+        ),
         NoteMenuAction.cheatsheet => _openCheatsheet(),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.recognizeText => Future<void>.sync(
@@ -3903,7 +3925,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
   /// sheet (the phone's way to the same three, #175).
-  Future<void> _showPanel(DockPane pane) => _dock.showPanel(context, pane);
+  Future<void> _showPanel(DockPane pane, {Rect? anchor}) =>
+      _dock.showPanel(context, pane, anchor: anchor);
 
   /// The phone's one note view, so its sheets reach its outline.
   final GlobalKey _phoneNoteKey = GlobalKey();
@@ -4039,7 +4062,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     createMissingNote: missingNoteCreatorFor(controller),
                     statusActions: _statusActionsFor(pane),
                     header: (path) => _journalUi.header(context, path),
-                    onEditEpubLook: () => _editEpubLook(controller),
+                    onEditEpubLook: (anchor) =>
+                        _editEpubLook(controller, anchor),
                     onEpubTextScale: (scale) =>
                         unawaited(keepEpubTextScale(controller, scale)),
                     epubFullScreen: _immersive.fullScreen,
@@ -4068,9 +4092,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         : TourTarget(id: TourTargets.note, child: listener);
   }
 
-  /// Opens the sheet that sets how the books look (#280).
-  void _editEpubLook(LibrarySession controller) =>
-      unawaited(showEpubLookSheet(context, session: controller));
+  /// Opens the sheet that sets how the books look (#280); a pointer's menu
+  /// grows from [anchor], the book's Aa button.
+  void _editEpubLook(LibrarySession controller, Rect? anchor) => unawaited(
+    showEpubLookSheet(context, session: controller, anchor: anchor),
+  );
 
   /// The view controls in [pane]'s status row (T-PP-22): for the note
   /// that pane shows, so each pane's eye says what its own tab does.
@@ -4457,7 +4483,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       case 'folder':
         await _createFlow.createFolder(context, parent: '');
       case 'exportlibrary':
-        await _exportFlow.runFolderExport(context, '', library: true);
+        await _exportFlow.runFolderExport(
+          context,
+          '',
+          library: true,
+          anchor: menuAnchorAt(position),
+        );
     }
   }
 }

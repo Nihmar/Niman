@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 
 /// One button of the editor toolbar (T-UI-08).
 final class EditorToolbarButton {
@@ -8,6 +9,7 @@ final class EditorToolbarButton {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.onPressedAt,
     this.active = false,
     this.group,
   });
@@ -23,6 +25,17 @@ final class EditorToolbarButton {
 
   /// The button's action.
   final VoidCallback onPressed;
+
+  /// A button that opens a menu runs this instead of [onPressed], handed
+  /// the place on screen it was pressed in — the button, or the overflow
+  /// button holding it — for a pointer's menu to grow from (#780).
+  final ValueChanged<Rect?>? onPressedAt;
+
+  /// Runs the button's action as pressed in [context]'s widget.
+  void pressIn(BuildContext context) => switch (onPressedAt) {
+    final at? => at(menuAnchorOf(context)),
+    null => onPressed(),
+  };
 
   /// Whether the format is on at the caret: the button stays pressed until
   /// it is toggled off, the way a word processor's toolbar behaves
@@ -138,27 +151,31 @@ final class EditorToolbar extends StatelessWidget {
               ),
             Tooltip(
               message: button.tooltip,
-              child: InkWell(
-                key: button.key,
-                onTap: button.onPressed,
-                canRequestFocus: false,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: pad,
-                    vertical: (editorToolbarHeight - iconSize) / 2,
-                  ),
-                  decoration: button.active
-                      ? BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(6),
-                        )
-                      : null,
-                  child: Icon(
-                    button.icon,
-                    size: iconSize,
-                    color: button.active
-                        ? Theme.of(context).colorScheme.onPrimaryContainer
+              child: Builder(
+                builder: (context) => InkWell(
+                  key: button.key,
+                  onTap: () => button.pressIn(context),
+                  canRequestFocus: false,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: pad,
+                      vertical: (editorToolbarHeight - iconSize) / 2,
+                    ),
+                    decoration: button.active
+                        ? BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer,
+                            borderRadius: BorderRadius.circular(6),
+                          )
                         : null,
+                    child: Icon(
+                      button.icon,
+                      size: iconSize,
+                      color: button.active
+                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                          : null,
+                    ),
                   ),
                 ),
               ),
@@ -178,13 +195,27 @@ final class EditorToolbar extends StatelessWidget {
     required int from,
   }) {
     final theme = Theme.of(context);
+    // The overflow button's own context: a menu one of its entries opens
+    // grows from it, the button that was pressed.
+    return Builder(
+      builder: (anchor) => _overflowMenu(anchor, theme, pad, iconSize, from),
+    );
+  }
+
+  Widget _overflowMenu(
+    BuildContext anchor,
+    ThemeData theme,
+    double pad,
+    double iconSize,
+    int from,
+  ) {
     return MenuAnchor(
       key: const Key('editor-toolbar-overflow'),
       menuChildren: [
         for (final button in buttons.skip(from))
           MenuItemButton(
             key: button.key,
-            onPressed: button.onPressed,
+            onPressed: () => button.pressIn(anchor),
             leadingIcon: Icon(button.icon, size: 18),
             child: Text(button.tooltip),
           ),

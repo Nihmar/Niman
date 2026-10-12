@@ -7,6 +7,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/settings_area.dart';
@@ -139,10 +140,11 @@ final class _SettingsAppearanceScreenState
     if (mounted) setState(() => _uiTextScale = scale);
   }
 
-  /// The sheet the book's Aa button opens, on the same values.
-  Future<void> _editEpubLook() async {
+  /// The sheet the book's Aa button opens, on the same values; a pointer's
+  /// menu grows from the row, [anchor].
+  Future<void> _editEpubLook(Rect? anchor) async {
     final controller = widget.controller;
-    await showEpubLookSheet(context, session: controller);
+    await showEpubLookSheet(context, session: controller, anchor: anchor);
     final look = await controller.epubLook;
     if (mounted) setState(() => _epubLook = look);
   }
@@ -191,11 +193,13 @@ final class _SettingsAppearanceScreenState
           ),
           HighlightRow(
             key: SettingsKeys.epubLook,
-            child: SettingsValueRow(
-              title: AppStrings.epubLookTitle,
-              subtitle: AppStrings.epubLookSubtitle,
-              value: epubLookSummary(_epubLook),
-              onTap: () => unawaited(_editEpubLook()),
+            child: Builder(
+              builder: (row) => SettingsValueRow(
+                title: AppStrings.epubLookTitle,
+                subtitle: AppStrings.epubLookSubtitle,
+                value: epubLookSummary(_epubLook),
+                onTap: () => unawaited(_editEpubLook(menuAnchorOf(row))),
+              ),
             ),
           ),
           // The window's × (#209): the desktops only, where there is a

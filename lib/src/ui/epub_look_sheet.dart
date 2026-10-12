@@ -25,13 +25,16 @@ String epubLookSummary(EpubLook look) {
 }
 
 /// Opens the sheet that sets how [session]'s books look. Every pick is
-/// kept at once, and an open book follows it behind the sheet.
+/// kept at once, and an open book follows it behind the sheet. A
+/// pointer's menu grows from [anchor], the control that opened it.
 Future<void> showEpubLookSheet(
   BuildContext context, {
   required LibrarySession session,
+  Rect? anchor,
 }) => showActionSheet<void>(
   context,
   sheetKey: const Key('epub-look-sheet'),
+  anchor: anchor,
   title: AppStrings.epubLookTitle,
   items: (context) => [EpubLookPanel(session: session)],
 );

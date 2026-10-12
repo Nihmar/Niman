@@ -8,6 +8,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
@@ -93,8 +94,9 @@ final class NoteTree extends StatefulWidget {
   /// Called with the row's note when the row is selected.
   final void Function(Note note) onSelect;
 
-  /// Called with the row's note on long-press (context menu, T-UI-05).
-  final void Function(Note note)? onLongPress;
+  /// Called with the row's note on long-press (context menu, T-UI-05), and
+  /// the row's place on screen, for a pointer's menu to grow from.
+  final void Function(Note note, Rect? anchor)? onLongPress;
 
   /// Called with the row's note on right-click (context menu at the
   /// cursor, T-PP-20): the desktop twin of [onLongPress], which stays
@@ -513,7 +515,7 @@ final class _RowTile extends StatelessWidget {
   final bool selected;
   final void Function(Note note) onSelect;
   final ValueChanged<String> onToggle;
-  final void Function(Note note)? onLongPress;
+  final void Function(Note note, Rect? anchor)? onLongPress;
   final void Function(Note note, TapDownDetails details)? onSecondaryTapDown;
 
   /// A middle click on a note's row (not a folder's).
@@ -529,7 +531,9 @@ final class _RowTile extends StatelessWidget {
     final metrics = TreeRowMetrics.of(context);
     final middle = onMiddleClick;
     final move = onMove;
-    final longPress = onLongPress == null ? null : () => onLongPress!(note);
+    final longPress = onLongPress == null
+        ? null
+        : () => onLongPress!(note, menuAnchorOf(context));
     // By touch the hold drags the row, and a hold that does not move is the
     // long press: the drag gives it back.
     final held = move != null && TreeRowDrag.holdToDrag;

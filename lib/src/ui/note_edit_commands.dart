@@ -160,6 +160,15 @@ final class NoteEditCommands {
     };
   }
 
+  /// The toolbar buttons that open a menu, run with the button's place on
+  /// screen so a pointer's menu grows from it (#780). A key runs the same
+  /// command through [toolbarActions], with no button to grow from.
+  Map<ToolbarItem, ValueChanged<Rect?>> toolbarMenus() => {
+    ToolbarItem.heading: (anchor) =>
+        unawaited(_showHeadingDialog(anchor: anchor)),
+    ToolbarItem.tools: (anchor) => unawaited(_openTools(anchor: anchor)),
+  };
+
   /// The toolbar's buttons as context-menu entries (#174): the same
   /// visible items in the same order, the same actions, and the same
   /// pressed state — read when the menu opens, so it is the caret's now.
@@ -335,13 +344,14 @@ final class NoteEditCommands {
   /// The availability is worked out here rather than in the sheet: only
   /// this side knows which surface is showing, and each one finds its
   /// lists its own way.
-  Future<void> _openTools() async {
+  Future<void> _openTools({Rect? anchor}) async {
     final tool = await showEditorToolsSheet(
       context(),
       available: <EditorTool>{
         if (_hasListToCount) EditorTool.countList,
         if (_hasListAtCaret) EditorTool.mindMap,
       },
+      anchor: anchor,
     );
     if (!mounted() || tool == null) return;
     switch (tool) {
@@ -485,9 +495,9 @@ final class NoteEditCommands {
   }
 
   /// Shows the heading-level picker (H1..H6) and applies the chosen level
-  /// to the selected line(s).
-  Future<void> _showHeadingDialog() async {
-    final level = await showHeadingLevelDialog(context());
+  /// to the selected line(s); a pointer's menu grows from [anchor].
+  Future<void> _showHeadingDialog({Rect? anchor}) async {
+    final level = await showHeadingLevelDialog(context(), anchor: anchor);
     if (level == null) return;
     run(
       (text, selection) =>
