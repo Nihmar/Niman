@@ -486,13 +486,30 @@ final class SourceInput implements DeltaTextInputClient {
       // A selection wider than the window reaches the platform clamped, and
       // what it types over is the part it holds: over the whole of it, in the
       // note — select all and type is the note replaced, not a window of it.
+      //
+      // The platform acting on the whole of what it holds says the same, even
+      // when the window its range was built on is not the one this side last
+      // sent: its own numbers are enough ([from, to] the whole of the old
+      // text), and reading them as note offsets from a stale window deleted
+      // the wrong lines. When the app's selection *is* the window the platform
+      // holds — its own Select all, told to the app as a range on that copy
+      // (#540), or reported as an edit the app read as a caret range — the
+      // selection the deletion means is the note's, and taking the window left
+      // the rest of the note behind: the delete had to be made twice (#753).
       final wide = selection().clampTo(buffer.length);
       final held = _toWindow(wide, origin, delta.oldText.length);
+      final whole = from == 0 && to == delta.oldText.length;
+      final (wideStart, wideEnd) = (wide.start, wide.end);
+      final onlyTheWindow =
+          wideStart == origin && wideEnd == origin + delta.oldText.length;
       if (!wide.isCollapsed &&
           delta is! TextEditingDeltaNonTextUpdate &&
-          from == held.start &&
-          to == held.end) {
-        (start, end) = (wide.start, wide.end);
+          (whole || (from == held.start && to == held.end))) {
+        if (onlyTheWindow && delta.oldText.length < buffer.length) {
+          (start, end) = (0, buffer.length);
+        } else {
+          (start, end) = (wideStart, wideEnd);
+        }
       }
       if (delta is TextEditingDeltaNonTextUpdate) {
         _reportSelection(
