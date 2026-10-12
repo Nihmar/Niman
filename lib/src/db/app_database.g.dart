@@ -538,7 +538,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// The palette: `niman` (the app's own colors, and what a fresh install
   /// wears), `system` (the device's own colors), `catppuccin`,
-  /// `solarized` or `gruvbox`.
+  /// `solarized`, `gruvbox` or `sepia`.
   final String themePalette;
 
   /// The settings waiting to reach the libraries they belong to: the
