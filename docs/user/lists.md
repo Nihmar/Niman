@@ -30,9 +30,12 @@ Create one with **New list note** in the Files FAB (or
   hold anywhere on the row** and drag from there — the gesture a phone
   already knows, for a handle a thumb can miss. Dropping it onto the
   upper or lower edge of another row puts it before or after that row;
-  dropping it onto the middle makes it a child of that row. Held near the
-  top or bottom edge, the drag scrolls the list, so an item out of sight
-  is still in reach. A parent moves with its whole subtree, prose lines
+  dropping it onto the middle makes it a child of that row. Dropped in the
+  empty space below the last row it becomes the last top-level item, and
+  above the first row the first one. Moved toward the top or bottom edge,
+  the drag scrolls the list, so an item out of sight is still in reach; a
+  row picked up at the edge stays put until the finger moves on toward it.
+  A parent moves with its whole subtree, prose lines
   included.
 - **Indentation is the nesting**: an item indented under another is its
   child, exactly as it reads in the raw note.

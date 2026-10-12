@@ -301,6 +301,73 @@ void main() {
     expect(offset(), landed, reason: 'nothing scrolls after the drag');
   });
 
+  // #777: the space below the last row is the zone after the last root
+  // item, not the edge of whichever row ends the list.
+  testWidgets('a drop below the last row makes the last root item', (
+    tester,
+  ) async {
+    String? out;
+    const text = '- [ ] B\n- [ ] A\n  - [ ] a1\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final last = tester.getRect(_row(2));
+    // Well below a1, in the empty list under it.
+    await _drag(
+      tester,
+      _rowHandle(0),
+      Offset(last.center.dx, last.bottom + 60),
+    );
+    expect(out, '- [ ] A\n  - [ ] a1\n- [ ] B\n');
+  });
+
+  // #777: the top and bottom rows on screen lie mostly in the edge zones;
+  // a still long press there picks the row up without scrolling the list
+  // away, and moving on toward the edge scrolls it.
+  testWidgets('picking up a row at the edge does not scroll by itself', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final text =
+        '${[for (var i = 0; i < 200; i++) '- [ ] item $i'].join('\n')}\n';
+    await tester.pumpWidget(_app(ListNoteView(text: text, onChanged: (_) {})));
+    await tester.pumpAndSettle();
+    final list = tester.getRect(find.byType(ListView));
+    final position = tester
+        .state<ScrollableState>(
+          find.descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          ),
+        )
+        .position;
+    final rowHeight = tester.getSize(_row(0)).height;
+    // Row 10's top at the list's top: its centre is inside the edge zone.
+    position.jumpTo(8 + 10 * rowHeight);
+    await tester.pump();
+    final before = position.pixels;
+    final row = find.text('item 10');
+    expect(tester.getCenter(row).dy - list.top, lessThan(48));
+
+    final gesture = await tester.startGesture(tester.getCenter(row));
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(position.pixels, before, reason: 'a still finger scrolls nothing');
+
+    // On toward the edge: now the scroll runs.
+    await gesture.moveBy(const Offset(0, -12));
+    for (var frame = 0; frame < 10; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(position.pixels, lessThan(before), reason: 'the edge scroll ran');
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('dragging a row onto another makes a sub-list', (tester) async {
     String? out;
     const text = '- [ ] one\n- [ ] two\n';
