@@ -1151,6 +1151,10 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<bool> tidyNote(String path, {Set<LintRule>? rules}) async {
     tidied.add(path);
     final row = _requireRow(path);
+    // An audio note's body is its clip document, which a tidy would
+    // rewrite: the real writer skips it (#840), and so does the fake, so
+    // a widget test through the on-close tidy says what ships.
+    if (frontmatterTypeOf(row.content) == 'audio') return false;
     final tidy = formatMarkdown(row.content, rules: rules);
     if (tidy == row.content) return false;
     row.content = tidy;
