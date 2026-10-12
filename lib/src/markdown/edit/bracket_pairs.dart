@@ -14,7 +14,8 @@
 /// * over a selection it wraps it instead, the selection kept inside;
 /// * a closing character typed where the one the pair wrote stands steps over
 ///   it, so typing on through `(a)` does not leave `(a))`;
-/// * Backspace between an empty pair takes both.
+/// * Backspace between an empty pair takes both — for a symmetric one, `**`
+///   or `""`, only when the pair wrote the closer.
 ///
 /// Not every character is closed the same way (#718). The brackets pair
 /// whenever there is room; the Markdown punctuation only sometimes does, and
@@ -156,6 +157,12 @@ final class BracketPairs {
 
   /// What Backspace at [caret] does instead of taking one character; null
   /// when it takes one. Between an empty pair it takes both.
+  ///
+  /// A bracket and its closer side by side are an empty pair whoever wrote
+  /// them: `()` holds nothing. A symmetric delimiter is not (#761): the two
+  /// stars around the caret in `**bold*|*` close one bold, and `''`, `***`
+  /// or `___` are a run of one character — so both go only when the closer
+  /// is the one this pair wrote.
   BracketEdit? backspace(SourceBuffer buffer, int caret) {
     if (caret <= 0 || caret >= buffer.length) return null;
     final open = buffer.substring(caret - 1, caret);
@@ -163,6 +170,7 @@ final class BracketPairs {
     if (close == null || buffer.substring(caret, caret + 1) != close) {
       return null;
     }
+    if (open == close && _closerAt(buffer, caret, close) == null) return null;
     final line = buffer.lineOf(caret);
     final column = caret - buffer.offsetOfLine(line);
     _closers.removeWhere(
