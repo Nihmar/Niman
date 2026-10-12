@@ -55,7 +55,9 @@ tree; the tree itself does not change.
   tree**: entering a folder selects it in the tree and expands it, so
   switching back finds it open. Opening a note from search, a tab or the
   palette does not move the grid. Switching from the tree to the grid
-  starts in the selected folder, or in the selected note's folder.
+  starts in the selected folder, or in the selected note's folder, every
+  time — the grid's own folder is what it holds while it is the pane on
+  screen.
 - **Pinned notes get a filled pin on their tile**, in their own folder; an
   OCR sidecar keeps its place right after its file, as in the tree, drawn
   dimmed with the scanner icon.
@@ -90,3 +92,19 @@ tree; the tree itself does not change.
   folds the middle crumbs into **…**, which opens them as a menu.
 - **The empty folder's words** on a phone: "Nothing in *folder* yet" and
   "Tap + to make a note or a folder here."
+
+## After the mockups (the review of #727)
+
+- **The walk is the pane's, not the grid's.** The mockups gave the grid a
+  keyboard and left the list view without one; that is a gap, not a shape.
+  Both views take the keyboard the same way — a click puts the cursor on
+  the row or the tile, the arrows and Home/End/PgUp/PgDn move it, Enter
+  opens, F2 and Delete act on it. The tree's left and right arrows close
+  and open folders, which a flat grid has no use for.
+- **A modified key is the app's.** Alt+Left/Right walk the notes' history
+  and Ctrl+Shift+PageUp/PageDown the journal, even while the pane holds
+  the cursor, so the walk claims the plain key or none (Alt+Up stays the
+  grid's own way up).
+- **The switch starts in the tree's selection every time**, not only the
+  first: the grid's own folder is what it holds while it is the pane on
+  screen, and the two never drift apart across switches.

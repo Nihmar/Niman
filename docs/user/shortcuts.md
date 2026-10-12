@@ -100,6 +100,24 @@ engine), which takes the keyboard when you switch to it or click it:
 - `PageUp` / `PageDown` — scroll a page, keeping a line of the last one
 - `Home` / `End`, with `Ctrl` or without — start and end of the note
 
+The Files pane — the tree or the grid, whichever view is on — takes the
+keyboard when you click a row or a tile:
+
+- `↑` / `↓` — walk the rows; `Home` / `End` and `PageUp` / `PageDown`
+  jump
+- `Enter` — open the note the cursor is on, or open a folder in the tree;
+  in the grid, a folder's tile is entered
+- `←` / `→` — in the tree, close an open folder or step out to the row
+  that holds it, and open a closed one or step into the rows under it; in
+  the grid, walk the tiles
+- `F2` — rename the row the cursor is on (in place on Linux and Windows,
+  the dialog on a phone); `Delete` — delete it
+- `Backspace` / `Alt+Up` — in the grid, up one folder
+
+A modified key is left to the app's own shortcuts: `Alt+←` / `Alt+→` walk
+the notes' history and `Ctrl/⌘+Shift+PageUp` / `PageDown` the journal,
+even while a row or a tile holds the cursor.
+
 Editor find/replace follows the familiar bindings:
 
 - `Ctrl/⌘+F` — find

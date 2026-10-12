@@ -207,6 +207,15 @@ do not offer one through the file API the app uses, so **Date created** is
 the modification time there — the order above it (see
 [platforms](platforms.md#date-created)).
 
+A click on a row puts the keyboard's cursor there, and the pane takes the
+keys: the arrows walk the rows, `Home`/`End` and `PgUp`/`PgDn` jump,
+`Enter` opens the note (or opens the folder) the cursor is on, `←` closes
+an open folder or steps out to the row that holds it, `→` opens a closed
+one or steps into the rows under it, `F2` renames and `Delete` deletes the
+row the cursor is on. A modified key is left to the app's own shortcuts —
+`Alt`+`←`/`→` walk the notes' history and `Ctrl`+`Shift`+`PgUp`/`PgDn`
+the journal — so the walk never shadows one.
+
 ### The grid
 
 The Files pane has a second shape: a **grid** of one folder's children,
@@ -234,15 +243,18 @@ pane folds the middle crumbs into a `…` that opens them as a menu.
 
 Nothing else changes: the row menu (long press, right-click) is the same
 one, a drag moves a tile onto another tile or a crumb as a row does, and
-a rename on Linux and Windows lays the tree's own field over the tile. On
-a keyboard the arrows, `Home`/`End` and `PgUp`/`PgDn` walk the tiles,
-`Enter` opens or enters, `F2` renames and `Delete` deletes the focused
-tile.
+a rename on Linux and Windows lays the tree's own field over the tile.
+A click puts the keyboard's cursor on a tile, as it does on a row, and
+the walk is the tree's own: the arrows, `Home`/`End` and `PgUp`/`PgDn`
+move it, `Enter` opens or enters, `F2` renames and `Delete` deletes the
+tile the cursor is on. A modified key stays the app's here too.
 
 Entering a folder writes the move through to the tree: the folder is
 selected and opened there, so switching back to the list finds it. The
-grid's own folder lives while the library is open, not in a file: a
-library opened again starts the grid from the tree's selection.
+grid's own folder lives while the library is open, not in a file: every
+switch to the grid starts from the tree's selection — the folder
+selected, or the folder the selected note sits in — and the grid keeps
+that folder while it is the pane on screen.
 
 ## Renaming a note or a folder
 
