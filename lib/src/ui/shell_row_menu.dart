@@ -130,6 +130,10 @@ Future<String?> showTreeBackgroundMenuAt(
 );
 
 /// [groups] as a menu at [position], a divider between groups.
+///
+/// A pointer's menu (#296) shares its metrics with the footer's own menus
+/// (`pointer_density.dart`), and its labels drop the phone's medium weight
+/// for the tree's own body text.
 Future<String?> _showEntriesAt(
   BuildContext context, {
   required Offset position,
@@ -182,10 +186,6 @@ Future<String?> _showEntriesAt(
     ],
   );
 }
-
-// A pointer's menu (#296): the metrics are shared with the footer's own
-// menus (`pointer_density.dart`), and the label drops the phone's medium
-// weight for the tree's own body text.
 
 /// What the menu acts on: the row's icon, its name, and the folder it
 /// sits in.

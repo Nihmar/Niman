@@ -87,6 +87,7 @@ final class TreeFooterBar extends StatelessWidget {
             tooltip: AppStrings.actionNew,
             onSelected: onNewItem,
             position: PopupMenuPosition.over,
+            menuPadding: dense ? pointerDenseMenuPadding : null,
             // A desktop menu should appear, not perform (T-PP-22): the
             // default 300 ms scale reads as skipped frames on this
             // compositor, and 120 ms is a menu that is simply there.
@@ -229,6 +230,11 @@ final class TreeSortToggle extends StatelessWidget {
     final dense = pointerDense(Theme.of(context));
     return PopupMenuButton<TreeSort>(
       key: const Key('toggle-sort'),
+      // Its name, as a tooltip and to a screen reader: without one both
+      // fall back to Flutter's generic "Show menu" (#785). The to-do
+      // list's sort button already says it, in every language.
+      tooltip: AppStrings.todoSortTooltip,
+      menuPadding: dense ? pointerDenseMenuPadding : null,
       icon: AnimatedRotation(
         turns: sort.descending ? 0.5 : 0,
         duration: const Duration(milliseconds: 180),
@@ -268,7 +274,8 @@ final class TreeSortToggle extends StatelessWidget {
   /// A plain item with the check leading, not a `CheckedPopupMenuItem`: that
   /// one draws a [ListTile], and a tile keeps its own 48 px whatever height
   /// the item was given — the sort menu stood twice as tall as the create
-  /// menu beside it because of it (#747).
+  /// menu beside it because of it (#747). The check is said to a screen
+  /// reader as the checked state the old item carried (#785).
   PopupMenuItem<TreeSort> _sortItem({
     required Key key,
     required TreeSort value,
@@ -280,20 +287,23 @@ final class TreeSortToggle extends StatelessWidget {
       key: key,
       value: value,
       height: dense ? pointerDenseItemHeight : kMinInteractiveDimension,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // The room of the check a chosen order wears, taken either way so
-          // the labels line up.
-          SizedBox(
-            width: 18,
-            child: checked
-                ? const Icon(Icons.check, size: 18)
-                : const SizedBox.shrink(),
-          ),
-          const SizedBox(width: 12),
-          Text(label, overflow: TextOverflow.ellipsis),
-        ],
+      child: Semantics(
+        checked: checked,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // The room of the check a chosen order wears, taken either way
+            // so the labels line up.
+            SizedBox(
+              width: 18,
+              child: checked
+                  ? const Icon(Icons.check, size: 18)
+                  : const SizedBox.shrink(),
+            ),
+            const SizedBox(width: 12),
+            Text(label, overflow: TextOverflow.ellipsis),
+          ],
+        ),
       ),
     );
   }
