@@ -51,6 +51,13 @@ Notification text is the task's prose without `key:value` tags (and
 without `+`/`@`/`#` markers unless the library's `reminderShowTokens`
 is true).
 
+An event in `calendar.txt` carries its reminder the same way — `17-18
+jogging @park rem:16:30.`, a clock time on the line's own day
+([journal](journal.md)) — and it feeds the same alarms: one wanted set
+over both files, so completing or deleting either takes its reminder
+with it. Tapping an event's notification opens the journal on that day;
+tapping a task's opens the task list.
+
 ## Home-screen widget
 
 Android: the **Niman Todos** widget mirrors the tab's open view —

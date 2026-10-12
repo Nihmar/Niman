@@ -247,7 +247,7 @@ final class PluginReminderBackend implements ReminderBackend {
       androidScheduleMode: exact
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
-      payload: todoReminderPayload,
+      payload: reminder.payload,
     );
   }
 

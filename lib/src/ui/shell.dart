@@ -1828,6 +1828,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       session: widget.controller,
       sourceFactory: widget.calendarSourceFactory,
     );
+    // The calendar's own reminders ride with the tasks' (#730): the file
+    // is pushed to the task controller, whose wanted set covers both.
+    _calendarController.addListener(_pushCalendarReminders);
     _templateFlow = ShellTemplateFlow(
       controller: widget.controller,
       origin: () => (
@@ -1861,6 +1864,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (payload == todoReminderPayload && mounted) {
         const AppLogger(name: 'todo').debug('todo tap: opening the todo list');
         _openTodo();
+      } else if (journalReminderDayOf(payload) != null) {
+        unawaited(_openReminderPayload(payload!));
       } else if (payload != null &&
           payload.startsWith(ocrNotificationPrefix) &&
           mounted) {
@@ -1988,6 +1993,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unawaited(_homeWidgets.dispose());
     unawaited(_inbound.cancel());
     _todoController.removeListener(_homeWidgets.pushTodos);
+    _calendarController.removeListener(_pushCalendarReminders);
     _todoController.dispose();
     _calendarController.dispose();
     _personalDictionary?.dispose();
@@ -2035,12 +2041,30 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _homeWidgets.pushAll();
   }
 
+  /// Hands the calendar file to the task controller, whose reminder set
+  /// covers both files (#730).
+  void _pushCalendarReminders() {
+    _todoController.calendar = _calendarController.snapshot;
+  }
+
+  /// A reminder's own destination: the journal on its day for an event
+  /// (#730), the Todo tab for a task.
+  Future<void> _openReminderPayload(String payload) async {
+    final day = journalReminderDayOf(payload);
+    if (day == null || !mounted) return;
+    const AppLogger(name: 'calendar').debug('event reminder tap: $payload');
+    _journalUi.showCalendar(context);
+    await _journalFlow.openDay(context, day);
+  }
+
   /// A notification tap that started the app lands on the Todo tab.
   Future<void> _applyReminderLaunch() async {
     final payload = await widget.reminders.consumeLaunchPayload();
     if (_followCaptureRoute(payload)) return;
     if (payload == todoReminderPayload && mounted) {
       _openTodo();
+    } else if (journalReminderDayOf(payload) != null) {
+      await _openReminderPayload(payload!);
     } else if (payload != null &&
         payload.startsWith(ocrNotificationPrefix) &&
         mounted) {

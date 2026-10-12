@@ -92,9 +92,14 @@ text — with the `+project`, `@context` and `#tag` tokens both files
 already use a tap away — **Remind me** with its lead time, and the exact
 line that will be written, so what is about to be added is read before it
 is. **Add task** opens the task dialog with the day as its due date; the
-task then shows under the day's **Due**. A reminder rides on the event's
-own line (`rem:16:30`), so moving or deleting the event moves or deletes
-it.
+task then shows under the day's **Due**.
+
+A reminder rides on the event's own line (`rem:16:30`), so moving or
+deleting the event moves or deletes it, and it feeds the same alarms a
+task's `rem:` does ([tasks](tasks.md)) — tapping the notification opens
+the journal on that day. It is a clock time on the line's own day: an
+event at `0600Z` with `rem:0530` reminds at half past five where the
+phone is, whatever the `Z` says.
 
 The file is otherwise yours: `calendar.txt` opens in the source editor,
 coloured, and a write touches only the line an event was written to —

@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_source.dart';
 
+import '../fakes/fake_calendar_source.dart';
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_reminder_service.dart';
 import '../fakes/fake_todo_source.dart';
@@ -20,6 +22,7 @@ void main() {
   late FakeLibrarySession controller;
   late FakeReminderService reminders;
   late FakeTodoSource todos;
+  late FakeCalendarSource calendar;
   late FakeFilePicker filePicker;
 
   const line = 'call rem:2099-09-08T10:30';
@@ -28,6 +31,9 @@ void main() {
     controller = FakeLibrarySession();
     reminders = FakeReminderService();
     todos = FakeTodoSource(todo: <String>[line]);
+    // No calendar file unless a test asks for one: the reminder set of
+    // these tests is the tasks' own.
+    calendar = FakeCalendarSource();
     filePicker = useFakeFilePicker();
   });
 
@@ -43,6 +49,7 @@ void main() {
           librarySessionProvider.overrideWithValue(controller),
           reminderServiceProvider.overrideWithValue(reminders),
           todoSourceFactoryProvider.overrideWithValue((_) => todos),
+          calendarSourceFactoryProvider.overrideWithValue((_) => calendar),
         ],
         child: const NimanApp(),
       ),
@@ -92,6 +99,40 @@ void main() {
     reminders.tap(todoReminderPayload);
     await settle(tester);
     expect(find.byKey(const Key('todo-view-switch')), findsOne);
+  });
+
+  testWidgets('an event reminder joins the tasks in one wanted set', (
+    tester,
+  ) async {
+    calendar = FakeCalendarSource(
+      lines: const ['2099-09-08 w37 Tue  16 dentist @city rem:15:15.'],
+    );
+    await pumpShell(tester, const Size(390, 844));
+    final wanted = reminders.reconciled.last;
+    expect(wanted.keys, contains(todoReminderId(line)));
+    expect(
+      wanted.keys,
+      contains(
+        calendarReminderId(DateTime(2099, 9, 8), 'dentist @city rem:15:15'),
+      ),
+    );
+    expect(
+      wanted.values.map((reminder) => reminder.payload),
+      contains('journal:2099-09-08'),
+    );
+  });
+
+  testWidgets('an event reminder tap opens the journal, not the todo list', (
+    tester,
+  ) async {
+    calendar = FakeCalendarSource(
+      lines: const ['2099-09-08 w37 Tue  16 dentist @city rem:15:15.'],
+    );
+    await pumpShell(tester, const Size(1200, 900));
+    reminders.tap(journalReminderPayload(DateTime(2099, 9, 8)));
+    await settle(tester);
+    expect(find.byKey(const Key('journal-browser')), findsOne);
+    expect(find.byKey(const Key('todo-view-switch')), findsNothing);
   });
 
   testWidgets('the format help is one tap from the list', (tester) async {

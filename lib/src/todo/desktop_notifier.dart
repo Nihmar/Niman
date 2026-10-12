@@ -78,7 +78,7 @@ final class PluginDesktopNotifier implements DesktopNotifier {
         ),
         windows: WindowsNotificationDetails(),
       ),
-      payload: todoReminderPayload,
+      payload: reminder.payload,
     );
   }
 }
