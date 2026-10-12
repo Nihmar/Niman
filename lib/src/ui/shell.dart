@@ -4626,6 +4626,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               sort: _editorSettings.treeSort,
               selectedPath: _selected,
               expanded: _expanded,
+              // The keyboard's walk (#727) lets go while the grid holds the
+              // pane, and while the search holds the sidebar's slot.
+              active: !_gridOn && !_sidebarShowsSearch,
               onToggle: _toggle,
               onSelect: _select,
               onOpenInNewTab: (note) => _select(note, newTab: true),
@@ -4636,6 +4639,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                   unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
               onMove: (path, folder) =>
                   unawaited(_rowActions.moveTo(path, folder)),
+              onRename: (path) => unawaited(_rowActions.rename(context, path)),
+              onDelete: (path) => unawaited(_rowActions.delete(context, path)),
               renaming: _treeRename,
             ),
           ),

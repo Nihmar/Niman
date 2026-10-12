@@ -622,6 +622,19 @@ final class _FolderGridState extends State<FolderGrid> {
     final rows = _current;
     if (rows == null || rows.rows.isEmpty) return KeyEventResult.ignored;
     final key = event.logicalKey;
+    final keys = HardwareKeyboard.instance;
+    // Alt+Up is the pane's own way up (#727) — the one modified key the
+    // walk keeps.
+    if (key == LogicalKeyboardKey.arrowUp && keys.isAltPressed) return _up();
+    // Every other modified key belongs to the app's accelerators (#23):
+    // Alt+Left and Alt+Right walk the notes' history, Ctrl+Shift+PageUp
+    // and PageDown the journal — the walk claims the plain key or none.
+    if (keys.isControlPressed ||
+        keys.isAltPressed ||
+        keys.isMetaPressed ||
+        keys.isShiftPressed) {
+      return KeyEventResult.ignored;
+    }
     final count = rows.rows.length;
     final columns = _columns;
     int? next;
@@ -630,7 +643,6 @@ final class _FolderGridState extends State<FolderGrid> {
     } else if (key == LogicalKeyboardKey.arrowRight) {
       next = (_focusIndex ?? 0) + 1;
     } else if (key == LogicalKeyboardKey.arrowUp) {
-      if (HardwareKeyboard.instance.isAltPressed) return _up();
       next = (_focusIndex ?? 0) - columns;
     } else if (key == LogicalKeyboardKey.arrowDown) {
       next = (_focusIndex ?? 0) + columns;
