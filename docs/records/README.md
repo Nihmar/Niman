@@ -28,4 +28,5 @@ comments (`docs/records/<name>.md`).
 | [transcription.md](transcription.md) | On-device speech-to-text with `whisper_ggml` |
 | [ocr.md](ocr.md) | Text recognition with Tesseract, engine and languages downloaded on demand (#532) |
 | [web-capture.md](web-capture.md) | Capturing a web page or a selection as Markdown, with a Dart port of Readability (#531) |
+| [calendar-txt.md](calendar-txt.md) | Reading and writing `calendar.txt` beside `todo.txt`: the journal's events, the line-wise sync merge, reminders on an event (#730) |
 | [review-v0.1.3.md](review-v0.1.3.md) | Code review of everything merged after v0.1.3: what was fixed, what is open |
