@@ -561,6 +561,15 @@ final class GalicianStrings extends Strings {
   String get toolbarImage => 'Inserir imaxe';
   @override
   String get toolbarTable => 'Táboa';
+
+  @override
+  String get toolbarColumns => 'Columnas';
+
+  @override
+  String get columnsLeft => 'Columna esquerda';
+
+  @override
+  String get columnsRight => 'Columna dereita';
   @override
   String get tableRow => 'Fila';
   @override
@@ -2955,6 +2964,9 @@ final class GalicianStrings extends Strings {
   String get fullScreen => 'Pantalla completa';
   @override
   String get commandInsertDiagram => 'Inserir diagrama (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Inserir columnas';
 
   @override
   String get commandInsertMindMap => 'Inserir mapa mental';

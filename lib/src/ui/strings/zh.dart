@@ -518,6 +518,15 @@ final class ChineseStrings extends Strings {
   String get toolbarImage => '插入图片';
   @override
   String get toolbarTable => '表格';
+
+  @override
+  String get toolbarColumns => '分栏';
+
+  @override
+  String get columnsLeft => '左栏';
+
+  @override
+  String get columnsRight => '右栏';
   @override
   String get tableRow => '行';
   @override
@@ -2584,6 +2593,9 @@ final class ChineseStrings extends Strings {
   String get fullScreen => '全屏';
   @override
   String get commandInsertDiagram => '插入图表（Mermaid）';
+
+  @override
+  String get commandInsertColumns => '插入分栏';
 
   @override
   String get commandInsertMindMap => '插入思维导图';

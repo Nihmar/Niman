@@ -559,6 +559,15 @@ final class UkrainianStrings extends Strings {
   String get toolbarImage => 'Вставити зображення';
   @override
   String get toolbarTable => 'Таблиця';
+
+  @override
+  String get toolbarColumns => 'Стовпці';
+
+  @override
+  String get columnsLeft => 'Лівий стовпець';
+
+  @override
+  String get columnsRight => 'Правий стовпець';
   @override
   String get tableRow => 'Рядок';
   @override
@@ -2980,6 +2989,9 @@ final class UkrainianStrings extends Strings {
   String get fullScreen => 'Повний екран';
   @override
   String get commandInsertDiagram => 'Вставити діаграму (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Вставити стовпці';
 
   @override
   String get commandInsertMindMap => 'Вставити карту думок';

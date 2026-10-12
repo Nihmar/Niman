@@ -147,6 +147,7 @@ final class NoteEditCommands {
         // The lines either side: the table keeps a blank line from them.
         context: 1,
       ),
+      ToolbarItem.columns: insertColumnsAtCaret,
       ToolbarItem.heading: _showHeadingDialog,
       ToolbarItem.list: () => _prefixLines(prefix: '- '),
       ToolbarItem.orderedList: _insertOrderedList,
@@ -159,6 +160,20 @@ final class NoteEditCommands {
       ToolbarItem.tools: () => unawaited(_openTools()),
     };
   }
+
+  /// Two columns at the caret, on lines of their own, the first column's
+  /// text selected (#729): the toolbar's Columns, the palette's Insert
+  /// columns.
+  void insertColumnsAtCaret() => run(
+    (text, selection) => insertColumns(
+      text: text,
+      selection: selection,
+      left: AppStrings.columnsLeft,
+      right: AppStrings.columnsRight,
+    ),
+    // The lines either side: the block keeps a blank line from them.
+    context: 1,
+  );
 
   /// The toolbar buttons that open a menu, run with the button's place on
   /// screen so a pointer's menu grows from it (#780). A key runs the same

@@ -520,6 +520,15 @@ final class JapaneseStrings extends Strings {
   String get toolbarImage => '画像の挿入';
   @override
   String get toolbarTable => '表';
+
+  @override
+  String get toolbarColumns => '段組み';
+
+  @override
+  String get columnsLeft => '左の段';
+
+  @override
+  String get columnsRight => '右の段';
   @override
   String get tableRow => '行';
   @override
@@ -2669,6 +2678,9 @@ final class JapaneseStrings extends Strings {
   String get fullScreen => '全画面';
   @override
   String get commandInsertDiagram => '図を挿入（Mermaid）';
+
+  @override
+  String get commandInsertColumns => '段組みを挿入';
 
   @override
   String get commandInsertMindMap => 'マインドマップを挿入';

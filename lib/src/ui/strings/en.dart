@@ -553,6 +553,15 @@ final class EnglishStrings extends Strings {
   String get toolbarImage => 'Insert image';
   @override
   String get toolbarTable => 'Table';
+
+  @override
+  String get toolbarColumns => 'Columns';
+
+  @override
+  String get columnsLeft => 'Left column';
+
+  @override
+  String get columnsRight => 'Right column';
   @override
   String get tableRow => 'Row';
   @override
@@ -2897,6 +2906,9 @@ final class EnglishStrings extends Strings {
   String get fullScreen => 'Full screen';
   @override
   String get commandInsertDiagram => 'Insert diagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Insert columns';
 
   @override
   String get commandInsertMindMap => 'Insert mind map';

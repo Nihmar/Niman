@@ -565,6 +565,15 @@ final class PolishStrings extends Strings {
   String get toolbarImage => 'Wstaw obraz';
   @override
   String get toolbarTable => 'Tabela';
+
+  @override
+  String get toolbarColumns => 'Kolumny';
+
+  @override
+  String get columnsLeft => 'Lewa kolumna';
+
+  @override
+  String get columnsRight => 'Prawa kolumna';
   @override
   String get tableRow => 'Wiersz';
   @override
@@ -2987,6 +2996,9 @@ final class PolishStrings extends Strings {
   String get fullScreen => 'Pełny ekran';
   @override
   String get commandInsertDiagram => 'Wstaw diagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Wstaw kolumny';
 
   @override
   String get commandInsertMindMap => 'Wstaw mapę myśli';

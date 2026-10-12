@@ -560,6 +560,15 @@ final class BosnianStrings extends Strings {
   String get toolbarImage => 'Umetni sliku';
   @override
   String get toolbarTable => 'Tabela';
+
+  @override
+  String get toolbarColumns => 'Kolone';
+
+  @override
+  String get columnsLeft => 'Lijeva kolona';
+
+  @override
+  String get columnsRight => 'Desna kolona';
   @override
   String get tableRow => 'Red';
   @override
@@ -2964,6 +2973,9 @@ final class BosnianStrings extends Strings {
   String get fullScreen => 'Cijeli ekran';
   @override
   String get commandInsertDiagram => 'Umetni dijagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Umetni kolone';
 
   @override
   String get commandInsertMindMap => 'Umetni mentalnu mapu';

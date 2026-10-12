@@ -251,6 +251,18 @@ ContextMenuPart editorMenu({
               context: 1,
             ),
             command(
+              'columns',
+              AppStrings.toolbarColumns,
+              Icons.view_column_outlined,
+              (text, selection) => insertColumns(
+                text: text,
+                selection: selection,
+                left: AppStrings.columnsLeft,
+                right: AppStrings.columnsRight,
+              ),
+              context: 1,
+            ),
+            command(
               'rule',
               AppStrings.insertRule,
               Icons.horizontal_rule,

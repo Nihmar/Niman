@@ -385,6 +385,36 @@ void main() {
   }
 
   for (final live in <bool>[false, true]) {
+    testWidgets('the columns button writes two columns, one undo step '
+        '(${live ? 'live' : 'source'})', (tester) async {
+      // #729: two equal columns at the caret, on lines of their own, the
+      // first column's text selected so typing replaces it.
+      final writes = <String>[];
+      await _pump(
+        tester,
+        _view(
+          readNote: (_) async => 'una riga\n',
+          writes: writes,
+          showWysiwyg: live,
+        ),
+      );
+      final surface = _surface(tester)..placeCaret(8);
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('toolbar-columns')));
+      await tester.pump();
+      const columns =
+          ':::: columns\n::: column\nLeft column\n:::\n\n'
+          '::: column\nRight column\n:::\n::::';
+      expect(surface.widget.buffer.text, 'una riga\n\n$columns\n');
+      const start = 'una riga\n\n:::: columns\n::: column\n';
+      expect(surface.selection.start, start.length);
+      expect(surface.selection.end, start.length + 'Left column'.length);
+      expect(surface.undo(), isTrue);
+      expect(surface.widget.buffer.text, 'una riga\n');
+    });
+  }
+
+  for (final live in <bool>[false, true]) {
     testWidgets('the checkbox list button toggles a task, one undo step '
         '(${live ? 'live' : 'source'})', (tester) async {
       // #263: the toolbar's checkbox list, in both unified modes.

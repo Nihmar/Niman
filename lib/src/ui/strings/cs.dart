@@ -558,6 +558,15 @@ final class CzechStrings extends Strings {
   String get toolbarImage => 'Vložit obrázek';
   @override
   String get toolbarTable => 'Tabulka';
+
+  @override
+  String get toolbarColumns => 'Sloupce';
+
+  @override
+  String get columnsLeft => 'Levý sloupec';
+
+  @override
+  String get columnsRight => 'Pravý sloupec';
   @override
   String get tableRow => 'Řádek';
   @override
@@ -2935,6 +2944,9 @@ final class CzechStrings extends Strings {
   String get fullScreen => 'Celá obrazovka';
   @override
   String get commandInsertDiagram => 'Vložit diagram (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Vložit sloupce';
 
   @override
   String get commandInsertMindMap => 'Vložit myšlenkovou mapu';

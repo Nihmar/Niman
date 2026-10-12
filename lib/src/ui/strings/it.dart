@@ -563,6 +563,15 @@ final class ItalianStrings extends Strings {
   String get toolbarImage => 'Inserisci immagine';
   @override
   String get toolbarTable => 'Tabella';
+
+  @override
+  String get toolbarColumns => 'Colonne';
+
+  @override
+  String get columnsLeft => 'Colonna sinistra';
+
+  @override
+  String get columnsRight => 'Colonna destra';
   @override
   String get tableRow => 'Riga';
   @override
@@ -2955,6 +2964,9 @@ final class ItalianStrings extends Strings {
   String get fullScreen => 'Schermo intero';
   @override
   String get commandInsertDiagram => 'Inserisci diagramma (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Inserisci colonne';
 
   @override
   String get commandInsertMindMap => 'Inserisci mappa mentale';

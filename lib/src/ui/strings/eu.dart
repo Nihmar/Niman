@@ -553,6 +553,15 @@ final class BasqueStrings extends Strings {
   String get toolbarImage => 'Txertatu irudia';
   @override
   String get toolbarTable => 'Taula';
+
+  @override
+  String get toolbarColumns => 'Zutabeak';
+
+  @override
+  String get columnsLeft => 'Ezkerreko zutabea';
+
+  @override
+  String get columnsRight => 'Eskuineko zutabea';
   @override
   String get tableRow => 'Errenkada';
   @override
@@ -2966,6 +2975,9 @@ final class BasqueStrings extends Strings {
   String get fullScreen => 'Pantaila osoa';
   @override
   String get commandInsertDiagram => 'Txertatu diagrama (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Txertatu zutabeak';
 
   @override
   String get commandInsertMindMap => 'Txertatu mapa mentala';

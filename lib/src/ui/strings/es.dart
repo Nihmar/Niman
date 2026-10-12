@@ -562,6 +562,15 @@ final class SpanishStrings extends Strings {
   String get toolbarImage => 'Insertar imagen';
   @override
   String get toolbarTable => 'Tabla';
+
+  @override
+  String get toolbarColumns => 'Columnas';
+
+  @override
+  String get columnsLeft => 'Columna izquierda';
+
+  @override
+  String get columnsRight => 'Columna derecha';
   @override
   String get tableRow => 'Fila';
   @override
@@ -2980,6 +2989,9 @@ final class SpanishStrings extends Strings {
   String get fullScreen => 'Pantalla completa';
   @override
   String get commandInsertDiagram => 'Insertar diagrama (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Insertar columnas';
 
   @override
   String get commandInsertMindMap => 'Insertar mapa mental';

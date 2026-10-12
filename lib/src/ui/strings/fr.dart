@@ -565,6 +565,15 @@ final class FrenchStrings extends Strings {
   String get toolbarImage => 'Insérer une image';
   @override
   String get toolbarTable => 'Tableau';
+
+  @override
+  String get toolbarColumns => 'Colonnes';
+
+  @override
+  String get columnsLeft => 'Colonne de gauche';
+
+  @override
+  String get columnsRight => 'Colonne de droite';
   @override
   String get tableRow => 'Ligne';
   @override
@@ -3025,6 +3034,9 @@ final class FrenchStrings extends Strings {
   String get fullScreen => 'Plein écran';
   @override
   String get commandInsertDiagram => 'Insérer un diagramme (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Insérer des colonnes';
 
   @override
   String get commandInsertMindMap => 'Insérer une carte mentale';

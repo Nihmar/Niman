@@ -568,6 +568,15 @@ final class GreekStrings extends Strings {
   String get toolbarImage => 'Εισαγωγή εικόνας';
   @override
   String get toolbarTable => 'Πίνακας';
+
+  @override
+  String get toolbarColumns => 'Στήλες';
+
+  @override
+  String get columnsLeft => 'Αριστερή στήλη';
+
+  @override
+  String get columnsRight => 'Δεξιά στήλη';
   @override
   String get tableRow => 'Γραμμή';
   @override
@@ -3031,6 +3040,9 @@ final class GreekStrings extends Strings {
   String get fullScreen => 'Πλήρης οθόνη';
   @override
   String get commandInsertDiagram => 'Εισαγωγή διαγράμματος (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Εισαγωγή στηλών';
 
   @override
   String get commandInsertMindMap => 'Εισαγωγή νοητικού χάρτη';

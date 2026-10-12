@@ -230,6 +230,42 @@ MarkdownEdit insertTable({
   );
 }
 
+/// Inserts two equal columns (#729), on lines of their own as a table is,
+/// with [left] — the first column's text — selected, so typing replaces
+/// it. The outer fence is four colons: djot and commonmark-hs close it
+/// where Pandoc does.
+MarkdownEdit insertColumns({
+  required String text,
+  required TextSelection selection,
+  required String left,
+  required String right,
+}) {
+  final edit = insertBlock(
+    text: text,
+    selection: selection,
+    block: <String>[
+      ':::: columns',
+      '::: column',
+      left,
+      ':::',
+      '',
+      '::: column',
+      right,
+      ':::',
+      '::::',
+    ],
+    caret: (line: 2, column: 0),
+  );
+  final start = edit.selection.extentOffset;
+  return MarkdownEdit(
+    text: edit.text,
+    selection: TextSelection(
+      baseOffset: start,
+      extentOffset: start + left.length,
+    ),
+  );
+}
+
 /// Inserts [block]'s lines on lines of their own, the caret at [caret] in
 /// them — at the end of the last one without it.
 ///

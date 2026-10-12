@@ -559,6 +559,15 @@ final class BulgarianStrings extends Strings {
   String get toolbarImage => 'Вмъкване на изображение';
   @override
   String get toolbarTable => 'Таблица';
+
+  @override
+  String get toolbarColumns => 'Колони';
+
+  @override
+  String get columnsLeft => 'Лява колона';
+
+  @override
+  String get columnsRight => 'Дясна колона';
   @override
   String get tableRow => 'Ред';
   @override
@@ -2946,6 +2955,9 @@ final class BulgarianStrings extends Strings {
   String get fullScreen => 'Цял екран';
   @override
   String get commandInsertDiagram => 'Вмъкни диаграма (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Вмъкни колони';
 
   @override
   String get commandInsertMindMap => 'Вмъкни интелектуална карта';

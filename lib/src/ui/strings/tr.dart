@@ -549,6 +549,15 @@ final class TurkishStrings extends Strings {
   String get toolbarImage => 'Görsel ekle';
   @override
   String get toolbarTable => 'Tablo';
+
+  @override
+  String get toolbarColumns => 'Sütunlar';
+
+  @override
+  String get columnsLeft => 'Sol sütun';
+
+  @override
+  String get columnsRight => 'Sağ sütun';
   @override
   String get tableRow => 'Satır';
   @override
@@ -2895,6 +2904,9 @@ final class TurkishStrings extends Strings {
   String get fullScreen => 'Tam ekran';
   @override
   String get commandInsertDiagram => 'Diyagram ekle (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Sütun ekle';
 
   @override
   String get commandInsertMindMap => 'Zihin haritası ekle';

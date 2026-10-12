@@ -102,6 +102,9 @@ enum AppCommand {
   /// Insert a mind map fence at the caret (#530).
   insertMindMap,
 
+  /// Insert two columns at the caret (#729).
+  insertColumns,
+
   /// Turn the list at the caret into a mind map (#530).
   convertListToMindMap,
 
@@ -400,6 +403,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.formatNote => AppStrings.formatNoteTitle,
   AppCommand.insertDiagram => AppStrings.commandInsertDiagram,
   AppCommand.insertMindMap => AppStrings.commandInsertMindMap,
+  AppCommand.insertColumns => AppStrings.commandInsertColumns,
   AppCommand.convertListToMindMap => AppStrings.commandConvertListToMindMap,
   AppCommand.pasteAsMarkdown => AppStrings.pasteAsMarkdown,
   AppCommand.exportNote => AppStrings.exportTitle,

@@ -560,6 +560,15 @@ final class LithuanianStrings extends Strings {
   String get toolbarImage => 'Įterpti vaizdą';
   @override
   String get toolbarTable => 'Lentelė';
+
+  @override
+  String get toolbarColumns => 'Stulpeliai';
+
+  @override
+  String get columnsLeft => 'Kairysis stulpelis';
+
+  @override
+  String get columnsRight => 'Dešinysis stulpelis';
   @override
   String get tableRow => 'Eilutė';
   @override
@@ -2977,6 +2986,9 @@ final class LithuanianStrings extends Strings {
   String get fullScreen => 'Visas ekranas';
   @override
   String get commandInsertDiagram => 'Įterpti diagramą (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Įterpti stulpelius';
 
   @override
   String get commandInsertMindMap => 'Įterpti minčių žemėlapį';

@@ -554,6 +554,15 @@ final class IcelandicStrings extends Strings {
   String get toolbarImage => 'Setja inn mynd';
   @override
   String get toolbarTable => 'Tafla';
+
+  @override
+  String get toolbarColumns => 'Dálkar';
+
+  @override
+  String get columnsLeft => 'Vinstri dálkur';
+
+  @override
+  String get columnsRight => 'Hægri dálkur';
   @override
   String get tableRow => 'Röð';
   @override
@@ -2932,6 +2941,9 @@ final class IcelandicStrings extends Strings {
   String get fullScreen => 'Skjár í fullri stærð';
   @override
   String get commandInsertDiagram => 'Setja inn skýringarmynd (Mermaid)';
+
+  @override
+  String get commandInsertColumns => 'Setja inn dálka';
 
   @override
   String get commandInsertMindMap => 'Setja inn hugarkort';
