@@ -651,6 +651,9 @@ final class CroatianStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Tablice';
+
+  @override
+  String get cheatColumns => 'Stupci';
   @override
   String get cheatFootnotes => 'Fusnote';
   @override

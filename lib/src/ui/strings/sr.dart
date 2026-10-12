@@ -653,6 +653,9 @@ final class SerbianStrings extends Strings {
   String get cheatMath => 'Математика';
   @override
   String get cheatTables => 'Табеле';
+
+  @override
+  String get cheatColumns => 'Колоне';
   @override
   String get cheatFootnotes => 'Фусноте';
   @override

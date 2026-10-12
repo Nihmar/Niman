@@ -638,6 +638,9 @@ final class HindiStrings extends Strings {
   String get cheatMath => 'गणित';
   @override
   String get cheatTables => 'तालिकाएँ';
+
+  @override
+  String get cheatColumns => 'स्तंभ';
   @override
   String get cheatFootnotes => 'फ़ुटनोट';
   @override

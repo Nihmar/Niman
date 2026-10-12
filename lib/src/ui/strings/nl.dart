@@ -653,6 +653,9 @@ final class DutchStrings extends Strings {
   String get cheatMath => 'Wiskunde';
   @override
   String get cheatTables => 'Tabellen';
+
+  @override
+  String get cheatColumns => 'Kolommen';
   @override
   String get cheatFootnotes => 'Voetnoten';
   @override

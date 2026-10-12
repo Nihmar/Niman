@@ -647,6 +647,9 @@ final class DanishStrings extends Strings {
   String get cheatMath => 'Matematik';
   @override
   String get cheatTables => 'Tabeller';
+
+  @override
+  String get cheatColumns => 'Kolonner';
   @override
   String get cheatFootnotes => 'Fodnoter';
   @override

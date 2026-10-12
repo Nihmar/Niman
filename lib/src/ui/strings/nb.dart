@@ -647,6 +647,9 @@ final class NorwegianStrings extends Strings {
   String get cheatMath => 'Matematikk';
   @override
   String get cheatTables => 'Tabeller';
+
+  @override
+  String get cheatColumns => 'Kolonner';
   @override
   String get cheatFootnotes => 'Fotnoter';
   @override

@@ -643,6 +643,9 @@ final class TurkishStrings extends Strings {
   String get cheatMath => 'Matematik';
   @override
   String get cheatTables => 'Tablolar';
+
+  @override
+  String get cheatColumns => 'Sütunlar';
   @override
   String get cheatFootnotes => 'Dipnotlar';
   @override

@@ -657,6 +657,9 @@ final class ItalianStrings extends Strings {
   String get cheatMath => 'Matematica';
   @override
   String get cheatTables => 'Tabelle';
+
+  @override
+  String get cheatColumns => 'Colonne';
   @override
   String get cheatFootnotes => 'Note a piè di pagina';
   @override

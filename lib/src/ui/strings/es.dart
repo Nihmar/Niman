@@ -656,6 +656,9 @@ final class SpanishStrings extends Strings {
   String get cheatMath => 'Matemáticas';
   @override
   String get cheatTables => 'Tablas';
+
+  @override
+  String get cheatColumns => 'Columnas';
   @override
   String get cheatFootnotes => 'Notas al pie';
   @override

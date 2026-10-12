@@ -659,6 +659,9 @@ final class FrenchStrings extends Strings {
   String get cheatMath => 'Mathématiques';
   @override
   String get cheatTables => 'Tableaux';
+
+  @override
+  String get cheatColumns => 'Colonnes';
   @override
   String get cheatFootnotes => 'Notes de bas de page';
   @override

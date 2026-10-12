@@ -654,6 +654,9 @@ final class LithuanianStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Lentelės';
+
+  @override
+  String get cheatColumns => 'Stulpeliai';
   @override
   String get cheatFootnotes => 'Išnašos';
   @override

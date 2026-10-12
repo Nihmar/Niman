@@ -662,6 +662,9 @@ final class GreekStrings extends Strings {
   String get cheatMath => 'Μαθηματικά';
   @override
   String get cheatTables => 'Πίνακες';
+
+  @override
+  String get cheatColumns => 'Στήλες';
   @override
   String get cheatFootnotes => 'Υποσημειώσεις';
   @override

@@ -653,6 +653,9 @@ final class BulgarianStrings extends Strings {
   String get cheatMath => 'Математика';
   @override
   String get cheatTables => 'Таблици';
+
+  @override
+  String get cheatColumns => 'Колони';
   @override
   String get cheatFootnotes => 'Бележки под линия';
   @override

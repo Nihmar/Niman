@@ -647,6 +647,9 @@ final class BasqueStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Taulak';
+
+  @override
+  String get cheatColumns => 'Zutabeak';
   @override
   String get cheatFootnotes => 'Oin-oharrak';
   @override

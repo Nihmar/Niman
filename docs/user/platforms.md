@@ -19,6 +19,14 @@ which Flutter offers only behind an experimental flag on the desktops and
 not at all on Android — a decision for now, not an omission (#534). On a
 second screen, present from the window placed there.
 
+A note's columns ([editing](editing.md#columns)) are on every platform,
+in the read view, in live mode and in every export. A pane lays them out
+by the width it has, not by the device: on a phone's pane they stack, in
+the order they are written; a tablet or a wide window sets them side by
+side. A PDF printed by the platform lays them out with the HTML page's
+CSS, and the fallback that draws the pages itself by the app's own rule:
+the two agree.
+
 ## Android
 
 - **Storage:** plain `dart:io` file access, gated by

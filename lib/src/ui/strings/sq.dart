@@ -649,6 +649,9 @@ final class AlbanianStrings extends Strings {
   String get cheatMath => 'Matematikë';
   @override
   String get cheatTables => 'Tabelat';
+
+  @override
+  String get cheatColumns => 'Kolona';
   @override
   String get cheatFootnotes => 'Shënimet në fund';
   @override

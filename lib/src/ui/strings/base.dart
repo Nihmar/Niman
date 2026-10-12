@@ -330,6 +330,9 @@ abstract base class Strings {
   String get cheatCodeBlocks;
   String get cheatMath;
   String get cheatTables;
+
+  /// The cheatsheet's note columns (#729).
+  String get cheatColumns;
   String get cheatFootnotes;
   String get cheatRule;
   String get cheatFrontmatter;

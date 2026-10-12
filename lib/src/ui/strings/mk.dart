@@ -656,6 +656,9 @@ final class MacedonianStrings extends Strings {
   String get cheatMath => 'Математика';
   @override
   String get cheatTables => 'Табели';
+
+  @override
+  String get cheatColumns => 'Колони';
   @override
   String get cheatFootnotes => 'Фусноти';
   @override

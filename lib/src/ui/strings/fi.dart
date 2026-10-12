@@ -649,6 +649,9 @@ final class FinnishStrings extends Strings {
   String get cheatMath => 'Matematiikka';
   @override
   String get cheatTables => 'Taulukot';
+
+  @override
+  String get cheatColumns => 'Sarakkeet';
   @override
   String get cheatFootnotes => 'Alaviitteet';
   @override

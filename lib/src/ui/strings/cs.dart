@@ -652,6 +652,9 @@ final class CzechStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Tabulky';
+
+  @override
+  String get cheatColumns => 'Sloupce';
   @override
   String get cheatFootnotes => 'Poznámky pod čarou';
   @override

@@ -643,6 +643,9 @@ final class EstonianStrings extends Strings {
   String get cheatMath => 'Matemaatika';
   @override
   String get cheatTables => 'Tabelid';
+
+  @override
+  String get cheatColumns => 'Veerud';
   @override
   String get cheatFootnotes => 'Joonealused märkused';
   @override

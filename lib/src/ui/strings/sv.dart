@@ -652,6 +652,9 @@ final class SwedishStrings extends Strings {
   String get cheatMath => 'Matematik';
   @override
   String get cheatTables => 'Tabeller';
+
+  @override
+  String get cheatColumns => 'Kolumner';
   @override
   String get cheatFootnotes => 'Fotnoter';
   @override

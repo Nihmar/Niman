@@ -652,6 +652,9 @@ final class BelarusianStrings extends Strings {
   String get cheatMath => 'Матэматыка';
   @override
   String get cheatTables => 'Табліцы';
+
+  @override
+  String get cheatColumns => 'Слупкі';
   @override
   String get cheatFootnotes => 'Зноскі';
   @override

@@ -653,6 +653,9 @@ final class UkrainianStrings extends Strings {
   String get cheatMath => 'Математика';
   @override
   String get cheatTables => 'Таблиці';
+
+  @override
+  String get cheatColumns => 'Стовпці';
   @override
   String get cheatFootnotes => 'Виноски';
   @override

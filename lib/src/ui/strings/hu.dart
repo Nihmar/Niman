@@ -649,6 +649,9 @@ final class HungarianStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Táblázatok';
+
+  @override
+  String get cheatColumns => 'Hasábok';
   @override
   String get cheatFootnotes => 'Lábjegyzetek';
   @override

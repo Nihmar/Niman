@@ -655,6 +655,9 @@ final class GalicianStrings extends Strings {
   String get cheatMath => 'Matemáticas';
   @override
   String get cheatTables => 'Táboas';
+
+  @override
+  String get cheatColumns => 'Columnas';
   @override
   String get cheatFootnotes => 'Notas ao pé';
   @override

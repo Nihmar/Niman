@@ -656,6 +656,9 @@ final class CatalanStrings extends Strings {
   String get cheatMath => 'Matemàtiques';
   @override
   String get cheatTables => 'Taules';
+
+  @override
+  String get cheatColumns => 'Columnes';
   @override
   String get cheatFootnotes => 'Notes al peu';
   @override

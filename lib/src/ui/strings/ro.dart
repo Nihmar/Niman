@@ -659,6 +659,9 @@ final class RomanianStrings extends Strings {
   String get cheatMath => 'Matematică';
   @override
   String get cheatTables => 'Tabele';
+
+  @override
+  String get cheatColumns => 'Coloane';
   @override
   String get cheatFootnotes => 'Note de subsol';
   @override

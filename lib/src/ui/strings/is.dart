@@ -648,6 +648,9 @@ final class IcelandicStrings extends Strings {
   String get cheatMath => 'Stærðfræði';
   @override
   String get cheatTables => 'Töflur';
+
+  @override
+  String get cheatColumns => 'Dálkar';
   @override
   String get cheatFootnotes => 'Neðanmálsgreinar';
   @override

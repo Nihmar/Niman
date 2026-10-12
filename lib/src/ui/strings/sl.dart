@@ -655,6 +655,9 @@ final class SlovenianStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Tabele';
+
+  @override
+  String get cheatColumns => 'Stolpci';
   @override
   String get cheatFootnotes => 'Opombe';
   @override

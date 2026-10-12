@@ -651,6 +651,9 @@ final class PortugueseStrings extends Strings {
   String get cheatMath => 'Matemática';
   @override
   String get cheatTables => 'Tabelas';
+
+  @override
+  String get cheatColumns => 'Colunas';
   @override
   String get cheatFootnotes => 'Notas de rodapé';
   @override

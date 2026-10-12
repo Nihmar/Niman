@@ -460,8 +460,8 @@ Obsidian's is:
 - **Format ›** — bold, italic, strikethrough, highlight, underline, superscript,
   subscript, code — **Paragraph ›** — headings 1 to 6, **Body** (the
   heading taken off), bulleted, numbered and checkbox lists, quote — and
-  **Insert ›** — footnote, table, horizontal rule, code block, math
-  block, image;
+  **Insert ›** — footnote, table, columns, horizontal rule, code block,
+  math block, image;
 - the clipboard last: Cut, Copy, Paste, Select all. What cannot run now
   (Cut with nothing selected) stays in its place, greyed out, so nothing
   moves under the pointer.
@@ -553,6 +553,86 @@ its columns padded to one width is written back padded, the pipes under
 one another; one written with a single space round each cell stays that
 way. A column's alignment (`:--`, `:-:`, `--:`) is drawn in both the read
 view and live mode.
+
+### Columns
+
+Two or more columns of blocks on one row — a picture and a table beside
+prose, two columns of text — written as Pandoc's and Quarto's fenced
+divs:
+
+```markdown
+:::: columns
+::: {.column width="40%"}
+![[map.png]]
+
+| Height | 2,218 m |
+|---|---|
+:::
+
+::: column
+Prose, a list, a table, a callout…
+:::
+::::
+```
+
+- **Fences.** A fence stands at the margin of what it is in — the note,
+  a list item, a quote — with no indent, as Pandoc reads it. An opener is
+  three colons or more and a class, `columns` or `column`, as a word or
+  in braces (`::: {.column}`); colons after it are optional. A line of
+  colons alone closes the div opened last, whatever its length. Any
+  other `::: name` stays the text it is; inside `columns` its closer is
+  matched with it, so it does not close the column around it. An opener
+  needs a blank line, a heading or another fence before it: a `:::` line
+  inside a paragraph is the paragraph's. An opener with no closer runs
+  to the end of what it is in, as an unclosed code fence does.
+- **Widths.** `width="40%"` gives a column its share of the row; the
+  columns without one share what is left equally. Each column is at
+  least 16 em wide: columns that do not fit move to the next row, and on
+  a phone's pane they stack one under the other, in the order they are
+  written. What decides is the width the note has, not the device: a
+  narrow window stacks them too, a wide tablet puts them side by side.
+- **What a block holds.** Anything: text, lists, tables, code, formulas,
+  diagrams, pictures, callouts. Text inside `columns` but outside any
+  `column` is a column of its own. A footnote defined in a column is
+  drawn with the note's footnotes, at its end.
+- **Nesting.** Columns may stand in a callout, a quote, a list item or a
+  column. Only the outermost level sits side by side: columns inside a
+  column are drawn one under the other.
+
+In **live mode** the columns sit side by side and are edited where they
+stand. Out of the caret's reach each fence is a thin band with nothing
+in it; with the caret in the block the bands show a hairline and a chip
+naming each column (`column · 40%`); with the caret on a fence line it
+shows its source, to edit the width. A fence is reached by a click on
+its band, by **Home** at the start of a column's first line, by a find,
+or in source mode. The arrows go through the note in the order it is
+written: **Right** at a column's last character goes to the next
+column's first, **Down** on a column's last row to the next column's
+first row — and out of the block after the last — and **Up** and
+**Left** the other way. The gutter numbers the block's first and last
+lines, with a bracket between them; source mode shows every line,
+numbered, the fences coloured as a code fence's. The block's opener has
+a fold arrow, which folds the block to its first line.
+
+**Insert columns** writes two columns at the caret, on lines of their
+own, with the first column's text selected so typing replaces it: the
+**Columns** toolbar button, **Insert › Columns** in the editor's menu
+(the Insert sheet on a phone), and **Insert columns** in the command
+palette.
+
+An export lays the columns out as the app does: the HTML page, the PDF
+and the EPUB by the same rule, in CSS. Elsewhere — GitHub, Obsidian —
+the `:::` lines show as text and the blocks one after the other; Pandoc
+and Quarto read them as columns. Nothing is lost or reordered.
+
+A few places keep the columns stacked, one under the other, where the
+rest of the app sets them side by side: in live mode, a quote or a
+callout of more than 2 000 lines, a quote inside another or inside a
+list item, and a block with a folded section in it; and the read view
+of a book or a recognized text, whose text can be selected. A heading in
+a side-by-side column has no fold arrow of its own — the gutter has one
+row for several columns — and folds inside its column where the columns
+stack.
 
 ### Diagrams (Mermaid)
 

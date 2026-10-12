@@ -659,6 +659,9 @@ final class PolishStrings extends Strings {
   String get cheatMath => 'Matematyka';
   @override
   String get cheatTables => 'Tabele';
+
+  @override
+  String get cheatColumns => 'Kolumny';
   @override
   String get cheatFootnotes => 'Przypisy';
   @override

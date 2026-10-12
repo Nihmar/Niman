@@ -649,6 +649,9 @@ final class LatvianStrings extends Strings {
   String get cheatMath => 'Matemātika';
   @override
   String get cheatTables => 'Tabulas';
+
+  @override
+  String get cheatColumns => 'Kolonnas';
   @override
   String get cheatFootnotes => 'Vēres';
   @override

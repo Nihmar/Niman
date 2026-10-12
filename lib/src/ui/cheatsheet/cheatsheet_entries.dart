@@ -109,6 +109,20 @@ final List<CheatsheetEntry> cheatsheetEntries = <CheatsheetEntry>[
         '| pears  |  12 |',
   ),
   CheatsheetEntry(
+    id: 'columns',
+    title: () => AppStrings.cheatColumns,
+    source:
+        ':::: columns\n'
+        '::: {.column width="40%"}\n'
+        'A narrow column.\n'
+        ':::\n'
+        '\n'
+        '::: column\n'
+        'A wide one, beside it.\n'
+        ':::\n'
+        '::::',
+  ),
+  CheatsheetEntry(
     id: 'footnotes',
     title: () => AppStrings.cheatFootnotes,
     source: 'A claim.[^1]\n\n[^1]: Where it comes from.',

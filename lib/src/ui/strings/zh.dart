@@ -612,6 +612,9 @@ final class ChineseStrings extends Strings {
   String get cheatMath => '数学公式';
   @override
   String get cheatTables => '表格';
+
+  @override
+  String get cheatColumns => '分栏';
   @override
   String get cheatFootnotes => '脚注';
   @override

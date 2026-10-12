@@ -653,6 +653,9 @@ final class GermanStrings extends Strings {
   String get cheatMath => 'Mathematik';
   @override
   String get cheatTables => 'Tabellen';
+
+  @override
+  String get cheatColumns => 'Spalten';
   @override
   String get cheatFootnotes => 'Fußnoten';
   @override

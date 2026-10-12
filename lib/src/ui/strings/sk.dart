@@ -653,6 +653,9 @@ final class SlovakStrings extends Strings {
   String get cheatMath => 'Matematika';
   @override
   String get cheatTables => 'Tabuľky';
+
+  @override
+  String get cheatColumns => 'Stĺpce';
   @override
   String get cheatFootnotes => 'Poznámky pod čiarou';
   @override

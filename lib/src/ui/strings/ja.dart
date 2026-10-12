@@ -614,6 +614,9 @@ final class JapaneseStrings extends Strings {
   String get cheatMath => '数式';
   @override
   String get cheatTables => '表';
+
+  @override
+  String get cheatColumns => '段組み';
   @override
   String get cheatFootnotes => '脚注';
   @override

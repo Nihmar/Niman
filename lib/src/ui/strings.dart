@@ -490,6 +490,7 @@ final class AppStrings {
   static String get cheatCodeBlocks => _s.cheatCodeBlocks;
   static String get cheatMath => _s.cheatMath;
   static String get cheatTables => _s.cheatTables;
+  static String get cheatColumns => _s.cheatColumns;
   static String get cheatFootnotes => _s.cheatFootnotes;
   static String get cheatRule => _s.cheatRule;
   static String get cheatFrontmatter => _s.cheatFrontmatter;

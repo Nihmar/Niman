@@ -647,6 +647,9 @@ final class EnglishStrings extends Strings {
   String get cheatMath => 'Math';
   @override
   String get cheatTables => 'Tables';
+
+  @override
+  String get cheatColumns => 'Columns';
   @override
   String get cheatFootnotes => 'Footnotes';
   @override
