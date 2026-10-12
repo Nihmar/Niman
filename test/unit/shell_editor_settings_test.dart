@@ -133,6 +133,7 @@ void main() {
     indentWidth: 4,
     sourceFont: SourceFont.serif,
     treeSort: TreeSort.nameDesc,
+    treeView: TreeView.grid,
     treeWidth: 321,
     tidyOnClose: false,
   );
@@ -147,6 +148,7 @@ void main() {
       settings.copyWith(typewriter: false),
       settings.copyWith(editorKind: EditorKind.source),
       settings.copyWith(treeSort: TreeSort.nameAsc),
+      settings.copyWith(treeView: TreeView.list),
       settings.copyWith(treeWidth: 400),
     ]) {
       expect(copy.lineNumbers, isFalse);
@@ -186,6 +188,16 @@ void main() {
       SourceFont.serif,
     );
   });
+
+  test(
+    'the read picks up the Files pane view from the device (#727)',
+    () async {
+      final session = FakeLibrarySession();
+      expect((await ShellEditorSettings.read(session)).treeView, TreeView.list);
+      await session.setTreeView(TreeView.grid);
+      expect((await ShellEditorSettings.read(session)).treeView, TreeView.grid);
+    },
+  );
 
   test('the read asks for the settings together (#362)', () async {
     final session = _CountedReads(FakeLibrarySession());
