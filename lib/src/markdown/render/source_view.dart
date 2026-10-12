@@ -397,13 +397,23 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late FocusNode _focus;
   bool _ownsFocus = false;
 
-  /// The viewport height the last metrics change left: a smaller one is the
-  /// keyboard opening over the note (#728).
+  /// The viewport height the last metrics change left: a smaller one, with
+  /// the bottom inset grown, is the keyboard opening over the note (#728).
   double? _viewportHeight;
 
-  /// The reveal a shrunken viewport asked for, waiting for the keyboard's
-  /// animation to settle; a scroll the writer makes meanwhile calls it off.
-  Timer? _insetReveal;
+  /// The view's bottom inset at the last metrics change, in physical pixels:
+  /// a viewport that shrank without it growing is the window made shorter
+  /// or turned, not the keyboard (#765).
+  double _bottomInset = 0;
+
+  /// Whether the writer took the scroll while the keyboard was coming up:
+  /// the reveal is theirs to call off, until the keyboard is asked for again
+  /// or goes down (#728).
+  bool _insetRevealOff = false;
+
+  /// Moves on when the writer starts a drag: a reveal still checking itself
+  /// over the frames after its jump stops there.
+  int _revealEpoch = 0;
 
   /// The edits that made the note what it is, and the way back.
   late EditHistory _history;
@@ -912,7 +922,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _menu
       ..removeListener(_onMenuChanged)
       ..dispose();
-    _insetReveal?.cancel();
     HardwareKeyboard.instance.removeHandler(_modifierChanged);
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
@@ -2267,6 +2276,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Takes the focus, or — when the surface has it — opens the connection
   /// again if the platform closed it, and asks for the keyboard either way.
   void _requestKeyboard() {
+    _insetRevealOff = false;
     if (!_focus.hasFocus) {
       // The focus change attaches (see `onFocusChange`).
       _focus.requestFocus();
@@ -2315,30 +2325,46 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void placeCaret(int offset) =>
       _applySelection(_selection.collapsedTo(offset), reveal: true);
 
-  /// A metrics change that shrank the viewport: the keyboard opening over
-  /// the note (#728) — the reveal waits for its animation to settle, and
-  /// only when a selection is there to keep in view.
+  /// A metrics change: when it is the keyboard this editor asked for coming
+  /// up over the note, the caret is brought back into view (#728).
+  ///
+  /// The keyboard, and only it (#765): the viewport shrank *and* the view's
+  /// bottom inset grew — a window made shorter or a phone turned shrinks the
+  /// viewport alone — while this editor has the focus and the platform's
+  /// connection, so a keyboard raised for another field (a rename, the find
+  /// bar, a dialog) moves nothing here.
+  ///
+  /// Each step of the keyboard's animation lays the pane out anew and lands
+  /// here, after that layout, with the viewport it left: the reveal runs at
+  /// every step against the viewport as it stands, as `EditableText` does,
+  /// and the last step is the keyboard at rest — no guess at how long the
+  /// animation takes.
   bool _onScrollMetrics(ScrollMetricsNotification notification) {
     final height = notification.metrics.viewportDimension;
     final last = _viewportHeight;
     _viewportHeight = height;
-    if (last == null || height >= last) return false;
-    _insetReveal?.cancel();
-    _insetReveal = Timer(const Duration(milliseconds: 120), () {
-      _insetReveal = null;
-      if (mounted) _ensureCaretVisible(wholeSelection: true);
-    });
+    final inset = View.of(context).viewInsets.bottom;
+    final lastInset = _bottomInset;
+    _bottomInset = inset;
+    // The keyboard going down ends what the writer called off.
+    if (inset < lastInset) _insetRevealOff = false;
+    if (last == null || height >= last || inset <= lastInset) return false;
+    if (!_focus.hasFocus || !_input.isAttached || _insetRevealOff) {
+      return false;
+    }
+    _ensureCaretVisible(wholeSelection: true);
     return false;
   }
 
-  /// The writer took the scroll: the inset reveal in flight is theirs to
-  /// finish, and nothing is moved under their finger (#728).
+  /// The writer took the scroll: the reveal of a keyboard coming up is
+  /// theirs to call off, and nothing is moved under their finger (#728).
   bool _onScroll(ScrollNotification notification) {
     if (notification.depth != 0) return false;
     if (notification is ScrollStartNotification &&
         notification.dragDetails != null) {
-      _insetReveal?.cancel();
-      _insetReveal = null;
+      _insetRevealOff = true;
+      // A reveal still settling over the next frames is called off too.
+      _revealEpoch++;
     }
     return false;
   }
@@ -2402,8 +2428,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (target == _scroll.offset) return;
     _scroll.jumpTo(target);
     if (settle <= 0) return;
+    final epoch = _revealEpoch;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
+      if (mounted && epoch == _revealEpoch) {
         _ensureCaretVisible(settle: settle - 1, wholeSelection: wholeSelection);
       }
     });
