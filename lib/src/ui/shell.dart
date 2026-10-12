@@ -1906,6 +1906,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _windows.close();
     _markOpenNote(null, null);
     _searchRequests.dispose();
+    _searchCommands.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();

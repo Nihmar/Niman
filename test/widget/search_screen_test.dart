@@ -45,6 +45,17 @@ void main() {
     );
   }
 
+  Widget searchWith(SearchCommands commands) => MaterialApp(
+    home: Scaffold(
+      body: SearchScreen(
+        controller: session,
+        onOpenNote: opened.add,
+        source: source,
+        commands: commands,
+      ),
+    ),
+  );
+
   setUp(() {
     session = FakeLibrarySession();
     source = FakeSearchSource();
@@ -573,6 +584,96 @@ void main() {
       find.byKey(const Key('search-query')),
     );
     expect(field.focusNode?.hasFocus, isTrue);
+  });
+
+  // #768: a step is an event. Ctrl+Shift+F after an F4 notified the
+  // screen again, and the step it still held opened the next hit.
+  testWidgets('a focus ask after a step opens no other hit (#768)', (
+    tester,
+  ) async {
+    final commands = SearchCommands();
+    addTearDown(commands.dispose);
+    source.hits = [_hit('a.md'), _hit('b.md'), _hit('c.md')];
+    await tester.pumpWidget(searchWith(commands));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+
+    commands.stepBy(1);
+    await settle(tester);
+    expect(opened, ['a.md']);
+
+    commands.focus();
+    await settle(tester);
+    expect(opened, ['a.md']);
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('search-query')),
+    );
+    expect(field.focusNode?.hasFocus, isTrue);
+  });
+
+  // #768: a focus ask is answered once; a screen mounted later (the
+  // sidebar rebuilt across the breakpoint) does not take the focus for it.
+  testWidgets('a remount does not take the focus for an old ask (#768)', (
+    tester,
+  ) async {
+    final commands = SearchCommands();
+    addTearDown(commands.dispose);
+    await tester.pumpWidget(searchWith(commands));
+    await tester.pump();
+    commands.focus();
+    await tester.pump();
+
+    await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+    await tester.pumpWidget(searchWith(commands));
+    await tester.pump();
+    await tester.pump();
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('search-query')),
+    );
+    expect(field.focusNode?.hasFocus, isFalse);
+  });
+
+  // #768: a step to a hit whose row is not built (the last one, the
+  // wrap back to the first, a row scrolled away) brings it into view.
+  testWidgets('a step brings a row outside the built range into view (#768)', (
+    tester,
+  ) async {
+    final commands = SearchCommands();
+    addTearDown(commands.dispose);
+    source.hits = [
+      for (var i = 0; i < 120; i++) _hit('n$i.md', snippet: 'xy $i'),
+    ];
+    await tester.pumpWidget(searchWith(commands));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+
+    Finder row(String path) => find.byKey(Key('search-hit-$path'));
+
+    // Shift+F4 with no current hit: the last, past the page's cut.
+    commands.stepBy(-1);
+    await tester.pumpAndSettle();
+    expect(opened.last, 'n119.md');
+    expect(row('n119.md').hitTestable(), findsOne);
+
+    // F4 from the last wraps to the first, far above.
+    commands.stepBy(1);
+    await tester.pumpAndSettle();
+    expect(opened.last, 'n0.md');
+    expect(row('n0.md').hitTestable(), findsOne);
+
+    // F4 after scrolling the current row away: the next comes back.
+    await tester.drag(
+      find.byKey(const Key('search-results')),
+      const Offset(0, -6000),
+    );
+    await tester.pumpAndSettle();
+    expect(row('n1.md'), findsNothing);
+    commands.stepBy(1);
+    await tester.pumpAndSettle();
+    expect(opened.last, 'n1.md');
+    expect(row('n1.md').hitTestable(), findsOne);
   });
 }
 
