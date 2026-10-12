@@ -300,7 +300,7 @@ void main() {
       await write('a/one.md', 'one changed');
       await write('b/two.md', 'two changed');
       var fires = 0;
-      indexer.onChanged = () => fires++;
+      indexer.onChanged = (change) => fires++;
       await indexer.fullScan(root.path);
 
       expect(fires, 1);
@@ -313,7 +313,7 @@ void main() {
     await indexer.fullScan(root.path);
 
     var fires = 0;
-    indexer.onChanged = () => fires++;
+    indexer.onChanged = (change) => fires++;
     await indexer.fullScan(root.path);
 
     expect(fires, 0);

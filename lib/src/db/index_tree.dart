@@ -661,7 +661,7 @@ final class IndexTree {
   /// the content pipeline; the stored digest is reused when `(size,
   /// mtime)` prove the content unchanged, so our own save of a large note
   /// is not re-read end to end on every watcher event.
-  Future<({bool wrote, NoteContent? content})> upsertFile(
+  Future<({bool wrote, bool tree, NoteContent? content})> upsertFile(
     String root,
     String abs,
     String rel,
@@ -709,8 +709,12 @@ final class IndexTree {
             ),
           );
       await _store.replaceFileStems(id, p.basename(abs));
-      return (wrote: true, content: content);
+      return (wrote: true, tree: true, content: content);
     }
+    final tree =
+        existing.parent != parentId ||
+        existing.name != p.basename(abs) ||
+        existing.isDir; // a stale directory row at a file path
     final changed =
         existing.parent != parentId ||
         existing.name != p.basename(abs) ||
@@ -720,7 +724,7 @@ final class IndexTree {
         existing.sha256 != sha;
     if (!changed) {
       _log.debug('upsert "$rel": unchanged');
-      return (wrote: false, content: null);
+      return (wrote: false, tree: false, content: null);
     }
     _log.debug('upsert "$rel": update (parent "$parentRel")');
     await (_db.update(_db.notes)..where((t) => t.path.equals(rel))).write(
@@ -735,6 +739,6 @@ final class IndexTree {
         sha256: Value(sha),
       ),
     );
-    return (wrote: true, content: content);
+    return (wrote: true, tree: tree, content: content);
   }
 }

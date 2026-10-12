@@ -300,12 +300,26 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   Widget _tree(BuildContext context) {
+    // A save writes the note's size and time and nothing a name-ordered tree
+    // draws: those rows stand, and only a change to their shape asks for the
+    // query again (#751). The field orders read size and times, so they
+    // follow every change.
+    final followsContents = widget.sort.contentMovesRows;
+    final controller = widget.controller;
+    final revision = followsContents
+        ? controller.revision
+        : controller.treeRevision;
     return StreamBuilder<int>(
-      stream: widget.controller.events,
-      initialData: widget.controller.revision,
+      stream: followsContents ? controller.events : controller.treeEvents,
+      initialData: revision,
       builder: (context, snapshot) {
         return FutureBuilder<_Rows>(
-          future: _rowsFor(snapshot.data ?? widget.controller.revision),
+          future: _rowsFor(
+            snapshot.data ??
+                (followsContents
+                    ? controller.revision
+                    : controller.treeRevision),
+          ),
           builder: (context, snap) {
             if (!snap.hasData) {
               return const Center(child: CircularProgressIndicator());

@@ -304,12 +304,22 @@ abstract interface class LibrarySession {
   /// Bumped after every index change.
   int get revision;
 
+  /// Bumped after an index change that can move the tree's rows (#751): a
+  /// row added, removed or reshaped, a pin, a folder synced. A save's new
+  /// size and time is not one — the name orders draw the same tree — and a
+  /// tree that reads only [revision] would flatten again on every save.
+  int get treeRevision;
+
   /// The note the first index is reading, or null when no scan is
   /// running. Reported only for the blocking scan of an opening library.
   IndexProgress? get indexProgress;
 
   /// Fires with the new [revision] after every index change.
   Stream<int> get events;
+
+  /// Fires with the new [treeRevision] after a change that may move the
+  /// tree's rows (#751).
+  Stream<int> get treeEvents;
 
   /// Fires with the library-relative paths a re-index pruned from the tree:
   /// a note or a folder gone from disk, renamed paths excluded (a rename is

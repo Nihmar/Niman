@@ -68,12 +68,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   final String? resumePath;
 
   final StreamController<int> _events = StreamController<int>.broadcast();
+  final StreamController<int> _treeEvents = StreamController<int>.broadcast();
   final StreamController<Set<String>> _removals =
       StreamController<Set<String>>.broadcast();
   final List<_Row> _rows = <_Row>[];
   final List<_TrashEntry> _trash = <_TrashEntry>[];
   int _nextId = 1;
   int _revision = 0;
+  int _treeRevision = 0;
   LibraryPhase _phase = LibraryPhase.none;
   String? _root;
   String? _lastError;
@@ -108,6 +110,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   int get revision => _revision;
 
+  @override
+  int get treeRevision => _treeRevision;
+
   /// The fake indexes nothing, so there is never a scan to report on.
   /// Tests that need the indexing line set this and pump.
   IndexProgress? indexing;
@@ -117,6 +122,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Stream<int> get events => _events.stream;
+
+  @override
+  Stream<int> get treeEvents => _treeEvents.stream;
 
   @override
   Stream<Set<String>> get removals => _removals.stream;
@@ -751,6 +759,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (!_events.isClosed) {
       await _events.close();
     }
+    if (!_treeEvents.isClosed) {
+      await _treeEvents.close();
+    }
     if (!_removals.isClosed) {
       await _removals.close();
     }
@@ -801,11 +812,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     return kids.map(_toNote).toList();
   }
 
+  /// How many times the tree's rows were read from the fake (#751): a
+  /// test holds a change that moved nothing the tree draws to no read.
+  int treeCalls = 0;
+
   @override
   Future<List<Note>> tree(
     Iterable<String> expandedPaths, {
     TreeSort sort = TreeSort.nameAsc,
   }) async {
+    treeCalls++;
     final expanded = Set<String>.from(expandedPaths);
     final results = <_Row>[
       for (final row in _rows)
@@ -1469,6 +1485,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   // -- internal model --------------------------------------------------
 
   void _bump() {
+    bumpContents();
+    _treeRevision++;
+    if (!_treeEvents.isClosed) {
+      _treeEvents.add(_treeRevision);
+    }
+  }
+
+  /// A revision that moved nothing the tree draws (#751): a save's new size
+  /// and time. The real indexer reports it as `IndexChange.contents`.
+  void bumpContents() {
     _revision++;
     if (!_events.isClosed) {
       _events.add(_revision);

@@ -9,6 +9,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_content_store.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
@@ -49,8 +50,10 @@ final class Indexer {
   /// The DAO over the same database, exposed for read-side callers.
   NoteDao get dao => _dao;
 
-  /// Callback invoked after each successful index mutation.
-  void Function()? onChanged;
+  /// Callback invoked after each successful index mutation, with what the
+  /// change did to the tree's rows (#751): a save reindexing a note is
+  /// [IndexChange.contents], a rename, a create or a pin [IndexChange.tree].
+  void Function(IndexChange change)? onChanged;
 
   /// Callback invoked with the library-relative paths a scan or a batch
   /// pruned from the tree — a note or a folder gone from disk. Renames are
@@ -205,6 +208,7 @@ final class Indexer {
       // Pair renames with unchanged content: the old row keeps its id (and
       // with it its FTS/tags/links rows) and is repointed at the new path.
       final paired = await _tree.pairRenames(root, live, gone, contents);
+      var tree = paired.isNotEmpty;
       final pairedOld = <String>{for (final o in paired.values) o};
       // A paired note keeps its content rows only when it has a frontmatter
       // title: without one its search title is its filename, which the
@@ -258,6 +262,7 @@ final class Indexer {
             p.join(root, entry.key),
           );
           wrote |= synced.wrote;
+          tree |= synced.wrote;
           removed.addAll(synced.removed);
         } else {
           _log.debug('applyEvents: "${entry.key}" -> upsert file');
@@ -269,6 +274,7 @@ final class Indexer {
             expected: contents[entry.key],
           );
           wrote |= result.wrote;
+          tree |= result.tree;
           if (result.content != null) changed.add(result.content!);
         }
       }
@@ -279,6 +285,7 @@ final class Indexer {
         if (deleted > 0) {
           _log.debug('applyEvents: pruned "$rel" ($deleted row(s))');
           removed.add(rel);
+          tree = true;
         }
         wrote |= deleted > 0;
       }
@@ -302,7 +309,7 @@ final class Indexer {
       }
       if (wrote) {
         final cb = onChanged;
-        if (cb != null) cb();
+        if (cb != null) cb(tree ? IndexChange.tree : IndexChange.contents);
       }
       if (removed.isNotEmpty) {
         final cb = onRemoved;
@@ -383,7 +390,7 @@ final class Indexer {
       }, paired: const {});
       if (wrote) {
         final cb = onChanged;
-        if (cb != null) cb();
+        if (cb != null) cb(IndexChange.contents);
       }
     });
   }
@@ -412,7 +419,7 @@ final class Indexer {
         ),
       );
       final cb = onChanged;
-      if (cb != null) cb();
+      if (cb != null) cb(IndexChange.tree);
     });
   }
 
@@ -435,7 +442,7 @@ final class Indexer {
       final result = await _reconcile(root, abs, rel, 'resync');
       if (result.wrote) {
         final cb = onChanged;
-        if (cb != null) cb();
+        if (cb != null) cb(IndexChange.tree);
       }
       if (result.removed.isNotEmpty) {
         final cb = onRemoved;

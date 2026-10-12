@@ -76,6 +76,11 @@ enum TreeSort {
 
   /// The same order, the other way round.
   TreeSort get flipped => of(order, descending: !descending);
+
+  /// Whether a note's contents moving — a save's new size and time — can
+  /// move its row: the field orders read those, the name orders do not
+  /// (#751).
+  bool get contentMovesRows => order != TreeOrder.name;
 }
 
 /// The link format the editor's link button inserts.
