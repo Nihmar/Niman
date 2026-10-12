@@ -71,13 +71,14 @@ String formatMarkdown(String source, {Set<LintRule>? rules}) {
     outside: on.contains(LintRule.joinParagraphLines),
   );
   final out = <String>[];
+  _Unit? last;
   for (final block in _units(text)) {
     // Frontmatter, fences, tables, math, HTML: kept verbatim. The one
     // exception is the trailing blank lines a block carries, which the
     // joining below decides instead.
     final lines = block.lines;
     final tidied = switch (block.kind) {
-      _Unit.opaque => lines,
+      _Unit.opaque || _Unit.div => lines,
       _Unit.fence => tidyFence(
         lines,
         language: on.contains(LintRule.fenceLanguage),
@@ -97,11 +98,21 @@ String formatMarkdown(String source, {Set<LintRule>? rules}) {
     final body = _withoutTrailingBlanks(tidied);
     if (body.isEmpty) continue;
     // A break on the last line of a block breaks nothing.
-    if (block.kind != _Unit.opaque && block.kind != _Unit.fence) {
+    if (block.kind != _Unit.opaque &&
+        block.kind != _Unit.fence &&
+        block.kind != _Unit.div) {
       body[body.length - 1] = body.last.trimRight();
     }
-    if (out.isNotEmpty) out.add('');
+    if (out.isNotEmpty) {
+      // A div's fence line (#729) keeps the blank lines written beside it,
+      // none or many: the layout of the columns is the writer's.
+      final fenced = block.kind == _Unit.div || last == _Unit.div;
+      for (var gap = 0; gap < (fenced ? block.blanks : 1); gap++) {
+        out.add('');
+      }
+    }
     out.addAll(body);
+    last = block.kind;
   }
   return '${out.join(_newline)}$_newline';
 }
@@ -152,22 +163,31 @@ enum _Unit {
 
   /// Anything else: a paragraph, a quote, a rule.
   prose,
+
+  /// A fenced div's fence line (#729): kept as written, and the blank lines
+  /// around it too.
+  div,
 }
 
 /// [source] cut into the stretches the tidying treats as one, read by the
 /// engine's own block scanner: a block apiece, but a list whole across the
-/// blank lines between its items, and blank lines left out.
-List<({_Unit kind, List<String> lines})> _units(String source) {
+/// blank lines between its items, and blank lines left out — each unit
+/// counting the ones before it.
+List<({_Unit kind, List<String> lines, int blanks})> _units(String source) {
   final buffer = SourceBuffer.fromText(source);
   final blocks = BlockScanner(buffer).index.blocks;
-  final units = <({_Unit kind, List<String> lines})>[];
+  final units = <({_Unit kind, List<String> lines, int blanks})>[];
+  var blanks = 0;
   List<String> linesOf(Block block) => [
     for (var line = block.startLine; line < block.endLine; line++)
       buffer.lineAt(line),
   ];
   for (var at = 0; at < blocks.length; at++) {
     final block = blocks[at];
-    if (block.kind == BlockKind.blank) continue;
+    if (block.kind == BlockKind.blank) {
+      blanks += block.lineCount;
+      continue;
+    }
     if (block.kind == BlockKind.listItem) {
       final lines = linesOf(block);
       // The list goes on over blank lines as long as another item follows —
@@ -192,7 +212,8 @@ List<({_Unit kind, List<String> lines})> _units(String source) {
           ..addAll(linesOf(blocks[next]));
         at = next;
       }
-      units.add((kind: _Unit.list, lines: lines));
+      units.add((kind: _Unit.list, lines: lines, blanks: blanks));
+      blanks = 0;
       continue;
     }
     final kind = switch (block.kind) {
@@ -203,9 +224,11 @@ List<({_Unit kind, List<String> lines})> _units(String source) {
       BlockKind.table => _Unit.opaque,
       BlockKind.fencedCode => _Unit.fence,
       BlockKind.heading => _Unit.heading,
+      BlockKind.div => _Unit.div,
       _ => _Unit.prose,
     };
-    units.add((kind: kind, lines: linesOf(block)));
+    units.add((kind: kind, lines: linesOf(block), blanks: blanks));
+    blanks = 0;
   }
   return units;
 }
