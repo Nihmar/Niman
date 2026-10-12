@@ -249,6 +249,58 @@ void main() {
     expect(grip.left - handle.left, 8);
   });
 
+  // #720: the edge scroll runs a frame at a time while the drag is held
+  // there, and the release lands against the list as it then stands; the
+  // scroll stops with the drag.
+  testWidgets('a drag held at the edge scrolls, and the release lands', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final text =
+        '${[for (var i = 0; i < 200; i++) '- [ ] item $i'].join('\n')}\n';
+    String? out;
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    await tester.pumpAndSettle();
+    final list = tester.getRect(find.byType(ListView));
+    final scrollable = find.descendant(
+      of: find.byType(ListView),
+      matching: find.byType(Scrollable),
+    );
+    double offset() =>
+        tester.state<ScrollableState>(scrollable).position.pixels;
+    // A little down the list, so there is room to scroll back up.
+    await tester.fling(find.byType(ListView), const Offset(0, -400), 2000);
+    await tester.pumpAndSettle();
+    final before = offset();
+
+    // The second built handle: the first row may be half scrolled out of
+    // the viewport, and a press off screen grabs nothing.
+    final handle = find.byKey(const Key('list-drag-handle')).at(1);
+    final gesture = await tester.startGesture(tester.getCenter(handle));
+    await tester.pump();
+    await gesture.moveTo(Offset(list.center.dx, list.top + 4));
+    await tester.pump();
+    // Held there: the frames alone scroll the list.
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(offset(), lessThan(before), reason: 'the edge scroll ran');
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(out, isNotNull, reason: 'the release landed');
+    // The scroll stopped with the drag.
+    final landed = offset();
+    for (var frame = 0; frame < 20; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(offset(), landed, reason: 'nothing scrolls after the drag');
+  });
+
   testWidgets('dragging a row onto another makes a sub-list', (tester) async {
     String? out;
     const text = '- [ ] one\n- [ ] two\n';
