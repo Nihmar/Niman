@@ -31,6 +31,7 @@ import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
@@ -173,12 +174,16 @@ final class LibraryController implements LibrarySession {
 
   final StreamController<int> _events = StreamController<int>.broadcast();
 
+  /// Fires when the tree's rows may have moved ([IndexChange.tree]).
+  final StreamController<int> _treeEvents = StreamController<int>.broadcast();
+
   /// Fires with the paths a re-index pruned ([Indexer.onRemoved]); what
   /// the shell holds open on them closes.
   final StreamController<Set<String>> _removals =
       StreamController<Set<String>>.broadcast();
   final AppLogger _log = const AppLogger(name: 'session');
   int _revision = 0;
+  int _treeRevision = 0;
   LibraryPhase _phase = LibraryPhase.none;
   String? _root;
   String? _lastError;
@@ -243,9 +248,20 @@ final class LibraryController implements LibrarySession {
   @override
   int get revision => _revision;
 
+  /// Bumped after an index change that can move the tree's rows: a row
+  /// added, removed or reshaped, a pin, a folder synced — not a save's new
+  /// size and time, which only the field orders draw (#751).
+  @override
+  int get treeRevision => _treeRevision;
+
   /// Fires with the new [revision] after every index change.
   @override
   Stream<int> get events => _events.stream;
+
+  /// Fires with the new [treeRevision] after a change that may move the
+  /// tree's rows (#751).
+  @override
+  Stream<int> get treeEvents => _treeEvents.stream;
 
   /// Fires with the library-relative paths a re-index pruned from the tree.
   @override
@@ -515,7 +531,7 @@ final class LibraryController implements LibrarySession {
     // now that the folder is known to be reachable (T-ML-02).
     await LegacyLibrarySettings(appDb).seed(abs);
     final indexer = Indexer(indexDb)
-      ..onChanged = _bump
+      ..onChanged = _onIndexChanged
       ..onRemoved = (removed) => _onRemoved(abs, removed);
     // One reader of `.niman/settings.json` per session: the four
     // per-library settings and the overrides (T-ML-10) share its cache.
@@ -1503,6 +1519,9 @@ final class LibraryController implements LibrarySession {
     if (!_events.isClosed) {
       await _events.close();
     }
+    if (!_treeEvents.isClosed) {
+      await _treeEvents.close();
+    }
     if (!_removals.isClosed) {
       await _removals.close();
     }
@@ -1515,12 +1534,25 @@ final class LibraryController implements LibrarySession {
     }
   }
 
-  void _bump() {
+  void _bump({bool tree = true}) {
     _revision++;
     if (!_events.isClosed) {
       _events.add(_revision);
     }
+    if (!tree) return;
+    _treeRevision++;
+    if (!_treeEvents.isClosed) {
+      _treeEvents.add(_treeRevision);
+    }
   }
+
+  /// An index write landed: everything that reads the index hears of it,
+  /// and — when the rows' shape moved, and not for a save's new size and
+  /// time (#751) — the tree hears that it has rows to read again. Every
+  /// other bump is the session's own (the phase, a progress report, a
+  /// setting): all of them may move what the tree draws.
+  void _onIndexChanged(IndexChange change) =>
+      _bump(tree: change == IndexChange.tree);
 
   /// Fires with the paths a re-index pruned, and drops their reading
   /// positions: those files are ones the library saw leave (#492).

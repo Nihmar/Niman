@@ -29,6 +29,7 @@ import 'package:drift/drift.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_content_store.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
@@ -96,7 +97,7 @@ final class IndexReconciler {
   Future<void> fullScan(
     String root, {
     required Future<T> Function<T>(Future<T> Function() fn) step,
-    void Function()? onChanged,
+    void Function(IndexChange change)? onChanged,
     void Function(Set<String> removed)? onRemoved,
   }) async {
     // Each [step] holds the indexer's lock: the setup, one directory, the
@@ -208,7 +209,7 @@ final class IndexReconciler {
       _log.info('fullScan: index already mirrors disk, no write');
     } else {
       final cb = onChanged;
-      if (cb != null) cb();
+      if (cb != null) cb(IndexChange.tree);
     }
     if (removed.isNotEmpty) {
       final cb = onRemoved;
@@ -245,7 +246,10 @@ final class IndexReconciler {
   /// scan writes digests it read, and a row written without one would lose
   /// the digest the rename pairing keys on — so this is the empty index's
   /// alone.
-  Future<bool> treeFirst(String root, {void Function()? onChanged}) async {
+  Future<bool> treeFirst(
+    String root, {
+    void Function(IndexChange change)? onChanged,
+  }) async {
     if (await _dao.hasRows()) return false;
     var wrote = false;
     var entries = 0;
@@ -300,7 +304,7 @@ final class IndexReconciler {
     );
     if (wrote) {
       final cb = onChanged;
-      if (cb != null) cb();
+      if (cb != null) cb(IndexChange.tree);
     }
     return wrote;
   }

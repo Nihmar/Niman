@@ -363,7 +363,7 @@ void main() {
     final firstRss = ProcessInfo.currentRss - before;
 
     var fires = 0;
-    scanTree.onChanged = () => fires++;
+    scanTree.onChanged = (change) => fires++;
     final beforeRescan = ProcessInfo.currentRss;
     final rescan = await timed(
       'a rescan of the unchanged library',

@@ -6,6 +6,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
@@ -165,7 +166,7 @@ void main() {
   test('a rescan without changes does not rewrite the index', () async {
     await indexer.fullScan(root.path);
     var fired = false;
-    indexer.onChanged = () {
+    indexer.onChanged = (change) {
       fired = true;
     };
     await indexer.fullScan(root.path);
@@ -235,7 +236,7 @@ void main() {
     () async {
       await indexer.fullScan(root.path);
       var fires = 0;
-      indexer.onChanged = () => fires++;
+      indexer.onChanged = (change) => fires++;
 
       // A no-change rescan writes nothing and fires nothing.
       await indexer.fullScan(root.path);
@@ -264,6 +265,32 @@ void main() {
       expect(fires, 2);
     },
   );
+
+  // #751: the index says whether a write can have moved the tree's rows. A
+  // save writes the note's size and time and nothing a name-ordered tree
+  // draws; a create, a rename or a pin moves rows.
+  test('a reindex says whether it moved a tree row', () async {
+    await indexer.fullScan(root.path);
+    final changes = <IndexChange>[];
+    indexer.onChanged = changes.add;
+
+    // The writer's own reindex, after a save: size and time in place.
+    File(p.join(root.path, 'note1.md')).writeAsStringSync('one, longer');
+    await indexer.rescanFiles(root.path, [p.join(root.path, 'note1.md')]);
+    expect(changes, [IndexChange.contents]);
+
+    // An external create.
+    File(p.join(root.path, 'note3.md')).writeAsStringSync('new');
+    await indexer.applyEvents(root.path, [p.join(root.path, 'note3.md')]);
+    expect(changes, [IndexChange.contents, IndexChange.tree]);
+
+    // A rename, paired with the old path.
+    final oldAbs = p.join(root.path, 'note2.md');
+    final newAbs = p.join(root.path, 'renamed.md');
+    await File(oldAbs).rename(newAbs);
+    await indexer.applyEvents(root.path, [oldAbs, newAbs]);
+    expect(changes.last, IndexChange.tree);
+  });
 
   test('applyEvents picks up external create and delete', () async {
     await indexer.fullScan(root.path);
