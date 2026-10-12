@@ -62,7 +62,7 @@ app is what ships. The engine design behind them is the record
 - **One syntax, no alias.** There is no Obsidian `> [!multi-column]`
   form: two ways to write one thing would be two things to keep in step.
 
-### Decided while drawing them, for the owner to confirm
+### Decided while drawing them, confirmed by the owner (2026-10-12)
 
 - **Fence lines are 0.5 em bands, in both modes.** A column's opener is
   the room above its first block, and the outer fences are the block's

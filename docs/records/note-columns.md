@@ -469,7 +469,7 @@ it follows.
 
 ### Fence lines
 
-Decided here, for the owner to confirm.
+Decided here, and confirmed by the owner (2026-10-12).
 
 - **Out of the caret's reach**, every fence line is a **band** of 0.5 em
   with nothing drawn in it, in both modes. A column's opener is the
