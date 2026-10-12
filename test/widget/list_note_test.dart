@@ -247,6 +247,110 @@ void main() {
     expect(grip.width, 20, reason: 'the grip drawn did not grow');
     // Left-aligned in the target: the 20 px grip keeps the column it had.
     expect(grip.left - handle.left, 8);
+    // #778: the target reaches over the row, it does not push it.
+    final checkbox = tester.getRect(_rowCheckbox(0));
+    expect(
+      checkbox.left - handle.left,
+      ListDragHandle.gripWidth,
+      reason: 'the checkbox stays where it was',
+    );
+  });
+
+  // #778: the whole 48 dp take the press, the part over the checkbox's
+  // padding included.
+  testWidgets('a drag from the far side of the handle target moves the row', (
+    tester,
+  ) async {
+    String? out;
+    const text = '- [ ] one\n- [ ] two\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final handle = tester.getRect(_rowHandle(0));
+    final below = tester.getRect(_row(1));
+    final gesture = await tester.startGesture(
+      Offset(handle.left + 44, handle.center.dy),
+    );
+    await tester.pump();
+    await gesture.moveTo(Offset(below.center.dx, below.bottom - 4));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(out, '- [ ] two\n- [ ] one\n');
+  });
+
+  // #778: where the theme shrink-wraps tap targets (a desktop), the row
+  // keeps the 40 px it had before the target grew.
+  testWidgets('a shrink-wrapped row keeps its height', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+        ),
+        home: Scaffold(
+          body: ListNoteView(text: '- [ ] one\n', onChanged: (_) {}),
+        ),
+      ),
+    );
+    expect(tester.getSize(_rowHandle(0)).height, ListDragHandle.gripHeight);
+    expect(tester.getSize(_rowHandle(0)).width, ListDragHandle.gripWidth);
+  });
+
+  // #778: every tap ends as a cancelled long press; only the drag
+  // source's own cancel ends the drag.
+  testWidgets('a second finger tapping another row keeps the drag', (
+    tester,
+  ) async {
+    String? out;
+    const text = '- [ ] one\n- [ ] two\n- [ ] three\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final below = tester.getRect(_row(1));
+    final drag = await tester.startGesture(tester.getCenter(find.text('one')));
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    await drag.moveTo(Offset(below.center.dx, below.bottom - 4));
+    await tester.pump();
+
+    final tap = await tester.startGesture(
+      tester.getCenter(find.text('three')),
+      pointer: 7,
+    );
+    await tester.pump();
+    await tap.up();
+    await tester.pump();
+
+    await drag.moveBy(const Offset(0, 1));
+    await tester.pump();
+    await drag.up();
+    await tester.pump();
+    expect(out, '- [ ] two\n- [ ] one\n- [ ] three\n');
+  });
+
+  // #778: a mouse picks the row up by the handle; a held click on the row
+  // is not a drag, and a click still edits.
+  testWidgets('a mouse long press does not pick the row up', (tester) async {
+    String? out;
+    const text = '- [ ] one\n- [ ] two\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final below = tester.getRect(_row(1));
+    final mouse = await tester.startGesture(
+      tester.getCenter(find.text('one')),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    await mouse.moveTo(Offset(below.center.dx, below.bottom - 4));
+    await tester.pump();
+    await mouse.up();
+    await tester.pumpAndSettle();
+    expect(out, isNull, reason: 'nothing moved');
+
+    await tester.tap(find.text('two'), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    expect(_rowEditField(), findsOneWidget, reason: 'a click edits');
   });
 
   // #720: the edge scroll runs a frame at a time while the drag is held

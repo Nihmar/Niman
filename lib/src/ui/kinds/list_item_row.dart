@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/ui/kinds/list_drag_handle.dart';
@@ -72,7 +73,9 @@ class ListItemRow extends StatefulWidget {
   /// The drag ended (drop).
   final VoidCallback onDragEnd;
 
-  /// The drag was cancelled (no drop).
+  /// The press that would have started a drag ended without one, or the
+  /// drag was cancelled (no drop). A tap ends that way too: the list
+  /// ignores it unless this row is the drag source.
   final VoidCallback onDragCancel;
 
   @override
@@ -189,15 +192,12 @@ class _ListItemRowState extends State<ListItemRow>
     final item = widget.item;
     final indent = 8.0 + item.depth * 24;
     final under = widget.indicator == ListDropMode.under;
-    final row = Row(
+    final cells = Row(
       children: [
-        ListDragHandle(
-          key: const Key('list-drag-handle'),
-          active: widget.isDragSource,
-          onDragStart: widget.onDragStart,
-          onDragMove: widget.onDragMove,
-          onDragEnd: widget.onDragEnd,
-          onDragCancel: widget.onDragCancel,
+        // The grip's slot: the handle is laid over it, below.
+        const SizedBox(
+          width: ListDragHandle.gripWidth,
+          height: ListDragHandle.gripHeight,
         ),
         Checkbox(value: item.checked, onChanged: (_) => widget.onToggle()),
         Expanded(
@@ -241,6 +241,27 @@ class _ListItemRowState extends State<ListItemRow>
         ),
       ],
     );
+    // The handle's target is wider than its slot on a touch platform
+    // (#778): laid over the row rather than in it, so the row keeps the
+    // layout it had, and on top, so the press it reaches over is its own.
+    final row = Stack(
+      children: [
+        cells,
+        Positioned(
+          left: 0,
+          top: 0,
+          bottom: 0,
+          child: ListDragHandle(
+            key: const Key('list-drag-handle'),
+            active: widget.isDragSource,
+            onDragStart: widget.onDragStart,
+            onDragMove: widget.onDragMove,
+            onDragEnd: widget.onDragEnd,
+            onDragCancel: widget.onDragCancel,
+          ),
+        ),
+      ],
+    );
     // The "under" drop tints the target row: the dragged item is about to
     // become its child, which no line between rows can say on its own.
     final body = AnimatedContainer(
@@ -260,17 +281,24 @@ class _ListItemRowState extends State<ListItemRow>
             behavior: HitTestBehavior.opaque,
             onTap: widget.onBeginEdit,
             // A long press anywhere picks the row up (#719): the reorder
-            // a phone knows, where the handle was easy to miss. The handle
-            // stays the affordance and the pointer's own way in; once the
+            // a phone knows, where the handle was easy to miss. Once the
             // press has picked the row up, the finger drags it from there,
-            // with no second hold.
-            onLongPressStart: (details) =>
-                widget.onDragStart(details.globalPosition),
-            onLongPressMoveUpdate: (details) =>
-                widget.onDragMove(details.globalPosition),
-            onLongPressEnd: (_) => widget.onDragEnd(),
-            onLongPressCancel: widget.onDragCancel,
-            child: body,
+            // with no second hold. A finger only (#778): a mouse, a
+            // trackpad or a pen has no trouble with the handle, which
+            // stays their way in — a held click on a row is not a drag,
+            // as the home grid's tiles do it. Its own detector, so the tap
+            // above still edits on every device.
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              supportedDevices: const {PointerDeviceKind.touch},
+              onLongPressStart: (details) =>
+                  widget.onDragStart(details.globalPosition),
+              onLongPressMoveUpdate: (details) =>
+                  widget.onDragMove(details.globalPosition),
+              onLongPressEnd: (_) => widget.onDragEnd(),
+              onLongPressCancel: widget.onDragCancel,
+              child: body,
+            ),
           );
     return Opacity(
       opacity: widget.isDragSource ? 0.3 : 1,

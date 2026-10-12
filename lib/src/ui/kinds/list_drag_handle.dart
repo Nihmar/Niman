@@ -9,9 +9,12 @@ import 'package:niman/src/ui/strings.dart';
 /// picks the row up with a long press anywhere on it instead, which
 /// `ListItemRow` wires; the handle stays the discoverable grip.
 ///
-/// The target is the 48 dp a thumb aims at (#719) while the grip drawn
-/// stays the 20 px icon in its 36×40 slot at the row's left, left-aligned
-/// in the target: the row looks as it did.
+/// The row lays out a [gripWidth]×[gripHeight] slot for the grip, as it
+/// always did, and lays this handle over its left end (`ListItemRow`
+/// stacks it there): the grip is drawn in that slot, while the area that
+/// takes the press is [targetWidth] wide and as tall as the row (#778). A
+/// thumb gets the 48 dp it aims at without the checkbox and text moving
+/// over for it.
 class ListDragHandle extends StatelessWidget {
   /// Creates the handle.
   const new({
@@ -27,12 +30,23 @@ class ListDragHandle extends StatelessWidget {
   /// a finger can be asked to hit, whatever the grip drawn in it is.
   static const double targetSize = 48;
 
-  /// The width the grip itself takes in the row: what was here before
-  /// the target grew around it.
+  /// The width the grip takes in the row's layout.
   static const double gripWidth = 36;
 
-  /// The height the grip itself takes in the row.
+  /// The height the grip takes in the row's layout.
   static const double gripHeight = 40;
+
+  /// The width of the area that takes the press, in [context]'s theme.
+  ///
+  /// Where the theme pads tap targets (a touch platform) it is
+  /// [targetSize], reaching over the left of the checkbox's own padded
+  /// target — the 15 dp of it beside the box drawn, never the box. Where
+  /// it shrink-wraps them (a desktop, a precise pointer) it is the grip's
+  /// own slot, as the checkbox beside it is.
+  static double targetWidth(BuildContext context) =>
+      Theme.of(context).materialTapTargetSize == MaterialTapTargetSize.padded
+      ? targetSize
+      : gripWidth;
 
   /// Whether this row is the one being dragged (the handle is
   /// highlighted).
@@ -64,11 +78,11 @@ class ListDragHandle extends StatelessWidget {
         onPanUpdate: (d) => onDragMove(d.globalPosition),
         onPanEnd: (_) => onDragEnd(),
         onPanCancel: onDragCancel,
-        child: SizedBox.square(
-          dimension: targetSize,
+        child: SizedBox(
+          width: targetWidth(context),
           child: Align(
-            // Left-aligned: growing the target around the grip must not
-            // move the grip, which is what the row's eye lands on.
+            // Left-aligned: the grip sits in the slot the row laid out for
+            // it, whatever the target reaches over.
             alignment: Alignment.centerLeft,
             child: SizedBox(
               width: gripWidth,
