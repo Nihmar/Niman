@@ -296,6 +296,17 @@ final class CzechStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Připomenutí v $time';
   @override
+  String get journalCalendarTitle => 'Kalendář';
+  @override
+  String get journalEventTimesTitle => 'Časy událostí';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Jak jsou zapsané v souboru, nebo jako hodiny ve vašem pásmu';
+  @override
+  String get journalEventTimesWritten => 'Jak jsou zapsané';
+  @override
+  String get journalEventTimesClock => 'Hodiny';
+  @override
   String get themeEditorRolesHint =>
       'Každá barva se jmenuje jako v exportovaném souboru';
   @override

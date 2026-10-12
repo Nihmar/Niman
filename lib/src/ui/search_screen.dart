@@ -48,6 +48,7 @@ final class SearchScreen extends StatefulWidget {
     this.fieldSource,
     this.taskEvents,
     this.onOpenTaskEvent,
+    this.eventTimesClock = false,
     super.key,
   });
 
@@ -89,6 +90,10 @@ final class SearchScreen extends StatefulWidget {
   /// Opens a row of the tasks-and-events group: a task (the task list), an
   /// event or a goal (its line in `calendar.txt`).
   final void Function(TaskEventHit hit)? onOpenTaskEvent;
+
+  /// Whether an event's time is read as a clock rather than as written
+  /// (#730), the journal's own setting.
+  final bool eventTimesClock;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -675,6 +680,7 @@ final class _SearchScreenState extends State<SearchScreen> {
               context,
               hit,
               today: DateTime.now(),
+              asClock: widget.eventTimesClock,
               onTap: widget.onOpenTaskEvent == null
                   ? null
                   : () => widget.onOpenTaskEvent!(hit),

@@ -36,6 +36,7 @@ void main() {
     bool large = false,
     CalendarSnapshot? calendar,
     ThemeData? theme,
+    bool clockTimes = false,
   }) async {
     final opened = <CalendarEntryEvent>[];
     final at = calendar ?? snapshot();
@@ -49,6 +50,7 @@ void main() {
           body: JournalBrowser(
             today: today,
             large: large,
+            eventTimesClock: clockTimes,
             entryDays: () async => [today],
             readEntry: (day) async => '',
             onOpenDay: (day, {confirmed = false}) {},
@@ -65,6 +67,17 @@ void main() {
     await tester.pumpAndSettle();
     return opened;
   }
+
+  testWidgets('a clock time is the file read, not the file written', (
+    tester,
+  ) async {
+    await pump(tester, clockTimes: true);
+
+    expect(find.text('13:30–14:00'), findsOne);
+    expect(find.text('18:00–19:00'), findsOne);
+    expect(find.text('13:30-14'), findsNothing);
+    expect(find.text('18-19'), findsNothing);
+  });
 
   testWidgets("a goal's label wears the palette's goal colour (#730)", (
     tester,

@@ -296,6 +296,17 @@ final class UkrainianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Нагадування о $time';
   @override
+  String get journalCalendarTitle => 'Календар';
+  @override
+  String get journalEventTimesTitle => 'Час подій';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Як записано у файлі або як годинник у вашому поясі';
+  @override
+  String get journalEventTimesWritten => 'Як записано';
+  @override
+  String get journalEventTimesClock => 'Годинник';
+  @override
   String get themeEditorRolesHint =>
       'Кожен колір названо так, як у файлі експорту';
   @override

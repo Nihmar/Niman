@@ -295,6 +295,17 @@ final class DanishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Påmindelse kl. $time';
   @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Begivenhedstider';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Som skrevet i filen, eller som et ur i din tidszone';
+  @override
+  String get journalEventTimesWritten => 'Som skrevet';
+  @override
+  String get journalEventTimesClock => 'Ur';
+  @override
   String get themeEditorRolesHint =>
       'Hver farve hedder det, den eksporterede fil kalder den';
   @override

@@ -115,6 +115,7 @@ final class ShellJournalUi {
     tasksChanged: tasks,
     onOpenTasks: openTasks,
     knownTokens: knownTokens(),
+    eventTimesClock: journal().clockTimes,
     calendarFile: calendarFile(),
     onAddEvent: writeEvent,
     onAddTask: addTask,
@@ -189,6 +190,7 @@ final class ShellJournalUi {
             openTasks();
           },
           knownTokens: knownTokens(),
+          eventTimesClock: journal().clockTimes,
           calendarFile: calendarFile(),
           onAddEvent: writeEvent,
           onAddTask: (day) {

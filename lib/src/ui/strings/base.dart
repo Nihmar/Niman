@@ -155,6 +155,14 @@ abstract base class Strings {
 
   /// The reminder's own clock time, `Reminder at 15:15`.
   String calendarReminderAt(String time);
+
+  /// Settings › Journal's calendar heading and its one setting (#730):
+  /// the times as written, or as a clock in the reader's own zone.
+  String get journalCalendarTitle;
+  String get journalEventTimesTitle;
+  String get journalEventTimesSubtitle;
+  String get journalEventTimesWritten;
+  String get journalEventTimesClock;
   String get themeEditorRolesHint;
   String get themeEditorDiscardTitle;
   String get themeEditorDiscardBody;

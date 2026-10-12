@@ -4422,6 +4422,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       tree: tree,
       taskEvents: _taskEvents,
       onOpenTaskEvent: _openTaskEvent,
+      eventTimesClock: _journal.clockTimes,
     );
   }
 
@@ -4466,6 +4467,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     todo: _todoController,
     calendar: _calendarController,
     journal: _journalFlow,
+    clockEventTimes: () => _journal.clockTimes,
     openEvent: _openCalendarEvent,
     openJournal: () => _journalUi.showCalendar(context),
     openNote: _openSearchNote,

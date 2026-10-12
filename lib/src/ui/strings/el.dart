@@ -299,6 +299,17 @@ final class GreekStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Υπενθύμιση στις $time';
   @override
+  String get journalCalendarTitle => 'Ημερολόγιο';
+  @override
+  String get journalEventTimesTitle => 'Ώρες συμβάντων';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Όπως γράφονται στο αρχείο ή ως ρολόι στη ζώνη σας';
+  @override
+  String get journalEventTimesWritten => 'Όπως γράφονται';
+  @override
+  String get journalEventTimesClock => 'Ρολόι';
+  @override
   String get themeEditorRolesHint =>
       'Κάθε χρώμα έχει το όνομα που χρησιμοποιεί το εξαγόμενο αρχείο';
   @override

@@ -298,6 +298,17 @@ final class ItalianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Promemoria alle $time';
   @override
+  String get journalCalendarTitle => 'Calendario';
+  @override
+  String get journalEventTimesTitle => 'Orari degli eventi';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Come scritti nel file, o come orologio nel tuo fuso';
+  @override
+  String get journalEventTimesWritten => 'Come scritti';
+  @override
+  String get journalEventTimesClock => 'Orologio';
+  @override
   String get themeEditorRolesHint =>
       'Ogni colore porta il nome che usa il file esportato';
   @override

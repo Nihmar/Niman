@@ -161,6 +161,30 @@ final class _SettingsJournalScreenState extends State<SettingsJournalScreen> {
 
   static String _hourLabel(int hour) => '${hour.toString().padLeft(2, '0')}:00';
 
+  /// Picks how an event's time is read: as the file writes it, or as a
+  /// clock in the reader's own zone (#730).
+  Future<void> _pickEventTimes(JournalSettings settings) async {
+    final clock = await showDialog<bool>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(AppStrings.journalEventTimesTitle),
+        children: [
+          for (final (value, label) in [
+            (false, AppStrings.journalEventTimesWritten),
+            (true, AppStrings.journalEventTimesClock),
+          ])
+            SimpleDialogOption(
+              key: Key('journal-event-times-${value ? 'clock' : 'written'}'),
+              onPressed: () => Navigator.pop(context, value),
+              child: Text(label),
+            ),
+        ],
+      ),
+    );
+    if (clock == null) return;
+    await _save(settings.copyWith(clockTimes: clock));
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = _settings;
@@ -227,6 +251,21 @@ final class _SettingsJournalScreenState extends State<SettingsJournalScreen> {
                     subtitle: AppStrings.journalDayStartSubtitle,
                     value: _hourLabel(settings.dayStartHour),
                     onTap: () => _pickDayStart(settings),
+                  ),
+                ),
+                // The calendar beside it: `calendar.txt` is a second file
+                // of the library's own, so what it says is settled here
+                // (#730).
+                SettingsSection(AppStrings.journalCalendarTitle),
+                HighlightRow(
+                  key: SettingsKeys.journalEventTimes,
+                  child: SettingsValueRow(
+                    title: AppStrings.journalEventTimesTitle,
+                    subtitle: AppStrings.journalEventTimesSubtitle,
+                    value: settings.clockTimes
+                        ? AppStrings.journalEventTimesClock
+                        : AppStrings.journalEventTimesWritten,
+                    onTap: () => _pickEventTimes(settings),
                   ),
                 ),
               ],

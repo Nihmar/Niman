@@ -298,6 +298,17 @@ final class BosnianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Podsjetnik u $time';
   @override
+  String get journalCalendarTitle => 'Kalendar';
+  @override
+  String get journalEventTimesTitle => 'Vremena događaja';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kako su zapisana u datoteci ili kao sat u vašoj zoni';
+  @override
+  String get journalEventTimesWritten => 'Kako su zapisana';
+  @override
+  String get journalEventTimesClock => 'Sat';
+  @override
   String get themeEditorRolesHint =>
       'Svaka boja nosi ime koje koristi izvezena datoteka';
   @override

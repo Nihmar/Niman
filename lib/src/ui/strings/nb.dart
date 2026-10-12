@@ -294,6 +294,17 @@ final class NorwegianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Påminnelse kl. $time';
   @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Hendelsestider';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Som skrevet i filen, eller som en klokke i din tidssone';
+  @override
+  String get journalEventTimesWritten => 'Som skrevet';
+  @override
+  String get journalEventTimesClock => 'Klokke';
+  @override
   String get themeEditorRolesHint =>
       'Hver farge heter det den eksporterte filen kaller den';
   @override

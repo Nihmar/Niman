@@ -298,6 +298,17 @@ final class SlovenianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Opomnik ob $time';
   @override
+  String get journalCalendarTitle => 'Koledar';
+  @override
+  String get journalEventTimesTitle => 'Časi dogodkov';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kot zapisano v datoteki ali kot ura v vašem pasu';
+  @override
+  String get journalEventTimesWritten => 'Kot zapisano';
+  @override
+  String get journalEventTimesClock => 'Ura';
+  @override
   String get themeEditorRolesHint =>
       'Vsaka barva je poimenovana kot v izvoženi datoteki';
   @override

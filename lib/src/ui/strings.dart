@@ -246,6 +246,11 @@ final class AppStrings {
   static String get calendarAddEvent => _s.calendarAddEvent;
   static String get calendarOpenInFile => _s.calendarOpenInFile;
   static String calendarReminderAt(String time) => _s.calendarReminderAt(time);
+  static String get journalCalendarTitle => _s.journalCalendarTitle;
+  static String get journalEventTimesTitle => _s.journalEventTimesTitle;
+  static String get journalEventTimesSubtitle => _s.journalEventTimesSubtitle;
+  static String get journalEventTimesWritten => _s.journalEventTimesWritten;
+  static String get journalEventTimesClock => _s.journalEventTimesClock;
   static String get themeEditorRolesHint => _s.themeEditorRolesHint;
   static String get themeEditorDiscardTitle => _s.themeEditorDiscardTitle;
   static String get themeEditorDiscardBody => _s.themeEditorDiscardBody;

@@ -294,6 +294,17 @@ final class FinnishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Muistutus klo $time';
   @override
+  String get journalCalendarTitle => 'Kalenteri';
+  @override
+  String get journalEventTimesTitle => 'Tapahtumien ajat';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kuten tiedostoon kirjoitettu tai kellona omalla vyöhykkeelläsi';
+  @override
+  String get journalEventTimesWritten => 'Kuten kirjoitettu';
+  @override
+  String get journalEventTimesClock => 'Kello';
+  @override
   String get themeEditorRolesHint =>
       'Jokainen väri on nimetty viedyn tiedoston mukaan';
   @override

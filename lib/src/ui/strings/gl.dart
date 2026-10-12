@@ -298,6 +298,17 @@ final class GalicianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Lembrete ás $time';
   @override
+  String get journalCalendarTitle => 'Calendario';
+  @override
+  String get journalEventTimesTitle => 'Horas dos eventos';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Como se escriben no ficheiro, ou como un reloxo na túa zona';
+  @override
+  String get journalEventTimesWritten => 'Como se escriben';
+  @override
+  String get journalEventTimesClock => 'Reloxo';
+  @override
   String get themeEditorRolesHint =>
       'Cada cor leva o nome que usa o ficheiro exportado';
   @override

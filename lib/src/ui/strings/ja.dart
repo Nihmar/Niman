@@ -274,6 +274,16 @@ final class JapaneseStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time にリマインド';
   @override
+  String get journalCalendarTitle => 'カレンダー';
+  @override
+  String get journalEventTimesTitle => '予定の時刻';
+  @override
+  String get journalEventTimesSubtitle => 'ファイルに書かれたまま、またはあなたの地域の時計で';
+  @override
+  String get journalEventTimesWritten => '書かれたまま';
+  @override
+  String get journalEventTimesClock => '時計';
+  @override
   String get themeEditorRolesHint => '各色の名前は書き出したファイルと同じです';
   @override
   String get themeEditorDiscardTitle => '変更を破棄';

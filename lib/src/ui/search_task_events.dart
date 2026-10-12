@@ -10,6 +10,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/parser.dart';
+import 'package:niman/src/calendar/time_display.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/templates/engine.dart';
@@ -58,11 +59,14 @@ Widget searchSectionHeader(BuildContext context, String label, {Key? key}) {
 }
 
 /// One row of the group: [hit]'s own icon, its time and text, and the day
-/// and file it comes from. [onTap] opens it; [today] reads a due date.
+/// and file it comes from. [onTap] opens it; [today] reads a due date;
+/// [asClock] reads an event's time as a clock rather than as written
+/// (#730).
 Widget searchTaskEventRow(
   BuildContext context,
   TaskEventHit hit, {
   required DateTime today,
+  bool asClock = false,
   VoidCallback? onTap,
 }) {
   final theme = Theme.of(context);
@@ -91,7 +95,7 @@ Widget searchTaskEventRow(
       ),
     },
     title: switch (hit.kind) {
-      TaskEventKind.event => _eventTitle(context, hit, syntax, theme),
+      TaskEventKind.event => _eventTitle(context, hit, syntax, theme, asClock),
       TaskEventKind.goal => lineText(
         context,
         hit.goal?.goalText ?? '',
@@ -124,9 +128,14 @@ Widget _eventTitle(
   TaskEventHit hit,
   SyntaxColors? syntax,
   ThemeData theme,
+  bool asClock,
 ) {
   final entry = hit.event!;
-  final time = entry.event.time?.raw ?? '';
+  final time = calendarTimeText(
+    entry.event.time,
+    asClock: asClock,
+    day: entry.line.date,
+  );
   return Row(
     children: [
       if (time.isNotEmpty) ...[

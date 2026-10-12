@@ -297,6 +297,17 @@ final class SlovakStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Pripomienka o $time';
   @override
+  String get journalCalendarTitle => 'Kalendár';
+  @override
+  String get journalEventTimesTitle => 'Časy udalostí';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Ako sú zapísané v súbore alebo ako hodiny vo vašom pásme';
+  @override
+  String get journalEventTimesWritten => 'Ako sú zapísané';
+  @override
+  String get journalEventTimesClock => 'Hodiny';
+  @override
   String get themeEditorRolesHint =>
       'Každá farba sa volá ako v exportovanom súbore';
   @override

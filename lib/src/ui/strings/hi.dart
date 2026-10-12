@@ -284,6 +284,17 @@ final class HindiStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time पर रिमाइंडर';
   @override
+  String get journalCalendarTitle => 'कैलेंडर';
+  @override
+  String get journalEventTimesTitle => 'ईवेंट के समय';
+  @override
+  String get journalEventTimesSubtitle =>
+      'फ़ाइल में लिखे अनुसार, या आपके क्षेत्र में घड़ी के रूप में';
+  @override
+  String get journalEventTimesWritten => 'लिखे अनुसार';
+  @override
+  String get journalEventTimesClock => 'घड़ी';
+  @override
   String get themeEditorRolesHint =>
       'हर रंग का नाम वही है जो निर्यात की गई फ़ाइल में है';
   @override

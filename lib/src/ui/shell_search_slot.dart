@@ -28,6 +28,7 @@ final class SearchSlot extends StatefulWidget {
     this.tree = false,
     this.taskEvents,
     this.onOpenTaskEvent,
+    this.eventTimesClock = false,
     super.key,
   });
 
@@ -51,6 +52,9 @@ final class SearchSlot extends StatefulWidget {
   /// Opens a row of the group: the shell's own open for a task, an event
   /// or a goal.
   final void Function(TaskEventHit hit)? onOpenTaskEvent;
+
+  /// See [SearchScreen.eventTimesClock].
+  final bool eventTimesClock;
 
   /// Whether Tags draws the wide sidebar's collapsible tree (#712);
   /// false keeps the phone's drill-down.
@@ -121,6 +125,7 @@ final class _SearchSlotState extends State<SearchSlot> {
               commands: widget.commands,
               taskEvents: widget.taskEvents,
               onOpenTaskEvent: widget.onOpenTaskEvent,
+              eventTimesClock: widget.eventTimesClock,
               onOpenTags: () => setState(() {
                 _showTags = true;
                 _tagsVisited = true;

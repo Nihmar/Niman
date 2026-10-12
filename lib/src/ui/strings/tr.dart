@@ -288,6 +288,17 @@ final class TurkishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time hatırlatması';
   @override
+  String get journalCalendarTitle => 'Takvim';
+  @override
+  String get journalEventTimesTitle => 'Etkinlik saatleri';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Dosyada yazıldığı gibi veya kendi saat diliminizde bir saat olarak';
+  @override
+  String get journalEventTimesWritten => 'Yazıldığı gibi';
+  @override
+  String get journalEventTimesClock => 'Saat';
+  @override
   String get themeEditorRolesHint =>
       'Her renk, dışa aktarılan dosyadaki adı taşır';
   @override

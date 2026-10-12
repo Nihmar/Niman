@@ -28,6 +28,7 @@ final class JournalScreen extends StatelessWidget {
     this.tasksChanged,
     this.onOpenTasks,
     this.knownTokens = const <String>{},
+    this.eventTimesClock = false,
     this.calendarFile,
     this.onAddEvent,
     this.onAddTask,
@@ -62,6 +63,9 @@ final class JournalScreen extends StatelessWidget {
 
   /// See [JournalBrowser.knownTokens].
   final Set<String> knownTokens;
+
+  /// See [JournalBrowser.eventTimesClock].
+  final bool eventTimesClock;
 
   /// See [JournalBrowser.calendarFile].
   final CalendarFileContent? calendarFile;
@@ -115,6 +119,7 @@ final class JournalScreen extends StatelessWidget {
         tasksChanged: tasksChanged,
         onOpenTasks: onOpenTasks,
         knownTokens: knownTokens,
+        eventTimesClock: eventTimesClock,
         calendarFile: calendarFile,
         onAddEvent: onAddEvent,
         onAddTask: onAddTask,

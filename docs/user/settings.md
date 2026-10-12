@@ -111,6 +111,7 @@ sync) in `.niman/settings.json`.
 | `journalEntryName` | `YYYY/MM/YYYY-MM-DD` | An entry's name: `YYYY` `MM` `M` `DD` `D`, `/` for a folder, `'quoted'` text |
 | `journalTemplate` | none (= a heading with the date) | The template an entry is made from, library-relative |
 | `journalDayStart` | 0 | The hour a new day begins (0–6): at 4, until four in the morning is still yesterday |
+| `journalClockTimes` | false | Read an event's time as a clock (`09:00–12:00`, in the device's zone) rather than as `calendar.txt` writes it (`9-12`); the file is never touched by it (**Settings → Journal → Calendar → Event times**) |
 | `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order, hidden destinations and start (**Settings → Navigation**): `{"order": [names], "hidden": [names], "start": name}` with `files`, `todo`, `search`, `home`, `quicknote`, `settings`, where `start` (**Opens on**) is absent for Files; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
 
 The **Diagnostics and info** area also carries the first run again

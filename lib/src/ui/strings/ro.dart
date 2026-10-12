@@ -299,6 +299,17 @@ final class RomanianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Memento la $time';
   @override
+  String get journalCalendarTitle => 'Calendar';
+  @override
+  String get journalEventTimesTitle => 'Orele evenimentelor';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Așa cum sunt scrise în fișier sau ca un ceas în fusul dvs';
+  @override
+  String get journalEventTimesWritten => 'Așa cum sunt scrise';
+  @override
+  String get journalEventTimesClock => 'Ceas';
+  @override
   String get themeEditorRolesHint =>
       'Fiecare culoare poartă numele din fișierul exportat';
   @override

@@ -294,6 +294,17 @@ final class IcelandicStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Áminning kl. $time';
   @override
+  String get journalCalendarTitle => 'Dagatal';
+  @override
+  String get journalEventTimesTitle => 'Tímar viðburða';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Eins og skrifað er í skránni eða sem klukka á þínu svæði';
+  @override
+  String get journalEventTimesWritten => 'Eins og skrifað';
+  @override
+  String get journalEventTimesClock => 'Klukka';
+  @override
   String get themeEditorRolesHint =>
       'Hver litur heitir því sem útflutta skráin kallar hann';
   @override

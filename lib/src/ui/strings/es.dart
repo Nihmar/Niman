@@ -298,6 +298,17 @@ final class SpanishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Recordatorio a las $time';
   @override
+  String get journalCalendarTitle => 'Calendario';
+  @override
+  String get journalEventTimesTitle => 'Horas de los eventos';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Como se escriben en el archivo, o como un reloj en tu zona';
+  @override
+  String get journalEventTimesWritten => 'Como se escriben';
+  @override
+  String get journalEventTimesClock => 'Reloj';
+  @override
   String get themeEditorRolesHint =>
       'Cada color lleva el nombre que usa el archivo exportado';
   @override

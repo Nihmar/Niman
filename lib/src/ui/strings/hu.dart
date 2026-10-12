@@ -293,6 +293,17 @@ final class HungarianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Emlékeztető $time-kor';
   @override
+  String get journalCalendarTitle => 'Naptár';
+  @override
+  String get journalEventTimesTitle => 'Eseményidők';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Ahogy a fájlban szerepel, vagy óraként az Ön időzónájában';
+  @override
+  String get journalEventTimesWritten => 'Ahogy szerepel';
+  @override
+  String get journalEventTimesClock => 'Óra';
+  @override
   String get themeEditorRolesHint =>
       'Minden szín neve az exportált fájlban szereplő név';
   @override

@@ -296,6 +296,17 @@ final class LithuanianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Priminimas $time';
   @override
+  String get journalCalendarTitle => 'Kalendorius';
+  @override
+  String get journalEventTimesTitle => 'Įvykių laikai';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Kaip įrašyta failo arba kaip laikrodis jūsų zonoje';
+  @override
+  String get journalEventTimesWritten => 'Kaip įrašyta';
+  @override
+  String get journalEventTimesClock => 'Laikrodis';
+  @override
   String get themeEditorRolesHint =>
       'Kiekviena spalva pavadinta taip, kaip eksportuotame faile';
   @override

@@ -298,6 +298,17 @@ final class SerbianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Подсетник у $time';
   @override
+  String get journalCalendarTitle => 'Календар';
+  @override
+  String get journalEventTimesTitle => 'Времена догађаја';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Како су записана у датотеци или као сат у вашој зони';
+  @override
+  String get journalEventTimesWritten => 'Како су записана';
+  @override
+  String get journalEventTimesClock => 'Сат';
+  @override
   String get themeEditorRolesHint =>
       'Свака боја носи име које користи извезена датотека';
   @override

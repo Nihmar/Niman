@@ -295,6 +295,17 @@ final class DutchStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Herinnering om $time';
   @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Gebeurtenistijden';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Zoals geschreven in het bestand, of als een klok in uw tijdzone';
+  @override
+  String get journalEventTimesWritten => 'Zoals geschreven';
+  @override
+  String get journalEventTimesClock => 'Klok';
+  @override
   String get themeEditorRolesHint =>
       'Elke kleur heet zoals het geëxporteerde bestand hem noemt';
   @override

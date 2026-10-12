@@ -294,6 +294,17 @@ final class EnglishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Reminder at $time';
   @override
+  String get journalCalendarTitle => 'Calendar';
+  @override
+  String get journalEventTimesTitle => 'Event times';
+  @override
+  String get journalEventTimesSubtitle =>
+      'As written in the file, or as a clock in your own zone';
+  @override
+  String get journalEventTimesWritten => 'As written';
+  @override
+  String get journalEventTimesClock => 'Clock';
+  @override
   String get themeEditorRolesHint =>
       'Each color is named as the exported file names it';
   @override

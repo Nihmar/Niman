@@ -296,6 +296,17 @@ final class SwedishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Påminnelse kl. $time';
   @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Händelsetider';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Som skrivet i filen, eller som en klocka i din tidszon';
+  @override
+  String get journalEventTimesWritten => 'Som skrivet';
+  @override
+  String get journalEventTimesClock => 'Klocka';
+  @override
   String get themeEditorRolesHint =>
       'Varje färg heter det den exporterade filen kallar den';
   @override

@@ -293,6 +293,17 @@ final class AlbanianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Kujtesë në $time';
   @override
+  String get journalCalendarTitle => 'Kalendari';
+  @override
+  String get journalEventTimesTitle => 'Oret e ngjarjeve';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Siç janë shkruar në skedar ose si orë në zonën tuaj';
+  @override
+  String get journalEventTimesWritten => 'Siç janë shkruar';
+  @override
+  String get journalEventTimesClock => 'Ora';
+  @override
   String get themeEditorRolesHint =>
       'Çdo ngjyrë mban emrin që përdor skedari i eksportuar';
   @override

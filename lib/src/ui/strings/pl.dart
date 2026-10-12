@@ -298,6 +298,17 @@ final class PolishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Przypomnienie o $time';
   @override
+  String get journalCalendarTitle => 'Kalendarz';
+  @override
+  String get journalEventTimesTitle => 'Godziny wydarzeń';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Tak jak zapisano w pliku lub jako zegar w Twojej strefie';
+  @override
+  String get journalEventTimesWritten => 'Tak jak zapisano';
+  @override
+  String get journalEventTimesClock => 'Zegar';
+  @override
   String get themeEditorRolesHint =>
       'Każdy kolor nazywa się tak jak w wyeksportowanym pliku';
   @override

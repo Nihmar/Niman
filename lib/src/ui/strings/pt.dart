@@ -295,6 +295,17 @@ final class PortugueseStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Lembrete às $time';
   @override
+  String get journalCalendarTitle => 'Calendário';
+  @override
+  String get journalEventTimesTitle => 'Horas dos eventos';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Como escritas no ficheiro, ou como um relógio na sua zona';
+  @override
+  String get journalEventTimesWritten => 'Como escritas';
+  @override
+  String get journalEventTimesClock => 'Relógio';
+  @override
   String get themeEditorRolesHint =>
       'Cada cor tem o nome que usa o ficheiro exportado';
   @override

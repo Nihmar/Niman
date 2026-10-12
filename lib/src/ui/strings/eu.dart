@@ -292,6 +292,17 @@ final class BasqueStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Gogorarazpena $time';
   @override
+  String get journalCalendarTitle => 'Egutegia';
+  @override
+  String get journalEventTimesTitle => 'Gertaeren orduak';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Fitxategian idatzita dauden bezala, edo erloju gisa zure ordu-eremuan';
+  @override
+  String get journalEventTimesWritten => 'Idatzita dauden bezala';
+  @override
+  String get journalEventTimesClock => 'Erlojua';
+  @override
   String get themeEditorRolesHint =>
       'Kolore bakoitzak esportatutako fitxategiak duen izena du';
   @override

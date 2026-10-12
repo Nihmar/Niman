@@ -295,6 +295,17 @@ final class BelarusianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Напамін у $time';
   @override
+  String get journalCalendarTitle => 'Каляндар';
+  @override
+  String get journalEventTimesTitle => 'Час падзей';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Як запісана ў файле або як гадзіннік у вашай зоне';
+  @override
+  String get journalEventTimesWritten => 'Як запісана';
+  @override
+  String get journalEventTimesClock => 'Гадзіннік';
+  @override
   String get themeEditorRolesHint =>
       'Кожны колер названы так, як яго называе файл экспарту';
   @override

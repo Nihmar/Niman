@@ -299,6 +299,17 @@ final class BulgarianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Напомняне в $time';
   @override
+  String get journalCalendarTitle => 'Календар';
+  @override
+  String get journalEventTimesTitle => 'Часове на събитията';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Както са записани във файла, или като часовник във вашата зона';
+  @override
+  String get journalEventTimesWritten => 'Както са записани';
+  @override
+  String get journalEventTimesClock => 'Часовник';
+  @override
   String get themeEditorRolesHint =>
       'Всеки цвят е с името, което използва експортираният файл';
   @override

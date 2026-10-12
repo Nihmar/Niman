@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/time_display.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_tile_frame.dart';
@@ -87,7 +88,11 @@ final class EventsTodayTile extends StatelessWidget {
                         SizedBox(
                           width: 48,
                           child: Text(
-                            event.event.time?.raw ?? '',
+                            calendarTimeText(
+                              event.event.time,
+                              asClock: host.clockEventTimes(),
+                              day: event.line.date,
+                            ),
                             textAlign: TextAlign.end,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: time ?? theme.colorScheme.tertiary,

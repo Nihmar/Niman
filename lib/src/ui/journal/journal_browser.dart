@@ -12,6 +12,7 @@ import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
+import 'package:niman/src/calendar/time_display.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/core/weeks.dart';
 import 'package:niman/src/journal/journal_summary.dart';
@@ -49,6 +50,7 @@ final class JournalBrowser extends StatefulWidget {
     this.tasksChanged,
     this.onOpenTasks,
     this.knownTokens = const <String>{},
+    this.eventTimesClock = false,
     this.calendarFile,
     this.onAddEvent,
     this.onAddTask,
@@ -96,6 +98,10 @@ final class JournalBrowser extends StatefulWidget {
 
   /// Opens the task list, from a task's tap.
   final VoidCallback? onOpenTasks;
+
+  /// Whether an event's time is read as a clock (`09:00–12:00`) rather
+  /// than as the file writes it (`9-12`) (#730).
+  final bool eventTimesClock;
 
   /// The `+`/`@`/`#` tokens the two files already use, for the Add event
   /// form's suggestions (#730).
@@ -464,7 +470,11 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       leading: SizedBox(
         width: 56,
         child: Text(
-          event.time?.raw ?? '',
+          calendarTimeText(
+            event.time,
+            asClock: widget.eventTimesClock,
+            day: entry.line.date,
+          ),
           textAlign: TextAlign.end,
           style: theme.textTheme.bodySmall?.copyWith(
             color: syntax?.calendarTime ?? theme.colorScheme.tertiary,

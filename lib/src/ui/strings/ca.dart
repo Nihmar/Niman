@@ -297,6 +297,17 @@ final class CatalanStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Recordatori a les $time';
   @override
+  String get journalCalendarTitle => 'Calendari';
+  @override
+  String get journalEventTimesTitle => 'Hores dels esdeveniments';
+  @override
+  String get journalEventTimesSubtitle =>
+      "Tal com s'escriuen al fitxer, o com un rellotge a la vostra zona";
+  @override
+  String get journalEventTimesWritten => "Tal com s'escriuen";
+  @override
+  String get journalEventTimesClock => 'Rellotge';
+  @override
   String get themeEditorRolesHint =>
       'Cada color porta el nom que fa servir el fitxer exportat';
   @override

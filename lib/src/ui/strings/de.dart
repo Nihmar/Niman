@@ -297,6 +297,17 @@ final class GermanStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Erinnerung um $time';
   @override
+  String get journalCalendarTitle => 'Kalender';
+  @override
+  String get journalEventTimesTitle => 'Terminzeiten';
+  @override
+  String get journalEventTimesSubtitle =>
+      'Wie in der Datei geschrieben oder als Uhr in Ihrer Zeitzone';
+  @override
+  String get journalEventTimesWritten => 'Wie geschrieben';
+  @override
+  String get journalEventTimesClock => 'Uhr';
+  @override
   String get themeEditorRolesHint =>
       'Jede Farbe heißt so, wie die exportierte Datei sie nennt';
   @override

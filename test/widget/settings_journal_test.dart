@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/ui/journal/settings_journal.dart';
+import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
 
@@ -81,6 +82,20 @@ void main() {
     await tester.tap(find.byKey(const Key('journal-template-none')));
     await tester.pumpAndSettle();
     expect((await session.journal).template, isNull);
+  });
+
+  testWidgets('event times are read as written, or as a clock', (tester) async {
+    await pump(tester);
+    expect(find.text(AppStrings.journalCalendarTitle), findsOne);
+    expect(find.text(AppStrings.journalEventTimesWritten), findsOne);
+
+    await tester.tap(find.text(AppStrings.journalEventTimesWritten));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('journal-event-times-clock')));
+    await tester.pumpAndSettle();
+
+    expect((await session.journal).clockTimes, isTrue);
+    expect(await session.journal, const JournalSettings(clockTimes: true));
   });
 
   testWidgets('a new day can start later than midnight', (tester) async {

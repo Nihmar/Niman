@@ -22,6 +22,7 @@ final class HomeHost {
     required this.todo,
     required this.calendar,
     required this.journal,
+    required this.clockEventTimes,
     required this.openNote,
     required this.openSearch,
     required this.openTag,
@@ -39,6 +40,10 @@ final class HomeHost {
 
   /// The calendar file, as the journal holds it (#730).
   final CalendarController calendar;
+
+  /// Whether an event's time is read as a clock rather than as written
+  /// (#730), the journal's own setting, asked as the tile builds.
+  final bool Function() clockEventTimes;
 
   /// Opens and makes journal entries.
   final JournalFlow journal;

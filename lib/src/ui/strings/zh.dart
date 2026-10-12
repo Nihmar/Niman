@@ -275,6 +275,16 @@ final class ChineseStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time 提醒';
   @override
+  String get journalCalendarTitle => '日历';
+  @override
+  String get journalEventTimesTitle => '事件时间';
+  @override
+  String get journalEventTimesSubtitle => '按文件中所写，或按你所在时区的时钟';
+  @override
+  String get journalEventTimesWritten => '按所写';
+  @override
+  String get journalEventTimesClock => '时钟';
+  @override
   String get themeEditorRolesHint => '每个颜色的名称与导出文件一致';
   @override
   String get themeEditorDiscardTitle => '放弃更改';
