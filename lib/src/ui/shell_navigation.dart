@@ -268,25 +268,22 @@ final class ShellRail extends StatelessWidget {
   /// The rail's width, and the note column's first tax on the window: a
   /// button and the margin left of it, no margin right. The islands' own
   /// gap is the space on that side, so the glyph sits as far from the
-  /// panel as from the window's edge, near enough, and the active pill
-  /// stands off the panel as one island does off the next.
+  /// panel as from the window's edge, and the active pill stands off the
+  /// panel as one island does off the next (#749).
   static const double width = _margin + _RailButton.size;
 
-  /// The base's pixel between the rail and the islands: no line, but
-  /// counted wherever the islands' left edge is worked out.
-  static const double seam = 1;
-
-  /// Where the panels start, from the window's left edge: past the rail,
-  /// its seam and the islands' gap. The title bar's name starts here, so
-  /// it stands over the panel's edge (#708).
-  static const double panelStart = width + seam + Island.gap;
+  /// Where the panels start, from the window's left edge: past the rail
+  /// and the islands' gap. The title bar's name starts here, so it stands
+  /// over the panel's edge (#708).
+  static const double panelStart = width + Island.gap;
 
   /// The centre of the buttons' glyphs, from the window's left edge: the
   /// title bar's sidebar toggle is centred on it (#708).
   static const double glyphCentre = _margin + _RailButton.size / 2;
 
-  /// The space between the window's edge and the buttons.
-  static const double _margin = 5;
+  /// The space between the window's edge and the buttons: the same the
+  /// islands keep from the edge beside it (#749).
+  static const double _margin = 4;
 
   /// The destinations shown, in order ([visibleDestinations]).
   final List<ShellDestination> destinations;

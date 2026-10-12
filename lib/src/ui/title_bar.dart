@@ -270,10 +270,10 @@ const double _titleInset = ShellRail.panelStart - _leading;
 
 /// The least room between the sidebar toggle and the first tab, a guard
 /// only: the tabs start at the panes' island, which with the tree hidden
-/// is 11 px past the toggle — room enough, and kept so the first tab
+/// is 6 px past the toggle — room enough, and kept so the first tab
 /// stands over the panel (0.0.8 test round asked for room; a 16 px floor
 /// once pushed the tab 8 px off the panel's edge).
-const double _tabsGap = 8;
+const double _tabsGap = 4;
 
 /// Minimize, maximize/restore and close, at the bar's right edge.
 ///

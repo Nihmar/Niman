@@ -76,23 +76,20 @@ void main() {
     final panesRect = tester.getRect(panes);
     final dockRect = tester.getRect(dock);
 
-    // The gap around: under the title bar, past the rail, before the
-    // window's right and bottom edges.
+    // The gap around: the title bar sits on the islands (#749), the rail
+    // and the window's right and bottom edges keep the gap.
     for (final rect in [treeRect, panesRect, dockRect]) {
-      expect(rect.top, bar.bottom + gap);
+      expect(rect.top, bar.bottom);
       expect(rect.bottom, size.height - gap);
     }
     expect(treeRect.left, ShellRail.panelStart);
     expect(dockRect.right, size.width - gap);
-    // The rail's buttons stand off the tree by the islands' gap (and the
-    // base's pixel), no more: the glyphs sit near the middle between the
-    // window's edge and the panel.
+    // The rail's buttons stand off the tree by the islands' gap, the same
+    // they keep from the window's left edge: the glyph sits in the middle
+    // between the edge and the panel (#749).
     final button = tester.getRect(find.byKey(const Key('rail-files')));
-    expect(treeRect.left - button.right, gap + 1);
-    expect(
-      (button.left - (treeRect.left - button.right)).abs(),
-      lessThanOrEqualTo(gap),
-    );
+    expect(treeRect.left - button.right, gap);
+    expect(button.left, gap);
     // The dividers are the base between two islands.
     expect(panesRect.left, treeRect.right + ResizeDivider.width);
     expect(dockRect.left, panesRect.right + ResizeDivider.width);

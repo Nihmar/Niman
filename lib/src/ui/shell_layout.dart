@@ -364,10 +364,6 @@ final class WideShellLayout extends StatelessWidget {
                             onSwitchLibrary: props.onSwitchLibrary,
                           ),
                         ),
-                        // No line: the rail is part of the base the
-                        // islands sit on. The pixel stays, counted where
-                        // the shell works out where the tabs start.
-                        const SizedBox(width: ShellRail.seam),
                       ],
                       Expanded(
                         child: Stack(
