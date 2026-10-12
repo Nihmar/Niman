@@ -1983,9 +1983,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   List<LiveRun> _runs = const <LiveRun>[];
   int _runsRevision = -1;
 
+  /// Whether a layout asked for [_liveRuns] while the scan owed part of the
+  /// note, and drew every block stacked: the scan settling owes it a
+  /// layout ([_carryScanOn]).
+  bool _runsOwed = false;
+
   /// The outermost `columns` blocks `live` draws, read off the scan's fence
   /// lines: none in `source`, and none while the scan owes part of the note
-  /// — its blocks there are hints.
+  /// — its blocks there are hints. That answer is not kept: the scan
+  /// settles at the same revision.
   List<LiveRun> get _liveRuns {
     if (!widget.hideMarkers) return const <LiveRun>[];
     final revision = widget.buffer.revision;
@@ -1994,15 +2000,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final fences = styler?.divBlocks;
     final quotes = styler?.quoteBlocks;
     if (styler == null || fences == null || quotes == null) {
-      _runs = const <LiveRun>[];
-    } else {
-      // The note's own, and the ones in its quotes and callouts, read off
-      // each quote's content.
-      _runs = [
-        ...LiveRun.of(fences, styler.blockOf, widget.buffer.lineAt),
-        ...LiveRun.inQuotes(quotes, widget.buffer),
-      ]..sort((a, b) => a.start.compareTo(b.start));
+      _runsOwed = styler != null;
+      return const <LiveRun>[];
     }
+    _runsOwed = false;
+    // The note's own, and the ones in its quotes and callouts, read off
+    // each quote's content.
+    _runs = [
+      ...LiveRun.of(fences, styler.blockOf, widget.buffer.lineAt),
+      ...LiveRun.inQuotes(quotes, widget.buffer),
+    ]..sort((a, b) => a.start.compareTo(b.start));
     _runsRevision = revision;
     return _runs;
   }
@@ -3464,6 +3471,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _scanSlice = null;
       if (!mounted || !identical(_styler, styler)) return;
       styler.advance();
+      // A layout that found the scan owed drew the `columns` blocks
+      // stacked (#729): settled, it lays them out side by side.
+      if (styler.settled && _runsOwed) {
+        setState(() {});
+      }
       _carryScanOn();
     });
   }

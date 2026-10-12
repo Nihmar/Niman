@@ -156,6 +156,30 @@ void main() {
     expect(after.top, greaterThanOrEqualTo(second.bottom));
   });
 
+  testWidgets('a scan an edit left owed lays the columns out once settled', (
+    tester,
+  ) async {
+    // Far more formulas after the columns than one keystroke's budget,
+    // all of them turned inside out by one more `$$` above them.
+    final note = [
+      _two,
+      for (var at = 0; at < 5000; at++) ...[r'$$', 'x_$at', r'$$', ''],
+    ].join('\n');
+    final state = await _pump(tester, note, live: true);
+    final at = note.indexOf(r'$$');
+    state.replaceText(at, at, '\$\$\n');
+    expect(state.scanSettled, isFalse, reason: 'the keystroke paid its budget');
+    // A frame while the scan is owed draws the columns stacked.
+    await tester.pump();
+    await tester.pump(Duration.zero);
+    expect(state.scanSettled, isTrue);
+    await tester.pump();
+    final left = tester.getRect(find.text('first left', findRichText: true));
+    final right = tester.getRect(find.text('first right', findRichText: true));
+    expect(right.left, greaterThan(left.right));
+    expect((right.top - left.top).abs(), lessThan(2));
+  });
+
   testWidgets('in source the columns stay line by line', (tester) async {
     await _pump(tester, _two);
     final left = tester.getRect(find.text('first left', findRichText: true));
