@@ -499,14 +499,20 @@ The frame trace (`NIMAN_FRAMES=true`, a profile beta) named it: the frames
 that brought the table's rows back into view laid out for **95–113 ms**
 (`build 0.0 ms, paint 0–2 ms` beside them, and `raster 2–7 ms` in the
 app-wide `[frames] slow frame` — the cost was the UI thread's layout, not the
-GPU). `LiveTables`' measurements were not re-taken: re-entering rows come
-back to the pieces they were measured into. `test/perf/live_table_scroll_test.dart`
-holds that (no measurement, no row laid out again when the rows return), on
-the reporting note's shape and font (Roboto from the Flutter cache, 390 ×
-800). On this host a scroll step through the table reads a median of 12 ms
-down and 8 ms up — inside §9.2's 16 ms frame, and asserted under
-`NIMAN_PERF=1` — with a worst of 51 ms where a step first builds the rows it
-brings in, which is what the follow-up has to bring down.
+GPU). `LiveTables`' measurements were not re-taken by the scroll itself: a
+row that leaves the window and comes back is drawn from the pieces it was
+measured into. What re-took them was a **theme rebuilt per `build`** —
+`NoteView` asks `markdownThemeOf`, which built a new instance every call,
+while the table's cache kept its measurements by the theme's *identity*, so
+every rebuild dropped them and measured the whole table again (944 text
+painters for this note). A value-equal theme is now the same theme
+(`MarkdownTheme`'s `==`/`hashCode`, and an `Expando` handing back what
+`markdownThemeOf` built), and the device reads **7–11 ms** on the frames that
+used to read ~100, with the table measured once. What is left is that one
+measuring frame at open, **265 ms** on the device for this note, and it is
+what `test/perf/live_table_scroll_test.dart` prints — the rows that come back
+measure nothing again, which is asserted on any host, and the median step is
+held to a 60 Hz frame under `NIMAN_PERF=1`.
 
 ## The testing builds
 
