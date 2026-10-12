@@ -4,11 +4,15 @@ import 'dart:io';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/home/home_action.dart';
+import 'package:niman/src/home/home_layout.dart';
+import 'package:niman/src/home/home_tile.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_engine.dart';
@@ -40,6 +44,7 @@ final class _Device {
     String name, {
     Duration timeout = const Duration(seconds: 5),
     HttpClient? httpClient,
+    DeviceSettingsStore? device,
   }) async {
     final root = await Directory.current.createTemp('niman_sync_$name');
     final dbDir = await Directory.current.createTemp('niman_sync_db_$name');
@@ -52,7 +57,7 @@ final class _Device {
       root: path,
       db: index,
       indexer: Indexer(index),
-      config: LibraryConfigRepo(path),
+      config: LibraryConfigRepo(path, device: device),
     );
     return _Device._(
       root,
@@ -1146,6 +1151,107 @@ void main() {
         onTimeout: () =>
             fail('the stalled connection was left open after the run'),
       );
+    });
+  });
+
+  // #774: a folder renamed on another device arrives as one move per note,
+  // and this device's own Home — which no sync carries — names the folder
+  // itself. It follows the folder once the moves leave nothing in it, and
+  // stays where it is when the folder keeps a note.
+  group('a folder renamed elsewhere', () {
+    HomeLayout meetingIn(String folder) => HomeLayout([
+      HomeTile(
+        id: 'actions',
+        kind: HomeTileKind.actions,
+        cell: (x: 0, y: 0, w: 2, h: 1),
+        at: 0,
+        actions: [
+          HomeAction(
+            id: 'm',
+            label: 'Meeting',
+            kind: HomeActionKind.newNote,
+            folder: folder,
+          ),
+        ],
+      ),
+    ]);
+
+    late _Device c;
+
+    setUp(() async {
+      server.fileIds = true;
+      c = await _Device.create('home', device: MemoryDeviceSettingsStore());
+      await c.connect(server.url);
+    });
+
+    tearDown(() => c.close());
+
+    Future<String?> deviceFolder() async =>
+        (await c.ops.home).device!['actions']!.actions.single.folder;
+
+    test("carries this device's Home actions to the new name", () async {
+      a
+        ..write('Work/a.md', 'one')
+        ..write('Work/Sub/b.md', 'two');
+      await a.sync();
+      await c.sync();
+      await c.ops.setHome(meetingIn('Work'), onDevice: true);
+
+      Directory(p.join(a.path, 'Work')).renameSync(p.join(a.path, 'Projects'));
+      await a.sync();
+      final report = await c.sync();
+
+      expect(
+        report.done[SyncActionKind.moveLocal],
+        2,
+        reason: report.summary(),
+      );
+      expect(c.read('Projects/a.md'), 'one');
+      expect(c.read('Projects/Sub/b.md'), 'two');
+      expect(await deviceFolder(), 'Projects');
+    });
+
+    test('leaves them on a folder that keeps a note', () async {
+      a
+        ..write('Work/a.md', 'one')
+        ..write('Work/b.md', 'two');
+      await a.sync();
+      await c.sync();
+      await c.ops.setHome(meetingIn('Work'), onDevice: true);
+
+      Directory(p.join(a.path, 'Projects')).createSync();
+      File(p.join(a.path, 'Work', 'a.md'))
+          .renameSync(p.join(a.path, 'Projects', 'a.md'));
+      await a.sync();
+      final report = await c.sync();
+
+      expect(
+        report.done[SyncActionKind.moveLocal],
+        1,
+        reason: report.summary(),
+      );
+      expect(c.read('Projects/a.md'), 'one');
+      expect(await deviceFolder(), 'Work');
+    });
+
+    test('leaves them on a folder a note here goes back up to', () async {
+      a.write('Work/a.md', 'one');
+      await a.sync();
+      await c.sync();
+      await c.ops.setHome(meetingIn('Work'), onDevice: true);
+      c.write('Work/new.md', 'written here meanwhile');
+
+      Directory(p.join(a.path, 'Work')).renameSync(p.join(a.path, 'Projects'));
+      await a.sync();
+      final report = await c.sync();
+
+      expect(
+        report.done[SyncActionKind.moveLocal],
+        1,
+        reason: report.summary(),
+      );
+      expect(remoteText('Work/new.md'), 'written here meanwhile');
+      expect(await deviceFolder(), 'Work');
     });
   });
 
