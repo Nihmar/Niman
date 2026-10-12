@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Folder grid, tile states</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;padding:28px;font-family:'IBM Plex Sans',sans-serif;background:#14161A;color:#F2EDE5}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+h2{font-size:14px;font-weight:600;margin:32px 0 10px;color:#A6A29A;text-transform:uppercase;letter-spacing:.08em}
+p.lead{margin:0 0 18px;color:#A6A29A;font-size:13px;max-width:900px;line-height:1.5}
+.caption{font-size:12.5px;color:#A6A29A;margin:10px 0 0;max-width:1100px;line-height:1.55}
+.caption b{color:#D9D4CB;font-weight:600}
+code{font-size:12px;color:#7FD1C4}
+.ico{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+/* the island colours: base #2C3037 (surfaceContainer), islands #23262B (surface), raised #363B44 */
+.window{width:1280px;height:800px;box-sizing:border-box;display:flex;flex-direction:column;background:#2C3037;overflow:hidden;border-radius:6px;border:1px solid #363B44;position:relative;font-size:14px}
+.titlebar{height:38px;flex:none;display:flex;align-items:center}
+.tbtn{width:36px;height:38px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.tab{height:30px;display:flex;align-items:center;gap:8px;padding:0 10px 0 12px;border-radius:7px;font-size:13px;color:#A6A29A;max-width:190px;box-sizing:border-box}
+.tab.on{background:#23262B;color:#F2EDE5;box-shadow:inset 0 0 0 1px #363B44}
+.cap{width:44px;height:38px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.body{flex:1;min-height:0;display:flex}
+.rail{width:42px;flex:none;box-sizing:border-box;padding:6px 0 6px 4px;display:flex;flex-direction:column;gap:2px}
+.rb{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.rb.on{background:#363B44;color:#587CD3}
+.slot{flex:1;min-width:0;display:flex;gap:4px;padding:0 4px 4px 4px}
+.island{background:#23262B;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+/* the breadcrumb: as tall as the editor toolbar across the gap (32 px), the hairline level with its divider */
+.crumbs{height:32px;flex:none;display:flex;align-items:center;gap:1px;padding:0 6px 0 4px;border-bottom:1px solid #363B44;font-size:13px;box-sizing:border-box;white-space:nowrap;overflow:hidden}
+.upb{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#A6A29A;flex:none;margin-right:2px}
+.upb.off{color:#4A4F59}
+.cr{padding:3px 6px;border-radius:5px;color:#A6A29A;flex:none}
+.cr.cur{color:#F2EDE5;font-weight:500;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
+.cr.lit{background:rgba(88,124,211,.16);color:#F2EDE5}
+.sep{color:#6B7079;font-size:12px;flex:none}
+.grid{flex:1;min-height:0;display:grid;gap:4px;padding:8px;align-content:start;overflow:hidden}
+.tile{position:relative;height:110px;border-radius:6px;display:flex;flex-direction:column;align-items:center;padding:12px 6px 7px;box-sizing:border-box;color:#F2EDE5;min-width:0}
+.tile .ic{height:32px;display:flex;align-items:center;justify-content:center;margin-bottom:5px}
+.tile .nm{font-size:12.5px;line-height:16px;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;max-width:100%}
+.tile .dt{font-size:11px;color:#A6A29A;margin-top:auto;padding-top:2px}
+.tile.sel{background:rgba(204,204,204,.10)}
+.tile.hover{background:rgba(242,237,229,.035)}
+.tile.focus{box-shadow:inset 0 0 0 2px #587CD3}
+.tile.drop{background:rgba(88,124,211,.16)}
+.tile.dragged{opacity:.4}
+.tile.side{color:#A6A29A}
+.tile.side .nm{font-size:12px}
+.tile .pinb{position:absolute;top:6px;right:6px;color:#F2EDE5}
+.tile .multi{position:absolute;top:6px;left:6px;color:#587CD3}
+.foot{height:44px;flex:none;border-top:1px solid #363B44;display:flex;align-items:center;padding:0 2px 0 4px;box-sizing:border-box}
+.newb{height:32px;display:flex;align-items:center;gap:4px;padding:0 6px 0 8px;border-radius:6px;font-size:14px;font-weight:500;color:#F2EDE5;flex:none}
+.newb.short{padding:0 2px 0 6px;gap:0}
+.fb{width:32px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#A6A29A;flex:none}
+.pair{display:flex;height:28px;border:1px solid #4A4F59;border-radius:7px;overflow:hidden;flex:none;box-sizing:border-box}
+.pair span{width:28px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.pair span.on{background:#363B44;color:#F2EDE5}
+.pair span+span{border-left:1px solid #4A4F59}
+.grow{flex:1}
+.etb{height:32px;flex:none;border-bottom:1px solid #363B44;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:0 8px;color:#A6A29A;font-size:12px;box-sizing:border-box}
+.etb .eb{width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.doc{padding:30px 0 0;width:640px;margin:0 auto;font-family:Literata,serif;color:#E8E3DA;font-size:16px;line-height:1.75}
+.doc h3{font-size:26px;font-weight:600;margin:0 0 14px;color:#F2EDE5;line-height:1.3}
+.doc h4{font-size:18px;font-weight:600;margin:22px 0 8px;color:#F2EDE5}
+.doc p{margin:0 0 12px}
+.doc ul{margin:0 0 12px;padding-left:22px}
+.doc .wl{color:#587CD3}
+.menu{position:absolute;background:#2C3037;border-radius:4px;padding:4px 0;box-shadow:0 6px 24px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03);font-size:14px;color:#F2EDE5;z-index:5}
+.mi{height:32px;display:flex;align-items:center;gap:10px;padding:0 14px 0 12px;white-space:nowrap}
+.mi .ico{color:#F2EDE5}
+.mi.hl{background:rgba(242,237,229,.08)}
+.mi.danger,.mi.danger .ico{color:#E0687A}
+.msep{height:1px;background:#363B44;margin:4px 0}
+.chip{position:absolute;display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;background:#363B44;box-shadow:0 4px 12px rgba(0,0,0,.45);font-size:14px;z-index:6}
+</style>
+</head>
+<body>
+<h1>Folder grid — a tile's states</h1>
+<p class="lead">Every state a tile can be in, on the island's own ground (#23262B) at the desktop's size. Selection is the fill the tree's selected row wears;
+keyboard focus is a ring of its own, so the two can be told apart and worn together.</p>
+<div style="width:1080px;background:#23262B;border-radius:10px;padding:26px 22px;display:grid;grid-template-columns:repeat(6,1fr);row-gap:28px;column-gap:10px"><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Ideas.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Normal</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile hover"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Ideas.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Hover</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile sel"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Ideas.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Selected — the note in the pane</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile focus"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Ideas.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Keyboard focus — the ring</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile sel focus"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Ideas.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Selected and focused</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile drop"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M3 7a1.5 1.5 0 0 1 1.5-1.5h4.3l2 2h8.7A1.5 1.5 0 0 1 21 9v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"/></svg></div><div class="nm">Meetings</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Drop target — a folder lit</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile dragged"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Ideas.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Being dragged — left behind at 40 %</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile sel multi"><span class="multi"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor" stroke="none"/><path d="M8 12.3l2.8 2.8 5.4-5.4" stroke="#23262B" stroke-width="2.2"/></svg></span><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Ideas.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Multi-selected (#712 item 2.1, reserved)</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile"><span class="pinb" title="Pinned"><svg class="ico" viewBox="0 0 24 24" style="width:13px;height:13px;" aria-hidden="true"><path d="M16 9V4h1a1 1 0 0 0 0-2H7a1 1 0 0 0 0 2h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z" fill="currentColor" stroke="none"/></svg></span><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Roadmap.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">Pinned</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile side"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:24px;height:24px;stroke-width:1.3;" aria-hidden="true"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5"/></svg></div><div class="nm">Whiteboard 10-09.ocr.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">OCR sidecar — dimmed, the scanner icon</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16h7"/></svg></div><div class="nm">Workshop notes, long title that wraps.md</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">A long name — two lines, then the ellipsis</div></div><div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:106px"><div class="tile"><div class="ic"><svg class="ico" viewBox="0 0 24 24" style="width:32px;height:32px;stroke-width:1.3;" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-5-5-9 8.5"/></svg></div><div class="nm">Whiteboard 10-09.jpg</div><div class="dt">2026-10-10</div></div></div><div style="font-size:12px;color:#A6A29A;text-align:center;max-width:150px;line-height:1.4">A picture — its outline icon, no thumbnail</div></div></div>
+<h2>The switch and the Up button</h2>
+<div style="display:flex;gap:40px;align-items:flex-start">
+  <div style="width:340px;background:#23262B;border-radius:10px;overflow:hidden"><div class="foot"><div class="newb"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>New</span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M8 10l4 4 4-4z" fill="currentColor"/></svg></div><div class="grow"></div><span class="fb" title="Sync"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.75 4.75 0 0 0 7 18.5z"/><path d="M9.5 13.5l2 2 3.5-3.5"/></svg></span><span class="fb" title="Trash"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M5 7h14M9.5 7V4.5h5V7M7 7l.9 12.1a1 1 0 0 0 1 .9h6.2a1 1 0 0 0 1-.9L17 7M10.5 11v5M13.5 11v5"/></svg></span><div class="pair" role="radiogroup" aria-label="View"><span class="on" title="List"><svg class="ico" viewBox="0 0 24 24" style="width:17px;height:17px;" aria-hidden="true"><g fill="currentColor"><rect x="3.5" y="4.5" width="4" height="4" rx=".8"/><rect x="10" y="4.5" width="10.5" height="4" rx=".8"/><rect x="3.5" y="10" width="4" height="4" rx=".8"/><rect x="10" y="10" width="10.5" height="4" rx=".8"/><rect x="3.5" y="15.5" width="4" height="4" rx=".8"/><rect x="10" y="15.5" width="10.5" height="4" rx=".8"/></g></svg></span><span class="" title="Grid"><svg class="ico" viewBox="0 0 24 24" style="width:17px;height:17px;" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></span></div><span class="fb" title="Sort"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M7.5 9.5L12 5l4.5 4.5M7.5 14.5L12 19l4.5-4.5"/></svg></span></div></div>
+  <div style="width:340px;background:#23262B;border-radius:10px;overflow:hidden"><div class="foot"><div class="newb"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>New</span><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M8 10l4 4 4-4z" fill="currentColor"/></svg></div><div class="grow"></div><span class="fb" title="Sync"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.75 4.75 0 0 0 7 18.5z"/><path d="M9.5 13.5l2 2 3.5-3.5"/></svg></span><span class="fb" title="Trash"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M5 7h14M9.5 7V4.5h5V7M7 7l.9 12.1a1 1 0 0 0 1 .9h6.2a1 1 0 0 0 1-.9L17 7M10.5 11v5M13.5 11v5"/></svg></span><div class="pair" role="radiogroup" aria-label="View"><span class="" title="List"><svg class="ico" viewBox="0 0 24 24" style="width:17px;height:17px;" aria-hidden="true"><rect x="3.5" y="4.5" width="4" height="4" rx=".8"/><rect x="10" y="4.5" width="10.5" height="4" rx=".8"/><rect x="3.5" y="10" width="4" height="4" rx=".8"/><rect x="10" y="10" width="10.5" height="4" rx=".8"/><rect x="3.5" y="15.5" width="4" height="4" rx=".8"/><rect x="10" y="15.5" width="10.5" height="4" rx=".8"/></svg></span><span class="on" title="Grid"><svg class="ico" viewBox="0 0 24 24" style="width:17px;height:17px;" aria-hidden="true"><g fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></g></svg></span></div><span class="fb" title="Sort"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><path d="M7.5 9.5L12 5l4.5 4.5M7.5 14.5L12 19l4.5-4.5"/></svg></span></div></div>
+</div>
+<p class="caption">The pair is two outline icons, list and grid; the one for the view that is on is filled, on the raised ground (#363B44). Left: List on. Right: Grid on.</p>
+<div style="display:flex;gap:40px;align-items:flex-start;margin-top:22px">
+  <div style="width:340px;background:#23262B;border-radius:10px;overflow:hidden"><div class="crumbs"><span class="upb off" title="Up (Alt+Up)"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></span><span class="cr cur">Library</span></div></div>
+  <div style="width:340px;background:#23262B;border-radius:10px;overflow:hidden"><div class="crumbs"><span class="upb" title="Up (Alt+Up)"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></span><span class="cr">Library</span><span class="sep">›</span><span class="cr">Projects</span><span class="sep">›</span><span class="cr cur">Niman</span></div></div>
+</div>
+<p class="caption">At the library's root there is no parent: <b>Up</b> is disabled, not hidden, so the crumbs never move under the pointer.</p>
+<p class="caption" style="margin-top:18px">The multi-selected tile only reserves the look — the fill plus a filled check in the corner — for the selection #712's item 2.1 brings.
+That selection is one model for the list and the grid, so a selection made in one view is the same selection in the other.</p>
+
+</body>
+</html>
