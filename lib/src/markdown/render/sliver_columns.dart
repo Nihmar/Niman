@@ -27,6 +27,12 @@ import 'package:niman/src/markdown/render/block_heights.dart';
 /// the sliver that draws it.
 typedef SliverColumn = ({double share, Widget sliver});
 
+/// A bracket down a block's gutter (#729): at `x`, from `top` below the
+/// block's top to `bottom` above its end — its outer fences' bands — in
+/// `color`. What `live` draws beside a side-by-side block, whose columns'
+/// lines are not numbered.
+typedef ColumnsBracket = ({double x, double top, double bottom, Color color});
+
 /// A `columns` block, its columns side by side in [rows].
 final class SliverColumns extends StatelessWidget {
   /// The block that is entry [index] of [heights], the note's map.
@@ -38,6 +44,7 @@ final class SliverColumns extends StatelessWidget {
     this.opener,
     this.closer,
     this.indent = 0,
+    this.bracket,
     super.key,
   });
 
@@ -58,6 +65,9 @@ final class SliverColumns extends StatelessWidget {
 
   /// The outer closer's band, drawn below them.
   final Widget? closer;
+
+  /// The bracket down the block's gutter, if any.
+  final ColumnsBracket? bracket;
 
   /// How far in the columns stand: the list items around the block, or
   /// the gutter beside them. The fences are as wide as the block's row.
@@ -83,7 +93,12 @@ final class SliverColumns extends StatelessWidget {
         if (closer != null) SliverToBoxAdapter(child: closer),
       ],
     );
-    return _ExtentRecorder(heights: heights, index: index, sliver: group);
+    return _ExtentRecorder(
+      heights: heights,
+      index: index,
+      bracket: bracket,
+      sliver: group,
+    );
   }
 
   /// A row's slivers: its columns, each flexed by its share, with a gap of
@@ -110,15 +125,17 @@ final class _ExtentRecorder extends SingleChildRenderObjectWidget {
   const new({
     required this.heights,
     required this.index,
+    required this.bracket,
     required Widget sliver,
   }) : super(child: sliver);
 
   final BlockHeights heights;
   final int index;
+  final ColumnsBracket? bracket;
 
   @override
   _RenderExtentRecorder createRenderObject(BuildContext context) =>
-      _RenderExtentRecorder(heights, index);
+      _RenderExtentRecorder(heights, index)..bracket = bracket;
 
   @override
   void updateRenderObject(
@@ -127,7 +144,8 @@ final class _ExtentRecorder extends SingleChildRenderObjectWidget {
   ) {
     renderObject
       ..heights = heights
-      ..index = index;
+      ..index = index
+      ..bracket = bracket;
   }
 }
 
@@ -139,6 +157,52 @@ final class _RenderExtentRecorder extends RenderProxySliver {
 
   BlockHeights heights;
   int index;
+
+  ColumnsBracket? get bracket => _bracket;
+  ColumnsBracket? _bracket;
+  set bracket(ColumnsBracket? value) {
+    if (value == _bracket) return;
+    _bracket = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    final bracket = _bracket;
+    final geometry = this.geometry;
+    if (bracket == null || geometry == null || !geometry.visible) return;
+    final scroll = constraints.scrollOffset;
+    final visible = geometry.paintExtent;
+    double clamped(double y) => y.clamp(0.0, visible);
+    final top = bracket.top - scroll;
+    final bottom = geometry.scrollExtent - bracket.bottom - scroll;
+    final from = clamped(top);
+    final to = clamped(bottom);
+    if (to <= from) return;
+    final paint = Paint()
+      ..color = bracket.color
+      ..strokeWidth = 1;
+    final x = offset.dx + bracket.x;
+    final canvas = context.canvas
+      ..drawLine(Offset(x, offset.dy + from), Offset(x, offset.dy + to), paint);
+    // Its ends, where they are on screen: a `[` the block's height.
+    const tick = 3.0;
+    if (top >= 0 && top <= visible) {
+      canvas.drawLine(
+        Offset(x, offset.dy + top),
+        Offset(x + tick, offset.dy + top),
+        paint,
+      );
+    }
+    if (bottom >= 0 && bottom <= visible) {
+      canvas.drawLine(
+        Offset(x, offset.dy + bottom),
+        Offset(x + tick, offset.dy + bottom),
+        paint,
+      );
+    }
+  }
 
   @override
   void performLayout() {

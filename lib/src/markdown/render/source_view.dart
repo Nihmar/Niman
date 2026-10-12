@@ -2004,6 +2004,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// gap between columns are counted in.
   double get _em => _textScaler.scale(widget.theme.body.fontSize ?? 14);
 
+  /// How far from the text the bracket beside a side-by-side block stands,
+  /// in the gutter.
+  static const double _bracketInset = 6;
+
   /// The room between two columns, and between two rows of them.
   double get _gap => ColumnLayout.gapEms * _em;
 
@@ -4150,6 +4154,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       index: host,
       gap: _gap,
       indent: _gutter,
+      // One gutter and several columns: the columns' lines are not
+      // numbered, and a bracket down the gutter spans the block between
+      // its outer fences, which are.
+      bracket: widget.showLineNumbers && _gutter > _bracketInset
+          ? (
+              x: _gutter - _bracketInset,
+              top: _band,
+              bottom: run.closed ? _band : 0,
+              color: widget.theme.markerDim,
+            )
+          : null,
       opener: _lineWidget(context, run.start, width: _textWidth),
       closer: run.closed
           ? _lineWidget(context, run.end - 1, width: _textWidth)
