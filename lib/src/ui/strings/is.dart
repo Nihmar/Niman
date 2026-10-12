@@ -770,6 +770,12 @@ final class IcelandicStrings extends Strings {
   String get searchNoMatches => 'Engar samanburðar';
   @override
   String get searchLoadMore => 'Sýna fleiri';
+  @override
+  String searchTasksAndEvents(int count) => 'Verkefni og viðburðir · $count';
+  @override
+  String searchNotes(int count) => 'Nótur · $count';
+  @override
+  String searchGoal(String scope) => 'Markmið: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override

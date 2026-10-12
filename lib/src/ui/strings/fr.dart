@@ -780,6 +780,12 @@ final class FrenchStrings extends Strings {
   String get searchNoMatches => 'Aucun résultat';
   @override
   String get searchLoadMore => 'Afficher plus';
+  @override
+  String searchTasksAndEvents(int count) => 'Tâches et événements · $count';
+  @override
+  String searchNotes(int count) => 'Notes · $count';
+  @override
+  String searchGoal(String scope) => 'Objectif $scope';
 
   // Replace (T-M3-10).
   @override

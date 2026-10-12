@@ -398,6 +398,19 @@ abstract base class Strings {
   String get searchNoMatches;
   String get searchLoadMore;
 
+  // The Tasks and events group of a lone `+project`/`@context` (#730).
+
+  /// The heading over the group, with how many rows it holds:
+  /// `Tasks and events · 6`.
+  String searchTasksAndEvents(int count);
+
+  /// The heading over the notes below it (`Notes · 3`).
+  String searchNotes(int count);
+
+  /// What a goal's row covers, [scope] being `Week 42`, `October`,
+  /// `2026` (`Week 42 goal`).
+  String searchGoal(String scope);
+
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   String get replaceTooltip;
   String get replaceInNoteAction;

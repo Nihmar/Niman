@@ -774,6 +774,12 @@ final class SerbianStrings extends Strings {
   String get searchNoMatches => 'Нема поклапања';
   @override
   String get searchLoadMore => 'Прикажи више';
+  @override
+  String searchTasksAndEvents(int count) => 'Задаци и догађаји · $count';
+  @override
+  String searchNotes(int count) => 'Белешке · $count';
+  @override
+  String searchGoal(String scope) => 'Циљ: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override

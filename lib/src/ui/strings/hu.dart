@@ -772,6 +772,12 @@ final class HungarianStrings extends Strings {
   String get searchNoMatches => 'Nincs találat';
   @override
   String get searchLoadMore => 'Több megjelenítése';
+  @override
+  String searchTasksAndEvents(int count) => 'Feladatok és események · $count';
+  @override
+  String searchNotes(int count) => 'Jegyzetek · $count';
+  @override
+  String searchGoal(String scope) => '$scope cél';
 
   // Replace (T-M3-10).
   @override

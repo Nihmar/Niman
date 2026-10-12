@@ -776,6 +776,12 @@ final class LithuanianStrings extends Strings {
   String get searchNoMatches => 'Rezultatų nėra';
   @override
   String get searchLoadMore => 'Rodyti daugiau';
+  @override
+  String searchTasksAndEvents(int count) => 'Užduotys ir įvykiai · $count';
+  @override
+  String searchNotes(int count) => 'Užrašai · $count';
+  @override
+  String searchGoal(String scope) => 'Tikslas: $scope';
 
   // Replace (T-M3-10).
   @override

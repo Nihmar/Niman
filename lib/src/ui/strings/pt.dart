@@ -773,6 +773,12 @@ final class PortugueseStrings extends Strings {
   String get searchNoMatches => 'Nenhum resultado';
   @override
   String get searchLoadMore => 'Mostrar mais';
+  @override
+  String searchTasksAndEvents(int count) => 'Tarefas e eventos · $count';
+  @override
+  String searchNotes(int count) => 'Notas · $count';
+  @override
+  String searchGoal(String scope) => 'Objetivo $scope';
 
   // Replace (T-M3-10).
   @override

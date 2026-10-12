@@ -775,6 +775,12 @@ final class SlovakStrings extends Strings {
   String get searchNoMatches => 'Žiadne výsledky';
   @override
   String get searchLoadMore => 'Zobraziť viac';
+  @override
+  String searchTasksAndEvents(int count) => 'Úlohy a udalosti · $count';
+  @override
+  String searchNotes(int count) => 'Poznámky · $count';
+  @override
+  String searchGoal(String scope) => 'Cieľ: $scope';
 
   // Replace (T-M3-10).
   @override

@@ -778,6 +778,12 @@ final class SpanishStrings extends Strings {
   String get searchNoMatches => 'Sin coincidencias';
   @override
   String get searchLoadMore => 'Mostrar más';
+  @override
+  String searchTasksAndEvents(int count) => 'Tareas y eventos · $count';
+  @override
+  String searchNotes(int count) => 'Notas · $count';
+  @override
+  String searchGoal(String scope) => 'Objetivo $scope';
 
   // Replace (T-M3-10).
   @override

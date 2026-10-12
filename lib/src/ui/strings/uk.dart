@@ -775,6 +775,12 @@ final class UkrainianStrings extends Strings {
   String get searchNoMatches => 'Немає результатів';
   @override
   String get searchLoadMore => 'Показати ще';
+  @override
+  String searchTasksAndEvents(int count) => 'Завдання та події · $count';
+  @override
+  String searchNotes(int count) => 'Нотатки · $count';
+  @override
+  String searchGoal(String scope) => 'Мета: $scope';
 
   // Replace (T-M3-10).
   @override

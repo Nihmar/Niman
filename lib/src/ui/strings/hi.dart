@@ -760,6 +760,12 @@ final class HindiStrings extends Strings {
   String get searchNoMatches => 'कोई मेल नहीं';
   @override
   String get searchLoadMore => 'और दिखाएँ';
+  @override
+  String searchTasksAndEvents(int count) => 'कार्य और ईवेंट · $count';
+  @override
+  String searchNotes(int count) => 'नोट्स · $count';
+  @override
+  String searchGoal(String scope) => '$scope का लक्ष्य';
 
   // Replace (T-M3-10).
   @override

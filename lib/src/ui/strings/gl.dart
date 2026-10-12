@@ -777,6 +777,12 @@ final class GalicianStrings extends Strings {
   String get searchNoMatches => 'Sen coincidencias';
   @override
   String get searchLoadMore => 'Mostrar máis';
+  @override
+  String searchTasksAndEvents(int count) => 'Tarefas e eventos · $count';
+  @override
+  String searchNotes(int count) => 'Notas · $count';
+  @override
+  String searchGoal(String scope) => 'Obxectivo $scope';
 
   // Replace (T-M3-10).
   @override

@@ -768,6 +768,12 @@ final class DanishStrings extends Strings {
   String get searchNoMatches => 'Ingen resultater';
   @override
   String get searchLoadMore => 'Vis mere';
+  @override
+  String searchTasksAndEvents(int count) => 'Opgaver og begivenheder · $count';
+  @override
+  String searchNotes(int count) => 'Noter · $count';
+  @override
+  String searchGoal(String scope) => 'Mål: $scope';
 
   // Replace (T-M3-10).
   @override

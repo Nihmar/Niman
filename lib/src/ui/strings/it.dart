@@ -779,6 +779,12 @@ final class ItalianStrings extends Strings {
   String get searchNoMatches => 'Nessuna corrispondenza';
   @override
   String get searchLoadMore => 'Mostra altri';
+  @override
+  String searchTasksAndEvents(int count) => 'Attività ed eventi · $count';
+  @override
+  String searchNotes(int count) => 'Note · $count';
+  @override
+  String searchGoal(String scope) => 'Obiettivo $scope';
 
   // Replace (T-M3-10).
   @override

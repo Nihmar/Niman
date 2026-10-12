@@ -776,6 +776,12 @@ final class SlovenianStrings extends Strings {
   String get searchNoMatches => 'Ni zadetkov';
   @override
   String get searchLoadMore => 'Prikaži več';
+  @override
+  String searchTasksAndEvents(int count) => 'Opravila in dogodki · $count';
+  @override
+  String searchNotes(int count) => 'Zapiski · $count';
+  @override
+  String searchGoal(String scope) => 'Cilj: $scope';
 
   // Replace (T-M3-10).
   @override

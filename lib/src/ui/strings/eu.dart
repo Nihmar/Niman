@@ -770,6 +770,12 @@ final class BasqueStrings extends Strings {
   String get searchNoMatches => 'Ez dago emaitzarik';
   @override
   String get searchLoadMore => 'Ikusi gehiago';
+  @override
+  String searchTasksAndEvents(int count) => 'Zereginak eta gertaerak · $count';
+  @override
+  String searchNotes(int count) => 'Oharrak · $count';
+  @override
+  String searchGoal(String scope) => 'Helburua: $scope';
 
   // Replace (T-M3-10).
   @override

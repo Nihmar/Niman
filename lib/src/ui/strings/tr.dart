@@ -765,6 +765,12 @@ final class TurkishStrings extends Strings {
   String get searchNoMatches => 'Eşleşme yok';
   @override
   String get searchLoadMore => 'Daha fazla göster';
+  @override
+  String searchTasksAndEvents(int count) => 'Görevler ve etkinlikler · $count';
+  @override
+  String searchNotes(int count) => 'Notlar · $count';
+  @override
+  String searchGoal(String scope) => '$scope hedefi';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override

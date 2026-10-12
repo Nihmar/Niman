@@ -775,6 +775,12 @@ final class GermanStrings extends Strings {
   String get searchNoMatches => 'Keine Treffer';
   @override
   String get searchLoadMore => 'Mehr anzeigen';
+  @override
+  String searchTasksAndEvents(int count) => 'Aufgaben und Termine · $count';
+  @override
+  String searchNotes(int count) => 'Notizen · $count';
+  @override
+  String searchGoal(String scope) => 'Ziel: $scope';
 
   // Replace (T-M3-10).
   @override

@@ -767,6 +767,12 @@ final class EnglishStrings extends Strings {
   String get searchNoMatches => 'No matches';
   @override
   String get searchLoadMore => 'Show more';
+  @override
+  String searchTasksAndEvents(int count) => 'Tasks and events · $count';
+  @override
+  String searchNotes(int count) => 'Notes · $count';
+  @override
+  String searchGoal(String scope) => '$scope goal';
 
   // Replace (T-M3-10).
   @override

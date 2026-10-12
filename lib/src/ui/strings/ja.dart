@@ -731,6 +731,12 @@ final class JapaneseStrings extends Strings {
   String get searchNoMatches => '一致はありません';
   @override
   String get searchLoadMore => 'もっと表示';
+  @override
+  String searchTasksAndEvents(int count) => 'タスクと予定 · $count';
+  @override
+  String searchNotes(int count) => 'ノート · $count';
+  @override
+  String searchGoal(String scope) => '$scopeの目標';
 
   // Replace (T-M3-10).
   @override

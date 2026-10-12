@@ -775,6 +775,12 @@ final class DutchStrings extends Strings {
   String get searchNoMatches => 'Geen overeenkomsten';
   @override
   String get searchLoadMore => 'Meer tonen';
+  @override
+  String searchTasksAndEvents(int count) => 'Taken en gebeurtenissen · $count';
+  @override
+  String searchNotes(int count) => 'Notities · $count';
+  @override
+  String searchGoal(String scope) => 'Doel: $scope';
 
   // Replace (T-M3-10).
   @override

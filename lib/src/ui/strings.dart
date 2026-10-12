@@ -567,6 +567,12 @@ final class AppStrings {
   static String get searchNoMatches => _s.searchNoMatches;
   static String get searchLoadMore => _s.searchLoadMore;
 
+  /// The Tasks and events group of a lone `+project`/`@context` (#730).
+  static String searchTasksAndEvents(int count) =>
+      _s.searchTasksAndEvents(count);
+  static String searchNotes(int count) => _s.searchNotes(count);
+  static String searchGoal(String scope) => _s.searchGoal(scope);
+
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   static String get replaceTooltip => _s.replaceTooltip;
   static String get replaceInNoteAction => _s.replaceInNoteAction;

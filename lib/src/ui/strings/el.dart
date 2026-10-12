@@ -785,6 +785,12 @@ final class GreekStrings extends Strings {
   String get searchNoMatches => 'Δεν υπάρχουν ταυτοτήτες';
   @override
   String get searchLoadMore => 'Εμφάνιση περισσότερων';
+  @override
+  String searchTasksAndEvents(int count) => 'Εργασίες και συμβάντα · $count';
+  @override
+  String searchNotes(int count) => 'Σημειώσεις · $count';
+  @override
+  String searchGoal(String scope) => 'Στόχος: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override

@@ -771,6 +771,12 @@ final class LatvianStrings extends Strings {
   String get searchNoMatches => 'Nav rezultātu';
   @override
   String get searchLoadMore => 'Rādīt vairāk';
+  @override
+  String searchTasksAndEvents(int count) => 'Uzdevumi un notikumi · $count';
+  @override
+  String searchNotes(int count) => 'Piezīmes · $count';
+  @override
+  String searchGoal(String scope) => 'Mērķis: $scope';
 
   // Replace (T-M3-10).
   @override

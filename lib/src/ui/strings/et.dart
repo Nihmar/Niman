@@ -765,6 +765,12 @@ final class EstonianStrings extends Strings {
   String get searchNoMatches => 'Tulemusi pole';
   @override
   String get searchLoadMore => 'Kuva rohkem';
+  @override
+  String searchTasksAndEvents(int count) => 'Ülesanded ja sündmused · $count';
+  @override
+  String searchNotes(int count) => 'Märkmed · $count';
+  @override
+  String searchGoal(String scope) => 'Eesmärk: $scope';
 
   // Replace (T-M3-10).
   @override

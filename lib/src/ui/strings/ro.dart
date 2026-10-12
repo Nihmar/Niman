@@ -781,6 +781,12 @@ final class RomanianStrings extends Strings {
   String get searchNoMatches => 'Niciun rezultat';
   @override
   String get searchLoadMore => 'Afișează mai multe';
+  @override
+  String searchTasksAndEvents(int count) => 'Sarcini și evenimente · $count';
+  @override
+  String searchNotes(int count) => 'Note · $count';
+  @override
+  String searchGoal(String scope) => 'Obiectiv $scope';
 
   // Replace (T-M3-10).
   @override

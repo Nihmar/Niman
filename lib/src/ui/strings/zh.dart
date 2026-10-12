@@ -729,6 +729,12 @@ final class ChineseStrings extends Strings {
   String get searchNoMatches => '没有匹配结果';
   @override
   String get searchLoadMore => '显示更多';
+  @override
+  String searchTasksAndEvents(int count) => '任务和事件 · $count';
+  @override
+  String searchNotes(int count) => '笔记 · $count';
+  @override
+  String searchGoal(String scope) => '$scope 的目标';
 
   // Replace (T-M3-10).
   @override

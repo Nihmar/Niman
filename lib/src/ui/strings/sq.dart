@@ -770,6 +770,12 @@ final class AlbanianStrings extends Strings {
   String get searchNoMatches => 'Nuk ka përputhje';
   @override
   String get searchLoadMore => 'Shfaq më shumë';
+  @override
+  String searchTasksAndEvents(int count) => 'Detyrat dhe ngjarjet · $count';
+  @override
+  String searchNotes(int count) => 'Shënime · $count';
+  @override
+  String searchGoal(String scope) => 'Objektivi: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override

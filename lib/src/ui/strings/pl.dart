@@ -781,6 +781,12 @@ final class PolishStrings extends Strings {
   String get searchNoMatches => 'Brak wyników';
   @override
   String get searchLoadMore => 'Pokaż więcej';
+  @override
+  String searchTasksAndEvents(int count) => 'Zadania i wydarzenia · $count';
+  @override
+  String searchNotes(int count) => 'Notatki · $count';
+  @override
+  String searchGoal(String scope) => 'Cel: $scope';
 
   // Replace (T-M3-10).
   @override

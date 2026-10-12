@@ -777,6 +777,12 @@ final class MacedonianStrings extends Strings {
   String get searchNoMatches => 'Нема совпаѓања';
   @override
   String get searchLoadMore => 'Прикажи повеќе';
+  @override
+  String searchTasksAndEvents(int count) => 'Задачи и настани · $count';
+  @override
+  String searchNotes(int count) => 'Белешки · $count';
+  @override
+  String searchGoal(String scope) => 'Цел: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override

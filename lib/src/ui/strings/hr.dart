@@ -772,6 +772,12 @@ final class CroatianStrings extends Strings {
   String get searchNoMatches => 'Nema rezultata';
   @override
   String get searchLoadMore => 'Prikaži više';
+  @override
+  String searchTasksAndEvents(int count) => 'Zadaci i događaji · $count';
+  @override
+  String searchNotes(int count) => 'Bilješke · $count';
+  @override
+  String searchGoal(String scope) => 'Cilj: $scope';
 
   // Replace (T-M3-10).
   @override

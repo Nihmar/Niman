@@ -9,8 +9,10 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_request.dart';
+import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart' show displayNameOf;
 
@@ -28,6 +30,11 @@ import 'package:niman/src/ui/tree.dart' show displayNameOf;
 /// replace mode an inline panel appears under the query box with the
 /// replacement text and a live per-note preview of the matches; the
 /// confirm button rewrites the notes.
+///
+/// A lone `+project` or `@context` (#730) asks the tasks and events the
+/// library already holds, above the notes and in a group of its own: the
+/// index has the notes' words and nothing else, so the two files are read
+/// from the snapshots in memory ([taskEvents]).
 final class SearchScreen extends StatefulWidget {
   /// Creates the search screen.
   const new({
@@ -39,6 +46,8 @@ final class SearchScreen extends StatefulWidget {
     this.source,
     this.replaceSource,
     this.fieldSource,
+    this.taskEvents,
+    this.onOpenTaskEvent,
     super.key,
   });
 
@@ -71,6 +80,15 @@ final class SearchScreen extends StatefulWidget {
   /// Optional frontmatter-field source override (widget tests inject a
   /// fake); when null the screen resolves it from [controller].
   final FieldSource? fieldSource;
+
+  /// The tasks and events already in memory (#730): a lone `+project` or
+  /// `@context` in the box answers with them, in a group above the notes.
+  /// Null — a host that holds neither file — draws the notes alone.
+  final TaskEvents? taskEvents;
+
+  /// Opens a row of the tasks-and-events group: a task (the task list), an
+  /// event or a goal (its line in `calendar.txt`).
+  final void Function(TaskEventHit hit)? onOpenTaskEvent;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -114,6 +132,11 @@ final class _SearchScreenState extends State<SearchScreen> {
   bool _searched = false;
   List<SearchHit> _hits = const [];
   int _shown = 0;
+
+  /// The lone `+project`/`@context` the results were searched for, when
+  /// the box held one (#730): the Tasks and events group answers it, and
+  /// null whenever the results are notes only.
+  String? _taskEventToken;
 
   /// The words [_hits] were searched for, when they came from a word
   /// search: its excerpts are read from the notes as their rows are built
@@ -257,6 +280,7 @@ final class _SearchScreenState extends State<SearchScreen> {
         _searched = false;
         _hits = const [];
         _shown = 0;
+        _taskEventToken = null;
       });
       return;
     }
@@ -284,6 +308,7 @@ final class _SearchScreenState extends State<SearchScreen> {
         _searched = false;
         _hits = const [];
         _shown = 0;
+        _taskEventToken = null;
       });
       return;
     }
@@ -296,6 +321,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       _searched = false;
       _hits = const [];
       _shown = 0;
+      _taskEventToken = null;
     });
   }
 
@@ -341,6 +367,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       _shown = _pageSize < results.length ? _pageSize : results.length;
       _excerpts.clear();
       _excerptWords = field == null && !contains ? text : null;
+      _taskEventToken = mode == 'words' ? taskEventQuery(text) : null;
     });
     logNextFrame('search.ui', 'results first frame (id $id)');
   }
@@ -437,9 +464,13 @@ final class _SearchScreenState extends State<SearchScreen> {
       }
       if (!_resultsScroll.hasClients) return;
       final position = _resultsScroll.position;
-      final rows = _shown + (_shown < _hits.length ? 1 : 0);
+      // The group's rows sit above the notes: the estimate counts them,
+      // or a step would land short by exactly their number.
+      final lead = _groupLead(_taskEventRows());
+      final rows = lead + _shown + (_shown < _hits.length ? 1 : 0);
       final length = position.maxScrollExtent + position.viewportDimension;
-      final offset = length * index / rows - position.viewportDimension / 2;
+      final offset =
+          length * (index + lead) / rows - position.viewportDimension / 2;
       position.jumpTo(
         offset.clamp(position.minScrollExtent, position.maxScrollExtent),
       );
@@ -573,7 +604,7 @@ final class _SearchScreenState extends State<SearchScreen> {
             Expanded(
               child: _replaceMode
                   ? _replacePreviewList(theme)
-                  : _results(theme),
+                  : _resultsWithEvents(theme),
             ),
           ],
         );
@@ -585,9 +616,36 @@ final class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  /// The results, re-read whenever the tasks or the calendar move: the
+  /// group is what is in memory, not what a query landed with (#730).
+  Widget _resultsWithEvents(ThemeData theme) {
+    final events = widget.taskEvents;
+    if (events == null) return _results(theme);
+    return ListenableBuilder(
+      listenable: events.changes,
+      builder: (context, _) => _results(theme),
+    );
+  }
+
+  /// The Tasks and events rows for the query the results were searched
+  /// for, or empty: a lone `+project`/`@context` in Words mode, read from
+  /// the files in memory.
+  List<TaskEventHit> _taskEventRows() {
+    final events = widget.taskEvents;
+    final token = _taskEventToken;
+    if (events == null || token == null) return const [];
+    return events.hits(token);
+  }
+
+  /// How many rows the group takes in the list before the notes: its
+  /// heading, its own rows, and the Notes heading when both sections show.
+  int _groupLead(List<TaskEventHit> group) =>
+      group.isEmpty ? 0 : 1 + group.length + (_hits.isEmpty ? 0 : 1);
+
   Widget _results(ThemeData theme) {
     if (!_searched) return _hint(theme);
-    if (_hits.isEmpty) {
+    final group = _taskEventRows();
+    if (_hits.isEmpty && group.isEmpty) {
       return Center(
         child: Text(
           AppStrings.searchNoMatches,
@@ -597,12 +655,39 @@ final class _SearchScreenState extends State<SearchScreen> {
         ),
       );
     }
+    final lead = _groupLead(group);
     return ListView.builder(
       key: const Key('search-results'),
       controller: _resultsScroll,
-      itemCount: _shown + (_shown < _hits.length ? 1 : 0),
+      itemCount: lead + _shown + (_shown < _hits.length ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index >= _shown) {
+        if (index < lead) {
+          if (index == 0) {
+            return searchSectionHeader(
+              context,
+              AppStrings.searchTasksAndEvents(group.length),
+              key: const Key('search-group-tasks-events'),
+            );
+          }
+          if (index <= group.length) {
+            final hit = group[index - 1];
+            return searchTaskEventRow(
+              context,
+              hit,
+              today: DateTime.now(),
+              onTap: widget.onOpenTaskEvent == null
+                  ? null
+                  : () => widget.onOpenTaskEvent!(hit),
+            );
+          }
+          return searchSectionHeader(
+            context,
+            AppStrings.searchNotes(_hits.length),
+            key: const Key('search-group-notes'),
+          );
+        }
+        final at = index - lead;
+        if (at >= _shown) {
           return ListTile(
             key: const Key('search-load-more'),
             leading: const Icon(Icons.expand_more),
@@ -610,7 +695,7 @@ final class _SearchScreenState extends State<SearchScreen> {
             onTap: _loadMore,
           );
         }
-        final hit = _hits[index];
+        final hit = _hits[at];
         final current = hit.path == _currentHit;
         return KeyedSubtree(
           key: current ? _currentHitKey : null,
@@ -654,7 +739,7 @@ final class _SearchScreenState extends State<SearchScreen> {
                   ),
               ],
             ),
-            onTap: () => _openHit(index),
+            onTap: () => _openHit(at),
             onLongPress: () => _showNoteActions(hit),
           ),
         );

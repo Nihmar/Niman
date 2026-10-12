@@ -772,6 +772,12 @@ final class FinnishStrings extends Strings {
   String get searchNoMatches => 'Ei osumia';
   @override
   String get searchLoadMore => 'Näytä lisää';
+  @override
+  String searchTasksAndEvents(int count) => 'Tehtävät ja tapahtumat · $count';
+  @override
+  String searchNotes(int count) => 'Muistiinpanot · $count';
+  @override
+  String searchGoal(String scope) => 'Tavoite: $scope';
 
   // Replace (T-M3-10).
   @override

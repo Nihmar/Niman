@@ -775,6 +775,12 @@ final class BulgarianStrings extends Strings {
   String get searchNoMatches => 'Няма резултати';
   @override
   String get searchLoadMore => 'Покажи още';
+  @override
+  String searchTasksAndEvents(int count) => 'Задачи и събития · $count';
+  @override
+  String searchNotes(int count) => 'Бележки · $count';
+  @override
+  String searchGoal(String scope) => 'Цел: $scope';
 
   // Replace (T-M3-10).
   @override

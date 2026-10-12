@@ -768,6 +768,12 @@ final class NorwegianStrings extends Strings {
   String get searchNoMatches => 'Ingen treff';
   @override
   String get searchLoadMore => 'Vis mer';
+  @override
+  String searchTasksAndEvents(int count) => 'Oppgaver og hendelser · $count';
+  @override
+  String searchNotes(int count) => 'Notater · $count';
+  @override
+  String searchGoal(String scope) => 'Mål: $scope';
 
   // Replace (T-M3-10).
   @override

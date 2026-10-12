@@ -774,6 +774,12 @@ final class SwedishStrings extends Strings {
   String get searchNoMatches => 'Inga träffar';
   @override
   String get searchLoadMore => 'Visa mer';
+  @override
+  String searchTasksAndEvents(int count) => 'Uppgifter och händelser · $count';
+  @override
+  String searchNotes(int count) => 'Anteckningar · $count';
+  @override
+  String searchGoal(String scope) => 'Mål: $scope';
 
   // Replace (T-M3-10).
   @override

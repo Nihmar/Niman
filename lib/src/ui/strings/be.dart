@@ -773,6 +773,12 @@ final class BelarusianStrings extends Strings {
   String get searchNoMatches => 'Няма вынікаў';
   @override
   String get searchLoadMore => 'Паказаць яшчэ';
+  @override
+  String searchTasksAndEvents(int count) => 'Задачы і падзеі · $count';
+  @override
+  String searchNotes(int count) => 'Нататкі · $count';
+  @override
+  String searchGoal(String scope) => 'Мэта: $scope';
 
   // Replace (T-M3-10).
   @override

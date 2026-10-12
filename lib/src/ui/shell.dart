@@ -48,6 +48,7 @@ import 'package:niman/src/ocr/ocr_installation_provider.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ocr/ocr_queue_provider.dart';
 import 'package:niman/src/reading/reading_positions.dart';
+import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
@@ -55,6 +56,7 @@ import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
@@ -97,6 +99,7 @@ import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/search_request.dart';
+import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
@@ -3772,6 +3775,35 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
   }
 
+  /// Opens a row of Search's tasks-and-events group (#730): a task is the
+  /// task list's, an event or a goal is its line in `calendar.txt`.
+  void _openTaskEvent(TaskEventHit hit) {
+    switch (hit.kind) {
+      case TaskEventKind.task:
+        _openTodo();
+      case TaskEventKind.event:
+        _openCalendarEvent(hit.event!);
+      case TaskEventKind.goal:
+        _showNote(
+          calendarFileName,
+          caret: _calendarController.snapshot?.offsetOfLine(hit.lineIndex),
+        );
+    }
+  }
+
+  /// The tasks and events in memory, as Search's lone-token group reads
+  /// them (#730): the two controllers' own snapshots, walked in memory and
+  /// never indexed. The group re-reads them on every change to either.
+  late final TaskEvents _taskEvents = TaskEvents(
+    hits: (token) => taskEventHits(
+      token,
+      tasks: _todoController.snapshot?.todo ?? const <TodoEntry>[],
+      calendar:
+          _calendarController.snapshot?.entries ?? const <CalendarEntry>[],
+    ),
+    changes: Listenable.merge([_todoController, _calendarController]),
+  );
+
   /// The journal's calendar, strip and recent entries (#7).
   late final ShellJournalUi _journalUi = ShellJournalUi(
     controller: widget.controller,
@@ -4378,6 +4410,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       requests: _searchRequests,
       commands: _searchCommands,
       tree: tree,
+      taskEvents: _taskEvents,
+      onOpenTaskEvent: _openTaskEvent,
     );
   }
 

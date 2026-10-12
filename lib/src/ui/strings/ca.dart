@@ -779,6 +779,12 @@ final class CatalanStrings extends Strings {
   String get searchNoMatches => 'Cap coincidència';
   @override
   String get searchLoadMore => 'Mostra més';
+  @override
+  String searchTasksAndEvents(int count) => 'Tasques i esdeveniments · $count';
+  @override
+  String searchNotes(int count) => 'Notes · $count';
+  @override
+  String searchGoal(String scope) => 'Objectiu $scope';
 
   // Replace (T-M3-10).
   @override

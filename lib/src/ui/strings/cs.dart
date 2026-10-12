@@ -773,6 +773,12 @@ final class CzechStrings extends Strings {
   String get searchNoMatches => 'Žádná shoda';
   @override
   String get searchLoadMore => 'Zobrazit další';
+  @override
+  String searchTasksAndEvents(int count) => 'Úkoly a události · $count';
+  @override
+  String searchNotes(int count) => 'Poznámky · $count';
+  @override
+  String searchGoal(String scope) => 'Cíl: $scope';
 
   // Replace (T-M3-10).
   @override

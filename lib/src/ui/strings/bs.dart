@@ -775,6 +775,12 @@ final class BosnianStrings extends Strings {
   String get searchNoMatches => 'Nema podudaranja';
   @override
   String get searchLoadMore => 'Prikaži više';
+  @override
+  String searchTasksAndEvents(int count) => 'Zadaci i događaji · $count';
+  @override
+  String searchNotes(int count) => 'Bilješke · $count';
+  @override
+  String searchGoal(String scope) => 'Cilj: $scope';
 
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   @override
