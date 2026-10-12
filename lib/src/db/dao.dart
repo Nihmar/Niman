@@ -65,9 +65,8 @@ final class NoteDao {
   /// field — the name breaking ties where the field cannot (a folder's
   /// size is 0, two files saved in the same second share a time).
   static List<OrderingTerm Function($NotesTable)> _treeOrder(TreeSort sort) {
-    OrderingTerm by(Expression<Object> column) => sort.descending
-        ? OrderingTerm.desc(column)
-        : OrderingTerm.asc(column);
+    OrderingTerm by(Expression<Object> column) =>
+        sort.descending ? OrderingTerm.desc(column) : OrderingTerm.asc(column);
     return [
       (t) => OrderingTerm.desc(t.isDir),
       switch (sort.order) {

@@ -726,10 +726,7 @@ abstract interface class LibrarySession {
   /// Children of the row with id [parentId] (0 = library root), in
   /// [sort]'s order (#726): directories first whatever the field, then
   /// the field in its own direction, the name breaking ties.
-  Future<List<Note>> children(
-    int parentId, {
-    TreeSort sort = TreeSort.nameAsc,
-  });
+  Future<List<Note>> children(int parentId, {TreeSort sort = TreeSort.nameAsc});
 
   /// Every note that belongs to the root or to one of the [expandedPaths],
   /// in [sort]'s order the same way [children] reads it.
