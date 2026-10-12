@@ -226,6 +226,15 @@ void main() {
     await deleteRow(tester, 'Books');
     // The sidecar inside is not a choice: it goes with the folder.
     expect(find.text(AppStrings.deleteNotesToo(1)), findsOne);
+    // A folder is not "only the file" (#775).
+    expect(find.text(AppStrings.deleteFileOnly), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('delete-carry-no')),
+        matching: find.text(AppStrings.actionDelete),
+      ),
+      findsOne,
+    );
     await confirmDelete(tester);
 
     expect(noteRow('Books', offstage: true), findsNothing);

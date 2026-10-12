@@ -243,10 +243,11 @@ final class ShellRowActions {
   /// asks (#712).
   ///
   /// Notes of its own — companions, an OCR sidecar — are the exception
-  /// (#717): the question appears to offer taking them along, checked by
-  /// default, and one Undo brings the file and its notes back together.
-  /// The question appears only when there is something to carry, so a
-  /// plain note still deletes without one.
+  /// (#717): the question appears to offer taking them along, with the
+  /// answer given last time as the emphasised action, and one Undo brings
+  /// the file and its notes back together. The question appears only when
+  /// there is something to carry, so a plain note still deletes without
+  /// one.
   Future<void> delete(BuildContext context, [String? path]) async {
     final sel = path ?? selectedPath();
     if (sel == null) return;
@@ -282,7 +283,10 @@ final class ShellRowActions {
               _deleteChoice(
                 context,
                 key: const Key('delete-carry-no'),
-                label: AppStrings.deleteFileOnly,
+                // "Only the file" is not what a folder is (#775).
+                label: isDir
+                    ? AppStrings.actionDelete
+                    : AppStrings.deleteFileOnly,
                 primary: !takeNotesDefault,
                 choice: false,
               ),
