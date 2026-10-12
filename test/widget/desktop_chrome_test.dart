@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/trash.dart';
@@ -110,6 +111,40 @@ void main() {
     await tester.tap(find.text('OK'));
     await settle(tester);
     expect(await controller.ops!.find('from the footer.md'), isNotNull);
+  });
+
+  // #747: the footer's menus are the tree's own — a pointer's 32 px rows on
+  // a pointer-dense theme (#296), not Material's 48 — the create menu and
+  // the sort chevron both.
+  testWidgets("wide: the footer's menus run the tree's dense rows", (
+    tester,
+  ) async {
+    // A desktop's theme is pointer-dense; the platform is overridden so the
+    // app builds one (tests default to Android). Reset before the test body
+    // ends: the binding checks the debug variables then, not in a tear-down.
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    try {
+      await pumpShell(tester, const Size(1200, 900));
+
+      await tester.tap(find.byKey(const Key('new-item-menu')));
+      await settle(tester);
+      expect(
+        tester.getSize(find.byKey(const Key('new-note-action'))).height,
+        pointerDenseItemHeight,
+      );
+
+      // Away from the menu closes it; the sort chevron opens its own.
+      await tester.tapAt(const Offset(20, 400));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('toggle-sort')));
+      await settle(tester);
+      expect(
+        tester.getSize(find.byKey(const Key('sort-name'))).height,
+        pointerDenseItemHeight,
+      );
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   // #173: one row of chrome above the note — the formatting on the

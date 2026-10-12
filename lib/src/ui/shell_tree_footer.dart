@@ -12,6 +12,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/trash.dart';
 
@@ -69,6 +70,9 @@ final class TreeFooterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // A pointer's menu is the tree's own (#296, #747): the footer's menus
+    // run the dense rows where the tree's do.
+    final dense = pointerDense(theme);
     return Container(
       key: const Key('tree-footer'),
       height: 44,
@@ -97,50 +101,58 @@ final class TreeFooterBar extends StatelessWidget {
                 Icons.today_outlined,
                 AppStrings.journalFabToday,
                 key: const Key('journal-today-action'),
+                dense: dense,
               ),
-              const PopupMenuDivider(),
+              PopupMenuDivider(height: dense ? pointerDenseDividerHeight : 16),
               _item(
                 NewShellItem.note,
                 Icons.note_add_outlined,
                 AppStrings.newNoteTitle,
                 key: const Key('new-note-action'),
+                dense: dense,
               ),
               _item(
                 NewShellItem.listNote,
                 Icons.checklist_outlined,
                 AppStrings.newListNoteTitle,
                 key: const Key('new-list-note-action'),
+                dense: dense,
               ),
               _item(
                 NewShellItem.audioNote,
                 Icons.mic_outlined,
                 AppStrings.newAudioNoteTitle,
                 key: const Key('new-audio-note-action'),
+                dense: dense,
               ),
               _item(
                 NewShellItem.slides,
                 Icons.slideshow_outlined,
                 AppStrings.newSlidesTitle,
                 key: const Key('new-slides-action'),
+                dense: dense,
               ),
               _item(
                 NewShellItem.template,
                 Icons.file_copy_outlined,
                 AppStrings.newFromTemplateTitle,
                 key: const Key('new-from-template-action'),
+                dense: dense,
               ),
               _item(
                 NewShellItem.captureWebPage,
                 Icons.language_outlined,
                 AppStrings.captureWebPage,
                 key: const Key('capture-web-page-action'),
+                dense: dense,
               ),
-              const PopupMenuDivider(),
+              PopupMenuDivider(height: dense ? pointerDenseDividerHeight : 16),
               _item(
                 NewShellItem.folder,
                 Icons.create_new_folder_outlined,
                 AppStrings.newFolderTitle,
                 key: const Key('new-folder-action'),
+                dense: dense,
               ),
             ],
             child: Padding(
@@ -176,11 +188,13 @@ final class TreeFooterBar extends StatelessWidget {
     NewShellItem item,
     IconData icon,
     String label, {
+    required bool dense,
     Key? key,
   }) {
     return PopupMenuItem<NewShellItem>(
       key: key,
       value: item,
+      height: dense ? pointerDenseItemHeight : kMinInteractiveDimension,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -212,6 +226,7 @@ final class TreeSortToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dense = pointerDense(Theme.of(context));
     return PopupMenuButton<TreeSort>(
       key: const Key('toggle-sort'),
       icon: AnimatedRotation(
@@ -222,26 +237,64 @@ final class TreeSortToggle extends StatelessWidget {
       onSelected: onSort,
       itemBuilder: (context) => [
         for (final order in TreeOrder.values)
-          CheckedPopupMenuItem(
+          _sortItem(
             key: Key('sort-${order.name}'),
             value: TreeSort.of(order, descending: sort.descending),
             checked: order == sort.order,
-            child: Text(sortOrderLabel(order)),
+            label: sortOrderLabel(order),
+            dense: dense,
           ),
-        const PopupMenuDivider(),
-        CheckedPopupMenuItem(
+        PopupMenuDivider(height: dense ? pointerDenseDividerHeight : 16),
+        _sortItem(
           key: const Key('sort-ascending'),
           value: TreeSort.of(sort.order, descending: false),
           checked: !sort.descending,
-          child: Text(AppStrings.sortAscending),
+          label: AppStrings.sortAscending,
+          dense: dense,
         ),
-        CheckedPopupMenuItem(
+        _sortItem(
           key: const Key('sort-descending'),
           value: TreeSort.of(sort.order, descending: true),
           checked: sort.descending,
-          child: Text(AppStrings.sortDescending),
+          label: AppStrings.sortDescending,
+          dense: dense,
         ),
       ],
+    );
+  }
+
+  /// One entry of the sort menu.
+  ///
+  /// A plain item with the check leading, not a `CheckedPopupMenuItem`: that
+  /// one draws a [ListTile], and a tile keeps its own 48 px whatever height
+  /// the item was given — the sort menu stood twice as tall as the create
+  /// menu beside it because of it (#747).
+  PopupMenuItem<TreeSort> _sortItem({
+    required Key key,
+    required TreeSort value,
+    required bool checked,
+    required String label,
+    required bool dense,
+  }) {
+    return PopupMenuItem<TreeSort>(
+      key: key,
+      value: value,
+      height: dense ? pointerDenseItemHeight : kMinInteractiveDimension,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // The room of the check a chosen order wears, taken either way so
+          // the labels line up.
+          SizedBox(
+            width: 18,
+            child: checked
+                ? const Icon(Icons.check, size: 18)
+                : const SizedBox.shrink(),
+          ),
+          const SizedBox(width: 12),
+          Text(label, overflow: TextOverflow.ellipsis),
+        ],
+      ),
     );
   }
 }
