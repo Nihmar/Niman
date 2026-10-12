@@ -83,6 +83,27 @@ void main() {
     expect(find.byKey(const Key('search-mode')), findsNothing);
   });
 
+  testWidgets('the words/contains toggle keeps its place when Clear comes '
+      '(#782)', (tester) async {
+    await tester.pumpWidget(buildApp(source, dense: true));
+    await tester.pump();
+    final toggle = find.byKey(const Key('search-mode-toggle'));
+    final before = tester.getRect(toggle);
+
+    await tester.enterText(find.byKey(const Key('search-query')), 'n');
+    await tester.pump();
+    final clear = find.byKey(const Key('search-clear'));
+    expect(clear, findsOne);
+    expect(tester.getRect(toggle), before);
+    expect(tester.getRect(clear).right, lessThanOrEqualTo(before.left));
+
+    await tester.tap(clear);
+    await tester.pump();
+    expect(clear, findsNothing);
+    expect(tester.getRect(toggle), before);
+    await tester.pump(const Duration(milliseconds: 500));
+  });
+
   testWidgets('query debounces: one search per pause, results appear', (
     tester,
   ) async {

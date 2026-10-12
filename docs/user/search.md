@@ -27,6 +27,13 @@ A word search asks the index, so it stays fast up to ~1M notes.
 
 ## Contains
 
+On a phone, **Words** and **Contains** are the two halves of the switch
+under the search field. On a desktop, and wherever the search pane is
+narrow, the switch is the **abc** button at the right end of the field:
+lit means *Contains*, and its tooltip names the mode it is in. The field's
+clear button appears to its left once something is typed, so the switch
+never moves under the pointer.
+
 **Contains** finds any piece of text, inside words too (`ell` finds
 `hello`), ignoring case and accents. It reads the notes themselves, in
 path order, each only as far as its first match — so it is slower than a

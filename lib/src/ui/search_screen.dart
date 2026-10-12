@@ -489,14 +489,24 @@ final class _SearchScreenState extends State<SearchScreen> {
                       suffixIcon: dense || _query.text.isNotEmpty
                           ? Row(
                               mainAxisSize: MainAxisSize.min,
+                              // The row is anchored at the field's end and
+                              // grows leftwards: Clear, which comes and
+                              // goes, sits on that side, so the toggle at
+                              // the end never moves under a pointer on it
+                              // (#782). Beside the toggle it is as compact
+                              // as the toggle, or the field would grow
+                              // taller and shift the toggle down.
                               children: [
-                                if (dense) _modeToggle(),
                                 if (_query.text.isNotEmpty)
                                   IconButton(
                                     key: const Key('search-clear'),
                                     icon: const Icon(Icons.close),
+                                    visualDensity: dense
+                                        ? VisualDensity.compact
+                                        : null,
                                     onPressed: _clearQuery,
                                   ),
+                                if (dense) _modeToggle(),
                               ],
                             )
                           : null,
