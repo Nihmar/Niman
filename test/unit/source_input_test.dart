@@ -6,6 +6,8 @@
 // the layer that must be right about *text*, and it is the layer a device
 // cannot
 // be used to debug.
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
@@ -84,19 +86,133 @@ void main() {
   });
 
   // #753: the platform holds a window of a long note (#540), and its own
-  // Select all is a range on that copy. When the app's selection is the whole
-  // window — a Select all it was told only as a range on the copy, or as an
-  // edit it read as a caret range — the platform deleting the whole of its
-  // copy means the note: taking the window would leave the rest of the note
-  // behind, and the delete had to be made twice.
-  test("a deletion of the platform's whole copy is the note", () {
+  // Select all is a range on that copy, which means the note — however it is
+  // reported: as a selection, as an edit that changes nothing, or as a whole
+  // value. The Backspace that follows empties the note, first time.
+  group("the platform's Select all, then Backspace, empties the note", () {
     final text = List.generate(400, (i) => 'line $i of the note').join('\n');
-    final surface = _wire(text);
+    TextSelection all(TextEditingValue value) =>
+        TextSelection(baseOffset: 0, extentOffset: value.text.length);
+    final reports =
+        <String, void Function(SourceInput input, TextEditingValue value)>{
+          'as a selection': (input, value) =>
+              input.updateEditingValueWithDeltas(<TextEditingDelta>[
+                TextEditingDeltaNonTextUpdate(
+                  oldText: value.text,
+                  selection: all(value),
+                  composing: TextRange.empty,
+                ),
+              ]),
+          'as an edit of nothing': (input, value) =>
+              input.updateEditingValueWithDeltas(<TextEditingDelta>[
+                TextEditingDeltaInsertion(
+                  oldText: value.text,
+                  insertionOffset: 0,
+                  textInserted: '',
+                  selection: all(value),
+                  composing: TextRange.empty,
+                ),
+              ]),
+          'as a whole value': (input, value) =>
+              input.updateEditingValue(value.copyWith(selection: all(value))),
+        };
+    for (final MapEntry(key: how, value: report) in reports.entries) {
+      test(how, () {
+        final surface = _wire(text, caret: text.length ~/ 2);
+        final before = surface.input.currentTextEditingValue!;
+        expect(before.text.length, lessThan(text.length));
+        report(surface.input, before);
+        expect(surface.carets.last.start, 0);
+        expect(surface.carets.last.end, text.length);
+        final value = surface.input.currentTextEditingValue!;
+        surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+          TextEditingDeltaDeletion(
+            oldText: value.text,
+            deletedRange: TextRange(start: 0, end: value.text.length),
+            selection: const TextSelection.collapsed(offset: 0),
+            composing: TextRange.empty,
+          ),
+        ]);
+        expect(surface.buffer.text, isEmpty);
+      });
+    }
+  });
+
+  // #758: a selection the app made that happens to be the whole window — the
+  // caret near the note's end, selected from the window's first line down to
+  // it — is that range, not the note. Checked against the plain model of an
+  // edit over a selection: Backspace removes exactly the app's selection, and
+  // a keystroke replaces exactly it, wherever the selection and the window
+  // fall.
+  test('Backspace and a keystroke act on exactly the selection', () {
+    final text = List.generate(600, (i) => 'line $i of the note').join('\n');
+    final random = math.Random(758);
+    final selections = <SelectionModel>[];
+    // The cases the issue names: the window's whole span, both directions,
+    // at the note's end and at its start.
+    for (final caret in <int>[text.length, 0]) {
+      final surface = _wire(text, caret: caret);
+      final value = surface.input.currentTextEditingValue!;
+      final from = surface.input.windowStart;
+      final to = from + value.text.length;
+      expect(to - from, lessThan(text.length));
+      final (near, far) = caret == 0 ? (from, to) : (to, from);
+      selections
+        ..add(SelectionModel(anchor: far, extent: near))
+        ..add(SelectionModel(anchor: near, extent: far));
+    }
+    for (var i = 0; i < 200; i++) {
+      selections.add(
+        SelectionModel(
+          anchor: random.nextInt(text.length + 1),
+          extent: random.nextInt(text.length + 1),
+        ),
+      );
+    }
+    for (final chosen in selections) {
+      if (chosen.isCollapsed) continue;
+      for (final typed in <String>['', 'x']) {
+        // The caret reaches the selection's extent first, as a drag or a
+        // Shift move does, so the window is the one it would be there.
+        final surface = _wire(text, caret: chosen.extent);
+        surface.input.currentTextEditingValue;
+        surface.setSelection(chosen);
+        final value = surface.input.currentTextEditingValue!;
+        final held = value.selection;
+        if (held.isCollapsed) continue;
+        surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+          TextEditingDeltaReplacement(
+            oldText: value.text,
+            replacementText: typed,
+            replacedRange: TextRange(start: held.start, end: held.end),
+            selection: TextSelection.collapsed(
+              offset: held.start + typed.length,
+            ),
+            composing: TextRange.empty,
+          ),
+        ]);
+        expect(
+          surface.buffer.text,
+          text.replaceRange(chosen.start, chosen.end, typed),
+          reason: '"$typed" over $chosen',
+        );
+      }
+    }
+  });
+
+  // The two selections out of step: the platform edits the whole of its copy
+  // while the app's selection is a smaller range in it. The platform's own
+  // range is what it did, and it is applied as it says.
+  test("an edit of the platform's whole copy over a smaller selection", () {
+    final text = List.generate(400, (i) => 'line $i of the note').join('\n');
+    final surface = _wire(text, caret: text.length ~/ 2);
+    final before = surface.input.currentTextEditingValue!;
+    final from = surface.input.windowStart;
+    final to = from + before.text.length;
+    final middle = (from + to) ~/ 2;
+    surface.setSelection(SelectionModel(anchor: middle, extent: middle + 10));
     final value = surface.input.currentTextEditingValue!;
-    final window = surface.input.windowStart;
-    surface.setSelection(
-      SelectionModel(anchor: window, extent: window + value.text.length),
-    );
+    expect(surface.input.windowStart, from);
     surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
       TextEditingDeltaDeletion(
         oldText: value.text,
@@ -105,7 +221,7 @@ void main() {
         composing: TextRange.empty,
       ),
     ]);
-    expect(surface.buffer.text, isEmpty);
+    expect(surface.buffer.text, text.replaceRange(from, to, ''));
   });
 
   // The same, with the selection reported backwards (its anchor at the note's
