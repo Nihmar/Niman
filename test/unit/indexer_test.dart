@@ -292,6 +292,58 @@ void main() {
     expect(changes.last, IndexChange.tree);
   });
 
+  // #760: a save that changes the title, the date or the pin has changed
+  // what a name-ordered tree draws — the row's name, the date at its right,
+  // the pinned block — and says so, on both reindex paths a save takes.
+  group('a save that changes what the tree draws says so (#760)', () {
+    const before = '---\ntitle: Foo\ndate: 2024-01-01\n---\n\nbody\n';
+    final edits = <String, String>{
+      'title': '---\ntitle: Bar\ndate: 2024-01-01\n---\n\nbody\n',
+      'date': '---\ntitle: Foo\ndate: 2025-06-30\n---\n\nbody\n',
+      'no date': '---\ntitle: Foo\n---\n\nbody\n',
+      'pinned':
+          '---\ntitle: Foo\ndate: 2024-01-01\npinned: true\n---\n\nbody\n',
+    };
+    final paths = <String, Future<void> Function(String abs)>{
+      'rescanFiles': (abs) => indexer.rescanFiles(root.path, [abs]),
+      'applyEvents': (abs) => indexer.applyEvents(root.path, [abs]),
+    };
+
+    for (final path in paths.entries) {
+      for (final edit in edits.entries) {
+        test('${edit.key}, through ${path.key}', () async {
+          final abs = p.join(root.path, 'note1.md');
+          File(abs).writeAsStringSync(before);
+          await indexer.fullScan(root.path);
+          final changes = <IndexChange>[];
+          indexer.onChanged = changes.add;
+
+          // A later second, as a real save's: the same size in the same
+          // second is invisible to the (size, mtime) shortcut of applyEvents.
+          File(abs)
+            ..writeAsStringSync(edit.value)
+            ..setLastModifiedSync(
+              DateTime.now().add(const Duration(seconds: 2)),
+            );
+          await path.value(abs);
+          expect(changes, [IndexChange.tree]);
+        });
+      }
+
+      test('the body alone, through ${path.key}, is contents', () async {
+        final abs = p.join(root.path, 'note1.md');
+        File(abs).writeAsStringSync(before);
+        await indexer.fullScan(root.path);
+        final changes = <IndexChange>[];
+        indexer.onChanged = changes.add;
+
+        File(abs).writeAsStringSync('${before}more body\n');
+        await path.value(abs);
+        expect(changes, [IndexChange.contents]);
+      });
+    }
+  });
+
   test('applyEvents picks up external create and delete', () async {
     await indexer.fullScan(root.path);
 

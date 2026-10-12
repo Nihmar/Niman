@@ -869,7 +869,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         oldWidget.caretWidth != widget.caretWidth) {
       _scheduleCaret();
     } else if (oldWidget.hideMarkers != widget.hideMarkers ||
-        !identical(oldWidget.theme, widget.theme) ||
+        // By value (#789): source mode with a chosen face builds its theme
+        // in every build (`surfaceThemeFor`), and a copy of the same values
+        // moves no caret.
+        oldWidget.theme != widget.theme ||
         oldWidget.showLineNumbers != widget.showLineNumbers ||
         oldWidget.column != widget.column ||
         oldWidget.padding != widget.padding) {
@@ -1482,7 +1485,55 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return _applyBracket(_brackets.backspace(widget.buffer, end));
     }
     if (inserted.length != 1) return false;
-    return _applyBracket(_brackets.typed(widget.buffer, start, end, inserted));
+    return _applyBracket(
+      _brackets.typed(
+        widget.buffer,
+        start,
+        end,
+        inserted,
+        verbatimAt: _caretInCode,
+      ),
+    );
+  }
+
+  /// Whether a caret at [offset] stands in code or maths: on a line of a
+  /// fenced or indented code block or of a `$$` block, or inside an inline
+  /// code or maths span — between its delimiters, not before the opening one
+  /// nor after the closing one.
+  ///
+  /// Answered by the scan behind the colours — the line's block, O(log
+  /// blocks), and that one line's runs — so a keystroke never reads the note
+  /// again. The block answers for an empty line of a fence, which has no
+  /// runs; the runs answer while there is no block scan.
+  bool _caretInCode(int offset) {
+    final buffer = widget.buffer;
+    final line = buffer.lineOf(offset);
+    final block = _styler?.blockOf(line)?.kind;
+    if (block == BlockKind.fencedCode ||
+        block == BlockKind.indentedCode ||
+        block == BlockKind.math) {
+      return true;
+    }
+    final local = offset - buffer.offsetOfLine(line);
+    TokenKind? before;
+    TokenKind? at;
+    for (final token in _lineAt(line).tokens) {
+      final kind = token.kind;
+      if (kind == TokenKind.codeFence ||
+          kind == TokenKind.codeBlock ||
+          kind == TokenKind.mathBlock) {
+        return true;
+      }
+      if (kind != TokenKind.codeInline && kind != TokenKind.mathInline) {
+        continue;
+      }
+      if (local - 1 >= token.start && local - 1 < token.end) before = kind;
+      if (local >= token.start && local < token.end) at = kind;
+    }
+    // A span's delimiters are runs of its own kind: a caret with the span on
+    // both sides of it is inside, one with a delimiter on one side only is
+    // at its edge, outside.
+    return before != null && before == at;
   }
 
   /// Makes [edit], when there is one; answers whether there was.
@@ -2082,6 +2133,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onPointerDown: (event) {
       _lastPointerKind = event.kind;
       _pressOffset = null;
+      _trackMouse(event);
       // A mouse asks for the keyboard as it goes down, which is where a click
       // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
       // only scrolls the note does not bring the keyboard up.
@@ -2117,6 +2169,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _input.holdSync = true;
     },
     onPointerMove: (event) {
+      _trackMouse(event);
       final anchor = _dragAnchor;
       if (anchor == null) return;
       if (event.kind != PointerDeviceKind.mouse) return;
@@ -2124,10 +2177,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (offset == null) return;
       _select(anchor, offset);
     },
-    onPointerUp: (_) => _endDrag(),
+    onPointerUp: (event) {
+      _trackMouse(event);
+      _endDrag();
+    },
     onPointerCancel: (_) => _endDrag(),
     child: child,
   );
+
+  /// Keeps [_hoverPosition] where the mouse is while a button is down too:
+  /// a press and a drag send no hover, and the modifier going down after a
+  /// drag asked the cursor about where the drag began — the hand over plain
+  /// text, where a click opens nothing (#787).
+  void _trackMouse(PointerEvent event) {
+    if (event.kind == PointerDeviceKind.mouse) _hoverPosition = event.position;
+  }
 
   /// A Ctrl+click (Cmd on a Mac) on a link at [offset]: the caret goes there
   /// and the link opens, the legacy editor's T-M3-07. True when it did.
@@ -2288,7 +2352,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!_focus.hasFocus || !_input.isAttached || _insetRevealOff) {
       return false;
     }
-    _ensureCaretVisible();
+    _ensureCaretVisible(wholeSelection: true);
     return false;
   }
 
@@ -2314,7 +2378,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// wheel, scrolling against the measured extent, went the rest of the
   /// way. So a jump is checked again after the frames that follow it, for
   /// as long as each one still has to move — [settle] of them at most.
-  void _ensureCaretVisible({int settle = 3}) {
+  ///
+  /// [wholeSelection] keeps the whole selection in view when it fits, not
+  /// only the caret: what the keyboard opening asks for (#728). A caret move
+  /// does not — with the anchor just off the screen, every Shift+Down pulled
+  /// the view back to it (#764).
+  void _ensureCaretVisible({int settle = 3, bool wholeSelection = false}) {
     if (!_scroll.hasClients) return;
     final line = _caretLineIndex;
     if (line < 0) return;
@@ -2323,22 +2392,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // jump down stopped the padding short, the caret's row cut by it.
     final row = _folds.rowOf(line);
     final extent = _rowBounds(row);
-    // A selection is kept whole when it fits the viewport, and its active
-    // end is kept when it does not — a selection longer than the screen
+    final viewport = _scroll.position.viewportDimension;
+    // A selection is kept whole when it is asked for and fits the viewport;
+    // otherwise its active end is — a selection longer than the screen
     // cannot be shown whole, and the writer's next keystroke lands at the
     // caret (#728).
-    final anchorRow = _folds.rowOf(widget.buffer.lineOf(_selection.anchor));
-    final anchor = _rowBounds(anchorRow);
-    final first = math.min(anchorRow, row);
-    final top = math.min(anchor.top, extent.top);
-    final bottom = math.max(anchor.bottom, extent.bottom);
-    final viewport = _scroll.position.viewportDimension;
-    final whole = bottom - top <= viewport;
-    final edgeTop = whole ? top : extent.top;
-    final edgeBottom = whole ? bottom : extent.bottom;
+    var firstRow = row;
+    var edgeTop = extent.top;
+    var edgeBottom = extent.bottom;
+    if (wholeSelection) {
+      final anchorRow = _folds.rowOf(widget.buffer.lineOf(_selection.anchor));
+      final anchor = _rowBounds(anchorRow);
+      final top = math.min(anchor.top, extent.top);
+      final bottom = math.max(anchor.bottom, extent.bottom);
+      if (bottom - top <= viewport) {
+        firstRow = math.min(anchorRow, row);
+        edgeTop = top;
+        edgeBottom = bottom;
+      }
+    }
     final double target;
     if (edgeTop < _scroll.offset) {
-      target = first == 0 ? 0 : edgeTop;
+      // The first row takes the top padding with it. Only the row actually
+      // kept says so: a too-long selection that starts at the note's top
+      // keeps its caret, not the top of the note (#764).
+      target = firstRow == 0 ? 0 : edgeTop;
     } else if (edgeBottom > _scroll.offset + viewport) {
       target = (edgeBottom - viewport).clamp(
         0.0,
@@ -2353,7 +2431,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final epoch = _revealEpoch;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && epoch == _revealEpoch) {
-        _ensureCaretVisible(settle: settle - 1);
+        _ensureCaretVisible(settle: settle - 1, wholeSelection: wholeSelection);
       }
     });
   }
@@ -3143,8 +3221,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     });
   }
 
+  /// How many times the caret was measured, for the test that holds a
+  /// rebuild with a theme of the same values to measuring nothing (#789).
+  @visibleForTesting
+  int get caretMeasures => _caretMeasures;
+  int _caretMeasures = 0;
+
   /// Where the caret is, from the caret line's own layout.
   void _measureCaret() {
+    _caretMeasures++;
     final line = _caretLineIndex;
     // Every selection change comes through here, so this is the one place the
     // lines hear which of them holds the caret and which of its words, and the

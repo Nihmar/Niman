@@ -105,11 +105,15 @@ class ShareBridge(private val activity: Activity) :
      * thread never waits on the bytes; a share that carries both keeps the
      * file and falls back to the text only when the copy fails or the
      * share is over the cap.
+     *
+     * Returns whether [intent] was a share or a file to open, so the
+     * caller knows the intent was Niman's own rather than another
+     * component's.
      */
-    fun handleIntent(intent: Intent?, running: Boolean) {
-        if (intent == null) return
+    fun handleIntent(intent: Intent?, running: Boolean): Boolean {
+        if (intent == null) return false
         val action = intent.action
-        if (action != Intent.ACTION_SEND && action != Intent.ACTION_VIEW) return
+        if (action != Intent.ACTION_SEND && action != Intent.ACTION_VIEW) return false
         val isSend = action == Intent.ACTION_SEND
         val uri = if (isSend) streamOf(intent) else intent.data
         val text = if (isSend) textPayload(intent) else null
@@ -120,7 +124,7 @@ class ShareBridge(private val activity: Activity) :
                 deliver(text, running)
                 answerLaunch()
             }
-            return
+            return true
         }
         copiesInFlight++
         copies().execute {
@@ -135,6 +139,7 @@ class ShareBridge(private val activity: Activity) :
             }
             main.post { copied(payload, running) }
         }
+        return true
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {

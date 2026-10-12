@@ -30,7 +30,7 @@ final class SearchRequest {
 final class SearchCommands extends ChangeNotifier {
   /// Asks for the query field's focus (`Ctrl+Shift+F`).
   void focus() {
-    _focusRequests++;
+    _focusPending = true;
     notifyListeners();
   }
 
@@ -41,11 +41,25 @@ final class SearchCommands extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// How many focus asks have been made: a listener acts on the last one.
-  int get focusRequests => _focusRequests;
-  int _focusRequests = 0;
+  /// Whether a focus ask is waiting, clearing it (#768): an ask is an
+  /// event, answered once — a screen mounted later does not take the
+  /// focus for a `Ctrl+Shift+F` pressed long before.
+  bool takeFocus() {
+    final pending = _focusPending;
+    _focusPending = false;
+    return pending;
+  }
 
-  /// The last step ask: 1 for the next hit, -1 for the previous.
-  int get step => _step;
+  bool _focusPending = false;
+
+  /// The step waiting to be taken — 1 for the next hit, -1 for the
+  /// previous, 0 for none — clearing it (#768): a step is an event, so a
+  /// later notification (a focus ask) does not repeat it.
+  int takeStep() {
+    final step = _step;
+    _step = 0;
+    return step;
+  }
+
   int _step = 0;
 }

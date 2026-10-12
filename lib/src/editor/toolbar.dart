@@ -185,7 +185,20 @@ final class EditorToolbar extends StatelessWidget {
           MenuItemButton(
             key: button.key,
             onPressed: button.onPressed,
+            // A format on at the caret reads as on here too (#788), as the
+            // pressed button does in the row: the same tint, and a check
+            // a menu row says "on" with.
+            style: button.active
+                ? MenuItemButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    foregroundColor: theme.colorScheme.onPrimaryContainer,
+                    iconColor: theme.colorScheme.onPrimaryContainer,
+                  )
+                : null,
             leadingIcon: Icon(button.icon, size: 18),
+            trailingIcon: button.active
+                ? const Icon(Icons.check, size: 18)
+                : null,
             child: Text(button.tooltip),
           ),
       ],

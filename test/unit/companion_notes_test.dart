@@ -142,6 +142,44 @@ void main() {
     expect(await companions.of('Books/Dune.pdf'), ['a.md', 'b.md']);
   });
 
+  // #776: the annotations folder is read on disk only for the notes the
+  // index lags behind — compared at the whole second the index keeps.
+  group('the annotations folder on disk', () {
+    /// Writes a companion of Dune at [path] with an mtime off a whole
+    /// second, as almost every real write has.
+    File companion(String path) => File(p.join(root.path, path))
+      ..parent.createSync(recursive: true)
+      ..writeAsStringSync('---\nannotates: "[[Books/Dune.pdf]]"\n---\n')
+      ..setLastModifiedSync(DateTime(2026, 1, 2, 3, 4, 5, 678));
+
+    test('an up-to-date folder reads nothing', () async {
+      companion(p.join('Annotations', 'Dune.md'));
+      await Indexer(db).fullScan(root.path);
+
+      expect(await companions.freshIn('Annotations', root: root.path), isEmpty);
+    });
+
+    test('a note rewritten since the index read it is read', () async {
+      final file = companion(p.join('Annotations', 'Dune.md'));
+      await Indexer(db).fullScan(root.path);
+      file
+        ..writeAsStringSync('---\nannotates: "[[Books/Dune.pdf]]"\n---\nMore')
+        ..setLastModifiedSync(DateTime(2026, 1, 2, 3, 4, 9, 123));
+
+      expect(await companions.freshIn('Annotations', root: root.path), {
+        'Books/Dune.pdf': ['Annotations/Dune.md'],
+      });
+    });
+
+    test('a note the index does not know is read', () async {
+      companion(p.join('Annotations', 'Dune.md'));
+
+      expect(await companions.freshIn('Annotations', root: root.path), {
+        'Books/Dune.pdf': ['Annotations/Dune.md'],
+      });
+    });
+  });
+
   group('where a file was annotated (#285)', () {
     test("its companions' links to it, not to other files", () async {
       await write(on('Books/Dune.pdf', 3));

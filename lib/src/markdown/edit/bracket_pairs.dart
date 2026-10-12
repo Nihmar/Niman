@@ -8,13 +8,17 @@
 /// one a writer expects:
 ///
 /// * an opening character closes itself when what follows is a space, the
-///   line's end or a closing character — not before a word, where the writer
+///   line's end or a closing bracket — not before a word, where the writer
 ///   is wrapping something already written, and not after a backslash, where
-///   `\(` opens inline math and wants `\)`;
+///   `\(` opens inline math and wants `\)`. A star or a quote counts as
+///   closing only when the pair wrote it: one already in the note may as
+///   well open what follows, `*emph*` or `"quote"`, and a pair typed in
+///   front of it would wrap nothing (#762);
 /// * over a selection it wraps it instead, the selection kept inside;
 /// * a closing character typed where the one the pair wrote stands steps over
 ///   it, so typing on through `(a)` does not leave `(a))`;
-/// * Backspace between an empty pair takes both.
+/// * Backspace between an empty pair takes both — for a symmetric one, `**`
+///   or `""`, only when the pair wrote the closer.
 ///
 /// Not every character is closed the same way (#718). The brackets pair
 /// whenever there is room; the Markdown punctuation only sometimes does, and
@@ -25,7 +29,8 @@
 ///   brackets: `***bold italic***` too, three and three. A space right
 ///   after it makes it a literal star, which is what `* ` at the start of
 ///   a line — a list item — and `a * b` want; a second star right after
-///   the first is the bold one, not another pair;
+///   the first is the bold one, not another pair; and after a word it
+///   closes, like `_`: `2*3`, `char *p` or the end of `*this*` (#762);
 /// * `_` — emphasis too — opens only when no word stands before it:
 ///   `snake_case` and a closing `word_` are what they are;
 /// * `"` (and `'`, `«`, `“`) open when no word stands before them: after a
@@ -34,6 +39,12 @@
 /// * `<`, `>` and `` ` `` do not pair at all: `a < b` is a comparison and
 ///   `<https://…>` an autolink — a pair would write `< >` in the first —
 ///   while a fence is three backticks and a code span is typed whole.
+///
+/// In code and maths — a fenced or indented code block, a code span, a `$$`
+/// block or `$…$` — the Markdown punctuation is only itself: `char *p` is a
+/// pointer, `$a * b$` a product and `'c'` a character, none of them an
+/// emphasis or a quote. The brackets pair there as anywhere: code and
+/// formulas are written with them.
 library;
 
 import 'package:niman/src/markdown/edit/caret_motion.dart';
@@ -75,11 +86,33 @@ final class BracketPairs {
 
   static final Set<String> _closing = pairs.values.toSet();
 
+  /// The brackets: the pairs that pair in code and maths too. The rest is
+  /// the Markdown punctuation, which there is only itself.
+  static const Set<String> _brackets = {'(', '[', '{'};
+
+  /// The closing characters that close only: the brackets' and the
+  /// language's own quotes'. A star, an underscore or a straight quote
+  /// opens as often as it closes (#762).
+  static final Set<String> _closingOnly = {
+    for (final MapEntry(:key, :value) in pairs.entries)
+      if (key != value) value,
+  };
+
   final List<_Closer> _closers = <_Closer>[];
 
   /// What typing [typed] over `[start, end)` of [buffer] does instead of
   /// inserting it; null when it is only typed.
-  BracketEdit? typed(SourceBuffer buffer, int start, int end, String typed) {
+  ///
+  /// [verbatimAt] answers whether a caret at an offset stands in code or
+  /// maths, where the Markdown punctuation neither opens a pair nor wraps a
+  /// selection: asked only for that punctuation, once a keystroke.
+  BracketEdit? typed(
+    SourceBuffer buffer,
+    int start,
+    int end,
+    String typed, {
+    bool Function(int offset)? verbatimAt,
+  }) {
     // A space between a `*` pair the pair wrote: a literal star with a
     // space after it — `* ` at the start of a line is a list item, and
     // `a * b` is a multiplication — so the closer is replaced by the
@@ -106,6 +139,9 @@ final class BracketPairs {
     }
     final close = pairs[typed];
     if (close == null) return null;
+    if (!_brackets.contains(typed) && (verbatimAt?.call(start) ?? false)) {
+      return null;
+    }
     if (start != end) {
       final inside = buffer.substring(start, end);
       return (
@@ -156,6 +192,12 @@ final class BracketPairs {
 
   /// What Backspace at [caret] does instead of taking one character; null
   /// when it takes one. Between an empty pair it takes both.
+  ///
+  /// A bracket and its closer side by side are an empty pair whoever wrote
+  /// them: `()` holds nothing. A symmetric delimiter is not (#761): the two
+  /// stars around the caret in `**bold*|*` close one bold, and `''`, `***`
+  /// or `___` are a run of one character — so both go only when the closer
+  /// is the one this pair wrote.
   BracketEdit? backspace(SourceBuffer buffer, int caret) {
     if (caret <= 0 || caret >= buffer.length) return null;
     final open = buffer.substring(caret - 1, caret);
@@ -163,6 +205,7 @@ final class BracketPairs {
     if (close == null || buffer.substring(caret, caret + 1) != close) {
       return null;
     }
+    if (open == close && _closerAt(buffer, caret, close) == null) return null;
     final line = buffer.lineOf(caret);
     final column = caret - buffer.offsetOfLine(line);
     _closers.removeWhere(
@@ -192,40 +235,39 @@ final class BracketPairs {
 
   /// Whether [typed] opens a pair at [offset]: per character, because half
   /// of these are ordinary punctuation most of the time (#718).
-  static bool _opensAt(SourceBuffer buffer, int offset, String typed) {
+  bool _opensAt(SourceBuffer buffer, int offset, String typed) {
     switch (typed) {
       case '*':
         // A second star right after the first is the bold one being
-        // written, not another pair (#718).
+        // written, not another pair (#718); after a word the star closes
+        // an emphasis — `*this*` — or is a product, `2*3` (#762).
         if (_charBefore(buffer, offset) == '*') return false;
+        if (_wordBefore(buffer, offset)) return false;
         return _closesBefore(buffer, offset);
       case '_':
-        return _emphasisOpens(buffer, offset);
+      // `snake_case` and a closing `word_` are what they are.
       case '"':
       case "'":
       case '«':
       case '“':
         // After a word the quote closes one already spoken — `don't`,
         // `word"` — and is only itself.
-        final before = _charBefore(buffer, offset);
-        if (before != null && isWordChar(before)) return false;
+        if (_wordBefore(buffer, offset)) return false;
         return _closesBefore(buffer, offset);
       default:
         return _closesBefore(buffer, offset);
     }
   }
 
-  /// `_` opens where no word stands before it and it is not the second of
-  /// two: `snake_case` and a closing `word_` are what they are.
-  static bool _emphasisOpens(SourceBuffer buffer, int offset) {
-    final before = _charBefore(buffer, offset);
-    if (before != null && isWordChar(before)) return false;
-    return _closesBefore(buffer, offset);
-  }
-
-  /// Whether an opening bracket at [offset] closes itself: at the line's
-  /// end, before a space or a closing character, and not after a backslash.
-  static bool _closesBefore(SourceBuffer buffer, int offset) {
+  /// Whether an opening character at [offset] closes itself: at the line's
+  /// end, before a space, a closing bracket or a closer this pair wrote,
+  /// and not after a backslash.
+  ///
+  /// A star or a quote already in the note is no closing character (#762):
+  /// `*` typed before `"quote"`, or `(` before `*emph*`, wraps what
+  /// follows, and a pair there would write `**"quote"` and `()*emph*`.
+  /// One the pair wrote is: `*(|)*` inside an emphasis being written.
+  bool _closesBefore(SourceBuffer buffer, int offset) {
     if (offset > 0 && buffer.substring(offset - 1, offset) == r'\') {
       return false;
     }
@@ -234,12 +276,28 @@ final class BracketPairs {
     return next == '\n' ||
         next == ' ' ||
         next == '\t' ||
-        _closing.contains(next);
+        _closingOnly.contains(next) ||
+        _closerAt(buffer, offset, next) != null;
   }
 
   /// The character before [offset], or null at the start of the note.
   static String? _charBefore(SourceBuffer buffer, int offset) =>
       offset <= 0 ? null : buffer.substring(offset - 1, offset);
+
+  /// Whether a word stands right before [offset]. The combining marks of a
+  /// decomposed accent — `café` written `cafe` + U+0301 — belong to the
+  /// letter before them, so they are stepped back over to it (#762).
+  static bool _wordBefore(SourceBuffer buffer, int offset) {
+    var index = offset;
+    while (index > 0 &&
+        _combiningMark.hasMatch(buffer.substring(index - 1, index))) {
+      index -= 1;
+    }
+    final before = _charBefore(buffer, index);
+    return before != null && isWordChar(before);
+  }
+
+  static final RegExp _combiningMark = RegExp(r'^\p{M}$', unicode: true);
 
   /// The closing character [char] this pair wrote, standing at [offset].
   _Closer? _closerAt(SourceBuffer buffer, int offset, String char) {

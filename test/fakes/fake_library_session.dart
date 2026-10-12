@@ -1409,8 +1409,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     return _toNote(row);
   }
 
+  /// The paths [delete] fails on, like a file another process holds.
+  final Set<String> failDeletes = {};
+
   @override
   Future<void> delete(String path) async {
+    if (failDeletes.contains(path)) {
+      throw StateError('"$path" is held by another process');
+    }
     final row = _requireRow(path);
     if (_trashEnabled) {
       final parts = splitFileName(p.basename(path));

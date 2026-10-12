@@ -247,12 +247,18 @@ final class SyncSides {
   /// server gives after the upload; throws [notListed] when the file is
   /// not listed then. [ifMatch], [ifNoneMatch] and [modified] go with the
   /// upload as they are.
+  ///
+  /// Bytes sent that are not [sha] — the file saved again since it was
+  /// hashed — record nothing and throw [changed]; without one, the signal
+  /// [guarded] turns into a skipped step. A caller outside [guarded] — a
+  /// conflict resolution — passes its own (#763).
   Future<void> uploadAndRecord(
     SyncRunContext c,
     String path, {
     required String sha,
     required LocalFileState local,
     required Exception notListed,
+    Exception? changed,
     String? ifMatch,
     bool ifNoneMatch = false,
     DateTime? modified,
@@ -270,7 +276,9 @@ final class SyncSides {
     // inside this upload — put bytes on the server that this row would not
     // describe. The path is left for the next run to decide (#723).
     final sent = uploaded.sha256;
-    if (sent != null && sent != sha) throw const _ChangedDuringSync();
+    if (sent != null && sent != sha) {
+      throw changed ?? const _ChangedDuringSync();
+    }
     final listed = await c.client.stat(path);
     if (listed == null) throw notListed;
     await store.putItems([

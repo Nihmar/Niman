@@ -12,8 +12,11 @@ scan's recognized text — asks about them on the delete's own question:
 answer you picked last is the one emphasised next time; the first time
 it is the one that takes them along. Taken, they are trash items of
 their own and the snackbar's **Undo** brings the file and them back
-together; left, they stay where they are. A folder offers the same for
-the companions living outside it (its files' sidecars and any
+together; left, they stay where they are. Should one of the notes
+refuse to go, the others still do, the **Undo** still brings back
+everything that went, and the failure is reported after it. A folder
+offers the same — **Delete** or **Also delete the N notes about it** —
+for the companions living outside it (its files' sidecars and any
 companions inside go with the folder itself), and a file with nothing
 written about it deletes without a question, as it always did.
 
@@ -21,7 +24,9 @@ Companions are found through the index and, so one written a moment ago
 is still counted, by reading the annotations folder where Niman writes
 them: only the notes the index does not know — or holds an older row
 for — are opened, so a folder the index is up to date with costs one
-listing and nothing more.
+listing and nothing more. A note opened there answers for itself in
+place of what the index held for it; the file's companions elsewhere
+still count.
 
 On a desktop the trash opens as a floating window over the note, so the
 tree and the open note stay where they are; on a phone it is a page.
@@ -196,9 +201,11 @@ folder's own size is 0, and the folders keep the lead whichever field is
 chosen. Ties fall back to the name. The order and the way are one setting
 of this device, kept like the tree's width (see [settings](settings.md#library-settings-kept-on-this-device)).
 
-Windows reports a file's creation time and the index records it; Linux and
-macOS do not offer one through the file API the app uses, so **Date
-created** is the modification time there — the order above it.
+Windows reports a file's creation time and the index records it, and a
+save keeps it: editing an old note does not make it new. Linux and Android
+do not offer one through the file API the app uses, so **Date created** is
+the modification time there — the order above it (see
+[platforms](platforms.md#date-created)).
 
 ## Renaming a note or a folder
 
@@ -535,8 +542,11 @@ else in it that is not Markdown is kept as a file.
   under the finger, **slide up** past a thumb's width to lock it so the
   finger can go free — the bar shows the lock — and let go before that to
   stop and save, the way a hold is sent; the bar says *Slide up to lock*
-  while the hold is live. A **tap** keeps the start/stop toggle it always
-  had. While
+  while the hold is live, and keeps the lock showing once the finger is
+  off. Let go before the microphone is ready (the first recording can take
+  a moment, and Android may ask for the permission mid-hold) and the
+  recording is thrown away as soon as it starts: nothing was said. A
+  **tap** keeps the start/stop toggle it always had. While
   recording, the field shows a red bar with the elapsed time, a pause
   button (the clock holds and the dot breathes until you resume) and a
   discard button, and the round button stops and saves; the bar reads

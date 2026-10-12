@@ -274,6 +274,113 @@ void main() {
     expect(railIndex(tester), ShellTab.files);
   });
 
+  // #770: a phone keeps Home and Todo as whole destinations; widening the
+  // window shows the one on screen as the pinned tab, not an empty pane.
+  testWidgets('narrow to wide: Home or Todo on screen stays on screen (#770)', (
+    tester,
+  ) async {
+    setSurfaceSize(tester, const Size(400, 800));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    await tester.tap(find.byKey(const Key('tab-todo')));
+    await settle(tester);
+
+    // The pinned tab's pane shows the list.
+    void expectTodoShows() {
+      expect(railIndex(tester), ShellTab.todo);
+      expect(
+        tester
+            .widget<Offstage>(find.byKey(const Key('content-pane-todo')))
+            .offstage,
+        isFalse,
+      );
+      expect(find.byType(TodoTab), findsOne);
+    }
+
+    setSurfaceSize(tester, const Size(1200, 900));
+    await settle(tester);
+    expectTodoShows();
+
+    // Home pinned on wide, narrow again, Todo, then wide: Todo shows.
+    await tester.tap(railDest('home'));
+    await settle(tester);
+    setSurfaceSize(tester, const Size(400, 800));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('tab-todo')));
+    await settle(tester);
+    setSurfaceSize(tester, const Size(1200, 900));
+    await settle(tester);
+    expectTodoShows();
+  });
+
+  // #770: the chip shows the content over a note that stays mounted
+  // behind it; the note's editor gives up the focus, or the keys typed
+  // next would edit a note no one can see.
+  testWidgets('wide: the content chip takes the focus from the note (#770)', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('home'));
+    await settle(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    // A control inside the note takes the focus, as the editor does when
+    // it is typed in (the fake library has no file for the editor to
+    // load): whatever in the note has it, it must let it go.
+    final inNote = find.descendant(
+      of: find.byType(NoteView),
+      matching: find.byType(Icon),
+    );
+    Focus.of(tester.element(inNote.first)).requestFocus();
+    await settle(tester);
+
+    bool noteHasFocus() {
+      final focused = FocusManager.instance.primaryFocus?.context;
+      if (focused == null) return false;
+      var inNote = false;
+      focused.visitAncestorElements((element) {
+        inNote = element.widget is NoteView;
+        return !inNote;
+      });
+      return inNote;
+    }
+
+    expect(noteHasFocus(), isTrue, reason: 'the editor is being typed in');
+    await tester.tap(find.byKey(const Key('content-tab-home')));
+    await settle(tester);
+    expect(noteHasFocus(), isFalse);
+  });
+
+  // #770: the chip comes and goes at the row's far end, so no note tab
+  // moves under the pointer when it does.
+  testWidgets('wide: the content chip moves no note tab (#770)', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    final before = tester.getRect(find.byKey(const Key('note-tab-0')));
+
+    await tester.tap(railDest('todo'));
+    await settle(tester);
+    expect(find.byKey(const Key('content-tab-todo')), findsOne);
+    expect(tester.getRect(find.byKey(const Key('note-tab-0'))), before);
+    expect(
+      tester.getRect(find.byKey(const Key('content-tab-todo'))).left,
+      greaterThan(before.right),
+    );
+
+    await tester.tap(find.byKey(const Key('content-tab-close-todo')));
+    await settle(tester);
+    expect(tester.getRect(find.byKey(const Key('note-tab-0'))), before);
+  });
+
   // #202: a floating window over what was on screen, which it closes
   // back to; the rail keeps its selection.
   testWidgets('wide: the rail settings open a window, and close back', (
@@ -559,6 +666,61 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     await settle(tester);
     expect(controller.workspace.activePath, 'alpha.md');
+  });
+
+  // #769: a note tab clicked with the search sidebar showing switches the
+  // note, not the sidebar: the hits stay, and F4 still steps them.
+  testWidgets('wide: a note tab leaves the search sidebar on screen (#769)', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await controller.createNote(parentPath: '', name: 'beta');
+    await controller.createNote(parentPath: '', name: 'gamma');
+    controller.searchHits = [
+      const SearchHit(
+        noteId: 0,
+        path: 'alpha.md',
+        title: 'alpha',
+        snippet: 'x',
+      ),
+      const SearchHit(noteId: 0, path: 'beta.md', title: 'beta', snippet: 'x'),
+      const SearchHit(
+        noteId: 0,
+        path: 'gamma.md',
+        title: 'gamma',
+        snippet: 'x',
+      ),
+    ];
+    await settle(tester);
+    // Two tabs, the second opened with Ctrl from the tree.
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(noteRow('beta.md'));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+    expect(find.byKey(const Key('note-tab-1')), findsOne);
+
+    await tester.tap(railDest('search'));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('search-query')), 'al');
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('search-hit-beta.md')));
+    await settle(tester);
+    expect(controller.workspace.activePath, 'beta.md');
+
+    await tester.tap(find.byKey(const Key('note-tab-0')));
+    await settle(tester);
+    expect(controller.workspace.activePath, 'alpha.md');
+    expect(railIndex(tester), ShellTab.search);
+    expect(find.byType(SearchScreen).hitTestable(), findsOne);
+    expect(find.byKey(const Key('tree-footer')), findsNothing);
+
+    // The steps continue from the hit last opened, beta.
+    await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+    await settle(tester);
+    expect(controller.workspace.activePath, 'gamma.md');
   });
 
   // #712: Ctrl+Shift+F shows the sidebar and puts the cursor in its field,

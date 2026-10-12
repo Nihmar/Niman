@@ -399,12 +399,15 @@ class _AudioNoteViewState extends State<AudioNoteView>
     return file?.path;
   }
 
-  Future<void> _toggleRecord() {
-    return _capture.toggle(
+  /// Starts or stops the recording; completes with whether the microphone
+  /// is live once it is done, which a hold released early acts on (#766).
+  Future<bool> _toggleRecord() async {
+    await _capture.toggle(
       beforeStart: _playback.stop,
       onRecorded: _attach,
       newPath: widget.newRecordPath,
     );
+    return _capture.recording;
   }
 
   Widget _buildRow(AudioChatRow row) {

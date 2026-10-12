@@ -7,7 +7,9 @@ final class SyncFailure implements Exception {
   const new(this.reason, this.detail, {this.moved = false});
 
   /// A resolution refused because a side is no longer the version the
-  /// user decided on; nothing was written.
+  /// user decided on. Nothing was written — unless the note was saved here
+  /// during the resolution's own upload: the server then holds that save,
+  /// and no row records an agreement (#763).
   factory stale(String detail) =>
       SyncFailure(SyncAbort.failed, detail, moved: true);
 

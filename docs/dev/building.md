@@ -60,6 +60,16 @@ a device (`flutter test -d linux`), which CI provides on a virtual
 display, and CI installs hunspell so the live spell-check cases run there
 instead of skipping (issue #363).
 
+A second job in the same workflow runs the JVM unit tests of the Android
+app module (`android/app/src/test`, e.g. `LaunchIntentTest`,
+`ShareCopyTest`) in parallel with the first: `flutter build apk
+--config-only` writes the Gradle project (`android/gradlew` and
+`android/local.properties` are not in the repository), then
+`./gradlew :app:testBetaDebugUnitTest` compiles the Kotlin and runs JUnit —
+no APK, no device (issue #813). Locally: the same two commands, with
+`gradlew.bat` on Windows and `JAVA_HOME` set (Android Studio's `jbr` will
+do).
+
 `site` (`.github/workflows/site.yml`) builds the documentation site on
 every pull request with the deploy's own steps — the Jekyll build from
 `pages.yml`, the step that wraps Niman's `{{…}}` template syntax in

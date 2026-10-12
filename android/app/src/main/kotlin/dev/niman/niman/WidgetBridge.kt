@@ -64,15 +64,21 @@ class WidgetBridge(private val activity: Activity) :
      * delivered straight away. The extras are removed either way, so the
      * tap is not replayed when the activity is recreated with the same
      * intent (a rotation, a process restore).
+     *
+     * Returns whether [intent] was a widget tap's, so the caller knows
+     * the intent was Niman's own rather than another component's.
      */
-    fun handleIntent(intent: Intent?, running: Boolean) {
-        val target = targetOf(intent) ?: return
-        clearExtras(intent!!)
+    fun handleIntent(intent: Intent?, running: Boolean): Boolean {
+        if (intent == null) return false
+        if (intent.action != ACTION_OPEN_TODO && intent.action != ACTION_OPEN_NOTE) return false
+        val target = targetOf(intent) ?: return true
+        clearExtras(intent)
         if (running) {
             channel?.invokeMethod("target", target)
         } else {
             launchTarget = target
         }
+        return true
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
