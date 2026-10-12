@@ -213,12 +213,21 @@ void main() {
       reason: 'a row that came back was laid out again',
     );
 
-    for (final time in [...down, ...up]) {
-      expect(
-        time,
-        lessThan(_backstopMicros),
-        reason: 'a scroll step took ${time ~/ 1000} ms: the shape of #722',
-      );
+    // The backstop holds every step but each leg's first. That one builds
+    // the rows it brings into view, and on a cold shared runner it is the
+    // warm-up too: CI once read 158 ms for it with the rest at 15-37 ms
+    // (#791's run 38216429744), a slow first frame and not #722. #722's
+    // shape is every step slow, each one measuring the table again: the
+    // counts above hold that on any host, and the steps after the first
+    // are where a time can still show it.
+    for (final leg in [down, up]) {
+      for (final time in leg.skip(1)) {
+        expect(
+          time,
+          lessThan(_backstopMicros),
+          reason: 'a scroll step took ${time ~/ 1000} ms: the shape of #722',
+        );
+      }
     }
     for (final leg in [down, up]) {
       final sorted = [...leg]..sort();
