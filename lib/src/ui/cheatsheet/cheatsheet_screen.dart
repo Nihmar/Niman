@@ -16,12 +16,15 @@ import 'package:niman/src/ui/tour/tour_targets.dart';
 /// it land in — and is null when no note is open to take one.
 ///
 /// On a desktop it is a floating window that stays open while examples are
-/// inserted one after another (#712); a phone keeps the page.
+/// inserted one after another (#712); a phone keeps the page. Opened from
+/// inside a window already — Settings' column — it is a page there too
+/// (#772), not a second window with its own barrier inside the first.
 Future<void> showMarkdownCheatsheet(
   BuildContext context, {
   ValueChanged<String>? onInsert,
 }) {
-  if (pointerDense(Theme.of(context))) {
+  final inWindow = context.findAncestorWidgetOfExactType<FloatingWindow>();
+  if (pointerDense(Theme.of(context)) && inWindow == null) {
     return showFloatingWindow(
       context,
       title: AppStrings.cheatsheetTitle,
