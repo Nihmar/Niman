@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search, Tasks and events</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fill{fill:currentColor;stroke:none}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A}
+.pj{color:#C08CD8}.cx{color:#7CA0E6}.tg{color:#6FB8CC}.kv{color:#7FD1C4}.tm{color:#D8A56B}.as{color:#6B7079;font-style:italic}
+.mono{font-family:'IBM Plex Mono',monospace}
+.tree{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB;white-space:nowrap}
+.tree.sel{background:#363B44;color:#F2EDE5}
+.tab{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 13px;border-radius:7px;font-size:13px;color:#C8C3BA}
+.tab.on{background:#383D46;color:#F2EDE5}
+.railbtn{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.railbtn.on{background:#363B44;color:#587CD3}
+.ibtn{width:32px;height:32px;border-radius:8px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.ibtn.on{background:#363B44;color:#F2EDE5}
+.obtn{height:32px;padding:0 12px;border-radius:16px;border:1px solid #4A4F59;background:transparent;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tbtn{height:32px;padding:0 10px;border-radius:16px;border:0;background:transparent;color:#A9C0F0;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.fbtn{height:32px;padding:0 16px;border-radius:16px;border:0;background:#587CD3;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px}
+.ev{display:flex;align-items:center;gap:10px;min-height:32px;border-radius:6px;font-size:13.5px;padding:0 4px}
+.ev .t{width:86px;flex:none;color:#D8A56B;font-variant-numeric:tabular-nums}
+.ev .x{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goal{display:flex;gap:10px;font-size:13px;line-height:22px}
+.goal .h{width:64px;flex:none;color:#A8C77A}
+.due{display:flex;align-items:center;gap:10px;height:32px;font-size:13.5px;padding:0 4px}
+.rec{display:flex;align-items:center;gap:12px;height:40px;padding:0 4px}
+.rec .d{width:40px;text-align:center;line-height:1.1}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;flex-direction:column;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+  <div style="height:40px;flex:none;background:#2C3037;display:flex;align-items:center;gap:6px;padding:0 0 0 4px">
+    <button class="ibtn" style="width:40px;height:40px;color:#587CD3" aria-label="Show the tree"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16" stroke-width="2.6"/></svg></button>
+    <div class="tab">2026-10-12</div><div class="tab on">calendar.txt <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px;color:#A6A29A" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    <div style="flex:1"></div>
+    <button class="ibtn" aria-label="Side panel"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button>
+    <div style="width:12px"></div>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Minimize"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Maximize"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Close"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div style="flex:1;min-height:0;display:flex">
+    <nav style="width:48px;flex:none;background:#2C3037;display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px">
+      <div class="railbtn" title="Files"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg></div><div class="railbtn" title="Todo"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 12l3 3 5-6"/></svg></div><div class="railbtn on" title="Search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></div><div class="railbtn" title="Home"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/></svg></div><div class="railbtn" title="Quick note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></div>
+      <div style="flex:1"></div>
+      <div class="railbtn" title="Settings"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></div>
+    </nav>
+    
+    <aside style="width:380px;flex:none;background:#23262B;border-right:1px solid #2C3037;display:flex;flex-direction:column;min-height:0">
+      <div style="padding:10px 12px 4px">
+        <div style="height:40px;border:1px solid #587CD3;border-radius:6px;display:flex;align-items:center;gap:8px;padding:0 6px 0 10px">
+          <svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M4 5h16l-6 8v6l-4 2v-8z"/></svg><span class="pj" style="flex:1">+thesis</span>
+          <button class="ibtn" style="width:28px;height:28px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+      </div>
+      <div style="flex:1;min-height:0;overflow:hidden;padding:6px 8px">
+        <div class="lab" style="padding:8px 10px 4px">Tasks and events · 6</div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;background:#363B44;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#D8A56B;margin-top:2px" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><rect x="13" y="13" width="4" height="4" rx=".5"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span class="tm">9-12</span> thesis chapter 3 <span class="pj">+thesis</span> <span class="cx">@library</span></div><div class="sub" style="font-size:12px">Mon 12 Oct · calendar.txt</div></div></div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#D8A56B;margin-top:2px" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><rect x="13" y="13" width="4" height="4" rx=".5"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span class="tm">10-1130</span> seminar v1.2 review <span class="pj">+thesis</span></div><div class="sub" style="font-size:12px">Tue 13 Oct · calendar.txt</div></div></div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A8C77A;margin-top:2px" aria-hidden="true"><path d="M5 21V4h11l-2 4 2 4H5"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Writing week <span class="pj">+thesis</span></div><div class="sub" style="font-size:12px">Week 42 goal · calendar.txt</div></div></div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A8C77A;margin-top:2px" aria-hidden="true"><path d="M5 21V4h11l-2 4 2 4H5"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Finish the thesis draft <span class="pj">+thesis</span></div><div class="sub" style="font-size:12px">October goal · calendar.txt</div></div></div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A;margin-top:2px" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Send chapter 2 to supervisor <span class="pj">+thesis</span></div><div class="sub" style="font-size:12px">Due today · todo.txt</div></div></div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A;margin-top:2px" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Book the defence room <span class="pj">+thesis</span> <span class="cx">@phone</span></div><div class="sub" style="font-size:12px">No date · todo.txt</div></div></div>
+        <div class="lab" style="padding:14px 10px 4px">Notes · 3</div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A;margin-top:2px" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Thesis outline</div><div class="sub" style="font-size:12px">Thesis · …the chapters, in order. <b style="color:#F2EDE5;font-weight:500">+thesis</b> on the calendar is…</div></div></div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A;margin-top:2px" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">2026-10-12</div><div class="sub" style="font-size:12px">Journal/2026 · …Writing week starts. The <b style="color:#F2EDE5;font-weight:500">thesis</b> plan is…</div></div></div>
+        <div style="display:flex;gap:12px;padding:8px 10px;border-radius:8px;"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A;margin-top:2px" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><div style="flex:1;min-width:0"><div style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Field study numbers</div><div class="sub" style="font-size:12px">Thesis · …the old table for the <b style="color:#F2EDE5;font-weight:500">thesis</b>…</div></div></div>
+      </div>
+    </aside><main style="flex:1;min-width:0;display:flex;flex-direction:column;background:#1B1D21">
+      <div style="height:46px;flex:none;display:flex;align-items:center;justify-content:flex-end;padding:0 12px"><button class="ibtn"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><circle class="fill" cx="12" cy="5" r="1.6"/><circle class="fill" cx="12" cy="12" r="1.6"/><circle class="fill" cx="12" cy="19" r="1.6"/></svg></button></div>
+      <div class="mono" style="flex:1;overflow:hidden;padding:4px 20px 0 8px;font-size:13px;line-height:24px;color:#D9D4CB">
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">1</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#A8C77A">2026</span>  The year of the move <span class="pj">+home</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">2</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#A8C77A">2026-10</span>  Finish the thesis draft <span class="pj">+thesis</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">3</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#A8C77A">2026-10-05 w41</span>  Reading week</span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">4</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-05</span> <span style="color:#6B7079">w41 Mon</span>  <span class="tm">9-12</span> library <span class="pj">+thesis</span> <span class="cx">@library</span><span style="color:#6B7079">.</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">5</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-06</span> <span style="color:#6B7079">w41 Tue</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">6</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-07</span> <span style="color:#6B7079">w41 Wed</span>  <span class="tm">0600Z</span> call with Tokyo <span class="cx">@phone</span><span style="color:#6B7079">.</span> <span class="tm">17</span> jogging <span class="cx">@park</span><span style="color:#6B7079">.</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">7</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-08</span> <span style="color:#6B7079">w41 Thu</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">8</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-09</span> <span style="color:#6B7079">w41</span> <span style="color:#6B7079;text-decoration:underline wavy #E0687A;text-underline-offset:3px" title="9 October 2026 is a Friday">Sat</span>  <span class="tm">20</span> dinner at Anna’s <span class="tg">#family</span><span style="color:#6B7079">.</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">9</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-10</span> <span style="color:#6B7079">w41 Sat</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">10</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-11</span> <span style="color:#6B7079">w41 Sun</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">11</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#A8C77A">2026-10-12 w42</span>  Writing week <span class="pj">+thesis</span></span></div>
+<div style="display:flex;background:rgba(88,124,211,.14);"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">12</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-12</span> <span style="color:#6B7079">w42 Mon</span>  <span class="tm">9-12</span> thesis chapter 3 <span class="pj">+thesis</span> <span class="cx">@library</span><span style="color:#6B7079">.</span> <span class="tm">13:30-14</span> call with Marta <span class="cx">@phone</span> <span class="kv">rem:13:15</span><span style="color:#6B7079">.</span> <span class="tm">18-19</span> jogging <span class="cx">@park</span> <span class="as">(if dry)</span><span style="color:#6B7079">.</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">13</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-13</span> <span style="color:#6B7079">w42 Tue</span>  <span class="tm">0600Z</span> call with Tokyo <span class="cx">@phone</span><span style="color:#6B7079">.</span> <span class="tm">10-1130</span> seminar v1.2 review <span class="pj">+thesis</span><span style="color:#6B7079">.</span> <span class="tm">16</span> dentist <span class="cx">@city</span> <span class="kv">rem:15:15</span><span style="color:#6B7079">.</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">14</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-14</span> <span style="color:#6B7079">w42 Wed</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">15</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-15</span> <span style="color:#6B7079;text-decoration:underline wavy #E0687A;text-underline-offset:3px" title="15 October 2026 is in week 42">w41</span> <span style="color:#6B7079">Thu</span>  <span class="tm">8-1345</span> exam session <span class="pj">+teaching</span> <span class="as">(14-1545 +teaching)</span><span style="color:#6B7079">.</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">16</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-16</span> <span style="color:#6B7079">w42 Fri</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">17</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-17</span> <span style="color:#6B7079">w42 Sat</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">18</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-18</span> <span style="color:#6B7079">w42 Sun</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">19</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#A8C77A">2026-10-19 w43</span>  Revision week <span class="pj">+thesis</span></span></div>
+<div style="display:flex;"><span style="width:40px;flex:none;text-align:right;padding-right:14px;color:#4A4F59">20</span><span style="white-space:pre-wrap;flex:1;min-width:0"><span style="color:#9A968E">2026-10-19</span> <span style="color:#6B7079">w43 Mon</span></span></div>
+      </div>
+      <div class="sub" style="height:32px;flex:none;display:flex;align-items:center;gap:14px;padding:0 14px;border-top:1px solid #2C3037;font-size:12.5px"><span>Source</span><span>calendar.txt</span><span style="flex:1"></span><span>Ln 12</span><span>Saved</span></div>
+    </main>
+    
+  </div>
+</div>
+</body>
+</html>
