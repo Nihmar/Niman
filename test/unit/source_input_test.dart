@@ -19,6 +19,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
   SourceInput input,
   HighlightDocument tokens,
   List<SelectionModel> carets,
+  void Function(SelectionModel) setSelection,
 })
 _wire(String text, {int caret = 0}) {
   final buffer = SourceBuffer.fromText(text);
@@ -35,7 +36,13 @@ _wire(String text, {int caret = 0}) {
     },
     onEdited: (_) {},
   );
-  return (buffer: buffer, input: input, tokens: tokens, carets: carets);
+  return (
+    buffer: buffer,
+    input: input,
+    tokens: tokens,
+    carets: carets,
+    setSelection: (next) => current = next,
+  );
 }
 
 TextEditingDeltaInsertion _insert(String oldText, int at, String text) =>
@@ -74,6 +81,50 @@ void main() {
       ),
     ]);
     expect(surface.buffer.text, 'ciao\n');
+  });
+
+  // #753: the platform holds a window of a long note (#540), and its own
+  // Select all is a range on that copy. When the app's selection is the whole
+  // window — a Select all it was told only as a range on the copy, or as an
+  // edit it read as a caret range — the platform deleting the whole of its
+  // copy means the note: taking the window would leave the rest of the note
+  // behind, and the delete had to be made twice.
+  test("a deletion of the platform's whole copy is the note", () {
+    final text = List.generate(400, (i) => 'line $i of the note').join('\n');
+    final surface = _wire(text);
+    final value = surface.input.currentTextEditingValue!;
+    final window = surface.input.windowStart;
+    surface.setSelection(
+      SelectionModel(anchor: window, extent: window + value.text.length),
+    );
+    surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+      TextEditingDeltaDeletion(
+        oldText: value.text,
+        deletedRange: TextRange(start: 0, end: value.text.length),
+        selection: const TextSelection.collapsed(offset: 0),
+        composing: TextRange.empty,
+      ),
+    ]);
+    expect(surface.buffer.text, isEmpty);
+  });
+
+  // The same, with the selection reported backwards (its anchor at the note's
+  // end): #540's rule has to hold in both directions, or the deletion takes
+  // the window's range again.
+  test('a backwards select all and delete empties the note', () {
+    final text = List.generate(400, (i) => 'line $i of the note').join('\n');
+    final surface = _wire(text, caret: text.length);
+    surface.setSelection(SelectionModel(anchor: text.length, extent: 0));
+    final value = surface.input.currentTextEditingValue!;
+    surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+      TextEditingDeltaDeletion(
+        oldText: value.text,
+        deletedRange: TextRange(start: 0, end: value.text.length),
+        selection: const TextSelection.collapsed(offset: 0),
+        composing: TextRange.empty,
+      ),
+    ]);
+    expect(surface.buffer.text, isEmpty);
   });
 
   test('an autocorrect replacement replaces the word it names', () {
