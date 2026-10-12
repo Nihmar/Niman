@@ -3,6 +3,7 @@
 // (unit-covered), the screen shows the stored names.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/tags_screen.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -129,6 +130,95 @@ void main() {
     expect(find.byKey(const Key('tag-note-b.md')), findsOne);
     await tester.tap(find.byKey(const Key('tag-note-c.md')));
     expect(opened, ['c.md']);
+  });
+
+  // #779: the sidebar stays mounted for the session; a tag open in the
+  // tree follows the index as notes are tagged and deleted.
+  testWidgets('wide: an open tag follows the index (#779)', (tester) async {
+    source.tags = {
+      'work': ['a.md', 'b.md'],
+    };
+    await tester.pumpWidget(buildApp(tree: true));
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('tag-node-work')));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('tag-note-a.md')), findsOne);
+
+    // A note tagged, another deleted: the index reports the change.
+    source.tags = {
+      'work': ['b.md', 'c.md'],
+      'new': ['c.md'],
+    };
+    session.bumpContents();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('tag-note-c.md')), findsOne);
+    expect(find.byKey(const Key('tag-note-a.md')), findsNothing);
+    expect(find.byKey(const Key('tag-node-new')), findsOne);
+  });
+
+  // #779: closing and opening a tag reads its notes again, as the
+  // drill-down does on every visit.
+  testWidgets('wide: opening a tag again reads its notes again (#779)', (
+    tester,
+  ) async {
+    source.tags = {
+      'work': ['a.md'],
+    };
+    await tester.pumpWidget(buildApp(tree: true));
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('tag-node-work')));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('tag-note-a.md')), findsOne);
+    await tester.tap(find.byKey(const Key('tag-node-work')));
+    await tester.pump();
+
+    source.tags = {
+      'work': ['a.md', 'b.md'],
+    };
+    await tester.tap(find.byKey(const Key('tag-node-work')));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('tag-note-b.md')), findsOne);
+  });
+
+  // #779: a tag asked for elsewhere opens with its ancestors, and each
+  // lists its own notes rather than a loading row that never ends.
+  testWidgets('wide: a requested tag opens its ancestors with notes (#779)', (
+    tester,
+  ) async {
+    source.tags = {
+      'work': ['a.md'],
+      'work/meetings': ['b.md'],
+    };
+    final requests = ValueNotifier<SearchRequest?>(
+      const SearchRequest.forTag('work/meetings'),
+    );
+    addTearDown(requests.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TagsScreen(
+            controller: session,
+            onOpenNote: opened.add,
+            onBack: () {},
+            sourceOverride: source,
+            requests: requests,
+            tree: true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('tag-note-b.md')), findsOne);
+    expect(find.byKey(const Key('tag-note-a.md')), findsOne);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('a phone keeps the drill-down (#712)', (tester) async {
