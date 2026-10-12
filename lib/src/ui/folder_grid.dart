@@ -18,7 +18,6 @@ library;
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart' show kMiddleMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
@@ -26,14 +25,11 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
-import 'package:niman/src/ui/action_sheet.dart';
-import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/folder_crumbs.dart';
-import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
+import 'package:niman/src/ui/folder_grid_tile.dart';
 import 'package:niman/src/ui/ocr/ocr_tree_order.dart';
-import 'package:niman/src/ui/ocr/ocr_tree_ring.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/tree.dart' show TreeRename, displayNameOf, isoDate;
+import 'package:niman/src/ui/tree.dart' show TreeRename;
 import 'package:niman/src/ui/tree_drag.dart';
 import 'package:niman/src/ui/tree_rename_field.dart';
 import 'package:path/path.dart' as p;
@@ -396,7 +392,7 @@ final class _FolderGridState extends State<FolderGrid> {
       itemCount: rows.rows.length,
       itemBuilder: (context, index) {
         final (note, sidecar) = rows.rows[index];
-        return _tile(context, note: note, sidecar: sidecar, index: index);
+        return _tile(note: note, sidecar: sidecar, index: index);
       },
     );
     // The empty space is the folder shown: a drop there is the folder a
@@ -426,46 +422,23 @@ final class _FolderGridState extends State<FolderGrid> {
     );
   }
 
-  /// One tile: its icon, its name and its date, its pin, and the ways it
-  /// is opened, dragged and dropped on.
-  Widget _tile(
-    BuildContext context, {
+  /// The tile at [index], wired to the grid: its cursor, its selection
+  /// and what its gestures do.
+  Widget _tile({
     required Note note,
     required bool sidecar,
     required int index,
   }) {
-    final theme = Theme.of(context);
-    final selected = !note.isDir && note.path == widget.selectedPath;
-    final focused =
-        _keyboardFocus && _focus.hasPrimaryFocus && _focusIndex == index;
+    final longPress = widget.onLongPress;
+    final secondary = widget.onSecondaryTapDown;
     final middle = widget.onOpenInNewTab;
-    final longPress = widget.onLongPress == null
-        ? null
-        : () => widget.onLongPress!(note, menuAnchorOf(context));
-    final date = widget.sort.order == TreeOrder.created
-        ? note.created
-        : note.modified;
-    final labelStyle = theme.textTheme.bodySmall?.copyWith(
-      fontSize: sidecar ? 12 : 12.5,
-      height: 16 / 12.5,
-      color: sidecar ? theme.colorScheme.onSurfaceVariant : null,
-    );
-    Widget icon = Icon(
-      sidecar
-          ? Icons.document_scanner_outlined
-          : (note.isDir ? Icons.folder_outlined : fileIconFor(note.name)),
-      size: sidecar ? 24 : 32,
-      color: sidecar ? theme.colorScheme.onSurfaceVariant : null,
-    );
-    final queue = widget.ocrQueue;
-    if (queue != null && !note.isDir && isRecognizableFile(note.name)) {
-      icon = OcrTreeRing(queue: queue, path: note.path, placeholder: icon);
-    }
-    Widget tile = InkWell(
-      key: Key('grid-tile-${note.path}'),
-      // The walk owns the keyboard here (#727), as in the tree: a tile
-      // that took the focus itself would leave the arrows to nobody.
-      canRequestFocus: false,
+    return FolderGridTile(
+      note: note,
+      sidecar: sidecar,
+      selected: !note.isDir && note.path == widget.selectedPath,
+      focused: _keyboardFocus && _focus.hasPrimaryFocus && _focusIndex == index,
+      sort: widget.sort,
+      ocrQueue: widget.ocrQueue,
       onTap: () {
         setState(() {
           _focusIndex = index;
@@ -477,76 +450,15 @@ final class _FolderGridState extends State<FolderGrid> {
         if (note.isDir) _focus.requestFocus();
         widget.onOpen(note);
       },
-      onLongPress: TreeRowDrag.holdToDrag ? null : longPress,
-      onSecondaryTapDown: widget.onSecondaryTapDown == null
+      onLongPress: longPress == null
           ? null
-          : (details) => widget.onSecondaryTapDown!(note, details),
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        decoration: BoxDecoration(
-          color: selected ? theme.highlightColor.withValues(alpha: 0.4) : null,
-          border: focused
-              ? Border.all(color: theme.colorScheme.primary, width: 2)
-              : null,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        padding: const EdgeInsets.fromLTRB(6, 12, 6, 7),
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                SizedBox(height: 32, child: Center(child: icon)),
-                const SizedBox(height: 5),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Text(
-                      displayNameOf(note),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: labelStyle,
-                    ),
-                  ),
-                ),
-                Text(
-                  isoDate(date),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 11,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            if (note.pinned && !note.isDir)
-              const Positioned(
-                top: 0,
-                right: 0,
-                child: Icon(Icons.push_pin, size: 13),
-              ),
-          ],
-        ),
-      ),
-    );
-    final move = widget.onMove;
-    // A tile being renamed is not dragged: a drag in its field selects
-    // text.
-    if (move != null && widget.renaming?.path != note.path) {
-      tile = TreeRowDrag(
-        note: note,
-        onMove: move,
-        onLongPress: longPress,
-        child: tile,
-      );
-    }
-    if (middle == null || note.isDir) return tile;
-    return Listener(
-      onPointerDown: (event) {
-        if (event.buttons == kMiddleMouseButton) middle(note);
-      },
-      child: tile,
+          : (anchor) => longPress(note, anchor),
+      onSecondaryTapDown: secondary == null
+          ? null
+          : (details) => secondary(note, details),
+      onMiddleClick: middle == null ? null : () => middle(note),
+      onMove: widget.onMove,
+      renaming: widget.renaming?.path == note.path,
     );
   }
 
