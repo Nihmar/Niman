@@ -2978,9 +2978,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   bool get _sidebarShowsSearch => _wide && _tab == ShellTab.search;
 
   /// A tab's screen on the wide layout: one island on the base, as the
-  /// tree, the panes and the dock are on Files.
+  /// tree, the panes and the dock are on Files. No band above it: the
+  /// title bar sits on the islands, its own room under the tab the 4 px
+  /// the tab row shows there (#749).
   Widget _islandSlot(Widget body) => Padding(
-    padding: const EdgeInsets.all(Island.gap),
+    padding: const EdgeInsets.fromLTRB(Island.gap, 0, Island.gap, Island.gap),
     child: Island(child: body),
   );
 
@@ -3760,14 +3762,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// title bar's toggle) gives its width to the detail pane.
   ///
   /// Each of the three is an [Island] on the chrome's base, [Island.gap]
-  /// from the window's edges and from each other; the dividers are the
+  /// from the window's edges and from each other, with the title bar
+  /// sitting on them — no band above (#749); the dividers are the
   /// base between them. The gaps never change while the tree or the dock
   /// comes and goes, so nothing on screen moves but the edge that has to.
   /// Zen drops the base: the note takes the window edge to edge.
   Widget _wideBody(LibrarySession controller) {
     final zen = _inZen;
     return Padding(
-      padding: EdgeInsets.all(zen ? 0 : Island.gap),
+      padding: EdgeInsets.fromLTRB(
+        zen ? 0 : Island.gap,
+        0,
+        zen ? 0 : Island.gap,
+        zen ? 0 : Island.gap,
+      ),
       child: Row(
         children: [
           if (_sidebarVisible && !zen) ...[

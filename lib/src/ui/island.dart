@@ -22,8 +22,9 @@ final class Island extends StatelessWidget {
   /// An island around [child].
   const new({required this.child, this.floating = true, super.key});
 
-  /// The base showing between two islands, and around them.
-  static const double gap = 8;
+  /// The base showing between two islands, and around them — the one
+  /// width the wide chrome's insets keep (#749).
+  static const double gap = 4;
 
   /// The corners' radius.
   static const double radius = 10;

@@ -118,10 +118,10 @@ void main() {
       find.ancestor(of: find.text('alpha'), matching: find.byType(InkWell)),
     );
     expect(tab.left, _panesStart, reason: 'over the panel, not past it');
-    // Room still (0.0.8 test round): the toggle's glyph ends 8 px inside
-    // its box, so the eye reads some 19 px of it — the toggle centred on
-    // the rail's glyphs took 3 px of the 22 there were (#708).
-    expect(tab.left - toggle.right, greaterThanOrEqualTo(11));
+    // Room still (0.0.8 test round): the chrome's own 4 px is the floor
+    // now (#749), and the toggle centred on the rail's glyphs (#708)
+    // leaves 6.
+    expect(tab.left - toggle.right, greaterThanOrEqualTo(4));
   });
 }
 
