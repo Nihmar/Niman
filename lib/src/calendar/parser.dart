@@ -692,12 +692,16 @@ bool _goalApplies(CalendarLine line, DateTime date) {
   };
 }
 
+/// Whether [a] and [b] name the same calendar day, at any time of it.
+bool sameCalendarDay(DateTime? a, DateTime? b) =>
+    a != null &&
+    b != null &&
+    a.year == b.year &&
+    a.month == b.month &&
+    a.day == b.day;
+
 /// Whether [date] and [other] are the same calendar day.
-bool _sameDay(DateTime? date, DateTime other) =>
-    date != null &&
-    date.year == other.year &&
-    date.month == other.month &&
-    date.day == other.day;
+bool _sameDay(DateTime? date, DateTime other) => sameCalendarDay(date, other);
 
 /// The text that follows a head at [at] (its two spaces skipped), or null
 /// when there is none.
@@ -754,6 +758,18 @@ final RegExp _keyValue = RegExp(r'^[A-Za-z][A-Za-z0-9_-]*:\S+$');
 final RegExp _year = RegExp(r'(\d{4})(?=\s|$)');
 final RegExp _month = RegExp(r'(\d{4})-(\d{2})(?=\s|$)');
 final RegExp _day = RegExp(r'(\d{4})-(\d{2})-(\d{2})(?: w(\d{1,2}))?(?=\s|$)');
+
+/// English's short weekday names, Monday first: the form the spec writes
+/// a day head in, and the one the parser always reads (#730).
+const List<String> englishWeekdayShortNames = [
+  'Mon',
+  'Tue',
+  'Wed',
+  'Thu',
+  'Fri',
+  'Sat',
+  'Sun',
+];
 
 /// English's three-letter weekday names, the spec's own and the mockups'.
 const Map<String, int> _englishWeekdays = {

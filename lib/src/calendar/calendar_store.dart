@@ -160,7 +160,7 @@ final class CalendarSnapshot {
     final events = <CalendarEntryEvent>[];
     for (final entry in entries) {
       if (entry.line.kind != CalendarLineKind.day) continue;
-      if (!_sameDay(entry.line.date, date)) continue;
+      if (!sameCalendarDay(entry.line.date, date)) continue;
       for (final event in entry.line.events) {
         events.add(
           CalendarEntryEvent(
@@ -305,9 +305,3 @@ Set<DateTime> _daysWithEvents(List<CalendarEntry> entries) {
 
 /// [date] at midnight: the key the calendar's days are compared by.
 DateTime _dayOf(DateTime date) => DateTime(date.year, date.month, date.day);
-
-bool _sameDay(DateTime? date, DateTime other) =>
-    date != null &&
-    date.year == other.year &&
-    date.month == other.month &&
-    date.day == other.day;
