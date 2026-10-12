@@ -237,8 +237,15 @@ final class _FolderGridState extends State<FolderGrid> {
 
   /// The folder's children from the index, falling back to the nearest
   /// ancestor that still exists.
+  ///
+  /// The folder and the sort are read once, before the first await: a
+  /// load the grid has already moved on from must neither query with the
+  /// new inputs nor report its own folder as a fallback, which would pull
+  /// the grid back to where it was (#727).
   Future<_GridRows> _load() async {
-    var at = widget.folder;
+    final asked = widget.folder;
+    final sort = widget.sort;
+    var at = asked;
     Note? dir;
     while (at.isNotEmpty) {
       final found = await widget.controller.ops?.find(at);
@@ -248,15 +255,14 @@ final class _FolderGridState extends State<FolderGrid> {
       }
       at = parentOf(at);
     }
-    final children = await widget.controller.children(
-      dir?.id ?? 0,
-      sort: widget.sort,
-    );
+    final children = await widget.controller.children(dir?.id ?? 0, sort: sort);
     final rows = _GridRows(
       folder: at,
       rows: nestOcrSidecars(children, (note) => note.name).toList(),
     );
-    if (rows.folder != widget.folder && widget.onFolderResolved != null) {
+    if (rows.folder != asked &&
+        asked == widget.folder &&
+        widget.onFolderResolved != null) {
       final resolved = widget.onFolderResolved!;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) resolved(rows.folder);

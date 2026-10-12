@@ -813,12 +813,18 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// grid's own read, which a pane nobody is looking at must not repeat.
   int childrenCalls = 0;
 
+  /// Set to hold every folder read until it completes: a test moves the
+  /// grid on while a read is still out (#727).
+  Completer<void>? childrenGate;
+
   @override
   Future<List<Note>> children(
     int parentId, {
     TreeSort sort = TreeSort.nameAsc,
   }) async {
     childrenCalls++;
+    final gate = childrenGate;
+    if (gate != null) await gate.future;
     final kids = <_Row>[
       for (final row in _rows)
         if (!row.trashed && _parentIdOf(row.path) == parentId) row,

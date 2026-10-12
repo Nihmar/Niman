@@ -1,5 +1,7 @@
 // The folder grid (#727): the folder's children as tiles, the breadcrumb
 // above them, and the ways a tile is opened, entered and renamed.
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -421,6 +423,36 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(resolved, 'Projects');
+    expect(
+      find.byKey(const Key('grid-tile-Projects/Roadmap.md')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a read the grid has moved on from does not pull it back', (
+    tester,
+  ) async {
+    await session.open('/lib', create: false);
+    await session.createFolder(parentPath: '', name: 'Projects');
+    await session.createFolder(parentPath: 'Projects', name: 'Niman');
+    await session.createNote(parentPath: 'Projects', name: 'Roadmap');
+    final resolved = <String>[];
+    final gate = session.childrenGate = Completer<void>();
+    await tester.pumpWidget(
+      gridFor(folder: 'Projects/Niman', onFolderResolved: resolved.add),
+    );
+    await tester.pump();
+    // Up before the first read is back: two reads are out, the first for
+    // a folder that still exists but is no longer the one shown.
+    await tester.pumpWidget(
+      gridFor(folder: 'Projects', onFolderResolved: resolved.add),
+    );
+    await tester.pump();
+    gate.complete();
+    session.childrenGate = null;
+    await tester.pumpAndSettle();
+
+    expect(resolved, isEmpty);
     expect(
       find.byKey(const Key('grid-tile-Projects/Roadmap.md')),
       findsOneWidget,
