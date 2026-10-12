@@ -90,8 +90,35 @@ void main() {
       expect(typedThrough('<https://niman.dev>'), '<https://niman.dev>');
     });
 
-    test('Backspace takes an empty emphasis pair whole', () {
-      final buffer = SourceBuffer.fromText('**\n');
+    test('Backspace takes an empty emphasis pair it wrote whole', () {
+      final buffer = SourceBuffer.fromText('\n');
+      final pairs = BracketPairs();
+      final open = pairs.typed(buffer, 0, 0, '*')!;
+      buffer.replaceRange(open.start, open.end, open.text);
+      expect(pairs.backspace(buffer, 1)?.text, '');
+    });
+
+    test('Backspace between two stars it did not write takes one (#761)', () {
+      // The caret between the closing stars of a bold: `**bold*|*`.
+      final bold = SourceBuffer.fromText('**bold**\n');
+      expect(BracketPairs().backspace(bold, 7), isNull);
+      // Between the opening ones, and inside `***` and `___` rules.
+      expect(BracketPairs().backspace(bold, 1), isNull);
+      final stars = SourceBuffer.fromText('***\n');
+      expect(BracketPairs().backspace(stars, 1), isNull);
+      final lows = SourceBuffer.fromText('___\n');
+      expect(BracketPairs().backspace(lows, 2), isNull);
+    });
+
+    test('Backspace between two quotes it did not write takes one (#761)', () {
+      final single = SourceBuffer.fromText("''\n");
+      expect(BracketPairs().backspace(single, 1), isNull);
+      final double = SourceBuffer.fromText('""\n');
+      expect(BracketPairs().backspace(double, 1), isNull);
+    });
+
+    test('an empty bracket pair goes whole whoever wrote it', () {
+      final buffer = SourceBuffer.fromText('()\n');
       expect(BracketPairs().backspace(buffer, 1)?.text, '');
     });
 

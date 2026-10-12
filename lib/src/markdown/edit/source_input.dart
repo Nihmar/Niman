@@ -431,7 +431,9 @@ final class SourceInput implements DeltaTextInputClient {
         _caretOf(value.selection, start),
       );
     } else {
-      _reportSelection(_caretOf(value.selection, start));
+      _reportSelection(
+        _platformSelection(value.selection, start, value.text.length),
+      );
     }
     _composing = _shifted(value.composing, start);
     _platformNowHas(value);
@@ -487,42 +489,35 @@ final class SourceInput implements DeltaTextInputClient {
       // what it types over is the part it holds: over the whole of it, in the
       // note — select all and type is the note replaced, not a window of it.
       //
-      // The platform acting on the whole of what it holds says the same, even
-      // when the window its range was built on is not the one this side last
-      // sent: its own numbers are enough ([from, to] the whole of the old
-      // text), and reading them as note offsets from a stale window deleted
-      // the wrong lines. When the app's selection *is* the window the platform
-      // holds — its own Select all, told to the app as a range on that copy
-      // (#540), or reported as an edit the app read as a caret range — the
-      // selection the deletion means is the note's, and taking the window left
-      // the rest of the note behind: the delete had to be made twice (#753).
+      // Only the app's selection says how far that reaches. The platform's own
+      // Select all — a range on the window it holds — is read as the note
+      // wherever it is reported ([_platformSelection]), so the deletion after
+      // it finds the note selected here (#753). A selection that merely equals
+      // the window — the caret near the note's end, selected from the window's
+      // first line down to it — is that range and no more (#758). And an edit
+      // of the platform's whole copy while the app's selection is smaller is
+      // the two out of step: the platform's own range is applied, and it is
+      // told the result.
       final wide = selection().clampTo(buffer.length);
       final held = _toWindow(wide, origin, delta.oldText.length);
-      final whole = from == 0 && to == delta.oldText.length;
-      final (wideStart, wideEnd) = (wide.start, wide.end);
-      final onlyTheWindow =
-          wideStart == origin && wideEnd == origin + delta.oldText.length;
       if (!wide.isCollapsed &&
           delta is! TextEditingDeltaNonTextUpdate &&
-          (whole || (from == held.start && to == held.end))) {
-        if (onlyTheWindow && delta.oldText.length < buffer.length) {
-          (start, end) = (0, buffer.length);
-        } else {
-          (start, end) = (wideStart, wideEnd);
-        }
+          from == held.start &&
+          to == held.end) {
+        (start, end) = (wide.start, wide.end);
       }
       if (delta is TextEditingDeltaNonTextUpdate) {
         _reportSelection(
-          _selectsAll(delta)
-              ? SelectionModel(anchor: 0, extent: buffer.length)
-              : _caretOf(delta.selection, origin),
+          _platformSelection(delta.selection, origin, delta.oldText.length),
         );
       } else if (from < 0 || end < start || end > buffer.length) {
         _log.warning('edit $start..$end outside the note (${buffer.length})');
         known = false;
         break;
       } else if (start == end && inserted.isEmpty) {
-        _reportSelection(_caretOf(delta.selection, origin));
+        _reportSelection(
+          _platformSelection(delta.selection, origin, delta.oldText.length),
+        );
       } else if (inserted == '\n' && (onNewline?.call(start, end) ?? false)) {
         known = false;
       } else if (!_composes(delta) &&
@@ -537,19 +532,28 @@ final class SourceInput implements DeltaTextInputClient {
     _platformNowHas(known ? value : null);
   }
 
-  /// Whether [delta] selects all the platform holds of a note it holds a
-  /// window of: the platform's own Select all — Android's, from the keyboard
-  /// or the selection's menu — which knows only its copy, and means the
-  /// note (#540). No selection the platform makes otherwise spans its whole
-  /// copy: the handles are the app's.
-  bool _selectsAll(TextEditingDelta delta) {
-    final length = delta.oldText.length;
-    final selection = delta.selection;
-    return length > 0 &&
-        length < buffer.length &&
-        selection.start == 0 &&
-        selection.end == length;
-  }
+  /// The selection a platform update reports on a copy [length] long at
+  /// [origin], in note offsets — the whole note when it is the platform's own
+  /// Select all of a window ([_selectsAll]).
+  SelectionModel _platformSelection(
+    TextSelection selection,
+    int origin,
+    int length,
+  ) => _selectsAll(selection, length)
+      ? SelectionModel(anchor: 0, extent: buffer.length)
+      : _caretOf(selection, origin);
+
+  /// Whether [selection] spans all the platform holds — a copy [length] long
+  /// — of a note it holds a window of: the platform's own Select all —
+  /// Android's, from the keyboard or the selection's menu — which knows only
+  /// its copy, and means the note (#540). No selection the platform makes
+  /// otherwise spans its whole copy: the handles are the app's.
+  bool _selectsAll(TextSelection selection, int length) =>
+      length > 0 &&
+      length < buffer.length &&
+      selection.isValid &&
+      selection.start == 0 &&
+      selection.end == length;
 
   /// Whether [delta] is part of a composition, which an IME may still
   /// change: a bracket in it is not typed yet.

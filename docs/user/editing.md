@@ -501,7 +501,10 @@ quotes `"`, `'`, `«»` and `“”` open when no word stands before them
 either: after a word a quote closes one already spoken, like the
 apostrophe in `don't`. A star or a quote already in the note does not
 count as a closing character, so typing `*` in front of `"quote"` or
-`(` in front of `*emph*` writes just that character. `<`, `>` and the backtick do not pair at all —
+`(` in front of `*emph*` writes just that character. Backspace takes both
+stars or both quotes only when the closing one was written by the pair:
+between the two closing stars of an existing `**bold**`, or inside `''`,
+it takes one. `<`, `>` and the backtick do not pair at all —
 `a < b` is a comparison, an autolink has its own `>`, and a fence is
 three backticks.
 
