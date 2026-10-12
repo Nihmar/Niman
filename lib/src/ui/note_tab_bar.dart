@@ -356,7 +356,6 @@ final class _NoteTabBarState extends State<NoteTabBar> {
   }
 }
 
-/// One tab.
 /// The rectangle a tab is drawn in (#23, #712): the open note tabs and the
 /// pinned content tabs (Home, Todo) wear one fill, outline and radius.
 ///
@@ -435,6 +434,8 @@ final class _TabSurfaceState extends State<TabSurface> {
   }
 }
 
+/// One open note's tab: its name in a [TabSurface], marked while it has
+/// unsaved edits, with its close button and its context menu.
 final class _NoteTab extends StatelessWidget {
   const new({
     required this.tab,
