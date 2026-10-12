@@ -2,11 +2,16 @@
 // has to reach the note, and what reaches the note has to reach the disk. So
 // each test ends where a writer's work ends: in the text handed to
 // `writeNote`.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/cheatsheet/cheatsheet_entries.dart';
+import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
@@ -296,6 +301,61 @@ void main() {
     handle.insertAtCaret('> a\n> b');
     await tester.pump();
     expect(_surface(tester).widget.buffer.text, 'una**x** riga\n\n> a\n> b\n');
+  });
+
+  testWidgets('an insert from the cheatsheet window leaves the window the '
+      'keyboard: Esc closes it (#772)', (tester) async {
+    final key = GlobalKey<State<NoteView>>();
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        // Pointer-dense, as a desktop's theme is: the cheatsheet is a window.
+        theme: ThemeData(visualDensity: VisualDensity.compact),
+        home: Scaffold(
+          body: NoteView(
+            key: key,
+            path: '/notes/a.md',
+            showLineNumbers: false,
+            autofocusEditor: true,
+            readNote: (_) async => 'una riga\n',
+            writeNote: (_, _) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final handle = key.currentState! as NoteViewHandle;
+    _surface(tester).placeCaret(3);
+    await tester.pump();
+    unawaited(
+      showMarkdownCheatsheet(
+        key.currentContext!,
+        onInsert: handle.insertAtCaret,
+      ),
+    );
+    await tester.pumpAndSettle();
+    final window = find.byKey(const Key('cheatsheet-window'));
+    expect(window, findsOne);
+
+    await tester.tap(find.byKey(const Key('cheat-emphasis-insert')));
+    await tester.pumpAndSettle();
+    expect(
+      _surface(tester).widget.buffer.text,
+      contains(cheatsheetEntries[1].source),
+    );
+    expect(window, findsOne, reason: 'the window stays for the next example');
+    final focused = FocusManager.instance.primaryFocus!.context!;
+    expect(
+      find.descendant(of: window, matching: find.byWidget(focused.widget)),
+      findsWidgets,
+      reason: 'the keyboard stays in the window, not in the note behind it',
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(window, findsNothing);
   });
 
   for (final live in <bool>[false, true]) {

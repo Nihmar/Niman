@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_entries.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
+import 'package:niman/src/ui/floating_window.dart';
 
 Future<void> _pump(
   WidgetTester tester, {
@@ -139,6 +140,47 @@ void main() {
       find.byKey(const Key('cheatsheet-window')),
       findsOne,
       reason: 'the window stays open for the next example',
+    );
+  });
+
+  testWidgets('opened inside a window, it is a page there, not a second '
+      'window (#772)', (tester) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(visualDensity: VisualDensity.compact),
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showFloatingWindow(
+              context,
+              title: 'Settings',
+              panelKey: const Key('settings-window'),
+              builder: (context) => TextButton(
+                onPressed: () => showMarkdownCheatsheet(context),
+                child: const Text('cheatsheet'),
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('cheatsheet'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('cheatsheet')), findsOne);
+    expect(find.byKey(const Key('cheatsheet-window')), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('settings-window')),
+        matching: find.byKey(const Key('cheatsheet')),
+      ),
+      findsOne,
+      reason: 'the page opens in the window it was asked from',
     );
   });
 }

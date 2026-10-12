@@ -69,18 +69,70 @@ final class _TagsScreenState extends State<TagsScreen> {
   /// they are still being read.
   final Map<String, List<Note>> _treeNotes = <String, List<Note>>{};
 
+  /// The index's changes (#779): the screen stays mounted for the session
+  /// (the wide sidebar, a kept-alive tab), so what it read goes stale as
+  /// notes are tagged, untagged and deleted.
+  StreamSubscription<int>? _indexChanges;
+
+  /// Whether a [_refresh] is reading, and whether another change came in
+  /// meanwhile: changes arriving during a read are answered by one more.
+  bool _refreshing = false;
+  bool _refreshAgain = false;
+
   @override
   void initState() {
     super.initState();
     const AppLogger(name: 'tags.ui').debug('mount');
     widget.requests?.addListener(_requested);
+    _indexChanges = widget.controller.events.listen(
+      (_) => unawaited(_refresh()),
+    );
     unawaited(_load());
   }
 
   @override
   void dispose() {
+    unawaited(_indexChanges?.cancel());
     widget.requests?.removeListener(_requested);
     super.dispose();
+  }
+
+  /// Reads again what the screen shows after the index changed (#779):
+  /// the counts, the notes of every tag open in the tree, the notes of the
+  /// tag the drill-down shows. Only what is on screen: a closed tag is
+  /// read when it opens.
+  Future<void> _refresh() async {
+    final source = _source;
+    if (source == null) return;
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshAgain = false;
+        final counts = await source.tagCounts();
+        final open = widget.tree ? {..._open} : const <String>{};
+        final tree = {
+          for (final tag in open) tag: await source.notesWithTag(tag),
+        };
+        final selected = _selectedTag;
+        final notes = selected == null
+            ? null
+            : await source.notesWithTag(selected);
+        if (!mounted) return;
+        setState(() {
+          _counts = counts;
+          _treeNotes
+            ..removeWhere((tag, _) => !_open.contains(tag))
+            ..addAll(tree);
+          if (selected != null && selected == _selectedTag) _notes = notes;
+        });
+      } while (_refreshAgain);
+    } finally {
+      _refreshing = false;
+    }
   }
 
   /// Opens a requested tag, once the counts are in.
@@ -124,14 +176,15 @@ final class _TagsScreenState extends State<TagsScreen> {
     });
   }
 
-  /// Opens or closes [tag] in the tree; opening reads its notes once.
+  /// Opens or closes [tag] in the tree. Opening reads its notes every
+  /// time, as the drill-down does (#779): the rows read the last time
+  /// show until the new ones are in.
   Future<void> _toggleTag(String tag) async {
     if (_open.contains(tag)) {
       setState(() => _open.remove(tag));
       return;
     }
     setState(() => _open.add(tag));
-    if (_treeNotes.containsKey(tag)) return;
     final source = _source;
     if (source == null) return;
     final notes = await source.notesWithTag(tag);
@@ -142,18 +195,19 @@ final class _TagsScreenState extends State<TagsScreen> {
   /// Opens [tag] in the tree, its ancestors with it (#535 asked for it).
   Future<void> _openInTree(String tag) async {
     final parts = tag.split('/');
-    for (var i = 1; i <= parts.length; i++) {
-      _open.add(parts.take(i).join('/'));
-    }
-    if (_treeNotes.containsKey(tag)) {
-      setState(() {});
-      return;
-    }
+    final chain = [
+      for (var i = 1; i <= parts.length; i++) parts.take(i).join('/'),
+    ];
+    setState(() => _open.addAll(chain));
     final source = _source;
     if (source == null) return;
-    final notes = await source.notesWithTag(tag);
-    if (!mounted) return;
-    setState(() => _treeNotes[tag] = notes);
+    // Each tag opened lists its own notes, the ancestors' included: they
+    // are read now, as a tap on each would read them.
+    for (final open in chain) {
+      final notes = await source.notesWithTag(open);
+      if (!mounted) return;
+      if (_open.contains(open)) setState(() => _treeNotes[open] = notes);
+    }
   }
 
   @override

@@ -245,4 +245,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(pressed, [5]);
   });
+
+  // #788: a format on at the caret reads as on in the overflow menu too.
+  testWidgets('an active button behind the overflow shows as on', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        SizedBox(
+          width: 120,
+          height: editorToolbarHeight,
+          child: EditorToolbar(
+            dense: true,
+            buttons: [
+              for (var i = 0; i < 6; i++)
+                EditorToolbarButton(
+                  key: Key('overflow-$i'),
+                  icon: Icons.abc,
+                  tooltip: 'Button $i',
+                  onPressed: () {},
+                  active: i == 5,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('editor-toolbar-overflow')));
+    await tester.pumpAndSettle();
+
+    Finder check(int i) => find.descendant(
+      of: find.byKey(Key('overflow-$i')),
+      matching: find.byIcon(Icons.check),
+    );
+    expect(check(5), findsOne, reason: 'the active one is checked');
+    expect(check(4), findsNothing, reason: 'the others are not');
+  });
 }

@@ -40,7 +40,10 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
   and `hunspell-it` so the live cases of `test/unit/spell_check_test.dart` check
   real words there instead of skipping, and `tesseract-ocr` + `tesseract-ocr-eng`
   for the live case of `test/unit/ocr_engine_test.dart` (`NIMAN_OCR_ENGINE=<path>`
-  runs it against a build of `scripts/ocr-engine.sh` instead). Run checks
+  runs it against a build of `scripts/ocr-engine.sh` instead). A second job,
+  in parallel, runs the Android app module's Kotlin unit tests
+  (`android/app/src/test`) on the JVM: `flutter build apk --config-only`,
+  then `cd android && ./gradlew :app:testBetaDebugUnitTest` (#813). Run checks
   locally too:
   - Linux: `./scripts/niman.sh check` (logs: `/tmp/niman/niman-check.log`),
     plus `./scripts/niman.sh integration` for `integration_test/`

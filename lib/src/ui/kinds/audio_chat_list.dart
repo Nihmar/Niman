@@ -33,6 +33,10 @@ class _AudioChatListState extends State<AudioChatList> {
   /// scroll to the bottom again.
   bool _followBottom = false;
 
+  /// How many of the list's own glides to the bottom are running: their
+  /// end is not a reader letting go (#767).
+  int _glides = 0;
+
   @override
   void initState() {
     super.initState();
@@ -118,10 +122,12 @@ class _AudioChatListState extends State<AudioChatList> {
       if (!mounted || !_scroll.hasClients) return;
       final position = _scroll.position;
       if (position.pixels >= position.maxScrollExtent) return;
+      final target = position.maxScrollExtent;
+      _glides++;
       unawaited(
         _scroll
             .animateTo(
-              position.maxScrollExtent,
+              target,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
             )
@@ -129,8 +135,22 @@ class _AudioChatListState extends State<AudioChatList> {
             // inserted row is growing: the rest is a jump, not a second
             // animation (#735).
             .whenComplete(() {
-              if (!mounted || !_scroll.hasClients || !_followBottom) return;
+              _glides--;
+              if (!mounted || !_scroll.hasClients) return;
               final landed = _scroll.position;
+              if ((landed.pixels - target).abs() > 0.5) {
+                // Cut short by the reader. A drag that takes over a glide
+                // sends no scroll start (the position was scrolling
+                // already), and a wheel's or the scrollbar's scroll end
+                // went by while the glide still counted: so their scroll
+                // decides — still under way, its own end will; over,
+                // where it left the list does.
+                if (!landed.isScrollingNotifier.value) {
+                  _followBottom = landed.pixels >= landed.maxScrollExtent - 1;
+                }
+                return;
+              }
+              if (!_followBottom) return;
               if (landed.pixels < landed.maxScrollExtent) {
                 landed.jumpTo(landed.maxScrollExtent);
               }
@@ -161,12 +181,18 @@ class _AudioChatListState extends State<AudioChatList> {
 
   /// A reader taking the list over ends the following; letting go at the
   /// bottom starts it again.
+  ///
+  /// The end of the list's own glide is no reader's (#767): Flutter sends
+  /// it as the glide's activity is replaced, before the glide's future
+  /// completes, with the pixels of the stale target and an extent the
+  /// growing row already raised. Read as a reader's, it turned the
+  /// following off, and the jump that finishes the glide never ran.
   bool _onScroll(ScrollNotification notification) {
     if (notification.depth != 0) return false;
     if (notification is ScrollStartNotification &&
         notification.dragDetails != null) {
       _followBottom = false;
-    } else if (notification is ScrollEndNotification) {
+    } else if (notification is ScrollEndNotification && _glides == 0) {
       _followBottom =
           notification.metrics.pixels >=
           notification.metrics.maxScrollExtent - 1;

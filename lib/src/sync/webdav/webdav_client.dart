@@ -552,16 +552,21 @@ final class WebDavClient {
     );
   }
 
-  /// [upload] with the contents of [file], streamed.
-  /// `PUT`s [file]'s bytes to [path], as one file.
+  /// `PUT`s [file]'s bytes to [path], as one file, streamed.
   ///
-  /// The length and the bytes come from **one open handle** (#723): a save
-  /// may rename a new file over the path while the upload is being made,
-  /// and taking the length from one read and the body from another sent the
-  /// new text's first bytes under the old length — half a note on the
-  /// server. The handle reads the file it opened, whole, whatever lands at
-  /// the path meanwhile, and a redirect hop that sends the body again reads
-  /// the same handle from its start.
+  /// The length and the bytes come from **one open handle** (#723): taking
+  /// the length from one read and the body from another sent a new save's
+  /// first bytes under the old length — half a note on the server. A
+  /// redirect hop that sends the body again reads the same handle from its
+  /// start.
+  ///
+  /// What a save during the upload does depends on the platform. On
+  /// Android and Linux its rename lands, and the handle goes on reading the
+  /// file it opened, whole. On Windows `File.open` does not share delete
+  /// access, so the save's rename over the path fails (access denied) for
+  /// as long as the handle is open — through the server's response and any
+  /// redirect — and the editor keeps the note unsaved until its next save
+  /// (#763). Either way the bytes sent are one version of the file.
   ///
   /// [WebDavUpload.sha256] is the digest of the bytes actually sent: what a
   /// caller with a plan compares its own hash against.

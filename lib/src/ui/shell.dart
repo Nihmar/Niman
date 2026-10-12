@@ -687,6 +687,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Shows [tab] in the focused pane (#712), where it is already open or
   /// not; the tree and dock stay put.
   void _showContentTab(ShellTab tab, int pane) {
+    // The note behind is only hidden, and a hidden editor keeps its focus
+    // and its keys (#770): the shell takes them back, as a rail switch
+    // does.
+    FocusManager.instance.primaryFocus?.unfocus();
+    _shellFocus.requestFocus();
     setState(() {
       _tab = tab;
       _visitedTabs.add(tab);
@@ -1196,6 +1201,30 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Whether the window is wide: the tabs' layout (#23).
   bool get _wide => MediaQuery.sizeOf(context).width >= wideBreakpoint;
 
+  /// Whether the window was wide when the dependencies last changed: a
+  /// crossing of the breakpoint is told by it (#770).
+  bool? _wasWide;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final wide = _wide;
+    if (wide && _wasWide == false) _becameWide();
+    _wasWide = wide;
+  }
+
+  /// The window crossed from narrow to wide (#770). A phone keeps the
+  /// Home and the Todo list as whole destinations, where a wide window
+  /// pins them in a pane: the one on screen becomes that pinned tab, or
+  /// the panes would show neither it nor the notes.
+  void _becameWide() {
+    if ((_tab == ShellTab.home || _tab == ShellTab.todo) &&
+        _contentTab != _tab) {
+      _contentTab = _tab;
+      _contentPane = _workspace.value.focused;
+    }
+  }
+
   /// The note on screen: on a wide window the showing tab, whatever the
   /// tree has selected (a folder leaves the tabs alone); on a phone the
   /// selection.
@@ -1519,7 +1548,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
   /// [pane]'s tab row, with the pinned content tab's chip (#712) at its
-  /// head when that pane holds one.
+  /// end when that pane holds one.
   Widget _paneTabs(int pane, Widget filler) {
     final w = _workspace.value;
     final tabs = w.panes[pane];
@@ -1551,15 +1580,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
     final content = _contentTab;
     if (content == null || pane != _contentPaneShown) return bar;
+    // At the row's far end, where it comes and goes without moving a note
+    // tab under the pointer (#770).
     return Row(
       children: [
-        _contentTabChip(content, pane),
         Expanded(child: bar),
+        _contentTabChip(content, pane),
       ],
     );
   }
 
-  /// The pinned content tab's chip (#712), at the head of [pane]'s row: the
+  /// The pinned content tab's chip (#712), at the end of [pane]'s row: the
   /// rectangle the note tabs wear, a click shows it again, the ✕ closes it.
   Widget _contentTabChip(ShellTab tab, int pane) {
     final theme = Theme.of(context);
@@ -1695,9 +1726,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     });
   }
 
-  /// Shows the tab at [index], and the Files tab it lives in.
+  /// Shows the tab at [index], and the Files tab it lives in. A sidebar
+  /// view (the search, the tags tree in it) is left alone on a wide
+  /// window (#769): the panes are on screen beside it, and its hits stay
+  /// there to step through.
   void _activateTab(int pane, int index) {
-    if (_tab != ShellTab.files) _onDestinationSelected(ShellTab.files);
+    if (_tab != ShellTab.files && !_sidebarShowsSearch) {
+      _onDestinationSelected(ShellTab.files);
+    }
     _workspace.activate(pane, index);
   }
 
@@ -1912,6 +1948,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _windows.close();
     _markOpenNote(null, null);
     _searchRequests.dispose();
+    _searchCommands.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
@@ -3798,102 +3835,130 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         zen ? 0 : Island.gap,
         zen ? 0 : Island.gap,
       ),
-      child: Row(
+      // The dividers' grab strips lie over the row rather than in it: each
+      // is wider than the gap it sits in, over the islands' edges either
+      // side (#786), and only on top of them does it take the pointer there.
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          if (_sidebarVisible && !zen) ...[
-            SizedBox(
-              width: _editorSettings.treeWidth,
-              child: Island(
-                key: const Key('tree-island'),
-                // Both stay mounted across a sidebar switch (#712): the
-                // search keeps its query and results, and the tree its
-                // expansion and scroll, as they did when each had a slot
-                // of its own. The search keeps its layout too — it is the
-                // one whose show-layout costs frames (T-TS-10).
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Offstage(
-                      offstage: _sidebarShowsSearch,
-                      child: Column(
-                        children: [
-                          Expanded(child: _treePane(controller)),
-                          if (controller.sync case final sync?)
-                            SyncProgressStrip(sync: sync),
-                          _treeFooter(controller),
-                        ],
-                      ),
-                    ),
-                    // Built on the first visit, as its slot was: the
-                    // search source (a background connection) is not
-                    // opened for a library no one searched in.
-                    if (_visitedTabs.contains(ShellTab.search))
-                      Visibility(
-                        visible: _sidebarShowsSearch,
-                        maintainState: true,
-                        maintainAnimation: true,
-                        maintainSize: true,
-                        child: _searchSlot(controller, tree: true),
-                      ),
-                  ],
-                ),
-              ),
+          _wideRow(controller, zen: zen),
+          if (_sidebarVisible && !zen)
+            Positioned(
+              left: _editorSettings.treeWidth - ResizeDivider.overhang,
+              top: 0,
+              bottom: 0,
+              child: _treeDivider(),
             ),
-            _treeDivider(),
-          ],
-          Expanded(
-            // Keyed: the tree and the dock come and go on either side of
-            // it (Zen takes both at once), and the panes must stay where
-            // they are.
-            key: const ValueKey('wide-panes'),
-            // One island for the panes, split or not: the split's divider
-            // stays a line inside it, as the title bar's tabs divide at
-            // that same x — two islands would part the panes by a gap the
-            // tabs above them do not have.
+          if (_dockShown && !zen)
+            Positioned(
+              right: _dockWidth - ResizeDivider.overhang,
+              top: 0,
+              bottom: 0,
+              child: _dockDivider(),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// The wide body's row: the islands, [Island.gap] apart, the gaps where
+  /// the dividers lie.
+  Widget _wideRow(LibrarySession controller, {required bool zen}) {
+    return Row(
+      children: [
+        if (_sidebarVisible && !zen) ...[
+          SizedBox(
+            width: _editorSettings.treeWidth,
             child: Island(
-              key: const Key('panes-island'),
-              floating: !zen,
-              child: Column(
+              key: const Key('tree-island'),
+              // Both stay mounted across a sidebar switch (#712): the
+              // search keeps its query and results, and the tree its
+              // expansion and scroll, as they did when each had a slot
+              // of its own. The search keeps its layout too — it is the
+              // one whose show-layout costs frames (T-TS-10).
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  // Without a title bar of the app's own (an Android
-                  // tablet, a phone in landscape) the tabs head the panes
-                  // instead: the same row, at the same x as the panes
-                  // below it.
-                  if (!widget.window.customTitleBar) ...[
-                    SizedBox(
-                      key: const Key('pane-tab-row'),
-                      height: 38,
-                      child: LayoutBuilder(
-                        builder: (context, constraints) => _tabRow(
-                          const SizedBox.shrink(),
-                          panesWidth: constraints.maxWidth,
-                        ),
-                      ),
+                  Offstage(
+                    offstage: _sidebarShowsSearch,
+                    child: Column(
+                      children: [
+                        Expanded(child: _treePane(controller)),
+                        if (controller.sync case final sync?)
+                          SyncProgressStrip(sync: sync),
+                        _treeFooter(controller),
+                      ],
                     ),
-                    const Divider(height: 1),
-                  ],
-                  Expanded(
-                    child: zen ? _zenPanes(controller) : _panes(controller),
                   ),
+                  // Built on the first visit, as its slot was: the
+                  // search source (a background connection) is not
+                  // opened for a library no one searched in.
+                  if (_visitedTabs.contains(ShellTab.search))
+                    Visibility(
+                      visible: _sidebarShowsSearch,
+                      maintainState: true,
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      child: _searchSlot(controller, tree: true),
+                    ),
                 ],
               ),
             ),
           ),
-          if (_dockShown && !zen) ...[
-            _dockDivider(),
-            TourTarget(
-              id: TourTargets.dock,
-              child: SizedBox(
-                width: _dockWidth,
-                child: Island(
-                  key: const Key('dock-island'),
-                  child: _rightDock(controller),
+          const SizedBox(width: ResizeDivider.width),
+        ],
+        Expanded(
+          // Keyed: the tree and the dock come and go on either side of
+          // it (Zen takes both at once), and the panes must stay where
+          // they are.
+          key: const ValueKey('wide-panes'),
+          // One island for the panes, split or not: the split's divider
+          // stays a line inside it, as the title bar's tabs divide at
+          // that same x — two islands would part the panes by a gap the
+          // tabs above them do not have.
+          child: Island(
+            key: const Key('panes-island'),
+            floating: !zen,
+            child: Column(
+              children: [
+                // Without a title bar of the app's own (an Android
+                // tablet, a phone in landscape) the tabs head the panes
+                // instead: the same row, at the same x as the panes
+                // below it.
+                if (!widget.window.customTitleBar) ...[
+                  SizedBox(
+                    key: const Key('pane-tab-row'),
+                    height: 38,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => _tabRow(
+                        const SizedBox.shrink(),
+                        panesWidth: constraints.maxWidth,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                ],
+                Expanded(
+                  child: zen ? _zenPanes(controller) : _panes(controller),
                 ),
+              ],
+            ),
+          ),
+        ),
+        if (_dockShown && !zen) ...[
+          const SizedBox(width: ResizeDivider.width),
+          TourTarget(
+            id: TourTargets.dock,
+            child: SizedBox(
+              width: _dockWidth,
+              child: Island(
+                key: const Key('dock-island'),
+                child: _rightDock(controller),
               ),
             ),
-          ],
+          ),
         ],
-      ),
+      ],
     );
   }
 

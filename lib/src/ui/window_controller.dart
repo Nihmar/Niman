@@ -1,10 +1,11 @@
 import 'dart:io';
-import 'dart:ui' show Rect, Size;
+import 'dart:ui' show Rect;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/caption_buttons.dart';
+import 'package:niman/src/ui/window_minimum_size.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 import 'package:window_manager/window_manager.dart'
     show TitleBarStyle, WindowListener, WindowManager;
@@ -120,8 +121,11 @@ final class WindowManagerController implements WindowController {
       // Under the wide breakpoint (600) the layout turns into the phone's
       // — bottom bar and a full-screen note — and a desktop window that
       // small is still driven by a mouse: the window is not allowed to go
-      // there (#712). The height only keeps it usable.
-      await _manager.setMinimumSize(const Size(600, 400));
+      // there (#712). On Windows the minimum bounds the outer window,
+      // frame included (#771).
+      await _manager.setMinimumSize(
+        minimumWindowSize(windows: Platform.isWindows),
+      );
     }
     _log.info('window controller ready');
   }

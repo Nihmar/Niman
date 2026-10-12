@@ -67,7 +67,7 @@ class AppSettings extends Table {
 
   /// The palette: `niman` (the app's own colors, and what a fresh install
   /// wears), `system` (the device's own colors), `catppuccin`,
-  /// `solarized` or `gruvbox`.
+  /// `solarized`, `gruvbox` or `sepia`.
   TextColumn get themePalette =>
       text().named('theme_palette').withDefault(const Constant('niman'))();
 

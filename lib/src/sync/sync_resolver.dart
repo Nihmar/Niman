@@ -139,6 +139,7 @@ final class SyncResolver {
         sha: sha,
         local: local,
         notListed: SyncFailure(SyncAbort.failed, '$path uploaded, not listed'),
+        changed: _savedDuringUpload(path),
         ifMatch: c.capabilities.ifMatch ? remote?.guardEtag : null,
       );
     },
@@ -177,6 +178,7 @@ final class SyncResolver {
             SyncAbort.failed,
             '$path uploaded, not listed',
           ),
+          changed: _savedDuringUpload(path),
           ifMatch: c.capabilities.ifMatch ? remote?.guardEtag : null,
           ifNoneMatch: remote == null && c.capabilities.ifNoneMatch,
         );
@@ -251,6 +253,13 @@ final class SyncResolver {
       client.close();
     }
   });
+
+  /// The failure of an upload that sent bytes other than the ones hashed:
+  /// the note was saved here while it went up. The server holds that save
+  /// and no row was recorded, so it is a side that moved — the screen reads
+  /// both sides again — not a resolution that went through (#763).
+  static SyncFailure _savedDuringUpload(String path) =>
+      SyncFailure.stale('$path was saved here during the upload');
 
   /// Throws a `moved` [SyncFailure] unless both sides of [path] are
   /// still the versions [shown]: the local bytes by hash, the server's

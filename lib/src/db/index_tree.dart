@@ -406,7 +406,6 @@ final class IndexTree {
             size: Value(e.size),
             modified: Value(e.modified),
             created: Value(e.created),
-
             sha256: Value(shas[e.rel]),
           ),
         );
@@ -447,7 +446,6 @@ final class IndexTree {
             size: Value(e.size),
             modified: Value(e.modified),
             created: Value(e.created),
-
             sha256: Value(sha),
           ),
         );
@@ -476,7 +474,6 @@ final class IndexTree {
               size: e.size,
               modified: e.modified,
               created: e.created,
-
               sha256: Value(shas[e.rel]),
             ),
           );
@@ -704,7 +701,6 @@ final class IndexTree {
               size: probe.size,
               modified: probe.modified,
               created: probe.created,
-
               sha256: Value(sha),
             ),
           );
@@ -735,7 +731,6 @@ final class IndexTree {
         size: Value(probe.size),
         modified: Value(probe.modified),
         created: Value(probe.created),
-
         sha256: Value(sha),
       ),
     );

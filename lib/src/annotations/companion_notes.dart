@@ -24,6 +24,7 @@ import 'dart:isolate';
 
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark.dart';
+import 'package:niman/src/core/files.dart' show toStoredSecond;
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';
@@ -85,13 +86,15 @@ final class CompanionNotes {
     return out;
   }
 
-  /// Every companion found by reading [folder]'s notes on disk (#717),
-  /// by the file each names.
+  /// What [folder]'s notes declare on disk (#717): for each note read,
+  /// the files it names — none, for a note that names no file (any more).
   ///
   /// The index can lag a moment behind a companion just written, so the
   /// folder Niman writes them to is looked at too — but only the notes
   /// the index does not know, or holds an older row for: an up-to-date
-  /// folder costs one listing and no reads.
+  /// folder costs one listing and no reads. By note, not by file: a note
+  /// read here answers for itself in place of its row, and a file keeps
+  /// the companions the index knows elsewhere (#775).
   Future<Map<String, List<String>>> freshIn(
     String folder, {
     required String root,
@@ -106,41 +109,46 @@ final class CompanionNotes {
       return [
         for (final entry in dir.listSync())
           if (entry is File && entry.path.toLowerCase().endsWith('.md'))
-            (
-              path: p.relative(entry.path, from: root).replaceAll(r'\', '/'),
-              modified: entry.statSync().modified.millisecondsSinceEpoch,
-            ),
+            if (entry.statSync() case final stat)
+              (
+                path: p.relative(entry.path, from: root).replaceAll(r'\', '/'),
+                size: stat.size,
+                modified: stat.modified,
+              ),
       ];
     });
-    final stale = <({String path, int modified})>[];
+    final stale = <String>[];
     for (final entry in listed) {
       final indexed = await ops.find(entry.path);
+      // The index's own test of a row against the disk (`index_tree.dart`):
+      // the same size, and the mtime in whole seconds — the precision the
+      // row keeps it at. Against the stat's milliseconds, any file written
+      // off a whole second read as newer than its row, and every delete
+      // re-read the whole folder (#776).
       if (indexed != null &&
-          indexed.modified.millisecondsSinceEpoch >= entry.modified) {
+          indexed.size == entry.size &&
+          indexed.modified == toStoredSecond(entry.modified)) {
         continue; // the index already answered for this note
       }
-      stale.add(entry);
+      stale.add(entry.path);
     }
     if (stale.isEmpty) return const {};
     // Read in the isolate: the notes are not in the index yet, so the
     // ops' own read (which goes through it) cannot find them.
     final texts = await Isolate.run(
       () => [
-        for (final entry in stale)
-          (
-            path: entry.path,
-            text: File(p.join(root, entry.path)).readAsStringSync(),
-          ),
+        for (final path in stale)
+          (path: path, text: File(p.join(root, path)).readAsStringSync()),
       ],
     );
     final out = <String, List<String>>{};
     for (final entry in texts) {
+      final files = out[entry.path] = <String>[];
       final frontmatter = parseFrontmatter(entry.text);
       for (final value in frontmatter?.fields[key] ?? const <String>[]) {
         final resolved = await _resolve(value, from: entry.path);
         if (resolved is! ResolvedNote) continue;
-        final notes = out.putIfAbsent(resolved.note.path, () => <String>[]);
-        if (!notes.contains(entry.path)) notes.add(entry.path);
+        if (!files.contains(resolved.note.path)) files.add(resolved.note.path);
       }
     }
     return out;

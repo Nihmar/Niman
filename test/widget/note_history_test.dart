@@ -373,6 +373,30 @@ void main() {
       expect(find.byType(SlimTitleBar), findsOne);
       expect(find.byType(AppBar), findsNothing);
     });
+
+    testWidgets('with a custom title bar both pages name the note (#783)', (
+      tester,
+    ) async {
+      String barTitle() =>
+          tester.widget<SlimTitleBar>(find.byType(SlimTitleBar).last).title;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: NoteHistoryScreen(
+            ops: session,
+            path: 'Plan.md',
+            limit: 10,
+            now: () => now,
+            window: FakeWindowController(customTitleBar: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(barTitle(), 'History · Plan.md');
+
+      await tester.tap(find.byKey(const ValueKey('history-version-3')));
+      await tester.pumpAndSettle();
+      expect(barTitle(), 'Today, 08:24 · Plan.md');
+    });
   });
 
   group('entry points', () {

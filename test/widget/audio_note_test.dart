@@ -6,6 +6,7 @@
 // so these tests prove the sequencing and the note-text edits.
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
@@ -13,6 +14,7 @@ import 'package:niman/src/ui/kinds/audio_chat_list.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/audio_player.dart';
 import 'package:niman/src/ui/kinds/audio_recorder.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
 final class _FakeRecorder implements VoiceRecorder {
@@ -21,11 +23,21 @@ final class _FakeRecorder implements VoiceRecorder {
   String? startedPath;
   String? stoppedPath = p.join('tmp', 'clip.wav');
 
+  /// How many times the microphone was asked for.
+  int permissionAsks = 0;
+
+  /// Holds [start] until completed: a recorder slow to set up (#766).
+  Completer<void>? startGate;
+
   @override
-  Future<bool> hasPermission() async => permission;
+  Future<bool> hasPermission() async {
+    permissionAsks++;
+    return permission;
+  }
 
   @override
   Future<void> start({required String path}) async {
+    await startGate?.future;
     startedPath = path;
   }
 
@@ -223,7 +235,8 @@ void main() {
     tester.view.physicalSize = const Size(400, 500);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final turns = [for (var i = 0; i < 40; i++) '> turn $i'].join('\n');
+    // Written notes, one turn each: the clip lands as a turn of its own.
+    final turns = [for (var i = 0; i < 40; i++) 'turn $i'].join('\n\n');
     await _pumpLive(tester, text: '---\ntype: audio\n---\n$turns\n');
     final (_, position) = listOf(tester);
     expect(
@@ -258,24 +271,78 @@ void main() {
     tester.view.physicalSize = const Size(400, 500);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final turns = [for (var i = 0; i < 40; i++) '> turn $i'].join('\n');
+    // Written notes, one turn each: the clip lands as a turn of its own.
+    final turns = [for (var i = 0; i < 40; i++) 'turn $i'].join('\n\n');
     await _pumpLive(tester, text: '---\ntype: audio\n---\n$turns\n');
-    final (_, position) = listOf(tester);
+    final (scrollable, position) = listOf(tester);
+    // A little above the bottom, so the new turn comes with a glide
+    // (#767): at the bottom there is nothing to glide.
+    await tester.drag(scrollable, const Offset(0, 150));
+    await tester.pumpAndSettle();
 
     await record(tester);
     await tester.pump(const Duration(milliseconds: 40));
-    // The reader takes the list over while the turn grows, and it stays
-    // where they put it.
+    expect(
+      position().isScrollingNotifier.value,
+      isTrue,
+      reason: 'the glide to the new turn is under way',
+    );
+    // The reader takes the list over mid-glide, and it stays where they
+    // put it.
+    final before = position().pixels;
     final gesture = await tester.startGesture(
       tester.getCenter(find.byType(AudioChatList)),
     );
     await gesture.moveBy(const Offset(0, 80));
     await tester.pump();
     final held = position().pixels;
+    expect(
+      held,
+      lessThan(before),
+      reason:
+          'the drag moved the list up from where the glide had it, '
+          'not from the bottom it was snapped to',
+    );
     await tester.pump(const Duration(milliseconds: 500));
     expect(position().pixels, moreOrLessEquals(held, epsilon: 1));
     await gesture.up();
-    await tester.pump();
+    // And once the finger is off, with the landing over (#767): the
+    // glide's end is not taken for the reader's, nor pulls them down.
+    await tester.pumpAndSettle();
+    expect(position().pixels, moreOrLessEquals(held, epsilon: 1));
+    expect(position().pixels, lessThan(position().maxScrollExtent - 40));
+  });
+
+  // #767: the glide's end is not the reader's, so the jump that finishes
+  // it runs for a reader who had scrolled up too.
+  testWidgets('a reader scrolled up still gets the new turn at the bottom', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final turns = [for (var i = 0; i < 40; i++) 'turn $i'].join('\n\n');
+    await _pumpLive(tester, text: '---\ntype: audio\n---\n$turns\n');
+    final (scrollable, position) = listOf(tester);
+    await tester.drag(scrollable, const Offset(0, 300));
+    await tester.pumpAndSettle();
+    expect(
+      position().pixels,
+      lessThan(position().maxScrollExtent - 200),
+      reason: 'the reader is well above the bottom',
+    );
+
+    await record(tester);
+    await tester.pumpAndSettle();
+
+    expect(
+      position().pixels,
+      moreOrLessEquals(position().maxScrollExtent, epsilon: 1),
+      reason: 'the glide was finished by the jump',
+    );
+    final list = tester.getRect(find.byType(AudioChatList));
+    final play = tester.getRect(find.byKey(const ValueKey('audio-play-0')));
+    expect(play.bottom, lessThanOrEqualTo(list.bottom + 0.5));
   });
 
   testWidgets('an empty audio note invites a first recording', (tester) async {
@@ -471,6 +538,8 @@ void main() {
     await tester.pump();
     expect(edits, isEmpty, reason: 'the lock kept the recording going');
     expect(find.byKey(const ValueKey('audio-recording-bar')), findsOneWidget);
+    // And still says so once the finger is off (#766).
+    expect(find.byKey(const ValueKey('audio-locked')), findsOneWidget);
 
     // The round button, now the stop, saves it on a tap.
     await tester.tap(find.byKey(const Key('audio-record-button')));
@@ -503,6 +572,132 @@ void main() {
     await gesture.up();
     await tester.pump();
     // Nothing was committed until the finger went up.
+    expect(edits.single, contains('![[${p.join('assets', 'imported.wav')}]]'));
+  });
+
+  // #766: the release acts on what the start did, whenever it lands.
+  for (final cancel in [false, true]) {
+    testWidgets(
+      'a hold ${cancel ? 'cancelled' : 'released'} before the start lands '
+      'leaves nothing recording',
+      (tester) async {
+        final edits = <String>[];
+        final recorder = _FakeRecorder()..startGate = Completer<void>();
+        await _pump(
+          tester,
+          text: '---\ntype: audio\n---\n',
+          edits: edits,
+          recorder: recorder,
+        );
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byKey(const Key('audio-record-button'))),
+        );
+        await tester.pump(const Duration(milliseconds: 200));
+        // The start is running: the microphone says it cannot be pressed.
+        final mic = tester.widget<IconButton>(
+          find.byKey(const Key('audio-record-button')),
+        );
+        expect(mic.onPressed, isNull);
+
+        // The finger leaves (or the permission dialog takes the pointer)
+        // before the recorder is ready.
+        if (cancel) {
+          await gesture.cancel();
+        } else {
+          await gesture.up();
+        }
+        await tester.pump();
+        recorder.startGate!.complete();
+        await tester.pumpAndSettle();
+
+        expect(recorder.startedPath, isNotNull);
+        expect(recorder.cancelled, isTrue, reason: 'nothing was said');
+        expect(edits, isEmpty);
+        expect(
+          find.byKey(const ValueKey('audio-recording-bar')),
+          findsNothing,
+          reason: 'the microphone is not left live, hands-free',
+        );
+      },
+    );
+  }
+
+  testWidgets('a hold refused the microphone is not started again on release', (
+    tester,
+  ) async {
+    final recorder = _FakeRecorder()..permission = false;
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n',
+      edits: [],
+      recorder: recorder,
+    );
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('audio-record-button'))),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+    expect(recorder.permissionAsks, 1);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(recorder.permissionAsks, 1, reason: 'the release is no new start');
+  });
+
+  testWidgets('a right-button hold does not record', (tester) async {
+    final recorder = _FakeRecorder();
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n',
+      edits: [],
+      recorder: recorder,
+    );
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('audio-record-button'))),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(recorder.startedPath, isNull);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(recorder.startedPath, isNull);
+  });
+
+  testWidgets('a long hold shows no tooltip under the thumb', (tester) async {
+    await _pump(tester, text: '---\ntype: audio\n---\n', edits: []);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('audio-record-button'))),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text(AppStrings.audioStop), findsNothing);
+    expect(find.text(AppStrings.audioRecord), findsNothing);
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('a second finger lifting off does not end the hold', (
+    tester,
+  ) async {
+    final edits = <String>[];
+    await _pump(tester, text: '---\ntype: audio\n---\n', edits: edits);
+    final center = tester.getCenter(
+      find.byKey(const Key('audio-record-button')),
+    );
+    final first = await tester.startGesture(center);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byKey(const ValueKey('audio-recording-bar')), findsOneWidget);
+
+    final second = await tester.startGesture(center);
+    await tester.pump();
+    await second.up();
+    await tester.pump();
+    expect(edits, isEmpty, reason: 'the first finger is still down');
+    expect(find.byKey(const ValueKey('audio-recording-bar')), findsOneWidget);
+
+    await first.up();
+    await tester.pump();
     expect(edits.single, contains('![[${p.join('assets', 'imported.wav')}]]'));
   });
 

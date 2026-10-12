@@ -247,10 +247,11 @@ final class ShellRowActions {
   /// asks (#712).
   ///
   /// Notes of its own — companions, an OCR sidecar — are the exception
-  /// (#717): the question appears to offer taking them along, checked by
-  /// default, and one Undo brings the file and its notes back together.
-  /// The question appears only when there is something to carry, so a
-  /// plain note still deletes without one.
+  /// (#717): the question appears to offer taking them along, with the
+  /// answer given last time as the emphasised action, and one Undo brings
+  /// the file and its notes back together. The question appears only when
+  /// there is something to carry, so a plain note still deletes without
+  /// one.
   Future<void> delete(BuildContext context, [String? path]) async {
     final sel = path ?? selectedPath();
     if (sel == null) return;
@@ -286,7 +287,10 @@ final class ShellRowActions {
               _deleteChoice(
                 context,
                 key: const Key('delete-carry-no'),
-                label: AppStrings.deleteFileOnly,
+                // "Only the file" is not what a folder is (#775).
+                label: isDir
+                    ? AppStrings.actionDelete
+                    : AppStrings.deleteFileOnly,
                 primary: !takeNotesDefault,
                 choice: false,
               ),
@@ -310,9 +314,19 @@ final class ShellRowActions {
     await guard(() async {
       await ops.delete(sel);
       onDeleted(sel);
+      // Each note on its own (#775): one that will not go must not leave
+      // the file and the notes before it in the trash with no Undo — the
+      // notice comes first, and the failure is reported after it.
+      final taken = <String>[];
+      (Object, StackTrace)? failure;
       for (final note in carry) {
-        await ops.delete(note);
-        onDeleted(note);
+        try {
+          await ops.delete(note);
+          onDeleted(note);
+          taken.add(note);
+        } on Object catch (error, stack) {
+          failure ??= (error, stack);
+        }
       }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -329,7 +343,7 @@ final class ShellRowActions {
                     label: AppStrings.actionUndo,
                     onPressed: () async {
                       await guard(() async {
-                        for (final restore in [sel, ...carry]) {
+                        for (final restore in [sel, ...taken]) {
                           final name = await _justDeleted(ops, restore);
                           if (name == null) continue;
                           await ops.restoreTrash(name);
@@ -341,6 +355,9 @@ final class ShellRowActions {
                 : null,
           ),
         );
+      }
+      if (failure case (final error, final stack)?) {
+        Error.throwWithStackTrace(error, stack);
       }
     });
   }

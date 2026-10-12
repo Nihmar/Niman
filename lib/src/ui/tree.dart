@@ -133,6 +133,11 @@ final class _NoteTreeState extends State<NoteTree> {
   /// flashing its spinner between rebuilds.
   Future<_Rows>? _rows;
   int? _rowsRevision;
+
+  /// Which counter [_rowsRevision] came from: the library's revision when
+  /// true, its tree revision when false. The two count apart, so the same
+  /// number from each is not the same index (#760).
+  bool _rowsFollowContents = false;
   Set<String> _rowsExpanded = const <String>{};
 
   /// The sort direction the cached rows were flattened with. It decides the
@@ -214,15 +219,21 @@ final class _NoteTreeState extends State<NoteTree> {
   /// The direction is part of the key: `_flatten` feeds it to the query, so
   /// reusing rows across a direction change would show the old order — the
   /// chevron flips and the list stays put.
-  Future<_Rows> _rowsFor(int revision) {
+  ///
+  /// So is the counter [revision] was read from ([followsContents]): a
+  /// save bumps one and not the other, so a number from each can match
+  /// while the index between them moved (#760).
+  Future<_Rows> _rowsFor(int revision, {required bool followsContents}) {
     final cached = _rows;
     if (cached != null &&
         _rowsRevision == revision &&
+        _rowsFollowContents == followsContents &&
         _rowsSort == widget.sort &&
         _setEquals(_rowsExpanded, widget.expanded)) {
       return cached;
     }
     _rowsRevision = revision;
+    _rowsFollowContents = followsContents;
     _rowsExpanded = Set<String>.of(widget.expanded);
     _rowsSort = widget.sort;
     return _rows = _flatten();
@@ -312,15 +323,17 @@ final class _NoteTreeState extends State<NoteTree> {
         ? controller.revision
         : controller.treeRevision;
     return StreamBuilder<int>(
+      // A builder of its own per counter: one switched to the other stream
+      // keeps the last number the old one sent, which is no revision of the
+      // new counter (#760).
+      key: ValueKey<bool>(followsContents),
       stream: followsContents ? controller.events : controller.treeEvents,
       initialData: revision,
       builder: (context, snapshot) {
         return FutureBuilder<_Rows>(
           future: _rowsFor(
-            snapshot.data ??
-                (followsContents
-                    ? controller.revision
-                    : controller.treeRevision),
+            snapshot.data ?? revision,
+            followsContents: followsContents,
           ),
           builder: (context, snap) {
             if (!snap.hasData) {

@@ -515,7 +515,18 @@ one runs joins it and gets the same report, saying that it joined.
      both local to this device — and nothing else: the settings,
      `home.json`, `reading.json` and the rewritten links arrive as
      writes of their own, and carrying them again would race them
-     (#713).
+     (#713). The planner pairs single files, so a folder renamed
+     elsewhere arrives as one move per note, and none names the folder:
+     the step reads it off the two paths (`Work/a.md` to
+     `Projects/a.md` is `Work` to `Projects`), and when the scan shows
+     that folder emptied out — no file under it on the server, none here
+     that would go back up — the device Home's actions follow the folder
+     too (`movedFolder`, #774). A folder whose only note moved elsewhere
+     reads the same and is carried as a rename.
+     **Known limit:** on a server without `oc:fileid` a rename made
+     elsewhere is a `trashLocal` and a `download`, not a move, and
+     carries nothing: this device's Home and widgets keep naming the old
+     path.
    - *conflict*: the remote is downloaded and hashed. Equal content is
      recorded. A note whose bytes one side is not valid UTF-8 is not
      merged: a lossy decode would write U+FFFD over bytes nobody touched,

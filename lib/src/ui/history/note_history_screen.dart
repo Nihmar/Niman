@@ -145,8 +145,12 @@ final class _NoteHistoryScreenState extends State<NoteHistoryScreen> {
       appBar: custom
           ? PreferredSize(
               preferredSize: const Size.fromHeight(38),
+              // One line, where the app bar has two: the note's name
+              // beside the page's, or nothing on the page names it (#783).
               child: SlimTitleBar(
-                title: AppStrings.noteHistoryTitle,
+                title:
+                    '${AppStrings.noteHistoryTitle} · '
+                    '${p.basename(widget.path)}',
                 window: window,
                 leading: BackButton(
                   onPressed: () => Navigator.of(context).maybePop(),

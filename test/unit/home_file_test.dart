@@ -201,7 +201,15 @@ void main() {
       () async {
         await ops.createFolder(parentPath: '', name: 'Work');
         await ops.createNote(parentPath: 'Work', name: 'Meeting');
+        // The library's Home names the note too: it syncs as a write of its
+        // own, so the remote move must leave its bytes alone. Set first: a
+        // library Home set clears the device's.
+        await ops.setHome(
+          meeting(template: 'Work/Meeting.md'),
+          onDevice: false,
+        );
         await ops.setHome(meeting(template: 'Work/Meeting.md'), onDevice: true);
+        final homeBefore = homeFile().readAsBytesSync();
         final settings = File(p.join(root.path, '.niman', 'settings.json'));
         final settingsBefore = settings.readAsStringSync();
         final carried = <String>[];
@@ -219,7 +227,7 @@ void main() {
         final home = await ops.home;
         expect(home.device, meeting(template: 'Work/Notes/Meeting.md'));
         expect(carried, ['Work/Meeting.md -> Work/Notes/Meeting.md file']);
-        expect(homeFile().existsSync(), isFalse);
+        expect(homeFile().readAsBytesSync(), homeBefore);
         expect(settings.readAsStringSync(), settingsBefore);
       },
     );

@@ -34,6 +34,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:niman/src/core/creation_time.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/history/history_store.dart';
@@ -413,6 +414,9 @@ final class _Conversation {
         _answers?.send(null);
         return;
       }
+      // The note's creation time onto the temp, or on Windows the rename
+      // makes it the temp's (#759).
+      keepCreationTime(target: start.abs, replacement: temp.path);
       await temp.rename(start.abs);
       _temp = null;
       _digest.close();

@@ -105,6 +105,34 @@ void main() {
     expect(await controller.ops!.trashItems(), isEmpty);
   });
 
+  // #775: a note that will not go must not leave the file and the notes
+  // before it in the trash with no way back.
+  testWidgets('a note that fails to delete still leaves an Undo', (
+    tester,
+  ) async {
+    await open(tester);
+    await controller.seedFile('Dune.pdf');
+    await seedCompanion('Dune.pdf');
+    await seedSidecar('Dune.pdf');
+    await settle(tester);
+    controller.failDeletes.add('Dune.ocr.md');
+
+    await deleteRow(tester, 'Dune.pdf');
+    await confirmDelete(tester);
+    expect(noteRow('Dune.pdf', offstage: true), findsNothing);
+    expect(noteRow('Dune.pdf - Annotation.md', offstage: true), findsNothing);
+    expect(noteRow('Dune.ocr.md', offstage: true), findsOne);
+    expect(await controller.ops!.trashItems(), hasLength(2));
+
+    await tester.tap(find.text(AppStrings.actionUndo));
+    await settle(tester);
+    expect(noteRow('Dune.pdf', offstage: true), findsOne);
+    expect(noteRow('Dune.pdf - Annotation.md', offstage: true), findsOne);
+    expect(await controller.ops!.trashItems(), isEmpty);
+    // The failure is still said, after the notice with its Undo.
+    expect(find.text(AppStrings.shellActionFailed), findsOne);
+  });
+
   testWidgets('choosing the file alone leaves the notes', (tester) async {
     await open(tester);
     await controller.seedFile('Dune.pdf');
@@ -198,6 +226,15 @@ void main() {
     await deleteRow(tester, 'Books');
     // The sidecar inside is not a choice: it goes with the folder.
     expect(find.text(AppStrings.deleteNotesToo(1)), findsOne);
+    // A folder is not "only the file" (#775).
+    expect(find.text(AppStrings.deleteFileOnly), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('delete-carry-no')),
+        matching: find.text(AppStrings.actionDelete),
+      ),
+      findsOne,
+    );
     await confirmDelete(tester);
 
     expect(noteRow('Books', offstage: true), findsNothing);

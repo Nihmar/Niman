@@ -247,6 +247,110 @@ void main() {
     expect(grip.width, 20, reason: 'the grip drawn did not grow');
     // Left-aligned in the target: the 20 px grip keeps the column it had.
     expect(grip.left - handle.left, 8);
+    // #778: the target reaches over the row, it does not push it.
+    final checkbox = tester.getRect(_rowCheckbox(0));
+    expect(
+      checkbox.left - handle.left,
+      ListDragHandle.gripWidth,
+      reason: 'the checkbox stays where it was',
+    );
+  });
+
+  // #778: the whole 48 dp take the press, the part over the checkbox's
+  // padding included.
+  testWidgets('a drag from the far side of the handle target moves the row', (
+    tester,
+  ) async {
+    String? out;
+    const text = '- [ ] one\n- [ ] two\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final handle = tester.getRect(_rowHandle(0));
+    final below = tester.getRect(_row(1));
+    final gesture = await tester.startGesture(
+      Offset(handle.left + 44, handle.center.dy),
+    );
+    await tester.pump();
+    await gesture.moveTo(Offset(below.center.dx, below.bottom - 4));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(out, '- [ ] two\n- [ ] one\n');
+  });
+
+  // #778: where the theme shrink-wraps tap targets (a desktop), the row
+  // keeps the 40 px it had before the target grew.
+  testWidgets('a shrink-wrapped row keeps its height', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+        ),
+        home: Scaffold(
+          body: ListNoteView(text: '- [ ] one\n', onChanged: (_) {}),
+        ),
+      ),
+    );
+    expect(tester.getSize(_rowHandle(0)).height, ListDragHandle.gripHeight);
+    expect(tester.getSize(_rowHandle(0)).width, ListDragHandle.gripWidth);
+  });
+
+  // #778: every tap ends as a cancelled long press; only the drag
+  // source's own cancel ends the drag.
+  testWidgets('a second finger tapping another row keeps the drag', (
+    tester,
+  ) async {
+    String? out;
+    const text = '- [ ] one\n- [ ] two\n- [ ] three\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final below = tester.getRect(_row(1));
+    final drag = await tester.startGesture(tester.getCenter(find.text('one')));
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    await drag.moveTo(Offset(below.center.dx, below.bottom - 4));
+    await tester.pump();
+
+    final tap = await tester.startGesture(
+      tester.getCenter(find.text('three')),
+      pointer: 7,
+    );
+    await tester.pump();
+    await tap.up();
+    await tester.pump();
+
+    await drag.moveBy(const Offset(0, 1));
+    await tester.pump();
+    await drag.up();
+    await tester.pump();
+    expect(out, '- [ ] two\n- [ ] one\n- [ ] three\n');
+  });
+
+  // #778: a mouse picks the row up by the handle; a held click on the row
+  // is not a drag, and a click still edits.
+  testWidgets('a mouse long press does not pick the row up', (tester) async {
+    String? out;
+    const text = '- [ ] one\n- [ ] two\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final below = tester.getRect(_row(1));
+    final mouse = await tester.startGesture(
+      tester.getCenter(find.text('one')),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    await mouse.moveTo(Offset(below.center.dx, below.bottom - 4));
+    await tester.pump();
+    await mouse.up();
+    await tester.pumpAndSettle();
+    expect(out, isNull, reason: 'nothing moved');
+
+    await tester.tap(find.text('two'), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    expect(_rowEditField(), findsOneWidget, reason: 'a click edits');
   });
 
   // #720: the edge scroll runs a frame at a time while the drag is held
@@ -299,6 +403,73 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
     expect(offset(), landed, reason: 'nothing scrolls after the drag');
+  });
+
+  // #777: the space below the last row is the zone after the last root
+  // item, not the edge of whichever row ends the list.
+  testWidgets('a drop below the last row makes the last root item', (
+    tester,
+  ) async {
+    String? out;
+    const text = '- [ ] B\n- [ ] A\n  - [ ] a1\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final last = tester.getRect(_row(2));
+    // Well below a1, in the empty list under it.
+    await _drag(
+      tester,
+      _rowHandle(0),
+      Offset(last.center.dx, last.bottom + 60),
+    );
+    expect(out, '- [ ] A\n  - [ ] a1\n- [ ] B\n');
+  });
+
+  // #777: the top and bottom rows on screen lie mostly in the edge zones;
+  // a still long press there picks the row up without scrolling the list
+  // away, and moving on toward the edge scrolls it.
+  testWidgets('picking up a row at the edge does not scroll by itself', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final text =
+        '${[for (var i = 0; i < 200; i++) '- [ ] item $i'].join('\n')}\n';
+    await tester.pumpWidget(_app(ListNoteView(text: text, onChanged: (_) {})));
+    await tester.pumpAndSettle();
+    final list = tester.getRect(find.byType(ListView));
+    final position = tester
+        .state<ScrollableState>(
+          find.descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          ),
+        )
+        .position;
+    final rowHeight = tester.getSize(_row(0)).height;
+    // Row 10's top at the list's top: its centre is inside the edge zone.
+    position.jumpTo(8 + 10 * rowHeight);
+    await tester.pump();
+    final before = position.pixels;
+    final row = find.text('item 10');
+    expect(tester.getCenter(row).dy - list.top, lessThan(48));
+
+    final gesture = await tester.startGesture(tester.getCenter(row));
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(position.pixels, before, reason: 'a still finger scrolls nothing');
+
+    // On toward the edge: now the scroll runs.
+    await gesture.moveBy(const Offset(0, -12));
+    for (var frame = 0; frame < 10; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(position.pixels, lessThan(before), reason: 'the edge scroll ran');
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('dragging a row onto another makes a sub-list', (tester) async {
