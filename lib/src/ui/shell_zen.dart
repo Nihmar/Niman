@@ -60,6 +60,12 @@ final class ShellImmersive extends ChangeNotifier {
 
   /// Takes the screen for the book read in full screen, or gives it back:
   /// the window on the desktops, the system bars on Android.
+  ///
+  /// The platform call only — no [notifyListeners] (#784). Nothing in the
+  /// shell's build reads [fullScreen] (the book's pane listens to it
+  /// itself), and a book pane disposed while it holds the full screen
+  /// clears it from `dispose`, inside the frame's tree finalization: a
+  /// notify there would rebuild the shell while the tree is locked.
   void _applyFullScreen() {
     final on = fullScreen.value != null;
     if (Platform.isAndroid) {
@@ -71,7 +77,6 @@ final class ShellImmersive extends ChangeNotifier {
     } else {
       unawaited(window.setFullScreen(on: on));
     }
-    notifyListeners();
   }
 
   @override
