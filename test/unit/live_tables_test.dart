@@ -644,6 +644,43 @@ void main() {
       expectFresh('the caret leaves');
     }
   });
+
+  // A theme rebuilt with the same values is the theme that stands (#722):
+  // the cache is keyed by value, and a copy of a theme may not measure the
+  // table again.
+  testWidgets('a copied theme keeps a table measured', (tester) async {
+    final theme = await _theme(tester);
+    final buffer = SourceBuffer.fromText(_note);
+    const block = Block(
+      kind: BlockKind.table,
+      startLine: _firstLine,
+      endLine: 5,
+    );
+    final tables = LiveTables();
+    LiveTableRow? row(MarkdownTheme theme) => tables.rowOf(
+      _firstLine + 2,
+      block,
+      buffer,
+      tokensOf: (line) => const <Token>[],
+      hidden: (line, token) => false,
+      styleOf: (token) => null,
+      theme: theme,
+      scaler: TextScaler.noScaling,
+      budget: 160,
+    );
+    expect(row(theme), isNotNull);
+    final measured = LiveTables.measurements;
+    expect(measured, greaterThan(0), reason: 'the table was measured');
+    final copy = _copyOf(theme);
+    expect(copy, theme, reason: 'a theme of the same values');
+    expect(copy.hashCode, theme.hashCode);
+    expect(row(copy), isNotNull);
+    expect(
+      LiveTables.measurements,
+      measured,
+      reason: 'a copied theme measured the table again',
+    );
+  });
 }
 
 /// Expects [a] and [b] to be the same row as far as anything draws it: its
@@ -688,3 +725,38 @@ Future<MarkdownTheme> _theme(WidgetTester tester) async {
   );
   return theme;
 }
+
+/// A copy of [theme] of the same values: what a `build` that rebuilt the
+/// theme would hand the surface (#722).
+MarkdownTheme _copyOf(MarkdownTheme theme) => MarkdownTheme(
+  body: theme.body,
+  heading1: theme.heading1,
+  heading2: theme.heading2,
+  heading3: theme.heading3,
+  heading4: theme.heading4,
+  heading5: theme.heading5,
+  heading6: theme.heading6,
+  code: theme.code,
+  quote: theme.quote,
+  tableCell: theme.tableCell,
+  tableHeader: theme.tableHeader,
+  link: theme.link,
+  wikilink: theme.wikilink,
+  tag: theme.tag,
+  marker: theme.marker,
+  rule: theme.rule,
+  codeHighlight: theme.codeHighlight,
+  codeBackground: theme.codeBackground,
+  quoteBar: theme.quoteBar,
+  tableBorder: theme.tableBorder,
+  markerDim: theme.markerDim,
+  blockSpacing: theme.blockSpacing,
+  listIndentPerLevel: theme.listIndentPerLevel,
+  quoteIndentPerLevel: theme.quoteIndentPerLevel,
+  codePadding: theme.codePadding,
+  quoteBarWidth: theme.quoteBarWidth,
+  ruleThickness: theme.ruleThickness,
+  tableCellPadding: theme.tableCellPadding,
+  lineHeight: theme.lineHeight,
+  highlight: theme.highlight,
+);

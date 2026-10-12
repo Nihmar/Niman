@@ -219,9 +219,11 @@ final class LiveTables {
     Object? tokensFrom,
   }) {
     if (block == null || block.kind != BlockKind.table) return null;
+    // A theme, a scaler or a tokenizer rebuilt with the values they had is
+    // what measured the rows: the caches below stand (#722).
     final same =
         identical(buffer, _buffer) &&
-        identical(theme, _theme) &&
+        theme == _theme &&
         scaler == _scaler &&
         tokensFrom == _tokensFrom;
     if (!same || buffer.revision != _revision) {

@@ -3,10 +3,14 @@
 // The device trace that opened this case: on Android, a 6.8 KB note — one
 // heading, then a four-column table whose cells are long prose, 24 rows —
 // laid out for 95–113 ms on the frames that brought its rows back into view,
-// with `build 0.0 ms, paint ~1 ms` and `raster 2–7 ms` beside them. The cost
-// is the source view's own layout, and `LiveTables`' measurements are not
-// re-taken: a row that leaves the window and comes back is drawn from the
-// pieces it was measured into (`LiveTableRow.wrapped` is worked out once).
+// with `build 0.0 ms, paint ~1 ms` and `raster 2–7 ms` beside them. Not
+// `LiveTables` measuring again: a row that leaves the window and comes back
+// is drawn from the pieces it was measured into (`LiveTableRow.wrapped` is
+// worked out once). It was a theme rebuilt per `build` (`markdownThemeOf`)
+// handed to a cache kept by identity, so every rebuild dropped the
+// measurements and took the whole table's again — 944 text painters each
+// time for this note, ~265 ms on the device at open and ~100 ms a rebuild
+// after (#722's own fix, on `fix/issue-722-theme`).
 //
 // What this case holds, then, is two claims. The one that holds on any host
 // is the work: the rows that come back measure nothing again — the pieces
@@ -14,10 +18,9 @@
 // is the frame that draws them: the steps of both legs are printed, and the
 // *median* one is held to a 60 Hz frame under `NIMAN_PERF=1` alone, since a
 // shared runner reads different milliseconds for the same commit
-// (`AGENTS.md`). The worst is printed: the first step of each leg builds the
-// rows it brings in, and on the reporting device that step is the stutter
-// itself, ~100 ms, waiting for the rows to be drawn with less than a widget
-// per visual line (#722's follow-up).
+// (`AGENTS.md`). The worst is printed too: the first step of each leg builds
+// the rows it brings in, and that step — 51 ms on this host, 265 ms at the
+// device's open — is what is left of the case.
 //
 // Roboto is loaded from the Flutter cache when it is there, so the rows are
 // measured with the font the device measured them with; without it the test
