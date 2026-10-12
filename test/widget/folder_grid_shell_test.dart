@@ -185,6 +185,39 @@ void main() {
     }
   });
 
+  testWidgets('back at the root, F2 renames the open note', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    try {
+      await openShell(tester);
+      await session.createFolder(parentPath: '', name: 'Projects');
+      await session.createNote(parentPath: '', name: 'Ideas');
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('view-grid-toggle')));
+      await settle(tester);
+
+      await tester.tap(find.byKey(const Key('grid-tile-Ideas.md')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('grid-tile-Projects')));
+      await settle(tester);
+      // The Library crumb: the grid is at the root, which is no row.
+      await tester.tap(find.text(AppStrings.libraryCrumb));
+      await settle(tester);
+      expect(gridFolder(tester), '');
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.f2);
+      await settle(tester);
+      expect(
+        find.byKey(const Key('tree-rename-field')),
+        findsOne,
+        reason: 'the open note is renamed, not a row at the path ""',
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await settle(tester);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
   testWidgets("the switch starts in the tree's selection every time", (
     tester,
   ) async {

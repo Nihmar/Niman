@@ -4530,11 +4530,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Moves the grid to [path], writing the move through to the tree: the
   /// folder is selected and expanded there, so switching back to the list
   /// finds it open (#727).
+  ///
+  /// The root has no row to select: going there clears the selection
+  /// rather than selecting the path `''`, which every command reading the
+  /// selection — F2's rename first — would take for a row of its own.
   void _gridGoTo(String path) {
     setState(() {
       _gridFolder = path;
-      _selected = path;
-      _selectedIsDir = true;
+      _selected = path.isEmpty ? null : path;
+      _selectedIsDir = path.isNotEmpty;
       if (path.isNotEmpty) _expanded.add(path);
     });
   }
