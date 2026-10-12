@@ -1185,6 +1185,16 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(treeSort: sort));
   }
 
+  /// How the Files pane shows a folder on this device (#727).
+  @override
+  Future<TreeView> get treeView async => (await _library).treeView;
+
+  /// Sets (and persists) the Files pane's view.
+  @override
+  Future<void> setTreeView(TreeView view) async {
+    await _editLibrary((c) => c.copyWith(treeView: view));
+  }
+
   /// The tree pane's width in logical pixels.
   @override
   Future<double> get treeWidth async => (await _library).treeWidth;

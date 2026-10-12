@@ -79,6 +79,9 @@ final class _CountedReads implements LibrarySession {
   Future<TreeSort> get treeSort => _read(_inner.treeSort);
 
   @override
+  Future<TreeView> get treeView => _read(_inner.treeView);
+
+  @override
   Future<double> get treeWidth => _read(_inner.treeWidth);
 
   @override
@@ -192,7 +195,7 @@ void main() {
     expect(settings, ShellEditorSettings.defaults);
     expect(
       session.reads,
-      19,
+      20,
       reason: 'every setting the session answers; the two folders ride on ops',
     );
     expect(

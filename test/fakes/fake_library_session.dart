@@ -526,6 +526,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<TreeView> get treeView async => _config.treeView;
+
+  @override
+  Future<void> setTreeView(TreeView view) async {
+    _config = _config.copyWith(treeView: view);
+    _bump();
+  }
+
+  @override
   Future<double> get treeWidth async => _config.treeWidth;
 
   @override
