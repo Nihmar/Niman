@@ -280,6 +280,20 @@ final class BosnianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalendar';
   @override
+  String get calendarNewEvent => 'Novi događaj';
+  @override
+  String get calendarAdd => 'Dodaj';
+  @override
+  String get calendarEndOptional => 'Kraj (opcionalno)';
+  @override
+  String get calendarRemindMe => 'Podsjeti me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min prije';
+  @override
+  String get calendarLinePreview => 'Red, kako će biti zapisan';
+  @override
+  String get calendarAddEvent => 'Dodaj događaj';
+  @override
   String get themeEditorRolesHint =>
       'Svaka boja nosi ime koje koristi izvezena datoteka';
   @override

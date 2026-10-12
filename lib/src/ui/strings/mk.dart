@@ -279,6 +279,20 @@ final class MacedonianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Календар';
   @override
+  String get calendarNewEvent => 'Нов настан';
+  @override
+  String get calendarAdd => 'Додај';
+  @override
+  String get calendarEndOptional => 'Крај (изборно)';
+  @override
+  String get calendarRemindMe => 'Потсети ме';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes мин. претходно';
+  @override
+  String get calendarLinePreview => 'Редот, како што ќе биде запишан';
+  @override
+  String get calendarAddEvent => 'Додај настан';
+  @override
   String get themeEditorRolesHint =>
       'Секоја боја е именувана како во извезената датотека';
   @override

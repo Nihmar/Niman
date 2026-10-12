@@ -276,6 +276,20 @@ final class NorwegianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalender';
   @override
+  String get calendarNewEvent => 'Ny hendelse';
+  @override
+  String get calendarAdd => 'Legg til';
+  @override
+  String get calendarEndOptional => 'Slutt valgfritt';
+  @override
+  String get calendarRemindMe => 'Påminn meg';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min før';
+  @override
+  String get calendarLinePreview => 'Linjen slik den skrives';
+  @override
+  String get calendarAddEvent => 'Legg til hendelse';
+  @override
   String get themeEditorRolesHint =>
       'Hver farge heter det den eksporterte filen kaller den';
   @override

@@ -374,3 +374,27 @@ Set<DateTime> _daysWithEvents(List<CalendarEntry> entries) {
 
 /// [date] at midnight: the key the calendar's days are compared by.
 DateTime _dayOf(DateTime date) => DateTime(date.year, date.month, date.day);
+
+/// The `+`/`@`/`#` tokens the file carries, sigil included and `key:value`
+/// tags among them: what the Add event form suggests (#730).
+Set<String> calendarSnapshotTokens(CalendarSnapshot snapshot) {
+  final tokens = <String>{};
+  for (final entry in snapshot.entries) {
+    for (final token in entry.line.tokens) {
+      tokens.add(_tokenText(token));
+    }
+    for (final event in entry.line.events) {
+      for (final token in event.tokens) {
+        tokens.add(_tokenText(token));
+      }
+    }
+  }
+  return tokens;
+}
+
+String _tokenText(CalendarToken token) => switch (token.kind) {
+  CalendarTokenKind.project => '+${token.value}',
+  CalendarTokenKind.context => '@${token.value}',
+  CalendarTokenKind.tag => '#${token.value}',
+  CalendarTokenKind.keyValue => token.value,
+};

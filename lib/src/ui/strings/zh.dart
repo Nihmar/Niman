@@ -257,6 +257,20 @@ final class ChineseStrings extends Strings {
   @override
   String get themeEditorCalendar => '日历';
   @override
+  String get calendarNewEvent => '新事件';
+  @override
+  String get calendarAdd => '添加';
+  @override
+  String get calendarEndOptional => '结束（可选）';
+  @override
+  String get calendarRemindMe => '提醒我';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes 分钟前';
+  @override
+  String get calendarLinePreview => '将写入的行';
+  @override
+  String get calendarAddEvent => '添加事件';
+  @override
   String get themeEditorRolesHint => '每个颜色的名称与导出文件一致';
   @override
   String get themeEditorDiscardTitle => '放弃更改';

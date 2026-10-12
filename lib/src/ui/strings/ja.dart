@@ -256,6 +256,20 @@ final class JapaneseStrings extends Strings {
   @override
   String get themeEditorCalendar => 'カレンダー';
   @override
+  String get calendarNewEvent => '新しい予定';
+  @override
+  String get calendarAdd => '追加';
+  @override
+  String get calendarEndOptional => '終了（任意）';
+  @override
+  String get calendarRemindMe => 'リマインド';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes分前';
+  @override
+  String get calendarLinePreview => '書き込まれる行';
+  @override
+  String get calendarAddEvent => '予定を追加';
+  @override
   String get themeEditorRolesHint => '各色の名前は書き出したファイルと同じです';
   @override
   String get themeEditorDiscardTitle => '変更を破棄';

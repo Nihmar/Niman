@@ -281,6 +281,20 @@ final class FrenchStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Calendrier';
   @override
+  String get calendarNewEvent => 'Nouvel événement';
+  @override
+  String get calendarAdd => 'Ajouter';
+  @override
+  String get calendarEndOptional => 'Fin facultative';
+  @override
+  String get calendarRemindMe => 'Me rappeler';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min avant';
+  @override
+  String get calendarLinePreview => "La ligne, telle qu'elle sera écrite";
+  @override
+  String get calendarAddEvent => 'Ajouter un événement';
+  @override
   String get themeEditorRolesHint =>
       'Chaque couleur porte le nom que lui donne le fichier exporté';
   @override

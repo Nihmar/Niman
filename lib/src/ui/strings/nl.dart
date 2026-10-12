@@ -277,6 +277,20 @@ final class DutchStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalender';
   @override
+  String get calendarNewEvent => 'Nieuwe gebeurtenis';
+  @override
+  String get calendarAdd => 'Toevoegen';
+  @override
+  String get calendarEndOptional => 'Einde optioneel';
+  @override
+  String get calendarRemindMe => 'Herinner me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min vooraf';
+  @override
+  String get calendarLinePreview => 'De regel, zoals die wordt geschreven';
+  @override
+  String get calendarAddEvent => 'Gebeurtenis toevoegen';
+  @override
   String get themeEditorRolesHint =>
       'Elke kleur heet zoals het geëxporteerde bestand hem noemt';
   @override

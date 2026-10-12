@@ -279,6 +279,20 @@ final class CatalanStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Calendari';
   @override
+  String get calendarNewEvent => 'Esdeveniment nou';
+  @override
+  String get calendarAdd => 'Afegeix';
+  @override
+  String get calendarEndOptional => 'Fi opcional';
+  @override
+  String get calendarRemindMe => "Recorda-m'ho";
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min abans';
+  @override
+  String get calendarLinePreview => "La línia, tal com s'escriurà";
+  @override
+  String get calendarAddEvent => 'Afegeix esdeveniment';
+  @override
   String get themeEditorRolesHint =>
       'Cada color porta el nom que fa servir el fitxer exportat';
   @override

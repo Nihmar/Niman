@@ -276,6 +276,20 @@ final class IcelandicStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Dagatal';
   @override
+  String get calendarNewEvent => 'Nýr viðburður';
+  @override
+  String get calendarAdd => 'Bæta við';
+  @override
+  String get calendarEndOptional => 'Lok (valfrjálst)';
+  @override
+  String get calendarRemindMe => 'Minn á mig';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes mín fyrr';
+  @override
+  String get calendarLinePreview => 'Línan eins og hún verður skrifuð';
+  @override
+  String get calendarAddEvent => 'Bæta við viðburði';
+  @override
   String get themeEditorRolesHint =>
       'Hver litur heitir því sem útflutta skráin kallar hann';
   @override

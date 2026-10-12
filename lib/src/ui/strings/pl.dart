@@ -280,6 +280,20 @@ final class PolishStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalendarz';
   @override
+  String get calendarNewEvent => 'Nowe wydarzenie';
+  @override
+  String get calendarAdd => 'Dodaj';
+  @override
+  String get calendarEndOptional => 'Koniec (opcjonalnie)';
+  @override
+  String get calendarRemindMe => 'Przypomnij';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min przed';
+  @override
+  String get calendarLinePreview => 'Linia, jak zostanie zapisana';
+  @override
+  String get calendarAddEvent => 'Dodaj wydarzenie';
+  @override
   String get themeEditorRolesHint =>
       'Każdy kolor nazywa się tak jak w wyeksportowanym pliku';
   @override

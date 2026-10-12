@@ -280,6 +280,20 @@ final class SerbianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Календар';
   @override
+  String get calendarNewEvent => 'Нови догађај';
+  @override
+  String get calendarAdd => 'Додај';
+  @override
+  String get calendarEndOptional => 'Крај (опционо)';
+  @override
+  String get calendarRemindMe => 'Подсети ме';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes мин пре';
+  @override
+  String get calendarLinePreview => 'Ред, како ће бити записан';
+  @override
+  String get calendarAddEvent => 'Додај догађај';
+  @override
   String get themeEditorRolesHint =>
       'Свака боја носи име које користи извезена датотека';
   @override

@@ -277,6 +277,20 @@ final class BelarusianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Каляндар';
   @override
+  String get calendarNewEvent => 'Новая падзея';
+  @override
+  String get calendarAdd => 'Дадаць';
+  @override
+  String get calendarEndOptional => 'Канец неабавязковы';
+  @override
+  String get calendarRemindMe => 'Напомніць';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes хв. раней';
+  @override
+  String get calendarLinePreview => 'Радок, як ён будзе запісаны';
+  @override
+  String get calendarAddEvent => 'Дадаць падзею';
+  @override
   String get themeEditorRolesHint =>
       'Кожны колер названы так, як яго называе файл экспарту';
   @override

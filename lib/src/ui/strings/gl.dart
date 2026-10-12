@@ -280,6 +280,20 @@ final class GalicianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Calendario';
   @override
+  String get calendarNewEvent => 'Novo evento';
+  @override
+  String get calendarAdd => 'Engadir';
+  @override
+  String get calendarEndOptional => 'Fin opcional';
+  @override
+  String get calendarRemindMe => 'Lembrarme';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min antes';
+  @override
+  String get calendarLinePreview => 'A liña, como se escribirá';
+  @override
+  String get calendarAddEvent => 'Engadir evento';
+  @override
   String get themeEditorRolesHint =>
       'Cada cor leva o nome que usa o ficheiro exportado';
   @override

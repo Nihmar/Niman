@@ -278,6 +278,20 @@ final class LithuanianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalendorius';
   @override
+  String get calendarNewEvent => 'Naujas įvykis';
+  @override
+  String get calendarAdd => 'Pridėti';
+  @override
+  String get calendarEndOptional => 'Pabaiga (nebūtina)';
+  @override
+  String get calendarRemindMe => 'Priminti';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min. prieš';
+  @override
+  String get calendarLinePreview => 'Eilutė, kaip bus įrašyta';
+  @override
+  String get calendarAddEvent => 'Pridėti įvykį';
+  @override
   String get themeEditorRolesHint =>
       'Kiekviena spalva pavadinta taip, kaip eksportuotame faile';
   @override

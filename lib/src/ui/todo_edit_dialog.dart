@@ -36,13 +36,15 @@ import 'package:niman/src/ui/todo_priority_chips.dart';
 ///
 /// [today] stamps the creation date of an added task and seeds the
 /// pickers. [knownTokens] (sigil-included: `+p`, `@c`, `#t`) completes
-/// the word under the caret. [onDelete], given only with [initial],
-/// shows Delete: the dialog closes as a cancel, then it runs.
+/// the word under the caret. [due], with no [initial], fills the due date
+/// in — Add task from a day (#730). [onDelete], given only with
+/// [initial], shows Delete: the dialog closes as a cancel, then it runs.
 Future<String?> showTodoTaskDialog(
   BuildContext context, {
   required DateTime today,
   TodoTask? initial,
   String text = '',
+  DateTime? due,
   Set<String> knownTokens = const <String>{},
   VoidCallback? onDelete,
   ReminderHealth health = ReminderHealth.ok,
@@ -53,6 +55,7 @@ Future<String?> showTodoTaskDialog(
     builder: (context) => _TodoTaskDialog(
       initial: initial,
       text: text,
+      due: due,
       today: today,
       knownTokens: knownTokens,
       onDelete: initial == null ? null : onDelete,
@@ -69,6 +72,7 @@ final class _TodoTaskDialog extends StatefulWidget {
   const new({
     required this.initial,
     required this.text,
+    required this.due,
     required this.today,
     required this.knownTokens,
     required this.onDelete,
@@ -81,6 +85,10 @@ final class _TodoTaskDialog extends StatefulWidget {
   /// A new task's text to start from — a Home action's project and
   /// context (#535), with the caret before them.
   final String text;
+
+  /// The due date a new task starts with, or null.
+  final DateTime? due;
+
   final DateTime today;
   final Set<String> knownTokens;
   final VoidCallback? onDelete;
@@ -112,12 +120,14 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   late final FocusNode _focus = FocusNode();
 
   late String? _priority = widget.initial?.priority;
-  late DateTime? _due = widget.initial?.due;
+  late DateTime? _due = widget.initial?.due ?? widget.due;
   late DateTime? _reminder = widget.initial?.reminder;
 
   /// Whether the pickers were touched (only then is their slot
-  /// rewritten — an untouched edit keeps the text byte-identical).
-  bool _dueDirty = false;
+  /// rewritten — an untouched edit keeps the text byte-identical). A due
+  /// date the dialog was opened with counts as touched: it is there to be
+  /// written.
+  late bool _dueDirty = widget.due != null;
   bool _reminderDirty = false;
 
   /// The date picked in place right now, on a window with the room; one

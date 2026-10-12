@@ -281,6 +281,20 @@ final class BulgarianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Календар';
   @override
+  String get calendarNewEvent => 'Ново събитие';
+  @override
+  String get calendarAdd => 'Добави';
+  @override
+  String get calendarEndOptional => 'Край (по избор)';
+  @override
+  String get calendarRemindMe => 'Напомни ми';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes мин. преди';
+  @override
+  String get calendarLinePreview => 'Редът, както ще бъде записан';
+  @override
+  String get calendarAddEvent => 'Добави събитие';
+  @override
   String get themeEditorRolesHint =>
       'Всеки цвят е с името, което използва експортираният файл';
   @override

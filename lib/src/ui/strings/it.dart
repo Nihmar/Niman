@@ -280,6 +280,20 @@ final class ItalianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Calendario';
   @override
+  String get calendarNewEvent => 'Nuovo evento';
+  @override
+  String get calendarAdd => 'Aggiungi';
+  @override
+  String get calendarEndOptional => 'Fine facoltativa';
+  @override
+  String get calendarRemindMe => 'Ricordamelo';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min prima';
+  @override
+  String get calendarLinePreview => 'La riga, come verrà scritta';
+  @override
+  String get calendarAddEvent => 'Aggiungi evento';
+  @override
   String get themeEditorRolesHint =>
       'Ogni colore porta il nome che usa il file esportato';
   @override

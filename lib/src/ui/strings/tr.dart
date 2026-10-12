@@ -270,6 +270,20 @@ final class TurkishStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Takvim';
   @override
+  String get calendarNewEvent => 'Yeni etkinlik';
+  @override
+  String get calendarAdd => 'Ekle';
+  @override
+  String get calendarEndOptional => 'Bitiş (isteğe bağlı)';
+  @override
+  String get calendarRemindMe => 'Hatırlat';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes dk önce';
+  @override
+  String get calendarLinePreview => 'Yazılacağı haliyle satır';
+  @override
+  String get calendarAddEvent => 'Etkinlik ekle';
+  @override
   String get themeEditorRolesHint =>
       'Her renk, dışa aktarılan dosyadaki adı taşır';
   @override

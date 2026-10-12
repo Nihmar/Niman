@@ -281,6 +281,20 @@ final class RomanianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Calendar';
   @override
+  String get calendarNewEvent => 'Eveniment nou';
+  @override
+  String get calendarAdd => 'Adaugă';
+  @override
+  String get calendarEndOptional => 'Sfârșit opțional';
+  @override
+  String get calendarRemindMe => 'Amintește-mi';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min înainte';
+  @override
+  String get calendarLinePreview => 'Linia, așa cum va fi scrisă';
+  @override
+  String get calendarAddEvent => 'Adaugă eveniment';
+  @override
   String get themeEditorRolesHint =>
       'Fiecare culoare poartă numele din fișierul exportat';
   @override

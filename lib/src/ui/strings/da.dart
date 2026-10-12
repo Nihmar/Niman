@@ -277,6 +277,20 @@ final class DanishStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalender';
   @override
+  String get calendarNewEvent => 'Ny begivenhed';
+  @override
+  String get calendarAdd => 'Tilføj';
+  @override
+  String get calendarEndOptional => 'Slut valgfrit';
+  @override
+  String get calendarRemindMe => 'Påmind mig';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min før';
+  @override
+  String get calendarLinePreview => 'Linjen, som den skrives';
+  @override
+  String get calendarAddEvent => 'Tilføj begivenhed';
+  @override
   String get themeEditorRolesHint =>
       'Hver farve hedder det, den eksporterede fil kalder den';
   @override

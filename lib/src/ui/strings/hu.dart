@@ -275,6 +275,20 @@ final class HungarianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Naptár';
   @override
+  String get calendarNewEvent => 'Új esemény';
+  @override
+  String get calendarAdd => 'Hozzáadás';
+  @override
+  String get calendarEndOptional => 'Befejezés (nem kötelező)';
+  @override
+  String get calendarRemindMe => 'Emlékeztetés';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes perccel előbb';
+  @override
+  String get calendarLinePreview => 'A sor, ahogy íródni fog';
+  @override
+  String get calendarAddEvent => 'Esemény hozzáadása';
+  @override
   String get themeEditorRolesHint =>
       'Minden szín neve az exportált fájlban szereplő név';
   @override

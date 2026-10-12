@@ -278,6 +278,20 @@ final class SwedishStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalender';
   @override
+  String get calendarNewEvent => 'Ny händelse';
+  @override
+  String get calendarAdd => 'Lägg till';
+  @override
+  String get calendarEndOptional => 'Slut valfritt';
+  @override
+  String get calendarRemindMe => 'Påminn mig';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min innan';
+  @override
+  String get calendarLinePreview => 'Raden som den skrivs';
+  @override
+  String get calendarAddEvent => 'Lägg till händelse';
+  @override
   String get themeEditorRolesHint =>
       'Varje färg heter det den exporterade filen kallar den';
   @override

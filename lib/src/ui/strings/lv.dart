@@ -274,6 +274,20 @@ final class LatvianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalendārs';
   @override
+  String get calendarNewEvent => 'Jauns notikums';
+  @override
+  String get calendarAdd => 'Pievienot';
+  @override
+  String get calendarEndOptional => 'Beigas (nav obligāts)';
+  @override
+  String get calendarRemindMe => 'Atgādināt';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min. pirms';
+  @override
+  String get calendarLinePreview => 'Rinda, kā tā tiks ierakstīta';
+  @override
+  String get calendarAddEvent => 'Pievienot notikumu';
+  @override
   String get themeEditorRolesHint =>
       'Katrai krāsai ir tāds nosaukums kā eksportētajā failā';
   @override

@@ -279,6 +279,20 @@ final class CroatianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalendar';
   @override
+  String get calendarNewEvent => 'Novi događaj';
+  @override
+  String get calendarAdd => 'Dodaj';
+  @override
+  String get calendarEndOptional => 'Kraj (neobavezno)';
+  @override
+  String get calendarRemindMe => 'Podsjeti me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min prije';
+  @override
+  String get calendarLinePreview => 'Redak, kako će biti zapisan';
+  @override
+  String get calendarAddEvent => 'Dodaj događaj';
+  @override
   String get themeEditorRolesHint =>
       'Svaka boja nosi ime koje koristi izvezena datoteka';
   @override

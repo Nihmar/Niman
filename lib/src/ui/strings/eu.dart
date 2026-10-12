@@ -274,6 +274,20 @@ final class BasqueStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Egutegia';
   @override
+  String get calendarNewEvent => 'Gertaera berria';
+  @override
+  String get calendarAdd => 'Gehitu';
+  @override
+  String get calendarEndOptional => 'Amaiera aukerakoa';
+  @override
+  String get calendarRemindMe => 'Gogorarazi';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min lehenago';
+  @override
+  String get calendarLinePreview => 'Lerroa, idatziko den bezala';
+  @override
+  String get calendarAddEvent => 'Gehitu gertaera';
+  @override
   String get themeEditorRolesHint =>
       'Kolore bakoitzak esportatutako fitxategiak duen izena du';
   @override

@@ -234,6 +234,16 @@ final class AppStrings {
   static String get themeEditorMarkdown => _s.themeEditorMarkdown;
   static String get themeEditorTaskLists => _s.themeEditorTaskLists;
   static String get themeEditorCalendar => _s.themeEditorCalendar;
+
+  // The Add event form (#730).
+  static String get calendarNewEvent => _s.calendarNewEvent;
+  static String get calendarAdd => _s.calendarAdd;
+  static String get calendarEndOptional => _s.calendarEndOptional;
+  static String get calendarRemindMe => _s.calendarRemindMe;
+  static String calendarRemindBefore(int minutes) =>
+      _s.calendarRemindBefore(minutes);
+  static String get calendarLinePreview => _s.calendarLinePreview;
+  static String get calendarAddEvent => _s.calendarAddEvent;
   static String get themeEditorRolesHint => _s.themeEditorRolesHint;
   static String get themeEditorDiscardTitle => _s.themeEditorDiscardTitle;
   static String get themeEditorDiscardBody => _s.themeEditorDiscardBody;

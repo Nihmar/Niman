@@ -275,6 +275,20 @@ final class AlbanianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalendari';
   @override
+  String get calendarNewEvent => 'Ngjarje e re';
+  @override
+  String get calendarAdd => 'Shto';
+  @override
+  String get calendarEndOptional => 'Fundi (opsionale)';
+  @override
+  String get calendarRemindMe => 'Më kujto';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min para';
+  @override
+  String get calendarLinePreview => 'Rreshti, si do të shkruhet';
+  @override
+  String get calendarAddEvent => 'Shto ngjarje';
+  @override
   String get themeEditorRolesHint =>
       'Çdo ngjyrë mban emrin që përdor skedari i eksportuar';
   @override

@@ -281,6 +281,20 @@ final class GreekStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Ημερολόγιο';
   @override
+  String get calendarNewEvent => 'Νέο συμβάν';
+  @override
+  String get calendarAdd => 'Προσθήκη';
+  @override
+  String get calendarEndOptional => 'Τέλος προαιρετικό';
+  @override
+  String get calendarRemindMe => 'Υπενθύμιση';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes λεπτά πριν';
+  @override
+  String get calendarLinePreview => 'Η γραμμή, όπως θα γραφτεί';
+  @override
+  String get calendarAddEvent => 'Προσθήκη συμβάντος';
+  @override
   String get themeEditorRolesHint =>
       'Κάθε χρώμα έχει το όνομα που χρησιμοποιεί το εξαγόμενο αρχείο';
   @override

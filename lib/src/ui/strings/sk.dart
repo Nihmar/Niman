@@ -279,6 +279,20 @@ final class SlovakStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalendár';
   @override
+  String get calendarNewEvent => 'Nová udalosť';
+  @override
+  String get calendarAdd => 'Pridať';
+  @override
+  String get calendarEndOptional => 'Koniec (voliteľné)';
+  @override
+  String get calendarRemindMe => 'Pripomenúť';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min pred';
+  @override
+  String get calendarLinePreview => 'Riadok, ako bude zapísaný';
+  @override
+  String get calendarAddEvent => 'Pridať udalosť';
+  @override
   String get themeEditorRolesHint =>
       'Každá farba sa volá ako v exportovanom súbore';
   @override

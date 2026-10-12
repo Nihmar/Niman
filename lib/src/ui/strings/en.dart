@@ -276,6 +276,20 @@ final class EnglishStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Calendar';
   @override
+  String get calendarNewEvent => 'New event';
+  @override
+  String get calendarAdd => 'Add';
+  @override
+  String get calendarEndOptional => 'End optional';
+  @override
+  String get calendarRemindMe => 'Remind me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min before';
+  @override
+  String get calendarLinePreview => 'The line, as it will be written';
+  @override
+  String get calendarAddEvent => 'Add event';
+  @override
   String get themeEditorRolesHint =>
       'Each color is named as the exported file names it';
   @override

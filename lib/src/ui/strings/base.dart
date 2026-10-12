@@ -135,6 +135,19 @@ abstract base class Strings {
 
   /// The section heading over the calendar.txt roles (#730).
   String get themeEditorCalendar;
+  // The Add event form (#730): a day's own event is written from it, in
+  // the dock's journal pane or a phone's sheet.
+  String get calendarNewEvent;
+  String get calendarAdd;
+  String get calendarEndOptional;
+  String get calendarRemindMe;
+
+  /// The lead time before an event, `15 min before`.
+  String calendarRemindBefore(int minutes);
+  String get calendarLinePreview;
+
+  /// The button that opens the form, `Add event`.
+  String get calendarAddEvent;
   String get themeEditorRolesHint;
   String get themeEditorDiscardTitle;
   String get themeEditorDiscardBody;

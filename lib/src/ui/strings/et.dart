@@ -274,6 +274,20 @@ final class EstonianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalender';
   @override
+  String get calendarNewEvent => 'Uus sündmus';
+  @override
+  String get calendarAdd => 'Lisa';
+  @override
+  String get calendarEndOptional => 'Lõpp valikuline';
+  @override
+  String get calendarRemindMe => 'Tuleta meelde';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min enne';
+  @override
+  String get calendarLinePreview => 'Rida, nagu see kirjutatakse';
+  @override
+  String get calendarAddEvent => 'Lisa sündmus';
+  @override
   String get themeEditorRolesHint =>
       'Iga värv on nimetatud nii, nagu seda nimetab eksporditud fail';
   @override

@@ -280,6 +280,20 @@ final class SlovenianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Koledar';
   @override
+  String get calendarNewEvent => 'Nov dogodek';
+  @override
+  String get calendarAdd => 'Dodaj';
+  @override
+  String get calendarEndOptional => 'Konec (neobvezno)';
+  @override
+  String get calendarRemindMe => 'Opomni me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min prej';
+  @override
+  String get calendarLinePreview => 'Vrstica, kot bo zapisana';
+  @override
+  String get calendarAddEvent => 'Dodaj dogodek';
+  @override
   String get themeEditorRolesHint =>
       'Vsaka barva je poimenovana kot v izvoženi datoteki';
   @override

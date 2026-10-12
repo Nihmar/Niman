@@ -280,6 +280,20 @@ final class SpanishStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Calendario';
   @override
+  String get calendarNewEvent => 'Nuevo evento';
+  @override
+  String get calendarAdd => 'Añadir';
+  @override
+  String get calendarEndOptional => 'Fin opcional';
+  @override
+  String get calendarRemindMe => 'Recordármelo';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min antes';
+  @override
+  String get calendarLinePreview => 'La línea, como se escribirá';
+  @override
+  String get calendarAddEvent => 'Añadir evento';
+  @override
   String get themeEditorRolesHint =>
       'Cada color lleva el nombre que usa el archivo exportado';
   @override

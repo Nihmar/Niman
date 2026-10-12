@@ -3,7 +3,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -25,6 +27,10 @@ final class JournalScreen extends StatelessWidget {
     this.dueOn,
     this.tasksChanged,
     this.onOpenTasks,
+    this.knownTokens = const <String>{},
+    this.calendarFile,
+    this.onAddEvent,
+    this.onAddTask,
     super.key,
   });
 
@@ -51,6 +57,18 @@ final class JournalScreen extends StatelessWidget {
 
   /// See [JournalBrowser.onOpenTasks].
   final VoidCallback? onOpenTasks;
+
+  /// See [JournalBrowser.knownTokens].
+  final Set<String> knownTokens;
+
+  /// See [JournalBrowser.calendarFile].
+  final CalendarFileContent? calendarFile;
+
+  /// See [JournalBrowser.onAddEvent].
+  final void Function(DateTime day, CalendarEventDraft event)? onAddEvent;
+
+  /// See [JournalBrowser.onAddTask].
+  final void Function(DateTime day)? onAddTask;
 
   /// See [JournalBrowser.today].
   final DateTime today;
@@ -87,6 +105,10 @@ final class JournalScreen extends StatelessWidget {
         dueOn: dueOn,
         tasksChanged: tasksChanged,
         onOpenTasks: onOpenTasks,
+        knownTokens: knownTokens,
+        calendarFile: calendarFile,
+        onAddEvent: onAddEvent,
+        onAddTask: onAddTask,
       ),
     );
   }

@@ -8,12 +8,15 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/core/weeks.dart';
 import 'package:niman/src/journal/journal_summary.dart';
 import 'package:niman/src/templates/engine.dart';
+import 'package:niman/src/ui/calendar_event_form.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/line_runs.dart';
@@ -43,6 +46,10 @@ final class JournalBrowser extends StatefulWidget {
     this.dueOn,
     this.tasksChanged,
     this.onOpenTasks,
+    this.knownTokens = const <String>{},
+    this.calendarFile,
+    this.onAddEvent,
+    this.onAddTask,
     this.focusDay,
     this.onEntryMenu,
     super.key,
@@ -79,6 +86,22 @@ final class JournalBrowser extends StatefulWidget {
   /// Opens the task list, from a task's tap.
   final VoidCallback? onOpenTasks;
 
+  /// The `+`/`@`/`#` tokens the two files already use, for the Add event
+  /// form's suggestions (#730).
+  final Set<String> knownTokens;
+
+  /// The calendar file as it is now: the Add event form previews the line
+  /// the writer would make of it.
+  final CalendarFileContent? calendarFile;
+
+  /// Writes a new event on a day: the shell owns the controller, the
+  /// browser owns the form (#730). Null shows no Add event.
+  final void Function(DateTime day, CalendarEventDraft event)? onAddEvent;
+
+  /// Opens the todo add with a day as its due date (#730). Null shows no
+  /// Add task.
+  final void Function(DateTime day)? onAddTask;
+
   /// The day the dock speaks for when nothing is picked in it: the entry
   /// on screen's, else today.
   final DateTime? focusDay;
@@ -113,6 +136,10 @@ final class _JournalBrowserState extends State<JournalBrowser> {
   /// Whether the dock picked [_selected] itself (#712): an empty day is
   /// picked, not opened, and the offer to make it sits under the calendar.
   bool _picked = false;
+
+  /// The day the Add event form is open for, or null when it is closed: a
+  /// window gets the form inline in this pane, a phone a sheet (#730).
+  DateTime? _addingEvent;
 
   List<DateTime> _days = const [];
   Map<DateTime, String> _summaries = const {};
@@ -222,21 +249,38 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           onMonth: _showMonth,
         ),
         const SizedBox(height: 8),
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: OutlinedButton.icon(
-            key: const Key('journal-to-today'),
-            onPressed: _toToday,
-            icon: const Icon(Icons.today_outlined, size: 18),
-            label: Text(words.currentDateLabel),
-          ),
+        // A wrap, not a row: the dock's island is narrow and a phone's
+        // card narrower still, and a control that cannot be reached is
+        // worse than one on the next line.
+        Wrap(
+          spacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              key: const Key('journal-to-today'),
+              onPressed: _toToday,
+              icon: const Icon(Icons.today_outlined, size: 18),
+              label: Text(words.currentDateLabel),
+            ),
+            // Beside Today in the dock; a phone gets them in the day card's
+            // own second row, where the thumb already is (#730).
+            if (!widget.large) ..._dayActions(context),
+          ],
         ),
         if (widget.large) ...[
           const SizedBox(height: 14),
           _dayCard(context, entries.contains(_selected)),
-        ] else if (_picked && !entries.contains(_selected)) ...[
-          const SizedBox(height: 12),
-          _dockCreateRow(context),
+        ] else ...[
+          if (_picked && !entries.contains(_selected)) ...[
+            const SizedBox(height: 12),
+            _dockCreateRow(context),
+          ],
+          // The form sits where the calendar is, under it: a dialog would
+          // go over the very thing the day was picked on (#712).
+          if (_addingEvent case final day?) ...[
+            const SizedBox(height: 12),
+            _eventForm(context, day),
+          ],
         ],
         if (widget.eventsOn case final eventsOn?)
           ListenableBuilder(
@@ -483,40 +527,136 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    journalDayLabel(_selected),
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  if (!hasEntry)
-                    Text(
-                      AppStrings.journalNoEntry,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+            // The first row keeps its height whether the day has an entry
+            // or not, so nothing moves under a thumb already on it (#730).
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        journalDayLabel(_selected),
+                        style: theme.textTheme.titleSmall,
                       ),
-                    ),
-                ],
-              ),
+                      if (!hasEntry)
+                        Text(
+                          AppStrings.journalNoEntry,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                FilledButton.icon(
+                  key: const Key('journal-day-open'),
+                  onPressed: () => widget.onOpenDay(_selected, confirmed: true),
+                  icon: Icon(
+                    hasEntry ? Icons.arrow_forward : Icons.add,
+                    size: 18,
+                  ),
+                  label: Text(
+                    hasEntry
+                        ? AppStrings.journalOpenEntry
+                        : AppStrings.actionCreate,
+                  ),
+                ),
+              ],
             ),
-            FilledButton.icon(
-              key: const Key('journal-day-open'),
-              onPressed: () => widget.onOpenDay(_selected, confirmed: true),
-              icon: Icon(hasEntry ? Icons.arrow_forward : Icons.add, size: 18),
-              label: Text(
-                hasEntry
-                    ? AppStrings.journalOpenEntry
-                    : AppStrings.actionCreate,
-              ),
-            ),
+            if (_dayActions(context).isNotEmpty)
+              Wrap(spacing: 4, children: _dayActions(context)),
           ],
         ),
       ),
     );
+  }
+
+  /// Add event and Add task for the picked day (#730), each only when the
+  /// shell gave the way to write it: the buttons never promise a write the
+  /// app cannot make.
+  List<Widget> _dayActions(BuildContext context) {
+    return [
+      if (widget.onAddEvent != null)
+        TextButton.icon(
+          key: const Key('journal-add-event'),
+          onPressed: () => _addEvent(_selected),
+          icon: const Icon(Icons.event_outlined, size: 18),
+          label: Text(AppStrings.calendarAddEvent),
+        ),
+      if (widget.onAddTask != null)
+        TextButton.icon(
+          key: const Key('journal-add-task'),
+          onPressed: () => widget.onAddTask!(_selected),
+          icon: const Icon(Icons.check_box_outlined, size: 18),
+          label: Text(AppStrings.todoAddTooltip),
+        ),
+    ];
+  }
+
+  /// Opens the Add event form for [day]: inline in the dock, where the
+  /// calendar is; a sheet on a phone, where the card is small (#730).
+  void _addEvent(DateTime day) {
+    if (!widget.large) {
+      setState(() => _addingEvent = day);
+      return;
+    }
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheet) => Padding(
+          padding: EdgeInsets.only(
+            left: 12,
+            right: 12,
+            bottom: MediaQuery.viewInsetsOf(sheet).bottom + 12,
+          ),
+          child: _eventForm(sheet, day),
+        ),
+      ),
+    );
+  }
+
+  /// The form itself, writing when it is told to and closing either way.
+  Widget _eventForm(BuildContext context, DateTime day) {
+    return CalendarEventForm(
+      day: day,
+      knownTokens: widget.knownTokens,
+      preview: (draft) => _previewLine(day, draft),
+      onCancel: () {
+        if (widget.large) {
+          Navigator.of(context).maybePop();
+        } else {
+          setState(() => _addingEvent = null);
+        }
+      },
+      onSave: (draft) {
+        widget.onAddEvent?.call(day, draft);
+        if (widget.large) {
+          Navigator.of(context).maybePop();
+        } else {
+          setState(() => _addingEvent = null);
+        }
+      },
+    );
+  }
+
+  /// The day's line as an added [draft] would leave it, from the file as
+  /// the shell last read it: the writer's own answer, so the preview
+  /// promises exactly what the write does.
+  String _previewLine(DateTime day, CalendarEventDraft draft) {
+    final file =
+        widget.calendarFile ??
+        const CalendarFileContent(lines: <CalendarRawLine>[]);
+    final next = addCalendarEvent(file, day, draft: draft);
+    final body = calendarEventAsText(draft);
+    for (final line in next.lines) {
+      if (line.text.contains(body)) return line.text;
+    }
+    return '';
   }
 }
 

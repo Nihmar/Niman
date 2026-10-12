@@ -83,11 +83,22 @@ its text with `+project`, `@context` and `#tag` picked out and a
 calendar itself a day with events wears a second dot, amber beside the
 entry's. Tapping an event opens `calendar.txt` at that line.
 
-The file is read and nothing else: Niman does not write it in this
-release, so everything you see is what the file says — and the whole file
-stays yours to edit by hand or with any other tool. A day line whose week
-number or weekday does not match its date is flagged in the editor (a wavy
-underline) and never corrected: the date is what is read.
+**Add event**, beside Today in the dock (a second row of the day card on
+a phone), opens a form for the day: a start time and an optional end, the
+text — with the `+project`, `@context` and `#tag` tokens both files
+already use a tap away — **Remind me** with its lead time, and the exact
+line that will be written, so what is about to be added is read before it
+is. **Add task** opens the task dialog with the day as its due date; the
+task then shows under the day's **Due**. A reminder rides on the event's
+own line (`rem:16:30`), so moving or deleting the event moves or deletes
+it.
+
+The file is otherwise yours: `calendar.txt` opens in the source editor,
+coloured, and a write touches only the line an event was written to —
+every other line comes back byte for byte, its own line ending included.
+A day line whose week number or weekday does not match its date is flagged
+in the editor (a wavy underline) and never corrected: the date is what is
+read.
 
 The **Events today** tile on the Home shows today's goals over its
 events, and opens the journal on that day.

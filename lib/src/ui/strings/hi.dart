@@ -266,6 +266,20 @@ final class HindiStrings extends Strings {
   @override
   String get themeEditorCalendar => 'कैलेंडर';
   @override
+  String get calendarNewEvent => 'नया ईवेंट';
+  @override
+  String get calendarAdd => 'जोड़ें';
+  @override
+  String get calendarEndOptional => 'समाप्ति वैकल्पिक';
+  @override
+  String get calendarRemindMe => 'मुझे याद दिलाएँ';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes मिनट पहले';
+  @override
+  String get calendarLinePreview => 'पंक्ति, जैसी लिखी जाएगी';
+  @override
+  String get calendarAddEvent => 'ईवेंट जोड़ें';
+  @override
   String get themeEditorRolesHint =>
       'हर रंग का नाम वही है जो निर्यात की गई फ़ाइल में है';
   @override

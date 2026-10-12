@@ -279,6 +279,20 @@ final class GermanStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalender';
   @override
+  String get calendarNewEvent => 'Neuer Termin';
+  @override
+  String get calendarAdd => 'Hinzufügen';
+  @override
+  String get calendarEndOptional => 'Ende optional';
+  @override
+  String get calendarRemindMe => 'Erinnern';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes Min. vorher';
+  @override
+  String get calendarLinePreview => 'Die Zeile, wie sie geschrieben wird';
+  @override
+  String get calendarAddEvent => 'Termin hinzufügen';
+  @override
   String get themeEditorRolesHint =>
       'Jede Farbe heißt so, wie die exportierte Datei sie nennt';
   @override

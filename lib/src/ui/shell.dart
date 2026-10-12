@@ -2657,7 +2657,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Adds a task from the Todo tab's add FAB (T-TD-04), or from a Home
   /// action with [text] written in.
-  Future<void> _addTodo({String text = ''}) async {
+  Future<void> _addTodo({String text = '', DateTime? due}) async {
     const AppLogger(name: 'todo').debug('todo add pressed');
     final snapshot = _todoController.snapshot;
     final reminders = widget.reminders;
@@ -2665,6 +2665,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       context,
       today: DateTime.now(),
       text: text,
+      due: due,
       knownTokens: snapshot == null
           ? const <String>{}
           : snapshotTokens(snapshot),
@@ -3812,6 +3813,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     tasks: _todoController,
     calendar: _calendarController,
     openEvent: _openCalendarEvent,
+    writeEvent: (day, event) =>
+        unawaited(_guard(() => _calendarController.addEvent(day, event))),
+    addTask: (day) => unawaited(_addTodo(due: day)),
+    knownTokens: () => _knownFileTokens,
+    calendarFile: () => _calendarController.snapshot?.file,
     dockRoom: () => _dockRoom,
     openDockJournal: () => _workspace.controller.update(
       (w) => w.withDock(open: true, pane: DockPane.journal),
@@ -4483,6 +4489,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(message))),
   );
+
+  /// The `+`/`@`/`#` tokens the two files already use (#730): the Add
+  /// event form suggests from them, both files at once, since `grep
+  /// +thesis` reads the two together.
+  Set<String> get _knownFileTokens => {
+    if (_todoController.snapshot case final todos?) ...snapshotTokens(todos),
+    if (_calendarController.snapshot case final calendar?)
+      ...calendarSnapshotTokens(calendar),
+  };
 
   /// Adds a task from a Home action: its project and context are written
   /// in, the caret before them.

@@ -277,6 +277,20 @@ final class PortugueseStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Calendário';
   @override
+  String get calendarNewEvent => 'Novo evento';
+  @override
+  String get calendarAdd => 'Adicionar';
+  @override
+  String get calendarEndOptional => 'Fim opcional';
+  @override
+  String get calendarRemindMe => 'Lembrar-me';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min antes';
+  @override
+  String get calendarLinePreview => 'A linha, como será escrita';
+  @override
+  String get calendarAddEvent => 'Adicionar evento';
+  @override
   String get themeEditorRolesHint =>
       'Cada cor tem o nome que usa o ficheiro exportado';
   @override

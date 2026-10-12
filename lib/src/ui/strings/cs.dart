@@ -278,6 +278,20 @@ final class CzechStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalendář';
   @override
+  String get calendarNewEvent => 'Nová událost';
+  @override
+  String get calendarAdd => 'Přidat';
+  @override
+  String get calendarEndOptional => 'Konec (nepovinné)';
+  @override
+  String get calendarRemindMe => 'Připomenout';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min před';
+  @override
+  String get calendarLinePreview => 'Řádek, jak bude zapsán';
+  @override
+  String get calendarAddEvent => 'Přidat událost';
+  @override
   String get themeEditorRolesHint =>
       'Každá barva se jmenuje jako v exportovaném souboru';
   @override

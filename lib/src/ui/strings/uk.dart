@@ -278,6 +278,20 @@ final class UkrainianStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Календар';
   @override
+  String get calendarNewEvent => 'Нова подія';
+  @override
+  String get calendarAdd => 'Додати';
+  @override
+  String get calendarEndOptional => 'Кінець (необов’язково)';
+  @override
+  String get calendarRemindMe => 'Нагадати';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes хв. раніше';
+  @override
+  String get calendarLinePreview => 'Рядок, як він буде записаний';
+  @override
+  String get calendarAddEvent => 'Додати подію';
+  @override
   String get themeEditorRolesHint =>
       'Кожен колір названо так, як у файлі експорту';
   @override

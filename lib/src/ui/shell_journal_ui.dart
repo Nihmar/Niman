@@ -9,7 +9,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_controller.dart';
+import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/journal/journal_settings.dart';
@@ -32,6 +34,10 @@ final class ShellJournalUi {
     required this.tasks,
     required this.calendar,
     required this.openEvent,
+    required this.writeEvent,
+    required this.addTask,
+    required this.knownTokens,
+    required this.calendarFile,
     required this.dockRoom,
     required this.openDockJournal,
     required this.openTasks,
@@ -56,6 +62,19 @@ final class ShellJournalUi {
 
   /// Opens an event's line in `calendar.txt`.
   final void Function(CalendarEntryEvent event) openEvent;
+
+  /// Writes a new event onto a day (#730): what the Add event form saves
+  /// through.
+  final void Function(DateTime day, CalendarEventDraft event) writeEvent;
+
+  /// Opens the todo add with a day as its due date (#730).
+  final void Function(DateTime day) addTask;
+
+  /// The `+`/`@`/`#` tokens the two files already use, as they stand.
+  final Set<String> Function() knownTokens;
+
+  /// The calendar file as the shell last read it, for the form's preview.
+  final CalendarFileContent? Function() calendarFile;
 
   /// Whether the window has room for the dock.
   final bool Function() dockRoom;
@@ -85,6 +104,10 @@ final class ShellJournalUi {
     dueOn: _tasksDueOn,
     tasksChanged: tasks,
     onOpenTasks: openTasks,
+    knownTokens: knownTokens(),
+    calendarFile: calendarFile(),
+    onAddEvent: writeEvent,
+    onAddTask: addTask,
     focusDay: focusDay,
     onEntryMenu: (day, position) => unawaited(_entryMenuAt(day, position)),
   );
@@ -152,6 +175,14 @@ final class ShellJournalUi {
           onOpenTasks: () {
             Navigator.of(screen).pop();
             openTasks();
+          },
+          knownTokens: knownTokens(),
+          calendarFile: calendarFile(),
+          onAddEvent: writeEvent,
+          onAddTask: (day) {
+            // The screen goes first: the dialog opens from the shell.
+            Navigator.of(screen).pop();
+            addTask(day);
           },
           onOpenDay: (day, {confirmed = false}) {
             // The screen goes first: the entry opens in the shell.

@@ -276,6 +276,20 @@ final class FinnishStrings extends Strings {
   @override
   String get themeEditorCalendar => 'Kalenteri';
   @override
+  String get calendarNewEvent => 'Uusi tapahtuma';
+  @override
+  String get calendarAdd => 'Lisää';
+  @override
+  String get calendarEndOptional => 'Loppu valinnainen';
+  @override
+  String get calendarRemindMe => 'Muistuta';
+  @override
+  String calendarRemindBefore(int minutes) => '$minutes min aiemmin';
+  @override
+  String get calendarLinePreview => 'Rivi sellaisena kuin se kirjoitetaan';
+  @override
+  String get calendarAddEvent => 'Lisää tapahtuma';
+  @override
   String get themeEditorRolesHint =>
       'Jokainen väri on nimetty viedyn tiedoston mukaan';
   @override
