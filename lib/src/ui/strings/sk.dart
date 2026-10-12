@@ -3465,6 +3465,10 @@ final class SlovakStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Žiadne otvorené úlohy.';
+  @override
+  String get homeTileEventsToday => 'Dnešné udalosti';
+  @override
+  String get homeEventsEmpty => 'Dnes žiadne udalosti';
 
   @override
   String get homeNotesEmpty => 'Zatiaľ žiadne poznámky.';

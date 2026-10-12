@@ -3416,6 +3416,10 @@ final class EnglishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'No open tasks.';
+  @override
+  String get homeTileEventsToday => 'Events today';
+  @override
+  String get homeEventsEmpty => 'No events today';
 
   @override
   String get homeNotesEmpty => 'No notes yet.';

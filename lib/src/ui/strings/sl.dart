@@ -3476,6 +3476,10 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ni odprtih nalog.';
+  @override
+  String get homeTileEventsToday => 'Današnji dogodki';
+  @override
+  String get homeEventsEmpty => 'Danes ni dogodkov';
 
   @override
   String get homeNotesEmpty => 'Še ni zapiskov.';

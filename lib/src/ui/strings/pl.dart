@@ -3506,6 +3506,10 @@ final class PolishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Brak otwartych zadań.';
+  @override
+  String get homeTileEventsToday => 'Dzisiejsze wydarzenia';
+  @override
+  String get homeEventsEmpty => 'Brak wydarzeń na dziś';
 
   @override
   String get homeNotesEmpty => 'Brak notatek.';

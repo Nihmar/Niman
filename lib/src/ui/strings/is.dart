@@ -3450,6 +3450,10 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Engin opin verkefni.';
+  @override
+  String get homeTileEventsToday => 'Dagsins viðburðir';
+  @override
+  String get homeEventsEmpty => 'Engir viðburðir í dag';
 
   @override
   String get homeNotesEmpty => 'Engar glósur enn.';

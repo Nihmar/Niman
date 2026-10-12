@@ -7,6 +7,7 @@ import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/home/home_tile_frame.dart';
 import 'package:niman/src/ui/home/tiles/actions_tile.dart';
+import 'package:niman/src/ui/home/tiles/events_today_tile.dart';
 import 'package:niman/src/ui/home/tiles/journal_calendar_tile.dart';
 import 'package:niman/src/ui/home/tiles/journal_today_tile.dart';
 import 'package:niman/src/ui/home/tiles/pinned_tile.dart';
@@ -58,6 +59,7 @@ final class HomeTileView extends StatelessWidget {
           revision: revision,
         ),
         HomeTileKind.tasksDue => TasksDueTile(host: host),
+        HomeTileKind.eventsToday => EventsTodayTile(host: host),
         HomeTileKind.recent => RecentTile(host: host, revision: revision),
         HomeTileKind.pinned => PinnedTile(host: host, revision: revision),
         HomeTileKind.journalCalendar => JournalCalendarTile(

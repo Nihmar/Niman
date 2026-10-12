@@ -59,6 +59,12 @@ final class HomeLayout {
       at: 2,
     ),
     HomeTile(
+      id: 'eventsToday',
+      kind: HomeTileKind.eventsToday,
+      cell: (x: 0, y: 3, w: 2, h: 1),
+      at: 5,
+    ),
+    HomeTile(
       id: 'recent',
       kind: HomeTileKind.recent,
       cell: (x: 1, y: 1, w: 1, h: 2),

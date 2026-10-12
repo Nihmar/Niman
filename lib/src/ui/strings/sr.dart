@@ -3476,6 +3476,10 @@ final class SerbianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Нема отворених задатака.';
+  @override
+  String get homeTileEventsToday => 'Данашњи догађаји';
+  @override
+  String get homeEventsEmpty => 'Данас нема догађаја';
 
   @override
   String get homeNotesEmpty => 'Још нема белешки.';

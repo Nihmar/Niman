@@ -3442,6 +3442,10 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ingen åpne oppgaver.';
+  @override
+  String get homeTileEventsToday => 'Dagens hendelser';
+  @override
+  String get homeEventsEmpty => 'Ingen hendelser i dag';
 
   @override
   String get homeNotesEmpty => 'Ingen notater ennå.';

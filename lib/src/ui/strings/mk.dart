@@ -3482,6 +3482,10 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Нема отворени задачи.';
+  @override
+  String get homeTileEventsToday => 'Денешни настани';
+  @override
+  String get homeEventsEmpty => 'Денес нема настани';
 
   @override
   String get homeNotesEmpty => 'Сè уште нема белешки.';

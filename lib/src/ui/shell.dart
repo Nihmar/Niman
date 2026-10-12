@@ -4420,7 +4420,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   HomeHost _homeHost(LibrarySession controller) => HomeHost(
     controller: controller,
     todo: _todoController,
+    calendar: _calendarController,
     journal: _journalFlow,
+    openEvent: _openCalendarEvent,
+    openJournal: () => _journalUi.showCalendar(context),
     openNote: _openSearchNote,
     openSearch: (query) => _showSearch(SearchRequest.forText(query)),
     openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),

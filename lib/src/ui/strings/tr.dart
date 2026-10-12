@@ -3417,6 +3417,10 @@ final class TurkishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Açık görev yok.';
+  @override
+  String get homeTileEventsToday => 'Bugünün etkinlikleri';
+  @override
+  String get homeEventsEmpty => 'Bugün etkinlik yok';
 
   @override
   String get homeNotesEmpty => 'Henüz not yok.';

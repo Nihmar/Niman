@@ -3496,6 +3496,10 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Няма адкрытых задач.';
+  @override
+  String get homeTileEventsToday => 'Падзеі сёння';
+  @override
+  String get homeEventsEmpty => 'Сёння падзей няма';
 
   @override
   String get homeNotesEmpty => 'Нататак пакуль няма.';

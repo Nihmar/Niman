@@ -3464,6 +3464,10 @@ final class HungarianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nincs nyitott feladat.';
+  @override
+  String get homeTileEventsToday => 'Mai események';
+  @override
+  String get homeEventsEmpty => 'Ma nincs esemény';
 
   @override
   String get homeNotesEmpty => 'Még nincsenek jegyzetek.';

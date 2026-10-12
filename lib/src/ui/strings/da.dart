@@ -3439,6 +3439,10 @@ final class DanishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ingen åbne opgaver.';
+  @override
+  String get homeTileEventsToday => 'Dagens begivenheder';
+  @override
+  String get homeEventsEmpty => 'Ingen begivenheder i dag';
 
   @override
   String get homeNotesEmpty => 'Ingen noter endnu.';

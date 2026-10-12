@@ -3479,6 +3479,10 @@ final class GalicianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Non hai tarefas abertas.';
+  @override
+  String get homeTileEventsToday => 'Eventos de hoxe';
+  @override
+  String get homeEventsEmpty => 'Sen eventos hoxe';
 
   @override
   String get homeNotesEmpty => 'Aínda non hai notas.';

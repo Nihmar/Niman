@@ -1799,6 +1799,8 @@ final class AppStrings {
   static String get homeJournalEmpty => _s.homeJournalEmpty;
   static String get homeJournalWrite => _s.homeJournalWrite;
   static String get homeTasksEmpty => _s.homeTasksEmpty;
+  static String get homeTileEventsToday => _s.homeTileEventsToday;
+  static String get homeEventsEmpty => _s.homeEventsEmpty;
   static String get homeNotesEmpty => _s.homeNotesEmpty;
   static String get homePinnedEmpty => _s.homePinnedEmpty;
   static String get homeTagsEmpty => _s.homeTagsEmpty;

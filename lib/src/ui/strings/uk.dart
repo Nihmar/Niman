@@ -3498,6 +3498,10 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Немає відкритих завдань.';
+  @override
+  String get homeTileEventsToday => 'Події сьогодні';
+  @override
+  String get homeEventsEmpty => 'Сьогодні подій немає';
 
   @override
   String get homeNotesEmpty => 'Нотаток ще немає.';

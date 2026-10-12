@@ -3497,6 +3497,10 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Atvirų užduočių nėra.';
+  @override
+  String get homeTileEventsToday => 'Šiandienos įvykiai';
+  @override
+  String get homeEventsEmpty => 'Šiandien įvykių nėra';
 
   @override
   String get homeNotesEmpty => 'Užrašų dar nėra.';

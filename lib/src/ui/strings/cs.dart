@@ -3453,6 +3453,10 @@ final class CzechStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Žádné otevřené úkoly.';
+  @override
+  String get homeTileEventsToday => 'Dnešní události';
+  @override
+  String get homeEventsEmpty => 'Dnes žádné události';
 
   @override
   String get homeNotesEmpty => 'Zatím žádné poznámky.';

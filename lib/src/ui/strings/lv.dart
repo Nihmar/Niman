@@ -3448,6 +3448,10 @@ final class LatvianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nav atvērtu uzdevumu.';
+  @override
+  String get homeTileEventsToday => 'Šodienas notikumi';
+  @override
+  String get homeEventsEmpty => 'Šodien nav notikumu';
 
   @override
   String get homeNotesEmpty => 'Piezīmju vēl nav.';

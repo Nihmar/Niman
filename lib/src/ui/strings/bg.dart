@@ -3468,6 +3468,10 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Няма отворени задачи.';
+  @override
+  String get homeTileEventsToday => 'Днешни събития';
+  @override
+  String get homeEventsEmpty => 'Днес няма събития';
 
   @override
   String get homeNotesEmpty => 'Все още няма бележки.';

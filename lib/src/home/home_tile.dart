@@ -17,6 +17,9 @@ enum HomeTileKind {
   /// The open tasks, due soonest first.
   tasksDue,
 
+  /// Today's events, from the calendar file (#730).
+  eventsToday,
+
   /// The notes modified last.
   recent,
 
@@ -44,6 +47,7 @@ enum HomeTileKind {
   ({int w, int h}) get defaultSize => switch (this) {
     journalToday => (w: 2, h: 2),
     tasksDue || recent || journalCalendar => (w: 1, h: 2),
+    eventsToday => (w: 2, h: 1),
     actions || search => (w: 2, h: 1),
     pinned || topTags || randomNote => (w: 1, h: 1),
   };

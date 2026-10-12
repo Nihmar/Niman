@@ -3494,6 +3494,10 @@ final class DutchStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Geen openstaande taken.';
+  @override
+  String get homeTileEventsToday => 'Gebeurtenissen vandaag';
+  @override
+  String get homeEventsEmpty => 'Geen gebeurtenissen vandaag';
 
   @override
   String get homeNotesEmpty => 'Nog geen notities.';

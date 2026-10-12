@@ -239,6 +239,10 @@ void main() {
       );
       final add = find.byKey(const Key('home-add-search'));
       await tester.scrollUntilVisible(add, 200, scrollable: list.first);
+      // The Home grew a tile (#730): make sure the row is all the way in
+      // before tapping it.
+      await tester.ensureVisible(add);
+      await settle(tester);
       await tester.tap(add);
       await settle(tester);
       final id = controller.libraryHome!.tiles

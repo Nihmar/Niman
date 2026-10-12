@@ -3478,6 +3478,10 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Asnjë detyrë e hapur.';
+  @override
+  String get homeTileEventsToday => 'Ngjarjet e sotme';
+  @override
+  String get homeEventsEmpty => 'Asnjë ngjarje sot';
 
   @override
   String get homeNotesEmpty => 'Ende nuk ka shënime.';

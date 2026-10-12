@@ -3530,6 +3530,10 @@ final class GermanStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Keine offenen Aufgaben.';
+  @override
+  String get homeTileEventsToday => 'Termine heute';
+  @override
+  String get homeEventsEmpty => 'Heute keine Termine';
 
   @override
   String get homeNotesEmpty => 'Noch keine Notizen.';

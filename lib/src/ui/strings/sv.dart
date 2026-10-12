@@ -3466,6 +3466,10 @@ final class SwedishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Inga öppna uppgifter.';
+  @override
+  String get homeTileEventsToday => 'Dagens händelser';
+  @override
+  String get homeEventsEmpty => 'Inga händelser i dag';
 
   @override
   String get homeNotesEmpty => 'Inga anteckningar än.';

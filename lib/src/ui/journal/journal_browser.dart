@@ -378,18 +378,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
   }
 
   /// What a goal covers: the week's number, the month's name, the year.
-  String _goalLabel(CalendarLine goal) {
-    final date = goal.date;
-    if (date == null) return '';
-    return switch (goal.kind) {
-      CalendarLineKind.weekGoal => AppStrings.journalWeek(
-        goal.week ?? isoWeekOf(date),
-      ),
-      CalendarLineKind.monthGoal => AppStrings.monthNames[date.month - 1],
-      CalendarLineKind.yearGoal => '${date.year}',
-      _ => '',
-    };
-  }
+  String _goalLabel(CalendarLine goal) => journalGoalLabel(goal);
 
   /// An event's row (#730): its time as written, then its text with the
   /// tokens coloured and an aside dimmed, and a bell for its reminder.
@@ -662,4 +651,19 @@ final class _Never implements Listenable {
 
   @override
   void removeListener(VoidCallback listener) {}
+}
+
+/// What a goal covers: the week's number, the month's name, the year
+/// (#730). Shared with the Home's events tile, so both name a goal alike.
+String journalGoalLabel(CalendarLine goal) {
+  final date = goal.date;
+  if (date == null) return '';
+  return switch (goal.kind) {
+    CalendarLineKind.weekGoal => AppStrings.journalWeek(
+      goal.week ?? isoWeekOf(date),
+    ),
+    CalendarLineKind.monthGoal => AppStrings.monthNames[date.month - 1],
+    CalendarLineKind.yearGoal => '${date.year}',
+    _ => '',
+  };
 }

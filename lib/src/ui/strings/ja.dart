@@ -3166,6 +3166,10 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get homeTasksEmpty => '未完了のタスクはありません。';
+  @override
+  String get homeTileEventsToday => '今日のイベント';
+  @override
+  String get homeEventsEmpty => '今日のイベントはありません';
 
   @override
   String get homeNotesEmpty => 'まだノートがありません。';

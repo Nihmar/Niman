@@ -3406,6 +3406,10 @@ final class HindiStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'कोई खुला कार्य नहीं।';
+  @override
+  String get homeTileEventsToday => 'आज के ईवेंट';
+  @override
+  String get homeEventsEmpty => 'आज कोई ईवेंट नहीं';
 
   @override
   String get homeNotesEmpty => 'अभी कोई नोट नहीं।';

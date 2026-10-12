@@ -3554,6 +3554,10 @@ final class FrenchStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Aucune tâche ouverte.';
+  @override
+  String get homeTileEventsToday => 'Événements du jour';
+  @override
+  String get homeEventsEmpty => "Aucun événement aujourd'hui";
 
   @override
   String get homeNotesEmpty => "Aucune note pour l'instant.";

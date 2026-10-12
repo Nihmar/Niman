@@ -3482,6 +3482,10 @@ final class CroatianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nema otvorenih zadataka.';
+  @override
+  String get homeTileEventsToday => 'Današnji događaji';
+  @override
+  String get homeEventsEmpty => 'Danas nema događaja';
 
   @override
   String get homeNotesEmpty => 'Još nema bilješki.';

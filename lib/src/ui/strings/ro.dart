@@ -3509,6 +3509,10 @@ final class RomanianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nicio sarcină deschisă.';
+  @override
+  String get homeTileEventsToday => 'Evenimentele de azi';
+  @override
+  String get homeEventsEmpty => 'Niciun eveniment azi';
 
   @override
   String get homeNotesEmpty => 'Încă nu există notițe.';

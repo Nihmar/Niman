@@ -1870,6 +1870,12 @@ abstract base class Strings {
   String get homeJournalEmpty;
   String get homeJournalWrite;
   String get homeTasksEmpty;
+
+  /// The Home's events tile (#730).
+  String get homeTileEventsToday;
+
+  /// What the events tile says on a day with nothing on it.
+  String get homeEventsEmpty;
   String get homeNotesEmpty;
   String get homePinnedEmpty;
   String get homeTagsEmpty;

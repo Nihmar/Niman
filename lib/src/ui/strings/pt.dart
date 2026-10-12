@@ -3476,6 +3476,10 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nenhuma tarefa aberta.';
+  @override
+  String get homeTileEventsToday => 'Eventos de hoje';
+  @override
+  String get homeEventsEmpty => 'Sem eventos hoje';
 
   @override
   String get homeNotesEmpty => 'Ainda não há notas.';

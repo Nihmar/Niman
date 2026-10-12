@@ -3479,6 +3479,10 @@ final class ItalianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Nessuna attività aperta.';
+  @override
+  String get homeTileEventsToday => 'Eventi di oggi';
+  @override
+  String get homeEventsEmpty => 'Nessun evento oggi';
 
   @override
   String get homeNotesEmpty => 'Ancora nessuna nota.';

@@ -3561,6 +3561,10 @@ final class GreekStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Καμία ανοιχτή εργασία.';
+  @override
+  String get homeTileEventsToday => 'Σημερινά συμβάντα';
+  @override
+  String get homeEventsEmpty => 'Κανένα συμβάν σήμερα';
 
   @override
   String get homeNotesEmpty => 'Δεν υπάρχουν σημειώσεις ακόμη.';

@@ -3490,6 +3490,10 @@ final class BasqueStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ez dago zeregin irekirik.';
+  @override
+  String get homeTileEventsToday => 'Gaurko gertaerak';
+  @override
+  String get homeEventsEmpty => 'Gaur ez dago gertaerarik';
 
   @override
   String get homeNotesEmpty => 'Ez dago oharrik oraindik.';

@@ -3474,6 +3474,10 @@ final class FinnishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Ei avoimia tehtäviä.';
+  @override
+  String get homeTileEventsToday => 'Tämän päivän tapahtumat';
+  @override
+  String get homeEventsEmpty => 'Ei tapahtumia tänään';
 
   @override
   String get homeNotesEmpty => 'Ei vielä muistiinpanoja.';

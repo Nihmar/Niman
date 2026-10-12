@@ -3076,6 +3076,10 @@ final class ChineseStrings extends Strings {
 
   @override
   String get homeTasksEmpty => '没有未完成的任务。';
+  @override
+  String get homeTileEventsToday => '今日事件';
+  @override
+  String get homeEventsEmpty => '今天没有事件';
 
   @override
   String get homeNotesEmpty => '还没有笔记。';

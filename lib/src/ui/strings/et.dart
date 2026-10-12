@@ -3404,6 +3404,10 @@ final class EstonianStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'Avatud ülesandeid pole.';
+  @override
+  String get homeTileEventsToday => 'Tänased sündmused';
+  @override
+  String get homeEventsEmpty => 'Täna sündmusi ei ole';
 
   @override
   String get homeNotesEmpty => 'Märkmeid veel pole.';

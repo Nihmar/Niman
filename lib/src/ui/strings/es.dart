@@ -3506,6 +3506,10 @@ final class SpanishStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'No hay tareas abiertas.';
+  @override
+  String get homeTileEventsToday => 'Eventos de hoy';
+  @override
+  String get homeEventsEmpty => 'Sin eventos hoy';
 
   @override
   String get homeNotesEmpty => 'Aún no hay notas.';

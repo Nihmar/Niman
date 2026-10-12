@@ -3515,6 +3515,10 @@ final class CatalanStrings extends Strings {
 
   @override
   String get homeTasksEmpty => 'No hi ha tasques obertes.';
+  @override
+  String get homeTileEventsToday => "Esdeveniments d'avui";
+  @override
+  String get homeEventsEmpty => 'Cap esdeveniment avui';
 
   @override
   String get homeNotesEmpty => 'Encara no hi ha notes.';
