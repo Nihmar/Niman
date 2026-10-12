@@ -218,6 +218,51 @@ void main() {
     }
   });
 
+  testWidgets('the grid follows a rename of the folder it shows', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    try {
+      await openShell(tester);
+      await session.createFolder(parentPath: '', name: 'Projects');
+      await session.createNote(parentPath: 'Projects', name: 'Roadmap');
+      await session.createNote(parentPath: '', name: 'Ideas');
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('view-grid-toggle')));
+      await settle(tester);
+      // A note open, as the Rename command asks.
+      await tester.tap(find.byKey(const Key('grid-tile-Ideas.md')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('grid-tile-Projects')));
+      await settle(tester);
+
+      // F2 with no tile under the cursor renames the selection: the folder
+      // shown, which has no tile of its own — so the dialog.
+      await tester.sendKeyEvent(LogicalKeyboardKey.f2);
+      await settle(tester);
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'Work',
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      await settle(tester);
+
+      expect(await session.find('Work'), isNotNull);
+      expect(gridFolder(tester), 'Work', reason: 'not the root it fell to');
+      expect(find.byKey(const Key('grid-tile-Work/Roadmap.md')), findsOne);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
   testWidgets("the switch starts in the tree's selection every time", (
     tester,
   ) async {

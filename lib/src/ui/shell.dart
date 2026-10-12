@@ -969,6 +969,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // an open one re-reads its file, which a clean buffer adopts — and
       // every buffer is clean, the move having saved them first.
       setState(() => _noteReloadToken++);
+      // The grid's own folder follows a rename or a move of it, or of a
+      // folder above it (#727): F2 with no tile under the cursor renames
+      // the selection, which is the folder shown.
+      final grid = _gridFolder;
+      if (grid != null && (grid == from || grid.startsWith('$from/'))) {
+        setState(() => _gridFolder = to + grid.substring(from.length));
+      }
       // The selection follows only a rename that is about it: the note
       // itself, or a folder it sits in. Renaming another row — a folder
       // above nothing selected — used to select that row while the shell
