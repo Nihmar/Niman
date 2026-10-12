@@ -19,6 +19,7 @@
 /// already decided how that looks.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/markdown/render/code_themes.dart';
@@ -208,6 +209,86 @@ final class MarkdownTheme {
     lineHeight: lineHeight,
     highlight: highlight,
   );
+
+  /// Whether [other] is a theme of the same values.
+  ///
+  /// The surfaces keep what they measured while the theme stands
+  /// ([`LiveTables`](live_tables.dart), #722), and a `build` that rebuilt
+  /// one with the same values has not moved it: a value comparison is what
+  /// tells them the theme is theirs.
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is MarkdownTheme &&
+        body == other.body &&
+        heading1 == other.heading1 &&
+        heading2 == other.heading2 &&
+        heading3 == other.heading3 &&
+        heading4 == other.heading4 &&
+        heading5 == other.heading5 &&
+        heading6 == other.heading6 &&
+        code == other.code &&
+        quote == other.quote &&
+        tableCell == other.tableCell &&
+        tableHeader == other.tableHeader &&
+        link == other.link &&
+        wikilink == other.wikilink &&
+        tag == other.tag &&
+        marker == other.marker &&
+        rule == other.rule &&
+        mapEquals(codeHighlight, other.codeHighlight) &&
+        codeBackground == other.codeBackground &&
+        quoteBar == other.quoteBar &&
+        tableBorder == other.tableBorder &&
+        markerDim == other.markerDim &&
+        highlight == other.highlight &&
+        blockSpacing == other.blockSpacing &&
+        listIndentPerLevel == other.listIndentPerLevel &&
+        quoteIndentPerLevel == other.quoteIndentPerLevel &&
+        codePadding == other.codePadding &&
+        quoteBarWidth == other.quoteBarWidth &&
+        ruleThickness == other.ruleThickness &&
+        tableCellPadding == other.tableCellPadding &&
+        lineHeight == other.lineHeight;
+  }
+
+  @override
+  int get hashCode => Object.hashAll(<Object?>[
+    body,
+    heading1,
+    heading2,
+    heading3,
+    heading4,
+    heading5,
+    heading6,
+    code,
+    quote,
+    tableCell,
+    tableHeader,
+    link,
+    wikilink,
+    tag,
+    marker,
+    rule,
+    // The map compares equal in any order (`mapEquals`), so its hash does
+    // too.
+    Object.hashAllUnordered(
+      codeHighlight.entries.map((e) => Object.hash(e.key, e.value)),
+    ),
+    codeBackground,
+    quoteBar,
+    tableBorder,
+    markerDim,
+    highlight,
+    blockSpacing,
+    listIndentPerLevel,
+    quoteIndentPerLevel,
+    codePadding,
+    quoteBarWidth,
+    ruleThickness,
+    tableCellPadding,
+    lineHeight,
+  ]);
 }
 
 /// The source mode's typography: a copy of [theme] set in [font]'s face.
@@ -276,8 +357,19 @@ MarkdownTheme surfaceThemeFor(MarkdownTheme theme, SourceFont font) {
 ///
 /// A function rather than a factory, as `noteTextScalerOf` is: it reads
 /// the context, which a constructor has no business doing.
+///
+/// The theme it built last is kept, and handed back while the same
+/// [ThemeData] and scaler are asked about: a caller builds in `build`, and a
+/// second instance of the same values is not the theme that stands — the
+/// surfaces cache their measurements on it (`LiveTables`, #722), and a
+/// rebuild dropped every one of them.
 MarkdownTheme markdownThemeOf(BuildContext context, {TextScaler? scaler}) {
   final theme = Theme.of(context);
+  final effective =
+      scaler ?? MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
+  final byScaler = _built[theme] ??= <TextScaler, MarkdownTheme>{};
+  final cached = byScaler[effective];
+  if (cached != null) return cached;
   final colors = theme.colorScheme;
   final text = theme.textTheme;
   final body = (text.bodyMedium ?? const TextStyle()).copyWith(
@@ -289,14 +381,12 @@ MarkdownTheme markdownThemeOf(BuildContext context, {TextScaler? scaler}) {
     fontFamilyFallback: const <String>['DejaVu Sans Mono', 'Courier New'],
   );
 
-  final em =
-      (scaler ?? MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling)
-          .scale(body.fontSize!);
+  final em = effective.scale(body.fontSize!);
 
   TextStyle heading(double size, FontWeight weight) =>
       body.copyWith(fontSize: size, fontWeight: weight, height: 1.3);
 
-  return MarkdownTheme(
+  final built = MarkdownTheme(
     body: body,
     heading1: heading(body.fontSize! * 1.8, FontWeight.w700),
     heading2: heading(body.fontSize! * 1.5, FontWeight.w700),
@@ -336,4 +426,15 @@ MarkdownTheme markdownThemeOf(BuildContext context, {TextScaler? scaler}) {
     lineHeight: body.fontSize! * 1.5,
     highlight: markHighlightFor(dark: theme.brightness == Brightness.dark),
   );
+  byScaler[effective] = built;
+  return built;
 }
+
+/// The themes [markdownThemeOf] built, by the application theme and text
+/// size they were built from and at.
+///
+/// An [Expando] holds a theme only while its application theme does: the
+/// cache grows with the themes a session really has, not with every edit of
+/// one.
+final Expando<Map<TextScaler, MarkdownTheme>> _built =
+    Expando<Map<TextScaler, MarkdownTheme>>('markdown themes');
