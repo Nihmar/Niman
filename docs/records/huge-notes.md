@@ -491,6 +491,23 @@ down in `unified-surface.md`: with per-word in, hiding a line's structural
 marks because the caret wrapped to another row would take away the marker of
 the item being written.
 
+## A note whose bulk is a table (#722)
+
+A 6.8 KB note — one heading, then a four-column table of long prose, 24 rows
+— stuttered on Android while scrolling back up it, in `live` and in preview.
+The frame trace (`NIMAN_FRAMES=true`, a profile beta) named it: the frames
+that brought the table's rows back into view laid out for **95–113 ms**
+(`build 0.0 ms, paint 0–2 ms` beside them, and `raster 2–7 ms` in the
+app-wide `[frames] slow frame` — the cost was the UI thread's layout, not the
+GPU). `LiveTables`' measurements were not re-taken: re-entering rows come
+back to the pieces they were measured into. `test/perf/live_table_scroll_test.dart`
+holds that (no measurement, no row laid out again when the rows return), on
+the reporting note's shape and font (Roboto from the Flutter cache, 390 ×
+800). On this host a scroll step through the table reads a median of 12 ms
+down and 8 ms up — inside §9.2's 16 ms frame, and asserted under
+`NIMAN_PERF=1` — with a worst of 51 ms where a step first builds the rows it
+brings in, which is what the follow-up has to bring down.
+
 ## The testing builds
 
 `scripts\niman.bat windows beta` and `scripts\niman.bat apk beta` were built
