@@ -338,7 +338,9 @@ a note, it can also be inserted at the caret — one line where the caret
 is, several on lines of their own. On a phone an example's source and its
 look are stacked, and the cheatsheet is a page. On a desktop it is a
 floating window that stays open, so several examples can be inserted one
-after another without reopening it.
+after another without reopening it; the keyboard stays with the window,
+so Esc still closes it after an insert. Opened from Settings, it is a page
+in the Settings window's right column, with a back arrow.
 
 One thing to know when a note came from somewhere else: **a list marker has
 to start a line.** `- c)` written inside a sentence — after a formula, or
