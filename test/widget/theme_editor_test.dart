@@ -90,6 +90,25 @@ void main() {
         tester.getTopLeft(find.byKey(const Key('theme-role-tag'))).dy,
       ),
     );
+    // The calendar's own roles, under their heading after the task list's
+    // (#730).
+    expect(find.text(AppStrings.themeEditorCalendar), findsOneWidget);
+    for (final role in ThemeColors.calendarRoles) {
+      expect(find.byKey(Key('theme-role-$role')), findsOneWidget, reason: role);
+      expect(
+        tester.getTopLeft(find.byKey(Key('theme-role-$role'))).dy,
+        greaterThan(
+          tester.getTopLeft(find.text(AppStrings.themeEditorCalendar)).dy,
+        ),
+        reason: role,
+      );
+    }
+    expect(
+      tester.getTopLeft(find.text(AppStrings.themeEditorCalendar)).dy,
+      greaterThan(
+        tester.getTopLeft(find.text(AppStrings.themeEditorTaskLists)).dy,
+      ),
+    );
     // The day side is the one shown: the sample's day accent (which the
     // wikilink shares, hence the row).
     expect(

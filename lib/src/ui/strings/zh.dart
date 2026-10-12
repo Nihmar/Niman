@@ -255,6 +255,8 @@ final class ChineseStrings extends Strings {
   @override
   String get themeEditorTaskLists => '任务列表 (todo.txt)';
   @override
+  String get themeEditorCalendar => '日历';
+  @override
   String get themeEditorRolesHint => '每个颜色的名称与导出文件一致';
   @override
   String get themeEditorDiscardTitle => '放弃更改';

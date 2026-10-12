@@ -95,22 +95,28 @@ void main() {
     );
   });
 
-  test('a goal head: the period, the week, and the text after it', () {
+  test("a goal head is the plan's own colour: the period and the week", () {
     const week = '2026-10-12 w42  Writing week +thesis';
-    expect(kindOf(week, '2026-10-12'), TokenKind.calendarDate);
-    expect(kindOf(week, 'w42'), TokenKind.calendarHead);
+    expect(kindOf(week, '2026-10-12'), TokenKind.calendarGoal);
+    expect(kindOf(week, 'w42'), TokenKind.calendarGoal);
     expect(kindOf(week, '+thesis'), TokenKind.todoProject);
 
     const month = '2026-10  Finish the thesis draft';
-    expect(kindOf(month, '2026-10'), TokenKind.calendarDate);
+    expect(kindOf(month, '2026-10'), TokenKind.calendarGoal);
 
     const year = '2026  The year of the move +home';
-    expect(kindOf(year, '2026'), TokenKind.calendarDate);
+    expect(kindOf(year, '2026'), TokenKind.calendarGoal);
     expect(kindOf(year, '+home'), TokenKind.todoProject);
+
+    // A day, on the other hand, keeps the calendar's own greys.
+    const day = '2026-10-12 w42 Mon  9-12 library.';
+    expect(kindOf(day, '2026-10-12'), TokenKind.calendarDate);
+    expect(kindOf(day, 'w42'), TokenKind.calendarHead);
   });
 
   test('a flagged week on a goal is flagged too', () {
     const line = '2026-10-12 w41  Writing week';
+    expect(kindOf(line, '2026-10-12'), TokenKind.calendarGoal);
     expect(kindOf(line, 'w41'), TokenKind.calendarMismatch);
   });
 

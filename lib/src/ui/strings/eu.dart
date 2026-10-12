@@ -272,6 +272,8 @@ final class BasqueStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Zeregin-zerrendak (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Egutegia';
+  @override
   String get themeEditorRolesHint =>
       'Kolore bakoitzak esportatutako fitxategiak duen izena du';
   @override

@@ -277,6 +277,8 @@ final class CatalanStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Llistes de tasques (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendari';
+  @override
   String get themeEditorRolesHint =>
       'Cada color porta el nom que fa servir el fitxer exportat';
   @override

@@ -278,6 +278,8 @@ final class ItalianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Liste di attività (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendario';
+  @override
   String get themeEditorRolesHint =>
       'Ogni colore porta il nome che usa il file esportato';
   @override

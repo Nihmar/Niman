@@ -70,6 +70,7 @@ final class ThemeColors {
   static const List<String> calendarRoles = [
     'calendarDate',
     'calendarHead',
+    'calendarGoal',
     'calendarTime',
     'calendarAside',
     'calendarMismatch',
@@ -82,6 +83,8 @@ final class ThemeColors {
   static const Map<String, String> calendarRoleSources = {
     'calendarDate': 'dim',
     'calendarHead': 'dim',
+    // A goal's head was drawn with the date's own colour before the role.
+    'calendarGoal': 'calendarDate',
     'calendarTime': 'image',
     'calendarAside': 'quote',
     'calendarMismatch': 'error',
@@ -175,6 +178,7 @@ final class ThemeColors {
     'todoDone': colorToHex(syntax.todoDone),
     'calendarDate': colorToHex(syntax.calendarDate),
     'calendarHead': colorToHex(syntax.calendarHead),
+    'calendarGoal': colorToHex(syntax.calendarGoal),
     'calendarTime': colorToHex(syntax.calendarTime),
     'calendarAside': colorToHex(syntax.calendarAside),
     'calendarMismatch': colorToHex(syntax.calendarMismatch),
@@ -232,6 +236,7 @@ final class ThemeColors {
         todoDone: colors['todoDone']!,
         calendarDate: colors['calendarDate']!,
         calendarHead: colors['calendarHead']!,
+        calendarGoal: colors['calendarGoal']!,
         calendarTime: colors['calendarTime']!,
         calendarAside: colors['calendarAside']!,
         calendarMismatch: colors['calendarMismatch']!,

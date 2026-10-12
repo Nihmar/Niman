@@ -50,6 +50,7 @@ const SyntaxColors _darkSyntax = SyntaxColors(
   todoDone: Color(0xFF7C6F64), // bg4
   calendarDate: Color(0xFFA89984),
   calendarHead: Color(0xFF7C6F64),
+  calendarGoal: Color(0xFFB8BB26), // bright green
   calendarTime: Color(0xFFD79921),
   calendarAside: Color(0xFF7C6F64),
   calendarMismatch: Color(0xFFFB4934),
@@ -89,6 +90,7 @@ const SyntaxColors _lightSyntax = SyntaxColors(
   todoDone: Color(0xFFA89984), // bg4
   calendarDate: Color(0xFF7C6F64),
   calendarHead: Color(0xFFA89984),
+  calendarGoal: Color(0xFF79740E), // faded green
   calendarTime: Color(0xFFB57614),
   calendarAside: Color(0xFFA89984),
   calendarMismatch: Color(0xFF9D0006),

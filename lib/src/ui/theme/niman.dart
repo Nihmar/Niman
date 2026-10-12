@@ -60,6 +60,8 @@ const SyntaxColors _darkSyntax = SyntaxColors(
   todoDone: Color(0xFF6B7079),
   calendarDate: Color(0xFF9A968E),
   calendarHead: Color(0xFF6B7079),
+  // The mockups' goal green, which Night's template also wears.
+  calendarGoal: Color(0xFFA8C77A),
   calendarTime: Color(0xFFD8A56B),
   calendarAside: Color(0xFF6B7079),
   calendarMismatch: Color(0xFFE0687A),
@@ -103,6 +105,7 @@ const SyntaxColors _lightSyntax = SyntaxColors(
   todoDone: Color(0xFF9B968C),
   calendarDate: Color(0xFF6E7178),
   calendarHead: Color(0xFF9B968C),
+  calendarGoal: Color(0xFF5E7F2A),
   calendarTime: Color(0xFFB26A25),
   calendarAside: Color(0xFF9B968C),
   calendarMismatch: Color(0xFFC0392B),

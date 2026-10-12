@@ -274,6 +274,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Oppgavelister (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalender';
+  @override
   String get themeEditorRolesHint =>
       'Hver farge heter det den eksporterte filen kaller den';
   @override

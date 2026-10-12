@@ -89,6 +89,7 @@ Set<ToolbarItem> activeFormatsOf({
       // either.
       case TokenKind.calendarDate ||
           TokenKind.calendarHead ||
+          TokenKind.calendarGoal ||
           TokenKind.calendarTime ||
           TokenKind.calendarAside ||
           TokenKind.calendarMismatch:

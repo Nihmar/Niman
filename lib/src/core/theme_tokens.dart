@@ -132,6 +132,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     required this.todoDone,
     required this.calendarDate,
     required this.calendarHead,
+    required this.calendarGoal,
     required this.calendarTime,
     required this.calendarAside,
     required this.calendarMismatch,
@@ -198,6 +199,12 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
   /// The week and the weekday of a calendar.txt head (`w42 Mon`).
   final Color calendarHead;
 
+  /// A goal's head in `calendar.txt` (`2026`, `2026-10`,
+  /// `2026-10-05 w41`) — the green the mockups drew a plan in — and the
+  /// marker beside a goal wherever one is shown: the journal's label, the
+  /// Home's, a search row's flag.
+  final Color calendarGoal;
+
   /// An event's time (`9-12`, `0600Z`).
   final Color calendarTime;
 
@@ -237,6 +244,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     todoDone: Color(0xFFA0A0A0),
     calendarDate: Color(0xFF7A7A7A),
     calendarHead: Color(0xFF9E9E9E),
+    calendarGoal: Color(0xFF4F7A28),
     calendarTime: Color(0xFFB26A00),
     calendarAside: Color(0xFF7A7A7A),
     calendarMismatch: Color(0xFFC0392B),
@@ -263,6 +271,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     todoDone: Color(0xFF7A7A7A),
     calendarDate: Color(0xFF9E9E9E),
     calendarHead: Color(0xFF7A828E),
+    calendarGoal: Color(0xFF98C379),
     calendarTime: Color(0xFFD8A56B),
     calendarAside: Color(0xFF7A828E),
     calendarMismatch: Color(0xFFE0687A),
@@ -289,6 +298,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     Color? todoDone,
     Color? calendarDate,
     Color? calendarHead,
+    Color? calendarGoal,
     Color? calendarTime,
     Color? calendarAside,
     Color? calendarMismatch,
@@ -313,6 +323,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       todoDone: todoDone ?? this.todoDone,
       calendarDate: calendarDate ?? this.calendarDate,
       calendarHead: calendarHead ?? this.calendarHead,
+      calendarGoal: calendarGoal ?? this.calendarGoal,
       calendarTime: calendarTime ?? this.calendarTime,
       calendarAside: calendarAside ?? this.calendarAside,
       calendarMismatch: calendarMismatch ?? this.calendarMismatch,
@@ -342,6 +353,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       todoDone: Color.lerp(todoDone, other.todoDone, t)!,
       calendarDate: Color.lerp(calendarDate, other.calendarDate, t)!,
       calendarHead: Color.lerp(calendarHead, other.calendarHead, t)!,
+      calendarGoal: Color.lerp(calendarGoal, other.calendarGoal, t)!,
       calendarTime: Color.lerp(calendarTime, other.calendarTime, t)!,
       calendarAside: Color.lerp(calendarAside, other.calendarAside, t)!,
       calendarMismatch: Color.lerp(
@@ -376,6 +388,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       other.todoDone == todoDone &&
       other.calendarDate == calendarDate &&
       other.calendarHead == calendarHead &&
+      other.calendarGoal == calendarGoal &&
       other.calendarTime == calendarTime &&
       other.calendarAside == calendarAside &&
       other.calendarMismatch == calendarMismatch;
@@ -399,11 +412,12 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     todoContext,
     todoKeyValue,
     todoDone,
-    // One slot for the calendar's five: they came after [Object.hash]'s
+    // One slot for the calendar's six: they came after [Object.hash]'s
     // twenty and travel together (#730).
     Object.hash(
       calendarDate,
       calendarHead,
+      calendarGoal,
       calendarTime,
       calendarAside,
       calendarMismatch,

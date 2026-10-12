@@ -54,6 +54,7 @@ const SyntaxColors _lightSyntax = SyntaxColors(
   todoDone: Color(0xFFA6977F), // quieter than the ink above
   calendarDate: Color(0xFF7A6A52),
   calendarHead: Color(0xFFA6977F),
+  calendarGoal: Color(0xFF5F7A46),
   calendarTime: Color(0xFFA0522D),
   calendarAside: Color(0xFFA6977F),
   calendarMismatch: Color(0xFFA6402D),
@@ -94,6 +95,7 @@ const SyntaxColors _darkSyntax = SyntaxColors(
   todoDone: Color(0xFF6E6250),
   calendarDate: Color(0xFFA99A83),
   calendarHead: Color(0xFF6E6250),
+  calendarGoal: Color(0xFF9BB37F),
   calendarTime: Color(0xFFD99A6C),
   calendarAside: Color(0xFF6E6250),
   calendarMismatch: Color(0xFFD98A7A),

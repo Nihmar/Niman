@@ -129,6 +129,10 @@ enum TokenKind {
   /// The week and the weekday of a calendar.txt head (`w42 Mon`).
   calendarHead,
 
+  /// A goal's head in calendar.txt (`2026`, `2026-10`, `2026-10-05
+  /// w41`).
+  calendarGoal,
+
   /// An event's time (`9-12`, `0600Z`).
   calendarTime,
 

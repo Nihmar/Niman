@@ -273,6 +273,8 @@ final class HungarianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Feladatlisták (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Naptár';
+  @override
   String get themeEditorRolesHint =>
       'Minden szín neve az exportált fájlban szereplő név';
   @override

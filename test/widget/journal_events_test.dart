@@ -9,6 +9,7 @@ import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/theme/niman.dart';
 
 void main() {
   final today = DateTime(2026, 10, 12);
@@ -34,6 +35,7 @@ void main() {
     WidgetTester tester, {
     bool large = false,
     CalendarSnapshot? calendar,
+    ThemeData? theme,
   }) async {
     final opened = <CalendarEntryEvent>[];
     final at = calendar ?? snapshot();
@@ -42,6 +44,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp(
+        theme: theme,
         home: Scaffold(
           body: JournalBrowser(
             today: today,
@@ -62,6 +65,17 @@ void main() {
     await tester.pumpAndSettle();
     return opened;
   }
+
+  testWidgets("a goal's label wears the palette's goal colour (#730)", (
+    tester,
+  ) async {
+    final syntax = nimanSyntax(Brightness.dark);
+    await pump(tester, theme: ThemeData(extensions: [syntax]));
+
+    final label = tester.widget<Text>(find.text(AppStrings.journalWeek(42)));
+    expect(label.style?.color, syntax.calendarGoal);
+    expect(syntax.calendarGoal, isNot(syntax.calendarHead));
+  });
 
   testWidgets("the day's events come above Due, the goals over them", (
     tester,

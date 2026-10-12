@@ -274,6 +274,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Verkefnalistar (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Dagatal';
+  @override
   String get themeEditorRolesHint =>
       'Hver litur heitir því sem útflutta skráin kallar hann';
   @override

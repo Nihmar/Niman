@@ -230,6 +230,17 @@ final class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                 color: _colors.colorOf(role)!,
                 onTap: () => unawaited(_editRole(role)),
               ),
+            // The calendar's own roles (#730), last: its `+`/`@`/`#`/
+            // `key:value` runs are the task list's, so only the file's own
+            // runs are named here.
+            SettingsSection(AppStrings.themeEditorCalendar),
+            for (final role in ThemeColors.calendarRoles)
+              _RoleRow(
+                key: Key('theme-role-$role'),
+                role: role,
+                color: _colors.colorOf(role)!,
+                onTap: () => unawaited(_editRole(role)),
+              ),
           ],
         ),
       ),

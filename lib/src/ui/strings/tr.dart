@@ -268,6 +268,8 @@ final class TurkishStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Görev listeleri (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Takvim';
+  @override
   String get themeEditorRolesHint =>
       'Her renk, dışa aktarılan dosyadaki adı taşır';
   @override

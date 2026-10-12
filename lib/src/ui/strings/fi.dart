@@ -274,6 +274,8 @@ final class FinnishStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Tehtävälistat (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalenteri';
+  @override
   String get themeEditorRolesHint =>
       'Jokainen väri on nimetty viedyn tiedoston mukaan';
   @override

@@ -9,6 +9,7 @@ import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_tile_frame.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
+import 'package:niman/src/ui/line_runs.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Today's events.
@@ -37,6 +38,15 @@ final class EventsTodayTile extends StatelessWidget {
           return HomeTileEmpty(AppStrings.homeEventsEmpty);
         }
         final time = theme.extension<SyntaxColors>()?.calendarTime;
+        // A goal is its label in the goal's green, then what it says in
+        // the tile's own muted body, its tokens in the editor's colours
+        // (#730).
+        final muted = theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        );
+        final goalColour =
+            theme.extension<SyntaxColors>()?.calendarGoal ??
+            theme.colorScheme.tertiary;
         return InkWell(
           key: const Key('home-events-open'),
           onTap: host.openJournal,
@@ -45,11 +55,20 @@ final class EventsTodayTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (final goal in goals)
-                Text(
-                  '${journalGoalLabel(goal.line)} · '
-                  '${goal.line.goalText ?? ''}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${journalGoalLabel(goal.line)} · ',
+                        style: muted?.copyWith(color: goalColour),
+                      ),
+                      ...lineSpans(
+                        context,
+                        goal.line.goalText ?? '',
+                        calendarLineRuns(goal.line.tokens),
+                        base: muted,
+                      ),
+                    ],
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

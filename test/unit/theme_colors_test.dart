@@ -11,12 +11,27 @@ ThemeColors _colors() => sampleThemeColors(
   dark: false,
 );
 
+/// Every role [sources] names reads from one that comes before it in
+/// [ThemeColors.roleNames], so a theme missing any of them still resolves:
+/// a role of an older section, or a later one that is itself read from an
+/// older role (a goal's head was drawn with the date's colour, #730).
+void expectSourcesReadEarlier(Map<String, String> sources) {
+  for (final MapEntry(key: role, value: source) in sources.entries) {
+    expect(ThemeColors.roleNames, contains(source));
+    expect(
+      ThemeColors.roleNames.indexOf(source),
+      lessThan(ThemeColors.roleNames.indexOf(role)),
+      reason: '$role reads from $source',
+    );
+  }
+}
+
 void main() {
   group('the role map', () {
     test('every role is there, in the order a file lists them', () {
       final json = _colors().toJson();
       expect(json.keys.toList(), ThemeColors.roleNames);
-      expect(json.length, 32);
+      expect(json.length, 33);
     });
 
     test('the task-list roles are the last of the Markdown ones', () {
@@ -42,10 +57,7 @@ void main() {
         ThemeColors.calendarRoles,
       );
       expect(ThemeColors.calendarRoleSources.keys, ThemeColors.calendarRoles);
-      for (final source in ThemeColors.calendarRoleSources.values) {
-        expect(ThemeColors.calendarRoles, isNot(contains(source)));
-        expect(ThemeColors.roleNames, contains(source));
-      }
+      expectSourcesReadEarlier(ThemeColors.calendarRoleSources);
     });
 
     test('a theme from before the calendar roles reads them from the '
@@ -103,11 +115,7 @@ void main() {
       final read = ThemeColors.fromJson(json)!;
       expect(read.syntax.template, colors.syntax.code);
       expect(read.syntax.tag, colors.syntax.tag);
-      // Each later role is read from a role every theme has.
-      for (final source in ThemeColors.laterRoleSources.values) {
-        expect(ThemeColors.laterRoleSources.keys, isNot(contains(source)));
-        expect(ThemeColors.roleNames, contains(source));
-      }
+      expectSourcesReadEarlier(ThemeColors.laterRoleSources);
     });
 
     test('a theme from before the task-list roles reads them from the '

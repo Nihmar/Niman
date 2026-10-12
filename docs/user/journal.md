@@ -74,7 +74,8 @@ A `calendar.txt` at the library root (the plain-text calendar
 has its events shown where the day is read: in the dock's journal pane and
 in the phone's day card, in an **Events** section above **Due**, with the
 day's goals — the week's, the month's, the year's — as a header over them
-(`Week 42`, `October`, `2026`).
+(`Week 42`, `October`, `2026`), in the goal green a goal's head wears in
+`calendar.txt`.
 
 Each event reads as it is written: its time (`9-12`, `08:15`, `0600Z`),
 its text with `+project`, `@context` and `#tag` picked out and a

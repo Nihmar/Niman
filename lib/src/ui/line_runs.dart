@@ -52,7 +52,11 @@ Widget calendarEventText(
       ));
     }
   }
-  return _richText(context, text, runs, maxLines);
+  return Text.rich(
+    TextSpan(children: _spans(context, text, runs, null)),
+    maxLines: maxLines,
+    overflow: TextOverflow.ellipsis,
+  );
 }
 
 /// [text] with [runs] coloured, their spellings found in [text].
@@ -61,6 +65,21 @@ Widget lineText(
   String text,
   List<LineRun> runs, {
   int maxLines = 2,
+  TextStyle? base,
+}) => Text.rich(
+  TextSpan(children: lineSpans(context, text, runs, base: base)),
+  maxLines: maxLines,
+  overflow: TextOverflow.ellipsis,
+);
+
+/// The spans of [text], its [runs] in the editor's colours and the rest
+/// in [base] (the body style when none is given): for a line a caller
+/// splices into a `Text.rich` of its own.
+List<TextSpan> lineSpans(
+  BuildContext context,
+  String text,
+  List<LineRun> runs, {
+  TextStyle? base,
 }) {
   final syntax = Theme.of(context).extension<SyntaxColors>();
   final placed = <({int start, int end, TextStyle style})>[];
@@ -75,7 +94,7 @@ Widget lineText(
       ));
     }
   }
-  return _richText(context, text, placed, maxLines);
+  return _spans(context, text, placed, base);
 }
 
 /// The runs of a todo.txt [task]'s description: its `+`/`@`/`#` tokens
@@ -146,21 +165,23 @@ bool _overlaps(
   return false;
 }
 
-/// [text] with [runs] spliced in, everything else in the body style.
-Widget _richText(
+/// [text] with [runs] spliced in, everything else in [base] — the body
+/// style when none is given.
+List<TextSpan> _spans(
   BuildContext context,
   String text,
   List<({int start, int end, TextStyle style})> runs,
-  int maxLines,
+  TextStyle? base,
 ) {
-  final base = Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
+  final body =
+      base ?? Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
   runs.sort((a, b) => a.start.compareTo(b.start));
   final spans = <TextSpan>[];
   var at = 0;
   for (final run in runs) {
     if (run.start < at) continue;
     if (run.start > at) {
-      spans.add(TextSpan(text: text.substring(at, run.start), style: base));
+      spans.add(TextSpan(text: text.substring(at, run.start), style: body));
     }
     spans.add(
       TextSpan(text: text.substring(run.start, run.end), style: run.style),
@@ -168,11 +189,7 @@ Widget _richText(
     at = run.end;
   }
   if (at < text.length) {
-    spans.add(TextSpan(text: text.substring(at), style: base));
+    spans.add(TextSpan(text: text.substring(at), style: body));
   }
-  return Text.rich(
-    TextSpan(children: spans),
-    maxLines: maxLines,
-    overflow: TextOverflow.ellipsis,
-  );
+  return spans;
 }

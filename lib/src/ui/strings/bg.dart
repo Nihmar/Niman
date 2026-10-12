@@ -279,6 +279,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Списъци със задачи (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Календар';
+  @override
   String get themeEditorRolesHint =>
       'Всеки цвят е с името, което използва експортираният файл';
   @override

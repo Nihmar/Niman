@@ -272,6 +272,8 @@ final class LatvianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Uzdevumu saraksti (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendārs';
+  @override
   String get themeEditorRolesHint =>
       'Katrai krāsai ir tāds nosaukums kā eksportētajā failā';
   @override

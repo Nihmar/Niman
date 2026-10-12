@@ -272,6 +272,8 @@ final class EstonianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Ülesannete loendid (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalender';
+  @override
   String get themeEditorRolesHint =>
       'Iga värv on nimetatud nii, nagu seda nimetab eksporditud fail';
   @override

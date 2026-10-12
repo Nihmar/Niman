@@ -11,6 +11,7 @@ import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/search_task_events.dart';
+import 'package:niman/src/ui/theme/niman.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_search_source.dart';
@@ -69,8 +70,10 @@ void main() {
     List<TaskEventHit> rows = const [],
     ChangeNotifier? changes,
     bool withGroup = true,
+    ThemeData? theme,
   }) {
     return MaterialApp(
+      theme: theme,
       home: Scaffold(
         body: SearchScreen(
           controller: session,
@@ -153,6 +156,32 @@ void main() {
     expect(find.text('9-12'), findsOne);
     expect(find.textContaining('thesis chapter 3'), findsOne);
     expect(find.text('Mon 12 Oct · calendar.txt'), findsOne);
+  });
+
+  testWidgets("a goal row's flag wears the palette's goal colour", (
+    tester,
+  ) async {
+    final syntax = nimanSyntax(Brightness.dark);
+    final rows = _rows('+thesis');
+    final goal = rows.firstWhere((row) => row.kind == TaskEventKind.goal);
+    await tester.pumpWidget(
+      buildApp(
+        rows: rows,
+        theme: ThemeData(extensions: [syntax]),
+      ),
+    );
+    await tester.pump();
+
+    await search(tester, '+thesis');
+
+    final icon = tester.widget<Icon>(
+      find.descendant(
+        of: find.byKey(Key('search-task-event-goal-${goal.lineIndex}')),
+        matching: find.byType(Icon),
+      ),
+    );
+    expect(icon.color, syntax.calendarGoal);
+    expect(syntax.calendarGoal, isNot(syntax.calendarHead));
   });
 
   testWidgets('a goal row says what it covers', (tester) async {

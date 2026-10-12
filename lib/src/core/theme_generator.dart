@@ -86,6 +86,8 @@ ThemeColors _variant({required double hue, required bool dark}) {
     // error.
     calendarDate: _blend(ink, ground, 0.38),
     calendarHead: _blend(ink, ground, 0.45),
+    // A goal's head wears the palette's green, as the mockups drew it.
+    calendarGoal: _hsl(hue + 120, 0.45, distant),
     calendarTime: _hsl(hue + 60, 0.50, distant),
     calendarAside: _blend(ink, ground, 0.45),
     calendarMismatch: dark ? _hsl(8, 0.62, 0.72) : _hsl(8, 0.72, 0.38),

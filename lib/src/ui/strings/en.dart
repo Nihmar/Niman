@@ -274,6 +274,8 @@ final class EnglishStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Task lists (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendar';
+  @override
   String get themeEditorRolesHint =>
       'Each color is named as the exported file names it';
   @override

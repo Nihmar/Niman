@@ -275,6 +275,8 @@ final class DutchStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Takenlijsten (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalender';
+  @override
   String get themeEditorRolesHint =>
       'Elke kleur heet zoals het geëxporteerde bestand hem noemt';
   @override

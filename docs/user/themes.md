@@ -30,7 +30,11 @@ plain where it is not a command. So do the colors of a task list
 (`todo.txt`, `done.txt`), which the editor paints with roles of their own:
 the priority `(A)`, drawn bold; the dates; `+projects`; `@contexts`;
 `key:value` tags such as `due:`; and a completed task, struck through and
-stepped back.
+stepped back. And so do the calendar's (`calendar.txt`): the date and the
+week of a head, an event's time, a `( … )` aside, the wavy flag under a
+week number or a weekday that does not match its date, and the green a
+goal's head wears — the same green as the marker beside a goal in the
+journal, on the Home and in a search row.
 
 ## Themes of your own
 
@@ -45,9 +49,11 @@ Each theme in the list carries a ⋮ menu:
 
 - **Edit** (your own themes) opens the theme color by color: the interface
   roles first — background, text, accent, error — then the Markdown ones,
-  the template command among them, and last, under *Task lists
-  (todo.txt)*, the six a task list is painted with (`todoPriority`,
-  `todoDate`, `todoProject`, `todoContext`, `todoKeyValue`, `todoDone`),
+  the template command among them, then under *Task lists (todo.txt)* the
+  six a task list is painted with (`todoPriority`, `todoDate`,
+  `todoProject`, `todoContext`, `todoKeyValue`, `todoDone`), and last
+  under *Calendar* `calendar.txt`'s six (`calendarDate`, `calendarHead`,
+  `calendarGoal`, `calendarTime`, `calendarAside`, `calendarMismatch`) —
   each with the color it holds and the name the exported file uses. A
   color is opened in a picker with a saturation-and-value square, a hue
   bar and a `#RRGGBB` field, and **the whole app wears the colors as they

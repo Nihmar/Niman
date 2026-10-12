@@ -132,6 +132,9 @@ abstract base class Strings {
   String get themeEditorChrome;
   String get themeEditorMarkdown;
   String get themeEditorTaskLists;
+
+  /// The section heading over the calendar.txt roles (#730).
+  String get themeEditorCalendar;
   String get themeEditorRolesHint;
   String get themeEditorDiscardTitle;
   String get themeEditorDiscardBody;

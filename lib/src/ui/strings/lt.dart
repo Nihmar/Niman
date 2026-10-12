@@ -276,6 +276,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Užduočių sąrašai (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendorius';
+  @override
   String get themeEditorRolesHint =>
       'Kiekviena spalva pavadinta taip, kaip eksportuotame faile';
   @override

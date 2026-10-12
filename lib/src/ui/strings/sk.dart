@@ -277,6 +277,8 @@ final class SlovakStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Zoznamy úloh (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendár';
+  @override
   String get themeEditorRolesHint =>
       'Každá farba sa volá ako v exportovanom súbore';
   @override

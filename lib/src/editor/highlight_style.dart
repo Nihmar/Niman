@@ -147,6 +147,7 @@ TextStyle? markdownTokenStyle(
     // only what is the calendar's own has a role here.
     TokenKind.calendarDate => TextStyle(color: syntax.calendarDate),
     TokenKind.calendarHead => TextStyle(color: syntax.calendarHead),
+    TokenKind.calendarGoal => TextStyle(color: syntax.calendarGoal),
     TokenKind.calendarTime => TextStyle(color: syntax.calendarTime),
     TokenKind.calendarAside => TextStyle(
       color: syntax.calendarAside,

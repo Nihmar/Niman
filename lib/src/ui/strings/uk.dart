@@ -276,6 +276,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Списки завдань (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Календар';
+  @override
   String get themeEditorRolesHint =>
       'Кожен колір названо так, як у файлі експорту';
   @override

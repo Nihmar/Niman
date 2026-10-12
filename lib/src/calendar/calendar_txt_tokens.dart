@@ -26,10 +26,18 @@ List<Token> calendarTxtTokens(String line) {
 
   final head = parsed.head;
   if (head != null) {
+    // The head is a goal's (`2026`, `2026-10`, `2026-10-05 w41`) or a
+    // day's: a goal is the plan itself and wears the goal's green, a day
+    // the calendar's own greys.
+    final goal = parsed.kind != CalendarLineKind.day;
     // The date, at the head's start: `2026-10-12`, `2026-10`, `2026`.
     final date = _dateAtStart.matchAsPrefix(head);
     if (date != null) {
-      add(TokenKind.calendarDate, date.start, date.end);
+      add(
+        goal ? TokenKind.calendarGoal : TokenKind.calendarDate,
+        date.start,
+        date.end,
+      );
       // The week and the weekday after it, when the head carries them; the
       // one the parser flagged keeps its colour and wears the flag.
       final week = _weekInHead.matchAsPrefix(head, date.end);
@@ -77,9 +85,13 @@ List<CalendarToken> _eventTokens(CalendarLine parsed) => [
 ];
 
 /// The kind a head's week number wears: flagged when it does not match the
-/// date.
-TokenKind _weekKind(CalendarLine parsed) =>
-    parsed.weekMismatch ? TokenKind.calendarMismatch : TokenKind.calendarHead;
+/// date, else the head's own — a goal's green, a day's grey.
+TokenKind _weekKind(CalendarLine parsed) {
+  if (parsed.weekMismatch) return TokenKind.calendarMismatch;
+  return parsed.kind == CalendarLineKind.day
+      ? TokenKind.calendarHead
+      : TokenKind.calendarGoal;
+}
 
 TokenKind _tokenKind(CalendarTokenKind kind) => switch (kind) {
   CalendarTokenKind.project => TokenKind.todoProject,

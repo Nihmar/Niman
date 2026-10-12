@@ -275,6 +275,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Listas de tarefas (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Calendário';
+  @override
   String get themeEditorRolesHint =>
       'Cada cor tem o nome que usa o ficheiro exportado';
   @override

@@ -357,6 +357,12 @@ final class _JournalBrowserState extends State<JournalBrowser> {
   Widget _goalRow(BuildContext context, CalendarLine goal, TextStyle? style) {
     final text = goal.goalText;
     if (text == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final goalStyle = style?.copyWith(
+      color:
+          theme.extension<SyntaxColors>()?.calendarGoal ??
+          theme.colorScheme.tertiary,
+    );
     return Padding(
       key: Key('journal-goal-${goal.key}'),
       padding: const EdgeInsets.only(bottom: 2),
@@ -367,7 +373,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
             width: 64,
             child: Text(
               _goalLabel(goal),
-              style: style,
+              style: goalStyle,
               textAlign: TextAlign.end,
             ),
           ),

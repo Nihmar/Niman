@@ -77,12 +77,12 @@ Widget searchTaskEventRow(
         size: 18,
         color: syntax?.calendarTime ?? scheme.tertiary,
       ),
-      // A goal has no colour role of its own in a palette: the flag wears
-      // the accent, the way every other marker in the app does.
+      // A goal wears the palette's own green, the colour a plan is drawn
+      // in wherever the app shows one (#730).
       TaskEventKind.goal => Icon(
         Icons.flag_outlined,
         size: 18,
-        color: scheme.tertiary,
+        color: syntax?.calendarGoal ?? scheme.tertiary,
       ),
       TaskEventKind.task => Icon(
         Icons.check_box_outline_blank,

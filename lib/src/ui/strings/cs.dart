@@ -276,6 +276,8 @@ final class CzechStrings extends Strings {
   @override
   String get themeEditorTaskLists => 'Seznamy úkolů (todo.txt)';
   @override
+  String get themeEditorCalendar => 'Kalendář';
+  @override
   String get themeEditorRolesHint =>
       'Každá barva se jmenuje jako v exportovaném souboru';
   @override
