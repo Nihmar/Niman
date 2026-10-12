@@ -97,6 +97,10 @@ svg.math { color: inherit; }
 .callout-title { color: var(--callout); font-weight: 600; }
 details.callout > summary { cursor: pointer; }
 .callout-body > :last-child { margin-bottom: 0; }
+.columns { display: flex; flex-wrap: wrap; gap: 1.5em; margin: 0 0 1em; }
+.column { flex: 1 1 0; min-width: min(16em, 100%); }
+.column > :last-child { margin-bottom: 0; }
+.column .columns { flex-direction: column; }
 .footnotes { font-size: 0.9em; color: var(--muted);
   border-top: 1px solid var(--line); margin-top: 2em; }
 .hljs-comment, .hljs-quote { color: #a0a1a7; font-style: italic; }

@@ -196,4 +196,41 @@ void main() {
     expect(image.width, greaterThanOrEqualTo(1));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets("a page lays a note's columns out as its width allows", (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1000, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note = '''
+:::: columns
+::: {.column width="40%"}
+Left
+:::
+::: column
+Right
+:::
+::::
+
+After
+''';
+    // An A4 page's text, 18 mm margins: about 658 px.
+    await _layout(tester, note, 658);
+    var left = tester.getRect(find.textContaining('Left'));
+    var right = tester.getRect(find.textContaining('Right'));
+    expect((right.top - left.top).abs(), lessThan(1));
+    // 40 % of the text's width after the gap, and the gap.
+    expect(right.left - left.left, greaterThan(0.35 * 658));
+    expect(right.left - left.left, lessThan(0.5 * 658));
+    expect(
+      tester.getRect(find.textContaining('After')).top,
+      greaterThan(left.bottom),
+    );
+    // Too narrow for two: stacked, in source order.
+    await _layout(tester, note, 400);
+    left = tester.getRect(find.textContaining('Left'));
+    right = tester.getRect(find.textContaining('Right'));
+    expect(right.top, greaterThan(left.bottom));
+  });
 }

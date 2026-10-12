@@ -7,6 +7,7 @@ library;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_tree.dart';
+import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/html/code_html.dart';
 import 'package:niman/src/markdown/html/footnote_html.dart';
 import 'package:niman/src/markdown/html/html_hooks.dart';
@@ -193,8 +194,8 @@ final class TreeHtml {
           _list(node);
         case ItemNode():
           _item(node, tight: tight);
-        case ColumnsNode(:final columns):
-          _blocks(columns, tight: false);
+        case ColumnsNode():
+          _columns(node);
         case ColumnNode(:final children):
           _blocks(children, tight: false);
         case FootnoteNode(:final children):
@@ -226,6 +227,33 @@ final class TreeHtml {
     FootnoteNode() => false,
     _ => true,
   };
+
+  /// A `columns` div (#729) as the page lays it out: a flex row that
+  /// wraps, each column growing by its share (`pageStyle`).
+  void _columns(ColumnsNode columns) {
+    final shares = ColumnLayout.shares([
+      for (final column in columns.columns) column.width,
+    ]);
+    _cr();
+    _write('<div class="columns">\n');
+    for (var at = 0; at < columns.columns.length; at++) {
+      _write('<div class="column" style="flex-grow:${_share(shares[at])}">\n');
+      _blocks(columns.columns[at].children, tight: false);
+      _cr();
+      _write('</div>\n');
+    }
+    _write('</div>\n');
+  }
+
+  /// A share as CSS takes it: a whole number bare, a fraction to four
+  /// places, its trailing zeros off.
+  static String _share(double share) {
+    if (share == share.roundToDouble()) return share.round().toString();
+    return share
+        .toStringAsFixed(4)
+        .replaceFirst(RegExp(r'0+$'), '')
+        .replaceFirst(RegExp(r'\.$'), '');
+  }
 
   void _list(ListNode list) {
     final tight = _tight(list);
