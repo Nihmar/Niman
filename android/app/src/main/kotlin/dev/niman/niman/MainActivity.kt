@@ -62,10 +62,21 @@ class MainActivity : FlutterActivity() {
         // that started the app must not run again. The intent is cleared
         // where it is consumed, so nothing that reads it later sees it
         // either. A fresh delivery arrives through onNewIntent.
+        //
+        // Only Niman's own launch is cleared (#756). A launch that is not
+        // a share, shortcut or widget tap belongs to another component:
+        // a reminder's tap is flutter_local_notifications' intent, and
+        // the plugin reads it from the activity only when Dart asks for
+        // the launch details, well after this runs — so clearing it here
+        // lost the reminder's note on a cold start. A launch already
+        // handled is cleared whoever it belongs to, so a rebuilt activity
+        // does not reopen the reminder's note either.
         if (launch.take(getTaskId(), intent?.toUri(Intent.URI_INTENT_SCHEME) ?: "")) {
-            shortcuts.handleIntent(intent, running = false)
-            widgets.handleIntent(intent, running = false)
-            shares.handleIntent(intent, running = false)
+            val shortcut = shortcuts.handleIntent(intent, running = false)
+            val widget = widgets.handleIntent(intent, running = false)
+            val share = shares.handleIntent(intent, running = false)
+            if (shortcut || widget || share) setIntent(Intent())
+        } else {
             setIntent(Intent())
         }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "niman/storage")
