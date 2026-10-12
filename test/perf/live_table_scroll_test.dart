@@ -36,6 +36,7 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:path/path.dart' as p;
 
 final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
 
@@ -48,11 +49,15 @@ const int _backstopMicros = 150 * 1000;
 
 bool _roboto = false;
 
-MarkdownTheme? _built;
-
-/// One theme for the whole test: [LiveTables] keeps its measurements by the
-/// theme's identity, and a theme built during a frame would drop them.
-MarkdownTheme get _theme => _built ??= MarkdownTheme(
+/// A theme of the test's values, a new instance on every call.
+///
+/// The surface is handed a fresh one on every build, which is the path the
+/// fault took (#722, #789): `NoteView` built its theme in `build`, and a
+/// cache that held its measurements by the theme's identity dropped them on
+/// every rebuild. Handing it one instance for the whole test, as this test
+/// once did, passed with or without that fault; a new one per build holds
+/// the value equality [LiveTables] reads the theme by (#745).
+MarkdownTheme _theme() => MarkdownTheme(
   body: TextStyle(
     fontSize: 14,
     height: 1.5,
@@ -112,7 +117,14 @@ void main() {
     final root = Platform.environment['FLUTTER_ROOT'];
     if (root == null) return;
     final font = File(
-      '$root/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf',
+      p.join(
+        root,
+        'bin',
+        'cache',
+        'artifacts',
+        'material_fonts',
+        'Roboto-Regular.ttf',
+      ),
     );
     if (!font.existsSync()) return;
     final loader = FontLoader(
@@ -128,13 +140,20 @@ void main() {
     tester.view.physicalSize = const Size(390, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    // Bumped on every scroll step: the surface is built again, with a theme
+    // built again, as a note view's rebuild does.
+    final rebuild = ValueNotifier<int>(0);
+    addTearDown(rebuild.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: MarkdownSurface(
-            buffer: buffer,
-            mode: MarkdownSurfaceMode.live,
-            theme: _theme,
+          body: ValueListenableBuilder<int>(
+            valueListenable: rebuild,
+            builder: (context, _, _) => MarkdownSurface(
+              buffer: buffer,
+              mode: MarkdownSurfaceMode.live,
+              theme: _theme(),
+            ),
           ),
         ),
       ),
@@ -151,6 +170,7 @@ void main() {
       final times = <int>[];
       for (var at = 0; at < steps; at++) {
         final clock = Stopwatch()..start();
+        rebuild.value++;
         await tester.drag(find.byType(MarkdownSourceView), Offset(0, dy));
         await tester.pump();
         clock.stop();
