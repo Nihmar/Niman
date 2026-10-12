@@ -258,17 +258,23 @@ final class SyncSides {
     DateTime? modified,
   }) async {
     await ensureRemoteParent(c, path);
-    await c.client.uploadFile(
+    final uploaded = await c.client.uploadFile(
       path,
       File(p.join(root, path)),
       ifMatch: ifMatch,
       ifNoneMatch: ifNoneMatch,
       modified: modified,
     );
+    // What was sent, against what the plan hashed: a note rewritten while
+    // the sync read it — a save landing between the scan and here, or
+    // inside this upload — put bytes on the server that this row would not
+    // describe. The path is left for the next run to decide (#723).
+    final sent = uploaded.sha256;
+    if (sent != null && sent != sha) throw const _ChangedDuringSync();
     final listed = await c.client.stat(path);
     if (listed == null) throw notListed;
     await store.putItems([
-      await row(c, path, sha: sha, local: local, remote: listed),
+      await row(c, path, sha: sent ?? sha, local: local, remote: listed),
     ]);
   }
 

@@ -58,7 +58,12 @@ final class WebDavDownload {
 @immutable
 final class WebDavUpload {
   /// An upload that [created] the item (or replaced it).
-  const new({required this.created, this.etag, this.mtimeAccepted = false});
+  const new({
+    required this.created,
+    this.etag,
+    this.mtimeAccepted = false,
+    this.sha256,
+  });
 
   /// 201: the item did not exist before.
   final bool created;
@@ -69,6 +74,25 @@ final class WebDavUpload {
 
   /// Whether the server kept the `X-OC-Mtime` sent with the upload.
   final bool mtimeAccepted;
+
+  /// The sha256 of the bytes sent, when the caller streamed a file
+  /// ([WebDavClient.uploadFile]): what the row records, and what a plan
+  /// compares its own hash against to tell whether the write it planned is
+  /// the write the server got (#723).
+  final String? sha256;
+}
+
+/// Takes the one digest a chunked hash makes when it is closed.
+final class _TakeDigest implements Sink<Digest> {
+  new(this._take);
+
+  final void Function(Digest digest) _take;
+
+  @override
+  void add(Digest data) => _take(data);
+
+  @override
+  void close() {}
 }
 
 /// A WebDAV client for one destination folder (docs/records/sync.md, "The
@@ -529,6 +553,18 @@ final class WebDavClient {
   }
 
   /// [upload] with the contents of [file], streamed.
+  /// `PUT`s [file]'s bytes to [path], as one file.
+  ///
+  /// The length and the bytes come from **one open handle** (#723): a save
+  /// may rename a new file over the path while the upload is being made,
+  /// and taking the length from one read and the body from another sent the
+  /// new text's first bytes under the old length — half a note on the
+  /// server. The handle reads the file it opened, whole, whatever lands at
+  /// the path meanwhile, and a redirect hop that sends the body again reads
+  /// the same handle from its start.
+  ///
+  /// [WebDavUpload.sha256] is the digest of the bytes actually sent: what a
+  /// caller with a plan compares its own hash against.
   Future<WebDavUpload> uploadFile(
     String path,
     File file, {
@@ -536,15 +572,52 @@ final class WebDavClient {
     bool ifNoneMatch = false,
     DateTime? modified,
   }) async {
-    final length = await file.length();
-    return await upload(
-      path,
-      open: file.openRead,
-      length: length,
-      ifMatch: ifMatch,
-      ifNoneMatch: ifNoneMatch,
-      modified: modified,
+    final handle = await file.open();
+    try {
+      final length = await handle.length();
+      String? sent;
+      final result = await upload(
+        path,
+        open: () => _handleBody(handle, (sha) => sent = sha),
+        length: length,
+        ifMatch: ifMatch,
+        ifNoneMatch: ifNoneMatch,
+        modified: modified,
+      );
+      return WebDavUpload(
+        created: result.created,
+        etag: result.etag,
+        mtimeAccepted: result.mtimeAccepted,
+        sha256: sent,
+      );
+    } finally {
+      await handle.close();
+    }
+  }
+
+  /// [handle]'s bytes from its start, chunk by chunk, with their digest
+  /// handed to [sent] once the file has gone: one subscription reads the
+  /// file again, for a body a redirect hop sends twice. A body the client
+  /// stopped early still hands its digest over — the caller must see it
+  /// did not send the whole file.
+  static Stream<List<int>> _handleBody(
+    RandomAccessFile handle,
+    void Function(String sha) sent,
+  ) async* {
+    final digest = sha256.startChunkedConversion(
+      _TakeDigest((value) => sent(value.toString())),
     );
+    try {
+      await handle.setPosition(0);
+      while (true) {
+        final chunk = await handle.read(64 << 10);
+        if (chunk.isEmpty) break;
+        digest.add(chunk);
+        yield chunk;
+      }
+    } finally {
+      digest.close();
+    }
   }
 
   /// `MKCOL` [folder]: true when it was created, false when it already

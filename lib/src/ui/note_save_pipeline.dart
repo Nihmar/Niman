@@ -126,9 +126,10 @@ final class NoteSavePipeline {
   int get editSession => _editSession;
   int _editSession = 0;
 
-  /// The save in flight, if any: a coalesced [save] hands it back, so a
-  /// caller that must know the disk moved ([saveForClose]) awaits the
-  /// real write instead of the pending flag.
+  /// The save in flight, if any: a call while one runs ([save]) joins it —
+  /// and the trailing save behind it when the text has moved on — so a
+  /// caller that must know the disk holds *its* revision ([saveForClose],
+  /// `saveAll` before a sync, #723) awaits the write, not the pending flag.
   Future<void>? _activeSave;
 
   Timer? _timer;
@@ -168,8 +169,12 @@ final class NoteSavePipeline {
 
   /// Saves the buffer at most once: a request that finds a save in flight
   /// coalesces into one trailing save (the text is re-read from the buffer
-  /// at that point, so nothing is lost) and returns the write already
-  /// running, so an awaiting caller still learns when the disk moved.
+  /// at that point, so nothing is lost) and **completes only once the disk
+  /// holds the revision this call found** — the write already running
+  /// covers the revision it started with, the trailing save the edits that
+  /// landed since (#723). A caller that acts on the disk afterwards (the
+  /// sync's `saveAll`, the close guard) is told of its own text, not of
+  /// the write that happened to be in flight.
   Future<void> save({String? path}) {
     // Until the note at notePath is loaded, the buffer is not its text:
     // it is the previous note's, or nothing — and when the load failed,
@@ -182,12 +187,28 @@ final class NoteSavePipeline {
     }
     if (path == null && _saving) {
       _pending = true;
-      return _activeSave ?? Future<void>.value();
+      return _covering(revision);
     }
     _saving = true;
     final future = _performSave(revision, path ?? notePath());
     _activeSave = future;
     return future;
+  }
+
+  /// A save asked while one is in flight: completes when the disk holds
+  /// [revision] or a later one.
+  ///
+  /// The write in flight covers the revision it started with; the trailing
+  /// save [_finishSave] leaves behind covers the revision this call found.
+  /// Awaiting it — and, if the text moved on again meanwhile, the next one —
+  /// is what makes the future mean what `UnsavedNote.save` promises the
+  /// sync: the disk holds the latest edit, not the one before it (#723).
+  Future<void> _covering(int revision) async {
+    while (_lastSavedRevision < revision) {
+      final active = _activeSave;
+      if (active == null) return;
+      await active;
+    }
   }
 
   /// The note at [path] is leaving the editor for another one: its edits

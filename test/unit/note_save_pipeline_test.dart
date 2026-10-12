@@ -159,16 +159,47 @@ void main() {
       expect(pipeline.busy, isTrue);
 
       await harness.release();
-      await Future.wait([first, second, third]);
-      // The trailing save is under way, with the text as it is now.
+      await first;
+      // The trailing save is under way, with the text as it is now: the
+      // callers still wait — the write that just landed is not theirs.
       expect(harness.gates, hasLength(1));
+      var done = false;
+      unawaited(Future.wait([second, third]).then((_) => done = true));
+      await pumpEventQueue();
+      expect(done, isFalse);
+
       await harness.release();
+      await pumpEventQueue();
+      expect(done, isTrue);
 
       expect(harness.writes.map((w) => w.text), ['two\n', 'four\n']);
       expect(pipeline.dirty, isFalse);
       expect(pipeline.busy, isFalse);
     },
   );
+
+  // #723: a sync saves the open notes first (`saveAll`) and then reads the
+  // disk. The save it asked for answers for *its* text — the disk holding
+  // the latest edit is what the sync's scan may count on — not for the
+  // write that happened to be in flight when it asked.
+  test('a save asked during one answers for its own text', () async {
+    harness = Harness()..hold = true;
+    final pipeline = harness.pipeline;
+    harness.edit('first\n');
+    unawaited(pipeline.save());
+    await pumpEventQueue();
+    harness.edit('second\n');
+
+    var disk = '';
+    final asked = pipeline.save().then((_) => disk = harness.writes.last.text);
+    await harness.release();
+    await pumpEventQueue();
+    expect(disk, isEmpty, reason: 'the write in flight is not this save');
+
+    await harness.release();
+    await asked;
+    expect(disk, 'second\n');
+  });
 
   test(
     'the outgoing note is saved as it stands, after the save in flight',
