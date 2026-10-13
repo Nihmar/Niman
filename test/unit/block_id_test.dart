@@ -42,7 +42,7 @@ void main() {
     }
   });
 
-  test('a trailing id is a space, a caret and an id at the line\'s end', () {
+  test("a trailing id is a space, a caret and an id at the line's end", () {
     expect(BlockId.trailingIn('a ^id')?.group(1), 'id');
     expect(BlockId.trailingIn('^id')?.group(1), 'id');
     expect(BlockId.trailingIn('a ^id  ')?.group(1), 'id');

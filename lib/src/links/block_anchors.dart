@@ -22,6 +22,7 @@ library;
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:niman/src/editor/highlighting.dart' show ProseLineWalker;
 import 'package:niman/src/links/block_id.dart';
+import 'package:niman/src/markdown/note_load.dart' show normalizedLineEndings;
 
 /// One block that ends with a ` ^id`.
 @immutable
@@ -173,11 +174,16 @@ final class BlockAnchorScanner {
 }
 
 /// The block anchors of [text], in line order.
+///
+/// The lines are the note's own, as the editor holds it: the rule loading a
+/// note applies ([normalizedLineEndings]), where a CR LF and a lone CR are
+/// line breaks like LF. A note written with Windows line endings has its ids
+/// where the same note with LF has them.
 List<BlockAnchor> blockAnchorsOfText(String text) {
   if (!text.contains('^')) return const <BlockAnchor>[];
   final scanner = BlockAnchorScanner();
   var index = 0;
-  for (final line in text.split('\n')) {
+  for (final line in normalizedLineEndings(text).split('\n')) {
     scanner.add(index++, line);
   }
   return scanner.anchors;
