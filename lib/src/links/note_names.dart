@@ -76,15 +76,29 @@ final class NoteNames {
   /// The shortest wiki target that names each of [paths] alone, by path; a
   /// path whose name no `[[…]]` target can carry (#491) has none.
   Future<Map<String, String>> targetsOf(Set<String> paths) async {
-    if (paths.isEmpty) return const <String, String>{};
-    final sharing = await _sharing({for (final path in paths) _stemOf(path)});
-    final out = <String, String>{};
+    final targets = await _targetsFor(paths);
+    return {
+      for (final entry in targets.entries)
+        if (readsBack(entry.value)) entry.key: entry.value,
+    };
+  }
+
+  /// The shortest wiki target that names each of [paths] alone, by path —
+  /// one query for the notes that share any of their names. The target is
+  /// what the rule produces, whether or not it reads back: the caller drops
+  /// the ones it cannot write.
+  Future<Map<String, String>> _targetsFor(Iterable<String> paths) async {
+    final byStem = <String, List<String>>{};
     for (final path in paths) {
-      final target = _targetFor(
-        path,
-        sharing[_stemOf(path)] ?? const <String>{},
-      );
-      if (readsBack(target)) out[path] = target;
+      (byStem[_stemOf(path)] ??= <String>[]).add(path);
+    }
+    if (byStem.isEmpty) return const <String, String>{};
+    final sharing = await _sharing(byStem.keys.toSet());
+    final out = <String, String>{};
+    for (final entry in byStem.entries) {
+      for (final path in entry.value) {
+        out[path] = _targetFor(path, sharing[entry.key] ?? const <String>{});
+      }
     }
     return out;
   }
@@ -148,24 +162,18 @@ final class NoteNames {
   static final RegExp _unlinkable = RegExp(r'[#|\[\]]');
 
   /// [ranked] with each target qualified as far as it takes to name that
-  /// note alone: one query for the notes that share any of their names,
-  /// then [_targetFor] each.
+  /// note alone: the same qualification [targetsOf] makes, before the
+  /// read-back filter (the caller counts those it drops).
   Future<List<NoteSuggestion>> _qualified(List<_Ranked> ranked) async {
     if (ranked.isEmpty) return const <NoteSuggestion>[];
-    final sharing = await _sharing({
-      for (final r in ranked) LinkPaths.normalizeTarget(r.note.target),
-    });
+    final targets = await _targetsFor([for (final r in ranked) r.path]);
     return [
       for (final r in ranked)
         NoteSuggestion(
           name: r.note.name,
           folder: r.note.folder,
           alias: r.note.alias,
-          target: _targetFor(
-            r.path,
-            sharing[LinkPaths.normalizeTarget(r.note.target)] ??
-                const <String>{},
-          ),
+          target: targets[r.path] ?? r.note.target,
         ),
     ];
   }
