@@ -55,6 +55,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   Set<String> _lintRulesOff = const <String>{};
   bool? _autofocusEditor;
   LinkType _linkType = LinkType.wikilink;
+  LinkUpdate _linkUpdate = LinkUpdate.automatic;
   NewItemLocation _newItemLocation = NewItemLocation.openNoteFolder;
   double _noteTextScale = defaultTextScale;
   SourceFont _sourceFont = defaultSourceFont;
@@ -92,6 +93,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final lintRulesOff = await controller.lintRulesOff;
     final autofocus = await controller.editorAutofocusEnabled;
     final linkType = await controller.linkType;
+    final linkUpdate = await controller.linkUpdate;
     final newItemLocation = await controller.newItemLocation;
     final noteTextScale = await controller.noteTextScale;
     final sourceFont = await controller.sourceFont;
@@ -110,6 +112,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _lintRulesOff = lintRulesOff;
       _autofocusEditor = autofocus;
       _linkType = linkType;
+      _linkUpdate = linkUpdate;
       _newItemLocation = newItemLocation;
       _noteTextScale = noteTextScale;
       _sourceFont = sourceFont;
@@ -297,6 +300,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     }
   }
 
+  Future<void> _setLinkUpdate(LinkUpdate mode) async {
+    final controller = widget.controller;
+    await controller.setLinkUpdate(mode);
+    controller.notify();
+    if (mounted) {
+      setState(() => _linkUpdate = mode);
+    }
+  }
+
   Future<void> _setNewItemLocation(NewItemLocation location) async {
     final controller = widget.controller;
     await controller.setNewItemLocation(location);
@@ -373,7 +385,25 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (type != null) await _setLinkType(type);
   }
 
-  /// Asks where a note created from a dead link lands (issue #78).
+  /// Asks what a rename or a move does to the links pointing at what
+  /// moved (#848).
+  Future<void> _chooseLinkUpdate() async {
+    final mode = await showSettingsChoice<LinkUpdate>(
+      context,
+      dialogKey: const Key('link-update-dialog'),
+      title: AppStrings.linkUpdateTitle,
+      subtitle: AppStrings.linkUpdateSubtitle,
+      current: _linkUpdate,
+      options: [
+        SettingsOption(LinkUpdate.automatic, AppStrings.linkUpdateAutomatic),
+        SettingsOption(LinkUpdate.ask, AppStrings.linkUpdateAsk),
+        SettingsOption(LinkUpdate.never, AppStrings.linkUpdateNever),
+      ],
+    );
+    if (mode != null) await _setLinkUpdate(mode);
+  }
+
+  /// Asks where new notes and folders go (#850).
   Future<void> _chooseNewItemLocation() async {
     final location = await showSettingsChoice<NewItemLocation>(
       context,
@@ -645,8 +675,24 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               onTap: () => unawaited(_chooseLinkType()),
             ),
           ),
-          // One rule for where every new note and folder lands (issue
-          // #850), the note a dead link creates (issue #78) among them.
+          // Next to the link format: they decide what a link does — what
+          // it inserts, what happens to it when its target moves (#848),
+          // where a new note lands (#850).
+          HighlightRow(
+            key: SettingsKeys.linkUpdate,
+            child: SettingsValueRow(
+              title: AppStrings.linkUpdateTitle,
+              subtitle: AppStrings.linkUpdateSubtitle,
+              value: switch (_linkUpdate) {
+                LinkUpdate.automatic => AppStrings.linkUpdateAutomatic,
+                LinkUpdate.ask => AppStrings.linkUpdateAsk,
+                LinkUpdate.never => AppStrings.linkUpdateNever,
+              },
+              onTap: () => unawaited(_chooseLinkUpdate()),
+            ),
+          ),
+          // The one rule for where every new note and folder lands (#850),
+          // the note a dead link creates (issue #78) among them.
           HighlightRow(
             key: SettingsKeys.newItemLocation,
             child: SettingsValueRow(

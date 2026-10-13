@@ -391,6 +391,27 @@ final class GalicianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle => 'Actualizar as ligazóns ao renomear ou mover';
+  @override
+  String get linkUpdateSubtitle =>
+      'Que pasa coas ligazóns que apuntan a unha nota ou cartafol renomeado '
+      'ou movido';
+  @override
+  String get linkUpdateAutomatic => 'Automaticamente';
+  @override
+  String get linkUpdateAsk => 'Preguntar cada vez';
+  @override
+  String get linkUpdateNever => 'Nunca';
+  @override
+  String get linkUpdateAskTitle => 'Actualizar as ligazóns?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notas que apuntan ao que se moveu: $notes. Actualizar as súas ligazóns?';
+  @override
+  String get linkUpdateConfirm => 'Actualizar';
+  @override
+  String get linkUpdateKeep => 'Deixar como están';
+  @override
   String get newItemLocationTitle => 'As notas e cartafoles novos van a';
   @override
   String get newItemLocationRoot => 'Raíz da biblioteca';

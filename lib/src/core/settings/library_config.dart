@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
+        LinkUpdate,
         SourceFont,
         TreeSort,
         TreeView,
@@ -389,6 +390,7 @@ final class LibraryConfig {
     this.treeSort = TreeSort.nameAsc,
     this.treeView = TreeView.list,
     this.linkType = LinkType.wikilink,
+    this.linkUpdate = LinkUpdate.automatic,
     this.weekStart = WeekStart.system,
     this.newItemLocation = NewItemLocation.openNoteFolder,
     this.indentWidth = defaultIndentWidth,
@@ -493,6 +495,13 @@ final class LibraryConfig {
       linkType: switch (json['linkType']) {
         'markdown' => LinkType.markdown,
         _ => LinkType.wikilink,
+      },
+      // The enum's name is the stored id; a file without the key, or with
+      // one this build does not know, keeps the rewrite it always had (#848).
+      linkUpdate: switch (json['linkUpdate']) {
+        'ask' => LinkUpdate.ask,
+        'never' => LinkUpdate.never,
+        _ => LinkUpdate.automatic,
       },
       weekStart: WeekStart.fromName(json['weekStart']),
       // The old dead-link setting reads into the new one when the new key
@@ -667,6 +676,10 @@ final class LibraryConfig {
   /// What the editor's link button inserts (default a wikilink).
   final LinkType linkType;
 
+  /// What a rename or a move does to the links pointing at what moved
+  /// (default: rewrite them, as it always has, #848).
+  final LinkUpdate linkUpdate;
+
   /// The day the calendars start the week on (#566): the system's by
   /// default; a library sets one for every device it is opened on.
   final WeekStart weekStart;
@@ -777,6 +790,7 @@ final class LibraryConfig {
     TreeSort? treeSort,
     TreeView? treeView,
     LinkType? linkType,
+    LinkUpdate? linkUpdate,
     WeekStart? weekStart,
     NewItemLocation? newItemLocation,
     int? indentWidth,
@@ -827,6 +841,7 @@ final class LibraryConfig {
       treeSort: treeSort ?? this.treeSort,
       treeView: treeView ?? this.treeView,
       linkType: linkType ?? this.linkType,
+      linkUpdate: linkUpdate ?? this.linkUpdate,
       weekStart: weekStart ?? this.weekStart,
       newItemLocation: newItemLocation ?? this.newItemLocation,
       indentWidth: indentWidth ?? this.indentWidth,
@@ -955,6 +970,7 @@ final class LibraryConfig {
     'treeSort',
     'treeView',
     'linkType',
+    'linkUpdate',
     'weekStart',
     'newItemLocation',
     // Legacy dead-link setting, read never written (#850): the new key
@@ -1023,6 +1039,7 @@ final class LibraryConfig {
       'treeSort': treeSort.name,
       'treeView': treeView.name,
       'linkType': linkType.name,
+      'linkUpdate': linkUpdate.name,
       'weekStart': weekStart.name,
       'newItemLocation': newItemLocation.name,
       'indentWidth': indentWidth,
@@ -1137,6 +1154,7 @@ final class LibraryConfig {
         treeSort == other.treeSort &&
         treeView == other.treeView &&
         linkType == other.linkType &&
+        linkUpdate == other.linkUpdate &&
         weekStart == other.weekStart &&
         newItemLocation == other.newItemLocation &&
         indentWidth == other.indentWidth &&

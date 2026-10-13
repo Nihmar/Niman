@@ -385,6 +385,27 @@ final class EnglishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle => 'Update links after rename or move';
+  @override
+  String get linkUpdateSubtitle =>
+      'What happens to the links pointing at a note or folder that is renamed '
+      'or moved';
+  @override
+  String get linkUpdateAutomatic => 'Automatically';
+  @override
+  String get linkUpdateAsk => 'Ask each time';
+  @override
+  String get linkUpdateNever => 'Never';
+  @override
+  String get linkUpdateAskTitle => 'Update links?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notes that link to what moved: $notes. Update their links?';
+  @override
+  String get linkUpdateConfirm => 'Update';
+  @override
+  String get linkUpdateKeep => 'Leave as is';
+  @override
   String get newItemLocationTitle => 'New notes and folders go to';
   @override
   String get newItemLocationRoot => 'Library root';

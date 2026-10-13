@@ -384,6 +384,28 @@ final class BasqueStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Eguneratu estekak izena aldatzean edo mugitzean';
+  @override
+  String get linkUpdateSubtitle =>
+      'Izena aldatu edo mugitu den ohar edo karpeta batera darraien estekei '
+      'zer gertatzen zaien';
+  @override
+  String get linkUpdateAutomatic => 'Automatikoki';
+  @override
+  String get linkUpdateAsk => 'Galdetu aldiro';
+  @override
+  String get linkUpdateNever => 'Inoiz ez';
+  @override
+  String get linkUpdateAskTitle => 'Estekak eguneratu?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Mugitutakora estekatzen duten oharrak: $notes. Haien estekak eguneratu?';
+  @override
+  String get linkUpdateConfirm => 'Eguneratu';
+  @override
+  String get linkUpdateKeep => 'Utzi dagoen bezala';
+  @override
   String get newItemLocationTitle => 'Ohar eta karpeta berriak non sortu';
   @override
   String get newItemLocationRoot => 'Bibliotekaren erroan';

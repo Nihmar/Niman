@@ -389,6 +389,28 @@ final class BosnianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Ažuriraj veze nakon preimenovanja ili premještanja';
+  @override
+  String get linkUpdateSubtitle =>
+      'Šta se dešava s vezama na bilješku ili folder koji je preimenovan ili '
+      'premješten';
+  @override
+  String get linkUpdateAutomatic => 'Automatski';
+  @override
+  String get linkUpdateAsk => 'Pitaj svaki put';
+  @override
+  String get linkUpdateNever => 'Nikada';
+  @override
+  String get linkUpdateAskTitle => 'Ažurirati veze?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Bilješke koje upućuju na premješteno: $notes. Ažurirati njihove veze?';
+  @override
+  String get linkUpdateConfirm => 'Ažuriraj';
+  @override
+  String get linkUpdateKeep => 'Ostavi kako jest';
+  @override
   String get newItemLocationTitle => 'Nove bilješke i mape idu u';
   @override
   String get newItemLocationRoot => 'Korijen biblioteke';

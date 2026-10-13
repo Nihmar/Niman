@@ -382,6 +382,27 @@ final class LatvianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Atjaunināt saites pēc pārdēvēšanas vai pārvietošanas';
+  @override
+  String get linkUpdateSubtitle =>
+      'Kas notiek ar saitēm uz pārdēvētu vai pārvietotu piezīmi vai mapi';
+  @override
+  String get linkUpdateAutomatic => 'Automātiski';
+  @override
+  String get linkUpdateAsk => 'Jautāt katru reizi';
+  @override
+  String get linkUpdateNever => 'Nekad';
+  @override
+  String get linkUpdateAskTitle => 'Vai atjaunināt saites?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Piezīmes, kas saista ar pārvietoto: $notes. Vai atjaunināt to saites?';
+  @override
+  String get linkUpdateConfirm => 'Atjaunināt';
+  @override
+  String get linkUpdateKeep => 'Atstāt kā ir';
+  @override
   String get newItemLocationTitle => 'Jaunu piezīmju un mapju izveide';
   @override
   String get newItemLocationRoot => 'Bibliotēkes saknē';

@@ -253,6 +253,18 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushEditor(SettingsKeys.linkType),
     ),
     SettingsSearchEntry(
+      title: AppStrings.linkUpdateTitle,
+      area: editor,
+      rowKey: SettingsKeys.linkUpdate,
+      value: () async => switch (await controller.linkUpdate) {
+        LinkUpdate.automatic => AppStrings.linkUpdateAutomatic,
+        LinkUpdate.ask => AppStrings.linkUpdateAsk,
+        LinkUpdate.never => AppStrings.linkUpdateNever,
+      },
+      areaId: SettingsAreaId.editor,
+      open: () => pushEditor(SettingsKeys.linkUpdate),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.newItemLocationTitle,
       area: editor,
       rowKey: SettingsKeys.newItemLocation,

@@ -309,6 +309,15 @@ final class AppStrings {
   static String get linkTypeSubtitle => _s.linkTypeSubtitle;
   static String get linkTypeWikilink => _s.linkTypeWikilink;
   static String get linkTypeMarkdown => _s.linkTypeMarkdown;
+  static String get linkUpdateTitle => _s.linkUpdateTitle;
+  static String get linkUpdateSubtitle => _s.linkUpdateSubtitle;
+  static String get linkUpdateAutomatic => _s.linkUpdateAutomatic;
+  static String get linkUpdateAsk => _s.linkUpdateAsk;
+  static String get linkUpdateNever => _s.linkUpdateNever;
+  static String get linkUpdateAskTitle => _s.linkUpdateAskTitle;
+  static String linkUpdateAskBody(int notes) => _s.linkUpdateAskBody(notes);
+  static String get linkUpdateConfirm => _s.linkUpdateConfirm;
+  static String get linkUpdateKeep => _s.linkUpdateKeep;
   static String get indentWidthTitle => _s.indentWidthTitle;
   static String get indentWidthSubtitle => _s.indentWidthSubtitle;
 

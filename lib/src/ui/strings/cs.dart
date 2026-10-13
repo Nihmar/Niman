@@ -385,6 +385,28 @@ final class CzechStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Aktualizovat odkazy po přejmenování nebo přesunutí';
+  @override
+  String get linkUpdateSubtitle =>
+      'Co se stane s odkazy na poznámku nebo složku, která je přejmenována či '
+      'přesunuta';
+  @override
+  String get linkUpdateAutomatic => 'Automaticky';
+  @override
+  String get linkUpdateAsk => 'Pokaždé se zeptat';
+  @override
+  String get linkUpdateNever => 'Nikdy';
+  @override
+  String get linkUpdateAskTitle => 'Aktualizovat odkazy?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Poznámky odkazující na přesunuté: $notes. Aktualizovat jejich odkazy?';
+  @override
+  String get linkUpdateConfirm => 'Aktualizovat';
+  @override
+  String get linkUpdateKeep => 'Nechat beze změny';
+  @override
   String get newItemLocationTitle => 'Nové poznámky a složky patří do';
   @override
   String get newItemLocationRoot => 'Kořen knihovny';

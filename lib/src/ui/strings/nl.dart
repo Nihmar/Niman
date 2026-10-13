@@ -389,6 +389,28 @@ final class DutchStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle => 'Links bijwerken na hernoemen of verplaatsen';
+  @override
+  String get linkUpdateSubtitle =>
+      'Wat er gebeurt met links naar een notitie of map die is hernoemd of '
+      'verplaatst';
+  @override
+  String get linkUpdateAutomatic => 'Automatisch';
+  @override
+  String get linkUpdateAsk => 'Elke keer vragen';
+  @override
+  String get linkUpdateNever => 'Nooit';
+  @override
+  String get linkUpdateAskTitle => 'Links bijwerken?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notities die naar het verplaatste verwijzen: $notes. Hun links '
+      'bijwerken?';
+  @override
+  String get linkUpdateConfirm => 'Bijwerken';
+  @override
+  String get linkUpdateKeep => 'Ongewijzigd laten';
+  @override
   String get newItemLocationTitle => 'Nieuwe notities en mappen komen in';
   @override
   String get newItemLocationRoot => 'Bibliotheek-wortel';

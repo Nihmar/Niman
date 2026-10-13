@@ -383,6 +383,29 @@ final class IcelandicStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Uppfæra tengla eftir endurnefningu eða flutning';
+  @override
+  String get linkUpdateSubtitle =>
+      'Hvað verður um tengla á minnisblað eða möppu sem er endurnefnd eða '
+      'flutt';
+  @override
+  String get linkUpdateAutomatic => 'Sjálfkrafa';
+  @override
+  String get linkUpdateAsk => 'Spyrja í hvert skipti';
+  @override
+  String get linkUpdateNever => 'Aldrei';
+  @override
+  String get linkUpdateAskTitle => 'Uppfæra tengla?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Minnisblöð sem tengja í það sem var flutt: $notes. Uppfæra tengla '
+      'þeirra?';
+  @override
+  String get linkUpdateConfirm => 'Uppfæra';
+  @override
+  String get linkUpdateKeep => 'Skilja eftir óbreytta';
+  @override
   String get newItemLocationTitle => 'Ný minnisblöð og möppur fara í';
   @override
   String get newItemLocationRoot => 'Rót bókasafns';

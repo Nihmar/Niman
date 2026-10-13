@@ -388,6 +388,28 @@ final class PortugueseStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle => 'Atualizar os links ao renomear ou mover';
+  @override
+  String get linkUpdateSubtitle =>
+      'O que acontece com os links que apontam para uma nota ou pasta '
+      'renomeada ou movida';
+  @override
+  String get linkUpdateAutomatic => 'Automaticamente';
+  @override
+  String get linkUpdateAsk => 'Perguntar sempre';
+  @override
+  String get linkUpdateNever => 'Nunca';
+  @override
+  String get linkUpdateAskTitle => 'Atualizar os links?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notas que apontam para o que foi movido: $notes. Atualizar os links '
+      'delas?';
+  @override
+  String get linkUpdateConfirm => 'Atualizar';
+  @override
+  String get linkUpdateKeep => 'Deixar como estão';
+  @override
   String get newItemLocationTitle => 'As novas notas e pastas vão para';
   @override
   String get newItemLocationRoot => 'Raiz da biblioteca';

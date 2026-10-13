@@ -86,7 +86,9 @@ written by name follows a rename. Each link keeps the form it was written
 in — a Markdown link relative to its note stays relative, so the note still
 reads right in any other Markdown tool — and a link that still finds the
 note as written, such as one naming only the end of its path, is left
-alone. Open notes are saved before the rename, and re-read after it. Embedded attachments (`![[…]]` and
+alone. (The library can ask first, or leave the links as written: **Settings →
+Editor → Update links after rename or move**, see [links](links.md).) Open
+notes are saved before the rename, and re-read after it. Embedded attachments (`![[…]]` and
 `![…](…)`) follow the same way, so a renamed attachments folder keeps the
 pictures and clips that cited it. The settings that name a note or a folder
 follow it the same way — the quick note, the list, template, attachments

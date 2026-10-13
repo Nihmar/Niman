@@ -105,6 +105,30 @@ editing the note. A link that names another note by its name only
 *to* a note that moved, from a note that did not, is read again when that
 note is next indexed.
 
+### Updating the links to what moved
+
+Renaming or moving a note, or a folder of them, also rewrites the links
+*other* notes hold to it, so they keep finding it: a path link and a
+Markdown link follow the new path, and a link by name follows a rename (see
+[organization](organization.md) for what else follows the note). **Settings →
+Editor → Update links after rename or move** chooses what happens:
+
+- **Automatically** (the default) rewrites every note that links to what
+  moved.
+- **Ask each time** moves first, then asks one question for the whole move
+  — a folder rename included, not one per note — naming how many notes
+  would change: *Update* rewrites their links, *Leave as is* (or closing the
+  question) leaves them as written. A move that would change no link asks
+  nothing.
+- **Never** leaves the links as written; the ones that no longer find their
+  target show as dead links, which is what you may want after renaming a
+  note on purpose.
+
+The setting is about the links alone. Whatever the choice, the move still
+carries the note's history, reading positions, the settings and the Home
+that name it, and the index. The setting is the library's own, the same on
+every device.
+
 ## Links into a PDF or a book
 
 A link can point at a place inside a PDF or an EPUB book; following it

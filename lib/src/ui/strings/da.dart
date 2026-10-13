@@ -385,6 +385,27 @@ final class DanishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle => 'Opdater links efter omdøbning eller flytning';
+  @override
+  String get linkUpdateSubtitle =>
+      'Hvad der sker med links til en note eller mappe, der omdøbes eller '
+      'flyttes';
+  @override
+  String get linkUpdateAutomatic => 'Automatisk';
+  @override
+  String get linkUpdateAsk => 'Spørg hver gang';
+  @override
+  String get linkUpdateNever => 'Aldrig';
+  @override
+  String get linkUpdateAskTitle => 'Opdater links?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Noter, der linker til det flyttede: $notes. Opdater deres links?';
+  @override
+  String get linkUpdateConfirm => 'Opdater';
+  @override
+  String get linkUpdateKeep => 'Lad dem være';
+  @override
   String get newItemLocationTitle => 'Nye noter og mapper placeres i';
   @override
   String get newItemLocationRoot => 'Bibliotekets rodmappe';

@@ -392,6 +392,29 @@ final class BulgarianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Обновяване на връзките след преименуване или преместване';
+  @override
+  String get linkUpdateSubtitle =>
+      'Какво се случва с връзките към преименувана или преместена бележка или '
+      'папка';
+  @override
+  String get linkUpdateAutomatic => 'Автоматично';
+  @override
+  String get linkUpdateAsk => 'Питай всеки път';
+  @override
+  String get linkUpdateNever => 'Никога';
+  @override
+  String get linkUpdateAskTitle => 'Да се обновят ли връзките?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Бележки, сочещи към преместеното: $notes. Да се обновят ли техните '
+      'връзки?';
+  @override
+  String get linkUpdateConfirm => 'Обнови';
+  @override
+  String get linkUpdateKeep => 'Остави без промяна';
+  @override
   String get newItemLocationTitle => 'Нови бележки и папки отиват в';
   @override
   String get newItemLocationRoot => 'Корен на библиотеката';

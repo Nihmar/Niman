@@ -105,6 +105,24 @@ enum LinkType {
   markdown,
 }
 
+/// What a rename or a move does to the links that point at what moved
+/// (#848).
+///
+/// Only the rewrite of those links is meant: the history, the reading
+/// positions, the settings and the Home keep following the move whatever
+/// this says.
+enum LinkUpdate {
+  /// Every note linking to what moved is rewritten (the default).
+  automatic,
+
+  /// One question per move, naming how many notes would change; the links
+  /// are rewritten when it is accepted and left as written when it is not.
+  ask,
+
+  /// The links are left as written, a dead one showing as dead.
+  never,
+}
+
 /// The face the source editor is set in (issue #259).
 ///
 /// The source is read as *text* — its markers, its indents, its columns —

@@ -1236,6 +1236,17 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(linkType: type));
   }
 
+  /// What a rename or a move does to the links pointing at what moved.
+  @override
+  Future<LinkUpdate> get linkUpdate async => (await _library).linkUpdate;
+
+  /// Sets (and persists) what a rename or a move does to those links.
+  @override
+  Future<void> setLinkUpdate(LinkUpdate mode) async {
+    _log.info('link update set to ${mode.name}');
+    await _editLibrary((c) => c.copyWith(linkUpdate: mode));
+  }
+
   /// Where a note created from a dead link lands.
   @override
   Future<NewItemLocation> get newItemLocation async =>

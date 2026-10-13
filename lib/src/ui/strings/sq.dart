@@ -385,6 +385,29 @@ final class AlbanianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Përditëso lidhjet pas riemërtimit ose zhvendosjes';
+  @override
+  String get linkUpdateSubtitle =>
+      'Çfarë ndodh me lidhjet drejt një shënimi ose dosjeje që riemërtohet '
+      'ose zhvendoset';
+  @override
+  String get linkUpdateAutomatic => 'Automatikisht';
+  @override
+  String get linkUpdateAsk => 'Pyet çdo herë';
+  @override
+  String get linkUpdateNever => 'Asnjëherë';
+  @override
+  String get linkUpdateAskTitle => 'Të përditësohen lidhjet?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Shënime që lidhen me atë që u zhvendos: $notes. Të përditësohen '
+      'lidhjet e tyre?';
+  @override
+  String get linkUpdateConfirm => 'Përditëso';
+  @override
+  String get linkUpdateKeep => 'Lëri siç janë';
+  @override
   String get newItemLocationTitle => 'Shënimet dhe tresat e reja shkojnë në';
   @override
   String get newItemLocationRoot => 'Rrënjë e bibliotekës';

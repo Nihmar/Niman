@@ -392,6 +392,29 @@ final class FrenchStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Mettre à jour les liens après un renommage ou un déplacement';
+  @override
+  String get linkUpdateSubtitle =>
+      'Ce qui arrive aux liens qui pointent vers une note ou un dossier '
+      'renommé ou déplacé';
+  @override
+  String get linkUpdateAutomatic => 'Automatiquement';
+  @override
+  String get linkUpdateAsk => 'Demander à chaque fois';
+  @override
+  String get linkUpdateNever => 'Jamais';
+  @override
+  String get linkUpdateAskTitle => 'Mettre à jour les liens ?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notes qui pointent vers ce qui a bougé : $notes. Mettre à jour leurs '
+      'liens ?';
+  @override
+  String get linkUpdateConfirm => 'Mettre à jour';
+  @override
+  String get linkUpdateKeep => 'Laisser tels quels';
+  @override
   String get newItemLocationTitle =>
       'Les nouvelles notes et dossiers vont dans';
   @override

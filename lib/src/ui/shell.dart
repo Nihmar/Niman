@@ -85,6 +85,7 @@ import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
+import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -978,6 +979,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// outside the app (issue #100 moved them into [ShellRowActions]).
   late final ShellRowActions _rowActions = ShellRowActions(
     renameInPlace: _startRenameInPlace,
+    // Under "ask", the question is the shell's to put (#848).
+    confirmLinks: (notes) async =>
+        mounted && await askLinkUpdate(context, notes),
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),

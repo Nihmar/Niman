@@ -384,6 +384,29 @@ final class FinnishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Päivitä linkit uudelleennimeämisen tai siirron jälkeen';
+  @override
+  String get linkUpdateSubtitle =>
+      'Mitä tapahtuu linkeille, jotka osoittavat uudelleennimettyyn tai '
+      'siirrettyyn muistiinpanoon tai kansioon';
+  @override
+  String get linkUpdateAutomatic => 'Automaattisesti';
+  @override
+  String get linkUpdateAsk => 'Kysy joka kerta';
+  @override
+  String get linkUpdateNever => 'Ei koskaan';
+  @override
+  String get linkUpdateAskTitle => 'Päivitetäänkö linkit?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Siirrettyyn viittaavat muistiinpanot: $notes. Päivitetäänkö niiden '
+      'linkit?';
+  @override
+  String get linkUpdateConfirm => 'Päivitä';
+  @override
+  String get linkUpdateKeep => 'Jätä ennalleen';
+  @override
   String get newItemLocationTitle => 'Luo uudet muistiinpanot ja kansiot';
   @override
   String get newItemLocationRoot => 'Kirjaston juureen';
