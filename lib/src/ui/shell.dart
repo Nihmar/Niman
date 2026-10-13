@@ -3316,7 +3316,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         // and remounts every body, defeating the keep-alive. Only its
         // currentIndex changes here; [bodies] are the same instances across
         // a switch, so no body re-inflates.
-        body: switch (widget.ocrQueue) {
+        body: _fab.measuring(switch (widget.ocrQueue) {
           final queue? => Column(
             children: [
               OcrJobStatus(queue: queue),
@@ -3334,7 +3334,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             retainLayout: <int>{ShellTab.search.index},
             children: bodies,
           ),
-        },
+        }),
         floatingActionButton: _tabFab(),
         bottomNavigationBar: switch (controller.sync) {
           _ when !_shown(tab) => null,
