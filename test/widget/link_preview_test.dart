@@ -117,8 +117,11 @@ void main() {
 
     await settleHover(tester);
     expect(_card, findsOneWidget);
-    expect(find.byKey(const Key('link-preview-title')), findsOneWidget);
-    expect(find.text('Newton'), findsWidgets);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('link-preview-title'))).data,
+      'Newton',
+      reason: "the card's title is the note's name",
+    );
     expect(
       find.textContaining('Gravity, and the laws of motion.'),
       findsOneWidget,
