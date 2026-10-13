@@ -27,7 +27,6 @@ import 'package:niman/src/library/attachment_store.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/library_links.dart';
-import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -37,10 +36,6 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/read_parser.dart';
-import 'package:niman/src/markdown/render/dead_link_ranges.dart'
-    show inlineHrefOf;
-import 'package:niman/src/markdown/render/inline_spans.dart'
-    show LinkPreviewHooks;
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -56,9 +51,7 @@ import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
-import 'package:niman/src/ui/link_preview/link_preview_controller.dart';
-import 'package:niman/src/ui/link_preview/link_preview_host.dart';
-import 'package:niman/src/ui/link_preview/link_preview_sheet.dart';
+import 'package:niman/src/ui/link_preview/note_link_preview.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
@@ -462,11 +455,13 @@ final class _NoteViewState extends State<NoteView>
     delay: () => _stats.settleDelay,
   );
 
-  /// The link preview card (#846): which link has one open, and when.
-  late final LinkPreviewController _preview = LinkPreviewController(
+  /// The link preview (#846): the card a hovered link opens over the note.
+  late final NoteLinkPreview _preview = NoteLinkPreview(
     source: () => widget.linkSource,
     notePath: () => _pathInLibrary,
     enabled: () => widget.linkPreview,
+    mathCache: _mathCache,
+    targets: _linkTargets,
   );
 
   /// The scrolls of both panes: a card closes when the note moves under it.
@@ -474,60 +469,6 @@ final class _NoteViewState extends State<NoteView>
     _previewScroll,
     _sourceScroll,
   ]);
-
-  /// The pointer is on a link in the editor with the opening modifier held,
-  /// or it left: the card opens at once (the modifier is the intent) or goes.
-  void _editorLinkHover(SourceLinkHover? hover) {
-    if (hover == null) {
-      _preview.leave();
-      return;
-    }
-    final raw = hover.raw;
-    final PreviewLink link;
-    if (hover.kind == TokenKind.wikilink) {
-      if (raw.length < 4 || !raw.startsWith('[[') || !raw.endsWith(']]')) {
-        return;
-      }
-      link = PreviewLink.wiki(raw.substring(2, raw.length - 2));
-    } else {
-      final href = hover.href ?? inlineHrefOf(raw);
-      if (href == null) return;
-      link = PreviewLink.markdown(href);
-    }
-    _preview.enter(link, hover.position, delay: Duration.zero);
-  }
-
-  /// What the read view's links tell the preview: a pointer on one, off it,
-  /// and — only on a touch screen — a long press (#846).
-  LinkPreviewHooks _previewHooks(BuildContext context) {
-    final touch = switch (Theme.of(context).platform) {
-      TargetPlatform.android || TargetPlatform.iOS => true,
-      _ => false,
-    };
-    return (
-      onEnter: _preview.enter,
-      onExit: _preview.leave,
-      onLongPress: touch ? _previewSheet : null,
-    );
-  }
-
-  /// A long press on a link in the read view: the card, as a sheet with an
-  /// Open action (#846). Nothing for a link that points at nothing.
-  Future<void> _previewSheet(PreviewLink link) async {
-    if (!_preview.enabled) return;
-    final preview = await _preview.read(link);
-    if (preview == null || !mounted) return;
-    await showLinkPreviewSheet(
-      context,
-      preview: preview,
-      mathCache: _mathCache,
-      onOpen: () => unawaited(
-        link.wiki
-            ? openWiki(context, parseWikiRef(link.text), _linkTargets())
-            : openHref(context, link.text, _linkTargets()),
-      ),
-    );
-  }
 
   /// The note's path in the library, slash-separated, or null for a note
   /// opened from outside one.
@@ -1497,7 +1438,7 @@ final class _NoteViewState extends State<NoteView>
         templateCommands: _templateIn(widget),
         wikilinkSuggester: widget.wikilinkSuggester,
         deadLinks: _deadLinks,
-        onLinkHover: _editorLinkHover,
+        onLinkHover: _preview.editorHover,
         notePath: _pathInLibrary,
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
@@ -1667,7 +1608,7 @@ final class _NoteViewState extends State<NoteView>
       ),
       embedResolver: _resolveEmbed,
       deadLinks: _deadLinks,
-      linkPreview: _previewHooks(context),
+      linkPreview: _preview.hooks(context),
       column: widget.noteColumn,
       knownScan: _editorScanOf,
       onToggleTask: _toggleTaskFromRead,
@@ -2144,9 +2085,7 @@ final class _NoteViewState extends State<NoteView>
           ),
         Expanded(
           // The preview card of a hovered link goes over the note (#846).
-          child: LinkPreviewHost(
-            controller: _preview,
-            mathCache: _mathCache,
+          child: _preview.host(
             closeOn: _scrolls,
             child: error == null
                 ? (!_ready || _loading
