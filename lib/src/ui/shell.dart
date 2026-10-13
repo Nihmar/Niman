@@ -2794,8 +2794,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _ocrFlow != null &&
         _shownIsAttachment &&
         isRecognizableFile(_selected ?? ''),
-    // The phone has no key for the palette (#206); the wide layout has.
-    palette: !_wide,
+    // A touch device has no key for the palette (#206), the phone's and
+    // the tablet's alike (#849); a desktop window has.
+    palette: _paletteByTouch,
     slides: _showsSlides,
     presenterView: _wide,
     kindSwitch: switch (_noteKind) {
@@ -2929,8 +2930,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _gridStart.isNotEmpty,
       onBackStep: _gridUp,
       onSwitchLibrary: () => _windows.switchLibrary(context),
-      // The phone's way into the palette (#206); the desktop has a key.
-      onOpenPalette: narrow ? () => unawaited(_palette.open(context)) : null,
+      // The touch way into the palette (#206); the desktop has a key.
+      onOpenPalette: _paletteByTouch
+          ? () => unawaited(_palette.open(context))
+          : null,
+      wideBackAvailable: _wideBackAvailable,
+      onWideBack: _wideBack,
       buildWideSlots: () => _wideSlots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
@@ -4715,6 +4720,43 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final at = _gridStart;
     if (at.isEmpty) return;
     _gridGoTo(parentOf(at));
+  }
+
+  /// Whether the palette is reached by touch (#206, #849): on a window
+  /// that is not the wide shell, and on any touch device's wide one. A
+  /// desktop's wide window has a key.
+  bool get _paletteByTouch => !_wide || !_desktop;
+
+  /// Whether the Files pane shows the grid inside a folder, which Back
+  /// steps out of (#727).
+  bool get _gridCanStepUp =>
+      _tab == ShellTab.files && _gridOn && _gridStart.isNotEmpty;
+
+  /// Whether the system Back has a step to take in the wide shell (#849):
+  /// what the phone's Back does in its layout, in the wide one's terms.
+  bool get _wideBackAvailable =>
+      _wide &&
+      (_contentTabShows ||
+          _sidebarShowsSearch ||
+          _workspace.value.activePath != null ||
+          _gridCanStepUp);
+
+  /// The wide shell's Back (#849): the topmost thing on screen goes
+  /// first — a book out of full screen, a pinned Home or Todo, the search
+  /// sidebar, the open note — and the grid steps up a folder last. With
+  /// none of them left Back leaves the app.
+  void _wideBack() {
+    if (_immersive.fullScreen.value != null) {
+      _immersive.fullScreen.value = null;
+    } else if (_contentTabShows) {
+      _closeContentTab();
+    } else if (_sidebarShowsSearch) {
+      _onDestinationSelected(ShellTab.files);
+    } else if (_workspace.value.activePath != null) {
+      _workspace.closeActive();
+    } else if (_gridCanStepUp) {
+      _gridUp();
+    }
   }
 
   /// The right-click menu on the grid's empty space: a note, a note from

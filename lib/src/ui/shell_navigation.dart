@@ -310,37 +310,53 @@ final class ShellRail extends StatelessWidget {
       width: width,
       color: Theme.of(context).colorScheme.surfaceContainer,
       padding: const EdgeInsets.only(left: _margin, top: 6, bottom: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final destination in places)
-            _RailButton(
-              buttonKey: Key('rail-${destination.name}'),
-              icon: destination.icon,
-              selectedIcon: destination.selectedIcon,
-              label: _railLabel(destination),
-              selected: current == destination.tab,
-              onPressed: () => onDestinationSelected(destination.tab),
-            ),
-          const Spacer(),
-          _RailButton(
-            buttonKey: const Key('rail-library'),
-            icon: Icons.layers_outlined,
-            selectedIcon: Icons.layers,
-            label: AppStrings.switchLibraryTitle,
-            selected: false,
-            onPressed: onSwitchLibrary,
+      // Scrolls when the window is shorter than the buttons are tall: a
+      // tablet with its keyboard up leaves the rail 130 dp (#849), and
+      // Settings and the library switch are not to be lost under the
+      // overflow. At its full height the column fills the rail as before,
+      // the library and Settings at the foot.
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(child: _column(places, settings)),
           ),
-          _RailButton(
-            buttonKey: Key('rail-${settings.name}'),
-            icon: settings.icon,
-            selectedIcon: settings.selectedIcon,
-            label: _railLabel(settings),
-            selected: current == ShellTab.settings,
-            onPressed: () => onDestinationSelected(ShellTab.settings),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _column(List<ShellDestination> places, ShellDestination settings) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final destination in places)
+          _RailButton(
+            buttonKey: Key('rail-${destination.name}'),
+            icon: destination.icon,
+            selectedIcon: destination.selectedIcon,
+            label: _railLabel(destination),
+            selected: current == destination.tab,
+            onPressed: () => onDestinationSelected(destination.tab),
+          ),
+        const Spacer(),
+        _RailButton(
+          buttonKey: const Key('rail-library'),
+          icon: Icons.layers_outlined,
+          selectedIcon: Icons.layers,
+          label: AppStrings.switchLibraryTitle,
+          selected: false,
+          onPressed: onSwitchLibrary,
+        ),
+        _RailButton(
+          buttonKey: Key('rail-${settings.name}'),
+          icon: settings.icon,
+          selectedIcon: settings.selectedIcon,
+          label: _railLabel(settings),
+          selected: current == ShellTab.settings,
+          onPressed: () => onDestinationSelected(ShellTab.settings),
+        ),
+      ],
     );
   }
 }
