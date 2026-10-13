@@ -147,7 +147,6 @@ final class _ActionEditorState extends State<_ActionEditor> {
       // An empty folder is the capture folder for a capture (#682) and
       // where the library's rule puts new notes for a note (#850), not
       // the root: the root is not among the choices.
-      allowRoot: false,
     );
     if (picked != null) setState(() => _folder = picked);
   }

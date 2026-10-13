@@ -325,7 +325,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('the new quick note goes in the open note\'s folder', (
+    testWidgets("the new quick note goes in the open note's folder", (
       tester,
     ) async {
       await createQuickNote(tester);
