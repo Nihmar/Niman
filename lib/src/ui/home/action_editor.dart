@@ -8,9 +8,9 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/home/action_field_rows.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
@@ -27,7 +27,7 @@ Future<HomeAction?> showActionEditor(
   required LibrarySession controller,
   Set<String> missing = const {},
 }) {
-  final fullscreen = MediaQuery.sizeOf(context).width < wideBreakpoint;
+  final fullscreen = !isWideShell(context);
   return showDialog<HomeAction>(
     context: context,
     builder: (context) => _ActionEditor(

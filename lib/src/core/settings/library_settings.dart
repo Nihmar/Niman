@@ -172,13 +172,18 @@ enum SourceFont {
   };
 }
 
-/// At and above this width the shell is wide: the rail, the tree and the
-/// note share the screen (spec: at 600 dp and up). Below it the phone
-/// layout, where the tree and the note are two full-screen panes.
+/// The room the wide shell needs: from this width the rail, the tree and
+/// the note can share the screen (spec: at 600 dp and up). Below it the
+/// phone layout, where the tree and the note are two full-screen panes.
+///
+/// It is a layout floor, not a device class (#849): a phone turned to
+/// landscape is wider than this and is still a phone. A reader asking
+/// "which chrome" (the rail or the bottom bar, a sheet or a dialog) asks
+/// `isWideShell`; one asking "is there room for this row" asks the width
+/// against this.
 ///
 /// It used to be named for the editor|preview split, which landed here
-/// and is gone: the width still decides the shell's shape, which is what
-/// every reader of it was actually asking.
+/// and is gone.
 const double wideBreakpoint = 600;
 
 /// The default folder (library-relative) of the list notes (T-TK-06).

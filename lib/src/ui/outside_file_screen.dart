@@ -21,6 +21,7 @@ import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/outside_files.dart';
@@ -147,7 +148,7 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
   Widget build(BuildContext context) {
     final window = ref.watch(windowControllerProvider);
     final active = widget.files.active;
-    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
+    final wide = isWideShell(context);
     final title = active?.name ?? '';
     final bindings = <ShortcutActivator, VoidCallback>{
       ...appShortcutBindings({

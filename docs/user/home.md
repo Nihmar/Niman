@@ -16,9 +16,11 @@ On a wide window the tiles sit on a grid of four columns, each tile one
 to four cells wide and tall. That grid needs the room: Home opens as a
 tab in the focused pane there (#712), and a pane narrower than the grid
 falls back to the column. On a phone the tiles stand one under the other,
-in an order of their own. An Android tablet in landscape gets the grid —
-when its content area is wide enough: the shape follows the room, not the
-system.
+in an order of their own. A tablet, and a phone turned to landscape, get
+the grid — when the content area is wide enough (640 px): the shape
+follows the room, not the system. A phone in landscape keeps the phone's
+layout around it (the bottom bar, the Home as a screen of its own); only
+the tiles use the width.
 
 ## Tiles
 

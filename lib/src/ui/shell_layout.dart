@@ -55,6 +55,8 @@ final class ShellLayoutProps {
     required this.onBackStep,
     required this.onSwitchLibrary,
     required this.buildWideSlots,
+    this.wideBackAvailable = false,
+    this.onWideBack,
     this.onOpenPalette,
     this.buildTabs,
     this.tabsStart = 0,
@@ -156,9 +158,19 @@ final class ShellLayoutProps {
   /// The rail's library button (#170): the library window (#203).
   final VoidCallback onSwitchLibrary;
 
-  /// Opens the command palette from the phone's two-finger swipe (#206);
-  /// null on a layout whose keyboard has a key for it.
+  /// Opens the command palette from the two-finger swipe (#206): on every
+  /// touch device, the phone's and the tablet's wide shell alike (#849);
+  /// null on a desktop, whose keyboard has a key for it.
   final VoidCallback? onOpenPalette;
+
+  /// Wide shell only: whether the system Back has a step to take inside
+  /// the app — a book out of full screen, a pinned Home or Todo, the
+  /// search sidebar, the open note, the grid's folder (#849). Without
+  /// one Back leaves the app, as it does from the phone's start screen.
+  final bool wideBackAvailable;
+
+  /// Takes that step.
+  final VoidCallback? onWideBack;
 
   /// The wide layout's stacked tab slots, in tab order.
   final List<Widget> Function() buildWideSlots;
@@ -326,67 +338,89 @@ final class WideShellLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A tablet is touch (#849): the system Back steps inside the app as the
+    // phone's does, and the palette has its swipe, there being no key.
+    return PopScope(
+      canPop: !props.wideBackAvailable,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) props.onWideBack?.call();
+      },
+      child: _scaffold(context),
+    );
+  }
+
+  Widget _scaffold(BuildContext context) {
     return Scaffold(
       // The base the parts float on as islands: the title bar's and the
       // rail's color, so the chrome reads as one ground around them.
       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      // Edge to edge is the platform's rule (#849): nothing of the rail,
+      // the panes or the footers sits under a status bar, a gesture bar or
+      // a camera cutout. A desktop has none of them, and this is nothing.
+      body: PaletteSwipe(
+        onOpen: props.onOpenPalette,
+        child: SafeArea(child: _body()),
+      ),
+    );
+  }
+
+  Widget _body() {
+    return Actions(
       // Under the Scaffold, whose own Esc (the drawer's, off without one)
       // would otherwise be the nearest and keep the key (#69).
-      body: Actions(
-        actions: {DismissIntent: ?props.leaveZenOnEsc},
-        child: CallbackShortcuts(
-          bindings: props.shortcutBindings,
-          // The shell has to be an ancestor of the primary focus for key
-          // events to bubble to the bindings; a fresh window focuses
-          // nothing (T-PP-10), so the body claims it until the tree or the
-          // editor takes over.
-          child: Focus(
-            focusNode: props.shellFocus,
-            autofocus: true,
-            child: Column(
-              children: [
-                if (props.zen)
-                  ZenTitleBar(
-                    title: props.zenTitle,
-                    onLeave: props.onLeaveZen ?? () {},
-                    window: props.window,
-                    previewVisible: props.zenPreviewVisible,
-                    onTogglePreview: props.onZenTogglePreview,
-                  )
-                else if (props.window.customTitleBar)
-                  AppTitleBar(
-                    title: props.windowTitle,
-                    sidebarVisible: props.sidebarVisible,
-                    onToggleSidebar: props.onToggleSidebar,
-                    window: props.window,
-                    tabs: props.buildTabs,
-                    tabsStart: props.tabsStart,
-                  ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      if (!props.zen) ...[
-                        TourTarget(
-                          id: TourTargets.nav,
-                          child: ShellRail(
-                            destinations: props.destinations,
-                            current: props.tab,
-                            onDestinationSelected: props.onDestinationSelected,
-                            onSwitchLibrary: props.onSwitchLibrary,
-                          ),
-                        ),
-                      ],
-                      Expanded(
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: props.buildWideSlots(),
+      actions: {DismissIntent: ?props.leaveZenOnEsc},
+      child: CallbackShortcuts(
+        bindings: props.shortcutBindings,
+        // The shell has to be an ancestor of the primary focus for key
+        // events to bubble to the bindings; a fresh window focuses
+        // nothing (T-PP-10), so the body claims it until the tree or the
+        // editor takes over.
+        child: Focus(
+          focusNode: props.shellFocus,
+          autofocus: true,
+          child: Column(
+            children: [
+              if (props.zen)
+                ZenTitleBar(
+                  title: props.zenTitle,
+                  onLeave: props.onLeaveZen ?? () {},
+                  window: props.window,
+                  previewVisible: props.zenPreviewVisible,
+                  onTogglePreview: props.onZenTogglePreview,
+                )
+              else if (props.window.customTitleBar)
+                AppTitleBar(
+                  title: props.windowTitle,
+                  sidebarVisible: props.sidebarVisible,
+                  onToggleSidebar: props.onToggleSidebar,
+                  window: props.window,
+                  tabs: props.buildTabs,
+                  tabsStart: props.tabsStart,
+                ),
+              Expanded(
+                child: Row(
+                  children: [
+                    if (!props.zen) ...[
+                      TourTarget(
+                        id: TourTargets.nav,
+                        child: ShellRail(
+                          destinations: props.destinations,
+                          current: props.tab,
+                          onDestinationSelected: props.onDestinationSelected,
+                          onSwitchLibrary: props.onSwitchLibrary,
                         ),
                       ),
                     ],
-                  ),
+                    Expanded(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: props.buildWideSlots(),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/templates/counters.dart';
@@ -16,6 +15,7 @@ import 'package:niman/src/templates/directives.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/templates/includes.dart';
 import 'package:niman/src/templates/prompts.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/note_picker.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -402,7 +402,7 @@ final class ShellTemplateFlow {
     final from = origin();
     final selected = from.selected;
     if (selected == null || from.isDir) return '';
-    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
+    final narrow = !isWideShell(context);
     if (narrow && from.treeVisible) return '';
     if (templateFolder.isNotEmpty && isUnder(templateFolder, selected)) {
       return '';

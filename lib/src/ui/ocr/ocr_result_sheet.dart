@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:niman/src/core/settings/library_settings.dart'
-    show wideBreakpoint;
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// A picture's text, as soon as it is read, on a phone (#595): the words
@@ -100,7 +99,7 @@ Future<void> showOcrResultSheet(
     );
   }
 
-  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+  if (isWideShell(context)) {
     return showDialog<void>(
       context: context,
       builder: (context) => Dialog(

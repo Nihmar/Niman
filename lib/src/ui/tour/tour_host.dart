@@ -6,10 +6,10 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tour/tour_overlay.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
@@ -29,7 +29,7 @@ Future<void> startTour(
   int from = 0,
   Future<void> Function(BuildContext context)? openCheatsheet,
 }) async {
-  final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
+  final wide = isWideShell(context);
   final store = await welcomeStore(ref);
   final session = ref.read(librarySessionProvider);
   final editors = await session.enabledEditors;

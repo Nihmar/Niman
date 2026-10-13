@@ -8,8 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart'
-    show wideBreakpoint;
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Asks for the comment on the place [label] names, [quote] its passage;
@@ -20,7 +19,7 @@ Future<String?> showAnnotationSheet(
   String quote = '',
 }) {
   final body = _AnnotationForm(label: label, quote: quote);
-  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+  if (isWideShell(context)) {
     return showDialog<String>(
       context: context,
       builder: (context) => Dialog(

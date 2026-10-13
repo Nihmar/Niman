@@ -34,6 +34,22 @@ final class ShellFab extends ChangeNotifier {
   /// its icon. Written from the FAB's paint, read when the scrim builds.
   Offset? _anchor;
 
+  /// The height of the screen's body, between the bars: the room the
+  /// button and its menu share. Written from layout, read when the button
+  /// next builds (the menu opening is one) — like [_anchor], never a
+  /// `setState`.
+  double? _room;
+
+  /// The room the button's menu may take, margins above and below it
+  /// kept; null before the body has been laid out.
+  double? get _menuRoom {
+    final room = _room;
+    return room == null ? null : room - 2 * _margin;
+  }
+
+  /// The gap the Scaffold keeps between its FAB and the edges of its body.
+  static const double _margin = 16;
+
   bool _disposed = false;
 
   /// Opens the menu, or closes it.
@@ -78,6 +94,7 @@ final class ShellFab extends ChangeNotifier {
       action();
     };
     return NewItemFab(
+      maxHeight: _menuRoom,
       onAnchor: (center) => _anchor = center,
       expanded: _expanded,
       listFolder: _listFolder,
@@ -92,6 +109,19 @@ final class ShellFab extends ChangeNotifier {
       onCaptureWebPage: closing(onCaptureWebPage),
     );
   }
+
+  /// Measures the body the button floats over, for the menu to fit in
+  /// (#849). The Scaffold hands its FAB the whole screen to grow in and
+  /// then sets it above the bottom bar, so a menu taller than the body
+  /// ends above the top of the screen.
+  ///
+  /// Always wrapped, never toggled, for the reason [withScrim] gives.
+  Widget measuring(Widget body) => LayoutBuilder(
+    builder: (context, constraints) {
+      _room = constraints.maxHeight;
+      return body;
+    },
+  );
 
   /// Covers [child] with the menu's scrim: a circle that grows out of the
   /// main FAB icon, dims the body, and closes the menu on any tap (the

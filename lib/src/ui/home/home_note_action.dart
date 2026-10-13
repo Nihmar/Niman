@@ -4,7 +4,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
 import 'package:niman/src/frontmatter/yaml_scalar.dart';
 import 'package:niman/src/home/home_action.dart';
@@ -12,6 +11,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/templates/directives.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/templates/prompts.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -80,7 +80,7 @@ Future<void> makeHomeNote(
       fields: fields,
       pickNote: () => templates.pickBacklinkNote(context),
       title: homeActionLabel(action),
-      sheet: MediaQuery.sizeOf(context).width < wideBreakpoint,
+      sheet: !isWideShell(context),
     );
     if (given == null) return;
     answers = given;

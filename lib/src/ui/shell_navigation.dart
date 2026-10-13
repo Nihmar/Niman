@@ -16,6 +16,7 @@ import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The command a destination runs on a key, if any.
@@ -270,7 +271,7 @@ final class ShellRail extends StatelessWidget {
   /// gap is the space on that side, so the glyph sits as far from the
   /// panel as from the window's edge, and the active pill stands off the
   /// panel as one island does off the next (#749).
-  static const double width = _margin + _RailButton.size;
+  static const double width = _margin + _RailButton.pointerSize;
 
   /// Where the panels start, from the window's left edge: past the rail
   /// and the islands' gap. The title bar's name starts here, so it stands
@@ -279,7 +280,7 @@ final class ShellRail extends StatelessWidget {
 
   /// The centre of the buttons' glyphs, from the window's left edge: the
   /// title bar's sidebar toggle is centred on it (#708).
-  static const double glyphCentre = _margin + _RailButton.size / 2;
+  static const double glyphCentre = _margin + _RailButton.pointerSize / 2;
 
   /// The space between the window's edge and the buttons: the same the
   /// islands keep from the edge beside it (#749).
@@ -305,42 +306,71 @@ final class ShellRail extends StatelessWidget {
       for (final d in destinations)
         if (d != settings) d,
     ];
+    // A mouse's 38 px button, or a thumb's 48 on a touch device (#849):
+    // the rail widens by the difference. The statics above are the
+    // desktop's, which the title bar lines up with.
+    final side = thumbDense(Theme.of(context))
+        ? thumbTarget
+        : _RailButton.pointerSize;
     return Container(
       key: const Key('shell-rail'),
-      width: width,
+      width: _margin + side,
       color: Theme.of(context).colorScheme.surfaceContainer,
       padding: const EdgeInsets.only(left: _margin, top: 6, bottom: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final destination in places)
-            _RailButton(
-              buttonKey: Key('rail-${destination.name}'),
-              icon: destination.icon,
-              selectedIcon: destination.selectedIcon,
-              label: _railLabel(destination),
-              selected: current == destination.tab,
-              onPressed: () => onDestinationSelected(destination.tab),
-            ),
-          const Spacer(),
-          _RailButton(
-            buttonKey: const Key('rail-library'),
-            icon: Icons.layers_outlined,
-            selectedIcon: Icons.layers,
-            label: AppStrings.switchLibraryTitle,
-            selected: false,
-            onPressed: onSwitchLibrary,
+      // Scrolls when the window is shorter than the buttons are tall: a
+      // tablet with its keyboard up leaves the rail 130 dp (#849), and
+      // Settings and the library switch are not to be lost under the
+      // overflow. At its full height the column fills the rail as before,
+      // the library and Settings at the foot.
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(child: _column(places, settings, side)),
           ),
-          _RailButton(
-            buttonKey: Key('rail-${settings.name}'),
-            icon: settings.icon,
-            selectedIcon: settings.selectedIcon,
-            label: _railLabel(settings),
-            selected: current == ShellTab.settings,
-            onPressed: () => onDestinationSelected(ShellTab.settings),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _column(
+    List<ShellDestination> places,
+    ShellDestination settings,
+    double side,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final destination in places)
+          _RailButton(
+            buttonKey: Key('rail-${destination.name}'),
+            icon: destination.icon,
+            selectedIcon: destination.selectedIcon,
+            label: _railLabel(destination),
+            selected: current == destination.tab,
+            onPressed: () => onDestinationSelected(destination.tab),
+            size: side,
+          ),
+        const Spacer(),
+        _RailButton(
+          buttonKey: const Key('rail-library'),
+          icon: Icons.layers_outlined,
+          selectedIcon: Icons.layers,
+          label: AppStrings.switchLibraryTitle,
+          selected: false,
+          onPressed: onSwitchLibrary,
+          size: side,
+        ),
+        _RailButton(
+          buttonKey: Key('rail-${settings.name}'),
+          icon: settings.icon,
+          selectedIcon: settings.selectedIcon,
+          label: _railLabel(settings),
+          selected: current == ShellTab.settings,
+          onPressed: () => onDestinationSelected(ShellTab.settings),
+          size: side,
+        ),
+      ],
     );
   }
 }
@@ -355,10 +385,15 @@ final class _RailButton extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onPressed,
+    required this.size,
   });
 
   /// The button's side.
-  static const double size = 38;
+  static const double pointerSize = 38;
+
+  /// The button's side on this surface: [pointerSize] for a mouse, a thumb's
+  /// target on a touch device (#849).
+  final double size;
 
   final Key buttonKey;
   final IconData icon;
@@ -383,12 +418,12 @@ final class _RailButton extends StatelessWidget {
         icon: Icon(selected ? selectedIcon : icon),
         iconSize: 20,
         padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(width: size, height: size),
+        constraints: BoxConstraints.tightFor(width: size, height: size),
         style: IconButton.styleFrom(
           backgroundColor: selected ? scheme.surfaceContainerHigh : null,
           foregroundColor: selected ? scheme.primary : scheme.onSurfaceVariant,
-          minimumSize: const Size.square(size),
-          fixedSize: const Size.square(size),
+          minimumSize: Size.square(size),
+          fixedSize: Size.square(size),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
           ),

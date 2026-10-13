@@ -7,12 +7,11 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/download/downloadable.dart';
-import 'package:niman/src/core/settings/library_settings.dart'
-    show wideBreakpoint;
 import 'package:niman/src/ocr/ocr_engine_build.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_language.dart';
 import 'package:niman/src/ocr/ocr_sidecar.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
@@ -38,7 +37,7 @@ Future<OcrRequest?> showRecognizeTextSheet(
     page: page,
     hasText: hasText,
   );
-  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+  if (isWideShell(context)) {
     return showDialog<OcrRequest>(
       context: context,
       builder: (context) => Dialog(

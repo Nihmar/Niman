@@ -4,6 +4,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_navigation.dart';
@@ -74,7 +75,10 @@ final class _SettingsTabState extends State<SettingsTab> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < wideBreakpoint) {
+        // The pane's own room decides whether the list and a section fit
+        // side by side, and a phone never shows them so, turned or not
+        // (#849): its Settings is the list, then a page per area.
+        if (constraints.maxWidth < wideBreakpoint || isPhone(context)) {
           return SettingsBody(
             controller: widget.controller,
             unsaved: widget.unsaved,

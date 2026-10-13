@@ -81,13 +81,16 @@ final class TreeFooterBar extends StatelessWidget {
     // A pointer's menu is the tree's own (#296, #747): the footer's menus
     // run the dense rows where the tree's do.
     final dense = pointerDense(theme);
+    // On a touch device (an Android tablet's wide shell, #849) the footer
+    // is a thumb's: 56 px tall, every button its 48.
+    final touch = thumbDense(theme);
     return LayoutBuilder(
       builder: (context, constraints) {
         final labelled = constraints.maxWidth >= _newLabelMinWidth;
         // A narrow pane keeps the same controls on 32 px buttons, as the
         // mockup draws them, so the whole footer still fits (#727).
         final compact = IconButtonThemeData(
-          style: labelled
+          style: labelled || touch
               ? null
               : IconButton.styleFrom(
                   minimumSize: const Size(32, 32),
@@ -95,9 +98,20 @@ final class TreeFooterBar extends StatelessWidget {
                   padding: EdgeInsets.zero,
                 ),
         );
+        final tools = <Widget>[
+          syncButton,
+          IconButton(
+            key: const Key('open-trash'),
+            tooltip: AppStrings.trashTitle,
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => unawaited(openTrash(context, controller)),
+          ),
+          ?viewToggle,
+          sortToggle,
+        ];
         return Container(
           key: const Key('tree-footer'),
-          height: 44,
+          height: touch ? 56 : 44,
           decoration: BoxDecoration(
             border: Border(top: BorderSide(color: theme.dividerColor)),
           ),
@@ -186,9 +200,9 @@ final class TreeFooterBar extends StatelessWidget {
                     ),
                   ],
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                       horizontal: 8,
-                      vertical: 7,
+                      vertical: touch ? 15 : 7,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -206,16 +220,24 @@ final class TreeFooterBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Spacer(),
-                syncButton,
-                IconButton(
-                  key: const Key('open-trash'),
-                  tooltip: AppStrings.trashTitle,
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => unawaited(openTrash(context, controller)),
-                ),
-                ?viewToggle,
-                sortToggle,
+                if (touch)
+                  // Forty-eight px buttons do not all fit the tree's
+                  // narrowest width: the row scrolls from its end rather
+                  // than shrink them or overflow.
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      reverse: true,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: tools,
+                      ),
+                    ),
+                  )
+                else ...[
+                  const Spacer(),
+                  ...tools,
+                ],
                 const SizedBox(width: 4),
               ],
             ),

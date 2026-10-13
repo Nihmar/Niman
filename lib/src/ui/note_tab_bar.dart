@@ -15,6 +15,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/ui/marquee_text.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/workspace/workspace.dart';
@@ -70,6 +71,11 @@ final class NoteTabBar extends StatefulWidget {
 
   /// The least of [filler] the tabs leave free, however many there are.
   static const double minFiller = 48;
+
+  /// The height of a pane's tab row: a tab and the air around it, a
+  /// mouse's 38 px or, with [touch], a thumb's tab and its margin (#849).
+  static double rowHeight({required bool touch}) =>
+      touch ? thumbTarget + 8 : 38;
 
   /// The tabs, left to right.
   final List<WorkspaceTab> tabs;
@@ -278,7 +284,11 @@ final class _NoteTabBarState extends State<NoteTabBar> {
     final tabs = widget.tabs;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final room = (constraints.maxWidth - 2 * 40 - NoteTabBar.minFiller)
+        final touch = thumbDense(Theme.of(context));
+        // Each of the two buttons past the tabs: 40 px with a mouse (the
+        // compact density), a thumb's target on a touch device (#849).
+        final button = touch ? thumbTarget : 40.0;
+        final room = (constraints.maxWidth - 2 * button - NoteTabBar.minFiller)
             .clamp(0.0, double.infinity);
         // Short of room, the tabs shrink first — their names cut with an
         // ellipsis — and only below the narrowest does the row scroll.
@@ -335,7 +345,7 @@ final class _NoteTabBarState extends State<NoteTabBar> {
               key: const Key('tab-new'),
               tooltip: AppStrings.newNoteTabTooltip,
               icon: const Icon(Icons.add, size: 18),
-              visualDensity: VisualDensity.compact,
+              visualDensity: touch ? null : VisualDensity.compact,
               onPressed: widget.onNew,
             ),
             if (tabs.isNotEmpty)
@@ -344,7 +354,7 @@ final class _NoteTabBarState extends State<NoteTabBar> {
                   key: const Key('tab-list'),
                   tooltip: AppStrings.openNotesTooltip,
                   icon: const Icon(Icons.expand_more, size: 18),
-                  visualDensity: VisualDensity.compact,
+                  visualDensity: touch ? null : VisualDensity.compact,
                   onPressed: () => unawaited(_showList(context)),
                 ),
               ),
@@ -392,6 +402,13 @@ final class TabSurface extends StatefulWidget {
   /// The height of a tab.
   static const double height = 30;
 
+  /// The height of a tab for a mouse or, with [touch], a thumb (#849).
+  static double heightFor({required bool touch}) =>
+      touch ? thumbTarget : height;
+
+  /// The side of a tab's close button: a mouse's 20 px, a thumb's target.
+  static double closeFor({required bool touch}) => touch ? thumbTarget : 20;
+
   @override
   State<TabSurface> createState() => _TabSurfaceState();
 }
@@ -425,7 +442,7 @@ final class _TabSurfaceState extends State<TabSurface> {
           borderRadius: BorderRadius.circular(TabSurface.radius),
           onTap: widget.onTap,
           child: SizedBox(
-            height: TabSurface.height,
+            height: TabSurface.heightFor(touch: thumbDense(Theme.of(context))),
             child: widget.builder(context, hover: _hover),
           ),
         ),
@@ -523,7 +540,9 @@ final class _NoteTab extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       SizedBox.square(
-                        dimension: 20,
+                        dimension: TabSurface.closeFor(
+                          touch: thumbDense(theme),
+                        ),
                         child: showDot
                             ? Center(
                                 child: Container(

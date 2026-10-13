@@ -3,8 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart'
-    show wideBreakpoint;
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/kinds/shopping_parser.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -20,7 +19,7 @@ Future<int?> showShoppingQuantitySheet(
   required int quantity,
 }) {
   final body = _QuantitySheet(quantity: quantity);
-  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+  if (isWideShell(context)) {
     return showDialog<int>(
       context: context,
       builder: (context) => Dialog(
@@ -34,6 +33,10 @@ Future<int?> showShoppingQuantitySheet(
   return showModalBottomSheet<int>(
     context: context,
     showDragHandle: true,
+    // A phone turned to landscape is 390 dp tall (#849): a sheet that is
+    // not scroll controlled is capped at 9/16 of that, under what this
+    // one needs.
+    isScrollControlled: true,
     builder: (context) => body,
   );
 }

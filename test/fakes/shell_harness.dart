@@ -204,3 +204,10 @@ void setSurfaceSize(WidgetTester tester, Size size) {
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 }
+
+/// Runs a test as on a desktop: the pointer's density, the wide chrome at
+/// its drawn sizes -- the 38 px rail, the 8 px divider strip. A test that
+/// pins those numbers says so with `variant: desktopDensity`: the test
+/// binding's default platform is Android, whose density is a thumb's
+/// (#849), and the wide chrome follows it.
+final desktopDensity = TargetPlatformVariant.only(TargetPlatform.windows);
