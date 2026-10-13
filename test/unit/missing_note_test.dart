@@ -2,6 +2,7 @@
 // library's own path; the proposal and its guards are pure.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 
 LinkContext context({
@@ -30,7 +31,7 @@ void main() {
     test('a bare name lands next to the clicked note (current folder)', () {
       final path = proposedMissingNotePath(
         'Foo',
-        MissingNoteLocation.currentFolder,
+        NewItemLocation.openNoteFolder,
         context(),
       );
       expect(path, 'Notes/Foo.md');
@@ -39,7 +40,7 @@ void main() {
     test('a bare name lands at the root (library root)', () {
       final path = proposedMissingNotePath(
         'Foo',
-        MissingNoteLocation.libraryRoot,
+        NewItemLocation.libraryRoot,
         context(),
       );
       expect(path, 'Foo.md');
@@ -49,7 +50,7 @@ void main() {
       expect(
         proposedMissingNotePath(
           'Foo.md',
-          MissingNoteLocation.currentFolder,
+          NewItemLocation.openNoteFolder,
           context(),
         ),
         'Notes/Foo.md',
@@ -60,7 +61,7 @@ void main() {
       expect(
         proposedMissingNotePath(
           'Foo#Some Heading',
-          MissingNoteLocation.currentFolder,
+          NewItemLocation.openNoteFolder,
           context(),
         ),
         'Notes/Foo.md',
@@ -70,12 +71,12 @@ void main() {
     test('a folder-qualified target keeps its own folder, both locations', () {
       final current = proposedMissingNotePath(
         'Sub/Foo',
-        MissingNoteLocation.currentFolder,
+        NewItemLocation.openNoteFolder,
         context(),
       );
       final root = proposedMissingNotePath(
         'Sub/Foo',
-        MissingNoteLocation.libraryRoot,
+        NewItemLocation.libraryRoot,
         context(),
       );
       expect(current, 'Sub/Foo.md');
@@ -87,7 +88,7 @@ void main() {
         expect(
           proposedMissingNotePath(
             target,
-            MissingNoteLocation.currentFolder,
+            NewItemLocation.openNoteFolder,
             context(),
           ),
           isNull,
@@ -101,7 +102,7 @@ void main() {
         expect(
           proposedMissingNotePath(
             target,
-            MissingNoteLocation.currentFolder,
+            NewItemLocation.openNoteFolder,
             context(),
           ),
           isNull,
@@ -115,7 +116,7 @@ void main() {
         expect(
           proposedMissingNotePath(
             target,
-            MissingNoteLocation.currentFolder,
+            NewItemLocation.openNoteFolder,
             context(),
           ),
           isNull,
@@ -125,7 +126,7 @@ void main() {
       expect(
         proposedMissingNotePath(
           'Sub/Foo',
-          MissingNoteLocation.currentFolder,
+          NewItemLocation.openNoteFolder,
           context(),
         ),
         'Sub/Foo.md',
@@ -137,17 +138,13 @@ void main() {
       expect(
         proposedMissingNotePath(
           '../Sub/..//Foo',
-          MissingNoteLocation.currentFolder,
+          NewItemLocation.openNoteFolder,
           context(),
         ),
         'Sub/Foo.md',
       );
       expect(
-        proposedMissingNotePath(
-          'Sub/',
-          MissingNoteLocation.libraryRoot,
-          context(),
-        ),
+        proposedMissingNotePath('Sub/', NewItemLocation.libraryRoot, context()),
         'Sub.md',
       );
     });
@@ -156,7 +153,7 @@ void main() {
       expect(
         proposedMissingNotePath(
           r'Sub\Foo',
-          MissingNoteLocation.libraryRoot,
+          NewItemLocation.libraryRoot,
           context(),
         ),
         'Sub/Foo.md',
@@ -167,17 +164,13 @@ void main() {
       expect(
         proposedMissingNotePath(
           'Bad/Name:',
-          MissingNoteLocation.libraryRoot,
+          NewItemLocation.libraryRoot,
           context(),
         ),
         'Bad/Name.md',
       );
       expect(
-        proposedMissingNotePath(
-          '::::',
-          MissingNoteLocation.libraryRoot,
-          context(),
-        ),
+        proposedMissingNotePath('::::', NewItemLocation.libraryRoot, context()),
         '$defaultNoteName.md',
       );
     });
@@ -186,7 +179,7 @@ void main() {
   group('MissingNoteHandler', () {
     /// A handler over recorded fakes.
     (MissingNoteHandler handler, _Recording recording) buildHandler({
-      MissingNoteLocation location = MissingNoteLocation.currentFolder,
+      NewItemLocation location = NewItemLocation.openNoteFolder,
       bool confirm = true,
       String created = 'created',
     }) {
@@ -280,7 +273,7 @@ void main() {
 
     test('a root proposal has no folder to make', () async {
       final (handler, recording) = buildHandler(
-        location: MissingNoteLocation.libraryRoot,
+        location: NewItemLocation.libraryRoot,
       );
       final outcome = await handler.handleDeadLink('Foo', context());
       expect(

@@ -386,11 +386,34 @@ final class HungarianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Hiányzó jegyzetek létrehozása';
+  String get linkUpdateTitle =>
+      'Hivatkozások frissítése átnevezés vagy áthelyezés után';
   @override
-  String get missingNoteLocationRoot => 'A könyvtár gyökerében';
+  String get linkUpdateSubtitle =>
+      'Mi történik az átnevezett vagy áthelyezett jegyzetre vagy mappára '
+      'mutató hivatkozásokkal';
   @override
-  String get missingNoteLocationCurrentFolder => 'A jelenlegi mappában';
+  String get linkUpdateAutomatic => 'Automatikusan';
+  @override
+  String get linkUpdateAsk => 'Mindig kérdezzen';
+  @override
+  String get linkUpdateNever => 'Soha';
+  @override
+  String get linkUpdateAskTitle => 'Frissíti a hivatkozásokat?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Az áthelyezettre hivatkozó jegyzetek: $notes. Frissíti a '
+      'hivatkozásaikat?';
+  @override
+  String get linkUpdateConfirm => 'Frissítés';
+  @override
+  String get linkUpdateKeep => 'Hagyja változatlanul';
+  @override
+  String get newItemLocationTitle => 'Új jegyzetek és mappák létrehozása';
+  @override
+  String get newItemLocationRoot => 'A könyvtár gyökerében';
+  @override
+  String get newItemLocationOpenNote => 'A megnyitott jegyzet mappájában';
   @override
   String get indentWidthTitle => 'Behúzás szélessége';
   @override
@@ -3697,6 +3720,9 @@ final class HungarianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'A mentések mappája';
+
+  @override
+  String get homeActionDefaultFolder => 'Ahová az új jegyzetek kerülnek';
 
   @override
   String get homeActionContext => 'Környezet';

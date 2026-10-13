@@ -357,11 +357,30 @@ final class JapaneseStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => '存在しないノートを作成する場所';
+  String get linkUpdateTitle => '名前変更・移動後にリンクを更新';
   @override
-  String get missingNoteLocationRoot => 'ライブラリルート';
+  String get linkUpdateSubtitle => '名前を変更または移動したノートやフォルダを指すリンクの扱い';
   @override
-  String get missingNoteLocationCurrentFolder => '現在のフォルダ';
+  String get linkUpdateAutomatic => '自動';
+  @override
+  String get linkUpdateAsk => '毎回確認';
+  @override
+  String get linkUpdateNever => '更新しない';
+  @override
+  String get linkUpdateAskTitle => 'リンクを更新しますか？';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      '移動したものへリンクしているノート: $notes 件。リンクを更新しますか？';
+  @override
+  String get linkUpdateConfirm => '更新';
+  @override
+  String get linkUpdateKeep => 'そのままにする';
+  @override
+  String get newItemLocationTitle => '新しいノートとフォルダを作成する場所';
+  @override
+  String get newItemLocationRoot => 'ライブラリルート';
+  @override
+  String get newItemLocationOpenNote => '開いているノートのフォルダ';
   @override
   String get indentWidthTitle => 'インデント幅';
   @override
@@ -3388,6 +3407,9 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'キャプチャ用フォルダ';
+
+  @override
+  String get homeActionDefaultFolder => '新しいノートの作成先';
 
   @override
   String get homeActionContext => 'コンテキスト';

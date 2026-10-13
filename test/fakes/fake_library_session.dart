@@ -26,12 +26,13 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/library_links.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -576,12 +577,19 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<MissingNoteLocation> get missingNoteLocation async =>
-      _config.missingNoteLocation;
+  Future<LinkUpdate> get linkUpdate async => _config.linkUpdate;
 
   @override
-  Future<void> setMissingNoteLocation(MissingNoteLocation location) async {
-    _config = _config.copyWith(missingNoteLocation: location);
+  Future<void> setLinkUpdate(LinkUpdate mode) async {
+    _config = _config.copyWith(linkUpdate: mode);
+  }
+
+  @override
+  Future<NewItemLocation> get newItemLocation async => _config.newItemLocation;
+
+  @override
+  Future<void> setNewItemLocation(NewItemLocation location) async {
+    _config = _config.copyWith(newItemLocation: location);
   }
 
   @override
@@ -1387,7 +1395,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<Note> rename(String path, String newName) async {
+  Future<Note> rename(
+    String path,
+    String newName, {
+    LinkUpdateConfirm? confirmLinks,
+  }) async {
     final row = _requireRow(path);
     final parent = parentOf(path);
     var base = newName;
@@ -1412,7 +1424,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<Note> move(String path, String targetParent) async {
+  Future<Note> move(
+    String path,
+    String targetParent, {
+    LinkUpdateConfirm? confirmLinks,
+  }) async {
     final row = _requireRow(path);
     final same = resolvePath(targetParent, p.basename(path)) == path;
     if (same) return _noteAt(path);

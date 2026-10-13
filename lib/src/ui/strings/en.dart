@@ -385,11 +385,32 @@ final class EnglishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Create missing notes in';
+  String get linkUpdateTitle => 'Update links after rename or move';
   @override
-  String get missingNoteLocationRoot => 'Library root';
+  String get linkUpdateSubtitle =>
+      'What happens to the links pointing at a note or folder that is renamed '
+      'or moved';
   @override
-  String get missingNoteLocationCurrentFolder => 'Current folder';
+  String get linkUpdateAutomatic => 'Automatically';
+  @override
+  String get linkUpdateAsk => 'Ask each time';
+  @override
+  String get linkUpdateNever => 'Never';
+  @override
+  String get linkUpdateAskTitle => 'Update links?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notes that link to what moved: $notes. Update their links?';
+  @override
+  String get linkUpdateConfirm => 'Update';
+  @override
+  String get linkUpdateKeep => 'Leave as is';
+  @override
+  String get newItemLocationTitle => 'New notes and folders go to';
+  @override
+  String get newItemLocationRoot => 'Library root';
+  @override
+  String get newItemLocationOpenNote => 'Folder of the open note';
   @override
   String get indentWidthTitle => 'Indent width';
   @override
@@ -3644,6 +3665,9 @@ final class EnglishStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'The capture folder';
+
+  @override
+  String get homeActionDefaultFolder => 'Where new notes go';
 
   @override
   String get homeActionContext => 'Context';

@@ -387,11 +387,33 @@ final class SlovakStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Vytvárať chýbajúce poznámky v';
+  String get linkUpdateTitle =>
+      'Aktualizovať odkazy po premenovaní alebo presune';
   @override
-  String get missingNoteLocationRoot => 'Koreň knižnice';
+  String get linkUpdateSubtitle =>
+      'Čo sa stane s odkazmi na poznámku alebo priečinok, ktoré sú '
+      'premenované či presunuté';
   @override
-  String get missingNoteLocationCurrentFolder => 'Aktuálny priečinok';
+  String get linkUpdateAutomatic => 'Automaticky';
+  @override
+  String get linkUpdateAsk => 'Vždy sa opýtať';
+  @override
+  String get linkUpdateNever => 'Nikdy';
+  @override
+  String get linkUpdateAskTitle => 'Aktualizovať odkazy?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Poznámky odkazujúce na presunuté: $notes. Aktualizovať ich odkazy?';
+  @override
+  String get linkUpdateConfirm => 'Aktualizovať';
+  @override
+  String get linkUpdateKeep => 'Nechať bez zmeny';
+  @override
+  String get newItemLocationTitle => 'Nové poznámky a priečinky idú do';
+  @override
+  String get newItemLocationRoot => 'Koreň knižnice';
+  @override
+  String get newItemLocationOpenNote => 'Priečinok otvorenej poznámky';
   @override
   String get indentWidthTitle => 'Šírka odsadenia';
   @override
@@ -3698,6 +3720,9 @@ final class SlovakStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Priečinok pre zachytenia';
+
+  @override
+  String get homeActionDefaultFolder => 'Kam idú nové poznámky';
 
   @override
   String get homeActionContext => 'Kontext';

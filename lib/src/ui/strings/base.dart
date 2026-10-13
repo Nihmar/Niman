@@ -202,6 +202,15 @@ abstract base class Strings {
   String get linkTypeSubtitle;
   String get linkTypeWikilink;
   String get linkTypeMarkdown;
+  String get linkUpdateTitle;
+  String get linkUpdateSubtitle;
+  String get linkUpdateAutomatic;
+  String get linkUpdateAsk;
+  String get linkUpdateNever;
+  String get linkUpdateAskTitle;
+  String linkUpdateAskBody(int notes);
+  String get linkUpdateConfirm;
+  String get linkUpdateKeep;
   String get indentWidthTitle;
   String get indentWidthSubtitle;
 
@@ -510,10 +519,12 @@ abstract base class Strings {
   String get linksToNoteEmbed;
   String get openLinkFailed;
 
+  // Where new notes and folders go (issue #850, which absorbed the
+  // dead-link setting of issue #78).
+  String get newItemLocationTitle;
+  String get newItemLocationRoot;
+  String get newItemLocationOpenNote;
   // Dead-link note creation (issue #78).
-  String get missingNoteLocationTitle;
-  String get missingNoteLocationRoot;
-  String get missingNoteLocationCurrentFolder;
   String get missingNoteDialogTitle;
   String missingNoteDialogBody(String path);
 
@@ -2011,6 +2022,7 @@ abstract base class Strings {
   String get homeActionAsk;
   String get homeActionAskHint;
   String get homeActionCaptureFolder;
+  String get homeActionDefaultFolder;
   String get homeActionContext;
   String get homeActionEdit;
   String get homeActionFieldAdd;

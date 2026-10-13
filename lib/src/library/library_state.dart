@@ -41,11 +41,11 @@ import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
 import 'package:niman/src/links/library_links.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/search/replace.dart';
@@ -1296,16 +1296,27 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(linkType: type));
   }
 
+  /// What a rename or a move does to the links pointing at what moved.
+  @override
+  Future<LinkUpdate> get linkUpdate async => (await _library).linkUpdate;
+
+  /// Sets (and persists) what a rename or a move does to those links.
+  @override
+  Future<void> setLinkUpdate(LinkUpdate mode) async {
+    _log.info('link update set to ${mode.name}');
+    await _editLibrary((c) => c.copyWith(linkUpdate: mode));
+  }
+
   /// Where a note created from a dead link lands.
   @override
-  Future<MissingNoteLocation> get missingNoteLocation async =>
-      (await _library).missingNoteLocation;
+  Future<NewItemLocation> get newItemLocation async =>
+      (await _library).newItemLocation;
 
   /// Sets (and persists) the dead-link note location.
   @override
-  Future<void> setMissingNoteLocation(MissingNoteLocation location) async {
+  Future<void> setNewItemLocation(NewItemLocation location) async {
     _log.info('missing note location set to ${location.name}');
-    await _editLibrary((c) => c.copyWith(missingNoteLocation: location));
+    await _editLibrary((c) => c.copyWith(newItemLocation: location));
   }
 
   /// The editor's indent/outdent width in spaces.

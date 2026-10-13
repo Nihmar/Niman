@@ -88,7 +88,9 @@ the picture.
 
 ## The text note
 
-The text goes into a note next to the file, named after it:
+The text goes into a note next to the file, named after it — always
+beside the file it belongs to, whatever the library's setting for where
+new notes go says, since that is where the app finds it again:
 `Contratto 2019 (scan).ocr.md` beside `Contratto 2019 (scan).pdf`. It is a
 real note — search finds the scan by its words, and you correct it by hand
 like any other.

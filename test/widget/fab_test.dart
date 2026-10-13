@@ -183,4 +183,82 @@ void main() {
     await controller.close();
     await controller.dispose();
   });
+
+  group('on a screen shorter than the menu (#849)', () {
+    // 390 dp tall is a phone turned sideways, minus its bars: the nine
+    // buttons are nearly 600 dp stacked.
+    Future<void> openShort(WidgetTester tester) async {
+      setSurfaceSize(tester, const Size(520, 390));
+      await tester.pumpWidget(buildApp());
+      await tester.pump();
+      await openLibrary(tester, filePicker);
+      await tester.tap(find.byKey(const Key('new-note-fab')));
+      await settleFabMenu(tester);
+    }
+
+    final scroll = find.byKey(const Key('new-item-menu-scroll'));
+
+    testWidgets('the menu fits the screen and scrolls to its first entry', (
+      tester,
+    ) async {
+      await openShort(tester);
+      expect(tester.takeException(), isNull, reason: 'no overflow');
+      final position = tester
+          .state<ScrollableState>(
+            find.descendant(of: scroll, matching: find.byType(Scrollable)),
+          )
+          .position;
+      expect(position.maxScrollExtent, greaterThan(0));
+      expect(
+        tester.getRect(scroll).top,
+        greaterThanOrEqualTo(0),
+        reason: 'the menu stays on the screen',
+      );
+
+      // It opens on the entries nearest the button, the first one cut off.
+      expect(
+        find.byKey(const Key('new-folder-action')).hitTestable(),
+        findsOne,
+      );
+      final first = find.byKey(const Key('journal-today-action'));
+      expect(first.hitTestable(), findsNothing);
+      await tester.drag(scroll, const Offset(0, 2000));
+      await settleFabMenu(tester);
+      expect(first.hitTestable(), findsOne, reason: 'a drag reaches it');
+      await tester.tap(first);
+      await settle(tester);
+      expect(
+        find.byKey(const ValueKey('full-note')),
+        findsOne,
+        reason: 'and the journal opens',
+      );
+    });
+
+    testWidgets('a tap beside the buttons still closes the menu', (
+      tester,
+    ) async {
+      await openShort(tester);
+      final menu = tester.getRect(scroll);
+      await tester.tapAt(Offset(menu.left / 2, menu.center.dy));
+      await settleFabMenu(tester);
+      expect(scrimInert(tester), isTrue);
+    });
+
+    testWidgets('with room, it is the plain column: nothing scrolls', (
+      tester,
+    ) async {
+      setSurfaceSize(tester, const Size(390, 844));
+      await tester.pumpWidget(buildApp());
+      await tester.pump();
+      await openLibrary(tester, filePicker);
+      await tester.tap(find.byKey(const Key('new-note-fab')));
+      await settleFabMenu(tester);
+      final position = tester
+          .state<ScrollableState>(
+            find.descendant(of: scroll, matching: find.byType(Scrollable)),
+          )
+          .position;
+      expect(position.maxScrollExtent, 0);
+    });
+  });
 }

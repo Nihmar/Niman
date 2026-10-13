@@ -4,7 +4,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
 import 'package:niman/src/frontmatter/yaml_scalar.dart';
 import 'package:niman/src/home/home_action.dart';
@@ -12,6 +11,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/templates/directives.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/templates/prompts.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -80,7 +80,7 @@ Future<void> makeHomeNote(
       fields: fields,
       pickNote: () => templates.pickBacklinkNote(context),
       title: homeActionLabel(action),
-      sheet: MediaQuery.sizeOf(context).width < wideBreakpoint,
+      sheet: !isWideShell(context),
     );
     if (given == null) return;
     answers = given;
@@ -117,15 +117,17 @@ Future<void> makeHomeNote(
     templateAnswers,
   );
   if (!context.mounted) return;
-  final folder = action.folder ?? '';
+  // A folder the action names wins over everything; without one the note
+  // goes where the library's rule puts new notes (#850).
+  final named = action.folder ?? '';
   await templates.file(
     context,
     template: template,
     answers: templateAnswers,
     surroundings: surroundings,
     name: name,
-    folder: folder,
-    folderWins: folder.isNotEmpty,
+    folder: named.isNotEmpty ? named : templates.newItemRule.folder,
+    folderWins: named.isNotEmpty,
     templateName: action.template ?? homeActionLabel(action),
     frontmatter: frontmatter,
     open: action.open,

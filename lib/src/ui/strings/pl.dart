@@ -390,11 +390,34 @@ final class PolishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Utwórz brakujące notatki w';
+  String get linkUpdateTitle =>
+      'Aktualizuj linki po zmianie nazwy lub przeniesieniu';
   @override
-  String get missingNoteLocationRoot => 'Korzeń biblioteki';
+  String get linkUpdateSubtitle =>
+      'Co dzieje się z linkami do notatki lub folderu, którego nazwę '
+      'zmieniono lub który przeniesiono';
   @override
-  String get missingNoteLocationCurrentFolder => 'Bieżący katalog';
+  String get linkUpdateAutomatic => 'Automatycznie';
+  @override
+  String get linkUpdateAsk => 'Pytaj za każdym razem';
+  @override
+  String get linkUpdateNever => 'Nigdy';
+  @override
+  String get linkUpdateAskTitle => 'Zaktualizować linki?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notatki z linkami do przeniesionego elementu: $notes. Zaktualizować '
+      'ich linki?';
+  @override
+  String get linkUpdateConfirm => 'Zaktualizuj';
+  @override
+  String get linkUpdateKeep => 'Zostaw bez zmian';
+  @override
+  String get newItemLocationTitle => 'Nowe notatki i katalogi trafiają do';
+  @override
+  String get newItemLocationRoot => 'Korzeń biblioteki';
+  @override
+  String get newItemLocationOpenNote => 'Katalog otwartej notatki';
   @override
   String get indentWidthTitle => 'Szerokość wcięcia';
   @override
@@ -3739,6 +3762,9 @@ final class PolishStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Folder przechwyceń';
+
+  @override
+  String get homeActionDefaultFolder => 'Dokąd trafiają nowe notatki';
 
   @override
   String get homeActionContext => 'Kontekst';

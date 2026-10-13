@@ -388,11 +388,33 @@ final class SwedishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Skapa saknade anteckningar i';
+  String get linkUpdateTitle => 'Uppdatera länkar efter namnbyte eller flytt';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekets rotmapp';
+  String get linkUpdateSubtitle =>
+      'Vad som händer med länkar till en anteckning eller mapp som byter namn '
+      'eller flyttas';
   @override
-  String get missingNoteLocationCurrentFolder => 'Aktuell mapp';
+  String get linkUpdateAutomatic => 'Automatiskt';
+  @override
+  String get linkUpdateAsk => 'Fråga varje gång';
+  @override
+  String get linkUpdateNever => 'Aldrig';
+  @override
+  String get linkUpdateAskTitle => 'Uppdatera länkarna?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Anteckningar som länkar till det som flyttats: $notes. Uppdatera deras '
+      'länkar?';
+  @override
+  String get linkUpdateConfirm => 'Uppdatera';
+  @override
+  String get linkUpdateKeep => 'Lämna som de är';
+  @override
+  String get newItemLocationTitle => 'Nya anteckningar och mappar hamnar i';
+  @override
+  String get newItemLocationRoot => 'Bibliotekets rotmapp';
+  @override
+  String get newItemLocationOpenNote => 'Mappen för den öppna anteckningen';
   @override
   String get indentWidthTitle => 'Indenteringsbredd';
   @override
@@ -3696,6 +3718,9 @@ final class SwedishStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Mappen för sparade sidor';
+
+  @override
+  String get homeActionDefaultFolder => 'Var nya anteckningar hamnar';
 
   @override
   String get homeActionContext => 'Kontext';

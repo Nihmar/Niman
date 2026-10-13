@@ -384,11 +384,34 @@ final class FinnishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Luo puuttuvat muistiinpanot';
+  String get linkUpdateTitle =>
+      'Päivitä linkit uudelleennimeämisen tai siirron jälkeen';
   @override
-  String get missingNoteLocationRoot => 'Kirjaston juureen';
+  String get linkUpdateSubtitle =>
+      'Mitä tapahtuu linkeille, jotka osoittavat uudelleennimettyyn tai '
+      'siirrettyyn muistiinpanoon tai kansioon';
   @override
-  String get missingNoteLocationCurrentFolder => 'Nykyiseen kansioon';
+  String get linkUpdateAutomatic => 'Automaattisesti';
+  @override
+  String get linkUpdateAsk => 'Kysy joka kerta';
+  @override
+  String get linkUpdateNever => 'Ei koskaan';
+  @override
+  String get linkUpdateAskTitle => 'Päivitetäänkö linkit?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Siirrettyyn viittaavat muistiinpanot: $notes. Päivitetäänkö niiden '
+      'linkit?';
+  @override
+  String get linkUpdateConfirm => 'Päivitä';
+  @override
+  String get linkUpdateKeep => 'Jätä ennalleen';
+  @override
+  String get newItemLocationTitle => 'Luo uudet muistiinpanot ja kansiot';
+  @override
+  String get newItemLocationRoot => 'Kirjaston juureen';
+  @override
+  String get newItemLocationOpenNote => 'Avoimen muistiinpanon kansioon';
   @override
   String get indentWidthTitle => 'Sisäännyrjäyksen leveys';
   @override
@@ -3705,6 +3728,9 @@ final class FinnishStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Tallennusten kansio';
+
+  @override
+  String get homeActionDefaultFolder => 'Mihin uudet muistiinpanot menevät';
 
   @override
   String get homeActionContext => 'Konteksti';

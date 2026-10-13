@@ -98,7 +98,7 @@ void main() {
     // Files is selected and the tree is showing.
     expect(railIndex(tester), ShellTab.files);
     expect(find.text('No notes yet'), findsOne);
-  });
+  }, variant: desktopDensity);
 
   // #712: the rail's tooltips name the key that selects the destination,
   // and follow a remap, so the tip cannot point at a key that does

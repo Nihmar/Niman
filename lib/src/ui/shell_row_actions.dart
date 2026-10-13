@@ -12,6 +12,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/carried_notes.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
@@ -44,7 +45,13 @@ final class ShellRowActions {
     required this.onExportFolder,
     this.onRecognize,
     this.renameInPlace,
+    this.confirmLinks,
   });
+
+  /// Asks whether the links to what a rename or a move took are to follow,
+  /// under the library's `LinkUpdate.ask` (#848); null asks nothing, and
+  /// those links are then left as written.
+  final LinkUpdateConfirm? confirmLinks;
 
   /// Starts a rename in place in the tree (#707): true when it did — a
   /// desktop with the tree on screen — false to ask in a dialog.
@@ -185,7 +192,11 @@ final class ShellRowActions {
     if (name == null) return;
     await guard(() async {
       await saveOpen();
-      final row = await controller.ops!.rename(sel, name);
+      final row = await controller.ops!.rename(
+        sel,
+        name,
+        confirmLinks: confirmLinks,
+      );
       onMoved(sel, row.path);
     });
   }
@@ -201,7 +212,7 @@ final class ShellRowActions {
     if (problem != null) return problem;
     await guard(() async {
       await saveOpen();
-      final renamed = await ops.rename(path, name);
+      final renamed = await ops.rename(path, name, confirmLinks: confirmLinks);
       onMoved(path, renamed.path);
     });
     return null;
@@ -237,7 +248,11 @@ final class ShellRowActions {
   /// (#567).
   Future<void> moveTo(String path, String target) => guard(() async {
     await saveOpen();
-    final row = await controller.ops!.move(path, target);
+    final row = await controller.ops!.move(
+      path,
+      target,
+      confirmLinks: confirmLinks,
+    );
     onMoved(path, row.path);
   });
 

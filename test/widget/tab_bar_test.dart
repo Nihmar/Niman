@@ -380,8 +380,8 @@ void main() {
     expect(find.byType(NoteTree), findsNothing);
   });
 
-  testWidgets('FAB creates in the selected folder, menu offers all actions '
-      '(T-UI-05)', (tester) async {
+  testWidgets('FAB creates by the library rule, not in the selected folder; '
+      'menu offers all actions (T-UI-05, #850)', (tester) async {
     setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -390,7 +390,8 @@ void main() {
     await controller.createFolder(parentPath: '', name: 'Docs');
     await settle(tester);
 
-    // Select the folder: the FAB creates the note inside it.
+    // Select the folder: no note is open, so the rule (the open note's
+    // folder, by default) puts the new note at the root.
     await tester.tap(noteRow('Docs'));
     await settle(tester);
     await tester.tap(find.byKey(const Key('new-note-fab')));
@@ -402,11 +403,11 @@ void main() {
         of: find.byType(AlertDialog),
         matching: find.byType(TextField),
       ),
-      'In root', // created in Docs (its parent) — see below.
+      'In root',
     );
     await tester.tap(find.text('OK'));
     await settle(tester);
-    expect(await controller.ops!.find('Docs/In root.md'), isNotNull);
+    expect(await controller.ops!.find('In root.md'), isNotNull);
 
     // Long-press the note: creating in its folder is offered; New folder
     // is not
@@ -438,7 +439,7 @@ void main() {
     );
     await tester.tap(find.text('OK'));
     await settle(tester);
-    expect(await controller.ops!.find('Docs/Renamed.md'), isNotNull);
+    expect(await controller.ops!.find('Renamed.md'), isNotNull);
 
     // Delete through the menu (trash toggle default on).
     await tester.longPress(noteRow('Renamed.md'));
@@ -448,7 +449,7 @@ void main() {
     await settle(tester);
     await tester.tap(delete);
     await settle(tester);
-    expect(await controller.ops!.find('Docs/Renamed.md'), isNull);
+    expect(await controller.ops!.find('Renamed.md'), isNull);
   });
 
   testWidgets('search tab shows the search screen (M3)', (tester) async {

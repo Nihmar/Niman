@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
+        LinkUpdate,
         SourceFont,
         TreeSort,
         TreeView,
@@ -22,7 +23,7 @@ import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/journal/journal_settings.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:path/path.dart' as p;
 
@@ -390,8 +391,9 @@ final class LibraryConfig {
     this.treeSort = TreeSort.nameAsc,
     this.treeView = TreeView.list,
     this.linkType = LinkType.wikilink,
+    this.linkUpdate = LinkUpdate.automatic,
     this.weekStart = WeekStart.system,
-    this.missingNoteLocation = MissingNoteLocation.currentFolder,
+    this.newItemLocation = NewItemLocation.openNoteFolder,
     this.indentWidth = defaultIndentWidth,
     this.editorToolbar = '',
     this.uiTextScale = defaultTextScale,
@@ -496,11 +498,19 @@ final class LibraryConfig {
         'markdown' => LinkType.markdown,
         _ => LinkType.wikilink,
       },
-      weekStart: WeekStart.fromName(json['weekStart']),
-      missingNoteLocation: switch (json['missingNoteLocation']) {
-        'libraryRoot' => MissingNoteLocation.libraryRoot,
-        _ => MissingNoteLocation.currentFolder,
+      // The enum's name is the stored id; a file without the key, or with
+      // one this build does not know, keeps the rewrite it always had (#848).
+      linkUpdate: switch (json['linkUpdate']) {
+        'ask' => LinkUpdate.ask,
+        'never' => LinkUpdate.never,
+        _ => LinkUpdate.automatic,
       },
+      weekStart: WeekStart.fromName(json['weekStart']),
+      // The old dead-link setting reads into the new one when the new key
+      // is absent (#850); it is never written again.
+      newItemLocation:
+          newItemLocationFromId(json['newItemLocation']) ??
+          newItemLocationFromLegacy(json['missingNoteLocation']),
       indentWidth: normalizeIndentWidth(json['indentWidth']),
       editorToolbar: switch (json['editorToolbar']) {
         final String layout => layout,
@@ -673,13 +683,18 @@ final class LibraryConfig {
   /// What the editor's link button inserts (default a wikilink).
   final LinkType linkType;
 
+  /// What a rename or a move does to the links pointing at what moved
+  /// (default: rewrite them, as it always has, #848).
+  final LinkUpdate linkUpdate;
+
   /// The day the calendars start the week on (#566): the system's by
   /// default; a library sets one for every device it is opened on.
   final WeekStart weekStart;
 
-  /// Where a note created from a dead link lands (default the folder of
-  /// the note the link was clicked in, issue #78).
-  final MissingNoteLocation missingNoteLocation;
+  /// Where new notes and folders go when no folder is named (default the
+  /// folder of the open note, issue #850; it absorbed the dead-link
+  /// setting `missingNoteLocation` of issue #78).
+  final NewItemLocation newItemLocation;
 
   /// Spaces added per indent level (default 2).
   final int indentWidth;
@@ -783,8 +798,9 @@ final class LibraryConfig {
     TreeSort? treeSort,
     TreeView? treeView,
     LinkType? linkType,
+    LinkUpdate? linkUpdate,
     WeekStart? weekStart,
-    MissingNoteLocation? missingNoteLocation,
+    NewItemLocation? newItemLocation,
     int? indentWidth,
     String? editorToolbar,
     double? uiTextScale,
@@ -834,8 +850,9 @@ final class LibraryConfig {
       treeSort: treeSort ?? this.treeSort,
       treeView: treeView ?? this.treeView,
       linkType: linkType ?? this.linkType,
+      linkUpdate: linkUpdate ?? this.linkUpdate,
       weekStart: weekStart ?? this.weekStart,
-      missingNoteLocation: missingNoteLocation ?? this.missingNoteLocation,
+      newItemLocation: newItemLocation ?? this.newItemLocation,
       indentWidth: indentWidth ?? this.indentWidth,
       editorToolbar: editorToolbar ?? this.editorToolbar,
       uiTextScale: uiTextScale ?? this.uiTextScale,
@@ -963,7 +980,12 @@ final class LibraryConfig {
     'treeSort',
     'treeView',
     'linkType',
+    'linkUpdate',
     'weekStart',
+    'newItemLocation',
+    // Legacy dead-link setting, read never written (#850): the new key
+    // takes its value over, and the file must not hand it back as an
+    // unknown one to preserve forever.
     'missingNoteLocation',
     'indentWidth',
     'editorToolbar',
@@ -1028,8 +1050,9 @@ final class LibraryConfig {
       'treeSort': treeSort.name,
       'treeView': treeView.name,
       'linkType': linkType.name,
+      'linkUpdate': linkUpdate.name,
       'weekStart': weekStart.name,
-      'missingNoteLocation': missingNoteLocation.name,
+      'newItemLocation': newItemLocation.name,
       'indentWidth': indentWidth,
       'editorToolbar': editorToolbar,
       'uiTextScale': uiTextScale,
@@ -1143,8 +1166,9 @@ final class LibraryConfig {
         treeSort == other.treeSort &&
         treeView == other.treeView &&
         linkType == other.linkType &&
+        linkUpdate == other.linkUpdate &&
         weekStart == other.weekStart &&
-        missingNoteLocation == other.missingNoteLocation &&
+        newItemLocation == other.newItemLocation &&
         indentWidth == other.indentWidth &&
         editorToolbar == other.editorToolbar &&
         uiTextScale == other.uiTextScale &&

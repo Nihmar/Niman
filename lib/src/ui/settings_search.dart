@@ -6,8 +6,8 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -261,16 +261,27 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushEditor(SettingsKeys.linkType),
     ),
     SettingsSearchEntry(
-      title: AppStrings.missingNoteLocationTitle,
+      title: AppStrings.linkUpdateTitle,
       area: editor,
-      rowKey: SettingsKeys.missingNoteLocation,
-      value: () async => switch (await controller.missingNoteLocation) {
-        MissingNoteLocation.libraryRoot => AppStrings.missingNoteLocationRoot,
-        MissingNoteLocation.currentFolder =>
-          AppStrings.missingNoteLocationCurrentFolder,
+      rowKey: SettingsKeys.linkUpdate,
+      value: () async => switch (await controller.linkUpdate) {
+        LinkUpdate.automatic => AppStrings.linkUpdateAutomatic,
+        LinkUpdate.ask => AppStrings.linkUpdateAsk,
+        LinkUpdate.never => AppStrings.linkUpdateNever,
       },
       areaId: SettingsAreaId.editor,
-      open: () => pushEditor(SettingsKeys.missingNoteLocation),
+      open: () => pushEditor(SettingsKeys.linkUpdate),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.newItemLocationTitle,
+      area: editor,
+      rowKey: SettingsKeys.newItemLocation,
+      value: () async => switch (await controller.newItemLocation) {
+        NewItemLocation.libraryRoot => AppStrings.newItemLocationRoot,
+        NewItemLocation.openNoteFolder => AppStrings.newItemLocationOpenNote,
+      },
+      areaId: SettingsAreaId.editor,
+      open: () => pushEditor(SettingsKeys.newItemLocation),
     ),
     SettingsSearchEntry(
       title: AppStrings.noteTextScaleTitle,

@@ -392,11 +392,34 @@ final class ItalianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Crea le note mancanti in';
+  String get linkUpdateTitle =>
+      'Aggiorna i link dopo uno spostamento o una rinomina';
   @override
-  String get missingNoteLocationRoot => 'Radice della libreria';
+  String get linkUpdateSubtitle =>
+      'Cosa succede ai link che puntano a una nota o a una cartella '
+      'rinominata o spostata';
   @override
-  String get missingNoteLocationCurrentFolder => 'Cartella attuale';
+  String get linkUpdateAutomatic => 'Automaticamente';
+  @override
+  String get linkUpdateAsk => 'Chiedi ogni volta';
+  @override
+  String get linkUpdateNever => 'Mai';
+  @override
+  String get linkUpdateAskTitle => 'Aggiornare i link?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Note che rimandano a ciò che è stato spostato: $notes. Aggiornare i '
+      'loro link?';
+  @override
+  String get linkUpdateConfirm => 'Aggiorna';
+  @override
+  String get linkUpdateKeep => 'Lascia invariati';
+  @override
+  String get newItemLocationTitle => 'Le nuove note e cartelle vanno in';
+  @override
+  String get newItemLocationRoot => 'Radice della libreria';
+  @override
+  String get newItemLocationOpenNote => 'Cartella della nota aperta';
   @override
   String get indentWidthTitle => 'Ampiezza del rientro';
   @override
@@ -3711,6 +3734,9 @@ final class ItalianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'La cartella delle catture';
+
+  @override
+  String get homeActionDefaultFolder => 'Dove vanno le nuove note';
 
   @override
   String get homeActionContext => 'Contesto';

@@ -142,7 +142,7 @@ void main() {
     final panes = tester.getRect(find.byKey(const ValueKey('wide-panes')));
     expect(panes.width, RightDock.minPanesWidth);
     expect(tester.getRect(dock).width, lessThan(maxDockWidth));
-  });
+  }, variant: desktopDensity);
 
   testWidgets('a saved dock width comes back', (tester) async {
     await controller.setDockWidth(420);

@@ -388,11 +388,33 @@ final class SerbianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Креирање недостајућих белешки у';
+  String get linkUpdateTitle =>
+      'Ажурирај везе након преименовања или премештања';
   @override
-  String get missingNoteLocationRoot => 'Корен библиотеке';
+  String get linkUpdateSubtitle =>
+      'Шта се дешава са везама ка белешци или фасцикли која је преименована '
+      'или премештена';
   @override
-  String get missingNoteLocationCurrentFolder => 'Тренутна фасцикла';
+  String get linkUpdateAutomatic => 'Аутоматски';
+  @override
+  String get linkUpdateAsk => 'Питај сваки пут';
+  @override
+  String get linkUpdateNever => 'Никада';
+  @override
+  String get linkUpdateAskTitle => 'Ажурирати везе?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Белешке које упућују на премештено: $notes. Ажурирати њихове везе?';
+  @override
+  String get linkUpdateConfirm => 'Ажурирај';
+  @override
+  String get linkUpdateKeep => 'Остави како јесте';
+  @override
+  String get newItemLocationTitle => 'Нове белешке и фасцикле иду у';
+  @override
+  String get newItemLocationRoot => 'Корен библиотеке';
+  @override
+  String get newItemLocationOpenNote => 'Фасцикла отворене белешке';
   @override
   String get indentWidthTitle => 'Ширина уступа';
   @override
@@ -3710,6 +3732,9 @@ final class SerbianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Фасцикла за снимке';
+
+  @override
+  String get homeActionDefaultFolder => 'Где иду нове белешке';
 
   @override
   String get homeActionContext => 'Контекст';

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_areas.dart';
@@ -188,29 +188,52 @@ void main() {
   ) async {
     await pump(tester);
     await openArea(tester, const Key('settings-area-editor'));
-    final row = find.byKey(const Key('missing-note-location'));
+    final row = find.byKey(const Key('new-item-location'));
     expect(
       find.descendant(
         of: row,
-        matching: find.text(AppStrings.missingNoteLocationCurrentFolder),
+        matching: find.text(AppStrings.newItemLocationOpenNote),
       ),
       findsOne,
     );
 
     await tester.tap(row);
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppStrings.missingNoteLocationRoot));
+    await tester.tap(find.text(AppStrings.newItemLocationRoot));
     await tester.pumpAndSettle();
 
-    expect(
-      await controller.missingNoteLocation,
-      MissingNoteLocation.libraryRoot,
-    );
+    expect(await controller.newItemLocation, NewItemLocation.libraryRoot);
     expect(
       find.descendant(
         of: row,
-        matching: find.text(AppStrings.missingNoteLocationRoot),
+        matching: find.text(AppStrings.newItemLocationRoot),
       ),
+      findsOne,
+    );
+  });
+
+  testWidgets('the link update row reads and applies its value (#848)', (
+    tester,
+  ) async {
+    await pump(tester);
+    await openArea(tester, const Key('settings-area-editor'));
+    final row = find.byKey(const Key('link-update'));
+    expect(
+      find.descendant(
+        of: row,
+        matching: find.text(AppStrings.linkUpdateAutomatic),
+      ),
+      findsOne,
+    );
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppStrings.linkUpdateAsk));
+    await tester.pumpAndSettle();
+
+    expect(await controller.linkUpdate, LinkUpdate.ask);
+    expect(
+      find.descendant(of: row, matching: find.text(AppStrings.linkUpdateAsk)),
       findsOne,
     );
   });

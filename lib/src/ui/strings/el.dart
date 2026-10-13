@@ -395,11 +395,35 @@ final class GreekStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Δημιουργία λείποντων σημειώσεων στο';
+  String get linkUpdateTitle =>
+      'Ενημέρωση συνδέσμων μετά από μετονομασία ή μετακίνηση';
   @override
-  String get missingNoteLocationRoot => 'Ρίζα βιβλιοθήκης';
+  String get linkUpdateSubtitle =>
+      'Τι συμβαίνει με τους συνδέσμους προς μια σημείωση ή φάκελο που '
+      'μετονομάζεται ή μετακινείται';
   @override
-  String get missingNoteLocationCurrentFolder => 'Τρέχων φάκελος';
+  String get linkUpdateAutomatic => 'Αυτόματα';
+  @override
+  String get linkUpdateAsk => 'Ερώτηση κάθε φορά';
+  @override
+  String get linkUpdateNever => 'Ποτέ';
+  @override
+  String get linkUpdateAskTitle => 'Ενημέρωση των συνδέσμων;';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Σημειώσεις που οδηγούν σε ό,τι μετακινήθηκε: $notes. Να ενημερωθούν οι '
+      'σύνδεσμοί τους;';
+  @override
+  String get linkUpdateConfirm => 'Ενημέρωση';
+  @override
+  String get linkUpdateKeep => 'Να μείνουν ως έχουν';
+  @override
+  String get newItemLocationTitle =>
+      'Οι νέες σημειώσεις και φάκελοι πηγαίνουν στο';
+  @override
+  String get newItemLocationRoot => 'Ρίζα βιβλιοθήκης';
+  @override
+  String get newItemLocationOpenNote => 'Φάκελος της ανοιχτής σημείωσης';
   @override
   String get indentWidthTitle => 'Πλάτος εισαγωγής';
   @override
@@ -3797,6 +3821,9 @@ final class GreekStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Ο φάκελος των λήψεων';
+
+  @override
+  String get homeActionDefaultFolder => 'Όπου πηγαίνουν οι νέες σημειώσεις';
 
   @override
   String get homeActionContext => 'Πλαίσιο';

@@ -49,6 +49,10 @@ capture that goes there. The dialog and the sheet start on it, and
 selected plays no part, so a capture made with a picture selected no
 longer lands among the attachments.
 
+A capture does not follow the library's setting
+for [where new notes go](organization.md#where-new-notes-and-folders-go):
+it keeps this folder whatever that setting says.
+
 The pictures go in the attachments folder whatever folder the note is
 in: the note links them from there.
 

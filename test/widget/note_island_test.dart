@@ -118,7 +118,7 @@ void main() {
       find.descendant(of: panes, matching: find.byType(Material)).first,
     );
     expect(ground.color, scheme.surface);
-  });
+  }, variant: desktopDensity);
 
   testWidgets("a divider is grabbed over the islands' edges, not only in "
       'the gap (#786)', (tester) async {
@@ -144,7 +144,7 @@ void main() {
     await tester.dragFrom(Offset(dockRect.left + 1, y), const Offset(-40, 0));
     await settle(tester);
     expect(tester.getRect(dock).width, dockRect.width + 40);
-  });
+  }, variant: desktopDensity);
 
   testWidgets(
     'the tabs start at the panes island, with the tree and without',
@@ -205,7 +205,7 @@ void main() {
     expect(alone.left, noTree.left);
     expect(alone.top, before.top);
     expect(alone.right, size.width - gap);
-  });
+  }, variant: desktopDensity);
 
   testWidgets('Zen takes the window edge to edge, square', (tester) async {
     await pumpAt(tester, size);

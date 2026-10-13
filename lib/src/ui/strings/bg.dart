@@ -392,11 +392,34 @@ final class BulgarianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Създаване на липсващи бележки в';
+  String get linkUpdateTitle =>
+      'Обновяване на връзките след преименуване или преместване';
   @override
-  String get missingNoteLocationRoot => 'Корен на библиотеката';
+  String get linkUpdateSubtitle =>
+      'Какво се случва с връзките към преименувана или преместена бележка или '
+      'папка';
   @override
-  String get missingNoteLocationCurrentFolder => 'Текуща папка';
+  String get linkUpdateAutomatic => 'Автоматично';
+  @override
+  String get linkUpdateAsk => 'Питай всеки път';
+  @override
+  String get linkUpdateNever => 'Никога';
+  @override
+  String get linkUpdateAskTitle => 'Да се обновят ли връзките?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Бележки, сочещи към преместеното: $notes. Да се обновят ли техните '
+      'връзки?';
+  @override
+  String get linkUpdateConfirm => 'Обнови';
+  @override
+  String get linkUpdateKeep => 'Остави без промяна';
+  @override
+  String get newItemLocationTitle => 'Нови бележки и папки отиват в';
+  @override
+  String get newItemLocationRoot => 'Корен на библиотеката';
+  @override
+  String get newItemLocationOpenNote => 'Папката на отворената бележка';
   @override
   String get indentWidthTitle => 'Ширина на отстъпа';
   @override
@@ -3703,6 +3726,9 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Папката за запазени страници';
+
+  @override
+  String get homeActionDefaultFolder => 'Където отиват новите бележки';
 
   @override
   String get homeActionContext => 'Контекст';

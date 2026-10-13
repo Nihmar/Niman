@@ -201,9 +201,12 @@ the two agree.
 
 ## Home
 
-On Linux, Windows and a wide Android window the [Home](home.md) is a grid
+On Linux, Windows and an Android tablet the [Home](home.md) is a grid
 of tiles; on a phone it is a column of the same tiles. One Home, one file:
-only the shape changes.
+only the shape changes. The grid asks for 640 px of room, and that is all
+it asks: a phone turned to landscape is a phone still, with the phone's
+bottom bar and one screen at a time, but its Home has the room and so is
+the grid.
 
 ## Density
 
@@ -212,7 +215,12 @@ for a mouse: shorter rows, a narrower slot for the folder chevron and
 the note icon, and a tighter menu. A phone or a tablet keeps the
 thumb-sized rows and the long-press sheet. The choice follows the
 platform's own density (compact on a desktop), not the window's width,
-so a tablet in landscape keeps the touch sizes.
+so a tablet in landscape keeps the touch sizes. That holds for the wide
+layout's own chrome too (#849): on a tablet the rail's buttons, the open
+notes' tab row and its buttons, the tree footer's buttons and the grab
+strip of the dividers between the panels are at least 48 px, where a
+mouse has them smaller (the rail's at 38, the divider's strip at 8). In the
+narrowest tree the footer's buttons scroll rather than shrink.
 
 ## The folder grid
 
@@ -232,14 +240,38 @@ The Linux and Windows window cannot be made narrower than 600 px — the
 width at which the layout would switch to the phone's bottom bar and
 full-screen note — nor shorter than 400 px. A window snapped that small
 is still driven by a mouse, and the desktop keeps its rail, tree and
-panes down to the floor; Android carries the narrow layout, so nothing
-is lost where a thumb is the pointer. On Windows the floor counts the
-window's thin frame on top of those 600 px, so the app's own area keeps
-all of them at any display scale.
+panes down to the floor. On Windows the floor counts the window's thin
+frame on top of those 600 px, so the app's own area keeps all of them at
+any display scale.
+
+On Android the layout follows what the device is, not how wide it is
+turned (#849). A window whose **shortest side is under 600 dp** is a
+phone, and has the phone's layout on both orientations: the bottom bar,
+one destination on screen at a time, a note as a page whose Back closes
+it, and Settings as a tab. Turned to landscape it is that same layout
+with more width for the note — there is no third layout, and turning the
+phone keeps the open note, its undo, the find bar and the search where
+they are. A window whose shortest side is 600 dp or more — a tablet, a
+phone in Samsung DeX or on an external display — has the wide layout:
+the rail, the tree, the panes and the tabs. The line is the *window's*
+shortest side, so a tablet in split-screen that leaves it a phone-sized
+window has the phone's layout there, and the wide one again when it has
+the room back. The tree's width, the side panel's width and the saved
+split are the wide layout's alone; a phone leaves them as they are and
+a library saved on a phone and opened on a tablet finds them untouched.
+
+The wide layout on a touch device keeps what a touch device needs of
+it: nothing under the status bar, the gesture bar or a camera cutout;
+a rail that scrolls when the keyboard leaves it too little height, so
+Settings and the library switch stay within reach; the system Back
+stepping inside the app (below); and the command palette by two fingers,
+there being no key for it.
 
 ## Destinations
 
-On a wide window the rail's destinations are not all the same shape.
+On a wide window (the desktops and an Android tablet; a phone is never
+one, [turned or not](#window-size)) the rail's destinations are not all
+the same shape.
 Files, Search and the tag tree are sidebar views: they swap what the left
 panel shows and leave the open notes, the panes and the right panel where
 they are. Home and Todo are content destinations: they open as a pinned
@@ -289,21 +321,27 @@ bar, the same tabs head the notes instead of sitting in the title bar.
 
 On an Android phone the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen
-at a time, and the phone has no split: a phone's width holds one note.
+at a time, and the phone has no split: a phone's width holds one note,
+in landscape too.
 
 **Back and forward** through the notes looked at work everywhere from a
 keyboard (`Alt+←` / `Alt+→`). The mouse's side buttons do it on Linux and
 Windows; on Android a mouse's back button is the system's Back, which
-keeps its meaning — closing the note, leaving a screen.
+keeps its meaning — closing the note, leaving a screen. On a phone that
+is the note's page, a screen opened from the navigation, the folder the
+grid is in; on a tablet's wide layout it takes the topmost thing off the
+screen, one step at a time: a book out of full screen, a pinned Home or
+Todo, the search in the sidebar, the open note (the focused tab), and
+last the grid's folder. With none of them left Back leaves the app.
 
-The **command palette** is `Ctrl+Shift+P` on the desktop. On a phone it
-is its own thing, apart from the library's search: **two fingers dragged
-down** anywhere open it, and so do the ⚡ on the Search tab's bar and
-*Command palette* in an open note's ⋮ menu. The Search tab searches
-notes. Either way the palette offers only the commands that can run
-where you are; Settings → **Commands** lists them all, with their keys
-and what each one needs to show (an open note, a wide window, the
-desktop, and so on).
+The **command palette** is `Ctrl+Shift+P` on the desktop. On a phone or a
+tablet it is its own thing, apart from the library's search: **two
+fingers dragged down** anywhere open it, and so does *Command palette* in
+an open note's ⋮ menu, and on a phone the ⚡ on the Search tab's bar. The
+Search tab searches notes. Either way the palette offers only the
+commands that can run where you are; Settings → **Commands** lists them
+all, with their keys and what each one needs to show (an open note, a
+wide window, the desktop, and so on).
 
 On a device that has never had a hardware keyboard, nothing mentions
 keys you cannot press: the palette's rows and Settings → Commands drop
@@ -353,8 +391,10 @@ appended to the
 [quick note](organization.md#folders-quick-note-list-notes-voice-notes)
 and the note opens; with no quick note chosen yet, the choose/create
 screen opens and the text lands in whatever note it picks. A shared file
-is copied into the library root as a new note — its name kept, uniquified
-like any other — and opened. A copy, because Android hands the sender's
+is copied into the library as a new note — its name kept, uniquified
+like any other — where the library's setting for
+[new notes](organization.md#where-new-notes-and-folders-go) puts it (the
+root when no note is open), and opened. A copy, because Android hands the sender's
 file as a read-only `content://` reference, not a path Niman could edit
 in place. A Notion export (a `.zip`) shared the same way is
 [imported](organization.md#importing-a-notion-export) instead of copied
@@ -365,12 +405,12 @@ instead, if it attached any.
 
 The **side panel** (outline, tags, the notes that link here, history beside
 the note, and the [journal](journal.md)'s calendar) shows on
-any window at least 1000 px wide: desktops, tablets, a phone in
-landscape if it is that wide. A phone upright has no room for a note
-and a panel side by side, so this is a decision rather than an
-omission: the note's ⋮ menu opens the same ones there, the outline, the tags
-and *Links to this note* as sheets and the history as its screen. The
-*Links to this note* header under the note is on every platform. Where the panel shows,
+any wide window at least 1000 px wide: desktops and tablets. A phone,
+upright or turned, has no room for a note and a panel side by side, so
+this is a decision rather than an omission: the note's ⋮ menu opens the
+same ones there, the outline, the tags and *Links to this note* as sheets
+and the history as its screen. The *Links to this note* header under the
+note is on every platform. Where the panel shows,
 its left edge drags to make it wider or narrower, like the tree's edge.
 It stops growing before the note gets narrower than 360 px, and it
 keeps its width for the next launch.

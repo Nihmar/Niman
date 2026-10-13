@@ -26,8 +26,13 @@ final class NewItemFab extends StatelessWidget {
     required this.onJournalToday,
     required this.onCaptureWebPage,
     this.listFolder,
+    this.maxHeight,
     super.key,
   });
+
+  /// The most the button and its menu may take, or null for what the
+  /// parent allows. The menu scrolls to stay within it (#849).
+  final double? maxHeight;
 
   /// Called with the main FAB's center in global coordinates, whenever
   /// it is painted (see [FabScrim]).
@@ -78,6 +83,66 @@ final class NewItemFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight ?? double.infinity),
+      child: _column(),
+    );
+  }
+
+  Widget _column() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // The menu is nine buttons tall, nearly 600 dp: more than a phone
+        // turned to landscape has (#849), where the top of it would sit
+        // above the screen out of reach. It scrolls when the room is
+        // short, from the button it grows out of, and is the plain column
+        // when there is room.
+        Flexible(
+          child: IgnorePointer(
+            ignoring: !expanded,
+            child: IntrinsicWidth(
+              child: ClipRect(
+                // The buttons' shadows reach past their boxes.
+                clipper: const _ShadowRoom(),
+                child: SingleChildScrollView(
+                  key: const Key('new-item-menu-scroll'),
+                  reverse: true,
+                  clipBehavior: Clip.none,
+                  // The blank beside the buttons belongs to the scrim
+                  // behind: a tap there closes the menu.
+                  hitTestBehavior: HitTestBehavior.translucent,
+                  child: _menu(),
+                ),
+              ),
+            ),
+          ),
+        ),
+        _ReportAnchor(
+          onAnchor: onAnchor,
+          child: FloatingActionButton(
+            key: const Key('new-note-fab'),
+            tooltip: expanded
+                ? AppStrings.closeMenuTooltip
+                : AppStrings.newItemTooltip,
+            onPressed: onToggle,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 150),
+              child: Icon(
+                expanded ? Icons.close : Icons.add,
+                key: ValueKey(expanded),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The mini buttons, the first the farthest from the main one, each
+  /// followed by the gap to the next and the last by the gap above it.
+  Widget _menu() {
     final listFolder = this.listFolder;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -150,26 +215,23 @@ final class NewItemFab extends StatelessWidget {
           onTap: onNewFolder,
         ),
         const SizedBox(height: 12),
-        _ReportAnchor(
-          onAnchor: onAnchor,
-          child: FloatingActionButton(
-            key: const Key('new-note-fab'),
-            tooltip: expanded
-                ? AppStrings.closeMenuTooltip
-                : AppStrings.newItemTooltip,
-            onPressed: onToggle,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 150),
-              child: Icon(
-                expanded ? Icons.close : Icons.add,
-                key: ValueKey(expanded),
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
+}
+
+/// How far the open menu's shadows may reach past the box it scrolls in.
+final class _ShadowRoom extends CustomClipper<Rect> {
+  const new();
+
+  static const double _room = 16;
+
+  @override
+  Rect getClip(Size size) =>
+      Rect.fromLTRB(-_room, -_room, size.width + _room, size.height);
+
+  @override
+  bool shouldReclip(_ShadowRoom oldClipper) => false;
 }
 
 /// One action of the open menu: an icon with its name beside it, that

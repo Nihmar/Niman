@@ -389,11 +389,33 @@ final class DutchStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Ontbrekende notities maken in';
+  String get linkUpdateTitle => 'Links bijwerken na hernoemen of verplaatsen';
   @override
-  String get missingNoteLocationRoot => 'Bibliotheek-wortel';
+  String get linkUpdateSubtitle =>
+      'Wat er gebeurt met links naar een notitie of map die is hernoemd of '
+      'verplaatst';
   @override
-  String get missingNoteLocationCurrentFolder => 'Huidige map';
+  String get linkUpdateAutomatic => 'Automatisch';
+  @override
+  String get linkUpdateAsk => 'Elke keer vragen';
+  @override
+  String get linkUpdateNever => 'Nooit';
+  @override
+  String get linkUpdateAskTitle => 'Links bijwerken?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notities die naar het verplaatste verwijzen: $notes. Hun links '
+      'bijwerken?';
+  @override
+  String get linkUpdateConfirm => 'Bijwerken';
+  @override
+  String get linkUpdateKeep => 'Ongewijzigd laten';
+  @override
+  String get newItemLocationTitle => 'Nieuwe notities en mappen komen in';
+  @override
+  String get newItemLocationRoot => 'Bibliotheek-wortel';
+  @override
+  String get newItemLocationOpenNote => 'Map van de geopende notitie';
   @override
   String get indentWidthTitle => 'Inspringbreedte';
   @override
@@ -3726,6 +3748,9 @@ final class DutchStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'De map voor opnames';
+
+  @override
+  String get homeActionDefaultFolder => 'Waar nieuwe notities komen';
 
   @override
   String get homeActionContext => 'Context';

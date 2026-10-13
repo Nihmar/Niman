@@ -389,11 +389,33 @@ final class BosnianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Kreiranje nedostajućih bilješki u';
+  String get linkUpdateTitle =>
+      'Ažuriraj veze nakon preimenovanja ili premještanja';
   @override
-  String get missingNoteLocationRoot => 'Korijen biblioteke';
+  String get linkUpdateSubtitle =>
+      'Šta se dešava s vezama na bilješku ili folder koji je preimenovan ili '
+      'premješten';
   @override
-  String get missingNoteLocationCurrentFolder => 'Trenutna mapa';
+  String get linkUpdateAutomatic => 'Automatski';
+  @override
+  String get linkUpdateAsk => 'Pitaj svaki put';
+  @override
+  String get linkUpdateNever => 'Nikada';
+  @override
+  String get linkUpdateAskTitle => 'Ažurirati veze?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Bilješke koje upućuju na premješteno: $notes. Ažurirati njihove veze?';
+  @override
+  String get linkUpdateConfirm => 'Ažuriraj';
+  @override
+  String get linkUpdateKeep => 'Ostavi kako jest';
+  @override
+  String get newItemLocationTitle => 'Nove bilješke i mape idu u';
+  @override
+  String get newItemLocationRoot => 'Korijen biblioteke';
+  @override
+  String get newItemLocationOpenNote => 'Mapa otvorene bilješke';
   @override
   String get indentWidthTitle => 'Širina uvlačenja';
   @override
@@ -3714,6 +3736,9 @@ final class BosnianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Mapa za snimanja';
+
+  @override
+  String get homeActionDefaultFolder => 'Gdje idu nove bilješke';
 
   @override
   String get homeActionContext => 'Kontekst';

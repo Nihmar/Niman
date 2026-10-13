@@ -386,11 +386,33 @@ final class UkrainianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Створити відсутні нотатки в';
+  String get linkUpdateTitle =>
+      'Оновлювати посилання після перейменування або переміщення';
   @override
-  String get missingNoteLocationRoot => 'Корень бібліотеки';
+  String get linkUpdateSubtitle =>
+      'Що відбувається з посиланнями на нотатку чи теку, яку перейменовано '
+      'або переміщено';
   @override
-  String get missingNoteLocationCurrentFolder => 'Поточна папка';
+  String get linkUpdateAutomatic => 'Автоматично';
+  @override
+  String get linkUpdateAsk => 'Питати щоразу';
+  @override
+  String get linkUpdateNever => 'Ніколи';
+  @override
+  String get linkUpdateAskTitle => 'Оновити посилання?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Нотатки з посиланнями на переміщене: $notes. Оновити їхні посилання?';
+  @override
+  String get linkUpdateConfirm => 'Оновити';
+  @override
+  String get linkUpdateKeep => 'Залишити як є';
+  @override
+  String get newItemLocationTitle => 'Нові нотатки й папки створюються в';
+  @override
+  String get newItemLocationRoot => 'Корень бібліотеки';
+  @override
+  String get newItemLocationOpenNote => 'Папка відкритої нотатки';
   @override
   String get indentWidthTitle => 'Ширина відступу';
   @override
@@ -3731,6 +3753,9 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Тека для захоплень';
+
+  @override
+  String get homeActionDefaultFolder => 'Куди потрапляють нові нотатки';
 
   @override
   String get homeActionContext => 'Контекст';

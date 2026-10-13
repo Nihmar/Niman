@@ -376,11 +376,33 @@ final class HindiStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'ग़ायब नोट्स बनाएँ';
+  String get linkUpdateTitle =>
+      'नाम बदलने या स्थानांतरित करने पर लिंक अपडेट करें';
   @override
-  String get missingNoteLocationRoot => 'लाइब्रेरी रूट';
+  String get linkUpdateSubtitle =>
+      'जिस नोट या फ़ोल्डर का नाम बदला गया या जिसे स्थानांतरित किया गया, उसकी '
+      'ओर इशारा करने वाले लिंक का क्या होगा';
   @override
-  String get missingNoteLocationCurrentFolder => 'वर्तमान फ़ोल्डर';
+  String get linkUpdateAutomatic => 'अपने आप';
+  @override
+  String get linkUpdateAsk => 'हर बार पूछें';
+  @override
+  String get linkUpdateNever => 'कभी नहीं';
+  @override
+  String get linkUpdateAskTitle => 'लिंक अपडेट करें?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'स्थानांतरित की गई चीज़ से जुड़े नोट: $notes। क्या उनके लिंक अपडेट करें?';
+  @override
+  String get linkUpdateConfirm => 'अपडेट करें';
+  @override
+  String get linkUpdateKeep => 'जैसा है वैसा रहने दें';
+  @override
+  String get newItemLocationTitle => 'नए नोट्स और फ़ोल्डर यहाँ बनाएँ';
+  @override
+  String get newItemLocationRoot => 'लाइब्रेरी रूट';
+  @override
+  String get newItemLocationOpenNote => 'खुले नोट का फ़ोल्डर';
   @override
   String get indentWidthTitle => 'इंडेंट की चौड़ाई';
   @override
@@ -3637,6 +3659,9 @@ final class HindiStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'कैप्चर फ़ोल्डर';
+
+  @override
+  String get homeActionDefaultFolder => 'जहाँ नए नोट्स बनते हैं';
 
   @override
   String get homeActionContext => 'संदर्भ';

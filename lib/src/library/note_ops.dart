@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:niman/src/core/file_holds.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
@@ -488,11 +489,16 @@ final class NoteOps implements NoteOperations {
   /// is treated as redundant. Names are uniquified against the new parent
   /// (self excluded). Returns the updated row.
   @override
-  Future<Note> rename(String path, String newName) {
-    return _released(path, () => _rename(path, newName));
+  Future<Note> rename(
+    String path,
+    String newName, {
+    LinkUpdateConfirm? confirmLinks,
+  }) async {
+    final done = await _released(path, () => _rename(path, newName));
+    return await _updateLinks(done, confirmLinks);
   }
 
-  Future<Note> _rename(String path, String newName) {
+  Future<Relocated> _rename(String path, String newName) {
     return _synchronized(() async {
       final row = await _mustFind(path);
       final parent = parentOf(path);
@@ -523,7 +529,7 @@ final class NoteOps implements NoteOperations {
         );
       }
       final newRel = resolvePath(parent, target);
-      if (newRel == path) return row;
+      if (newRel == path) return (row: row, pending: null);
       return await _relocator.relocate(row, path, newRel);
     });
   }
@@ -534,14 +540,21 @@ final class NoteOps implements NoteOperations {
   /// Throws [ArgumentError] when [targetParent] is [path] itself or inside
   /// it — a folder cannot be renamed onto its own subtree.
   @override
-  Future<Note> move(String path, String targetParent) {
-    return _released(path, () => _move(path, targetParent));
+  Future<Note> move(
+    String path,
+    String targetParent, {
+    LinkUpdateConfirm? confirmLinks,
+  }) async {
+    final done = await _released(path, () => _move(path, targetParent));
+    return await _updateLinks(done, confirmLinks);
   }
 
-  Future<Note> _move(String path, String targetParent) {
+  Future<Relocated> _move(String path, String targetParent) {
     return _synchronized(() async {
       final row = await _mustFind(path);
-      if (resolvePath(targetParent, p.basename(path)) == path) return row;
+      if (resolvePath(targetParent, p.basename(path)) == path) {
+        return (row: row, pending: null);
+      }
       if (targetParent == path || isUnder(path, targetParent)) {
         throw ArgumentError(
           'Cannot move "$path" into itself or its own subtree',
@@ -559,6 +572,26 @@ final class NoteOps implements NoteOperations {
       final newRel = resolvePath(targetParent, target);
       return await _relocator.relocate(row, path, newRel);
     });
+  }
+
+  /// Asks [confirm] about the link rewrite [done] left pending (#848), now
+  /// that the turn of the op chain that moved the note is over: a dialog
+  /// the user leaves open must not hold up every other op and every sync
+  /// write. On a yes the rewrite runs in a turn of its own, and reads each
+  /// note again, so an edit made while the question was open is kept.
+  /// Without a [confirm] to ask, the links stay as written: a note is never
+  /// written unasked.
+  Future<Note> _updateLinks(Relocated done, LinkUpdateConfirm? confirm) async {
+    final pending = done.pending;
+    if (pending == null) return done.row;
+    if (confirm == null) {
+      const AppLogger(name: 'links')
+          .info('links to "${done.row.path}" left as written: no prompt');
+      return done.row;
+    }
+    if (!await confirm(pending.notes)) return done.row;
+    await _synchronized(pending.apply);
+    return await _mustFind(done.row.path);
   }
 
   /// The text of the note at [path], decoded leniently (a note with a

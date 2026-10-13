@@ -88,7 +88,8 @@ rounded island on the color of the title bar and the rail, with a thin
 margin of it around and between them; the margin between two islands is
 what drags to make one wider. Split panes share one island, divided by
 their own line. The other places of the rail (tasks, search) are an
-island each too. A phone keeps its screens edge to edge.
+island each too. A phone keeps its screens edge to edge, turned to
+landscape as well: it is the same layout with more width for the note.
 
 A name too long for its room — a tree row, a tab, the window title, or
 the phone's note bar — does not stop at an ellipsis: it scrolls itself to
@@ -166,7 +167,8 @@ behind them, undo included. Older ones come back to where you left them
 (caret, selection, scroll) but start a fresh undo history. A very long
 note keeps its editor only while it is on screen.
 
-**On a phone** the notes you open stay open after you go back to the
+**On a phone** (upright or turned: one note on one screen, never panes or
+tabs) the notes you open stay open after you go back to the
 tree. The note bar and the Files bar show how many there are. Tapping
 that count opens the list of open notes: the one on screen is marked,
 and each note has its folder, the orange dot while it has unsaved

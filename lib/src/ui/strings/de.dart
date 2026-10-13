@@ -390,11 +390,34 @@ final class GermanStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Fehlende Notizen erstellen in';
+  String get linkUpdateTitle =>
+      'Links nach Umbenennen oder Verschieben aktualisieren';
   @override
-  String get missingNoteLocationRoot => 'Bibliothekswurzel';
+  String get linkUpdateSubtitle =>
+      'Was mit Links geschieht, die auf eine umbenannte oder verschobene '
+      'Notiz oder einen Ordner zeigen';
   @override
-  String get missingNoteLocationCurrentFolder => 'Aktueller Ordner';
+  String get linkUpdateAutomatic => 'Automatisch';
+  @override
+  String get linkUpdateAsk => 'Jedes Mal fragen';
+  @override
+  String get linkUpdateNever => 'Nie';
+  @override
+  String get linkUpdateAskTitle => 'Links aktualisieren?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notizen, die auf das Verschobene verweisen: $notes. Ihre Links '
+      'aktualisieren?';
+  @override
+  String get linkUpdateConfirm => 'Aktualisieren';
+  @override
+  String get linkUpdateKeep => 'Unverändert lassen';
+  @override
+  String get newItemLocationTitle => 'Neue Notizen und Ordner kommen in';
+  @override
+  String get newItemLocationRoot => 'Bibliothekswurzel';
+  @override
+  String get newItemLocationOpenNote => 'Ordner der geöffneten Notiz';
   @override
   String get indentWidthTitle => 'Einzugstiefe';
   @override
@@ -3763,6 +3786,9 @@ final class GermanStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Der Ordner für Aufnahmen';
+
+  @override
+  String get homeActionDefaultFolder => 'Wohin neue Notizen kommen';
 
   @override
   String get homeActionContext => 'Kontext';

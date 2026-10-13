@@ -8,8 +8,8 @@ import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/library_links.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -33,7 +33,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.barActions,
     required this.autofocusEditor,
     required this.linkType,
-    required this.missingNoteLocation,
+    required this.newItemLocation,
     required this.attachmentsFolder,
     required this.indentWidth,
     required this.toolbarLayout,
@@ -142,7 +142,7 @@ final class ShellDetailPane extends StatelessWidget {
   final LinkType linkType;
 
   /// Where a dead link's new note lands (settings, issue #78).
-  final MissingNoteLocation missingNoteLocation;
+  final NewItemLocation newItemLocation;
 
   /// The folder (library-relative) picked images are copied into.
   final String attachmentsFolder;
@@ -321,7 +321,7 @@ final class ShellDetailPane extends StatelessWidget {
     autofocusEditor: autofocusEditor,
     caretRequest: tab.path == caretPath ? caretRequest : 0,
     linkType: linkType,
-    missingNoteLocation: missingNoteLocation,
+    newItemLocation: newItemLocation,
     attachmentsFolder: attachmentsFolder,
     templateFolder: templateFolder,
     indentWidth: indentWidth,

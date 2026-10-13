@@ -392,11 +392,33 @@ final class CatalanStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Crear notes que manquen a';
+  String get linkUpdateTitle => 'Actualitza els enllaços en reanomenar o moure';
   @override
-  String get missingNoteLocationRoot => 'Arrel de la biblioteca';
+  String get linkUpdateSubtitle =>
+      'Què passa amb els enllaços que apunten a una nota o carpeta '
+      'reanomenada o moguda';
   @override
-  String get missingNoteLocationCurrentFolder => 'Carpeta actual';
+  String get linkUpdateAutomatic => 'Automàticament';
+  @override
+  String get linkUpdateAsk => 'Pregunta cada vegada';
+  @override
+  String get linkUpdateNever => 'Mai';
+  @override
+  String get linkUpdateAskTitle => 'Voleu actualitzar els enllaços?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      "Notes que enllacen amb el que s'ha mogut: $notes. Voleu actualitzar-ne "
+      'els enllaços?';
+  @override
+  String get linkUpdateConfirm => 'Actualitza';
+  @override
+  String get linkUpdateKeep => 'Deixa-ho tal com està';
+  @override
+  String get newItemLocationTitle => 'Les notes i carpetes noves van a';
+  @override
+  String get newItemLocationRoot => 'Arrel de la biblioteca';
+  @override
+  String get newItemLocationOpenNote => 'Carpeta de la nota oberta';
   @override
   String get indentWidthTitle => 'Ample del sagnat';
   @override
@@ -3748,6 +3770,9 @@ final class CatalanStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'La carpeta de captures';
+
+  @override
+  String get homeActionDefaultFolder => 'On van les notes noves';
 
   @override
   String get homeActionContext => 'Context';

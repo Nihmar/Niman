@@ -385,11 +385,32 @@ final class DanishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Opret manglende noter i';
+  String get linkUpdateTitle => 'Opdater links efter omdøbning eller flytning';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekets rodmappe';
+  String get linkUpdateSubtitle =>
+      'Hvad der sker med links til en note eller mappe, der omdøbes eller '
+      'flyttes';
   @override
-  String get missingNoteLocationCurrentFolder => 'Nuværende mappe';
+  String get linkUpdateAutomatic => 'Automatisk';
+  @override
+  String get linkUpdateAsk => 'Spørg hver gang';
+  @override
+  String get linkUpdateNever => 'Aldrig';
+  @override
+  String get linkUpdateAskTitle => 'Opdater links?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Noter, der linker til det flyttede: $notes. Opdater deres links?';
+  @override
+  String get linkUpdateConfirm => 'Opdater';
+  @override
+  String get linkUpdateKeep => 'Lad dem være';
+  @override
+  String get newItemLocationTitle => 'Nye noter og mapper placeres i';
+  @override
+  String get newItemLocationRoot => 'Bibliotekets rodmappe';
+  @override
+  String get newItemLocationOpenNote => 'Mappen med den åbne note';
   @override
   String get indentWidthTitle => 'Indrykningens bredde';
   @override
@@ -3669,6 +3690,9 @@ final class DanishStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Mappen til gemte sider';
+
+  @override
+  String get homeActionDefaultFolder => 'Hvor nye noter placeres';
 
   @override
   String get homeActionContext => 'Kontekst';

@@ -228,6 +228,30 @@ editing the note. A link that names another note by its name only
 *to* a note that moved, from a note that did not, is read again when that
 note is next indexed.
 
+### Updating the links to what moved
+
+Renaming or moving a note, or a folder of them, also rewrites the links
+*other* notes hold to it, so they keep finding it: a path link and a
+Markdown link follow the new path, and a link by name follows a rename (see
+[organization](organization.md) for what else follows the note). **Settings →
+Editor → Update links after rename or move** chooses what happens:
+
+- **Automatically** (the default) rewrites every note that links to what
+  moved.
+- **Ask each time** moves first, then asks one question for the whole move
+  — a folder rename included, not one per note — naming how many notes
+  would change: *Update* rewrites their links, *Leave as is* (or closing the
+  question) leaves them as written. A move that would change no link asks
+  nothing.
+- **Never** leaves the links as written; the ones that no longer find their
+  target show as dead links, which is what you may want after renaming a
+  note on purpose.
+
+The setting is about the links alone. Whatever the choice, the move still
+carries the note's history, reading positions, the settings and the Home
+that name it, and the index. The setting is the library's own, the same on
+every device.
+
 ## Links into a PDF or a book
 
 A link can point at a place inside a PDF or an EPUB book; following it
@@ -300,21 +324,30 @@ dialog shows the proposed path with **Create** and **Cancel**. Create
 makes an empty note there (no frontmatter) and opens it in the editor;
 Cancel changes nothing — no file, no error, no second prompt.
 
-Where the new note lands is the library setting `missingNoteLocation`
-(Settings → Editor):
+Where the new note lands is the library setting `newItemLocation`
+(Settings → Editor → **New notes and folders go to**), the one rule every
+new note and folder follows (see
+[organization](organization.md#where-new-notes-and-folders-go)); the note
+open is the one the link was clicked in:
 
-- `currentFolder` (default) — the folder of the note where the link was
+- `openNoteFolder` (default) — the folder of the note where the link was
   clicked: `[[Foo]]` in `Notes/Current.md` creates `Notes/Foo.md`
 - `libraryRoot` — the library root: `[[Foo]]` creates `Foo.md`
 
-A target that names a folder (`[[Sub/Foo]]`) keeps that folder, **and the
-folders are made with the note**: `[[Projects/Three laws]]` creates
-`Projects/` if the library has none, and the note inside it, as Obsidian
-does. The confirmation dialog names the whole proposed path, so you see what
-is about to be made, and Cancel makes neither the note nor its folders. Each
-name is cleaned the way a note's name is, and a segment that names nothing
-(`.`, `..`, empty) is dropped, so a link never creates anything outside the
-library. If a name on the way is already a file, or the disk refuses, nothing
+A library written before the rule had its own setting for this,
+`missingNoteLocation`; its value carries over (`currentFolder` is
+`openNoteFolder`).
+
+A target that names a folder (`[[Sub/Foo]]`) keeps that folder, whatever
+the setting says, **and the folders are made with the note**:
+`[[Projects/Three laws]]` creates `Projects/` if the library has none, and
+the note inside it, as Obsidian does. The confirmation dialog names the
+whole proposed path, so you see what is about to be made, and Cancel makes
+neither the note nor its folders. Each name is cleaned the way a note's
+name is, and a segment that names nothing (`.`, `..`, empty) is dropped, so
+a link never creates anything outside the library; a segment that starts
+with a dot names a hidden folder, and the link is refused rather than made
+there. If a name on the way is already a file, or the disk refuses, nothing
 is made and the link stays dead. Targets with an extension (`[[photo.png]]`)
 are attachments, not notes: they are never created. External URLs keep their
 behavior.

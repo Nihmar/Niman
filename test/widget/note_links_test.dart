@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/block_anchors.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/ui/note_links.dart';
 
@@ -36,7 +36,7 @@ void main() {
       source: source,
       notePath: '/lib/n.md',
       libraryRoot: '/lib',
-      missingNoteLocation: MissingNoteLocation.currentFolder,
+      newItemLocation: NewItemLocation.openNoteFolder,
       outline: const [],
       jumpToHeading: (_) {},
     );
@@ -69,7 +69,7 @@ void main() {
       source: FakeLinkSource(notes: ['other.md', 'n.md']),
       notePath: '/lib/n.md',
       libraryRoot: '/lib',
-      missingNoteLocation: MissingNoteLocation.currentFolder,
+      newItemLocation: NewItemLocation.openNoteFolder,
       outline: headings ?? outline,
       jumpToHeading: jumps.add,
       blocks: () async {

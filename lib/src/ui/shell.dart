@@ -40,6 +40,7 @@ import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -70,6 +71,7 @@ import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
@@ -84,6 +86,7 @@ import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
+import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -98,6 +101,7 @@ import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/pane_split.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/search_request.dart';
@@ -800,7 +804,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // first mount, or the open FAB all still fall to the full setState.
     // A hidden tab on either side of the switch changes the back key's
     // meaning (#536), which only a rebuild hands the layout.
-    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
+    final narrow = !isWideShell(context);
     // Home and Todo are content destinations on a wide window (#712):
     // they open as a pinned tab in the focused pane and the tree, the
     // panes and the dock stay, instead of taking a whole slot.
@@ -897,7 +901,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _shellFocus.requestFocus();
   }
 
-  /// Phone (< [wideBreakpoint]) mode: which pane is visible.
+  /// Phone mode (a window that is not [isWideShell]): which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
 
@@ -924,7 +928,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// into [ShellCreateFlow]).
   late final ShellCreateFlow _createFlow = ShellCreateFlow(
     controller: widget.controller,
-    createParent: () => _createParent,
+    newItemRule: _newItemRule,
     guard: _guard,
     onCreated: _onItemCreated,
   );
@@ -977,6 +981,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// outside the app (issue #100 moved them into [ShellRowActions]).
   late final ShellRowActions _rowActions = ShellRowActions(
     renameInPlace: _startRenameInPlace,
+    // Under "ask", the question is the shell's to put (#848).
+    confirmLinks: (notes) async =>
+        mounted && await askLinkUpdate(context, notes),
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),
@@ -1226,8 +1233,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     });
   }
 
-  /// Whether the window is wide: the tabs' layout (#23).
-  bool get _wide => MediaQuery.sizeOf(context).width >= wideBreakpoint;
+  /// Whether the shell is the wide one: the tabs' layout (#23). A phone
+  /// never is, whichever way it is turned (#849).
+  bool get _wide => isWideShell(context);
 
   /// Whether the window was wide when the dependencies last changed: a
   /// crossing of the breakpoint is told by it (#770).
@@ -1452,7 +1460,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           // The Files pane opened this note (#727): the caret goes in it.
           caretRequest: selectedPath == _caretPath ? _caretRequest : 0,
           linkType: _editorSettings.linkType,
-          missingNoteLocation: _editorSettings.missingNoteLocation,
+          newItemLocation: _editorSettings.newItemLocation,
           attachmentsFolder: _editorSettings.attachmentsFolder,
           templateFolder: _editorSettings.templateFolder,
           indentWidth: _editorSettings.indentWidth,
@@ -1655,7 +1663,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             ),
             const SizedBox(width: 6),
             SizedBox.square(
-              dimension: 20,
+              dimension: TabSurface.closeFor(touch: thumbDense(theme)),
               child: IconButton(
                 key: Key('content-tab-close-${tab.name}'),
                 tooltip: AppStrings.closeTabTooltip,
@@ -1851,7 +1859,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         isDir: _selectedIsDir,
         treeVisible: _treeVisible,
       ),
-      createParent: () => _createParent,
+      newItemRule: _newItemRule,
       guard: _guard,
       opensPreviewOnly: () => _notePreview,
       onNoteFiled: _onTemplateNoteFiled,
@@ -2194,13 +2202,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // A cache file that outlives us costs disk, not the import.
     }
     await _guard(() async {
+      // Where the library's rule puts a new note (#850); a share that
+      // arrives with no note open lands at the root.
+      final folder = _newItemRule.folder;
       final imported = await ops.createNote(
-        parentPath: '',
+        parentPath: folder,
         name: p.basenameWithoutExtension(name),
         content: text,
       );
       if (!mounted) return;
-      _revealFolder('');
+      _revealFolder(folder);
       _openNoteFromLink(imported.path, null);
     });
   }
@@ -2372,11 +2383,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     widget.controller.notify();
   }
 
-  /// Parent path for new note/folder creation.
-  String get _createParent {
-    if (_selected == null) return '';
-    return _selectedIsDir ? _selected! : parentOf(_selected!);
-  }
+  /// The library's one rule for where new notes and folders go (#850),
+  /// read on each creation: its setting, and the note on screen.
+  late final NewItemRule _newItemRule = NewItemRule(
+    location: () => _editorSettings.newItemLocation,
+    activeNote: () => _shownNote,
+  );
 
   void _select(Note note, {bool newTab = false}) {
     // A note opening in preview-only has no editable for the IME.
@@ -2553,7 +2565,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // the note leaves it selected, and on a phone the tab it lands on has
     // an empty body by design — so the shortcut showed nothing at all.
     // The tree being up is what says the note is closed.
-    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
+    final narrow = !isWideShell(context);
     final onScreen = !narrow || !_treeVisible;
     if (onScreen &&
         _selected == path &&
@@ -2793,8 +2805,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _ocrFlow != null &&
         _shownIsAttachment &&
         isRecognizableFile(_selected ?? ''),
-    // The phone has no key for the palette (#206); the wide layout has.
-    palette: !_wide,
+    // A touch device has no key for the palette (#206), the phone's and
+    // the tablet's alike (#849); a desktop window has.
+    palette: _paletteByTouch,
     slides: _showsSlides,
     presenterView: _wide,
     kindSwitch: switch (_noteKind) {
@@ -2871,9 +2884,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   @override
   Widget build(BuildContext context) {
+    DeviceShapeScope.debugCheck(context);
     final controller = widget.controller;
     final selectedPath = _selected;
-    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
+    final narrow = !isWideShell(context);
     _markOpenNote(controller.root, _shownNote);
     // Notes stay open until they are closed: a folder selected, or the
     // phone back on its tree, closes none (#23). On the phone a note
@@ -2929,8 +2943,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _gridStart.isNotEmpty,
       onBackStep: _gridUp,
       onSwitchLibrary: () => _windows.switchLibrary(context),
-      // The phone's way into the palette (#206); the desktop has a key.
-      onOpenPalette: narrow ? () => unawaited(_palette.open(context)) : null,
+      // The touch way into the palette (#206); the desktop has a key.
+      onOpenPalette: _paletteByTouch
+          ? () => unawaited(_palette.open(context))
+          : null,
+      wideBackAvailable: _wideBackAvailable,
+      onWideBack: _wideBack,
       buildWideSlots: () => _wideSlots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
@@ -3318,7 +3336,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         // and remounts every body, defeating the keep-alive. Only its
         // currentIndex changes here; [bodies] are the same instances across
         // a switch, so no body re-inflates.
-        body: switch (widget.ocrQueue) {
+        body: _fab.measuring(switch (widget.ocrQueue) {
           final queue? => Column(
             children: [
               OcrJobStatus(queue: queue),
@@ -3336,7 +3354,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             retainLayout: <int>{ShellTab.search.index},
             children: bodies,
           ),
-        },
+        }),
         floatingActionButton: _tabFab(),
         bottomNavigationBar: switch (controller.sync) {
           _ when !_shown(tab) => null,
@@ -3970,6 +3988,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Zen drops the base: the note takes the window edge to edge.
   Widget _wideBody(LibrarySession controller) {
     final zen = _inZen;
+    final touch = thumbDense(Theme.of(context));
     return Padding(
       padding: EdgeInsets.fromLTRB(
         zen ? 0 : Island.gap,
@@ -3986,17 +4005,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _wideRow(controller, zen: zen),
           if (_sidebarVisible && !zen)
             Positioned(
-              left: _editorSettings.treeWidth - ResizeDivider.overhang,
+              left:
+                  _editorSettings.treeWidth -
+                  ResizeDivider.overhangFor(touch: touch),
               top: 0,
               bottom: 0,
-              child: _treeDivider(),
+              child: _treeDivider(touch: touch),
             ),
           if (_dockShown && !zen)
             Positioned(
-              right: _dockWidth - ResizeDivider.overhang,
+              right: _dockWidth - ResizeDivider.overhangFor(touch: touch),
               top: 0,
               bottom: 0,
-              child: _dockDivider(),
+              child: _dockDivider(touch: touch),
             ),
         ],
       ),
@@ -4070,7 +4091,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 if (!widget.window.customTitleBar) ...[
                   SizedBox(
                     key: const Key('pane-tab-row'),
-                    height: 38,
+                    height: NoteTabBar.rowHeight(
+                      touch: thumbDense(Theme.of(context)),
+                    ),
                     child: LayoutBuilder(
                       builder: (context, constraints) => _tabRow(
                         const SizedBox.shrink(),
@@ -4156,7 +4179,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           ? Column(
               children: [
                 SizedBox(
-                  height: 38,
+                  height: NoteTabBar.rowHeight(
+                    touch: thumbDense(Theme.of(context)),
+                  ),
                   child: _paneTabs(1, const SizedBox.shrink()),
                 ),
                 const Divider(height: 1),
@@ -4243,7 +4268,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     caretPath: _caretPath,
                     caretRequest: _caretRequest,
                     linkType: _editorSettings.linkType,
-                    missingNoteLocation: _editorSettings.missingNoteLocation,
+                    newItemLocation: _editorSettings.newItemLocation,
                     attachmentsFolder: _editorSettings.attachmentsFolder,
                     templateFolder: _editorSettings.templateFolder,
                     indentWidth: _editorSettings.indentWidth,
@@ -4376,7 +4401,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The draggable tree/detail divider (T-PP-21). Moves apply live; the
   /// lift persists the width to the library.
-  Widget _treeDivider() => ResizeDivider(
+  Widget _treeDivider({required bool touch}) => ResizeDivider(
+    touch: touch,
     key: const Key('tree-divider'),
     onDrag: (dx) => setState(() {
       _editorSettings = _editorSettings.copyWith(
@@ -4397,7 +4423,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The draggable panes/dock divider (#297): the tree's divider on the
   /// dock's edge, so a move to the left widens the dock.
-  Widget _dockDivider() => ResizeDivider(
+  Widget _dockDivider({required bool touch}) => ResizeDivider(
+    touch: touch,
     key: const Key('dock-divider'),
     onDrag: (dx) => setState(() {
       _editorSettings = _editorSettings.copyWith(
@@ -4461,7 +4488,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // open quick note leaves this body painted under the opening note.
       ShellTab.quickNote =>
         _showQuickNoteChooser
-            ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
+            ? QuickNoteTab(
+                controller: controller,
+                newItemRule: _newItemRule,
+                onOpen: _openQuickNote,
+              )
             : const SizedBox.shrink(),
       ShellTab.home => HomeScreen(
         host: _homeHost(controller),
@@ -4716,6 +4747,43 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final at = _gridStart;
     if (at.isEmpty) return;
     _gridGoTo(parentOf(at));
+  }
+
+  /// Whether the palette is reached by touch (#206, #849): on a window
+  /// that is not the wide shell, and on any touch device's wide one. A
+  /// desktop's wide window has a key.
+  bool get _paletteByTouch => !_wide || !_desktop;
+
+  /// Whether the Files pane shows the grid inside a folder, which Back
+  /// steps out of (#727).
+  bool get _gridCanStepUp =>
+      _tab == ShellTab.files && _gridOn && _gridStart.isNotEmpty;
+
+  /// Whether the system Back has a step to take in the wide shell (#849):
+  /// what the phone's Back does in its layout, in the wide one's terms.
+  bool get _wideBackAvailable =>
+      _wide &&
+      (_contentTabShows ||
+          _sidebarShowsSearch ||
+          _workspace.value.activePath != null ||
+          _gridCanStepUp);
+
+  /// The wide shell's Back (#849): the topmost thing on screen goes
+  /// first — a book out of full screen, a pinned Home or Todo, the search
+  /// sidebar, the open note — and the grid steps up a folder last. With
+  /// none of them left Back leaves the app.
+  void _wideBack() {
+    if (_immersive.fullScreen.value != null) {
+      _immersive.fullScreen.value = null;
+    } else if (_contentTabShows) {
+      _closeContentTab();
+    } else if (_sidebarShowsSearch) {
+      _onDestinationSelected(ShellTab.files);
+    } else if (_workspace.value.activePath != null) {
+      _workspace.closeActive();
+    } else if (_gridCanStepUp) {
+      _gridUp();
+    }
   }
 
   /// The right-click menu on the grid's empty space: a note, a note from

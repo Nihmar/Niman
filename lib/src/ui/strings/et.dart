@@ -382,11 +382,33 @@ final class EstonianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Loo puuduvad märkmed kausta';
+  String get linkUpdateTitle =>
+      'Värskenda lingid ümbernimetamisel või teisaldamisel';
   @override
-  String get missingNoteLocationRoot => 'Biblioteka juur';
+  String get linkUpdateSubtitle =>
+      'Mis juhtub linkidega, mis viitavad ümber nimetatud või teisaldatud '
+      'märkmele või kaustale';
   @override
-  String get missingNoteLocationCurrentFolder => 'Praegune kaust';
+  String get linkUpdateAutomatic => 'Automaatselt';
+  @override
+  String get linkUpdateAsk => 'Küsi iga kord';
+  @override
+  String get linkUpdateNever => 'Mitte kunagi';
+  @override
+  String get linkUpdateAskTitle => 'Kas värskendada lingid?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Teisaldatule viitavad märkmed: $notes. Kas värskendada nende lingid?';
+  @override
+  String get linkUpdateConfirm => 'Värskenda';
+  @override
+  String get linkUpdateKeep => 'Jäta muutmata';
+  @override
+  String get newItemLocationTitle => 'Uued märkmed ja kaustad luuakse siia';
+  @override
+  String get newItemLocationRoot => 'Biblioteka juur';
+  @override
+  String get newItemLocationOpenNote => 'Avatud märkme kaust';
   @override
   String get indentWidthTitle => 'Taande laius';
   @override
@@ -3635,6 +3657,9 @@ final class EstonianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Salvestuste kaust';
+
+  @override
+  String get homeActionDefaultFolder => 'Kuhu uued märkmed lähevad';
 
   @override
   String get homeActionContext => 'Kontekst';

@@ -19,3 +19,12 @@ const double pointerDenseDividerHeight = 9;
 
 /// The room a pointer's menu keeps above its first row and below its last.
 const EdgeInsets pointerDenseMenuPadding = EdgeInsets.symmetric(vertical: 4);
+
+/// Whether [theme] is drawn for a thumb: the platform's own density is
+/// standard, not compact (#849). The wide shell on an Android tablet has
+/// the desktop's chrome, and this is what turns its small targets into
+/// thumb-sized ones while a mouse's stay as drawn.
+bool thumbDense(ThemeData theme) => !pointerDense(theme);
+
+/// The least a thumb's target measures on a side: Material's 48 dp.
+const double thumbTarget = kMinInteractiveDimension;

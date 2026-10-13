@@ -389,11 +389,34 @@ final class MacedonianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Креирање недостапни белешки во';
+  String get linkUpdateTitle =>
+      'Ажурирај ги врските по преименување или преместување';
   @override
-  String get missingNoteLocationRoot => 'Корен на библиотеката';
+  String get linkUpdateSubtitle =>
+      'Што се случува со врските до белешка или папка што е преименувана или '
+      'преместена';
   @override
-  String get missingNoteLocationCurrentFolder => 'Тековна папка';
+  String get linkUpdateAutomatic => 'Автоматски';
+  @override
+  String get linkUpdateAsk => 'Прашај секој пат';
+  @override
+  String get linkUpdateNever => 'Никогаш';
+  @override
+  String get linkUpdateAskTitle => 'Да се ажурираат ли врските?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Белешки што упатуваат на преместеното: $notes. Да се ажурираат ли '
+      'нивните врски?';
+  @override
+  String get linkUpdateConfirm => 'Ажурирај';
+  @override
+  String get linkUpdateKeep => 'Остави како што е';
+  @override
+  String get newItemLocationTitle => 'Новите белешки и папки одат во';
+  @override
+  String get newItemLocationRoot => 'Корен на библиотеката';
+  @override
+  String get newItemLocationOpenNote => 'Папка на отворената белешка';
   @override
   String get indentWidthTitle => 'Ширина на вовлечување';
   @override
@@ -3714,6 +3737,9 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Папката за снимени страници';
+
+  @override
+  String get homeActionDefaultFolder => 'Каде одат новите белешки';
 
   @override
   String get homeActionContext => 'Контекст';

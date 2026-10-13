@@ -15,6 +15,7 @@ import 'package:niman/src/core/files.dart' show pathInLibrary;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/anchor.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
@@ -33,7 +34,7 @@ final class NoteLinkTargets {
     required this.source,
     required this.notePath,
     required this.libraryRoot,
-    required this.missingNoteLocation,
+    required this.newItemLocation,
     required this.outline,
     required this.jumpToHeading,
     this.blocks,
@@ -53,7 +54,7 @@ final class NoteLinkTargets {
   final String? libraryRoot;
 
   /// Where a dead link's new note would be created.
-  final MissingNoteLocation missingNoteLocation;
+  final NewItemLocation newItemLocation;
 
   /// The note's headings, for an anchor to land on.
   final List<OutlineEntry> outline;
@@ -252,7 +253,7 @@ Future<DeadLinkOutcome> _handleDeadLink(
     currentNote: link.notePath,
   );
   final handler = MissingNoteHandler(
-    location: link.missingNoteLocation,
+    location: link.newItemLocation,
     confirm: link.modifier
         ? (_) async => true
         : (path) async {

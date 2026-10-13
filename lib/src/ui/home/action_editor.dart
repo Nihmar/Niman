@@ -8,9 +8,9 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/home/action_field_rows.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
@@ -27,7 +27,7 @@ Future<HomeAction?> showActionEditor(
   required LibrarySession controller,
   Set<String> missing = const {},
 }) {
-  final fullscreen = MediaQuery.sizeOf(context).width < wideBreakpoint;
+  final fullscreen = !isWideShell(context);
   return showDialog<HomeAction>(
     context: context,
     builder: (context) => _ActionEditor(
@@ -144,9 +144,9 @@ final class _ActionEditorState extends State<_ActionEditor> {
       folders: folders,
       ops: ops,
       current: _folder,
-      // A capture's empty folder is the capture folder, not the root
-      // (#682): the root is offered where it is what empty means.
-      allowRoot: _kind != HomeActionKind.capture,
+      // An empty folder is the capture folder for a capture (#682) and
+      // where the library's rule puts new notes for a note (#850), not
+      // the root: the root is not among the choices.
     );
     if (picked != null) setState(() => _folder = picked);
   }
@@ -252,7 +252,7 @@ final class _ActionEditorState extends State<_ActionEditor> {
             key: const Key('home-action-folder'),
             title: AppStrings.homeActionFolder,
             path: (_folder ?? '').isEmpty ? null : _folder,
-            empty: AppStrings.libraryRoot,
+            empty: AppStrings.homeActionDefaultFolder,
             onTap: () => unawaited(_pickFolder()),
             onClear: () => setState(() => _folder = null),
           ),

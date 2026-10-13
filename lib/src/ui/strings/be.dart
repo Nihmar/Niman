@@ -385,11 +385,33 @@ final class BelarusianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Стварыць адсутныя заўвагі ў';
+  String get linkUpdateTitle =>
+      'Абнаўляць спасылкі пасля перайменавання або перамяшчэння';
   @override
-  String get missingNoteLocationRoot => 'Карань бібліятэкі';
+  String get linkUpdateSubtitle =>
+      'Што адбываецца са спасылкамі на нататку або папку, якую перайменавалі '
+      'ці перамясцілі';
   @override
-  String get missingNoteLocationCurrentFolder => 'Поточная папка';
+  String get linkUpdateAutomatic => 'Аўтаматычна';
+  @override
+  String get linkUpdateAsk => 'Пытаць кожны раз';
+  @override
+  String get linkUpdateNever => 'Ніколі';
+  @override
+  String get linkUpdateAskTitle => 'Абнавіць спасылкі?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Нататкі са спасылкамі на перамешчанае: $notes. Абнавіць іх спасылкі?';
+  @override
+  String get linkUpdateConfirm => 'Абнавіць';
+  @override
+  String get linkUpdateKeep => 'Пакінуць як ёсць';
+  @override
+  String get newItemLocationTitle => 'Новыя заўвагі і папкі ствараюцца ў';
+  @override
+  String get newItemLocationRoot => 'Карань бібліятэкі';
+  @override
+  String get newItemLocationOpenNote => 'Папка адкрытай заўвагі';
   @override
   String get indentWidthTitle => 'Шырыня відступу';
   @override
@@ -3729,6 +3751,9 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Папка для захопленняў';
+
+  @override
+  String get homeActionDefaultFolder => 'Куды ідуць новыя заўвагі';
 
   @override
   String get homeActionContext => 'Кантэкст';

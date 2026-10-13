@@ -86,7 +86,9 @@ written by name follows a rename. Each link keeps the form it was written
 in — a Markdown link relative to its note stays relative, so the note still
 reads right in any other Markdown tool — and a link that still finds the
 note as written, such as one naming only the end of its path, is left
-alone. Open notes are saved before the rename, and re-read after it. Embedded attachments (`![[…]]` and
+alone. (The library can ask first, or leave the links as written: **Settings →
+Editor → Update links after rename or move**, see [links](links.md).) Open
+notes are saved before the rename, and re-read after it. Embedded attachments (`![[…]]` and
 `![…](…)`) follow the same way, so a renamed attachments folder keeps the
 pictures and clips that cited it. The settings that name a note or a folder
 follow it the same way — the quick note, the list, template, attachments
@@ -259,6 +261,41 @@ grid's own folder lives while the library is open, not in a file: every
 switch to the grid starts from the tree's selection — the folder
 selected, or the folder the selected note sits in — and the grid keeps
 that folder while it is the pane on screen.
+
+## Where new notes and folders go
+
+One library setting, **Settings → Editor → New notes and folders go to**
+(`newItemLocation`, see [settings](settings.md)), decides where a new note
+or folder is made when nothing else names the place:
+
+- **Library root** — at the top level of the library.
+- **Folder of the open note** (the default) — next to the note on screen;
+  with no note open, at the library root. On a phone the open note is the
+  one selected in the tree; a folder selected instead counts as none.
+
+It is the same rule for **New note**, **New folder**, **New slides** and
+**New voice note** (the Files FAB, the tree's footer menu, the command
+palette, the tray and the keyboard shortcuts), the quick note's **create**
+button, a note from a [template](templates.md), the note a dead
+[link](links.md) creates, a text file shared into Niman and imported as a
+note (with no note open, which is how a share usually arrives, it lands
+at the root), and a Home [action](home.md#actions) that names no folder.
+Changing the setting moves all of them at once.
+
+What does not ask the rule, because it already says where:
+
+- **Create … here** in a folder's context menu, and the tree's and the
+  grid's right-click menus on empty space: the note or folder goes in that
+  folder (the library root, for the empty space of the tree).
+- A link that names a path (`[[Sub/Foo]]`), a template whose frontmatter
+  names its `folder`, a Home action's own folder, and the folder picked in
+  a capture.
+- The kinds that keep a folder of their own: the [journal](journal.md),
+  **New list note** (`listNoteFolder`) and a page or a quote captured as a
+  new note, which goes in the web captures folder (`captureFolder`,
+  `Clippings` by default; see [web capture](web-capture.md)).
+- Attachments pasted or dropped on a note, and the text note a
+  [recognition](text-recognition.md) writes (always beside its file).
 
 ## Renaming a note or a folder
 
@@ -570,7 +607,9 @@ else in it that is not Markdown is kept as a file.
 
 - Notes live in plain folders inside the library.
 - **Quick note:** one tap target for scratch text. Defaults to
-  `Quick note.md` at the library root; `quickNotePath` overrides it. Text
+  `Quick note.md` at the library root; `quickNotePath` overrides it, and
+  the note its **create** button makes goes where
+  [new notes go](#where-new-notes-and-folders-go). Text
   shared into Niman from another app lands at its end
   ([platforms](platforms.md)), and the note opens.
 - **List notes:** created under `listNoteFolder` (default `Lists`) and

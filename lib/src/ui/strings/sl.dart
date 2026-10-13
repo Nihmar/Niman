@@ -390,11 +390,34 @@ final class SlovenianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Ustvari manjkajoče opombe v';
+  String get linkUpdateTitle =>
+      'Posodobi povezave po preimenovanju ali premiku';
   @override
-  String get missingNoteLocationRoot => 'Koren knjižnice';
+  String get linkUpdateSubtitle =>
+      'Kaj se zgodi s povezavami na preimenovan ali premaknjen zapisek ali '
+      'mapo';
   @override
-  String get missingNoteLocationCurrentFolder => 'Trenutna mapa';
+  String get linkUpdateAutomatic => 'Samodejno';
+  @override
+  String get linkUpdateAsk => 'Vprašaj vsakič';
+  @override
+  String get linkUpdateNever => 'Nikoli';
+  @override
+  String get linkUpdateAskTitle => 'Posodobim povezave?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Zapiski s povezavami na premaknjeno: $notes. Posodobim njihove '
+      'povezave?';
+  @override
+  String get linkUpdateConfirm => 'Posodobi';
+  @override
+  String get linkUpdateKeep => 'Pusti nespremenjeno';
+  @override
+  String get newItemLocationTitle => 'Nove opombe in mape gredo v';
+  @override
+  String get newItemLocationRoot => 'Koren knjižnice';
+  @override
+  String get newItemLocationOpenNote => 'Mapa odprte opombe';
   @override
   String get indentWidthTitle => 'Širina zamika';
   @override
@@ -3710,6 +3733,9 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Mapa za zajeme';
+
+  @override
+  String get homeActionDefaultFolder => 'Kam gredo nove opombe';
 
   @override
   String get homeActionContext => 'Kontekst';

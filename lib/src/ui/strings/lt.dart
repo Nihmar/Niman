@@ -386,11 +386,32 @@ final class LithuanianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Trūkst pastabų sukūrimas';
+  String get linkUpdateTitle => 'Atnaujinti nuorodas pervadinus ar perkėlus';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekos šaknyje';
+  String get linkUpdateSubtitle =>
+      'Kas nutinka nuorodoms į pervadintą ar perkeltą užrašą ar aplanką';
   @override
-  String get missingNoteLocationCurrentFolder => 'Dabartiniame kataloge';
+  String get linkUpdateAutomatic => 'Automatiškai';
+  @override
+  String get linkUpdateAsk => 'Klausti kiekvieną kartą';
+  @override
+  String get linkUpdateNever => 'Niekada';
+  @override
+  String get linkUpdateAskTitle => 'Atnaujinti nuorodas?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Užrašai, nurodantys į perkeltą elementą: $notes. Atnaujinti jų '
+      'nuorodas?';
+  @override
+  String get linkUpdateConfirm => 'Atnaujinti';
+  @override
+  String get linkUpdateKeep => 'Palikti kaip yra';
+  @override
+  String get newItemLocationTitle => 'Naujų pastabų ir katalogų kūrimas';
+  @override
+  String get newItemLocationRoot => 'Bibliotekos šaknyje';
+  @override
+  String get newItemLocationOpenNote => 'Atidarytos pastabos kataloge';
   @override
   String get indentWidthTitle => 'Įtraukos plotis';
   @override
@@ -3729,6 +3750,9 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Išsaugojimų aplankas';
+
+  @override
+  String get homeActionDefaultFolder => 'Kur kuriamos naujos pastabos';
 
   @override
   String get homeActionContext => 'Kontekstas';

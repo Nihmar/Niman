@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The List | Grid pair (#727), beside the sort chevron in the wide
@@ -25,6 +26,7 @@ final class TreeViewToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final touch = thumbDense(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: DecoratedBox(
@@ -45,7 +47,11 @@ final class TreeViewToggle extends StatelessWidget {
               on: view == TreeView.list,
               onTap: () => onView(TreeView.list),
             ),
-            Container(width: 1, height: 26, color: theme.colorScheme.outline),
+            Container(
+              width: 1,
+              height: touch ? thumbTarget : 26,
+              color: theme.colorScheme.outline,
+            ),
             _segment(
               context,
               key: const Key('view-grid-toggle'),
@@ -72,14 +78,15 @@ final class TreeViewToggle extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
+    final touch = thumbDense(theme);
     return Tooltip(
       message: tooltip,
       child: InkWell(
         key: key,
         onTap: onTap,
         child: Container(
-          width: 28,
-          height: 26,
+          width: touch ? thumbTarget : 28,
+          height: touch ? thumbTarget : 26,
           alignment: Alignment.center,
           color: on ? theme.colorScheme.surfaceContainerHigh : null,
           child: Icon(

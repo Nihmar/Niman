@@ -382,11 +382,32 @@ final class LatvianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Trūkstošo piezīmju izveide';
+  String get linkUpdateTitle =>
+      'Atjaunināt saites pēc pārdēvēšanas vai pārvietošanas';
   @override
-  String get missingNoteLocationRoot => 'Bibliotēkes saknē';
+  String get linkUpdateSubtitle =>
+      'Kas notiek ar saitēm uz pārdēvētu vai pārvietotu piezīmi vai mapi';
   @override
-  String get missingNoteLocationCurrentFolder => 'Pašreizējā mapē';
+  String get linkUpdateAutomatic => 'Automātiski';
+  @override
+  String get linkUpdateAsk => 'Jautāt katru reizi';
+  @override
+  String get linkUpdateNever => 'Nekad';
+  @override
+  String get linkUpdateAskTitle => 'Vai atjaunināt saites?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Piezīmes, kas saista ar pārvietoto: $notes. Vai atjaunināt to saites?';
+  @override
+  String get linkUpdateConfirm => 'Atjaunināt';
+  @override
+  String get linkUpdateKeep => 'Atstāt kā ir';
+  @override
+  String get newItemLocationTitle => 'Jaunu piezīmju un mapju izveide';
+  @override
+  String get newItemLocationRoot => 'Bibliotēkes saknē';
+  @override
+  String get newItemLocationOpenNote => 'Atvērtās piezīmes mapē';
   @override
   String get indentWidthTitle => 'Ielādes platums';
   @override
@@ -3681,6 +3702,9 @@ final class LatvianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Saglabāto lapu mape';
+
+  @override
+  String get homeActionDefaultFolder => 'Kur tiek veidotas jaunas piezīmes';
 
   @override
   String get homeActionContext => 'Konteksts';

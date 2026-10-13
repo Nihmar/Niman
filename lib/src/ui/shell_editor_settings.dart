@@ -14,8 +14,8 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 
 /// What the shell needs to know about the open library to draw it.
@@ -31,7 +31,7 @@ final class ShellEditorSettings {
     this.editorKind = EditorKind.source,
     this.editorsEnabled = const {EditorKind.source, EditorKind.wysiwyg},
     this.linkType = LinkType.wikilink,
-    this.missingNoteLocation = MissingNoteLocation.currentFolder,
+    this.newItemLocation = NewItemLocation.openNoteFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.templateFolder = defaultTemplateFolder,
     this.indentWidth = 2,
@@ -74,7 +74,7 @@ final class ShellEditorSettings {
   final LinkType linkType;
 
   /// Where a dead link's new note lands (issue #78).
-  final MissingNoteLocation missingNoteLocation;
+  final NewItemLocation newItemLocation;
 
   /// The folder new attachments are copied into (issue #56).
   final String attachmentsFolder;
@@ -150,7 +150,7 @@ final class ShellEditorSettings {
       session.typewriter,
       session.editorAutofocusEnabled,
       session.linkType,
-      session.missingNoteLocation,
+      session.newItemLocation,
       session.indentWidth,
       session.sourceFont,
     ).wait;
@@ -183,7 +183,7 @@ final class ShellEditorSettings {
       typewriter,
       autofocus,
       linkType,
-      missingNoteLocation,
+      newItemLocation,
       indentWidth,
       sourceFont,
     ) = await head;
@@ -219,7 +219,7 @@ final class ShellEditorSettings {
           : EditorKind.wysiwyg,
       editorsEnabled: {...enabled},
       linkType: linkType,
-      missingNoteLocation: missingNoteLocation,
+      newItemLocation: newItemLocation,
       attachmentsFolder: attachmentsFolder,
       templateFolder: templateFolder,
       indentWidth: indentWidth,
@@ -263,7 +263,7 @@ final class ShellEditorSettings {
       editorKind: editorKind ?? this.editorKind,
       editorsEnabled: editorsEnabled,
       linkType: linkType,
-      missingNoteLocation: missingNoteLocation,
+      newItemLocation: newItemLocation,
       attachmentsFolder: attachmentsFolder,
       templateFolder: templateFolder,
       indentWidth: indentWidth,
@@ -292,7 +292,7 @@ final class ShellEditorSettings {
         editorKind == other.editorKind &&
         setEquals(editorsEnabled, other.editorsEnabled) &&
         linkType == other.linkType &&
-        missingNoteLocation == other.missingNoteLocation &&
+        newItemLocation == other.newItemLocation &&
         attachmentsFolder == other.attachmentsFolder &&
         templateFolder == other.templateFolder &&
         indentWidth == other.indentWidth &&
@@ -320,7 +320,7 @@ final class ShellEditorSettings {
     editorKind,
     Object.hashAllUnordered(editorsEnabled),
     linkType,
-    missingNoteLocation,
+    newItemLocation,
     attachmentsFolder,
     templateFolder,
     indentWidth,
