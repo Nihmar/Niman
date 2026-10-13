@@ -17,6 +17,9 @@ final class TreeViewToggle extends StatelessWidget {
   /// Creates the pair; [view] is the view in force.
   const new({required this.view, required this.onView, super.key});
 
+  /// The radius of the outline, and so of the clip inside it.
+  static const double cornerRadius = 7;
+
   /// The view in force.
   final TreeView view;
 
@@ -29,10 +32,16 @@ final class TreeViewToggle extends StatelessWidget {
     final touch = thumbDense(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border.all(color: theme.colorScheme.outline),
-          borderRadius: BorderRadius.circular(7),
+      // One rounded shape, outline included, that clips what is inside:
+      // the fill of the segment that is on, the divider and the ink all
+      // follow its corners. A `DecoratedBox` only draws the outline and
+      // clips nothing, so the fill poked out of the corners square.
+      child: Material(
+        color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(cornerRadius),
+          side: BorderSide(color: theme.colorScheme.outline),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -81,20 +90,23 @@ final class TreeViewToggle extends StatelessWidget {
     final touch = thumbDense(theme);
     return Tooltip(
       message: tooltip,
-      child: InkWell(
-        key: key,
-        onTap: onTap,
-        child: Container(
-          width: touch ? thumbTarget : 28,
-          height: touch ? thumbTarget : 26,
-          alignment: Alignment.center,
-          color: on ? theme.colorScheme.surfaceContainerHigh : null,
-          child: Icon(
-            icon,
-            size: 17,
-            color: on
-                ? theme.colorScheme.onSurface
-                : theme.colorScheme.onSurfaceVariant,
+      // `Ink`, not `Container`: the fill is painted on the clipped
+      // `Material`, under the splash, instead of over it.
+      child: Ink(
+        width: touch ? thumbTarget : 28,
+        height: touch ? thumbTarget : 26,
+        color: on ? theme.colorScheme.surfaceContainerHigh : null,
+        child: InkWell(
+          key: key,
+          onTap: onTap,
+          child: Center(
+            child: Icon(
+              icon,
+              size: 17,
+              color: on
+                  ? theme.colorScheme.onSurface
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ),
