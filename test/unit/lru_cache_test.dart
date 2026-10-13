@@ -42,6 +42,23 @@ void main() {
     expect(cache['a'], 10);
   });
 
+  test('a stored null is a value, not a miss', () {
+    final cache = LruCache<int, int?>(2);
+    cache[1] = null;
+    cache[2] = null;
+
+    expect(cache.length, 2);
+    expect(cache[1], isNull, reason: 'a stored null comes back as null');
+    expect(
+      cache.length,
+      2,
+      reason: 'asking for it is a use, and does not drop the entry',
+    );
+
+    cache[3] = null;
+    expect(cache.length, 2, reason: 'the least recently used one goes');
+  });
+
   test('remove and clear let go', () {
     final cache = LruCache<String, int>(4);
     cache['a'] = 1;

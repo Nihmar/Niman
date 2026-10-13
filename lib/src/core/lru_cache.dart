@@ -30,9 +30,12 @@ final class LruCache<K, V> {
 
   /// The entry for [key], which becomes the most recently used; null when
   /// there is none.
+  ///
+  /// A stored null is a value like any other: whether the key was held is
+  /// asked of the map, so asking for one does not drop it.
   V? operator [](K key) {
-    final value = _entries.remove(key);
-    if (value == null) return null;
+    if (!_entries.containsKey(key)) return null;
+    final value = _entries.remove(key) as V;
     _entries[key] = value;
     return value;
   }
