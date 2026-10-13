@@ -79,6 +79,17 @@ final class MentionReader implements MentionSource {
 
   @override
   Future<Mention> mentionIn(String referrerPath, String path) async {
+    try {
+      return await _mentionIn(referrerPath, path);
+    } on Object {
+      // The index closed under the question (the library is going): the row
+      // is left unread rather than the error reaching the frame that drew
+      // it.
+      return Mention.unread;
+    }
+  }
+
+  Future<Mention> _mentionIn(String referrerPath, String path) async {
     final read = _readSpots;
     final dao = NoteDao(_db);
     final referrer = await dao.find(referrerPath);

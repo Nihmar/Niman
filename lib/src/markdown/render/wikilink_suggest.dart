@@ -256,46 +256,12 @@ final class WikilinkSuggestController extends ChangeNotifier {
     WikilinkSuggester suggester,
   ) async {
     final kind = _modeOf(query);
-    List<SuggestEntry> entries;
-    var named = query.target;
-    switch (kind) {
-      case WikilinkPanelKind.notes:
-        named = '';
-        entries = await suggester.notes(query.target);
-      case WikilinkPanelKind.embeds:
-        named = '';
-        entries = await suggester.embeds(query.target);
-      case WikilinkPanelKind.headings:
-        if (query.target.isEmpty) {
-          // The empty target is the note being edited: its own scan answers,
-          // so no read is paid for what is already on screen.
-          named = '';
-          entries = HeadingSuggestion.linkable([
-            for (final heading in _headings() ?? const <OutlineEntry>[])
-              heading.text,
-          ]);
-        } else {
-          entries = await suggester.headings(query.target);
-        }
-      case WikilinkPanelKind.blocks:
-        if (query.target.isEmpty) {
-          named = '';
-          entries = <SuggestEntry>[
-            for (final block in await _blocks())
-              BlockIdSuggestion(block.id, excerpt: block.excerpt),
-          ];
-        } else {
-          entries = await suggester.blocks(query.target);
-        }
-      case WikilinkPanelKind.libraryHeadings:
-        named = '';
-        entries = await suggester.headingsAcross(query.matchText);
-      case WikilinkPanelKind.libraryBlocks:
-        named = '';
-        entries = await suggester.blocksAcross(query.matchText);
-      case WikilinkPanelKind.book:
-        entries = await suggester.bookPlaces(query.target);
-    }
+    final read = await _read(kind, query, suggester);
+    // A read that failed — an index closing under the question, a panel left
+    // open as the library goes — leaves the panel as it was; the next
+    // keystroke asks again.
+    if (read == null) return;
+    final (entries, named) = read;
     if (_disposed || seq != _seq) return;
     final panel = _panel;
     // The panel still stands in the same link text — the caret may have moved
@@ -309,6 +275,61 @@ final class WikilinkSuggestController extends ChangeNotifier {
       ..answers = query
       ..selected = 0;
     notifyListeners();
+  }
+
+  /// The rows the panel lists for [query] and the note its caption names, or
+  /// null when the read failed (an index closing under the question): the
+  /// failure is the panel's to ignore, not the frame's to catch.
+  Future<(List<SuggestEntry>, String)?> _read(
+    WikilinkPanelKind kind,
+    _LinkQuery query,
+    WikilinkSuggester suggester,
+  ) async {
+    try {
+      List<SuggestEntry> entries;
+      var named = query.target;
+      switch (kind) {
+        case WikilinkPanelKind.notes:
+          named = '';
+          entries = await suggester.notes(query.target);
+        case WikilinkPanelKind.embeds:
+          named = '';
+          entries = await suggester.embeds(query.target);
+        case WikilinkPanelKind.headings:
+          if (query.target.isEmpty) {
+            // The empty target is the note being edited: its own scan answers,
+            // so no read is paid for what is already on screen.
+            named = '';
+            entries = HeadingSuggestion.linkable([
+              for (final heading in _headings() ?? const <OutlineEntry>[])
+                heading.text,
+            ]);
+          } else {
+            entries = await suggester.headings(query.target);
+          }
+        case WikilinkPanelKind.blocks:
+          if (query.target.isEmpty) {
+            named = '';
+            entries = <SuggestEntry>[
+              for (final block in await _blocks())
+                BlockIdSuggestion(block.id, excerpt: block.excerpt),
+            ];
+          } else {
+            entries = await suggester.blocks(query.target);
+          }
+        case WikilinkPanelKind.libraryHeadings:
+          named = '';
+          entries = await suggester.headingsAcross(query.matchText);
+        case WikilinkPanelKind.libraryBlocks:
+          named = '';
+          entries = await suggester.blocksAcross(query.matchText);
+        case WikilinkPanelKind.book:
+          entries = await suggester.bookPlaces(query.target);
+      }
+      return (entries, named);
+    } on Object {
+      return null;
+    }
   }
 
   /// [entries] as the panel shows them: a note's headings and block ids
