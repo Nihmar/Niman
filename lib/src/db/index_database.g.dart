@@ -2865,7 +2865,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   );
   late final Index linksTo = Index(
     'links_to',
-    'CREATE INDEX links_to ON note_links (to_note)',
+    'CREATE INDEX links_to ON note_links (to_note, from_note, kind)',
   );
   late final Index fieldsKeyValue = Index(
     'fields_key_value',

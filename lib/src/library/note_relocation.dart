@@ -151,7 +151,7 @@ final class NoteRelocator {
     if (rows.isEmpty) {
       return (oldPaths: oldPaths, referrers: const <String>[]);
     }
-    final referrers = await dao.referrerPaths([
+    final referrers = await dao.referrers.pathsOf([
       for (final row in rows.values) row.id,
     ]);
     return (oldPaths: oldPaths, referrers: referrers);

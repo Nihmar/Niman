@@ -145,12 +145,12 @@ class NoteTags extends Table {
 
 /// A resolved link edge between two notes; dead links are skipped, so every
 /// row points at an existing note. Read in reverse by the rename/move rewrite
-/// (`NoteDao.referrerPaths`, #507) and by "Links to this note"
-/// (`NoteDao.referrersOf`, #842).
+/// (`ReferrerDao.pathsOf`, #507) and by "Links to this note"
+/// (`ReferrerDao.page`, #842).
 ///
 /// The primary key reads a note's outgoing links; the index reads them the
 /// way those two do, which is the direction the key cannot answer.
-@TableIndex(name: 'links_to', columns: {#toNote})
+@TableIndex(name: 'links_to', columns: {#toNote, #fromNote, #kind})
 class NoteLinks extends Table {
   /// The id of the note containing the link.
   IntColumn get fromNote => integer()();
@@ -295,8 +295,11 @@ class IndexDatabase extends _$IndexDatabase {
   /// the same wipe and rescan.
   /// v8: the headings and block ids of every note and their word index, for
   /// `[[##` and `[[^^` (#845, #844) — the same wipe and rescan.
+  /// v9: `links_to` holds the referrer and the link form beside the target,
+  /// so "Links to this note" pages a note's edges in index order (#842) —
+  /// the same wipe and rescan.
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the

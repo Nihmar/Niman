@@ -12,9 +12,10 @@ import 'package:niman/src/links/resolver.dart';
 /// Lists who links to a note and reads what they say.
 abstract interface class MentionSource implements IndexChanges {
   /// The notes that link to the note at library-relative [path] (#842): who
-  /// names it, by a link or an embed, in path order. Empty when the note is
-  /// not in the index; `truncated` when there are more than a list shows.
-  Future<Referrers> referrersOf(String path);
+  /// names it, by a link or an embed, a page at a time in path order — the
+  /// page after the cursor [after] (null for the first). Empty when the note
+  /// is not in the index; [Referrers.next] says where the next page starts.
+  Future<Referrers> referrersOf(String path, {int? after});
 
   /// What the note at [referrerPath] says about the note at [path]: the line
   /// of its first mention, whether that is an embed, and how many there are.
@@ -39,7 +40,7 @@ final class MentionReader implements MentionSource {
   /// each, and no more than this many.
   static const int kept = 256;
 
-  /// How many referrers a list of the notes that link to one note holds.
+  /// How many referrers one page of the notes that link to a note holds.
   static const int referrersShown = 200;
 
   /// The mentions read, by the referrer, the note it names and the
@@ -56,14 +57,24 @@ final class MentionReader implements MentionSource {
   Stream<void> get changes => _changes ?? const Stream<void>.empty();
 
   @override
-  Future<Referrers> referrersOf(String path) async {
+  Future<Referrers> referrersOf(String path, {int? after}) async {
     final dao = NoteDao(_db);
     final target = await dao.find(path);
     if (target == null) return Referrers.none;
-    final found = await dao.referrersOf(target.id, limit: referrersShown);
+    final found = await dao.referrers.page(
+      target.id,
+      limit: referrersShown,
+      after: after ?? 0,
+    );
     return Referrers([
-      for (final r in found.items) Referrer(path: r.path, kinds: r.kinds),
-    ], truncated: found.truncated);
+      for (final r in found.items)
+        Referrer(
+          path: r.path,
+          kinds: r.kinds,
+          modified: r.modified,
+          size: r.size,
+        ),
+    ], next: found.next);
   }
 
   @override

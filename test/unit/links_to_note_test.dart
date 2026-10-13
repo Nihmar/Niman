@@ -5,11 +5,13 @@
 // resolver's own rules, once per revision of the referrer.
 import 'dart:io';
 
+import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/db/referrer_dao.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/links/mentions.dart';
@@ -65,7 +67,7 @@ void main() {
     test('lists who links here, in path order, with the link forms', () async {
       final b = (await indexer.dao.find('B.md'))!;
 
-      final found = await indexer.dao.referrersOf(b.id, limit: 50);
+      final found = await indexer.dao.referrers.page(b.id, limit: 50);
 
       expect(found.items.map((r) => r.path), [
         'A.md',
@@ -76,14 +78,14 @@ void main() {
       ]);
       expect(found.items.first.kinds, ['md', 'wiki'], reason: 'both forms');
       expect(found.items[1].kinds, ['wiki']);
-      expect(found.truncated, isFalse);
+      expect(found.next, isNull);
     });
 
     test(
       "the note itself is not a referrer, nor is a dead link's writer",
       () async {
         final b = (await indexer.dao.find('B.md'))!;
-        final paths = (await indexer.dao.referrersOf(
+        final paths = (await indexer.dao.referrers.page(
           b.id,
           limit: 50,
         )).items.map((r) => r.path);
@@ -93,29 +95,69 @@ void main() {
       },
     );
 
-    test('a note nobody links to has none; a limit says it cut', () async {
+    test('a note nobody links to has none', () async {
       final e = (await indexer.dao.find('E.md'))!;
-      expect((await indexer.dao.referrersOf(e.id, limit: 5)).items, isEmpty);
-
-      final b = (await indexer.dao.find('B.md'))!;
-      final cut = await indexer.dao.referrersOf(b.id, limit: 2);
-      expect(cut.items.map((r) => r.path), ['A.md', 'C.md']);
-      expect(cut.truncated, isTrue);
+      final none = await indexer.dao.referrers.page(e.id, limit: 5);
+      expect(none.items, isEmpty);
+      expect(none.next, isNull);
     });
 
-    test("is a lookup of the target's own edges, not a scan", () async {
+    // A page is the edges the index walks to first, stopped at the limit,
+    // and put in path order; the cursor carries the walk on, so every
+    // referrer is on exactly one page, however many there are.
+    test('pages through every referrer once, each page by path', () async {
+      final b = (await indexer.dao.find('B.md'))!;
+      final seen = <String>[];
+      int? after;
+      var pages = 0;
+      do {
+        final page = await indexer.dao.referrers.page(
+          b.id,
+          limit: 2,
+          after: after ?? 0,
+        );
+        final paths = [for (final r in page.items) r.path];
+        expect(paths, [...paths]..sort(), reason: 'a page is by path');
+        expect(paths.length, lessThanOrEqualTo(2));
+        seen.addAll(paths);
+        after = page.next;
+        pages++;
+      } while (after != null);
+
+      expect(pages, 3);
+      expect(seen..sort(), ['A.md', 'C.md', 'D.md', 'Long.md', 'Sub/G.md']);
+    });
+
+    test('a referrer comes with its revision', () async {
+      final b = (await indexer.dao.find('B.md'))!;
+      final a = (await indexer.dao.find('A.md'))!;
+      final row = (await indexer.dao.referrers.page(
+        b.id,
+        limit: 50,
+      )).items.firstWhere((r) => r.path == 'A.md');
+
+      expect(row.modified, a.modified);
+      expect(row.size, a.size);
+    });
+
+    // The edges are read in the `links_to` index's own order and the walk
+    // stops at the page: no sort of every edge a hub note has.
+    test("is a walk of the target's own edges, never a sort of them", () async {
       final plan = await db
           .customSelect(
-            'EXPLAIN QUERY PLAN SELECT n.path, group_concat(l.kind) '
-            'FROM note_links l JOIN notes n ON n.id = l.from_note '
-            'WHERE l.to_note = 1 AND l.from_note <> 1 '
-            'GROUP BY l.from_note ORDER BY n.path LIMIT 5',
+            'EXPLAIN QUERY PLAN ${ReferrerDao.pageQuery}',
+            variables: [
+              Variable.withInt(1),
+              Variable.withInt(0),
+              Variable.withInt(5),
+            ],
           )
           .get();
-      final detail = plan.map((r) => r.read<String>('detail')).join(' ');
+      final detail = plan.map((r) => r.read<String>('detail')).join(' | ');
 
       expect(detail, contains('links_to'), reason: detail);
       expect(detail, isNot(contains('SCAN l')), reason: detail);
+      expect(detail, isNot(contains('TEMP B-TREE')), reason: detail);
     });
 
     test(
@@ -183,7 +225,7 @@ void main() {
         // The index has not heard yet: the edge is there, the link is not.
         final b = (await indexer.dao.find('B.md'))!;
         expect(
-          (await indexer.dao.referrersOf(
+          (await indexer.dao.referrers.page(
             b.id,
             limit: 9,
           )).items.map((r) => r.path),

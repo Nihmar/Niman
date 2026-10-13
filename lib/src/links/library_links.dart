@@ -75,7 +75,8 @@ final class IndexLibraryLinks implements LibraryLinks {
       _dead.deadAmong(queries);
 
   @override
-  Future<Referrers> referrersOf(String path) => _mentions.referrersOf(path);
+  Future<Referrers> referrersOf(String path, {int? after}) =>
+      _mentions.referrersOf(path, after: after);
 
   @override
   Future<Mention> mentionIn(String referrerPath, String path) =>

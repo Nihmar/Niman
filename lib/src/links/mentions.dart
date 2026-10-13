@@ -3,14 +3,14 @@
 ///
 /// The index already holds the edges — `note_links`, one row per resolved
 /// `from → to` and kind, answered in the reverse direction by `links_to` — so
-/// *who* links here is one indexed lookup (`NoteDao.referrersOf`). *Where*
-/// each one says it is not in the index, and is read when a row is drawn, not
-/// before: the referrer's text is read off the UI isolate, its links read
-/// with the index's own engine ([noteReferencesOf]), the ones that name the
-/// note found by the resolver's own rules, and the line around the first of
-/// them cut ([Mention]). Only the rows
-/// a list scrolls to are read, and the answers are kept by the revision of the
-/// referrer, bounded.
+/// *who* links here is one indexed lookup a page at a time
+/// (`ReferrerDao.page`). *Where* each one says it is not in the index, and is
+/// read when a row is drawn, not before: the referrer's text is read off the
+/// UI isolate, its links read with the index's own engine
+/// ([noteReferencesOf]), the ones that name the note found by the resolver's
+/// own rules, and the line around the first of them cut ([Mention]). Only
+/// the rows a list scrolls to are read, and the answers are kept by the
+/// revision of the referrer, bounded.
 ///
 /// Only linked mentions: a note's name written without a link is not one
 /// (docs/user/links.md says so). A link to a note that is not there is no edge,
@@ -25,21 +25,33 @@ import 'package:niman/src/markdown/note_references.dart';
 /// A note that links to another, as the index knows it.
 final class Referrer {
   /// Creates the referrer at library-relative [path], whose links to the note
-  /// are of these [kinds] (`wiki`, `md`).
-  const new({required this.path, required this.kinds});
+  /// are of these [kinds] (`wiki`, `md`), at the revision [modified] and
+  /// [size] the index read it at.
+  const new({
+    required this.path,
+    required this.kinds,
+    required this.modified,
+    required this.size,
+  });
 
   /// The referrer's library-relative path.
   final String path;
 
   /// The link forms it uses to name the note, sorted: `md`, `wiki`.
   final List<String> kinds;
+
+  /// The referrer's mtime, as the index recorded it.
+  final DateTime modified;
+
+  /// The referrer's size in bytes, as the index recorded it.
+  final int size;
 }
 
-/// The notes that link to one note: the first [items] in path order, and
-/// whether there are more than the lookup was asked for.
+/// A page of the notes that link to one note, in path order, and where the
+/// next page starts.
 final class Referrers {
-  /// Creates the list.
-  const new(this.items, {this.truncated = false});
+  /// Creates the page; [next] is the cursor of the page after it.
+  const new(this.items, {this.next});
 
   /// No one links to the note.
   static const Referrers none = Referrers(<Referrer>[]);
@@ -47,8 +59,12 @@ final class Referrers {
   /// The referrers, by path.
   final List<Referrer> items;
 
-  /// Whether [items] stops short: more notes link here than were asked for.
-  final bool truncated;
+  /// Where the next page starts (an opaque cursor), or null when [items]
+  /// ends the list.
+  final int? next;
+
+  /// Whether more notes link here than this page holds.
+  bool get truncated => next != null;
 }
 
 /// What one referrer says about the note it links to.

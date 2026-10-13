@@ -213,6 +213,42 @@ void main() {
       );
     });
 
+    testWidgets('past a page, "Show more" reads the next one, kept on reload', (
+      tester,
+    ) async {
+      final links = FakeLinkSource(notes: ['Hub.md'])..referrersPage = 2;
+      links.referrers['Hub.md'] = ['a.md', 'b.md', 'c.md'];
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await pumpSection(tester, links, path: 'Hub.md');
+      await tester.tap(find.byKey(const Key('links-to-note-header')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('c'), findsNothing);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('links-to-note-count'))).data,
+        '2+',
+      );
+
+      await tester.tap(find.byKey(const Key('links-to-note-more')));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('c'), findsOneWidget);
+      expect(find.byKey(const Key('links-to-note-more')), findsNothing);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('links-to-note-count'))).data,
+        '3',
+      );
+
+      links.announceChange();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('c'), findsOneWidget, reason: 'both pages read again');
+    });
+
     testWidgets('follows the note it is for', (tester) async {
       final links = _library();
       links.referrers['Optics.md'] = ['Newton.md'];

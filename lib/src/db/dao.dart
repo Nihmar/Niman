@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/referrer_dao.dart';
 
 /// Paths per `WHERE path IN (…)` statement: SQLite binds 999 variables by
 /// default (32766 since 3.32), so a whole candidate set is looked up in
@@ -13,6 +14,9 @@ final class NoteDao {
   new(this._db);
 
   final IndexDatabase _db;
+
+  /// Who links to a note: the reverse lookups over the link edges.
+  late final ReferrerDao referrers = ReferrerDao(_db);
 
   /// Rows directly under the library root (parent id 0), directories first.
   Future<List<Note>> topLevel() {
@@ -258,69 +262,6 @@ final class NoteDao {
     }
     final rows = await query.get();
     return [for (final row in rows) row.read(_db.notes.path)!];
-  }
-
-  /// The paths of the notes holding a link to any note in [toIds], distinct.
-  ///
-  /// The reverse of the `note_links` primary key, answered by its
-  /// `links_to` index: the backlinks of a moved note, in one lookup per
-  /// [_pathChunk] target ids rather than a walk of every note (#507).
-  Future<List<String>> referrerPaths(Iterable<int> toIds) async {
-    final wanted = toIds.toSet().toList(growable: false);
-    if (wanted.isEmpty) return const <String>[];
-    final paths = <String>{};
-    for (var i = 0; i < wanted.length; i += _pathChunk) {
-      final end = i + _pathChunk < wanted.length
-          ? i + _pathChunk
-          : wanted.length;
-      final placeholders = List.filled(end - i, '?').join(', ');
-      final rows = await _db
-          .customSelect(
-            'SELECT DISTINCT n.path AS path FROM note_links l '
-            'JOIN notes n ON n.id = l.from_note '
-            'WHERE l.to_note IN ($placeholders)',
-            variables: [
-              for (final id in wanted.sublist(i, end)) Variable.withInt(id),
-            ],
-            readsFrom: {_db.noteLinks, _db.notes},
-          )
-          .get();
-      paths.addAll([for (final row in rows) row.read<String>('path')]);
-    }
-    return paths.toList(growable: false);
-  }
-
-  /// The notes that link to the note [toId] (#842), by path: one row per
-  /// referrer with the link forms it names the note by, at most [limit] of
-  /// them (`truncated` says there were more).
-  ///
-  /// The reverse of the `note_links` primary key, answered by its `links_to`
-  /// index: one lookup of the target's own edges, joined to the notes that hold
-  /// them, never a walk of the library. The note itself is left out (a link to
-  /// its own heading is no one else's mention), and so is a link to a note
-  /// that is not there: dead links are not edges. Embeds and images are edges
-  /// too (#507); the reader of the referrer's text tells them apart.
-  Future<({List<({String path, List<String> kinds})> items, bool truncated})>
-  referrersOf(int toId, {required int limit}) async {
-    final rows = await _db
-        .customSelect(
-          'SELECT n.path AS path, group_concat(l.kind) AS kinds '
-          'FROM note_links l JOIN notes n ON n.id = l.from_note '
-          'WHERE l.to_note = ?1 AND l.from_note <> ?1 '
-          'GROUP BY l.from_note ORDER BY n.path LIMIT ?2',
-          variables: [Variable.withInt(toId), Variable.withInt(limit + 1)],
-          readsFrom: {_db.noteLinks, _db.notes},
-        )
-        .get();
-    final items = [
-      for (final row in rows.take(limit))
-        (
-          path: row.read<String>('path'),
-          kinds: (row.read<String>('kinds').split(',').toSet().toList()
-            ..sort()),
-        ),
-    ];
-    return (items: items, truncated: rows.length > limit);
   }
 
   /// Every indexed row, for full-scan reconciliation.

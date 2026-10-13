@@ -12,7 +12,8 @@ import 'package:path/path.dart' as p;
 /// The rows come from [controller] (one indexed lookup); the line of each is
 /// read as the row is drawn, off the UI isolate and once for each revision of
 /// the note that holds it, so a list that is scrolled through reads the notes
-/// it shows and no others. A tap opens the note that holds the link.
+/// it shows and no others. A tap opens the note that holds the link; past the
+/// last page, "Show more" reads on.
 final class LinksToNoteList extends StatelessWidget {
   /// The rows of [controller]; [onOpenNote] opens the note at a path.
   const new({
@@ -63,8 +64,18 @@ final class LinksToNoteList extends StatelessWidget {
           key: const Key('links-to-note'),
           shrinkWrap: shrinkWrap,
           padding: const EdgeInsets.symmetric(vertical: 4),
-          itemCount: referrers.items.length,
+          itemCount: referrers.items.length + (referrers.truncated ? 1 : 0),
           itemBuilder: (context, index) {
+            if (index == referrers.items.length) {
+              return Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton(
+                  key: const Key('links-to-note-more'),
+                  onPressed: controller.loadMore,
+                  child: Text(AppStrings.searchLoadMore),
+                ),
+              );
+            }
             final referrer = referrers.items[index];
             return _ReferrerRow(
               // A row is a note at a revision of the list: it asks again

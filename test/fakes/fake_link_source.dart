@@ -34,6 +34,13 @@ final class FakeLinkSource implements LibraryLinks {
   /// The notes that link to a note, by its path: what [referrersOf] answers.
   final Map<String, List<String>> referrers = <String, List<String>>{};
 
+  /// The revision of a referrer, by its path (0 when not given): a test
+  /// moves it to say the referrer's text changed.
+  final Map<String, int> revisions = <String, int>{};
+
+  /// How many referrers one page of [referrersOf] holds.
+  int referrersPage = 1 << 20;
+
   /// What a referrer says about a note, by `referrer -> note`: what
   /// [mentionIn] answers (nothing readable for a pair not given).
   final Map<String, Mention> mentions = <String, Mention>{};
@@ -63,12 +70,21 @@ final class FakeLinkSource implements LibraryLinks {
   }
 
   @override
-  Future<Referrers> referrersOf(String path) async {
+  Future<Referrers> referrersOf(String path, {int? after}) async {
     final found = referrers[path] ?? const <String>[];
+    final start = after ?? 0;
+    final end = start + referrersPage < found.length
+        ? start + referrersPage
+        : found.length;
     return Referrers([
-      for (final referrer in found)
-        Referrer(path: referrer, kinds: const <String>['wiki']),
-    ]);
+      for (final referrer in found.sublist(start < end ? start : end, end))
+        Referrer(
+          path: referrer,
+          kinds: const <String>['wiki'],
+          modified: DateTime.utc(2026),
+          size: revisions[referrer] ?? 0,
+        ),
+    ], next: end < found.length ? end : null);
   }
 
   @override
