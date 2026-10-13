@@ -2204,6 +2204,636 @@ class PendingLinksCompanion extends UpdateCompanion<PendingLink> {
   }
 }
 
+class $NoteHeadingsTable extends NoteHeadings
+    with TableInfo<$NoteHeadingsTable, NoteHeading> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NoteHeadingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _noteIdMeta = const VerificationMeta('noteId');
+  @override
+  late final GeneratedColumn<int> noteId = GeneratedColumn<int>(
+    'note_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lineMeta = const VerificationMeta('line');
+  @override
+  late final GeneratedColumn<int> line = GeneratedColumn<int>(
+    'line',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _levelMeta = const VerificationMeta('level');
+  @override
+  late final GeneratedColumn<int> level = GeneratedColumn<int>(
+    'level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _headingMeta = const VerificationMeta(
+    'heading',
+  );
+  @override
+  late final GeneratedColumn<String> heading = GeneratedColumn<String>(
+    'heading',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [noteId, line, level, heading];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'note_headings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NoteHeading> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('note_id')) {
+      context.handle(
+        _noteIdMeta,
+        noteId.isAcceptableOrUnknown(data['note_id']!, _noteIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_noteIdMeta);
+    }
+    if (data.containsKey('line')) {
+      context.handle(
+        _lineMeta,
+        line.isAcceptableOrUnknown(data['line']!, _lineMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lineMeta);
+    }
+    if (data.containsKey('level')) {
+      context.handle(
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_levelMeta);
+    }
+    if (data.containsKey('heading')) {
+      context.handle(
+        _headingMeta,
+        heading.isAcceptableOrUnknown(data['heading']!, _headingMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_headingMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {noteId, line};
+  @override
+  NoteHeading map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NoteHeading(
+      noteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}note_id'],
+      )!,
+      line: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}line'],
+      )!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}level'],
+      )!,
+      heading: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}heading'],
+      )!,
+    );
+  }
+
+  @override
+  $NoteHeadingsTable createAlias(String alias) {
+    return $NoteHeadingsTable(attachedDatabase, alias);
+  }
+}
+
+class NoteHeading extends DataClass implements Insertable<NoteHeading> {
+  /// The id of the note the heading is in.
+  final int noteId;
+
+  /// The logical line the heading is on.
+  final int line;
+
+  /// The heading level, 1..6.
+  final int level;
+
+  /// The heading text, as the outline reads it.
+  final String heading;
+  const NoteHeading({
+    required this.noteId,
+    required this.line,
+    required this.level,
+    required this.heading,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['note_id'] = Variable<int>(noteId);
+    map['line'] = Variable<int>(line);
+    map['level'] = Variable<int>(level);
+    map['heading'] = Variable<String>(heading);
+    return map;
+  }
+
+  NoteHeadingsCompanion toCompanion(bool nullToAbsent) {
+    return NoteHeadingsCompanion(
+      noteId: Value(noteId),
+      line: Value(line),
+      level: Value(level),
+      heading: Value(heading),
+    );
+  }
+
+  factory NoteHeading.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NoteHeading(
+      noteId: serializer.fromJson<int>(json['noteId']),
+      line: serializer.fromJson<int>(json['line']),
+      level: serializer.fromJson<int>(json['level']),
+      heading: serializer.fromJson<String>(json['heading']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'noteId': serializer.toJson<int>(noteId),
+      'line': serializer.toJson<int>(line),
+      'level': serializer.toJson<int>(level),
+      'heading': serializer.toJson<String>(heading),
+    };
+  }
+
+  NoteHeading copyWith({int? noteId, int? line, int? level, String? heading}) =>
+      NoteHeading(
+        noteId: noteId ?? this.noteId,
+        line: line ?? this.line,
+        level: level ?? this.level,
+        heading: heading ?? this.heading,
+      );
+  NoteHeading copyWithCompanion(NoteHeadingsCompanion data) {
+    return NoteHeading(
+      noteId: data.noteId.present ? data.noteId.value : this.noteId,
+      line: data.line.present ? data.line.value : this.line,
+      level: data.level.present ? data.level.value : this.level,
+      heading: data.heading.present ? data.heading.value : this.heading,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteHeading(')
+          ..write('noteId: $noteId, ')
+          ..write('line: $line, ')
+          ..write('level: $level, ')
+          ..write('heading: $heading')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(noteId, line, level, heading);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NoteHeading &&
+          other.noteId == this.noteId &&
+          other.line == this.line &&
+          other.level == this.level &&
+          other.heading == this.heading);
+}
+
+class NoteHeadingsCompanion extends UpdateCompanion<NoteHeading> {
+  final Value<int> noteId;
+  final Value<int> line;
+  final Value<int> level;
+  final Value<String> heading;
+  final Value<int> rowid;
+  const NoteHeadingsCompanion({
+    this.noteId = const Value.absent(),
+    this.line = const Value.absent(),
+    this.level = const Value.absent(),
+    this.heading = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NoteHeadingsCompanion.insert({
+    required int noteId,
+    required int line,
+    required int level,
+    required String heading,
+    this.rowid = const Value.absent(),
+  }) : noteId = Value(noteId),
+       line = Value(line),
+       level = Value(level),
+       heading = Value(heading);
+  static Insertable<NoteHeading> custom({
+    Expression<int>? noteId,
+    Expression<int>? line,
+    Expression<int>? level,
+    Expression<String>? heading,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (noteId != null) 'note_id': noteId,
+      if (line != null) 'line': line,
+      if (level != null) 'level': level,
+      if (heading != null) 'heading': heading,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NoteHeadingsCompanion copyWith({
+    Value<int>? noteId,
+    Value<int>? line,
+    Value<int>? level,
+    Value<String>? heading,
+    Value<int>? rowid,
+  }) {
+    return NoteHeadingsCompanion(
+      noteId: noteId ?? this.noteId,
+      line: line ?? this.line,
+      level: level ?? this.level,
+      heading: heading ?? this.heading,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (noteId.present) {
+      map['note_id'] = Variable<int>(noteId.value);
+    }
+    if (line.present) {
+      map['line'] = Variable<int>(line.value);
+    }
+    if (level.present) {
+      map['level'] = Variable<int>(level.value);
+    }
+    if (heading.present) {
+      map['heading'] = Variable<String>(heading.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteHeadingsCompanion(')
+          ..write('noteId: $noteId, ')
+          ..write('line: $line, ')
+          ..write('level: $level, ')
+          ..write('heading: $heading, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $NoteBlocksTable extends NoteBlocks
+    with TableInfo<$NoteBlocksTable, NoteBlock> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NoteBlocksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _noteIdMeta = const VerificationMeta('noteId');
+  @override
+  late final GeneratedColumn<int> noteId = GeneratedColumn<int>(
+    'note_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _blockIdMeta = const VerificationMeta(
+    'blockId',
+  );
+  @override
+  late final GeneratedColumn<String> blockId = GeneratedColumn<String>(
+    'block_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lineMeta = const VerificationMeta('line');
+  @override
+  late final GeneratedColumn<int> line = GeneratedColumn<int>(
+    'line',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _excerptMeta = const VerificationMeta(
+    'excerpt',
+  );
+  @override
+  late final GeneratedColumn<String> excerpt = GeneratedColumn<String>(
+    'excerpt',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [noteId, blockId, line, excerpt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'note_blocks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NoteBlock> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('note_id')) {
+      context.handle(
+        _noteIdMeta,
+        noteId.isAcceptableOrUnknown(data['note_id']!, _noteIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_noteIdMeta);
+    }
+    if (data.containsKey('block_id')) {
+      context.handle(
+        _blockIdMeta,
+        blockId.isAcceptableOrUnknown(data['block_id']!, _blockIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_blockIdMeta);
+    }
+    if (data.containsKey('line')) {
+      context.handle(
+        _lineMeta,
+        line.isAcceptableOrUnknown(data['line']!, _lineMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lineMeta);
+    }
+    if (data.containsKey('excerpt')) {
+      context.handle(
+        _excerptMeta,
+        excerpt.isAcceptableOrUnknown(data['excerpt']!, _excerptMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_excerptMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {noteId, blockId};
+  @override
+  NoteBlock map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NoteBlock(
+      noteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}note_id'],
+      )!,
+      blockId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}block_id'],
+      )!,
+      line: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}line'],
+      )!,
+      excerpt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}excerpt'],
+      )!,
+    );
+  }
+
+  @override
+  $NoteBlocksTable createAlias(String alias) {
+    return $NoteBlocksTable(attachedDatabase, alias);
+  }
+}
+
+class NoteBlock extends DataClass implements Insertable<NoteBlock> {
+  /// The id of the note the block is in.
+  final int noteId;
+
+  /// The block id, without its `^`.
+  final String blockId;
+
+  /// The line the block starts on.
+  final int line;
+
+  /// The block's first words, to tell one id from another in a list.
+  final String excerpt;
+  const NoteBlock({
+    required this.noteId,
+    required this.blockId,
+    required this.line,
+    required this.excerpt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['note_id'] = Variable<int>(noteId);
+    map['block_id'] = Variable<String>(blockId);
+    map['line'] = Variable<int>(line);
+    map['excerpt'] = Variable<String>(excerpt);
+    return map;
+  }
+
+  NoteBlocksCompanion toCompanion(bool nullToAbsent) {
+    return NoteBlocksCompanion(
+      noteId: Value(noteId),
+      blockId: Value(blockId),
+      line: Value(line),
+      excerpt: Value(excerpt),
+    );
+  }
+
+  factory NoteBlock.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NoteBlock(
+      noteId: serializer.fromJson<int>(json['noteId']),
+      blockId: serializer.fromJson<String>(json['blockId']),
+      line: serializer.fromJson<int>(json['line']),
+      excerpt: serializer.fromJson<String>(json['excerpt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'noteId': serializer.toJson<int>(noteId),
+      'blockId': serializer.toJson<String>(blockId),
+      'line': serializer.toJson<int>(line),
+      'excerpt': serializer.toJson<String>(excerpt),
+    };
+  }
+
+  NoteBlock copyWith({
+    int? noteId,
+    String? blockId,
+    int? line,
+    String? excerpt,
+  }) => NoteBlock(
+    noteId: noteId ?? this.noteId,
+    blockId: blockId ?? this.blockId,
+    line: line ?? this.line,
+    excerpt: excerpt ?? this.excerpt,
+  );
+  NoteBlock copyWithCompanion(NoteBlocksCompanion data) {
+    return NoteBlock(
+      noteId: data.noteId.present ? data.noteId.value : this.noteId,
+      blockId: data.blockId.present ? data.blockId.value : this.blockId,
+      line: data.line.present ? data.line.value : this.line,
+      excerpt: data.excerpt.present ? data.excerpt.value : this.excerpt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteBlock(')
+          ..write('noteId: $noteId, ')
+          ..write('blockId: $blockId, ')
+          ..write('line: $line, ')
+          ..write('excerpt: $excerpt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(noteId, blockId, line, excerpt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NoteBlock &&
+          other.noteId == this.noteId &&
+          other.blockId == this.blockId &&
+          other.line == this.line &&
+          other.excerpt == this.excerpt);
+}
+
+class NoteBlocksCompanion extends UpdateCompanion<NoteBlock> {
+  final Value<int> noteId;
+  final Value<String> blockId;
+  final Value<int> line;
+  final Value<String> excerpt;
+  final Value<int> rowid;
+  const NoteBlocksCompanion({
+    this.noteId = const Value.absent(),
+    this.blockId = const Value.absent(),
+    this.line = const Value.absent(),
+    this.excerpt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NoteBlocksCompanion.insert({
+    required int noteId,
+    required String blockId,
+    required int line,
+    required String excerpt,
+    this.rowid = const Value.absent(),
+  }) : noteId = Value(noteId),
+       blockId = Value(blockId),
+       line = Value(line),
+       excerpt = Value(excerpt);
+  static Insertable<NoteBlock> custom({
+    Expression<int>? noteId,
+    Expression<String>? blockId,
+    Expression<int>? line,
+    Expression<String>? excerpt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (noteId != null) 'note_id': noteId,
+      if (blockId != null) 'block_id': blockId,
+      if (line != null) 'line': line,
+      if (excerpt != null) 'excerpt': excerpt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NoteBlocksCompanion copyWith({
+    Value<int>? noteId,
+    Value<String>? blockId,
+    Value<int>? line,
+    Value<String>? excerpt,
+    Value<int>? rowid,
+  }) {
+    return NoteBlocksCompanion(
+      noteId: noteId ?? this.noteId,
+      blockId: blockId ?? this.blockId,
+      line: line ?? this.line,
+      excerpt: excerpt ?? this.excerpt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (noteId.present) {
+      map['note_id'] = Variable<int>(noteId.value);
+    }
+    if (blockId.present) {
+      map['block_id'] = Variable<String>(blockId.value);
+    }
+    if (line.present) {
+      map['line'] = Variable<int>(line.value);
+    }
+    if (excerpt.present) {
+      map['excerpt'] = Variable<String>(excerpt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteBlocksCompanion(')
+          ..write('noteId: $noteId, ')
+          ..write('blockId: $blockId, ')
+          ..write('line: $line, ')
+          ..write('excerpt: $excerpt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$IndexDatabase extends GeneratedDatabase {
   _$IndexDatabase(QueryExecutor e) : super(e);
   $IndexDatabaseManager get managers => $IndexDatabaseManager(this);
@@ -2215,6 +2845,8 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   late final $FrontmatterFieldsTable frontmatterFields =
       $FrontmatterFieldsTable(this);
   late final $PendingLinksTable pendingLinks = $PendingLinksTable(this);
+  late final $NoteHeadingsTable noteHeadings = $NoteHeadingsTable(this);
+  late final $NoteBlocksTable noteBlocks = $NoteBlocksTable(this);
   late final Index notesParent = Index(
     'notes_parent',
     'CREATE INDEX notes_parent ON notes (parent)',
@@ -2233,7 +2865,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   );
   late final Index linksTo = Index(
     'links_to',
-    'CREATE INDEX links_to ON note_links (to_note)',
+    'CREATE INDEX links_to ON note_links (to_note, from_note, kind)',
   );
   late final Index fieldsKeyValue = Index(
     'fields_key_value',
@@ -2251,6 +2883,8 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     noteLinks,
     frontmatterFields,
     pendingLinks,
+    noteHeadings,
+    noteBlocks,
     notesParent,
     notesDirPath,
     stemsNote,
@@ -3556,6 +4190,381 @@ typedef $$PendingLinksTableProcessedTableManager =
       PendingLink,
       PrefetchHooks Function()
     >;
+typedef $$NoteHeadingsTableCreateCompanionBuilder =
+    NoteHeadingsCompanion Function({
+      required int noteId,
+      required int line,
+      required int level,
+      required String heading,
+      Value<int> rowid,
+    });
+typedef $$NoteHeadingsTableUpdateCompanionBuilder =
+    NoteHeadingsCompanion Function({
+      Value<int> noteId,
+      Value<int> line,
+      Value<int> level,
+      Value<String> heading,
+      Value<int> rowid,
+    });
+
+class $$NoteHeadingsTableFilterComposer
+    extends Composer<_$IndexDatabase, $NoteHeadingsTable> {
+  $$NoteHeadingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get line => $composableBuilder(
+    column: $table.line,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get heading => $composableBuilder(
+    column: $table.heading,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$NoteHeadingsTableOrderingComposer
+    extends Composer<_$IndexDatabase, $NoteHeadingsTable> {
+  $$NoteHeadingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get line => $composableBuilder(
+    column: $table.line,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get heading => $composableBuilder(
+    column: $table.heading,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$NoteHeadingsTableAnnotationComposer
+    extends Composer<_$IndexDatabase, $NoteHeadingsTable> {
+  $$NoteHeadingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get noteId =>
+      $composableBuilder(column: $table.noteId, builder: (column) => column);
+
+  GeneratedColumn<int> get line =>
+      $composableBuilder(column: $table.line, builder: (column) => column);
+
+  GeneratedColumn<int> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumn<String> get heading =>
+      $composableBuilder(column: $table.heading, builder: (column) => column);
+}
+
+class $$NoteHeadingsTableTableManager
+    extends
+        RootTableManager<
+          _$IndexDatabase,
+          $NoteHeadingsTable,
+          NoteHeading,
+          $$NoteHeadingsTableFilterComposer,
+          $$NoteHeadingsTableOrderingComposer,
+          $$NoteHeadingsTableAnnotationComposer,
+          $$NoteHeadingsTableCreateCompanionBuilder,
+          $$NoteHeadingsTableUpdateCompanionBuilder,
+          (
+            NoteHeading,
+            BaseReferences<_$IndexDatabase, $NoteHeadingsTable, NoteHeading>,
+          ),
+          NoteHeading,
+          PrefetchHooks Function()
+        > {
+  $$NoteHeadingsTableTableManager(_$IndexDatabase db, $NoteHeadingsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NoteHeadingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NoteHeadingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NoteHeadingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> noteId = const Value.absent(),
+                Value<int> line = const Value.absent(),
+                Value<int> level = const Value.absent(),
+                Value<String> heading = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => NoteHeadingsCompanion(
+                noteId: noteId,
+                line: line,
+                level: level,
+                heading: heading,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int noteId,
+                required int line,
+                required int level,
+                required String heading,
+                Value<int> rowid = const Value.absent(),
+              }) => NoteHeadingsCompanion.insert(
+                noteId: noteId,
+                line: line,
+                level: level,
+                heading: heading,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$NoteHeadingsTable, NoteHeading>(table),
+                  BaseReferences<
+                    _$IndexDatabase,
+                    $NoteHeadingsTable,
+                    NoteHeading
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$NoteHeadingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$IndexDatabase,
+      $NoteHeadingsTable,
+      NoteHeading,
+      $$NoteHeadingsTableFilterComposer,
+      $$NoteHeadingsTableOrderingComposer,
+      $$NoteHeadingsTableAnnotationComposer,
+      $$NoteHeadingsTableCreateCompanionBuilder,
+      $$NoteHeadingsTableUpdateCompanionBuilder,
+      (
+        NoteHeading,
+        BaseReferences<_$IndexDatabase, $NoteHeadingsTable, NoteHeading>,
+      ),
+      NoteHeading,
+      PrefetchHooks Function()
+    >;
+typedef $$NoteBlocksTableCreateCompanionBuilder = NoteBlocksCompanion Function({
+  required int noteId,
+  required String blockId,
+  required int line,
+  required String excerpt,
+  Value<int> rowid,
+});
+typedef $$NoteBlocksTableUpdateCompanionBuilder = NoteBlocksCompanion Function({
+  Value<int> noteId,
+  Value<String> blockId,
+  Value<int> line,
+  Value<String> excerpt,
+  Value<int> rowid,
+});
+
+class $$NoteBlocksTableFilterComposer
+    extends Composer<_$IndexDatabase, $NoteBlocksTable> {
+  $$NoteBlocksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get blockId => $composableBuilder(
+    column: $table.blockId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get line => $composableBuilder(
+    column: $table.line,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get excerpt => $composableBuilder(
+    column: $table.excerpt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$NoteBlocksTableOrderingComposer
+    extends Composer<_$IndexDatabase, $NoteBlocksTable> {
+  $$NoteBlocksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get blockId => $composableBuilder(
+    column: $table.blockId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get line => $composableBuilder(
+    column: $table.line,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get excerpt => $composableBuilder(
+    column: $table.excerpt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$NoteBlocksTableAnnotationComposer
+    extends Composer<_$IndexDatabase, $NoteBlocksTable> {
+  $$NoteBlocksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get noteId =>
+      $composableBuilder(column: $table.noteId, builder: (column) => column);
+
+  GeneratedColumn<String> get blockId =>
+      $composableBuilder(column: $table.blockId, builder: (column) => column);
+
+  GeneratedColumn<int> get line =>
+      $composableBuilder(column: $table.line, builder: (column) => column);
+
+  GeneratedColumn<String> get excerpt =>
+      $composableBuilder(column: $table.excerpt, builder: (column) => column);
+}
+
+class $$NoteBlocksTableTableManager
+    extends
+        RootTableManager<
+          _$IndexDatabase,
+          $NoteBlocksTable,
+          NoteBlock,
+          $$NoteBlocksTableFilterComposer,
+          $$NoteBlocksTableOrderingComposer,
+          $$NoteBlocksTableAnnotationComposer,
+          $$NoteBlocksTableCreateCompanionBuilder,
+          $$NoteBlocksTableUpdateCompanionBuilder,
+          (
+            NoteBlock,
+            BaseReferences<_$IndexDatabase, $NoteBlocksTable, NoteBlock>,
+          ),
+          NoteBlock,
+          PrefetchHooks Function()
+        > {
+  $$NoteBlocksTableTableManager(_$IndexDatabase db, $NoteBlocksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NoteBlocksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NoteBlocksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NoteBlocksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> noteId = const Value.absent(),
+                Value<String> blockId = const Value.absent(),
+                Value<int> line = const Value.absent(),
+                Value<String> excerpt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => NoteBlocksCompanion(
+                noteId: noteId,
+                blockId: blockId,
+                line: line,
+                excerpt: excerpt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int noteId,
+                required String blockId,
+                required int line,
+                required String excerpt,
+                Value<int> rowid = const Value.absent(),
+              }) => NoteBlocksCompanion.insert(
+                noteId: noteId,
+                blockId: blockId,
+                line: line,
+                excerpt: excerpt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$NoteBlocksTable, NoteBlock>(table),
+                  BaseReferences<_$IndexDatabase, $NoteBlocksTable, NoteBlock>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$NoteBlocksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$IndexDatabase,
+      $NoteBlocksTable,
+      NoteBlock,
+      $$NoteBlocksTableFilterComposer,
+      $$NoteBlocksTableOrderingComposer,
+      $$NoteBlocksTableAnnotationComposer,
+      $$NoteBlocksTableCreateCompanionBuilder,
+      $$NoteBlocksTableUpdateCompanionBuilder,
+      (NoteBlock, BaseReferences<_$IndexDatabase, $NoteBlocksTable, NoteBlock>),
+      NoteBlock,
+      PrefetchHooks Function()
+    >;
 
 class $IndexDatabaseManager {
   final _$IndexDatabase _db;
@@ -3573,4 +4582,8 @@ class $IndexDatabaseManager {
       $$FrontmatterFieldsTableTableManager(_db, _db.frontmatterFields);
   $$PendingLinksTableTableManager get pendingLinks =>
       $$PendingLinksTableTableManager(_db, _db.pendingLinks);
+  $$NoteHeadingsTableTableManager get noteHeadings =>
+      $$NoteHeadingsTableTableManager(_db, _db.noteHeadings);
+  $$NoteBlocksTableTableManager get noteBlocks =>
+      $$NoteBlocksTableTableManager(_db, _db.noteBlocks);
 }

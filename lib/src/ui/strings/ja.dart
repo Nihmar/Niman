@@ -865,7 +865,15 @@ final class JapaneseStrings extends Strings {
   @override
   String get headingNotFoundTitle => '見出しが見つかりません';
   @override
+  String get blockNotFoundTitle => 'ブロックが見つかりません';
+  @override
   String get ambiguousLinkTitle => '複数のノートが一致します';
+  @override
+  String get linksToNoteTitle => 'このノートへのリンク';
+  @override
+  String get linksToNoteEmpty => 'このノートにリンクしているノートはまだありません';
+  @override
+  String get linksToNoteEmbed => '埋め込み';
   @override
   String get openLinkFailed => 'リンクを開けませんでした';
 
@@ -874,8 +882,6 @@ final class JapaneseStrings extends Strings {
   String get missingNoteDialogTitle => 'ノートが存在しません';
   @override
   String missingNoteDialogBody(String path) => '"$path" を作成しますか？';
-  @override
-  String missingNoteFolderMissing(String folder) => 'フォルダ "$folder" は存在しません';
 
   // Task lists (T-TD-04).
   @override
@@ -2664,6 +2670,14 @@ final class JapaneseStrings extends Strings {
   @override
   String get cascadeChecklistSubtitle =>
       'チェックすると、その下に入れ子になったものも一緒にチェックされます。外すとそのままです。';
+  @override
+  String get linkPreviewTitle => 'リンクのプレビュー';
+  @override
+  String get linkPreviewSubtitle =>
+      '閲覧表示ではリンクにポインタを重ね、エディタでは Ctrl (Mac は ⌘) '
+      'を押しながら重ねると、リンク先のノートを小さなカードで確認できます。タッチ画面では、閲覧表示でリンクを長押ししてください。';
+  @override
+  String get linkPreviewOpen => '開く';
 
   // Rebuilding the index file (#368).
 
@@ -2687,17 +2701,31 @@ final class JapaneseStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => '$named の見出し';
   @override
+  String wikilinkBlocksIn(String named) => '$named のブロック';
+  @override
+  String get wikilinkHeadingsEverywhere => 'ライブラリ全体の見出し';
+  @override
+  String get wikilinkBlocksEverywhere => 'ライブラリ全体のブロック';
+  @override
   String wikilinkPlacesIn(String named) => '$named の場所';
   @override
   String get wikilinkThisNote => 'このノート';
   @override
   String wikilinkNoMatchHeading(String query) => '「$query」 に一致する見出しはありません。';
   @override
+  String wikilinkNoMatchBlock(String query) => '「$query」 に一致するブロックはありません。';
+  @override
   String wikilinkNoMatchNote(String query) => '「$query」 に一致するノートはありません。';
   @override
   String wikilinkNoMatchFile(String query) => '「$query」に一致するファイルはありません。';
   @override
   String get wikilinkNoHeading => 'このノートにその名前の見出しはありません';
+  @override
+  String get wikilinkNoBlock => 'このノートにその ID のブロックはありません';
+  @override
+  String get wikilinkNoHeadingAnywhere => 'ライブラリにそのような見出しのあるノートはありません';
+  @override
+  String get wikilinkNoBlockAnywhere => 'ライブラリにその ID のブロックのあるノートはありません';
   @override
   String get wikilinkNoNote => 'ライブラリにその名前または別名のものはありません';
   @override

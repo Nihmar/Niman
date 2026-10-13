@@ -133,6 +133,25 @@ void main() {
       expect(await dao.find('Journal_1'), isNull);
     });
 
+    test('a folder spelled otherwise is the one that is there', () async {
+      final first = await ops.ensureFolder('Journal');
+
+      final second = await ops.ensureFolder('journal');
+
+      expect(second.id, first.id, reason: 'one folder, not two spellings');
+      expect(await dao.find('journal'), isNull);
+    });
+
+    test('a new subfolder is made inside the spelling that is there', () async {
+      await ops.ensureFolder('Journal');
+
+      final row = await ops.ensureFolder('journal/2026');
+
+      expect(row.path, 'Journal/2026');
+      expect(await dao.find('Journal/2026'), isNotNull);
+      expect(await dao.find('journal/2026'), isNull);
+    });
+
     test('a path out of a settings file is sanitized', () async {
       final row = await ops.ensureFolder('/../World//Places/');
       expect(row.path, 'World/Places');

@@ -900,7 +900,15 @@ final class HindiStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'हेडिंग नहीं मिली';
   @override
+  String get blockNotFoundTitle => 'ब्लॉक नहीं मिला';
+  @override
   String get ambiguousLinkTitle => 'कई नोट्स मेल खाते हैं';
+  @override
+  String get linksToNoteTitle => 'इस नोट के लिंक';
+  @override
+  String get linksToNoteEmpty => 'अभी कोई नोट यहाँ लिंक नहीं करता';
+  @override
+  String get linksToNoteEmbed => 'एम्बेड';
   @override
   String get openLinkFailed => 'लिंक नहीं खोला जा सका';
 
@@ -909,9 +917,6 @@ final class HindiStrings extends Strings {
   String get missingNoteDialogTitle => 'नोट मौजूद नहीं है';
   @override
   String missingNoteDialogBody(String path) => 'क्या "$path" बनाना है?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'फ़ोल्डर "$folder" मौजूद नहीं है';
 
   // Task lists (T-TD-04).
   @override
@@ -2870,6 +2875,16 @@ final class HindiStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'किसी चेकबॉक्स पर टिक करने से उसके नीचे नेस्ट किए गए भी टिक '
       'हो जाते हैं। हटाने पर वे वैसे ही रहते हैं।';
+  @override
+  String get linkPreviewTitle => 'लिंक का पूर्वावलोकन';
+  @override
+  String get linkPreviewSubtitle =>
+      'रीडिंग व्यू में किसी लिंक पर पॉइंटर ले जाएँ, या एडिटर में Ctrl (Mac '
+      'पर ⌘) दबाकर उस पर रखें, ताकि वह जिस नोट की ओर इशारा करता है उसे एक '
+      'छोटे कार्ड में देख सकें। टच स्क्रीन पर रीडिंग व्यू में किसी लिंक को '
+      'देर तक दबाएँ।';
+  @override
+  String get linkPreviewOpen => 'खोलें';
 
   // Rebuilding the index file (#368).
 
@@ -2896,12 +2911,21 @@ final class HindiStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => '$named में हेडिंग';
   @override
+  String wikilinkBlocksIn(String named) => '$named में ब्लॉक';
+  @override
+  String get wikilinkHeadingsEverywhere => 'पूरी लाइब्रेरी की हेडिंग';
+  @override
+  String get wikilinkBlocksEverywhere => 'पूरी लाइब्रेरी के ब्लॉक';
+  @override
   String wikilinkPlacesIn(String named) => '$named में स्थान';
   @override
   String get wikilinkThisNote => 'इस नोट में';
   @override
   String wikilinkNoMatchHeading(String query) =>
       '«$query» से मेल खाती कोई हेडिंग नहीं।';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      '«$query» से मेल खाता कोई ब्लॉक नहीं।';
   @override
   String wikilinkNoMatchNote(String query) =>
       '«$query» से मेल खाता कोई नोट नहीं।';
@@ -2910,6 +2934,14 @@ final class HindiStrings extends Strings {
       '“$query” से कोई फ़ाइल मेल नहीं खाती।';
   @override
   String get wikilinkNoHeading => 'इस नोट में उस नाम की कोई हेडिंग नहीं है';
+  @override
+  String get wikilinkNoBlock => 'इस नोट में उस आईडी का कोई ब्लॉक नहीं है';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'लाइब्रेरी के किसी नोट में ऐसी हेडिंग नहीं है';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'लाइब्रेरी के किसी नोट में उस आईडी का ब्लॉक नहीं है';
   @override
   String get wikilinkNoNote => 'लाइब्रेरी में उस नाम या उपनाम वाला कुछ नहीं है';
   @override

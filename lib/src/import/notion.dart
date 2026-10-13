@@ -33,7 +33,7 @@ import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/import/bounded_entry.dart';
 import 'package:niman/src/library/markdown_import.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/link_path.dart';
 import 'package:path/path.dart' as p;
 
 /// What an import brought in: the folder it landed in (library-relative),
@@ -407,7 +407,7 @@ String? _mapHref(
   required Map<String, String> byName,
 }) {
   if (href.isEmpty || href.startsWith('#')) return null;
-  if (LinkResolver.hasScheme(href)) return null;
+  if (LinkPaths.hasScheme(href)) return null;
   final hash = href.indexOf('#');
   final path = hash < 0 ? href : href.substring(0, hash);
   final anchor = hash < 0 ? '' : href.substring(hash);

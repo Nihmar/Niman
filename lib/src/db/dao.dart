@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/referrer_dao.dart';
 
 /// Paths per `WHERE path IN (…)` statement: SQLite binds 999 variables by
 /// default (32766 since 3.32), so a whole candidate set is looked up in
@@ -13,6 +14,9 @@ final class NoteDao {
   new(this._db);
 
   final IndexDatabase _db;
+
+  /// Who links to a note: the reverse lookups over the link edges.
+  late final ReferrerDao referrers = ReferrerDao(_db);
 
   /// Rows directly under the library root (parent id 0), directories first.
   Future<List<Note>> topLevel() {
@@ -87,6 +91,21 @@ final class NoteDao {
       _db.notes,
     )..where((t) => t.path.equals(path))).get();
     return rows.isEmpty ? null : rows.first;
+  }
+
+  /// The directory row whose path spells [path] in any case, or null: the
+  /// folder `NoteOps.ensureFolder` reuses rather than making a second one
+  /// under a different spelling (#847).
+  Future<Note?> folderIgnoringCase(String path) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM notes WHERE is_dir = 1 AND path = ? COLLATE NOCASE '
+          'LIMIT 1',
+          variables: [Variable.withString(path)],
+          readsFrom: {_db.notes},
+        )
+        .get();
+    return rows.isEmpty ? null : _db.notes.map(rows.first.data);
   }
 
   /// The rows at [paths], keyed by path, one `WHERE path IN (…)` per
@@ -260,36 +279,6 @@ final class NoteDao {
     return [for (final row in rows) row.read(_db.notes.path)!];
   }
 
-  /// The paths of the notes holding a link to any note in [toIds], distinct.
-  ///
-  /// The reverse of the `note_links` primary key, answered by its
-  /// `links_to` index: the backlinks of a moved note, in one lookup per
-  /// [_pathChunk] target ids rather than a walk of every note (#507).
-  Future<List<String>> referrerPaths(Iterable<int> toIds) async {
-    final wanted = toIds.toSet().toList(growable: false);
-    if (wanted.isEmpty) return const <String>[];
-    final paths = <String>{};
-    for (var i = 0; i < wanted.length; i += _pathChunk) {
-      final end = i + _pathChunk < wanted.length
-          ? i + _pathChunk
-          : wanted.length;
-      final placeholders = List.filled(end - i, '?').join(', ');
-      final rows = await _db
-          .customSelect(
-            'SELECT DISTINCT n.path AS path FROM note_links l '
-            'JOIN notes n ON n.id = l.from_note '
-            'WHERE l.to_note IN ($placeholders)',
-            variables: [
-              for (final id in wanted.sublist(i, end)) Variable.withInt(id),
-            ],
-            readsFrom: {_db.noteLinks, _db.notes},
-          )
-          .get();
-      paths.addAll([for (final row in rows) row.read<String>('path')]);
-    }
-    return paths.toList(growable: false);
-  }
-
   /// Every indexed row, for full-scan reconciliation.
   Future<List<Note>> allRows() {
     return _db.select(_db.notes).get();
@@ -339,6 +328,21 @@ final class NoteDao {
       // rows themselves.
       await _db.customStatement(
         'DELETE FROM notes_fts WHERE rowid IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_anchors_fts WHERE rowid IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_headings WHERE note_id IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_blocks WHERE note_id IN '
         '(SELECT id FROM notes WHERE $where)',
         args,
       );

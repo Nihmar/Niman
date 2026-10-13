@@ -913,7 +913,15 @@ final class CroatianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Naslov nije pronađen';
   @override
+  String get blockNotFoundTitle => 'Blok nije pronađen';
+  @override
   String get ambiguousLinkTitle => 'Više napomena odgovara';
+  @override
+  String get linksToNoteTitle => 'Poveznice na ovu napomenu';
+  @override
+  String get linksToNoteEmpty => 'Nijedna napomena još ne vodi ovamo';
+  @override
+  String get linksToNoteEmbed => 'ugrađena';
   @override
   String get openLinkFailed => 'Veza se nije mogla otvoriti';
 
@@ -922,9 +930,6 @@ final class CroatianStrings extends Strings {
   String get missingNoteDialogTitle => 'Napomena ne postoji';
   @override
   String missingNoteDialogBody(String path) => 'Kreirati „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Direktorij „$folder“ ne postoji';
 
   // Task lists (T-TD-04).
   @override
@@ -2949,6 +2954,16 @@ final class CroatianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Označavanje kućice označava i one ugniježđene ispod. '
       'Odznačavanje ih ostavlja kakve jesu.';
+  @override
+  String get linkPreviewTitle => 'Pregled poveznica';
+  @override
+  String get linkPreviewSubtitle =>
+      'Zadržite pokazivač iznad poveznice u prikazu čitanja ili držite Ctrl '
+      '(⌘ na Macu) iznad nje u uredniku da biste u maloj kartici vidjeli '
+      'napomenu na koju vodi. Na zaslonu osjetljivom na dodir dugo '
+      'pritisnite poveznicu u prikazu čitanja.';
+  @override
+  String get linkPreviewOpen => 'Otvori';
 
   // Rebuilding the index file (#368).
 
@@ -2975,12 +2990,21 @@ final class CroatianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Naslovi u $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blokovi u $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Naslovi u cijeloj knjižnici';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blokovi u cijeloj knjižnici';
+  @override
   String wikilinkPlacesIn(String named) => 'Mjesta u $named';
   @override
   String get wikilinkThisNote => 'ova napomena';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Nijedan naslov se ne podudara s „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Nijedan blok se ne podudara s „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Nijedna napomena se ne podudara s „$query”.';
@@ -2989,6 +3013,14 @@ final class CroatianStrings extends Strings {
       'Nijedna datoteka ne odgovara „$query”.';
   @override
   String get wikilinkNoHeading => 'ova napomena nema naslov s tim imenom';
+  @override
+  String get wikilinkNoBlock => 'ova napomena nema blok s tim ID-om';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'nijedna napomena u knjižnici nema takav naslov';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'nijedna napomena u knjižnici nema blok s tim ID-om';
   @override
   String get wikilinkNoNote => 'ništa u knjižnici nema to ime ni alias';
   @override

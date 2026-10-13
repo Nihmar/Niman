@@ -25,11 +25,13 @@ import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
 import 'package:niman/src/library/new_item_folder.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/embed_path.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/parser.dart';
-import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
+import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
@@ -46,8 +48,12 @@ import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
+import 'package:niman/src/ui/link_preview/note_link_preview.dart';
+import 'package:niman/src/ui/links_to_note_section.dart';
+import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
@@ -117,7 +123,6 @@ final class NoteView extends StatefulWidget {
     this.wikilinkSuggester,
     this.onOpenNote,
     this.createMissingNote,
-    this.folderExists,
     this.initialAnchor,
     this.initialCaretOffset,
     this.active = true,
@@ -135,6 +140,7 @@ final class NoteView extends StatefulWidget {
     this.typewriter = false,
     this.cascadeChecklist = true,
     this.frontmatterPanel = true,
+    this.linkPreview = true,
     this.onToggleTypewriter,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
@@ -166,6 +172,11 @@ final class NoteView extends StatefulWidget {
   /// Whether the note's frontmatter is drawn as the properties panel above it
   /// (settings toggle, #157). Off, the note is its own text in both surfaces.
   final bool frontmatterPanel;
+
+  /// Whether hovering a link — with Ctrl (⌘) held in the editor — or pressing
+  /// and holding it in the read view on a touch screen previews the note it
+  /// points at (settings, #846).
+  final bool linkPreview;
 
   /// Where the note's text sits across the pane (issue #171): both
   /// editors, the preview, the toolbar, the find bars and the status row
@@ -261,7 +272,7 @@ final class NoteView extends StatefulWidget {
 
   /// The link-resolution source (wiki targets + markdown hrefs against the
   /// open index); null (tests without a session) disables link navigation.
-  final LinkSource? linkSource;
+  final LibraryLinks? linkSource;
 
   /// The library the wikilink suggester panel reads (#475): the notes,
   /// their aliases and their headings. Null (no open library) draws no
@@ -281,11 +292,6 @@ final class NoteView extends StatefulWidget {
   /// path; null (no open library) keeps the dead-link snackbar instead of
   /// the offer.
   final Future<String> Function(String path)? createMissingNote;
-
-  /// Whether a library-relative folder exists under `[root]` (issue #78);
-  /// defaults to an off-UI-isolate disk check. A test seam: widget tests
-  /// run against a fake library that is not on disk.
-  final Future<bool> Function(String root, String rel)? folderExists;
 
   /// A heading anchor to land on after the note loads (T-M3-07).
   final String? initialAnchor;
@@ -439,6 +445,45 @@ final class _NoteViewState extends State<NoteView>
   /// surface — the same seam [NoteView.spellCheck] keeps — so the status row
   /// can show the count the surface works out.
   final TemplateCheck _templateCheck = TemplateCheck();
+
+  /// Which of the note's links name nothing (#847): resolved against the
+  /// index apart from the drawing, on load, a pause after an edit, and when
+  /// the library's index moves; the editor and the read view draw the answer.
+  late final DeadLinkWatcher _deadLinks = openNoteDeadLinks(
+    source: () => widget.linkSource,
+    buffer: () => _loading ? null : _surface?.buffer,
+    kept: () => _sourceViewKey.currentState?.references(),
+    notePath: () => _pathInLibrary,
+    delay: () => _stats.settleDelay,
+  );
+
+  /// The link preview (#846): the card a hovered link opens over the note.
+  late final NoteLinkPreview _preview = NoteLinkPreview(
+    source: () => widget.linkSource,
+    notePath: () => _pathInLibrary,
+    enabled: () => widget.linkPreview,
+    unsavedText: _unsavedTextOf,
+    mathCache: _mathCache,
+    targets: _linkTargets,
+  );
+
+  /// The unsaved buffer text of the note at library-relative [path], when it
+  /// is open with edits the disk does not have yet (in any pane).
+  String? _unsavedTextOf(String path) {
+    final root = widget.libraryRoot;
+    if (root == null) return null;
+    return widget.unsavedTracker?.unsavedTextOf(p.join(root, path));
+  }
+
+  /// The scrolls of both panes: a card closes when the note moves under it.
+  late final Listenable _scrolls = Listenable.merge([
+    _previewScroll,
+    _sourceScroll,
+  ]);
+
+  /// The note's path in the library, slash-separated, or null for a note
+  /// opened from outside one.
+  String? get _pathInLibrary => pathInLibrary(widget.libraryRoot, widget.path);
 
   @override
   ValueListenable<List<OutlineEntry>> get outline => _stats.outline;
@@ -811,6 +856,7 @@ final class _NoteViewState extends State<NoteView>
     revision: () => _saves.revision,
     lastSavedRevision: () => _saves.lastSavedRevision,
     saveForClose: _saves.saveForClose,
+    bufferText: () => _unifiedText,
   );
 
   /// How the note reaches the disk: its revisions, the debounce after an
@@ -846,6 +892,7 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
+    _deadLinks.sourceChanged();
     // The pane opened the note before this editor was mounted (#727): the
     // surface is built this frame, so the caret is asked for after it.
     _caretPending = widget.caretRequest != 0;
@@ -883,6 +930,13 @@ final class _NoteViewState extends State<NoteView>
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
+    if (!identical(oldWidget.linkSource, widget.linkSource)) {
+      // The library opened under a note that was already on screen: its
+      // links are resolved against it now.
+      _deadLinks
+        ..sourceChanged()
+        ..refresh();
+    }
     if (oldWidget.path != widget.path) {
       // Another note's head is not this one's (#157): the panel opens closed
       // again, and the note on screen is taken at its head until it scrolls.
@@ -972,6 +1026,8 @@ final class _NoteViewState extends State<NoteView>
     _stats
       ..removeListener(_onStatsChanged)
       ..dispose();
+    _deadLinks.dispose();
+    _preview.dispose();
     _activeFormats.dispose();
     _formatKeys.detach();
     _focus.dispose();
@@ -1054,6 +1110,9 @@ final class _NoteViewState extends State<NoteView>
     // the incoming one is not read yet. Nothing in it is owed to the disk,
     // so the close guard has nothing to wait for (#156).
     _saves.markClean();
+    // The links of the note that went are not this one's.
+    _deadLinks.clear();
+    _preview.close();
     setState(() {
       _loading = true;
       _ready = false;
@@ -1130,6 +1189,9 @@ final class _NoteViewState extends State<NoteView>
       // answer synchronously inside this call; big ones go to an isolate
       // and land a moment later.
       _stats.refresh();
+      // The links that name nothing, resolved against the index with the
+      // note already on screen, and drawn muted when they arrive (#847).
+      _deadLinks.refresh();
       // The editor gets this frame: the preview's parse and first layout
       // start right after the text is on screen, so a large note shows it
       // before the preview works (T-PP-22).
@@ -1138,7 +1200,7 @@ final class _NoteViewState extends State<NoteView>
       });
       final anchor = widget.initialAnchor;
       if (anchor != null && mounted) {
-        jumpToAnchor(context, anchor, _linkTargets());
+        unawaited(jumpToAnchor(context, anchor, _linkTargets()));
       }
       widget.onLoaded?.call(path, text.length);
       _recordDiskStat(path);
@@ -1230,6 +1292,7 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.noteChanged();
     widget.onNoteKindChanged?.call(_noteKind);
     _stats.refresh();
+    _deadLinks.refresh();
     _refreshPreview();
     if (mounted) setState(() {});
     _log.info('note reloaded: $path (external change, ${text.length} chars)');
@@ -1253,6 +1316,8 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.noteChanged();
     _caretLine = caretLine;
     _stats.schedule();
+    _deadLinks.edited();
+    _preview.close();
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
   }
@@ -1371,6 +1436,9 @@ final class _NoteViewState extends State<NoteView>
         lineTokens: plainTextTokensOf(p.basename(widget.path)),
         templateCommands: _templateIn(widget),
         wikilinkSuggester: widget.wikilinkSuggester,
+        deadLinks: _deadLinks,
+        onLinkHover: _preview.editorHover,
+        notePath: _pathInLibrary,
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.
@@ -1538,6 +1606,8 @@ final class _NoteViewState extends State<NoteView>
         openWiki(context, parseWikiRef(inner), _linkTargets()),
       ),
       embedResolver: _resolveEmbed,
+      deadLinks: _deadLinks,
+      linkPreview: _preview.hooks(context),
       column: widget.noteColumn,
       knownScan: _editorScanOf,
       onToggleTask: _toggleTaskFromRead,
@@ -1863,11 +1933,20 @@ final class _NoteViewState extends State<NoteView>
     newItemLocation: widget.newItemLocation,
     outline: _stats.outline.value,
     jumpToHeading: _jumpToHeading,
+    blocks: _blocks,
     onOpenNote: widget.onOpenNote,
     createMissingNote: widget.createMissingNote,
-    folderExists: widget.folderExists,
     modifier: modifier,
   );
+
+  /// The note's block anchors (#844), read off its buffer when a block link
+  /// is followed.
+  late final BufferBlockAnchors _blockAnchors = BufferBlockAnchors(
+    () => _surface!.buffer,
+  );
+
+  Future<List<BlockAnchor>> _blocks() async =>
+      _surface == null ? const <BlockAnchor>[] : await _blockAnchors.read();
 
   void _onFocusChanged() {
     if (!_focus.hasFocus) unawaited(_saves.save());
@@ -2004,45 +2083,49 @@ final class _NoteViewState extends State<NoteView>
             actions: widget.barActions,
           ),
         Expanded(
-          child: error == null
-              ? (!_ready || _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : kindBody
-                    ? kindChild!
-                    // Both panes stay mounted and only one is on stage:
-                    // coming back to the preview finds its parse, scroll
-                    // offset, typeset math and images where they were
-                    // (device report, 2026-09-11: every return re-parsed
-                    // the note and restarted from the top). Offstage
-                    // children skip hit testing, painting and the default
-                    // finders; the panes never show together.
-                    : Stack(
-                        children: [
-                          Offstage(
-                            offstage: showPreview,
-                            child: KeyedSubtree(
-                              key: ValueKey(
-                                _wysiwygIn(widget)
-                                    ? 'pane-wysiwyg'
-                                    : 'pane-editor',
+          // The preview card of a hovered link goes over the note (#846).
+          child: _preview.host(
+            closeOn: _scrolls,
+            child: error == null
+                ? (!_ready || _loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : kindBody
+                      ? kindChild!
+                      // Both panes stay mounted and only one is on stage:
+                      // coming back to the preview finds its parse, scroll
+                      // offset, typeset math and images where they were
+                      // (device report, 2026-09-11: every return re-parsed
+                      // the note and restarted from the top). Offstage
+                      // children skip hit testing, painting and the default
+                      // finders; the panes never show together.
+                      : Stack(
+                          children: [
+                            Offstage(
+                              offstage: showPreview,
+                              child: KeyedSubtree(
+                                key: ValueKey(
+                                  _wysiwygIn(widget)
+                                      ? 'pane-wysiwyg'
+                                      : 'pane-editor',
+                                ),
+                                child: _unifiedSurfacePane(),
                               ),
-                              child: _unifiedSurfacePane(),
                             ),
-                          ),
-                          Offstage(
-                            offstage: !showPreview,
-                            child: KeyedSubtree(
-                              key: const ValueKey('pane-preview'),
-                              child: _previewPane(context),
+                            Offstage(
+                              offstage: !showPreview,
+                              child: KeyedSubtree(
+                                key: const ValueKey('pane-preview'),
+                                child: _previewPane(context),
+                              ),
                             ),
-                          ),
-                        ],
-                      ))
-              : NoteLoadError(
-                  message: error,
-                  path: widget.path,
-                  offerDefaultApp: _notText,
-                ),
+                          ],
+                        ))
+                : NoteLoadError(
+                    message: error,
+                    path: widget.path,
+                    offerDefaultApp: _notText,
+                  ),
+          ),
         ),
         if (!kindBody && !widget.zen) ...[
           SafeArea(
@@ -2055,6 +2138,16 @@ final class _NoteViewState extends State<NoteView>
               children: [
                 if (!_loading && _stats.frontmatterError != null)
                   FrontmatterWarningBanner(message: _stats.frontmatterError!),
+                // The notes that link to this one (#842), under the note.
+                if (!_loading && _ready)
+                  NoteColumnPadding(
+                    column: widget.noteColumn,
+                    child: LinksToNoteSection(
+                      source: widget.linkSource,
+                      path: _pathInLibrary,
+                      onOpenNote: (path) => widget.onOpenNote?.call(path, null),
+                    ),
+                  ),
                 NoteColumnPadding(
                   column: widget.noteColumn,
                   child: ListenableBuilder(

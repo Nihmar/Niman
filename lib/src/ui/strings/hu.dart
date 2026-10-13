@@ -914,7 +914,15 @@ final class HungarianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'A cím nem található';
   @override
+  String get blockNotFoundTitle => 'A blokk nem található';
+  @override
   String get ambiguousLinkTitle => 'Több jegyzet is egyezik';
+  @override
+  String get linksToNoteTitle => 'Hivatkozások erre a jegyzetre';
+  @override
+  String get linksToNoteEmpty => 'Még egy jegyzet sem hivatkozik erre';
+  @override
+  String get linksToNoteEmbed => 'beágyazva';
   @override
   String get openLinkFailed => 'A hivatkozás nem nyitható meg';
 
@@ -923,9 +931,6 @@ final class HungarianStrings extends Strings {
   String get missingNoteDialogTitle => 'A jegyzet nem létezik';
   @override
   String missingNoteDialogBody(String path) => 'Létrehozás: „$path"?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'A „$folder" mappa nem létezik';
 
   // Task lists (T-TD-04).
   @override
@@ -2930,6 +2935,16 @@ final class HungarianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Egy négyzet bejelölése az alatta beágyazottakat is bejelöli. '
       'A jelölés levétele úgy hagyja őket.';
+  @override
+  String get linkPreviewTitle => 'Hivatkozások előnézete';
+  @override
+  String get linkPreviewSubtitle =>
+      'Vidd az egeret egy hivatkozás fölé az olvasónézetben, vagy tartsd '
+      'lenyomva a Ctrl-t (Macen ⌘) egy fölött a szerkesztőben, hogy egy kis '
+      'kártyán lásd a jegyzetet, amelyre mutat. Érintőképernyőn nyomd '
+      'hosszan a hivatkozást az olvasónézetben.';
+  @override
+  String get linkPreviewOpen => 'Megnyitás';
 
   // Rebuilding the index file (#368).
 
@@ -2956,11 +2971,19 @@ final class HungarianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Címsorok: $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blokkok: $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Címsorok az egész könyvtárban';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blokkok az egész könyvtárban';
+  @override
   String wikilinkPlacesIn(String named) => 'Helyek: $named';
   @override
   String get wikilinkThisNote => 'ez a jegyzet';
   @override
   String wikilinkNoMatchHeading(String query) => 'Nincs „$query” címsor.';
+  @override
+  String wikilinkNoMatchBlock(String query) => 'Nincs „$query” blokk.';
   @override
   String wikilinkNoMatchNote(String query) => 'Nincs „$query” jegyzet.';
   @override
@@ -2968,6 +2991,15 @@ final class HungarianStrings extends Strings {
       'Egy fájl sem egyezik ezzel: „$query”.';
   @override
   String get wikilinkNoHeading => 'ennek a jegyzetnek nincs ilyen nevű címsora';
+  @override
+  String get wikilinkNoBlock =>
+      'ennek a jegyzetnek nincs ilyen azonosítójú blokkja';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'a könyvtár egyetlen jegyzetének sincs ilyen címsora';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'a könyvtár egyetlen jegyzetének sincs ilyen azonosítójú blokkja';
   @override
   String get wikilinkNoNote =>
       'a könyvtárban semminek nincs ilyen neve vagy álneve';

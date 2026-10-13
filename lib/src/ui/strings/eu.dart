@@ -913,7 +913,16 @@ final class BasqueStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Ez da izenbururik aurkitu';
   @override
+  String get blockNotFoundTitle => 'Ez da blokerik aurkitu';
+  @override
   String get ambiguousLinkTitle => 'Ohar askok bat etortzen dute';
+  @override
+  String get linksToNoteTitle => 'Ohar honetara datozen estekak';
+  @override
+  String get linksToNoteEmpty =>
+      'Oraindik ez dago hona estekatzen duen oharrik';
+  @override
+  String get linksToNoteEmbed => 'txertatua';
   @override
   String get openLinkFailed => 'Ezin izan da esteka ireki';
 
@@ -922,9 +931,6 @@ final class BasqueStrings extends Strings {
   String get missingNoteDialogTitle => 'Oharra ez dago';
   @override
   String missingNoteDialogBody(String path) => '«$path» sortu?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      '«$folder» karpetak ez dago';
 
   // Task lists (T-TD-04).
   @override
@@ -2948,6 +2954,16 @@ final class BasqueStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Lauki bat markatzean hark azpian habiaratutakoak ere '
       'markatzen ditu. Marka kentzean dauden bezala uzten ditu.';
+  @override
+  String get linkPreviewTitle => 'Estekak aurreikusi';
+  @override
+  String get linkPreviewSubtitle =>
+      'Pasatu sagua irakurketako esteka baten gainetik, edo mantendu Ctrl '
+      '(⌘ Mac-en) editoreko baten gainean, bideratzen duen oharra txartel '
+      'txiki batean ikusteko. Ukipen-pantailan, mantendu sakatuta '
+      'irakurketako esteka bat.';
+  @override
+  String get linkPreviewOpen => 'Ireki';
 
   // Rebuilding the index file (#368).
 
@@ -2972,12 +2988,21 @@ final class BasqueStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Izenburuak: $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blokeak: $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Izenburuak liburutegi osoan';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blokeak liburutegi osoan';
+  @override
   String wikilinkPlacesIn(String named) => 'Kokapenak: $named';
   @override
   String get wikilinkThisNote => 'ohar hau';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Ez dago izenbururik “$query” izenarekin.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Ez dago blokerik “$query” bilaketarekin bat datorrenik.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Ez dago oharrik “$query” izenarekin.';
@@ -2986,6 +3011,14 @@ final class BasqueStrings extends Strings {
       'Ez dago «$query»-rekin bat datorren fitxategirik.';
   @override
   String get wikilinkNoHeading => 'ohar honek ez du izen hori duen izenbururik';
+  @override
+  String get wikilinkNoBlock => 'ohar honek ez du id hori duen blokerik';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'liburutegiko ohar batek ere ez du horrelako izenburuik';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'liburutegiko ohar batek ere ez du id hori duen blokerik';
   @override
   String get wikilinkNoNote =>
       'liburutegian ez dago izen edo alias hori duen ezer';

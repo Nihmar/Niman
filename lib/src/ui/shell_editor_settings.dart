@@ -43,6 +43,7 @@ final class ShellEditorSettings {
     this.toolbarLayout = ToolbarLayout.defaults,
     this.tidyOnClose = true,
     this.cascadeChecklist = true,
+    this.linkPreview = true,
     this.frontmatterPanel = true,
     this.lintRulesOff = const <String>{},
   });
@@ -113,6 +114,9 @@ final class ShellEditorSettings {
   /// (#326).
   final bool cascadeChecklist;
 
+  /// Whether hovering a link previews the note it points at (#846).
+  final bool linkPreview;
+
   /// Whether a note's properties panel shows above it (#157).
   final bool frontmatterPanel;
 
@@ -153,6 +157,7 @@ final class ShellEditorSettings {
     // Started here with the rest, awaited below: a record's `wait` covers
     // nine futures, and this one makes the group ten (#157).
     final panel = session.frontmatterPanel;
+    final preview = session.linkPreview;
     final body = (
       session.treeSort,
       session.treeWidth,
@@ -195,6 +200,7 @@ final class ShellEditorSettings {
     ) = await body;
     final (attachmentsFolder, templateFolder) = await folders;
     final frontmatterPanel = await panel;
+    final linkPreview = await preview;
     final enabled = editorsEnabled.isEmpty
         ? const {EditorKind.source, EditorKind.wysiwyg}
         : editorsEnabled;
@@ -225,6 +231,7 @@ final class ShellEditorSettings {
       toolbarLayout: ToolbarLayout.parse(toolbar),
       tidyOnClose: tidyOnClose,
       cascadeChecklist: cascadeChecklist,
+      linkPreview: linkPreview,
       frontmatterPanel: frontmatterPanel,
       lintRulesOff: lintRulesOff,
     );
@@ -268,6 +275,7 @@ final class ShellEditorSettings {
       toolbarLayout: toolbarLayout,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
       cascadeChecklist: cascadeChecklist,
+      linkPreview: linkPreview,
       frontmatterPanel: frontmatterPanel,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
     );
@@ -295,6 +303,7 @@ final class ShellEditorSettings {
         dockWidth == other.dockWidth &&
         tidyOnClose == other.tidyOnClose &&
         cascadeChecklist == other.cascadeChecklist &&
+        linkPreview == other.linkPreview &&
         frontmatterPanel == other.frontmatterPanel &&
         setEquals(lintRulesOff, other.lintRulesOff) &&
         // The layout compares by what it is written as: two parses of the
@@ -324,7 +333,8 @@ final class ShellEditorSettings {
     toolbarLayout.encode(),
     tidyOnClose,
     cascadeChecklist,
-    frontmatterPanel,
+    // One slot for the pair, past [Object.hash]'s twenty.
+    Object.hash(frontmatterPanel, linkPreview),
     Object.hashAllUnordered(lintRulesOff),
   );
 }

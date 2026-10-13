@@ -139,21 +139,24 @@ tabs.
   again takes you to the pane and tab it is in.
 
 **The side panel.** On a window wide enough (1000 px and up) a panel on
-the right shows the note's **Outline**, its **Tags** or its **History**,
-one at a time, switched by the icons at its top.
+the right shows the note's **Outline**, its **Tags**, its **Links** or its
+**History**, one at a time, switched by the icons at its top.
 
 - **Outline** lists the headings, and a click takes the caret to one.
 - **Tags** lists the note's tags; a click lists the other notes with
   that tag, which open from there.
+- **Links** lists the notes that link to this one, each with the line it
+  says the link on, and opens one on a click (see
+  [links](links.md#links-to-this-note)).
 - **History** lists the kept versions, newest first, and opens the
   history screen to compare or restore.
 
 It follows the note in the focused pane, and changes as the note is
 edited. The panel's button in the note's row, its **×**, or
 `Ctrl+Shift+B` shows and hides it. Whether it is open, and which of the
-three it shows, is remembered with the tabs. The note's **⋮** menu has
-Outline and Tags too: they open the panel where it fits, and a sheet on
-a phone. Where the panel fits, the outline button leaves the row under
+panes it shows, is remembered with the tabs. The note's **⋮** menu has
+Outline, Tags and Links to this note too: they open the panel where it
+fits, and a sheet on a phone. Where the panel fits, the outline button leaves the row under
 the note — the panel is where the outline is; on a narrower window and a
 phone that button opens the outline as a sheet.
 

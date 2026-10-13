@@ -923,7 +923,15 @@ final class PolishStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Nie znaleziono nagłówka';
   @override
+  String get blockNotFoundTitle => 'Nie znaleziono bloku';
+  @override
   String get ambiguousLinkTitle => 'Wiele notatek pasuje';
+  @override
+  String get linksToNoteTitle => 'Linki do tej notatki';
+  @override
+  String get linksToNoteEmpty => 'Żadna notatka jeszcze tu nie prowadzi';
+  @override
+  String get linksToNoteEmbed => 'osadzona';
   @override
   String get openLinkFailed => 'Nie udało się otworzyć linku';
 
@@ -932,9 +940,6 @@ final class PolishStrings extends Strings {
   String get missingNoteDialogTitle => 'Notatka nie istnieje';
   @override
   String missingNoteDialogBody(String path) => 'Utworzyć „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Katalog „$folder“ nie istnieje';
 
   // Task lists (T-TD-04).
   @override
@@ -2965,6 +2970,16 @@ final class PolishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Zaznaczenie pola zaznacza też te zagnieżdżone pod nim. '
       'Odznaczenie zostawia je bez zmian.';
+  @override
+  String get linkPreviewTitle => 'Podgląd linków';
+  @override
+  String get linkPreviewSubtitle =>
+      'Najedź kursorem na link w widoku czytania lub przytrzymaj Ctrl (⌘ na '
+      'Macu) nad linkiem w edytorze, aby zobaczyć notatkę, do której '
+      'prowadzi, na małej karcie. Na ekranie dotykowym przytrzymaj link w '
+      'widoku czytania.';
+  @override
+  String get linkPreviewOpen => 'Otwórz';
 
   // Rebuilding the index file (#368).
 
@@ -2997,12 +3012,21 @@ final class PolishStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Nagłówki w $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Bloki w $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Nagłówki w całej bibliotece';
+  @override
+  String get wikilinkBlocksEverywhere => 'Bloki w całej bibliotece';
+  @override
   String wikilinkPlacesIn(String named) => 'Miejsca w $named';
   @override
   String get wikilinkThisNote => 'ta notatka';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Żaden nagłówek nie pasuje do „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Żaden blok nie pasuje do „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Żadna notatka nie pasuje do „$query”.';
@@ -3011,6 +3035,14 @@ final class PolishStrings extends Strings {
       'Żaden plik nie pasuje do „$query”.';
   @override
   String get wikilinkNoHeading => 'ta notatka nie ma nagłówka o tej nazwie';
+  @override
+  String get wikilinkNoBlock => 'ta notatka nie ma bloku o tym identyfikatorze';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'żadna notatka w bibliotece nie ma takiego nagłówka';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'żadna notatka w bibliotece nie ma bloku o tym identyfikatorze';
   @override
   String get wikilinkNoNote => 'nic w bibliotece nie ma tej nazwy ani aliasu';
   @override

@@ -60,6 +60,12 @@ the two agree.
   foreground service and its notification; a page with too little text is
   run in a hidden WebView of the app's own (see
   [web capture](web-capture.md)).
+- **Link preview:** there is no pointer to hover, so a long press on a link
+  in the **read view** opens the note it points at as a bottom sheet with an
+  **Open** button (see [links](links.md#preview-a-link)). The editor has none:
+  a long press there selects the word under the finger, and a tap places the
+  caret. This is a decision, not an omission; Linux and Windows preview on
+  hover.
 - **Paste as Markdown:** in the editor's menu. Android's clipboard holds
   the HTML a browser copies but not the page it came from, so the paste
   is not linked to its page, and links written relative to it stay as
@@ -397,13 +403,14 @@ responsive while a large share is read, and it is capped at 512 MB: past
 that the share is refused rather than copied — the sender's text arrives
 instead, if it attached any.
 
-The **side panel** (outline, tags, history beside the note, and the
-[journal](journal.md)'s calendar) shows on
+The **side panel** (outline, tags, the notes that link here, history beside
+the note, and the [journal](journal.md)'s calendar) shows on
 any wide window at least 1000 px wide: desktops and tablets. A phone,
 upright or turned, has no room for a note and a panel side by side, so
 this is a decision rather than an omission: the note's ⋮ menu opens the
-same three there, the outline and the tags as sheets and the history as
-its screen. Where the panel shows,
+same ones there, the outline, the tags and *Links to this note* as sheets
+and the history as its screen. The *Links to this note* header under the
+note is on every platform. Where the panel shows,
 its left edge drags to make it wider or narrower, like the tree's edge.
 It stops growing before the note gets narrower than 360 px, and it
 keeps its width for the next launch.

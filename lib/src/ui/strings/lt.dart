@@ -916,7 +916,15 @@ final class LithuanianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Antraštė nerasta';
   @override
+  String get blockNotFoundTitle => 'Blokas nerastas';
+  @override
   String get ambiguousLinkTitle => 'Kelioms pastaboms tinka';
+  @override
+  String get linksToNoteTitle => 'Nuorodos į šią pastabą';
+  @override
+  String get linksToNoteEmpty => 'Kol kas jokia pastaba nenurodo čia';
+  @override
+  String get linksToNoteEmbed => 'įterpta';
   @override
   String get openLinkFailed => 'Nepavyko atidaryti nuorodos';
 
@@ -925,9 +933,6 @@ final class LithuanianStrings extends Strings {
   String get missingNoteDialogTitle => 'Pastaba neegzistuoja';
   @override
   String missingNoteDialogBody(String path) => 'Sukurti „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Katalogas „$folder“ neegzistuoja';
 
   // Task lists (T-TD-04).
   @override
@@ -2947,6 +2952,16 @@ final class LithuanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Pažymėjus langelį pažymimi ir po juo įdėti. Nuėmus žymę jie '
       'paliekami.';
+  @override
+  String get linkPreviewTitle => 'Nuorodų peržiūra';
+  @override
+  String get linkPreviewSubtitle =>
+      'Perkelkite pelę virš nuorodos skaitymo rodinyje arba laikykite '
+      'nuspaudę Ctrl (Mac – ⌘) virš nuorodos redaktoriuje, kad mažoje '
+      'kortelėje pamatytumėte pastabą, į kurią ji rodo. Jutikliniame ekrane '
+      'skaitymo rodinyje ilgai palieskite nuorodą.';
+  @override
+  String get linkPreviewOpen => 'Atidaryti';
 
   // Rebuilding the index file (#368).
 
@@ -2981,12 +2996,21 @@ final class LithuanianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Antraštės: $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blokai: $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Antraštės visoje bibliotekoje';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blokai visoje bibliotekoje';
+  @override
   String wikilinkPlacesIn(String named) => 'Vietos: $named';
   @override
   String get wikilinkThisNote => 'ši pastaba';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Nė viena antraštė neatitinka „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Joks blokas neatitinka „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Nė viena pastaba neatitinka „$query”.';
@@ -2996,6 +3020,14 @@ final class LithuanianStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'šioje pastaboje nėra antraštės tokiu pavadinimu';
+  @override
+  String get wikilinkNoBlock => 'šioje pastaboje nėra bloko su tokiu ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'jokioje bibliotekos pastaboje nėra tokios antraštės';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'jokioje bibliotekos pastaboje nėra bloko su tokiu ID';
   @override
   String get wikilinkNoNote =>
       'bibliotekoje nėra nieko tokiu pavadinimu ar slapyvardžiu';

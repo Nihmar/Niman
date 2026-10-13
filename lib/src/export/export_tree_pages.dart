@@ -10,6 +10,7 @@ library;
 
 import 'dart:io';
 
+import 'package:niman/src/export/export_anchors.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/note_html.dart';
@@ -147,6 +148,7 @@ abstract final class ExportTreePages {
           ? imageFileUrls(text, noteDir, tree)
           : imageUrls(text, noteDir, tree),
       links: linkUrls(text, noteDir, tree, linkExtension),
+      anchors: linkAnchors(text, noteDir, tree),
     );
     final html = NoteHtml(source);
     return htmlPage(
@@ -226,6 +228,17 @@ abstract final class ExportTreePages {
     }
     return out;
   }
+
+  /// The ids the links of [text] with a `#` in their heading land on, read
+  /// from the notes they point at ([ExportAnchors]).
+  static Map<String, String> linkAnchors(
+    String text,
+    String noteDir,
+    ExportTreeWalk tree,
+  ) => ExportAnchors.of(text, (target) {
+    final note = noteIn(target, noteDir, tree);
+    return note == null ? null : readNote(p.join(tree.root, note));
+  });
 
   /// The file [target] names inside the tree, from [noteDir]: the subtree
   /// root first, then the note's own folder, then a unique file name — the

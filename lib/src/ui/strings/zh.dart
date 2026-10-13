@@ -862,7 +862,15 @@ final class ChineseStrings extends Strings {
   @override
   String get headingNotFoundTitle => '未找到标题';
   @override
+  String get blockNotFoundTitle => '未找到区块';
+  @override
   String get ambiguousLinkTitle => '有多篇笔记匹配';
+  @override
+  String get linksToNoteTitle => '指向本笔记的链接';
+  @override
+  String get linksToNoteEmpty => '还没有笔记链接到这里';
+  @override
+  String get linksToNoteEmbed => '嵌入';
   @override
   String get openLinkFailed => '无法打开链接';
 
@@ -871,8 +879,6 @@ final class ChineseStrings extends Strings {
   String get missingNoteDialogTitle => '笔记不存在';
   @override
   String missingNoteDialogBody(String path) => '创建"$path"？';
-  @override
-  String missingNoteFolderMissing(String folder) => '文件夹"$folder"不存在';
 
   // Task lists (T-TD-04).
   @override
@@ -2582,6 +2588,14 @@ final class ChineseStrings extends Strings {
   String get cascadeChecklistTitle => '勾选嵌套的复选框';
   @override
   String get cascadeChecklistSubtitle => '勾选一个复选框会同时勾选嵌套在它下面的。取消勾选则保持原样。';
+  @override
+  String get linkPreviewTitle => '链接预览';
+  @override
+  String get linkPreviewSubtitle =>
+      '在阅读视图中将指针悬停在链接上，或在编辑器中按住 Ctrl（Mac 上为 '
+      '⌘）悬停，即可在小卡片中查看链接指向的笔记。在触摸屏上，请在阅读视图中长按链接。';
+  @override
+  String get linkPreviewOpen => '打开';
 
   // Rebuilding the index file (#368).
 
@@ -2605,17 +2619,31 @@ final class ChineseStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => '$named中的标题';
   @override
+  String wikilinkBlocksIn(String named) => '$named中的区块';
+  @override
+  String get wikilinkHeadingsEverywhere => '整个资料库的标题';
+  @override
+  String get wikilinkBlocksEverywhere => '整个资料库的区块';
+  @override
   String wikilinkPlacesIn(String named) => '$named中的位置';
   @override
   String get wikilinkThisNote => '本笔记';
   @override
   String wikilinkNoMatchHeading(String query) => '没有标题与「$query」匹配。';
   @override
+  String wikilinkNoMatchBlock(String query) => '没有区块与「$query」匹配。';
+  @override
   String wikilinkNoMatchNote(String query) => '没有笔记与「$query」匹配。';
   @override
   String wikilinkNoMatchFile(String query) => '没有与“$query”匹配的文件。';
   @override
   String get wikilinkNoHeading => '本笔记没有该名称的标题';
+  @override
+  String get wikilinkNoBlock => '本笔记没有该 ID 的区块';
+  @override
+  String get wikilinkNoHeadingAnywhere => '资料库中没有笔记含有这样的标题';
+  @override
+  String get wikilinkNoBlockAnywhere => '资料库中没有笔记含有该 ID 的区块';
   @override
   String get wikilinkNoNote => '资料库中没有这个名称或别名的内容';
   @override

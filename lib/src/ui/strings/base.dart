@@ -512,7 +512,11 @@ abstract base class Strings {
   // Link navigation (T-M3-07).
   String get unresolvedLinkTitle;
   String get headingNotFoundTitle;
+  String get blockNotFoundTitle;
   String get ambiguousLinkTitle;
+  String get linksToNoteTitle;
+  String get linksToNoteEmpty;
+  String get linksToNoteEmbed;
   String get openLinkFailed;
 
   // Where new notes and folders go (issue #850, which absorbed the
@@ -523,7 +527,6 @@ abstract base class Strings {
   // Dead-link note creation (issue #78).
   String get missingNoteDialogTitle;
   String missingNoteDialogBody(String path);
-  String missingNoteFolderMissing(String folder);
 
   // Task lists (T-TD-04).
   String get todoOpen;
@@ -1455,6 +1458,9 @@ abstract base class Strings {
 
   String get cascadeChecklistTitle;
   String get cascadeChecklistSubtitle;
+  String get linkPreviewTitle;
+  String get linkPreviewSubtitle;
+  String get linkPreviewOpen;
 
   // The wikilink suggester panel (#475): the caption over the list, its own
   // words when nothing matched, the alias a row was found through, the form
@@ -1467,6 +1473,9 @@ abstract base class Strings {
 
   /// `Headings in <name>`, drawn over the headings a `#` offers.
   String wikilinkHeadingsIn(String named);
+  String wikilinkBlocksIn(String named);
+  String get wikilinkHeadingsEverywhere;
+  String get wikilinkBlocksEverywhere;
 
   /// `Places in <name>`, drawn over the places a book offers.
   String wikilinkPlacesIn(String named);
@@ -1477,6 +1486,7 @@ abstract base class Strings {
 
   /// The panel's sentence when no heading matched [query].
   String wikilinkNoMatchHeading(String query);
+  String wikilinkNoMatchBlock(String query);
 
   /// The panel's sentence when no note matched [query].
   String wikilinkNoMatchNote(String query);
@@ -1484,6 +1494,9 @@ abstract base class Strings {
 
   /// What stands under [wikilinkNoMatchHeading].
   String get wikilinkNoHeading;
+  String get wikilinkNoBlock;
+  String get wikilinkNoHeadingAnywhere;
+  String get wikilinkNoBlockAnywhere;
 
   /// What stands under [wikilinkNoMatchNote].
   String get wikilinkNoNote;

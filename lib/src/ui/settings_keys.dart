@@ -46,6 +46,7 @@ abstract final class SettingsKeys {
   static const noteColumnWidth = Key('note-column-width-setting');
   static const typewriter = Key('typewriter-setting');
   static const cascadeChecklist = Key('cascade-checklist-setting');
+  static const linkPreview = Key('link-preview-setting');
   static const frontmatterPanel = Key('frontmatter-panel-setting');
   static const linkType = Key('link-type');
   static const linkUpdate = Key('link-update');

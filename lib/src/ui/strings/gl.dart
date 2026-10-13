@@ -918,7 +918,15 @@ final class GalicianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Non se encontrou o título';
   @override
+  String get blockNotFoundTitle => 'Non se encontrou o bloque';
+  @override
   String get ambiguousLinkTitle => 'Varias notas coinciden';
+  @override
+  String get linksToNoteTitle => 'Ligazóns a esta nota';
+  @override
+  String get linksToNoteEmpty => 'Ningunha nota liga aquí aínda';
+  @override
+  String get linksToNoteEmbed => 'incrustada';
   @override
   String get openLinkFailed => 'Non se puido abrir o enlace';
 
@@ -927,9 +935,6 @@ final class GalicianStrings extends Strings {
   String get missingNoteDialogTitle => 'A nota non existe';
   @override
   String missingNoteDialogBody(String path) => 'Crear «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'O cartafol «$folder» non existe';
 
   // Task lists (T-TD-04).
   @override
@@ -2935,6 +2940,16 @@ final class GalicianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar unha casiña marca as que están aniñadas debaixo. '
       'Desmarcala déixaas como están.';
+  @override
+  String get linkPreviewTitle => 'Previsualizar ligazóns';
+  @override
+  String get linkPreviewSubtitle =>
+      'Pasa o rato por riba dunha ligazón na lectura, ou mantén Ctrl (⌘ no '
+      'Mac) sobre unha no editor, para ver a nota á que apunta nunha '
+      'tarxeta pequena. Nunha pantalla táctil, mantén premida unha ligazón '
+      'na lectura.';
+  @override
+  String get linkPreviewOpen => 'Abrir';
 
   // Rebuilding the index file (#368).
 
@@ -2961,12 +2976,21 @@ final class GalicianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Títulos en $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Bloques en $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Títulos en toda a biblioteca';
+  @override
+  String get wikilinkBlocksEverywhere => 'Bloques en toda a biblioteca';
+  @override
   String wikilinkPlacesIn(String named) => 'Localizacións en $named';
   @override
   String get wikilinkThisNote => 'esta nota';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Ningún título coincide con “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Ningún bloque coincide con “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Ningunha nota coincide con “$query”.';
@@ -2976,6 +3000,14 @@ final class GalicianStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'esta nota non ten ningún título con ese nome';
+  @override
+  String get wikilinkNoBlock => 'esta nota non ten ningún bloque con ese id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'ningunha nota da biblioteca ten un título así';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'ningunha nota da biblioteca ten un bloque con ese id';
   @override
   String get wikilinkNoNote => 'nada na biblioteca ten ese nome nin ese alias';
   @override

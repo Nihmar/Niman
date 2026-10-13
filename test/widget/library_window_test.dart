@@ -20,6 +20,9 @@ final class _Note implements UnsavedNote {
   bool unsaved = true;
 
   @override
+  String get text => '';
+
+  @override
   Future<void> save() async {
     saves++;
     if (fails) throw const _SaveFailed('disk full');

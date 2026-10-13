@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
@@ -17,6 +18,7 @@ import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/fake_link_source.dart';
 import '../fakes/fake_todo_source.dart';
 import '../fakes/fake_window_controller.dart';
 import '../fakes/shell_harness.dart';
@@ -165,5 +167,57 @@ void main() {
     await tester.tap(find.byKey(const Key('note-menu-outline')));
     await settle(tester);
     expect(find.byType(BottomSheet), findsOne);
+  });
+
+  // #842: the notes that link to the open one, in the dock on a wide window
+  // and as a sheet from the ⋮ on a phone.
+  FakeLinkSource linksToAlpha() {
+    final links = FakeLinkSource(notes: ['alpha.md', 'beta.md']);
+    links.referrers['alpha.md'] = ['beta.md'];
+    links.mentions['beta.md -> alpha.md'] = const Mention(
+      context: 'Beta leans on [[alpha]] here',
+      line: 0,
+      embed: false,
+      count: 1,
+    );
+    return links;
+  }
+
+  testWidgets('the dock has a pane of the notes that link to the open note', (
+    tester,
+  ) async {
+    controller.linkSourceOverride = linksToAlpha();
+    await pumpAt(tester, const Size(1400, 900));
+    await tester.tap(find.byKey(const Key('dock-pane-links')));
+    await settle(tester);
+
+    expect(controller.workspace.dockPane, DockPane.links);
+    expect(
+      find.descendant(of: dock, matching: find.text('Links to this note')),
+      findsOne,
+      reason: "the pane's name beside its buttons",
+    );
+    expect(find.text('Beta leans on [[alpha]] here'), findsOne);
+
+    await tester.tap(find.byKey(const Key('links-to-note-row-beta.md')));
+    await settle(tester);
+    expect(controller.workspace.activePath, 'beta.md');
+  });
+
+  testWidgets('on a phone the note’s ⋮ offers them as a sheet', (tester) async {
+    controller.linkSourceOverride = linksToAlpha();
+    await pumpAt(tester, const Size(400, 800));
+    await tester.tap(find.byKey(const Key('note-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('note-menu-links')));
+    await settle(tester);
+
+    expect(find.byType(BottomSheet), findsOne);
+    expect(find.text('Beta leans on [[alpha]] here'), findsOne);
+
+    await tester.tap(find.byKey(const Key('links-to-note-row-beta.md')));
+    await settle(tester);
+    expect(find.byType(BottomSheet), findsNothing, reason: 'the sheet closes');
+    expect(controller.workspace.activePath, 'beta.md');
   });
 }

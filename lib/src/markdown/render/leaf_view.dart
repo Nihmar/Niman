@@ -18,6 +18,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
@@ -69,8 +70,22 @@ final class LeafView extends StatelessWidget {
   final bool printed;
 
   @override
-  Widget build(BuildContext context) => switch (leaf.kind) {
-    BlockKind.paragraph => _rich(theme.body),
+  Widget build(BuildContext context) {
+    final dead = taps.deadLinks;
+    // The links that name nothing are resolved apart from the page and arrive
+    // when they do (#847): the leaf draws again by itself, as the leaves
+    // around it stand.
+    if (dead == null || leaf.inline == null && leaf.rows.isEmpty) {
+      return _drawn(context);
+    }
+    return ValueListenableBuilder<DeadLinks>(
+      valueListenable: dead,
+      builder: (context, _, _) => _drawn(context),
+    );
+  }
+
+  Widget _drawn(BuildContext context) => switch (leaf.kind) {
+    BlockKind.paragraph => _rich(theme.body, hideBlockId: true),
     BlockKind.heading => _heading(context),
     BlockKind.fencedCode => _fenced(context),
     BlockKind.indentedCode => _code(context, null),
@@ -99,15 +114,22 @@ final class LeafView extends StatelessWidget {
     taps: taps,
     availableWidth: availableWidth,
     footnoteNumbers: footnoteNumbers,
+    deadLinks: taps.deadLinks?.value ?? DeadLinks.none,
   );
 
   /// The leaf's inline text, in [style]: nothing when it has none — a
   /// paragraph of link reference definitions is syntax, not prose.
-  Widget _rich(TextStyle style) {
+  ///
+  /// A paragraph's trailing ` ^id` is left out of what is drawn ([hideBlockId],
+  /// #844): the id is the block's name for a `[[note#^id]]` link, not prose.
+  Widget _rich(TextStyle style, {bool hideBlockId = false}) {
     final inline = leaf.inline;
     if (inline == null || inline.isEmpty) return const SizedBox.shrink();
     return Text.rich(
-      TextSpan(children: _spans(style).of(inline), style: style),
+      TextSpan(
+        children: _spans(style).of(inline, hideBlockId: hideBlockId),
+        style: style,
+      ),
       textAlign: TextAlign.start,
     );
   }
@@ -120,12 +142,12 @@ final class LeafView extends StatelessWidget {
     final style = theme.heading(leaf.node.headingLevel);
     final inline = leaf.inline;
     if (leaf.lines.length < 2 || inline == null || inline.isEmpty) {
-      return _rich(style);
+      return _rich(style, hideBlockId: true);
     }
     return Text.rich(
       TextSpan(
         children: [
-          ..._spans(style).of(inline),
+          ..._spans(style).of(inline, hideBlockId: true),
           const TextSpan(text: '\n'),
         ],
         style: style,

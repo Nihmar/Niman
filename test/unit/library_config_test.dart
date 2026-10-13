@@ -548,6 +548,7 @@ void main() {
         'typewriter',
         'tidyOnClose',
         'cascadeChecklist',
+        'linkPreview',
         'frontmatterPanel',
       ]) {
         expect(content, contains('"$key"'), reason: key);

@@ -906,7 +906,15 @@ final class EnglishStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Heading not found';
   @override
+  String get blockNotFoundTitle => 'Block not found';
+  @override
   String get ambiguousLinkTitle => 'Several notes match';
+  @override
+  String get linksToNoteTitle => 'Links to this note';
+  @override
+  String get linksToNoteEmpty => 'No note links here yet';
+  @override
+  String get linksToNoteEmbed => 'embed';
   @override
   String get openLinkFailed => 'Could not open link';
 
@@ -915,9 +923,6 @@ final class EnglishStrings extends Strings {
   String get missingNoteDialogTitle => 'Note does not exist';
   @override
   String missingNoteDialogBody(String path) => "Create '$path'?";
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      "The folder '$folder' does not exist";
 
   // Task lists (T-TD-04).
   @override
@@ -2882,6 +2887,15 @@ final class EnglishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ticking a checkbox ticks every one nested under it. Clearing '
       'it leaves them as they are.';
+  @override
+  String get linkPreviewTitle => 'Preview links';
+  @override
+  String get linkPreviewSubtitle =>
+      'Hover a link in the read view, or hold Ctrl (⌘ on a Mac) over one in '
+      'the editor, to see the note it points at in a small card. On a touch '
+      'screen, press and hold a link in the read view.';
+  @override
+  String get linkPreviewOpen => 'Open';
 
   // Rebuilding the index file (#368).
 
@@ -2908,17 +2922,33 @@ final class EnglishStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Headings in $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blocks in $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Headings across the library';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blocks across the library';
+  @override
   String wikilinkPlacesIn(String named) => 'Places in $named';
   @override
   String get wikilinkThisNote => 'this note';
   @override
   String wikilinkNoMatchHeading(String query) => 'No heading matches “$query”.';
   @override
+  String wikilinkNoMatchBlock(String query) => 'No block matches “$query”.';
+  @override
   String wikilinkNoMatchNote(String query) => 'No note matches “$query”.';
   @override
   String wikilinkNoMatchFile(String query) => 'No file matches “$query”.';
   @override
   String get wikilinkNoHeading => 'this note has no heading with that name';
+  @override
+  String get wikilinkNoBlock => 'this note has no block with that id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'no note in the library has a heading like that';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'no note in the library has a block with that id';
   @override
   String get wikilinkNoNote => 'nothing in the library has that name or alias';
   @override

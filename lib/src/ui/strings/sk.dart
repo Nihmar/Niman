@@ -916,7 +916,15 @@ final class SlovakStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Nadpis sa nenašiel';
   @override
+  String get blockNotFoundTitle => 'Blok sa nenašiel';
+  @override
   String get ambiguousLinkTitle => 'Viac poznámok zodpovedá';
+  @override
+  String get linksToNoteTitle => 'Odkazy na túto poznámku';
+  @override
+  String get linksToNoteEmpty => 'Zatiaľ sem žiadna poznámka neodkazuje';
+  @override
+  String get linksToNoteEmbed => 'vložená';
   @override
   String get openLinkFailed => 'Odkaz sa nedal otvoriť';
 
@@ -925,9 +933,6 @@ final class SlovakStrings extends Strings {
   String get missingNoteDialogTitle => 'Poznámka neexistuje';
   @override
   String missingNoteDialogBody(String path) => 'Vytvoriť „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Priečinok „$folder“ neexistuje';
 
   // Task lists (T-TD-04).
   @override
@@ -2925,6 +2930,16 @@ final class SlovakStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Zaškrtnutie políčka zaškrtne aj tie vnorené pod ním. '
       'Odškrtnutie ich nechá tak.';
+  @override
+  String get linkPreviewTitle => 'Náhľad odkazov';
+  @override
+  String get linkPreviewSubtitle =>
+      'Prejdite myšou nad odkaz v zobrazení čítania, alebo v editore '
+      'podržte nad odkazom Ctrl (⌘ na Macu), a uvidíte poznámku, na ktorú '
+      'odkazuje, v malej karte. Na dotykovej obrazovke odkaz v zobrazení '
+      'čítania dlho stlačte.';
+  @override
+  String get linkPreviewOpen => 'Otvoriť';
 
   // Rebuilding the index file (#368).
 
@@ -2955,12 +2970,21 @@ final class SlovakStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Nadpisy v $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Bloky v $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Nadpisy v celej knižnici';
+  @override
+  String get wikilinkBlocksEverywhere => 'Bloky v celej knižnici';
+  @override
   String wikilinkPlacesIn(String named) => 'Miesta v $named';
   @override
   String get wikilinkThisNote => 'táto poznámka';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Žiadny nadpis nezodpovedá „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Žiadny blok nezodpovedá „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Žiadna poznámka nezodpovedá „$query”.';
@@ -2969,6 +2993,14 @@ final class SlovakStrings extends Strings {
       'Žiadny súbor nezodpovedá „$query“.';
   @override
   String get wikilinkNoHeading => 'táto poznámka nemá nadpis s týmto názvom';
+  @override
+  String get wikilinkNoBlock => 'táto poznámka nemá blok s týmto ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'žiadna poznámka v knižnici nemá takýto nadpis';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'žiadna poznámka v knižnici nemá blok s týmto ID';
   @override
   String get wikilinkNoNote => 'nič v knižnici nemá tento názov ani alias';
   @override

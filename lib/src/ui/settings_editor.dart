@@ -50,6 +50,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   double _noteColumnWidth = defaultNoteColumnWidth;
   bool _typewriter = false;
   bool _cascadeChecklist = false;
+  bool _linkPreview = true;
   bool _frontmatterPanel = true;
   bool _tidyOnClose = true;
   Set<String> _lintRulesOff = const <String>{};
@@ -88,6 +89,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final noteColumnWidth = await controller.noteColumnWidth;
     final typewriter = await controller.typewriter;
     final cascadeChecklist = await controller.cascadeChecklist;
+    final linkPreview = await controller.linkPreview;
     final frontmatterPanel = await controller.frontmatterPanel;
     final tidyOnClose = await controller.tidyOnClose;
     final lintRulesOff = await controller.lintRulesOff;
@@ -107,6 +109,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _noteColumnWidth = noteColumnWidth;
       _typewriter = typewriter;
       _cascadeChecklist = cascadeChecklist;
+      _linkPreview = linkPreview;
       _frontmatterPanel = frontmatterPanel;
       _tidyOnClose = tidyOnClose;
       _lintRulesOff = lintRulesOff;
@@ -162,6 +165,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     await controller.setCascadeChecklist(enabled: value);
     controller.notify();
     if (mounted) setState(() => _cascadeChecklist = value);
+  }
+
+  /// Persists the link-preview setting (#846); an open note takes it on the
+  /// spot, through the shell's refresh.
+  Future<void> _toggleLinkPreview(bool value) async {
+    final controller = widget.controller;
+    await controller.setLinkPreview(enabled: value);
+    controller.notify();
+    if (mounted) setState(() => _linkPreview = value);
   }
 
   /// Persists the properties-panel setting (#157); an open note takes it on
@@ -642,6 +654,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               description: AppStrings.cascadeChecklistSubtitle,
               value: _cascadeChecklist,
               onChanged: (value) => unawaited(_toggleCascadeChecklist(value)),
+            ),
+          ),
+          HighlightRow(
+            key: SettingsKeys.linkPreview,
+            child: SettingsSwitchRow(
+              title: AppStrings.linkPreviewTitle,
+              description: AppStrings.linkPreviewSubtitle,
+              value: _linkPreview,
+              onChanged: (value) => unawaited(_toggleLinkPreview(value)),
             ),
           ),
           HighlightRow(

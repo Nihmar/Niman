@@ -167,6 +167,24 @@ void main() {
     expect(fences.every(hidden), isTrue, reason: 'the fences are syntax');
   });
 
+  testWidgets('live and source keep showing a block id (#844)', (tester) async {
+    // Only the read view leaves the id out: it is the note's bytes, and the
+    // editor is where it is written and changed.
+    for (final mode in MarkdownSurfaceMode.values) {
+      await pumpMode(
+        tester,
+        mode,
+        caret: 0,
+        text: 'caret\n\nA paragraph ^37066d\n',
+      );
+      expect(
+        find.textContaining('^37066d', findRichText: true),
+        findsOneWidget,
+        reason: '$mode draws the id',
+      );
+    }
+  });
+
   testWidgets('live hides the marker, source shows it', (tester) async {
     // The caret is *off* the heading's line: the markers are hidden
     // everywhere except where the writer is, which is the policy

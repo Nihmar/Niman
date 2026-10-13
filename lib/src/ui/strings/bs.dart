@@ -917,7 +917,15 @@ final class BosnianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Naslov nije pronađen';
   @override
+  String get blockNotFoundTitle => 'Blok nije pronađen';
+  @override
   String get ambiguousLinkTitle => 'Više bilješki se podudara';
+  @override
+  String get linksToNoteTitle => 'Veze na ovu bilješku';
+  @override
+  String get linksToNoteEmpty => 'Nijedna bilješka još ne vodi ovamo';
+  @override
+  String get linksToNoteEmbed => 'ugrađena';
   @override
   String get openLinkFailed => 'Veza se ne može otvoriti';
 
@@ -926,8 +934,6 @@ final class BosnianStrings extends Strings {
   String get missingNoteDialogTitle => 'Bilješka ne postoji';
   @override
   String missingNoteDialogBody(String path) => 'Kreirati „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) => 'Mapa „$folder“ ne postoji';
 
   // Task lists (T-TD-04).
   @override
@@ -2949,6 +2955,16 @@ final class BosnianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Označavanje kućice označava i one ugniježđene ispod. '
       'Uklanjanje oznake ih ostavlja kakve jesu.';
+  @override
+  String get linkPreviewTitle => 'Pregled veza';
+  @override
+  String get linkPreviewSubtitle =>
+      'Zadržite pokazivač iznad veze u prikazu čitanja ili držite Ctrl (⌘ '
+      'na Macu) iznad nje u uredniku da biste u maloj kartici vidjeli '
+      'bilješku na koju vodi. Na ekranu osjetljivom na dodir dugo '
+      'pritisnite vezu u prikazu čitanja.';
+  @override
+  String get linkPreviewOpen => 'Otvori';
 
   // Rebuilding the index file (#368).
 
@@ -2975,12 +2991,21 @@ final class BosnianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Naslovi u $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blokovi u $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Naslovi u cijeloj biblioteci';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blokovi u cijeloj biblioteci';
+  @override
   String wikilinkPlacesIn(String named) => 'Mjesta u $named';
   @override
   String get wikilinkThisNote => 'ova bilješka';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Nijedan naslov se ne poklapa sa "$query".';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Nijedan blok se ne poklapa sa "$query".';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Nijedna bilješka se ne poklapa sa "$query".';
@@ -2989,6 +3014,14 @@ final class BosnianStrings extends Strings {
       'Nijedna datoteka ne odgovara „$query”.';
   @override
   String get wikilinkNoHeading => 'ova bilješka nema naslov s tim imenom';
+  @override
+  String get wikilinkNoBlock => 'ova bilješka nema blok s tim ID-om';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'nijedna bilješka u biblioteci nema takav naslov';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'nijedna bilješka u biblioteci nema blok s tim ID-om';
   @override
   String get wikilinkNoNote => 'ništa u biblioteci nema to ime ni alias';
   @override

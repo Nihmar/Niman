@@ -335,6 +335,26 @@ final class _Line {
   bool tokensAtZero = false;
 }
 
+/// A walk over a note's lines in order that says which are prose.
+///
+/// The block state machine of [HighlightDocument] (which
+/// [HighlightDocument.forEachHeading] shares) without the inline scan, made a
+/// value a caller steps one line at a time: it can pause between two lines —
+/// yield to the UI on a long note — which a callback over the whole text
+/// cannot.
+final class ProseLineWalker {
+  /// A walker at the top of a note.
+  new();
+
+  _State _state = _State.initial;
+
+  /// Whether the line [text] at [lineIndex] is prose — not a fence or its
+  /// code, display maths or the frontmatter. Lines are given in order from
+  /// line 0, each once.
+  bool isProse(int lineIndex, String text) =>
+      HighlightDocument._walkLine(this, lineIndex, text);
+}
+
 /// Incremental highlighter over a plain-text buffer.
 ///
 /// Build once with `fromText`; after every buffer edit call `replace` with
@@ -689,6 +709,24 @@ final class HighlightDocument {
       }
       state = _stateAfter(line, state, i);
     }
+  }
+
+  /// Whether the line [text] at [lineIndex], entered in [walker]'s state, is
+  /// prose — not a fence, a fence's code, display maths, the frontmatter —
+  /// and moves the walker on to the next line. A caller that visits every
+  /// line in order (and may pause between two, which [forEachHeading]'s
+  /// loop cannot) asks this of each.
+  static bool _walkLine(ProseLineWalker walker, int lineIndex, String text) {
+    final state = walker._state;
+    final prose =
+        state.fence == null &&
+        !state.inMath &&
+        !state.inFrontmatter &&
+        _fenceOpen(text) == null &&
+        !text.trim().startsWith(r'$$') &&
+        !(lineIndex == 0 && text.trim() == '---');
+    walker._state = _stateAfter(text, state, lineIndex);
+    return prose;
   }
 
   static _Fence? _fenceOpen(String text) {

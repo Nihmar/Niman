@@ -406,6 +406,15 @@ void main() {
       expect(relPath('/a/b/c/note.md', '/a/b'), 'c/note.md');
     });
 
+    test('pathInLibrary: where a note is, or null when it is not in one', () {
+      expect(pathInLibrary('/a/b', '/a/b/c/note.md'), 'c/note.md');
+      expect(pathInLibrary('/a/b', '/a/b/../b/n.md'), 'n.md');
+      expect(pathInLibrary('/a/b', '/a/other/note.md'), isNull);
+      expect(pathInLibrary('/a/b', '/a/bc/note.md'), isNull);
+      expect(pathInLibrary('/a/b', '/a/b'), isNull, reason: 'the root itself');
+      expect(pathInLibrary(null, '/a/b/note.md'), isNull, reason: 'no library');
+    });
+
     test('relPath throws for paths outside the root', () {
       expect(() => relPath('/x/note.md', '/y'), throwsArgumentError);
     });

@@ -916,7 +916,15 @@ final class UkrainianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Заголовок не знайдено';
   @override
+  String get blockNotFoundTitle => 'Блок не знайдено';
+  @override
   String get ambiguousLinkTitle => 'Кілька нотаток відповідають';
+  @override
+  String get linksToNoteTitle => 'Посилання на цю нотатку';
+  @override
+  String get linksToNoteEmpty => 'Жодна нотатка ще не посилається сюди';
+  @override
+  String get linksToNoteEmbed => 'вбудована';
   @override
   String get openLinkFailed => 'Не вдалося відкрити посилання';
 
@@ -925,8 +933,6 @@ final class UkrainianStrings extends Strings {
   String get missingNoteDialogTitle => 'Нотатка не існує';
   @override
   String missingNoteDialogBody(String path) => 'Створити «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) => 'Папка «$folder» не існує';
 
   // Task lists (T-TD-04).
   @override
@@ -2953,6 +2959,16 @@ final class UkrainianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Позначення прапорця позначає й вкладені під ним. Зняття '
       'позначки залишає їх як є.';
+  @override
+  String get linkPreviewTitle => 'Попередній перегляд посилань';
+  @override
+  String get linkPreviewSubtitle =>
+      'Наведіть курсор на посилання в режимі читання або утримуйте Ctrl (⌘ '
+      'на Mac) над ним у редакторі, щоб побачити нотатку, на яку воно веде, '
+      'у маленькій картці. На сенсорному екрані довго натисніть посилання в '
+      'режимі читання.';
+  @override
+  String get linkPreviewOpen => 'Відкрити';
 
   // Rebuilding the index file (#368).
 
@@ -2987,12 +3003,21 @@ final class UkrainianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Заголовки в $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Блоки в $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Заголовки в усій бібліотеці';
+  @override
+  String get wikilinkBlocksEverywhere => 'Блоки в усій бібліотеці';
+  @override
   String wikilinkPlacesIn(String named) => 'Місця в $named';
   @override
   String get wikilinkThisNote => 'ця нотатка';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Жоден заголовок не відповідає „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Жоден блок не відповідає „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Жодна нотатка не відповідає „$query”.';
@@ -3002,6 +3027,14 @@ final class UkrainianStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'у цій нотатці немає заголовка з такою назвою';
+  @override
+  String get wikilinkNoBlock => 'у цій нотатці немає блока з таким ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'у жодній нотатці бібліотеки немає такого заголовка';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'у жодній нотатці бібліотеки немає блока з таким ID';
   @override
   String get wikilinkNoNote =>
       'нічого в бібліотеці не має такої назви чи псевдоніма';

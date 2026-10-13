@@ -921,7 +921,15 @@ final class MacedonianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Насловот не е пронајден';
   @override
+  String get blockNotFoundTitle => 'Блокот не е пронајден';
+  @override
   String get ambiguousLinkTitle => 'Повеќе белешки совпаѓаат';
+  @override
+  String get linksToNoteTitle => 'Врски до оваа белешка';
+  @override
+  String get linksToNoteEmpty => 'Сè уште ниту една белешка не води овде';
+  @override
+  String get linksToNoteEmbed => 'вметната';
   @override
   String get openLinkFailed => 'Не може да се отвори врската';
 
@@ -930,9 +938,6 @@ final class MacedonianStrings extends Strings {
   String get missingNoteDialogTitle => 'Белешката не постои';
   @override
   String missingNoteDialogBody(String path) => 'Да се креира „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Папката „$folder“ не постои';
 
   // Task lists (T-TD-04).
   @override
@@ -2944,6 +2949,16 @@ final class MacedonianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Означувањето квадратче ги означува и вгнездените под него. '
       'Отстранувањето на ознаката ги остава како се.';
+  @override
+  String get linkPreviewTitle => 'Преглед на врски';
+  @override
+  String get linkPreviewSubtitle =>
+      'Задржете го покажувачот над врска во приказот за читање или држете '
+      'Ctrl (⌘ на Mac) над неа во уредникот за да ја видите белешката на '
+      'која упатува во мала картичка. На екран на допир, долго притиснете '
+      'врска во приказот за читање.';
+  @override
+  String get linkPreviewOpen => 'Отвори';
 
   // Rebuilding the index file (#368).
 
@@ -2970,12 +2985,21 @@ final class MacedonianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Наслови во $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Блокови во $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Наслови во целата библиотека';
+  @override
+  String get wikilinkBlocksEverywhere => 'Блокови во целата библиотека';
+  @override
   String wikilinkPlacesIn(String named) => 'Места во $named';
   @override
   String get wikilinkThisNote => 'оваа белешка';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Ниту еден наслов не се совпаѓа со „$query".';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Ниту еден блок не се совпаѓа со „$query".';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Ниту една белешка не се совпаѓа со „$query".';
@@ -2984,6 +3008,14 @@ final class MacedonianStrings extends Strings {
       'Ниедна датотека не одговара на „$query“.';
   @override
   String get wikilinkNoHeading => 'оваа белешка нема наслов со тоа име';
+  @override
+  String get wikilinkNoBlock => 'оваа белешка нема блок со тој ИД';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'ниту една белешка во библиотеката нема таков наслов';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'ниту една белешка во библиотеката нема блок со тој ИД';
   @override
   String get wikilinkNoNote =>
       'ништо во библиотеката го нема тоа име или алијас';

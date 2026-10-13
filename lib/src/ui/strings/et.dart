@@ -906,7 +906,15 @@ final class EstonianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Pealkirja ei leitud';
   @override
+  String get blockNotFoundTitle => 'Plokki ei leitud';
+  @override
   String get ambiguousLinkTitle => 'Mitu märgist vastab';
+  @override
+  String get linksToNoteTitle => 'Lingid sellele märkele';
+  @override
+  String get linksToNoteEmpty => 'Ükski märge ei viita siia veel';
+  @override
+  String get linksToNoteEmbed => 'manustatud';
   @override
   String get openLinkFailed => 'Viidet ei õnnestunud avada';
 
@@ -915,8 +923,6 @@ final class EstonianStrings extends Strings {
   String get missingNoteDialogTitle => 'Märkme pole olemas';
   @override
   String missingNoteDialogBody(String path) => 'Loo „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) => 'Kaust „$folder“ puudub';
 
   // Task lists (T-TD-04).
   @override
@@ -2876,6 +2882,15 @@ final class EstonianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Märkeruudu märkimine märgib ka selle alla pesastatud. Märgi '
       'eemaldamine jätab need puutumata.';
+  @override
+  String get linkPreviewTitle => 'Linkide eelvaade';
+  @override
+  String get linkPreviewSubtitle =>
+      'Liiguta hiir lugemisvaates lingi kohale või hoia redaktoris lingi '
+      'kohal all Ctrl (Macis ⌘), et näha väikesel kaardil märget, millele '
+      'see viitab. Puuteekraanil vajuta lugemisvaates linki pikalt.';
+  @override
+  String get linkPreviewOpen => 'Ava';
 
   // Rebuilding the index file (#368).
 
@@ -2902,12 +2917,21 @@ final class EstonianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Pealkirjad: $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Plokid: $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Pealkirjad kogu kogus';
+  @override
+  String get wikilinkBlocksEverywhere => 'Plokid kogu kogus';
+  @override
   String wikilinkPlacesIn(String named) => 'Kohad: $named';
   @override
   String get wikilinkThisNote => 'see märge';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Ükski pealkiri ei vasta päringule „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Ükski plokk ei vasta päringule „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Ükski märge ei vasta päringule „$query”.';
@@ -2916,6 +2940,14 @@ final class EstonianStrings extends Strings {
       'Ükski fail ei vasta päringule „$query“.';
   @override
   String get wikilinkNoHeading => 'selles märkes pole sellenimelist pealkirja';
+  @override
+  String get wikilinkNoBlock => 'selles märkes pole sellise ID-ga plokki';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'ühelgi kogu märkel pole sellist pealkirja';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'ühelgi kogu märkel pole sellise ID-ga plokki';
   @override
   String get wikilinkNoNote => 'kogus pole midagi selle nime või aliasega';
   @override

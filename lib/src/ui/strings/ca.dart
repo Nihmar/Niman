@@ -922,7 +922,15 @@ final class CatalanStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'No s’ha trobat el títol';
   @override
+  String get blockNotFoundTitle => 'No s’ha trobat el bloc';
+  @override
   String get ambiguousLinkTitle => 'Diverses notes coincideixen';
+  @override
+  String get linksToNoteTitle => 'Enllaços a aquesta nota';
+  @override
+  String get linksToNoteEmpty => 'Cap nota enllaça aquí encara';
+  @override
+  String get linksToNoteEmbed => 'incrustada';
   @override
   String get openLinkFailed => 'No s’ha pogut obrir l’enllaç';
 
@@ -931,9 +939,6 @@ final class CatalanStrings extends Strings {
   String get missingNoteDialogTitle => 'La nota no existeix';
   @override
   String missingNoteDialogBody(String path) => 'Crear «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'La carpeta «$folder» no existeix';
 
   // Task lists (T-TD-04).
   @override
@@ -2966,6 +2971,16 @@ final class CatalanStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar una casella marca les que hi ha imbricades a sota. '
       'Desmarcar-la les deixa tal com estan.';
+  @override
+  String get linkPreviewTitle => 'Previsualitza els enllaços';
+  @override
+  String get linkPreviewSubtitle =>
+      'Passa el ratolí per sobre d’un enllaç a la lectura, o mantén Ctrl (⌘ '
+      'al Mac) sobre un a l’editor, per veure la nota a la qual apunta en '
+      'una targeta petita. En una pantalla tàctil, mantén premut un enllaç '
+      'a la lectura.';
+  @override
+  String get linkPreviewOpen => 'Obre';
 
   // Rebuilding the index file (#368).
 
@@ -2992,12 +3007,21 @@ final class CatalanStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Títols a $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blocs a $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Títols a tota la biblioteca';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blocs a tota la biblioteca';
+  @override
   String wikilinkPlacesIn(String named) => 'Ubicacions a $named';
   @override
   String get wikilinkThisNote => 'aquesta nota';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Cap títol coincideix amb “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Cap bloc coincideix amb “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Cap nota coincideix amb “$query”.';
@@ -3006,6 +3030,14 @@ final class CatalanStrings extends Strings {
       'Cap fitxer coincideix amb «$query».';
   @override
   String get wikilinkNoHeading => 'aquesta nota no té cap títol amb aquest nom';
+  @override
+  String get wikilinkNoBlock => 'aquesta nota no té cap bloc amb aquest id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'cap nota de la biblioteca té un títol així';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'cap nota de la biblioteca té un bloc amb aquest id';
   @override
   String get wikilinkNoNote =>
       'res de la biblioteca no té aquest nom ni aquest àlies';

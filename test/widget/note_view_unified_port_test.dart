@@ -11,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -55,7 +57,7 @@ NoteView _note({
   NoteColumn column = NoteColumn.off,
   Future<String> Function(String path)? readNote,
   Future<String> Function(String path)? createMissingNote,
-  Future<bool> Function(String root, String rel)? folderExists,
+  bool linkPreview = true,
 }) => NoteView(
   key: key,
   path: path,
@@ -80,7 +82,7 @@ NoteView _note({
   readNote: readNote ?? (_) async => text,
   writeNote: (_, content) async => writes?.add(content),
   createMissingNote: createMissingNote,
-  folderExists: folderExists,
+  linkPreview: linkPreview,
 );
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -432,6 +434,334 @@ void main() {
     expect(_surface(tester).selection, const SelectionModel.at(6));
   });
 
+  testWidgets('the note carries a "Links to this note" section under it, '
+      'opened onto the notes that link here (#842)', (tester) async {
+    final links = FakeLinkSource(notes: <String>['Notes/Current.md', 'a.md']);
+    links.referrers['Notes/Current.md'] = <String>['a.md'];
+    links.mentions['a.md -> Notes/Current.md'] = const Mention(
+      context: 'a points at [[Current]]',
+      line: 0,
+      embed: false,
+      count: 1,
+    );
+    final opened = <String>[];
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'the note\n',
+          path: '/lib/Notes/Current.md',
+          libraryRoot: '/lib',
+          links: links,
+          opened: opened,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('links-to-note-section')), findsOne);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('links-to-note-count'))).data,
+      '1',
+    );
+    await tester.tap(find.byKey(const Key('links-to-note-header')));
+    await tester.pumpAndSettle();
+    expect(find.text('a points at [[Current]]'), findsOne);
+
+    await tester.tap(find.byKey(const Key('links-to-note-row-a.md')));
+    await tester.pumpAndSettle();
+    expect(opened, <String>['a.md|null']);
+  });
+
+  testWidgets('a note outside the library root has no such section either', (
+    tester,
+  ) async {
+    // The section asks the index for a library-relative path; a note from
+    // elsewhere has none, and its absolute path is not one.
+    final links = FakeLinkSource(notes: <String>['loose.md']);
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'loose\n',
+          path: '/elsewhere/loose.md',
+          libraryRoot: '/lib',
+          links: links,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('links-to-note-section')), findsNothing);
+  });
+
+  testWidgets('a note opened without a library has no such section', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(_note(text: 'loose\n', path: '/elsewhere/loose.md')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('links-to-note-section')), findsNothing);
+  });
+
+  // #846: hovering a link shows what it points at. In the editor the opening
+  // modifier is the intent (Ctrl, ⌘ on a Mac), in the read view the pointer
+  // resting on the link is, and on a touch screen a long press in the read
+  // view opens the same note as a sheet.
+  group("a link's preview (#846)", () {
+    final card = find.byKey(const Key('link-preview-card'));
+    const text = 'see [[Newton]] here\n';
+
+    FakeLinkSource library() {
+      final links = FakeLinkSource(
+        notes: <String>['Notes/Current.md', 'Notes/Newton.md'],
+      );
+      links.previews['Notes/Newton.md'] = '# Newton\n\nThe laws of motion.\n';
+      return links;
+    }
+
+    NoteView note({
+      required FakeLinkSource links,
+      bool showPreview = false,
+      bool linkPreview = true,
+      List<String>? opened,
+    }) => _note(
+      text: text,
+      path: '/lib/Notes/Current.md',
+      libraryRoot: '/lib',
+      links: links,
+      opened: opened,
+      showPreview: showPreview,
+      linkPreview: linkPreview,
+    );
+
+    /// A point inside `Newton` on the note's first row, in either pane.
+    Offset onLink(WidgetTester tester, String drawn) {
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.text(drawn, findRichText: true),
+      );
+      return paragraph.localToGlobal(
+        paragraph.getOffsetForCaret(
+              TextPosition(offset: drawn.indexOf('Newton') + 1),
+              Rect.zero,
+            ) +
+            const Offset(2, 8),
+      );
+    }
+
+    Future<TestGesture> mouseAt(WidgetTester tester, Offset at) async {
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(5, 5));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(at);
+      return gesture;
+    }
+
+    Future<void> leave(WidgetTester tester) async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    testWidgets('Ctrl held over a link in the editor opens its card at once; '
+        'without it, none', (tester) async {
+      await tester.pumpWidget(_app(note(links: library())));
+      await tester.pumpAndSettle();
+      final at = onLink(tester, 'see [[Newton]] here');
+
+      final gesture = await mouseAt(tester, at);
+      await tester.pump();
+      await tester.pump();
+      expect(card, findsNothing, reason: 'the pointer alone previews nothing');
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      await tester.pump();
+      expect(card, findsOneWidget);
+      expect(find.byKey(const Key('link-preview-title')), findsOneWidget);
+      expect(find.textContaining('The laws of motion.'), findsOneWidget);
+
+      // The modifier goes up and the pointer is still on the link: it goes.
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump(const Duration(milliseconds: 100));
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(card, findsNothing);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('typing closes it', (tester) async {
+      await tester.pumpWidget(_app(note(links: library())));
+      await tester.pumpAndSettle();
+      // A click gives the editor the keyboard.
+      await tester.tap(find.byType(MarkdownSourceView));
+      await tester.pump();
+      final gesture = await mouseAt(
+        tester,
+        onLink(tester, 'see [[Newton]] here'),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      await tester.pump();
+      expect(card, findsOneWidget);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'xsee [[Newton]] here\n',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await tester.pump();
+
+      expect(card, findsNothing);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('a dead link in the editor opens nothing', (tester) async {
+      final links = library();
+      links.notes.remove('Notes/Newton.md');
+      await tester.pumpWidget(_app(note(links: links)));
+      await tester.pumpAndSettle();
+      final gesture = await mouseAt(
+        tester,
+        onLink(tester, 'see [[Newton]] here'),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      await tester.pump();
+
+      expect(card, findsNothing);
+      expect(links.previewReads, isEmpty);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('the read view previews on a pointer at rest, with no key', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_app(note(links: library(), showPreview: true)));
+      await tester.pumpAndSettle();
+      final at = onLink(tester, 'see Newton here');
+
+      final gesture = await mouseAt(tester, at);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(card, findsNothing, reason: 'not until it rests');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+      await tester.pump();
+
+      expect(card, findsOneWidget);
+      expect(find.textContaining('The laws of motion.'), findsOneWidget);
+
+      await gesture.moveTo(const Offset(5, 5));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+      expect(card, findsNothing);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('another note opened under a card closes it, the overlay '
+        'left alone during the build', (tester) async {
+      final links = library();
+      await tester.pumpWidget(_app(note(links: links, showPreview: true)));
+      await tester.pumpAndSettle();
+      await mouseAt(tester, onLink(tester, 'see Newton here'));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+      await tester.pump();
+      expect(card, findsOneWidget);
+
+      // The pane opens another note in the same view: its didUpdateWidget
+      // loads it, and the load closes the card from inside the build.
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: 'another note\n',
+            path: '/lib/Notes/Other.md',
+            libraryRoot: '/lib',
+            links: links,
+            showPreview: true,
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      expect(card, findsNothing);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('the setting off, neither pane previews', (tester) async {
+      final links = library();
+      await tester.pumpWidget(
+        _app(note(links: links, showPreview: true, linkPreview: false)),
+      );
+      await tester.pumpAndSettle();
+      await mouseAt(tester, onLink(tester, 'see Newton here'));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+
+      expect(card, findsNothing);
+      expect(links.previewReads, isEmpty);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('a long press on a link in the read view opens a sheet with '
+        'Open', (tester) async {
+      final links = library();
+      final opened = <String>[];
+      await tester.pumpWidget(
+        _app(note(links: links, showPreview: true, opened: opened)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPressAt(onLink(tester, 'see Newton here'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('link-preview-sheet')), findsOneWidget);
+      expect(card, findsNothing, reason: 'a sheet, not the card');
+      expect(find.textContaining('The laws of motion.'), findsOneWidget);
+      expect(opened, isEmpty, reason: 'a long press does not follow it');
+
+      await tester.tap(find.byKey(const Key('link-preview-open')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('link-preview-sheet')), findsNothing);
+      expect(opened, <String>['Notes/Newton.md|null']);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('a tap on a link in the read view still follows it, on a '
+        'touch screen too', (tester) async {
+      final opened = <String>[];
+      await tester.pumpWidget(
+        _app(note(links: library(), showPreview: true, opened: opened)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(onLink(tester, 'see Newton here'));
+      await tester.pumpAndSettle();
+
+      expect(opened, <String>['Notes/Newton.md|null']);
+      expect(find.byKey(const Key('link-preview-sheet')), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('a long press on a dead link in the read view opens nothing', (
+      tester,
+    ) async {
+      final links = library();
+      links.notes.remove('Notes/Newton.md');
+      await tester.pumpWidget(_app(note(links: links, showPreview: true)));
+      await tester.pumpAndSettle();
+
+      await tester.longPressAt(onLink(tester, 'see Newton here'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('link-preview-sheet')), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
+
   group('a dead wikilink is where a note comes from (#477)', () {
     // The clicked note sits at `/lib/Notes/Current.md` in a library rooted
     // at `/lib`, and `[[Name]]` names a note nobody has written: a dead
@@ -457,6 +787,54 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    /// The colour the span holding [text] is drawn in, in the editor.
+    Color? colourOf(WidgetTester tester, String text) {
+      Color? found;
+      for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+        widget.text.visitChildren((span) {
+          if (found == null &&
+              span is TextSpan &&
+              (span.text ?? '').contains(text)) {
+            found = span.style?.color;
+          }
+          return true;
+        });
+      }
+      return found;
+    }
+
+    testWidgets('a dead wikilink is muted from the load, and goes live '
+        'when its note comes to exist (#847)', (tester) async {
+      NoteView.statsDelayOverride = Duration.zero;
+      addTearDown(() => NoteView.statsDelayOverride = null);
+      final links = FakeLinkSource(notes: <String>['Notes/Current.md']);
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: 'see [[Name]] and [[Current]] here\n',
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: links,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final syntax = SyntaxColors.of(
+        tester.element(find.byType(MarkdownSourceView)),
+      );
+
+      expect(links.deadChecks, greaterThan(0), reason: 'resolved on load');
+      expect(colourOf(tester, 'Name'), syntax.deadLink);
+      expect(colourOf(tester, 'Current'), syntax.wikilink);
+
+      // The note is written somewhere in the library: the index moves.
+      links.notes.add('Notes/Name.md');
+      links.announceChange();
+      await tester.pumpAndSettle();
+
+      expect(colourOf(tester, 'Name'), syntax.wikilink);
+    });
+
     testWidgets('Ctrl+click on a dead wikilink creates and opens its note', (
       tester,
     ) async {
@@ -476,7 +854,6 @@ void main() {
               links.notes.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );
@@ -490,6 +867,47 @@ void main() {
       await tapName(tester);
       expect(created, <String>['Notes/Name.md'], reason: 'the link resolved');
       expect(opened, <String>['Notes/Name.md|null', 'Notes/Name.md|null']);
+    }, variant: _desktop);
+
+    testWidgets('a dead link into folders nobody made creates its note '
+        'where it says (#847)', (tester) async {
+      const nested = 'see [[Sub/Deep/Foo]] here\n';
+      final links = FakeLinkSource(notes: <String>['Notes/Current.md']);
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: nested,
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: links,
+            opened: opened,
+            createMissingNote: (rel) async {
+              created.add(rel);
+              links.notes.add(rel);
+              return rel;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.text('see [[Sub/Deep/Foo]] here', findRichText: true),
+      );
+      final at = paragraph.localToGlobal(
+        paragraph.getOffsetForCaret(const TextPosition(offset: 9), Rect.zero) +
+            const Offset(2, 8),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tapAt(at, kind: PointerDeviceKind.mouse);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+
+      expect(created, <String>[
+        'Sub/Deep/Foo.md',
+      ], reason: "the folder in the link, not the clicked note's: no refusal");
+      expect(opened, <String>['Sub/Deep/Foo.md|null']);
     }, variant: _desktop);
 
     testWidgets('a plain click on a dead wikilink only places the caret', (
@@ -509,7 +927,6 @@ void main() {
               created.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );
@@ -543,7 +960,6 @@ void main() {
               created.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );
@@ -569,7 +985,6 @@ void main() {
               created.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );
@@ -602,7 +1017,6 @@ void main() {
               created.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );

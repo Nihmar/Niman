@@ -917,7 +917,15 @@ final class DutchStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Kop niet gevonden';
   @override
+  String get blockNotFoundTitle => 'Blok niet gevonden';
+  @override
   String get ambiguousLinkTitle => 'Meerdere notities komen overeen';
+  @override
+  String get linksToNoteTitle => 'Links naar deze notitie';
+  @override
+  String get linksToNoteEmpty => 'Nog geen notitie verwijst hiernaartoe';
+  @override
+  String get linksToNoteEmbed => 'ingesloten';
   @override
   String get openLinkFailed => 'Kon de link niet openen';
 
@@ -926,9 +934,6 @@ final class DutchStrings extends Strings {
   String get missingNoteDialogTitle => 'De notitie bestaat niet';
   @override
   String missingNoteDialogBody(String path) => '„$path" maken?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Map „$folder" bestaat niet';
 
   // Task lists (T-TD-04).
   @override
@@ -2954,6 +2959,16 @@ final class DutchStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Een vakje aanvinken vinkt ook de eronder geneste aan. '
       'Uitzetten laat ze zoals ze zijn.';
+  @override
+  String get linkPreviewTitle => 'Linkvoorbeeld';
+  @override
+  String get linkPreviewSubtitle =>
+      'Beweeg de muis over een link in de leesweergave, of houd Ctrl (⌘ op '
+      'een Mac) ingedrukt boven een link in de editor, om de notitie '
+      'waarnaar hij verwijst in een kleine kaart te zien. Houd op een '
+      'touchscreen een link in de leesweergave ingedrukt.';
+  @override
+  String get linkPreviewOpen => 'Openen';
 
   // Rebuilding the index file (#368).
 
@@ -2980,12 +2995,21 @@ final class DutchStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Koppen in $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blokken in $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Koppen in de hele bibliotheek';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blokken in de hele bibliotheek';
+  @override
   String wikilinkPlacesIn(String named) => 'Plaatsen in $named';
   @override
   String get wikilinkThisNote => 'deze notitie';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Geen kop komt overeen met “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Geen blok komt overeen met “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Geen notitie komt overeen met “$query”.';
@@ -2994,6 +3018,14 @@ final class DutchStrings extends Strings {
       'Geen bestand komt overeen met “$query”.';
   @override
   String get wikilinkNoHeading => 'deze notitie heeft geen kop met die naam';
+  @override
+  String get wikilinkNoBlock => 'deze notitie heeft geen blok met die id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'geen notitie in de bibliotheek heeft zo’n kop';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'geen notitie in de bibliotheek heeft een blok met die id';
   @override
   String get wikilinkNoNote =>
       'niets in de bibliotheek heeft die naam of dat alias';

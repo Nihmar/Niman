@@ -47,11 +47,13 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/div_syntax.dart';
@@ -73,6 +75,7 @@ import 'package:niman/src/markdown/render/block_heights.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
+import 'package:niman/src/markdown/render/dead_link_ranges.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/focus_return.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
@@ -156,6 +159,9 @@ final class MarkdownSourceView extends StatefulWidget {
     this.templateCommands = false,
     this.autofocus = false,
     this.wikilinkSuggester,
+    this.notePath,
+    this.deadLinks,
+    this.onLinkHover,
     super.key,
   });
 
@@ -311,9 +317,36 @@ final class MarkdownSourceView extends StatefulWidget {
   /// library) draws no panel.
   final WikilinkSuggester? wikilinkSuggester;
 
+  /// The note's library-relative path, or null for a note outside a library:
+  /// what the wikilink panel tells the note's own headings and blocks from
+  /// the rest of the library's when it completes a link (#845).
+  final String? notePath;
+
+  /// The links of the note that name nothing (#847), resolved apart from the
+  /// drawing and handed in as they arrive: drawn in the muted colour of a
+  /// link that is not there yet. Null draws every link as a live one.
+  final ValueListenable<DeadLinks>? deadLinks;
+
+  /// Told when the pointer comes onto a link with the opening modifier held
+  /// (Ctrl, ⌘ on a Mac), and with null when it leaves it or the modifier goes
+  /// up: what the link preview opens its card from (#846). Null (the
+  /// default, and every touch screen) reports nothing.
+  final void Function(SourceLinkHover? hover)? onLinkHover;
+
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
 }
+
+/// A link the pointer is on with the opening modifier held (#846): its kind
+/// (a wikilink or a Markdown link), as written (`[[…]]`, `[…](…)`), the target
+/// a reference link resolved to when its source spells none, and where the
+/// pointer is (global).
+typedef SourceLinkHover = ({
+  TokenKind kind,
+  String raw,
+  String? href,
+  Offset position,
+});
 
 /// The source view's state, so a caller can ask where the caret is.
 final class MarkdownSourceViewState extends State<MarkdownSourceView> {
@@ -674,12 +707,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     lineRead: (line) => _tokensAt(line) != null,
     inCodeAt: _inCodeAt,
     headings: () => headings,
+    blocks: () => _blockAnchors.read(),
+    notePath: () => widget.notePath,
     replace: (start, end, text, caret) =>
         _replaceRange(start, end, text, caret: caret),
     ensureCaretVisible: _ensureCaretVisible,
     caretRect: () => _caretRectAt(_selection.extent) ?? caretRect,
     noteBox: () => _noteBox,
     caretMoves: () => Listenable.merge([_scroll, _caretRect]),
+  );
+
+  /// The note's block anchors, for a `[[#^` link to the note being edited
+  /// (#844): walked when the panel asks, kept for the revision.
+  late final BufferBlockAnchors _blockAnchors = BufferBlockAnchors(
+    () => widget.buffer,
   );
 
   /// The suggester's panel opened, closed or changed: the note is built
@@ -720,6 +761,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.spellCheck?.addListener(_onSpellingChanged);
     widget.templateCheck?.addListener(_onSpellingChanged);
     widget.findMatches?.addListener(_onSpellingChanged);
+    widget.deadLinks?.addListener(_onDeadLinksChanged);
     widget.mathCache?.addListener(_onMathTypeset);
     // The hand over a Ctrl-clickable link appears when the modifier goes
     // down, and goes when it comes up, without waiting for a move (#725).
@@ -860,6 +902,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       oldWidget.findMatches?.removeListener(_onSpellingChanged);
       widget.findMatches?.addListener(_onSpellingChanged);
     }
+    if (!identical(oldWidget.deadLinks, widget.deadLinks)) {
+      oldWidget.deadLinks?.removeListener(_onDeadLinksChanged);
+      widget.deadLinks?.addListener(_onDeadLinksChanged);
+    }
     if (!identical(oldWidget.mathCache, widget.mathCache)) {
       oldWidget.mathCache?.removeListener(_onMathTypeset);
       widget.mathCache?.addListener(_onMathTypeset);
@@ -937,6 +983,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.spellCheck?.removeListener(_onSpellingChanged);
     widget.templateCheck?.removeListener(_onSpellingChanged);
     widget.findMatches?.removeListener(_onSpellingChanged);
+    widget.deadLinks?.removeListener(_onDeadLinksChanged);
     widget.mathCache?.removeListener(_onMathTypeset);
     _hints.dispose();
     _suggest
@@ -977,6 +1024,23 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!mounted) return;
     _hints.refresh();
     setState(() {});
+  }
+
+  /// The note's dead links were resolved again (#847): its links are drawn
+  /// again, in the colours the answer gives them.
+  void _onDeadLinksChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// The links of line [index] that name nothing, local to the line.
+  List<TextRange> _deadLinksIn(int index, StyledLine styled) {
+    final dead = widget.deadLinks?.value;
+    if (dead == null || dead.isEmpty) return const <TextRange>[];
+    return deadLinkRanges(
+      styled,
+      dead,
+      hrefOf: (start) => _styler?.linkHrefAt(index, start),
+    );
   }
 
   /// A formula was typeset, or failed to be: the lines that concealed their
@@ -4118,6 +4182,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                       _leaveTable();
                       _hoverPosition = null;
                       _hoverCursor.value = SystemMouseCursors.text;
+                      _reportLinkHover(null, Offset.zero);
                     },
                     child: child,
                   ),
@@ -4298,6 +4363,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       selected: _selectionIn(index),
       composing: _composingIn(index),
       misspelled: _misspelledIn(index),
+      deadLinks: _deadLinksIn(index, styled),
       found: _foundIn(index),
       templateProblems: _hints.problemsIn(index),
       misspelledColor: Theme.of(context).colorScheme.error,
@@ -4525,6 +4591,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ? SystemMouseCursors.click
         : SystemMouseCursors.text;
     if (_hoverCursor.value != cursor) _hoverCursor.value = cursor;
+    _reportLinkHover(offset, global);
+  }
+
+  /// The link the pointer is on with the opening modifier held, as last told
+  /// to [MarkdownSourceView.onLinkHover]: a pointer moving along one link
+  /// tells once.
+  String? _hoveredLink;
+
+  /// Tells [MarkdownSourceView.onLinkHover] which link the pointer is on —
+  /// only with the modifier down, which is the intent to open it — or that it
+  /// is on none. Asked of the same line [_overLink] reads, so a hover costs no
+  /// scan of the note.
+  void _reportLinkHover(int? offset, Offset global) {
+    final report = widget.onLinkHover;
+    if (report == null) return;
+    final link = offset != null && _linkModifier() ? linkAt(offset) : null;
+    final key = link == null ? null : '${link.$1.name}|${link.$2}';
+    if (key == _hoveredLink) return;
+    _hoveredLink = key;
+    report(
+      link == null
+          ? null
+          : (kind: link.$1, raw: link.$2, href: link.$3, position: global),
+    );
   }
 
   /// Whether the opening modifier over [offset] would open a link: the very

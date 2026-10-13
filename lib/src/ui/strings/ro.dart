@@ -923,7 +923,15 @@ final class RomanianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Titlul nu a fost găsit';
   @override
+  String get blockNotFoundTitle => 'Blocul nu a fost găsit';
+  @override
   String get ambiguousLinkTitle => 'Mai multe note se potrivesc';
+  @override
+  String get linksToNoteTitle => 'Linkuri către această notă';
+  @override
+  String get linksToNoteEmpty => 'Nicio notă nu trimite încă aici';
+  @override
+  String get linksToNoteEmbed => 'încorporată';
   @override
   String get openLinkFailed => 'Linkul nu a putut fi deschis';
 
@@ -932,9 +940,6 @@ final class RomanianStrings extends Strings {
   String get missingNoteDialogTitle => 'Notița nu există';
   @override
   String missingNoteDialogBody(String path) => 'Se creează „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Dosarul „$folder“ nu există';
 
   // Task lists (T-TD-04).
   @override
@@ -2962,6 +2967,16 @@ final class RomanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Bifarea unei casete le bifează și pe cele imbricate '
       'dedesubt. Debifarea le lasă așa.';
+  @override
+  String get linkPreviewTitle => 'Previzualizare linkuri';
+  @override
+  String get linkPreviewSubtitle =>
+      'Treceți cursorul peste un link în vizualizarea de citire sau țineți '
+      'apăsat Ctrl (⌘ pe Mac) peste unul în editor, pentru a vedea nota '
+      'spre care duce într-un card mic. Pe un ecran tactil, apăsați lung un '
+      'link în vizualizarea de citire.';
+  @override
+  String get linkPreviewOpen => 'Deschide';
 
   // Rebuilding the index file (#368).
 
@@ -2992,12 +3007,21 @@ final class RomanianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Titluri în $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blocuri în $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Titluri din toată biblioteca';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blocuri din toată biblioteca';
+  @override
   String wikilinkPlacesIn(String named) => 'Locuri în $named';
   @override
   String get wikilinkThisNote => 'această notă';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Niciun titlu nu corespunde cu “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Niciun bloc nu corespunde cu “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Nicio notă nu corespunde cu “$query”.';
@@ -3007,6 +3031,14 @@ final class RomanianStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'această notă nu are niciun titlu cu acest nume';
+  @override
+  String get wikilinkNoBlock => 'această notă nu are niciun bloc cu acest id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'nicio notă din bibliotecă nu are un asemenea titlu';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'nicio notă din bibliotecă nu are un bloc cu acest id';
   @override
   String get wikilinkNoNote =>
       'nimic din bibliotecă nu are acest nume sau alias';

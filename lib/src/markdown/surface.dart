@@ -20,6 +20,7 @@
 /// renders.
 library;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/settings/library_config.dart'
     show defaultSourceFont;
@@ -30,6 +31,7 @@ import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -101,6 +103,9 @@ final class MarkdownSurface extends StatelessWidget {
     this.lineTokens,
     this.templateCommands = false,
     this.wikilinkSuggester,
+    this.notePath,
+    this.deadLinks,
+    this.onLinkHover,
     super.key,
   });
 
@@ -113,6 +118,15 @@ final class MarkdownSurface extends StatelessWidget {
   /// See [MarkdownSourceView.wikilinkSuggester]: the library the wikilink
   /// suggester panel reads (#475), the same in both modes.
   final WikilinkSuggester? wikilinkSuggester;
+
+  /// See [MarkdownSourceView.notePath].
+  final String? notePath;
+
+  /// See [MarkdownSourceView.deadLinks].
+  final ValueListenable<DeadLinks>? deadLinks;
+
+  /// See [MarkdownSourceView.onLinkHover].
+  final void Function(SourceLinkHover? hover)? onLinkHover;
 
   /// The note.
   final SourceBuffer buffer;
@@ -269,5 +283,8 @@ final class MarkdownSurface extends StatelessWidget {
     lineTokens: lineTokens,
     templateCommands: templateCommands,
     wikilinkSuggester: wikilinkSuggester,
+    notePath: notePath,
+    deadLinks: deadLinks,
+    onLinkHover: onLinkHover,
   );
 }

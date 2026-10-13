@@ -144,13 +144,13 @@ class NoteTags extends Table {
 }
 
 /// A resolved link edge between two notes; dead links are skipped, so every
-/// row points at an existing note. References/backlinks UI is future work
-/// (M3 stores the edges; it has no reader for them yet).
+/// row points at an existing note. Read in reverse by the rename/move rewrite
+/// (`ReferrerDao.pathsOf`, #507) and by "Links to this note"
+/// (`ReferrerDao.page`, #842).
 ///
 /// The primary key reads a note's outgoing links; the index reads them the
-/// way the backlinks panel will, which is the direction the key cannot
-/// answer.
-@TableIndex(name: 'links_to', columns: {#toNote})
+/// way those two do, which is the direction the key cannot answer.
+@TableIndex(name: 'links_to', columns: {#toNote, #fromNote, #kind})
 class NoteLinks extends Table {
   /// The id of the note containing the link.
   IntColumn get fromNote => integer()();
@@ -195,6 +195,49 @@ class PendingLinks extends Table {
   Set<Column> get primaryKey => {noteId, target, kind};
 }
 
+/// The headings of a note, one row each: the text a `[[Note#Heading]]` link
+/// completes and a `[[##` search lists across the library (#845).
+///
+/// The primary key reads a note's headings in line order and is what a
+/// re-index of the note deletes by; finding a heading by what was typed goes
+/// through the `note_anchors_fts` word index, never a scan of this table.
+class NoteHeadings extends Table {
+  /// The id of the note the heading is in.
+  IntColumn get noteId => integer()();
+
+  /// The logical line the heading is on.
+  IntColumn get line => integer()();
+
+  /// The heading level, 1..6.
+  IntColumn get level => integer()();
+
+  /// The heading text, as the outline reads it.
+  TextColumn get heading => text()();
+
+  @override
+  Set<Column> get primaryKey => {noteId, line};
+}
+
+/// The blocks of a note that end with a ` ^id`, one row each: what a
+/// `[[Note#^id]]` link completes and a `[[^^` search lists across the
+/// library (#844).
+class NoteBlocks extends Table {
+  /// The id of the note the block is in.
+  IntColumn get noteId => integer()();
+
+  /// The block id, without its `^`.
+  TextColumn get blockId => text()();
+
+  /// The line the block starts on.
+  IntColumn get line => integer()();
+
+  /// The block's first words, to tell one id from another in a list.
+  TextColumn get excerpt => text()();
+
+  @override
+  Set<Column> get primaryKey => {noteId, blockId};
+}
+
 /// The pragmas an index connection opens with: those of every connection
 /// of the app, and incremental auto-vacuum.
 ///
@@ -232,6 +275,8 @@ void indexDatabaseSetup(sqlite3.Database db) {
     NoteLinks,
     FrontmatterFields,
     PendingLinks,
+    NoteHeadings,
+    NoteBlocks,
   ],
 )
 class IndexDatabase extends _$IndexDatabase {
@@ -248,8 +293,13 @@ class IndexDatabase extends _$IndexDatabase {
   /// written before holds none for them, and is wiped and rescanned.
   /// v7: the created column, for the tree's date-created order (#726) —
   /// the same wipe and rescan.
+  /// v8: the headings and block ids of every note and their word index, for
+  /// `[[##` and `[[^^` (#845, #844) — the same wipe and rescan.
+  /// v9: `links_to` holds the referrer and the link form beside the target,
+  /// so "Links to this note" pages a note's edges in index order (#842) —
+  /// the same wipe and rescan.
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 9;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -265,6 +315,18 @@ class IndexDatabase extends _$IndexDatabase {
   static const String _createFts =
       'CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING '
       "fts5(title, body, content = '', contentless_delete = 1, "
+      "tokenize = 'unicode61 remove_diacritics 2')";
+
+  /// The word index of every note's headings and block ids (#844, #845):
+  /// raw SQL like [_createFts], one row per note (`rowid` = `notes.id`) whose
+  /// `headings` column holds the note's headings and `blocks` its block ids
+  /// and their first words. A `[[##term` or `[[^^term` search is a prefix
+  /// query on it, cut to a bound, which names the notes to read the rows of
+  /// from `note_headings` / `note_blocks` — a lookup in the index of words,
+  /// never a scan of the headings of a million notes.
+  static const String _createAnchorsFts =
+      'CREATE VIRTUAL TABLE IF NOT EXISTS note_anchors_fts USING '
+      "fts5(headings, blocks, content = '', contentless_delete = 1, "
       "tokenize = 'unicode61 remove_diacritics 2')";
 
   /// The notes by modification time, files apart from folders: what
@@ -291,6 +353,9 @@ class IndexDatabase extends _$IndexDatabase {
   /// The tables an upgrade drops, dependents before the rows they key on.
   static const List<String> _allTables = [
     'notes_fts',
+    'note_anchors_fts',
+    'note_headings',
+    'note_blocks',
     tag_counts.tagCountsTable,
     'pending_links',
     'frontmatter_fields',
@@ -306,6 +371,7 @@ class IndexDatabase extends _$IndexDatabase {
     onCreate: (m) async {
       await m.createAll();
       await m.database.customStatement(_createFts);
+      await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
       await tag_counts.createTagCounts(m.database);
     },
@@ -321,6 +387,7 @@ class IndexDatabase extends _$IndexDatabase {
       }
       await m.createAll();
       await m.database.customStatement(_createFts);
+      await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
       await tag_counts.createTagCounts(m.database);
     },
@@ -328,6 +395,7 @@ class IndexDatabase extends _$IndexDatabase {
       // Belt and braces: an index file that predates the FTS table (or
       // lost it) rebuilds it here rather than failing every search.
       await customStatement(_createFts);
+      await customStatement(_createAnchorsFts);
       // Dropping the old tables freed their pages but kept them in the
       // file: without this, an index that held every note's text stays
       // that size, empty. The vacuum also puts the file on the

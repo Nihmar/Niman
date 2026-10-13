@@ -124,7 +124,7 @@ List<AnnotationLink> annotationLinksIn(String text) {
     switch (link) {
       case WikiLink(:final ref):
         target = ref.target;
-        fragment = ref.heading;
+        fragment = ref.fragment;
         markdown = false;
         label = ref.alias;
       case MarkdownLink(:final href):

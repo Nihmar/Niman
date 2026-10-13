@@ -11,6 +11,7 @@ final class NoteHtmlSource {
     required this.title,
     this.images = const <String, String>{},
     this.links = const <String, String>{},
+    this.anchors = const <String, String>{},
   });
 
   /// The note, as written.
@@ -30,4 +31,10 @@ final class NoteHtmlSource {
   /// leaves it empty, and a wikilink is then highlighted text, since a page
   /// on its own has nothing to point to.
   final Map<String, String> links;
+
+  /// The id a link into a heading with a `#` in its fragment lands on, by
+  /// `ExportAnchors.keyOf`: `Issue #12` is a path or one heading, which only
+  /// the target's headings tell. An empty id is a heading the target lacks.
+  /// A fragment that is not here is read as a heading path.
+  final Map<String, String> anchors;
 }

@@ -9,7 +9,7 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/library/new_item_folder.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -56,6 +56,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.ocr,
     this.marks,
     this.zen = false,
+    this.linkPreview = true,
     this.outlineInDock = false,
     this.typewriter = false,
     this.sourceFont = SourceFont.monospace,
@@ -161,7 +162,7 @@ final class ShellDetailPane extends StatelessWidget {
   final ValueChanged<EditorKind>? onEditorKindChanged;
 
   /// Link navigation (T-M3-07).
-  final LinkSource? linkSource;
+  final LibraryLinks? linkSource;
 
   /// The library the wikilink suggester panel reads (#475).
   final WikilinkSuggester? wikilinkSuggester;
@@ -207,6 +208,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Whether a note's properties panel shows above it (#157).
   final bool frontmatterPanel;
+
+  /// Whether hovering a link previews the note it points at (#846).
+  final bool linkPreview;
 
   /// See [typewriter].
   final VoidCallback? onToggleTypewriter;
@@ -331,6 +335,7 @@ final class ShellDetailPane extends StatelessWidget {
     typewriter: typewriter,
     cascadeChecklist: cascadeChecklist,
     frontmatterPanel: frontmatterPanel,
+    linkPreview: linkPreview,
     onToggleTypewriter: onToggleTypewriter,
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,

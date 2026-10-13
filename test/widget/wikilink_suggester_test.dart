@@ -87,6 +87,7 @@ void main() {
     SourceBuffer buffer,
     FakeWikilinkSuggester? suggester, {
     MarkdownSurfaceMode mode = MarkdownSurfaceMode.source,
+    String? notePath,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -97,6 +98,7 @@ void main() {
             theme: _theme,
             showLineNumbers: false,
             wikilinkSuggester: suggester,
+            notePath: notePath,
           ),
         ),
       ),
@@ -280,6 +282,25 @@ void main() {
     expect(panel(tester).selected, 0);
   });
 
+  testWidgets("[[# lists the open note's headings that read back as links", (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    await pump(tester, buffer, _library());
+
+    await type(
+      tester,
+      '# C#\n\n## Issue #12\n\n## A|B\n\n## Use [x] here\n\n## Plain\n\n[[#',
+    );
+
+    expect(panel(tester).kind, WikilinkPanelKind.headings);
+    expect(panel(tester).entries.map((e) => (e as HeadingSuggestion).heading), [
+      'C#',
+      'Issue #12',
+      'Plain',
+    ], reason: 'a `|` or a bracket in a heading has no link spelling');
+  });
+
   testWidgets('# lists the named note headings and completes one', (
     tester,
   ) async {
@@ -341,6 +362,237 @@ void main() {
     expect(drawn.entries.map((e) => (e as HeadingSuggestion).heading), [
       'Links',
     ]);
+  });
+
+  group('block ids and heading paths (#844, #845)', () {
+    FakeWikilinkSuggester library() => FakeWikilinkSuggester(
+      notes: const <NoteSuggestion>[
+        NoteSuggestion(name: 'Notes', folder: '', target: 'Notes'),
+        NoteSuggestion(name: 'Plan', folder: 'Work', target: 'Plan'),
+      ],
+      headings: const <String, List<HeadingSuggestion>>{
+        'Notes': <HeadingSuggestion>[
+          HeadingSuggestion('Links'),
+          HeadingSuggestion('Dead links'),
+        ],
+      },
+      blocks: const <String, List<BlockIdSuggestion>>{
+        'Notes': <BlockIdSuggestion>[
+          BlockIdSuggestion('37066d', excerpt: 'A paragraph'),
+          BlockIdSuggestion('quote-1', excerpt: 'A quote'),
+          BlockIdSuggestion('abc', excerpt: 'Mentions 37066d'),
+        ],
+      },
+      acrossHeadings: const <HeadingSuggestion>[
+        HeadingSuggestion('Team plan', path: 'Work/Plan.md', target: 'Plan'),
+        HeadingSuggestion('Team notes', path: 'Notes.md', target: 'Notes'),
+      ],
+      acrossBlocks: const <BlockIdSuggestion>[
+        BlockIdSuggestion(
+          'idea-1',
+          excerpt: 'The first idea',
+          path: 'Work/Plan.md',
+          target: 'Plan',
+        ),
+        BlockIdSuggestion(
+          'idea-2',
+          excerpt: 'Another idea',
+          path: 'Notes.md',
+          target: 'Notes',
+        ),
+      ],
+    );
+
+    testWidgets('#^ lists the named note block ids and completes one', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = library();
+      await pump(tester, buffer, suggester);
+
+      await type(tester, '[[Notes#^');
+
+      expect(suggester.blockTargets, ['Notes']);
+      expect(suggester.headingTargets, isEmpty);
+      var drawn = panel(tester);
+      expect(drawn.kind, WikilinkPanelKind.blocks);
+      expect(drawn.entries.map((e) => (e as BlockIdSuggestion).id), [
+        '37066d',
+        'quote-1',
+        'abc',
+      ]);
+      expect(find.textContaining('Blocks in'), findsOneWidget);
+      expect(find.textContaining('A paragraph'), findsOneWidget);
+
+      await type(tester, '[[Notes#^37');
+      drawn = panel(tester);
+      expect(drawn.entries.map((e) => (e as BlockIdSuggestion).id), [
+        '37066d',
+        'abc',
+      ], reason: 'the id that starts with it, then the one that mentions it');
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(buffer.text, '[[Notes#^37066d]]');
+    });
+
+    testWidgets('#^ with no target lists the note being edited', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('Intro ^intro\n\nSee [[');
+      final state = await pump(tester, buffer, library());
+      await tester.pumpAndSettle();
+      state.placeCaret(buffer.length);
+      await tester.pump();
+
+      await type(tester, 'Intro ^intro\n\nSee [[#^');
+      await tester.pumpAndSettle();
+
+      final drawn = panel(tester);
+      expect(drawn.kind, WikilinkPanelKind.blocks);
+      expect(drawn.named, isEmpty);
+      expect(drawn.entries.map((e) => (e as BlockIdSuggestion).id), [
+        'intro',
+      ], reason: "the note's own anchors, read off the buffer");
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(buffer.text, 'Intro ^intro\n\nSee [[#^intro]]');
+    });
+
+    testWidgets('a second # keeps listing the headings of the target', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = library();
+      await pump(tester, buffer, suggester);
+
+      await type(tester, '[[Notes#Links#');
+      var drawn = panel(tester);
+      expect(drawn.kind, WikilinkPanelKind.headings);
+      expect(drawn.entries.map((e) => (e as HeadingSuggestion).heading), [
+        'Links',
+        'Dead links',
+      ]);
+
+      await type(tester, '[[Notes#Links#De');
+      drawn = panel(tester);
+      expect(drawn.entries.map((e) => (e as HeadingSuggestion).heading), [
+        'Dead links',
+      ], reason: 'filtered by the level being typed, not the whole path');
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(buffer.text, '[[Notes#Links#Dead links]]');
+    });
+
+    testWidgets('## lists headings across the library, with their note', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = library();
+      await pump(tester, buffer, suggester, notePath: 'Notes.md');
+
+      await type(tester, '[[## team');
+
+      expect(suggester.headingSearches, ['team']);
+      expect(suggester.headingTargets, isEmpty, reason: 'no one note named');
+      final drawn = panel(tester);
+      expect(drawn.kind, WikilinkPanelKind.libraryHeadings);
+      expect(drawn.entries.map((e) => (e as HeadingSuggestion).heading), [
+        'Team plan',
+        'Team notes',
+      ]);
+      expect(find.text('Headings across the library'), findsOneWidget);
+      expect(find.text('Plan'), findsOneWidget, reason: 'the note, dimmed');
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(buffer.text, '[[Plan#Team plan]]');
+    });
+
+    testWidgets('## completes a heading of this note as #Heading', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = library();
+      await pump(tester, buffer, suggester, notePath: 'Notes.md');
+
+      await type(tester, '[[##team n');
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(buffer.text, '[[#Team notes]]');
+    });
+
+    testWidgets('[[## alone lists headings generically', (tester) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = library();
+      await pump(tester, buffer, suggester);
+
+      await type(tester, '[[##');
+
+      expect(suggester.headingSearches, ['']);
+      expect(panel(tester).entries, hasLength(2));
+    });
+
+    testWidgets('^^ lists block ids across the library', (tester) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = library();
+      await pump(tester, buffer, suggester, notePath: 'Notes.md');
+
+      await type(tester, '[[^^idea');
+
+      expect(suggester.blockSearches, ['idea']);
+      final drawn = panel(tester);
+      expect(drawn.kind, WikilinkPanelKind.libraryBlocks);
+      expect(drawn.entries.map((e) => (e as BlockIdSuggestion).id), [
+        'idea-1',
+        'idea-2',
+      ]);
+      expect(find.text('Blocks across the library'), findsOneWidget);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(buffer.text, '[[Plan#^idea-1]]');
+    });
+
+    testWidgets('^^ completes a block of this note as #^id', (tester) async {
+      final buffer = SourceBuffer.fromText('');
+      await pump(tester, buffer, library(), notePath: 'Notes.md');
+
+      await type(tester, '[[^^another');
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(buffer.text, '[[#^idea-2]]');
+    });
+
+    testWidgets('a block id nobody has says so', (tester) async {
+      final buffer = SourceBuffer.fromText('');
+      await pump(tester, buffer, library());
+
+      await type(tester, '[[Notes#^zzz');
+      expect(panel(tester).entries, isEmpty);
+      expect(find.textContaining('No block matches'), findsOneWidget);
+
+      await type(tester, '[[^^zzz');
+      expect(find.textContaining('No block matches'), findsOneWidget);
+      expect(find.textContaining('no note in the library'), findsOneWidget);
+    });
+
+    testWidgets('completing inside a written link keeps what follows', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      await pump(tester, buffer, library());
+
+      await type(tester, '[[Notes#^37]] and on', caret: 11);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(buffer.text, '[[Notes#^37066d]] and on');
+    });
   });
 
   testWidgets('a book target offers its place form, not a list', (

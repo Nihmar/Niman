@@ -11,6 +11,7 @@ import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
+import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
@@ -210,7 +211,7 @@ final class IndexContentStore {
   /// resolve; [paired] rels keep their existing rows (their content did
   /// not change — the rename only moved the path), but their link edges are
   /// written again when one of their links reads from the note's folder
-  /// ([LinkResolver.dependsOnLocation]): the note may have moved to another
+  /// ([LinkPaths.dependsOnLocation]): the note may have moved to another
   /// one (#491).
   ///
   /// With [pendingLink] set, the link edges are handed to it instead of
@@ -327,7 +328,7 @@ final class IndexContentStore {
   static bool _dependsOnLocation(ParsedLink link) {
     final target = _linkTarget(link);
     return target != null &&
-        LinkResolver.dependsOnLocation(target, markdown: link is MarkdownLink);
+        LinkPaths.dependsOnLocation(target, markdown: link is MarkdownLink);
   }
 
   /// Whether any link or embed of [c] reads from the note's folder (#491):
@@ -341,9 +342,9 @@ final class IndexContentStore {
   static String? _linkTarget(ParsedLink link) => switch (link) {
     final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
     final MarkdownLink m
-        when !LinkResolver.hasScheme(m.href) &&
+        when !LinkPaths.hasScheme(m.href) &&
             !m.href.trim().startsWith('#') &&
-            LinkResolver.markdownPath(m.href) != null =>
+            LinkPaths.markdownPath(m.href) != null =>
       m.href,
     _ => null,
   };
@@ -382,8 +383,66 @@ final class IndexContentStore {
     await replaceFileStems(row.id, row.name);
     await _writeAliasStems(row.id, c);
     await _writeTags(row.id, c);
+    await _writeAnchors(row.id, c);
     await writeFields(row.id, fields: c.fields, date: c.date, pinned: c.pinned);
     await _writeLinks(row, c, resolved, pendingLink);
+  }
+
+  /// Rewrites the heading and block-id rows of note [noteId] to match [c]
+  /// (#844, #845), and its row of the word index they are searched through.
+  ///
+  /// The word index holds the headings and the ids as words (`headings`
+  /// joined by line breaks, `blocks` as each id and its first words), so a
+  /// search names the notes to read the rows of: an indexed lookup however
+  /// many notes the library has.
+  Future<void> _writeAnchors(int noteId, NoteContent c) async {
+    await (_db.delete(
+      _db.noteHeadings,
+    )..where((h) => h.noteId.equals(noteId))).go();
+    await (_db.delete(
+      _db.noteBlocks,
+    )..where((b) => b.noteId.equals(noteId))).go();
+    await _db.customStatement(
+      'DELETE FROM note_anchors_fts WHERE rowid = ?',
+      <Object?>[noteId],
+    );
+    if (c.headings.isEmpty && c.blocks.isEmpty) return;
+    await _db.batch((batch) {
+      for (final heading in c.headings) {
+        batch.insert(
+          _db.noteHeadings,
+          NoteHeadingsCompanion.insert(
+            noteId: noteId,
+            line: heading.line,
+            level: heading.level,
+            heading: heading.text,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+      }
+      for (final block in c.blocks) {
+        batch.insert(
+          _db.noteBlocks,
+          NoteBlocksCompanion.insert(
+            noteId: noteId,
+            blockId: block.id,
+            line: block.line,
+            excerpt: block.excerpt,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+      }
+    });
+    await _db.customStatement(
+      'INSERT INTO note_anchors_fts (rowid, headings, blocks) '
+      'VALUES (?, ?, ?)',
+      <Object?>[
+        noteId,
+        [for (final heading in c.headings) heading.text].join('\n'),
+        [for (final block in c.blocks) '${block.id} ${block.excerpt}']
+            .join('\n'),
+      ],
+    );
   }
 
   /// Writes the known frontmatter fields onto the note row itself and the

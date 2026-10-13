@@ -921,7 +921,15 @@ final class ItalianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Titolo non trovato';
   @override
+  String get blockNotFoundTitle => 'Blocco non trovato';
+  @override
   String get ambiguousLinkTitle => 'Più note corrispondono';
+  @override
+  String get linksToNoteTitle => 'Link a questa nota';
+  @override
+  String get linksToNoteEmpty => 'Nessuna nota rimanda qui';
+  @override
+  String get linksToNoteEmbed => 'incorporata';
   @override
   String get openLinkFailed => 'Impossibile aprire il link';
 
@@ -930,9 +938,6 @@ final class ItalianStrings extends Strings {
   String get missingNoteDialogTitle => 'La nota non esiste';
   @override
   String missingNoteDialogBody(String path) => 'Creare «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'La cartella «$folder» non esiste';
 
   // Task lists (T-TD-04).
   @override
@@ -2939,6 +2944,16 @@ final class ItalianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Spuntare una casella spunta quelle annidate sotto. Toglierla '
       'le lascia come sono.';
+  @override
+  String get linkPreviewTitle => 'Anteprima dei link';
+  @override
+  String get linkPreviewSubtitle =>
+      'Passa il mouse su un link nella lettura, o tieni premuto Ctrl (⌘ su '
+      'Mac) su uno nell’editor, per vedere la nota a cui punta in una '
+      'piccola scheda. Su uno schermo touch, tieni premuto un link nella '
+      'lettura.';
+  @override
+  String get linkPreviewOpen => 'Apri';
 
   // Rebuilding the index file (#368).
 
@@ -2965,12 +2980,21 @@ final class ItalianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Titoli in $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blocchi in $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Titoli in tutta la libreria';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blocchi in tutta la libreria';
+  @override
   String wikilinkPlacesIn(String named) => 'Posizioni in $named';
   @override
   String get wikilinkThisNote => 'questa nota';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Nessun titolo corrisponde a “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Nessun blocco corrisponde a “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Nessuna nota corrisponde a “$query”.';
@@ -2979,6 +3003,14 @@ final class ItalianStrings extends Strings {
       'Nessun file corrisponde a “$query”.';
   @override
   String get wikilinkNoHeading => 'questa nota non ha un titolo con quel nome';
+  @override
+  String get wikilinkNoBlock => 'questa nota non ha un blocco con quell’id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'nessuna nota della libreria ha un titolo simile';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'nessuna nota della libreria ha un blocco con quell’id';
   @override
   String get wikilinkNoNote => 'niente nella libreria ha quel nome o alias';
   @override

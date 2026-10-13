@@ -32,6 +32,7 @@ import 'dart:convert';
 
 import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/links/link_moves.dart';
+import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/parser.dart';
 
 /// The links of [source] retargeted for a move.
@@ -144,7 +145,7 @@ String? _renamedBareName(String target, String? from, String? to) {
 /// The whole `[[…]]` of [target] with [ref]'s heading and alias, as an embed
 /// (`![[…]]`) when it was written as one.
 String _wikiText(String target, WikiRef ref, {required bool embed}) {
-  final heading = ref.heading == null ? '' : '#${ref.heading}';
+  final heading = ref.fragment == null ? '' : '#${ref.fragment}';
   final alias = ref.alias == null ? '' : '|${ref.alias}';
   return '${embed ? '!' : ''}[[$target$heading$alias]]';
 }
@@ -158,7 +159,9 @@ String? _markdownHref(
   LinkMoves moves,
 ) {
   final trimmed = href.trim();
-  if (trimmed.isEmpty || trimmed.startsWith('#') || _hasScheme(trimmed)) {
+  if (trimmed.isEmpty ||
+      trimmed.startsWith('#') ||
+      LinkPaths.hasScheme(trimmed)) {
     return null;
   }
   final hash = trimmed.indexOf('#');
@@ -319,11 +322,6 @@ String? _walk(List<String> segments, String? from) {
   }
   return path.isEmpty ? null : path.join('/');
 }
-
-final RegExp _scheme = RegExp('^[a-zA-Z][a-zA-Z0-9+.-]*://');
-
-/// Whether [href] is a URL rather than a path.
-bool _hasScheme(String href) => _scheme.hasMatch(href);
 
 /// Whether [rune] can sit in a Markdown href as written.
 ///

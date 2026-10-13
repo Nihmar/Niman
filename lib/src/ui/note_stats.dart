@@ -163,6 +163,11 @@ final class NoteStatsController extends ChangeNotifier {
     );
   }
 
+  /// How long a note waits after the last edit before what is derived from
+  /// it is worked out again: [refresh]'s own pause, which the note's other
+  /// background readers (its dead links, #847) keep to as well.
+  Duration get settleDelay => _delay;
+
   /// How long the writer has to pause before the word count and the outline
   /// are worked out again.
   ///

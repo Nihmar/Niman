@@ -15,9 +15,14 @@ library;
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:niman/src/links/parser.dart' show wikiDisplayText;
+import 'package:niman/src/links/block_anchors.dart' show withoutTrailingBlockId;
+import 'package:niman/src/links/dead_links.dart';
+import 'package:niman/src/links/link_preview.dart';
+import 'package:niman/src/links/parser.dart' show parseWikiRef, wikiDisplayText;
 import 'package:niman/src/markdown/inline/inline_node.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
 import 'package:niman/src/markdown/read_block.dart';
@@ -27,12 +32,29 @@ import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
 
+/// What the links a leaf draws tell the link preview (#846): the pointer came
+/// onto one (with where it is, globally) or left it, and — on a touch screen,
+/// where nothing hovers — a long press on one.
+typedef LinkPreviewHooks = ({
+  void Function(PreviewLink link, Offset at) onEnter,
+  VoidCallback onExit,
+  void Function(PreviewLink link)? onLongPress,
+});
+
 /// What a tap on a drawn construct calls.
 typedef InlineTaps = ({
   void Function(String text, String? href)? onTapLink,
   void Function(String inner)? onTapWikiLink,
   Future<String?> Function(String target)? embedResolver,
   Map<String, ui.Image>? embedImages,
+
+  /// The links of the note that name nothing (#847), drawn muted; null draws
+  /// every link as a live one.
+  ValueListenable<DeadLinks>? deadLinks,
+
+  /// What the links tell the link preview; null draws links that preview
+  /// nothing.
+  LinkPreviewHooks? linkPreview,
 });
 
 /// Draws inline nodes as spans.
@@ -46,6 +68,7 @@ final class InlineSpans {
     required this.taps,
     this.availableWidth,
     this.footnoteNumbers = const <String, int>{},
+    this.deadLinks = DeadLinks.none,
   });
 
   /// The typography and colours.
@@ -67,12 +90,36 @@ final class InlineSpans {
   /// The number each footnote is cited as, by its normalized label.
   final Map<String, int> footnoteNumbers;
 
+  /// The links of the note that name nothing (#847): drawn in the muted
+  /// colour of a link that is not there yet.
+  final DeadLinks deadLinks;
+
+  /// [nodes] with the ` ^id` that ends their text taken off: the id and the
+  /// space before it, nothing when the text is the id alone.
+  static List<InlineNode> _withoutBlockId(List<InlineNode> nodes) {
+    if (nodes.isEmpty) return nodes;
+    final last = nodes.last;
+    if (last is! TextNode) return nodes;
+    final shown = withoutTrailingBlockId(last.text);
+    if (shown == last.text) return nodes;
+    return [
+      ...nodes.take(nodes.length - 1),
+      if (shown.isNotEmpty)
+        TextNode(shown, start: last.start, end: last.start + shown.length),
+    ];
+  }
+
   /// The spans of [inline], in order.
-  List<InlineSpan> of(ReadInline inline) {
+  ///
+  /// With [hideBlockId] a ` ^id` that ends the text is left out, as Obsidian's
+  /// reading view leaves it (#844): the id names the block for a link, and
+  /// the note keeps it — `live` and `source` show it, and nothing here
+  /// changes the file.
+  List<InlineSpan> of(ReadInline inline, {bool hideBlockId = false}) {
     final spans = <InlineSpan>[];
+    final nodes = hideBlockId ? _withoutBlockId(inline.nodes) : inline.nodes;
     final stack = <_Frame>[
-      for (final node in inline.nodes.reversed)
-        _Frame(node, const _Style(), null),
+      for (final node in nodes.reversed) _Frame(node, const _Style(), null),
     ];
     while (stack.isNotEmpty) {
       final frame = stack.removeLast();
@@ -91,7 +138,12 @@ final class InlineSpans {
           _push(stack, children, style.and(tag: tag), frame.link);
         case LinkNode(:final destination, :final children):
           final link = _Link(destination, ReadInline.plainOf(children));
-          _push(stack, children, style.and(link: true), link);
+          _push(
+            stack,
+            children,
+            style.and(link: true, dead: deadLinks.hrefIsDead(destination)),
+            link,
+          );
         case ImageNode():
           spans.add(_image(node, style));
         case TextNode(:final text):
@@ -149,11 +201,35 @@ final class InlineSpans {
   InlineSpan _text(String text, _Style style, _Link? link) {
     final drawn = style.apply(this);
     if (link == null) return TextSpan(text: text, style: drawn);
+    final preview = PreviewLink.markdown(link.href);
+    return _linkSpan(
+      text,
+      drawn,
+      preview,
+      () => taps.onTapLink?.call(link.text, link.href),
+    );
+  }
+
+  /// The span of a link: tapped it follows, and it tells the link preview
+  /// where the pointer is and what a long press on it asks for (#846).
+  TextSpan _linkSpan(
+    String text,
+    TextStyle style,
+    PreviewLink link,
+    VoidCallback onTap,
+  ) {
+    final hooks = taps.linkPreview;
+    final longPress = hooks?.onLongPress;
     return TextSpan(
       text: text,
-      style: drawn,
-      recognizer: TapGestureRecognizer()
-        ..onTap = () => taps.onTapLink?.call(link.text, link.href),
+      style: style,
+      recognizer: longPress == null
+          ? (TapGestureRecognizer()..onTap = onTap)
+          : (_LinkTapRecognizer(() => longPress(link))..onTap = onTap),
+      onEnter: hooks == null
+          ? null
+          : (event) => hooks.onEnter(link, event.position),
+      onExit: hooks == null ? null : (_) => hooks.onExit(),
     );
   }
 
@@ -191,11 +267,16 @@ final class InlineSpans {
         : InlineMathView(cache: mathCache, tex: tex, style: mathStyleFor(base)),
   );
 
-  InlineSpan _wikilink(String inner, _Style style) => TextSpan(
-    text: wikiDisplayText(inner),
-    style: _tinted(style.apply(this), theme.wikilink),
-    recognizer: TapGestureRecognizer()
-      ..onTap = () => taps.onTapWikiLink?.call(inner),
+  InlineSpan _wikilink(String inner, _Style style) => _linkSpan(
+    wikiDisplayText(inner),
+    _tinted(
+      style.apply(this),
+      deadLinks.wikiIsDead(parseWikiRef(inner))
+          ? theme.deadWikilink
+          : theme.wikilink,
+    ),
+    PreviewLink.wiki(inner),
+    () => taps.onTapWikiLink?.call(inner),
   );
 
   /// `![[target|alias]]`: the picture, or the note's own words for it.
@@ -257,6 +338,29 @@ final class InlineSpans {
   }
 }
 
+/// A tap that is also a long press: a link on a touch screen follows on a tap
+/// and previews on a press and hold (#846). The two compete in the gesture
+/// arena as they do under any widget that takes both.
+final class _LinkTapRecognizer extends TapGestureRecognizer {
+  new(VoidCallback onLongPress) {
+    _longPress = LongPressGestureRecognizer()..onLongPress = onLongPress;
+  }
+
+  late final LongPressGestureRecognizer _longPress;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    _longPress.addPointer(event);
+  }
+
+  @override
+  void dispose() {
+    _longPress.dispose();
+    super.dispose();
+  }
+}
+
 /// A node to draw, the style of the constructs around it, and the link it
 /// is in.
 final class _Frame {
@@ -285,6 +389,7 @@ final class _Style {
     this.underlined = false,
     this.code = false,
     this.link = false,
+    this.dead = false,
     this.shift,
   });
 
@@ -296,6 +401,9 @@ final class _Style {
   final bool code;
   final bool link;
 
+  /// Whether the link names nothing (#847).
+  final bool dead;
+
   /// `sup` or `sub`, the innermost.
   final String? shift;
 
@@ -306,6 +414,7 @@ final class _Style {
     bool marked = false,
     bool code = false,
     bool link = false,
+    bool dead = false,
     String? tag,
   }) => _Style(
     italic: this.italic || italic,
@@ -315,13 +424,19 @@ final class _Style {
     underlined: underlined || tag == 'u',
     code: this.code || code,
     link: this.link || link,
+    dead: this.dead || dead,
     shift: tag == 'sup' || tag == 'sub' ? tag : shift,
   );
 
   /// The text style it makes of [spans]' base.
   TextStyle apply(InlineSpans spans) {
     var style = code ? spans._code : spans.base;
-    if (link) style = spans._tinted(style, spans.theme.link);
+    if (link) {
+      style = spans._tinted(
+        style,
+        dead ? spans.theme.deadLink : spans.theme.link,
+      );
+    }
     final decorations = <TextDecoration>[
       if (style.decoration != null && style.decoration != TextDecoration.none)
         style.decoration!,

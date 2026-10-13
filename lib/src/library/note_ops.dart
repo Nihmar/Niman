@@ -28,6 +28,9 @@ import 'package:niman/src/library/note_trash.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/link_preview.dart';
+import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -400,7 +403,12 @@ final class NoteOps implements NoteOperations {
 
   /// The folder at [path], created with its parents if missing.
   ///
-  /// No uniquifying: the caller named a folder, not a wish for one.
+  /// No uniquifying: the caller named a folder, not a wish for one. A folder
+  /// the library already holds under another spelling is that folder —
+  /// `[[Projects/Three laws]]` lands in the `projects` that is there, as
+  /// `[[Note]]` opens `note.md` — and the path is canonicalized segment by
+  /// segment, so a folder made below a reused one sits inside the spelled
+  /// one (#847).
   @override
   Future<Note> ensureFolder(String path) {
     return _synchronized(() async {
@@ -410,19 +418,26 @@ final class NoteOps implements NoteOperations {
         // a thing a caller can mean.
         throw ArgumentError('ensureFolder was given no folder: "$path"');
       }
-      final dir = Directory(_abs(clean));
+      final segments = <String>[];
+      for (final segment in clean.split('/')) {
+        final existing = await _dao.folderIgnoringCase(
+          resolvePath(segments.join('/'), segment),
+        );
+        segments.add(existing?.name ?? segment);
+      }
+      final canonical = segments.join('/');
+      final dir = Directory(_abs(canonical));
       if (!dir.existsSync()) {
         await dir.create(recursive: true);
         // Every folder on the way is new too, so the index hears about
         // the whole chain rather than only its last link.
-        final segments = clean.split('/');
         final made = <String>[
           for (var i = 1; i <= segments.length; i++)
             _abs(segments.take(i).join('/')),
         ];
         await indexer.applyEvents(root, made);
       }
-      return await _mustFind(clean);
+      return await _mustFind(canonical);
     });
   }
 
@@ -614,6 +629,43 @@ final class NoteOps implements NoteOperations {
     );
   }
 
+  /// The block anchors of the note at [path] — its blocks that end with a
+  /// ` ^id` (#844) — read and walked where the note lies, off the UI isolate,
+  /// as [noteHeadings] reads the headings.
+  Future<List<BlockAnchor>> noteBlocks(String path) async {
+    await _mustFind(path);
+    final abs = _abs(path);
+    return await IsolateGauge.run(
+      () => blocksOfNoteFile(abs),
+      'blocks "$path"',
+    );
+  }
+
+  /// The beginning of the note at [path] for a preview card (#846): its first
+  /// [PreviewLimits.bytes] bytes, read and decoded where the note lies, off
+  /// the UI isolate. A novel-length note is not read whole to show a card.
+  Future<NotePreviewText> notePreview(String path) async {
+    await _mustFind(path);
+    final abs = _abs(path);
+    return await IsolateGauge.run(
+      () => previewTextOfNoteFile(abs),
+      'preview "$path"',
+    );
+  }
+
+  /// The links and embeds of the note at [path] with the line around each —
+  /// what a list of the notes that link to another reads a mention from
+  /// (#842) — read, decoded and parsed where the note lies, off the UI
+  /// isolate.
+  Future<List<LinkSpot>> noteLinkSpots(String path) async {
+    await _mustFind(path);
+    final abs = _abs(path);
+    return await IsolateGauge.run(
+      () => linkSpotsOfNoteFile(abs),
+      'link spots "$path"',
+    );
+  }
+
   /// Pins or unpins the note at [path] by editing its frontmatter.
   ///
   /// Unpinning removes the key rather than writing `pinned: false`: the
@@ -782,10 +834,47 @@ final class NoteOps implements NoteOperations {
 /// [NoteOps.readNote] does — and walked for its headings, so this is work
 /// for a background isolate ([IsolateGauge.run]), never the UI's (#491).
 List<String> headingsOfNoteFile(String path) {
+  return [for (final heading in outlineOfText(_noteTextAt(path))) heading.text];
+}
+
+/// The block anchors of the note file at absolute [path] (#844), read as
+/// [headingsOfNoteFile] reads: work for a background isolate.
+List<BlockAnchor> blocksOfNoteFile(String path) =>
+    blockAnchorsOfText(_noteTextAt(path));
+
+/// The first [PreviewLimits.bytes] bytes of the note file at absolute [path],
+/// decoded as a note is, its BOM off and its line endings `\n` (#846): work
+/// for a background isolate.
+NotePreviewText previewTextOfNoteFile(String path) {
+  final file = File(path).openSync();
+  final List<int> head;
+  final bool truncated;
+  try {
+    head = file.readSync(PreviewLimits.bytes);
+    truncated = file.lengthSync() > PreviewLimits.bytes;
+  } finally {
+    file.closeSync();
+  }
+  var text = decodeNoteText(Uint8List.fromList(head));
+  if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
+    text = text.substring(1);
+  }
+  return NotePreviewText(
+    text: text.replaceAll('\r\n', '\n').replaceAll('\r', '\n'),
+    truncated: truncated,
+  );
+}
+
+/// The link spots of the note file at absolute [path] (#842): work for a
+/// background isolate.
+List<LinkSpot> linkSpotsOfNoteFile(String path) =>
+    linkSpotsOf(_noteTextAt(path));
+
+String _noteTextAt(String path) {
   final bytes = File(path).readAsBytesSync();
   var text = decodeNoteText(bytes);
   if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
     text = text.substring(1);
   }
-  return [for (final heading in outlineOfText(text)) heading.text];
+  return text;
 }

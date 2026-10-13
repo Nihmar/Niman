@@ -9,6 +9,7 @@
 library;
 
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/links/block_id.dart';
 
 /// A parsed link occurrence in a document; [start]..[end] are absolute
 /// offsets into the source text (`[`, `(`… or `[[`…`]]`).
@@ -71,23 +72,57 @@ final class MarkdownLink extends ParsedLink {
   final bool angled;
 }
 
-/// The inside of `[[…]]`, parsed into target / heading / alias.
+/// The inside of `[[…]]`, parsed into target / fragment / alias.
 ///
 /// Forms: `target`, `target|alias`, `target#heading`,
-/// `target#heading|alias`, `#heading`, `#heading|alias`, `|alias`.
+/// `target#heading#subheading`, `target#^block-id`, each also with
+/// `|alias`; and `#heading`, `#^id`, `|alias`. The fragment after the first
+/// `#` is either a heading path ([heading]) or a block id ([block]) — never
+/// both.
 final class WikiRef {
-  /// Creates a wiki ref: [target] and optional [heading] / [alias].
-  const new({required this.target, this.heading, this.alias});
+  /// Creates a wiki ref: [target] and optional [heading] / [block] / [alias].
+  const new({required this.target, this.heading, this.block, this.alias})
+    : assert(
+        heading == null || block == null,
+        'a fragment is a heading or a block, never both',
+      );
 
   /// The note reference before any `#`/`|` (trimmed). Empty for `[[#heading]]`
   /// and `[[|alias]]` — "the current note".
   final String target;
 
-  /// The heading text after `#` (trimmed), or null when absent or empty.
+  /// The heading path after `#` as written (trimmed): `H1#H2` for a
+  /// subheading. Null when absent, empty, or a block link.
   final String? heading;
+
+  /// The block id after `#^` (`[[note#^37066d]]` is `37066d`), or null.
+  ///
+  /// A block link points at a paragraph, list item or quote by the id its
+  /// block ends with (` ^37066d`); ids are matched literally and are made
+  /// of letters, digits and dashes.
+  final String? block;
 
   /// The display text after `|` (trimmed), or null when absent or empty.
   final String? alias;
+
+  /// The heading path as its levels, outermost first: `A#B` is `[A, B]`.
+  /// Empty for a ref with no heading.
+  List<String> get headingPath => headingPathOf(heading);
+
+  /// The anchor as it is written after the `#` and as it travels between the
+  /// parser, the resolver, the shell and the note's jump: `^id` for a block,
+  /// the heading path otherwise; null when the ref has none.
+  String? get fragment => block != null ? '^$block' : heading;
+}
+
+/// The levels of the heading path [heading] (`H1#H2`), trimmed, empty ones
+/// dropped; empty for null.
+List<String> headingPathOf(String? heading) {
+  if (heading == null) return const <String>[];
+  return [
+    for (final part in heading.split('#'))
+      if (part.trim().isNotEmpty) part.trim(),
+  ];
 }
 
 /// All links in [text], in document order, with absolute offsets.
@@ -137,7 +172,7 @@ List<ParsedLink> linksInDocument(
           );
           continue;
         }
-        if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
+        if (ref.target.isEmpty && ref.fragment == null && ref.alias == null) {
           continue;
         }
         out.add(
@@ -207,10 +242,12 @@ MarkdownLink _parseImage(String src, int start, int end, int absStart) {
 /// Parses the inside of `[[…]]` (without the brackets).
 ///
 /// Split rules: the first `|` separates the display alias; the first `#`
-/// before it separates the heading; everything before `#` is the target.
-/// Parts are trimmed; an absent or empty heading/alias is null. This is the
-/// single parse rule — the indexer, the editor Ctrl+click and the preview
-/// all call it.
+/// before it separates the fragment; everything before `#` is the target.
+/// A fragment that starts with `^` and is a valid block id is a block link;
+/// any other is a heading path, whose further `#` separate the levels
+/// (`H1#H2`) and are kept as written. Parts are trimmed; an absent or empty
+/// fragment/alias is null. This is the single parse rule — the indexer, the
+/// editor Ctrl+click and the preview all call it.
 WikiRef parseWikiRef(String inner) {
   final s = inner.trim();
   final pipe = s.indexOf('|');
@@ -218,10 +255,13 @@ WikiRef parseWikiRef(String inner) {
   final aliasText = pipe == -1 ? null : s.substring(pipe + 1).trim();
   final hash = before.indexOf('#');
   final target = (hash == -1 ? before : before.substring(0, hash)).trim();
-  final headingText = hash == -1 ? null : before.substring(hash + 1).trim();
+  final fragment = hash == -1 ? '' : before.substring(hash + 1).trim();
+  final isBlock =
+      fragment.startsWith('^') && BlockId.isValid(fragment.substring(1));
   return WikiRef(
     target: target,
-    heading: headingText == null || headingText.isEmpty ? null : headingText,
+    heading: fragment.isEmpty || isBlock ? null : fragment,
+    block: isBlock ? fragment.substring(1) : null,
     alias: aliasText == null || aliasText.isEmpty ? null : aliasText,
   );
 }

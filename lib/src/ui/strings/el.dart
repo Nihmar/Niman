@@ -932,7 +932,15 @@ final class GreekStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Ο τίτλος δεν βρέθηκε';
   @override
+  String get blockNotFoundTitle => 'Το μπλοκ δεν βρέθηκε';
+  @override
   String get ambiguousLinkTitle => 'Πολλές σημειώσεις ταυτίζονται';
+  @override
+  String get linksToNoteTitle => 'Σύνδεσμοι προς αυτή τη σημείωση';
+  @override
+  String get linksToNoteEmpty => 'Καμία σημείωση δεν παραπέμπει εδώ ακόμη';
+  @override
+  String get linksToNoteEmbed => 'ενσωματωμένη';
   @override
   String get openLinkFailed => 'Δεν ήταν δυνατό το άνοιγμα του συνδέσμου';
 
@@ -941,9 +949,6 @@ final class GreekStrings extends Strings {
   String get missingNoteDialogTitle => 'Η σημείωση δεν υπάρχει';
   @override
   String missingNoteDialogBody(String path) => 'Δημιουργία «$path»;';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Ο φάκελος «$folder» δεν υπάρχει';
 
   // Task lists (T-TD-04).
   @override
@@ -3013,6 +3018,16 @@ final class GreekStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Η σήμανση ενός πλαισίου σημαίνει και όσα είναι ένθετα από '
       'κάτω. Η αφαίρεση τα αφήνει ως έχουν.';
+  @override
+  String get linkPreviewTitle => 'Προεπισκόπηση συνδέσμων';
+  @override
+  String get linkPreviewSubtitle =>
+      'Περάστε το ποντίκι πάνω από έναν σύνδεσμο στην ανάγνωση ή κρατήστε '
+      'πατημένο το Ctrl (⌘ σε Mac) πάνω από έναν στον επεξεργαστή για να '
+      'δείτε τη σημείωση στην οποία δείχνει σε μια μικρή κάρτα. Σε οθόνη '
+      'αφής, πατήστε παρατεταμένα έναν σύνδεσμο στην ανάγνωση.';
+  @override
+  String get linkPreviewOpen => 'Άνοιγμα';
 
   // Rebuilding the index file (#368).
 
@@ -3039,12 +3054,21 @@ final class GreekStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Τίτλοι σε $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Μπλοκ σε $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Τίτλοι σε όλη τη βιβλιοθήκη';
+  @override
+  String get wikilinkBlocksEverywhere => 'Μπλοκ σε όλη τη βιβλιοθήκη';
+  @override
   String wikilinkPlacesIn(String named) => 'Θέσεις σε $named';
   @override
   String get wikilinkThisNote => 'αυτή η σημείωση';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Κανένας τίτλος δεν ταιριάζει με «$query».';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Κανένα μπλοκ δεν ταιριάζει με «$query».';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Καμία σημείωση δεν ταιριάζει με «$query».';
@@ -3054,6 +3078,15 @@ final class GreekStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'αυτή η σημείωση δεν έχει τίτλο με αυτό το όνομα';
+  @override
+  String get wikilinkNoBlock =>
+      'αυτή η σημείωση δεν έχει μπλοκ με αυτό το αναγνωριστικό';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'καμία σημείωση της βιβλιοθήκης δεν έχει τέτοιον τίτλο';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'καμία σημείωση της βιβλιοθήκης δεν έχει μπλοκ με αυτό το αναγνωριστικό';
   @override
   String get wikilinkNoNote =>
       'τίποτα στη βιβλιοθήκη δεν έχει αυτό το όνομα ή ψευδώνυμο';

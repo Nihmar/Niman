@@ -78,13 +78,7 @@ final class ExportHooks extends HtmlHooks {
 
   @override
   String? headingId(String text) {
-    final id = headingAnchor(text);
-    if (_ids.add(id)) return id;
-    var suffix = 2;
-    while (!_ids.add('$id-$suffix')) {
-      suffix++;
-    }
-    return '$id-$suffix';
+    return uniqueHeadingId(_ids, headingAnchor(text));
   }
 
   @override

@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:path/path.dart' as p;
 
 /// What the panel is listing.
 enum WikilinkPanelKind {
@@ -22,6 +23,15 @@ enum WikilinkPanelKind {
 
   /// A note's headings, after `#`.
   headings,
+
+  /// A note's block ids, after `#^` (#844).
+  blocks,
+
+  /// The headings of every note of the library, after `[[##` (#845).
+  libraryHeadings,
+
+  /// The block ids of every note of the library, after `[[^^` (#844).
+  libraryBlocks,
 
   /// A book's place forms, after `#` on a PDF or an EPUB.
   book,
@@ -154,9 +164,14 @@ final class WikilinkPanel extends StatelessWidget {
   Widget _caption(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final named = this.named.isEmpty ? AppStrings.wikilinkThisNote : this.named;
-    final sentence = kind == WikilinkPanelKind.book
-        ? AppStrings.wikilinkPlacesIn(named)
-        : AppStrings.wikilinkHeadingsIn(named);
+    final sentence = switch (kind) {
+      WikilinkPanelKind.book => AppStrings.wikilinkPlacesIn(named),
+      WikilinkPanelKind.blocks => AppStrings.wikilinkBlocksIn(named),
+      WikilinkPanelKind.libraryHeadings =>
+        AppStrings.wikilinkHeadingsEverywhere,
+      WikilinkPanelKind.libraryBlocks => AppStrings.wikilinkBlocksEverywhere,
+      _ => AppStrings.wikilinkHeadingsIn(named),
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
       decoration: BoxDecoration(
@@ -182,6 +197,18 @@ final class WikilinkPanel extends StatelessWidget {
       WikilinkPanelKind.headings => (
         AppStrings.wikilinkNoMatchHeading(query),
         AppStrings.wikilinkNoHeading,
+      ),
+      WikilinkPanelKind.blocks => (
+        AppStrings.wikilinkNoMatchBlock(query),
+        AppStrings.wikilinkNoBlock,
+      ),
+      WikilinkPanelKind.libraryHeadings => (
+        AppStrings.wikilinkNoMatchHeading(query),
+        AppStrings.wikilinkNoHeadingAnywhere,
+      ),
+      WikilinkPanelKind.libraryBlocks => (
+        AppStrings.wikilinkNoMatchBlock(query),
+        AppStrings.wikilinkNoBlockAnywhere,
       ),
       WikilinkPanelKind.embeds => (
         AppStrings.wikilinkNoMatchFile(query),
@@ -243,6 +270,7 @@ final class WikilinkPanel extends StatelessWidget {
               child: switch (entry) {
                 NoteSuggestion() => _noteRow(context, entry),
                 HeadingSuggestion() => _headingRow(context, entry),
+                BlockIdSuggestion() => _blockRow(context, entry),
                 BookSuggestion() => _bookRow(context, entry),
               },
             ),
@@ -311,21 +339,86 @@ final class WikilinkPanel extends StatelessWidget {
 
   Widget _headingRow(BuildContext context, HeadingSuggestion heading) {
     final scheme = Theme.of(context).colorScheme;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text.rich(
-        _nameSpan(
-          heading.heading,
-          query,
-          TextStyle(fontSize: 12.5, color: scheme.onSurface),
-          TextStyle(
-            fontSize: 12.5,
-            color: scheme.onSurface,
-            fontWeight: FontWeight.w700,
+    return Row(
+      children: <Widget>[
+        Flexible(
+          child: Text.rich(
+            _nameSpan(
+              heading.heading,
+              query,
+              TextStyle(fontSize: 12.5, color: scheme.onSurface),
+              TextStyle(
+                fontSize: 12.5,
+                color: scheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
+        if (heading.path != null) ...<Widget>[
+          const Spacer(),
+          _noteName(scheme, heading.path!),
+        ],
+      ],
+    );
+  }
+
+  /// A block id, bold where it matches, and the block's first words dimmed;
+  /// a row across the library also names its note.
+  Widget _blockRow(BuildContext context, BlockIdSuggestion block) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      children: <Widget>[
+        Text.rich(
+          _nameSpan(
+            '^${block.id}',
+            query.isEmpty ? '' : '^$query',
+            TextStyle(fontSize: 12.5, color: scheme.onSurface),
+            TextStyle(
+              fontSize: 12.5,
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          maxLines: 1,
+        ),
+        if (block.excerpt.isNotEmpty)
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Text(
+                block.excerpt,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        if (block.path != null) ...<Widget>[
+          const Spacer(),
+          _noteName(scheme, block.path!),
+        ],
+      ],
+    );
+  }
+
+  /// The note a row of the library-wide lists is in, dimmed at the right.
+  Widget _noteName(ColorScheme scheme, String path) {
+    final name = p.basename(path);
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Text(
+        name.toLowerCase().endsWith('.md')
+            ? name.substring(0, name.length - 3)
+            : name,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
       ),
     );
   }

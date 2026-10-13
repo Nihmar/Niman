@@ -28,6 +28,10 @@ enum DockPane {
   /// The note's tags, and the notes that share them.
   tags,
 
+  /// The notes that link to the note, each with the line it says it on
+  /// (#842).
+  links,
+
   /// The note's kept versions.
   history,
 

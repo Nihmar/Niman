@@ -8,7 +8,10 @@ Forms (target, heading, alias combine freely):
 - `[[note|alias]]` — displayed as `alias`
 - `[[note#heading]]` — jumps to the heading
 - `[[note#heading|alias]]`
-- `[[#heading]]` / `[[|alias]]` — the current note
+- `[[note#heading#subheading]]` — a subheading, by its path
+  (see *Heading links* below)
+- `[[note#^id]]` — jumps to a block (see *Block links* below)
+- `[[#heading]]` / `[[#^id]]` / `[[|alias]]` — the current note
 
 Click (or Ctrl+click in the source editor) to navigate. While the
 opening modifier is held over a link the pointer becomes a hand, so the
@@ -43,7 +46,29 @@ the note's. The panel lists:
   folder as it takes when another file shares the name. A Markdown
   embed, `![](…)`, has no panel, as a Markdown link has none;
 - after a `#` — the headings of the note just named, filtered the same
-  way. `[[#` — no target — lists the headings of the note being edited;
+  way. `[[#` — no target — lists the headings of the note being edited.
+  After a second `#` (`[[note#Part#`) the same list is filtered by the
+  level being typed;
+- after `#^` — the block ids of the note just named, each with the first
+  words of its block, filtered by the id or by those words. `[[#^`
+  lists the ids of the note being edited;
+- after `##` — `[[##` — the headings of **every note of the library**, each
+  with its note dimmed beside it, filtered by what follows (`[[## team]]`
+  lists the headings that hold the word *team*). Choosing one writes the
+  whole link, `[[Team notes#Team plan]]`, with the note named as the note
+  rows name it (as much of its folder as it takes to tell it from a note
+  of the same name); a heading of the note being edited is written
+  `[[#Team plan]]`, as Obsidian writes the link to the note it is in;
+- after `^^` — `[[^^` — the block ids of every note of the library, with
+  the same rows and the same choice: `[[^^idea]]` lists the ids and
+  blocks that hold *idea*, and choosing one writes `[[Plan#^idea-1]]`
+  (`[[#^idea-1]]` for this note). The library-wide lists show at most 50
+  rows, from the library's word index, so they cost the same in a library
+  of a million notes as in one of a hundred: type more of the heading to
+  narrow them, as the word is matched by its start (`tea` finds *Team*)
+  and without its accents (`resume` finds *Résumé*). When more notes hold
+  the words than the list reads, it reads the ones where they weigh most
+  — a short heading made of them before a long one that mentions them;
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or
   `chapter=`. Once the form's key is written, what follows the `=` is the
   number you type: the panel is not offered again there, so `⏎` or `Tab`
@@ -66,6 +91,107 @@ chosen: no note is created from it, and a name that matches nothing is
 left as typed (see *Dead links* below for where a new note comes from).
 The rows come from the index the app already keeps; nothing is scanned to
 fill the panel.
+
+## Heading links
+
+`[[note#heading]]` lands on the heading, whatever its case or punctuation
+(`## A Heading!` is `[[note#a heading]]`). A heading that shares its text
+with another one — two notes' worth of `## Details` in a long note — is
+told apart by its parents: `[[note#Part one#Details]]` is the `Details`
+inside the section of `Part one`, however deep below it, and
+`[[#Part one#Details]]` is the same inside the note being edited. The path
+is read by the outline's levels: `A#C` finds `C` only in the section of
+`A` (up to the next heading as high as `A`), so a `C` under another
+heading is not it. A single heading still lands on the first one of that
+name. Moving or renaming the note rewrites the target and keeps the whole
+path.
+
+A `#` in a heading's own text is fine: `[[note#Issue #12]]` and
+`[[note#C#]]` land on the headings `Issue #12` and `C#`. The path is tried
+first (`Issue` and, inside it, `12`); when the note has no such path, the
+whole text is read as one heading. The same rule is used when you follow the
+link, in the link preview and in an exported page. A heading holding a `|` or
+a bracket cannot be written in a link, so the panels do not offer it.
+
+## Block links
+
+`[[note#^id]]` links to one **block** — a paragraph, a list item, a quote —
+instead of the whole note or a heading. The block carries a name at its
+end, a space and a caret and the id (` ^37066d`); the id is letters,
+digits and dashes, so a readable one works too (`^quote-of-the-day`).
+
+- a paragraph, a list item or a heading ends with it:
+  `This is the idea. ^37066d`;
+- a quote, a callout, a table, or a whole list takes it on **a line of its
+  own below it**, after a blank line:
+
+  ```
+  > A quote worth keeping.
+
+  ^quote-of-the-day
+  ```
+
+  Only the whole block is a target: a part of a quote, a callout or a
+  table is not (Obsidian's limit too).
+
+Choose an id from the panel (`[[note#^`) or write it. The id is matched
+**literally**, case included; following the link brings the block into view
+at its first line (for a paragraph of several lines, the one it starts
+on, not the one that ends with the id). A link to an id the note does
+not have says *Block not found*. The ids of a note are the same in the
+editor and in the index; an id in a code block (indented code included), a
+formula or the frontmatter is not one, an id in the middle of a block is
+not one either, and if two blocks carry the same id the first owns it.
+
+The read view leaves the ` ^id` out of the text, as Obsidian's reading view
+does; the editor (`live` and `source`) keeps showing it, and the note's
+file is never changed by hiding it. Renaming or moving the note carries
+`#^id` along like any other fragment.
+
+> **Only Obsidian reads them.** Block references are specific to
+> Obsidian, not part of standard Markdown: in another editor `^37066d`
+> is plain text at the end of a line, and a `[[note#^id]]` link is not
+> followed there. Niman writes nothing of the kind on its own; a block
+> link is only what you type or choose.
+
+## Links to this note
+
+Links go both ways in a library, and the open note shows the other one: the
+notes that **link to it**, each with the line it says the link on. It is in
+three places, one list:
+
+- **under the note**, a header — *Links to this note*, with the count — that
+  opens onto the list and shuts again. It is always there while a library is
+  open, so it never appears under your thumb; with no one linking in, it opens
+  onto the words that say so. A note opened from outside a library has none;
+- **in the side panel** on a window wide enough for it (1000 px and up), the
+  *Links* pane beside Outline, Tags and History, following the note in the
+  focused pane;
+- **as a sheet on a phone**, from the note's ⋮ menu — *Links to this note* —
+  as the Outline and Tags are (see [platforms](platforms.md)).
+
+A row is the note's name, its folder dimmed, and the line it says the link
+on, cut to two rows of the list (a long line is a window around the link, with
+`…` where it was cut; a list or quote mark is taken off its head). A tap opens
+the note that holds the link. A note that links to this one in more than one
+way is one row, shown by its link; one that only **embeds** it (`![[note]]`,
+`![](note.md)`) is one row too, marked *embed*. The list is in path order and
+holds the first 200 notes; the count says `200+` past that.
+
+What is listed is what the index records as a link: a wikilink or a Markdown
+link that resolves to this note, wherever the writer is in the library, and
+embeds. A note's own link to itself is not a mention, and a link to a note that
+does not exist yet (a [dead link](#dead-links)) is no one's mention — it
+names no note. The list is one indexed lookup however large the library is;
+the line of each row is read from the note that holds it only as the row is
+drawn (so only the rows you scroll to), off the app's main thread, and kept
+until that note changes. The list is read again a moment after the library's
+index changes.
+
+**Unlinked mentions** — a note's name written in another note's text without a
+link, which Obsidian's panel lists too — are not shown: finding them is a
+search over the text of the whole library, and turning one into a link is a
+separate feature. Only linked mentions are here.
 
 ## Markdown links
 
@@ -166,7 +292,31 @@ past its end, a chapter it lost) opens it where you left it.
 ## Dead links
 
 A link whose target note does not exist is a *dead link*, and a dead
-link is where a note comes from. In the editor, **Ctrl+click**
+link is where a note comes from.
+
+**A dead link is drawn muted**, before it is clicked: in the editor (`live`
+and `source`) and in the read view, a wikilink or a Markdown link to a file
+the library does not hold takes the quieter colour of the markers around the
+text, still underlined, in the light and the dark theme alike; a live link
+keeps the link colour. So a typo, and a note you have named but not written
+yet, are told from a link that works. Only a link to a *file* is judged: a
+web address, a `#anchor` in the same note, and an href with no extension
+(which Niman does not follow either) are never dead. A name that several
+notes share is not dead, it is ambiguous. And it is the note that counts:
+`[[Note#Nope]]` and `[[Note#^nope]]` stay live as long as `Note` exists —
+Niman, like Obsidian, marks a link at the level of the note, not of its
+heading or block. A label-first link, `[[a label|filename]]`, is dead only
+if neither `a label` nor `filename` is a note.
+
+The links of the open note are resolved against the library's index in one
+batch, off the drawing: when the note opens, a short pause after you stop
+typing (the same pause the word count waits), and whenever the library's index
+changes — a note made, renamed or deleted anywhere turns the links to it live
+or dead without touching the note. A link you have just typed is drawn as a
+live one until the next resolution. Nothing is read from the disk for it, and
+a note too long to read twice (over 32 MB) keeps its links drawn as they were.
+
+In the editor, **Ctrl+click**
 (**Cmd+click** on macOS), the same gesture that follows a link, is its
 own confirmation: the note the link names is created on the spot and
 opened, and the writer is left in it.
@@ -192,13 +342,57 @@ A library written before the rule had its own setting for this,
 `openNoteFolder`).
 
 A target that names a folder (`[[Sub/Foo]]`) keeps that folder, whatever
-the setting says; Niman
-does not create intermediate folders, so a missing folder shows an
-error. Targets with an extension (`[[photo.png]]`) are attachments,
-not notes: they are never created. External URLs keep their behavior.
+the setting says, **and the folders are made with the note**:
+`[[Projects/Three laws]]` creates `Projects/` if the library has none, and
+the note inside it, as Obsidian does — a folder the library already has
+under another spelling is that folder. The confirmation dialog names the
+whole proposed path, so you see what is about to be made, and Cancel makes
+neither the note nor its folders. Each name is cleaned the way a note's
+name is, and a segment that names nothing (`.`, `..`, empty) is dropped, so
+a link never creates anything outside the library; a segment that starts
+with a dot names a hidden folder, and the link is refused rather than made
+there. If a name on the way is already a file, or the disk refuses, nothing
+is made and the link stays dead. Targets with an extension (`[[photo.png]]`)
+are attachments, not notes: they are never created. External URLs keep their
+behavior.
 
 Notes opened without a library (editor-only mode) keep the old
 "link not found" outcome.
+
+## Preview a link
+
+A link can show what it points at before you go there. The card is the note,
+rendered as the read view renders it, in a box of a fixed size that scrolls —
+a note of any length — and it never navigates:
+
+- **in the read view**, rest the pointer on a link for a moment (a sweep
+  across the page opens nothing);
+- **in the editor** (`live` and `source`), hold **Ctrl** (**⌘** on a Mac) over
+  the link — the same key that follows it, so the card says *this is where it
+  goes* — and the card opens at once. Without the key the pointer stays the
+  text caret and nothing opens;
+- **on a touch screen**, press and hold a link in the read view: the same
+  note opens as a **bottom sheet** with an **Open** button that follows the
+  link, as a tap does. A tap still follows it. The Android editor has no
+  preview: it has no pointer to rest on a link, and a long press there
+  selects text (see [platforms](platforms.md)).
+
+The card stands at the pointer, inside the window. It stays while the pointer
+is on it, so you can scroll it, and closes when the pointer leaves the link
+and the card, on **Esc**, when the note scrolls, when you press anywhere, and
+when the note is edited. A link to a `#heading`, a `#heading#subheading` or a
+`#^block` opens the card scrolled to it. A link that names nothing — a dead
+link, a name several notes share, a web address, a file that is not a note,
+the note the link is written in — has no card.
+
+It reads the first 256 KB of the note off the app's main thread, once for each
+revision of it, keeping the last sixteen: moving across a page of links does
+not read a note twice. A heading further down a longer note than that is not
+found, and the card shows the top. A note that is open with edits the disk
+does not have yet is shown as its buffer holds it, not as the file still is.
+
+**Settings → Editor → Preview links** (on by default) turns the cards, and the
+sheet, off for the library.
 
 ## Dropping a file from the tree
 

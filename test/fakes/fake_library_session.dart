@@ -31,7 +31,8 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -432,6 +433,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setCascadeChecklist({required bool enabled}) async {
     _config = _config.copyWith(cascadeChecklist: enabled);
+  }
+
+  @override
+  Future<bool> get linkPreview async => _config.linkPreview;
+
+  @override
+  Future<void> setLinkPreview({required bool enabled}) async {
+    _config = _config.copyWith(linkPreview: enabled);
   }
 
   @override
@@ -935,7 +944,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   FakeLinkSource? linkSourceOverride;
 
   @override
-  Future<LinkSource?> get linkSource async =>
+  Future<LibraryLinks?> get linkSource async =>
       linkSourceOverride ??
       FakeLinkSource(notes: [for (final note in _liveNotes()) note.path]);
 
@@ -1354,14 +1363,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (clean.isEmpty) {
       throw ArgumentError('ensureFolder was given no folder: "$path"');
     }
-    final segments = clean.split('/');
+    // A folder the library already has under another spelling is that
+    // folder, as the real ops reuse it (#847).
+    final segments = <String>[];
+    for (final segment in clean.split('/')) {
+      final existing = _findDirIgnoringCase(
+        resolvePath(segments.join('/'), segment),
+      );
+      segments.add(existing?.name ?? segment);
+    }
     for (var i = 1; i <= segments.length; i++) {
       final rel = segments.take(i).join('/');
       if (_findRow(rel) != null) continue;
       _addRow(rel, isDir: true);
     }
     _bump();
-    return _noteAt(clean);
+    return _noteAt(segments.join('/'));
   }
 
   @override
@@ -1589,6 +1606,19 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   _Row? _findRow(String path) {
     for (final row in _rows) {
       if (!row.trashed && row.path == path) return row;
+    }
+    return null;
+  }
+
+  /// The directory row whose path spells [path] in any case, or null: the
+  /// folder [ensureFolder] reuses rather than making a second one under a
+  /// different spelling (#847).
+  _Row? _findDirIgnoringCase(String path) {
+    final lower = path.toLowerCase();
+    for (final row in _rows) {
+      if (!row.trashed && row.isDir && row.path.toLowerCase() == lower) {
+        return row;
+      }
     }
     return null;
   }
@@ -2009,6 +2039,57 @@ final class _FakeWikilinkSuggester implements WikilinkSuggester {
     return <HeadingSuggestion>[
       for (final heading in outlineOfText(row.content))
         HeadingSuggestion(heading.text),
+    ];
+  }
+
+  @override
+  Future<List<BlockIdSuggestion>> blocks(String target) async {
+    final stem = p.basenameWithoutExtension(target).toLowerCase();
+    final row = _session._rows
+        .where(
+          (row) =>
+              !row.isDir &&
+              !row.trashed &&
+              p.basenameWithoutExtension(row.path).toLowerCase() == stem,
+        )
+        .firstOrNull;
+    if (row == null) return const <BlockIdSuggestion>[];
+    return <BlockIdSuggestion>[
+      for (final block in blockAnchorsOfText(row.content))
+        BlockIdSuggestion(block.id, excerpt: block.excerpt),
+    ];
+  }
+
+  @override
+  Future<List<HeadingSuggestion>> headingsAcross(String query) async {
+    final q = query.trim().toLowerCase();
+    return <HeadingSuggestion>[
+      for (final row in _session._rows)
+        if (!row.isDir && !row.trashed && row.path.endsWith('.md'))
+          for (final heading in outlineOfText(row.content))
+            if (heading.text.toLowerCase().contains(q))
+              HeadingSuggestion(
+                heading.text,
+                path: row.path,
+                target: p.basenameWithoutExtension(row.path),
+              ),
+    ];
+  }
+
+  @override
+  Future<List<BlockIdSuggestion>> blocksAcross(String query) async {
+    final q = query.trim().toLowerCase();
+    return <BlockIdSuggestion>[
+      for (final row in _session._rows)
+        if (!row.isDir && !row.trashed && row.path.endsWith('.md'))
+          for (final block in blockAnchorsOfText(row.content))
+            if ('${block.id} ${block.excerpt}'.toLowerCase().contains(q))
+              BlockIdSuggestion(
+                block.id,
+                excerpt: block.excerpt,
+                path: row.path,
+                target: p.basenameWithoutExtension(row.path),
+              ),
     ];
   }
 

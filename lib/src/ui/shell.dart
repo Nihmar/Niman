@@ -42,7 +42,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
@@ -909,7 +909,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// the search box; the tabs button flips it and back.
 
   /// The link-resolution source (T-M3-07), resolved from the session.
-  LinkSource? _linkSource;
+  LibraryLinks? _linkSource;
 
   /// The library the wikilink suggester panel reads (#475), resolved from
   /// the session.
@@ -1452,6 +1452,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           typewriter: _editorSettings.typewriter,
           cascadeChecklist: _editorSettings.cascadeChecklist,
           frontmatterPanel: _editorSettings.frontmatterPanel,
+          linkPreview: _editorSettings.linkPreview,
           // No switch in the phone's status row: it has no room left for one.
           // Settings and the Search tab's commands reach it there.
           noteColumn: _editorSettings.noteColumn,
@@ -2821,6 +2822,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       unawaited(switch (action) {
         NoteMenuAction.outline => _showPanel(DockPane.outline, anchor: anchor),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
+        NoteMenuAction.links => _showPanel(DockPane.links),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _palette.open(context),
         NoteMenuAction.format => _formatNote(),
@@ -4247,6 +4249,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     typewriter: _editorSettings.typewriter,
                     cascadeChecklist: _editorSettings.cascadeChecklist,
                     frontmatterPanel: _editorSettings.frontmatterPanel,
+                    linkPreview: _editorSettings.linkPreview,
                     onToggleTypewriter: _toggleTypewriter,
                     onLoaded: _workspace.noteLoaded,
                     onEditedNoteClosed: _tidyClosedNote,

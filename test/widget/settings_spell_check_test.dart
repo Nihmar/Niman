@@ -99,6 +99,10 @@ void main() {
     final switchRow = find.byKey(const Key('spell-check-setting'));
     final dictionaryRow = find.byKey(const Key('spell-dictionary-setting'));
     await tester.scrollUntilVisible(switchRow, 200);
+    // A row the ListView built from its cache is found before it is on
+    // screen: the tap has to land on the row itself.
+    await tester.ensureVisible(switchRow);
+    await tester.pumpAndSettle();
     expect(switchRow, findsOne);
 
     await tester.tap(switchRow);

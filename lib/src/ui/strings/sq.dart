@@ -914,7 +914,15 @@ final class AlbanianStrings extends Strings {
   @override
   String get headingNotFoundTitle => "Titulli s'u gjet";
   @override
+  String get blockNotFoundTitle => "Blloku s'u gjet";
+  @override
   String get ambiguousLinkTitle => 'Shënime të shumta përputhen';
+  @override
+  String get linksToNoteTitle => 'Lidhje me këtë shënim';
+  @override
+  String get linksToNoteEmpty => 'Asnjë shënim nuk lidhet ende këtu';
+  @override
+  String get linksToNoteEmbed => 'e ngulitur';
   @override
   String get openLinkFailed => "Lidhja s'u hap";
 
@@ -923,9 +931,6 @@ final class AlbanianStrings extends Strings {
   String get missingNoteDialogTitle => 'Shënimi nuk ekziston';
   @override
   String missingNoteDialogBody(String path) => 'Krijoj „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Tresja „$folder“ nuk ekziston';
 
   // Task lists (T-TD-04).
   @override
@@ -2939,6 +2944,16 @@ final class AlbanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Shënimi i një kutie shënon edhe ato të futura poshtë saj. '
       'Heqja e shënimit i lë ashtu.';
+  @override
+  String get linkPreviewTitle => 'Paraqitje paraprake e lidhjeve';
+  @override
+  String get linkPreviewSubtitle =>
+      'Kaloje miun mbi një lidhje në pamjen e leximit, ose mbaj shtypur '
+      'Ctrl (⌘ në Mac) mbi një në redaktor, për të parë shënimin ku të çon '
+      'në një kartë të vogël. Në ekran me prekje, mbaj të shtypur një '
+      'lidhje në pamjen e leximit.';
+  @override
+  String get linkPreviewOpen => 'Hap';
 
   // Rebuilding the index file (#368).
 
@@ -2965,12 +2980,21 @@ final class AlbanianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Titujt në $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blloqet në $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Titujt në të gjithë bibliotekën';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blloqet në të gjithë bibliotekën';
+  @override
   String wikilinkPlacesIn(String named) => 'Vendndodhjet në $named';
   @override
   String get wikilinkThisNote => 'ky shënim';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Asnjë titull nuk përputhet me „$query".';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Asnjë bllok nuk përputhet me „$query".';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Asnjë shënim nuk përputhet me „$query".';
@@ -2979,6 +3003,14 @@ final class AlbanianStrings extends Strings {
       'Asnjë skedar nuk përputhet me “$query”.';
   @override
   String get wikilinkNoHeading => 'ky shënim nuk ka titull me atë emër';
+  @override
+  String get wikilinkNoBlock => 'ky shënim nuk ka bllok me atë ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'asnjë shënim në bibliotekë nuk ka një titull të tillë';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'asnjë shënim në bibliotekë nuk ka bllok me atë ID';
   @override
   String get wikilinkNoNote =>
       'asgjë në bibliotekë nuk e ka atë emër ose alias';

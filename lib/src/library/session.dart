@@ -21,7 +21,7 @@ import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_write_stream.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -500,6 +500,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the cascade-checklist toggle.
   Future<void> setCascadeChecklist({required bool enabled});
 
+  /// Whether hovering a link previews the note it points at (default true,
+  /// #846).
+  Future<bool> get linkPreview;
+
+  /// Sets (and persists) the link-preview toggle.
+  Future<void> setLinkPreview({required bool enabled});
+
   /// Whether a note's leading frontmatter is drawn as the properties panel
   /// above it (default true, #157).
   Future<bool> get frontmatterPanel;
@@ -794,7 +801,7 @@ abstract interface class LibrarySession {
 
   /// The link-resolution source (wiki targets + markdown hrefs against
   /// the open index).
-  Future<LinkSource?> get linkSource;
+  Future<LibraryLinks?> get linkSource;
 
   /// The library the wikilink suggester panel reads (#475): the notes,
   /// their aliases and their headings, over the open index. Null while no

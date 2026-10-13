@@ -155,6 +155,13 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
   /// palette's accent.
   final Color wikilink;
 
+  /// A link to nothing (#847): the wikilink colour drawn most of the way
+  /// toward the colour of the markers the reader looks past, so a dead link
+  /// reads as a link that is not there yet. Derived, not a token of its own:
+  /// every palette — light, dark, a custom theme — gets a muted link that
+  /// stays a link of its own hue.
+  Color get deadLink => Color.lerp(wikilink, dim, 0.7)!;
+
   /// Images.
   final Color image;
 

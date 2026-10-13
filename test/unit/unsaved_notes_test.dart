@@ -2,7 +2,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
-/// A note with a settable dirty bit and a counted, controllable save.
+/// A note with a settable dirty bit, buffer text and a counted,
+/// controllable save.
 final class _FakeNote implements UnsavedNote {
   new(this.path, {this.unsaved = false});
 
@@ -11,6 +12,9 @@ final class _FakeNote implements UnsavedNote {
 
   @override
   bool unsaved;
+
+  @override
+  String text = '';
 
   int saveCalls = 0;
   Error? failWith;
@@ -79,6 +83,28 @@ void main() {
     expect(dirty.saveCalls, 1);
     expect(clean.saveCalls, 0);
     expect(tracker.hasUnsaved, isFalse);
+  });
+
+  test('unsavedTextOf reads a dirty note’s buffer, and only a dirty one’s', () {
+    final tracker = UnsavedTracker();
+    final dirty = _FakeNote('/lib/a.md', unsaved: true)..text = 'edited';
+    final clean = _FakeNote('/lib/b.md')..text = 'saved';
+    tracker
+      ..register(dirty)
+      ..register(clean);
+
+    expect(tracker.unsavedTextOf('/lib/a.md'), 'edited');
+    expect(tracker.unsavedTextOf('/lib/b.md'), isNull);
+    expect(tracker.unsavedTextOf('/lib/c.md'), isNull);
+
+    dirty.unsaved = false;
+    tracker.noteChanged();
+
+    expect(
+      tracker.unsavedTextOf('/lib/a.md'),
+      isNull,
+      reason: 'the disk holds it now',
+    );
   });
 
   test('saveAll surfaces the first write error', () async {

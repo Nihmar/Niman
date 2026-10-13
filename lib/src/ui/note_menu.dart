@@ -22,6 +22,10 @@ enum NoteMenuAction {
   /// The note's tags, and the notes that share them.
   tags,
 
+  /// The notes that link to the note (#842): the dock's pane where there is
+  /// room for the dock, a sheet on a phone.
+  links,
+
   /// Typewriter mode on or off (#70): on the phone, where there is no
   /// key and no switch on the status row, the way to it beside the note.
   typewriter,
@@ -157,6 +161,7 @@ final class NoteMenuButton extends StatelessWidget {
         if (textNote) ...[
           _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
           _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
+          _item(NoteMenuAction.links, Icons.link, AppStrings.linksToNoteTitle),
           if (kindSwitch case final kind?)
             _item(
               NoteMenuAction.kindSwitch,

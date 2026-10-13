@@ -148,6 +148,37 @@ void main() {
     expect(a, isNot(contains('Top.html')));
   });
 
+  test(
+    'a link to a heading with a # in its text lands on that heading',
+    () async {
+      await File(p.join(notes, 'sub', 'c.md')).writeAsString(
+        '# C\n\n## Part\n\n### Deep\n\n## Issue #12\n\n## Issue #12\n',
+      );
+      await File(p.join(notes, 'd.md')).writeAsString(
+        '[[sub/c#Issue #12]] [[sub/c#Part#Deep]] [[sub/c#Part]] [[sub/c#Nope #1]]\n',
+      );
+      await TreeExport.run(
+        dir: notes,
+        zipPath: zip,
+        format: ExportTreeFormat.html,
+        language: 'en',
+      );
+      final d = (await contents())['d.html']!;
+      expect(
+        d,
+        contains('href="sub/c.html#issue-12"'),
+        reason: 'whole heading',
+      );
+      expect(d, contains('href="sub/c.html#deep"'), reason: 'a path');
+      expect(d, contains('href="sub/c.html#part"'));
+      expect(
+        d,
+        contains('href="sub/c.html"'),
+        reason: 'a heading the page lacks leaves the link on the page',
+      );
+    },
+  );
+
   test('two notes whose names differ only by case get one page each', () async {
     // `a.md` is in the fixture. On a case-sensitive disk `a.MD` is a
     // second note whose stem is the same file name, and the zip cannot

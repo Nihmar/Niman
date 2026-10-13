@@ -106,6 +106,14 @@ final class MarkdownTheme {
   /// A wikilink's style.
   final TextStyle wikilink;
 
+  /// A Markdown link to a file the library does not hold (#847): the link's
+  /// style in the muted colour of the markers, so it reads as not there yet.
+  TextStyle get deadLink => link.copyWith(color: markerDim);
+
+  /// A wikilink to a note that does not exist (#847): the wikilink's style,
+  /// underline and all, in the same muted colour.
+  TextStyle get deadWikilink => wikilink.copyWith(color: markerDim);
+
   /// An inline tag's style.
   final TextStyle tag;
 

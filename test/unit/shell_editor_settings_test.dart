@@ -18,7 +18,7 @@ import '../fakes/fake_library_session.dart';
 /// The session the read runs against, counting how many of its settings
 /// reads are outstanding at once (#362).
 ///
-/// The settings are nineteen reads on the mount path, and a read that
+/// The settings are twenty-one reads on the mount path, and a read that
 /// awaits one before asking for the next has one of them outstanding at
 /// its most: what the read is held to here is that they are all asked for
 /// together.
@@ -97,6 +97,9 @@ final class _CountedReads implements LibrarySession {
 
   @override
   Future<bool> get frontmatterPanel => _read(_inner.frontmatterPanel);
+
+  @override
+  Future<bool> get linkPreview => _read(_inner.linkPreview);
 
   @override
   Future<Set<String>> get lintRulesOff => _read(_inner.lintRulesOff);
@@ -206,7 +209,7 @@ void main() {
     expect(settings, ShellEditorSettings.defaults);
     expect(
       session.reads,
-      20,
+      21,
       reason: 'every setting the session answers; the two folders ride on ops',
     );
     expect(

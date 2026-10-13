@@ -121,6 +121,7 @@ abstract final class ExportTreeBook {
       images: images,
       // A book's chapters link to each other, as the HTML zip's pages do.
       links: ExportTreePages.linkUrls(text, noteDir, tree, '.xhtml'),
+      anchors: ExportTreePages.linkAnchors(text, noteDir, tree),
     );
     final html = NoteHtml(source);
     final body = html.body();

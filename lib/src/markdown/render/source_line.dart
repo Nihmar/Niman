@@ -62,6 +62,7 @@ final class SourceLine extends StatelessWidget {
     required this.width,
     required this.misspelled,
     required this.misspelledColor,
+    required this.deadLinks,
     required this.templateProblems,
     required this.found,
     required this.rowColor,
@@ -180,6 +181,10 @@ final class SourceLine extends StatelessWidget {
 
   /// The colour their wavy underline is drawn in.
   final Color misspelledColor;
+
+  /// The links of the line that name nothing (#847), as offsets local to it:
+  /// drawn in the muted colour of a link that is not there yet.
+  final List<TextRange> deadLinks;
 
   /// The template checker's problems on this line, as offsets local to it
   /// (T-TPL-09). Drawn in the same wavy shape as the spelling's, on its own
@@ -1109,9 +1114,7 @@ final class SourceLine extends StatelessWidget {
         spans,
         from,
         to,
-        hidden(token, revealed: false)
-            ? _hiddenMarker
-            : nestedTokenStyle(token, syntax, dark: dark),
+        hidden(token, revealed: false) ? _hiddenMarker : _styleOf(token),
         marks,
         ink,
       );
@@ -1187,7 +1190,7 @@ final class SourceLine extends StatelessWidget {
         token.end,
         hidden(token, revealed: revealed, run: run)
             ? _hiddenMarker
-            : nestedTokenStyle(token, syntax, dark: dark),
+            : _styleOf(token),
         concealed,
       );
       at = token.end;
@@ -1196,6 +1199,22 @@ final class SourceLine extends StatelessWidget {
       _add(spans, at, styled.text.length, null, concealed);
     }
     return TextSpan(children: spans);
+  }
+
+  /// The style [token] is drawn in: its kind's, and the muted colour of a
+  /// link that is not there yet when it is part of a dead one (#847).
+  TextStyle? _styleOf(Token token) {
+    final style = nestedTokenStyle(token, syntax, dark: dark);
+    if (deadLinks.isEmpty) return style;
+    if (token.kind != TokenKind.wikilink && token.kind != TokenKind.link) {
+      return style;
+    }
+    for (final range in deadLinks) {
+      if (token.start >= range.start && token.end <= range.end) {
+        return (style ?? const TextStyle()).copyWith(color: syntax.deadLink);
+      }
+    }
+    return style;
   }
 
   /// A line of a code block inside a quote.
