@@ -139,9 +139,9 @@ Choose an id from the panel (`[[note#^`) or write it. The id is matched
 at its first line (for a paragraph of several lines, the one it starts
 on, not the one that ends with the id). A link to an id the note does
 not have says *Block not found*. The ids of a note are the same in the
-editor and in the index; an id in a code block, a formula or the
-frontmatter is not one, and if two blocks carry the same id the first
-owns it.
+editor and in the index; an id in a code block (indented code included), a
+formula or the frontmatter is not one, an id in the middle of a block is
+not one either, and if two blocks carry the same id the first owns it.
 
 The read view leaves the ` ^id` out of the text, as Obsidian's reading view
 does; the editor (`live` and `source`) keeps showing it, and the note's
@@ -344,7 +344,8 @@ A library written before the rule had its own setting for this,
 A target that names a folder (`[[Sub/Foo]]`) keeps that folder, whatever
 the setting says, **and the folders are made with the note**:
 `[[Projects/Three laws]]` creates `Projects/` if the library has none, and
-the note inside it, as Obsidian does. The confirmation dialog names the
+the note inside it, as Obsidian does — a folder the library already has
+under another spelling is that folder. The confirmation dialog names the
 whole proposed path, so you see what is about to be made, and Cancel makes
 neither the note nor its folders. Each name is cleaned the way a note's
 name is, and a segment that names nothing (`.`, `..`, empty) is dropped, so
@@ -387,7 +388,8 @@ the note the link is written in — has no card.
 It reads the first 256 KB of the note off the app's main thread, once for each
 revision of it, keeping the last sixteen: moving across a page of links does
 not read a note twice. A heading further down a longer note than that is not
-found, and the card shows the top.
+found, and the card shows the top. A note that is open with edits the disk
+does not have yet is shown as its buffer holds it, not as the file still is.
 
 **Settings → Editor → Preview links** (on by default) turns the cards, and the
 sheet, off for the library.
