@@ -212,6 +212,28 @@ void main() {
     expect(reads, ['Notes.md'], reason: 'the named note is read once');
   });
 
+  // A heading is written between `[[Note#` and `]]`: a `|` would start an
+  // alias and a bracket end the link, so such a heading has no spelling and
+  // is left out; a `#` is no obstacle, the link reads back by the whole
+  // fragment (`Issue #12`).
+  test('a heading a link cannot spell is not offered, a # is fine', () async {
+    await addNote('Notes.md', stems: ['notes']);
+    final suggester = IndexWikilinkSuggester(
+      db,
+      readHeadings: (_) async => const [
+        'C#',
+        'Issue #12',
+        'A|B',
+        'Use [x] here',
+        'Plain',
+      ],
+    );
+
+    final headings = await suggester.headings('Notes');
+
+    expect(headings.map((h) => h.heading), ['C#', 'Issue #12', 'Plain']);
+  });
+
   // #491: every key after `#` asked again — the whole target note read,
   // decoded and outlined on the UI isolate, seconds per key on a
   // novel-length one — although the panel filters the same list locally.
@@ -614,6 +636,18 @@ void main() {
       final rows = await suggesterOver().headingsAcross('tips');
 
       expect(rows.map((r) => r.heading), ['Tips for all']);
+    });
+
+    test('a heading with a # is offered across the library too', () async {
+      final fine = await addNote('Tips.md', stems: ['tips']);
+      await anchors(fine, headings: ['Tips for C#', 'Tips #1', 'Tips | a']);
+
+      final rows = await suggesterOver().headingsAcross('tips');
+
+      expect(
+        rows.map((r) => r.heading),
+        unorderedEquals(['Tips for C#', 'Tips #1']),
+      );
     });
 
     test('block ids across the library carry the note and the words', () async {

@@ -282,6 +282,25 @@ void main() {
     expect(panel(tester).selected, 0);
   });
 
+  testWidgets("[[# lists the open note's headings that read back as links", (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    await pump(tester, buffer, _library());
+
+    await type(
+      tester,
+      '# C#\n\n## Issue #12\n\n## A|B\n\n## Use [x] here\n\n## Plain\n\n[[#',
+    );
+
+    expect(panel(tester).kind, WikilinkPanelKind.headings);
+    expect(panel(tester).entries.map((e) => (e as HeadingSuggestion).heading), [
+      'C#',
+      'Issue #12',
+      'Plain',
+    ], reason: 'a `|` or a bracket in a heading has no link spelling');
+  });
+
   testWidgets('# lists the named note headings and completes one', (
     tester,
   ) async {

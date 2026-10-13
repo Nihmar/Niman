@@ -64,12 +64,13 @@ void main() {
       required List<int> jumps,
       List<(String, String?)>? opened,
       List<int>? blockReads,
+      List<OutlineEntry>? headings,
     }) => NoteLinkTargets(
       source: FakeLinkSource(notes: ['other.md', 'n.md']),
       notePath: '/lib/n.md',
       libraryRoot: '/lib',
       missingNoteLocation: MissingNoteLocation.currentFolder,
-      outline: outline,
+      outline: headings ?? outline,
       jumpToHeading: jumps.add,
       blocks: () async {
         blockReads?.add(1);
@@ -124,6 +125,22 @@ void main() {
       await tester.pump();
       expect(jumps, [2]);
       expect(find.text('Heading not found'), findsOneWidget);
+    });
+
+    testWidgets('a heading with a # in its text is followed whole', (
+      tester,
+    ) async {
+      await pumpHost(tester);
+      final jumps = <int>[];
+      final link = targets(
+        jumps: jumps,
+        headings: outlineOfText('# Top\n## C#\n## Issue #12\n'),
+      );
+
+      await openWiki(context, parseWikiRef('#C#'), link);
+      await openWiki(context, parseWikiRef('#Issue #12'), link);
+      expect(jumps, [1, 2]);
+      expect(find.text('Heading not found'), findsNothing);
     });
 
     testWidgets('a link to another note carries the fragment to it', (

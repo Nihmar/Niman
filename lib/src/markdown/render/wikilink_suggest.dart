@@ -270,10 +270,10 @@ final class WikilinkSuggestController extends ChangeNotifier {
           // The empty target is the note being edited: its own scan answers,
           // so no read is paid for what is already on screen.
           named = '';
-          entries = <SuggestEntry>[
+          entries = HeadingSuggestion.linkable([
             for (final heading in _headings() ?? const <OutlineEntry>[])
-              HeadingSuggestion(heading.text),
-          ];
+              heading.text,
+          ]);
         } else {
           entries = await suggester.headings(query.target);
         }

@@ -79,7 +79,7 @@ final class _LinkPreviewBodyState extends State<LinkPreviewBody> {
 int? anchorLineOf(String text, String? anchor) {
   if (anchor == null) return null;
   return switch (parseAnchor(anchor)) {
-    HeadingAnchor(:final path) => headingLineOf(outlineOfText(text), path),
+    final HeadingAnchor heading => headingLineOf(outlineOfText(text), heading),
     BlockIdAnchor(:final id) => blockLineOf(blockAnchorsOfText(text), id),
     null => null,
   };

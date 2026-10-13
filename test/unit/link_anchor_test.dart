@@ -44,25 +44,25 @@ void main() {
     );
 
     test('a single heading lands on the first one of that name', () {
-      expect(headingLineOf(outline, ['A']), 1);
-      expect(headingLineOf(outline, ['Top']), 0);
-      expect(headingLineOf(outline, ['Details']), 4);
+      expect(headingLineOf(outline, HeadingAnchor(['A'])), 1);
+      expect(headingLineOf(outline, HeadingAnchor(['Top'])), 0);
+      expect(headingLineOf(outline, HeadingAnchor(['Details'])), 4);
     });
 
     test('A#C lands on C, B#C is not found', () {
-      expect(headingLineOf(outline, ['A', 'C']), 2);
+      expect(headingLineOf(outline, HeadingAnchor(['A', 'C'])), 2);
       expect(
-        headingLineOf(outline, ['B', 'C']),
+        headingLineOf(outline, HeadingAnchor(['B', 'C'])),
         isNull,
         reason: 'C is in the section of A, not of B',
       );
     });
 
     test('the parent tells a repeated heading apart', () {
-      expect(headingLineOf(outline, ['Top', 'Details']), 4);
-      expect(headingLineOf(outline, ['Other', 'Details']), 7);
+      expect(headingLineOf(outline, HeadingAnchor(['Top', 'Details'])), 4);
+      expect(headingLineOf(outline, HeadingAnchor(['Other', 'Details'])), 7);
       expect(
-        headingLineOf(outline, ['A', 'Details']),
+        headingLineOf(outline, HeadingAnchor(['A', 'Details'])),
         isNull,
         reason: 'the Details of Top is after B, outside the section of A',
       );
@@ -71,23 +71,60 @@ void main() {
     test('a path tries the next heading of its first level', () {
       // Two `## A`; only the second holds `### D`.
       final deep = outlineOfText('## A\n### X\n## A\n### D\n');
-      expect(headingLineOf(deep, ['A', 'D']), 3);
-      expect(headingLineOf(deep, ['A', 'X']), 1);
+      expect(headingLineOf(deep, HeadingAnchor(['A', 'D'])), 3);
+      expect(headingLineOf(deep, HeadingAnchor(['A', 'X'])), 1);
     });
 
     test('levels are matched by the shared slug', () {
-      expect(headingLineOf(outline, ['top', 'a']), 1);
-      expect(headingLineOf(outline, ['TOP', 'c']), 2);
+      expect(headingLineOf(outline, HeadingAnchor(['top', 'a'])), 1);
+      expect(headingLineOf(outline, HeadingAnchor(['TOP', 'c'])), 2);
     });
 
     test('a level may be any depth below its parent', () {
-      expect(headingLineOf(outline, ['Top', 'C']), 2);
+      expect(headingLineOf(outline, HeadingAnchor(['Top', 'C'])), 2);
     });
 
     test('a missing heading is not found', () {
-      expect(headingLineOf(outline, ['Nope']), isNull);
-      expect(headingLineOf(outline, const <String>[]), isNull);
-      expect(headingLineOf(outline, ['A', 'Nope']), isNull);
+      expect(headingLineOf(outline, HeadingAnchor(['Nope'])), isNull);
+      expect(headingLineOf(outline, HeadingAnchor(const <String>[])), isNull);
+      expect(headingLineOf(outline, HeadingAnchor(['A', 'Nope'])), isNull);
+    });
+  });
+
+  // A `#` in a heading's own text is not always a level separator: the link
+  // `[[Notes#Issue #12]]` names the heading "Issue #12" as the fragment
+  // always did before paths existed. The path is tried first; when it names
+  // no heading, the whole fragment is one heading.
+  group('a heading whose text holds a #', () {
+    int? lineOf(String text, String fragment) => headingLineOf(
+      outlineOfText(text),
+      parseAnchor(fragment)! as HeadingAnchor,
+    );
+
+    test('the whole fragment is the heading when the path finds none', () {
+      const text = '# Intro\n## C#\n## F# tips\n## Issue #12\n';
+      expect(lineOf(text, 'C#'), 1);
+      expect(lineOf(text, 'F# tips'), 2);
+      expect(lineOf(text, 'Issue #12'), 3);
+      expect(lineOf(text, 'issue #12'), 3, reason: 'case does not matter');
+    });
+
+    test('the path wins when it names a heading', () {
+      const text = '# Issue #12\n# Issue\n## 12\n';
+      expect(lineOf(text, 'Issue #12'), 2, reason: '12 under Issue');
+      expect(lineOf(text, 'Issue'), 1);
+    });
+
+    test('a fragment that names nothing, as a path or whole, is null', () {
+      const text = '# C#\n# Issue #12\n';
+      expect(lineOf(text, 'Issue #13'), isNull);
+      expect(lineOf(text, 'Nope #1'), isNull);
+    });
+
+    test('the parsed anchor keeps the fragment as written', () {
+      final anchor = parseAnchor(' Issue #12 ')! as HeadingAnchor;
+      expect(anchor.path, ['Issue', '12']);
+      expect(anchor.whole, 'Issue #12');
     });
   });
 

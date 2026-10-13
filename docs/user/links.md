@@ -103,6 +103,13 @@ heading is not it. A single heading still lands on the first one of that
 name. Moving or renaming the note rewrites the target and keeps the whole
 path.
 
+A `#` in a heading's own text is fine: `[[note#Issue #12]]` and
+`[[note#C#]]` land on the headings `Issue #12` and `C#`. The path is tried
+first (`Issue` and, inside it, `12`); when the note has no such path, the
+whole text is read as one heading. The same rule is used when you follow the
+link, in the link preview and in an exported page. A heading holding a `|` or
+a bracket cannot be written in a link, so the panels do not offer it.
+
 ## Block links
 
 `[[note#^id]]` links to one **block** — a paragraph, a list item, a quote —

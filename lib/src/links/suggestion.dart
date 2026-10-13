@@ -42,6 +42,22 @@ final class HeadingSuggestion extends SuggestEntry {
   /// says which note it is in.
   const new(this.heading, {this.path, this.target});
 
+  /// The rows for the heading [texts] of one note: those a link can spell.
+  static List<HeadingSuggestion> linkable(Iterable<String> texts) => [
+    for (final text in texts)
+      if (readsBack(text)) HeadingSuggestion(text),
+  ];
+
+  /// Whether a link to [heading] reads back as that heading.
+  ///
+  /// The link ends at its first `]]` and a `|` starts its alias, so a heading
+  /// holding one has no wikilink spelling and is left out of the panel. A `#`
+  /// is no obstacle: `[[Notes#Issue #12]]` reads as the path `Issue` > `12`
+  /// first and, when the note has none, as the heading `Issue #12`.
+  static bool readsBack(String heading) => !_unspellable.hasMatch(heading);
+
+  static final RegExp _unspellable = RegExp(r'[|\[\]]');
+
   /// The heading text, as the outline reads it.
   final String heading;
 

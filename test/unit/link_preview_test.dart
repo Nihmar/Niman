@@ -282,6 +282,14 @@ void main() {
       expect(anchorLineOf(text, '^p1'), 4);
     });
 
+    test('a heading with a # in its text is found whole (C#, Issue #12)', () {
+      const hashes = '# Top\n\n## C#\n\n## F# tips\n\n## Issue #12\n';
+      expect(anchorLineOf(hashes, 'C#'), 2);
+      expect(anchorLineOf(hashes, 'F# tips'), 4);
+      expect(anchorLineOf(hashes, 'Issue #12'), 6);
+      expect(anchorLineOf(hashes, 'Issue #13'), isNull);
+    });
+
     test('no anchor, or one the note lacks, names none', () {
       expect(anchorLineOf(text, null), isNull);
       expect(anchorLineOf(text, 'Nope'), isNull);

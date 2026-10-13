@@ -375,8 +375,9 @@ Future<void> jumpToAnchor(
         return;
       }
       link.jumpToHeading(line);
-    case HeadingAnchor(:final path):
-      final line = headingLineOf(link.outline, path);
+    case final HeadingAnchor heading:
+      final path = heading.path;
+      final line = headingLineOf(link.outline, heading);
       if (line == null) {
         // Trace the outline so a dead anchor is diagnosable from the log:
         // is the heading missing, or does its text differ from the link's?

@@ -58,9 +58,7 @@ final class AnchorSuggestions {
     if (note == null) return const <HeadingSuggestion>[];
     return await _headingsByNote.of(note, () async {
       final texts = await readHeadings(note.path);
-      return texts == null
-          ? null
-          : [for (final text in texts) HeadingSuggestion(text)];
+      return texts == null ? null : HeadingSuggestion.linkable(texts);
     });
   }
 
@@ -87,7 +85,8 @@ final class AnchorSuggestions {
     final targets = await _names.targetsOf({for (final hit in hits) hit.path});
     return [
       for (final hit in hits)
-        if (NoteNames.readsBack(hit.heading) && targets[hit.path] != null)
+        if (HeadingSuggestion.readsBack(hit.heading) &&
+            targets[hit.path] != null)
           HeadingSuggestion(
             hit.heading,
             path: hit.path,

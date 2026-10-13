@@ -5,6 +5,7 @@
 /// so the page and the note agree on where each one is.
 library;
 
+import 'package:niman/src/export/export_anchors.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html_source.dart';
@@ -49,14 +50,27 @@ final class HtmlSpans {
     }
     // A heading path (`A#B`) lands on its last level, the heading itself;
     // a block link has no anchor in the exported page (its id is not kept).
-    final levels = ref.headingPath;
-    final anchor = levels.isEmpty ? '' : '#${headingAnchor(levels.last)}';
+    final anchor = _anchorOf(ref);
     return (
       html:
           '<a class="wikilink" href="${escapeAttribute('$href$anchor')}">'
           '$shown</a>',
       plain: plain,
     );
+  }
+
+  /// The `#id` a link to [ref] lands on, or none. A heading path lands on
+  /// its last level; a fragment with a `#` in it is resolved against the
+  /// target's own headings when the export has them
+  /// ([NoteHtmlSource.anchors]).
+  String _anchorOf(WikiRef ref) {
+    final heading = ref.heading;
+    final known = heading == null
+        ? null
+        : source.anchors[ExportAnchors.keyOf(ref.target, heading)];
+    if (known != null) return known.isEmpty ? '' : '#$known';
+    final levels = ref.headingPath;
+    return levels.isEmpty ? '' : '#${headingAnchor(levels.last)}';
   }
 
   /// An embed whose inside is [inner].
@@ -89,6 +103,17 @@ String headingAnchor(String text) => text
     .trim()
     .replaceAll(_notInAnchor, '')
     .replaceAll(_space, '-');
+
+/// [id], or [id] with the first number that makes it new to [taken] (`id-2`),
+/// which then holds it: the ids a page's headings get, in document order.
+String uniqueHeadingId(Set<String> taken, String id) {
+  if (taken.add(id)) return id;
+  var suffix = 2;
+  while (!taken.add('$id-$suffix')) {
+    suffix++;
+  }
+  return '$id-$suffix';
+}
 
 final RegExp _notInAnchor = RegExp('[^a-z0-9 _-]');
 final RegExp _space = RegExp(r'\s');

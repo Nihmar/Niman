@@ -22,11 +22,16 @@ sealed class LinkAnchor {
 
 /// A heading, or a path of headings from an outer one to an inner (`A#B`).
 final class HeadingAnchor extends LinkAnchor {
-  /// Creates a heading anchor for the [path], outermost level first.
-  const new(this.path);
+  /// Creates a heading anchor for the [path], outermost level first, written
+  /// as [whole] (the levels joined by `#` when not given).
+  new(this.path, [String? whole]) : whole = whole ?? path.join('#');
 
   /// The heading levels as written; never empty.
   final List<String> path;
+
+  /// The fragment as one heading's text: `Issue #12` is the path
+  /// `[Issue, 12]` and, when no such path exists, the heading `Issue #12`.
+  final String whole;
 }
 
 /// A block, by the id it ends with.
@@ -41,7 +46,8 @@ final class BlockIdAnchor extends LinkAnchor {
 /// The anchor [fragment] names, or null for an empty one.
 ///
 /// `^` and a valid id is a block; everything else is a heading path, split at
-/// each `#` — the same rule [parseWikiRef] reads a wikilink's by.
+/// each `#` — the same rule [parseWikiRef] reads a wikilink's by — that also
+/// keeps the fragment whole, for a heading with a `#` in its own text.
 LinkAnchor? parseAnchor(String fragment) {
   final text = fragment.trim();
   if (text.isEmpty) return null;
@@ -49,22 +55,35 @@ LinkAnchor? parseAnchor(String fragment) {
     return BlockIdAnchor(text.substring(1));
   }
   final path = headingPathOf(text);
-  return path.isEmpty ? null : HeadingAnchor(path);
+  return path.isEmpty ? null : HeadingAnchor(path, text);
 }
 
-/// The line of the heading [path] names in [outline], or null when no heading
-/// does.
+/// The line of the heading [anchor] names in [outline], or null when no
+/// heading does.
 ///
-/// A path is read by level order: `A#C` is a heading `C` inside a section of
-/// a heading `A` — any depth below it, up to the next heading of `A`'s level
-/// or higher. Every level is matched by the shared slug, so case and
-/// punctuation do not matter. A single level is the first heading of that
-/// slug; a path tries every heading of its first level in turn, so a
-/// `## Details` that appears under two parents is told apart by the parent.
-int? headingLineOf(List<OutlineEntry> outline, List<String> path) {
+/// The path is tried first. A path is read by level order: `A#C` is a heading
+/// `C` inside a section of a heading `A` — any depth below it, up to the next
+/// heading of `A`'s level or higher. Every level is matched by the shared
+/// slug, so case and punctuation do not matter. A single level is the first
+/// heading of that slug; a path tries every heading of its first level in
+/// turn, so a `## Details` that appears under two parents is told apart by
+/// the parent.
+///
+/// When the path names no heading, the whole fragment is tried as one
+/// heading's text: a `#` in a heading (`C#`, `Issue #12`) is not a level
+/// separator there, as it never was before paths existed.
+int? headingLineOf(List<OutlineEntry> outline, HeadingAnchor anchor) {
+  final path = anchor.path;
   if (path.isEmpty) return null;
-  final slugs = [for (final level in path) headingSlug(level)];
-  return _find(outline, slugs, 0, 0, outline.length);
+  final byPath = _find(
+    outline,
+    [for (final l in path) headingSlug(l)],
+    0,
+    0,
+    outline.length,
+  );
+  if (byPath != null || path.length == 1) return byPath;
+  return _find(outline, [headingSlug(anchor.whole)], 0, 0, outline.length);
 }
 
 int? _find(
