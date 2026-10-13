@@ -3,19 +3,22 @@
 ///
 /// While a wikilink is typed the panel lists the library's notes after
 /// `[[`, its attachments after `![[` (#705), and a note's headings after
-/// `#`. Everything comes from what the app already keeps: the notes, the
-/// attachments and the aliases from `note_stems` (one query, never a walk
-/// of the tree), a note's headings from its own file — read and
-/// outlined off the UI isolate, once per revision of it (#491) — and a
-/// book's place forms from the target itself. Nothing here scans the library
-/// to fill the panel.
+/// `#`, and its block ids after `#^` (#844). Everything comes from what the
+/// app already keeps: the notes, the attachments and the aliases from
+/// `note_stems` (one query, never a walk of the tree), a note's headings and
+/// block ids from its own file — read and outlined off the UI isolate, once
+/// per revision of it (#491) — the headings and ids of the whole library from
+/// their word index (`[[##`, `[[^^`; #845), and a book's place forms from the
+/// target itself. Nothing here scans the library to fill the panel.
 library;
 
 import 'dart:async' show unawaited;
 import 'dart:math' show min;
 
 import 'package:drift/drift.dart';
+import 'package:niman/src/db/anchor_index.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -57,11 +60,42 @@ final class NoteSuggestion extends SuggestEntry {
 
 /// A heading a `#` target can name.
 final class HeadingSuggestion extends SuggestEntry {
-  /// Creates a heading row.
-  const new(this.heading);
+  /// Creates a heading row; a row of the library-wide list (`[[##`) also
+  /// says which note it is in.
+  const new(this.heading, {this.path, this.target});
 
   /// The heading text, as the outline reads it.
   final String heading;
+
+  /// The library-relative path of the note the heading is in, for a row of a
+  /// list across the library; null in a note's own list.
+  final String? path;
+
+  /// What completing the link writes before the `#`: the shortest target that
+  /// names that note alone (the rule the note rows follow). Null in a note's
+  /// own list.
+  final String? target;
+}
+
+/// A block id a `#^` target can name (#844).
+final class BlockIdSuggestion extends SuggestEntry {
+  /// Creates a block row; a row of the library-wide list (`[[^^`) also says
+  /// which note it is in.
+  const new(this.id, {this.excerpt = '', this.path, this.target});
+
+  /// The id, without its `^`.
+  final String id;
+
+  /// The block's first words, to tell one id from another.
+  final String excerpt;
+
+  /// The library-relative path of the note the block is in, for a row of a
+  /// list across the library; null in a note's own list.
+  final String? path;
+
+  /// What completing the link writes before the `#^`: as for
+  /// [HeadingSuggestion.target]. Null in a note's own list.
+  final String? target;
 }
 
 /// A place form a book target offers after `#` — `page=` for a PDF,
@@ -106,6 +140,21 @@ abstract interface class WikilinkSuggester {
   /// panel filters it for the heading being typed.
   Future<List<HeadingSuggestion>> headings(String target);
 
+  /// The block ids of the note named by the wiki [target] — the blocks that
+  /// end with a ` ^id` — or none when it does not resolve or cannot be read.
+  /// The panel filters the list for the id being typed after `#^`.
+  Future<List<BlockIdSuggestion>> blocks(String target);
+
+  /// The headings of the whole library that match [query] (`[[##query`),
+  /// best match first, each with the note it is in. Bounded: at most
+  /// [IndexWikilinkSuggester.limit] rows, read from the library's word index
+  /// and never a scan of its notes.
+  Future<List<HeadingSuggestion>> headingsAcross(String query);
+
+  /// The block ids of the whole library that match [query] (`[[^^query`), as
+  /// [headingsAcross].
+  Future<List<BlockIdSuggestion>> blocksAcross(String query);
+
   /// The place forms the book named by [target] offers, or none when the
   /// target is not a PDF or an EPUB.
   Future<List<BookSuggestion>> bookPlaces(String target);
@@ -124,8 +173,13 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   ///
   /// [attachmentsFolder] names the library's attachments folder, whose
   /// files an embed lists first; null lists every attachment as one.
-  new(this._db, {required this.readHeadings, this.attachmentsFolder})
-    : _resolver = LinkResolver(_db);
+  new(
+    this._db, {
+    required this.readHeadings,
+    this.readBlocks,
+    this.attachmentsFolder,
+  }) : _resolver = LinkResolver(_db),
+       _anchors = AnchorIndex(_db);
 
   final IndexDatabase _db;
 
@@ -138,24 +192,26 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   /// the implementation runs it off the UI isolate.
   final Future<List<String>?> Function(String path) readHeadings;
 
+  /// The block anchors of a library-relative note path, in line order, or
+  /// null when it is gone: read the way [readHeadings] reads. Null leaves a
+  /// note's block list empty (a surface with no such read).
+  final Future<List<BlockAnchor>?> Function(String path)? readBlocks;
+
   final LinkResolver _resolver;
+
+  final AnchorIndex _anchors;
 
   /// The headings already read, by note and revision. A run of keystrokes
   /// after `#` names the same target each time and the panel filters the
   /// list locally, so one read answers them all; only the note's own
   /// revision (its mtime and size, as the index records it) can make the
   /// list stale.
-  final Map<(int, DateTime, int), List<HeadingSuggestion>> _headingsByNote = {};
+  final _RevisionCache<HeadingSuggestion> _headingsByNote =
+      _RevisionCache<HeadingSuggestion>();
 
-  /// The reads under way, by the same key: what a key typed while one runs
-  /// waits for instead of starting another.
-  final Map<(int, DateTime, int), Future<List<HeadingSuggestion>>> _reading =
-      {};
-
-  /// How many notes' headings are kept. More than the run of keystrokes
-  /// needs, so moving between a few targets does not re-read; bounded, so a
-  /// long session cannot keep a novel's outline per note it ever named.
-  static const int _headingCacheNotes = 8;
+  /// The block ids already read, by the same key.
+  final _RevisionCache<BlockIdSuggestion> _blocksByNote =
+      _RevisionCache<BlockIdSuggestion>();
 
   /// How many matching rows are fetched before the list is ranked and cut to
   /// [limit]. The indexed prefix query takes this many; the contains query —
@@ -455,35 +511,90 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   Future<List<HeadingSuggestion>> headings(String target) async {
     final note = await _resolved(target);
     if (note == null) return const <HeadingSuggestion>[];
-    final key = (note.id, note.modified, note.size);
-    final kept = _headingsByNote[key];
-    if (kept != null) return kept;
-    // A read under way answers every ask for the same revision that comes
-    // before it lands: a slow note is still being read when the next key
-    // does, and the keys would each start a read of their own.
-    final reading = _reading[key] ??= _read(key, note.path);
-    return await reading;
+    return await _headingsByNote.of(note, () async {
+      final texts = await readHeadings(note.path);
+      return texts == null
+          ? null
+          : [for (final text in texts) HeadingSuggestion(text)];
+    });
   }
 
-  /// One read of the note at [path], kept under [key] once it lands and
-  /// forgotten as a read under way however it ends. Empty when the note is
-  /// gone, which is not kept: it may come back.
-  Future<List<HeadingSuggestion>> _read(
-    (int, DateTime, int) key,
-    String path,
-  ) async {
-    try {
-      final texts = await readHeadings(path);
-      if (texts == null) return const <HeadingSuggestion>[];
-      final rows = [for (final text in texts) HeadingSuggestion(text)];
-      if (_headingsByNote.length >= _headingCacheNotes) {
-        _headingsByNote.remove(_headingsByNote.keys.first);
-      }
-      _headingsByNote[key] = rows;
-      return rows;
-    } finally {
-      unawaited(_reading.remove(key));
+  @override
+  Future<List<BlockIdSuggestion>> blocks(String target) async {
+    final note = await _resolved(target);
+    final read = readBlocks;
+    if (note == null || read == null) return const <BlockIdSuggestion>[];
+    return await _blocksByNote.of(note, () async {
+      final anchors = await read(note.path);
+      return anchors == null
+          ? null
+          : [
+              for (final anchor in anchors)
+                BlockIdSuggestion(anchor.id, excerpt: anchor.excerpt),
+            ];
+    });
+  }
+
+  @override
+  Future<List<HeadingSuggestion>> headingsAcross(String query) async {
+    final hits = await _anchors.headings(query, limit: limit * 2);
+    final targets = await _targetsOf({for (final hit in hits) hit.path});
+    return [
+      for (final hit in hits)
+        if (_readsBack(hit.heading) && targets[hit.path] != null)
+          HeadingSuggestion(
+            hit.heading,
+            path: hit.path,
+            target: targets[hit.path],
+          ),
+    ].take(limit).toList(growable: false);
+  }
+
+  @override
+  Future<List<BlockIdSuggestion>> blocksAcross(String query) async {
+    final hits = await _anchors.blocks(query, limit: limit * 2);
+    final targets = await _targetsOf({for (final hit in hits) hit.path});
+    return [
+      for (final hit in hits)
+        if (targets[hit.path] != null)
+          BlockIdSuggestion(
+            hit.blockId,
+            excerpt: hit.excerpt,
+            path: hit.path,
+            target: targets[hit.path],
+          ),
+    ].take(limit).toList(growable: false);
+  }
+
+  /// The shortest wiki target that names each of [paths] alone, by path;
+  /// a path whose name no `[[…]]` target can carry (#491) has none.
+  Future<Map<String, String>> _targetsOf(Set<String> paths) async {
+    if (paths.isEmpty) return const <String, String>{};
+    final stems = {
+      for (final path in paths)
+        LinkResolver.normalizeTarget(_displayName(path)),
+    };
+    final rows = await _db
+        .customSelect(
+          'SELECT DISTINCT s.stem AS stem, n.path AS path '
+          'FROM note_stems AS s JOIN notes AS n ON n.id = s.note_id '
+          'WHERE s.stem IN (${List.filled(stems.length, '?').join(', ')})',
+          variables: [for (final stem in stems) Variable<String>(stem)],
+        )
+        .get();
+    final sharing = <String, Set<String>>{};
+    for (final row in rows) {
+      (sharing[row.read<String>('stem')] ??= <String>{}).add(
+        row.read<String>('path'),
+      );
     }
+    final out = <String, String>{};
+    for (final path in paths) {
+      final stem = LinkResolver.normalizeTarget(_displayName(path));
+      final target = _targetFor(path, sharing[stem] ?? const <String>{});
+      if (_readsBack(target)) out[path] = target;
+    }
+    return out;
   }
 
   @override
@@ -538,4 +649,44 @@ final class _StemRow {
   final String path;
   final String stem;
   final String source;
+}
+
+/// What a panel kept of a note's list, by the note and its revision: a run of
+/// keystrokes names the same target each time and the panel filters the list
+/// locally, so one read answers them all, and a read still under way answers
+/// every ask that comes before it lands.
+final class _RevisionCache<T> {
+  /// How many notes' lists are kept. More than the run of keystrokes needs,
+  /// so moving between a few targets does not re-read; bounded, so a long
+  /// session cannot keep a novel's outline per note it ever named.
+  static const int _notes = 8;
+
+  final Map<(int, DateTime, int), List<T>> _kept = {};
+  final Map<(int, DateTime, int), Future<List<T>>> _reading = {};
+
+  /// The list of [note] at its revision (its mtime and size, as the index
+  /// records it), read by [read] when it is not kept. An empty list when the
+  /// note is gone, which is not kept: it may come back.
+  Future<List<T>> of(Note note, Future<List<T>?> Function() read) async {
+    final key = (note.id, note.modified, note.size);
+    final kept = _kept[key];
+    if (kept != null) return kept;
+    final reading = _reading[key] ??= _read(key, read);
+    return await reading;
+  }
+
+  Future<List<T>> _read(
+    (int, DateTime, int) key,
+    Future<List<T>?> Function() read,
+  ) async {
+    try {
+      final rows = await read();
+      if (rows == null) return List<T>.empty();
+      if (_kept.length >= _notes) _kept.remove(_kept.keys.first);
+      _kept[key] = rows;
+      return rows;
+    } finally {
+      unawaited(_reading.remove(key));
+    }
+  }
 }

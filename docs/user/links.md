@@ -8,7 +8,10 @@ Forms (target, heading, alias combine freely):
 - `[[note|alias]]` — displayed as `alias`
 - `[[note#heading]]` — jumps to the heading
 - `[[note#heading|alias]]`
-- `[[#heading]]` / `[[|alias]]` — the current note
+- `[[note#heading#subheading]]` — a subheading, by its path
+  (see *Heading links* below)
+- `[[note#^id]]` — jumps to a block (see *Block links* below)
+- `[[#heading]]` / `[[#^id]]` / `[[|alias]]` — the current note
 
 Click (or Ctrl+click in the source editor) to navigate. While the
 opening modifier is held over a link the pointer becomes a hand, so the
@@ -43,7 +46,26 @@ the note's. The panel lists:
   folder as it takes when another file shares the name. A Markdown
   embed, `![](…)`, has no panel, as a Markdown link has none;
 - after a `#` — the headings of the note just named, filtered the same
-  way. `[[#` — no target — lists the headings of the note being edited;
+  way. `[[#` — no target — lists the headings of the note being edited.
+  After a second `#` (`[[note#Part#`) the same list is filtered by the
+  level being typed;
+- after `#^` — the block ids of the note just named, each with the first
+  words of its block, filtered by the id or by those words. `[[#^`
+  lists the ids of the note being edited;
+- after `##` — `[[##` — the headings of **every note of the library**, each
+  with its note dimmed beside it, filtered by what follows (`[[## team]]`
+  lists the headings that hold the word *team*). Choosing one writes the
+  whole link, `[[Team notes#Team plan]]`, with the note named as the note
+  rows name it (as much of its folder as it takes to tell it from a note
+  of the same name); a heading of the note being edited is written
+  `[[#Team plan]]`, as Obsidian writes the link to the note it is in;
+- after `^^` — `[[^^` — the block ids of every note of the library, with
+  the same rows and the same choice: `[[^^idea]]` lists the ids and
+  blocks that hold *idea*, and choosing one writes `[[Plan#^idea-1]]`
+  (`[[#^idea-1]]` for this note). The library-wide lists show at most 50
+  rows, from the library's word index, so they cost the same in a library
+  of a million notes as in one of a hundred: type more of the heading to
+  narrow them, as the word is matched by its start (`tea` finds *Team*);
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or
   `chapter=`. Once the form's key is written, what follows the `=` is the
   number you type: the panel is not offered again there, so `⏎` or `Tab`
@@ -66,6 +88,61 @@ chosen: no note is created from it, and a name that matches nothing is
 left as typed (see *Dead links* below for where a new note comes from).
 The rows come from the index the app already keeps; nothing is scanned to
 fill the panel.
+
+## Heading links
+
+`[[note#heading]]` lands on the heading, whatever its case or punctuation
+(`## A Heading!` is `[[note#a heading]]`). A heading that shares its text
+with another one — two notes' worth of `## Details` in a long note — is
+told apart by its parents: `[[note#Part one#Details]]` is the `Details`
+inside the section of `Part one`, however deep below it, and
+`[[#Part one#Details]]` is the same inside the note being edited. The path
+is read by the outline's levels: `A#C` finds `C` only in the section of
+`A` (up to the next heading as high as `A`), so a `C` under another
+heading is not it. A single heading still lands on the first one of that
+name. Moving or renaming the note rewrites the target and keeps the whole
+path.
+
+## Block links
+
+`[[note#^id]]` links to one **block** — a paragraph, a list item, a quote —
+instead of the whole note or a heading. The block carries a name at its
+end, a space and a caret and the id (` ^37066d`); the id is letters,
+digits and dashes, so a readable one works too (`^quote-of-the-day`).
+
+- a paragraph, a list item or a heading ends with it:
+  `This is the idea. ^37066d`;
+- a quote, a callout, a table, or a whole list takes it on **a line of its
+  own below it**, after a blank line:
+
+  ```
+  > A quote worth keeping.
+
+  ^quote-of-the-day
+  ```
+
+  Only the whole block is a target: a part of a quote, a callout or a
+  table is not (Obsidian's limit too).
+
+Choose an id from the panel (`[[note#^`) or write it. The id is matched
+**literally**, case included; following the link brings the block into view
+at its first line (for a paragraph of several lines, the one it starts
+on, not the one that ends with the id). A link to an id the note does
+not have says *Block not found*. The ids of a note are the same in the
+editor and in the index; an id in a code block, a formula or the
+frontmatter is not one, and if two blocks carry the same id the first
+owns it.
+
+The read view leaves the ` ^id` out of the text, as Obsidian's reading view
+does; the editor (`live` and `source`) keeps showing it, and the note's
+file is never changed by hiding it. Renaming or moving the note carries
+`#^id` along like any other fragment.
+
+> **Only Obsidian reads them.** Block references are specific to
+> Obsidian, not part of standard Markdown: in another editor `^37066d`
+> is plain text at the end of a line, and a `[[note#^id]]` link is not
+> followed there. Niman writes nothing of the kind on its own; a block
+> link is only what you type or choose.
 
 ## Markdown links
 

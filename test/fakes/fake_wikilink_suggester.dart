@@ -11,13 +11,33 @@ final class FakeWikilinkSuggester implements WikilinkSuggester {
   new({
     List<NoteSuggestion>? notes,
     Map<String, List<HeadingSuggestion>>? headings,
+    Map<String, List<BlockIdSuggestion>>? blocks,
+    this.acrossHeadings = const <HeadingSuggestion>[],
+    this.acrossBlocks = const <BlockIdSuggestion>[],
     this.places = const <BookSuggestion>[],
     this.attachments = const <NoteSuggestion>[],
   }) : _notes = notes ?? const <NoteSuggestion>[],
-       _headings = headings ?? const <String, List<HeadingSuggestion>>{};
+       _headings = headings ?? const <String, List<HeadingSuggestion>>{},
+       _blocks = blocks ?? const <String, List<BlockIdSuggestion>>{};
 
   final List<NoteSuggestion> _notes;
   final Map<String, List<HeadingSuggestion>> _headings;
+  final Map<String, List<BlockIdSuggestion>> _blocks;
+
+  /// The rows a `[[##` search answers with (each says which note it is in).
+  final List<HeadingSuggestion> acrossHeadings;
+
+  /// The rows a `[[^^` search answers with.
+  final List<BlockIdSuggestion> acrossBlocks;
+
+  /// Every block target the panel asked for, in order.
+  final List<String> blockTargets = <String>[];
+
+  /// Every `[[##` query the panel asked for, in order.
+  final List<String> headingSearches = <String>[];
+
+  /// Every `[[^^` query the panel asked for, in order.
+  final List<String> blockSearches = <String>[];
 
   /// The book forms a `#` on a PDF/EPUB answers with.
   final List<BookSuggestion> places;
@@ -107,6 +127,35 @@ final class FakeWikilinkSuggester implements WikilinkSuggester {
     headingTargets.add(target);
     await _answer();
     return _headings[target] ?? const <HeadingSuggestion>[];
+  }
+
+  @override
+  Future<List<BlockIdSuggestion>> blocks(String target) async {
+    blockTargets.add(target);
+    await _answer();
+    return _blocks[target] ?? const <BlockIdSuggestion>[];
+  }
+
+  @override
+  Future<List<HeadingSuggestion>> headingsAcross(String query) async {
+    headingSearches.add(query);
+    await _answer();
+    final q = query.toLowerCase();
+    return <HeadingSuggestion>[
+      for (final row in acrossHeadings)
+        if (row.heading.toLowerCase().contains(q)) row,
+    ];
+  }
+
+  @override
+  Future<List<BlockIdSuggestion>> blocksAcross(String query) async {
+    blockSearches.add(query);
+    await _answer();
+    final q = query.toLowerCase();
+    return <BlockIdSuggestion>[
+      for (final row in acrossBlocks)
+        if ('${row.id} ${row.excerpt}'.toLowerCase().contains(q)) row,
+    ];
   }
 
   @override

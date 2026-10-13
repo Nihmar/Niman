@@ -894,6 +894,8 @@ final class SerbianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Наслов није пронађен';
   @override
+  String get blockNotFoundTitle => 'Блок није пронађен';
+  @override
   String get ambiguousLinkTitle => 'Више белешки поклапа';
   @override
   String get openLinkFailed => 'Веза се не може отворити';
@@ -2950,12 +2952,21 @@ final class SerbianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Наслови у $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Блокови у $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Наслови у целој библиотеци';
+  @override
+  String get wikilinkBlocksEverywhere => 'Блокови у целој библиотеци';
+  @override
   String wikilinkPlacesIn(String named) => 'Места у $named';
   @override
   String get wikilinkThisNote => 'ова белешка';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Ниједан наслов се не поклапа са „$query".';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Ниједан блок се не поклапа са „$query".';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Ниједна белешка се не поклапа са „$query".';
@@ -2964,6 +2975,14 @@ final class SerbianStrings extends Strings {
       'Ниједна датотека не одговара „$query”.';
   @override
   String get wikilinkNoHeading => 'ова белешка нема наслов с тим именом';
+  @override
+  String get wikilinkNoBlock => 'ова белешка нема блок с тим ИД-ом';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'ниједна белешка у библиотеци нема такав наслов';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'ниједна белешка у библиотеци нема блок с тим ИД-ом';
   @override
   String get wikilinkNoNote => 'ништа у библиотеци нема то име или алијас';
   @override

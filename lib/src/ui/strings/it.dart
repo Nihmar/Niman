@@ -898,6 +898,8 @@ final class ItalianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Titolo non trovato';
   @override
+  String get blockNotFoundTitle => 'Blocco non trovato';
+  @override
   String get ambiguousLinkTitle => 'Più note corrispondono';
   @override
   String get openLinkFailed => 'Impossibile aprire il link';
@@ -2942,12 +2944,21 @@ final class ItalianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Titoli in $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blocchi in $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Titoli in tutta la libreria';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blocchi in tutta la libreria';
+  @override
   String wikilinkPlacesIn(String named) => 'Posizioni in $named';
   @override
   String get wikilinkThisNote => 'questa nota';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Nessun titolo corrisponde a “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Nessun blocco corrisponde a “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Nessuna nota corrisponde a “$query”.';
@@ -2956,6 +2967,14 @@ final class ItalianStrings extends Strings {
       'Nessun file corrisponde a “$query”.';
   @override
   String get wikilinkNoHeading => 'questa nota non ha un titolo con quel nome';
+  @override
+  String get wikilinkNoBlock => 'questa nota non ha un blocco con quell’id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'nessuna nota della libreria ha un titolo simile';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'nessuna nota della libreria ha un blocco con quell’id';
   @override
   String get wikilinkNoNote => 'niente nella libreria ha quel nome o alias';
   @override

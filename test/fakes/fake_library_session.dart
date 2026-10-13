@@ -29,6 +29,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -1993,6 +1994,57 @@ final class _FakeWikilinkSuggester implements WikilinkSuggester {
     return <HeadingSuggestion>[
       for (final heading in outlineOfText(row.content))
         HeadingSuggestion(heading.text),
+    ];
+  }
+
+  @override
+  Future<List<BlockIdSuggestion>> blocks(String target) async {
+    final stem = p.basenameWithoutExtension(target).toLowerCase();
+    final row = _session._rows
+        .where(
+          (row) =>
+              !row.isDir &&
+              !row.trashed &&
+              p.basenameWithoutExtension(row.path).toLowerCase() == stem,
+        )
+        .firstOrNull;
+    if (row == null) return const <BlockIdSuggestion>[];
+    return <BlockIdSuggestion>[
+      for (final block in blockAnchorsOfText(row.content))
+        BlockIdSuggestion(block.id, excerpt: block.excerpt),
+    ];
+  }
+
+  @override
+  Future<List<HeadingSuggestion>> headingsAcross(String query) async {
+    final q = query.trim().toLowerCase();
+    return <HeadingSuggestion>[
+      for (final row in _session._rows)
+        if (!row.isDir && !row.trashed && row.path.endsWith('.md'))
+          for (final heading in outlineOfText(row.content))
+            if (heading.text.toLowerCase().contains(q))
+              HeadingSuggestion(
+                heading.text,
+                path: row.path,
+                target: p.basenameWithoutExtension(row.path),
+              ),
+    ];
+  }
+
+  @override
+  Future<List<BlockIdSuggestion>> blocksAcross(String query) async {
+    final q = query.trim().toLowerCase();
+    return <BlockIdSuggestion>[
+      for (final row in _session._rows)
+        if (!row.isDir && !row.trashed && row.path.endsWith('.md'))
+          for (final block in blockAnchorsOfText(row.content))
+            if ('${block.id} ${block.excerpt}'.toLowerCase().contains(q))
+              BlockIdSuggestion(
+                block.id,
+                excerpt: block.excerpt,
+                path: row.path,
+                target: p.basenameWithoutExtension(row.path),
+              ),
     ];
   }
 

@@ -892,6 +892,8 @@ final class FinnishStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Otsikkoa ei löytynyt';
   @override
+  String get blockNotFoundTitle => 'Lohkoa ei löytynyt';
+  @override
   String get ambiguousLinkTitle => 'Useat muistiinpanot täsmäävät';
   @override
   String get openLinkFailed => 'Linkkiä ei voitu avata';
@@ -2937,12 +2939,21 @@ final class FinnishStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Otsikot: $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Lohkot: $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Otsikot koko kirjastossa';
+  @override
+  String get wikilinkBlocksEverywhere => 'Lohkot koko kirjastossa';
+  @override
   String wikilinkPlacesIn(String named) => 'Paikat: $named';
   @override
   String get wikilinkThisNote => 'tämä muistiinpano';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Mikään otsikko ei vastaa hakua “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Mikään lohko ei vastaa hakua “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Mikään muistiinpano ei vastaa hakua “$query”.';
@@ -2952,6 +2963,15 @@ final class FinnishStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'tässä muistiinpanossa ei ole sen nimistä otsikkoa';
+  @override
+  String get wikilinkNoBlock =>
+      'tässä muistiinpanossa ei ole lohkoa, jolla on tuo tunniste';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'missään kirjaston muistiinpanossa ei ole tuollaista otsikkoa';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'missään kirjaston muistiinpanossa ei ole lohkoa, jolla on tuo tunniste';
   @override
   String get wikilinkNoNote =>
       'kirjastossa ei ole mitään sen nimistä tai aliasnimistä';

@@ -16,10 +16,11 @@ import 'package:niman/src/core/files.dart' show relPath;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/links/anchor.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
-import 'package:niman/src/links/slug.dart';
 import 'package:niman/src/ui/missing_note_dialog.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -36,6 +37,7 @@ final class NoteLinkTargets {
     required this.missingNoteLocation,
     required this.outline,
     required this.jumpToHeading,
+    this.blocks,
     this.onOpenNote,
     this.createMissingNote,
     this.folderExists,
@@ -60,6 +62,11 @@ final class NoteLinkTargets {
 
   /// Scrolls the note to a heading's line.
   final void Function(int line) jumpToHeading;
+
+  /// The note's block anchors, the blocks that end with a ` ^id` (#844), read
+  /// when a block link is followed; null for a surface that keeps none, where
+  /// a block link finds nothing.
+  final Future<List<BlockAnchor>> Function()? blocks;
 
   /// Opens another note through the shell; null leaves a link that
   /// resolves with nowhere to go.
@@ -124,20 +131,20 @@ Future<void> openWiki(
   const log = AppLogger(name: 'links');
   final source = link.source;
   final alias = ref.alias == null ? '-' : '"${ref.alias}"';
-  final heading = ref.heading == null ? '-' : '"${ref.heading}"';
+  final heading = ref.fragment == null ? '-' : '"${ref.fragment}"';
   final src = source == null ? 'not loaded' : 'ready';
   log.debug(
     'wikilink tap in ${p.basename(link.notePath)}: '
     'target="${ref.target}" alias=$alias heading=$heading (source $src)',
   );
   if (ref.target.isEmpty) {
-    final heading = ref.heading;
+    final heading = ref.fragment;
     if (heading == null) {
       log.debug('wikilink: empty target and no heading — snackbar');
       return _linkSnack(context, AppStrings.unresolvedLinkTitle);
     }
-    log.debug('wikilink: local anchor — jump to heading "$heading"');
-    jumpToAnchor(context, heading, link);
+    log.debug('wikilink: local anchor — jump to "$heading"');
+    await jumpToAnchor(context, heading, link);
     return;
   }
   if (source == null) return;
@@ -147,7 +154,7 @@ Future<void> openWiki(
   var resolved = await source.resolveWiki(ref.target, from: from);
   final outcome = describeResolved(resolved);
   log.debug('wikilink target "${ref.target}" -> $outcome');
-  var anchor = ref.heading;
+  var anchor = ref.fragment;
   if (resolved is! ResolvedNote && ref.alias != null) {
     // Label-first links — `[[a label|filename]]`, the display text
     // first — parse with the target and alias swapped, so when the
@@ -206,8 +213,8 @@ Future<void> _applyResolved(
         if (context.mounted) _linkSnack(context, AppStrings.openLinkFailed);
       }
     case LocalAnchor(:final heading):
-      log.debug('link outcome: jump to local heading "$heading"');
-      jumpToAnchor(context, heading, link);
+      log.debug('link outcome: jump to local anchor "$heading"');
+      await jumpToAnchor(context, heading, link);
     case ResolvedNote(:final note, :final heading):
       await _openNoteResult(context, note, heading, link);
     case AmbiguousNote(:final candidates):
@@ -313,7 +320,7 @@ Future<void> _openNoteResult(
       'link outcome: target is the current note — '
       '${anchor == null ? 'no-op' : 'local jump to "$anchor"'}',
     );
-    if (anchor != null) jumpToAnchor(context, anchor, link);
+    if (anchor != null) await jumpToAnchor(context, anchor, link);
     return;
   }
   final open = link.onOpenNote;
@@ -356,35 +363,58 @@ Future<void> _pickAmbiguous(
   await _openNoteResult(context, chosen, null, link);
 }
 
-/// Jumps to the heading whose slug matches [heading] (the shared slug,
-/// so `[[x#My Heading]]` and `## My Heading` agree).
+/// Brings the note to what [fragment] names: a heading, a path of headings
+/// (`A#B`, #845), or a block by its id (`^37066d`, #844).
 ///
-/// Also the note's own opening jump, when it was opened at an anchor.
-void jumpToAnchor(BuildContext context, String heading, NoteLinkTargets link) {
-  final slug = headingSlug(heading);
-  OutlineEntry? entry;
-  for (final e in link.outline) {
-    if (headingSlug(e.text) == slug) {
-      entry = e;
-      break;
-    }
+/// Headings are matched by the shared slug (so `[[x#My Heading]]` and
+/// `## My Heading` agree) and read by level order; a block is matched by its
+/// id, literally. Also the note's own opening jump, when it was opened at an
+/// anchor.
+Future<void> jumpToAnchor(
+  BuildContext context,
+  String fragment,
+  NoteLinkTargets link,
+) async {
+  const log = AppLogger(name: 'links');
+  final anchor = parseAnchor(fragment);
+  switch (anchor) {
+    case null:
+      return;
+    case BlockIdAnchor(:final id):
+      final blocks = await link.blocks?.call() ?? const <BlockAnchor>[];
+      final line = blockLineOf(blocks, id);
+      if (line == null) {
+        log.debug(
+          'block "^$id" not found among ${blocks.length} block anchor(s): '
+          '${blocks.take(40).map((b) => '${b.line}:^${b.id}').join(', ')}',
+        );
+        if (context.mounted) {
+          _linkSnack(context, AppStrings.blockNotFoundTitle);
+        }
+        return;
+      }
+      link.jumpToHeading(line);
+    case HeadingAnchor(:final path):
+      final line = headingLineOf(link.outline, path);
+      if (line == null) {
+        // Trace the outline so a dead anchor is diagnosable from the log:
+        // is the heading missing, or does its text differ from the link's?
+        final entries = link.outline;
+        final shown = entries.length <= 40
+            ? entries
+            : [...entries.take(20), ...entries.skip(entries.length - 20)];
+        log.debug(
+          'heading "${path.join('#')}" not found among ${entries.length} '
+          'outline entr(ies): '
+          '${shown.map((e) => '${e.line}:"${e.text}"').join(', ')}',
+        );
+        if (context.mounted) {
+          _linkSnack(context, AppStrings.headingNotFoundTitle);
+        }
+        return;
+      }
+      link.jumpToHeading(line);
   }
-  if (entry == null) {
-    // Trace the outline so a dead anchor is diagnosable from the log:
-    // is the heading missing, or does its text differ from the link's?
-    final entries = link.outline;
-    final shown = entries.length <= 40
-        ? entries
-        : [...entries.take(20), ...entries.skip(entries.length - 20)];
-    const AppLogger(name: 'links').debug(
-      'heading "$heading" (slug "$slug") not found among '
-      '${entries.length} outline entr(ies): '
-      '${shown.map((e) => '${e.line}:"${e.text}"').join(', ')}',
-    );
-    _linkSnack(context, AppStrings.headingNotFoundTitle);
-    return;
-  }
-  link.jumpToHeading(entry.line);
 }
 
 void _linkSnack(BuildContext context, String message) {

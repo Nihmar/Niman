@@ -52,6 +52,7 @@ import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/div_syntax.dart';
@@ -156,6 +157,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.templateCommands = false,
     this.autofocus = false,
     this.wikilinkSuggester,
+    this.notePath,
     super.key,
   });
 
@@ -310,6 +312,11 @@ final class MarkdownSourceView extends StatefulWidget {
   /// and headings, and the books' place forms. Null (a surface with no
   /// library) draws no panel.
   final WikilinkSuggester? wikilinkSuggester;
+
+  /// The note's library-relative path, or null for a note outside a library:
+  /// what the wikilink panel tells the note's own headings and blocks from
+  /// the rest of the library's when it completes a link (#845).
+  final String? notePath;
 
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
@@ -674,12 +681,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     lineRead: (line) => _tokensAt(line) != null,
     inCodeAt: _inCodeAt,
     headings: () => headings,
+    blocks: () => _blockAnchors.read(),
+    notePath: () => widget.notePath,
     replace: (start, end, text, caret) =>
         _replaceRange(start, end, text, caret: caret),
     ensureCaretVisible: _ensureCaretVisible,
     caretRect: () => _caretRectAt(_selection.extent) ?? caretRect,
     noteBox: () => _noteBox,
     caretMoves: () => Listenable.merge([_scroll, _caretRect]),
+  );
+
+  /// The note's block anchors, for a `[[#^` link to the note being edited
+  /// (#844): walked when the panel asks, kept for the revision.
+  late final BufferBlockAnchors _blockAnchors = BufferBlockAnchors(
+    () => widget.buffer,
   );
 
   /// The suggester's panel opened, closed or changed: the note is built

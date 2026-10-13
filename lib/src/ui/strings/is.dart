@@ -891,6 +891,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Titillinn fannst ekki';
   @override
+  String get blockNotFoundTitle => 'Blokkin fannst ekki';
+  @override
   String get ambiguousLinkTitle => 'Fleiri minnisblöð passa';
   @override
   String get openLinkFailed => 'Það gekk ekki að opna tengilinn';
@@ -2922,12 +2924,21 @@ final class IcelandicStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Titlar í $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blokkir í $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Titlar í öllu safninu';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blokkir í öllu safninu';
+  @override
   String wikilinkPlacesIn(String named) => 'Staðir í $named';
   @override
   String get wikilinkThisNote => 'þessi minnispunktur';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Enginn titill passar við „$query".';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Engin blokk passar við „$query".';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Enginn minnispunktur passar við „$query".';
@@ -2936,6 +2947,15 @@ final class IcelandicStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'þessi minnispunktur hefur engan titil með þessu nafni';
+  @override
+  String get wikilinkNoBlock =>
+      'þessi minnispunktur hefur enga blokk með þessu auðkenni';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'enginn minnispunktur í safninu hefur slíkan titil';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'enginn minnispunktur í safninu hefur blokk með þessu auðkenni';
   @override
   String get wikilinkNoNote => 'ekkert í safninu ber þetta nafn eða alias';
   @override

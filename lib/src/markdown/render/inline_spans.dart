@@ -17,6 +17,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/links/block_anchors.dart' show withoutTrailingBlockId;
 import 'package:niman/src/links/parser.dart' show wikiDisplayText;
 import 'package:niman/src/markdown/inline/inline_node.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
@@ -67,12 +68,32 @@ final class InlineSpans {
   /// The number each footnote is cited as, by its normalized label.
   final Map<String, int> footnoteNumbers;
 
+  /// [nodes] with the ` ^id` that ends their text taken off: the id and the
+  /// space before it, nothing when the text is the id alone.
+  static List<InlineNode> _withoutBlockId(List<InlineNode> nodes) {
+    if (nodes.isEmpty) return nodes;
+    final last = nodes.last;
+    if (last is! TextNode) return nodes;
+    final shown = withoutTrailingBlockId(last.text);
+    if (shown == last.text) return nodes;
+    return [
+      ...nodes.take(nodes.length - 1),
+      if (shown.isNotEmpty)
+        TextNode(shown, start: last.start, end: last.start + shown.length),
+    ];
+  }
+
   /// The spans of [inline], in order.
-  List<InlineSpan> of(ReadInline inline) {
+  ///
+  /// With [hideBlockId] a ` ^id` that ends the text is left out, as Obsidian's
+  /// reading view leaves it (#844): the id names the block for a link, and
+  /// the note keeps it — `live` and `source` show it, and nothing here
+  /// changes the file.
+  List<InlineSpan> of(ReadInline inline, {bool hideBlockId = false}) {
     final spans = <InlineSpan>[];
+    final nodes = hideBlockId ? _withoutBlockId(inline.nodes) : inline.nodes;
     final stack = <_Frame>[
-      for (final node in inline.nodes.reversed)
-        _Frame(node, const _Style(), null),
+      for (final node in nodes.reversed) _Frame(node, const _Style(), null),
     ];
     while (stack.isNotEmpty) {
       final frame = stack.removeLast();

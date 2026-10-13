@@ -433,6 +433,15 @@ final class LibraryController implements LibrarySession {
           return null;
         }
       },
+      // The same for a note's block ids (#844).
+      readBlocks: (path) async {
+        if (reader == null) return null;
+        try {
+          return await reader.noteBlocks(path);
+        } on Object {
+          return null;
+        }
+      },
     );
   }
 

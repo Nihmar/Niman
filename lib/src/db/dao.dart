@@ -343,6 +343,21 @@ final class NoteDao {
         args,
       );
       await _db.customStatement(
+        'DELETE FROM note_anchors_fts WHERE rowid IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_headings WHERE note_id IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_blocks WHERE note_id IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
         'DELETE FROM note_stems WHERE note_id IN '
         '(SELECT id FROM notes WHERE $where)',
         args,

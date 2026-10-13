@@ -901,6 +901,8 @@ final class RomanianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Titlul nu a fost găsit';
   @override
+  String get blockNotFoundTitle => 'Blocul nu a fost găsit';
+  @override
   String get ambiguousLinkTitle => 'Mai multe note se potrivesc';
   @override
   String get openLinkFailed => 'Linkul nu a putut fi deschis';
@@ -2970,12 +2972,21 @@ final class RomanianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Titluri în $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blocuri în $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Titluri din toată biblioteca';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blocuri din toată biblioteca';
+  @override
   String wikilinkPlacesIn(String named) => 'Locuri în $named';
   @override
   String get wikilinkThisNote => 'această notă';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Niciun titlu nu corespunde cu “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Niciun bloc nu corespunde cu “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Nicio notă nu corespunde cu “$query”.';
@@ -2985,6 +2996,14 @@ final class RomanianStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'această notă nu are niciun titlu cu acest nume';
+  @override
+  String get wikilinkNoBlock => 'această notă nu are niciun bloc cu acest id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'nicio notă din bibliotecă nu are un asemenea titlu';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'nicio notă din bibliotecă nu are un bloc cu acest id';
   @override
   String get wikilinkNoNote =>
       'nimic din bibliotecă nu are acest nume sau alias';

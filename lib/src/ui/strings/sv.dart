@@ -892,6 +892,8 @@ final class SwedishStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Rubriken hittades inte';
   @override
+  String get blockNotFoundTitle => 'Blocket hittades inte';
+  @override
   String get ambiguousLinkTitle => 'Flera anteckningar matchar';
   @override
   String get openLinkFailed => 'Kunde inte öppna länken';
@@ -2931,12 +2933,20 @@ final class SwedishStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Rubriker i $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Block i $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Rubriker i hela biblioteket';
+  @override
+  String get wikilinkBlocksEverywhere => 'Block i hela biblioteket';
+  @override
   String wikilinkPlacesIn(String named) => 'Platser i $named';
   @override
   String get wikilinkThisNote => 'den här anteckningen';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Ingen rubrik matchar “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) => 'Inget block matchar “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Ingen anteckning matchar “$query”.';
@@ -2945,6 +2955,15 @@ final class SwedishStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'den här anteckningen har ingen rubrik med det namnet';
+  @override
+  String get wikilinkNoBlock =>
+      'den här anteckningen har inget block med det id:t';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'ingen anteckning i biblioteket har en sådan rubrik';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'ingen anteckning i biblioteket har ett block med det id:t';
   @override
   String get wikilinkNoNote =>
       'inget i biblioteket har det namnet eller aliaset';

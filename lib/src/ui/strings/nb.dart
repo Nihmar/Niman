@@ -886,6 +886,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Overskriften ble ikke funnet';
   @override
+  String get blockNotFoundTitle => 'Blokken ble ikke funnet';
+  @override
   String get ambiguousLinkTitle => 'Flere notater samsvarer';
   @override
   String get openLinkFailed => 'Kunne ikke åpne lenken';
@@ -2906,12 +2908,21 @@ final class NorwegianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Overskrifter i $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blokker i $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Overskrifter i hele biblioteket';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blokker i hele biblioteket';
+  @override
   String wikilinkPlacesIn(String named) => 'Steder i $named';
   @override
   String get wikilinkThisNote => 'dette notatet';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Ingen overskrift samsvarer med “$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Ingen blokk samsvarer med “$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Ingen notater samsvarer med “$query”.';
@@ -2921,6 +2932,14 @@ final class NorwegianStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'dette notatet har ingen overskrift med det navnet';
+  @override
+  String get wikilinkNoBlock => 'dette notatet har ingen blokk med den iden';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'ingen notater i biblioteket har en slik overskrift';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'ingen notater i biblioteket har en blokk med den iden';
   @override
   String get wikilinkNoNote =>
       'ingenting i biblioteket har det navnet eller aliaset';

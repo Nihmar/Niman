@@ -47,8 +47,10 @@ final class HtmlSpans {
     if (href == null) {
       return (html: '<span class="wikilink">$shown</span>', plain: plain);
     }
-    final heading = ref.heading;
-    final anchor = heading == null ? '' : '#${headingAnchor(heading)}';
+    // A heading path (`A#B`) lands on its last level, the heading itself;
+    // a block link has no anchor in the exported page (its id is not kept).
+    final levels = ref.headingPath;
+    final anchor = levels.isEmpty ? '' : '#${headingAnchor(levels.last)}';
     return (
       html:
           '<a class="wikilink" href="${escapeAttribute('$href$anchor')}">'

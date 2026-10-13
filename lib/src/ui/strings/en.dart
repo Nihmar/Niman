@@ -885,6 +885,8 @@ final class EnglishStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Heading not found';
   @override
+  String get blockNotFoundTitle => 'Block not found';
+  @override
   String get ambiguousLinkTitle => 'Several notes match';
   @override
   String get openLinkFailed => 'Could not open link';
@@ -2887,17 +2889,33 @@ final class EnglishStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Headings in $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blocks in $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Headings across the library';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blocks across the library';
+  @override
   String wikilinkPlacesIn(String named) => 'Places in $named';
   @override
   String get wikilinkThisNote => 'this note';
   @override
   String wikilinkNoMatchHeading(String query) => 'No heading matches “$query”.';
   @override
+  String wikilinkNoMatchBlock(String query) => 'No block matches “$query”.';
+  @override
   String wikilinkNoMatchNote(String query) => 'No note matches “$query”.';
   @override
   String wikilinkNoMatchFile(String query) => 'No file matches “$query”.';
   @override
   String get wikilinkNoHeading => 'this note has no heading with that name';
+  @override
+  String get wikilinkNoBlock => 'this note has no block with that id';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'no note in the library has a heading like that';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'no note in the library has a block with that id';
   @override
   String get wikilinkNoNote => 'nothing in the library has that name or alias';
   @override

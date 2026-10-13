@@ -185,7 +185,7 @@ final class _Collected {
         case WikiLinkNode(:final inner):
           final ref = parseWikiRef(inner);
           // `[[]]`, `[[|]]` and `[[#]]` carry nothing to resolve or show.
-          if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
+          if (ref.target.isEmpty && ref.fragment == null && ref.alias == null) {
             continue;
           }
           final (start, end) = _offsets(inline, node);

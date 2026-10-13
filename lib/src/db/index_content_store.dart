@@ -382,8 +382,66 @@ final class IndexContentStore {
     await replaceFileStems(row.id, row.name);
     await _writeAliasStems(row.id, c);
     await _writeTags(row.id, c);
+    await _writeAnchors(row.id, c);
     await writeFields(row.id, fields: c.fields, date: c.date, pinned: c.pinned);
     await _writeLinks(row, c, resolved, pendingLink);
+  }
+
+  /// Rewrites the heading and block-id rows of note [noteId] to match [c]
+  /// (#844, #845), and its row of the word index they are searched through.
+  ///
+  /// The word index holds the headings and the ids as words (`headings`
+  /// joined by line breaks, `blocks` as each id and its first words), so a
+  /// search names the notes to read the rows of: an indexed lookup however
+  /// many notes the library has.
+  Future<void> _writeAnchors(int noteId, NoteContent c) async {
+    await (_db.delete(
+      _db.noteHeadings,
+    )..where((h) => h.noteId.equals(noteId))).go();
+    await (_db.delete(
+      _db.noteBlocks,
+    )..where((b) => b.noteId.equals(noteId))).go();
+    await _db.customStatement(
+      'DELETE FROM note_anchors_fts WHERE rowid = ?',
+      <Object?>[noteId],
+    );
+    if (c.headings.isEmpty && c.blocks.isEmpty) return;
+    await _db.batch((batch) {
+      for (final heading in c.headings) {
+        batch.insert(
+          _db.noteHeadings,
+          NoteHeadingsCompanion.insert(
+            noteId: noteId,
+            line: heading.line,
+            level: heading.level,
+            heading: heading.text,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+      }
+      for (final block in c.blocks) {
+        batch.insert(
+          _db.noteBlocks,
+          NoteBlocksCompanion.insert(
+            noteId: noteId,
+            blockId: block.id,
+            line: block.line,
+            excerpt: block.excerpt,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+      }
+    });
+    await _db.customStatement(
+      'INSERT INTO note_anchors_fts (rowid, headings, blocks) '
+      'VALUES (?, ?, ?)',
+      <Object?>[
+        noteId,
+        [for (final heading in c.headings) heading.text].join('\n'),
+        [for (final block in c.blocks) '${block.id} ${block.excerpt}']
+            .join('\n'),
+      ],
+    );
   }
 
   /// Writes the known frontmatter fields onto the note row itself and the

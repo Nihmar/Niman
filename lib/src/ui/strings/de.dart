@@ -895,6 +895,8 @@ final class GermanStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Überschrift nicht gefunden';
   @override
+  String get blockNotFoundTitle => 'Block nicht gefunden';
+  @override
   String get ambiguousLinkTitle => 'Mehrere Notizen passen';
   @override
   String get openLinkFailed => 'Link konnte nicht geöffnet werden';
@@ -2988,6 +2990,13 @@ final class GermanStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Überschriften in $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blöcke in $named';
+  @override
+  String get wikilinkHeadingsEverywhere =>
+      'Überschriften in der ganzen Bibliothek';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blöcke in der ganzen Bibliothek';
+  @override
   String wikilinkPlacesIn(String named) => 'Stellen in $named';
   @override
   String get wikilinkThisNote => 'diese Notiz';
@@ -2995,12 +3004,22 @@ final class GermanStrings extends Strings {
   String wikilinkNoMatchHeading(String query) =>
       'Keine Überschrift passt zu „$query“.';
   @override
+  String wikilinkNoMatchBlock(String query) => 'Kein Block passt zu „$query“.';
+  @override
   String wikilinkNoMatchNote(String query) => 'Keine Notiz passt zu „$query“.';
   @override
   String wikilinkNoMatchFile(String query) => 'Keine Datei passt zu „$query“.';
   @override
   String get wikilinkNoHeading =>
       'diese Notiz hat keine Überschrift mit diesem Namen';
+  @override
+  String get wikilinkNoBlock => 'diese Notiz hat keinen Block mit dieser ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'keine Notiz der Bibliothek hat eine solche Überschrift';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'keine Notiz der Bibliothek hat einen Block mit dieser ID';
   @override
   String get wikilinkNoNote =>
       'nichts in der Bibliothek trägt diesen Namen oder Alias';

@@ -24,12 +24,14 @@ import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
+import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
@@ -1138,7 +1140,7 @@ final class _NoteViewState extends State<NoteView>
       });
       final anchor = widget.initialAnchor;
       if (anchor != null && mounted) {
-        jumpToAnchor(context, anchor, _linkTargets());
+        unawaited(jumpToAnchor(context, anchor, _linkTargets()));
       }
       widget.onLoaded?.call(path, text.length);
       _recordDiskStat(path);
@@ -1371,6 +1373,9 @@ final class _NoteViewState extends State<NoteView>
         lineTokens: plainTextTokensOf(p.basename(widget.path)),
         templateCommands: _templateIn(widget),
         wikilinkSuggester: widget.wikilinkSuggester,
+        notePath: widget.libraryRoot == null
+            ? null
+            : relPath(widget.path, widget.libraryRoot!),
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.
@@ -1863,11 +1868,21 @@ final class _NoteViewState extends State<NoteView>
     missingNoteLocation: widget.missingNoteLocation,
     outline: _stats.outline.value,
     jumpToHeading: _jumpToHeading,
+    blocks: _blocks,
     onOpenNote: widget.onOpenNote,
     createMissingNote: widget.createMissingNote,
     folderExists: widget.folderExists,
     modifier: modifier,
   );
+
+  /// The note's block anchors (#844), read off its buffer when a block link
+  /// is followed.
+  late final BufferBlockAnchors _blockAnchors = BufferBlockAnchors(
+    () => _surface!.buffer,
+  );
+
+  Future<List<BlockAnchor>> _blocks() async =>
+      _surface == null ? const <BlockAnchor>[] : await _blockAnchors.read();
 
   void _onFocusChanged() {
     if (!_focus.hasFocus) unawaited(_saves.save());

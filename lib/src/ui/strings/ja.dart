@@ -846,6 +846,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get headingNotFoundTitle => '見出しが見つかりません';
   @override
+  String get blockNotFoundTitle => 'ブロックが見つかりません';
+  @override
   String get ambiguousLinkTitle => '複数のノートが一致します';
   @override
   String get openLinkFailed => 'リンクを開けませんでした';
@@ -2668,17 +2670,31 @@ final class JapaneseStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => '$named の見出し';
   @override
+  String wikilinkBlocksIn(String named) => '$named のブロック';
+  @override
+  String get wikilinkHeadingsEverywhere => 'ライブラリ全体の見出し';
+  @override
+  String get wikilinkBlocksEverywhere => 'ライブラリ全体のブロック';
+  @override
   String wikilinkPlacesIn(String named) => '$named の場所';
   @override
   String get wikilinkThisNote => 'このノート';
   @override
   String wikilinkNoMatchHeading(String query) => '「$query」 に一致する見出しはありません。';
   @override
+  String wikilinkNoMatchBlock(String query) => '「$query」 に一致するブロックはありません。';
+  @override
   String wikilinkNoMatchNote(String query) => '「$query」 に一致するノートはありません。';
   @override
   String wikilinkNoMatchFile(String query) => '「$query」に一致するファイルはありません。';
   @override
   String get wikilinkNoHeading => 'このノートにその名前の見出しはありません';
+  @override
+  String get wikilinkNoBlock => 'このノートにその ID のブロックはありません';
+  @override
+  String get wikilinkNoHeadingAnywhere => 'ライブラリにそのような見出しのあるノートはありません';
+  @override
+  String get wikilinkNoBlockAnywhere => 'ライブラリにその ID のブロックのあるノートはありません';
   @override
   String get wikilinkNoNote => 'ライブラリにその名前または別名のものはありません';
   @override

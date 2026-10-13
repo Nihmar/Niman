@@ -27,6 +27,7 @@ import 'package:niman/src/library/note_trash.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -581,6 +582,18 @@ final class NoteOps implements NoteOperations {
     );
   }
 
+  /// The block anchors of the note at [path] — its blocks that end with a
+  /// ` ^id` (#844) — read and walked where the note lies, off the UI isolate,
+  /// as [noteHeadings] reads the headings.
+  Future<List<BlockAnchor>> noteBlocks(String path) async {
+    await _mustFind(path);
+    final abs = _abs(path);
+    return await IsolateGauge.run(
+      () => blocksOfNoteFile(abs),
+      'blocks "$path"',
+    );
+  }
+
   /// Pins or unpins the note at [path] by editing its frontmatter.
   ///
   /// Unpinning removes the key rather than writing `pinned: false`: the
@@ -749,10 +762,19 @@ final class NoteOps implements NoteOperations {
 /// [NoteOps.readNote] does — and walked for its headings, so this is work
 /// for a background isolate ([IsolateGauge.run]), never the UI's (#491).
 List<String> headingsOfNoteFile(String path) {
+  return [for (final heading in outlineOfText(_noteTextAt(path))) heading.text];
+}
+
+/// The block anchors of the note file at absolute [path] (#844), read as
+/// [headingsOfNoteFile] reads: work for a background isolate.
+List<BlockAnchor> blocksOfNoteFile(String path) =>
+    blockAnchorsOfText(_noteTextAt(path));
+
+String _noteTextAt(String path) {
   final bytes = File(path).readAsBytesSync();
   var text = decodeNoteText(bytes);
   if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
     text = text.substring(1);
   }
-  return [for (final heading in outlineOfText(text)) heading.text];
+  return text;
 }

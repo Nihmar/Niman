@@ -56,6 +56,16 @@ final class FakeLinkSource implements LinkSource {
       return ExternalLink(url: h);
     }
     if (h.startsWith('#')) return LocalAnchor(heading: h.substring(1));
+    final hash = h.indexOf('#');
+    if (hash > 0) {
+      // The fragment rides on the note it follows, as the resolver has it.
+      final path = await resolveWiki(
+        h.substring(0, hash).replaceAll('.md', ''),
+      );
+      return path is ResolvedNote
+          ? ResolvedNote(note: path.note, heading: h.substring(hash + 1))
+          : path;
+    }
     return await resolveWiki(h.replaceAll('.md', ''));
   }
 

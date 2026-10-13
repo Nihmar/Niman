@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/wikilink_panel.dart';
@@ -27,6 +28,8 @@ final class WikilinkSuggestController extends ChangeNotifier {
     required this._lineRead,
     required this._inCodeAt,
     required this._headings,
+    required this._blocks,
+    required this._notePath,
     required this._replace,
     required this._ensureCaretVisible,
     required this._caretRect,
@@ -52,6 +55,16 @@ final class WikilinkSuggestController extends ChangeNotifier {
 
   /// The note's own headings, for a `[[#` link to the note being edited.
   final List<OutlineEntry>? Function() _headings;
+
+  /// The note's own block anchors, for a `[[#^` link to the note being
+  /// edited (#844).
+  final Future<List<BlockAnchor>> Function() _blocks;
+
+  /// The library-relative path of the note being edited, or null when it is
+  /// outside a library: a heading or a block of the library-wide lists
+  /// (`[[##`, `[[^^`) that is in this very note is completed as `#Heading` /
+  /// `#^id`, the way Obsidian writes the link to the note it is in (#845).
+  final String? Function() _notePath;
 
   /// Replaces `[start, end)` with the text as one undoable edit, the caret
   /// where it is given.
@@ -264,6 +277,22 @@ final class WikilinkSuggestController extends ChangeNotifier {
         } else {
           entries = await suggester.headings(query.target);
         }
+      case WikilinkPanelKind.blocks:
+        if (query.target.isEmpty) {
+          named = '';
+          entries = <SuggestEntry>[
+            for (final block in await _blocks())
+              BlockIdSuggestion(block.id, excerpt: block.excerpt),
+          ];
+        } else {
+          entries = await suggester.blocks(query.target);
+        }
+      case WikilinkPanelKind.libraryHeadings:
+        named = '';
+        entries = await suggester.headingsAcross(query.matchText);
+      case WikilinkPanelKind.libraryBlocks:
+        named = '';
+        entries = await suggester.blocksAcross(query.matchText);
       case WikilinkPanelKind.book:
         entries = await suggester.bookPlaces(query.target);
     }
@@ -282,44 +311,55 @@ final class WikilinkSuggestController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// [entries] as the panel shows them: filtered for a heading query (prefix
-  /// before contains), and cut to the rows it draws.
+  /// [entries] as the panel shows them: a note's headings and block ids
+  /// filtered for what is typed (prefix before contains), and cut to the rows
+  /// it draws. The library-wide lists come filtered and ranked already.
   static List<SuggestEntry> _shown(
     List<SuggestEntry> entries,
     _LinkQuery query,
   ) {
     var matches = entries;
-    if (query.hasHash &&
-        matches.isNotEmpty &&
-        matches.first is HeadingSuggestion) {
-      final q = query.heading.toLowerCase();
-      if (q.isNotEmpty) {
-        final before = <SuggestEntry>[];
-        final within = <SuggestEntry>[];
-        for (final entry in matches) {
-          final text = (entry as HeadingSuggestion).heading.toLowerCase();
-          if (text.startsWith(q)) {
-            before.add(entry);
-          } else if (text.contains(q)) {
-            within.add(entry);
-          }
+    final kind = _modeOf(query);
+    final q = query.matchText.toLowerCase();
+    if (q.isNotEmpty &&
+        (kind == WikilinkPanelKind.headings ||
+            kind == WikilinkPanelKind.blocks)) {
+      final before = <SuggestEntry>[];
+      final within = <SuggestEntry>[];
+      for (final entry in matches) {
+        final (lead, text) = switch (entry) {
+          HeadingSuggestion(:final heading) => (heading, heading),
+          BlockIdSuggestion(:final id, :final excerpt) => (id, '$id $excerpt'),
+          _ => ('', ''),
+        };
+        if (lead.toLowerCase().startsWith(q)) {
+          before.add(entry);
+        } else if (text.toLowerCase().contains(q)) {
+          within.add(entry);
         }
-        matches = <SuggestEntry>[...before, ...within];
       }
+      matches = <SuggestEntry>[...before, ...within];
     }
     return matches.take(_rows).toList(growable: false);
   }
 
-  /// What the link [query] is listing: the notes, a note's headings, or a
-  /// book's place forms.
+  /// What the link [query] is listing: the notes, a note's headings or block
+  /// ids, the library's headings (`[[##`) or block ids (`[[^^`), or a book's
+  /// place forms.
   static WikilinkPanelKind _modeOf(_LinkQuery query) {
     if (!query.hasHash) {
+      if (query.target.startsWith('^^')) return WikilinkPanelKind.libraryBlocks;
       return query.embed ? WikilinkPanelKind.embeds : WikilinkPanelKind.notes;
     }
     final target = query.target.toLowerCase();
-    return target.endsWith('.pdf') || target.endsWith('.epub')
-        ? WikilinkPanelKind.book
-        : WikilinkPanelKind.headings;
+    if (target.endsWith('.pdf') || target.endsWith('.epub')) {
+      return WikilinkPanelKind.book;
+    }
+    if (query.target.isEmpty && query.heading.startsWith('#')) {
+      return WikilinkPanelKind.libraryHeadings;
+    }
+    if (query.heading.startsWith('^')) return WikilinkPanelKind.blocks;
+    return WikilinkPanelKind.headings;
   }
 
   /// Closes the panel, dropping any answer still on its way.
@@ -370,8 +410,29 @@ final class WikilinkSuggestController extends ChangeNotifier {
     switch (entry) {
       case NoteSuggestion():
         _complete(query, query.start, entry.target);
-      case HeadingSuggestion():
-        _complete(query, query.hashAt, entry.heading);
+      case HeadingSuggestion(:final heading, :final path, :final target):
+        if (path == null) {
+          // A level of the note's heading path: `[[Note#A#` + the heading.
+          _complete(query, query.levelAt, heading);
+        } else {
+          // A heading found across the library: the whole link, `[[##team`
+          // becoming `[[Note#Team notes`, or `[[#Team notes` for this note.
+          _complete(
+            query,
+            query.start,
+            '${path == _notePath() ? '' : target}#$heading',
+          );
+        }
+      case BlockIdSuggestion(:final id, :final path, :final target):
+        if (path == null) {
+          _complete(query, query.hashAt, '^$id');
+        } else {
+          _complete(
+            query,
+            query.start,
+            '${path == _notePath() ? '' : target}#^$id',
+          );
+        }
       case BookSuggestion():
         // A form, not a link: the number is typed after it, so the caret
         // stops at the `=` and the link is left open.
@@ -554,12 +615,27 @@ final class _LinkQuery {
   /// Whether a `!` stands before the `[[`: an embed (#705).
   final bool embed;
 
-  /// The offset just past the `#`, where a heading or a book form is written.
+  /// The offset just past the `#`, where a heading, a block id or a book
+  /// form is written.
   int get hashAt => start + target.length + 1;
 
-  /// What the panel matches and bolds: the heading after a `#`, the target
-  /// before it.
-  String get matchText => hasHash ? heading : target;
+  /// The offset just past the last `#`: where the level of a heading path
+  /// being typed (`A#B`) starts. The first one's for a single level.
+  int get levelAt => hashAt + heading.lastIndexOf('#') + 1;
+
+  /// What the panel matches and bolds: the text typed for what is listed —
+  /// the last level of a heading path, an id after `#^`, what follows `##`
+  /// or `^^` — and the target before a `#` otherwise.
+  String get matchText {
+    if (!hasHash) {
+      return target.startsWith('^^') ? target.substring(2).trim() : target;
+    }
+    if (target.isEmpty && heading.startsWith('#')) {
+      return heading.substring(1).trim();
+    }
+    if (heading.startsWith('^')) return heading.substring(1);
+    return heading.substring(heading.lastIndexOf('#') + 1);
+  }
 
   /// Whether [other] names the same link text, however the caret moved.
   bool sameText(_LinkQuery other) =>

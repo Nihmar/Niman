@@ -189,6 +189,27 @@ void main() {
     expect(out, '![[New]] and ![[New#Head|big]]');
   });
 
+  test('a heading path and a block id ride along with a moved target', () {
+    // #844 / #845: the target is rewritten, the whole fragment is kept — the
+    // levels of a path (`#H1#H2`) and a block id (`#^id`) alike, with the
+    // alias — and a same-note fragment is not a target at all.
+    const source =
+        '[[Docs/Old#H1#H2]], [[Docs/Old#^37066d|the idea]], '
+        '![[Docs/Old#H1#H2]], [[#H1#H2]], [[#^37066d]], [[Old#^a-b]]';
+    final out = rewriteMovedLinks(
+      source,
+      from: 'root.md',
+      moves: LinkMoves({'Docs/Old.md': 'Docs/New.md'}),
+      renamedFrom: 'Old.md',
+      renamedTo: 'New.md',
+    );
+    expect(
+      out,
+      '[[Docs/New#H1#H2]], [[Docs/New#^37066d|the idea]], '
+      '![[Docs/New#H1#H2]], [[#H1#H2]], [[#^37066d]], [[New#^a-b]]',
+    );
+  });
+
   test('an embed that did not move is left exactly as written', () {
     const source = '![[Elsewhere/pic.png]] and ![alt](Elsewhere/pic.png)';
     final out = rewriteMovedLinks(

@@ -884,6 +884,8 @@ final class TurkishStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Başlık bulunamadı';
   @override
+  String get blockNotFoundTitle => 'Blok bulunamadı';
+  @override
   String get ambiguousLinkTitle => 'Birden çok not eşleşiyor';
   @override
   String get openLinkFailed => 'Bağlantı açılamadı';
@@ -2885,6 +2887,12 @@ final class TurkishStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => '$named içindeki başlıklar';
   @override
+  String wikilinkBlocksIn(String named) => '$named içindeki bloklar';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Tüm kitaplıktaki başlıklar';
+  @override
+  String get wikilinkBlocksEverywhere => 'Tüm kitaplıktaki bloklar';
+  @override
   String wikilinkPlacesIn(String named) => '$named içindeki yerler';
   @override
   String get wikilinkThisNote => 'bu not';
@@ -2892,11 +2900,21 @@ final class TurkishStrings extends Strings {
   String wikilinkNoMatchHeading(String query) =>
       '“$query” ile eşleşen başlık yok.';
   @override
+  String wikilinkNoMatchBlock(String query) => '“$query” ile eşleşen blok yok.';
+  @override
   String wikilinkNoMatchNote(String query) => '“$query” ile eşleşen not yok.';
   @override
   String wikilinkNoMatchFile(String query) => '“$query” ile eşleşen dosya yok.';
   @override
   String get wikilinkNoHeading => 'bu notta o adı taşıyan başlık yok';
+  @override
+  String get wikilinkNoBlock => 'bu notta o kimliğe sahip blok yok';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'kitaplıktaki hiçbir notta böyle bir başlık yok';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'kitaplıktaki hiçbir notta o kimliğe sahip blok yok';
   @override
   String get wikilinkNoNote =>
       'kitaplıkta o adı ya da takma adı taşıyan hiçbir şey yok';

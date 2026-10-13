@@ -101,6 +101,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.lineTokens,
     this.templateCommands = false,
     this.wikilinkSuggester,
+    this.notePath,
     super.key,
   });
 
@@ -113,6 +114,9 @@ final class MarkdownSurface extends StatelessWidget {
   /// See [MarkdownSourceView.wikilinkSuggester]: the library the wikilink
   /// suggester panel reads (#475), the same in both modes.
   final WikilinkSuggester? wikilinkSuggester;
+
+  /// See [MarkdownSourceView.notePath].
+  final String? notePath;
 
   /// The note.
   final SourceBuffer buffer;
@@ -269,5 +273,6 @@ final class MarkdownSurface extends StatelessWidget {
     lineTokens: lineTokens,
     templateCommands: templateCommands,
     wikilinkSuggester: wikilinkSuggester,
+    notePath: notePath,
   );
 }

@@ -894,6 +894,8 @@ final class SlovakStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Nadpis sa nenašiel';
   @override
+  String get blockNotFoundTitle => 'Blok sa nenašiel';
+  @override
   String get ambiguousLinkTitle => 'Viac poznámok zodpovedá';
   @override
   String get openLinkFailed => 'Odkaz sa nedal otvoriť';
@@ -2933,12 +2935,21 @@ final class SlovakStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Nadpisy v $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Bloky v $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Nadpisy v celej knižnici';
+  @override
+  String get wikilinkBlocksEverywhere => 'Bloky v celej knižnici';
+  @override
   String wikilinkPlacesIn(String named) => 'Miesta v $named';
   @override
   String get wikilinkThisNote => 'táto poznámka';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Žiadny nadpis nezodpovedá „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Žiadny blok nezodpovedá „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Žiadna poznámka nezodpovedá „$query”.';
@@ -2947,6 +2958,14 @@ final class SlovakStrings extends Strings {
       'Žiadny súbor nezodpovedá „$query“.';
   @override
   String get wikilinkNoHeading => 'táto poznámka nemá nadpis s týmto názvom';
+  @override
+  String get wikilinkNoBlock => 'táto poznámka nemá blok s týmto ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'žiadna poznámka v knižnici nemá takýto nadpis';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'žiadna poznámka v knižnici nemá blok s týmto ID';
   @override
   String get wikilinkNoNote => 'nič v knižnici nemá tento názov ani alias';
   @override

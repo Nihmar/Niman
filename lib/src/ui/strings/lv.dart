@@ -890,6 +890,8 @@ final class LatvianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Virsraksts netika atrasts';
   @override
+  String get blockNotFoundTitle => 'Bloks netika atrasts';
+  @override
   String get ambiguousLinkTitle => 'Vairākas piezīmes atbilst';
   @override
   String get openLinkFailed => 'Nevarēja atvērt saiti';
@@ -2918,12 +2920,21 @@ final class LatvianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Virsraksti: $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Bloki: $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Virsraksti visā bibliotēkā';
+  @override
+  String get wikilinkBlocksEverywhere => 'Bloki visā bibliotēkā';
+  @override
   String wikilinkPlacesIn(String named) => 'Vietas: $named';
   @override
   String get wikilinkThisNote => 'šī piezīme';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Neviens virsraksts neatbilst „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Neviens bloks neatbilst „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Neviena piezīme neatbilst „$query”.';
@@ -2933,6 +2944,14 @@ final class LatvianStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'šai piezīmei nav virsraksta ar šādu nosaukumu';
+  @override
+  String get wikilinkNoBlock => 'šai piezīmei nav bloka ar šādu ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'nevienai bibliotēkas piezīmei nav šāda virsraksta';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'nevienai bibliotēkas piezīmei nav bloka ar šādu ID';
   @override
   String get wikilinkNoNote =>
       'bibliotēkā nekas nav ar šādu nosaukumu vai aizstājvārdu';

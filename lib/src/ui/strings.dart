@@ -636,6 +636,7 @@ final class AppStrings {
   // Link navigation (T-M3-07).
   static String get unresolvedLinkTitle => _s.unresolvedLinkTitle;
   static String get headingNotFoundTitle => _s.headingNotFoundTitle;
+  static String get blockNotFoundTitle => _s.blockNotFoundTitle;
   static String get ambiguousLinkTitle => _s.ambiguousLinkTitle;
   static String get openLinkFailed => _s.openLinkFailed;
 
@@ -900,15 +901,23 @@ final class AppStrings {
   // after `#`.
   static String wikilinkHeadingsIn(String named) =>
       _s.wikilinkHeadingsIn(named);
+  static String wikilinkBlocksIn(String named) => _s.wikilinkBlocksIn(named);
+  static String get wikilinkHeadingsEverywhere => _s.wikilinkHeadingsEverywhere;
+  static String get wikilinkBlocksEverywhere => _s.wikilinkBlocksEverywhere;
   static String wikilinkPlacesIn(String named) => _s.wikilinkPlacesIn(named);
   static String get wikilinkThisNote => _s.wikilinkThisNote;
   static String wikilinkNoMatchHeading(String query) =>
       _s.wikilinkNoMatchHeading(query);
+  static String wikilinkNoMatchBlock(String query) =>
+      _s.wikilinkNoMatchBlock(query);
   static String wikilinkNoMatchNote(String query) =>
       _s.wikilinkNoMatchNote(query);
   static String wikilinkNoMatchFile(String query) =>
       _s.wikilinkNoMatchFile(query);
   static String get wikilinkNoHeading => _s.wikilinkNoHeading;
+  static String get wikilinkNoBlock => _s.wikilinkNoBlock;
+  static String get wikilinkNoHeadingAnywhere => _s.wikilinkNoHeadingAnywhere;
+  static String get wikilinkNoBlockAnywhere => _s.wikilinkNoBlockAnywhere;
   static String get wikilinkNoNote => _s.wikilinkNoNote;
   static String wikilinkAlias(String alias) => _s.wikilinkAlias(alias);
   static String get wikilinkBookNote => _s.wikilinkBookNote;

@@ -11,6 +11,7 @@ import 'package:drift/drift.dart'
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -504,6 +505,143 @@ void main() {
         'Trip/photo.png',
         'Photos',
       ]);
+    });
+  });
+
+  group('block ids and the headings of the library (#844, #845)', () {
+    /// Gives the note [id] its anchors, as the content pass writes them: the
+    /// rows and the note's row of the word index.
+    Future<void> anchors(
+      int id, {
+      List<String> headings = const <String>[],
+      Map<String, String> blocks = const <String, String>{},
+    }) async {
+      var line = 0;
+      for (final heading in headings) {
+        await db.customStatement(
+          'INSERT INTO note_headings (note_id, line, level, heading) '
+          'VALUES (?, ?, 2, ?)',
+          <Object?>[id, line++, heading],
+        );
+      }
+      for (final MapEntry(key: blockId, value: excerpt) in blocks.entries) {
+        await db.customStatement(
+          'INSERT INTO note_blocks (note_id, block_id, line, excerpt) '
+          'VALUES (?, ?, ?, ?)',
+          <Object?>[id, blockId, line++, excerpt],
+        );
+      }
+      await db.customStatement(
+        'INSERT INTO note_anchors_fts (rowid, headings, blocks) '
+        'VALUES (?, ?, ?)',
+        <Object?>[
+          id,
+          headings.join('\n'),
+          [for (final e in blocks.entries) '${e.key} ${e.value}'].join('\n'),
+        ],
+      );
+    }
+
+    test(
+      "a note's block ids come from its own read, once per revision",
+      () async {
+        await addNote('Notes.md', stems: ['notes']);
+        final reads = <String>[];
+        final suggester = IndexWikilinkSuggester(
+          db,
+          readHeadings: (_) async => null,
+          readBlocks: (path) async {
+            reads.add(path);
+            return const [
+              BlockAnchor(id: 'abc', line: 0, excerpt: 'A paragraph'),
+              BlockAnchor(id: 'item-1', line: 4, excerpt: 'one'),
+            ];
+          },
+        );
+
+        for (var key = 0; key < 3; key++) {
+          final rows = await suggester.blocks('Notes');
+          expect(rows.map((r) => r.id), ['abc', 'item-1']);
+          expect(rows.first.excerpt, 'A paragraph');
+          expect(rows.first.path, isNull, reason: "a note's own list");
+        }
+        expect(reads, ['Notes.md'], reason: 'a run of keys is one read');
+      },
+    );
+
+    test(
+      'a surface with no block read lists none, an unknown note none',
+      () async {
+        await addNote('Notes.md', stems: ['notes']);
+        final suggester = suggesterOver();
+
+        expect(await suggester.blocks('Notes'), isEmpty);
+        expect(
+          await IndexWikilinkSuggester(
+            db,
+            readHeadings: (_) async => null,
+            readBlocks: (_) async => const <BlockAnchor>[],
+          ).blocks('Nope'),
+          isEmpty,
+        );
+      },
+    );
+
+    test('headings across the library name the shortest target', () async {
+      final guides = await addNote('Guides/Notes.md', stems: ['notes']);
+      final archive = await addNote('Archive/Notes.md', stems: ['notes']);
+      final plan = await addNote('Plan.md', stems: ['plan']);
+      await anchors(guides, headings: ['Team notes']);
+      await anchors(archive, headings: ['Old team']);
+      await anchors(plan, headings: ['Team plan', 'Budget']);
+      final suggester = suggesterOver();
+
+      final rows = await suggester.headingsAcross('team');
+
+      expect(rows.map((r) => (r.heading, r.path, r.target)), [
+        ('Team notes', 'Guides/Notes.md', 'Guides/Notes'),
+        ('Team plan', 'Plan.md', 'Plan'),
+        ('Old team', 'Archive/Notes.md', 'Archive/Notes'),
+      ], reason: 'a name two notes share is qualified, as the note rows are');
+    });
+
+    test('a heading in a note a target cannot name is not offered', () async {
+      final odd = await addNote('C# tips.md', stems: ['c# tips']);
+      final fine = await addNote('Tips.md', stems: ['tips']);
+      await anchors(odd, headings: ['Tips for C']);
+      await anchors(fine, headings: ['Tips for all', 'Use [brackets] tips']);
+
+      final rows = await suggesterOver().headingsAcross('tips');
+
+      expect(rows.map((r) => r.heading), ['Tips for all']);
+    });
+
+    test('block ids across the library carry the note and the words', () async {
+      final a = await addNote('A.md', stems: ['a']);
+      final b = await addNote('docs/B.md', stems: ['b']);
+      await anchors(a, blocks: {'idea-1': 'The first idea'});
+      await anchors(b, blocks: {'idea-2': 'Another idea'});
+
+      final rows = await suggesterOver().blocksAcross('idea');
+
+      expect(rows.map((r) => (r.id, r.path, r.target, r.excerpt)), [
+        ('idea-1', 'A.md', 'A', 'The first idea'),
+        ('idea-2', 'docs/B.md', 'B', 'Another idea'),
+      ]);
+      expect((await suggesterOver().blocksAcross('another')).map((r) => r.id), [
+        'idea-2',
+      ], reason: 'the first words of the block are searched as well');
+    });
+
+    test("the lists are cut to the panel's rows", () async {
+      for (var i = 0; i < 80; i++) {
+        final id = await addNote('n$i.md', stems: ['n$i']);
+        await anchors(id, headings: ['Team $i']);
+      }
+
+      final rows = await suggesterOver().headingsAcross('team');
+
+      expect(rows, hasLength(IndexWikilinkSuggester.limit));
     });
   });
 }

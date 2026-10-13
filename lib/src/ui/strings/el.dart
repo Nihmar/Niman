@@ -908,6 +908,8 @@ final class GreekStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Ο τίτλος δεν βρέθηκε';
   @override
+  String get blockNotFoundTitle => 'Το μπλοκ δεν βρέθηκε';
+  @override
   String get ambiguousLinkTitle => 'Πολλές σημειώσεις ταυτίζονται';
   @override
   String get openLinkFailed => 'Δεν ήταν δυνατό το άνοιγμα του συνδέσμου';
@@ -3015,12 +3017,21 @@ final class GreekStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Τίτλοι σε $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Μπλοκ σε $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Τίτλοι σε όλη τη βιβλιοθήκη';
+  @override
+  String get wikilinkBlocksEverywhere => 'Μπλοκ σε όλη τη βιβλιοθήκη';
+  @override
   String wikilinkPlacesIn(String named) => 'Θέσεις σε $named';
   @override
   String get wikilinkThisNote => 'αυτή η σημείωση';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Κανένας τίτλος δεν ταιριάζει με «$query».';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Κανένα μπλοκ δεν ταιριάζει με «$query».';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Καμία σημείωση δεν ταιριάζει με «$query».';
@@ -3030,6 +3041,15 @@ final class GreekStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'αυτή η σημείωση δεν έχει τίτλο με αυτό το όνομα';
+  @override
+  String get wikilinkNoBlock =>
+      'αυτή η σημείωση δεν έχει μπλοκ με αυτό το αναγνωριστικό';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'καμία σημείωση της βιβλιοθήκης δεν έχει τέτοιον τίτλο';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'καμία σημείωση της βιβλιοθήκης δεν έχει μπλοκ με αυτό το αναγνωριστικό';
   @override
   String get wikilinkNoNote =>
       'τίποτα στη βιβλιοθήκη δεν έχει αυτό το όνομα ή ψευδώνυμο';

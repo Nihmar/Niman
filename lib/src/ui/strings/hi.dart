@@ -878,6 +878,8 @@ final class HindiStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'हेडिंग नहीं मिली';
   @override
+  String get blockNotFoundTitle => 'ब्लॉक नहीं मिला';
+  @override
   String get ambiguousLinkTitle => 'कई नोट्स मेल खाते हैं';
   @override
   String get openLinkFailed => 'लिंक नहीं खोला जा सका';
@@ -2874,12 +2876,21 @@ final class HindiStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => '$named में हेडिंग';
   @override
+  String wikilinkBlocksIn(String named) => '$named में ब्लॉक';
+  @override
+  String get wikilinkHeadingsEverywhere => 'पूरी लाइब्रेरी की हेडिंग';
+  @override
+  String get wikilinkBlocksEverywhere => 'पूरी लाइब्रेरी के ब्लॉक';
+  @override
   String wikilinkPlacesIn(String named) => '$named में स्थान';
   @override
   String get wikilinkThisNote => 'इस नोट में';
   @override
   String wikilinkNoMatchHeading(String query) =>
       '«$query» से मेल खाती कोई हेडिंग नहीं।';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      '«$query» से मेल खाता कोई ब्लॉक नहीं।';
   @override
   String wikilinkNoMatchNote(String query) =>
       '«$query» से मेल खाता कोई नोट नहीं।';
@@ -2888,6 +2899,14 @@ final class HindiStrings extends Strings {
       '“$query” से कोई फ़ाइल मेल नहीं खाती।';
   @override
   String get wikilinkNoHeading => 'इस नोट में उस नाम की कोई हेडिंग नहीं है';
+  @override
+  String get wikilinkNoBlock => 'इस नोट में उस आईडी का कोई ब्लॉक नहीं है';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'लाइब्रेरी के किसी नोट में ऐसी हेडिंग नहीं है';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'लाइब्रेरी के किसी नोट में उस आईडी का ब्लॉक नहीं है';
   @override
   String get wikilinkNoNote => 'लाइब्रेरी में उस नाम या उपनाम वाला कुछ नहीं है';
   @override

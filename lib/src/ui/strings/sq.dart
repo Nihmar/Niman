@@ -891,6 +891,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get headingNotFoundTitle => "Titulli s'u gjet";
   @override
+  String get blockNotFoundTitle => "Blloku s'u gjet";
+  @override
   String get ambiguousLinkTitle => 'Shënime të shumta përputhen';
   @override
   String get openLinkFailed => "Lidhja s'u hap";
@@ -2942,12 +2944,21 @@ final class AlbanianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Titujt në $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Blloqet në $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Titujt në të gjithë bibliotekën';
+  @override
+  String get wikilinkBlocksEverywhere => 'Blloqet në të gjithë bibliotekën';
+  @override
   String wikilinkPlacesIn(String named) => 'Vendndodhjet në $named';
   @override
   String get wikilinkThisNote => 'ky shënim';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Asnjë titull nuk përputhet me „$query".';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Asnjë bllok nuk përputhet me „$query".';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Asnjë shënim nuk përputhet me „$query".';
@@ -2956,6 +2967,14 @@ final class AlbanianStrings extends Strings {
       'Asnjë skedar nuk përputhet me “$query”.';
   @override
   String get wikilinkNoHeading => 'ky shënim nuk ka titull me atë emër';
+  @override
+  String get wikilinkNoBlock => 'ky shënim nuk ka bllok me atë ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'asnjë shënim në bibliotekë nuk ka një titull të tillë';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'asnjë shënim në bibliotekë nuk ka bllok me atë ID';
   @override
   String get wikilinkNoNote =>
       'asgjë në bibliotekë nuk e ka atë emër ose alias';

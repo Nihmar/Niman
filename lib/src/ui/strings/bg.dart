@@ -896,6 +896,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Заглавието не е намерено';
   @override
+  String get blockNotFoundTitle => 'Блокът не е намерен';
+  @override
   String get ambiguousLinkTitle => 'Няколко бележки съответстват';
   @override
   String get openLinkFailed => 'Не може да се отвори връзката';
@@ -2936,12 +2938,21 @@ final class BulgarianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Заглавия в $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Блокове в $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Заглавия в цялата библиотека';
+  @override
+  String get wikilinkBlocksEverywhere => 'Блокове в цялата библиотека';
+  @override
   String wikilinkPlacesIn(String named) => 'Места в $named';
   @override
   String get wikilinkThisNote => 'тази бележка';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Никое заглавие не съвпада с „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Никой блок не съвпада с „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Никоя бележка не съвпада с „$query”.';
@@ -2950,6 +2961,14 @@ final class BulgarianStrings extends Strings {
       'Няма файл, който да съвпада с „$query“.';
   @override
   String get wikilinkNoHeading => 'тази бележка няма заглавие с това име';
+  @override
+  String get wikilinkNoBlock => 'тази бележка няма блок с този ИД';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'никоя бележка в библиотеката няма такова заглавие';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'никоя бележка в библиотеката няма блок с този ИД';
   @override
   String get wikilinkNoNote =>
       'нищо в библиотеката няма това име или псевдоним';

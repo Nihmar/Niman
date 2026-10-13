@@ -81,6 +81,50 @@ void main() {
     expect(find.textContaining('<b>'), findsOne);
   });
 
+  testWidgets('a block id at the end of a paragraph is not drawn (#844)', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      'A paragraph with an id ^37066d\n\n'
+      '- an item ^item-1\n- another\n\n'
+      '> a quote\n\n^quote-1\n\n'
+      'A caret ^ in the middle and ^not-last words\n',
+    );
+
+    expect(find.textContaining('A paragraph with an id'), findsOne);
+    expect(find.textContaining('^37066d'), findsNothing);
+    expect(find.textContaining('an item'), findsOne);
+    expect(find.textContaining('^item-1'), findsNothing);
+    expect(find.textContaining('^quote-1'), findsNothing);
+    expect(
+      find.textContaining('A caret ^ in the middle and ^not-last words'),
+      findsOne,
+      reason: "only an id that ends the block is the block's name",
+    );
+  });
+
+  testWidgets('a block id stays in the buffer the read view draws', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('A paragraph ^37066d\n');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownReadView(
+            buffer: buffer,
+            parser: ReadParser(),
+            mathCache: _syncCache(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.textContaining('^37066d'), findsNothing);
+    expect(buffer.text, 'A paragraph ^37066d\n', reason: 'a projection only');
+  });
+
   testWidgets('the keys move the page: arrows, page keys, Home and End', (
     tester,
   ) async {

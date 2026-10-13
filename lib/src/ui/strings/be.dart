@@ -892,6 +892,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Загаловак не знойдзены';
   @override
+  String get blockNotFoundTitle => 'Блок не знойдзены';
+  @override
   String get ambiguousLinkTitle => 'Колькі заўваг адпавядаюць';
   @override
   String get openLinkFailed => 'Не ўдалося адкрыць спасылку';
@@ -2962,12 +2964,21 @@ final class BelarusianStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Загалоўкі ў $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Блокі ў $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Загалоўкі ва ўсёй бібліятэцы';
+  @override
+  String get wikilinkBlocksEverywhere => 'Блокі ва ўсёй бібліятэцы';
+  @override
   String wikilinkPlacesIn(String named) => 'Месцы ў $named';
   @override
   String get wikilinkThisNote => 'гэтая нататка';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Ніводзін загаловак не адпавядае „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Ніводзін блок не адпавядае „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Ніводная нататка не адпавядае „$query”.';
@@ -2977,6 +2988,14 @@ final class BelarusianStrings extends Strings {
   @override
   String get wikilinkNoHeading =>
       'у гэтай нататцы няма загалоўка з такой назвай';
+  @override
+  String get wikilinkNoBlock => 'у гэтай нататцы няма блока з такім ID';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'ні ў адной нататцы бібліятэкі няма такога загалоўка';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'ні ў адной нататцы бібліятэкі няма блока з такім ID';
   @override
   String get wikilinkNoNote =>
       'нічога ў бібліятэцы не мае такой назвы ці псеўданіма';

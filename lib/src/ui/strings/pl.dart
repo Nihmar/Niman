@@ -900,6 +900,8 @@ final class PolishStrings extends Strings {
   @override
   String get headingNotFoundTitle => 'Nie znaleziono nagłówka';
   @override
+  String get blockNotFoundTitle => 'Nie znaleziono bloku';
+  @override
   String get ambiguousLinkTitle => 'Wiele notatek pasuje';
   @override
   String get openLinkFailed => 'Nie udało się otworzyć linku';
@@ -2974,12 +2976,21 @@ final class PolishStrings extends Strings {
   @override
   String wikilinkHeadingsIn(String named) => 'Nagłówki w $named';
   @override
+  String wikilinkBlocksIn(String named) => 'Bloki w $named';
+  @override
+  String get wikilinkHeadingsEverywhere => 'Nagłówki w całej bibliotece';
+  @override
+  String get wikilinkBlocksEverywhere => 'Bloki w całej bibliotece';
+  @override
   String wikilinkPlacesIn(String named) => 'Miejsca w $named';
   @override
   String get wikilinkThisNote => 'ta notatka';
   @override
   String wikilinkNoMatchHeading(String query) =>
       'Żaden nagłówek nie pasuje do „$query”.';
+  @override
+  String wikilinkNoMatchBlock(String query) =>
+      'Żaden blok nie pasuje do „$query”.';
   @override
   String wikilinkNoMatchNote(String query) =>
       'Żadna notatka nie pasuje do „$query”.';
@@ -2988,6 +2999,14 @@ final class PolishStrings extends Strings {
       'Żaden plik nie pasuje do „$query”.';
   @override
   String get wikilinkNoHeading => 'ta notatka nie ma nagłówka o tej nazwie';
+  @override
+  String get wikilinkNoBlock => 'ta notatka nie ma bloku o tym identyfikatorze';
+  @override
+  String get wikilinkNoHeadingAnywhere =>
+      'żadna notatka w bibliotece nie ma takiego nagłówka';
+  @override
+  String get wikilinkNoBlockAnywhere =>
+      'żadna notatka w bibliotece nie ma bloku o tym identyfikatorze';
   @override
   String get wikilinkNoNote => 'nic w bibliotece nie ma tej nazwy ani aliasu';
   @override

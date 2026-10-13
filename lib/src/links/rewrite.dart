@@ -144,7 +144,7 @@ String? _renamedBareName(String target, String? from, String? to) {
 /// The whole `[[…]]` of [target] with [ref]'s heading and alias, as an embed
 /// (`![[…]]`) when it was written as one.
 String _wikiText(String target, WikiRef ref, {required bool embed}) {
-  final heading = ref.heading == null ? '' : '#${ref.heading}';
+  final heading = ref.fragment == null ? '' : '#${ref.fragment}';
   final alias = ref.alias == null ? '' : '|${ref.alias}';
   return '${embed ? '!' : ''}[[$target$heading$alias]]';
 }

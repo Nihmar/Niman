@@ -70,7 +70,7 @@ final class LeafView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (leaf.kind) {
-    BlockKind.paragraph => _rich(theme.body),
+    BlockKind.paragraph => _rich(theme.body, hideBlockId: true),
     BlockKind.heading => _heading(context),
     BlockKind.fencedCode => _fenced(context),
     BlockKind.indentedCode => _code(context, null),
@@ -103,11 +103,17 @@ final class LeafView extends StatelessWidget {
 
   /// The leaf's inline text, in [style]: nothing when it has none — a
   /// paragraph of link reference definitions is syntax, not prose.
-  Widget _rich(TextStyle style) {
+  ///
+  /// A paragraph's trailing ` ^id` is left out of what is drawn ([hideBlockId],
+  /// #844): the id is the block's name for a `[[note#^id]]` link, not prose.
+  Widget _rich(TextStyle style, {bool hideBlockId = false}) {
     final inline = leaf.inline;
     if (inline == null || inline.isEmpty) return const SizedBox.shrink();
     return Text.rich(
-      TextSpan(children: _spans(style).of(inline), style: style),
+      TextSpan(
+        children: _spans(style).of(inline, hideBlockId: hideBlockId),
+        style: style,
+      ),
       textAlign: TextAlign.start,
     );
   }

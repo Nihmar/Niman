@@ -9,7 +9,9 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
+import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -31,6 +33,8 @@ final class NoteContent {
     required this.aliases,
     required this.links,
     this.embeds = const <ParsedLink>[],
+    this.headings = const <OutlineEntry>[],
+    this.blocks = const <BlockAnchor>[],
     this.fields = const {},
     this.date,
     this.pinned = false,
@@ -65,6 +69,14 @@ final class NoteContent {
   /// The note's embeds (`![[…]]`) and Markdown images (`![…](…)`), which a
   /// rename or move must carry too (#507).
   final List<ParsedLink> embeds;
+
+  /// The note's headings, in line order: what the `note_headings` rows are
+  /// written from (#845).
+  final List<OutlineEntry> headings;
+
+  /// The note's blocks that end with a ` ^id`, in line order: what the
+  /// `note_blocks` rows are written from (#844).
+  final List<BlockAnchor> blocks;
 
   /// Every frontmatter key mapped to its values as text — what the
   /// `frontmatter_fields` rows are written from (T-M4-02).
@@ -199,6 +211,11 @@ NoteContent _extractContent(
     aliases: fm?.aliases ?? const [],
     links: references.links,
     embeds: references.embeds,
+    // The headings and the block ids come off the block state machine, not
+    // the inline scan: a few milliseconds on a long note, which the pass is
+    // already reading whole (the outline's own rule, `outlineOfText`).
+    headings: outlineOfText(text),
+    blocks: blockAnchorsOfText(text),
     fields: fm?.fields ?? const {},
     date: fm?.date,
     pinned: fm?.pinned ?? false,

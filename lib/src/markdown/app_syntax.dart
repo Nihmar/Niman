@@ -77,7 +77,7 @@ abstract final class AppSyntax {
     final ref = parseWikiRef(inner);
     // `[[]]`, `[[|]]` and `[[#]]` carry nothing to show or resolve, so they are
     // not links — the same rule `links/parser.dart` applies.
-    if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
+    if (ref.target.isEmpty && ref.fragment == null && ref.alias == null) {
       return null;
     }
     return ExtensionSpan(

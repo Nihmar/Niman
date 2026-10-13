@@ -1,0 +1,149 @@
+// #844: the blocks of a note that end with a ` ^id`, enumerated line by line
+// the way the outline enumerates headings.
+import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/markdown/buffer_block_anchors.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
+
+List<(String, int)> _anchors(String text) => [
+  for (final a in blockAnchorsOfText(text)) (a.id, a.line),
+];
+
+void main() {
+  group('trailingBlockId', () {
+    test('a space, a caret and letters, digits or dashes at the end', () {
+      expect(trailingBlockId('A paragraph ^37066d'), '37066d');
+      expect(trailingBlockId('A paragraph ^a-b-9  '), 'a-b-9');
+      expect(trailingBlockId('^alone'), 'alone');
+      expect(trailingBlockId('- item\t^Item-1'), 'Item-1');
+    });
+
+    test('not in the middle, not without the space, not other characters', () {
+      expect(trailingBlockId('a ^id and more'), isNull);
+      expect(trailingBlockId('x^id'), isNull);
+      expect(trailingBlockId('a ^i d'), isNull);
+      expect(trailingBlockId('a ^ünï'), isNull);
+      expect(trailingBlockId('plain'), isNull);
+      expect(trailingBlockId('a ^'), isNull);
+    });
+
+    test('withoutTrailingBlockId drops the id and the space before it', () {
+      expect(withoutTrailingBlockId('A paragraph ^37066d'), 'A paragraph');
+      expect(withoutTrailingBlockId('^alone'), '');
+      expect(withoutTrailingBlockId('no id here'), 'no id here');
+    });
+  });
+
+  group('blockAnchorsOfText', () {
+    test('a paragraph ends with its id: the anchor is the paragraph', () {
+      expect(_anchors('First\n\nSecond line\nruns on ^second\n\nThird'), [
+        ('second', 2),
+      ], reason: 'the line the paragraph starts on');
+    });
+
+    test('the line ending with the id, for a one-line block', () {
+      final anchors = blockAnchorsOfText('Intro ^37066d\n');
+      expect(anchors.single.id, '37066d');
+      expect(anchors.single.line, 0);
+      expect(anchors.single.excerpt, 'Intro');
+    });
+
+    test('each list item carries its own id', () {
+      expect(_anchors('- one ^first\n- two\n- three ^third\n'), [
+        ('first', 0),
+        ('third', 2),
+      ]);
+    });
+
+    test('an item of a task or numbered list, markers off the excerpt', () {
+      final anchors = blockAnchorsOfText('- [ ] buy milk ^milk\n1. second ^n2');
+      expect(anchors.map((a) => a.excerpt), ['buy milk', 'second']);
+    });
+
+    test('a quote carries the id on its own line below, as a whole', () {
+      expect(_anchors('> a quote\n> goes on\n\n^quote-id\n'), [
+        ('quote-id', 0),
+      ]);
+      expect(blockAnchorsOfText('> a quote\n\n^q').single.excerpt, 'a quote');
+    });
+
+    test('a table carries it below too; so does a whole list', () {
+      expect(_anchors('| a | b |\n| - | - |\n| 1 | 2 |\n\n^tbl\n'), [
+        ('tbl', 0),
+      ]);
+      expect(_anchors('- a\n- b\n\n^whole-list\n'), [('whole-list', 0)]);
+    });
+
+    test('a part of a quote is not a target, only the whole block', () {
+      // The id at the end of a quote's line names the quote, not the line.
+      expect(_anchors('> first\n> second ^deep\n'), [('deep', 0)]);
+    });
+
+    test('a heading can carry one', () {
+      expect(_anchors('## Title ^head\n\ntext'), [('head', 0)]);
+    });
+
+    test('an id in a fence, a formula or the frontmatter is not one', () {
+      const text =
+          '---\ntitle: x ^fm\n---\n'
+          '```\ncode ^fence\n```\n'
+          r'$$'
+          '\nmath ^math\n'
+          r'$$'
+          '\nreal ^real\n';
+      expect(_anchors(text).map((a) => a.$1), ['real']);
+    });
+
+    test('the first block that carries an id owns it', () {
+      expect(_anchors('a ^same\n\nb ^same\n').map((a) => a.$2), [0]);
+    });
+
+    test('a note without a caret has none, and costs no walk', () {
+      expect(blockAnchorsOfText('# H\n\nplain\n'), isEmpty);
+    });
+
+    test('text then a heading: each its own block', () {
+      expect(_anchors('# H\ntext ^t\n'), [('t', 1)]);
+    });
+  });
+
+  group('BufferBlockAnchors', () {
+    test(
+      'reads a buffer, keeps the answer per revision, reads again',
+      () async {
+        final buffer = SourceBuffer.fromText('a ^one\n\nb\n');
+        final anchors = BufferBlockAnchors(() => buffer);
+
+        final first = await anchors.read();
+        expect(first.map((a) => a.id), ['one']);
+        expect(identical(await anchors.read(), first), isTrue);
+
+        buffer.insert(buffer.length, 'c ^two\n');
+        final second = await anchors.read();
+        expect(second.map((a) => a.id), ['one', 'two']);
+      },
+    );
+
+    test('a long note is walked in slices and answers the same', () async {
+      final text = StringBuffer();
+      for (var i = 0; i < 25000; i++) {
+        text
+          ..writeln(i % 5000 == 0 ? 'line $i ^b$i' : 'line $i')
+          ..writeln();
+      }
+      final buffer = SourceBuffer.fromText(text.toString());
+      expect(buffer.length, greaterThan(BufferBlockAnchors.sliceAbove));
+
+      final anchors = await BufferBlockAnchors(() => buffer).read();
+
+      expect(anchors.map((a) => a.id), [
+        'b0',
+        'b5000',
+        'b10000',
+        'b15000',
+        'b20000',
+      ]);
+      expect(anchors.map((a) => a.line), [0, 10000, 20000, 30000, 40000]);
+    });
+  });
+}

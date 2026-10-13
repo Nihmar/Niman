@@ -503,6 +503,7 @@ abstract base class Strings {
   // Link navigation (T-M3-07).
   String get unresolvedLinkTitle;
   String get headingNotFoundTitle;
+  String get blockNotFoundTitle;
   String get ambiguousLinkTitle;
   String get openLinkFailed;
 
@@ -1456,6 +1457,9 @@ abstract base class Strings {
 
   /// `Headings in <name>`, drawn over the headings a `#` offers.
   String wikilinkHeadingsIn(String named);
+  String wikilinkBlocksIn(String named);
+  String get wikilinkHeadingsEverywhere;
+  String get wikilinkBlocksEverywhere;
 
   /// `Places in <name>`, drawn over the places a book offers.
   String wikilinkPlacesIn(String named);
@@ -1466,6 +1470,7 @@ abstract base class Strings {
 
   /// The panel's sentence when no heading matched [query].
   String wikilinkNoMatchHeading(String query);
+  String wikilinkNoMatchBlock(String query);
 
   /// The panel's sentence when no note matched [query].
   String wikilinkNoMatchNote(String query);
@@ -1473,6 +1478,9 @@ abstract base class Strings {
 
   /// What stands under [wikilinkNoMatchHeading].
   String get wikilinkNoHeading;
+  String get wikilinkNoBlock;
+  String get wikilinkNoHeadingAnywhere;
+  String get wikilinkNoBlockAnywhere;
 
   /// What stands under [wikilinkNoMatchNote].
   String get wikilinkNoNote;

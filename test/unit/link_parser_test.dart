@@ -92,6 +92,85 @@ void main() {
     });
   });
 
+  group('parseWikiRef — block links (#844)', () {
+    test('#^id is a block, not a heading', () {
+      final ref = parseWikiRef('Note#^37066d');
+      expect(ref.target, 'Note');
+      expect(ref.block, '37066d');
+      expect(ref.heading, isNull, reason: 'a fragment is one or the other');
+      expect(ref.fragment, '^37066d');
+    });
+
+    test('a heading is still a heading', () {
+      final ref = parseWikiRef('Note#Heading');
+      expect(ref.heading, 'Heading');
+      expect(ref.block, isNull);
+      expect(ref.fragment, 'Heading');
+    });
+
+    test('an id keeps its letters, digits and dashes verbatim', () {
+      expect(parseWikiRef('Note#^a-b').block, 'a-b');
+      expect(parseWikiRef('Note#^Quote-2').block, 'Quote-2');
+      expect(parseWikiRef('#^only-here').block, 'only-here');
+      expect(parseWikiRef('#^only-here').target, '');
+    });
+
+    test('a caret that is not an id stays a heading', () {
+      expect(parseWikiRef('Note#^').heading, '^');
+      expect(parseWikiRef('Note#^two words').heading, '^two words');
+      expect(parseWikiRef('Note#^ünï').heading, '^ünï');
+      expect(parseWikiRef('Note#^two words').block, isNull);
+    });
+
+    test('the alias rides along and the display text drops the fragment', () {
+      final ref = parseWikiRef('Note#^id1|the idea');
+      expect(ref.block, 'id1');
+      expect(ref.alias, 'the idea');
+      expect(wikiDisplayText('Note#^id1'), 'Note');
+      expect(wikiDisplayText('Note#Heading'), 'Note');
+      expect(wikiDisplayText('Note#^id1|the idea'), 'the idea');
+    });
+
+    test('a block link is a link of its own in a document', () {
+      final link = parseLinks('See [[Note#^37066d]] now').single as WikiLink;
+      expect(link.ref.block, '37066d');
+      expect(parseLinks('[[#^37066d]]'), hasLength(1));
+    });
+  });
+
+  group('parseWikiRef — heading paths (#845)', () {
+    test('every # after the first is a level of the path', () {
+      final ref = parseWikiRef('Note#H1#H2');
+      expect(ref.target, 'Note');
+      expect(ref.heading, 'H1#H2', reason: 'kept whole, as it was written');
+      expect(ref.headingPath, ['H1', 'H2']);
+      expect(ref.fragment, 'H1#H2');
+    });
+
+    test('the same note, nested: [[#A#B]]', () {
+      final ref = parseWikiRef('#A#B');
+      expect(ref.target, '');
+      expect(ref.headingPath, ['A', 'B']);
+    });
+
+    test('levels are trimmed and an empty one dropped', () {
+      expect(parseWikiRef('Note# A # B ').headingPath, ['A', 'B']);
+      expect(parseWikiRef('Note#A##B').headingPath, ['A', 'B']);
+      expect(parseWikiRef('Note#A#').headingPath, ['A']);
+      expect(parseWikiRef('Note').headingPath, isEmpty);
+    });
+
+    test('a single heading is a path of one', () {
+      expect(parseWikiRef('Note#Heading').headingPath, ['Heading']);
+    });
+
+    test('the alias is cut before the path', () {
+      final ref = parseWikiRef('Note#A#B|shown');
+      expect(ref.headingPath, ['A', 'B']);
+      expect(ref.alias, 'shown');
+    });
+  });
+
   group('parseLinks — wikilinks', () {
     test('all documented forms in one document, in order', () {
       const text =
