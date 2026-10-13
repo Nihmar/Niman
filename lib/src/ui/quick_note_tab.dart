@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/note_picker.dart';
@@ -13,10 +14,18 @@ import 'package:niman/src/ui/strings.dart';
 /// not shown anymore.
 final class QuickNoteTab extends StatefulWidget {
   /// Creates the quick note tab.
-  const new({required this.controller, required this.onOpen, super.key});
+  const new({
+    required this.controller,
+    required this.newItemRule,
+    required this.onOpen,
+    super.key,
+  });
 
   /// The session providing the ops.
   final LibrarySession controller;
+
+  /// Where the note made here goes: the library's one rule (#850).
+  final NewItemRule newItemRule;
 
   /// Called with the note path once the user opens the quick note.
   final ValueChanged<String> onOpen;
@@ -42,7 +51,8 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
     if (path != null) widget.onOpen(path);
   }
 
-  /// Create a new note (named by the user) at the library root and use it.
+  /// Create a new note (named by the user) where the library's rule puts
+  /// new notes, and use it.
   Future<void> _create() async {
     final ops = widget.controller.ops;
     if (ops == null) return;
@@ -52,7 +62,10 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
       initial: AppStrings.quickNoteTitle,
     );
     if (name == null || name.isEmpty || !mounted) return;
-    final row = await ops.createNote(parentPath: '', name: name);
+    final row = await ops.createNote(
+      parentPath: widget.newItemRule.folder,
+      name: name,
+    );
     await ops.setQuickNotePath(path: row.path);
     widget.controller.notify();
     if (!mounted) return;

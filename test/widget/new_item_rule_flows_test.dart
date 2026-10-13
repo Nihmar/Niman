@@ -5,7 +5,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/new_item_folder.dart';
+import 'package:niman/src/ui/home/home_note_action.dart';
+import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -18,6 +21,7 @@ void main() {
   late NewItemLocation location;
   late String? openNote;
   late List<CreatedItem> created;
+  late List<String> opened;
   late List<String> filed;
   late BuildContext context;
   late List<Route<dynamic>> pushes;
@@ -40,6 +44,7 @@ void main() {
     location = NewItemLocation.openNoteFolder;
     openNote = 'Projects/Niman/Plan.md';
     created = [];
+    opened = [];
     filed = [];
     pushes = [];
     navigator = GlobalKey<NavigatorState>();
@@ -169,6 +174,19 @@ void main() {
       ]);
     });
 
+    testWidgets('a slides note follows the rule too (it used to be the root)', (
+      tester,
+    ) async {
+      await pumpHost(tester);
+      await confirmName(tester, () => creates.createSlidesNote(context));
+      expect(created.single.path, 'Projects/Niman/My slides.md');
+      expect(created.single.hasKind, isTrue);
+
+      location = NewItemLocation.libraryRoot;
+      await confirmName(tester, () => creates.createSlidesNote(context));
+      expect(created.last.path, 'My slides.md');
+    });
+
     testWidgets('"Create here" names its folder and bypasses the rule', (
       tester,
     ) async {
@@ -246,6 +264,85 @@ void main() {
       location = NewItemLocation.libraryRoot;
       await fromTemplate(tester, parent: 'Elsewhere');
       expect(filed, ['Elsewhere/Standup.md', 'Elsewhere/Standup_1.md']);
+    });
+  });
+
+  group("a Home action's new note", () {
+    Future<void> press(WidgetTester tester, HomeAction action) async {
+      await tester.runAsync(
+        () => makeHomeNote(
+          context,
+          action,
+          controller: session,
+          templates: templates,
+        ),
+      );
+    }
+
+    const idea = HomeAction(
+      id: 'idea',
+      label: 'Idea',
+      kind: HomeActionKind.newNote,
+      name: FieldPreset.value('Idea'),
+    );
+
+    testWidgets('without a folder of its own goes by the rule', (tester) async {
+      await pumpTemplateHost(tester);
+      await press(tester, idea);
+      expect(filed.single, 'Projects/Niman/Idea.md');
+
+      location = NewItemLocation.libraryRoot;
+      await press(tester, idea);
+      expect(filed.last, 'Idea.md');
+    });
+
+    testWidgets('with a folder of its own keeps it', (tester) async {
+      await pumpTemplateHost(tester);
+      await press(tester, idea.copyWith(folder: 'Elsewhere'));
+      expect(filed.single, 'Elsewhere/Idea.md');
+    });
+  });
+
+  group('QuickNoteTab', () {
+    Future<void> createQuickNote(WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: QuickNoteTab(
+              controller: session,
+              newItemRule: NewItemRule(
+                location: () => location,
+                activeNote: () => openNote,
+              ),
+              onOpen: opened.add,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const Key('quick-note-create')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppStrings.actionOk));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('the new quick note goes in the open note\'s folder', (
+      tester,
+    ) async {
+      await createQuickNote(tester);
+      expect(opened.single, 'Projects/Niman/Quick note.md');
+      expect(await session.quickNotePath, 'Projects/Niman/Quick note.md');
+    });
+
+    testWidgets('under the root setting it goes at the root', (tester) async {
+      location = NewItemLocation.libraryRoot;
+      await createQuickNote(tester);
+      expect(opened.single, 'Quick note.md');
+    });
+
+    testWidgets('with no note open it goes at the root', (tester) async {
+      openNote = null;
+      await createQuickNote(tester);
+      expect(opened.single, 'Quick note.md');
     });
   });
 }

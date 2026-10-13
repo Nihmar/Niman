@@ -13,6 +13,7 @@ import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/ui/capture/background_capture.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
@@ -378,6 +379,82 @@ void main() {
       isFalse,
       reason: 'the platform copy is consumed by the import',
     );
+    await close();
+  });
+
+  /// Opens `Docs/[name]`, so the folder of the open note is `Docs`.
+  Future<void> openNestedNote(
+    WidgetTester tester, {
+    String name = 'Plan.md',
+  }) async {
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await controller.seedFile('Docs/$name', content: 'plan');
+    await settle(tester);
+    await tester.tap(noteRow('Docs'));
+    await settle(tester);
+    await tester.tap(noteRow(name));
+    await settle(tester);
+  }
+
+  /// Shares a text file called `Report.md` and waits for its import.
+  Future<void> shareReport(WidgetTester tester, String folder) async {
+    final tmp = Directory.systemTemp.createTempSync('niman_share_rule_');
+    addTearDown(() => tmp.deleteSync(recursive: true));
+    final copy = File(p.join(tmp.path, 'Report.md'))
+      ..writeAsStringSync('body text');
+    final path = folder.isEmpty ? 'Report.md' : '$folder/Report.md';
+    shares.emit(SharedFile(path: copy.path, name: 'Report.md'));
+    for (var i = 0; i < 300 && controller.contentOf(path) == null; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump();
+    }
+    await settle(tester);
+  }
+
+  testWidgets("a shared file lands in the open note's folder (#850)", (
+    tester,
+  ) async {
+    await pumpOpenLibrary(tester);
+    await openNestedNote(tester);
+    await shareReport(tester, 'Docs');
+    expect(controller.contentOf('Docs/Report.md'), 'body text');
+    await close();
+  });
+
+  testWidgets('under the root setting a shared file lands at the root', (
+    tester,
+  ) async {
+    await pumpOpenLibrary(tester);
+    await controller.setNewItemLocation(NewItemLocation.libraryRoot);
+    await openNestedNote(tester);
+    await shareReport(tester, '');
+    expect(controller.contentOf('Report.md'), 'body text');
+    await close();
+  });
+
+  testWidgets('a shared quote keeps going to the capture folder, whatever '
+      'the rule says', (tester) async {
+    await pumpOpenLibrary(tester);
+    // A picture on screen takes no quote, so the quote is a note of its own.
+    await openNestedNote(tester, name: 'photo.png');
+    for (final location in NewItemLocation.values) {
+      await controller.setNewItemLocation(location);
+      shares.emit(
+        SharedText(
+          '"A choice, not an error." https://example.com/garden',
+          subject: 'Garden ${location.name}',
+        ),
+      );
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('capture-sheet-save')));
+      await settle(tester);
+      expect(
+        controller.contentOf('Clippings/Garden ${location.name}.md'),
+        contains('A choice'),
+      );
+    }
     await close();
   });
 }

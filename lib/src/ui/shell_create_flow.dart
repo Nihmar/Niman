@@ -107,10 +107,9 @@ final class ShellCreateFlow {
     });
   }
 
-  /// A slides note (#534): a note with `type: slides` frontmatter in the
-  /// library's root, whatever is selected (#703) — a presentation is a
-  /// thing of its own, not one more page of the folder that happens to
-  /// be open — two slides in it to start from.
+  /// A slides note (#534): a note with `type: slides` frontmatter where
+  /// the library's rule puts new notes (#850; it used to be the root,
+  /// whatever was selected, #703), two slides in it to start from.
   Future<void> createSlidesNote(BuildContext context) async {
     final name = await showNameDialog(
       context,
@@ -120,7 +119,7 @@ final class ShellCreateFlow {
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createNote(
-        parentPath: '',
+        parentPath: newItemRule.folder,
         name: name,
         content: slidesNoteContent(name),
       );

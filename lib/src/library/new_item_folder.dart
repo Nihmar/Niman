@@ -1,16 +1,18 @@
 /// The one rule for where a new note or folder is created (issue #850).
 ///
 /// Every flow that makes something new without being told a folder — New
-/// note, New folder, a note from a template, the note a dead link
-/// creates, a captured web page, a voice note — asks [resolveNewItemFolder]
-/// instead of deciding for itself, so the library setting
-/// ([NewItemLocation]) moves all of them at once.
+/// note, New folder, New slides, a voice note, the quick note's New, a
+/// note from a template, the note a dead link creates, a shared text file
+/// imported as a note — asks [resolveNewItemFolder] instead of deciding
+/// for itself, so the library setting ([NewItemLocation]) moves all of
+/// them at once.
 ///
 /// What does not ask: a folder named by the user (the tree's **Create …
 /// here**, a Home action's own folder, a folder picked in a capture), a
 /// link that names a path (`[[Sub/Foo]]`), a template's own `folder:`
-/// directive, the journal's folder and the sidecar a recognition writes
-/// beside its file.
+/// directive, and the kinds with a folder of their own — the journal, list
+/// notes, annotations and the web captures folder (`captureFolder`) — plus
+/// the sidecar a recognition writes beside its file.
 library;
 
 import 'package:niman/src/core/files.dart';

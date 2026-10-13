@@ -2194,13 +2194,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // A cache file that outlives us costs disk, not the import.
     }
     await _guard(() async {
+      // Where the library's rule puts a new note (#850); a share that
+      // arrives with no note open lands at the root.
+      final folder = _newItemRule.folder;
       final imported = await ops.createNote(
-        parentPath: '',
+        parentPath: folder,
         name: p.basenameWithoutExtension(name),
         content: text,
       );
       if (!mounted) return;
-      _revealFolder('');
+      _revealFolder(folder);
       _openNoteFromLink(imported.path, null);
     });
   }
@@ -4460,7 +4463,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // open quick note leaves this body painted under the opening note.
       ShellTab.quickNote =>
         _showQuickNoteChooser
-            ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
+            ? QuickNoteTab(
+                controller: controller,
+                newItemRule: _newItemRule,
+                onOpen: _openQuickNote,
+              )
             : const SizedBox.shrink(),
       ShellTab.home => HomeScreen(
         host: _homeHost(controller),
