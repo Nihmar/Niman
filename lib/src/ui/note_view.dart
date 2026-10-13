@@ -60,6 +60,7 @@ import 'package:niman/src/ui/link_preview/link_preview_controller.dart';
 import 'package:niman/src/ui/link_preview/link_preview_host.dart';
 import 'package:niman/src/ui/link_preview/link_preview_sheet.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
+import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
@@ -455,9 +456,10 @@ final class _NoteViewState extends State<NoteView>
   /// Which of the note's links name nothing (#847): resolved against the
   /// index apart from the drawing, on load, a pause after an edit, and when
   /// the library's index moves; the editor and the read view draw the answer.
-  late final DeadLinkWatcher _deadLinks = DeadLinkWatcher(
+  late final DeadLinkWatcher _deadLinks = openNoteDeadLinks(
     source: () => widget.linkSource,
-    links: _linksOfNote,
+    buffer: () => _loading ? null : _surface?.buffer,
+    kept: () => _sourceViewKey.currentState?.references(),
     notePath: () => _pathInLibrary,
     delay: () => _stats.settleDelay,
   );
@@ -532,19 +534,6 @@ final class _NoteViewState extends State<NoteView>
   /// The note's path in the library, slash-separated, or null for a note
   /// opened from outside one.
   String? get _pathInLibrary => pathInLibrary(widget.libraryRoot, widget.path);
-
-  /// The links of the open note, as the index reads them: the editor's own
-  /// record of them when it keeps one (a long note), else a read of its text —
-  /// null for a note too long to read twice.
-  Future<List<ParsedLink>?> _linksOfNote() async {
-    final surface = _surface;
-    if (surface == null || _loading) return null;
-    final kept = _sourceViewKey.currentState?.references();
-    if (kept != null) return kept.links;
-    final buffer = surface.buffer;
-    if (buffer.length > deadLinkTextLimit) return null;
-    return await linksOfText(buffer.text);
-  }
 
   @override
   ValueListenable<List<OutlineEntry>> get outline => _stats.outline;
@@ -1376,7 +1365,7 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.noteChanged();
     _caretLine = caretLine;
     _stats.schedule();
-    _deadLinks.schedule();
+    _deadLinks.edited();
     _preview.close();
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);

@@ -14,6 +14,7 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/render/dead_link_ranges.dart';
 import 'package:niman/src/ui/dead_link_watcher.dart';
+import 'package:niman/src/ui/note_dead_links.dart';
 
 import '../fakes/fake_link_source.dart';
 
@@ -276,6 +277,7 @@ void main() {
   group('DeadLinkWatcher', () {
     late FakeLinkSource source;
     late List<ParsedLink> links;
+    late int reads;
     late DeadLinkWatcher watcher;
     var delay = Duration.zero;
     var notified = 0;
@@ -285,9 +287,13 @@ void main() {
       links = parseLinks('[[Live]] [[Gone]]');
       delay = Duration.zero;
       notified = 0;
+      reads = 0;
       watcher = DeadLinkWatcher(
         source: () => source,
-        links: () async => links,
+        links: () async {
+          reads++;
+          return links;
+        },
         notePath: () => 'n.md',
         delay: () => delay,
       )..addListener(() => notified++);
@@ -317,12 +323,12 @@ void main() {
       expect(notified, 1, reason: 'nothing changed, nothing is drawn again');
     });
 
-    test('schedule waits out the pause and resolves once', () async {
+    test('an edit waits out the pause and resolves once', () async {
       delay = const Duration(milliseconds: 30);
       watcher
-        ..schedule()
-        ..schedule()
-        ..schedule();
+        ..edited()
+        ..edited()
+        ..edited();
       await pumpEventQueue();
       expect(source.deadChecks, 0, reason: 'inside the pause');
 
@@ -343,6 +349,31 @@ void main() {
       await pumpEventQueue();
 
       expect(watcher.value, DeadLinks.none, reason: 'the note exists now');
+    });
+
+    // A library busy elsewhere moves its index often; the open note's text
+    // did not change, so the links already read are resolved again, and the
+    // note is read anew only after an edit.
+    test('an index move resolves the links read; an edit reads them', () async {
+      watcher.refresh();
+      await pumpEventQueue();
+      expect(reads, 1);
+
+      source.notes.add('Gone.md');
+      source.announceChange();
+      await pumpEventQueue();
+      await Future<void>.delayed(Duration.zero);
+      await pumpEventQueue();
+      expect(watcher.value, DeadLinks.none);
+      expect(source.deadChecks, 2);
+      expect(reads, 1, reason: 'the index moved, the text did not');
+
+      links = parseLinks('[[Live]] [[Other]]');
+      watcher.edited();
+      await Future<void>.delayed(Duration.zero);
+      await pumpEventQueue();
+      expect(reads, 2, reason: 'an edit reads the links again');
+      expect(watcher.value.wiki, {'Other'});
     });
 
     test('an older resolution never lands over a newer one', () async {
