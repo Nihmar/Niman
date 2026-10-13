@@ -56,7 +56,7 @@ final class RightDock extends StatelessWidget {
       switch (pane) {
         DockPane.outline => Icons.toc,
         DockPane.tags => selected ? Icons.sell : Icons.sell_outlined,
-        DockPane.links => Icons.link,
+        DockPane.links => selected ? Icons.link : Icons.link_outlined,
         DockPane.history => Icons.history,
         DockPane.journal =>
           selected ? Icons.calendar_today : Icons.calendar_today_outlined,
