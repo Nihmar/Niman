@@ -905,8 +905,6 @@ final class UkrainianStrings extends Strings {
   String get missingNoteDialogTitle => 'Нотатка не існує';
   @override
   String missingNoteDialogBody(String path) => 'Створити «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) => 'Папка «$folder» не існує';
 
   // Task lists (T-TD-04).
   @override

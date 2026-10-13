@@ -905,9 +905,6 @@ final class SerbianStrings extends Strings {
   String get missingNoteDialogTitle => 'Белешка не постоји';
   @override
   String missingNoteDialogBody(String path) => 'Креирај „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Фасцикла „$folder“ не постоји';
 
   // Task lists (T-TD-04).
   @override

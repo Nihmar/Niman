@@ -410,7 +410,9 @@ final class LibraryController implements LibrarySession {
   Future<LinkSource?> get linkSource async {
     final db = _indexDb;
     if (db == null) return null;
-    return LinkResolver(db);
+    // The library announces every index change; a note on screen resolves
+    // its dead links again when one lands (#847).
+    return LinkResolver(db, changes: _events.stream.map<void>((_) {}));
   }
 
   @override

@@ -902,9 +902,6 @@ final class BasqueStrings extends Strings {
   String get missingNoteDialogTitle => 'Oharra ez dago';
   @override
   String missingNoteDialogBody(String path) => '«$path» sortu?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      '«$folder» karpetak ez dago';
 
   // Task lists (T-TD-04).
   @override

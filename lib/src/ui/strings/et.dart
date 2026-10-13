@@ -895,8 +895,6 @@ final class EstonianStrings extends Strings {
   String get missingNoteDialogTitle => 'Märkme pole olemas';
   @override
   String missingNoteDialogBody(String path) => 'Loo „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) => 'Kaust „$folder“ puudub';
 
   // Task lists (T-TD-04).
   @override

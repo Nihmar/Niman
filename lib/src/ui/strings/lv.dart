@@ -901,8 +901,6 @@ final class LatvianStrings extends Strings {
   String get missingNoteDialogTitle => 'Piezīme neeksistē';
   @override
   String missingNoteDialogBody(String path) => 'Izveidot „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) => 'Mape „$folder“ neeksistē';
 
   // Task lists (T-TD-04).
   @override

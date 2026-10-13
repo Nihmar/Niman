@@ -219,7 +219,31 @@ past its end, a chapter it lost) opens it where you left it.
 ## Dead links
 
 A link whose target note does not exist is a *dead link*, and a dead
-link is where a note comes from. In the editor, **Ctrl+click**
+link is where a note comes from.
+
+**A dead link is drawn muted**, before it is clicked: in the editor (`live`
+and `source`) and in the read view, a wikilink or a Markdown link to a file
+the library does not hold takes the quieter colour of the markers around the
+text, still underlined, in the light and the dark theme alike; a live link
+keeps the link colour. So a typo, and a note you have named but not written
+yet, are told from a link that works. Only a link to a *file* is judged: a
+web address, a `#anchor` in the same note, and an href with no extension
+(which Niman does not follow either) are never dead. A name that several
+notes share is not dead, it is ambiguous. And it is the note that counts:
+`[[Note#Nope]]` and `[[Note#^nope]]` stay live as long as `Note` exists —
+Niman, like Obsidian, marks a link at the level of the note, not of its
+heading or block. A label-first link, `[[a label|filename]]`, is dead only
+if neither `a label` nor `filename` is a note.
+
+The links of the open note are resolved against the library's index in one
+batch, off the drawing: when the note opens, a short pause after you stop
+typing (the same pause the word count waits), and whenever the library's index
+changes — a note made, renamed or deleted anywhere turns the links to it live
+or dead without touching the note. A link you have just typed is drawn as a
+live one until the next resolution. Nothing is read from the disk for it, and
+a note too long to read twice (over 32 MB) keeps its links drawn as they were.
+
+In the editor, **Ctrl+click**
 (**Cmd+click** on macOS), the same gesture that follows a link, is its
 own confirmation: the note the link names is created on the spot and
 opened, and the writer is left in it.
@@ -237,10 +261,17 @@ Where the new note lands is the library setting `missingNoteLocation`
   clicked: `[[Foo]]` in `Notes/Current.md` creates `Notes/Foo.md`
 - `libraryRoot` — the library root: `[[Foo]]` creates `Foo.md`
 
-A target that names a folder (`[[Sub/Foo]]`) keeps that folder; Niman
-does not create intermediate folders, so a missing folder shows an
-error. Targets with an extension (`[[photo.png]]`) are attachments,
-not notes: they are never created. External URLs keep their behavior.
+A target that names a folder (`[[Sub/Foo]]`) keeps that folder, **and the
+folders are made with the note**: `[[Projects/Three laws]]` creates
+`Projects/` if the library has none, and the note inside it, as Obsidian
+does. The confirmation dialog names the whole proposed path, so you see what
+is about to be made, and Cancel makes neither the note nor its folders. Each
+name is cleaned the way a note's name is, and a segment that names nothing
+(`.`, `..`, empty) is dropped, so a link never creates anything outside the
+library. If a name on the way is already a file, or the disk refuses, nothing
+is made and the link stays dead. Targets with an extension (`[[photo.png]]`)
+are attachments, not notes: they are never created. External URLs keep their
+behavior.
 
 Notes opened without a library (editor-only mode) keep the old
 "link not found" outcome.

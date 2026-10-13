@@ -855,8 +855,6 @@ final class ChineseStrings extends Strings {
   String get missingNoteDialogTitle => '笔记不存在';
   @override
   String missingNoteDialogBody(String path) => '创建"$path"？';
-  @override
-  String missingNoteFolderMissing(String folder) => '文件夹"$folder"不存在';
 
   // Task lists (T-TD-04).
   @override

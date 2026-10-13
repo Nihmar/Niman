@@ -903,9 +903,6 @@ final class FinnishStrings extends Strings {
   String get missingNoteDialogTitle => 'Muistiinpanoa ei ole olemassa';
   @override
   String missingNoteDialogBody(String path) => 'Luotako „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Kansiota „$folder“ ei ole olemassa';
 
   // Task lists (T-TD-04).
   @override

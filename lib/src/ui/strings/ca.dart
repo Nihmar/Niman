@@ -911,9 +911,6 @@ final class CatalanStrings extends Strings {
   String get missingNoteDialogTitle => 'La nota no existeix';
   @override
   String missingNoteDialogBody(String path) => 'Crear «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'La carpeta «$folder» no existeix';
 
   // Task lists (T-TD-04).
   @override

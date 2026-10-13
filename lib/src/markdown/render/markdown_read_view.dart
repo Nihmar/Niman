@@ -17,12 +17,14 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
@@ -61,6 +63,7 @@ final class MarkdownReadView extends StatefulWidget {
     this.column = NoteColumn.off,
     this.onTapLink,
     this.onTapWikiLink,
+    this.deadLinks,
     this.embedResolver,
     this.knownScan,
     this.onToggleTask,
@@ -114,6 +117,10 @@ final class MarkdownReadView extends StatefulWidget {
 
   /// Called when a wikilink is tapped.
   final void Function(String inner)? onTapWikiLink;
+
+  /// The links of the note that name nothing (#847), drawn muted; null draws
+  /// every link as a live one.
+  final ValueListenable<DeadLinks>? deadLinks;
 
   /// Resolves an embed's target to an absolute path, or null.
   final Future<String?> Function(String target)? embedResolver;
@@ -1126,6 +1133,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       availableWidth: availableWidth,
       onTapLink: widget.onTapLink,
       onTapWikiLink: widget.onTapWikiLink,
+      deadLinks: widget.deadLinks,
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
       outerItems: outerItems,

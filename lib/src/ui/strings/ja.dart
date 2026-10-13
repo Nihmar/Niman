@@ -857,8 +857,6 @@ final class JapaneseStrings extends Strings {
   String get missingNoteDialogTitle => 'ノートが存在しません';
   @override
   String missingNoteDialogBody(String path) => '"$path" を作成しますか？';
-  @override
-  String missingNoteFolderMissing(String folder) => 'フォルダ "$folder" は存在しません';
 
   // Task lists (T-TD-04).
   @override

@@ -97,6 +97,21 @@ abstract interface class LinkSource {
   /// path (`a.md`, `sub/a.md`) prefer the note beside the linking one, the
   /// way Markdown reads a path.
   Future<ResolveResult> resolveMarkdown(String href, {String? from});
+
+  /// The links among [queries] that name nothing (#847): a wiki target or a
+  /// Markdown path to a file the library does not hold. Judged at the note
+  /// (or file) level only — what follows a `#` is not asked — and in one
+  /// batch ([LinkResolver.resolveQueries]), however many links there are.
+  ///
+  /// A link that is not a path to a file is never dead: a URL, a `#anchor`,
+  /// an href with no extension (which is not followed either). A name that
+  /// several notes share is not dead; it is ambiguous.
+  Future<Set<LinkQuery>> deadAmong(Iterable<LinkQuery> queries);
+
+  /// Fires after the index changed — a note made, renamed, deleted or saved
+  /// anywhere in the library — which can make a dead link live and a live
+  /// one dead. A source with no index to watch never fires.
+  Stream<void> get changes;
 }
 
 /// One link to resolve in a batch ([LinkResolver.resolveQueries]): the
@@ -108,10 +123,43 @@ typedef LinkQuery = ({String target, String? from, bool markdown});
 /// Resolves wiki targets (`[[…]]` target part) and markdown hrefs against
 /// the note index. Not a DAO and not stateful: callers create one per use.
 final class LinkResolver implements LinkSource {
-  /// Creates a resolver over the drift [IndexDatabase].
-  new(this._db);
+  /// Creates a resolver over the drift [IndexDatabase]; [changes] is the
+  /// library's own announcement that its index moved (see
+  /// [LinkSource.changes]).
+  new(this._db, {this._changes});
 
   final IndexDatabase _db;
+
+  final Stream<void>? _changes;
+
+  @override
+  Stream<void> get changes => _changes ?? const Stream<void>.empty();
+
+  @override
+  Future<Set<LinkQuery>> deadAmong(Iterable<LinkQuery> queries) async {
+    final asked = <LinkQuery>{
+      for (final query in queries)
+        if (_namesAFile(query)) query,
+    };
+    if (asked.isEmpty) return const <LinkQuery>{};
+    final resolved = await resolveQueries(asked);
+    return {
+      for (final MapEntry(:key, :value) in resolved.entries)
+        if (value is UnresolvedNote) key,
+    };
+  }
+
+  /// Whether [query] is a link to a file the library could hold: a wiki
+  /// target with something in it, or a Markdown path that is not a URL, an
+  /// anchor or an extension-less href.
+  static bool _namesAFile(LinkQuery query) {
+    final target = query.target.trim();
+    if (target.isEmpty) return false;
+    if (!query.markdown) return true;
+    return !hasScheme(target) &&
+        !target.startsWith('#') &&
+        markdownPath(target) != null;
+  }
 
   @override
   Future<ResolveResult> resolveWiki(String target, {String? from}) {

@@ -919,9 +919,6 @@ final class GreekStrings extends Strings {
   String get missingNoteDialogTitle => 'Η σημείωση δεν υπάρχει';
   @override
   String missingNoteDialogBody(String path) => 'Δημιουργία «$path»;';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Ο φάκελος «$folder» δεν υπάρχει';
 
   // Task lists (T-TD-04).
   @override

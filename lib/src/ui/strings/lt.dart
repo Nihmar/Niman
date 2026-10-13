@@ -906,9 +906,6 @@ final class LithuanianStrings extends Strings {
   String get missingNoteDialogTitle => 'Pastaba neegzistuoja';
   @override
   String missingNoteDialogBody(String path) => 'Sukurti „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Katalogas „$folder“ neegzistuoja';
 
   // Task lists (T-TD-04).
   @override

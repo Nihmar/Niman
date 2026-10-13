@@ -22,8 +22,10 @@ library;
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/read_block.dart';
@@ -45,6 +47,7 @@ final class BlockView extends StatelessWidget {
     this.availableWidth,
     this.onTapLink,
     this.onTapWikiLink,
+    this.deadLinks,
     this.embedResolver,
     this.embedImages,
     this.onToggleTask,
@@ -72,6 +75,10 @@ final class BlockView extends StatelessWidget {
 
   /// Called when a wikilink is tapped, with what is between its brackets.
   final void Function(String inner)? onTapWikiLink;
+
+  /// The links of the note that name nothing (#847), which are drawn muted;
+  /// null draws every link as a live one.
+  final ValueListenable<DeadLinks>? deadLinks;
 
   /// Resolves an embed's target to a picture.
   final Future<String?> Function(String target)? embedResolver;
@@ -142,6 +149,7 @@ final class _Drawer {
   late final InlineTaps _taps = (
     onTapLink: view.onTapLink,
     onTapWikiLink: view.onTapWikiLink,
+    deadLinks: view.deadLinks,
     embedResolver: view.embedResolver,
     embedImages: view.embedImages,
   );

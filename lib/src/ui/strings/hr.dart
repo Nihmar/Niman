@@ -902,9 +902,6 @@ final class CroatianStrings extends Strings {
   String get missingNoteDialogTitle => 'Napomena ne postoji';
   @override
   String missingNoteDialogBody(String path) => 'Kreirati „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Direktorij „$folder“ ne postoji';
 
   // Task lists (T-TD-04).
   @override

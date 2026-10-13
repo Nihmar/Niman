@@ -909,9 +909,6 @@ final class MacedonianStrings extends Strings {
   String get missingNoteDialogTitle => 'Белешката не постои';
   @override
   String missingNoteDialogBody(String path) => 'Да се креира „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Папката „$folder“ не постои';
 
   // Task lists (T-TD-04).
   @override

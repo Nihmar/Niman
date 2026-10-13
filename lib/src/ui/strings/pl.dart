@@ -911,9 +911,6 @@ final class PolishStrings extends Strings {
   String get missingNoteDialogTitle => 'Notatka nie istnieje';
   @override
   String missingNoteDialogBody(String path) => 'Utworzyć „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Katalog „$folder“ nie istnieje';
 
   // Task lists (T-TD-04).
   @override

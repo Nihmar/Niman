@@ -907,9 +907,6 @@ final class BulgarianStrings extends Strings {
   String get missingNoteDialogTitle => 'Бележката не съществува';
   @override
   String missingNoteDialogBody(String path) => 'Да се създаде „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Папката „$folder“ не съществува';
 
   // Task lists (T-TD-04).
   @override

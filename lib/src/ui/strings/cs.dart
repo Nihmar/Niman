@@ -903,9 +903,6 @@ final class CzechStrings extends Strings {
   String get missingNoteDialogTitle => 'Poznámka neexistuje';
   @override
   String missingNoteDialogBody(String path) => 'Vytvořit „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Složka „$folder“ neexistuje';
 
   // Task lists (T-TD-04).
   @override

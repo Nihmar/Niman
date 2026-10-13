@@ -903,8 +903,6 @@ final class BelarusianStrings extends Strings {
   String get missingNoteDialogTitle => 'Заўвага не існуе';
   @override
   String missingNoteDialogBody(String path) => "Стварыць '$path'?";
-  @override
-  String missingNoteFolderMissing(String folder) => "Папка '$folder' не існуе";
 
   // Task lists (T-TD-04).
   @override

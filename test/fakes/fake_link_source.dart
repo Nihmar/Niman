@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/resolver.dart';
 
@@ -16,6 +18,39 @@ final class FakeLinkSource implements LinkSource {
 
   /// Records every resolution, in order (for tap assertions).
   final List<String> queries = [];
+
+  final StreamController<void> _changes = StreamController<void>.broadcast();
+
+  /// The library's index moved: what a test announces after it changes
+  /// [notes], so the links drawn dead are resolved again.
+  void announceChange() => _changes.add(null);
+
+  /// How many batches [deadAmong] has been asked for.
+  int deadChecks = 0;
+
+  @override
+  Stream<void> get changes => _changes.stream;
+
+  @override
+  Future<Set<LinkQuery>> deadAmong(Iterable<LinkQuery> queries) async {
+    deadChecks++;
+    final dead = <LinkQuery>{};
+    for (final query in queries) {
+      final target = query.target.trim();
+      if (target.isEmpty) continue;
+      if (query.markdown &&
+          (target.startsWith('#') ||
+              target.contains('://') ||
+              !target.contains('.'))) {
+        continue;
+      }
+      final result = query.markdown
+          ? await resolveMarkdown(target, from: query.from)
+          : await resolveWiki(target, from: query.from);
+      if (result is UnresolvedNote) dead.add(query);
+    }
+    return dead;
+  }
 
   Note _noteFor(String path) => Note(
     id: path.hashCode & 0x7fffffff,

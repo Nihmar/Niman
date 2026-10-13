@@ -913,9 +913,6 @@ final class FrenchStrings extends Strings {
   String get missingNoteDialogTitle => 'La note n’existe pas';
   @override
   String missingNoteDialogBody(String path) => 'Créer « $path » ?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Le dossier « $folder » n’existe pas';
 
   // Task lists (T-TD-04).
   @override

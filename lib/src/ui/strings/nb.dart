@@ -897,9 +897,6 @@ final class NorwegianStrings extends Strings {
   String get missingNoteDialogTitle => 'Notatet finnes ikke';
   @override
   String missingNoteDialogBody(String path) => 'Opprette „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Mappen „$folder“ finnes ikke';
 
   // Task lists (T-TD-04).
   @override

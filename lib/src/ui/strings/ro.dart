@@ -912,9 +912,6 @@ final class RomanianStrings extends Strings {
   String get missingNoteDialogTitle => 'Notița nu există';
   @override
   String missingNoteDialogBody(String path) => 'Se creează „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Dosarul „$folder“ nu există';
 
   // Task lists (T-TD-04).
   @override

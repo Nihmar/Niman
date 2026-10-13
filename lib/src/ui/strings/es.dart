@@ -911,9 +911,6 @@ final class SpanishStrings extends Strings {
   String get missingNoteDialogTitle => 'La nota no existe';
   @override
   String missingNoteDialogBody(String path) => '¿Crear «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'La carpeta «$folder» no existe';
 
   // Task lists (T-TD-04).
   @override

@@ -49,16 +49,22 @@ NoteStreamSaver? noteStreamSaverFor(LibrarySession controller) {
 }
 
 /// The dead-link note-creation path (issue #78): an empty note through
-/// the library's own creation path; null while no library is ready,
-/// which keeps the dead-link snackbar instead of the offer.
+/// the library's own creation path, in a folder made first when the link
+/// names one the library does not have (#847); null while no library is
+/// ready, which keeps the dead-link snackbar instead of the offer.
 Future<String> Function(String relPath)? missingNoteCreatorFor(
   LibrarySession controller,
 ) {
   final ops = controller.ops;
   if (ops == null) return null;
   return (relPath) async {
+    final folder = parentOf(relPath);
+    // Folders on the way, through the library's own path for a folder: the
+    // names were sanitized when the path was proposed, and the index hears of
+    // every one made.
+    if (folder.isNotEmpty) await ops.ensureFolder(folder);
     final note = await ops.createNote(
-      parentPath: parentOf(relPath),
+      parentPath: folder,
       name: p.basenameWithoutExtension(relPath),
     );
     return note.path;

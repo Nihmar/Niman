@@ -161,10 +161,9 @@ void main() {
   });
 
   group('MissingNoteHandler', () {
-    /// A handler over recorded fakes; [folders] are the existing folders.
+    /// A handler over recorded fakes.
     (MissingNoteHandler handler, _Recording recording) buildHandler({
       MissingNoteLocation location = MissingNoteLocation.currentFolder,
-      Set<String> folders = const <String>{},
       bool confirm = true,
       String created = 'created',
     }) {
@@ -178,10 +177,6 @@ void main() {
         createNote: (path) async {
           recording.createCalls.add(path);
           return created;
-        },
-        folderExists: (folder) async {
-          recording.folderCalls.add(folder);
-          return folders.contains(folder);
         },
       );
       return (handler, recording);
@@ -209,19 +204,37 @@ void main() {
       expect(recording.createCalls, isEmpty);
     });
 
-    test('a missing folder is an error, and nothing is created', () async {
-      final (handler, recording) = buildHandler();
+    test(
+      'a folder the library lacks is no refusal: it is asked and made',
+      () async {
+        // #847: the folders on the way are the creator's to make, so the
+        // proposal names the whole path and the handler asks about it.
+        final (handler, recording) = buildHandler();
+        final outcome = await handler.handleDeadLink('Sub/Deep/Foo', context());
+        expect(
+          outcome,
+          isA<DeadLinkCreated>().having((o) => o.path, 'path', 'created'),
+        );
+        expect(recording.confirmCalls, ['Sub/Deep/Foo.md']);
+        expect(recording.createCalls, ['Sub/Deep/Foo.md']);
+      },
+    );
+
+    test('a declined dialog makes neither the note nor its folders', () async {
+      final (handler, recording) = buildHandler(confirm: false);
       final outcome = await handler.handleDeadLink('Sub/Foo', context());
-      expect(
-        outcome,
-        isA<DeadLinkFolderMissing>().having((o) => o.folder, 'folder', 'Sub'),
-      );
-      expect(recording.confirmCalls, isEmpty);
+      expect(outcome, const DeadLinkDeclined());
       expect(recording.createCalls, isEmpty);
     });
 
-    test('an existing folder is created when confirmed', () async {
-      final (handler, recording) = buildHandler(folders: {'Notes'});
+    test('a target that climbs out of the library stays in it', () async {
+      final (handler, recording) = buildHandler();
+      await handler.handleDeadLink('../../Out/Foo', context());
+      expect(recording.confirmCalls, ['Out/Foo.md']);
+    });
+
+    test('the current folder is created when confirmed', () async {
+      final (handler, recording) = buildHandler();
       final outcome = await handler.handleDeadLink('Foo', context());
       expect(
         outcome,
@@ -234,10 +247,7 @@ void main() {
     test(
       'a declined dialog changes nothing (issue #78, no second prompt)',
       () async {
-        final (handler, recording) = buildHandler(
-          confirm: false,
-          folders: {'Notes'},
-        );
+        final (handler, recording) = buildHandler(confirm: false);
         final outcome = await handler.handleDeadLink('Foo', context());
         expect(outcome, const DeadLinkDeclined());
         expect(recording.createCalls, isEmpty);
@@ -245,7 +255,7 @@ void main() {
       },
     );
 
-    test('a root proposal never asks about a folder', () async {
+    test('a root proposal has no folder to make', () async {
       final (handler, recording) = buildHandler(
         location: MissingNoteLocation.libraryRoot,
       );
@@ -254,7 +264,6 @@ void main() {
         outcome,
         isA<DeadLinkCreated>().having((o) => o.path, 'path', 'created'),
       );
-      expect(recording.folderCalls, isEmpty);
       expect(recording.createCalls, ['Foo.md']);
     });
   });
@@ -264,5 +273,4 @@ void main() {
 final class _Recording {
   final List<String> confirmCalls = [];
   final List<String> createCalls = [];
-  final List<String> folderCalls = [];
 }

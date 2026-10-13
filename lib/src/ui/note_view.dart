@@ -48,6 +48,7 @@ import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
@@ -119,7 +120,6 @@ final class NoteView extends StatefulWidget {
     this.wikilinkSuggester,
     this.onOpenNote,
     this.createMissingNote,
-    this.folderExists,
     this.initialAnchor,
     this.initialCaretOffset,
     this.active = true,
@@ -284,11 +284,6 @@ final class NoteView extends StatefulWidget {
   /// the offer.
   final Future<String> Function(String path)? createMissingNote;
 
-  /// Whether a library-relative folder exists under `[root]` (issue #78);
-  /// defaults to an off-UI-isolate disk check. A test seam: widget tests
-  /// run against a fake library that is not on disk.
-  final Future<bool> Function(String root, String rel)? folderExists;
-
   /// A heading anchor to land on after the note loads (T-M3-07).
   final String? initialAnchor;
 
@@ -441,6 +436,32 @@ final class _NoteViewState extends State<NoteView>
   /// surface — the same seam [NoteView.spellCheck] keeps — so the status row
   /// can show the count the surface works out.
   final TemplateCheck _templateCheck = TemplateCheck();
+
+  /// Which of the note's links name nothing (#847): resolved against the
+  /// index apart from the drawing, on load, a pause after an edit, and when
+  /// the library's index moves; the editor and the read view draw the answer.
+  late final DeadLinkWatcher _deadLinks = DeadLinkWatcher(
+    source: () => widget.linkSource,
+    links: _linksOfNote,
+    notePath: () {
+      final root = widget.libraryRoot;
+      return root == null ? null : relPath(widget.path, root);
+    },
+    delay: () => _stats.settleDelay,
+  );
+
+  /// The links of the open note, as the index reads them: the editor's own
+  /// record of them when it keeps one (a long note), else a read of its text —
+  /// null for a note too long to read twice.
+  Future<List<ParsedLink>?> _linksOfNote() async {
+    final surface = _surface;
+    if (surface == null || _loading) return null;
+    final kept = _sourceViewKey.currentState?.references();
+    if (kept != null) return kept.links;
+    final buffer = surface.buffer;
+    if (buffer.length > deadLinkTextLimit) return null;
+    return await linksOfText(buffer.text);
+  }
 
   @override
   ValueListenable<List<OutlineEntry>> get outline => _stats.outline;
@@ -848,6 +869,7 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
+    _deadLinks.sourceChanged();
     // The pane opened the note before this editor was mounted (#727): the
     // surface is built this frame, so the caret is asked for after it.
     _caretPending = widget.caretRequest != 0;
@@ -885,6 +907,13 @@ final class _NoteViewState extends State<NoteView>
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
+    if (!identical(oldWidget.linkSource, widget.linkSource)) {
+      // The library opened under a note that was already on screen: its
+      // links are resolved against it now.
+      _deadLinks
+        ..sourceChanged()
+        ..refresh();
+    }
     if (oldWidget.path != widget.path) {
       // Another note's head is not this one's (#157): the panel opens closed
       // again, and the note on screen is taken at its head until it scrolls.
@@ -974,6 +1003,7 @@ final class _NoteViewState extends State<NoteView>
     _stats
       ..removeListener(_onStatsChanged)
       ..dispose();
+    _deadLinks.dispose();
     _activeFormats.dispose();
     _formatKeys.detach();
     _focus.dispose();
@@ -1056,6 +1086,8 @@ final class _NoteViewState extends State<NoteView>
     // the incoming one is not read yet. Nothing in it is owed to the disk,
     // so the close guard has nothing to wait for (#156).
     _saves.markClean();
+    // The links of the note that went are not this one's.
+    _deadLinks.clear();
     setState(() {
       _loading = true;
       _ready = false;
@@ -1132,6 +1164,9 @@ final class _NoteViewState extends State<NoteView>
       // answer synchronously inside this call; big ones go to an isolate
       // and land a moment later.
       _stats.refresh();
+      // The links that name nothing, resolved against the index with the
+      // note already on screen, and drawn muted when they arrive (#847).
+      _deadLinks.refresh();
       // The editor gets this frame: the preview's parse and first layout
       // start right after the text is on screen, so a large note shows it
       // before the preview works (T-PP-22).
@@ -1232,6 +1267,7 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.noteChanged();
     widget.onNoteKindChanged?.call(_noteKind);
     _stats.refresh();
+    _deadLinks.refresh();
     _refreshPreview();
     if (mounted) setState(() {});
     _log.info('note reloaded: $path (external change, ${text.length} chars)');
@@ -1255,6 +1291,7 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.noteChanged();
     _caretLine = caretLine;
     _stats.schedule();
+    _deadLinks.schedule();
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
   }
@@ -1373,6 +1410,7 @@ final class _NoteViewState extends State<NoteView>
         lineTokens: plainTextTokensOf(p.basename(widget.path)),
         templateCommands: _templateIn(widget),
         wikilinkSuggester: widget.wikilinkSuggester,
+        deadLinks: _deadLinks,
         notePath: widget.libraryRoot == null
             ? null
             : relPath(widget.path, widget.libraryRoot!),
@@ -1543,6 +1581,7 @@ final class _NoteViewState extends State<NoteView>
         openWiki(context, parseWikiRef(inner), _linkTargets()),
       ),
       embedResolver: _resolveEmbed,
+      deadLinks: _deadLinks,
       column: widget.noteColumn,
       knownScan: _editorScanOf,
       onToggleTask: _toggleTaskFromRead,
@@ -1871,7 +1910,6 @@ final class _NoteViewState extends State<NoteView>
     blocks: _blocks,
     onOpenNote: widget.onOpenNote,
     createMissingNote: widget.createMissingNote,
-    folderExists: widget.folderExists,
     modifier: modifier,
   );
 

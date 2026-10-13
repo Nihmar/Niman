@@ -648,8 +648,6 @@ final class AppStrings {
   static String get missingNoteDialogTitle => _s.missingNoteDialogTitle;
   static String missingNoteDialogBody(String path) =>
       _s.missingNoteDialogBody(path);
-  static String missingNoteFolderMissing(String folder) =>
-      _s.missingNoteFolderMissing(folder);
 
   // Task lists (T-TD-04).
   static String get todoOpen => _s.todoOpen;

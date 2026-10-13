@@ -906,8 +906,6 @@ final class SlovenianStrings extends Strings {
   String get missingNoteDialogTitle => 'Opomba ne obstaja';
   @override
   String missingNoteDialogBody(String path) => 'Ustvariti „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) => 'Mapa „$folder“ ne obstaja';
 
   // Task lists (T-TD-04).
   @override

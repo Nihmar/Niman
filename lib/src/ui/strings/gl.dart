@@ -908,9 +908,6 @@ final class GalicianStrings extends Strings {
   String get missingNoteDialogTitle => 'A nota non existe';
   @override
   String missingNoteDialogBody(String path) => 'Crear «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'O cartafol «$folder» non existe';
 
   // Task lists (T-TD-04).
   @override

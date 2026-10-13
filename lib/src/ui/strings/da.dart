@@ -898,9 +898,6 @@ final class DanishStrings extends Strings {
   String get missingNoteDialogTitle => 'Noten findes ikke';
   @override
   String missingNoteDialogBody(String path) => 'Opret „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Mappen „$folder“ findes ikke';
 
   // Task lists (T-TD-04).
   @override

@@ -896,9 +896,6 @@ final class EnglishStrings extends Strings {
   String get missingNoteDialogTitle => 'Note does not exist';
   @override
   String missingNoteDialogBody(String path) => "Create '$path'?";
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      "The folder '$folder' does not exist";
 
   // Task lists (T-TD-04).
   @override

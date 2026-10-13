@@ -902,9 +902,6 @@ final class AlbanianStrings extends Strings {
   String get missingNoteDialogTitle => 'Shënimi nuk ekziston';
   @override
   String missingNoteDialogBody(String path) => 'Krijoj „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Tresja „$folder“ nuk ekziston';
 
   // Task lists (T-TD-04).
   @override

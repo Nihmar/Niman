@@ -905,9 +905,6 @@ final class SlovakStrings extends Strings {
   String get missingNoteDialogTitle => 'Poznámka neexistuje';
   @override
   String missingNoteDialogBody(String path) => 'Vytvoriť „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Priečinok „$folder“ neexistuje';
 
   // Task lists (T-TD-04).
   @override

@@ -9,7 +9,6 @@
 library;
 
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart' show relPath;
@@ -40,7 +39,6 @@ final class NoteLinkTargets {
     this.blocks,
     this.onOpenNote,
     this.createMissingNote,
-    this.folderExists,
     this.modifier = false,
   });
 
@@ -72,11 +70,9 @@ final class NoteLinkTargets {
   /// resolves with nowhere to go.
   final void Function(String path, String? anchor)? onOpenNote;
 
-  /// Creates the note a dead link points at; null disables the offer.
+  /// Creates the note a dead link points at, and the folders on the way to
+  /// it (#847); null disables the offer.
   final Future<String> Function(String path)? createMissingNote;
-
-  /// Whether a folder exists, for the dead-link offer (a test seam).
-  final Future<bool> Function(String root, String rel)? folderExists;
 
   /// The tap carried the platform's link modifier (Ctrl, Cmd on macOS) —
   /// the editor surface's own way to follow a link. A *dead* link is then
@@ -235,13 +231,6 @@ Future<void> _applyResolved(
           return;
         }
         open(outcome.path, null);
-      } else if (outcome is DeadLinkFolderMissing) {
-        if (context.mounted) {
-          _linkSnack(
-            context,
-            AppStrings.missingNoteFolderMissing(outcome.folder),
-          );
-        }
       } else if (outcome is DeadLinkNotOffered && context.mounted) {
         _linkSnack(context, AppStrings.unresolvedLinkTitle);
       }
@@ -268,7 +257,6 @@ Future<DeadLinkOutcome> _handleDeadLink(
     libraryRoot: root,
     currentNote: link.notePath,
   );
-  final seam = link.folderExists;
   final handler = MissingNoteHandler(
     location: link.missingNoteLocation,
     confirm: link.modifier
@@ -280,25 +268,24 @@ Future<DeadLinkOutcome> _handleDeadLink(
             final confirmed = await showMissingNoteDialog(context, path: path);
             return confirmed ?? false;
           },
-    folderExists: seam == null
-        ? (rel) => _folderExists(root, rel)
-        : (rel) => seam(root, rel),
     createNote: create,
   );
-  return await handler.handleDeadLink(target, linkContext);
+  try {
+    return await handler.handleDeadLink(target, linkContext);
+  } on FileSystemException catch (error) {
+    // A name on the way is a file, or the disk refuses: nothing was made
+    // that the writer can open, and the link stays dead.
+    const AppLogger(name: 'links')
+        .warning('dead link "$target" not created: $error');
+    return const DeadLinkNotOffered();
+  }
 }
-
-/// A folder's disk existence, off the UI isolate (one stat is a FUSE
-/// round trip on Android).
-Future<bool> _folderExists(String root, String rel) =>
-    Isolate.run(() => Directory(p.join(root, rel)).existsSync());
 
 /// A dead-link outcome for the log: `Created: Notes/Foo.md`.
 String describeOutcome(DeadLinkOutcome outcome) => switch (outcome) {
   DeadLinkCreated(:final path) => 'created $path',
   DeadLinkDeclined() => 'creation declined — nothing shown',
   DeadLinkNotOffered() => 'no offer — snackbar',
-  DeadLinkFolderMissing(:final folder) => 'folder "$folder" missing — error',
 };
 
 /// Opens [note] via the shell (or jumps locally when it is already the

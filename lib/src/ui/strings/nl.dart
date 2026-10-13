@@ -906,9 +906,6 @@ final class DutchStrings extends Strings {
   String get missingNoteDialogTitle => 'De notitie bestaat niet';
   @override
   String missingNoteDialogBody(String path) => '„$path" maken?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Map „$folder" bestaat niet';
 
   // Task lists (T-TD-04).
   @override

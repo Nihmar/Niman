@@ -20,6 +20,7 @@
 /// renders.
 library;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/settings/library_config.dart'
     show defaultSourceFont;
@@ -30,6 +31,7 @@ import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -102,6 +104,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.templateCommands = false,
     this.wikilinkSuggester,
     this.notePath,
+    this.deadLinks,
     super.key,
   });
 
@@ -117,6 +120,9 @@ final class MarkdownSurface extends StatelessWidget {
 
   /// See [MarkdownSourceView.notePath].
   final String? notePath;
+
+  /// See [MarkdownSourceView.deadLinks].
+  final ValueListenable<DeadLinks>? deadLinks;
 
   /// The note.
   final SourceBuffer buffer;
@@ -274,5 +280,6 @@ final class MarkdownSurface extends StatelessWidget {
     templateCommands: templateCommands,
     wikilinkSuggester: wikilinkSuggester,
     notePath: notePath,
+    deadLinks: deadLinks,
   );
 }

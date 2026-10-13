@@ -903,9 +903,6 @@ final class SwedishStrings extends Strings {
   String get missingNoteDialogTitle => 'Anteckningen finns inte';
   @override
   String missingNoteDialogBody(String path) => 'Skapa „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Mappen „$folder“ finns inte';
 
   // Task lists (T-TD-04).
   @override

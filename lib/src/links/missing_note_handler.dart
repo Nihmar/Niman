@@ -58,8 +58,8 @@ final class LinkContext {
 /// puts it next to the clicked note,
 /// [MissingNoteLocation.libraryRoot] at the library root. A
 /// folder-qualified target keeps its own folder, which may not exist
-/// yet: Niman does not create intermediate folders, so the caller checks
-/// the folder before offering (see [MissingNoteHandler]).
+/// yet: creating the note creates the folders on the way (#847), as
+/// Obsidian does, so `[[Projects/Three laws]]` makes `Projects/` too.
 ///
 /// Not a note (null): an empty target after normalization, or a name
 /// with a surviving extension — a `foo.png` target is an attachment, and
@@ -133,31 +133,19 @@ final class DeadLinkNotOffered extends DeadLinkOutcome {
   const new();
 }
 
-/// The target's folder does not exist, and Niman does not create
-/// intermediate folders (issue #78): the caller shows its error.
-final class DeadLinkFolderMissing extends DeadLinkOutcome {
-  /// Creates a folder-missing outcome for [folder].
-  const new(this.folder);
-
-  /// The missing folder, library-relative.
-  final String folder;
-}
-
 /// Handles a dead link: proposes where the missing note would be created,
 /// asks the user, and creates it through the library's own note-creation
 /// path (issue #78).
 ///
 /// Not a DAO and not stateful: callers create one per use, with their
-/// own dialog, creation path, and disk check. The disk check and the
-/// creation run off the UI isolate (the caller's job — a `statSync` is a
-/// FUSE round trip on Android).
+/// own dialog and creation path. The creation runs off the UI isolate (the
+/// caller's job — a `statSync` is a FUSE round trip on Android).
 final class MissingNoteHandler {
   /// Creates a handler.
   const new({
     required this.location,
     required this.confirm,
     required this.createNote,
-    required this.folderExists,
   });
 
   /// Where the created note lands (the library's setting).
@@ -168,12 +156,10 @@ final class MissingNoteHandler {
   final Future<bool> Function(String path) confirm;
 
   /// Creates the empty note at library-relative `[path]` (the library's own
-  /// creation path — sanitized, uniquified, indexed) and returns its
+  /// creation path — sanitized, uniquified, indexed), and the folders on the
+  /// way to it when the library does not have them yet (#847); returns its
   /// library-relative path.
   final Future<String> Function(String path) createNote;
-
-  /// Whether library-relative `[folder]` exists on disk.
-  final Future<bool> Function(String folder) folderExists;
 
   /// Handles the unresolved [linkTarget] clicked in [context].
   Future<DeadLinkOutcome> handleDeadLink(
@@ -183,10 +169,6 @@ final class MissingNoteHandler {
     if (!context.hasLibrary) return const DeadLinkNotOffered();
     final proposed = proposedMissingNotePath(linkTarget, location, context);
     if (proposed == null) return const DeadLinkNotOffered();
-    final folder = parentOf(proposed);
-    if (folder.isNotEmpty && !await folderExists(folder)) {
-      return DeadLinkFolderMissing(folder);
-    }
     if (!await confirm(proposed)) return const DeadLinkDeclined();
     return DeadLinkCreated(await createNote(proposed));
   }

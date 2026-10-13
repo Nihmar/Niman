@@ -902,9 +902,6 @@ final class HungarianStrings extends Strings {
   String get missingNoteDialogTitle => 'A jegyzet nem létezik';
   @override
   String missingNoteDialogBody(String path) => 'Létrehozás: „$path"?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'A „$folder" mappa nem létezik';
 
   // Task lists (T-TD-04).
   @override

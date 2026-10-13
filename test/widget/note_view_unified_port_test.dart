@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
@@ -55,7 +56,6 @@ NoteView _note({
   NoteColumn column = NoteColumn.off,
   Future<String> Function(String path)? readNote,
   Future<String> Function(String path)? createMissingNote,
-  Future<bool> Function(String root, String rel)? folderExists,
 }) => NoteView(
   key: key,
   path: path,
@@ -80,7 +80,6 @@ NoteView _note({
   readNote: readNote ?? (_) async => text,
   writeNote: (_, content) async => writes?.add(content),
   createMissingNote: createMissingNote,
-  folderExists: folderExists,
 );
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -457,6 +456,54 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    /// The colour the span holding [text] is drawn in, in the editor.
+    Color? colourOf(WidgetTester tester, String text) {
+      Color? found;
+      for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+        widget.text.visitChildren((span) {
+          if (found == null &&
+              span is TextSpan &&
+              (span.text ?? '').contains(text)) {
+            found = span.style?.color;
+          }
+          return true;
+        });
+      }
+      return found;
+    }
+
+    testWidgets('a dead wikilink is muted from the load, and goes live '
+        'when its note comes to exist (#847)', (tester) async {
+      NoteView.statsDelayOverride = Duration.zero;
+      addTearDown(() => NoteView.statsDelayOverride = null);
+      final links = FakeLinkSource(notes: <String>['Notes/Current.md']);
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: 'see [[Name]] and [[Current]] here\n',
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: links,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final syntax = SyntaxColors.of(
+        tester.element(find.byType(MarkdownSourceView)),
+      );
+
+      expect(links.deadChecks, greaterThan(0), reason: 'resolved on load');
+      expect(colourOf(tester, 'Name'), syntax.deadLink);
+      expect(colourOf(tester, 'Current'), syntax.wikilink);
+
+      // The note is written somewhere in the library: the index moves.
+      links.notes.add('Notes/Name.md');
+      links.announceChange();
+      await tester.pumpAndSettle();
+
+      expect(colourOf(tester, 'Name'), syntax.wikilink);
+    });
+
     testWidgets('Ctrl+click on a dead wikilink creates and opens its note', (
       tester,
     ) async {
@@ -476,7 +523,6 @@ void main() {
               links.notes.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );
@@ -490,6 +536,47 @@ void main() {
       await tapName(tester);
       expect(created, <String>['Notes/Name.md'], reason: 'the link resolved');
       expect(opened, <String>['Notes/Name.md|null', 'Notes/Name.md|null']);
+    }, variant: _desktop);
+
+    testWidgets('a dead link into folders nobody made creates its note '
+        'where it says (#847)', (tester) async {
+      const nested = 'see [[Sub/Deep/Foo]] here\n';
+      final links = FakeLinkSource(notes: <String>['Notes/Current.md']);
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: nested,
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: links,
+            opened: opened,
+            createMissingNote: (rel) async {
+              created.add(rel);
+              links.notes.add(rel);
+              return rel;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.text('see [[Sub/Deep/Foo]] here', findRichText: true),
+      );
+      final at = paragraph.localToGlobal(
+        paragraph.getOffsetForCaret(const TextPosition(offset: 9), Rect.zero) +
+            const Offset(2, 8),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tapAt(at, kind: PointerDeviceKind.mouse);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+
+      expect(created, <String>[
+        'Sub/Deep/Foo.md',
+      ], reason: "the folder in the link, not the clicked note's: no refusal");
+      expect(opened, <String>['Sub/Deep/Foo.md|null']);
     }, variant: _desktop);
 
     testWidgets('a plain click on a dead wikilink only places the caret', (
@@ -509,7 +596,6 @@ void main() {
               created.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );
@@ -543,7 +629,6 @@ void main() {
               created.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );
@@ -569,7 +654,6 @@ void main() {
               created.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );
@@ -602,7 +686,6 @@ void main() {
               created.add(rel);
               return rel;
             },
-            folderExists: (_, _) async => true,
           ),
         ),
       );

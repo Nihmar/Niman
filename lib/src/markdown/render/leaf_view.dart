@@ -18,6 +18,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
@@ -69,7 +70,21 @@ final class LeafView extends StatelessWidget {
   final bool printed;
 
   @override
-  Widget build(BuildContext context) => switch (leaf.kind) {
+  Widget build(BuildContext context) {
+    final dead = taps.deadLinks;
+    // The links that name nothing are resolved apart from the page and arrive
+    // when they do (#847): the leaf draws again by itself, as the leaves
+    // around it stand.
+    if (dead == null || leaf.inline == null && leaf.rows.isEmpty) {
+      return _drawn(context);
+    }
+    return ValueListenableBuilder<DeadLinks>(
+      valueListenable: dead,
+      builder: (context, _, _) => _drawn(context),
+    );
+  }
+
+  Widget _drawn(BuildContext context) => switch (leaf.kind) {
     BlockKind.paragraph => _rich(theme.body, hideBlockId: true),
     BlockKind.heading => _heading(context),
     BlockKind.fencedCode => _fenced(context),
@@ -99,6 +114,7 @@ final class LeafView extends StatelessWidget {
     taps: taps,
     availableWidth: availableWidth,
     footnoteNumbers: footnoteNumbers,
+    deadLinks: taps.deadLinks?.value ?? DeadLinks.none,
   );
 
   /// The leaf's inline text, in [style]: nothing when it has none — a

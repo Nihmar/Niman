@@ -909,9 +909,6 @@ final class ItalianStrings extends Strings {
   String get missingNoteDialogTitle => 'La nota non esiste';
   @override
   String missingNoteDialogBody(String path) => 'Creare «$path»?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'La cartella «$folder» non esiste';
 
   // Task lists (T-TD-04).
   @override

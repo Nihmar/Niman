@@ -902,9 +902,6 @@ final class IcelandicStrings extends Strings {
   String get missingNoteDialogTitle => 'Minnisblaðið er ekki til';
   @override
   String missingNoteDialogBody(String path) => 'Búa til „$path“?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'Mappan „$folder“ er ekki til';
 
   // Task lists (T-TD-04).
   @override

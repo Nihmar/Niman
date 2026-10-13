@@ -513,7 +513,6 @@ abstract base class Strings {
   String get missingNoteLocationCurrentFolder;
   String get missingNoteDialogTitle;
   String missingNoteDialogBody(String path);
-  String missingNoteFolderMissing(String folder);
 
   // Task lists (T-TD-04).
   String get todoOpen;

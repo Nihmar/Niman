@@ -47,6 +47,7 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -74,6 +75,7 @@ import 'package:niman/src/markdown/render/block_heights.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
+import 'package:niman/src/markdown/render/dead_link_ranges.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/focus_return.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
@@ -158,6 +160,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.autofocus = false,
     this.wikilinkSuggester,
     this.notePath,
+    this.deadLinks,
     super.key,
   });
 
@@ -317,6 +320,11 @@ final class MarkdownSourceView extends StatefulWidget {
   /// what the wikilink panel tells the note's own headings and blocks from
   /// the rest of the library's when it completes a link (#845).
   final String? notePath;
+
+  /// The links of the note that name nothing (#847), resolved apart from the
+  /// drawing and handed in as they arrive: drawn in the muted colour of a
+  /// link that is not there yet. Null draws every link as a live one.
+  final ValueListenable<DeadLinks>? deadLinks;
 
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
@@ -735,6 +743,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.spellCheck?.addListener(_onSpellingChanged);
     widget.templateCheck?.addListener(_onSpellingChanged);
     widget.findMatches?.addListener(_onSpellingChanged);
+    widget.deadLinks?.addListener(_onDeadLinksChanged);
     widget.mathCache?.addListener(_onMathTypeset);
     // The hand over a Ctrl-clickable link appears when the modifier goes
     // down, and goes when it comes up, without waiting for a move (#725).
@@ -875,6 +884,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       oldWidget.findMatches?.removeListener(_onSpellingChanged);
       widget.findMatches?.addListener(_onSpellingChanged);
     }
+    if (!identical(oldWidget.deadLinks, widget.deadLinks)) {
+      oldWidget.deadLinks?.removeListener(_onDeadLinksChanged);
+      widget.deadLinks?.addListener(_onDeadLinksChanged);
+    }
     if (!identical(oldWidget.mathCache, widget.mathCache)) {
       oldWidget.mathCache?.removeListener(_onMathTypeset);
       widget.mathCache?.addListener(_onMathTypeset);
@@ -952,6 +965,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.spellCheck?.removeListener(_onSpellingChanged);
     widget.templateCheck?.removeListener(_onSpellingChanged);
     widget.findMatches?.removeListener(_onSpellingChanged);
+    widget.deadLinks?.removeListener(_onDeadLinksChanged);
     widget.mathCache?.removeListener(_onMathTypeset);
     _hints.dispose();
     _suggest
@@ -992,6 +1006,23 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!mounted) return;
     _hints.refresh();
     setState(() {});
+  }
+
+  /// The note's dead links were resolved again (#847): its links are drawn
+  /// again, in the colours the answer gives them.
+  void _onDeadLinksChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// The links of line [index] that name nothing, local to the line.
+  List<TextRange> _deadLinksIn(int index, StyledLine styled) {
+    final dead = widget.deadLinks?.value;
+    if (dead == null || dead.isEmpty) return const <TextRange>[];
+    return deadLinkRanges(
+      styled,
+      dead,
+      hrefOf: (start) => _styler?.linkHrefAt(index, start),
+    );
   }
 
   /// A formula was typeset, or failed to be: the lines that concealed their
@@ -4313,6 +4344,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       selected: _selectionIn(index),
       composing: _composingIn(index),
       misspelled: _misspelledIn(index),
+      deadLinks: _deadLinksIn(index, styled),
       found: _foundIn(index),
       templateProblems: _hints.problemsIn(index),
       misspelledColor: Theme.of(context).colorScheme.error,

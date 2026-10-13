@@ -889,9 +889,6 @@ final class HindiStrings extends Strings {
   String get missingNoteDialogTitle => 'नोट मौजूद नहीं है';
   @override
   String missingNoteDialogBody(String path) => 'क्या "$path" बनाना है?';
-  @override
-  String missingNoteFolderMissing(String folder) =>
-      'फ़ोल्डर "$folder" मौजूद नहीं है';
 
   // Task lists (T-TD-04).
   @override

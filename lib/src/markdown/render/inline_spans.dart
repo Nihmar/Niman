@@ -15,10 +15,13 @@ library;
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/links/block_anchors.dart' show withoutTrailingBlockId;
-import 'package:niman/src/links/parser.dart' show wikiDisplayText;
+import 'package:niman/src/links/dead_links.dart';
+import 'package:niman/src/links/parser.dart' show parseWikiRef, wikiDisplayText;
 import 'package:niman/src/markdown/inline/inline_node.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
 import 'package:niman/src/markdown/read_block.dart';
@@ -34,6 +37,10 @@ typedef InlineTaps = ({
   void Function(String inner)? onTapWikiLink,
   Future<String?> Function(String target)? embedResolver,
   Map<String, ui.Image>? embedImages,
+
+  /// The links of the note that name nothing (#847), drawn muted; null draws
+  /// every link as a live one.
+  ValueListenable<DeadLinks>? deadLinks,
 });
 
 /// Draws inline nodes as spans.
@@ -47,6 +54,7 @@ final class InlineSpans {
     required this.taps,
     this.availableWidth,
     this.footnoteNumbers = const <String, int>{},
+    this.deadLinks = DeadLinks.none,
   });
 
   /// The typography and colours.
@@ -67,6 +75,10 @@ final class InlineSpans {
 
   /// The number each footnote is cited as, by its normalized label.
   final Map<String, int> footnoteNumbers;
+
+  /// The links of the note that name nothing (#847): drawn in the muted
+  /// colour of a link that is not there yet.
+  final DeadLinks deadLinks;
 
   /// [nodes] with the ` ^id` that ends their text taken off: the id and the
   /// space before it, nothing when the text is the id alone.
@@ -112,7 +124,12 @@ final class InlineSpans {
           _push(stack, children, style.and(tag: tag), frame.link);
         case LinkNode(:final destination, :final children):
           final link = _Link(destination, ReadInline.plainOf(children));
-          _push(stack, children, style.and(link: true), link);
+          _push(
+            stack,
+            children,
+            style.and(link: true, dead: deadLinks.hrefIsDead(destination)),
+            link,
+          );
         case ImageNode():
           spans.add(_image(node, style));
         case TextNode(:final text):
@@ -214,7 +231,12 @@ final class InlineSpans {
 
   InlineSpan _wikilink(String inner, _Style style) => TextSpan(
     text: wikiDisplayText(inner),
-    style: _tinted(style.apply(this), theme.wikilink),
+    style: _tinted(
+      style.apply(this),
+      deadLinks.wikiIsDead(parseWikiRef(inner))
+          ? theme.deadWikilink
+          : theme.wikilink,
+    ),
     recognizer: TapGestureRecognizer()
       ..onTap = () => taps.onTapWikiLink?.call(inner),
   );
@@ -306,6 +328,7 @@ final class _Style {
     this.underlined = false,
     this.code = false,
     this.link = false,
+    this.dead = false,
     this.shift,
   });
 
@@ -317,6 +340,9 @@ final class _Style {
   final bool code;
   final bool link;
 
+  /// Whether the link names nothing (#847).
+  final bool dead;
+
   /// `sup` or `sub`, the innermost.
   final String? shift;
 
@@ -327,6 +353,7 @@ final class _Style {
     bool marked = false,
     bool code = false,
     bool link = false,
+    bool dead = false,
     String? tag,
   }) => _Style(
     italic: this.italic || italic,
@@ -336,13 +363,19 @@ final class _Style {
     underlined: underlined || tag == 'u',
     code: this.code || code,
     link: this.link || link,
+    dead: this.dead || dead,
     shift: tag == 'sup' || tag == 'sub' ? tag : shift,
   );
 
   /// The text style it makes of [spans]' base.
   TextStyle apply(InlineSpans spans) {
     var style = code ? spans._code : spans.base;
-    if (link) style = spans._tinted(style, spans.theme.link);
+    if (link) {
+      style = spans._tinted(
+        style,
+        dead ? spans.theme.deadLink : spans.theme.link,
+      );
+    }
     final decorations = <TextDecoration>[
       if (style.decoration != null && style.decoration != TextDecoration.none)
         style.decoration!,
