@@ -21,6 +21,9 @@ final class _Note implements UnsavedNote {
   bool unsaved = false;
 
   @override
+  String get text => '';
+
+  @override
   Future<void> save() async => unsaved = false;
 }
 

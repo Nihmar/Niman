@@ -16,6 +16,9 @@ final class _FakeNote implements UnsavedNote {
   Error? failWith;
 
   @override
+  String get text => '';
+
+  @override
   Future<void> save() async {
     saveCalls++;
     final error = failWith;

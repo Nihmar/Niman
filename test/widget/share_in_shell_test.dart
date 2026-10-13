@@ -397,6 +397,9 @@ final class _Buffer implements UnsavedNote {
   bool unsaved = true;
 
   @override
+  String get text => '';
+
+  @override
   Future<void> save() async {
     await write(text);
     unsaved = false;

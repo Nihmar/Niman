@@ -61,3 +61,25 @@ final class PreviewReader implements PreviewSource {
   @visibleForTesting
   int get held => _kept.length;
 }
+
+/// [PreviewSource] that shows a note open with unsaved edits as its buffer
+/// holds it, not as the disk still does: the edits are what the note says
+/// now, and the card shows the note (#846). Every other note is read from
+/// [_disk].
+final class UnsavedFirstPreviews implements PreviewSource {
+  /// Reads the notes [_unsaved] has no buffer text for (null) from [_disk].
+  new(this._disk, this._unsaved);
+
+  final PreviewSource _disk;
+
+  /// The unsaved buffer text of the note at a library-relative path, or
+  /// null.
+  final String? Function(String path) _unsaved;
+
+  @override
+  Future<NotePreviewText?> previewText(String path) async {
+    final text = _unsaved(path);
+    if (text != null) return NotePreviewText.of(text);
+    return _disk.previewText(path);
+  }
+}

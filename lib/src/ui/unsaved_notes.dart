@@ -4,18 +4,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/note_view.dart' show NoteView;
+import 'package:path/path.dart' as p;
 
 /// A note whose buffer may hold edits the disk does not have yet
 /// (T-PP-11).
 ///
 /// The adapter is a read/write view of the note's own save state (the
-/// revision pair) — it holds no copy of the text, so it cannot drift.
+/// revision pair) and its buffer — it holds no copy of the text, so it
+/// cannot drift.
 abstract interface class UnsavedNote {
   /// The note's absolute path (its identity).
   String get path;
 
   /// True while the buffer holds edits the disk does not have yet.
   bool get unsaved;
+
+  /// The buffer's text now: what the disk will hold once [save] lands.
+  String get text;
 
   /// Writes the buffer to disk. Completes when the disk holds the latest
   /// edit (including saves that were already in flight), or with the
@@ -45,6 +50,16 @@ final class UnsavedTracker extends ChangeNotifier {
       for (final note in _notes)
         if (note.unsaved) note.path,
     ];
+  }
+
+  /// The buffer text of the open note at absolute [path] while it holds
+  /// edits the disk does not have yet, else null: what a reader of the note
+  /// shows instead of the disk's older text (a link's preview, #846).
+  String? unsavedTextOf(String path) {
+    for (final note in _notes) {
+      if (note.unsaved && p.equals(note.path, path)) return note.text;
+    }
+    return null;
   }
 
   /// Writes every unsaved note to disk. Completes when the disk holds each
