@@ -87,7 +87,7 @@ void main() {
     final divider = tester.getRect(find.byKey(const Key('pane-divider')));
     final second = tester.getRect(find.byKey(const Key('pane-tabs-1')));
     expect(second.left, closeTo(divider.right, 1));
-  });
+  }, variant: desktopDensity);
 
   testWidgets('a click in a pane gives it the next note', (tester) async {
     await pumpShell(tester);

@@ -99,6 +99,7 @@ import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/pane_split.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/search_request.dart';
@@ -1656,7 +1657,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             ),
             const SizedBox(width: 6),
             SizedBox.square(
-              dimension: 20,
+              dimension: TabSurface.closeFor(touch: thumbDense(theme)),
               child: IconButton(
                 key: Key('content-tab-close-${tab.name}'),
                 tooltip: AppStrings.closeTabTooltip,
@@ -3975,6 +3976,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Zen drops the base: the note takes the window edge to edge.
   Widget _wideBody(LibrarySession controller) {
     final zen = _inZen;
+    final touch = thumbDense(Theme.of(context));
     return Padding(
       padding: EdgeInsets.fromLTRB(
         zen ? 0 : Island.gap,
@@ -3991,17 +3993,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _wideRow(controller, zen: zen),
           if (_sidebarVisible && !zen)
             Positioned(
-              left: _editorSettings.treeWidth - ResizeDivider.overhang,
+              left:
+                  _editorSettings.treeWidth -
+                  ResizeDivider.overhangFor(touch: touch),
               top: 0,
               bottom: 0,
-              child: _treeDivider(),
+              child: _treeDivider(touch: touch),
             ),
           if (_dockShown && !zen)
             Positioned(
-              right: _dockWidth - ResizeDivider.overhang,
+              right: _dockWidth - ResizeDivider.overhangFor(touch: touch),
               top: 0,
               bottom: 0,
-              child: _dockDivider(),
+              child: _dockDivider(touch: touch),
             ),
         ],
       ),
@@ -4075,7 +4079,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 if (!widget.window.customTitleBar) ...[
                   SizedBox(
                     key: const Key('pane-tab-row'),
-                    height: 38,
+                    height: NoteTabBar.rowHeight(
+                      touch: thumbDense(Theme.of(context)),
+                    ),
                     child: LayoutBuilder(
                       builder: (context, constraints) => _tabRow(
                         const SizedBox.shrink(),
@@ -4161,7 +4167,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           ? Column(
               children: [
                 SizedBox(
-                  height: 38,
+                  height: NoteTabBar.rowHeight(
+                    touch: thumbDense(Theme.of(context)),
+                  ),
                   child: _paneTabs(1, const SizedBox.shrink()),
                 ),
                 const Divider(height: 1),
@@ -4380,7 +4388,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The draggable tree/detail divider (T-PP-21). Moves apply live; the
   /// lift persists the width to the library.
-  Widget _treeDivider() => ResizeDivider(
+  Widget _treeDivider({required bool touch}) => ResizeDivider(
+    touch: touch,
     key: const Key('tree-divider'),
     onDrag: (dx) => setState(() {
       _editorSettings = _editorSettings.copyWith(
@@ -4401,7 +4410,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The draggable panes/dock divider (#297): the tree's divider on the
   /// dock's edge, so a move to the left widens the dock.
-  Widget _dockDivider() => ResizeDivider(
+  Widget _dockDivider({required bool touch}) => ResizeDivider(
+    touch: touch,
     key: const Key('dock-divider'),
     onDrag: (dx) => setState(() {
       _editorSettings = _editorSettings.copyWith(

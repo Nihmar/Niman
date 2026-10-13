@@ -209,7 +209,12 @@ for a mouse: shorter rows, a narrower slot for the folder chevron and
 the note icon, and a tighter menu. A phone or a tablet keeps the
 thumb-sized rows and the long-press sheet. The choice follows the
 platform's own density (compact on a desktop), not the window's width,
-so a tablet in landscape keeps the touch sizes.
+so a tablet in landscape keeps the touch sizes. That holds for the wide
+layout's own chrome too (#849): on a tablet the rail's buttons, the open
+notes' tab row and its buttons, the tree footer's buttons and the grab
+strip of the dividers between the panels are at least 48 px, where a
+mouse has them smaller (the rail's at 38, the divider's strip at 8). In the
+narrowest tree the footer's buttons scroll rather than shrink.
 
 ## The folder grid
 
