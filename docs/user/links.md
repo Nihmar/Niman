@@ -65,7 +65,10 @@ the note's. The panel lists:
   (`[[#^idea-1]]` for this note). The library-wide lists show at most 50
   rows, from the library's word index, so they cost the same in a library
   of a million notes as in one of a hundred: type more of the heading to
-  narrow them, as the word is matched by its start (`tea` finds *Team*);
+  narrow them, as the word is matched by its start (`tea` finds *Team*)
+  and without its accents (`resume` finds *Résumé*). When more notes hold
+  the words than the list reads, it reads the ones where they weigh most
+  — a short heading made of them before a long one that mentions them;
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or
   `chapter=`. Once the form's key is written, what follows the `=` is the
   number you type: the panel is not offered again there, so `⏎` or `Tab`
