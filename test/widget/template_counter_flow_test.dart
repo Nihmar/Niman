@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:path/path.dart' as p;
 
@@ -46,7 +47,7 @@ void main() {
     flow = ShellTemplateFlow(
       controller: session,
       origin: () => (selected: null, isDir: false, treeVisible: true),
-      createParent: () => '',
+      newItemRule: NewItemRule.fixed(NewItemLocation.libraryRoot),
       // What the shell's guard does with a failure: report it, and go on.
       guard: (action) async {
         try {

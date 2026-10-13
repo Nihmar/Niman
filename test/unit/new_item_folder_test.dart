@@ -14,7 +14,7 @@ void main() {
       );
     });
 
-    test('the open note setting answers the open note\'s folder', () {
+    test("the open note setting answers the open note's folder", () {
       expect(
         resolveNewItemFolder(
           NewItemLocation.openNoteFolder,

@@ -10,6 +10,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/frontmatter/edit.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/templates/counters.dart';
 import 'package:niman/src/templates/directives.dart';
@@ -33,7 +34,7 @@ final class ShellTemplateFlow {
   new({
     required this.controller,
     required this.origin,
-    required this.createParent,
+    required this.newItemRule,
     required this.guard,
     required this.opensPreviewOnly,
     required this.onNoteFiled,
@@ -45,8 +46,9 @@ final class ShellTemplateFlow {
   /// Where the creation starts from (tree or note on screen).
   final TemplateOrigin Function() origin;
 
-  /// Parent path for new note/folder creation.
-  final String Function() createParent;
+  /// Where a note goes when neither the caller nor the template names a
+  /// folder: the library's one rule (issue #850).
+  final NewItemRule newItemRule;
 
   /// Serializes mutating flows, reporting errors.
   final Future<void> Function(Future<void> Function() action) guard;
@@ -63,8 +65,8 @@ final class ShellTemplateFlow {
   })
   onNoteFiled;
 
-  /// Creates a note from a template in [parent] (default: the FAB
-  /// target), T-M4-07.
+  /// Creates a note from a template in [parent] (default: where the
+  /// library's rule puts new notes), T-M4-07.
   ///
   /// Template first, then name: which template you want is the decision,
   /// and the name often follows from it. The template's text — frontmatter
@@ -139,7 +141,7 @@ final class ShellTemplateFlow {
       answers: answers,
       surroundings: surroundings,
       name: name,
-      folder: awayFromTemplates(parent ?? createParent(), folder),
+      folder: awayFromTemplates(parent ?? newItemRule.folder, folder),
       templateName: chosen.name,
     );
   }

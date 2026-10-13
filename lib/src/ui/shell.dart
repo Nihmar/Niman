@@ -40,6 +40,7 @@ import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -924,7 +925,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// into [ShellCreateFlow]).
   late final ShellCreateFlow _createFlow = ShellCreateFlow(
     controller: widget.controller,
-    createParent: () => _createParent,
+    newItemRule: _newItemRule,
     guard: _guard,
     onCreated: _onItemCreated,
   );
@@ -1850,7 +1851,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         isDir: _selectedIsDir,
         treeVisible: _treeVisible,
       ),
-      createParent: () => _createParent,
+      newItemRule: _newItemRule,
       guard: _guard,
       opensPreviewOnly: () => _notePreview,
       onNoteFiled: _onTemplateNoteFiled,
@@ -2371,11 +2372,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     widget.controller.notify();
   }
 
-  /// Parent path for new note/folder creation.
-  String get _createParent {
-    if (_selected == null) return '';
-    return _selectedIsDir ? _selected! : parentOf(_selected!);
-  }
+  /// The library's one rule for where new notes and folders go (#850),
+  /// read on each creation: its setting, and the note on screen.
+  late final NewItemRule _newItemRule = NewItemRule(
+    location: () => _editorSettings.newItemLocation,
+    activeNote: () => _shownNote,
+  );
 
   void _select(Note note, {bool newTab = false}) {
     // A note opening in preview-only has no editable for the IME.

@@ -3,13 +3,15 @@
 ///
 /// Each is the same shape — ask for a name, create under the guard,
 /// report what was made — and none of them needs the shell's state:
-/// where to create is a question it asks, and what to open afterwards is
-/// a fact it reports. Notes from a template have a flow of their own,
+/// where to create is a question it asks the library's one rule
+/// ([NewItemRule], issue #850), and what to open afterwards is a fact it
+/// reports. Notes from a template have a flow of their own,
 /// because their directives decide the folder.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
@@ -29,7 +31,7 @@ final class ShellCreateFlow {
   /// read the shell's live state and take its decisions.
   new({
     required this.controller,
-    required this.createParent,
+    required this.newItemRule,
     required this.guard,
     required this.onCreated,
   });
@@ -37,9 +39,9 @@ final class ShellCreateFlow {
   /// The open library's session.
   final LibrarySession controller;
 
-  /// The folder a create with no parent of its own lands in: the FAB's
-  /// target, which follows the tree selection.
-  final String Function() createParent;
+  /// Where a create with no parent of its own lands: the library's
+  /// setting, not the tree selection.
+  final NewItemRule newItemRule;
 
   /// Serializes mutating flows, reporting errors.
   final Future<void> Function(Future<void> Function() action) guard;
@@ -47,7 +49,8 @@ final class ShellCreateFlow {
   /// Reports what was created; the shell opens it.
   final void Function(CreatedItem item) onCreated;
 
-  /// A plain Markdown note in [parent] (default: the FAB's target).
+  /// A plain Markdown note in [parent] (default: where the library's
+  /// rule puts new notes).
   Future<void> createNote(BuildContext context, {String? parent}) async {
     final name = await showNameDialog(
       context,
@@ -57,7 +60,7 @@ final class ShellCreateFlow {
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createNote(
-        parentPath: parent ?? createParent(),
+        parentPath: parent ?? newItemRule.folder,
         name: name,
       );
       onCreated((path: row.path, isDir: false, hasKind: false));
@@ -85,8 +88,8 @@ final class ShellCreateFlow {
     });
   }
 
-  /// A voice note: a note with `type: audio` frontmatter in the FAB's
-  /// target folder, ready to record into.
+  /// A voice note: a note with `type: audio` frontmatter where the
+  /// library's rule puts new notes, ready to record into.
   Future<void> createAudioNote(BuildContext context) async {
     final name = await showNameDialog(
       context,
@@ -96,7 +99,7 @@ final class ShellCreateFlow {
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createNote(
-        parentPath: createParent(),
+        parentPath: newItemRule.folder,
         name: name,
         content: audioNoteContent(),
       );
@@ -125,7 +128,8 @@ final class ShellCreateFlow {
     });
   }
 
-  /// A folder in [parent] (default: the FAB's target).
+  /// A folder in [parent] (default: where the library's rule puts new
+  /// folders).
   Future<void> createFolder(BuildContext context, {String? parent}) async {
     final name = await showNameDialog(
       context,
@@ -135,7 +139,7 @@ final class ShellCreateFlow {
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createFolder(
-        parentPath: parent ?? createParent(),
+        parentPath: parent ?? newItemRule.folder,
         name: name,
       );
       onCreated((path: row.path, isDir: true, hasKind: false));

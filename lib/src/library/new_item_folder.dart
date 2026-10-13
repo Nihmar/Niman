@@ -52,3 +52,25 @@ String resolveNewItemFolder(NewItemLocation location, {String? activeNote}) {
       activeNote == null || activeNote.isEmpty ? '' : parentOf(activeNote),
   };
 }
+
+/// The rule as a flow holds it: the setting and the open note, both read
+/// when a creation asks, never when the flow was built (the setting can
+/// change, and the open note moves).
+final class NewItemRule {
+  /// A rule reading [location] and [activeNote] on each [folder].
+  const new({required this.location, required this.activeNote});
+
+  /// A rule that never changes: [location], with [activeNote] open.
+  new fixed(NewItemLocation location, {String? activeNote})
+    : this(location: () => location, activeNote: () => activeNote);
+
+  /// The library setting, read now.
+  final NewItemLocation Function() location;
+
+  /// The library-relative path of the note open now, or null.
+  final String? Function() activeNote;
+
+  /// The folder a new note or folder goes in now.
+  String get folder =>
+      resolveNewItemFolder(location(), activeNote: activeNote());
+}
