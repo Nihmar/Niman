@@ -904,6 +904,12 @@ final class SpanishStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Varias notas coinciden';
   @override
+  String get linksToNoteTitle => 'Enlaces a esta nota';
+  @override
+  String get linksToNoteEmpty => 'Ninguna nota enlaza aquí todavía';
+  @override
+  String get linksToNoteEmbed => 'incrustada';
+  @override
   String get openLinkFailed => 'No se pudo abrir el enlace';
 
   // Dead-link note creation (issue #78).

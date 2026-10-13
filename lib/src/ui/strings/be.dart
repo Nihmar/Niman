@@ -896,6 +896,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Колькі заўваг адпавядаюць';
   @override
+  String get linksToNoteTitle => 'Спасылкі на гэтую нататку';
+  @override
+  String get linksToNoteEmpty => 'Ніводная нататка яшчэ не спасылаецца сюды';
+  @override
+  String get linksToNoteEmbed => 'убудаваная';
+  @override
   String get openLinkFailed => 'Не ўдалося адкрыць спасылку';
 
   // Dead-link note creation (issue #78).

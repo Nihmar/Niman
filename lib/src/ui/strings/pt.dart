@@ -898,6 +898,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Várias notas correspondem';
   @override
+  String get linksToNoteTitle => 'Links para esta nota';
+  @override
+  String get linksToNoteEmpty => 'Nenhuma nota aponta para cá ainda';
+  @override
+  String get linksToNoteEmbed => 'incorporada';
+  @override
   String get openLinkFailed => 'Não foi possível abrir o link';
 
   // Dead-link note creation (issue #78).

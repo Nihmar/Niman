@@ -28,6 +28,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -594,6 +595,19 @@ final class NoteOps implements NoteOperations {
     );
   }
 
+  /// The links and embeds of the note at [path] with the line around each —
+  /// what a list of the notes that link to another reads a mention from
+  /// (#842) — read, decoded and parsed where the note lies, off the UI
+  /// isolate.
+  Future<List<LinkSpot>> noteLinkSpots(String path) async {
+    await _mustFind(path);
+    final abs = _abs(path);
+    return await IsolateGauge.run(
+      () => linkSpotsOfNoteFile(abs),
+      'link spots "$path"',
+    );
+  }
+
   /// Pins or unpins the note at [path] by editing its frontmatter.
   ///
   /// Unpinning removes the key rather than writing `pinned: false`: the
@@ -769,6 +783,11 @@ List<String> headingsOfNoteFile(String path) {
 /// [headingsOfNoteFile] reads: work for a background isolate.
 List<BlockAnchor> blocksOfNoteFile(String path) =>
     blockAnchorsOfText(_noteTextAt(path));
+
+/// The link spots of the note file at absolute [path] (#842): work for a
+/// background isolate.
+List<LinkSpot> linkSpotsOfNoteFile(String path) =>
+    linkSpotsOf(_noteTextAt(path));
 
 String _noteTextAt(String path) {
   final bytes = File(path).readAsBytesSync();

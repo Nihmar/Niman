@@ -906,6 +906,12 @@ final class FrenchStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Plusieurs notes correspondent';
   @override
+  String get linksToNoteTitle => 'Liens vers cette note';
+  @override
+  String get linksToNoteEmpty => 'Aucune note ne renvoie ici';
+  @override
+  String get linksToNoteEmbed => 'intégrée';
+  @override
   String get openLinkFailed => 'Impossible d’ouvrir le lien';
 
   // Dead-link note creation (issue #78).

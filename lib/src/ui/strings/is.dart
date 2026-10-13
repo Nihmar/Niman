@@ -895,6 +895,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Fleiri minnisblöð passa';
   @override
+  String get linksToNoteTitle => 'Tenglar á þennan minnispunkt';
+  @override
+  String get linksToNoteEmpty => 'Enginn minnispunktur vísar hingað enn';
+  @override
+  String get linksToNoteEmbed => 'ívafið';
+  @override
   String get openLinkFailed => 'Það gekk ekki að opna tengilinn';
 
   // Dead-link note creation (issue #78).

@@ -51,6 +51,7 @@ import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
+import 'package:niman/src/ui/links_to_note_section.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
@@ -443,12 +444,20 @@ final class _NoteViewState extends State<NoteView>
   late final DeadLinkWatcher _deadLinks = DeadLinkWatcher(
     source: () => widget.linkSource,
     links: _linksOfNote,
-    notePath: () {
-      final root = widget.libraryRoot;
-      return root == null ? null : relPath(widget.path, root);
-    },
+    notePath: () => _pathInLibrary,
     delay: () => _stats.settleDelay,
   );
+
+  /// The note's path in the library, slash-separated, or null for a note
+  /// opened from outside one.
+  String? get _pathInLibrary {
+    final root = widget.libraryRoot;
+    if (root == null ||
+        !p.isWithin(p.normalize(root), p.normalize(widget.path))) {
+      return null;
+    }
+    return relPath(widget.path, root);
+  }
 
   /// The links of the open note, as the index reads them: the editor's own
   /// record of them when it keeps one (a long note), else a read of its text —
@@ -2108,6 +2117,16 @@ final class _NoteViewState extends State<NoteView>
               children: [
                 if (!_loading && _stats.frontmatterError != null)
                   FrontmatterWarningBanner(message: _stats.frontmatterError!),
+                // The notes that link to this one (#842), under the note.
+                if (!_loading && _ready)
+                  NoteColumnPadding(
+                    column: widget.noteColumn,
+                    child: LinksToNoteSection(
+                      source: widget.linkSource,
+                      path: _pathInLibrary,
+                      onOpenNote: (path) => widget.onOpenNote?.call(path, null),
+                    ),
+                  ),
                 NoteColumnPadding(
                   column: widget.noteColumn,
                   child: ListenableBuilder(

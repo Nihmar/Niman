@@ -905,6 +905,12 @@ final class RomanianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Mai multe note se potrivesc';
   @override
+  String get linksToNoteTitle => 'Linkuri către această notă';
+  @override
+  String get linksToNoteEmpty => 'Nicio notă nu trimite încă aici';
+  @override
+  String get linksToNoteEmbed => 'încorporată';
+  @override
   String get openLinkFailed => 'Linkul nu a putut fi deschis';
 
   // Dead-link note creation (issue #78).

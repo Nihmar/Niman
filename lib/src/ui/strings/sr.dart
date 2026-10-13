@@ -898,6 +898,12 @@ final class SerbianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Више белешки поклапа';
   @override
+  String get linksToNoteTitle => 'Везе ка овој белешци';
+  @override
+  String get linksToNoteEmpty => 'Ниједна белешка још не води овамо';
+  @override
+  String get linksToNoteEmbed => 'уграђена';
+  @override
   String get openLinkFailed => 'Веза се не може отворити';
 
   // Dead-link note creation (issue #78).

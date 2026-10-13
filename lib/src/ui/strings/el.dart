@@ -912,6 +912,12 @@ final class GreekStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Πολλές σημειώσεις ταυτίζονται';
   @override
+  String get linksToNoteTitle => 'Σύνδεσμοι προς αυτή τη σημείωση';
+  @override
+  String get linksToNoteEmpty => 'Καμία σημείωση δεν παραπέμπει εδώ ακόμη';
+  @override
+  String get linksToNoteEmbed => 'ενσωματωμένη';
+  @override
   String get openLinkFailed => 'Δεν ήταν δυνατό το άνοιγμα του συνδέσμου';
 
   // Dead-link note creation (issue #78).

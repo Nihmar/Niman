@@ -290,6 +290,39 @@ final class NoteDao {
     return paths.toList(growable: false);
   }
 
+  /// The notes that link to the note [toId] (#842), by path: one row per
+  /// referrer with the link forms it names the note by, at most [limit] of
+  /// them (`truncated` says there were more).
+  ///
+  /// The reverse of the `note_links` primary key, answered by its `links_to`
+  /// index: one lookup of the target's own edges, joined to the notes that hold
+  /// them, never a walk of the library. The note itself is left out (a link to
+  /// its own heading is no one else's mention), and so is a link to a note
+  /// that is not there: dead links are not edges. Embeds and images are edges
+  /// too (#507); the reader of the referrer's text tells them apart.
+  Future<({List<({String path, List<String> kinds})> items, bool truncated})>
+  referrersOf(int toId, {required int limit}) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT n.path AS path, group_concat(l.kind) AS kinds '
+          'FROM note_links l JOIN notes n ON n.id = l.from_note '
+          'WHERE l.to_note = ?1 AND l.from_note <> ?1 '
+          'GROUP BY l.from_note ORDER BY n.path LIMIT ?2',
+          variables: [Variable.withInt(toId), Variable.withInt(limit + 1)],
+          readsFrom: {_db.noteLinks, _db.notes},
+        )
+        .get();
+    final items = [
+      for (final row in rows.take(limit))
+        (
+          path: row.read<String>('path'),
+          kinds: (row.read<String>('kinds').split(',').toSet().toList()
+            ..sort()),
+        ),
+    ];
+    return (items: items, truncated: rows.length > limit);
+  }
+
   /// Every indexed row, for full-scan reconciliation.
   Future<List<Note>> allRows() {
     return _db.select(_db.notes).get();

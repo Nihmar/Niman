@@ -891,6 +891,12 @@ final class DanishStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Flere noter matcher';
   @override
+  String get linksToNoteTitle => 'Links til denne note';
+  @override
+  String get linksToNoteEmpty => 'Ingen note linker hertil endnu';
+  @override
+  String get linksToNoteEmbed => 'indlejret';
+  @override
   String get openLinkFailed => 'Kunne ikke åbne linket';
 
   // Dead-link note creation (issue #78).

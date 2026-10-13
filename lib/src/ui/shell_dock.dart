@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
+import 'package:niman/src/ui/dock/links_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
@@ -86,6 +87,12 @@ final class ShellDock {
           tags: controller.tagSource,
           onOpenNote: workspace.show,
         ),
+        DockPane.links => LinksDockPane(
+          note: panelNote(),
+          links: controller.linkSource,
+          libraryRoot: controller.root,
+          onOpenNote: workspace.show,
+        ),
         DockPane.history => HistoryDockPane(
           ops: controller.ops,
           path: path,
@@ -113,7 +120,7 @@ final class ShellDock {
   );
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
-  /// sheet (the phone's way to the same three, #175). The outline, as a
+  /// sheet (the phone's way to the same panes, #175). The outline, as a
   /// pointer's menu, grows from [anchor], the control that asked for it.
   Future<void> showPanel(
     BuildContext context,
@@ -133,6 +140,25 @@ final class ShellDock {
         anchor: anchor,
       );
       if (line != null) note.jumpToHeading(line);
+      return;
+    }
+    if (pane == DockPane.links) {
+      await showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        builder: (sheet) => SizedBox(
+          height: MediaQuery.sizeOf(sheet).height * 0.5,
+          child: LinksDockPane(
+            note: note,
+            links: controller.linkSource,
+            libraryRoot: controller.root,
+            onOpenNote: (path) {
+              Navigator.pop(sheet);
+              onOpenNoteFromLink(path);
+            },
+          ),
+        ),
+      );
       return;
     }
     await showModalBottomSheet<void>(

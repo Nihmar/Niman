@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -429,6 +430,54 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(_surface(tester).selection, const SelectionModel.at(6));
+  });
+
+  testWidgets('the note carries a "Links to this note" section under it, '
+      'opened onto the notes that link here (#842)', (tester) async {
+    final links = FakeLinkSource(notes: <String>['Notes/Current.md', 'a.md']);
+    links.referrers['Notes/Current.md'] = <String>['a.md'];
+    links.mentions['a.md -> Notes/Current.md'] = const Mention(
+      context: 'a points at [[Current]]',
+      line: 0,
+      embed: false,
+      count: 1,
+    );
+    final opened = <String>[];
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'the note\n',
+          path: '/lib/Notes/Current.md',
+          libraryRoot: '/lib',
+          links: links,
+          opened: opened,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('links-to-note-section')), findsOne);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('links-to-note-count'))).data,
+      '1',
+    );
+    await tester.tap(find.byKey(const Key('links-to-note-header')));
+    await tester.pumpAndSettle();
+    expect(find.text('a points at [[Current]]'), findsOne);
+
+    await tester.tap(find.byKey(const Key('links-to-note-row-a.md')));
+    await tester.pumpAndSettle();
+    expect(opened, <String>['a.md|null']);
+  });
+
+  testWidgets('a note opened without a library has no such section', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(_note(text: 'loose\n', path: '/elsewhere/loose.md')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('links-to-note-section')), findsNothing);
   });
 
   group('a dead wikilink is where a note comes from (#477)', () {

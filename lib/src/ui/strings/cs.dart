@@ -896,6 +896,12 @@ final class CzechStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Více poznámek odpovídá';
   @override
+  String get linksToNoteTitle => 'Odkazy na tuto poznámku';
+  @override
+  String get linksToNoteEmpty => 'Zatím sem žádná poznámka neodkazuje';
+  @override
+  String get linksToNoteEmbed => 'vložená';
+  @override
   String get openLinkFailed => 'Odkaz se nepodařilo otevřít';
 
   // Dead-link note creation (issue #78).

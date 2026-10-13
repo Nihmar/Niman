@@ -898,6 +898,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Кілька нотаток відповідають';
   @override
+  String get linksToNoteTitle => 'Посилання на цю нотатку';
+  @override
+  String get linksToNoteEmpty => 'Жодна нотатка ще не посилається сюди';
+  @override
+  String get linksToNoteEmbed => 'вбудована';
+  @override
   String get openLinkFailed => 'Не вдалося відкрити посилання';
 
   // Dead-link note creation (issue #78).

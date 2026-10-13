@@ -896,6 +896,12 @@ final class SwedishStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Flera anteckningar matchar';
   @override
+  String get linksToNoteTitle => 'Länkar till den här anteckningen';
+  @override
+  String get linksToNoteEmpty => 'Ingen anteckning länkar hit ännu';
+  @override
+  String get linksToNoteEmbed => 'inbäddad';
+  @override
   String get openLinkFailed => 'Kunde inte öppna länken';
 
   // Dead-link note creation (issue #78).

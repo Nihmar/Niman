@@ -899,6 +899,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Več opomb ustreza';
   @override
+  String get linksToNoteTitle => 'Povezave na to opombo';
+  @override
+  String get linksToNoteEmpty => 'Nobena opomba še ne povezuje sem';
+  @override
+  String get linksToNoteEmbed => 'vdelana';
+  @override
   String get openLinkFailed => 'Povezave ni bilo mogoče odpreti';
 
   // Dead-link note creation (issue #78).

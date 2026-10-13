@@ -33,8 +33,8 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+W` — close the note on screen (its tab)
 - `Ctrl/⌘+Tab` / `Ctrl/⌘+Shift+Tab` — next / previous open note
 - `Ctrl/⌘+\` — split the window right with the note on screen
-- `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, history,
-  the journal's calendar)
+- `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, links,
+  history, the journal's calendar)
 - `F11` — Zen mode: the note and nothing else; `Esc` or `F11` again
   leaves it (see [editing](editing.md#zen-mode))
 - `F5` — present the slides note on screen, `Alt+F5` its presenter view

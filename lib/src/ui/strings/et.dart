@@ -888,6 +888,12 @@ final class EstonianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Mitu märgist vastab';
   @override
+  String get linksToNoteTitle => 'Lingid sellele märkele';
+  @override
+  String get linksToNoteEmpty => 'Ükski märge ei viita siia veel';
+  @override
+  String get linksToNoteEmbed => 'manustatud';
+  @override
   String get openLinkFailed => 'Viidet ei õnnestunud avada';
 
   // Dead-link note creation (issue #78).

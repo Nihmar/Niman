@@ -894,6 +894,12 @@ final class LatvianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Vairākas piezīmes atbilst';
   @override
+  String get linksToNoteTitle => 'Saites uz šo piezīmi';
+  @override
+  String get linksToNoteEmpty => 'Neviena piezīme vēl nesaistās ar šo';
+  @override
+  String get linksToNoteEmbed => 'iegulta';
+  @override
   String get openLinkFailed => 'Nevarēja atvērt saiti';
 
   // Dead-link note creation (issue #78).

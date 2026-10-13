@@ -144,12 +144,12 @@ class NoteTags extends Table {
 }
 
 /// A resolved link edge between two notes; dead links are skipped, so every
-/// row points at an existing note. References/backlinks UI is future work
-/// (M3 stores the edges; it has no reader for them yet).
+/// row points at an existing note. Read in reverse by the rename/move rewrite
+/// (`NoteDao.referrerPaths`, #507) and by "Links to this note"
+/// (`NoteDao.referrersOf`, #842).
 ///
 /// The primary key reads a note's outgoing links; the index reads them the
-/// way the backlinks panel will, which is the direction the key cannot
-/// answer.
+/// way those two do, which is the direction the key cannot answer.
 @TableIndex(name: 'links_to', columns: {#toNote})
 class NoteLinks extends Table {
   /// The id of the note containing the link.

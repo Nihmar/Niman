@@ -895,6 +895,12 @@ final class CroatianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Više napomena odgovara';
   @override
+  String get linksToNoteTitle => 'Poveznice na ovu napomenu';
+  @override
+  String get linksToNoteEmpty => 'Nijedna napomena još ne vodi ovamo';
+  @override
+  String get linksToNoteEmbed => 'ugrađena';
+  @override
   String get openLinkFailed => 'Veza se nije mogla otvoriti';
 
   // Dead-link note creation (issue #78).

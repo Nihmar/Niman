@@ -638,6 +638,9 @@ final class AppStrings {
   static String get headingNotFoundTitle => _s.headingNotFoundTitle;
   static String get blockNotFoundTitle => _s.blockNotFoundTitle;
   static String get ambiguousLinkTitle => _s.ambiguousLinkTitle;
+  static String get linksToNoteTitle => _s.linksToNoteTitle;
+  static String get linksToNoteEmpty => _s.linksToNoteEmpty;
+  static String get linksToNoteEmbed => _s.linksToNoteEmbed;
   static String get openLinkFailed => _s.openLinkFailed;
 
   // Dead-link note creation (issue #78).

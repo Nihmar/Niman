@@ -888,6 +888,12 @@ final class TurkishStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Birden çok not eşleşiyor';
   @override
+  String get linksToNoteTitle => 'Bu nota bağlantılar';
+  @override
+  String get linksToNoteEmpty => 'Henüz hiçbir not buraya bağlanmıyor';
+  @override
+  String get linksToNoteEmbed => 'gömülü';
+  @override
   String get openLinkFailed => 'Bağlantı açılamadı';
 
   // Dead-link note creation (issue #78).

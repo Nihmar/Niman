@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/links/resolver.dart';
 
 /// In-memory [LinkSource] for widget tests: resolves wiki targets and md
@@ -27,6 +28,35 @@ final class FakeLinkSource implements LinkSource {
 
   /// How many batches [deadAmong] has been asked for.
   int deadChecks = 0;
+
+  /// The notes that link to a note, by its path: what [referrersOf] answers.
+  final Map<String, List<String>> referrers = <String, List<String>>{};
+
+  /// What a referrer says about a note, by `referrer -> note`: what
+  /// [mentionIn] answers (nothing readable for a pair not given).
+  final Map<String, Mention> mentions = <String, Mention>{};
+
+  /// Every `referrer -> note` pair [mentionIn] was asked for, in order.
+  final List<String> mentionReads = <String>[];
+
+  /// While set, [mentionIn] waits for it: a row still being read.
+  Completer<void>? mentionGate;
+
+  @override
+  Future<Referrers> referrersOf(String path) async {
+    final found = referrers[path] ?? const <String>[];
+    return Referrers([
+      for (final referrer in found)
+        Referrer(path: referrer, kinds: const <String>['wiki']),
+    ]);
+  }
+
+  @override
+  Future<Mention> mentionIn(String referrerPath, String path) async {
+    mentionReads.add('$referrerPath -> $path');
+    await mentionGate?.future;
+    return mentions['$referrerPath -> $path'] ?? Mention.unread;
+  }
 
   @override
   Stream<void> get changes => _changes.stream;

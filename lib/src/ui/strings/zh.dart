@@ -848,6 +848,12 @@ final class ChineseStrings extends Strings {
   @override
   String get ambiguousLinkTitle => '有多篇笔记匹配';
   @override
+  String get linksToNoteTitle => '指向本笔记的链接';
+  @override
+  String get linksToNoteEmpty => '还没有笔记链接到这里';
+  @override
+  String get linksToNoteEmbed => '嵌入';
+  @override
   String get openLinkFailed => '无法打开链接';
 
   // Dead-link note creation (issue #78).

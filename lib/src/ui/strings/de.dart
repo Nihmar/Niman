@@ -899,6 +899,12 @@ final class GermanStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Mehrere Notizen passen';
   @override
+  String get linksToNoteTitle => 'Links auf diese Notiz';
+  @override
+  String get linksToNoteEmpty => 'Noch keine Notiz verlinkt hierher';
+  @override
+  String get linksToNoteEmbed => 'eingebettet';
+  @override
   String get openLinkFailed => 'Link konnte nicht geöffnet werden';
 
   // Dead-link note creation (issue #78).

@@ -47,6 +47,7 @@ final class RightDock extends StatelessWidget {
   static String _label(DockPane pane) => switch (pane) {
     DockPane.outline => AppStrings.outlineTooltip,
     DockPane.tags => AppStrings.tagsTitle,
+    DockPane.links => AppStrings.linksToNoteTitle,
     DockPane.history => AppStrings.noteHistoryTitle,
     DockPane.journal => AppStrings.paletteGroupJournal,
   };
@@ -55,6 +56,7 @@ final class RightDock extends StatelessWidget {
       switch (pane) {
         DockPane.outline => Icons.toc,
         DockPane.tags => selected ? Icons.sell : Icons.sell_outlined,
+        DockPane.links => Icons.link,
         DockPane.history => Icons.history,
         DockPane.journal =>
           selected ? Icons.calendar_today : Icons.calendar_today_outlined,

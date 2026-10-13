@@ -895,6 +895,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Shënime të shumta përputhen';
   @override
+  String get linksToNoteTitle => 'Lidhje me këtë shënim';
+  @override
+  String get linksToNoteEmpty => 'Asnjë shënim nuk lidhet ende këtu';
+  @override
+  String get linksToNoteEmbed => 'e ngulitur';
+  @override
   String get openLinkFailed => "Lidhja s'u hap";
 
   // Dead-link note creation (issue #78).

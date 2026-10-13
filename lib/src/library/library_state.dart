@@ -412,7 +412,22 @@ final class LibraryController implements LibrarySession {
     if (db == null) return null;
     // The library announces every index change; a note on screen resolves
     // its dead links again when one lands (#847).
-    return LinkResolver(db, changes: _events.stream.map<void>((_) {}));
+    final reader = _ops;
+    return LinkResolver(
+      db,
+      changes: _events.stream.map<void>((_) {}),
+      // What the notes that link to a note say about it is read off their
+      // files, on a background isolate, a row at a time (#842).
+      readSpots: reader == null
+          ? null
+          : (path) async {
+              try {
+                return await reader.noteLinkSpots(path);
+              } on Object {
+                return null;
+              }
+            },
+    );
   }
 
   @override

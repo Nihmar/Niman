@@ -144,6 +144,45 @@ file is never changed by hiding it. Renaming or moving the note carries
 > followed there. Niman writes nothing of the kind on its own; a block
 > link is only what you type or choose.
 
+## Links to this note
+
+Links go both ways in a library, and the open note shows the other one: the
+notes that **link to it**, each with the line it says the link on. It is in
+three places, one list:
+
+- **under the note**, a header — *Links to this note*, with the count — that
+  opens onto the list and shuts again. It is always there while a library is
+  open, so it never appears under your thumb; with no one linking in, it opens
+  onto the words that say so. A note opened from outside a library has none;
+- **in the side panel** on a window wide enough for it (1000 px and up), the
+  *Links* pane beside Outline, Tags and History, following the note in the
+  focused pane;
+- **as a sheet on a phone**, from the note's ⋮ menu — *Links to this note* —
+  as the Outline and Tags are (see [platforms](platforms.md)).
+
+A row is the note's name, its folder dimmed, and the line it says the link
+on, cut to two rows of the list (a long line is a window around the link, with
+`…` where it was cut; a list or quote mark is taken off its head). A tap opens
+the note that holds the link. A note that links to this one in more than one
+way is one row, shown by its link; one that only **embeds** it (`![[note]]`,
+`![](note.md)`) is one row too, marked *embed*. The list is in path order and
+holds the first 200 notes; the count says `200+` past that.
+
+What is listed is what the index records as a link: a wikilink or a Markdown
+link that resolves to this note, wherever the writer is in the library, and
+embeds. A note's own link to itself is not a mention, and a link to a note that
+does not exist yet (a [dead link](#dead-links)) is no one's mention — it
+names no note. The list is one indexed lookup however large the library is;
+the line of each row is read from the note that holds it only as the row is
+drawn (so only the rows you scroll to), off the app's main thread, and kept
+until that note changes. The list is read again a moment after the library's
+index changes.
+
+**Unlinked mentions** — a note's name written in another note's text without a
+link, which Obsidian's panel lists too — are not shown: finding them is a
+search over the text of the whole library, and turning one into a link is a
+separate feature. Only linked mentions are here.
+
 ## Markdown links
 
 Standard `[text](href)` links, and reference links — `[text][label]` with a

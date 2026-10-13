@@ -899,6 +899,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Kelioms pastaboms tinka';
   @override
+  String get linksToNoteTitle => 'Nuorodos į šią pastabą';
+  @override
+  String get linksToNoteEmpty => 'Kol kas jokia pastaba nenurodo čia';
+  @override
+  String get linksToNoteEmbed => 'įterpta';
+  @override
   String get openLinkFailed => 'Nepavyko atidaryti nuorodos';
 
   // Dead-link note creation (issue #78).

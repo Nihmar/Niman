@@ -902,6 +902,12 @@ final class ItalianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Più note corrispondono';
   @override
+  String get linksToNoteTitle => 'Link a questa nota';
+  @override
+  String get linksToNoteEmpty => 'Nessuna nota rimanda qui';
+  @override
+  String get linksToNoteEmbed => 'incorporata';
+  @override
   String get openLinkFailed => 'Impossibile aprire il link';
 
   // Dead-link note creation (issue #78).

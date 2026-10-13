@@ -904,6 +904,12 @@ final class CatalanStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Diverses notes coincideixen';
   @override
+  String get linksToNoteTitle => 'Enllaços a aquesta nota';
+  @override
+  String get linksToNoteEmpty => 'Cap nota enllaça aquí encara';
+  @override
+  String get linksToNoteEmbed => 'incrustada';
+  @override
   String get openLinkFailed => 'No s’ha pogut obrir l’enllaç';
 
   // Dead-link note creation (issue #78).

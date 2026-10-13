@@ -900,6 +900,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Няколко бележки съответстват';
   @override
+  String get linksToNoteTitle => 'Връзки към тази бележка';
+  @override
+  String get linksToNoteEmpty => 'Все още никоя бележка не води насам';
+  @override
+  String get linksToNoteEmbed => 'вградена';
+  @override
   String get openLinkFailed => 'Не може да се отвори връзката';
 
   // Dead-link note creation (issue #78).

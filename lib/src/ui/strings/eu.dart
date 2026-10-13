@@ -895,6 +895,13 @@ final class BasqueStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Ohar askok bat etortzen dute';
   @override
+  String get linksToNoteTitle => 'Ohar honetara datozen estekak';
+  @override
+  String get linksToNoteEmpty =>
+      'Oraindik ez dago hona estekatzen duen oharrik';
+  @override
+  String get linksToNoteEmbed => 'txertatua';
+  @override
   String get openLinkFailed => 'Ezin izan da esteka ireki';
 
   // Dead-link note creation (issue #78).

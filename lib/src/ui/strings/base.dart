@@ -505,6 +505,9 @@ abstract base class Strings {
   String get headingNotFoundTitle;
   String get blockNotFoundTitle;
   String get ambiguousLinkTitle;
+  String get linksToNoteTitle;
+  String get linksToNoteEmpty;
+  String get linksToNoteEmbed;
   String get openLinkFailed;
 
   // Dead-link note creation (issue #78).

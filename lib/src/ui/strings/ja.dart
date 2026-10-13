@@ -850,6 +850,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get ambiguousLinkTitle => '複数のノートが一致します';
   @override
+  String get linksToNoteTitle => 'このノートへのリンク';
+  @override
+  String get linksToNoteEmpty => 'このノートにリンクしているノートはまだありません';
+  @override
+  String get linksToNoteEmbed => '埋め込み';
+  @override
   String get openLinkFailed => 'リンクを開けませんでした';
 
   // Dead-link note creation (issue #78).

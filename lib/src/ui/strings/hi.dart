@@ -882,6 +882,12 @@ final class HindiStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'कई नोट्स मेल खाते हैं';
   @override
+  String get linksToNoteTitle => 'इस नोट के लिंक';
+  @override
+  String get linksToNoteEmpty => 'अभी कोई नोट यहाँ लिंक नहीं करता';
+  @override
+  String get linksToNoteEmbed => 'एम्बेड';
+  @override
   String get openLinkFailed => 'लिंक नहीं खोला जा सका';
 
   // Dead-link note creation (issue #78).

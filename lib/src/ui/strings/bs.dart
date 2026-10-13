@@ -899,6 +899,12 @@ final class BosnianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Više bilješki se podudara';
   @override
+  String get linksToNoteTitle => 'Veze na ovu bilješku';
+  @override
+  String get linksToNoteEmpty => 'Nijedna bilješka još ne vodi ovamo';
+  @override
+  String get linksToNoteEmbed => 'ugrađena';
+  @override
   String get openLinkFailed => 'Veza se ne može otvoriti';
 
   // Dead-link note creation (issue #78).

@@ -904,6 +904,12 @@ final class PolishStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Wiele notatek pasuje';
   @override
+  String get linksToNoteTitle => 'Linki do tej notatki';
+  @override
+  String get linksToNoteEmpty => 'Żadna notatka jeszcze tu nie prowadzi';
+  @override
+  String get linksToNoteEmbed => 'osadzona';
+  @override
   String get openLinkFailed => 'Nie udało się otworzyć linku';
 
   // Dead-link note creation (issue #78).

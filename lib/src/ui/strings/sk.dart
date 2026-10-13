@@ -898,6 +898,12 @@ final class SlovakStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Viac poznámok zodpovedá';
   @override
+  String get linksToNoteTitle => 'Odkazy na túto poznámku';
+  @override
+  String get linksToNoteEmpty => 'Zatiaľ sem žiadna poznámka neodkazuje';
+  @override
+  String get linksToNoteEmbed => 'vložená';
+  @override
   String get openLinkFailed => 'Odkaz sa nedal otvoriť';
 
   // Dead-link note creation (issue #78).

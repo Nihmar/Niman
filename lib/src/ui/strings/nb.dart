@@ -890,6 +890,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Flere notater samsvarer';
   @override
+  String get linksToNoteTitle => 'Lenker til dette notatet';
+  @override
+  String get linksToNoteEmpty => 'Ingen notater lenker hit ennå';
+  @override
+  String get linksToNoteEmbed => 'innebygd';
+  @override
   String get openLinkFailed => 'Kunne ikke åpne lenken';
 
   // Dead-link note creation (issue #78).

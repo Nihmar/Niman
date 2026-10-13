@@ -895,6 +895,12 @@ final class HungarianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Több jegyzet is egyezik';
   @override
+  String get linksToNoteTitle => 'Hivatkozások erre a jegyzetre';
+  @override
+  String get linksToNoteEmpty => 'Még egy jegyzet sem hivatkozik erre';
+  @override
+  String get linksToNoteEmbed => 'beágyazva';
+  @override
   String get openLinkFailed => 'A hivatkozás nem nyitható meg';
 
   // Dead-link note creation (issue #78).

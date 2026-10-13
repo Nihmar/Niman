@@ -896,6 +896,12 @@ final class FinnishStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Useat muistiinpanot täsmäävät';
   @override
+  String get linksToNoteTitle => 'Linkit tähän muistiinpanoon';
+  @override
+  String get linksToNoteEmpty => 'Mikään muistiinpano ei vielä linkitä tänne';
+  @override
+  String get linksToNoteEmbed => 'upotettu';
+  @override
   String get openLinkFailed => 'Linkkiä ei voitu avata';
 
   // Dead-link note creation (issue #78).

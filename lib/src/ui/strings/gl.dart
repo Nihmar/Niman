@@ -901,6 +901,12 @@ final class GalicianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Varias notas coinciden';
   @override
+  String get linksToNoteTitle => 'Ligazóns a esta nota';
+  @override
+  String get linksToNoteEmpty => 'Ningunha nota liga aquí aínda';
+  @override
+  String get linksToNoteEmbed => 'incrustada';
+  @override
   String get openLinkFailed => 'Non se puido abrir o enlace';
 
   // Dead-link note creation (issue #78).

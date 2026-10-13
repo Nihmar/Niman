@@ -899,6 +899,12 @@ final class DutchStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Meerdere notities komen overeen';
   @override
+  String get linksToNoteTitle => 'Links naar deze notitie';
+  @override
+  String get linksToNoteEmpty => 'Nog geen notitie verwijst hiernaartoe';
+  @override
+  String get linksToNoteEmbed => 'ingesloten';
+  @override
   String get openLinkFailed => 'Kon de link niet openen';
 
   // Dead-link note creation (issue #78).

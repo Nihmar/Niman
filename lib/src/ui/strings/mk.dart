@@ -902,6 +902,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Повеќе белешки совпаѓаат';
   @override
+  String get linksToNoteTitle => 'Врски до оваа белешка';
+  @override
+  String get linksToNoteEmpty => 'Сè уште ниту една белешка не води овде';
+  @override
+  String get linksToNoteEmbed => 'вметната';
+  @override
   String get openLinkFailed => 'Не може да се отвори врската';
 
   // Dead-link note creation (issue #78).

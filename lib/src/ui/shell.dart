@@ -2808,6 +2808,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       unawaited(switch (action) {
         NoteMenuAction.outline => _showPanel(DockPane.outline, anchor: anchor),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
+        NoteMenuAction.links => _showPanel(DockPane.links),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _palette.open(context),
         NoteMenuAction.format => _formatNote(),

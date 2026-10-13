@@ -7,9 +7,12 @@
 /// picker.
 library;
 
+import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/percent.dart';
+import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/mentions.dart';
 import 'package:path/path.dart' as p;
 
 /// The normalized stem of a note file name: lowercased, with the `.md`
@@ -112,6 +115,17 @@ abstract interface class LinkSource {
   /// anywhere in the library — which can make a dead link live and a live
   /// one dead. A source with no index to watch never fires.
   Stream<void> get changes;
+
+  /// The notes that link to the note at library-relative [path] (#842): who
+  /// names it, by a link or an embed, in path order. Empty when the note is
+  /// not in the index; `truncated` when there are more than a list shows.
+  Future<Referrers> referrersOf(String path);
+
+  /// What the note at [referrerPath] says about the note at [path]: the line
+  /// of its first mention, whether that is an embed, and how many there are.
+  /// Read from the referrer's text when asked, once for each revision of it;
+  /// [Mention.unread] when the text no longer names the note.
+  Future<Mention> mentionIn(String referrerPath, String path);
 }
 
 /// One link to resolve in a batch ([LinkResolver.resolveQueries]): the
@@ -126,11 +140,93 @@ final class LinkResolver implements LinkSource {
   /// Creates a resolver over the drift [IndexDatabase]; [changes] is the
   /// library's own announcement that its index moved (see
   /// [LinkSource.changes]).
-  new(this._db, {this._changes});
+  new(this._db, {this._changes, this._readSpots});
 
   final IndexDatabase _db;
 
   final Stream<void>? _changes;
+
+  /// Reads the links of the note at a library-relative path, off the UI
+  /// isolate: what [mentionIn] finds a mention in. Null reads none.
+  final Future<List<LinkSpot>?> Function(String path)? _readSpots;
+
+  /// How many mentions are kept: a list scrolled through a long way, once
+  /// each, and no more than this many.
+  static const int mentionsKept = 256;
+
+  /// The mentions read, by the referrer, the note it names and the
+  /// referrer's revision (its mtime and size, as the index records it).
+  final Map<(int, int, DateTime, int), Mention> _mentions = {};
+
+  /// How many mentions are kept now, for the test that holds the cache to
+  /// [mentionsKept].
+  @visibleForTesting
+  int get mentionsHeld => _mentions.length;
+
+  /// How many referrers a list of the notes that link to one note holds.
+  static const int referrersShown = 200;
+
+  @override
+  Future<Referrers> referrersOf(String path) async {
+    final target = await NoteDao(_db).find(path);
+    if (target == null) return Referrers.none;
+    final found = await NoteDao(_db)
+        .referrersOf(target.id, limit: referrersShown);
+    return Referrers([
+      for (final r in found.items) Referrer(path: r.path, kinds: r.kinds),
+    ], truncated: found.truncated);
+  }
+
+  @override
+  Future<Mention> mentionIn(String referrerPath, String path) async {
+    final read = _readSpots;
+    final dao = NoteDao(_db);
+    final referrer = await dao.find(referrerPath);
+    final target = await dao.find(path);
+    if (read == null || referrer == null || target == null) {
+      return Mention.unread;
+    }
+    final key = (referrer.id, target.id, referrer.modified, referrer.size);
+    final kept = _mentions[key];
+    if (kept != null) return kept;
+    final spots = await read(referrerPath);
+    if (spots == null) return Mention.unread;
+    final resolved = await resolveQueries({
+      for (final spot in spots)
+        (target: spot.target, from: referrerPath, markdown: spot.markdown),
+    });
+    final named = <LinkSpot>[
+      for (final spot in spots)
+        if (resolved[(
+              target: spot.target,
+              from: referrerPath,
+              markdown: spot.markdown,
+            )]
+            case ResolvedNote(:final note) when note.id == target.id)
+          spot,
+    ];
+    final Mention mention;
+    if (named.isEmpty) {
+      mention = Mention.unread;
+    } else {
+      // A link shows the referrer before an embed does.
+      final shown = named.firstWhere(
+        (s) => !s.embed,
+        orElse: () => named.first,
+      );
+      mention = Mention(
+        context: shown.context,
+        line: shown.line,
+        embed: shown.embed,
+        count: named.length,
+      );
+    }
+    if (_mentions.length >= mentionsKept) {
+      _mentions.remove(_mentions.keys.first);
+    }
+    _mentions[key] = mention;
+    return mention;
+  }
 
   @override
   Stream<void> get changes => _changes ?? const Stream<void>.empty();

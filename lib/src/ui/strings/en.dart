@@ -889,6 +889,12 @@ final class EnglishStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Several notes match';
   @override
+  String get linksToNoteTitle => 'Links to this note';
+  @override
+  String get linksToNoteEmpty => 'No note links here yet';
+  @override
+  String get linksToNoteEmbed => 'embed';
+  @override
   String get openLinkFailed => 'Could not open link';
 
   // Dead-link note creation (issue #78).
