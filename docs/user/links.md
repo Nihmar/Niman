@@ -153,14 +153,22 @@ dialog shows the proposed path with **Create** and **Cancel**. Create
 makes an empty note there (no frontmatter) and opens it in the editor;
 Cancel changes nothing — no file, no error, no second prompt.
 
-Where the new note lands is the library setting `missingNoteLocation`
-(Settings → Editor):
+Where the new note lands is the library setting `newItemLocation`
+(Settings → Editor → **New notes and folders go to**), the one rule every
+new note and folder follows (see
+[organization](organization.md#where-new-notes-and-folders-go)); the note
+open is the one the link was clicked in:
 
-- `currentFolder` (default) — the folder of the note where the link was
+- `openNoteFolder` (default) — the folder of the note where the link was
   clicked: `[[Foo]]` in `Notes/Current.md` creates `Notes/Foo.md`
 - `libraryRoot` — the library root: `[[Foo]]` creates `Foo.md`
 
-A target that names a folder (`[[Sub/Foo]]`) keeps that folder; Niman
+A library written before the rule had its own setting for this,
+`missingNoteLocation`; its value carries over (`currentFolder` is
+`openNoteFolder`).
+
+A target that names a folder (`[[Sub/Foo]]`) keeps that folder, whatever
+the setting says; Niman
 does not create intermediate folders, so a missing folder shows an
 error. Targets with an extension (`[[photo.png]]`) are attachments,
 not notes: they are never created. External URLs keep their behavior.

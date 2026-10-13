@@ -260,6 +260,38 @@ switch to the grid starts from the tree's selection — the folder
 selected, or the folder the selected note sits in — and the grid keeps
 that folder while it is the pane on screen.
 
+## Where new notes and folders go
+
+One library setting, **Settings → Editor → New notes and folders go to**
+(`newItemLocation`, see [settings](settings.md)), decides where a new note
+or folder is made when nothing else names the place:
+
+- **Library root** — at the top level of the library.
+- **Folder of the open note** (the default) — next to the note on screen;
+  with no note open, at the library root. On a phone the open note is the
+  one selected in the tree; a folder selected instead counts as none.
+
+It is the same rule for **New note** and **New folder** (the Files FAB, the
+tree's footer menu, the command palette, the tray and the keyboard
+shortcuts), a note from a [template](templates.md), the note a dead
+[link](links.md) creates, a page or a quote captured as a new note
+([web capture](web-capture.md)), a **New voice note**, and a Home
+[action](home.md#actions) that names no folder. Changing the setting moves
+all of them at once.
+
+What does not ask the rule, because it already says where:
+
+- **Create … here** in a folder's context menu, and the tree's and the
+  grid's right-click menus on empty space: the note or folder goes in that
+  folder (the library root, for the empty space of the tree).
+- A link that names a path (`[[Sub/Foo]]`), a template whose frontmatter
+  names its `folder`, a Home action's own folder, and the folder picked in
+  a capture.
+- The [journal](journal.md) (its own folder), **New list note** (the list
+  folder), **New slides** (the library root), attachments pasted or
+  dropped on a note, and the text note a [recognition](text-recognition.md)
+  writes (always beside its file).
+
 ## Renaming a note or a folder
 
 On Linux and Windows a rename happens in the tree, as in a file manager:

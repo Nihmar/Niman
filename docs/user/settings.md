@@ -95,11 +95,10 @@ sync) in `.niman/settings.json`.
 | `templateFolder` | `Templates` | Where note templates live |
 | `attachmentsFolder` | `assets` | Where copied-in images and voice clips live, under the library root |
 | `annotationsFolder` | `Annotations` | Where a note annotating a PDF or a book is made, when the file has none yet (see [organization](organization.md)) |
-| `captureFolder` | `Clippings` | Where a web page or a quote captured as a new note goes (**Settings → Folders and paths → Web captures folder**); the capture can still pick another folder for one page. Its pictures go in `attachmentsFolder` (see [web capture](web-capture.md)) |
 | `highlightColour` | `yellow` | The colour a passage of a PDF or a book is highlighted in: the one last chosen (`yellow`, `green`, `blue`, `pink`; see [organization](organization.md)) |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
 | `weekStart` | `system` | The day every calendar starts the week on (**Settings → Appearance → First day of the week**): `system` — the system's region's first day, not the app language's (on Linux `LC_ALL`, `LC_TIME`, `LANG`; on Windows the region settings' first day) — or `monday`, `saturday`, `sunday`, the same on every device of the library |
-| `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
+| `newItemLocation` | `openNoteFolder` | Where new notes and folders go (**Settings → Editor → New notes and folders go to**): `libraryRoot`, or `openNoteFolder` — the folder of the note open at the time, the library root while none is open. One rule for a new note, a new folder, a note from a template, the note a dead link creates, a captured web page and a voice note; the tree's *Create … here*, a link that names a path and the journal's folder do not ask it (see [organization](organization.md#where-new-notes-and-folders-go)). It replaced `missingNoteLocation` (`currentFolder` reads as `openNoteFolder`), which is read when `newItemLocation` is absent and no longer written |
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
 | `tidyOnClose` | true | Tidy the Markdown of a note closed after an edit (**Settings → Editor → Tidy the Markdown on close**); notes over 4 MB are left as they are, and a `type: audio` note's clip document is never tidied |
 | `cascadeChecklist` | true | Ticking a checklist item ticks the tasks nested under it (**Settings → Editor → Tick nested checkboxes**); clearing a parent leaves its children as they are |
@@ -152,8 +151,8 @@ leave the file at its next write.
 | `epubTextScale` | 1.0 | The books' text size (0.8–1.8); also set by a pinch over a book and, with a book on screen, by the zoom keys and commands |
 | `deviceNavigation` | none (= the library's `navigation`) | This device's own navigation, same shape as `navigation`, set by **Only on this device**; while there, it wins |
 
-The five folder keys — `listNoteFolder`, `templateFolder`,
-`attachmentsFolder`, `annotationsFolder`, `captureFolder` — are paths
+The four folder keys — `listNoteFolder`, `templateFolder`,
+`attachmentsFolder`, `annotationsFolder` — are paths
 under the library root, created the first time something is written there. Their picker lists the folders
 the library actually holds, so a default naming one it has never had
 (`assets`, until an image or a voice clip is copied in) starts out
