@@ -25,7 +25,8 @@ it, its settings and its sync.
 The search at the top looks through the settings themselves, not only
 the area names, and takes you to the row it found.
 
-- **Wide windows** (desktop, tablets, phones in landscape): Settings
+- **Wide windows** (desktop and tablets; a phone is not one, in landscape
+  or not): Settings
   opens as a floating window over the note, from the gear at the foot of
   the rail or its key, and closes back to it. The note, its tabs and the
   tree stay where they were. `Esc` or a click outside closes it; from a
@@ -36,7 +37,8 @@ the area names, and takes you to the row it found.
   search result shows its row on the right and flashes it; the results
   stay, one click from the next. The window is at most 960 × 680 and
   shrinks with a small window.
-- **Phones**: the list of areas, each opening a screen of its own.
+- **Phones**, upright or turned: the list of areas, each opening a screen
+  of its own.
 
 Every setting reads the same on both: its name, a line saying what it
 does, and the control under that. A switch flips in place; anything with
