@@ -98,6 +98,7 @@ sync) in `.niman/settings.json`.
 | `captureFolder` | `Clippings` | Where a web page or a quote captured as a new note goes (**Settings → Folders and paths → Web captures folder**); the capture can still pick another folder for one page. Its pictures go in `attachmentsFolder` (see [web capture](web-capture.md)) |
 | `highlightColour` | `yellow` | The colour a passage of a PDF or a book is highlighted in: the one last chosen (`yellow`, `green`, `blue`, `pink`; see [organization](organization.md)) |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
+| `linkUpdate` | `automatic` | What a rename or a move does to the links other notes hold to what moved (**Settings → Editor → Update links after rename or move**): `automatic` rewrites them, `ask` asks once per move how many notes would change and rewrites on a yes, `never` leaves them as written. History, reading positions, settings and the Home follow the move whichever it is (see [links](links.md)) |
 | `weekStart` | `system` | The day every calendar starts the week on (**Settings → Appearance → First day of the week**): `system` — the system's region's first day, not the app language's (on Linux `LC_ALL`, `LC_TIME`, `LANG`; on Windows the region settings' first day) — or `monday`, `saturday`, `sunday`, the same on every device of the library |
 | `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
