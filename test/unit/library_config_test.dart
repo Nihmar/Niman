@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +16,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultCaptureFolder,
         defaultHighlightColour,
         defaultListFolder;
-import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -118,8 +119,7 @@ void main() {
       },
     );
 
-    test('round trips the dead-link note location; nonsense reads back as '
-        'the current folder (issue #78)', () async {
+    test('round trips where new notes and folders go (issue #850)', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       const config = LibraryConfig(
@@ -127,37 +127,69 @@ void main() {
         historyVersions: 10,
         quickNotePath: null,
         listNoteFolder: 'Lists',
-        missingNoteLocation: MissingNoteLocation.libraryRoot,
+        newItemLocation: NewItemLocation.libraryRoot,
       );
       await store.write(config);
+      expect((await store.read()).newItemLocation, NewItemLocation.libraryRoot);
+    });
+
+    test("new notes and folders default to the open note's folder", () {
       expect(
-        (await store.read()).missingNoteLocation,
-        MissingNoteLocation.libraryRoot,
+        LibraryConfig.defaults.newItemLocation,
+        NewItemLocation.openNoteFolder,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{}).newItemLocation,
+        NewItemLocation.openNoteFolder,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{
+          'newItemLocation': 'libraryRoot',
+        }).newItemLocation,
+        NewItemLocation.libraryRoot,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{
+          'newItemLocation': 'nonsense',
+        }).newItemLocation,
+        NewItemLocation.openNoteFolder,
       );
     });
 
-    test('the dead-link location defaults to the current folder', () {
+    test('the old missingNoteLocation key reads into the new setting', () {
+      NewItemLocation read(Map<String, Object?> json) =>
+          LibraryConfig.fromJsonMap(json).newItemLocation;
       expect(
-        LibraryConfig.defaults.missingNoteLocation,
-        MissingNoteLocation.currentFolder,
+        read(const {'missingNoteLocation': 'libraryRoot'}),
+        NewItemLocation.libraryRoot,
       );
       expect(
-        LibraryConfig.fromJsonMap(const <String, Object?>{})
-            .missingNoteLocation,
-        MissingNoteLocation.currentFolder,
+        read(const {'missingNoteLocation': 'currentFolder'}),
+        NewItemLocation.openNoteFolder,
       );
+      // The new key wins over a stale old one.
       expect(
-        LibraryConfig.fromJsonMap(const <String, Object?>{
+        read(const {
+          'newItemLocation': 'openNoteFolder',
           'missingNoteLocation': 'libraryRoot',
-        }).missingNoteLocation,
-        MissingNoteLocation.libraryRoot,
+        }),
+        NewItemLocation.openNoteFolder,
       );
-      expect(
-        LibraryConfig.fromJsonMap(const <String, Object?>{
-          'missingNoteLocation': 'nonsense',
-        }).missingNoteLocation,
-        MissingNoteLocation.currentFolder,
-      );
+    });
+
+    test('the old key is no longer written, and no longer preserved', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      store.file
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"missingNoteLocation": "libraryRoot"}');
+      final read = await store.read();
+      expect(read.newItemLocation, NewItemLocation.libraryRoot);
+      await store.write(read);
+      final written =
+          jsonDecode(store.file.readAsStringSync()) as Map<String, Object?>;
+      expect(written['newItemLocation'], 'libraryRoot');
+      expect(written.containsKey('missingNoteLocation'), isFalse);
     });
 
     test('round trips the spell-check dictionaries', () async {

@@ -392,11 +392,11 @@ final class SpanishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Crear notas que faltan en';
+  String get newItemLocationTitle => 'Las notas y carpetas nuevas van a';
   @override
-  String get missingNoteLocationRoot => 'Raíz de la biblioteca';
+  String get newItemLocationRoot => 'Raíz de la biblioteca';
   @override
-  String get missingNoteLocationCurrentFolder => 'Carpeta actual';
+  String get newItemLocationOpenNote => 'Carpeta de la nota abierta';
   @override
   String get indentWidthTitle => 'Anchura de sangría';
   @override

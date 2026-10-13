@@ -390,11 +390,11 @@ final class PolishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Utwórz brakujące notatki w';
+  String get newItemLocationTitle => 'Nowe notatki i katalogi trafiają do';
   @override
-  String get missingNoteLocationRoot => 'Korzeń biblioteki';
+  String get newItemLocationRoot => 'Korzeń biblioteki';
   @override
-  String get missingNoteLocationCurrentFolder => 'Bieżący katalog';
+  String get newItemLocationOpenNote => 'Katalog otwartej notatki';
   @override
   String get indentWidthTitle => 'Szerokość wcięcia';
   @override

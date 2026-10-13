@@ -388,11 +388,11 @@ final class PortugueseStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Criar notas em falta em';
+  String get newItemLocationTitle => 'As novas notas e pastas vão para';
   @override
-  String get missingNoteLocationRoot => 'Raiz da biblioteca';
+  String get newItemLocationRoot => 'Raiz da biblioteca';
   @override
-  String get missingNoteLocationCurrentFolder => 'Pasta atual';
+  String get newItemLocationOpenNote => 'Pasta da nota aberta';
   @override
   String get indentWidthTitle => 'Largura da indentação';
   @override

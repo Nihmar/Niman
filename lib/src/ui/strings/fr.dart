@@ -392,11 +392,12 @@ final class FrenchStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Créer les notes manquantes dans';
+  String get newItemLocationTitle =>
+      'Les nouvelles notes et dossiers vont dans';
   @override
-  String get missingNoteLocationRoot => 'Racine de la bibliothèque';
+  String get newItemLocationRoot => 'Racine de la bibliothèque';
   @override
-  String get missingNoteLocationCurrentFolder => 'Dossier actuel';
+  String get newItemLocationOpenNote => 'Dossier de la note ouverte';
   @override
   String get indentWidthTitle => 'Largeur d’indentation';
   @override

@@ -506,10 +506,12 @@ abstract base class Strings {
   String get ambiguousLinkTitle;
   String get openLinkFailed;
 
+  // Where new notes and folders go (issue #850, which absorbed the
+  // dead-link setting of issue #78).
+  String get newItemLocationTitle;
+  String get newItemLocationRoot;
+  String get newItemLocationOpenNote;
   // Dead-link note creation (issue #78).
-  String get missingNoteLocationTitle;
-  String get missingNoteLocationRoot;
-  String get missingNoteLocationCurrentFolder;
   String get missingNoteDialogTitle;
   String missingNoteDialogBody(String path);
   String missingNoteFolderMissing(String folder);

@@ -390,11 +390,11 @@ final class SlovenianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Ustvari manjkajoče opombe v';
+  String get newItemLocationTitle => 'Nove opombe in mape gredo v';
   @override
-  String get missingNoteLocationRoot => 'Koren knjižnice';
+  String get newItemLocationRoot => 'Koren knjižnice';
   @override
-  String get missingNoteLocationCurrentFolder => 'Trenutna mapa';
+  String get newItemLocationOpenNote => 'Mapa odprte opombe';
   @override
   String get indentWidthTitle => 'Širina zamika';
   @override

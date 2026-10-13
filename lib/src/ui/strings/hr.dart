@@ -387,11 +387,11 @@ final class CroatianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Kreiranje nedostajućih napomena u';
+  String get newItemLocationTitle => 'Nove napomene i mape idu u';
   @override
-  String get missingNoteLocationRoot => 'Korijen biblioteke';
+  String get newItemLocationRoot => 'Korijen biblioteke';
   @override
-  String get missingNoteLocationCurrentFolder => 'Trenutni direktorij';
+  String get newItemLocationOpenNote => 'Direktorij otvorene napomene';
   @override
   String get indentWidthTitle => 'Širina uvlačenja';
   @override

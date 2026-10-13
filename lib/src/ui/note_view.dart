@@ -24,8 +24,8 @@ import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/embed_path.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -96,7 +96,7 @@ final class NoteView extends StatefulWidget {
     this.noteColumn = NoteColumn.off,
     this.barActions = const [],
     this.linkType = LinkType.wikilink,
-    this.missingNoteLocation = MissingNoteLocation.currentFolder,
+    this.newItemLocation = NewItemLocation.openNoteFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.templateFolder,
     this.indentWidth = 2,
@@ -274,7 +274,7 @@ final class NoteView extends StatefulWidget {
 
   /// Where a note created from a dead link lands (settings, issue #78);
   /// the offer itself is disabled when [createMissingNote] is null.
-  final MissingNoteLocation missingNoteLocation;
+  final NewItemLocation newItemLocation;
 
   /// The note-creation path for dead links (issue #78): creates an empty
   /// note at library-relative [path] and returns its library-relative
@@ -1860,7 +1860,7 @@ final class _NoteViewState extends State<NoteView>
     source: widget.linkSource,
     notePath: widget.path,
     libraryRoot: widget.libraryRoot,
-    missingNoteLocation: widget.missingNoteLocation,
+    newItemLocation: widget.newItemLocation,
     outline: _stats.outline.value,
     jumpToHeading: _jumpToHeading,
     onOpenNote: widget.onOpenNote,

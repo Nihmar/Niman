@@ -389,11 +389,11 @@ final class BosnianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Kreiranje nedostajućih bilješki u';
+  String get newItemLocationTitle => 'Nove bilješke i mape idu u';
   @override
-  String get missingNoteLocationRoot => 'Korijen biblioteke';
+  String get newItemLocationRoot => 'Korijen biblioteke';
   @override
-  String get missingNoteLocationCurrentFolder => 'Trenutna mapa';
+  String get newItemLocationOpenNote => 'Mapa otvorene bilješke';
   @override
   String get indentWidthTitle => 'Širina uvlačenja';
   @override

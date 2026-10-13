@@ -639,11 +639,11 @@ final class AppStrings {
   static String get ambiguousLinkTitle => _s.ambiguousLinkTitle;
   static String get openLinkFailed => _s.openLinkFailed;
 
+  // Where new notes and folders go (issue #850).
+  static String get newItemLocationTitle => _s.newItemLocationTitle;
+  static String get newItemLocationRoot => _s.newItemLocationRoot;
+  static String get newItemLocationOpenNote => _s.newItemLocationOpenNote;
   // Dead-link note creation (issue #78).
-  static String get missingNoteLocationTitle => _s.missingNoteLocationTitle;
-  static String get missingNoteLocationRoot => _s.missingNoteLocationRoot;
-  static String get missingNoteLocationCurrentFolder =>
-      _s.missingNoteLocationCurrentFolder;
   static String get missingNoteDialogTitle => _s.missingNoteDialogTitle;
   static String missingNoteDialogBody(String path) =>
       _s.missingNoteDialogBody(path);

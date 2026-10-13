@@ -26,10 +26,10 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/lint/lint_rule.dart';
@@ -567,12 +567,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<MissingNoteLocation> get missingNoteLocation async =>
-      _config.missingNoteLocation;
+  Future<NewItemLocation> get newItemLocation async => _config.newItemLocation;
 
   @override
-  Future<void> setMissingNoteLocation(MissingNoteLocation location) async {
-    _config = _config.copyWith(missingNoteLocation: location);
+  Future<void> setNewItemLocation(NewItemLocation location) async {
+    _config = _config.copyWith(newItemLocation: location);
   }
 
   @override

@@ -392,11 +392,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Създаване на липсващи бележки в';
+  String get newItemLocationTitle => 'Нови бележки и папки отиват в';
   @override
-  String get missingNoteLocationRoot => 'Корен на библиотеката';
+  String get newItemLocationRoot => 'Корен на библиотеката';
   @override
-  String get missingNoteLocationCurrentFolder => 'Текуща папка';
+  String get newItemLocationOpenNote => 'Папката на отворената бележка';
   @override
   String get indentWidthTitle => 'Ширина на отстъпа';
   @override

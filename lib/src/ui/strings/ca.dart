@@ -392,11 +392,11 @@ final class CatalanStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Crear notes que manquen a';
+  String get newItemLocationTitle => 'Les notes i carpetes noves van a';
   @override
-  String get missingNoteLocationRoot => 'Arrel de la biblioteca';
+  String get newItemLocationRoot => 'Arrel de la biblioteca';
   @override
-  String get missingNoteLocationCurrentFolder => 'Carpeta actual';
+  String get newItemLocationOpenNote => 'Carpeta de la nota oberta';
   @override
   String get indentWidthTitle => 'Ample del sagnat';
   @override

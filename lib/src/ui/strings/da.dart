@@ -385,11 +385,11 @@ final class DanishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Opret manglende noter i';
+  String get newItemLocationTitle => 'Nye noter og mapper placeres i';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekets rodmappe';
+  String get newItemLocationRoot => 'Bibliotekets rodmappe';
   @override
-  String get missingNoteLocationCurrentFolder => 'Nuværende mappe';
+  String get newItemLocationOpenNote => 'Mappen med den åbne note';
   @override
   String get indentWidthTitle => 'Indrykningens bredde';
   @override

@@ -1451,7 +1451,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           // The Files pane opened this note (#727): the caret goes in it.
           caretRequest: selectedPath == _caretPath ? _caretRequest : 0,
           linkType: _editorSettings.linkType,
-          missingNoteLocation: _editorSettings.missingNoteLocation,
+          newItemLocation: _editorSettings.newItemLocation,
           attachmentsFolder: _editorSettings.attachmentsFolder,
           templateFolder: _editorSettings.templateFolder,
           indentWidth: _editorSettings.indentWidth,
@@ -4240,7 +4240,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     caretPath: _caretPath,
                     caretRequest: _caretRequest,
                     linkType: _editorSettings.linkType,
-                    missingNoteLocation: _editorSettings.missingNoteLocation,
+                    newItemLocation: _editorSettings.newItemLocation,
                     attachmentsFolder: _editorSettings.attachmentsFolder,
                     templateFolder: _editorSettings.templateFolder,
                     indentWidth: _editorSettings.indentWidth,

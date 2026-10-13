@@ -389,11 +389,11 @@ final class DutchStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Ontbrekende notities maken in';
+  String get newItemLocationTitle => 'Nieuwe notities en mappen komen in';
   @override
-  String get missingNoteLocationRoot => 'Bibliotheek-wortel';
+  String get newItemLocationRoot => 'Bibliotheek-wortel';
   @override
-  String get missingNoteLocationCurrentFolder => 'Huidige map';
+  String get newItemLocationOpenNote => 'Map van de geopende notitie';
   @override
   String get indentWidthTitle => 'Inspringbreedte';
   @override

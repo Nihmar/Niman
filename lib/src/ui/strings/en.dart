@@ -385,11 +385,11 @@ final class EnglishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Create missing notes in';
+  String get newItemLocationTitle => 'New notes and folders go to';
   @override
-  String get missingNoteLocationRoot => 'Library root';
+  String get newItemLocationRoot => 'Library root';
   @override
-  String get missingNoteLocationCurrentFolder => 'Current folder';
+  String get newItemLocationOpenNote => 'Folder of the open note';
   @override
   String get indentWidthTitle => 'Indent width';
   @override

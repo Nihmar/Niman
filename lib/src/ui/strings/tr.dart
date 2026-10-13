@@ -378,11 +378,11 @@ final class TurkishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Eksik notları oluştur';
+  String get newItemLocationTitle => 'Yeni notları ve klasörleri oluştur';
   @override
-  String get missingNoteLocationRoot => 'Kütüphane kökünde';
+  String get newItemLocationRoot => 'Kütüphane kökünde';
   @override
-  String get missingNoteLocationCurrentFolder => 'Mevcut klasörde';
+  String get newItemLocationOpenNote => 'Açık notun klasöründe';
   @override
   String get indentWidthTitle => 'Girinti genişliği';
   @override

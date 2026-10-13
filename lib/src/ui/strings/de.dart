@@ -390,11 +390,11 @@ final class GermanStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Fehlende Notizen erstellen in';
+  String get newItemLocationTitle => 'Neue Notizen und Ordner kommen in';
   @override
-  String get missingNoteLocationRoot => 'Bibliothekswurzel';
+  String get newItemLocationRoot => 'Bibliothekswurzel';
   @override
-  String get missingNoteLocationCurrentFolder => 'Aktueller Ordner';
+  String get newItemLocationOpenNote => 'Ordner der geöffneten Notiz';
   @override
   String get indentWidthTitle => 'Einzugstiefe';
   @override

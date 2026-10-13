@@ -388,11 +388,11 @@ final class SerbianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Креирање недостајућих белешки у';
+  String get newItemLocationTitle => 'Нове белешке и фасцикле иду у';
   @override
-  String get missingNoteLocationRoot => 'Корен библиотеке';
+  String get newItemLocationRoot => 'Корен библиотеке';
   @override
-  String get missingNoteLocationCurrentFolder => 'Тренутна фасцикла';
+  String get newItemLocationOpenNote => 'Фасцикла отворене белешке';
   @override
   String get indentWidthTitle => 'Ширина уступа';
   @override

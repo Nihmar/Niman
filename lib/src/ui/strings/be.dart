@@ -385,11 +385,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Стварыць адсутныя заўвагі ў';
+  String get newItemLocationTitle => 'Новыя заўвагі і папкі ствараюцца ў';
   @override
-  String get missingNoteLocationRoot => 'Карань бібліятэкі';
+  String get newItemLocationRoot => 'Карань бібліятэкі';
   @override
-  String get missingNoteLocationCurrentFolder => 'Поточная папка';
+  String get newItemLocationOpenNote => 'Папка адкрытай заўвагі';
   @override
   String get indentWidthTitle => 'Шырыня відступу';
   @override

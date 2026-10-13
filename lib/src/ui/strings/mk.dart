@@ -389,11 +389,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Креирање недостапни белешки во';
+  String get newItemLocationTitle => 'Новите белешки и папки одат во';
   @override
-  String get missingNoteLocationRoot => 'Корен на библиотеката';
+  String get newItemLocationRoot => 'Корен на библиотеката';
   @override
-  String get missingNoteLocationCurrentFolder => 'Тековна папка';
+  String get newItemLocationOpenNote => 'Папка на отворената белешка';
   @override
   String get indentWidthTitle => 'Ширина на вовлечување';
   @override

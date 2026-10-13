@@ -382,11 +382,11 @@ final class EstonianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Loo puuduvad märkmed kausta';
+  String get newItemLocationTitle => 'Uued märkmed ja kaustad luuakse siia';
   @override
-  String get missingNoteLocationRoot => 'Biblioteka juur';
+  String get newItemLocationRoot => 'Biblioteka juur';
   @override
-  String get missingNoteLocationCurrentFolder => 'Praegune kaust';
+  String get newItemLocationOpenNote => 'Avatud märkme kaust';
   @override
   String get indentWidthTitle => 'Taande laius';
   @override

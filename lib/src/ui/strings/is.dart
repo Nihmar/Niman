@@ -383,11 +383,11 @@ final class IcelandicStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Búa til vanskilin minnisblöð í';
+  String get newItemLocationTitle => 'Ný minnisblöð og möppur fara í';
   @override
-  String get missingNoteLocationRoot => 'Rót bókasafns';
+  String get newItemLocationRoot => 'Rót bókasafns';
   @override
-  String get missingNoteLocationCurrentFolder => 'Núverandi mappa';
+  String get newItemLocationOpenNote => 'Mappa opna minnisblaðsins';
   @override
   String get indentWidthTitle => 'Innhengsbreidd';
   @override

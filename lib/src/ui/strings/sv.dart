@@ -388,11 +388,11 @@ final class SwedishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Skapa saknade anteckningar i';
+  String get newItemLocationTitle => 'Nya anteckningar och mappar hamnar i';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekets rotmapp';
+  String get newItemLocationRoot => 'Bibliotekets rotmapp';
   @override
-  String get missingNoteLocationCurrentFolder => 'Aktuell mapp';
+  String get newItemLocationOpenNote => 'Mappen för den öppna anteckningen';
   @override
   String get indentWidthTitle => 'Indenteringsbredd';
   @override

@@ -386,11 +386,11 @@ final class HungarianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Hiányzó jegyzetek létrehozása';
+  String get newItemLocationTitle => 'Új jegyzetek és mappák létrehozása';
   @override
-  String get missingNoteLocationRoot => 'A könyvtár gyökerében';
+  String get newItemLocationRoot => 'A könyvtár gyökerében';
   @override
-  String get missingNoteLocationCurrentFolder => 'A jelenlegi mappában';
+  String get newItemLocationOpenNote => 'A megnyitott jegyzet mappájában';
   @override
   String get indentWidthTitle => 'Behúzás szélessége';
   @override

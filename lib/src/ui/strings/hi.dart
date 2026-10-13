@@ -376,11 +376,11 @@ final class HindiStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'ग़ायब नोट्स बनाएँ';
+  String get newItemLocationTitle => 'नए नोट्स और फ़ोल्डर यहाँ बनाएँ';
   @override
-  String get missingNoteLocationRoot => 'लाइब्रेरी रूट';
+  String get newItemLocationRoot => 'लाइब्रेरी रूट';
   @override
-  String get missingNoteLocationCurrentFolder => 'वर्तमान फ़ोल्डर';
+  String get newItemLocationOpenNote => 'खुले नोट का फ़ोल्डर';
   @override
   String get indentWidthTitle => 'इंडेंट की चौड़ाई';
   @override

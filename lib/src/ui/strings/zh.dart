@@ -357,11 +357,11 @@ final class ChineseStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => '在以下位置创建缺失的笔记';
+  String get newItemLocationTitle => '新笔记和文件夹创建在';
   @override
-  String get missingNoteLocationRoot => '库根目录';
+  String get newItemLocationRoot => '库根目录';
   @override
-  String get missingNoteLocationCurrentFolder => '当前文件夹';
+  String get newItemLocationOpenNote => '已打开笔记所在的文件夹';
   @override
   String get indentWidthTitle => '缩进宽度';
   @override

@@ -395,11 +395,12 @@ final class GreekStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Δημιουργία λείποντων σημειώσεων στο';
+  String get newItemLocationTitle =>
+      'Οι νέες σημειώσεις και φάκελοι πηγαίνουν στο';
   @override
-  String get missingNoteLocationRoot => 'Ρίζα βιβλιοθήκης';
+  String get newItemLocationRoot => 'Ρίζα βιβλιοθήκης';
   @override
-  String get missingNoteLocationCurrentFolder => 'Τρέχων φάκελος';
+  String get newItemLocationOpenNote => 'Φάκελος της ανοιχτής σημείωσης';
   @override
   String get indentWidthTitle => 'Πλάτος εισαγωγής';
   @override

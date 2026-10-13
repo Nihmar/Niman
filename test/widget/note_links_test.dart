@@ -2,7 +2,7 @@
 // preview, as on a slide.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/ui/note_links.dart';
 
 import '../fakes/fake_link_source.dart';
@@ -27,7 +27,7 @@ void main() {
       source: source,
       notePath: '/lib/n.md',
       libraryRoot: '/lib',
-      missingNoteLocation: MissingNoteLocation.currentFolder,
+      newItemLocation: NewItemLocation.openNoteFolder,
       outline: const [],
       jumpToHeading: (_) {},
     );

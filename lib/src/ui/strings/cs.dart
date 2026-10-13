@@ -385,11 +385,11 @@ final class CzechStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Vytvořovat chybující poznámky v';
+  String get newItemLocationTitle => 'Nové poznámky a složky patří do';
   @override
-  String get missingNoteLocationRoot => 'Kořen knihovny';
+  String get newItemLocationRoot => 'Kořen knihovny';
   @override
-  String get missingNoteLocationCurrentFolder => 'Aktuální složka';
+  String get newItemLocationOpenNote => 'Složka otevřené poznámky';
   @override
   String get indentWidthTitle => 'Šířka odsazení';
   @override

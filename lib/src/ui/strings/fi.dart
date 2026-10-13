@@ -384,11 +384,11 @@ final class FinnishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Luo puuttuvat muistiinpanot';
+  String get newItemLocationTitle => 'Luo uudet muistiinpanot ja kansiot';
   @override
-  String get missingNoteLocationRoot => 'Kirjaston juureen';
+  String get newItemLocationRoot => 'Kirjaston juureen';
   @override
-  String get missingNoteLocationCurrentFolder => 'Nykyiseen kansioon';
+  String get newItemLocationOpenNote => 'Avoimen muistiinpanon kansioon';
   @override
   String get indentWidthTitle => 'Sisäännyrjäyksen leveys';
   @override

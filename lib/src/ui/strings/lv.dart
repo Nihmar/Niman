@@ -382,11 +382,11 @@ final class LatvianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Trūkstošo piezīmju izveide';
+  String get newItemLocationTitle => 'Jaunu piezīmju un mapju izveide';
   @override
-  String get missingNoteLocationRoot => 'Bibliotēkes saknē';
+  String get newItemLocationRoot => 'Bibliotēkes saknē';
   @override
-  String get missingNoteLocationCurrentFolder => 'Pašreizējā mapē';
+  String get newItemLocationOpenNote => 'Atvērtās piezīmes mapē';
   @override
   String get indentWidthTitle => 'Ielādes platums';
   @override

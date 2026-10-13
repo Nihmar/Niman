@@ -48,7 +48,7 @@ abstract final class SettingsKeys {
   static const cascadeChecklist = Key('cascade-checklist-setting');
   static const frontmatterPanel = Key('frontmatter-panel-setting');
   static const linkType = Key('link-type');
-  static const missingNoteLocation = Key('missing-note-location');
+  static const newItemLocation = Key('new-item-location');
   static const noteTextScale = Key('note-text-scale-setting');
   static const sourceFont = Key('source-font-setting');
   static const indentWidth = Key('indent-width');

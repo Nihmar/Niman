@@ -387,11 +387,11 @@ final class SlovakStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Vytvárať chýbajúce poznámky v';
+  String get newItemLocationTitle => 'Nové poznámky a priečinky idú do';
   @override
-  String get missingNoteLocationRoot => 'Koreň knižnice';
+  String get newItemLocationRoot => 'Koreň knižnice';
   @override
-  String get missingNoteLocationCurrentFolder => 'Aktuálny priečinok';
+  String get newItemLocationOpenNote => 'Priečinok otvorenej poznámky';
   @override
   String get indentWidthTitle => 'Šírka odsadenia';
   @override

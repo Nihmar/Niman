@@ -392,11 +392,11 @@ final class ItalianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
-  String get missingNoteLocationTitle => 'Crea le note mancanti in';
+  String get newItemLocationTitle => 'Le nuove note e cartelle vanno in';
   @override
-  String get missingNoteLocationRoot => 'Radice della libreria';
+  String get newItemLocationRoot => 'Radice della libreria';
   @override
-  String get missingNoteLocationCurrentFolder => 'Cartella attuale';
+  String get newItemLocationOpenNote => 'Cartella della nota aperta';
   @override
   String get indentWidthTitle => 'Ampiezza del rientro';
   @override
