@@ -57,6 +57,17 @@ void main() {
       expect(await session.find('Notes/Foo.md'), isNotNull);
     });
 
+    test('a folder spelled otherwise is the one that is there', () async {
+      await session.ensureFolder('Notes');
+      final create = missingNoteCreatorFor(session)!;
+
+      final made = await create('notes/Foo.md');
+
+      expect(made, 'Notes/Foo.md');
+      expect(await session.find('notes'), isNull);
+      expect(await session.find('Notes/Foo.md'), isNotNull);
+    });
+
     test('a note at the root asks for no folder', () async {
       final create = missingNoteCreatorFor(session)!;
 

@@ -402,7 +402,12 @@ final class NoteOps implements NoteOperations {
 
   /// The folder at [path], created with its parents if missing.
   ///
-  /// No uniquifying: the caller named a folder, not a wish for one.
+  /// No uniquifying: the caller named a folder, not a wish for one. A folder
+  /// the library already holds under another spelling is that folder —
+  /// `[[Projects/Three laws]]` lands in the `projects` that is there, as
+  /// `[[Note]]` opens `note.md` — and the path is canonicalized segment by
+  /// segment, so a folder made below a reused one sits inside the spelled
+  /// one (#847).
   @override
   Future<Note> ensureFolder(String path) {
     return _synchronized(() async {
@@ -412,19 +417,26 @@ final class NoteOps implements NoteOperations {
         // a thing a caller can mean.
         throw ArgumentError('ensureFolder was given no folder: "$path"');
       }
-      final dir = Directory(_abs(clean));
+      final segments = <String>[];
+      for (final segment in clean.split('/')) {
+        final existing = await _dao.folderIgnoringCase(
+          resolvePath(segments.join('/'), segment),
+        );
+        segments.add(existing?.name ?? segment);
+      }
+      final canonical = segments.join('/');
+      final dir = Directory(_abs(canonical));
       if (!dir.existsSync()) {
         await dir.create(recursive: true);
         // Every folder on the way is new too, so the index hears about
         // the whole chain rather than only its last link.
-        final segments = clean.split('/');
         final made = <String>[
           for (var i = 1; i <= segments.length; i++)
             _abs(segments.take(i).join('/')),
         ];
         await indexer.applyEvents(root, made);
       }
-      return await _mustFind(clean);
+      return await _mustFind(canonical);
     });
   }
 

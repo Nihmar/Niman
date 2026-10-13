@@ -93,6 +93,21 @@ final class NoteDao {
     return rows.isEmpty ? null : rows.first;
   }
 
+  /// The directory row whose path spells [path] in any case, or null: the
+  /// folder `NoteOps.ensureFolder` reuses rather than making a second one
+  /// under a different spelling (#847).
+  Future<Note?> folderIgnoringCase(String path) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM notes WHERE is_dir = 1 AND path = ? COLLATE NOCASE '
+          'LIMIT 1',
+          variables: [Variable.withString(path)],
+          readsFrom: {_db.notes},
+        )
+        .get();
+    return rows.isEmpty ? null : _db.notes.map(rows.first.data);
+  }
+
   /// The rows at [paths], keyed by path, one `WHERE path IN (…)` per
   /// [_pathChunk] paths (a path the index does not hold is absent from the
   /// map, which is what [missingAmong] reads backwards).

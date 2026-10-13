@@ -1355,14 +1355,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (clean.isEmpty) {
       throw ArgumentError('ensureFolder was given no folder: "$path"');
     }
-    final segments = clean.split('/');
+    // A folder the library already has under another spelling is that
+    // folder, as the real ops reuse it (#847).
+    final segments = <String>[];
+    for (final segment in clean.split('/')) {
+      final existing = _findDirIgnoringCase(
+        resolvePath(segments.join('/'), segment),
+      );
+      segments.add(existing?.name ?? segment);
+    }
     for (var i = 1; i <= segments.length; i++) {
       final rel = segments.take(i).join('/');
       if (_findRow(rel) != null) continue;
       _addRow(rel, isDir: true);
     }
     _bump();
-    return _noteAt(clean);
+    return _noteAt(segments.join('/'));
   }
 
   @override
@@ -1582,6 +1590,19 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   _Row? _findRow(String path) {
     for (final row in _rows) {
       if (!row.trashed && row.path == path) return row;
+    }
+    return null;
+  }
+
+  /// The directory row whose path spells [path] in any case, or null: the
+  /// folder [ensureFolder] reuses rather than making a second one under a
+  /// different spelling (#847).
+  _Row? _findDirIgnoringCase(String path) {
+    final lower = path.toLowerCase();
+    for (final row in _rows) {
+      if (!row.trashed && row.isDir && row.path.toLowerCase() == lower) {
+        return row;
+      }
     }
     return null;
   }

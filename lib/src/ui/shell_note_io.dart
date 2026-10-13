@@ -58,11 +58,13 @@ Future<String> Function(String relPath)? missingNoteCreatorFor(
   final ops = controller.ops;
   if (ops == null) return null;
   return (relPath) async {
-    final folder = parentOf(relPath);
     // Folders on the way, through the library's own path for a folder: the
     // names were sanitized when the path was proposed, and the index hears of
-    // every one made.
-    if (folder.isNotEmpty) await ops.ensureFolder(folder);
+    // every one made. A folder the library already has under another
+    // spelling is that folder, and the note lands inside the spelled one
+    // (#847), so the returned path is what names the parent from here on.
+    var folder = parentOf(relPath);
+    if (folder.isNotEmpty) folder = (await ops.ensureFolder(folder)).path;
     final note = await ops.createNote(
       parentPath: folder,
       name: p.basenameWithoutExtension(relPath),
