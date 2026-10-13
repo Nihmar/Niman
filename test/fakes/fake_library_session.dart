@@ -30,8 +30,8 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
-import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -936,7 +936,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   FakeLinkSource? linkSourceOverride;
 
   @override
-  Future<LinkSource?> get linkSource async =>
+  Future<LibraryLinks?> get linkSource async =>
       linkSourceOverride ??
       FakeLinkSource(notes: [for (final note in _liveNotes()) note.path]);
 

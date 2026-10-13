@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/ui/links_to_note_controller.dart';
 import 'package:niman/src/ui/links_to_note_list.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -23,7 +23,7 @@ final class LinksToNoteSection extends StatefulWidget {
   });
 
   /// The library the notes are looked up in, or null while none is open.
-  final LinkSource? source;
+  final MentionSource? source;
 
   /// The note's library-relative path, or null for a note outside a library.
   final String? path;

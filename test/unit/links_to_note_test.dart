@@ -11,6 +11,7 @@ import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
@@ -21,7 +22,7 @@ void main() {
   late IndexDatabase db;
   late Indexer indexer;
   late List<String> reads;
-  late LinkResolver resolver;
+  late MentionReader resolver;
 
   void write(String name, String text) {
     final file = File(p.join(root.path, name));
@@ -44,8 +45,9 @@ void main() {
     indexer = Indexer(db);
     await indexer.fullScan(root.path);
     reads = <String>[];
-    resolver = LinkResolver(
+    resolver = MentionReader(
       db,
+      LinkResolver(db),
       readSpots: (path) async {
         reads.add(path);
         return linkSpotsOfNoteFile(p.join(root.path, path));
@@ -199,7 +201,7 @@ void main() {
     test(
       'without a way to read notes, or for a note not in the index',
       () async {
-        final blind = LinkResolver(db);
+        final blind = MentionReader(db, LinkResolver(db));
         expect((await blind.mentionIn('A.md', 'B.md')).count, 0);
         expect((await resolver.mentionIn('Nope.md', 'B.md')).count, 0);
         expect((await resolver.mentionIn('A.md', 'Nope.md')).count, 0);
@@ -224,17 +226,21 @@ void main() {
       final spots = <LinkSpot>[
         (target: 'B', markdown: false, embed: false, line: 0, context: '[[B]]'),
       ];
-      final bulk = LinkResolver(db, readSpots: (_) async => spots);
-      for (var i = 0; i < LinkResolver.mentionsKept + 40; i++) {
+      final bulk = MentionReader(
+        db,
+        LinkResolver(db),
+        readSpots: (_) async => spots,
+      );
+      for (var i = 0; i < MentionReader.kept + 40; i++) {
         write('bulk/n$i.md', '[[B]]\n');
       }
       await indexer.fullScan(root.path);
 
-      for (var i = 0; i < LinkResolver.mentionsKept + 40; i++) {
+      for (var i = 0; i < MentionReader.kept + 40; i++) {
         await bulk.mentionIn('bulk/n$i.md', 'B.md');
       }
 
-      expect(bulk.mentionsHeld, LinkResolver.mentionsKept);
+      expect(bulk.held, MentionReader.kept);
     });
   });
 

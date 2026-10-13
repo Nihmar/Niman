@@ -8,6 +8,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/links/dead_link_checker.dart';
 import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -18,7 +19,7 @@ import '../fakes/fake_link_source.dart';
 
 void main() {
   late IndexDatabase db;
-  late LinkResolver resolver;
+  late DeadLinkChecker resolver;
 
   Future<void> addNote(String path, {String? stem}) async {
     final id = await db
@@ -50,14 +51,14 @@ void main() {
   setUp(() async {
     db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
-    resolver = LinkResolver(db);
+    resolver = DeadLinkChecker(LinkResolver(db));
   });
 
   LinkQuery wiki(String target) =>
       (target: target, from: null, markdown: false);
   LinkQuery md(String href) => (target: href, from: null, markdown: true);
 
-  group('LinkResolver.deadAmong', () {
+  group('DeadLinkChecker.deadAmong', () {
     test(
       'a wiki target with no note is dead, one with a note is not',
       () async {

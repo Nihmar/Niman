@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/link_preview.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/preview_reader.dart';
 import 'package:niman/src/ui/link_preview/link_preview_body.dart';
 import 'package:path/path.dart' as p;
 
@@ -37,9 +37,9 @@ void main() {
     });
 
     Future<LinkPreview?> wiki(String inner, {String? from = 'Here.md'}) =>
-        previewOfLink(source, PreviewLink.wiki(inner), from: from);
+        previewOfLink(source, source, PreviewLink.wiki(inner), from: from);
     Future<LinkPreview?> md(String href, {String? from = 'Here.md'}) =>
-        previewOfLink(source, PreviewLink.markdown(href), from: from);
+        previewOfLink(source, source, PreviewLink.markdown(href), from: from);
 
     test('a wikilink shows its note, titled by its name', () async {
       final preview = (await wiki('Newton'))!;
@@ -100,10 +100,10 @@ void main() {
     });
   });
 
-  group('LinkResolver.previewText', () {
+  group('PreviewReader.previewText', () {
     late IndexDatabase db;
     late List<String> reads;
-    late LinkResolver resolver;
+    late PreviewReader resolver;
     late Completer<void> gate;
     var held = false;
 
@@ -129,9 +129,9 @@ void main() {
       reads = <String>[];
       gate = Completer<void>();
       held = false;
-      resolver = LinkResolver(
+      resolver = PreviewReader(
         db,
-        readPreview: (path) async {
+        read: (path) async {
           reads.add(path);
           if (held) await gate.future;
           return path == 'Gone.md'
@@ -190,7 +190,7 @@ void main() {
           await addNote('n$i.md');
           await resolver.previewText('n$i.md');
         }
-        expect(resolver.previewsHeld, PreviewLimits.kept);
+        expect(resolver.held, PreviewLimits.kept);
 
         reads.clear();
         await resolver.previewText('n${PreviewLimits.kept + 3}.md');
@@ -207,7 +207,7 @@ void main() {
         expect(await resolver.previewText('Gone.md'), isNull);
         expect(await resolver.previewText('Gone.md'), isNull);
         expect(reads, ['Gone.md', 'Gone.md']);
-        expect(resolver.previewsHeld, 0);
+        expect(resolver.held, 0);
       },
     );
 
@@ -216,7 +216,7 @@ void main() {
       () async {
         expect(await resolver.previewText('Nope.md'), isNull);
         await addNote('A.md');
-        expect(await LinkResolver(db).previewText('A.md'), isNull);
+        expect(await PreviewReader(db).previewText('A.md'), isNull);
         expect(reads, isEmpty);
       },
     );

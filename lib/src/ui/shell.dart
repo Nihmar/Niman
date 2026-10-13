@@ -41,7 +41,7 @@ import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
@@ -905,7 +905,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// the search box; the tabs button flips it and back.
 
   /// The link-resolution source (T-M3-07), resolved from the session.
-  LinkSource? _linkSource;
+  LibraryLinks? _linkSource;
 
   /// The library the wikilink suggester panel reads (#475), resolved from
   /// the session.

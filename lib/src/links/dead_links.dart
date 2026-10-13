@@ -2,7 +2,7 @@
 /// view draw muted, before the link is clicked.
 ///
 /// Resolution happens against the library's index, in one batch for all of a
-/// note's links ([LinkSource.deadAmong]), and never in the drawing: the
+/// note's links ([DeadLinkSource.deadAmong]), and never in the drawing: the
 /// drawing only asks a [DeadLinks] — a set of the targets that resolved to
 /// nothing — which is cheap to ask and cheap to compare. A link the set does
 /// not know about (typed since the last resolution) is drawn live until the
@@ -14,8 +14,9 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/links/dead_link_checker.dart';
 import 'package:niman/src/links/parser.dart';
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/resolver.dart' show LinkQuery;
 
 /// The targets of a note's links that resolve to nothing.
 @immutable
@@ -116,7 +117,7 @@ Set<LinkQuery> deadLinkQueries(Iterable<ParsedLink> links, String? from) {
 /// The [links] that name nothing in the library [source] reads, as one
 /// batched resolution.
 Future<DeadLinks> resolveDeadLinks(
-  LinkSource source,
+  DeadLinkSource source,
   Iterable<ParsedLink> links, {
   required String? from,
 }) async {

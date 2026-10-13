@@ -8,8 +8,8 @@ import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
-import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -162,7 +162,7 @@ final class ShellDetailPane extends StatelessWidget {
   final ValueChanged<EditorKind>? onEditorKindChanged;
 
   /// Link navigation (T-M3-07).
-  final LinkSource? linkSource;
+  final LibraryLinks? linkSource;
 
   /// The library the wikilink suggester panel reads (#475).
   final WikilinkSuggester? wikilinkSuggester;

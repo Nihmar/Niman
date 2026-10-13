@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart' show relPath;
-import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/ui/links_to_note_controller.dart';
 import 'package:niman/src/ui/links_to_note_list.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
@@ -26,7 +26,7 @@ final class LinksDockPane extends StatefulWidget {
   final NoteViewHandle? note;
 
   /// Where the links are looked up: the open library's.
-  final Future<LinkSource?> links;
+  final Future<MentionSource?> links;
 
   /// The library's root, which the note's path is read against.
   final String? libraryRoot;
@@ -40,7 +40,7 @@ final class LinksDockPane extends StatefulWidget {
 
 final class _LinksDockPaneState extends State<LinksDockPane> {
   final LinksToNoteController _controller = LinksToNoteController();
-  LinkSource? _source;
+  MentionSource? _source;
 
   @override
   void initState() {

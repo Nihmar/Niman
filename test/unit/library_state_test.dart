@@ -353,6 +353,31 @@ void main() {
     await controller.dispose();
   });
 
+  test(
+    'the library has one links object, whoever asks (#842, #846, #847)',
+    () async {
+      // The mentions, previews and dead links keep caches; a surface that asked
+      // for a fresh object each time would never find what another had read.
+      final controller = makeController();
+      await controller.open(root.path, create: false);
+
+      final first = await controller.linkSource;
+      expect(first, isNotNull);
+      expect(identical(await controller.linkSource, first), isTrue);
+
+      await controller.close();
+      expect(await controller.linkSource, isNull);
+      await controller.open(root.path, create: false);
+      expect(
+        identical(await controller.linkSource, first),
+        isFalse,
+        reason: 'another open is another library: its own caches',
+      );
+      await controller.close();
+      await controller.dispose();
+    },
+  );
+
   test('a disk-originated change moves the revision', () async {
     final controller = makeController();
     await controller.open(root.path, create: false);

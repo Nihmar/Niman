@@ -44,8 +44,8 @@ import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
-import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/search/replace.dart';
@@ -406,18 +406,34 @@ final class LibraryController implements LibrarySession {
     return TemplateRepo(indexer.dao, ops);
   }
 
+  /// The open library's links, built once for the library and the files it
+  /// reads: every surface that asks gets the object whose caches the others
+  /// fill (#842, #846, #847).
+  LibraryLinks? _links;
+  IndexDatabase? _linksDb;
+  NoteOps? _linksOps;
+
   @override
-  Future<LinkSource?> get linkSource async {
+  Future<LibraryLinks?> get linkSource async {
     final db = _indexDb;
     if (db == null) return null;
-    // The library announces every index change; a note on screen resolves
-    // its dead links again when one lands (#847).
     final reader = _ops;
-    return LinkResolver(
+    final kept = _links;
+    if (kept != null &&
+        identical(_linksDb, db) &&
+        identical(_linksOps, reader)) {
+      return kept;
+    }
+    _linksDb = db;
+    _linksOps = reader;
+    return _links = IndexLibraryLinks(
       db,
+      // The library announces every index change; a note on screen resolves
+      // its dead links again when one lands (#847).
       changes: _events.stream.map<void>((_) {}),
-      // What the notes that link to a note say about it is read off their
-      // files, on a background isolate, a row at a time (#842).
+      // What the notes that link to a note say about it, and the beginning of
+      // one for a preview card, are read off their files on a background
+      // isolate, a row at a time (#842, #846).
       readPreview: reader == null
           ? null
           : (path) async {
@@ -1630,6 +1646,9 @@ final class LibraryController implements LibrarySession {
     await watcher?.stop();
     _indexer = null;
     _ops = null;
+    _links = null;
+    _linksDb = null;
+    _linksOps = null;
     _configRepo = null;
     final sync = _sync;
     _sync = null;

@@ -12,6 +12,7 @@ library;
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/links/preview_reader.dart';
 import 'package:niman/src/links/resolver.dart';
 
 /// A link as the preview is asked about it: the text it was written with.
@@ -95,9 +96,11 @@ final class LinkPreview {
 }
 
 /// The preview of what [link] points at, written in the note at
-/// library-relative [from], or null when it points at nothing a card can show.
+/// library-relative [from], or null when it points at nothing a card can show:
+/// the link is resolved by [source], the note's beginning read by [previews].
 Future<LinkPreview?> previewOfLink(
   LinkSource source,
+  PreviewSource previews,
   PreviewLink link, {
   required String? from,
 }) async {
@@ -107,7 +110,7 @@ Future<LinkPreview?> previewOfLink(
   if (!path.toLowerCase().endsWith('.md')) return null;
   // The note the link is written in is the page already on screen.
   if (path == from) return null;
-  final read = await source.previewText(path);
+  final read = await previews.previewText(path);
   if (read == null) return null;
   return LinkPreview(
     path: path,

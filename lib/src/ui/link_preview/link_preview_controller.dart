@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show Offset;
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/link_preview.dart';
-import 'package:niman/src/links/resolver.dart';
 
 /// A preview card being shown: what it previews, where the pointer was when
 /// it opened.
@@ -33,7 +33,7 @@ final class ShownPreview {
 /// pointer is on it (it scrolls); `Esc`, a scroll of the note, a press
 /// anywhere and an edit close it at once ([close]). A link that names
 /// nothing opens nothing, and a read already done is the library's to keep
-/// (see [LinkSource.previewText]).
+/// (see `PreviewSource.previewText`).
 final class LinkPreviewController extends ChangeNotifier {
   /// A controller that previews the links of the note at the library-relative
   /// path `notePath` in the library `source`, while `enabled` says the setting
@@ -47,7 +47,7 @@ final class LinkPreviewController extends ChangeNotifier {
     this.leaveGrace = const Duration(milliseconds: 200),
   });
 
-  final LinkSource? Function() _source;
+  final LibraryLinks? Function() _source;
   final String? Function() _notePath;
   final bool Function() _enabled;
 
@@ -129,7 +129,7 @@ final class LinkPreviewController extends ChangeNotifier {
     final source = _source();
     if (source == null || !_enabled()) return null;
     try {
-      return await previewOfLink(source, link, from: _notePath());
+      return await previewOfLink(source, source, link, from: _notePath());
     } on Object {
       return null;
     }

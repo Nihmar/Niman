@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -11,7 +12,7 @@ import 'package:niman/src/links/resolver.dart';
 /// `target.md` and `dir/target.md` styles resolve against [notes]; a target
 /// whose basename matches several notes is ambiguous; everything else is
 /// unresolved. External URLs stay external.
-final class FakeLinkSource implements LinkSource {
+final class FakeLinkSource implements LibraryLinks {
   /// Creates a fake source over [notes] (library-relative paths).
   new({List<String>? notes}) : notes = notes ?? [];
 

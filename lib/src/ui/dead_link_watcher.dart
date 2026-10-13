@@ -14,9 +14,9 @@ import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/links/dead_link_checker.dart';
 import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/parser.dart';
-import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/note_references.dart';
 
 /// The open note's dead links, as a value the drawing listens to.
@@ -34,7 +34,7 @@ final class DeadLinkWatcher extends ChangeNotifier
     required this._delay,
   });
 
-  final LinkSource? Function() _source;
+  final DeadLinkSource? Function() _source;
   final Future<List<ParsedLink>?> Function() _links;
   final String? Function() _notePath;
   final Duration Function() _delay;
@@ -44,7 +44,7 @@ final class DeadLinkWatcher extends ChangeNotifier
   DeadLinks _value = DeadLinks.none;
   Timer? _timer;
   StreamSubscription<void>? _changes;
-  LinkSource? _watched;
+  DeadLinkSource? _watched;
   int _run = 0;
   bool _disposed = false;
 

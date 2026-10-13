@@ -26,10 +26,10 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/embed_path.dart';
+import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
-import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/buffer_block_anchors.dart';
@@ -278,7 +278,7 @@ final class NoteView extends StatefulWidget {
 
   /// The link-resolution source (wiki targets + markdown hrefs against the
   /// open index); null (tests without a session) disables link navigation.
-  final LinkSource? linkSource;
+  final LibraryLinks? linkSource;
 
   /// The library the wikilink suggester panel reads (#475): the notes,
   /// their aliases and their headings. Null (no open library) draws no

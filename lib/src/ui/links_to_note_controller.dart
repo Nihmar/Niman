@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/links/mentions.dart';
-import 'package:niman/src/links/resolver.dart';
 
 /// The notes that link to one note (#842), kept current for the surfaces that
 /// list them — the note view's section, the dock's pane, the phone's sheet.
 ///
-/// One indexed lookup ([LinkSource.referrersOf]) when the note or the library
-/// changes, and again a pause after the library's index moves (a note
+/// One indexed lookup ([MentionSource.referrersOf]) when the note or the
+/// library changes, and again a pause after the library's index moves (a note
 /// elsewhere that gained or lost a link to this one). Nothing is read from the
 /// notes themselves here: the rows ask for the line they show as they are
 /// drawn.
@@ -21,7 +21,7 @@ final class LinksToNoteController extends ChangeNotifier {
   /// for again.
   final Duration delay;
 
-  LinkSource? _source;
+  MentionSource? _source;
   String? _path;
   Referrers? _referrers;
   StreamSubscription<void>? _changes;
@@ -30,7 +30,7 @@ final class LinksToNoteController extends ChangeNotifier {
   bool _disposed = false;
 
   /// The library the list is read from, or null while none is open.
-  LinkSource? get source => _source;
+  MentionSource? get source => _source;
 
   /// The library-relative path of the note the list is for, or null.
   String? get path => _path;
@@ -47,7 +47,7 @@ final class LinksToNoteController extends ChangeNotifier {
 
   /// Points the list at the note at library-relative [path] in [source]; the
   /// answer is asked for again only if either changed.
-  void target(LinkSource? source, String? path) {
+  void target(MentionSource? source, String? path) {
     if (identical(source, _source) && path == _path) return;
     if (!identical(source, _source)) {
       unawaited(_changes?.cancel());

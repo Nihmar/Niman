@@ -11,6 +11,7 @@ import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
+import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
@@ -210,7 +211,7 @@ final class IndexContentStore {
   /// resolve; [paired] rels keep their existing rows (their content did
   /// not change — the rename only moved the path), but their link edges are
   /// written again when one of their links reads from the note's folder
-  /// ([LinkResolver.dependsOnLocation]): the note may have moved to another
+  /// ([LinkPaths.dependsOnLocation]): the note may have moved to another
   /// one (#491).
   ///
   /// With [pendingLink] set, the link edges are handed to it instead of
@@ -327,7 +328,7 @@ final class IndexContentStore {
   static bool _dependsOnLocation(ParsedLink link) {
     final target = _linkTarget(link);
     return target != null &&
-        LinkResolver.dependsOnLocation(target, markdown: link is MarkdownLink);
+        LinkPaths.dependsOnLocation(target, markdown: link is MarkdownLink);
   }
 
   /// Whether any link or embed of [c] reads from the note's folder (#491):
@@ -341,9 +342,9 @@ final class IndexContentStore {
   static String? _linkTarget(ParsedLink link) => switch (link) {
     final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
     final MarkdownLink m
-        when !LinkResolver.hasScheme(m.href) &&
+        when !LinkPaths.hasScheme(m.href) &&
             !m.href.trim().startsWith('#') &&
-            LinkResolver.markdownPath(m.href) != null =>
+            LinkPaths.markdownPath(m.href) != null =>
       m.href,
     _ => null,
   };

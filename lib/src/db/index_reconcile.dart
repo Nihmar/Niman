@@ -36,6 +36,7 @@ import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/index_tree.dart';
 import 'package:niman/src/db/scan_touches.dart';
+import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/resolver.dart';
 
 /// Reconciles the index with the library a directory at a time (#302).
@@ -673,7 +674,7 @@ final class IndexReconciler {
         )
         .get();
     final depends = queued.any(
-      (row) => LinkResolver.dependsOnLocation(
+      (row) => LinkPaths.dependsOnLocation(
         row.read<String>('target'),
         markdown: row.read<String>('kind') == 'md',
       ),
