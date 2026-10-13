@@ -129,6 +129,64 @@ void main() {
       expect(wide, isTrue);
     }, variant: _android);
 
+    testWidgets('a subtree that overrides the MediaQuery is the same device', (
+      tester,
+    ) async {
+      late bool phone;
+      late bool wide;
+      Widget under(Size lie) => MediaQuery(
+        data: MediaQueryData(size: lie),
+        child: Builder(
+          builder: (context) {
+            phone = isPhone(context);
+            wide = isWideShell(context);
+            return const SizedBox();
+          },
+        ),
+      );
+
+      // A tablet whose subtree is laid out as a 300 dp panel: not a phone.
+      setSurfaceSize(tester, _tablet);
+      await tester.pumpWidget(under(const Size(300, 300)));
+      expect(phone, isFalse, reason: 'the panel is not the device');
+      expect(wide, isFalse, reason: "but the room is the panel's");
+
+      // A phone whose subtree is told it has a desktop's room: a phone.
+      setSurfaceSize(tester, _phoneLandscape);
+      await tester.pumpWidget(under(const Size(1400, 900)));
+      expect(phone, isTrue);
+      expect(wide, isFalse, reason: 'whatever room the subtree claims');
+    }, variant: _android);
+
+    testWidgets('turning the window flips the answer under an override', (
+      tester,
+    ) async {
+      late bool phone;
+      setSurfaceSize(tester, _phonePortrait);
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            // An override that follows the window, as a panel's does,
+            // and says something else about it.
+            final outer = MediaQuery.of(context);
+            return MediaQuery(
+              data: outer.copyWith(size: const Size(300, 300)),
+              child: Builder(
+                builder: (context) {
+                  phone = isPhone(context);
+                  return const SizedBox();
+                },
+              ),
+            );
+          },
+        ),
+      );
+      expect(phone, isTrue);
+      setSurfaceSize(tester, _tablet);
+      await tester.pump();
+      expect(phone, isFalse, reason: "a window grown to a tablet's");
+    }, variant: _android);
+
     testWidgets('a desktop is never a phone, however small its window', (
       tester,
     ) async {

@@ -21,6 +21,27 @@ import 'package:niman/src/core/settings/library_settings.dart'
 /// free to part.
 const double phoneShortestSide = 600;
 
+/// The size of the window the platform gave the app, in dp: what the
+/// device is, as opposed to the room a subtree has.
+///
+/// It is read from the app's [View], not from [MediaQuery]: a subtree may
+/// override the [MediaQuery] and lay its pages out as if another size were
+/// the screen -- a floating window does, so that its pages choose their
+/// shape by the panel -- and none of that is a different device. The
+/// [View] is the window itself, so rotation, a foldable, split-screen and
+/// DeX all move it.
+///
+/// A [View] says nothing when its metrics change, and a widget asking has
+/// to be rebuilt when they do, so this also depends on the [MediaQuery]
+/// nearest [context], whose size moves with the window; only the
+/// dependency is taken from it, never the value.
+Size deviceWindowSize(BuildContext context) {
+  final room = MediaQuery.maybeSizeOf(context);
+  final view = View.maybeOf(context);
+  if (view == null) return room ?? Size.zero;
+  return view.physicalSize / view.devicePixelRatio;
+}
+
 /// Whether the window is a phone's: Android, with a shortest side under
 /// [phoneShortestSide].
 ///
@@ -30,42 +51,21 @@ const double phoneShortestSide = 600;
 /// phone, however small their window is dragged; their shape follows the
 /// width ([isWideShell]).
 ///
-/// A [PhoneScope] above [context] answers for the device instead: a
-/// floating window lays its pages out as if the panel were the screen, and
-/// a tablet's 552 dp-tall panel is not a phone.
+/// The answer is the device's wherever it is asked ([deviceWindowSize]):
+/// inside a subtree that overrides its [MediaQuery] it is the same as
+/// outside.
 bool isPhone(BuildContext context) =>
-    PhoneScope.maybeOf(context) ??
-    (defaultTargetPlatform == TargetPlatform.android &&
-        MediaQuery.sizeOf(context).shortestSide < phoneShortestSide);
-
-/// Carries the answer of [isPhone] past a subtree that resizes its
-/// [MediaQuery] (#849).
-///
-/// The floating windows (Settings, the libraries) hand their pages the
-/// panel's size as the screen's, so that a page choosing its shape by
-/// width chooses it by the room it has. The device does not shrink with
-/// its panel: asked inside one, [isPhone] reads the answer taken outside.
-final class PhoneScope extends InheritedWidget {
-  /// Fixes [isPhone] to [phone] for [child].
-  const new({required this.phone, required super.child, super.key});
-
-  /// What [isPhone] answered where the scope was made.
-  final bool phone;
-
-  /// The nearest scope's answer, or null without one.
-  static bool? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<PhoneScope>()?.phone;
-
-  @override
-  bool updateShouldNotify(PhoneScope oldWidget) => phone != oldWidget.phone;
-}
+    defaultTargetPlatform == TargetPlatform.android &&
+    deviceWindowSize(context).shortestSide < phoneShortestSide;
 
 /// Whether the shell is the wide one: the rail, the tree and the panes
 /// beside each other. A phone never is, whichever way it is turned; any
 /// other window is from [wideBreakpoint] up.
 ///
 /// This is the question "which chrome": the rail or the bottom bar, the
-/// tabs, Settings as a window, the sheets or the dialogs. A reader asking
-/// "is there room for this row" keeps asking the width.
+/// tabs, Settings as a window, the sheets or the dialogs. The device half
+/// is [isPhone], the window's; the width half is the [MediaQuery]'s, the
+/// room this subtree has, which a panel narrows on purpose. A reader asking
+/// "is there room for this row" keeps asking the width alone.
 bool isWideShell(BuildContext context) =>
     !isPhone(context) && MediaQuery.sizeOf(context).width >= wideBreakpoint;
