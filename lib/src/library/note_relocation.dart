@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkUpdate;
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
@@ -16,6 +17,11 @@ import 'package:niman/src/links/rewrite.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
+
+/// Asks whether the links in [notes] notes, which pointed at what has just
+/// moved, are to be rewritten (the library's [LinkUpdate.ask], #848). The
+/// library does not draw the question: the shell does.
+typedef LinkUpdateConfirm = Future<bool> Function(int notes);
 
 /// Moves a note or a folder on disk and carries along everything that
 /// named it by its path: the history, the reading positions, the settings,
@@ -77,10 +83,17 @@ final class NoteRelocator {
   /// Renames what [row] holds at [path] to [newRel] on disk, and carries
   /// everything that named it along: the sync hint, the history, the
   /// reading positions, the settings, the Home, what lies outside the
-  /// library, the index and the links in the notes that pointed at it.
+  /// library, the index and the links in the notes that pointed at it —
+  /// those as the [LinkUpdate] setting says, asking [confirm] under
+  /// [LinkUpdate.ask] (#848).
   /// The shared tail of `NoteOps.rename` and `NoteOps.move`; returns the
   /// updated row.
-  Future<Note> relocate(Note row, String path, String newRel) async {
+  Future<Note> relocate(
+    Note row,
+    String path,
+    String newRel, {
+    LinkUpdateConfirm? confirm,
+  }) async {
     final oldAbs = _abs(path);
     if (row.isDir) {
       await Directory(oldAbs).rename(_abs(newRel));
@@ -103,6 +116,7 @@ final class NoteRelocator {
       isDir: row.isDir,
       oldPaths: links.oldPaths,
       referrers: links.referrers,
+      confirm: confirm,
     );
     return await find(newRel);
   }
@@ -158,7 +172,10 @@ final class NoteRelocator {
   }
 
   /// Rewrites the links in every note that pointed at what moved from [from]
-  /// to [to] (#507).
+  /// to [to] (#507), as the library's [LinkUpdate] setting says (#848):
+  /// always, only once [confirm] has said yes to the number of notes that
+  /// would change, or not at all. Nothing else that followed the move
+  /// depends on the answer.
   ///
   /// [oldPaths] are the moved files' old library-relative paths and
   /// [referrers] their referring notes' paths, as [_linksToMove] read them
@@ -172,8 +189,11 @@ final class NoteRelocator {
     required bool isDir,
     required List<String> oldPaths,
     required List<String> referrers,
+    LinkUpdateConfirm? confirm,
   }) async {
     if (oldPaths.isEmpty || referrers.isEmpty) return;
+    final mode = (await config.config).linkUpdate;
+    if (mode == LinkUpdate.never) return;
     // Indexed once for every referrer: a link is a lookup, not a walk of
     // everything that moved.
     final moves = LinkMoves({
@@ -191,27 +211,54 @@ final class NoteRelocator {
         renamedTo = newName;
       }
     }
-    var updated = 0;
+    // A referrer inside the moved subtree moved with it; one note is
+    // rewritten once however many of its old paths were referrers.
+    final targets = <(String oldReferrer, String path)>[];
     final seen = <String>{};
     for (final oldReferrer in referrers) {
-      // A referrer inside the moved subtree moved with it.
       final path = pathAfterMove(oldReferrer, from, to, isDir: isDir)!;
-      if (!seen.add(path)) continue;
+      if (seen.add(path)) targets.add((oldReferrer, path));
+    }
+    Future<String?> rewritten(String oldReferrer, String path) async {
+      final text = await readNote(path);
+      final next = rewriteMovedLinks(
+        text,
+        // Its links were written where it stood; a relative one is
+        // written back from where it stands now.
+        from: oldReferrer,
+        at: path,
+        moves: moves,
+        renamedFrom: renamedFrom,
+        renamedTo: renamedTo,
+      );
+      return next == text ? null : next;
+    }
+
+    if (mode == LinkUpdate.ask) {
+      if (confirm == null) {
+        // Nobody to ask: a note is never written unasked.
+        const AppLogger(name: 'links')
+            .info('links after "$from" -> "$to" left as written: no prompt');
+        return;
+      }
+      var changing = 0;
+      for (final (oldReferrer, path) in targets) {
+        try {
+          if (await rewritten(oldReferrer, path) != null) changing++;
+        } on Object catch (error) {
+          const AppLogger(name: 'links')
+              .warning('could not read links in "$path": $error');
+        }
+      }
+      if (changing == 0 || !await confirm(changing)) return;
+    }
+    var updated = 0;
+    for (final (oldReferrer, path) in targets) {
       // One referrer that cannot be read or written must not stop the rest:
       // the move is already done, and the others still need their links fixed.
       try {
-        final text = await readNote(path);
-        final next = rewriteMovedLinks(
-          text,
-          // Its links were written where it stood; a relative one is
-          // written back from where it stands now.
-          from: oldReferrer,
-          at: path,
-          moves: moves,
-          renamedFrom: renamedFrom,
-          renamedTo: renamedTo,
-        );
-        if (next == text) continue;
+        final next = await rewritten(oldReferrer, path);
+        if (next == null) continue;
         await writer.save(path, next);
         hint(path, SyncOpKind.changed);
         updated++;

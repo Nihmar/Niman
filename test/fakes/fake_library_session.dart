@@ -27,6 +27,7 @@ import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
@@ -1370,7 +1371,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<Note> rename(String path, String newName) async {
+  Future<Note> rename(
+    String path,
+    String newName, {
+    LinkUpdateConfirm? confirmLinks,
+  }) async {
     final row = _requireRow(path);
     final parent = parentOf(path);
     var base = newName;
@@ -1395,7 +1400,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<Note> move(String path, String targetParent) async {
+  Future<Note> move(
+    String path,
+    String targetParent, {
+    LinkUpdateConfirm? confirmLinks,
+  }) async {
     final row = _requireRow(path);
     final same = resolvePath(targetParent, p.basename(path)) == path;
     if (same) return _noteAt(path);

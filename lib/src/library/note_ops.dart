@@ -473,11 +473,19 @@ final class NoteOps implements NoteOperations {
   /// is treated as redundant. Names are uniquified against the new parent
   /// (self excluded). Returns the updated row.
   @override
-  Future<Note> rename(String path, String newName) {
-    return _released(path, () => _rename(path, newName));
+  Future<Note> rename(
+    String path,
+    String newName, {
+    LinkUpdateConfirm? confirmLinks,
+  }) {
+    return _released(path, () => _rename(path, newName, confirmLinks));
   }
 
-  Future<Note> _rename(String path, String newName) {
+  Future<Note> _rename(
+    String path,
+    String newName,
+    LinkUpdateConfirm? confirmLinks,
+  ) {
     return _synchronized(() async {
       final row = await _mustFind(path);
       final parent = parentOf(path);
@@ -509,7 +517,12 @@ final class NoteOps implements NoteOperations {
       }
       final newRel = resolvePath(parent, target);
       if (newRel == path) return row;
-      return await _relocator.relocate(row, path, newRel);
+      return await _relocator.relocate(
+        row,
+        path,
+        newRel,
+        confirm: confirmLinks,
+      );
     });
   }
 
@@ -519,11 +532,19 @@ final class NoteOps implements NoteOperations {
   /// Throws [ArgumentError] when [targetParent] is [path] itself or inside
   /// it — a folder cannot be renamed onto its own subtree.
   @override
-  Future<Note> move(String path, String targetParent) {
-    return _released(path, () => _move(path, targetParent));
+  Future<Note> move(
+    String path,
+    String targetParent, {
+    LinkUpdateConfirm? confirmLinks,
+  }) {
+    return _released(path, () => _move(path, targetParent, confirmLinks));
   }
 
-  Future<Note> _move(String path, String targetParent) {
+  Future<Note> _move(
+    String path,
+    String targetParent,
+    LinkUpdateConfirm? confirmLinks,
+  ) {
     return _synchronized(() async {
       final row = await _mustFind(path);
       if (resolvePath(targetParent, p.basename(path)) == path) return row;
@@ -542,7 +563,12 @@ final class NoteOps implements NoteOperations {
         target = await uniqueFileName(targetDir, parts.base, parts.ext);
       }
       final newRel = resolvePath(targetParent, target);
-      return await _relocator.relocate(row, path, newRel);
+      return await _relocator.relocate(
+        row,
+        path,
+        newRel,
+        confirm: confirmLinks,
+      );
     });
   }
 
