@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/files.dart' show relPath;
+import 'package:niman/src/core/files.dart' show pathInLibrary;
 import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/ui/links_to_note_controller.dart';
 import 'package:niman/src/ui/links_to_note_list.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
-import 'package:path/path.dart' as p;
 
 /// The dock's "Links to this note" (#842), and the phone's sheet of the same:
 /// the notes that link to the note shown beside, each with the line it says
@@ -65,13 +64,10 @@ final class _LinksDockPaneState extends State<LinksDockPane> {
   /// Points the list at the note beside, in the library's own terms.
   void _aim() {
     final note = widget.note;
-    final root = widget.libraryRoot;
-    final path = note == null || root == null
-        ? null
-        : p.isWithin(p.normalize(root), p.normalize(note.notePath))
-        ? relPath(note.notePath, root)
-        : null;
-    _controller.target(_source, path);
+    _controller.target(
+      _source,
+      note == null ? null : pathInLibrary(widget.libraryRoot, note.notePath),
+    );
   }
 
   @override

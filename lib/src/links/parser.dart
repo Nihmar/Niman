@@ -9,6 +9,7 @@
 library;
 
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/links/block_id.dart';
 
 /// A parsed link occurrence in a document; [start]..[end] are absolute
 /// offsets into the source text (`[`, `(`… or `[[`…`]]`).
@@ -123,10 +124,6 @@ List<String> headingPathOf(String? heading) {
       if (part.trim().isNotEmpty) part.trim(),
   ];
 }
-
-/// What a block id is made of: letters, digits and dashes, matched literally
-/// (Obsidian's human-readable ids).
-final RegExp blockIdPattern = RegExp(r'^[A-Za-z0-9-]+$');
 
 /// All links in [text], in document order, with absolute offsets.
 ///
@@ -260,8 +257,7 @@ WikiRef parseWikiRef(String inner) {
   final target = (hash == -1 ? before : before.substring(0, hash)).trim();
   final fragment = hash == -1 ? '' : before.substring(hash + 1).trim();
   final isBlock =
-      fragment.startsWith('^') &&
-      blockIdPattern.hasMatch(fragment.substring(1));
+      fragment.startsWith('^') && BlockId.isValid(fragment.substring(1));
   return WikiRef(
     target: target,
     heading: fragment.isEmpty || isBlock ? null : fragment,

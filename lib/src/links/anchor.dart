@@ -10,6 +10,7 @@ library;
 
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/block_id.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/slug.dart';
 
@@ -44,7 +45,7 @@ final class BlockIdAnchor extends LinkAnchor {
 LinkAnchor? parseAnchor(String fragment) {
   final text = fragment.trim();
   if (text.isEmpty) return null;
-  if (text.startsWith('^') && blockIdPattern.hasMatch(text.substring(1))) {
+  if (text.startsWith('^') && BlockId.isValid(text.substring(1))) {
     return BlockIdAnchor(text.substring(1));
   }
   final path = headingPathOf(text);

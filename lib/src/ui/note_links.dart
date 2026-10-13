@@ -11,7 +11,7 @@ library;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/files.dart' show relPath;
+import 'package:niman/src/core/files.dart' show pathInLibrary;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -83,13 +83,7 @@ final class NoteLinkTargets {
 
   /// The open note's path in the library, slash-separated — what a `..` in
   /// a link walks from (#491); null for a note opened from outside one.
-  String? get notePathInLibrary {
-    final root = libraryRoot;
-    if (root == null || !p.isWithin(p.normalize(root), p.normalize(notePath))) {
-      return null;
-    }
-    return relPath(notePath, root);
-  }
+  String? get notePathInLibrary => pathInLibrary(libraryRoot, notePath);
 }
 
 /// The preview's link handler (T-M3-07): `.md` relative links navigate

@@ -472,6 +472,26 @@ void main() {
     expect(opened, <String>['a.md|null']);
   });
 
+  testWidgets('a note outside the library root has no such section either', (
+    tester,
+  ) async {
+    // The section asks the index for a library-relative path; a note from
+    // elsewhere has none, and its absolute path is not one.
+    final links = FakeLinkSource(notes: <String>['loose.md']);
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'loose\n',
+          path: '/elsewhere/loose.md',
+          libraryRoot: '/lib',
+          links: links,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('links-to-note-section')), findsNothing);
+  });
+
   testWidgets('a note opened without a library has no such section', (
     tester,
   ) async {

@@ -494,6 +494,19 @@ bool _entryExists(String path) =>
     FileSystemEntity.typeSync(path, followLinks: false) !=
     FileSystemEntityType.notFound;
 
+/// The slash-separated path of the file at absolute [path] in the library
+/// rooted at [root], or null when there is no library ([root] null) or the file
+/// is not inside it — a note opened from outside one.
+///
+/// The one place that asks both questions the links' surfaces ask of a note:
+/// whether it is in the library, and where.
+String? pathInLibrary(String? root, String path) {
+  if (root == null || !p.isWithin(p.normalize(root), p.normalize(path))) {
+    return null;
+  }
+  return relPath(path, root);
+}
+
 /// The relative, slash-separated name of [path] inside [root].
 ///
 /// Throws an [ArgumentError] when [path] is not under [root].

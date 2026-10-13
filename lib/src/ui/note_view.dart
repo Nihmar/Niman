@@ -531,14 +531,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// The note's path in the library, slash-separated, or null for a note
   /// opened from outside one.
-  String? get _pathInLibrary {
-    final root = widget.libraryRoot;
-    if (root == null ||
-        !p.isWithin(p.normalize(root), p.normalize(widget.path))) {
-      return null;
-    }
-    return relPath(widget.path, root);
-  }
+  String? get _pathInLibrary => pathInLibrary(widget.libraryRoot, widget.path);
 
   /// The links of the open note, as the index reads them: the editor's own
   /// record of them when it keeps one (a long note), else a read of its text —
@@ -1505,9 +1498,7 @@ final class _NoteViewState extends State<NoteView>
         wikilinkSuggester: widget.wikilinkSuggester,
         deadLinks: _deadLinks,
         onLinkHover: _editorLinkHover,
-        notePath: widget.libraryRoot == null
-            ? null
-            : relPath(widget.path, widget.libraryRoot!),
+        notePath: _pathInLibrary,
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.

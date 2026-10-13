@@ -21,6 +21,7 @@ library;
 
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:niman/src/editor/highlighting.dart' show ProseLineWalker;
+import 'package:niman/src/links/block_id.dart';
 
 /// One block that ends with a ` ^id`.
 @immutable
@@ -55,23 +56,20 @@ final class BlockAnchor {
   String toString() => 'BlockAnchor(^$id @ $line)';
 }
 
-/// A ` ^id` at the end of a line, or a line that is nothing else.
-final RegExp _trailingId = RegExp(r'(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$');
-
 /// The id [line] ends with, or null: a space (or the line's start), a caret,
 /// letters, digits and dashes, at its end.
 String? trailingBlockId(String line) {
   // A line without a caret cannot end with an id: the common case costs one
   // scan and no regular expression.
   if (!line.contains('^')) return null;
-  return _trailingId.firstMatch(line)?.group(1);
+  return BlockId.trailingIn(line)?.group(1);
 }
 
 /// [text] without the ` ^id` it ends with, trailing space dropped; [text]
 /// itself when it ends with none.
 String withoutTrailingBlockId(String text) {
   if (!text.contains('^')) return text;
-  final match = _trailingId.firstMatch(text);
+  final match = BlockId.trailingIn(text);
   return match == null ? text : text.substring(0, match.start).trimRight();
 }
 
