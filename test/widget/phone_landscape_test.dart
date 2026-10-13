@@ -112,12 +112,14 @@ void main() {
       late bool wide;
       setSurfaceSize(tester, _phoneLandscape);
       await tester.pumpWidget(
-        Builder(
-          builder: (context) {
-            phone = isPhone(context);
-            wide = isWideShell(context);
-            return const SizedBox();
-          },
+        DeviceShapeScope(
+          child: Builder(
+            builder: (context) {
+              phone = isPhone(context);
+              wide = isWideShell(context);
+              return const SizedBox();
+            },
+          ),
         ),
       );
       expect(phone, isTrue, reason: '844x390 is a phone turned sideways');
@@ -127,6 +129,35 @@ void main() {
       await tester.pump();
       expect(phone, isFalse, reason: '600 dp is the first tablet');
       expect(wide, isTrue);
+    }, variant: _android);
+
+    testWidgets('a static override never rebuilt still follows the window', (
+      tester,
+    ) async {
+      var phone = true;
+      setSurfaceSize(tester, _phonePortrait);
+      await tester.pumpWidget(
+        DeviceShapeScope(
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(500, 500)),
+            child: Builder(
+              builder: (context) {
+                phone = isPhone(context);
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      );
+      expect(phone, isTrue);
+      // The builder's MediaQuery is a constant that is never rebuilt: only
+      // the scope above it hears the window.
+      setSurfaceSize(tester, _tablet);
+      await tester.pump();
+      expect(phone, isFalse, reason: 'the window crossed the line');
+      setSurfaceSize(tester, _phoneLandscape);
+      await tester.pump();
+      expect(phone, isTrue);
     }, variant: _android);
 
     testWidgets('a subtree that overrides the MediaQuery is the same device', (
@@ -164,27 +195,68 @@ void main() {
       late bool phone;
       setSurfaceSize(tester, _phonePortrait);
       await tester.pumpWidget(
-        Builder(
-          builder: (context) {
-            // An override that follows the window, as a panel's does,
-            // and says something else about it.
-            final outer = MediaQuery.of(context);
-            return MediaQuery(
-              data: outer.copyWith(size: const Size(300, 300)),
-              child: Builder(
-                builder: (context) {
-                  phone = isPhone(context);
-                  return const SizedBox();
-                },
-              ),
-            );
-          },
+        DeviceShapeScope(
+          child: Builder(
+            builder: (context) {
+              // An override that follows the window, as a panel's does,
+              // and says something else about it.
+              final outer = MediaQuery.of(context);
+              return MediaQuery(
+                data: outer.copyWith(size: const Size(300, 300)),
+                child: Builder(
+                  builder: (context) {
+                    phone = isPhone(context);
+                    return const SizedBox();
+                  },
+                ),
+              );
+            },
+          ),
         ),
       );
       expect(phone, isTrue);
       setSurfaceSize(tester, _tablet);
       await tester.pump();
       expect(phone, isFalse, reason: "a window grown to a tablet's");
+    }, variant: _android);
+
+    testWidgets('a resize that keeps the class rebuilds nothing', (
+      tester,
+    ) async {
+      var builds = 0;
+      late bool phone;
+      setSurfaceSize(tester, _phonePortrait);
+      await tester.pumpWidget(
+        DeviceShapeScope(
+          child: Builder(
+            builder: (context) {
+              builds++;
+              phone = isPhone(context);
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      expect(builds, 1);
+      expect(phone, isTrue);
+
+      for (final size in const [
+        Size(400, 800),
+        _phoneLandscape,
+        Size(360, 640),
+      ]) {
+        setSurfaceSize(tester, size);
+        await tester.pump();
+      }
+      expect(builds, 1, reason: 'still a phone, so nothing was told');
+
+      setSurfaceSize(tester, _tablet);
+      await tester.pump();
+      expect(builds, 2, reason: 'a tablet: told once');
+      expect(phone, isFalse);
+      setSurfaceSize(tester, const Size(1280, 800));
+      await tester.pump();
+      expect(builds, 2, reason: 'and not again for a bigger tablet');
     }, variant: _android);
 
     testWidgets('a desktop is never a phone, however small its window', (

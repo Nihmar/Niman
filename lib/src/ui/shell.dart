@@ -2873,6 +2873,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   @override
   Widget build(BuildContext context) {
+    DeviceShapeScope.debugCheck(context);
     final controller = widget.controller;
     final selectedPath = _selected;
     final narrow = !isWideShell(context);
