@@ -5,9 +5,10 @@
 /// `from → to` and kind, answered in the reverse direction by `links_to` — so
 /// *who* links here is one indexed lookup (`NoteDao.referrersOf`). *Where*
 /// each one says it is not in the index, and is read when a row is drawn, not
-/// before: the referrer's text is read off the UI isolate, its links parsed
-/// with [parseLinks], the ones that name the note found by the resolver's own
-/// rules, and the line around the first of them cut ([Mention]). Only the rows
+/// before: the referrer's text is read off the UI isolate, its links read
+/// with the index's own engine ([noteReferencesOf]), the ones that name the
+/// note found by the resolver's own rules, and the line around the first of
+/// them cut ([Mention]). Only the rows
 /// a list scrolls to are read, and the answers are kept by the revision of the
 /// referrer, bounded.
 ///
@@ -16,7 +17,10 @@
 /// so it names no one.
 library;
 
+import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/markdown/note_load.dart' show normalizedLineEndings;
+import 'package:niman/src/markdown/note_references.dart';
 
 /// A note that links to another, as the index knows it.
 final class Referrer {
@@ -95,13 +99,21 @@ typedef LinkSpot = ({
 /// How wide a mention's context is cut, in characters.
 const int mentionContextWidth = 140;
 
-/// The links and embeds of [text] as the mentions list reads them: in
+/// The links and embeds of [raw] as the mentions list reads them: in
 /// document order, each with its line and the context around it.
 ///
 /// A link with no target (`[[#heading]]`) names the note it is in, and a
 /// Markdown href that is a URL or an anchor names no note: both are left out.
-List<LinkSpot> linkSpotsOf(String text) {
-  final links = parseLinks(text, includeEmbeds: true);
+///
+/// The links are the ones the index keeps ([noteReferencesOf], the engine
+/// that draws the note), read block by block: a note of any size is not
+/// tokenized whole, and a reference-style link (`[text][ref]`) is a mention
+/// with its line like the others.
+List<LinkSpot> linkSpotsOf(String raw) {
+  final text = normalizedLineEndings(raw);
+  final references = noteReferencesOf(text);
+  final links = <ParsedLink>[...references.links, ...references.embeds]
+    ..sort((a, b) => a.start.compareTo(b.start));
   if (links.isEmpty) return const <LinkSpot>[];
   final spots = <LinkSpot>[];
   var line = 0;
@@ -125,7 +137,7 @@ List<LinkSpot> linkSpotsOf(String text) {
         final written = href.trim();
         if (written.isEmpty ||
             written.startsWith('#') ||
-            RegExp('^[a-zA-Z][a-zA-Z0-9+.-]*://').hasMatch(written)) {
+            LinkPaths.hasScheme(written)) {
           continue;
         }
         target = written;

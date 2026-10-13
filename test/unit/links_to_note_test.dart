@@ -290,6 +290,27 @@ void main() {
       ], reason: 'a URL and a link to the note itself name no other note');
     });
 
+    // The index finds a note's links with the engine that draws the note
+    // (`noteReferencesOf`), so the list of who links here agrees with it:
+    // a reference-style link is a mention, with the line it is written on.
+    test('a reference-style link is a mention with its line', () {
+      final spots = linkSpotsOf(
+        'Intro\n\nSee [the plan][p] now.\n\n[p]: Plan.md\n',
+      );
+
+      expect(spots.map((s) => (s.target, s.markdown, s.line, s.context)), [
+        ('Plan.md', true, 2, 'See [the plan][p] now.'),
+      ]);
+    });
+
+    test('a note with Windows line endings has the same lines', () {
+      final spots = linkSpotsOf('one\r\n\r\ntwo [[A]]\r\n');
+
+      expect(spots.map((s) => (s.target, s.line, s.context)), [
+        ('A', 2, 'two [[A]]'),
+      ]);
+    });
+
     test('a link in a fence or in code is not one', () {
       expect(
         linkSpotsOf('`[[A]]`\n\n```\n[[B]]\n```\n[[C]]\n').map((s) => s.target),

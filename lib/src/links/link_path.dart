@@ -75,8 +75,9 @@ abstract final class LinkPaths {
   }
 
   /// Whether [s] starts with a URI scheme (`http://`, `https://`, …).
-  static bool hasScheme(String s) =>
-      RegExp('^[a-zA-Z][a-zA-Z0-9+.-]*://').hasMatch(s);
+  static bool hasScheme(String s) => _scheme.hasMatch(s);
+
+  static final RegExp _scheme = RegExp('^[a-zA-Z][a-zA-Z0-9+.-]*://');
 
   /// Normalizes a target for matching: backslashes to slashes, `./` and
   /// whitespace trimmed, lowercased. The `.md` extension and any
