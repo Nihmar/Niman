@@ -257,6 +257,25 @@ void main() {
       );
     });
 
+    test('headings: accents fold as the word index folds them', () async {
+      write('Cv.md', '# Résumé\n\n## Resume draft\n');
+      await indexer.fullScan(root.path);
+
+      expect(
+        (await index.headings('resume', limit: 10)).map((h) => h.heading),
+        ['Résumé', 'Resume draft'],
+      );
+      expect((await index.headings('RÉSU', limit: 10)).map((h) => h.heading), [
+        'Résumé',
+        'Resume draft',
+      ]);
+      expect(
+        (await index.headings('Re\u0301sume\u0301', limit: 10)).length,
+        2,
+        reason: 'a decomposed accent is dropped, as the tokenizer drops it',
+      );
+    });
+
     test("blocks: a note's lines come back with the block start", () async {
       final hit = (await index.blocks('quote', limit: 10)).single;
       expect(hit.path, 'Alpha.md');

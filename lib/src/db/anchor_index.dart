@@ -5,13 +5,16 @@
 /// the words of both are in one row per note of `note_anchors_fts`. A search
 /// is a prefix query on that word index, taken in note order and cut to
 /// `candidateNotes` notes, and the rows of those notes are then read by their
-/// key and told apart by what was typed. Nothing walks the headings of the
-/// library: a million notes cost the same lookup as a hundred, and the answer
-/// is bounded by `candidateNotes` and the `limit` asked for.
+/// key and told apart by what was typed, compared in the index's own fold
+/// (`foldForIndex`): what the word index matched, the filter keeps. Nothing
+/// walks the headings of the library: a million notes cost the same lookup
+/// as a hundred, and the answer is bounded by `candidateNotes` and the
+/// `limit` asked for.
 library;
 
 import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/search/index_fold.dart';
 
 /// A heading found by a library-wide search.
 typedef HeadingHit = ({String path, String heading, int line, int level});
@@ -31,16 +34,16 @@ final class AnchorIndex {
   /// size of the library or how common the typed word is.
   static const int candidateNotes = 200;
 
-  /// The words of a query, the way the word index splits text: runs of
-  /// letters and digits.
-  static final RegExp _word = RegExp(r'[\p{L}\p{N}]+', unicode: true);
+  /// The words of a folded query, the way the word index splits text: runs
+  /// of letters, digits and the marks the fold keeps.
+  static final RegExp _word = RegExp(r'[\p{L}\p{N}\p{M}]+', unicode: true);
 
   /// Headings across the library that match [query], best first: a heading
   /// that starts with the typed text before one that holds it, then by note
   /// path and line. An empty [query] lists the first headings of the first
   /// notes. At most [limit] rows.
   Future<List<HeadingHit>> headings(String query, {required int limit}) async {
-    final q = query.trim().toLowerCase();
+    final q = foldForIndex(query.trim());
     final words = _words(q);
     if (q.isNotEmpty && words.isEmpty) return const <HeadingHit>[];
     final List<QueryRow> rows;
@@ -92,7 +95,7 @@ final class AnchorIndex {
   /// first words do), then by note path and line. An empty [query] lists the
   /// first ids of the first notes. At most [limit] rows.
   Future<List<BlockHit>> blocks(String query, {required int limit}) async {
-    final q = query.trim().toLowerCase();
+    final q = foldForIndex(query.trim());
     final words = _words(q);
     if (q.isNotEmpty && words.isEmpty) return const <BlockHit>[];
     final List<QueryRow> rows;
@@ -163,9 +166,9 @@ final class AnchorIndex {
     return [for (final row in rows) row.read<int>('rowid')];
   }
 
-  /// [hits] that hold every word of the query in their [text], ranked and cut
-  /// to [limit]: a [lead] (or [text]) that starts with [q] first, then by
-  /// path and line.
+  /// [hits] that hold every word of the folded query [q] in their [text],
+  /// ranked and cut to [limit]: a [lead] (or [text]) that starts with [q]
+  /// first, then by path and line.
   static List<T> _best<T>(
     List<T> hits,
     int limit,
@@ -179,9 +182,9 @@ final class AnchorIndex {
     if (q.isEmpty) return hits;
     final kept = <(T, bool)>[];
     for (final hit in hits) {
-      final lower = text(hit).toLowerCase();
-      if (!words.every(lower.contains)) continue;
-      final head = (lead ?? text)(hit).toLowerCase();
+      final folded = foldForIndex(text(hit));
+      if (!words.every(folded.contains)) continue;
+      final head = foldForIndex((lead ?? text)(hit));
       kept.add((hit, head.startsWith(q)));
     }
     kept.sort((a, b) {
