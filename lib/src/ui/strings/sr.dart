@@ -2929,6 +2929,16 @@ final class SerbianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Означавање квадратића означава и оне уграђене испод. '
       'Уклањање ознаке их оставља какви јесу.';
+  @override
+  String get linkPreviewTitle => 'Преглед веза';
+  @override
+  String get linkPreviewSubtitle =>
+      'Задржите показивач изнад везе у приказу читања или држите Ctrl (⌘ на '
+      'Mac-у) изнад ње у уреднику да бисте у малој картици видели белешку '
+      'на коју води. На екрану осетљивом на додир дуго притисните везу у '
+      'приказу читања.';
+  @override
+  String get linkPreviewOpen => 'Отвори';
 
   // Rebuilding the index file (#368).
 

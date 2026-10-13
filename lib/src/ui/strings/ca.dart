@@ -2949,6 +2949,16 @@ final class CatalanStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar una casella marca les que hi ha imbricades a sota. '
       'Desmarcar-la les deixa tal com estan.';
+  @override
+  String get linkPreviewTitle => 'Previsualitza els enllaços';
+  @override
+  String get linkPreviewSubtitle =>
+      'Passa el ratolí per sobre d’un enllaç a la lectura, o mantén Ctrl (⌘ '
+      'al Mac) sobre un a l’editor, per veure la nota a la qual apunta en '
+      'una targeta petita. En una pantalla tàctil, mantén premut un enllaç '
+      'a la lectura.';
+  @override
+  String get linkPreviewOpen => 'Obre';
 
   // Rebuilding the index file (#368).
 

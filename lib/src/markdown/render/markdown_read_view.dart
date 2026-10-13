@@ -37,6 +37,8 @@ import 'package:niman/src/markdown/render/code_piece_view.dart';
 import 'package:niman/src/markdown/render/columns_run.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
+import 'package:niman/src/markdown/render/inline_spans.dart'
+    show LinkPreviewHooks;
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/marked_block.dart';
@@ -64,6 +66,7 @@ final class MarkdownReadView extends StatefulWidget {
     this.onTapLink,
     this.onTapWikiLink,
     this.deadLinks,
+    this.linkPreview,
     this.embedResolver,
     this.knownScan,
     this.onToggleTask,
@@ -121,6 +124,10 @@ final class MarkdownReadView extends StatefulWidget {
   /// The links of the note that name nothing (#847), drawn muted; null draws
   /// every link as a live one.
   final ValueListenable<DeadLinks>? deadLinks;
+
+  /// What the links tell the link preview (#846): a pointer on one, a long
+  /// press; null previews nothing.
+  final LinkPreviewHooks? linkPreview;
 
   /// Resolves an embed's target to an absolute path, or null.
   final Future<String?> Function(String target)? embedResolver;
@@ -1134,6 +1141,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       onTapLink: widget.onTapLink,
       onTapWikiLink: widget.onTapWikiLink,
       deadLinks: widget.deadLinks,
+      linkPreview: widget.linkPreview,
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
       outerItems: outerItems,

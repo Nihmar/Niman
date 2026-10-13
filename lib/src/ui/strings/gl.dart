@@ -2919,6 +2919,16 @@ final class GalicianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar unha casiña marca as que están aniñadas debaixo. '
       'Desmarcala déixaas como están.';
+  @override
+  String get linkPreviewTitle => 'Previsualizar ligazóns';
+  @override
+  String get linkPreviewSubtitle =>
+      'Pasa o rato por riba dunha ligazón na lectura, ou mantén Ctrl (⌘ no '
+      'Mac) sobre unha no editor, para ver a nota á que apunta nunha '
+      'tarxeta pequena. Nunha pantalla táctil, mantén premida unha ligazón '
+      'na lectura.';
+  @override
+  String get linkPreviewOpen => 'Abrir';
 
   // Rebuilding the index file (#368).
 

@@ -2937,6 +2937,16 @@ final class UkrainianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Позначення прапорця позначає й вкладені під ним. Зняття '
       'позначки залишає їх як є.';
+  @override
+  String get linkPreviewTitle => 'Попередній перегляд посилань';
+  @override
+  String get linkPreviewSubtitle =>
+      'Наведіть курсор на посилання в режимі читання або утримуйте Ctrl (⌘ '
+      'на Mac) над ним у редакторі, щоб побачити нотатку, на яку воно веде, '
+      'у маленькій картці. На сенсорному екрані довго натисніть посилання в '
+      'режимі читання.';
+  @override
+  String get linkPreviewOpen => 'Відкрити';
 
   // Rebuilding the index file (#368).
 

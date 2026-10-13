@@ -161,6 +161,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.wikilinkSuggester,
     this.notePath,
     this.deadLinks,
+    this.onLinkHover,
     super.key,
   });
 
@@ -326,9 +327,26 @@ final class MarkdownSourceView extends StatefulWidget {
   /// link that is not there yet. Null draws every link as a live one.
   final ValueListenable<DeadLinks>? deadLinks;
 
+  /// Told when the pointer comes onto a link with the opening modifier held
+  /// (Ctrl, ⌘ on a Mac), and with null when it leaves it or the modifier goes
+  /// up: what the link preview opens its card from (#846). Null (the
+  /// default, and every touch screen) reports nothing.
+  final void Function(SourceLinkHover? hover)? onLinkHover;
+
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
 }
+
+/// A link the pointer is on with the opening modifier held (#846): its kind
+/// (a wikilink or a Markdown link), as written (`[[…]]`, `[…](…)`), the target
+/// a reference link resolved to when its source spells none, and where the
+/// pointer is (global).
+typedef SourceLinkHover = ({
+  TokenKind kind,
+  String raw,
+  String? href,
+  Offset position,
+});
 
 /// The source view's state, so a caller can ask where the caret is.
 final class MarkdownSourceViewState extends State<MarkdownSourceView> {
@@ -4164,6 +4182,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                       _leaveTable();
                       _hoverPosition = null;
                       _hoverCursor.value = SystemMouseCursors.text;
+                      _reportLinkHover(null, Offset.zero);
                     },
                     child: child,
                   ),
@@ -4572,6 +4591,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ? SystemMouseCursors.click
         : SystemMouseCursors.text;
     if (_hoverCursor.value != cursor) _hoverCursor.value = cursor;
+    _reportLinkHover(offset, global);
+  }
+
+  /// The link the pointer is on with the opening modifier held, as last told
+  /// to [MarkdownSourceView.onLinkHover]: a pointer moving along one link
+  /// tells once.
+  String? _hoveredLink;
+
+  /// Tells [MarkdownSourceView.onLinkHover] which link the pointer is on —
+  /// only with the modifier down, which is the intent to open it — or that it
+  /// is on none. Asked of the same line [_overLink] reads, so a hover costs no
+  /// scan of the note.
+  void _reportLinkHover(int? offset, Offset global) {
+    final report = widget.onLinkHover;
+    if (report == null) return;
+    final link = offset != null && _linkModifier() ? linkAt(offset) : null;
+    final key = link == null ? null : '${link.$1.name}|${link.$2}';
+    if (key == _hoveredLink) return;
+    _hoveredLink = key;
+    report(
+      link == null
+          ? null
+          : (kind: link.$1, raw: link.$2, href: link.$3, position: global),
+    );
   }
 
   /// Whether the opening modifier over [offset] would open a link: the very

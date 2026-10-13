@@ -2860,6 +2860,15 @@ final class EstonianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Märkeruudu märkimine märgib ka selle alla pesastatud. Märgi '
       'eemaldamine jätab need puutumata.';
+  @override
+  String get linkPreviewTitle => 'Linkide eelvaade';
+  @override
+  String get linkPreviewSubtitle =>
+      'Liiguta hiir lugemisvaates lingi kohale või hoia redaktoris lingi '
+      'kohal all Ctrl (Macis ⌘), et näha väikesel kaardil märget, millele '
+      'see viitab. Puuteekraanil vajuta lugemisvaates linki pikalt.';
+  @override
+  String get linkPreviewOpen => 'Ava';
 
   // Rebuilding the index file (#368).
 

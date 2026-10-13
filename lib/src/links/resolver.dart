@@ -7,11 +7,14 @@
 /// picker.
 library;
 
+import 'dart:async' show unawaited;
+
 import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:path/path.dart' as p;
 
@@ -126,6 +129,12 @@ abstract interface class LinkSource {
   /// Read from the referrer's text when asked, once for each revision of it;
   /// [Mention.unread] when the text no longer names the note.
   Future<Mention> mentionIn(String referrerPath, String path);
+
+  /// The beginning of the note at library-relative [path], for a preview
+  /// card (#846): read off the UI isolate, kept by the note's revision so a
+  /// sweep of hovers over the same link is one read. Null when the note is
+  /// not in the index or cannot be read.
+  Future<NotePreviewText?> previewText(String path);
 }
 
 /// One link to resolve in a batch ([LinkResolver.resolveQueries]): the
@@ -140,7 +149,7 @@ final class LinkResolver implements LinkSource {
   /// Creates a resolver over the drift [IndexDatabase]; [changes] is the
   /// library's own announcement that its index moved (see
   /// [LinkSource.changes]).
-  new(this._db, {this._changes, this._readSpots});
+  new(this._db, {this._changes, this._readSpots, this._readPreview});
 
   final IndexDatabase _db;
 
@@ -149,6 +158,47 @@ final class LinkResolver implements LinkSource {
   /// Reads the links of the note at a library-relative path, off the UI
   /// isolate: what [mentionIn] finds a mention in. Null reads none.
   final Future<List<LinkSpot>?> Function(String path)? _readSpots;
+
+  /// Reads the beginning of the note at a library-relative path, off the UI
+  /// isolate: what [previewText] shows a card. Null reads none.
+  final Future<NotePreviewText?> Function(String path)? _readPreview;
+
+  /// The previews read or being read, by note and revision (its mtime and
+  /// size, as the index records it), least recently asked first.
+  final Map<(int, DateTime, int), Future<NotePreviewText?>> _previews = {};
+
+  @override
+  Future<NotePreviewText?> previewText(String path) async {
+    final read = _readPreview;
+    final note = await NoteDao(_db).find(path);
+    if (read == null || note == null || note.isDir) return null;
+    final key = (note.id, note.modified, note.size);
+    final kept = _previews.remove(key);
+    if (kept != null) {
+      // Asked again: now the freshest, and a read under way is shared.
+      _previews[key] = kept;
+      return await kept;
+    }
+    final reading = read(path);
+    _previews[key] = reading;
+    if (_previews.length > PreviewLimits.kept) {
+      unawaited(_previews.remove(_previews.keys.first));
+    }
+    try {
+      final text = await reading;
+      if (text == null) unawaited(_previews.remove(key));
+      return text;
+    } on Object {
+      // A note gone since the index heard of it: nothing is kept for it.
+      unawaited(_previews.remove(key));
+      return null;
+    }
+  }
+
+  /// How many previews are kept now, for the test that holds the cache to
+  /// [PreviewLimits.kept].
+  @visibleForTesting
+  int get previewsHeld => _previews.length;
 
   /// How many mentions are kept: a list scrolled through a long way, once
   /// each, and no more than this many.

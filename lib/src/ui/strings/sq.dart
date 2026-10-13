@@ -2921,6 +2921,16 @@ final class AlbanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Shënimi i një kutie shënon edhe ato të futura poshtë saj. '
       'Heqja e shënimit i lë ashtu.';
+  @override
+  String get linkPreviewTitle => 'Paraqitje paraprake e lidhjeve';
+  @override
+  String get linkPreviewSubtitle =>
+      'Kaloje miun mbi një lidhje në pamjen e leximit, ose mbaj shtypur '
+      'Ctrl (⌘ në Mac) mbi një në redaktor, për të parë shënimin ku të çon '
+      'në një kartë të vogël. Në ekran me prekje, mbaj të shtypur një '
+      'lidhje në pamjen e leximit.';
+  @override
+  String get linkPreviewOpen => 'Hap';
 
   // Rebuilding the index file (#368).
 

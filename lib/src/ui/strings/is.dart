@@ -2901,6 +2901,16 @@ final class IcelandicStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Að haka við reit hakir líka við þá sem eru innfelldir undir. '
       'Að taka hakið af lætur þá standa.';
+  @override
+  String get linkPreviewTitle => 'Forskoðun tengla';
+  @override
+  String get linkPreviewSubtitle =>
+      'Færðu músina yfir tengil í lestrarsýn, eða haltu Ctrl (⌘ á Mac) '
+      'niðri yfir einum í ritlinum, til að sjá minnispunktinn sem hann '
+      'vísar á á litlu korti. Á snertiskjá skaltu halda inni tengli í '
+      'lestrarsýn.';
+  @override
+  String get linkPreviewOpen => 'Opna';
 
   // Rebuilding the index file (#368).
 

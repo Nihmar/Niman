@@ -2889,6 +2889,15 @@ final class DanishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Et flueben i et felt sætter også dem, der er indlejret '
       'under. At fjerne det lader dem være.';
+  @override
+  String get linkPreviewTitle => 'Vis forhåndsvisning af links';
+  @override
+  String get linkPreviewSubtitle =>
+      'Hold musen over et link i læsevisningen, eller hold Ctrl (⌘ på Mac) '
+      'nede over et i editoren, for at se noten, det peger på, i et lille '
+      'kort. På en berøringsskærm: tryk og hold på et link i læsevisningen.';
+  @override
+  String get linkPreviewOpen => 'Åbn';
 
   // Rebuilding the index file (#368).
 

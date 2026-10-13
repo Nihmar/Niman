@@ -2910,6 +2910,15 @@ final class SwedishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Att markera en ruta markerar dem som är nästlade under. Att '
       'avmarkera lämnar dem som de är.';
+  @override
+  String get linkPreviewTitle => 'Förhandsgranska länkar';
+  @override
+  String get linkPreviewSubtitle =>
+      'Håll muspekaren över en länk i läsvyn, eller håll ned Ctrl (⌘ på '
+      'Mac) över en i redigeraren, för att se anteckningen den pekar på i '
+      'ett litet kort. På en pekskärm: tryck och håll på en länk i läsvyn.';
+  @override
+  String get linkPreviewOpen => 'Öppna';
 
   // Rebuilding the index file (#368).
 

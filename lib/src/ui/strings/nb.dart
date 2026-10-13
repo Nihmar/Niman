@@ -2886,6 +2886,16 @@ final class NorwegianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Å huke av en boks huker også av dem som er nøstet under. Å '
       'fjerne haken lar dem stå.';
+  @override
+  String get linkPreviewTitle => 'Forhåndsvis lenker';
+  @override
+  String get linkPreviewSubtitle =>
+      'Hold musepekeren over en lenke i lesevisningen, eller hold inne Ctrl '
+      '(⌘ på Mac) over en i redigeringsvisningen, for å se notatet den '
+      'peker på i et lite kort. På berøringsskjerm: trykk og hold på en '
+      'lenke i lesevisningen.';
+  @override
+  String get linkPreviewOpen => 'Åpne';
 
   // Rebuilding the index file (#368).
 

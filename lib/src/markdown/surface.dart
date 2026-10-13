@@ -105,6 +105,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.wikilinkSuggester,
     this.notePath,
     this.deadLinks,
+    this.onLinkHover,
     super.key,
   });
 
@@ -123,6 +124,9 @@ final class MarkdownSurface extends StatelessWidget {
 
   /// See [MarkdownSourceView.deadLinks].
   final ValueListenable<DeadLinks>? deadLinks;
+
+  /// See [MarkdownSourceView.onLinkHover].
+  final void Function(SourceLinkHover? hover)? onLinkHover;
 
   /// The note.
   final SourceBuffer buffer;
@@ -281,5 +285,6 @@ final class MarkdownSurface extends StatelessWidget {
     wikilinkSuggester: wikilinkSuggester,
     notePath: notePath,
     deadLinks: deadLinks,
+    onLinkHover: onLinkHover,
   );
 }

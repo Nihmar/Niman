@@ -2931,6 +2931,16 @@ final class LithuanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Pažymėjus langelį pažymimi ir po juo įdėti. Nuėmus žymę jie '
       'paliekami.';
+  @override
+  String get linkPreviewTitle => 'Nuorodų peržiūra';
+  @override
+  String get linkPreviewSubtitle =>
+      'Perkelkite pelę virš nuorodos skaitymo rodinyje arba laikykite '
+      'nuspaudę Ctrl (Mac – ⌘) virš nuorodos redaktoriuje, kad mažoje '
+      'kortelėje pamatytumėte pastabą, į kurią ji rodo. Jutikliniame ekrane '
+      'skaitymo rodinyje ilgai palieskite nuorodą.';
+  @override
+  String get linkPreviewOpen => 'Atidaryti';
 
   // Rebuilding the index file (#368).
 

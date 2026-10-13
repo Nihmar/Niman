@@ -2947,6 +2947,16 @@ final class PolishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Zaznaczenie pola zaznacza też te zagnieżdżone pod nim. '
       'Odznaczenie zostawia je bez zmian.';
+  @override
+  String get linkPreviewTitle => 'Podgląd linków';
+  @override
+  String get linkPreviewSubtitle =>
+      'Najedź kursorem na link w widoku czytania lub przytrzymaj Ctrl (⌘ na '
+      'Macu) nad linkiem w edytorze, aby zobaczyć notatkę, do której '
+      'prowadzi, na małej karcie. Na ekranie dotykowym przytrzymaj link w '
+      'widoku czytania.';
+  @override
+  String get linkPreviewOpen => 'Otwórz';
 
   // Rebuilding the index file (#368).
 

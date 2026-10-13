@@ -2932,6 +2932,16 @@ final class BasqueStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Lauki bat markatzean hark azpian habiaratutakoak ere '
       'markatzen ditu. Marka kentzean dauden bezala uzten ditu.';
+  @override
+  String get linkPreviewTitle => 'Estekak aurreikusi';
+  @override
+  String get linkPreviewSubtitle =>
+      'Pasatu sagua irakurketako esteka baten gainetik, edo mantendu Ctrl '
+      '(⌘ Mac-en) editoreko baten gainean, bideratzen duen oharra txartel '
+      'txiki batean ikusteko. Ukipen-pantailan, mantendu sakatuta '
+      'irakurketako esteka bat.';
+  @override
+  String get linkPreviewOpen => 'Ireki';
 
   // Rebuilding the index file (#368).
 

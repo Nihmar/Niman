@@ -435,6 +435,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<bool> get linkPreview async => _config.linkPreview;
+
+  @override
+  Future<void> setLinkPreview({required bool enabled}) async {
+    _config = _config.copyWith(linkPreview: enabled);
+  }
+
+  @override
   Future<bool> get frontmatterPanel async => _config.frontmatterPanel;
 
   @override

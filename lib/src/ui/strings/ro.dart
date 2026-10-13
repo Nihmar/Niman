@@ -2945,6 +2945,16 @@ final class RomanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Bifarea unei casete le bifează și pe cele imbricate '
       'dedesubt. Debifarea le lasă așa.';
+  @override
+  String get linkPreviewTitle => 'Previzualizare linkuri';
+  @override
+  String get linkPreviewSubtitle =>
+      'Treceți cursorul peste un link în vizualizarea de citire sau țineți '
+      'apăsat Ctrl (⌘ pe Mac) peste unul în editor, pentru a vedea nota '
+      'spre care duce într-un card mic. Pe un ecran tactil, apăsați lung un '
+      'link în vizualizarea de citire.';
+  @override
+  String get linkPreviewOpen => 'Deschide';
 
   // Rebuilding the index file (#368).
 

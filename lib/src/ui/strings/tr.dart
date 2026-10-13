@@ -2866,6 +2866,16 @@ final class TurkishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Bir kutuyu işaretlemek altındaki iç içe kutuları da '
       'işaretler. İşareti kaldırmak onları olduğu gibi bırakır.';
+  @override
+  String get linkPreviewTitle => 'Bağlantı önizlemesi';
+  @override
+  String get linkPreviewSubtitle =>
+      'Okuma görünümünde bir bağlantının üzerine gelin ya da düzenleyicide '
+      'üzerindeyken Ctrl (Mac’te ⌘) tuşunu basılı tutun; gösterdiği notu '
+      'küçük bir kartta görün. Dokunmatik ekranda okuma görünümünde bir '
+      'bağlantıya basılı tutun.';
+  @override
+  String get linkPreviewOpen => 'Aç';
 
   // Rebuilding the index file (#368).
 

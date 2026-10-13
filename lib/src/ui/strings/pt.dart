@@ -2919,6 +2919,15 @@ final class PortugueseStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar uma caixa marca as que estão aninhadas por baixo. '
       'Desmarcá-la deixa-as como estão.';
+  @override
+  String get linkPreviewTitle => 'Pré-visualizar links';
+  @override
+  String get linkPreviewSubtitle =>
+      'Passe o rato sobre um link na leitura, ou mantenha Ctrl (⌘ no Mac) '
+      'sobre um no editor, para ver a nota para a qual ele aponta num '
+      'cartão pequeno. Num ecrã tátil, mantenha premido um link na leitura.';
+  @override
+  String get linkPreviewOpen => 'Abrir';
 
   // Rebuilding the index file (#368).
 

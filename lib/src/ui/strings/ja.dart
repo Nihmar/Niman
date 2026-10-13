@@ -2651,6 +2651,14 @@ final class JapaneseStrings extends Strings {
   @override
   String get cascadeChecklistSubtitle =>
       'チェックすると、その下に入れ子になったものも一緒にチェックされます。外すとそのままです。';
+  @override
+  String get linkPreviewTitle => 'リンクのプレビュー';
+  @override
+  String get linkPreviewSubtitle =>
+      '閲覧表示ではリンクにポインタを重ね、エディタでは Ctrl (Mac は ⌘) '
+      'を押しながら重ねると、リンク先のノートを小さなカードで確認できます。タッチ画面では、閲覧表示でリンクを長押ししてください。';
+  @override
+  String get linkPreviewOpen => '開く';
 
   // Rebuilding the index file (#368).
 

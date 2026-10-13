@@ -2921,6 +2921,16 @@ final class ItalianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Spuntare una casella spunta quelle annidate sotto. Toglierla '
       'le lascia come sono.';
+  @override
+  String get linkPreviewTitle => 'Anteprima dei link';
+  @override
+  String get linkPreviewSubtitle =>
+      'Passa il mouse su un link nella lettura, o tieni premuto Ctrl (⌘ su '
+      'Mac) su uno nell’editor, per vedere la nota a cui punta in una '
+      'piccola scheda. Su uno schermo touch, tieni premuto un link nella '
+      'lettura.';
+  @override
+  String get linkPreviewOpen => 'Apri';
 
   // Rebuilding the index file (#368).
 

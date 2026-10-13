@@ -2570,6 +2570,14 @@ final class ChineseStrings extends Strings {
   String get cascadeChecklistTitle => '勾选嵌套的复选框';
   @override
   String get cascadeChecklistSubtitle => '勾选一个复选框会同时勾选嵌套在它下面的。取消勾选则保持原样。';
+  @override
+  String get linkPreviewTitle => '链接预览';
+  @override
+  String get linkPreviewSubtitle =>
+      '在阅读视图中将指针悬停在链接上，或在编辑器中按住 Ctrl（Mac 上为 '
+      '⌘）悬停，即可在小卡片中查看链接指向的笔记。在触摸屏上，请在阅读视图中长按链接。';
+  @override
+  String get linkPreviewOpen => '打开';
 
   // Rebuilding the index file (#368).
 

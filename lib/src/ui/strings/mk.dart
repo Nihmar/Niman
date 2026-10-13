@@ -2926,6 +2926,16 @@ final class MacedonianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Означувањето квадратче ги означува и вгнездените под него. '
       'Отстранувањето на ознаката ги остава како се.';
+  @override
+  String get linkPreviewTitle => 'Преглед на врски';
+  @override
+  String get linkPreviewSubtitle =>
+      'Задржете го покажувачот над врска во приказот за читање или држете '
+      'Ctrl (⌘ на Mac) над неа во уредникот за да ја видите белешката на '
+      'која упатува во мала картичка. На екран на допир, долго притиснете '
+      'врска во приказот за читање.';
+  @override
+  String get linkPreviewOpen => 'Отвори';
 
   // Rebuilding the index file (#368).
 

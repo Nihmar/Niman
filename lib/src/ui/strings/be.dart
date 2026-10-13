@@ -2934,6 +2934,16 @@ final class BelarusianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Адзначэнне сцяжка адзначае і ўкладзеныя пад ім. Зняцце '
       'адзнакі пакідае іх як ёсць.';
+  @override
+  String get linkPreviewTitle => 'Папярэдні прагляд спасылак';
+  @override
+  String get linkPreviewSubtitle =>
+      'Навядзіце курсор на спасылку ў рэжыме чытання або ўтрымлівайце Ctrl '
+      '(⌘ на Mac) над ёй у рэдактары, каб убачыць нататку, на якую яна '
+      'вядзе, у маленькай картцы. На сэнсарным экране доўга націсніце '
+      'спасылку ў рэжыме чытання.';
+  @override
+  String get linkPreviewOpen => 'Адкрыць';
 
   // Rebuilding the index file (#368).
 

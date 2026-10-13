@@ -60,6 +60,12 @@ the two agree.
   foreground service and its notification; a page with too little text is
   run in a hidden WebView of the app's own (see
   [web capture](web-capture.md)).
+- **Link preview:** there is no pointer to hover, so a long press on a link
+  in the **read view** opens the note it points at as a bottom sheet with an
+  **Open** button (see [links](links.md#preview-a-link)). The editor has none:
+  a long press there selects the word under the finger, and a tap places the
+  caret. This is a decision, not an omission; Linux and Windows preview on
+  hover.
 - **Paste as Markdown:** in the editor's menu. Android's clipboard holds
   the HTML a browser copies but not the page it came from, so the paste
   is not linked to its page, and links written relative to it stay as

@@ -26,6 +26,7 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/embed_path.dart';
+import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -36,6 +37,10 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/read_parser.dart';
+import 'package:niman/src/markdown/render/dead_link_ranges.dart'
+    show inlineHrefOf;
+import 'package:niman/src/markdown/render/inline_spans.dart'
+    show LinkPreviewHooks;
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -51,6 +56,9 @@ import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
+import 'package:niman/src/ui/link_preview/link_preview_controller.dart';
+import 'package:niman/src/ui/link_preview/link_preview_host.dart';
+import 'package:niman/src/ui/link_preview/link_preview_sheet.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
@@ -138,6 +146,7 @@ final class NoteView extends StatefulWidget {
     this.typewriter = false,
     this.cascadeChecklist = true,
     this.frontmatterPanel = true,
+    this.linkPreview = true,
     this.onToggleTypewriter,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
@@ -169,6 +178,11 @@ final class NoteView extends StatefulWidget {
   /// Whether the note's frontmatter is drawn as the properties panel above it
   /// (settings toggle, #157). Off, the note is its own text in both surfaces.
   final bool frontmatterPanel;
+
+  /// Whether hovering a link — with Ctrl (⌘) held in the editor — or pressing
+  /// and holding it in the read view on a touch screen previews the note it
+  /// points at (settings, #846).
+  final bool linkPreview;
 
   /// Where the note's text sits across the pane (issue #171): both
   /// editors, the preview, the toolbar, the find bars and the status row
@@ -447,6 +461,73 @@ final class _NoteViewState extends State<NoteView>
     notePath: () => _pathInLibrary,
     delay: () => _stats.settleDelay,
   );
+
+  /// The link preview card (#846): which link has one open, and when.
+  late final LinkPreviewController _preview = LinkPreviewController(
+    source: () => widget.linkSource,
+    notePath: () => _pathInLibrary,
+    enabled: () => widget.linkPreview,
+  );
+
+  /// The scrolls of both panes: a card closes when the note moves under it.
+  late final Listenable _scrolls = Listenable.merge([
+    _previewScroll,
+    _sourceScroll,
+  ]);
+
+  /// The pointer is on a link in the editor with the opening modifier held,
+  /// or it left: the card opens at once (the modifier is the intent) or goes.
+  void _editorLinkHover(SourceLinkHover? hover) {
+    if (hover == null) {
+      _preview.leave();
+      return;
+    }
+    final raw = hover.raw;
+    final PreviewLink link;
+    if (hover.kind == TokenKind.wikilink) {
+      if (raw.length < 4 || !raw.startsWith('[[') || !raw.endsWith(']]')) {
+        return;
+      }
+      link = PreviewLink.wiki(raw.substring(2, raw.length - 2));
+    } else {
+      final href = hover.href ?? inlineHrefOf(raw);
+      if (href == null) return;
+      link = PreviewLink.markdown(href);
+    }
+    _preview.enter(link, hover.position, delay: Duration.zero);
+  }
+
+  /// What the read view's links tell the preview: a pointer on one, off it,
+  /// and — only on a touch screen — a long press (#846).
+  LinkPreviewHooks _previewHooks(BuildContext context) {
+    final touch = switch (Theme.of(context).platform) {
+      TargetPlatform.android || TargetPlatform.iOS => true,
+      _ => false,
+    };
+    return (
+      onEnter: _preview.enter,
+      onExit: _preview.leave,
+      onLongPress: touch ? _previewSheet : null,
+    );
+  }
+
+  /// A long press on a link in the read view: the card, as a sheet with an
+  /// Open action (#846). Nothing for a link that points at nothing.
+  Future<void> _previewSheet(PreviewLink link) async {
+    if (!_preview.enabled) return;
+    final preview = await _preview.read(link);
+    if (preview == null || !mounted) return;
+    await showLinkPreviewSheet(
+      context,
+      preview: preview,
+      mathCache: _mathCache,
+      onOpen: () => unawaited(
+        link.wiki
+            ? openWiki(context, parseWikiRef(link.text), _linkTargets())
+            : openHref(context, link.text, _linkTargets()),
+      ),
+    );
+  }
 
   /// The note's path in the library, slash-separated, or null for a note
   /// opened from outside one.
@@ -1013,6 +1094,7 @@ final class _NoteViewState extends State<NoteView>
       ..removeListener(_onStatsChanged)
       ..dispose();
     _deadLinks.dispose();
+    _preview.dispose();
     _activeFormats.dispose();
     _formatKeys.detach();
     _focus.dispose();
@@ -1097,6 +1179,7 @@ final class _NoteViewState extends State<NoteView>
     _saves.markClean();
     // The links of the note that went are not this one's.
     _deadLinks.clear();
+    _preview.close();
     setState(() {
       _loading = true;
       _ready = false;
@@ -1301,6 +1384,7 @@ final class _NoteViewState extends State<NoteView>
     _caretLine = caretLine;
     _stats.schedule();
     _deadLinks.schedule();
+    _preview.close();
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
   }
@@ -1420,6 +1504,7 @@ final class _NoteViewState extends State<NoteView>
         templateCommands: _templateIn(widget),
         wikilinkSuggester: widget.wikilinkSuggester,
         deadLinks: _deadLinks,
+        onLinkHover: _editorLinkHover,
         notePath: widget.libraryRoot == null
             ? null
             : relPath(widget.path, widget.libraryRoot!),
@@ -1591,6 +1676,7 @@ final class _NoteViewState extends State<NoteView>
       ),
       embedResolver: _resolveEmbed,
       deadLinks: _deadLinks,
+      linkPreview: _previewHooks(context),
       column: widget.noteColumn,
       knownScan: _editorScanOf,
       onToggleTask: _toggleTaskFromRead,
@@ -2066,45 +2152,51 @@ final class _NoteViewState extends State<NoteView>
             actions: widget.barActions,
           ),
         Expanded(
-          child: error == null
-              ? (!_ready || _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : kindBody
-                    ? kindChild!
-                    // Both panes stay mounted and only one is on stage:
-                    // coming back to the preview finds its parse, scroll
-                    // offset, typeset math and images where they were
-                    // (device report, 2026-09-11: every return re-parsed
-                    // the note and restarted from the top). Offstage
-                    // children skip hit testing, painting and the default
-                    // finders; the panes never show together.
-                    : Stack(
-                        children: [
-                          Offstage(
-                            offstage: showPreview,
-                            child: KeyedSubtree(
-                              key: ValueKey(
-                                _wysiwygIn(widget)
-                                    ? 'pane-wysiwyg'
-                                    : 'pane-editor',
+          // The preview card of a hovered link goes over the note (#846).
+          child: LinkPreviewHost(
+            controller: _preview,
+            mathCache: _mathCache,
+            closeOn: _scrolls,
+            child: error == null
+                ? (!_ready || _loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : kindBody
+                      ? kindChild!
+                      // Both panes stay mounted and only one is on stage:
+                      // coming back to the preview finds its parse, scroll
+                      // offset, typeset math and images where they were
+                      // (device report, 2026-09-11: every return re-parsed
+                      // the note and restarted from the top). Offstage
+                      // children skip hit testing, painting and the default
+                      // finders; the panes never show together.
+                      : Stack(
+                          children: [
+                            Offstage(
+                              offstage: showPreview,
+                              child: KeyedSubtree(
+                                key: ValueKey(
+                                  _wysiwygIn(widget)
+                                      ? 'pane-wysiwyg'
+                                      : 'pane-editor',
+                                ),
+                                child: _unifiedSurfacePane(),
                               ),
-                              child: _unifiedSurfacePane(),
                             ),
-                          ),
-                          Offstage(
-                            offstage: !showPreview,
-                            child: KeyedSubtree(
-                              key: const ValueKey('pane-preview'),
-                              child: _previewPane(context),
+                            Offstage(
+                              offstage: !showPreview,
+                              child: KeyedSubtree(
+                                key: const ValueKey('pane-preview'),
+                                child: _previewPane(context),
+                              ),
                             ),
-                          ),
-                        ],
-                      ))
-              : NoteLoadError(
-                  message: error,
-                  path: widget.path,
-                  offerDefaultApp: _notText,
-                ),
+                          ],
+                        ))
+                : NoteLoadError(
+                    message: error,
+                    path: widget.path,
+                    offerDefaultApp: _notText,
+                  ),
+          ),
         ),
         if (!kindBody && !widget.zen) ...[
           SafeArea(

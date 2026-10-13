@@ -1666,6 +1666,9 @@ final class AppStrings {
 
   static String get cascadeChecklistTitle => _s.cascadeChecklistTitle;
   static String get cascadeChecklistSubtitle => _s.cascadeChecklistSubtitle;
+  static String get linkPreviewTitle => _s.linkPreviewTitle;
+  static String get linkPreviewSubtitle => _s.linkPreviewSubtitle;
+  static String get linkPreviewOpen => _s.linkPreviewOpen;
 
   // Text recognition (#593).
 

@@ -384,6 +384,7 @@ final class LibraryConfig {
     this.tidyOnClose = true,
     this.deleteCarriesNotes = true,
     this.cascadeChecklist = true,
+    this.linkPreview = true,
     this.frontmatterPanel = true,
     this.lintRulesOff = const <String>{},
     this.treeSort = TreeSort.nameAsc,
@@ -472,6 +473,7 @@ final class LibraryConfig {
       tidyOnClose: _boolOr(json['tidyOnClose'], true),
       deleteCarriesNotes: _boolOr(json['deleteCarriesNotes'], true),
       cascadeChecklist: _boolOr(json['cascadeChecklist'], true),
+      linkPreview: _boolOr(json['linkPreview'], true),
       frontmatterPanel: _boolOr(json['frontmatterPanel'], true),
       lintRulesOff: _lintRulesOffFrom(json['lintRulesOff']),
       // The enum's name is the stored id (#726): a value a later build
@@ -637,6 +639,11 @@ final class LibraryConfig {
   /// leaves its children as they are.
   final bool cascadeChecklist;
 
+  /// Whether hovering a link previews the note it points at (default true,
+  /// #846): a card at the pointer in the read view, with Ctrl (⌘) held in the
+  /// editor, and a sheet from a long press on a touch screen.
+  final bool linkPreview;
+
   /// Whether a note's leading frontmatter is drawn as the properties panel
   /// above it (default true, #157).
   ///
@@ -770,6 +777,7 @@ final class LibraryConfig {
     bool? tidyOnClose,
     bool? deleteCarriesNotes,
     bool? cascadeChecklist,
+    bool? linkPreview,
     bool? frontmatterPanel,
     Set<String>? lintRulesOff,
     TreeSort? treeSort,
@@ -820,6 +828,7 @@ final class LibraryConfig {
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
       deleteCarriesNotes: deleteCarriesNotes ?? this.deleteCarriesNotes,
       cascadeChecklist: cascadeChecklist ?? this.cascadeChecklist,
+      linkPreview: linkPreview ?? this.linkPreview,
       frontmatterPanel: frontmatterPanel ?? this.frontmatterPanel,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
       treeSort: treeSort ?? this.treeSort,
@@ -948,6 +957,7 @@ final class LibraryConfig {
     'tidyOnClose',
     'deleteCarriesNotes',
     'cascadeChecklist',
+    'linkPreview',
     'frontmatterPanel',
     'lintRulesOff',
     'treeSort',
@@ -1013,6 +1023,7 @@ final class LibraryConfig {
       'tidyOnClose': tidyOnClose,
       'deleteCarriesNotes': deleteCarriesNotes,
       'cascadeChecklist': cascadeChecklist,
+      'linkPreview': linkPreview,
       'frontmatterPanel': frontmatterPanel,
       'treeSort': treeSort.name,
       'treeView': treeView.name,
@@ -1126,6 +1137,7 @@ final class LibraryConfig {
         tidyOnClose == other.tidyOnClose &&
         deleteCarriesNotes == other.deleteCarriesNotes &&
         cascadeChecklist == other.cascadeChecklist &&
+        linkPreview == other.linkPreview &&
         lintRulesOff.length == other.lintRulesOff.length &&
         lintRulesOff.containsAll(other.lintRulesOff) &&
         treeSort == other.treeSort &&

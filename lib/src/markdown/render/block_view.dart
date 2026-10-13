@@ -48,6 +48,7 @@ final class BlockView extends StatelessWidget {
     this.onTapLink,
     this.onTapWikiLink,
     this.deadLinks,
+    this.linkPreview,
     this.embedResolver,
     this.embedImages,
     this.onToggleTask,
@@ -79,6 +80,9 @@ final class BlockView extends StatelessWidget {
   /// The links of the note that name nothing (#847), which are drawn muted;
   /// null draws every link as a live one.
   final ValueListenable<DeadLinks>? deadLinks;
+
+  /// What the links tell the link preview (#846); null previews nothing.
+  final LinkPreviewHooks? linkPreview;
 
   /// Resolves an embed's target to a picture.
   final Future<String?> Function(String target)? embedResolver;
@@ -150,6 +154,7 @@ final class _Drawer {
     onTapLink: view.onTapLink,
     onTapWikiLink: view.onTapWikiLink,
     deadLinks: view.deadLinks,
+    linkPreview: view.linkPreview,
     embedResolver: view.embedResolver,
     embedImages: view.embedImages,
   );

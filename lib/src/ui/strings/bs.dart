@@ -2933,6 +2933,16 @@ final class BosnianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Označavanje kućice označava i one ugniježđene ispod. '
       'Uklanjanje oznake ih ostavlja kakve jesu.';
+  @override
+  String get linkPreviewTitle => 'Pregled veza';
+  @override
+  String get linkPreviewSubtitle =>
+      'Zadržite pokazivač iznad veze u prikazu čitanja ili držite Ctrl (⌘ '
+      'na Macu) iznad nje u uredniku da biste u maloj kartici vidjeli '
+      'bilješku na koju vodi. Na ekranu osjetljivom na dodir dugo '
+      'pritisnite vezu u prikazu čitanja.';
+  @override
+  String get linkPreviewOpen => 'Otvori';
 
   // Rebuilding the index file (#368).
 

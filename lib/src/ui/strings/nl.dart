@@ -2937,6 +2937,16 @@ final class DutchStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Een vakje aanvinken vinkt ook de eronder geneste aan. '
       'Uitzetten laat ze zoals ze zijn.';
+  @override
+  String get linkPreviewTitle => 'Linkvoorbeeld';
+  @override
+  String get linkPreviewSubtitle =>
+      'Beweeg de muis over een link in de leesweergave, of houd Ctrl (⌘ op '
+      'een Mac) ingedrukt boven een link in de editor, om de notitie '
+      'waarnaar hij verwijst in een kleine kaart te zien. Houd op een '
+      'touchscreen een link in de leesweergave ingedrukt.';
+  @override
+  String get linkPreviewOpen => 'Openen';
 
   // Rebuilding the index file (#368).
 

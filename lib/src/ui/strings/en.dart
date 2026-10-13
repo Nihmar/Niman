@@ -2866,6 +2866,15 @@ final class EnglishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ticking a checkbox ticks every one nested under it. Clearing '
       'it leaves them as they are.';
+  @override
+  String get linkPreviewTitle => 'Preview links';
+  @override
+  String get linkPreviewSubtitle =>
+      'Hover a link in the read view, or hold Ctrl (⌘ on a Mac) over one in '
+      'the editor, to see the note it points at in a small card. On a touch '
+      'screen, press and hold a link in the read view.';
+  @override
+  String get linkPreviewOpen => 'Open';
 
   // Rebuilding the index file (#368).
 

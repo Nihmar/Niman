@@ -2895,6 +2895,16 @@ final class LatvianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ķekstiņa atzīmēšana atzīmē arī zem tā iegultos. Atzīmes '
       'noņemšana tos atstāj kā ir.';
+  @override
+  String get linkPreviewTitle => 'Saišu priekšskatījums';
+  @override
+  String get linkPreviewSubtitle =>
+      'Virziet peli virs saites lasīšanas skatā vai turiet nospiestu Ctrl '
+      '(Mac datorā ⌘) virs saites redaktorā, lai mazā kartītē redzētu '
+      'piezīmi, uz kuru tā norāda. Skārienekrānā lasīšanas skatā ilgi '
+      'nospiediet saiti.';
+  @override
+  String get linkPreviewOpen => 'Atvērt';
 
   // Rebuilding the index file (#368).
 

@@ -2994,6 +2994,16 @@ final class GreekStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Η σήμανση ενός πλαισίου σημαίνει και όσα είναι ένθετα από '
       'κάτω. Η αφαίρεση τα αφήνει ως έχουν.';
+  @override
+  String get linkPreviewTitle => 'Προεπισκόπηση συνδέσμων';
+  @override
+  String get linkPreviewSubtitle =>
+      'Περάστε το ποντίκι πάνω από έναν σύνδεσμο στην ανάγνωση ή κρατήστε '
+      'πατημένο το Ctrl (⌘ σε Mac) πάνω από έναν στον επεξεργαστή για να '
+      'δείτε τη σημείωση στην οποία δείχνει σε μια μικρή κάρτα. Σε οθόνη '
+      'αφής, πατήστε παρατεταμένα έναν σύνδεσμο στην ανάγνωση.';
+  @override
+  String get linkPreviewOpen => 'Άνοιγμα';
 
   // Rebuilding the index file (#368).
 

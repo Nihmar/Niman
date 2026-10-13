@@ -2912,6 +2912,16 @@ final class HungarianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Egy négyzet bejelölése az alatta beágyazottakat is bejelöli. '
       'A jelölés levétele úgy hagyja őket.';
+  @override
+  String get linkPreviewTitle => 'Hivatkozások előnézete';
+  @override
+  String get linkPreviewSubtitle =>
+      'Vidd az egeret egy hivatkozás fölé az olvasónézetben, vagy tartsd '
+      'lenyomva a Ctrl-t (Macen ⌘) egy fölött a szerkesztőben, hogy egy kis '
+      'kártyán lásd a jegyzetet, amelyre mutat. Érintőképernyőn nyomd '
+      'hosszan a hivatkozást az olvasónézetben.';
+  @override
+  String get linkPreviewOpen => 'Megnyitás';
 
   // Rebuilding the index file (#368).
 

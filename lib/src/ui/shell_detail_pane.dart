@@ -56,6 +56,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.ocr,
     this.marks,
     this.zen = false,
+    this.linkPreview = true,
     this.outlineInDock = false,
     this.typewriter = false,
     this.sourceFont = SourceFont.monospace,
@@ -208,6 +209,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// Whether a note's properties panel shows above it (#157).
   final bool frontmatterPanel;
 
+  /// Whether hovering a link previews the note it points at (#846).
+  final bool linkPreview;
+
   /// See [typewriter].
   final VoidCallback? onToggleTypewriter;
 
@@ -331,6 +335,7 @@ final class ShellDetailPane extends StatelessWidget {
     typewriter: typewriter,
     cascadeChecklist: cascadeChecklist,
     frontmatterPanel: frontmatterPanel,
+    linkPreview: linkPreview,
     onToggleTypewriter: onToggleTypewriter,
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,

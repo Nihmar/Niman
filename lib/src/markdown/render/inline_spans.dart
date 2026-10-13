@@ -21,6 +21,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/links/block_anchors.dart' show withoutTrailingBlockId;
 import 'package:niman/src/links/dead_links.dart';
+import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/parser.dart' show parseWikiRef, wikiDisplayText;
 import 'package:niman/src/markdown/inline/inline_node.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
@@ -30,6 +31,15 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
+
+/// What the links a leaf draws tell the link preview (#846): the pointer came
+/// onto one (with where it is, globally) or left it, and — on a touch screen,
+/// where nothing hovers — a long press on one.
+typedef LinkPreviewHooks = ({
+  void Function(PreviewLink link, Offset at) onEnter,
+  VoidCallback onExit,
+  void Function(PreviewLink link)? onLongPress,
+});
 
 /// What a tap on a drawn construct calls.
 typedef InlineTaps = ({
@@ -41,6 +51,10 @@ typedef InlineTaps = ({
   /// The links of the note that name nothing (#847), drawn muted; null draws
   /// every link as a live one.
   ValueListenable<DeadLinks>? deadLinks,
+
+  /// What the links tell the link preview; null draws links that preview
+  /// nothing.
+  LinkPreviewHooks? linkPreview,
 });
 
 /// Draws inline nodes as spans.
@@ -187,11 +201,35 @@ final class InlineSpans {
   InlineSpan _text(String text, _Style style, _Link? link) {
     final drawn = style.apply(this);
     if (link == null) return TextSpan(text: text, style: drawn);
+    final preview = PreviewLink.markdown(link.href);
+    return _linkSpan(
+      text,
+      drawn,
+      preview,
+      () => taps.onTapLink?.call(link.text, link.href),
+    );
+  }
+
+  /// The span of a link: tapped it follows, and it tells the link preview
+  /// where the pointer is and what a long press on it asks for (#846).
+  TextSpan _linkSpan(
+    String text,
+    TextStyle style,
+    PreviewLink link,
+    VoidCallback onTap,
+  ) {
+    final hooks = taps.linkPreview;
+    final longPress = hooks?.onLongPress;
     return TextSpan(
       text: text,
-      style: drawn,
-      recognizer: TapGestureRecognizer()
-        ..onTap = () => taps.onTapLink?.call(link.text, link.href),
+      style: style,
+      recognizer: longPress == null
+          ? (TapGestureRecognizer()..onTap = onTap)
+          : (_LinkTapRecognizer(() => longPress(link))..onTap = onTap),
+      onEnter: hooks == null
+          ? null
+          : (event) => hooks.onEnter(link, event.position),
+      onExit: hooks == null ? null : (_) => hooks.onExit(),
     );
   }
 
@@ -229,16 +267,16 @@ final class InlineSpans {
         : InlineMathView(cache: mathCache, tex: tex, style: mathStyleFor(base)),
   );
 
-  InlineSpan _wikilink(String inner, _Style style) => TextSpan(
-    text: wikiDisplayText(inner),
-    style: _tinted(
+  InlineSpan _wikilink(String inner, _Style style) => _linkSpan(
+    wikiDisplayText(inner),
+    _tinted(
       style.apply(this),
       deadLinks.wikiIsDead(parseWikiRef(inner))
           ? theme.deadWikilink
           : theme.wikilink,
     ),
-    recognizer: TapGestureRecognizer()
-      ..onTap = () => taps.onTapWikiLink?.call(inner),
+    PreviewLink.wiki(inner),
+    () => taps.onTapWikiLink?.call(inner),
   );
 
   /// `![[target|alias]]`: the picture, or the note's own words for it.
@@ -297,6 +335,29 @@ final class InlineSpans {
         onResolve: resolve,
       ),
     );
+  }
+}
+
+/// A tap that is also a long press: a link on a touch screen follows on a tap
+/// and previews on a press and hold (#846). The two compete in the gesture
+/// arena as they do under any widget that takes both.
+final class _LinkTapRecognizer extends TapGestureRecognizer {
+  new(VoidCallback onLongPress) {
+    _longPress = LongPressGestureRecognizer()..onLongPress = onLongPress;
+  }
+
+  late final LongPressGestureRecognizer _longPress;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    _longPress.addPointer(event);
+  }
+
+  @override
+  void dispose() {
+    _longPress.dispose();
+    super.dispose();
   }
 }
 

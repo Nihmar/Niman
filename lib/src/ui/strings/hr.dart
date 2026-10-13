@@ -2932,6 +2932,16 @@ final class CroatianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Označavanje kućice označava i one ugniježđene ispod. '
       'Odznačavanje ih ostavlja kakve jesu.';
+  @override
+  String get linkPreviewTitle => 'Pregled poveznica';
+  @override
+  String get linkPreviewSubtitle =>
+      'Zadržite pokazivač iznad poveznice u prikazu čitanja ili držite Ctrl '
+      '(⌘ na Macu) iznad nje u uredniku da biste u maloj kartici vidjeli '
+      'napomenu na koju vodi. Na zaslonu osjetljivom na dodir dugo '
+      'pritisnite poveznicu u prikazu čitanja.';
+  @override
+  String get linkPreviewOpen => 'Otvori';
 
   // Rebuilding the index file (#368).
 

@@ -489,6 +489,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the cascade-checklist toggle.
   Future<void> setCascadeChecklist({required bool enabled});
 
+  /// Whether hovering a link previews the note it points at (default true,
+  /// #846).
+  Future<bool> get linkPreview;
+
+  /// Sets (and persists) the link-preview toggle.
+  Future<void> setLinkPreview({required bool enabled});
+
   /// Whether a note's leading frontmatter is drawn as the properties panel
   /// above it (default true, #157).
   Future<bool> get frontmatterPanel;

@@ -63,22 +63,25 @@ bool _isDead(
     }
     return dead.wikiIsDead(parseWikiRef(raw.substring(2, raw.length - 2)));
   }
-  final close = raw.indexOf(']');
-  if (close < 0) return false;
   // An inline link spells `](href)`; a reference link's target is the
   // parse's, not the text's.
-  final String? href;
-  if (raw.contains('](') && raw.endsWith(')')) {
-    var written = raw.substring(close + 2, raw.length - 1).trim();
-    // A title after the destination (`](a.md "the title")` is not part of it,
-    // unless the destination is angled and may hold spaces.
-    if (!written.startsWith('<')) {
-      final space = written.indexOf(RegExp(r'\s'));
-      if (space > 0) written = written.substring(0, space);
-    }
-    href = written;
-  } else {
-    href = hrefOf?.call(start);
-  }
+  final href = inlineHrefOf(raw) ?? hrefOf?.call(start);
   return href != null && dead.hrefIsDead(href);
+}
+
+/// The destination a Markdown link spells between its parentheses — `[t](a.md
+/// "the title")` is `a.md` — or null for a link that spells none (a
+/// reference link, `[t][label]`).
+///
+/// A title after the destination is not part of it, unless the destination is
+/// angled (`<a b.md>`) and may hold spaces.
+String? inlineHrefOf(String raw) {
+  final close = raw.indexOf(']');
+  if (close < 0 || !raw.contains('](') || !raw.endsWith(')')) return null;
+  var written = raw.substring(close + 2, raw.length - 1).trim();
+  if (!written.startsWith('<')) {
+    final space = written.indexOf(RegExp(r'\s'));
+    if (space > 0) written = written.substring(0, space);
+  }
+  return written;
 }

@@ -2967,6 +2967,16 @@ final class GermanStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ein Häkchen setzt auch die darunter verschachtelten. Es '
       'wieder zu entfernen lässt sie, wie sie sind.';
+  @override
+  String get linkPreviewTitle => 'Linkvorschau';
+  @override
+  String get linkPreviewSubtitle =>
+      'Fahre in der Leseansicht über einen Link – oder halte im Editor Strg '
+      '(⌘ auf dem Mac) darüber gedrückt –, um die Notiz, auf die er zeigt, '
+      'in einer kleinen Karte zu sehen. Auf einem Touchscreen halte einen '
+      'Link in der Leseansicht gedrückt.';
+  @override
+  String get linkPreviewOpen => 'Öffnen';
 
   // Rebuilding the index file (#368).
 

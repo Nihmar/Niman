@@ -418,6 +418,15 @@ final class LibraryController implements LibrarySession {
       changes: _events.stream.map<void>((_) {}),
       // What the notes that link to a note say about it is read off their
       // files, on a background isolate, a row at a time (#842).
+      readPreview: reader == null
+          ? null
+          : (path) async {
+              try {
+                return await reader.notePreview(path);
+              } on Object {
+                return null;
+              }
+            },
       readSpots: reader == null
           ? null
           : (path) async {
@@ -1091,6 +1100,15 @@ final class LibraryController implements LibrarySession {
   Future<void> setCascadeChecklist({required bool enabled}) async {
     _log.info('cascade checklist set to $enabled');
     await _editLibrary((c) => c.copyWith(cascadeChecklist: enabled));
+  }
+
+  @override
+  Future<bool> get linkPreview async => (await _library).linkPreview;
+
+  @override
+  Future<void> setLinkPreview({required bool enabled}) async {
+    _log.info('link preview set to $enabled');
+    await _editLibrary((c) => c.copyWith(linkPreview: enabled));
   }
 
   @override

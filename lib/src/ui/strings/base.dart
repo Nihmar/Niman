@@ -1447,6 +1447,9 @@ abstract base class Strings {
 
   String get cascadeChecklistTitle;
   String get cascadeChecklistSubtitle;
+  String get linkPreviewTitle;
+  String get linkPreviewSubtitle;
+  String get linkPreviewOpen;
 
   // The wikilink suggester panel (#475): the caption over the list, its own
   // words when nothing matched, the alias a row was found through, the form

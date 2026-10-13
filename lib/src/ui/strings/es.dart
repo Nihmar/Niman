@@ -2944,6 +2944,16 @@ final class SpanishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar una casilla marca las que están anidadas debajo. '
       'Desmarcarla las deja como están.';
+  @override
+  String get linkPreviewTitle => 'Vista previa de enlaces';
+  @override
+  String get linkPreviewSubtitle =>
+      'Pasa el ratón por un enlace en la lectura, o mantén Ctrl (⌘ en Mac) '
+      'sobre uno en el editor, para ver la nota a la que apunta en una '
+      'tarjeta pequeña. En una pantalla táctil, mantén pulsado un enlace en '
+      'la lectura.';
+  @override
+  String get linkPreviewOpen => 'Abrir';
 
   // Rebuilding the index file (#368).
 

@@ -2916,6 +2916,16 @@ final class FinnishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ruudun valitseminen valitsee myös sen alle sisäkkäiset. '
       'Valinnan poisto jättää ne ennalleen.';
+  @override
+  String get linkPreviewTitle => 'Linkkien esikatselu';
+  @override
+  String get linkPreviewSubtitle =>
+      'Vie hiiri linkin päälle lukunäkymässä tai pidä Ctrl-näppäintä '
+      '(Macilla ⌘) painettuna linkin päällä editorissa nähdäksesi, mihin '
+      'muistiinpanoon se osoittaa, pienessä kortissa. Kosketusnäytöllä '
+      'paina linkkiä pitkään lukunäkymässä.';
+  @override
+  String get linkPreviewOpen => 'Avaa';
 
   // Rebuilding the index file (#368).
 

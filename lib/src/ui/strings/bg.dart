@@ -2916,6 +2916,16 @@ final class BulgarianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Отмятането на квадратче отмята и вложените под него. '
       'Махането на отметката ги оставя както са.';
+  @override
+  String get linkPreviewTitle => 'Преглед на връзките';
+  @override
+  String get linkPreviewSubtitle =>
+      'Задръжте показалеца върху връзка в изгледа за четене или дръжте Ctrl '
+      '(⌘ на Mac) върху нея в редактора, за да видите бележката, към която '
+      'води, в малка карта. На сензорен екран натиснете и задръжте връзка в '
+      'изгледа за четене.';
+  @override
+  String get linkPreviewOpen => 'Отвори';
 
   // Rebuilding the index file (#368).
 

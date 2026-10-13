@@ -2986,6 +2986,16 @@ final class FrenchStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Cocher une case coche celles qui sont imbriquées dessous. La '
       'décocher les laisse telles quelles.';
+  @override
+  String get linkPreviewTitle => 'Aperçu des liens';
+  @override
+  String get linkPreviewSubtitle =>
+      'Survolez un lien en lecture, ou maintenez Ctrl (⌘ sur Mac) au-dessus '
+      'd’un lien dans l’éditeur, pour voir la note vers laquelle il pointe '
+      'dans une petite carte. Sur un écran tactile, appuyez longuement sur '
+      'un lien en lecture.';
+  @override
+  String get linkPreviewOpen => 'Ouvrir';
 
   // Rebuilding the index file (#368).
 

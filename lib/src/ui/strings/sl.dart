@@ -2924,6 +2924,16 @@ final class SlovenianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Označitev kvadratka označi tudi tiste, gnezdene pod njim. '
       'Odznačitev jih pusti take.';
+  @override
+  String get linkPreviewTitle => 'Predogled povezav';
+  @override
+  String get linkPreviewSubtitle =>
+      'Z miško se pomaknite čez povezavo v bralnem pogledu ali v '
+      'urejevalniku nad njo držite Ctrl (⌘ na Macu), da v majhni kartici '
+      'vidite opombo, na katero kaže. Na zaslonu na dotik v bralnem pogledu '
+      'dolgo pritisnite povezavo.';
+  @override
+  String get linkPreviewOpen => 'Odpri';
 
   // Rebuilding the index file (#368).
 

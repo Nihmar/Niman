@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/links/resolver.dart';
 
@@ -41,6 +42,24 @@ final class FakeLinkSource implements LinkSource {
 
   /// While set, [mentionIn] waits for it: a row still being read.
   Completer<void>? mentionGate;
+
+  /// The text of a note, by its library-relative path: what [previewText]
+  /// answers (nothing for a note not given).
+  final Map<String, String> previews = <String, String>{};
+
+  /// Every path [previewText] was asked for, in order.
+  final List<String> previewReads = <String>[];
+
+  /// While set, [previewText] waits for it: a note still being read.
+  Completer<void>? previewGate;
+
+  @override
+  Future<NotePreviewText?> previewText(String path) async {
+    previewReads.add(path);
+    await previewGate?.future;
+    final text = previews[path];
+    return text == null ? null : NotePreviewText(text: text, truncated: false);
+  }
 
   @override
   Future<Referrers> referrersOf(String path) async {

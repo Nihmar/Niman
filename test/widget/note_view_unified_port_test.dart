@@ -57,6 +57,7 @@ NoteView _note({
   NoteColumn column = NoteColumn.off,
   Future<String> Function(String path)? readNote,
   Future<String> Function(String path)? createMissingNote,
+  bool linkPreview = true,
 }) => NoteView(
   key: key,
   path: path,
@@ -81,6 +82,7 @@ NoteView _note({
   readNote: readNote ?? (_) async => text,
   writeNote: (_, content) async => writes?.add(content),
   createMissingNote: createMissingNote,
+  linkPreview: linkPreview,
 );
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -478,6 +480,234 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('links-to-note-section')), findsNothing);
+  });
+
+  // #846: hovering a link shows what it points at. In the editor the opening
+  // modifier is the intent (Ctrl, ⌘ on a Mac), in the read view the pointer
+  // resting on the link is, and on a touch screen a long press in the read
+  // view opens the same note as a sheet.
+  group("a link's preview (#846)", () {
+    final card = find.byKey(const Key('link-preview-card'));
+    const text = 'see [[Newton]] here\n';
+
+    FakeLinkSource library() {
+      final links = FakeLinkSource(
+        notes: <String>['Notes/Current.md', 'Notes/Newton.md'],
+      );
+      links.previews['Notes/Newton.md'] = '# Newton\n\nThe laws of motion.\n';
+      return links;
+    }
+
+    NoteView note({
+      required FakeLinkSource links,
+      bool showPreview = false,
+      bool linkPreview = true,
+      List<String>? opened,
+    }) => _note(
+      text: text,
+      path: '/lib/Notes/Current.md',
+      libraryRoot: '/lib',
+      links: links,
+      opened: opened,
+      showPreview: showPreview,
+      linkPreview: linkPreview,
+    );
+
+    /// A point inside `Newton` on the note's first row, in either pane.
+    Offset onLink(WidgetTester tester, String drawn) {
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.text(drawn, findRichText: true),
+      );
+      return paragraph.localToGlobal(
+        paragraph.getOffsetForCaret(
+              TextPosition(offset: drawn.indexOf('Newton') + 1),
+              Rect.zero,
+            ) +
+            const Offset(2, 8),
+      );
+    }
+
+    Future<TestGesture> mouseAt(WidgetTester tester, Offset at) async {
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(5, 5));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(at);
+      return gesture;
+    }
+
+    Future<void> leave(WidgetTester tester) async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    testWidgets('Ctrl held over a link in the editor opens its card at once; '
+        'without it, none', (tester) async {
+      await tester.pumpWidget(_app(note(links: library())));
+      await tester.pumpAndSettle();
+      final at = onLink(tester, 'see [[Newton]] here');
+
+      final gesture = await mouseAt(tester, at);
+      await tester.pump();
+      await tester.pump();
+      expect(card, findsNothing, reason: 'the pointer alone previews nothing');
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      await tester.pump();
+      expect(card, findsOneWidget);
+      expect(find.byKey(const Key('link-preview-title')), findsOneWidget);
+      expect(find.textContaining('The laws of motion.'), findsOneWidget);
+
+      // The modifier goes up and the pointer is still on the link: it goes.
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump(const Duration(milliseconds: 100));
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(card, findsNothing);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('typing closes it', (tester) async {
+      await tester.pumpWidget(_app(note(links: library())));
+      await tester.pumpAndSettle();
+      // A click gives the editor the keyboard.
+      await tester.tap(find.byType(MarkdownSourceView));
+      await tester.pump();
+      final gesture = await mouseAt(
+        tester,
+        onLink(tester, 'see [[Newton]] here'),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      await tester.pump();
+      expect(card, findsOneWidget);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'xsee [[Newton]] here\n',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await tester.pump();
+
+      expect(card, findsNothing);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('a dead link in the editor opens nothing', (tester) async {
+      final links = library();
+      links.notes.remove('Notes/Newton.md');
+      await tester.pumpWidget(_app(note(links: links)));
+      await tester.pumpAndSettle();
+      final gesture = await mouseAt(
+        tester,
+        onLink(tester, 'see [[Newton]] here'),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      await tester.pump();
+
+      expect(card, findsNothing);
+      expect(links.previewReads, isEmpty);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('the read view previews on a pointer at rest, with no key', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_app(note(links: library(), showPreview: true)));
+      await tester.pumpAndSettle();
+      final at = onLink(tester, 'see Newton here');
+
+      final gesture = await mouseAt(tester, at);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(card, findsNothing, reason: 'not until it rests');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+      await tester.pump();
+
+      expect(card, findsOneWidget);
+      expect(find.textContaining('The laws of motion.'), findsOneWidget);
+
+      await gesture.moveTo(const Offset(5, 5));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+      expect(card, findsNothing);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('the setting off, neither pane previews', (tester) async {
+      final links = library();
+      await tester.pumpWidget(
+        _app(note(links: links, showPreview: true, linkPreview: false)),
+      );
+      await tester.pumpAndSettle();
+      await mouseAt(tester, onLink(tester, 'see Newton here'));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+
+      expect(card, findsNothing);
+      expect(links.previewReads, isEmpty);
+      await leave(tester);
+    }, variant: _desktop);
+
+    testWidgets('a long press on a link in the read view opens a sheet with '
+        'Open', (tester) async {
+      final links = library();
+      final opened = <String>[];
+      await tester.pumpWidget(
+        _app(note(links: links, showPreview: true, opened: opened)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPressAt(onLink(tester, 'see Newton here'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('link-preview-sheet')), findsOneWidget);
+      expect(card, findsNothing, reason: 'a sheet, not the card');
+      expect(find.textContaining('The laws of motion.'), findsOneWidget);
+      expect(opened, isEmpty, reason: 'a long press does not follow it');
+
+      await tester.tap(find.byKey(const Key('link-preview-open')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('link-preview-sheet')), findsNothing);
+      expect(opened, <String>['Notes/Newton.md|null']);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('a tap on a link in the read view still follows it, on a '
+        'touch screen too', (tester) async {
+      final opened = <String>[];
+      await tester.pumpWidget(
+        _app(note(links: library(), showPreview: true, opened: opened)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(onLink(tester, 'see Newton here'));
+      await tester.pumpAndSettle();
+
+      expect(opened, <String>['Notes/Newton.md|null']);
+      expect(find.byKey(const Key('link-preview-sheet')), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('a long press on a dead link in the read view opens nothing', (
+      tester,
+    ) async {
+      final links = library();
+      links.notes.remove('Notes/Newton.md');
+      await tester.pumpWidget(_app(note(links: links, showPreview: true)));
+      await tester.pumpAndSettle();
+
+      await tester.longPressAt(onLink(tester, 'see Newton here'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('link-preview-sheet')), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 
   group('a dead wikilink is where a note comes from (#477)', () {

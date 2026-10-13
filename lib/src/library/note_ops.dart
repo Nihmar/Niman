@@ -28,6 +28,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
@@ -595,6 +596,18 @@ final class NoteOps implements NoteOperations {
     );
   }
 
+  /// The beginning of the note at [path] for a preview card (#846): its first
+  /// [PreviewLimits.bytes] bytes, read and decoded where the note lies, off
+  /// the UI isolate. A novel-length note is not read whole to show a card.
+  Future<NotePreviewText> notePreview(String path) async {
+    await _mustFind(path);
+    final abs = _abs(path);
+    return await IsolateGauge.run(
+      () => previewTextOfNoteFile(abs),
+      'preview "$path"',
+    );
+  }
+
   /// The links and embeds of the note at [path] with the line around each —
   /// what a list of the notes that link to another reads a mention from
   /// (#842) — read, decoded and parsed where the note lies, off the UI
@@ -783,6 +796,29 @@ List<String> headingsOfNoteFile(String path) {
 /// [headingsOfNoteFile] reads: work for a background isolate.
 List<BlockAnchor> blocksOfNoteFile(String path) =>
     blockAnchorsOfText(_noteTextAt(path));
+
+/// The first [PreviewLimits.bytes] bytes of the note file at absolute [path],
+/// decoded as a note is, its BOM off and its line endings `\n` (#846): work
+/// for a background isolate.
+NotePreviewText previewTextOfNoteFile(String path) {
+  final file = File(path).openSync();
+  final List<int> head;
+  final bool truncated;
+  try {
+    head = file.readSync(PreviewLimits.bytes);
+    truncated = file.lengthSync() > PreviewLimits.bytes;
+  } finally {
+    file.closeSync();
+  }
+  var text = decodeNoteText(Uint8List.fromList(head));
+  if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
+    text = text.substring(1);
+  }
+  return NotePreviewText(
+    text: text.replaceAll('\r\n', '\n').replaceAll('\r', '\n'),
+    truncated: truncated,
+  );
+}
 
 /// The link spots of the note file at absolute [path] (#842): work for a
 /// background isolate.

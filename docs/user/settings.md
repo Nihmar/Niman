@@ -103,6 +103,7 @@ sync) in `.niman/settings.json`.
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
 | `tidyOnClose` | true | Tidy the Markdown of a note closed after an edit (**Settings → Editor → Tidy the Markdown on close**); notes over 4 MB are left as they are, and a `type: audio` note's clip document is never tidied |
 | `cascadeChecklist` | true | Ticking a checklist item ticks the tasks nested under it (**Settings → Editor → Tick nested checkboxes**); clearing a parent leaves its children as they are |
+| `linkPreview` | true | Whether hovering a link previews the note it points at (**Settings → Editor → Preview links**): a card at the pointer in the read view, with Ctrl (⌘) held in the editor, and a sheet from a long press on a touch screen (see [links](links.md#preview-a-link)) |
 | `frontmatterPanel` | true | Whether a note's frontmatter is drawn as the properties panel above it (**Settings → Editor → Properties panel**): closed until it is opened, away while the note is scrolled past its head. Off, a note is its own text everywhere (see [frontmatter](organization.md)) |
 | `lintRulesOff` | [] (= all rules) | The #72 rules turned off, by id (`tight-lists`, `task-marker`, `list-spacing`, `closing-fence`, `fence-language`, `join-wrapped-items`, `join-paragraph-lines`), chosen in **Settings → Editor → Markdown rules**; a rule added in a later build runs unless it is turned off |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |

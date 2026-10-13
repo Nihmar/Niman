@@ -315,6 +315,40 @@ behavior.
 Notes opened without a library (editor-only mode) keep the old
 "link not found" outcome.
 
+## Preview a link
+
+A link can show what it points at before you go there. The card is the note,
+rendered as the read view renders it, in a box of a fixed size that scrolls —
+a note of any length — and it never navigates:
+
+- **in the read view**, rest the pointer on a link for a moment (a sweep
+  across the page opens nothing);
+- **in the editor** (`live` and `source`), hold **Ctrl** (**⌘** on a Mac) over
+  the link — the same key that follows it, so the card says *this is where it
+  goes* — and the card opens at once. Without the key the pointer stays the
+  text caret and nothing opens;
+- **on a touch screen**, press and hold a link in the read view: the same
+  note opens as a **bottom sheet** with an **Open** button that follows the
+  link, as a tap does. A tap still follows it. The Android editor has no
+  preview: it has no pointer to rest on a link, and a long press there
+  selects text (see [platforms](platforms.md)).
+
+The card stands at the pointer, inside the window. It stays while the pointer
+is on it, so you can scroll it, and closes when the pointer leaves the link
+and the card, on **Esc**, when the note scrolls, when you press anywhere, and
+when the note is edited. A link to a `#heading`, a `#heading#subheading` or a
+`#^block` opens the card scrolled to it. A link that names nothing — a dead
+link, a name several notes share, a web address, a file that is not a note,
+the note the link is written in — has no card.
+
+It reads the first 256 KB of the note off the app's main thread, once for each
+revision of it, keeping the last sixteen: moving across a page of links does
+not read a note twice. A heading further down a longer note than that is not
+found, and the card shows the top.
+
+**Settings → Editor → Preview links** (on by default) turns the cards, and the
+sheet, off for the library.
+
 ## Dropping a file from the tree
 
 On Linux and Windows a row of the tree dragged onto an open note writes a

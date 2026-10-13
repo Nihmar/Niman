@@ -2853,6 +2853,16 @@ final class HindiStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'किसी चेकबॉक्स पर टिक करने से उसके नीचे नेस्ट किए गए भी टिक '
       'हो जाते हैं। हटाने पर वे वैसे ही रहते हैं।';
+  @override
+  String get linkPreviewTitle => 'लिंक का पूर्वावलोकन';
+  @override
+  String get linkPreviewSubtitle =>
+      'रीडिंग व्यू में किसी लिंक पर पॉइंटर ले जाएँ, या एडिटर में Ctrl (Mac '
+      'पर ⌘) दबाकर उस पर रखें, ताकि वह जिस नोट की ओर इशारा करता है उसे एक '
+      'छोटे कार्ड में देख सकें। टच स्क्रीन पर रीडिंग व्यू में किसी लिंक को '
+      'देर तक दबाएँ।';
+  @override
+  String get linkPreviewOpen => 'खोलें';
 
   // Rebuilding the index file (#368).
 

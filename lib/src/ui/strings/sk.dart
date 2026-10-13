@@ -2908,6 +2908,16 @@ final class SlovakStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Zaškrtnutie políčka zaškrtne aj tie vnorené pod ním. '
       'Odškrtnutie ich nechá tak.';
+  @override
+  String get linkPreviewTitle => 'Náhľad odkazov';
+  @override
+  String get linkPreviewSubtitle =>
+      'Prejdite myšou nad odkaz v zobrazení čítania, alebo v editore '
+      'podržte nad odkazom Ctrl (⌘ na Macu), a uvidíte poznámku, na ktorú '
+      'odkazuje, v malej karte. Na dotykovej obrazovke odkaz v zobrazení '
+      'čítania dlho stlačte.';
+  @override
+  String get linkPreviewOpen => 'Otvoriť';
 
   // Rebuilding the index file (#368).
 

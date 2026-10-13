@@ -2900,6 +2900,16 @@ final class CzechStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Zaškrtnutí políčka zaškrtne i ta vnořená pod ním. Odškrtnutí '
       'je nechá být.';
+  @override
+  String get linkPreviewTitle => 'Náhled odkazů';
+  @override
+  String get linkPreviewSubtitle =>
+      'Najeďte myší na odkaz v zobrazení čtení, nebo v editoru podržte nad '
+      'odkazem Ctrl (⌘ na Macu), a uvidíte poznámku, na kterou odkazuje, v '
+      'malé kartě. Na dotykové obrazovce odkaz v zobrazení čtení dlouze '
+      'stiskněte.';
+  @override
+  String get linkPreviewOpen => 'Otevřít';
 
   // Rebuilding the index file (#368).
 
