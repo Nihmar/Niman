@@ -158,6 +158,35 @@ void main() {
     },
   );
 
+  test('a renamed note keeps its anchors under its new path', () async {
+    final from = p.join(root.path, 'docs', 'Beta.md');
+    final to = p.join(root.path, 'archive', 'Renamed.md');
+    Directory(p.dirname(to)).createSync(recursive: true);
+    File(from).renameSync(to);
+    await indexer.applyEvents(root.path, [from, to]);
+
+    final anchors = AnchorIndex(db);
+    expect(
+      (await anchors.headings(
+        'planning',
+        limit: 10,
+      )).map((h) => (h.path, h.heading)),
+      [('archive/Renamed.md', 'Team planning')],
+    );
+    expect(
+      (await anchors.blocks('beta', limit: 10)).map((b) => (b.path, b.blockId)),
+      [('archive/Renamed.md', 'beta-id')],
+    );
+    expect(
+      [
+        for (final r in await headingRows()) r.$1,
+        for (final r in await blockRows()) r.$1,
+      ],
+      isNot(contains('docs/Beta.md')),
+      reason: 'no row is left under the old path',
+    );
+  });
+
   test('a deleted index file rebuilds the rows on the next scan', () async {
     final before = await headingRows();
     final blocksBefore = await blockRows();
