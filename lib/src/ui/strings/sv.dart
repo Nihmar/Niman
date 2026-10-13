@@ -1901,11 +1901,6 @@ final class SwedishStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Anteckningar som annoterar en PDF eller en bok';
   @override
-  String get captureFolderTitle => 'Mapp för webbklipp';
-  @override
-  String get captureFolderSubtitle =>
-      'Webbsidor och citat sparade som nya anteckningar';
-  @override
   String get annotationNoteSuffix => 'Annotering';
   @override
   String get annotateAction => 'Annotera';
@@ -3664,7 +3659,7 @@ final class SwedishStrings extends Strings {
   String get homeActionAskHint => 'Frågas när knappen trycks';
 
   @override
-  String get homeActionCaptureFolder => 'Mappen för sparade sidor';
+  String get homeActionDefaultFolder => 'Var nya anteckningar hamnar';
 
   @override
   String get homeActionContext => 'Kontext';

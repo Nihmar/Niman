@@ -1909,11 +1909,6 @@ final class GalicianStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Notas que anotan un PDF ou un libro';
   @override
-  String get captureFolderTitle => 'Cartafol das capturas web';
-  @override
-  String get captureFolderSubtitle =>
-      'Páxinas web e citas capturadas como notas novas';
-  @override
   String get annotationNoteSuffix => 'Anotación';
   @override
   String get annotateAction => 'Anotar';
@@ -3680,7 +3675,7 @@ final class GalicianStrings extends Strings {
   String get homeActionAskHint => 'Pregúntase ao premer o botón';
 
   @override
-  String get homeActionCaptureFolder => 'O cartafol das capturas';
+  String get homeActionDefaultFolder => 'Onde van as notas novas';
 
   @override
   String get homeActionContext => 'Contexto';

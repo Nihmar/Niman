@@ -1908,11 +1908,6 @@ final class RomanianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Notițe care adnotează un PDF sau o carte';
   @override
-  String get captureFolderTitle => 'Dosarul capturilor web';
-  @override
-  String get captureFolderSubtitle =>
-      'Pagini web și citate salvate ca note noi';
-  @override
   String get annotationNoteSuffix => 'Adnotare';
   @override
   String get annotateAction => 'Adnotează';
@@ -3710,7 +3705,7 @@ final class RomanianStrings extends Strings {
   String get homeActionAskHint => 'Se cere la apăsarea butonului';
 
   @override
-  String get homeActionCaptureFolder => 'Dosarul capturilor';
+  String get homeActionDefaultFolder => 'Unde merg notele noi';
 
   @override
   String get homeActionContext => 'Context';

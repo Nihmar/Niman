@@ -1888,10 +1888,6 @@ final class DanishStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Noter, der annoterer en PDF eller en bog';
   @override
-  String get captureFolderTitle => 'Mappe til webudklip';
-  @override
-  String get captureFolderSubtitle => 'Websider og citater gemt som nye noter';
-  @override
   String get annotationNoteSuffix => 'Annotering';
   @override
   String get annotateAction => 'Annotér';
@@ -3638,7 +3634,7 @@ final class DanishStrings extends Strings {
   String get homeActionAskHint => 'Spørges når knappen trykkes';
 
   @override
-  String get homeActionCaptureFolder => 'Mappen til gemte sider';
+  String get homeActionDefaultFolder => 'Hvor nye noter placeres';
 
   @override
   String get homeActionContext => 'Kontekst';

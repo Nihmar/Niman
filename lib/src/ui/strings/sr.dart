@@ -1899,11 +1899,6 @@ final class SerbianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Белешке које анотирају PDF или књигу';
   @override
-  String get captureFolderTitle => 'Фасцикла за веб-исечке';
-  @override
-  String get captureFolderSubtitle =>
-      'Веб-странице и цитати сачувани као нове белешке';
-  @override
   String get annotationNoteSuffix => 'Анотација';
   @override
   String get annotateAction => 'Анотирај';
@@ -3677,7 +3672,7 @@ final class SerbianStrings extends Strings {
   String get homeActionAskHint => 'Пита се када се притисне дугме';
 
   @override
-  String get homeActionCaptureFolder => 'Фасцикла за снимке';
+  String get homeActionDefaultFolder => 'Где иду нове белешке';
 
   @override
   String get homeActionContext => 'Контекст';

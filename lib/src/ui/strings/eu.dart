@@ -1905,11 +1905,6 @@ final class BasqueStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'PDF edo liburu bat oharpentzen duten oharrak';
   @override
-  String get captureFolderTitle => 'Web-gordeketen karpeta';
-  @override
-  String get captureFolderSubtitle =>
-      'Ohar berri gisa gordetako web-orriak eta aipuak';
-  @override
   String get annotationNoteSuffix => 'Oharpena';
   @override
   String get annotateAction => 'Oharpena egin';
@@ -3690,7 +3685,7 @@ final class BasqueStrings extends Strings {
   String get homeActionAskHint => 'Botoia sakatzean galdetzen da';
 
   @override
-  String get homeActionCaptureFolder => 'Kapturen karpeta';
+  String get homeActionDefaultFolder => 'Ohar berriak non sortzen diren';
 
   @override
   String get homeActionContext => 'Testuingurua';

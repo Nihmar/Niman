@@ -1889,11 +1889,6 @@ final class SlovenianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Zapiski, ki označujejo PDF ali knjigo';
   @override
-  String get captureFolderTitle => 'Mapa za spletne izrezke';
-  @override
-  String get captureFolderSubtitle =>
-      'Spletne strani in citati, shranjeni kot nove opombe';
-  @override
   String get annotationNoteSuffix => 'Opomba';
   @override
   String get annotateAction => 'Dodaj opombo';
@@ -3676,7 +3671,7 @@ final class SlovenianStrings extends Strings {
   String get homeActionAskHint => 'Vpraša ob pritisku na gumb';
 
   @override
-  String get homeActionCaptureFolder => 'Mapa za zajeme';
+  String get homeActionDefaultFolder => 'Kam gredo nove opombe';
 
   @override
   String get homeActionContext => 'Kontekst';

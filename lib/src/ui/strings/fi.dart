@@ -1907,11 +1907,6 @@ final class FinnishStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'PDF:ää tai kirjaa kommentoivat muistiinpanot';
   @override
-  String get captureFolderTitle => 'Verkkotallenteiden kansio';
-  @override
-  String get captureFolderSubtitle =>
-      'Uusina muistiinpanoina tallennetut sivut ja lainaukset';
-  @override
   String get annotationNoteSuffix => 'Merkintä';
   @override
   String get annotateAction => 'Merkitse';
@@ -3671,7 +3666,7 @@ final class FinnishStrings extends Strings {
   String get homeActionAskHint => 'Kysytään, kun painiketta painetaan';
 
   @override
-  String get homeActionCaptureFolder => 'Tallennusten kansio';
+  String get homeActionDefaultFolder => 'Mihin uudet muistiinpanot menevät';
 
   @override
   String get homeActionContext => 'Konteksti';

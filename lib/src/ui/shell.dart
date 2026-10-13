@@ -934,6 +934,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   late final CaptureFlow _captureFlow = CaptureFlow(
     controller: widget.controller,
     services: widget.capture,
+    newItemRule: _newItemRule,
     // A quote appended to the note on screen lands between its buffer's
     // save and its re-read, as shared text does in the quick note (#635).
     saveOpen: () => widget.unsavedTracker.saveAll(),

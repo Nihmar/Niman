@@ -1893,11 +1893,6 @@ final class SlovakStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Poznámky k PDF alebo knihe';
   @override
-  String get captureFolderTitle => 'Priečinok webových záznamov';
-  @override
-  String get captureFolderSubtitle =>
-      'Webové stránky a citáty uložené ako nové poznámky';
-  @override
   String get annotationNoteSuffix => 'Anotácia';
   @override
   String get annotateAction => 'Anotovať';
@@ -3665,7 +3660,7 @@ final class SlovakStrings extends Strings {
   String get homeActionAskHint => 'Opýta sa pri stlačení tlačidla';
 
   @override
-  String get homeActionCaptureFolder => 'Priečinok pre zachytenia';
+  String get homeActionDefaultFolder => 'Kam idú nové poznámky';
 
   @override
   String get homeActionContext => 'Kontext';

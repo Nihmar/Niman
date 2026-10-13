@@ -1006,8 +1006,6 @@ abstract base class Strings {
   String get annotationsFolderSubtitle;
 
   // Where a captured web page or quote goes as a new note.
-  String get captureFolderTitle;
-  String get captureFolderSubtitle;
 
   /// Ends the name of a note made to annotate a file:
   /// `Dune - Annotation.md`.
@@ -1999,7 +1997,7 @@ abstract base class Strings {
   String get homeActionAdd;
   String get homeActionAsk;
   String get homeActionAskHint;
-  String get homeActionCaptureFolder;
+  String get homeActionDefaultFolder;
   String get homeActionContext;
   String get homeActionEdit;
   String get homeActionFieldAdd;

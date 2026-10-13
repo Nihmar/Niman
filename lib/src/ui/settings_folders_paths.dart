@@ -35,7 +35,6 @@ final class _SettingsFoldersPathsScreenState
   String? _templateFolder;
   String? _attachmentsFolder;
   String? _annotationsFolder;
-  String? _captureFolder;
   String? _quickNotePath;
 
   /// The folders the library actually holds, for the "to create" badge:
@@ -66,7 +65,6 @@ final class _SettingsFoldersPathsScreenState
     final templateFolder = await ops.templateFolder;
     final attachmentsFolder = await ops.attachmentsFolder;
     final annotationsFolder = await ops.annotationsFolder;
-    final captureFolder = await ops.captureFolder;
     final quickNotePath = await ops.quickNotePath;
     final folders = await widget.controller.folders();
     if (!mounted) return;
@@ -75,7 +73,6 @@ final class _SettingsFoldersPathsScreenState
       _templateFolder = templateFolder;
       _attachmentsFolder = attachmentsFolder;
       _annotationsFolder = annotationsFolder;
-      _captureFolder = captureFolder;
       _quickNotePath = quickNotePath;
       _folderPaths = {for (final folder in folders) folder.path};
     });
@@ -159,18 +156,6 @@ final class _SettingsFoldersPathsScreenState
     if (saved != null && mounted) setState(() => _annotationsFolder = saved);
   }
 
-  /// Where a web page or a quote captured as a new note goes, unless the
-  /// capture picks another folder.
-  Future<void> _pickCaptureFolder() async {
-    final saved = await _pickFolder(
-      title: AppStrings.captureFolderTitle,
-      current: _captureFolder ?? defaultCaptureFolder,
-      save: (ops, folder) => ops.setCaptureFolder(folder: folder),
-      read: (ops) => ops.captureFolder,
-    );
-    if (saved != null && mounted) setState(() => _captureFolder = saved);
-  }
-
   /// Opens the quick-note picker (the chosen note is set from the tree
   /// dialog); the shell picks the value up through the session.
   Future<void> _pickQuickNote() async {
@@ -213,7 +198,6 @@ final class _SettingsFoldersPathsScreenState
     final templateFolder = _templateFolder ?? defaultTemplateFolder;
     final attachmentsFolder = _attachmentsFolder ?? defaultAttachmentsFolder;
     final annotationsFolder = _annotationsFolder ?? defaultAnnotationsFolder;
-    final captureFolder = _captureFolder ?? defaultCaptureFolder;
     return SettingsAreaShell(
       title: AppStrings.settingsAreaFolders,
       controller: controller,
@@ -264,13 +248,6 @@ final class _SettingsFoldersPathsScreenState
             subtitle: AppStrings.annotationsFolderSubtitle,
             value: annotationsFolder,
             onTap: _pickAnnotationsFolder,
-          ),
-          _folderRow(
-            key: SettingsKeys.captureFolder,
-            title: AppStrings.captureFolderTitle,
-            subtitle: AppStrings.captureFolderSubtitle,
-            value: captureFolder,
-            onTap: _pickCaptureFolder,
           ),
           HighlightRow(
             key: SettingsKeys.quickNote,

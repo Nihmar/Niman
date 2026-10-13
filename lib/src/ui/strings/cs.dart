@@ -1886,11 +1886,6 @@ final class CzechStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Poznámky k PDF nebo knize';
   @override
-  String get captureFolderTitle => 'Složka webových záznamů';
-  @override
-  String get captureFolderSubtitle =>
-      'Webové stránky a citace uložené jako nové poznámky';
-  @override
   String get annotationNoteSuffix => 'Anotace';
   @override
   String get annotateAction => 'Anotovat';
@@ -3653,7 +3648,7 @@ final class CzechStrings extends Strings {
   String get homeActionAskHint => 'Zeptá se při stisknutí tlačítka';
 
   @override
-  String get homeActionCaptureFolder => 'Složka pro záchyty';
+  String get homeActionDefaultFolder => 'Kam patří nové poznámky';
 
   @override
   String get homeActionContext => 'Kontext';

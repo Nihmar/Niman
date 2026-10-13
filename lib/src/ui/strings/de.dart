@@ -1931,11 +1931,6 @@ final class GermanStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Notizen, die ein PDF oder Buch annotieren';
   @override
-  String get captureFolderTitle => 'Ordner für Web-Erfassungen';
-  @override
-  String get captureFolderSubtitle =>
-      'Webseiten und Zitate, als neue Notizen erfasst';
-  @override
   String get annotationNoteSuffix => 'Anmerkung';
   @override
   String get annotateAction => 'Anmerken';
@@ -3730,7 +3725,7 @@ final class GermanStrings extends Strings {
   String get homeActionAskHint => 'Wird beim Drücken gefragt';
 
   @override
-  String get homeActionCaptureFolder => 'Der Ordner für Aufnahmen';
+  String get homeActionDefaultFolder => 'Wohin neue Notizen kommen';
 
   @override
   String get homeActionContext => 'Kontext';

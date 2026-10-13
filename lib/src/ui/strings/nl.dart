@@ -1916,11 +1916,6 @@ final class DutchStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Notities bij een pdf of boek';
   @override
-  String get captureFolderTitle => 'Map voor webknipsels';
-  @override
-  String get captureFolderSubtitle =>
-      'Webpagina’s en citaten vastgelegd als nieuwe notities';
-  @override
   String get annotationNoteSuffix => 'Aantekening';
   @override
   String get annotateAction => 'Aantekening maken';
@@ -3693,7 +3688,7 @@ final class DutchStrings extends Strings {
   String get homeActionAskHint => 'Gevraagd bij het indrukken';
 
   @override
-  String get homeActionCaptureFolder => 'De map voor opnames';
+  String get homeActionDefaultFolder => 'Waar nieuwe notities komen';
 
   @override
   String get homeActionContext => 'Context';

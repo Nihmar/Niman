@@ -1882,11 +1882,6 @@ final class NorwegianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Notater som kommenterer en PDF eller en bok';
   @override
-  String get captureFolderTitle => 'Mappe for nettutklipp';
-  @override
-  String get captureFolderSubtitle =>
-      'Nettsider og sitater lagret som nye notater';
-  @override
   String get annotationNoteSuffix => 'Merknad';
   @override
   String get annotateAction => 'Legg til merknad';
@@ -3640,7 +3635,7 @@ final class NorwegianStrings extends Strings {
   String get homeActionAskHint => 'Spørres når knappen trykkes';
 
   @override
-  String get homeActionCaptureFolder => 'Mappen for lagrede sider';
+  String get homeActionDefaultFolder => 'Hvor nye notater havner';
 
   @override
   String get homeActionContext => 'Kontekst';

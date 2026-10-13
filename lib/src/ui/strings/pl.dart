@@ -1919,11 +1919,6 @@ final class PolishStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Notatki z adnotacjami do PDF-a lub książki';
   @override
-  String get captureFolderTitle => 'Folder zapisów z sieci';
-  @override
-  String get captureFolderSubtitle =>
-      'Strony internetowe i cytaty zapisane jako nowe notatki';
-  @override
   String get annotationNoteSuffix => 'Adnotacja';
   @override
   String get annotateAction => 'Dodaj adnotację';
@@ -3706,7 +3701,7 @@ final class PolishStrings extends Strings {
   String get homeActionAskHint => 'Pytane po naciśnięciu przycisku';
 
   @override
-  String get homeActionCaptureFolder => 'Folder przechwyceń';
+  String get homeActionDefaultFolder => 'Dokąd trafiają nowe notatki';
 
   @override
   String get homeActionContext => 'Kontekst';
