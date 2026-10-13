@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/keep_awake.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/slides/slide_place.dart';
 import 'package:niman/src/ui/kinds/slides/slide_split.dart';
@@ -14,9 +15,9 @@ import 'package:niman/src/ui/window_controller.dart';
 
 bool _presenting = false;
 
-/// Whether [context] is a phone: Android, and narrow on its short side.
-bool isSlidesPhone(BuildContext context) =>
-    Platform.isAndroid && MediaQuery.sizeOf(context).shortestSide < 600;
+/// Whether [context] is a phone: Android, and narrow on its short side
+/// ([isPhone], which the shell's own shape follows too, #849).
+bool isSlidesPhone(BuildContext context) => isPhone(context);
 
 /// Whether [event] is the key presenting runs on, by the map in force
 /// (#159): true for [AppCommand.presenterView]'s, false for

@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/home/action_editor.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -24,7 +24,7 @@ Future<List<HomeAction>?> showActionsTileDialog(
   builder: (context) => _ActionsTileDialog(
     actions: actions,
     controller: controller,
-    fullscreen: MediaQuery.sizeOf(context).width < wideBreakpoint,
+    fullscreen: !isWideShell(context),
   ),
 );
 

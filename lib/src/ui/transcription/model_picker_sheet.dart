@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart'
-    show wideBreakpoint;
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 
@@ -19,7 +18,7 @@ Future<TranscriptionModel?> showModelPickerSheet(
   TranscriptionModels models,
 ) async {
   final body = _ModelPicker(models: models);
-  final picked = MediaQuery.sizeOf(context).width >= wideBreakpoint
+  final picked = isWideShell(context)
       ? await showDialog<TranscriptionModel>(
           context: context,
           builder: (context) => Dialog(

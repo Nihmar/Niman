@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/library_settings.dart'
-    show wideBreakpoint;
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_service.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/spinning_sync_icon.dart';
@@ -174,7 +173,7 @@ Future<void> showSyncPanel(
       },
     ),
   );
-  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+  if (isWideShell(context)) {
     return showDialog<void>(
       context: context,
       builder: (context) => Dialog(

@@ -12,10 +12,9 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart'
-    show wideBreakpoint;
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One list the count could run on.
@@ -69,7 +68,7 @@ Future<TallyChoice?> showListTallySheet(
     candidates: candidates,
     initialIndex: initialIndex.clamp(0, candidates.length - 1),
   );
-  if (MediaQuery.sizeOf(context).width >= wideBreakpoint) {
+  if (isWideShell(context)) {
     return showDialog<TallyChoice>(
       context: context,
       builder: (context) => Dialog(

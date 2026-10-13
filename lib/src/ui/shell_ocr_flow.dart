@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart'
-    show wideBreakpoint;
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_job.dart';
@@ -10,6 +8,7 @@ import 'package:niman/src/ocr/ocr_language.dart';
 import 'package:niman/src/ocr/ocr_page_source.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ocr/ocr_sidecar.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/ocr/ocr_notifier.dart';
 import 'package:niman/src/ui/ocr/ocr_result_sheet.dart';
 import 'package:niman/src/ui/ocr/recognize_text_sheet.dart';
@@ -139,7 +138,7 @@ final class ShellOcrFlow {
           when sidecar != null &&
               inFront &&
               p.extension(job.path).toLowerCase() != '.pdf' &&
-              MediaQuery.sizeOf(context).width < wideBreakpoint:
+              !isWideShell(context):
         unawaited(_showPicture(context, job, sidecar));
       case OcrJobPhase.done when sidecar != null:
         final message = AppStrings.ocrRecognized(job.words);

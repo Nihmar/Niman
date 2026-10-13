@@ -9,9 +9,9 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
@@ -87,7 +87,7 @@ final class _SettingsNavigationLayoutScreenState
     final theme = Theme.of(context);
     final placed = placedDestinations(_layout);
     final visible = visibleDestinations(_layout);
-    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
+    final wide = isWideShell(context);
     final list = ReorderableListView(
       key: const Key('navigation-layout-list'),
       buildDefaultDragHandles: false,

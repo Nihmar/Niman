@@ -13,7 +13,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/reminder_health.dart';
@@ -21,6 +20,7 @@ import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/reminder_health_banner.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
@@ -112,7 +112,7 @@ final class _TodoTabState extends State<TodoTab> {
         // as long as the pane holds the panel's pills — under that it
         // takes the phone's row, with Add in it, because the wide shell
         // has no FAB at all.
-        final shellWide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
+        final shellWide = isWideShell(context);
         final wide = shellWide && constraints.maxWidth >= _minFoldWidth;
         return ListenableBuilder(
           listenable: widget.controller,
@@ -225,7 +225,7 @@ final class _TodoTabState extends State<TodoTab> {
   /// what the chips are. On the desktop it opens as a dialog over the
   /// tab: a pushed screen would hide the rail and the list (T-PP-22).
   Future<void> _openHelp() async {
-    if (MediaQuery.sizeOf(context).width < wideBreakpoint) {
+    if (!isWideShell(context)) {
       await Navigator.push(
         context,
         MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),

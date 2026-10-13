@@ -70,6 +70,7 @@ import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
@@ -800,7 +801,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // first mount, or the open FAB all still fall to the full setState.
     // A hidden tab on either side of the switch changes the back key's
     // meaning (#536), which only a rebuild hands the layout.
-    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
+    final narrow = !isWideShell(context);
     // Home and Todo are content destinations on a wide window (#712):
     // they open as a pinned tab in the focused pane and the tree, the
     // panes and the dock stay, instead of taking a whole slot.
@@ -897,7 +898,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _shellFocus.requestFocus();
   }
 
-  /// Phone (< [wideBreakpoint]) mode: which pane is visible.
+  /// Phone mode (a window that is not [isWideShell]): which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
 
@@ -1226,8 +1227,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     });
   }
 
-  /// Whether the window is wide: the tabs' layout (#23).
-  bool get _wide => MediaQuery.sizeOf(context).width >= wideBreakpoint;
+  /// Whether the shell is the wide one: the tabs' layout (#23). A phone
+  /// never is, whichever way it is turned (#849).
+  bool get _wide => isWideShell(context);
 
   /// Whether the window was wide when the dependencies last changed: a
   /// crossing of the breakpoint is told by it (#770).
@@ -2552,7 +2554,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // the note leaves it selected, and on a phone the tab it lands on has
     // an empty body by design — so the shortcut showed nothing at all.
     // The tree being up is what says the note is closed.
-    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
+    final narrow = !isWideShell(context);
     final onScreen = !narrow || !_treeVisible;
     if (onScreen &&
         _selected == path &&
@@ -2871,7 +2873,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final selectedPath = _selected;
-    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
+    final narrow = !isWideShell(context);
     _markOpenNote(controller.root, _shownNote);
     // Notes stay open until they are closed: a folder selected, or the
     // phone back on its tree, closes none (#23). On the phone a note
