@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/ui/device_shape.dart';
 
 /// Shows [builder]'s page in a floating window titled [title], and
 /// resolves when the window closes.
@@ -164,6 +165,10 @@ final class _FloatingWindowState extends State<FloatingWindow> {
   /// The pages, laid out as if the panel were the screen: a page that
   /// reads the screen's size to choose its shape reads the panel's.
   Widget _body(MediaQueryData outer, Size panel) {
+    return PhoneScope(phone: isPhone(context), child: _panel(outer, panel));
+  }
+
+  Widget _panel(MediaQueryData outer, Size panel) {
     return MediaQuery(
       data: outer.copyWith(
         size: panel,

@@ -29,9 +29,36 @@ const double phoneShortestSide = 600;
 /// phone a desktop-sized one where it is not. The desktops are never a
 /// phone, however small their window is dragged; their shape follows the
 /// width ([isWideShell]).
+///
+/// A [PhoneScope] above [context] answers for the device instead: a
+/// floating window lays its pages out as if the panel were the screen, and
+/// a tablet's 552 dp-tall panel is not a phone.
 bool isPhone(BuildContext context) =>
-    defaultTargetPlatform == TargetPlatform.android &&
-    MediaQuery.sizeOf(context).shortestSide < phoneShortestSide;
+    PhoneScope.maybeOf(context) ??
+    (defaultTargetPlatform == TargetPlatform.android &&
+        MediaQuery.sizeOf(context).shortestSide < phoneShortestSide);
+
+/// Carries the answer of [isPhone] past a subtree that resizes its
+/// [MediaQuery] (#849).
+///
+/// The floating windows (Settings, the libraries) hand their pages the
+/// panel's size as the screen's, so that a page choosing its shape by
+/// width chooses it by the room it has. The device does not shrink with
+/// its panel: asked inside one, [isPhone] reads the answer taken outside.
+final class PhoneScope extends InheritedWidget {
+  /// Fixes [isPhone] to [phone] for [child].
+  const new({required this.phone, required super.child, super.key});
+
+  /// What [isPhone] answered where the scope was made.
+  final bool phone;
+
+  /// The nearest scope's answer, or null without one.
+  static bool? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<PhoneScope>()?.phone;
+
+  @override
+  bool updateShouldNotify(PhoneScope oldWidget) => phone != oldWidget.phone;
+}
 
 /// Whether the shell is the wide one: the rail, the tree and the panes
 /// beside each other. A phone never is, whichever way it is turned; any

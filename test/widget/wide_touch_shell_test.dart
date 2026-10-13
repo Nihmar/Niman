@@ -12,6 +12,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/palette/palette_swipe.dart';
+import 'package:niman/src/ui/settings_section_pane.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/window_controller.dart';
 
@@ -166,6 +167,21 @@ void main() {
       await settle(tester);
       expect(find.byKey(const Key('note-menu-palette')), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+  });
+
+  group('Settings on a tablet', () {
+    testWidgets('a short tablet opens it as a window with two columns', (
+      tester,
+    ) async {
+      // 600 dp tall: the window is 552 dp inside its margins, and the
+      // pages in it read that as the screen. The device is still a
+      // tablet, so Settings is the list beside a section, not a phone's
+      // list of pages.
+      await pumpApp(tester, _shortTablet);
+      await tester.tap(find.byKey(const Key('rail-settings')));
+      await settle(tester);
+      expect(find.byType(SettingsSectionPane), findsOne);
+    }, variant: _android);
   });
 
   group('Back on a tablet', () {
