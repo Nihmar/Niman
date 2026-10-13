@@ -408,11 +408,11 @@ final class AlbanianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Lëri siç janë';
   @override
-  String get missingNoteLocationTitle => 'Krijoni shënime të munguara në';
+  String get newItemLocationTitle => 'Shënimet dhe tresat e reja shkojnë në';
   @override
-  String get missingNoteLocationRoot => 'Rrënjë e bibliotekës';
+  String get newItemLocationRoot => 'Rrënjë e bibliotekës';
   @override
-  String get missingNoteLocationCurrentFolder => 'Tresë aktuale';
+  String get newItemLocationOpenNote => 'Tresa e shënimit të hapur';
   @override
   String get indentWidthTitle => 'Gjerësia e indenteve';
   @override
@@ -3703,6 +3703,9 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Dosja e kapjeve';
+
+  @override
+  String get homeActionDefaultFolder => 'Ku shkojnë shënimet e reja';
 
   @override
   String get homeActionContext => 'Konteksti';

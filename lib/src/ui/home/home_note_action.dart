@@ -117,15 +117,17 @@ Future<void> makeHomeNote(
     templateAnswers,
   );
   if (!context.mounted) return;
-  final folder = action.folder ?? '';
+  // A folder the action names wins over everything; without one the note
+  // goes where the library's rule puts new notes (#850).
+  final named = action.folder ?? '';
   await templates.file(
     context,
     template: template,
     answers: templateAnswers,
     surroundings: surroundings,
     name: name,
-    folder: folder,
-    folderWins: folder.isNotEmpty,
+    folder: named.isNotEmpty ? named : templates.newItemRule.folder,
+    folderWins: named.isNotEmpty,
     templateName: action.template ?? homeActionLabel(action),
     frontmatter: frontmatter,
     open: action.open,

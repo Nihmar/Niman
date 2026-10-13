@@ -415,11 +415,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Остави без промяна';
   @override
-  String get missingNoteLocationTitle => 'Създаване на липсващи бележки в';
+  String get newItemLocationTitle => 'Нови бележки и папки отиват в';
   @override
-  String get missingNoteLocationRoot => 'Корен на библиотеката';
+  String get newItemLocationRoot => 'Корен на библиотеката';
   @override
-  String get missingNoteLocationCurrentFolder => 'Текуща папка';
+  String get newItemLocationOpenNote => 'Папката на отворената бележка';
   @override
   String get indentWidthTitle => 'Ширина на отстъпа';
   @override
@@ -3694,6 +3694,9 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Папката за запазени страници';
+
+  @override
+  String get homeActionDefaultFolder => 'Където отиват новите бележки';
 
   @override
   String get homeActionContext => 'Контекст';

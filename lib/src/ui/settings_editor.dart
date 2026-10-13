@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
@@ -56,7 +56,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   bool? _autofocusEditor;
   LinkType _linkType = LinkType.wikilink;
   LinkUpdate _linkUpdate = LinkUpdate.automatic;
-  MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
+  NewItemLocation _newItemLocation = NewItemLocation.openNoteFolder;
   double _noteTextScale = defaultTextScale;
   SourceFont _sourceFont = defaultSourceFont;
   int _indentWidth = 2;
@@ -94,7 +94,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final autofocus = await controller.editorAutofocusEnabled;
     final linkType = await controller.linkType;
     final linkUpdate = await controller.linkUpdate;
-    final missingNoteLocation = await controller.missingNoteLocation;
+    final newItemLocation = await controller.newItemLocation;
     final noteTextScale = await controller.noteTextScale;
     final sourceFont = await controller.sourceFont;
     final indentWidth = await controller.indentWidth;
@@ -113,7 +113,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _autofocusEditor = autofocus;
       _linkType = linkType;
       _linkUpdate = linkUpdate;
-      _missingNoteLocation = missingNoteLocation;
+      _newItemLocation = newItemLocation;
       _noteTextScale = noteTextScale;
       _sourceFont = sourceFont;
       _indentWidth = indentWidth;
@@ -309,12 +309,12 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     }
   }
 
-  Future<void> _setMissingNoteLocation(MissingNoteLocation location) async {
+  Future<void> _setNewItemLocation(NewItemLocation location) async {
     final controller = widget.controller;
-    await controller.setMissingNoteLocation(location);
+    await controller.setNewItemLocation(location);
     controller.notify();
     if (mounted) {
-      setState(() => _missingNoteLocation = location);
+      setState(() => _newItemLocation = location);
     }
   }
 
@@ -403,25 +403,25 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (mode != null) await _setLinkUpdate(mode);
   }
 
-  /// Asks where a note created from a dead link lands (issue #78).
-  Future<void> _chooseMissingNoteLocation() async {
-    final location = await showSettingsChoice<MissingNoteLocation>(
+  /// Asks where new notes and folders go (#850).
+  Future<void> _chooseNewItemLocation() async {
+    final location = await showSettingsChoice<NewItemLocation>(
       context,
-      dialogKey: const Key('missing-note-location-dialog'),
-      title: AppStrings.missingNoteLocationTitle,
-      current: _missingNoteLocation,
+      dialogKey: const Key('new-item-location-dialog'),
+      title: AppStrings.newItemLocationTitle,
+      current: _newItemLocation,
       options: [
         SettingsOption(
-          MissingNoteLocation.libraryRoot,
-          AppStrings.missingNoteLocationRoot,
+          NewItemLocation.libraryRoot,
+          AppStrings.newItemLocationRoot,
         ),
         SettingsOption(
-          MissingNoteLocation.currentFolder,
-          AppStrings.missingNoteLocationCurrentFolder,
+          NewItemLocation.openNoteFolder,
+          AppStrings.newItemLocationOpenNote,
         ),
       ],
     );
-    if (location != null) await _setMissingNoteLocation(location);
+    if (location != null) await _setNewItemLocation(location);
   }
 
   /// Asks for the spaces added per indent level.
@@ -677,7 +677,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           ),
           // Next to the link format: they decide what a link does — what
           // it inserts, what happens to it when its target moves (#848),
-          // what a click on a missing target becomes (issue #78).
+          // where a new note lands (#850).
           HighlightRow(
             key: SettingsKeys.linkUpdate,
             child: SettingsValueRow(
@@ -691,17 +691,18 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               onTap: () => unawaited(_chooseLinkUpdate()),
             ),
           ),
+          // The one rule for where every new note and folder lands (#850),
+          // the note a dead link creates (issue #78) among them.
           HighlightRow(
-            key: SettingsKeys.missingNoteLocation,
+            key: SettingsKeys.newItemLocation,
             child: SettingsValueRow(
-              title: AppStrings.missingNoteLocationTitle,
-              value: switch (_missingNoteLocation) {
-                MissingNoteLocation.libraryRoot =>
-                  AppStrings.missingNoteLocationRoot,
-                MissingNoteLocation.currentFolder =>
-                  AppStrings.missingNoteLocationCurrentFolder,
+              title: AppStrings.newItemLocationTitle,
+              value: switch (_newItemLocation) {
+                NewItemLocation.libraryRoot => AppStrings.newItemLocationRoot,
+                NewItemLocation.openNoteFolder =>
+                  AppStrings.newItemLocationOpenNote,
               },
-              onTap: () => unawaited(_chooseMissingNoteLocation()),
+              onTap: () => unawaited(_chooseNewItemLocation()),
             ),
           ),
           HighlightRow(

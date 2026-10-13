@@ -2,7 +2,12 @@
 
 Templates live in the library's `templateFolder` (default `Templates`).
 Creating a note from a template substitutes `{{placeholders}}` and merges
-the template's frontmatter into the new note.
+the template's frontmatter into the new note. The note is made where the
+library's setting for new notes puts it (**Settings → Editor → New notes
+and folders go to**: the library root, or the folder of the open note —
+see [organization](organization.md#where-new-notes-and-folders-go)),
+unless the template names a `folder` or the creation is *Create … here* on
+a folder.
 
 A [Home](home.md#actions) action can make notes from a template with
 some of its questions answered in advance: a fixed value named like a

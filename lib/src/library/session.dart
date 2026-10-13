@@ -17,10 +17,10 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_write_stream.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/lint/lint_rule.dart';
@@ -614,10 +614,10 @@ abstract interface class LibrarySession {
 
   /// Where a note created from a dead link lands (default the folder of
   /// the note the link was clicked in, issue #78).
-  Future<MissingNoteLocation> get missingNoteLocation;
+  Future<NewItemLocation> get newItemLocation;
 
   /// Sets (and persists) the dead-link note location.
-  Future<void> setMissingNoteLocation(MissingNoteLocation location);
+  Future<void> setNewItemLocation(NewItemLocation location);
 
   /// The editor's indent/outdent width in spaces (default 2).
   Future<int> get indentWidth;

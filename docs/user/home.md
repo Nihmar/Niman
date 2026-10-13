@@ -57,15 +57,18 @@ back.
 An **Actions** tile is a row of buttons, each one something the app
 already does with what it needs set in advance:
 
-- **New note** — from a [template](templates.md) or empty, in a folder,
-  its name and frontmatter fields filled.
+- **New note** — from a [template](templates.md) or empty, in a folder
+  (with none chosen, where the library's setting for new notes puts it,
+  see [organization](organization.md#where-new-notes-and-folders-go)), its
+  name and frontmatter fields filled.
 - **Add task** — the task dialog, its `+project` and `@context` already
   written in.
 - **Open a note**.
 - **Today's entry** — the [journal](journal.md)'s.
 - **Capture web page** — into a folder of its own instead of the capture
   folder (see [web capture](web-capture.md)); with none chosen, into the
-  capture folder. The library root is not among the choices.
+  capture folder, which does not follow the setting for new notes. The
+  library root is not among the choices of either action.
 
 Every value of a new note is **Fixed** or **Ask**:
 

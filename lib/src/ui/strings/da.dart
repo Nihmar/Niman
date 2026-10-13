@@ -406,11 +406,11 @@ final class DanishStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Lad dem være';
   @override
-  String get missingNoteLocationTitle => 'Opret manglende noter i';
+  String get newItemLocationTitle => 'Nye noter og mapper placeres i';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekets rodmappe';
+  String get newItemLocationRoot => 'Bibliotekets rodmappe';
   @override
-  String get missingNoteLocationCurrentFolder => 'Nuværende mappe';
+  String get newItemLocationOpenNote => 'Mappen med den åbne note';
   @override
   String get indentWidthTitle => 'Indrykningens bredde';
   @override
@@ -3660,6 +3660,9 @@ final class DanishStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Mappen til gemte sider';
+
+  @override
+  String get homeActionDefaultFolder => 'Hvor nye noter placeres';
 
   @override
   String get homeActionContext => 'Kontekst';

@@ -413,11 +413,11 @@ final class GermanStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Unverändert lassen';
   @override
-  String get missingNoteLocationTitle => 'Fehlende Notizen erstellen in';
+  String get newItemLocationTitle => 'Neue Notizen und Ordner kommen in';
   @override
-  String get missingNoteLocationRoot => 'Bibliothekswurzel';
+  String get newItemLocationRoot => 'Bibliothekswurzel';
   @override
-  String get missingNoteLocationCurrentFolder => 'Aktueller Ordner';
+  String get newItemLocationOpenNote => 'Ordner der geöffneten Notiz';
   @override
   String get indentWidthTitle => 'Einzugstiefe';
   @override
@@ -3754,6 +3754,9 @@ final class GermanStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Der Ordner für Aufnahmen';
+
+  @override
+  String get homeActionDefaultFolder => 'Wohin neue Notizen kommen';
 
   @override
   String get homeActionContext => 'Kontext';

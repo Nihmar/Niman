@@ -407,11 +407,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Пакінуць як ёсць';
   @override
-  String get missingNoteLocationTitle => 'Стварыць адсутныя заўвагі ў';
+  String get newItemLocationTitle => 'Новыя заўвагі і папкі ствараюцца ў';
   @override
-  String get missingNoteLocationRoot => 'Карань бібліятэкі';
+  String get newItemLocationRoot => 'Карань бібліятэкі';
   @override
-  String get missingNoteLocationCurrentFolder => 'Поточная папка';
+  String get newItemLocationOpenNote => 'Папка адкрытай заўвагі';
   @override
   String get indentWidthTitle => 'Шырыня відступу';
   @override
@@ -3718,6 +3718,9 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Папка для захопленняў';
+
+  @override
+  String get homeActionDefaultFolder => 'Куды ідуць новыя заўвагі';
 
   @override
   String get homeActionContext => 'Кантэкст';

@@ -407,11 +407,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Palikti kaip yra';
   @override
-  String get missingNoteLocationTitle => 'Trūkst pastabų sukūrimas';
+  String get newItemLocationTitle => 'Naujų pastabų ir katalogų kūrimas';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekos šaknyje';
+  String get newItemLocationRoot => 'Bibliotekos šaknyje';
   @override
-  String get missingNoteLocationCurrentFolder => 'Dabartiniame kataloge';
+  String get newItemLocationOpenNote => 'Atidarytos pastabos kataloge';
   @override
   String get indentWidthTitle => 'Įtraukos plotis';
   @override
@@ -3718,6 +3718,9 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Išsaugojimų aplankas';
+
+  @override
+  String get homeActionDefaultFolder => 'Kur kuriamos naujos pastabos';
 
   @override
   String get homeActionContext => 'Kontekstas';

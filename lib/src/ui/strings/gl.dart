@@ -412,11 +412,11 @@ final class GalicianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Deixar como están';
   @override
-  String get missingNoteLocationTitle => 'Crear notas que faltan en';
+  String get newItemLocationTitle => 'As notas e cartafoles novos van a';
   @override
-  String get missingNoteLocationRoot => 'Raíz da biblioteca';
+  String get newItemLocationRoot => 'Raíz da biblioteca';
   @override
-  String get missingNoteLocationCurrentFolder => 'Cartafol actual';
+  String get newItemLocationOpenNote => 'Cartafol da nota aberta';
   @override
   String get indentWidthTitle => 'Ancho da sangría';
   @override
@@ -3702,6 +3702,9 @@ final class GalicianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'O cartafol das capturas';
+
+  @override
+  String get homeActionDefaultFolder => 'Onde van as notas novas';
 
   @override
   String get homeActionContext => 'Contexto';

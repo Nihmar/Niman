@@ -406,11 +406,11 @@ final class BasqueStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Utzi dagoen bezala';
   @override
-  String get missingNoteLocationTitle => 'Falta dagoen oharrak sortu';
+  String get newItemLocationTitle => 'Ohar eta karpeta berriak non sortu';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekaren erroan';
+  String get newItemLocationRoot => 'Bibliotekaren erroan';
   @override
-  String get missingNoteLocationCurrentFolder => 'Uneko karpetan';
+  String get newItemLocationOpenNote => 'Irekitako oharraren karpetan';
   @override
   String get indentWidthTitle => 'Bilketa-zabalera';
   @override
@@ -3713,6 +3713,9 @@ final class BasqueStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Kapturen karpeta';
+
+  @override
+  String get homeActionDefaultFolder => 'Ohar berriak non sortzen diren';
 
   @override
   String get homeActionContext => 'Testuingurua';

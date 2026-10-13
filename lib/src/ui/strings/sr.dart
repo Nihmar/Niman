@@ -410,11 +410,11 @@ final class SerbianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Остави како јесте';
   @override
-  String get missingNoteLocationTitle => 'Креирање недостајућих белешки у';
+  String get newItemLocationTitle => 'Нове белешке и фасцикле иду у';
   @override
-  String get missingNoteLocationRoot => 'Корен библиотеке';
+  String get newItemLocationRoot => 'Корен библиотеке';
   @override
-  String get missingNoteLocationCurrentFolder => 'Тренутна фасцикла';
+  String get newItemLocationOpenNote => 'Фасцикла отворене белешке';
   @override
   String get indentWidthTitle => 'Ширина уступа';
   @override
@@ -3700,6 +3700,9 @@ final class SerbianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Фасцикла за снимке';
+
+  @override
+  String get homeActionDefaultFolder => 'Где иду нове белешке';
 
   @override
   String get homeActionContext => 'Контекст';

@@ -406,11 +406,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'La dem stå';
   @override
-  String get missingNoteLocationTitle => 'Opprett manglende notater i';
+  String get newItemLocationTitle => 'Nye notater og mapper havner i';
   @override
-  String get missingNoteLocationRoot => 'Bibliotekets rotmappe';
+  String get newItemLocationRoot => 'Bibliotekets rotmappe';
   @override
-  String get missingNoteLocationCurrentFolder => 'Nuværende mappe';
+  String get newItemLocationOpenNote => 'Mappen til det åpne notatet';
   @override
   String get indentWidthTitle => 'Innrykkingsbredde';
   @override
@@ -3663,6 +3663,9 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Mappen for lagrede sider';
+
+  @override
+  String get homeActionDefaultFolder => 'Hvor nye notater havner';
 
   @override
   String get homeActionContext => 'Kontekst';

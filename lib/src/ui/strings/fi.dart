@@ -407,11 +407,11 @@ final class FinnishStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Jätä ennalleen';
   @override
-  String get missingNoteLocationTitle => 'Luo puuttuvat muistiinpanot';
+  String get newItemLocationTitle => 'Luo uudet muistiinpanot ja kansiot';
   @override
-  String get missingNoteLocationRoot => 'Kirjaston juureen';
+  String get newItemLocationRoot => 'Kirjaston juureen';
   @override
-  String get missingNoteLocationCurrentFolder => 'Nykyiseen kansioon';
+  String get newItemLocationOpenNote => 'Avoimen muistiinpanon kansioon';
   @override
   String get indentWidthTitle => 'Sisäännyrjäyksen leveys';
   @override
@@ -3695,6 +3695,9 @@ final class FinnishStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Tallennusten kansio';
+
+  @override
+  String get homeActionDefaultFolder => 'Mihin uudet muistiinpanot menevät';
 
   @override
   String get homeActionContext => 'Konteksti';

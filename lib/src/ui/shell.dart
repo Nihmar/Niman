@@ -40,6 +40,7 @@ import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -927,7 +928,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// into [ShellCreateFlow]).
   late final ShellCreateFlow _createFlow = ShellCreateFlow(
     controller: widget.controller,
-    createParent: () => _createParent,
+    newItemRule: _newItemRule,
     guard: _guard,
     onCreated: _onItemCreated,
   );
@@ -1458,7 +1459,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           // The Files pane opened this note (#727): the caret goes in it.
           caretRequest: selectedPath == _caretPath ? _caretRequest : 0,
           linkType: _editorSettings.linkType,
-          missingNoteLocation: _editorSettings.missingNoteLocation,
+          newItemLocation: _editorSettings.newItemLocation,
           attachmentsFolder: _editorSettings.attachmentsFolder,
           templateFolder: _editorSettings.templateFolder,
           indentWidth: _editorSettings.indentWidth,
@@ -1857,7 +1858,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         isDir: _selectedIsDir,
         treeVisible: _treeVisible,
       ),
-      createParent: () => _createParent,
+      newItemRule: _newItemRule,
       guard: _guard,
       opensPreviewOnly: () => _notePreview,
       onNoteFiled: _onTemplateNoteFiled,
@@ -2200,13 +2201,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // A cache file that outlives us costs disk, not the import.
     }
     await _guard(() async {
+      // Where the library's rule puts a new note (#850); a share that
+      // arrives with no note open lands at the root.
+      final folder = _newItemRule.folder;
       final imported = await ops.createNote(
-        parentPath: '',
+        parentPath: folder,
         name: p.basenameWithoutExtension(name),
         content: text,
       );
       if (!mounted) return;
-      _revealFolder('');
+      _revealFolder(folder);
       _openNoteFromLink(imported.path, null);
     });
   }
@@ -2378,11 +2382,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     widget.controller.notify();
   }
 
-  /// Parent path for new note/folder creation.
-  String get _createParent {
-    if (_selected == null) return '';
-    return _selectedIsDir ? _selected! : parentOf(_selected!);
-  }
+  /// The library's one rule for where new notes and folders go (#850),
+  /// read on each creation: its setting, and the note on screen.
+  late final NewItemRule _newItemRule = NewItemRule(
+    location: () => _editorSettings.newItemLocation,
+    activeNote: () => _shownNote,
+  );
 
   void _select(Note note, {bool newTab = false}) {
     // A note opening in preview-only has no editable for the IME.
@@ -4260,7 +4265,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     caretPath: _caretPath,
                     caretRequest: _caretRequest,
                     linkType: _editorSettings.linkType,
-                    missingNoteLocation: _editorSettings.missingNoteLocation,
+                    newItemLocation: _editorSettings.newItemLocation,
                     attachmentsFolder: _editorSettings.attachmentsFolder,
                     templateFolder: _editorSettings.templateFolder,
                     indentWidth: _editorSettings.indentWidth,
@@ -4480,7 +4485,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // open quick note leaves this body painted under the opening note.
       ShellTab.quickNote =>
         _showQuickNoteChooser
-            ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
+            ? QuickNoteTab(
+                controller: controller,
+                newItemRule: _newItemRule,
+                onOpen: _openQuickNote,
+              )
             : const SizedBox.shrink(),
       ShellTab.home => HomeScreen(
         host: _homeHost(controller),

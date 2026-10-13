@@ -144,9 +144,9 @@ final class _ActionEditorState extends State<_ActionEditor> {
       folders: folders,
       ops: ops,
       current: _folder,
-      // A capture's empty folder is the capture folder, not the root
-      // (#682): the root is offered where it is what empty means.
-      allowRoot: _kind != HomeActionKind.capture,
+      // An empty folder is the capture folder for a capture (#682) and
+      // where the library's rule puts new notes for a note (#850), not
+      // the root: the root is not among the choices.
     );
     if (picked != null) setState(() => _folder = picked);
   }
@@ -252,7 +252,7 @@ final class _ActionEditorState extends State<_ActionEditor> {
             key: const Key('home-action-folder'),
             title: AppStrings.homeActionFolder,
             path: (_folder ?? '').isEmpty ? null : _folder,
-            empty: AppStrings.libraryRoot,
+            empty: AppStrings.homeActionDefaultFolder,
             onTap: () => unawaited(_pickFolder()),
             onClear: () => setState(() => _folder = null),
           ),

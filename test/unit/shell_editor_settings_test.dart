@@ -9,8 +9,8 @@ import 'package:niman/src/core/settings/library_config.dart'
     show defaultSourceFont;
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -66,8 +66,7 @@ final class _CountedReads implements LibrarySession {
   Future<LinkType> get linkType => _read(_inner.linkType);
 
   @override
-  Future<MissingNoteLocation> get missingNoteLocation =>
-      _read(_inner.missingNoteLocation);
+  Future<NewItemLocation> get newItemLocation => _read(_inner.newItemLocation);
 
   @override
   Future<int> get indentWidth => _read(_inner.indentWidth);
@@ -128,7 +127,7 @@ void main() {
     editorKind: EditorKind.wysiwyg,
     editorsEnabled: {EditorKind.wysiwyg},
     linkType: LinkType.markdown,
-    missingNoteLocation: MissingNoteLocation.libraryRoot,
+    newItemLocation: NewItemLocation.libraryRoot,
     attachmentsFolder: 'media',
     indentWidth: 4,
     sourceFont: SourceFont.serif,
@@ -156,7 +155,7 @@ void main() {
       expect(copy.autofocusEditor, isTrue);
       expect(copy.editorsEnabled, settings.editorsEnabled);
       expect(copy.linkType, LinkType.markdown);
-      expect(copy.missingNoteLocation, MissingNoteLocation.libraryRoot);
+      expect(copy.newItemLocation, NewItemLocation.libraryRoot);
       expect(copy.attachmentsFolder, 'media');
       expect(copy.indentWidth, 4);
       expect(copy.sourceFont, SourceFont.serif);

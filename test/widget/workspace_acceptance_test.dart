@@ -15,7 +15,7 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -64,7 +64,7 @@ Widget _deck(
   barActions: const [],
   autofocusEditor: false,
   linkType: LinkType.wikilink,
-  missingNoteLocation: MissingNoteLocation.currentFolder,
+  newItemLocation: NewItemLocation.openNoteFolder,
   attachmentsFolder: 'assets',
   indentWidth: 2,
   toolbarLayout: ToolbarLayout.defaults,

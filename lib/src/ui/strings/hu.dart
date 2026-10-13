@@ -409,11 +409,11 @@ final class HungarianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Hagyja változatlanul';
   @override
-  String get missingNoteLocationTitle => 'Hiányzó jegyzetek létrehozása';
+  String get newItemLocationTitle => 'Új jegyzetek és mappák létrehozása';
   @override
-  String get missingNoteLocationRoot => 'A könyvtár gyökerében';
+  String get newItemLocationRoot => 'A könyvtár gyökerében';
   @override
-  String get missingNoteLocationCurrentFolder => 'A jelenlegi mappában';
+  String get newItemLocationOpenNote => 'A megnyitott jegyzet mappájában';
   @override
   String get indentWidthTitle => 'Behúzás szélessége';
   @override
@@ -3688,6 +3688,9 @@ final class HungarianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'A mentések mappája';
+
+  @override
+  String get homeActionDefaultFolder => 'Ahová az új jegyzetek kerülnek';
 
   @override
   String get homeActionContext => 'Környezet';

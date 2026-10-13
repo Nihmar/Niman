@@ -413,11 +413,11 @@ final class RomanianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Lasă-le neschimbate';
   @override
-  String get missingNoteLocationTitle => 'Creează notele lipsă în';
+  String get newItemLocationTitle => 'Notele și dosarele noi merg în';
   @override
-  String get missingNoteLocationRoot => 'Rădăcina bibliotecii';
+  String get newItemLocationRoot => 'Rădăcina bibliotecii';
   @override
-  String get missingNoteLocationCurrentFolder => 'Dosar curent';
+  String get newItemLocationOpenNote => 'Dosarul notei deschise';
   @override
   String get indentWidthTitle => 'Lățimea indentării';
   @override
@@ -3733,6 +3733,9 @@ final class RomanianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Dosarul capturilor';
+
+  @override
+  String get homeActionDefaultFolder => 'Unde merg notele noi';
 
   @override
   String get homeActionContext => 'Context';

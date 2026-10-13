@@ -418,11 +418,12 @@ final class GreekStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Να μείνουν ως έχουν';
   @override
-  String get missingNoteLocationTitle => 'Δημιουργία λείποντων σημειώσεων στο';
+  String get newItemLocationTitle =>
+      'Οι νέες σημειώσεις και φάκελοι πηγαίνουν στο';
   @override
-  String get missingNoteLocationRoot => 'Ρίζα βιβλιοθήκης';
+  String get newItemLocationRoot => 'Ρίζα βιβλιοθήκης';
   @override
-  String get missingNoteLocationCurrentFolder => 'Τρέχων φάκελος';
+  String get newItemLocationOpenNote => 'Φάκελος της ανοιχτής σημείωσης';
   @override
   String get indentWidthTitle => 'Πλάτος εισαγωγής';
   @override
@@ -3787,6 +3788,9 @@ final class GreekStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Ο φάκελος των λήψεων';
+
+  @override
+  String get homeActionDefaultFolder => 'Όπου πηγαίνουν οι νέες σημειώσεις';
 
   @override
   String get homeActionContext => 'Πλαίσιο';

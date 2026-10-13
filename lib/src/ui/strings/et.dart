@@ -404,11 +404,11 @@ final class EstonianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Jäta muutmata';
   @override
-  String get missingNoteLocationTitle => 'Loo puuduvad märkmed kausta';
+  String get newItemLocationTitle => 'Uued märkmed ja kaustad luuakse siia';
   @override
-  String get missingNoteLocationRoot => 'Biblioteka juur';
+  String get newItemLocationRoot => 'Biblioteka juur';
   @override
-  String get missingNoteLocationCurrentFolder => 'Praegune kaust';
+  String get newItemLocationOpenNote => 'Avatud märkme kaust';
   @override
   String get indentWidthTitle => 'Taande laius';
   @override
@@ -3625,6 +3625,9 @@ final class EstonianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Salvestuste kaust';
+
+  @override
+  String get homeActionDefaultFolder => 'Kuhu uued märkmed lähevad';
 
   @override
   String get homeActionContext => 'Kontekst';

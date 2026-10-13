@@ -2,25 +2,15 @@
 ///
 /// A dead link is a click that resolves to nothing. The handler proposes
 /// where the missing note would be created (per the library's
-/// [MissingNoteLocation] setting), asks the user, and creates it through
+/// [NewItemLocation] setting), asks the user, and creates it through
 /// the library's own note-creation path — the same one the tree's New
 /// note goes through. Cancelling changes nothing: no file, no error, no
 /// second prompt.
 library;
 
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:path/path.dart' as p;
-
-/// Where a note created from a dead link lands (library setting).
-enum MissingNoteLocation {
-  /// The library root: a bare name is created as `<name>.md` at the top
-  /// level.
-  libraryRoot,
-
-  /// The folder of the note the link was clicked in: a bare name is
-  /// created next to that note.
-  currentFolder,
-}
 
 /// The context of a dead-link click: the note the link was clicked in,
 /// and the open library it belongs to.
@@ -37,13 +27,20 @@ final class LinkContext {
   /// Absolute path of the note the link was clicked in.
   final String currentNote;
 
-  /// The clicked note's folder, library-relative ('' = the library
-  /// root); null when the note is not inside [libraryRoot].
-  String? get currentFolder {
+  /// The clicked note's library-relative path; null when the note is not
+  /// inside [libraryRoot].
+  String? get currentNotePath {
     final root = libraryRoot;
     if (root == null) return null;
     if (!p.isWithin(root, currentNote)) return null;
-    return parentOf(relPath(currentNote, root));
+    return relPath(currentNote, root);
+  }
+
+  /// The clicked note's folder, library-relative ('' = the library
+  /// root); null when the note is not inside [libraryRoot].
+  String? get currentFolder {
+    final path = currentNotePath;
+    return path == null ? null : parentOf(path);
   }
 
   /// Whether the click has a library to create in.
@@ -54,9 +51,9 @@ final class LinkContext {
 /// unresolved link [target] clicked in [context], or null when the target
 /// is not a note.
 ///
-/// A bare name lands per [location]: [MissingNoteLocation.currentFolder]
-/// puts it next to the clicked note,
-/// [MissingNoteLocation.libraryRoot] at the library root. A
+/// A bare name lands where the library's one rule puts new notes
+/// ([resolveNewItemFolder], with the clicked note as the open one): next
+/// to that note, or at the library root, per [location]. A
 /// folder-qualified target keeps its own folder, which may not exist
 /// yet: Niman does not create intermediate folders, so the caller checks
 /// the folder before offering (see [MissingNoteHandler]).
@@ -68,7 +65,7 @@ final class LinkContext {
 /// `..`, empty) are dropped, so a proposal never leaves the library.
 String? proposedMissingNotePath(
   String target,
-  MissingNoteLocation location,
+  NewItemLocation location,
   LinkContext context,
 ) {
   var t = target.trim().replaceAll(r'\', '/');
@@ -96,9 +93,7 @@ String? proposedMissingNotePath(
   }
   final cleanName = sanitizeName(name, fallback: defaultNoteName);
   final folder = folders.isEmpty
-      ? (location == MissingNoteLocation.currentFolder
-            ? (context.currentFolder ?? '')
-            : '')
+      ? resolveNewItemFolder(location, activeNote: context.currentNotePath)
       : folders.join('/');
   return folder.isEmpty ? '$cleanName.md' : '$folder/$cleanName.md';
 }
@@ -161,7 +156,7 @@ final class MissingNoteHandler {
   });
 
   /// Where the created note lands (the library's setting).
-  final MissingNoteLocation location;
+  final NewItemLocation location;
 
   /// Asks the user to create the note at library-relative `[path]`; returns
   /// whether they chose to.

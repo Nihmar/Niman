@@ -411,11 +411,11 @@ final class BosnianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Ostavi kako jest';
   @override
-  String get missingNoteLocationTitle => 'Kreiranje nedostajućih bilješki u';
+  String get newItemLocationTitle => 'Nove bilješke i mape idu u';
   @override
-  String get missingNoteLocationRoot => 'Korijen biblioteke';
+  String get newItemLocationRoot => 'Korijen biblioteke';
   @override
-  String get missingNoteLocationCurrentFolder => 'Trenutna mapa';
+  String get newItemLocationOpenNote => 'Mapa otvorene bilješke';
   @override
   String get indentWidthTitle => 'Širina uvlačenja';
   @override
@@ -3703,6 +3703,9 @@ final class BosnianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Mapa za snimanja';
+
+  @override
+  String get homeActionDefaultFolder => 'Gdje idu nove bilješke';
 
   @override
   String get homeActionContext => 'Kontekst';

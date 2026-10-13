@@ -414,11 +414,11 @@ final class CatalanStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Deixa-ho tal com està';
   @override
-  String get missingNoteLocationTitle => 'Crear notes que manquen a';
+  String get newItemLocationTitle => 'Les notes i carpetes noves van a';
   @override
-  String get missingNoteLocationRoot => 'Arrel de la biblioteca';
+  String get newItemLocationRoot => 'Arrel de la biblioteca';
   @override
-  String get missingNoteLocationCurrentFolder => 'Carpeta actual';
+  String get newItemLocationOpenNote => 'Carpeta de la nota oberta';
   @override
   String get indentWidthTitle => 'Ample del sagnat';
   @override
@@ -3738,6 +3738,9 @@ final class CatalanStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'La carpeta de captures';
+
+  @override
+  String get homeActionDefaultFolder => 'On van les notes noves';
 
   @override
   String get homeActionContext => 'Context';

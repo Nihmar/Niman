@@ -412,11 +412,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get linkUpdateKeep => 'Остави како што е';
   @override
-  String get missingNoteLocationTitle => 'Креирање недостапни белешки во';
+  String get newItemLocationTitle => 'Новите белешки и папки одат во';
   @override
-  String get missingNoteLocationRoot => 'Корен на библиотеката';
+  String get newItemLocationRoot => 'Корен на библиотеката';
   @override
-  String get missingNoteLocationCurrentFolder => 'Тековна папка';
+  String get newItemLocationOpenNote => 'Папка на отворената белешка';
   @override
   String get indentWidthTitle => 'Ширина на вовлечување';
   @override
@@ -3705,6 +3705,9 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'Папката за снимени страници';
+
+  @override
+  String get homeActionDefaultFolder => 'Каде одат новите белешки';
 
   @override
   String get homeActionContext => 'Контекст';

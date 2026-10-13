@@ -376,11 +376,11 @@ final class JapaneseStrings extends Strings {
   @override
   String get linkUpdateKeep => 'そのままにする';
   @override
-  String get missingNoteLocationTitle => '存在しないノートを作成する場所';
+  String get newItemLocationTitle => '新しいノートとフォルダを作成する場所';
   @override
-  String get missingNoteLocationRoot => 'ライブラリルート';
+  String get newItemLocationRoot => 'ライブラリルート';
   @override
-  String get missingNoteLocationCurrentFolder => '現在のフォルダ';
+  String get newItemLocationOpenNote => '開いているノートのフォルダ';
   @override
   String get indentWidthTitle => 'インデント幅';
   @override
@@ -3379,6 +3379,9 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'キャプチャ用フォルダ';
+
+  @override
+  String get homeActionDefaultFolder => '新しいノートの作成先';
 
   @override
   String get homeActionContext => 'コンテキスト';

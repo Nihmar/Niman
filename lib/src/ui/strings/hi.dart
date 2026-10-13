@@ -398,11 +398,11 @@ final class HindiStrings extends Strings {
   @override
   String get linkUpdateKeep => 'जैसा है वैसा रहने दें';
   @override
-  String get missingNoteLocationTitle => 'ग़ायब नोट्स बनाएँ';
+  String get newItemLocationTitle => 'नए नोट्स और फ़ोल्डर यहाँ बनाएँ';
   @override
-  String get missingNoteLocationRoot => 'लाइब्रेरी रूट';
+  String get newItemLocationRoot => 'लाइब्रेरी रूट';
   @override
-  String get missingNoteLocationCurrentFolder => 'वर्तमान फ़ोल्डर';
+  String get newItemLocationOpenNote => 'खुले नोट का फ़ोल्डर';
   @override
   String get indentWidthTitle => 'इंडेंट की चौड़ाई';
   @override
@@ -3627,6 +3627,9 @@ final class HindiStrings extends Strings {
 
   @override
   String get homeActionCaptureFolder => 'कैप्चर फ़ोल्डर';
+
+  @override
+  String get homeActionDefaultFolder => 'जहाँ नए नोट्स बनते हैं';
 
   @override
   String get homeActionContext => 'संदर्भ';
