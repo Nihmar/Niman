@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
-/// The dock: a row of three pane tabs and a close, over the pane shown.
+/// The dock: a row of pane tabs and a close, over the pane shown.
 final class RightDock extends StatelessWidget {
   /// Shows [pane], built by [paneBuilder].
   const new({
@@ -77,24 +77,42 @@ final class RightDock extends StatelessWidget {
             child: Row(
               children: [
                 const SizedBox(width: 6),
-                for (final each in DockPane.values)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 1),
-                    child: IconButton(
-                      key: Key('dock-pane-${each.name}'),
-                      tooltip: _label(each),
-                      isSelected: each == pane,
-                      visualDensity: VisualDensity.compact,
-                      iconSize: 18,
-                      style: IconButton.styleFrom(
-                        backgroundColor: each == pane
-                            ? scheme.surfaceContainerHighest
-                            : null,
-                      ),
-                      icon: Icon(_icon(each, selected: each == pane)),
-                      onPressed: () => onPane(each),
+                // The tabs, from their end: five panes and the close do
+                // not all fit the narrowest dock (200 px) at a thumb's
+                // sizes, and a tab a thumb cannot hit is worse than a
+                // strip that scrolls (the tree footer's own rule, #849).
+                // The strip has the row's larger share, so the pane's name
+                // beside it — the smaller one — keeps a little width.
+                Flexible(
+                  flex: 2,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    reverse: true,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final each in DockPane.values)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 1),
+                            child: IconButton(
+                              key: Key('dock-pane-${each.name}'),
+                              tooltip: _label(each),
+                              isSelected: each == pane,
+                              visualDensity: VisualDensity.compact,
+                              iconSize: 18,
+                              style: IconButton.styleFrom(
+                                backgroundColor: each == pane
+                                    ? scheme.surfaceContainerHighest
+                                    : null,
+                              ),
+                              icon: Icon(_icon(each, selected: each == pane)),
+                              onPressed: () => onPane(each),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
+                ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
