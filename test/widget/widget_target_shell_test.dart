@@ -34,6 +34,9 @@ final class _OpenNote implements UnsavedNote {
   bool unsaved = true;
 
   @override
+  String get text => 'edited';
+
+  @override
   Future<void> save() async {
     await session.saveNote(path, 'edited');
     unsaved = false;

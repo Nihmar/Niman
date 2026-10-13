@@ -460,9 +460,18 @@ final class _NoteViewState extends State<NoteView>
     source: () => widget.linkSource,
     notePath: () => _pathInLibrary,
     enabled: () => widget.linkPreview,
+    unsavedText: _unsavedTextOf,
     mathCache: _mathCache,
     targets: _linkTargets,
   );
+
+  /// The unsaved buffer text of the note at library-relative [path], when it
+  /// is open with edits the disk does not have yet (in any pane).
+  String? _unsavedTextOf(String path) {
+    final root = widget.libraryRoot;
+    if (root == null) return null;
+    return widget.unsavedTracker?.unsavedTextOf(p.join(root, path));
+  }
 
   /// The scrolls of both panes: a card closes when the note moves under it.
   late final Listenable _scrolls = Listenable.merge([
@@ -858,6 +867,7 @@ final class _NoteViewState extends State<NoteView>
     revision: () => _saves.revision,
     lastSavedRevision: () => _saves.lastSavedRevision,
     saveForClose: _saves.saveForClose,
+    bufferText: () => _unifiedText,
   );
 
   /// How the note reaches the disk: its revisions, the debounce after an

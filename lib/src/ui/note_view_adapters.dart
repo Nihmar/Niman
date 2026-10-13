@@ -20,6 +20,7 @@ final class UnsavedNoteAdapter implements UnsavedNote {
     required this.revision,
     required this.lastSavedRevision,
     required this.saveForClose,
+    required this.bufferText,
   });
 
   /// The open note's path.
@@ -36,6 +37,12 @@ final class UnsavedNoteAdapter implements UnsavedNote {
 
   /// Saves for close.
   final Future<void> Function() saveForClose;
+
+  /// The buffer's text.
+  final String Function() bufferText;
+
+  @override
+  String get text => bufferText();
 
   @override
   String get path => notePath();

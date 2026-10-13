@@ -2,6 +2,7 @@
 // following the link uses, read off the UI isolate and kept by the revision
 // of the note, a dead link or a file that is not a note showing nothing.
 import 'dart:async';
+import 'dart:convert' show utf8;
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
@@ -270,6 +271,76 @@ void main() {
 
       expect(preview.truncated, isTrue);
       expect(preview.text.startsWith('a' * 100), isTrue);
+    });
+  });
+
+  group('NotePreviewText.of', () {
+    test('a short note is whole, its line endings `\n`', () {
+      final preview = NotePreviewText.of('one\r\ntwo\rthree\n');
+
+      expect(preview.text, 'one\ntwo\nthree\n');
+      expect(preview.truncated, isFalse);
+    });
+
+    test('a long note is cut to the limit of bytes, and says it goes on', () {
+      final text = 'a' * (PreviewLimits.bytes + 10);
+
+      final preview = NotePreviewText.of(text);
+
+      expect(preview.truncated, isTrue);
+      expect(preview.text.length, PreviewLimits.bytes);
+      expect(text.startsWith(preview.text), isTrue);
+    });
+
+    test('a multi-byte character at the cut is not cut in two', () {
+      final text = '${'a' * (PreviewLimits.bytes - 1)}éééé';
+
+      final preview = NotePreviewText.of(text);
+
+      expect(preview.truncated, isTrue);
+      expect(preview.text, 'a' * (PreviewLimits.bytes - 1));
+      expect(preview.text, isNot(contains('\uFFFD')));
+      expect(utf8.encode(preview.text).length, PreviewLimits.bytes - 1);
+    });
+
+    test('a surrogate pair at the cut is not cut in two', () {
+      final text = '${'a' * (PreviewLimits.bytes - 1)}😀rest';
+
+      final preview = NotePreviewText.of(text);
+
+      expect(preview.truncated, isTrue);
+      expect(preview.text, 'a' * (PreviewLimits.bytes - 1));
+      expect(preview.text, isNot(contains('\uFFFD')));
+    });
+  });
+
+  group('UnsavedFirstPreviews', () {
+    test('a note with an unsaved buffer is shown as the buffer', () async {
+      final disk = FakeLinkSource(notes: ['A.md', 'B.md']);
+      disk.previews['A.md'] = 'From the disk.';
+      disk.previews['B.md'] = 'B from the disk.';
+      final previews = UnsavedFirstPreviews(
+        disk,
+        (path) => path == 'A.md' ? 'From the buffer.' : null,
+      );
+
+      expect((await previews.previewText('A.md'))!.text, 'From the buffer.');
+      expect((await previews.previewText('B.md'))!.text, 'B from the disk.');
+      expect(disk.previewReads, [
+        'B.md',
+      ], reason: 'the unsaved note is never read off the disk');
+    });
+
+    test('the buffer is cut as a read off the disk is', () async {
+      final previews = UnsavedFirstPreviews(
+        FakeLinkSource(),
+        (_) => 'x' * (PreviewLimits.bytes + 1),
+      );
+
+      final preview = (await previews.previewText('A.md'))!;
+
+      expect(preview.truncated, isTrue);
+      expect(preview.text.length, PreviewLimits.bytes);
     });
   });
 

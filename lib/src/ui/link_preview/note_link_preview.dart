@@ -26,19 +26,22 @@ import 'package:niman/src/ui/note_links.dart';
 /// the editor is read, how a sheet's Open follows the link.
 final class NoteLinkPreview {
   /// The preview of the links of the note at the library-relative path
-  /// `notePath`, resolved and read in `source`, while `enabled` says the
-  /// setting is on; its notes are typeset through [_mathCache], and a sheet's
-  /// Open follows a link through `targets`.
+  /// `notePath`, resolved and read in `source` — a note open with unsaved
+  /// edits shown as `unsavedText` gives its buffer — while `enabled` says
+  /// the setting is on; its notes are typeset through [_mathCache], and a
+  /// sheet's Open follows a link through `targets`.
   new({
     required LibraryLinks? Function() source,
     required String? Function() notePath,
     required bool Function() enabled,
+    required String? Function(String path) unsavedText,
     required this._mathCache,
     required this._targets,
   }) : controller = LinkPreviewController(
          source: source,
          notePath: notePath,
          enabled: enabled,
+         unsavedText: unsavedText,
        );
 
   /// Which card is up, and when one opens and closes.
