@@ -213,6 +213,32 @@ void main() {
       );
     });
 
+    testWidgets('a referrer that changed says its new line after a reload', (
+      tester,
+    ) async {
+      final links = _library();
+      await pumpSection(tester, links);
+      await tester.tap(find.byKey(const Key('links-to-note-header')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('See also [[Newton]].'), findsOneWidget);
+
+      links.mentions['Optics.md -> Newton.md'] = const Mention(
+        context: 'Now: [[Newton]] and more.',
+        line: 3,
+        embed: false,
+        count: 1,
+      );
+      links.revisions['Optics.md'] = 1;
+      links.announceChange();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Now: [[Newton]] and more.'), findsOneWidget);
+      expect(find.text('See also [[Newton]].'), findsNothing);
+    });
+
     testWidgets('past a page, "Show more" reads the next one, kept on reload', (
       tester,
     ) async {

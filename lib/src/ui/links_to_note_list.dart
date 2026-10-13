@@ -12,8 +12,9 @@ import 'package:path/path.dart' as p;
 /// The rows come from [controller] (one indexed lookup); the line of each is
 /// read as the row is drawn, off the UI isolate and once for each revision of
 /// the note that holds it, so a list that is scrolled through reads the notes
-/// it shows and no others. A tap opens the note that holds the link; past the
-/// last page, "Show more" reads on.
+/// it shows and no others. A row is keyed by its referrer's revision, so a
+/// reload that brings a changed referrer reads its line again. A tap opens
+/// the note that holds the link; past the last page, "Show more" reads on.
 final class LinksToNoteList extends StatelessWidget {
   /// The rows of [controller]; [onOpenNote] opens the note at a path.
   const new({
@@ -78,9 +79,9 @@ final class LinksToNoteList extends StatelessWidget {
             }
             final referrer = referrers.items[index];
             return _ReferrerRow(
-              // A row is a note at a revision of the list: it asks again
-              // for another note's, and keeps its answer while scrolled.
-              key: ValueKey('$path|${referrer.path}'),
+              // A row is a referrer at one revision: it asks again for a
+              // changed one, and keeps its answer while scrolled.
+              key: ValueKey('$path|${referrer.revision}'),
               referrer: referrer,
               read: () => source.mentionIn(referrer.path, path),
               onTap: () => onOpenNote(referrer.path),

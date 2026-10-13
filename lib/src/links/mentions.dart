@@ -45,6 +45,10 @@ final class Referrer {
 
   /// The referrer's size in bytes, as the index recorded it.
   final int size;
+
+  /// The referrer at this revision: what it says is read again when the
+  /// revision moves, and not before.
+  String get revision => '$path|${modified.microsecondsSinceEpoch}|$size';
 }
 
 /// A page of the notes that link to one note, in path order, and where the
