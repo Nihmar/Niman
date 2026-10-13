@@ -89,6 +89,7 @@ void main() {
       'A paragraph with an id ^37066d\n\n'
       '- an item ^item-1\n- another\n\n'
       '> a quote\n\n^quote-1\n\n'
+      '## A heading ^head-1\n\n'
       'A caret ^ in the middle and ^not-last words\n',
     );
 
@@ -97,6 +98,8 @@ void main() {
     expect(find.textContaining('an item'), findsOne);
     expect(find.textContaining('^item-1'), findsNothing);
     expect(find.textContaining('^quote-1'), findsNothing);
+    expect(find.textContaining('A heading'), findsOne);
+    expect(find.textContaining('^head-1'), findsNothing);
     expect(
       find.textContaining('A caret ^ in the middle and ^not-last words'),
       findsOne,

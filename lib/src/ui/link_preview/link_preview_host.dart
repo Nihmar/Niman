@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/link_preview/link_preview_card.dart';
@@ -71,8 +72,27 @@ final class _LinkPreviewHostState extends State<LinkPreviewHost> {
     super.dispose();
   }
 
+  /// Whether a frame's end is already asked to bring the portal in line.
+  bool _syncPending = false;
+
   void _onChanged() {
     if (!mounted) return;
+    // The controller can change inside a build — the note view's
+    // didUpdateWidget loads another note, and the load closes the card —
+    // where the overlay portal refuses to be shown or hidden. The card
+    // reads the controller, so it draws nothing this frame already; the
+    // portal follows once the frame is over, as the wikilink panel's does
+    // (`WikilinkSuggest.dropInUpdate`).
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      if (_syncPending) return;
+      _syncPending = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _syncPending = false;
+        _onChanged();
+      });
+      return;
+    }
     if (widget.controller.shown != null) {
       _portal.show();
     } else if (_portal.isShowing) {

@@ -169,6 +169,9 @@ final class _DirtyNote implements UnsavedNote {
   bool get unsaved => saves == 0;
 
   @override
+  String get text => '';
+
+  @override
   Future<void> save() async {
     if (fails) throw const FileSystemException('disk full');
     saves++;

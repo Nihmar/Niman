@@ -142,12 +142,12 @@ final class LeafView extends StatelessWidget {
     final style = theme.heading(leaf.node.headingLevel);
     final inline = leaf.inline;
     if (leaf.lines.length < 2 || inline == null || inline.isEmpty) {
-      return _rich(style);
+      return _rich(style, hideBlockId: true);
     }
     return Text.rich(
       TextSpan(
         children: [
-          ..._spans(style).of(inline),
+          ..._spans(style).of(inline, hideBlockId: true),
           const TextSpan(text: '\n'),
         ],
         style: style,

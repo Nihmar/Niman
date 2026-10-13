@@ -662,6 +662,38 @@ void main() {
       await leave(tester);
     }, variant: _desktop);
 
+    testWidgets('another note opened under a card closes it, the overlay '
+        'left alone during the build', (tester) async {
+      final links = library();
+      await tester.pumpWidget(_app(note(links: links, showPreview: true)));
+      await tester.pumpAndSettle();
+      await mouseAt(tester, onLink(tester, 'see Newton here'));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+      await tester.pump();
+      expect(card, findsOneWidget);
+
+      // The pane opens another note in the same view: its didUpdateWidget
+      // loads it, and the load closes the card from inside the build.
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: 'another note\n',
+            path: '/lib/Notes/Other.md',
+            libraryRoot: '/lib',
+            links: links,
+            showPreview: true,
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      expect(card, findsNothing);
+      await leave(tester);
+    }, variant: _desktop);
+
     testWidgets('the setting off, neither pane previews', (tester) async {
       final links = library();
       await tester.pumpWidget(

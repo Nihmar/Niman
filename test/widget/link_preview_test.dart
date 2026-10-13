@@ -43,10 +43,12 @@ void main() {
   late FakeLinkSource links;
   late LinkPreviewController controller;
   late ScrollController scroll;
+  String? Function(String path)? unsavedText;
   var enabled = true;
 
   setUp(() {
     enabled = true;
+    unsavedText = null;
     links = FakeLinkSource(notes: ['Newton.md', 'Optics.md', 'Here.md']);
     links.previews['Newton.md'] =
         '# Newton\n\nGravity, and the laws of motion.';
@@ -58,6 +60,7 @@ void main() {
       source: () => links,
       notePath: () => 'Here.md',
       enabled: () => enabled,
+      unsavedText: (path) => unsavedText?.call(path),
     );
     scroll = ScrollController();
     addTearDown(controller.dispose);
@@ -117,8 +120,11 @@ void main() {
 
     await settleHover(tester);
     expect(_card, findsOneWidget);
-    expect(find.byKey(const Key('link-preview-title')), findsOneWidget);
-    expect(find.text('Newton'), findsWidgets);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('link-preview-title'))).data,
+      'Newton',
+      reason: "the card's title is the note's name",
+    );
     expect(
       find.textContaining('Gravity, and the laws of motion.'),
       findsOneWidget,
@@ -224,6 +230,25 @@ void main() {
 
     expect(links.previewReads, ['Newton.md']);
     expect(_card, findsOneWidget);
+  });
+
+  _cardTest('a note open with unsaved edits shows its buffer, not the disk', (
+    tester,
+  ) async {
+    unsavedText = (path) =>
+        path == 'Newton.md' ? '# Newton\n\nEdited, not saved.' : null;
+    await pumpPage(tester);
+    await hover(tester, 'Newton');
+    await settleHover(tester);
+
+    expect(_card, findsOneWidget);
+    expect(find.textContaining('Edited, not saved.'), findsOneWidget);
+    expect(
+      find.textContaining('Gravity, and the laws of motion.'),
+      findsNothing,
+      reason: 'the disk is not what the note says now',
+    );
+    expect(links.previewReads, isEmpty, reason: 'the disk was never read');
   });
 
   _cardTest('the setting off, no card opens', (tester) async {

@@ -468,6 +468,7 @@ final class _Buffer implements UnsavedNote {
 
   final Future<void> Function(String text) write;
 
+  @override
   final String text;
 
   @override

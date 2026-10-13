@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show Offset;
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/link_preview.dart';
+import 'package:niman/src/links/preview_reader.dart';
 
 /// A preview card being shown: what it previews, where the pointer was when
 /// it opened.
@@ -37,12 +38,15 @@ final class ShownPreview {
 final class LinkPreviewController extends ChangeNotifier {
   /// A controller that previews the links of the note at the library-relative
   /// path `notePath` in the library `source`, while `enabled` says the setting
-  /// is on. The pauses are the hover intent, and the grace of crossing from a
-  /// link to its card.
+  /// is on; a note `unsavedText` has a text for (by its library-relative
+  /// path) is shown as that text, its open buffer, instead of its file. The
+  /// pauses are the hover intent, and the grace of crossing from a link to
+  /// its card.
   new({
     required this._source,
     required this._notePath,
     required this._enabled,
+    this._unsavedText,
     this.hoverDelay = const Duration(milliseconds: 400),
     this.leaveGrace = const Duration(milliseconds: 200),
   });
@@ -50,6 +54,7 @@ final class LinkPreviewController extends ChangeNotifier {
   final LibraryLinks? Function() _source;
   final String? Function() _notePath;
   final bool Function() _enabled;
+  final String? Function(String path)? _unsavedText;
 
   /// How long a pointer rests on a link, with no modifier, before its card
   /// opens: the pointer sweeping across a page opens nothing.
@@ -129,7 +134,11 @@ final class LinkPreviewController extends ChangeNotifier {
     final source = _source();
     if (source == null || !_enabled()) return null;
     try {
-      return await previewOfLink(source, source, link, from: _notePath());
+      final unsaved = _unsavedText;
+      final previews = unsaved == null
+          ? source
+          : UnsavedFirstPreviews(source, unsaved);
+      return await previewOfLink(source, previews, link, from: _notePath());
     } on Object {
       return null;
     }
