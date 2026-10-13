@@ -202,6 +202,15 @@ abstract base class Strings {
   String get linkTypeSubtitle;
   String get linkTypeWikilink;
   String get linkTypeMarkdown;
+  String get linkUpdateTitle;
+  String get linkUpdateSubtitle;
+  String get linkUpdateAutomatic;
+  String get linkUpdateAsk;
+  String get linkUpdateNever;
+  String get linkUpdateAskTitle;
+  String linkUpdateAskBody(int notes);
+  String get linkUpdateConfirm;
+  String get linkUpdateKeep;
   String get indentWidthTitle;
   String get indentWidthSubtitle;
 

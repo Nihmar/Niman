@@ -391,6 +391,28 @@ final class RomanianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Actualizează linkurile după redenumire sau mutare';
+  @override
+  String get linkUpdateSubtitle =>
+      'Ce se întâmplă cu linkurile către o notă sau un dosar redenumit ori '
+      'mutat';
+  @override
+  String get linkUpdateAutomatic => 'Automat';
+  @override
+  String get linkUpdateAsk => 'Întreabă de fiecare dată';
+  @override
+  String get linkUpdateNever => 'Niciodată';
+  @override
+  String get linkUpdateAskTitle => 'Actualizezi linkurile?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Note care trimit la ce a fost mutat: $notes. Actualizezi linkurile lor?';
+  @override
+  String get linkUpdateConfirm => 'Actualizează';
+  @override
+  String get linkUpdateKeep => 'Lasă-le neschimbate';
+  @override
   String get missingNoteLocationTitle => 'Creează notele lipsă în';
   @override
   String get missingNoteLocationRoot => 'Rădăcina bibliotecii';

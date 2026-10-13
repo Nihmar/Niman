@@ -387,6 +387,28 @@ final class SlovakStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Aktualizovať odkazy po premenovaní alebo presune';
+  @override
+  String get linkUpdateSubtitle =>
+      'Čo sa stane s odkazmi na poznámku alebo priečinok, ktoré sú '
+      'premenované či presunuté';
+  @override
+  String get linkUpdateAutomatic => 'Automaticky';
+  @override
+  String get linkUpdateAsk => 'Vždy sa opýtať';
+  @override
+  String get linkUpdateNever => 'Nikdy';
+  @override
+  String get linkUpdateAskTitle => 'Aktualizovať odkazy?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Poznámky odkazujúce na presunuté: $notes. Aktualizovať ich odkazy?';
+  @override
+  String get linkUpdateConfirm => 'Aktualizovať';
+  @override
+  String get linkUpdateKeep => 'Nechať bez zmeny';
+  @override
   String get missingNoteLocationTitle => 'Vytvárať chýbajúce poznámky v';
   @override
   String get missingNoteLocationRoot => 'Koreň knižnice';

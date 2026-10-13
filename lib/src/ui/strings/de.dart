@@ -390,6 +390,29 @@ final class GermanStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Links nach Umbenennen oder Verschieben aktualisieren';
+  @override
+  String get linkUpdateSubtitle =>
+      'Was mit Links geschieht, die auf eine umbenannte oder verschobene '
+      'Notiz oder einen Ordner zeigen';
+  @override
+  String get linkUpdateAutomatic => 'Automatisch';
+  @override
+  String get linkUpdateAsk => 'Jedes Mal fragen';
+  @override
+  String get linkUpdateNever => 'Nie';
+  @override
+  String get linkUpdateAskTitle => 'Links aktualisieren?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notizen, die auf das Verschobene verweisen: $notes. Ihre Links '
+      'aktualisieren?';
+  @override
+  String get linkUpdateConfirm => 'Aktualisieren';
+  @override
+  String get linkUpdateKeep => 'Unverändert lassen';
+  @override
   String get missingNoteLocationTitle => 'Fehlende Notizen erstellen in';
   @override
   String get missingNoteLocationRoot => 'Bibliothekswurzel';

@@ -386,6 +386,29 @@ final class HungarianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Hivatkozások frissítése átnevezés vagy áthelyezés után';
+  @override
+  String get linkUpdateSubtitle =>
+      'Mi történik az átnevezett vagy áthelyezett jegyzetre vagy mappára '
+      'mutató hivatkozásokkal';
+  @override
+  String get linkUpdateAutomatic => 'Automatikusan';
+  @override
+  String get linkUpdateAsk => 'Mindig kérdezzen';
+  @override
+  String get linkUpdateNever => 'Soha';
+  @override
+  String get linkUpdateAskTitle => 'Frissíti a hivatkozásokat?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Az áthelyezettre hivatkozó jegyzetek: $notes. Frissíti a '
+      'hivatkozásaikat?';
+  @override
+  String get linkUpdateConfirm => 'Frissítés';
+  @override
+  String get linkUpdateKeep => 'Hagyja változatlanul';
+  @override
   String get missingNoteLocationTitle => 'Hiányzó jegyzetek létrehozása';
   @override
   String get missingNoteLocationRoot => 'A könyvtár gyökerében';

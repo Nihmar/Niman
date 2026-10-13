@@ -605,6 +605,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the link format.
   Future<void> setLinkType(LinkType type);
 
+  /// What a rename or a move does to the links pointing at what moved
+  /// (default [LinkUpdate.automatic], #848).
+  Future<LinkUpdate> get linkUpdate;
+
+  /// Sets (and persists) what a rename or a move does to those links.
+  Future<void> setLinkUpdate(LinkUpdate mode);
+
   /// Where a note created from a dead link lands (default the folder of
   /// the note the link was clicked in, issue #78).
   Future<MissingNoteLocation> get missingNoteLocation;

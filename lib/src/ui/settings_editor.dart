@@ -55,6 +55,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   Set<String> _lintRulesOff = const <String>{};
   bool? _autofocusEditor;
   LinkType _linkType = LinkType.wikilink;
+  LinkUpdate _linkUpdate = LinkUpdate.automatic;
   MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
   double _noteTextScale = defaultTextScale;
   SourceFont _sourceFont = defaultSourceFont;
@@ -92,6 +93,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final lintRulesOff = await controller.lintRulesOff;
     final autofocus = await controller.editorAutofocusEnabled;
     final linkType = await controller.linkType;
+    final linkUpdate = await controller.linkUpdate;
     final missingNoteLocation = await controller.missingNoteLocation;
     final noteTextScale = await controller.noteTextScale;
     final sourceFont = await controller.sourceFont;
@@ -110,6 +112,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _lintRulesOff = lintRulesOff;
       _autofocusEditor = autofocus;
       _linkType = linkType;
+      _linkUpdate = linkUpdate;
       _missingNoteLocation = missingNoteLocation;
       _noteTextScale = noteTextScale;
       _sourceFont = sourceFont;
@@ -297,6 +300,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     }
   }
 
+  Future<void> _setLinkUpdate(LinkUpdate mode) async {
+    final controller = widget.controller;
+    await controller.setLinkUpdate(mode);
+    controller.notify();
+    if (mounted) {
+      setState(() => _linkUpdate = mode);
+    }
+  }
+
   Future<void> _setMissingNoteLocation(MissingNoteLocation location) async {
     final controller = widget.controller;
     await controller.setMissingNoteLocation(location);
@@ -371,6 +383,24 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       ],
     );
     if (type != null) await _setLinkType(type);
+  }
+
+  /// Asks what a rename or a move does to the links pointing at what
+  /// moved (#848).
+  Future<void> _chooseLinkUpdate() async {
+    final mode = await showSettingsChoice<LinkUpdate>(
+      context,
+      dialogKey: const Key('link-update-dialog'),
+      title: AppStrings.linkUpdateTitle,
+      subtitle: AppStrings.linkUpdateSubtitle,
+      current: _linkUpdate,
+      options: [
+        SettingsOption(LinkUpdate.automatic, AppStrings.linkUpdateAutomatic),
+        SettingsOption(LinkUpdate.ask, AppStrings.linkUpdateAsk),
+        SettingsOption(LinkUpdate.never, AppStrings.linkUpdateNever),
+      ],
+    );
+    if (mode != null) await _setLinkUpdate(mode);
   }
 
   /// Asks where a note created from a dead link lands (issue #78).
@@ -645,9 +675,22 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               onTap: () => unawaited(_chooseLinkType()),
             ),
           ),
-          // Next to the link format: both decide what a link does — one
-          // what it inserts, the other what a click on a missing target
-          // becomes (issue #78).
+          // Next to the link format: they decide what a link does — what
+          // it inserts, what happens to it when its target moves (#848),
+          // what a click on a missing target becomes (issue #78).
+          HighlightRow(
+            key: SettingsKeys.linkUpdate,
+            child: SettingsValueRow(
+              title: AppStrings.linkUpdateTitle,
+              subtitle: AppStrings.linkUpdateSubtitle,
+              value: switch (_linkUpdate) {
+                LinkUpdate.automatic => AppStrings.linkUpdateAutomatic,
+                LinkUpdate.ask => AppStrings.linkUpdateAsk,
+                LinkUpdate.never => AppStrings.linkUpdateNever,
+              },
+              onTap: () => unawaited(_chooseLinkUpdate()),
+            ),
+          ),
           HighlightRow(
             key: SettingsKeys.missingNoteLocation,
             child: SettingsValueRow(

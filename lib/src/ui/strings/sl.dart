@@ -390,6 +390,29 @@ final class SlovenianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Posodobi povezave po preimenovanju ali premiku';
+  @override
+  String get linkUpdateSubtitle =>
+      'Kaj se zgodi s povezavami na preimenovan ali premaknjen zapisek ali '
+      'mapo';
+  @override
+  String get linkUpdateAutomatic => 'Samodejno';
+  @override
+  String get linkUpdateAsk => 'Vprašaj vsakič';
+  @override
+  String get linkUpdateNever => 'Nikoli';
+  @override
+  String get linkUpdateAskTitle => 'Posodobim povezave?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Zapiski s povezavami na premaknjeno: $notes. Posodobim njihove '
+      'povezave?';
+  @override
+  String get linkUpdateConfirm => 'Posodobi';
+  @override
+  String get linkUpdateKeep => 'Pusti nespremenjeno';
+  @override
   String get missingNoteLocationTitle => 'Ustvari manjkajoče opombe v';
   @override
   String get missingNoteLocationRoot => 'Koren knjižnice';

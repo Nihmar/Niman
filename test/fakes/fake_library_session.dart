@@ -568,6 +568,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<LinkUpdate> get linkUpdate async => _config.linkUpdate;
+
+  @override
+  Future<void> setLinkUpdate(LinkUpdate mode) async {
+    _config = _config.copyWith(linkUpdate: mode);
+  }
+
+  @override
   Future<MissingNoteLocation> get missingNoteLocation async =>
       _config.missingNoteLocation;
 

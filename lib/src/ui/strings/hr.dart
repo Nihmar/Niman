@@ -387,6 +387,28 @@ final class CroatianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Ažuriraj veze nakon preimenovanja ili premještanja';
+  @override
+  String get linkUpdateSubtitle =>
+      'Što se događa s vezama na napomenu ili mapu koja je preimenovana ili '
+      'premještena';
+  @override
+  String get linkUpdateAutomatic => 'Automatski';
+  @override
+  String get linkUpdateAsk => 'Pitaj svaki put';
+  @override
+  String get linkUpdateNever => 'Nikada';
+  @override
+  String get linkUpdateAskTitle => 'Ažurirati veze?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Napomene koje upućuju na premješteno: $notes. Ažurirati njihove veze?';
+  @override
+  String get linkUpdateConfirm => 'Ažuriraj';
+  @override
+  String get linkUpdateKeep => 'Ostavi kako jest';
+  @override
   String get missingNoteLocationTitle => 'Kreiranje nedostajućih napomena u';
   @override
   String get missingNoteLocationRoot => 'Korijen biblioteke';

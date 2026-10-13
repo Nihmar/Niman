@@ -390,6 +390,29 @@ final class PolishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Aktualizuj linki po zmianie nazwy lub przeniesieniu';
+  @override
+  String get linkUpdateSubtitle =>
+      'Co dzieje się z linkami do notatki lub folderu, którego nazwę '
+      'zmieniono lub który przeniesiono';
+  @override
+  String get linkUpdateAutomatic => 'Automatycznie';
+  @override
+  String get linkUpdateAsk => 'Pytaj za każdym razem';
+  @override
+  String get linkUpdateNever => 'Nigdy';
+  @override
+  String get linkUpdateAskTitle => 'Zaktualizować linki?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notatki z linkami do przeniesionego elementu: $notes. Zaktualizować '
+      'ich linki?';
+  @override
+  String get linkUpdateConfirm => 'Zaktualizuj';
+  @override
+  String get linkUpdateKeep => 'Zostaw bez zmian';
+  @override
   String get missingNoteLocationTitle => 'Utwórz brakujące notatki w';
   @override
   String get missingNoteLocationRoot => 'Korzeń biblioteki';
