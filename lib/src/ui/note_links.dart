@@ -8,84 +8,21 @@
 /// needs — the same bargain `shell_layout.dart` struck with the shell.
 library;
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/files.dart' show pathInLibrary;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
-import 'package:niman/src/editor/outline.dart';
-import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/anchor.dart';
 import 'package:niman/src/links/block_anchors.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
-import 'package:niman/src/ui/missing_note_dialog.dart';
+import 'package:niman/src/ui/dead_link_flow.dart';
+import 'package:niman/src/ui/link_snack.dart';
+import 'package:niman/src/ui/note_link_targets.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
-/// What following one link needs to know, and what it may call.
-@immutable
-final class NoteLinkTargets {
-  /// Creates the targets for one tap.
-  const new({
-    required this.source,
-    required this.notePath,
-    required this.libraryRoot,
-    required this.newItemLocation,
-    required this.outline,
-    required this.jumpToHeading,
-    this.blocks,
-    this.onOpenNote,
-    this.createMissingNote,
-    this.modifier = false,
-  });
-
-  /// Resolves a link against the library; null while the library is not
-  /// ready, and then nothing resolves.
-  final LinkSource? source;
-
-  /// The open note's absolute path: what a relative link is relative to.
-  final String notePath;
-
-  /// The library root, or null for a note opened from outside one.
-  final String? libraryRoot;
-
-  /// Where a dead link's new note would be created.
-  final NewItemLocation newItemLocation;
-
-  /// The note's headings, for an anchor to land on.
-  final List<OutlineEntry> outline;
-
-  /// Scrolls the note to a heading's line.
-  final void Function(int line) jumpToHeading;
-
-  /// The note's block anchors, the blocks that end with a ` ^id` (#844), read
-  /// when a block link is followed; null for a surface that keeps none, where
-  /// a block link finds nothing.
-  final Future<List<BlockAnchor>> Function()? blocks;
-
-  /// Opens another note through the shell; null leaves a link that
-  /// resolves with nowhere to go.
-  final void Function(String path, String? anchor)? onOpenNote;
-
-  /// Creates the note a dead link points at, and the folders on the way to
-  /// it (#847); null disables the offer.
-  final Future<String> Function(String path)? createMissingNote;
-
-  /// The tap carried the platform's link modifier (Ctrl, Cmd on macOS) —
-  /// the editor surface's own way to follow a link. A *dead* link is then
-  /// created on the spot and opened, the modifier standing as its own
-  /// confirmation, rather than offered (#477); a resolved link is
-  /// followed as always, and every other tap keeps the offer.
-  final bool modifier;
-
-  /// The open note's path in the library, slash-separated — what a `..` in
-  /// a link walks from (#491); null for a note opened from outside one.
-  String? get notePathInLibrary => pathInLibrary(libraryRoot, notePath);
-}
+export 'package:niman/src/ui/note_link_targets.dart';
 
 /// The preview's link handler (T-M3-07): `.md` relative links navigate
 /// in-app, http(s) launch the browser, `#anchor` stays local.
@@ -132,7 +69,7 @@ Future<void> openWiki(
     final heading = ref.fragment;
     if (heading == null) {
       log.debug('wikilink: empty target and no heading — snackbar');
-      return _linkSnack(context, AppStrings.unresolvedLinkTitle);
+      return linkSnack(context, AppStrings.unresolvedLinkTitle);
     }
     log.debug('wikilink: local anchor — jump to "$heading"');
     await jumpToAnchor(context, heading, link);
@@ -201,7 +138,7 @@ Future<void> _applyResolved(
       try {
         await launchUrl(Uri.parse(url));
       } on Object {
-        if (context.mounted) _linkSnack(context, AppStrings.openLinkFailed);
+        if (context.mounted) linkSnack(context, AppStrings.openLinkFailed);
       }
     case LocalAnchor(:final heading):
       log.debug('link outcome: jump to local anchor "$heading"');
@@ -215,73 +152,11 @@ Future<void> _applyResolved(
       );
       await _pickAmbiguous(context, candidates, link);
     case UnresolvedNote(:final target):
-      final outcome = await _handleDeadLink(context, target, link);
-      log.debug('link outcome: ${describeOutcome(outcome)}');
-      if (outcome is DeadLinkCreated) {
-        final open = link.onOpenNote;
-        if (open == null) {
-          if (context.mounted) {
-            _linkSnack(context, AppStrings.unresolvedLinkTitle);
-          }
-          return;
-        }
-        open(outcome.path, null);
-      } else if (outcome is DeadLinkNotOffered && context.mounted) {
-        _linkSnack(context, AppStrings.unresolvedLinkTitle);
-      }
+      await offerDeadLink(context, target, link);
     // DeadLinkDeclined: nothing — no error, no second prompt
     // (issue #78).
   }
 }
-
-/// The dead-link offer (issue #78): propose where the missing note
-/// would be created, ask, create through the library's own path.
-///
-/// A Ctrl/Cmd+click (#477) is its own confirmation: the proposal and the
-/// creation are the same, only the asking is skipped, so the note lands
-/// where an ordinary new note would, and the writer is left in it.
-Future<DeadLinkOutcome> _handleDeadLink(
-  BuildContext context,
-  String target,
-  NoteLinkTargets link,
-) async {
-  final create = link.createMissingNote;
-  final root = link.libraryRoot;
-  if (create == null || root == null) return const DeadLinkNotOffered();
-  final linkContext = LinkContext(
-    libraryRoot: root,
-    currentNote: link.notePath,
-  );
-  final handler = MissingNoteHandler(
-    location: link.newItemLocation,
-    confirm: link.modifier
-        ? (_) async => true
-        : (path) async {
-            // The dialog needs a live context; an unmounted note declines,
-            // and a dismiss (outside tap) reads as one.
-            if (!context.mounted) return false;
-            final confirmed = await showMissingNoteDialog(context, path: path);
-            return confirmed ?? false;
-          },
-    createNote: create,
-  );
-  try {
-    return await handler.handleDeadLink(target, linkContext);
-  } on FileSystemException catch (error) {
-    // A name on the way is a file, or the disk refuses: nothing was made
-    // that the writer can open, and the link stays dead.
-    const AppLogger(name: 'links')
-        .warning('dead link "$target" not created: $error');
-    return const DeadLinkNotOffered();
-  }
-}
-
-/// A dead-link outcome for the log: `Created: Notes/Foo.md`.
-String describeOutcome(DeadLinkOutcome outcome) => switch (outcome) {
-  DeadLinkCreated(:final path) => 'created $path',
-  DeadLinkDeclined() => 'creation declined — nothing shown',
-  DeadLinkNotOffered() => 'no offer — snackbar',
-};
 
 /// Opens [note] via the shell (or jumps locally when it is already the
 /// open note).
@@ -311,7 +186,7 @@ Future<void> _openNoteResult(
       'link outcome: resolved ${note.path} but no onOpenNote — '
       'snackbar',
     );
-    if (context.mounted) _linkSnack(context, AppStrings.unresolvedLinkTitle);
+    if (context.mounted) linkSnack(context, AppStrings.unresolvedLinkTitle);
     return;
   }
   log.debug(
@@ -371,7 +246,7 @@ Future<void> jumpToAnchor(
           '${blocks.take(40).map((b) => '${b.line}:^${b.id}').join(', ')}',
         );
         if (context.mounted) {
-          _linkSnack(context, AppStrings.blockNotFoundTitle);
+          linkSnack(context, AppStrings.blockNotFoundTitle);
         }
         return;
       }
@@ -392,17 +267,12 @@ Future<void> jumpToAnchor(
           '${shown.map((e) => '${e.line}:"${e.text}"').join(', ')}',
         );
         if (context.mounted) {
-          _linkSnack(context, AppStrings.headingNotFoundTitle);
+          linkSnack(context, AppStrings.headingNotFoundTitle);
         }
         return;
       }
       link.jumpToHeading(line);
   }
-}
-
-void _linkSnack(BuildContext context, String message) {
-  if (!context.mounted) return;
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 
 /// The one-line link outcome for the logs.
