@@ -63,10 +63,10 @@ already does with what it needs set in advance:
   written in.
 - **Open a note**.
 - **Today's entry** — the [journal](journal.md)'s.
-- **Capture web page** — into a folder of its own (see
-  [web capture](web-capture.md)); with none chosen, where the library's
-  setting for new notes puts it. The library root is not among the
-  choices of either action.
+- **Capture web page** — into a folder of its own instead of the capture
+  folder (see [web capture](web-capture.md)); with none chosen, into the
+  capture folder, which does not follow the setting for new notes. The
+  library root is not among the choices of either action.
 
 Every value of a new note is **Fixed** or **Ask**:
 

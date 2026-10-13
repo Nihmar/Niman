@@ -347,8 +347,10 @@ appended to the
 [quick note](organization.md#folders-quick-note-list-notes-voice-notes)
 and the note opens; with no quick note chosen yet, the choose/create
 screen opens and the text lands in whatever note it picks. A shared file
-is copied into the library root as a new note — its name kept, uniquified
-like any other — and opened. A copy, because Android hands the sender's
+is copied into the library as a new note — its name kept, uniquified
+like any other — where the library's setting for
+[new notes](organization.md#where-new-notes-and-folders-go) puts it (the
+root when no note is open), and opened. A copy, because Android hands the sender's
 file as a read-only `content://` reference, not a path Niman could edit
 in place. A Notion export (a `.zip`) shared the same way is
 [imported](organization.md#importing-a-notion-export) instead of copied
