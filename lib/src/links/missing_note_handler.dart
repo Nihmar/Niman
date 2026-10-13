@@ -90,6 +90,11 @@ String? proposedMissingNotePath(
   if (name.contains('.')) return null;
   final folders = <String>[];
   for (final segment in segments.sublist(0, segments.length - 1)) {
+    // A segment that starts with a dot names a hidden folder — the app's own
+    // (`.niman`, `.trash`) or one the library hides — and a link never makes
+    // one. The whole proposal is refused rather than silently created
+    // elsewhere: the note would not be where the link says.
+    if (segment.startsWith('.')) return null;
     final clean = sanitizeName(segment, fallback: '');
     if (clean.isEmpty) continue;
     folders.add(clean);

@@ -110,6 +110,29 @@ void main() {
       }
     });
 
+    test('a hidden folder is not made by a link', () {
+      for (final target in ['.trash/Foo', '.niman/Foo', 'Sub/.hidden/Foo']) {
+        expect(
+          proposedMissingNotePath(
+            target,
+            MissingNoteLocation.currentFolder,
+            context(),
+          ),
+          isNull,
+          reason: target,
+        );
+      }
+      expect(
+        proposedMissingNotePath(
+          'Sub/Foo',
+          MissingNoteLocation.currentFolder,
+          context(),
+        ),
+        'Sub/Foo.md',
+        reason: 'a plain folder is still offered',
+      );
+    });
+
     test('trailing-slash and dot segments do not escape or double up', () {
       expect(
         proposedMissingNotePath(
