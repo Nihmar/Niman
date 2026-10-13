@@ -1925,6 +1925,11 @@ final class SpanishStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Notas que anotan un PDF o un libro';
   @override
+  String get captureFolderTitle => 'Carpeta de capturas web';
+  @override
+  String get captureFolderSubtitle =>
+      'Páginas web y citas capturadas como notas nuevas';
+  @override
   String get annotationNoteSuffix => 'Anotación';
   @override
   String get annotateAction => 'Anotar';
@@ -3701,7 +3706,7 @@ final class SpanishStrings extends Strings {
   String get homeActionAskHint => 'Se pregunta al pulsar el botón';
 
   @override
-  String get homeActionDefaultFolder => 'Donde van las notas nuevas';
+  String get homeActionCaptureFolder => 'La carpeta de capturas';
 
   @override
   String get homeActionContext => 'Contexto';

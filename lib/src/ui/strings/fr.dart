@@ -1942,6 +1942,11 @@ final class FrenchStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Notes qui annotent un PDF ou un livre';
   @override
+  String get captureFolderTitle => 'Dossier des captures web';
+  @override
+  String get captureFolderSubtitle =>
+      'Pages web et citations capturées en nouvelles notes';
+  @override
   String get annotationNoteSuffix => 'Annotation';
   @override
   String get annotateAction => 'Annoter';
@@ -3751,7 +3756,7 @@ final class FrenchStrings extends Strings {
   String get homeActionAskHint => "Demandé à l'appui du bouton";
 
   @override
-  String get homeActionDefaultFolder => 'Là où vont les nouvelles notes';
+  String get homeActionCaptureFolder => 'Le dossier des captures';
 
   @override
   String get homeActionContext => 'Contexte';

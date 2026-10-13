@@ -1899,6 +1899,11 @@ final class BelarusianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Нататкі з анатацыямі да PDF ці кнігі';
   @override
+  String get captureFolderTitle => 'Папка вэб-захаванняў';
+  @override
+  String get captureFolderSubtitle =>
+      'Вэб-старонкі і цытаты, захаваныя як новыя нататкі';
+  @override
   String get annotationNoteSuffix => 'Анатацыя';
   @override
   String get annotateAction => 'Анатаваць';
@@ -3690,7 +3695,7 @@ final class BelarusianStrings extends Strings {
   String get homeActionAskHint => 'Пытаецца пры націсканні кнопкі';
 
   @override
-  String get homeActionDefaultFolder => 'Куды ідуць новыя заўвагі';
+  String get homeActionCaptureFolder => 'Папка для захопленняў';
 
   @override
   String get homeActionContext => 'Кантэкст';

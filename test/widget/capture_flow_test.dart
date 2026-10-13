@@ -1,6 +1,6 @@
-// Where a capture puts its note: where the library's one rule puts new
-// notes (#850) — its root, or the open note's folder — unless the capture or
-// a Home action names a folder, while its pictures still go in the
+// Where a capture puts its note: the library's web captures folder
+// (default `Clippings`, made when the library has none yet), not the
+// folder the tree has selected — while its pictures still go in the
 // attachments folder. The reading and the saving are the test's own, so
 // no network and no isolate is in the way.
 //
@@ -11,8 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/capture/capture_note.dart';
 import 'package:niman/src/capture/page_reading.dart';
 import 'package:niman/src/capture/web_capture.dart';
-import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
-import 'package:niman/src/library/new_item_folder.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show LinkType, defaultCaptureFolder;
 import 'package:niman/src/ui/capture/background_capture.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
@@ -43,8 +43,6 @@ void main() {
   late FakeLibrarySession session;
   late List<String> picturesTo;
   late List<String> captured;
-  late NewItemLocation location;
-  late String? openNote;
 
   setUp(() async {
     session = FakeLibrarySession();
@@ -52,9 +50,6 @@ void main() {
     // The tree's selection used to be where a capture landed: a folder
     // the library holds, and the wrong one for a note.
     await session.ensureFolder('Attachments');
-    await session.ensureFolder('Reading/Web');
-    location = NewItemLocation.openNoteFolder;
-    openNote = 'Reading/Web/Garden.md';
     picturesTo = [];
     captured = [];
   });
@@ -85,10 +80,6 @@ void main() {
       save: save,
       browser: () async => null,
     ),
-    newItemRule: NewItemRule(
-      location: () => location,
-      activeNote: () => openNote,
-    ),
     attachmentsFolder: () => 'Attachments',
     linkType: () => LinkType.wikilink,
     onCaptured: captured.add,
@@ -118,42 +109,34 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets("a capture goes in the open note's folder, and its pictures "
-      'in the attachments folder', (tester) async {
+  testWidgets('a capture goes in the web captures folder, made for it, '
+      'and its pictures in the attachments folder', (tester) async {
+    expect(await session.captureFolder, defaultCaptureFolder);
+    expect(await session.find('Clippings'), isNull, reason: 'not made yet');
+
+    await captureAndSave(tester);
+
+    expect(captured, ['Clippings/Tending a winter garden.md']);
+    expect(await session.find('Clippings'), isNotNull);
+    expect(picturesTo, ['Attachments']);
+  });
+
+  testWidgets('the folder chosen in the settings is the one it goes in', (
+    tester,
+  ) async {
+    await session.setCaptureFolder(folder: 'Reading/Web');
+
     await captureAndSave(tester);
 
     expect(captured, ['Reading/Web/Tending a winter garden.md']);
     expect(picturesTo, ['Attachments']);
   });
 
-  testWidgets('under the root setting it goes at the root', (tester) async {
-    location = NewItemLocation.libraryRoot;
-
-    await captureAndSave(tester);
-
-    expect(captured, ['Tending a winter garden.md']);
-    expect(picturesTo, ['Attachments']);
-  });
-
-  testWidgets('with no note open it goes at the root', (tester) async {
-    openNote = null;
-
-    await captureAndSave(tester);
-
-    expect(captured, ['Tending a winter garden.md']);
-  });
-
-  testWidgets("a Home action's folder wins over the rule", (tester) async {
-    await captureAndSave(tester, folder: 'Attachments');
-
-    expect(captured, ['Attachments/Tending a winter garden.md']);
-  });
-
-  testWidgets("a Home action's empty folder is the rule's (#682, #850)", (
+  testWidgets("a Home action's empty folder is the capture folder (#682)", (
     tester,
   ) async {
     await captureAndSave(tester, folder: '');
 
-    expect(captured, ['Reading/Web/Tending a winter garden.md']);
+    expect(captured, ['Clippings/Tending a winter garden.md']);
   });
 }

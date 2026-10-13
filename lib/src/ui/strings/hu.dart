@@ -1907,6 +1907,11 @@ final class HungarianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'PDF-et vagy könyvet kommentáló jegyzetek';
   @override
+  String get captureFolderTitle => 'Webes mentések mappája';
+  @override
+  String get captureFolderSubtitle =>
+      'Új jegyzetként mentett weboldalak és idézetek';
+  @override
   String get annotationNoteSuffix => 'Kommentár';
   @override
   String get annotateAction => 'Kommentálás';
@@ -3659,7 +3664,7 @@ final class HungarianStrings extends Strings {
   String get homeActionAskHint => 'A gomb megnyomásakor kérdezi';
 
   @override
-  String get homeActionDefaultFolder => 'Ahová az új jegyzetek kerülnek';
+  String get homeActionCaptureFolder => 'A mentések mappája';
 
   @override
   String get homeActionContext => 'Környezet';

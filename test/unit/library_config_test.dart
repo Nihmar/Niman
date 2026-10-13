@@ -13,6 +13,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         TreeView,
         defaultAnnotationsFolder,
         defaultAttachmentsFolder,
+        defaultCaptureFolder,
         defaultHighlightColour,
         defaultListFolder;
 import 'package:niman/src/library/new_item_folder.dart';
@@ -614,12 +615,18 @@ void main() {
       expect(LibraryConfig.defaults.attachmentsFolder, 'assets');
     });
 
-    test('the old captureFolder key is read past and never written (#850)', () {
-      final config = LibraryConfig.fromJsonMap(const {
-        'captureFolder': 'Web/Articles',
-      });
-      expect(config.extra, isNot(contains('captureFolder')));
-      expect(config.toJsonMap(), isNot(contains('captureFolder')));
+    test('the capture folder round-trips, sanitized on read', () {
+      String folderOf(String raw) =>
+          LibraryConfig.fromJsonMap({'captureFolder': raw}).captureFolder;
+      expect(folderOf('/Web/Articles/'), 'Web/Articles');
+      expect(folderOf('../'), defaultCaptureFolder);
+      expect(LibraryConfig.defaults.captureFolder, 'Clippings');
+      expect(LibraryConfig.fromJsonMap(const {}).captureFolder, 'Clippings');
+      final config = LibraryConfig.defaults.copyWith(captureFolder: 'Web');
+      expect(
+        LibraryConfig.fromJsonMap(config.toJsonMap()).captureFolder,
+        'Web',
+      );
     });
 
     test('the annotations folder round-trips, sanitized on read (#284)', () {

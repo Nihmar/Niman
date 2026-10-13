@@ -1928,6 +1928,11 @@ final class CatalanStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Notes que anoten un PDF o un llibre';
   @override
+  String get captureFolderTitle => 'Carpeta de captures web';
+  @override
+  String get captureFolderSubtitle =>
+      'Pàgines web i citacions capturades com a notes noves';
+  @override
   String get annotationNoteSuffix => 'Anotació';
   @override
   String get annotateAction => 'Anota';
@@ -3710,7 +3715,7 @@ final class CatalanStrings extends Strings {
   String get homeActionAskHint => 'Es pregunta en prémer el botó';
 
   @override
-  String get homeActionDefaultFolder => 'On van les notes noves';
+  String get homeActionCaptureFolder => 'La carpeta de captures';
 
   @override
   String get homeActionContext => 'Context';

@@ -1902,6 +1902,11 @@ final class UkrainianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Нотатки з анотаціями до PDF чи книги';
   @override
+  String get captureFolderTitle => 'Тека вебзбережень';
+  @override
+  String get captureFolderSubtitle =>
+      'Вебсторінки й цитати, збережені як нові нотатки';
+  @override
   String get annotationNoteSuffix => 'Анотація';
   @override
   String get annotateAction => 'Анотувати';
@@ -3692,7 +3697,7 @@ final class UkrainianStrings extends Strings {
   String get homeActionAskHint => 'Запитується під час натискання кнопки';
 
   @override
-  String get homeActionDefaultFolder => 'Куди потрапляють нові нотатки';
+  String get homeActionCaptureFolder => 'Тека для захоплень';
 
   @override
   String get homeActionContext => 'Контекст';

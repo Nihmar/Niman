@@ -5,9 +5,9 @@
 /// open the capture sheet instead, and Save leaves the page to the
 /// background capture — a share's sending the user back to the browser.
 ///
-/// A new note goes where the library's one rule puts new notes
-/// ([NewItemRule], issue #850) unless the user picks another folder — or a
-/// Home action names one. Like the create flow, it needs nothing of the
+/// A new note goes in the library's web captures folder unless the user
+/// picks another — not the folder the tree has selected, which can be the
+/// attachments folder. Like the create flow, it needs nothing of the
 /// shell's state: what to open afterwards is a fact it reports.
 library;
 
@@ -21,7 +21,6 @@ import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/android_task.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/db/index_database.dart' show Note;
-import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/capture/capture_dialog.dart';
 import 'package:niman/src/ui/capture/capture_routes.dart';
@@ -50,7 +49,6 @@ final class CaptureFlow {
   new({
     required this.controller,
     required this.services,
-    required this.newItemRule,
     required this.attachmentsFolder,
     required this.linkType,
     required this.onCaptured,
@@ -67,10 +65,6 @@ final class CaptureFlow {
   /// How pages are read and saved, and the captures that run off
   /// screen.
   final CaptureServices services;
-
-  /// Where a capture goes when no folder is picked: the library's one
-  /// rule, not a folder of its own.
-  final NewItemRule newItemRule;
 
   /// The library's attachments folder.
   final String Function() attachmentsFolder;
@@ -101,7 +95,7 @@ final class CaptureFlow {
 
   /// Asks where to capture [url]; with none, the address the clipboard
   /// holds, when it holds one. [folder] is where the note goes in place
-  /// of the rule's folder: a Home action's own (#535).
+  /// of the capture folder: a Home action's own (#535).
   Future<void> capture(BuildContext context, {Uri? url, String? folder}) async {
     var page = url;
     var fromClipboard = false;
@@ -211,15 +205,16 @@ final class CaptureFlow {
     }
   }
 
-  /// Where a capture goes: the open library, the rule's folder first, or
-  /// null when none is open.
+  /// Where a capture goes: the open library, its web captures folder
+  /// first, or null when none is open.
   Future<CaptureTarget?> _target(BuildContext context, {String? folder}) async {
     final ops = controller.ops;
     final root = controller.root;
     if (ops == null || root == null) return null;
-    // Empty is the default, as a Home action stores it (#682): the
-    // library's rule (#850).
-    final into = folder == null || folder.isEmpty ? newItemRule.folder : folder;
+    // Empty is the default, as a Home action stores it (#682).
+    final into = folder == null || folder.isEmpty
+        ? await ops.captureFolder
+        : folder;
     return CaptureTarget(
       libraryRoot: root,
       attachmentsFolder: attachmentsFolder(),
@@ -255,7 +250,8 @@ final class CaptureFlow {
 
 /// Makes a captured page's or quote's note, [name] with [content], in
 /// [folder] ('' is the root) — the folder made first when the library
-/// does not hold it yet, as a Home action's folder may not.
+/// does not hold it yet, as the web captures folder's default does not
+/// until the first capture.
 Future<Note> createCapturedNote(
   NoteOperations ops, {
   required String folder,

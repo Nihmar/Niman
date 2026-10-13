@@ -1893,6 +1893,11 @@ final class CroatianStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Bilješke koje anotiraju PDF ili knjigu';
   @override
+  String get captureFolderTitle => 'Mapa za web-isječke';
+  @override
+  String get captureFolderSubtitle =>
+      'Web-stranice i citati spremljeni kao nove bilješke';
+  @override
   String get annotationNoteSuffix => 'Anotacija';
   @override
   String get annotateAction => 'Anotiraj';
@@ -3676,7 +3681,7 @@ final class CroatianStrings extends Strings {
   String get homeActionAskHint => 'Pita se kad se pritisne gumb';
 
   @override
-  String get homeActionDefaultFolder => 'Kamo idu nove napomene';
+  String get homeActionCaptureFolder => 'Mapa za snimke';
 
   @override
   String get homeActionContext => 'Kontekst';

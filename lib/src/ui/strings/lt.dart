@@ -1896,6 +1896,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Užrašai, anotuojantys PDF ar knygą';
   @override
+  String get captureFolderTitle => 'Tinklo įrašų aplankas';
+  @override
+  String get captureFolderSubtitle =>
+      'Tinklalapiai ir citatos, išsaugoti kaip nauji užrašai';
+  @override
   String get annotationNoteSuffix => 'Anotacija';
   @override
   String get annotateAction => 'Anotuoti';
@@ -3691,7 +3696,7 @@ final class LithuanianStrings extends Strings {
   String get homeActionAskHint => 'Klausiama paspaudus mygtuką';
 
   @override
-  String get homeActionDefaultFolder => 'Kur kuriamos naujos pastabos';
+  String get homeActionCaptureFolder => 'Išsaugojimų aplankas';
 
   @override
   String get homeActionContext => 'Kontekstas';

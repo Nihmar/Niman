@@ -5,9 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/new_item_folder.dart';
-import 'package:niman/src/ui/home/home_note_action.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -248,42 +246,6 @@ void main() {
       location = NewItemLocation.libraryRoot;
       await fromTemplate(tester, parent: 'Elsewhere');
       expect(filed, ['Elsewhere/Standup.md', 'Elsewhere/Standup_1.md']);
-    });
-  });
-
-  group("a Home action's new note", () {
-    Future<void> press(WidgetTester tester, HomeAction action) async {
-      await tester.runAsync(
-        () => makeHomeNote(
-          context,
-          action,
-          controller: session,
-          templates: templates,
-        ),
-      );
-    }
-
-    const idea = HomeAction(
-      id: 'idea',
-      label: 'Idea',
-      kind: HomeActionKind.newNote,
-      name: FieldPreset.value('Idea'),
-    );
-
-    testWidgets('without a folder of its own goes by the rule', (tester) async {
-      await pumpTemplateHost(tester);
-      await press(tester, idea);
-      expect(filed.single, 'Projects/Niman/Idea.md');
-
-      location = NewItemLocation.libraryRoot;
-      await press(tester, idea);
-      expect(filed.last, 'Idea.md');
-    });
-
-    testWidgets('with a folder of its own keeps it', (tester) async {
-      await pumpTemplateHost(tester);
-      await press(tester, idea.copyWith(folder: 'Elsewhere'));
-      expect(filed.single, 'Elsewhere/Idea.md');
     });
   });
 }

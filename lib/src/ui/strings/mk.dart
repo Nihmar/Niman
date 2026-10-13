@@ -1910,6 +1910,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Белешки што анотираат PDF или книга';
   @override
+  String get captureFolderTitle => 'Папка за веб-зачувувања';
+  @override
+  String get captureFolderSubtitle =>
+      'Веб-страници и цитати зачувани како нови белешки';
+  @override
   String get annotationNoteSuffix => 'Анотација';
   @override
   String get annotateAction => 'Анотирај';
@@ -3676,7 +3681,7 @@ final class MacedonianStrings extends Strings {
   String get homeActionAskHint => 'Се прашува кога ќе се притисне копчето';
 
   @override
-  String get homeActionDefaultFolder => 'Каде одат новите белешки';
+  String get homeActionCaptureFolder => 'Папката за снимени страници';
 
   @override
   String get homeActionContext => 'Контекст';

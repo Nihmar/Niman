@@ -1179,6 +1179,8 @@ final class AppStrings {
       _s.pdfPageLabel(name, page);
   static String get annotationsFolderTitle => _s.annotationsFolderTitle;
   static String get annotationsFolderSubtitle => _s.annotationsFolderSubtitle;
+  static String get captureFolderTitle => _s.captureFolderTitle;
+  static String get captureFolderSubtitle => _s.captureFolderSubtitle;
   static String get annotationNoteSuffix => _s.annotationNoteSuffix;
   static String get annotateAction => _s.annotateAction;
   static String get annotationCommentHint => _s.annotationCommentHint;
@@ -1879,7 +1881,7 @@ final class AppStrings {
   static String get homeActionAdd => _s.homeActionAdd;
   static String get homeActionAsk => _s.homeActionAsk;
   static String get homeActionAskHint => _s.homeActionAskHint;
-  static String get homeActionDefaultFolder => _s.homeActionDefaultFolder;
+  static String get homeActionCaptureFolder => _s.homeActionCaptureFolder;
   static String get homeActionContext => _s.homeActionContext;
   static String get homeActionEdit => _s.homeActionEdit;
   static String get homeActionFieldAdd => _s.homeActionFieldAdd;

@@ -1956,6 +1956,11 @@ final class GreekStrings extends Strings {
   String get annotationsFolderSubtitle =>
       'Σημειώσεις που σχολιάζουν ένα PDF ή ένα βιβλίο';
   @override
+  String get captureFolderTitle => 'Φάκελος αποθηκεύσεων ιστού';
+  @override
+  String get captureFolderSubtitle =>
+      'Ιστοσελίδες και αποσπάσματα ως νέες σημειώσεις';
+  @override
   String get annotationNoteSuffix => 'Σχολιασμός';
   @override
   String get annotateAction => 'Σχολίασε';
@@ -3759,7 +3764,7 @@ final class GreekStrings extends Strings {
   String get homeActionAskHint => 'Ερωτάται όταν πατηθεί το κουμπί';
 
   @override
-  String get homeActionDefaultFolder => 'Όπου πηγαίνουν οι νέες σημειώσεις';
+  String get homeActionCaptureFolder => 'Ο φάκελος των λήψεων';
 
   @override
   String get homeActionContext => 'Πλαίσιο';

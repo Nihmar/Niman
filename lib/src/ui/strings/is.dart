@@ -1893,6 +1893,11 @@ final class IcelandicStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Glósur sem skýra PDF-skjal eða bók';
   @override
+  String get captureFolderTitle => 'Mappa fyrir vefúrklippur';
+  @override
+  String get captureFolderSubtitle =>
+      'Vefsíður og tilvitnanir vistaðar sem nýjar glósur';
+  @override
   String get annotationNoteSuffix => 'Athugasemd';
   @override
   String get annotateAction => 'Skrifa athugasemd';
@@ -3644,7 +3649,7 @@ final class IcelandicStrings extends Strings {
   String get homeActionAskHint => 'Spurt þegar ýtt er á hnappinn';
 
   @override
-  String get homeActionDefaultFolder => 'Hvert ný minnisblöð fara';
+  String get homeActionCaptureFolder => 'Mappan fyrir vistanir';
 
   @override
   String get homeActionContext => 'Samhengi';

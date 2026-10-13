@@ -1876,6 +1876,11 @@ final class EnglishStrings extends Strings {
   @override
   String get annotationsFolderSubtitle => 'Notes annotating a PDF or a book';
   @override
+  String get captureFolderTitle => 'Web captures folder';
+  @override
+  String get captureFolderSubtitle =>
+      'Web pages and quotes captured as new notes';
+  @override
   String get annotationNoteSuffix => 'Annotation';
   @override
   String get annotateAction => 'Annotate';
@@ -3608,7 +3613,7 @@ final class EnglishStrings extends Strings {
   String get homeActionAskHint => 'Asked when the button is pressed';
 
   @override
-  String get homeActionDefaultFolder => 'Where new notes go';
+  String get homeActionCaptureFolder => 'The capture folder';
 
   @override
   String get homeActionContext => 'Context';
