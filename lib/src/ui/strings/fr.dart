@@ -3759,6 +3759,9 @@ final class FrenchStrings extends Strings {
   String get homeActionCaptureFolder => 'Le dossier des captures';
 
   @override
+  String get homeActionDefaultFolder => 'Là où vont les nouvelles notes';
+
+  @override
   String get homeActionContext => 'Contexte';
 
   @override

@@ -3673,6 +3673,9 @@ final class BulgarianStrings extends Strings {
   String get homeActionCaptureFolder => 'Папката за запазени страници';
 
   @override
+  String get homeActionDefaultFolder => 'Където отиват новите бележки';
+
+  @override
   String get homeActionContext => 'Контекст';
 
   @override

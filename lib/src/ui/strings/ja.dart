@@ -3362,6 +3362,9 @@ final class JapaneseStrings extends Strings {
   String get homeActionCaptureFolder => 'キャプチャ用フォルダ';
 
   @override
+  String get homeActionDefaultFolder => '新しいノートの作成先';
+
+  @override
   String get homeActionContext => 'コンテキスト';
 
   @override

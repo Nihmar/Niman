@@ -3271,6 +3271,9 @@ final class ChineseStrings extends Strings {
   String get homeActionCaptureFolder => '捕获文件夹';
 
   @override
+  String get homeActionDefaultFolder => '新笔记的位置';
+
+  @override
   String get homeActionContext => '情境';
 
   @override

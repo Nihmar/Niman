@@ -3620,6 +3620,9 @@ final class TurkishStrings extends Strings {
   String get homeActionCaptureFolder => 'Yakalama klasörü';
 
   @override
+  String get homeActionDefaultFolder => 'Yeni notların gittiği yer';
+
+  @override
   String get homeActionContext => 'Bağlam';
 
   @override

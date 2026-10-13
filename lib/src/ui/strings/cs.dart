@@ -3656,6 +3656,9 @@ final class CzechStrings extends Strings {
   String get homeActionCaptureFolder => 'Složka pro záchyty';
 
   @override
+  String get homeActionDefaultFolder => 'Kam patří nové poznámky';
+
+  @override
   String get homeActionContext => 'Kontext';
 
   @override

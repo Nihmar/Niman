@@ -3733,6 +3733,9 @@ final class GermanStrings extends Strings {
   String get homeActionCaptureFolder => 'Der Ordner für Aufnahmen';
 
   @override
+  String get homeActionDefaultFolder => 'Wohin neue Notizen kommen';
+
+  @override
   String get homeActionContext => 'Kontext';
 
   @override

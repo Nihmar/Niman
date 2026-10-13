@@ -3699,6 +3699,9 @@ final class LithuanianStrings extends Strings {
   String get homeActionCaptureFolder => 'Išsaugojimų aplankas';
 
   @override
+  String get homeActionDefaultFolder => 'Kur kuriamos naujos pastabos';
+
+  @override
   String get homeActionContext => 'Kontekstas';
 
   @override

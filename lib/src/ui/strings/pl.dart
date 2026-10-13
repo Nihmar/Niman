@@ -3709,6 +3709,9 @@ final class PolishStrings extends Strings {
   String get homeActionCaptureFolder => 'Folder przechwyceń';
 
   @override
+  String get homeActionDefaultFolder => 'Dokąd trafiają nowe notatki';
+
+  @override
   String get homeActionContext => 'Kontekst';
 
   @override

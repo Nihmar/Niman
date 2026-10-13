@@ -3674,6 +3674,9 @@ final class FinnishStrings extends Strings {
   String get homeActionCaptureFolder => 'Tallennusten kansio';
 
   @override
+  String get homeActionDefaultFolder => 'Mihin uudet muistiinpanot menevät';
+
+  @override
   String get homeActionContext => 'Konteksti';
 
   @override

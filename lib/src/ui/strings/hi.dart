@@ -3607,6 +3607,9 @@ final class HindiStrings extends Strings {
   String get homeActionCaptureFolder => 'कैप्चर फ़ोल्डर';
 
   @override
+  String get homeActionDefaultFolder => 'जहाँ नए नोट्स बनते हैं';
+
+  @override
   String get homeActionContext => 'संदर्भ';
 
   @override

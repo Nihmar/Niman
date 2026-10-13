@@ -3693,6 +3693,9 @@ final class BasqueStrings extends Strings {
   String get homeActionCaptureFolder => 'Kapturen karpeta';
 
   @override
+  String get homeActionDefaultFolder => 'Ohar berriak non sortzen diren';
+
+  @override
   String get homeActionContext => 'Testuingurua';
 
   @override

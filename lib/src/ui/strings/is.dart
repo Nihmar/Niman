@@ -3652,6 +3652,9 @@ final class IcelandicStrings extends Strings {
   String get homeActionCaptureFolder => 'Mappan fyrir vistanir';
 
   @override
+  String get homeActionDefaultFolder => 'Hvert ný minnisblöð fara';
+
+  @override
   String get homeActionContext => 'Samhengi';
 
   @override

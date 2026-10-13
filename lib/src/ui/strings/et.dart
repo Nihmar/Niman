@@ -3605,6 +3605,9 @@ final class EstonianStrings extends Strings {
   String get homeActionCaptureFolder => 'Salvestuste kaust';
 
   @override
+  String get homeActionDefaultFolder => 'Kuhu uued märkmed lähevad';
+
+  @override
   String get homeActionContext => 'Kontekst';
 
   @override

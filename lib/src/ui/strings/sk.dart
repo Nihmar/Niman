@@ -3668,6 +3668,9 @@ final class SlovakStrings extends Strings {
   String get homeActionCaptureFolder => 'Priečinok pre zachytenia';
 
   @override
+  String get homeActionDefaultFolder => 'Kam idú nové poznámky';
+
+  @override
   String get homeActionContext => 'Kontext';
 
   @override

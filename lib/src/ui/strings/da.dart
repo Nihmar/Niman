@@ -3641,6 +3641,9 @@ final class DanishStrings extends Strings {
   String get homeActionCaptureFolder => 'Mappen til gemte sider';
 
   @override
+  String get homeActionDefaultFolder => 'Hvor nye noter placeres';
+
+  @override
   String get homeActionContext => 'Kontekst';
 
   @override

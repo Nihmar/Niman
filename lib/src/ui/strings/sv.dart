@@ -3667,6 +3667,9 @@ final class SwedishStrings extends Strings {
   String get homeActionCaptureFolder => 'Mappen för sparade sidor';
 
   @override
+  String get homeActionDefaultFolder => 'Var nya anteckningar hamnar';
+
+  @override
   String get homeActionContext => 'Kontext';
 
   @override

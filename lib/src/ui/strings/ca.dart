@@ -3718,6 +3718,9 @@ final class CatalanStrings extends Strings {
   String get homeActionCaptureFolder => 'La carpeta de captures';
 
   @override
+  String get homeActionDefaultFolder => 'On van les notes noves';
+
+  @override
   String get homeActionContext => 'Context';
 
   @override

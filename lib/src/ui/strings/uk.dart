@@ -3700,6 +3700,9 @@ final class UkrainianStrings extends Strings {
   String get homeActionCaptureFolder => 'Тека для захоплень';
 
   @override
+  String get homeActionDefaultFolder => 'Куди потрапляють нові нотатки';
+
+  @override
   String get homeActionContext => 'Контекст';
 
   @override

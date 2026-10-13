@@ -3680,6 +3680,9 @@ final class SerbianStrings extends Strings {
   String get homeActionCaptureFolder => 'Фасцикла за снимке';
 
   @override
+  String get homeActionDefaultFolder => 'Где иду нове белешке';
+
+  @override
   String get homeActionContext => 'Контекст';
 
   @override

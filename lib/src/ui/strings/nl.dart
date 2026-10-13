@@ -3696,6 +3696,9 @@ final class DutchStrings extends Strings {
   String get homeActionCaptureFolder => 'De map voor opnames';
 
   @override
+  String get homeActionDefaultFolder => 'Waar nieuwe notities komen';
+
+  @override
   String get homeActionContext => 'Context';
 
   @override

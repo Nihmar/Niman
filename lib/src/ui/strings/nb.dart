@@ -3643,6 +3643,9 @@ final class NorwegianStrings extends Strings {
   String get homeActionCaptureFolder => 'Mappen for lagrede sider';
 
   @override
+  String get homeActionDefaultFolder => 'Hvor nye notater havner';
+
+  @override
   String get homeActionContext => 'Kontekst';
 
   @override

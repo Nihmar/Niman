@@ -3683,6 +3683,9 @@ final class BosnianStrings extends Strings {
   String get homeActionCaptureFolder => 'Mapa za snimanja';
 
   @override
+  String get homeActionDefaultFolder => 'Gdje idu nove bilješke';
+
+  @override
   String get homeActionContext => 'Kontekst';
 
   @override

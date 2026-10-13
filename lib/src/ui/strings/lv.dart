@@ -3650,6 +3650,9 @@ final class LatvianStrings extends Strings {
   String get homeActionCaptureFolder => 'Saglabāto lapu mape';
 
   @override
+  String get homeActionDefaultFolder => 'Kur tiek veidotas jaunas piezīmes';
+
+  @override
   String get homeActionContext => 'Konteksts';
 
   @override

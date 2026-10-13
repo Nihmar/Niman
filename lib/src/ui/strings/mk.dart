@@ -3684,6 +3684,9 @@ final class MacedonianStrings extends Strings {
   String get homeActionCaptureFolder => 'Папката за снимени страници';
 
   @override
+  String get homeActionDefaultFolder => 'Каде одат новите белешки';
+
+  @override
   String get homeActionContext => 'Контекст';
 
   @override

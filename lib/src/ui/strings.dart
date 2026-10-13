@@ -1882,6 +1882,7 @@ final class AppStrings {
   static String get homeActionAsk => _s.homeActionAsk;
   static String get homeActionAskHint => _s.homeActionAskHint;
   static String get homeActionCaptureFolder => _s.homeActionCaptureFolder;
+  static String get homeActionDefaultFolder => _s.homeActionDefaultFolder;
   static String get homeActionContext => _s.homeActionContext;
   static String get homeActionEdit => _s.homeActionEdit;
   static String get homeActionFieldAdd => _s.homeActionFieldAdd;

@@ -3683,6 +3683,9 @@ final class GalicianStrings extends Strings {
   String get homeActionCaptureFolder => 'O cartafol das capturas';
 
   @override
+  String get homeActionDefaultFolder => 'Onde van as notas novas';
+
+  @override
   String get homeActionContext => 'Contexto';
 
   @override

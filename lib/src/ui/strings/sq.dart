@@ -3682,6 +3682,9 @@ final class AlbanianStrings extends Strings {
   String get homeActionCaptureFolder => 'Dosja e kapjeve';
 
   @override
+  String get homeActionDefaultFolder => 'Ku shkojnë shënimet e reja';
+
+  @override
   String get homeActionContext => 'Konteksti';
 
   @override

@@ -3679,6 +3679,9 @@ final class SlovenianStrings extends Strings {
   String get homeActionCaptureFolder => 'Mapa za zajeme';
 
   @override
+  String get homeActionDefaultFolder => 'Kam gredo nove opombe';
+
+  @override
   String get homeActionContext => 'Kontekst';
 
   @override

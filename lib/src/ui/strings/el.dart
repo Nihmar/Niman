@@ -3767,6 +3767,9 @@ final class GreekStrings extends Strings {
   String get homeActionCaptureFolder => 'Ο φάκελος των λήψεων';
 
   @override
+  String get homeActionDefaultFolder => 'Όπου πηγαίνουν οι νέες σημειώσεις';
+
+  @override
   String get homeActionContext => 'Πλαίσιο';
 
   @override

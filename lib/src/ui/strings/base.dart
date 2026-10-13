@@ -2000,6 +2000,7 @@ abstract base class Strings {
   String get homeActionAsk;
   String get homeActionAskHint;
   String get homeActionCaptureFolder;
+  String get homeActionDefaultFolder;
   String get homeActionContext;
   String get homeActionEdit;
   String get homeActionFieldAdd;

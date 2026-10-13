@@ -3678,6 +3678,9 @@ final class PortugueseStrings extends Strings {
   String get homeActionCaptureFolder => 'A pasta de capturas';
 
   @override
+  String get homeActionDefaultFolder => 'Para onde vão as novas notas';
+
+  @override
   String get homeActionContext => 'Contexto';
 
   @override

@@ -3667,6 +3667,9 @@ final class HungarianStrings extends Strings {
   String get homeActionCaptureFolder => 'A mentések mappája';
 
   @override
+  String get homeActionDefaultFolder => 'Ahová az új jegyzetek kerülnek';
+
+  @override
   String get homeActionContext => 'Környezet';
 
   @override

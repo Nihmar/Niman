@@ -3616,6 +3616,9 @@ final class EnglishStrings extends Strings {
   String get homeActionCaptureFolder => 'The capture folder';
 
   @override
+  String get homeActionDefaultFolder => 'Where new notes go';
+
+  @override
   String get homeActionContext => 'Context';
 
   @override

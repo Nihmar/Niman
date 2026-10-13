@@ -3684,6 +3684,9 @@ final class CroatianStrings extends Strings {
   String get homeActionCaptureFolder => 'Mapa za snimke';
 
   @override
+  String get homeActionDefaultFolder => 'Kamo idu nove napomene';
+
+  @override
   String get homeActionContext => 'Kontekst';
 
   @override

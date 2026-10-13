@@ -3698,6 +3698,9 @@ final class BelarusianStrings extends Strings {
   String get homeActionCaptureFolder => 'Папка для захопленняў';
 
   @override
+  String get homeActionDefaultFolder => 'Куды ідуць новыя заўвагі';
+
+  @override
   String get homeActionContext => 'Кантэкст';
 
   @override

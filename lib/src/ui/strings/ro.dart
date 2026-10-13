@@ -3713,6 +3713,9 @@ final class RomanianStrings extends Strings {
   String get homeActionCaptureFolder => 'Dosarul capturilor';
 
   @override
+  String get homeActionDefaultFolder => 'Unde merg notele noi';
+
+  @override
   String get homeActionContext => 'Context';
 
   @override

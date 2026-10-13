@@ -3681,6 +3681,9 @@ final class ItalianStrings extends Strings {
   String get homeActionCaptureFolder => 'La cartella delle catture';
 
   @override
+  String get homeActionDefaultFolder => 'Dove vanno le nuove note';
+
+  @override
   String get homeActionContext => 'Contesto';
 
   @override
