@@ -385,6 +385,28 @@ final class BelarusianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Абнаўляць спасылкі пасля перайменавання або перамяшчэння';
+  @override
+  String get linkUpdateSubtitle =>
+      'Што адбываецца са спасылкамі на нататку або папку, якую перайменавалі '
+      'ці перамясцілі';
+  @override
+  String get linkUpdateAutomatic => 'Аўтаматычна';
+  @override
+  String get linkUpdateAsk => 'Пытаць кожны раз';
+  @override
+  String get linkUpdateNever => 'Ніколі';
+  @override
+  String get linkUpdateAskTitle => 'Абнавіць спасылкі?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Нататкі са спасылкамі на перамешчанае: $notes. Абнавіць іх спасылкі?';
+  @override
+  String get linkUpdateConfirm => 'Абнавіць';
+  @override
+  String get linkUpdateKeep => 'Пакінуць як ёсць';
+  @override
   String get missingNoteLocationTitle => 'Стварыць адсутныя заўвагі ў';
   @override
   String get missingNoteLocationRoot => 'Карань бібліятэкі';

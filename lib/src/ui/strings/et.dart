@@ -382,6 +382,28 @@ final class EstonianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Värskenda lingid ümbernimetamisel või teisaldamisel';
+  @override
+  String get linkUpdateSubtitle =>
+      'Mis juhtub linkidega, mis viitavad ümber nimetatud või teisaldatud '
+      'märkmele või kaustale';
+  @override
+  String get linkUpdateAutomatic => 'Automaatselt';
+  @override
+  String get linkUpdateAsk => 'Küsi iga kord';
+  @override
+  String get linkUpdateNever => 'Mitte kunagi';
+  @override
+  String get linkUpdateAskTitle => 'Kas värskendada lingid?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Teisaldatule viitavad märkmed: $notes. Kas värskendada nende lingid?';
+  @override
+  String get linkUpdateConfirm => 'Värskenda';
+  @override
+  String get linkUpdateKeep => 'Jäta muutmata';
+  @override
   String get missingNoteLocationTitle => 'Loo puuduvad märkmed kausta';
   @override
   String get missingNoteLocationRoot => 'Biblioteka juur';

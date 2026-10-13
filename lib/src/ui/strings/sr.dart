@@ -388,6 +388,28 @@ final class SerbianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Ажурирај везе након преименовања или премештања';
+  @override
+  String get linkUpdateSubtitle =>
+      'Шта се дешава са везама ка белешци или фасцикли која је преименована '
+      'или премештена';
+  @override
+  String get linkUpdateAutomatic => 'Аутоматски';
+  @override
+  String get linkUpdateAsk => 'Питај сваки пут';
+  @override
+  String get linkUpdateNever => 'Никада';
+  @override
+  String get linkUpdateAskTitle => 'Ажурирати везе?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Белешке које упућују на премештено: $notes. Ажурирати њихове везе?';
+  @override
+  String get linkUpdateConfirm => 'Ажурирај';
+  @override
+  String get linkUpdateKeep => 'Остави како јесте';
+  @override
   String get missingNoteLocationTitle => 'Креирање недостајућих белешки у';
   @override
   String get missingNoteLocationRoot => 'Корен библиотеке';

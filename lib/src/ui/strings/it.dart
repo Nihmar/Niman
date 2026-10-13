@@ -392,6 +392,29 @@ final class ItalianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Aggiorna i link dopo uno spostamento o una rinomina';
+  @override
+  String get linkUpdateSubtitle =>
+      'Cosa succede ai link che puntano a una nota o a una cartella '
+      'rinominata o spostata';
+  @override
+  String get linkUpdateAutomatic => 'Automaticamente';
+  @override
+  String get linkUpdateAsk => 'Chiedi ogni volta';
+  @override
+  String get linkUpdateNever => 'Mai';
+  @override
+  String get linkUpdateAskTitle => 'Aggiornare i link?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Note che rimandano a ciò che è stato spostato: $notes. Aggiornare i '
+      'loro link?';
+  @override
+  String get linkUpdateConfirm => 'Aggiorna';
+  @override
+  String get linkUpdateKeep => 'Lascia invariati';
+  @override
   String get missingNoteLocationTitle => 'Crea le note mancanti in';
   @override
   String get missingNoteLocationRoot => 'Radice della libreria';

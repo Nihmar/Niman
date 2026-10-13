@@ -392,6 +392,27 @@ final class SpanishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle => 'Actualizar los enlaces al renombrar o mover';
+  @override
+  String get linkUpdateSubtitle =>
+      'Qué ocurre con los enlaces que apuntan a una nota o carpeta renombrada '
+      'o movida';
+  @override
+  String get linkUpdateAutomatic => 'Automáticamente';
+  @override
+  String get linkUpdateAsk => 'Preguntar cada vez';
+  @override
+  String get linkUpdateNever => 'Nunca';
+  @override
+  String get linkUpdateAskTitle => '¿Actualizar los enlaces?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Notas que enlazan a lo que se movió: $notes. ¿Actualizar sus enlaces?';
+  @override
+  String get linkUpdateConfirm => 'Actualizar';
+  @override
+  String get linkUpdateKeep => 'Dejar como están';
+  @override
   String get missingNoteLocationTitle => 'Crear notas que faltan en';
   @override
   String get missingNoteLocationRoot => 'Raíz de la biblioteca';

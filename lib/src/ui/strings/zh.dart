@@ -357,6 +357,24 @@ final class ChineseStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle => '重命名或移动后更新链接';
+  @override
+  String get linkUpdateSubtitle => '指向被重命名或移动的笔记或文件夹的链接如何处理';
+  @override
+  String get linkUpdateAutomatic => '自动';
+  @override
+  String get linkUpdateAsk => '每次询问';
+  @override
+  String get linkUpdateNever => '从不';
+  @override
+  String get linkUpdateAskTitle => '更新链接？';
+  @override
+  String linkUpdateAskBody(int notes) => '链接到被移动内容的笔记：$notes 篇。要更新它们的链接吗？';
+  @override
+  String get linkUpdateConfirm => '更新';
+  @override
+  String get linkUpdateKeep => '保持原样';
+  @override
   String get missingNoteLocationTitle => '在以下位置创建缺失的笔记';
   @override
   String get missingNoteLocationRoot => '库根目录';

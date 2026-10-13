@@ -215,6 +215,32 @@ void main() {
     );
   });
 
+  testWidgets('the link update row reads and applies its value (#848)', (
+    tester,
+  ) async {
+    await pump(tester);
+    await openArea(tester, const Key('settings-area-editor'));
+    final row = find.byKey(const Key('link-update'));
+    expect(
+      find.descendant(
+        of: row,
+        matching: find.text(AppStrings.linkUpdateAutomatic),
+      ),
+      findsOne,
+    );
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppStrings.linkUpdateAsk));
+    await tester.pumpAndSettle();
+
+    expect(await controller.linkUpdate, LinkUpdate.ask);
+    expect(
+      find.descendant(of: row, matching: find.text(AppStrings.linkUpdateAsk)),
+      findsOne,
+    );
+  });
+
   testWidgets('the toolbar row sits under Editor, not Appearance', (
     tester,
   ) async {

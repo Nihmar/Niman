@@ -378,6 +378,28 @@ final class TurkishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Yeniden adlandırma veya taşımadan sonra bağlantıları güncelle';
+  @override
+  String get linkUpdateSubtitle =>
+      'Yeniden adlandırılan veya taşınan bir nota ya da klasöre giden '
+      'bağlantılara ne olacağı';
+  @override
+  String get linkUpdateAutomatic => 'Otomatik';
+  @override
+  String get linkUpdateAsk => 'Her seferinde sor';
+  @override
+  String get linkUpdateNever => 'Hiçbir zaman';
+  @override
+  String get linkUpdateAskTitle => 'Bağlantılar güncellensin mi?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Taşınana bağlanan notlar: $notes. Bağlantıları güncellensin mi?';
+  @override
+  String get linkUpdateConfirm => 'Güncelle';
+  @override
+  String get linkUpdateKeep => 'Olduğu gibi bırak';
+  @override
   String get missingNoteLocationTitle => 'Eksik notları oluştur';
   @override
   String get missingNoteLocationRoot => 'Kütüphane kökünde';

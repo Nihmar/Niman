@@ -7,6 +7,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
+        LinkUpdate,
         SourceFont,
         TreeSort,
         TreeView,
@@ -157,6 +158,46 @@ void main() {
           'missingNoteLocation': 'nonsense',
         }).missingNoteLocation,
         MissingNoteLocation.currentFolder,
+      );
+    });
+
+    test('the link update setting defaults to automatic and round trips '
+        '(#848)', () async {
+      expect(LibraryConfig.defaults.linkUpdate, LinkUpdate.automatic);
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      for (final mode in LinkUpdate.values) {
+        await store.write(LibraryConfig.defaults.copyWith(linkUpdate: mode));
+        expect((await store.read()).linkUpdate, mode);
+      }
+      expect(
+        LibraryConfig.defaults.copyWith(linkUpdate: LinkUpdate.never),
+        isNot(LibraryConfig.defaults),
+      );
+    });
+
+    test('an older config without the link update key reads as automatic, '
+        'and an unknown value does too (#848)', () {
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{}).linkUpdate,
+        LinkUpdate.automatic,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{
+          'linkType': 'markdown',
+        }).linkUpdate,
+        LinkUpdate.automatic,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{
+          'linkUpdate': 'nonsense',
+        }).linkUpdate,
+        LinkUpdate.automatic,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{'linkUpdate': 'ask'})
+            .linkUpdate,
+        LinkUpdate.ask,
       );
     });
 

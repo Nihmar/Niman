@@ -18,6 +18,7 @@ import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -69,11 +70,21 @@ abstract interface class NoteOperations {
   /// into the last paragraph of the previous one.
   Future<Note> appendToNote(String path, String content);
 
-  /// Renames the note or folder at [path] to [newName].
-  Future<Note> rename(String path, String newName);
+  /// Renames the note or folder at [path] to [newName]. [confirmLinks]
+  /// answers the library's [LinkUpdate.ask] (#848).
+  Future<Note> rename(
+    String path,
+    String newName, {
+    LinkUpdateConfirm? confirmLinks,
+  });
 
   /// Moves the note or folder at [path] into [targetParent].
-  Future<Note> move(String path, String targetParent);
+  /// [confirmLinks] answers the library's [LinkUpdate.ask] (#848).
+  Future<Note> move(
+    String path,
+    String targetParent, {
+    LinkUpdateConfirm? confirmLinks,
+  });
 
   /// The indexed note/folder at library-relative [path], or null.
   Future<Note?> find(String path);
@@ -593,6 +604,13 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the link format.
   Future<void> setLinkType(LinkType type);
+
+  /// What a rename or a move does to the links pointing at what moved
+  /// (default [LinkUpdate.automatic], #848).
+  Future<LinkUpdate> get linkUpdate;
+
+  /// Sets (and persists) what a rename or a move does to those links.
+  Future<void> setLinkUpdate(LinkUpdate mode);
 
   /// Where a note created from a dead link lands (default the folder of
   /// the note the link was clicked in, issue #78).

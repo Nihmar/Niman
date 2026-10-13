@@ -389,6 +389,29 @@ final class MacedonianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'Ажурирај ги врските по преименување или преместување';
+  @override
+  String get linkUpdateSubtitle =>
+      'Што се случува со врските до белешка или папка што е преименувана или '
+      'преместена';
+  @override
+  String get linkUpdateAutomatic => 'Автоматски';
+  @override
+  String get linkUpdateAsk => 'Прашај секој пат';
+  @override
+  String get linkUpdateNever => 'Никогаш';
+  @override
+  String get linkUpdateAskTitle => 'Да се ажурираат ли врските?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'Белешки што упатуваат на преместеното: $notes. Да се ажурираат ли '
+      'нивните врски?';
+  @override
+  String get linkUpdateConfirm => 'Ажурирај';
+  @override
+  String get linkUpdateKeep => 'Остави како што е';
+  @override
   String get missingNoteLocationTitle => 'Креирање недостапни белешки во';
   @override
   String get missingNoteLocationRoot => 'Корен на библиотеката';

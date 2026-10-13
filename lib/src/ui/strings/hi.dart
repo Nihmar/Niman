@@ -376,6 +376,28 @@ final class HindiStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get linkUpdateTitle =>
+      'नाम बदलने या स्थानांतरित करने पर लिंक अपडेट करें';
+  @override
+  String get linkUpdateSubtitle =>
+      'जिस नोट या फ़ोल्डर का नाम बदला गया या जिसे स्थानांतरित किया गया, उसकी '
+      'ओर इशारा करने वाले लिंक का क्या होगा';
+  @override
+  String get linkUpdateAutomatic => 'अपने आप';
+  @override
+  String get linkUpdateAsk => 'हर बार पूछें';
+  @override
+  String get linkUpdateNever => 'कभी नहीं';
+  @override
+  String get linkUpdateAskTitle => 'लिंक अपडेट करें?';
+  @override
+  String linkUpdateAskBody(int notes) =>
+      'स्थानांतरित की गई चीज़ से जुड़े नोट: $notes। क्या उनके लिंक अपडेट करें?';
+  @override
+  String get linkUpdateConfirm => 'अपडेट करें';
+  @override
+  String get linkUpdateKeep => 'जैसा है वैसा रहने दें';
+  @override
   String get missingNoteLocationTitle => 'ग़ायब नोट्स बनाएँ';
   @override
   String get missingNoteLocationRoot => 'लाइब्रेरी रूट';
