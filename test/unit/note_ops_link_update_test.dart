@@ -2,6 +2,7 @@
 // on the library's link update setting (#848): rewritten, rewritten once
 // asked, or left as written. Only the rewrite is the setting's; everything
 // else that names the path follows the move whichever it is.
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -256,6 +257,63 @@ void main() {
       await use(LinkUpdate.ask);
       await ops.rename('Old.md', 'New');
       expect(await ops.readNote('Ref.md'), 'See [[Old]] and [[Other]].\n');
+    });
+
+    test(
+      'the question holds no lock: another op runs while it is open',
+      () async {
+        await seed();
+        await use(LinkUpdate.ask);
+        final asked = Completer<int>();
+        final answer = Completer<bool>();
+        final rename = ops.rename(
+          'Old.md',
+          'New',
+          confirmLinks: (notes) {
+            asked.complete(notes);
+            return answer.future;
+          },
+        );
+        expect(await asked.future.timeout(const Duration(seconds: 10)), 2);
+
+        // A dialog left open must not stall the library: this op joins the
+        // same serial chain the rename ran in.
+        final created = await ops
+            .createNote(parentPath: '', name: 'Free')
+            .timeout(const Duration(seconds: 5));
+        expect(created.path, 'Free.md');
+
+        answer.complete(true);
+        await rename;
+        expect(await ops.readNote('Ref.md'), 'See [[New]] and [[Other]].\n');
+      },
+    );
+
+    test('an edit made while the question is open is kept', () async {
+      await seed();
+      await use(LinkUpdate.ask);
+      final asked = Completer<int>();
+      final answer = Completer<bool>();
+      final rename = ops.rename(
+        'Old.md',
+        'New',
+        confirmLinks: (notes) {
+          asked.complete(notes);
+          return answer.future;
+        },
+      );
+      await asked.future.timeout(const Duration(seconds: 10));
+      await ops.saveNote('Ref.md', 'Edited meanwhile: [[Old]].\n');
+      await ops.writer.indexed;
+
+      answer.complete(true);
+      await rename;
+      expect(
+        await ops.readNote('Ref.md'),
+        'Edited meanwhile: [[New]].\n',
+        reason: 'the rewrite reads the note again once it is agreed to',
+      );
+      expect(await ops.readNote('Second.md'), '[x](New.md)\n');
     });
   });
 }
