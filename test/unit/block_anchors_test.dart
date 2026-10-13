@@ -60,11 +60,18 @@ void main() {
       expect(anchors.map((a) => a.excerpt), ['buy milk', 'second']);
     });
 
-    test('a quote carries the id on its own line below, as a whole', () {
-      expect(_anchors('> a quote\n> goes on\n\n^quote-id\n'), [
-        ('quote-id', 0),
-      ]);
-      expect(blockAnchorsOfText('> a quote\n\n^q').single.excerpt, 'a quote');
+    test('an id in the middle of a paragraph names nothing', () {
+      expect(_anchors('first ^x\nsecond\n'), isEmpty);
+      expect(_anchors('first\nsecond ^x\nmore\n'), isEmpty);
+    });
+
+    test('a quote carries its id at the end of its last line', () {
+      expect(_anchors('> first\n> second ^deep\n'), [('deep', 0)]);
+      expect(blockAnchorsOfText('> first\n\n^q').single.excerpt, 'first');
+    });
+
+    test('an id in the middle of a quote names nothing', () {
+      expect(_anchors('> first ^q\n> second\n'), isEmpty);
     });
 
     test('a table carries it below too; so does a whole list', () {
@@ -72,11 +79,6 @@ void main() {
         ('tbl', 0),
       ]);
       expect(_anchors('- a\n- b\n\n^whole-list\n'), [('whole-list', 0)]);
-    });
-
-    test('a part of a quote is not a target, only the whole block', () {
-      // The id at the end of a quote's line names the quote, not the line.
-      expect(_anchors('> first\n> second ^deep\n'), [('deep', 0)]);
     });
 
     test('a heading can carry one', () {
@@ -92,6 +94,28 @@ void main() {
           r'$$'
           '\nreal ^real\n';
       expect(_anchors(text).map((a) => a.$1), ['real']);
+    });
+
+    test('an own-line id below a fence names nothing above it', () {
+      expect(_anchors('para\n\n```\ncode\n```\n\n^after\n'), isEmpty);
+    });
+
+    test('an id in indented code is not an anchor', () {
+      expect(_anchors('    indented ^code\n'), isEmpty);
+      expect(_anchors('\tindented ^code\n'), isEmpty);
+      expect(_anchors('para\n\n    indented ^code\n\n^own\n'), isEmpty);
+    });
+
+    test('an escaped caret is not an id', () {
+      expect(trailingBlockId(r'text \^id'), isNull);
+      expect(
+        _anchors(
+          'text '
+          r'\^id'
+          '\n',
+        ),
+        isEmpty,
+      );
     });
 
     test('the first block that carries an id owns it', () {

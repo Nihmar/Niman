@@ -109,13 +109,35 @@ final class BlockAnchorScanner {
   String _previousRunText = '';
   _Kind _previous = _Kind.text;
 
+  /// The last prose line read, and the id a line ended with waiting to be
+  /// owned: it belongs to the block only when the block ends on that very
+  /// line — a block that runs on past its id does not carry one (#844).
+  int _lastLine = -1;
+  String? _pendingId;
+  int _pendingAt = -1;
+
   /// The anchors found so far, in line order.
   List<BlockAnchor> get anchors => _anchors;
 
   /// Reads line [index] of the note, [text]; lines come in order from 0.
   void add(int index, String text) {
-    if (!_walker.isProse(index, text) || text.trim().isEmpty) {
+    if (!_walker.isProse(index, text)) {
+      // A fence, a formula or the frontmatter ends the run and stands
+      // between what came before it and what follows: an own-line id below
+      // one names nothing of the paragraph above.
       _endRun();
+      _forgetPreviousRun();
+      return;
+    }
+    if (text.trim().isEmpty) {
+      _endRun();
+      return;
+    }
+    if (_runStart < 0 && _indentedCode(text)) {
+      // Four spaces (or a tab) at the start of a block, with no run open, is
+      // an indented code block: a ` ^id` in it is code, not an anchor.
+      _endRun();
+      _forgetPreviousRun();
       return;
     }
     final kind = _kindOf(text);
@@ -126,36 +148,78 @@ final class BlockAnchorScanner {
         _previous == _Kind.heading ||
         (kind != _previous && (kind == _Kind.quote || kind == _Kind.table)) ||
         (_previous == _Kind.table && kind == _Kind.text);
-    if (_runStart < 0) {
-      _runStart = index;
-      _runText = text;
-    }
     if (startsBlock) {
+      // The block before this line ended on the line just read: the id that
+      // line carried, if any, is the block's; one an earlier line carried
+      // belonged to a block that ran on past it.
+      if (_runStart >= 0) _ownPending();
+      if (_runStart < 0) {
+        _runStart = index;
+        _runText = text;
+      }
       _blockStart = index;
       _blockText = text;
     }
     _previous = kind;
+    _lastLine = index;
     final id = trailingBlockId(text);
-    if (id == null || !_seen.add(id)) return;
+    if (id == null) return;
     final own = text.trim() == '^$id';
-    if (own && _runStart == index && _previousRunStart >= 0) {
-      // An id on a line of its own after a blank line names the block above:
-      // the whole run it ended (a list, a quote, a table).
-      _anchors.add(_anchor(id, _previousRunStart, _previousRunText));
+    if (own && _runStart == index) {
+      // An id on a line of its own names the block above, when there is one
+      // and a blank line separates them (a list, a quote, a table). With no
+      // block above it, the line is nothing but an id and names nothing.
+      if (_previousRunStart >= 0) {
+        _claim(id, _previousRunStart, _previousRunText);
+      }
       return;
     }
-    _anchors.add(_anchor(id, _blockStart, _blockText));
+    _pendingId = id;
+    _pendingAt = index;
   }
+
+  /// Claims the pending id when the block ended on the line that carried it.
+  void _ownPending() {
+    final id = _pendingId;
+    final at = _pendingAt;
+    _pendingId = null;
+    _pendingAt = -1;
+    if (id == null || at != _lastLine) return;
+    _claim(id, _blockStart, _blockText);
+  }
+
+  /// Ends the note: the last block's id, if it carries one, is claimed.
+  void finish() => _endRun();
 
   void _endRun() {
     if (_runStart >= 0) {
+      _ownPending();
       _previousRunStart = _runStart;
       _previousRunText = _runText;
     }
     _runStart = -1;
     _blockStart = -1;
     _previous = _Kind.text;
+    _pendingId = null;
+    _pendingAt = -1;
   }
+
+  /// The run before the fence, formula or code that just interrupted it is
+  /// not the block an own-line id below the interruption may name.
+  void _forgetPreviousRun() {
+    _previousRunStart = -1;
+    _previousRunText = '';
+  }
+
+  void _claim(String id, int line, String text) {
+    if (!_seen.add(id)) return;
+    _anchors.add(_anchor(id, line, text));
+  }
+
+  /// Whether [text] starts an indented code block: a tab or four spaces in,
+  /// with no list, quote or table marker it belongs to.
+  static bool _indentedCode(String text) =>
+      text.startsWith('\t') || text.startsWith('    ');
 
   BlockAnchor _anchor(String id, int line, String text) =>
       BlockAnchor(id: id, line: line, excerpt: _excerptOf(text));
@@ -186,6 +250,7 @@ List<BlockAnchor> blockAnchorsOfText(String text) {
   for (final line in normalizedLineEndings(text).split('\n')) {
     scanner.add(index++, line);
   }
+  scanner.finish();
   return scanner.anchors;
 }
 
@@ -205,5 +270,6 @@ Future<List<BlockAnchor>> blockAnchorsOfLines(
       await Future<void>.delayed(Duration.zero);
     }
   }
+  scanner.finish();
   return scanner.anchors;
 }
