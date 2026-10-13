@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/shell_note_io.dart';
@@ -109,7 +110,7 @@ void main() {
       );
       final proposed = proposedMissingNotePath(
         'Pro:jects/../Three laws',
-        MissingNoteLocation.currentFolder,
+        NewItemLocation.openNoteFolder,
         context,
       );
       expect(
