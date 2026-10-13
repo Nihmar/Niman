@@ -3,16 +3,18 @@
 ///
 /// A note's headings and ids are rows (`note_headings`, `note_blocks`), and
 /// the words of both are in one row per note of `note_anchors_fts`. A search
-/// is a prefix query on that word index, taken in note order and cut to
-/// `candidateNotes` notes, and the rows of those notes are then read by their
-/// key and told apart by what was typed, compared in the index's own fold
+/// is a prefix query on that word index, ranked there by its relevance
+/// (`bm25`: the notes where the typed words weigh most come first) and cut
+/// to `candidateNotes` notes, so the bound drops the weakest matches, never
+/// arbitrary ones. The rows of those notes are then read by their key and
+/// told apart by what was typed, compared in the index's own fold
 /// (`foldForIndex`): what the word index matched, the filter keeps. Nothing
-/// walks the headings of the library: a million notes cost the same lookup
-/// as a hundred, and the answer is bounded by `candidateNotes` and the
-/// `limit` asked for.
+/// walks the headings of the library: the answer is bounded by
+/// `candidateNotes` and the `limit` asked for.
 library;
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/search/index_fold.dart';
 
@@ -149,21 +151,35 @@ final class AnchorIndex {
 
   static String _marks(int count) => List.filled(count, '?').join(', ');
 
-  /// The ids of the first [candidateNotes] notes whose [column] holds every
-  /// word of [words], the last as a prefix, in note order.
+  /// The query that names the candidate notes: the notes whose column
+  /// holds every word, the last as a prefix, most relevant first, cut to a
+  /// bound. FTS5 ranks before it cuts, on its own `rank` order.
+  @visibleForTesting
+  static const String candidatesSql =
+      'SELECT rowid FROM note_anchors_fts WHERE note_anchors_fts MATCH ? '
+      'ORDER BY rank LIMIT ?';
+
+  /// The ids of the [candidateNotes] notes whose [column] holds every word
+  /// of [words], the last as a prefix, the most relevant ones.
   Future<List<int>> _candidates(String column, List<String> words) async {
-    final phrase = [for (final word in words) '"$word"'].join(' ');
     final rows = await _db
         .customSelect(
-          'SELECT rowid FROM note_anchors_fts WHERE note_anchors_fts MATCH ? '
-          'ORDER BY rowid LIMIT ?',
+          candidatesSql,
           variables: [
-            Variable<String>('$column : ($phrase *)'),
+            Variable<String>(matchOf(column, words)),
             const Variable<int>(candidateNotes),
           ],
         )
         .get();
     return [for (final row in rows) row.read<int>('rowid')];
+  }
+
+  /// The FTS5 query for [words] in [column]: each word whole, the last a
+  /// prefix.
+  @visibleForTesting
+  static String matchOf(String column, List<String> words) {
+    final phrase = [for (final word in words) '"$word"'].join(' ');
+    return '$column : ($phrase *)';
   }
 
   /// [hits] that hold every word of the folded query [q] in their [text],

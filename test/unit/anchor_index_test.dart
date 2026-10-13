@@ -287,6 +287,40 @@ void main() {
   });
 
   group('at the size of a library', () {
+    test('the bound cuts the weakest matches, not the latest notes', () async {
+      // More notes than the bound hold "team" among many words; the one
+      // note whose heading is just "Team" is the newest. A cut in note order
+      // would drop it; the word index ranks it first.
+      await db.batch((batch) {
+        for (var i = 0; i <= AnchorIndex.candidateNotes + 50; i++) {
+          final id = 1000 + i;
+          final last = i == AnchorIndex.candidateNotes + 50;
+          final heading = last
+              ? 'Team'
+              : 'Team meeting minutes from the archive, number $i';
+          batch
+            ..customStatement(
+              'INSERT INTO notes (id, path, parent, name, is_dir, size, '
+              'modified, created) '
+              "VALUES ($id, 'bulk/n$i.md', 0, 'n$i.md', 0, 1, 0, 0)",
+            )
+            ..customStatement(
+              'INSERT INTO note_headings (note_id, line, level, heading) '
+              "VALUES ($id, 0, 1, '$heading')",
+            )
+            ..customStatement(
+              'INSERT INTO note_anchors_fts (rowid, headings, blocks) '
+              "VALUES ($id, '$heading', '')",
+            );
+        }
+      });
+
+      final hits = await AnchorIndex(db).headings('team', limit: 1000);
+
+      expect(hits.map((h) => h.heading), contains('Team'));
+      expect(hits.length, lessThanOrEqualTo(AnchorIndex.candidateNotes));
+    });
+
     test('a search reads a bounded number of notes, and rows by key', () async {
       // 6,000 notes that all hold "team" in a heading: the word index names
       // the first AnchorIndex.candidateNotes of them, and the rows read are
@@ -326,17 +360,17 @@ void main() {
       // table: SQLite says so in its own plan.
       final plan = await db
           .customSelect(
-            'EXPLAIN QUERY PLAN SELECT rowid FROM note_anchors_fts '
-            'WHERE note_anchors_fts MATCH ? ORDER BY rowid LIMIT ?',
+            'EXPLAIN QUERY PLAN ${AnchorIndex.candidatesSql}',
             variables: [
-              const Variable<String>('headings : ("team" *)'),
+              Variable<String>(AnchorIndex.matchOf('headings', ['team'])),
               const Variable<int>(AnchorIndex.candidateNotes),
             ],
           )
           .get();
       expect(
-        plan.map((r) => r.read<String>('detail')).join(' ').toUpperCase(),
-        contains('VIRTUAL TABLE INDEX'),
+        plan.map((r) => r.read<String>('detail')).join(' | '),
+        matches(RegExp(r'^SCAN note_anchors_fts VIRTUAL TABLE INDEX \d+:M')),
+        reason: 'the MATCH is answered by the word index, nothing else read',
       );
       final rowsPlan = await db
           .customSelect(
@@ -345,8 +379,13 @@ void main() {
           )
           .get();
       expect(
-        rowsPlan.map((r) => r.read<String>('detail')).join(' '),
-        contains('SEARCH h USING'),
+        rowsPlan.map((r) => r.read<String>('detail')).join(' | '),
+        allOf(
+          contains(
+            'SEARCH h USING INDEX sqlite_autoindex_note_headings_1 (note_id=?)',
+          ),
+          contains('SEARCH n USING INTEGER PRIMARY KEY (rowid=?)'),
+        ),
         reason: 'the headings of the named notes are read by their key',
       );
     });
