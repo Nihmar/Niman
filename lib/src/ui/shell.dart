@@ -984,6 +984,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // Under "ask", the question is the shell's to put (#848).
     confirmLinks: (notes) async =>
         mounted && await askLinkUpdate(context, notes),
+    // The rewrite lands after the move's own reload (#859).
+    onLinksRewritten: () {
+      if (mounted) setState(() => _noteReloadToken++);
+    },
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),
