@@ -19,6 +19,7 @@ void main() {
   late Directory dbDir;
   late IndexDatabase db;
   late NoteOps ops;
+  late Indexer indexer;
   late LibraryConfigRepo config;
 
   setUp(() async {
@@ -27,12 +28,8 @@ void main() {
     db = IndexDatabase(NativeDatabase(File(p.join(dbDir.path, 'test.sqlite'))));
     addTearDown(db.close);
     config = LibraryConfigRepo(root.path);
-    ops = NoteOps(
-      root: root.path,
-      db: db,
-      indexer: Indexer(db),
-      config: config,
-    );
+    indexer = Indexer(db);
+    ops = NoteOps(root: root.path, db: db, indexer: indexer, config: config);
   });
 
   tearDown(() async {
@@ -59,6 +56,13 @@ void main() {
       name: 'Second',
       content: '[x](Old.md)\n',
     );
+  }
+
+  /// The paths "Links to this note" lists for the note at [path].
+  Future<List<String>> referrersOf(String path) async {
+    final row = (await ops.find(path))!;
+    final page = await indexer.dao.referrers.page(row.id, limit: 50);
+    return [for (final item in page.items) item.path];
   }
 
   group('automatic (the default)', () {
@@ -96,6 +100,15 @@ void main() {
       expect(await ops.readNote('Ref.md'), 'See [[Old]] and [[Other]].\n');
       expect(await ops.readNote('Second.md'), '[x](Old.md)\n');
       expect(asked, 0);
+    });
+
+    test('a rename drops the edges of the links it left dead (#856)', () async {
+      await seed();
+      expect(await referrersOf('Old.md'), ['Ref.md', 'Second.md']);
+      await use(LinkUpdate.never);
+      await ops.rename('Old.md', 'New');
+      await ops.writer.indexed;
+      expect(await referrersOf('New.md'), isEmpty);
     });
 
     test('a move leaves the links as written', () async {
@@ -148,6 +161,11 @@ void main() {
       );
       expect(counts, [2], reason: 'Ref and Second would change; one prompt');
       expect(row.path, 'New.md', reason: 'the move itself is not up to it');
+      expect(
+        await referrersOf('New.md'),
+        isEmpty,
+        reason: 'the links left dead are no longer edges (#856)',
+      );
       expect(await ops.readNote('Ref.md'), 'See [[Old]] and [[Other]].\n');
       expect(await ops.readNote('Second.md'), '[x](Old.md)\n');
     });

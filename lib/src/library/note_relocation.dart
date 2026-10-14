@@ -209,6 +209,19 @@ final class NoteRelocator {
   }) async {
     if (oldPaths.isEmpty || referrers.isEmpty) return null;
     final mode = (await config.config).linkUpdate;
+    // A referrer inside the moved subtree moved with it; one note is
+    // rewritten once however many of its old paths were referrers.
+    final targets = <(String oldReferrer, String path)>[];
+    final seen = <String>{};
+    for (final oldReferrer in referrers) {
+      final path = pathAfterMove(oldReferrer, from, to, isDir: isDir)!;
+      if (seen.add(path)) targets.add((oldReferrer, path));
+    }
+    // The rewrite is not done now, so the referrers' edges are not renewed
+    // by a save: they are read again here (#856).
+    if (mode != LinkUpdate.automatic) {
+      await _reresolve([for (final (_, path) in targets) path]);
+    }
     if (mode == LinkUpdate.never) return null;
     // Indexed once for every referrer: a link is a lookup, not a walk of
     // everything that moved.
@@ -226,14 +239,6 @@ final class NoteRelocator {
         renamedFrom = oldName;
         renamedTo = newName;
       }
-    }
-    // A referrer inside the moved subtree moved with it; one note is
-    // rewritten once however many of its old paths were referrers.
-    final targets = <(String oldReferrer, String path)>[];
-    final seen = <String>{};
-    for (final oldReferrer in referrers) {
-      final path = pathAfterMove(oldReferrer, from, to, isDir: isDir)!;
-      if (seen.add(path)) targets.add((oldReferrer, path));
     }
     Future<String?> rewritten(String oldReferrer, String path) async {
       final text = await readNote(path);
@@ -289,6 +294,24 @@ final class NoteRelocator {
     return changing == 0
         ? null
         : PendingLinkRewrite(notes: changing, apply: write);
+  }
+
+  /// Re-indexes the referrers at [paths] whose links the move left as
+  /// written (#856).
+  ///
+  /// A rename keeps the moved note's row id, so an edge that named it
+  /// outlives a link that no longer resolves to it, and "Links to this
+  /// note" lists a note whose text points nowhere. Reading the referrers
+  /// again drops such an edge, and keeps (or, for a folder, restores) the
+  /// ones that still resolve. The move is already done: a failure is logged
+  /// and leaves it standing.
+  Future<void> _reresolve(List<String> paths) async {
+    try {
+      await indexer.rescanFiles(root, [for (final path in paths) _abs(path)]);
+    } on Object catch (error) {
+      const AppLogger(name: 'links')
+          .warning('could not renew the links of the referrers: $error');
+    }
   }
 
   /// Carries the reading positions of what moved from [from] to [to]
