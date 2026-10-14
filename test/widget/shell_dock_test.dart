@@ -189,10 +189,14 @@ void main() {
     expect(dock, findsNothing);
   });
 
-  testWidgets('a narrow window has no dock, and no way to one', (tester) async {
+  // The way to the panel stays on a narrow window: it opens over the note
+  // there (shell_dock_overlay_test).
+  testWidgets('a narrow window has no docked panel, but keeps the button', (
+    tester,
+  ) async {
     await pumpAt(tester, const Size(900, 900));
     expect(dock, findsNothing);
-    expect(find.byKey(const Key('dock-toggle')), findsNothing);
+    expect(find.byKey(const Key('dock-toggle')), findsOne);
   });
 
   testWidgets('it follows the focused pane’s note', (tester) async {

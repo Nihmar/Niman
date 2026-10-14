@@ -75,6 +75,9 @@ import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/dismiss_chain.dart';
+import 'package:niman/src/ui/dock/close_overlay_action.dart';
+import 'package:niman/src/ui/dock/dock_overlay.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
@@ -1600,6 +1603,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onOpenHistory: (path) => unawaited(_openHistoryPage(path)),
     onOpenNoteFromLink: (path) => _openNoteFromLink(path, null),
     onOpenVersion: (path, version) => unawaited(_openCompare(path, version)),
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
   );
 
   /// A version of a note compared with the note, as a tab of a pane
@@ -3712,10 +3718,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// what it dismisses while Zen is on. It gets there only when nothing
   /// nearer wanted the key: the find bar and a selection take the first
   /// press, a dialog or a menu its own.
-  late final Action<DismissIntent> _leaveZenOnEsc = LeaveZenAction(
-    _immersive.zen,
-    () => _inZen,
-  );
+  ///
+  /// The same key shuts the side panel while it lies over the note (the
+  /// two never show together: Zen hides it).
+  late final Action<DismissIntent> _leaveZenOnEsc = DismissChain([
+    CloseOverlayAction(() => _dock.overlayShown && !_inZen, _dock.closeOverlay),
+    LeaveZenAction(_immersive.zen, () => _inZen),
+  ]);
 
   /// Zen mode (#69) and the book read in full screen (#621).
   late final ShellImmersive _immersive = ShellImmersive(
@@ -4273,6 +4282,31 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget _wideBody(LibrarySession controller) {
     final zen = _inZen;
     final touch = thumbDense(Theme.of(context));
+    _dock.settle();
+    // A stack always, the overlay or not: the islands below keep their
+    // place in the tree, and so their editors their state.
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _wideIslands(controller, zen: zen, touch: touch),
+        // A window without room for the dock beside the note lays it over
+        // the note instead, under the title bar and the rail.
+        if (_dock.overlayShown && !zen)
+          DockOverlay(
+            width: _editorSettings.dockWidth,
+            onDismiss: _dock.closeOverlay,
+            dock: _dock.build(context, overlay: true),
+          ),
+      ],
+    );
+  }
+
+  /// The wide body's islands and the dividers over their gaps.
+  Widget _wideIslands(
+    LibrarySession controller, {
+    required bool zen,
+    required bool touch,
+  }) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         zen ? 0 : Island.gap,
@@ -4434,7 +4468,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
   void _toggleDock() => _dock.toggleOpen();
 
-  /// The note row's dock button, where the window has room for a dock.
+  /// The note row's dock button: always there on the wide layout.
   Widget _dockToggle() => _dock.toggle();
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
@@ -4546,11 +4580,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     noteColumn: _editorSettings.noteColumn,
                     // The kind toggles and ⋮ sit at the end of the note's
                     // one row of chrome (#173); there is no header above.
-                    barActions: [
-                      ..._kindActions,
-                      if (_dockRoom) _dockToggle(),
-                      _noteMenu(),
-                    ],
+                    barActions: [..._kindActions, _dockToggle(), _noteMenu()],
                     autofocusEditor: _editorSettings.autofocusEditor,
                     // The Files pane opened a note (#727): that tab's own
                     // view is asked for the caret, and no other.

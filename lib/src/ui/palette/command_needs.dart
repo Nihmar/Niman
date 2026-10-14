@@ -87,7 +87,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   },
   AppCommand.splitRight ||
   AppCommand.splitDown => const {CommandNeed.wideWindow, CommandNeed.notInZen},
-  AppCommand.toggleDock => const {CommandNeed.dockRoom, CommandNeed.notInZen},
+  AppCommand.toggleDock => const {CommandNeed.wideWindow, CommandNeed.notInZen},
   AppCommand.toggleSidebar => const {CommandNeed.notInZen},
   AppCommand.journalPrevious ||
   AppCommand.journalNext => const {CommandNeed.journalEntry},
