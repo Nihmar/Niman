@@ -1466,6 +1466,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get closeAllNotes => 'すべて閉じる';
   @override
+  String get tabCloseOthers => '他を閉じる';
+  @override
+  String get tabCloseToRight => '右側を閉じる';
+  @override
+  String get copyPathAction => 'パスをコピー';
+  @override
   String get sidePanelTooltip => 'サイドパネルの表示・非表示';
   @override
   String get historyAllVersions => 'すべてのバージョン';
@@ -1483,6 +1489,10 @@ final class JapaneseStrings extends Strings {
   String get paletteGroupLibrary => 'ライブラリ';
   @override
   String get paletteGroupGoTo => '移動';
+  @override
+  String get appMenuTooltip => 'メニュー';
+  @override
+  String get appMenuHelp => 'ヘルプ';
   @override
   String get paletteGroupJournal => '日記';
   @override

@@ -1567,6 +1567,12 @@ final class RomanianStrings extends Strings {
   @override
   String get closeAllNotes => 'Închide toate';
   @override
+  String get tabCloseOthers => 'Închide celelalte';
+  @override
+  String get tabCloseToRight => 'Închide la dreapta';
+  @override
+  String get copyPathAction => 'Copiază calea';
+  @override
   String get sidePanelTooltip => 'Afișează sau ascunde panoul lateral';
   @override
   String get historyAllVersions => 'Toate versiunile';
@@ -1584,6 +1590,10 @@ final class RomanianStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotecă';
   @override
   String get paletteGroupGoTo => 'Mergi la';
+  @override
+  String get appMenuTooltip => 'Meniu';
+  @override
+  String get appMenuHelp => 'Ajutor';
   @override
   String get paletteGroupJournal => 'Jurnal';
   @override

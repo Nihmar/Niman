@@ -1565,6 +1565,12 @@ final class HungarianStrings extends Strings {
   @override
   String get closeAllNotes => 'Összes bezárása';
   @override
+  String get tabCloseOthers => 'A többi bezárása';
+  @override
+  String get tabCloseToRight => 'Jobbra lévők bezárása';
+  @override
+  String get copyPathAction => 'Útvonal másolása';
+  @override
   String get sidePanelTooltip => 'Oldalsó panel megjelenítése vagy elrejtése';
   @override
   String get historyAllVersions => 'Összes verzió';
@@ -1582,6 +1588,10 @@ final class HungarianStrings extends Strings {
   String get paletteGroupLibrary => 'Könyvtár';
   @override
   String get paletteGroupGoTo => 'Ugrás';
+  @override
+  String get appMenuTooltip => 'Menü';
+  @override
+  String get appMenuHelp => 'Súgó';
   @override
   String get paletteGroupJournal => 'Napló';
   @override

@@ -1582,6 +1582,12 @@ final class SpanishStrings extends Strings {
   @override
   String get closeAllNotes => 'Cerrar todas';
   @override
+  String get tabCloseOthers => 'Cerrar las demás';
+  @override
+  String get tabCloseToRight => 'Cerrar las de la derecha';
+  @override
+  String get copyPathAction => 'Copiar ruta';
+  @override
   String get sidePanelTooltip => 'Mostrar u ocultar el panel lateral';
   @override
   String get historyAllVersions => 'Todas las versiones';
@@ -1599,6 +1605,10 @@ final class SpanishStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteca';
   @override
   String get paletteGroupGoTo => 'Ir a';
+  @override
+  String get appMenuTooltip => 'Menú';
+  @override
+  String get appMenuHelp => 'Ayuda';
   @override
   String get paletteGroupJournal => 'Diario';
   @override

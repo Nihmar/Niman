@@ -115,7 +115,11 @@ motion keeps the ellipsis instead.
   it on a pane's right or bottom quarter splits the window with that tab
   — the shaded half shows what you are about to get.
 - **Closing** is by the tab's **×**, a middle click, or `Ctrl+W`. The tab
-  to the right takes its place.
+  to the right takes its place. A tab's right-click menu also closes the
+  **others**, those **to the right**, or **all** of the pane's.
+- **The tab's note.** The same menu has **Reveal in tree**, **Copy path**
+  (the library path), **Rename…**, **History** and **Export…** for the
+  note in the tab (#712).
 - **An orange dot** in place of the **×** means the note has edits not
   written yet. They are written a moment later, as always.
 

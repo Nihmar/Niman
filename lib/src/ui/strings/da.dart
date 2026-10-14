@@ -1551,6 +1551,12 @@ final class DanishStrings extends Strings {
   @override
   String get closeAllNotes => 'Luk alle';
   @override
+  String get tabCloseOthers => 'Luk de andre';
+  @override
+  String get tabCloseToRight => 'Luk til højre';
+  @override
+  String get copyPathAction => 'Kopiér sti';
+  @override
   String get sidePanelTooltip => 'Vis eller skjul sidepanelet';
   @override
   String get historyAllVersions => 'Alle versioner';
@@ -1568,6 +1574,10 @@ final class DanishStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotek';
   @override
   String get paletteGroupGoTo => 'Gå til';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Hjælp';
   @override
   String get paletteGroupJournal => 'Dagbog';
   @override

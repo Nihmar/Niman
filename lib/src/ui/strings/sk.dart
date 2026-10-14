@@ -1556,6 +1556,12 @@ final class SlovakStrings extends Strings {
   @override
   String get closeAllNotes => 'Zavrieť všetky';
   @override
+  String get tabCloseOthers => 'Zavrieť ostatné';
+  @override
+  String get tabCloseToRight => 'Zavrieť vpravo';
+  @override
+  String get copyPathAction => 'Kopírovať cestu';
+  @override
   String get sidePanelTooltip => 'Zobraziť alebo skryť bočný panel';
   @override
   String get historyAllVersions => 'Všetky verzie';
@@ -1573,6 +1579,10 @@ final class SlovakStrings extends Strings {
   String get paletteGroupLibrary => 'Knižnica';
   @override
   String get paletteGroupGoTo => 'Prejsť na';
+  @override
+  String get appMenuTooltip => 'Ponuka';
+  @override
+  String get appMenuHelp => 'Pomocník';
   @override
   String get paletteGroupJournal => 'Denník';
   @override

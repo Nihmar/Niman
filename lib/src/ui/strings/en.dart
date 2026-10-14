@@ -1546,6 +1546,12 @@ final class EnglishStrings extends Strings {
   @override
   String get closeAllNotes => 'Close all';
   @override
+  String get tabCloseOthers => 'Close others';
+  @override
+  String get tabCloseToRight => 'Close to the right';
+  @override
+  String get copyPathAction => 'Copy path';
+  @override
   String get sidePanelTooltip => 'Show or hide the side panel';
   @override
   String get historyAllVersions => 'All versions';
@@ -1563,6 +1569,10 @@ final class EnglishStrings extends Strings {
   String get paletteGroupLibrary => 'Library';
   @override
   String get paletteGroupGoTo => 'Go to';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Help';
   @override
   String get paletteGroupJournal => 'Journal';
   @override

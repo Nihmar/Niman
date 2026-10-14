@@ -1556,6 +1556,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get closeAllNotes => 'Loka öllu';
   @override
+  String get tabCloseOthers => 'Loka hinum';
+  @override
+  String get tabCloseToRight => 'Loka til hægri';
+  @override
+  String get copyPathAction => 'Afrita slóð';
+  @override
   String get sidePanelTooltip => 'Sýna eða fela hliðarspjaldið';
   @override
   String get historyAllVersions => 'Allar útgáfur';
@@ -1573,6 +1579,10 @@ final class IcelandicStrings extends Strings {
   String get paletteGroupLibrary => 'Safn';
   @override
   String get paletteGroupGoTo => 'Fara í';
+  @override
+  String get appMenuTooltip => 'Valmynd';
+  @override
+  String get appMenuHelp => 'Hjálp';
   @override
   String get paletteGroupJournal => 'Dagbók';
   @override

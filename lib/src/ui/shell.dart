@@ -63,6 +63,7 @@ import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/app_menu.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
@@ -1740,6 +1741,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       pane: pane,
       onDrop: (drag, at) => _dropTab(drag, pane, at),
       filler: filler,
+      onTabAction: (index, action, anchor) =>
+          unawaited(_tabAction(tabs.tabs[index].path, action, anchor)),
     );
     final content = _contentTab;
     final hasContent = content != null && pane == _contentPaneShown;
@@ -1754,6 +1757,26 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         if (hasContent) _contentTabChip(content, pane),
       ],
     );
+  }
+
+  /// Runs a tab menu's note action on the note at [path] (#712).
+  Future<void> _tabAction(
+    String path,
+    NoteTabAction action,
+    Rect anchor,
+  ) async {
+    switch (action) {
+      case NoteTabAction.reveal:
+        _revealInTree(path);
+      case NoteTabAction.copyPath:
+        await Clipboard.setData(ClipboardData(text: path));
+      case NoteTabAction.rename:
+        await _rowActions.rename(context, path);
+      case NoteTabAction.history:
+        await _openHistory(path);
+      case NoteTabAction.export:
+        await _exportFlow.runNoteExport(context, path, anchor: anchor);
+    }
   }
 
   /// The pinned content tab's chip (#712), at the end of [pane]'s row: the
@@ -3067,6 +3090,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       windowTitle: narrow ? _windowTitle : _libraryName,
       buildTabs: narrow ? null : _buildTabs,
       tabsStart: _tabsStart,
+      menu: narrow ? null : AppMenuButton(handlers: _commandHandlers),
       sidebarVisible: _sidebarVisible,
       onToggleSidebar: _toggleSidebar,
       shellFocus: _shellFocus,

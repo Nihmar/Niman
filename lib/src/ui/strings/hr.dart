@@ -1552,6 +1552,12 @@ final class CroatianStrings extends Strings {
   @override
   String get closeAllNotes => 'Zatvori sve';
   @override
+  String get tabCloseOthers => 'Zatvori ostale';
+  @override
+  String get tabCloseToRight => 'Zatvori desno';
+  @override
+  String get copyPathAction => 'Kopiraj putanju';
+  @override
   String get sidePanelTooltip => 'Prikaži ili sakrij bočnu ploču';
   @override
   String get historyAllVersions => 'Sve verzije';
@@ -1569,6 +1575,10 @@ final class CroatianStrings extends Strings {
   String get paletteGroupLibrary => 'Knjižnica';
   @override
   String get paletteGroupGoTo => 'Idi na';
+  @override
+  String get appMenuTooltip => 'Izbornik';
+  @override
+  String get appMenuHelp => 'Pomoć';
   @override
   String get paletteGroupJournal => 'Dnevnik';
   @override

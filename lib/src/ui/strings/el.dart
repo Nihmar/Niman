@@ -1604,6 +1604,12 @@ final class GreekStrings extends Strings {
   @override
   String get closeAllNotes => 'Κλείσιμο όλων';
   @override
+  String get tabCloseOthers => 'Κλείσιμο των άλλων';
+  @override
+  String get tabCloseToRight => 'Κλείσιμο προς τα δεξιά';
+  @override
+  String get copyPathAction => 'Αντιγραφή διαδρομής';
+  @override
   String get sidePanelTooltip => 'Εμφάνιση ή απόκρυψη του πλαϊνού πίνακα';
   @override
   String get historyAllVersions => 'Όλες οι εκδόσεις';
@@ -1621,6 +1627,10 @@ final class GreekStrings extends Strings {
   String get paletteGroupLibrary => 'Βιβλιοθήκη';
   @override
   String get paletteGroupGoTo => 'Μετάβαση';
+  @override
+  String get appMenuTooltip => 'Μενού';
+  @override
+  String get appMenuHelp => 'Βοήθεια';
   @override
   String get paletteGroupJournal => 'Ημερολόγιο';
   @override

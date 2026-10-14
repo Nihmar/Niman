@@ -1560,6 +1560,12 @@ final class SerbianStrings extends Strings {
   @override
   String get closeAllNotes => 'Затвори све';
   @override
+  String get tabCloseOthers => 'Затвори остале';
+  @override
+  String get tabCloseToRight => 'Затвори десно';
+  @override
+  String get copyPathAction => 'Копирај путању';
+  @override
   String get sidePanelTooltip => 'Прикажи или сакриј бочну таблу';
   @override
   String get historyAllVersions => 'Све верзије';
@@ -1577,6 +1583,10 @@ final class SerbianStrings extends Strings {
   String get paletteGroupLibrary => 'Библиотека';
   @override
   String get paletteGroupGoTo => 'Иди на';
+  @override
+  String get appMenuTooltip => 'Мени';
+  @override
+  String get appMenuHelp => 'Помоћ';
   @override
   String get paletteGroupJournal => 'Дневник';
   @override

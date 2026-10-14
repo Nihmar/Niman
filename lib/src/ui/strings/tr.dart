@@ -1543,6 +1543,12 @@ final class TurkishStrings extends Strings {
   @override
   String get closeAllNotes => 'Tümünü kapat';
   @override
+  String get tabCloseOthers => 'Diğerlerini kapat';
+  @override
+  String get tabCloseToRight => 'Sağdakileri kapat';
+  @override
+  String get copyPathAction => 'Yolu kopyala';
+  @override
   String get sidePanelTooltip => 'Yan paneli göster veya gizle';
   @override
   String get historyAllVersions => 'Tüm sürümler';
@@ -1560,6 +1566,10 @@ final class TurkishStrings extends Strings {
   String get paletteGroupLibrary => 'Kitaplık';
   @override
   String get paletteGroupGoTo => 'Git';
+  @override
+  String get appMenuTooltip => 'Menü';
+  @override
+  String get appMenuHelp => 'Yardım';
   @override
   String get paletteGroupJournal => 'Günlük';
   @override

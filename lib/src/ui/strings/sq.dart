@@ -1571,6 +1571,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get closeAllNotes => 'Mbyll të gjitha';
   @override
+  String get tabCloseOthers => 'Mbyll të tjerat';
+  @override
+  String get tabCloseToRight => 'Mbyll djathtas';
+  @override
+  String get copyPathAction => 'Kopjo shtegun';
+  @override
   String get sidePanelTooltip => 'Shfaq ose fshih panelin anësor';
   @override
   String get historyAllVersions => 'Të gjitha versionet';
@@ -1588,6 +1594,10 @@ final class AlbanianStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteka';
   @override
   String get paletteGroupGoTo => 'Shko te';
+  @override
+  String get appMenuTooltip => 'Menyja';
+  @override
+  String get appMenuHelp => 'Ndihmë';
   @override
   String get paletteGroupJournal => 'Ditari';
   @override

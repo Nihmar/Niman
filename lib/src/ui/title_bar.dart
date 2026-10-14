@@ -31,8 +31,13 @@ final class AppTitleBar extends StatelessWidget {
     required this.window,
     this.tabs,
     this.tabsStart = 0,
+    this.menu,
     super.key,
   });
+
+  /// The app's menu (#712), before the window's buttons, as a browser's
+  /// is; null draws none.
+  final Widget? menu;
 
   /// The open notes' tabs (#23), in the bar's middle, built around the
   /// drag area they leave free; null leaves the whole middle to the
@@ -128,6 +133,7 @@ final class AppTitleBar extends StatelessWidget {
                 // its left.
                 child: DragToMoveArea(child: _title(theme)),
               ),
+            ?menu,
             _WindowButtons(window: window),
           ],
         ),

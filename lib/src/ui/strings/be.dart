@@ -1559,6 +1559,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get closeAllNotes => 'Закрыць усе';
   @override
+  String get tabCloseOthers => 'Закрыць астатнія';
+  @override
+  String get tabCloseToRight => 'Закрыць справа';
+  @override
+  String get copyPathAction => 'Скапіраваць шлях';
+  @override
   String get sidePanelTooltip => 'Паказаць або схаваць бакавую панэль';
   @override
   String get historyAllVersions => 'Усе версіі';
@@ -1576,6 +1582,10 @@ final class BelarusianStrings extends Strings {
   String get paletteGroupLibrary => 'Бібліятэка';
   @override
   String get paletteGroupGoTo => 'Перайсці';
+  @override
+  String get appMenuTooltip => 'Меню';
+  @override
+  String get appMenuHelp => 'Даведка';
   @override
   String get paletteGroupJournal => 'Дзённік';
   @override

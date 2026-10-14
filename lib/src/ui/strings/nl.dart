@@ -1570,6 +1570,12 @@ final class DutchStrings extends Strings {
   @override
   String get closeAllNotes => 'Alles sluiten';
   @override
+  String get tabCloseOthers => 'Andere sluiten';
+  @override
+  String get tabCloseToRight => 'Rechts sluiten';
+  @override
+  String get copyPathAction => 'Pad kopiëren';
+  @override
   String get sidePanelTooltip => 'Zijpaneel tonen of verbergen';
   @override
   String get historyAllVersions => 'Alle versies';
@@ -1587,6 +1593,10 @@ final class DutchStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotheek';
   @override
   String get paletteGroupGoTo => 'Ga naar';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Help';
   @override
   String get paletteGroupJournal => 'Dagboek';
   @override

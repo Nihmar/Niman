@@ -1585,6 +1585,12 @@ final class CatalanStrings extends Strings {
   @override
   String get closeAllNotes => 'Tanca-les totes';
   @override
+  String get tabCloseOthers => 'Tanca les altres';
+  @override
+  String get tabCloseToRight => 'Tanca les de la dreta';
+  @override
+  String get copyPathAction => 'Copia el camí';
+  @override
   String get sidePanelTooltip => 'Mostra o amaga el plafó lateral';
   @override
   String get historyAllVersions => 'Totes les versions';
@@ -1602,6 +1608,10 @@ final class CatalanStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteca';
   @override
   String get paletteGroupGoTo => 'Ves a';
+  @override
+  String get appMenuTooltip => 'Menú';
+  @override
+  String get appMenuHelp => 'Ajuda';
   @override
   String get paletteGroupJournal => 'Diari';
   @override

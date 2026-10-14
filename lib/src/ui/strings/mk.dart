@@ -1569,6 +1569,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get closeAllNotes => 'Затвори ги сите';
   @override
+  String get tabCloseOthers => 'Затвори ги другите';
+  @override
+  String get tabCloseToRight => 'Затвори десно';
+  @override
+  String get copyPathAction => 'Копирај патека';
+  @override
   String get sidePanelTooltip => 'Прикажи или скриј го страничниот панел';
   @override
   String get historyAllVersions => 'Сите верзии';
@@ -1586,6 +1592,10 @@ final class MacedonianStrings extends Strings {
   String get paletteGroupLibrary => 'Библиотека';
   @override
   String get paletteGroupGoTo => 'Оди на';
+  @override
+  String get appMenuTooltip => 'Мени';
+  @override
+  String get appMenuHelp => 'Помош';
   @override
   String get paletteGroupJournal => 'Дневник';
   @override

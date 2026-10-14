@@ -28,6 +28,25 @@ String noteTabLabel(String path) {
   return isMarkdownNote(name) ? name.substring(0, name.length - 3) : name;
 }
 
+/// What a tab's right-click menu does to its note, past splitting and
+/// closing it (#712): the shell's to run.
+enum NoteTabAction {
+  /// Shows the note's row in the tree.
+  reveal,
+
+  /// Puts the note's library path on the clipboard.
+  copyPath,
+
+  /// Renames the note.
+  rename,
+
+  /// Opens the note's history.
+  history,
+
+  /// Exports the note.
+  export,
+}
+
 /// The row of tabs.
 final class NoteTabBar extends StatefulWidget {
   /// Creates the row for [tabs], [active] showing.
@@ -44,8 +63,14 @@ final class NoteTabBar extends StatefulWidget {
     this.onMoveToOtherPane,
     this.pane = 0,
     this.onDrop,
+    this.onTabAction,
     super.key,
   });
+
+  /// Runs a tab menu's note action on the tab at the index (#712); null
+  /// leaves the menu to the tabs themselves.
+  final void Function(int index, NoteTabAction action, Rect anchor)?
+  onTabAction;
 
   /// Which pane's row this is (#204): what a dragged tab carries.
   final int pane;
@@ -224,7 +249,8 @@ final class _NoteTabBarState extends State<NoteTabBar> {
   }
 
   /// The tab's right-click menu: the ways to split with it, to move it,
-  /// and to close it.
+  /// and to close it — or the others, those to its right, or all — and,
+  /// where the shell runs them, what can be done to its note (#712).
   Future<void> _showTabMenu(
     BuildContext context,
     int index,
@@ -265,8 +291,48 @@ final class _NoteTabBarState extends State<NoteTabBar> {
           value: 'close',
           child: Text(AppStrings.closeTabTooltip),
         ),
+        PopupMenuItem(
+          key: const Key('tab-menu-close-others'),
+          value: 'others',
+          enabled: widget.tabs.length > 1,
+          child: Text(AppStrings.tabCloseOthers),
+        ),
+        PopupMenuItem(
+          key: const Key('tab-menu-close-right'),
+          value: 'toright',
+          enabled: index < widget.tabs.length - 1,
+          child: Text(AppStrings.tabCloseToRight),
+        ),
+        PopupMenuItem(
+          key: const Key('tab-menu-close-all'),
+          value: 'all',
+          child: Text(AppStrings.closeAllNotes),
+        ),
+        if (widget.onTabAction != null) ...[
+          const PopupMenuDivider(),
+          for (final (action, label) in [
+            (NoteTabAction.reveal, AppStrings.revealInTree),
+            (NoteTabAction.copyPath, AppStrings.copyPathAction),
+            (NoteTabAction.rename, '${AppStrings.actionRename}…'),
+            (NoteTabAction.history, AppStrings.noteHistoryTitle),
+            (NoteTabAction.export, '${AppStrings.exportTitle}…'),
+          ])
+            PopupMenuItem(
+              key: Key('tab-menu-${action.name}'),
+              value: action.name,
+              child: Text(label),
+            ),
+        ],
       ],
     );
+    final count = widget.tabs.length;
+    // From the end, so each index still names the tab it did.
+    void closeWhere(bool Function(int i) which) {
+      for (var i = count - 1; i >= 0; i--) {
+        if (which(i)) widget.onClose(i);
+      }
+    }
+
     switch (chosen) {
       case 'right':
         split?.call(index, SplitAxis.right);
@@ -276,6 +342,17 @@ final class _NoteTabBarState extends State<NoteTabBar> {
         move?.call(index);
       case 'close':
         widget.onClose(index);
+      case 'others':
+        closeWhere((i) => i != index);
+      case 'toright':
+        closeWhere((i) => i > index);
+      case 'all':
+        closeWhere((_) => true);
+      case final String name:
+        final action = NoteTabAction.values.asNameMap()[name];
+        if (action != null) {
+          widget.onTabAction?.call(index, action, position & Size.zero);
+        }
     }
   }
 

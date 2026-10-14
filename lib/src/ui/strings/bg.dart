@@ -1569,6 +1569,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get closeAllNotes => 'Затвори всички';
   @override
+  String get tabCloseOthers => 'Затвори другите';
+  @override
+  String get tabCloseToRight => 'Затвори вдясно';
+  @override
+  String get copyPathAction => 'Копирай пътя';
+  @override
   String get sidePanelTooltip => 'Покажи или скрий страничния панел';
   @override
   String get historyAllVersions => 'Всички версии';
@@ -1586,6 +1592,10 @@ final class BulgarianStrings extends Strings {
   String get paletteGroupLibrary => 'Библиотека';
   @override
   String get paletteGroupGoTo => 'Към';
+  @override
+  String get appMenuTooltip => 'Меню';
+  @override
+  String get appMenuHelp => 'Помощ';
   @override
   String get paletteGroupJournal => 'Дневник';
   @override

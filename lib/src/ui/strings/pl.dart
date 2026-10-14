@@ -1577,6 +1577,12 @@ final class PolishStrings extends Strings {
   @override
   String get closeAllNotes => 'Zamknij wszystkie';
   @override
+  String get tabCloseOthers => 'Zamknij pozostałe';
+  @override
+  String get tabCloseToRight => 'Zamknij po prawej';
+  @override
+  String get copyPathAction => 'Kopiuj ścieżkę';
+  @override
   String get sidePanelTooltip => 'Pokaż lub ukryj panel boczny';
   @override
   String get historyAllVersions => 'Wszystkie wersje';
@@ -1594,6 +1600,10 @@ final class PolishStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteka';
   @override
   String get paletteGroupGoTo => 'Przejdź do';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Pomoc';
   @override
   String get paletteGroupJournal => 'Dziennik';
   @override

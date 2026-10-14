@@ -123,6 +123,26 @@ void main() {
     expect(find.byKey(const Key('history-restored-snack')), findsOne);
   });
 
+  testWidgets('the title bar menu runs a command, its key beside it (#712)', (
+    tester,
+  ) async {
+    await pumpAt(tester, const Size(1400, 900));
+    expect(dock, findsOne);
+    await tester.tap(find.byKey(const Key('app-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('app-menu-group-view')));
+    await settle(tester);
+    final item = find.byKey(const Key('app-menu-toggleDock'));
+    expect(
+      find.descendant(of: item, matching: find.textContaining('B')),
+      findsWidgets,
+      reason: 'Ctrl+Shift+B shown',
+    );
+    await tester.tap(item);
+    await settle(tester);
+    expect(dock, findsNothing);
+  });
+
   testWidgets('a narrow window has no dock, and no way to one', (tester) async {
     await pumpAt(tester, const Size(900, 900));
     expect(dock, findsNothing);

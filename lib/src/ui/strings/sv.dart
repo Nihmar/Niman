@@ -1561,6 +1561,12 @@ final class SwedishStrings extends Strings {
   @override
   String get closeAllNotes => 'Stäng alla';
   @override
+  String get tabCloseOthers => 'Stäng andra';
+  @override
+  String get tabCloseToRight => 'Stäng till höger';
+  @override
+  String get copyPathAction => 'Kopiera sökväg';
+  @override
   String get sidePanelTooltip => 'Visa eller dölj sidopanelen';
   @override
   String get historyAllVersions => 'Alla versioner';
@@ -1578,6 +1584,10 @@ final class SwedishStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotek';
   @override
   String get paletteGroupGoTo => 'Gå till';
+  @override
+  String get appMenuTooltip => 'Meny';
+  @override
+  String get appMenuHelp => 'Hjälp';
   @override
   String get paletteGroupJournal => 'Dagbok';
   @override

@@ -1568,6 +1568,12 @@ final class FinnishStrings extends Strings {
   @override
   String get closeAllNotes => 'Sulje kaikki';
   @override
+  String get tabCloseOthers => 'Sulje muut';
+  @override
+  String get tabCloseToRight => 'Sulje oikealta';
+  @override
+  String get copyPathAction => 'Kopioi polku';
+  @override
   String get sidePanelTooltip => 'Näytä tai piilota sivupaneeli';
   @override
   String get historyAllVersions => 'Kaikki versiot';
@@ -1585,6 +1591,10 @@ final class FinnishStrings extends Strings {
   String get paletteGroupLibrary => 'Kirjasto';
   @override
   String get paletteGroupGoTo => 'Siirry';
+  @override
+  String get appMenuTooltip => 'Valikko';
+  @override
+  String get appMenuHelp => 'Ohje';
   @override
   String get paletteGroupJournal => 'Päiväkirja';
   @override

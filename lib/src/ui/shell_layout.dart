@@ -60,6 +60,7 @@ final class ShellLayoutProps {
     this.onOpenPalette,
     this.buildTabs,
     this.tabsStart = 0,
+    this.menu,
     this.zen = false,
     this.zenTitle = '',
     this.onLeaveZen,
@@ -122,6 +123,9 @@ final class ShellLayoutProps {
 
   /// Where the tabs start in the bar: the tree's right edge.
   final double tabsStart;
+
+  /// The app's menu in the title bar (#712), or null.
+  final Widget? menu;
 
   /// Whether the wide layout's tree pane shows (the rail always stays).
   final bool sidebarVisible;
@@ -396,6 +400,7 @@ final class WideShellLayout extends StatelessWidget {
                   window: props.window,
                   tabs: props.buildTabs,
                   tabsStart: props.tabsStart,
+                  menu: props.menu,
                 ),
               Expanded(
                 child: Row(

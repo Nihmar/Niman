@@ -1554,6 +1554,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get closeAllNotes => 'Zapri vse';
   @override
+  String get tabCloseOthers => 'Zapri druge';
+  @override
+  String get tabCloseToRight => 'Zapri na desni';
+  @override
+  String get copyPathAction => 'Kopiraj pot';
+  @override
   String get sidePanelTooltip => 'Pokaži ali skrij stransko ploščo';
   @override
   String get historyAllVersions => 'Vse različice';
@@ -1571,6 +1577,10 @@ final class SlovenianStrings extends Strings {
   String get paletteGroupLibrary => 'Knjižnica';
   @override
   String get paletteGroupGoTo => 'Pojdi na';
+  @override
+  String get appMenuTooltip => 'Meni';
+  @override
+  String get appMenuHelp => 'Pomoč';
   @override
   String get paletteGroupJournal => 'Dnevnik';
   @override

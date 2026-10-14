@@ -1435,6 +1435,12 @@ final class ChineseStrings extends Strings {
   @override
   String get closeAllNotes => '全部关闭';
   @override
+  String get tabCloseOthers => '关闭其他';
+  @override
+  String get tabCloseToRight => '关闭右侧';
+  @override
+  String get copyPathAction => '复制路径';
+  @override
   String get sidePanelTooltip => '显示或隐藏侧边栏';
   @override
   String get historyAllVersions => '所有版本';
@@ -1452,6 +1458,10 @@ final class ChineseStrings extends Strings {
   String get paletteGroupLibrary => '资料库';
   @override
   String get paletteGroupGoTo => '转到';
+  @override
+  String get appMenuTooltip => '菜单';
+  @override
+  String get appMenuHelp => '帮助';
   @override
   String get paletteGroupJournal => '日记';
   @override

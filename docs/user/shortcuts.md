@@ -136,6 +136,12 @@ from the caret to the click (a drag after it goes on extending).
 
 ## Changing a shortcut
 
+On a desktop with the app's own title bar, the **☰** before the window's
+buttons is the menu (#712): every command of the palette, grouped as the
+palette names them — Note, Editor, View, Library, Journal, Go to — and
+Help, each with its keys beside it. A command that cannot run now is
+there, greyed.
+
 In the palette itself, `Alt+P` pins or unpins the selected command;
 pinned ones head it before anything is typed. On a phone the palette
 opens with two fingers dragged down, with the ⚡ on the Search tab's

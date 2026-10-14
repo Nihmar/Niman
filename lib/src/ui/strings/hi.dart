@@ -1531,6 +1531,12 @@ final class HindiStrings extends Strings {
   @override
   String get closeAllNotes => 'सभी बंद करें';
   @override
+  String get tabCloseOthers => 'अन्य बंद करें';
+  @override
+  String get tabCloseToRight => 'दाईं ओर के बंद करें';
+  @override
+  String get copyPathAction => 'पथ कॉपी करें';
+  @override
   String get sidePanelTooltip => 'साइड पैनल दिखाएँ या छिपाएँ';
   @override
   String get historyAllVersions => 'सभी संस्करण';
@@ -1548,6 +1554,10 @@ final class HindiStrings extends Strings {
   String get paletteGroupLibrary => 'लाइब्रेरी';
   @override
   String get paletteGroupGoTo => 'जाएँ';
+  @override
+  String get appMenuTooltip => 'मेनू';
+  @override
+  String get appMenuHelp => 'सहायता';
   @override
   String get paletteGroupJournal => 'डायरी';
   @override

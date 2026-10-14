@@ -1565,6 +1565,12 @@ final class BasqueStrings extends Strings {
   @override
   String get closeAllNotes => 'Itxi guztiak';
   @override
+  String get tabCloseOthers => 'Itxi besteak';
+  @override
+  String get tabCloseToRight => 'Itxi eskuinekoak';
+  @override
+  String get copyPathAction => 'Kopiatu bidea';
+  @override
   String get sidePanelTooltip => 'Erakutsi edo ezkutatu alboko panela';
   @override
   String get historyAllVersions => 'Bertsio guztiak';
@@ -1582,6 +1588,10 @@ final class BasqueStrings extends Strings {
   String get paletteGroupLibrary => 'Liburutegia';
   @override
   String get paletteGroupGoTo => 'Joan';
+  @override
+  String get appMenuTooltip => 'Menua';
+  @override
+  String get appMenuHelp => 'Laguntza';
   @override
   String get paletteGroupJournal => 'Egunkaria';
   @override

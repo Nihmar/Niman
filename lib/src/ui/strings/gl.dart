@@ -1569,6 +1569,12 @@ final class GalicianStrings extends Strings {
   @override
   String get closeAllNotes => 'Pechar todas';
   @override
+  String get tabCloseOthers => 'Pechar as demais';
+  @override
+  String get tabCloseToRight => 'Pechar as da dereita';
+  @override
+  String get copyPathAction => 'Copiar ruta';
+  @override
   String get sidePanelTooltip => 'Amosar ou agochar o panel lateral';
   @override
   String get historyAllVersions => 'Todas as versións';
@@ -1586,6 +1592,10 @@ final class GalicianStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteca';
   @override
   String get paletteGroupGoTo => 'Ir a';
+  @override
+  String get appMenuTooltip => 'Menú';
+  @override
+  String get appMenuHelp => 'Axuda';
   @override
   String get paletteGroupJournal => 'Diario';
   @override

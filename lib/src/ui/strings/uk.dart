@@ -1562,6 +1562,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get closeAllNotes => 'Закрити всі';
   @override
+  String get tabCloseOthers => 'Закрити інші';
+  @override
+  String get tabCloseToRight => 'Закрити праворуч';
+  @override
+  String get copyPathAction => 'Копіювати шлях';
+  @override
   String get sidePanelTooltip => 'Показати або сховати бічну панель';
   @override
   String get historyAllVersions => 'Усі версії';
@@ -1579,6 +1585,10 @@ final class UkrainianStrings extends Strings {
   String get paletteGroupLibrary => 'Бібліотека';
   @override
   String get paletteGroupGoTo => 'Перейти до';
+  @override
+  String get appMenuTooltip => 'Меню';
+  @override
+  String get appMenuHelp => 'Довідка';
   @override
   String get paletteGroupJournal => 'Щоденник';
   @override

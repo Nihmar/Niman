@@ -1580,6 +1580,12 @@ final class GermanStrings extends Strings {
   @override
   String get closeAllNotes => 'Alle schließen';
   @override
+  String get tabCloseOthers => 'Andere schließen';
+  @override
+  String get tabCloseToRight => 'Rechts schließen';
+  @override
+  String get copyPathAction => 'Pfad kopieren';
+  @override
   String get sidePanelTooltip => 'Seitenleiste ein- oder ausblenden';
   @override
   String get historyAllVersions => 'Alle Versionen';
@@ -1597,6 +1603,10 @@ final class GermanStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliothek';
   @override
   String get paletteGroupGoTo => 'Gehe zu';
+  @override
+  String get appMenuTooltip => 'Menü';
+  @override
+  String get appMenuHelp => 'Hilfe';
   @override
   String get paletteGroupJournal => 'Tagebuch';
   @override

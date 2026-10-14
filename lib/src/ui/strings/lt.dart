@@ -1558,6 +1558,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get closeAllNotes => 'Uždaryti visus';
   @override
+  String get tabCloseOthers => 'Uždaryti kitus';
+  @override
+  String get tabCloseToRight => 'Uždaryti dešinėje';
+  @override
+  String get copyPathAction => 'Kopijuoti kelią';
+  @override
   String get sidePanelTooltip => 'Rodyti arba slėpti šoninį skydelį';
   @override
   String get historyAllVersions => 'Visos versijos';
@@ -1575,6 +1581,10 @@ final class LithuanianStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteka';
   @override
   String get paletteGroupGoTo => 'Eiti į';
+  @override
+  String get appMenuTooltip => 'Meniu';
+  @override
+  String get appMenuHelp => 'Pagalba';
   @override
   String get paletteGroupJournal => 'Dienoraštis';
   @override

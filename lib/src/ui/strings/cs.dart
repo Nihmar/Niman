@@ -1551,6 +1551,12 @@ final class CzechStrings extends Strings {
   @override
   String get closeAllNotes => 'Zavřít vše';
   @override
+  String get tabCloseOthers => 'Zavřít ostatní';
+  @override
+  String get tabCloseToRight => 'Zavřít vpravo';
+  @override
+  String get copyPathAction => 'Kopírovat cestu';
+  @override
   String get sidePanelTooltip => 'Zobrazit nebo skrýt boční panel';
   @override
   String get historyAllVersions => 'Všechny verze';
@@ -1568,6 +1574,10 @@ final class CzechStrings extends Strings {
   String get paletteGroupLibrary => 'Knihovna';
   @override
   String get paletteGroupGoTo => 'Přejít na';
+  @override
+  String get appMenuTooltip => 'Nabídka';
+  @override
+  String get appMenuHelp => 'Nápověda';
   @override
   String get paletteGroupJournal => 'Deník';
   @override

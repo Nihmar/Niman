@@ -1593,6 +1593,12 @@ final class FrenchStrings extends Strings {
   @override
   String get closeAllNotes => 'Tout fermer';
   @override
+  String get tabCloseOthers => 'Fermer les autres';
+  @override
+  String get tabCloseToRight => 'Fermer à droite';
+  @override
+  String get copyPathAction => 'Copier le chemin';
+  @override
   String get sidePanelTooltip => 'Afficher ou masquer le panneau latéral';
   @override
   String get historyAllVersions => 'Toutes les versions';
@@ -1610,6 +1616,10 @@ final class FrenchStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliothèque';
   @override
   String get paletteGroupGoTo => 'Aller à';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Aide';
   @override
   String get paletteGroupJournal => 'Journal';
   @override

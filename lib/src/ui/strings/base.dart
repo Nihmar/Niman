@@ -826,6 +826,9 @@ abstract base class Strings {
   String get actionOpen;
   String get revealInTree;
   String get closeAllNotes;
+  String get tabCloseOthers;
+  String get tabCloseToRight;
+  String get copyPathAction;
   String get sidePanelTooltip;
   String get historyAllVersions;
   String get commandPaletteTitle;
@@ -835,6 +838,8 @@ abstract base class Strings {
   String get paletteGroupView;
   String get paletteGroupLibrary;
   String get paletteGroupGoTo;
+  String get appMenuTooltip;
+  String get appMenuHelp;
   String get paletteGroupJournal;
   String get journalToday;
   String get journalPrevious;

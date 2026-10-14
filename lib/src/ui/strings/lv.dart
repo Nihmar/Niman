@@ -1552,6 +1552,12 @@ final class LatvianStrings extends Strings {
   @override
   String get closeAllNotes => 'Aizvērt visas';
   @override
+  String get tabCloseOthers => 'Aizvērt pārējās';
+  @override
+  String get tabCloseToRight => 'Aizvērt pa labi';
+  @override
+  String get copyPathAction => 'Kopēt ceļu';
+  @override
   String get sidePanelTooltip => 'Rādīt vai slēpt sānu paneli';
   @override
   String get historyAllVersions => 'Visas versijas';
@@ -1569,6 +1575,10 @@ final class LatvianStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotēka';
   @override
   String get paletteGroupGoTo => 'Doties uz';
+  @override
+  String get appMenuTooltip => 'Izvēlne';
+  @override
+  String get appMenuHelp => 'Palīdzība';
   @override
   String get paletteGroupJournal => 'Dienasgrāmata';
   @override

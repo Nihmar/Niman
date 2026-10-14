@@ -1575,6 +1575,12 @@ final class ItalianStrings extends Strings {
   @override
   String get closeAllNotes => 'Chiudi tutte';
   @override
+  String get tabCloseOthers => 'Chiudi le altre';
+  @override
+  String get tabCloseToRight => 'Chiudi a destra';
+  @override
+  String get copyPathAction => 'Copia percorso';
+  @override
   String get sidePanelTooltip => 'Mostra o nascondi il pannello laterale';
   @override
   String get historyAllVersions => 'Tutte le versioni';
@@ -1592,6 +1598,10 @@ final class ItalianStrings extends Strings {
   String get paletteGroupLibrary => 'Libreria';
   @override
   String get paletteGroupGoTo => 'Vai a';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Aiuto';
   @override
   String get paletteGroupJournal => 'Diario';
   @override

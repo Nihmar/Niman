@@ -1549,6 +1549,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get closeAllNotes => 'Lukk alle';
   @override
+  String get tabCloseOthers => 'Lukk de andre';
+  @override
+  String get tabCloseToRight => 'Lukk til høyre';
+  @override
+  String get copyPathAction => 'Kopier sti';
+  @override
   String get sidePanelTooltip => 'Vis eller skjul sidepanelet';
   @override
   String get historyAllVersions => 'Alle versjoner';
@@ -1566,6 +1572,10 @@ final class NorwegianStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotek';
   @override
   String get paletteGroupGoTo => 'Gå til';
+  @override
+  String get appMenuTooltip => 'Meny';
+  @override
+  String get appMenuHelp => 'Hjelp';
   @override
   String get paletteGroupJournal => 'Dagbok';
   @override

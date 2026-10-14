@@ -1537,6 +1537,12 @@ final class EstonianStrings extends Strings {
   @override
   String get closeAllNotes => 'Sulge kõik';
   @override
+  String get tabCloseOthers => 'Sulge teised';
+  @override
+  String get tabCloseToRight => 'Sulge paremal';
+  @override
+  String get copyPathAction => 'Kopeeri tee';
+  @override
   String get sidePanelTooltip => 'Näita või peida külgpaneel';
   @override
   String get historyAllVersions => 'Kõik versioonid';
@@ -1554,6 +1560,10 @@ final class EstonianStrings extends Strings {
   String get paletteGroupLibrary => 'Teek';
   @override
   String get paletteGroupGoTo => 'Mine';
+  @override
+  String get appMenuTooltip => 'Menüü';
+  @override
+  String get appMenuHelp => 'Abi';
   @override
   String get paletteGroupJournal => 'Päevik';
   @override

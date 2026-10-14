@@ -1560,6 +1560,12 @@ final class BosnianStrings extends Strings {
   @override
   String get closeAllNotes => 'Zatvori sve';
   @override
+  String get tabCloseOthers => 'Zatvori ostale';
+  @override
+  String get tabCloseToRight => 'Zatvori desno';
+  @override
+  String get copyPathAction => 'Kopiraj putanju';
+  @override
   String get sidePanelTooltip => 'Prikaži ili sakrij bočnu ploču';
   @override
   String get historyAllVersions => 'Sve verzije';
@@ -1577,6 +1583,10 @@ final class BosnianStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteka';
   @override
   String get paletteGroupGoTo => 'Idi na';
+  @override
+  String get appMenuTooltip => 'Meni';
+  @override
+  String get appMenuHelp => 'Pomoć';
   @override
   String get paletteGroupJournal => 'Dnevnik';
   @override

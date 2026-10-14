@@ -1035,6 +1035,9 @@ final class AppStrings {
   static String get actionOpen => _s.actionOpen;
   static String get revealInTree => _s.revealInTree;
   static String get closeAllNotes => _s.closeAllNotes;
+  static String get tabCloseOthers => _s.tabCloseOthers;
+  static String get tabCloseToRight => _s.tabCloseToRight;
+  static String get copyPathAction => _s.copyPathAction;
   static String get sidePanelTooltip => _s.sidePanelTooltip;
   static String get historyAllVersions => _s.historyAllVersions;
   static String get commandPaletteTitle => _s.commandPaletteTitle;
@@ -1044,6 +1047,8 @@ final class AppStrings {
   static String get paletteGroupView => _s.paletteGroupView;
   static String get paletteGroupLibrary => _s.paletteGroupLibrary;
   static String get paletteGroupGoTo => _s.paletteGroupGoTo;
+  static String get appMenuTooltip => _s.appMenuTooltip;
+  static String get appMenuHelp => _s.appMenuHelp;
   static String get paletteGroupJournal => _s.paletteGroupJournal;
   static String get journalToday => _s.journalToday;
   static String get journalPrevious => _s.journalPrevious;
