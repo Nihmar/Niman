@@ -105,6 +105,38 @@ void main() {
     expect(await controller.ops!.find('Journal/2026'), isNotNull);
   });
 
+  testWidgets('a folder the library holds under other capitals is the one '
+      'filed in (#904)', (tester) async {
+    await openWith(
+      tester,
+      '---\nniman:\n  folder: Journal/2026\n  filename: Monday\n---\nbody\n',
+    );
+    await controller.createFolder(parentPath: '', name: 'journal');
+
+    await useTemplate(tester);
+
+    // The spelling that is there, not the one the template asked for: on a
+    // case-sensitive disk the other would be a folder that does not exist.
+    expect(controller.contentOf('journal/2026/Monday.md'), 'body\n');
+    expect(await controller.ops!.find('Journal'), isNull);
+  });
+
+  testWidgets('append goes to the file in the folder as the library '
+      'spells it (#904)', (tester) async {
+    await openWith(
+      tester,
+      '---\nniman:\n  folder: Logs\n  filename: Log\n  append: true\n---\n'
+      '- an entry\n',
+    );
+    await controller.createFolder(parentPath: '', name: 'logs');
+
+    await useTemplate(tester);
+    await useTemplate(tester);
+
+    expect(controller.contentOf('logs/Log.md'), '- an entry\n\n- an entry\n');
+    expect(await controller.ops!.find('Logs/Log.md'), isNull);
+  });
+
   testWidgets('append adds to the file instead of making a second one', (
     tester,
   ) async {

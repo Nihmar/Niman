@@ -233,9 +233,13 @@ final class JournalFlow {
       // The numbers are on disk before the entry exists: one that could not
       // be made gives them back rather than leaving a gap.
       final row = await CounterStore.whileCreating(counters, () async {
-        if (parent.isNotEmpty) await ops.ensureFolder(parent);
+        // The folder as the library spells it: one held under other
+        // capitals is the one to file in (#904).
+        final folder = parent.isEmpty
+            ? parent
+            : (await ops.ensureFolder(parent)).path;
         return await ops.createNote(
-          parentPath: parent,
+          parentPath: folder,
           name: name,
           content: rendered.text,
         );

@@ -48,7 +48,7 @@ void main() {
     });
 
     test('a note in a folder it has leaves the folder alone', () async {
-      await session.ensureFolder('Notes');
+      final _ = await session.ensureFolder('Notes');
       final before = await session.find('Notes');
       final create = missingNoteCreatorFor(session)!;
 
@@ -59,7 +59,7 @@ void main() {
     });
 
     test('a folder spelled otherwise is the one that is there', () async {
-      await session.ensureFolder('Notes');
+      final _ = await session.ensureFolder('Notes');
       final create = missingNoteCreatorFor(session)!;
 
       final made = await create('notes/Foo.md');
@@ -117,7 +117,7 @@ void main() {
     });
 
     test('the folders and the note exist, and are in the index', () async {
-      await ops.ensureFolder('Projects/Laws');
+      final _ = await ops.ensureFolder('Projects/Laws');
       final note = await ops.createNote(
         parentPath: 'Projects/Laws',
         name: 'Three laws',

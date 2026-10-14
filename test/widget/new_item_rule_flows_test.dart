@@ -33,9 +33,9 @@ void main() {
     dir = await Directory.systemTemp.createTemp('niman_new_item_rule_');
     session = FakeLibrarySession();
     await session.open(dir.path, create: true);
-    await session.ensureFolder('Projects/Niman');
-    await session.ensureFolder('Elsewhere');
-    await session.ensureFolder('Templates');
+    final _ = await session.ensureFolder('Projects/Niman');
+    final _ = await session.ensureFolder('Elsewhere');
+    final _ = await session.ensureFolder('Templates');
     await session.createNote(
       parentPath: 'Templates',
       name: 'Meeting',

@@ -74,6 +74,17 @@ void main() {
 
   String read(String path) => File(p.join(root.path, path)).readAsStringSync();
 
+  test('an annotations folder held under other capitals is the one the '
+      'companion goes in (#904)', () async {
+    await ops.createFolder(parentPath: '', name: 'annotations');
+
+    final written = await write(on('Books/Dune.pdf', 3, 'First.'));
+
+    expect(written.path, 'annotations/Dune - Annotation.md');
+    expect(await ops.find('Annotations'), isNull);
+    expect(await ops.find('annotations/Dune - Annotation.md'), isNotNull);
+  });
+
   test('a file with none gets one, in the annotations folder', () async {
     expect(await companions.of('Books/Dune.pdf'), isEmpty);
     final written = await write(on('Books/Dune.pdf', 3, 'First.'));

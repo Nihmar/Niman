@@ -325,9 +325,12 @@ final class CompanionNotes {
       path = companions.first;
       await ops.appendToNote(path, text);
     } else {
-      if (folder.isNotEmpty) await ops.ensureFolder(folder);
+      // The folder as the library spells it (#904).
+      final parent = folder.isEmpty
+          ? folder
+          : (await ops.ensureFolder(folder)).path;
       final note = await ops.createNote(
-        parentPath: folder,
+        parentPath: parent,
         name: '${p.url.basenameWithoutExtension(annotation.path)} - $suffix',
         content: '${companionHead(annotation.path)}\n$text',
       );

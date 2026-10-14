@@ -306,11 +306,14 @@ final class ShellTemplateFlow {
       // The numbers are on disk before the note exists: one that could not
       // be made gives them back, so the next one does not skip them.
       final row = await CounterStore.whileCreating(counters, () async {
-        if (target.isNotEmpty) await ops.ensureFolder(target);
+        // The folder as the library spells it (#904).
+        final parent = target.isEmpty
+            ? target
+            : (await ops.ensureFolder(target)).path;
         return directives.append
-            ? await ops.appendToNote(resolvePath(target, '$title.md'), content)
+            ? await ops.appendToNote(resolvePath(parent, '$title.md'), content)
             : await ops.createNote(
-                parentPath: target,
+                parentPath: parent,
                 name: title,
                 content: content,
               );

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/file_holds.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
@@ -411,6 +412,7 @@ final class NoteOps implements NoteOperations {
   /// segment, so a folder made below a reused one sits inside the spelled
   /// one (#847).
   @override
+  @useResult
   Future<Note> ensureFolder(String path) {
     return _synchronized(() async {
       final clean = cleanFolderPath(path, '');
