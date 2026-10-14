@@ -12,6 +12,8 @@ import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/stem_row.dart';
+import 'package:niman/src/links/stem_rows.dart';
 import 'package:niman/src/links/suggestion.dart';
 import 'package:path/path.dart' as p;
 
@@ -22,17 +24,12 @@ final class NoteNames {
 
   final IndexDatabase _db;
 
+  StemRows get _stems => StemRows(_db);
+
   /// The library's attachments folder, read when an embed is typed: the
   /// setting can change under a running editor. Null lists every attachment
   /// as one.
   final Future<String> Function()? attachmentsFolder;
-
-  /// How many matching rows are fetched before the list is ranked and cut to
-  /// [limit]. The indexed prefix query takes this many; the contains query —
-  /// which cannot use the stem index (a leading `%`) — is read only while the
-  /// prefix rows leave room, so a keystroke is not charged a `%q%` scan the
-  /// prefix already answered (#475, #491).
-  static const int _fetch = 200;
 
   /// How many rows the panel is handed.
   static const int limit = 50;
@@ -40,7 +37,7 @@ final class NoteNames {
   /// The notes and aliases matching [query], best match first.
   Future<List<NoteSuggestion>> notes(String query) async {
     final q = query.trim().toLowerCase();
-    return await _complete(_rank(await _rows(q, _linkable), q));
+    return await _complete(_rank(await _stems.rows(q, StemRows.linkable), q));
   }
 
   /// What an `![[` embed can name: the attachments folder's files first, the
@@ -51,11 +48,19 @@ final class NoteNames {
     // Two reads, the folder's and the rest: one read cut at its cap by path
     // could fill up with attachments elsewhere before it reached the folder.
     final attachments = folder.isEmpty
-        ? _rank(await _rows(q, _attachment), q)
+        ? _rank(await _stems.rows(q, StemRows.attachment), q)
         : [
-            ..._rank(await _rows(q, _attachment, under: folder), q),
             ..._rank(
-              await _rows(q, _attachment, under: folder, outside: true),
+              await _stems.rows(q, StemRows.attachment, under: folder),
+              q,
+            ),
+            ..._rank(
+              await _stems.rows(
+                q,
+                StemRows.attachment,
+                under: folder,
+                outside: true,
+              ),
               q,
             ),
           ];
@@ -63,7 +68,9 @@ final class NoteNames {
     // transcludes it, and the panel still offers that.
     final rows = await _complete(attachments);
     if (rows.length >= limit) return rows;
-    final notes = await _complete(_rank(await _rows(q, _note), q));
+    final notes = await _complete(
+      _rank(await _stems.rows(q, StemRows.note), q),
+    );
     return [...rows, ...notes.take(limit - rows.length)];
   }
 
@@ -200,110 +207,13 @@ final class NoteNames {
     return bare;
   }
 
-  /// A note, a PDF or an EPUB: the files a `[[…]]` link names, and the
-  /// books the `#` half serves. Other attachments are left to embeds.
-  static const String _linkable =
-      "(lower(substr(n.name, -3)) = '.md' "
-      "OR lower(substr(n.name, -4)) = '.pdf' "
-      "OR lower(substr(n.name, -5)) = '.epub')";
-
-  /// Every file but a note: what an `![[` embed names first (#705).
-  static const String _attachment = "lower(substr(n.name, -3)) <> '.md'";
-
-  /// A note: what an `![[` embed names after the attachments, a PDF or an
-  /// EPUB being one of those.
-  static const String _note = "lower(substr(n.name, -3)) = '.md'";
-
-  /// The matching `note_stems` rows of the [files] kind joined to their
-  /// file, prefix matches first. An empty [q] lists every file, by path; a
-  /// non-empty one reads the indexed prefix matches, then the contains
-  /// matches only while the cap has room (#491). With [under], only the
-  /// files in that folder (at any depth) — or, [outside], only the others.
-  Future<List<_StemRow>> _rows(
-    String q,
-    String files, {
-    String? under,
-    bool outside = false,
-  }) async {
-    final scope = under == null
-        ? ''
-        : " AND n.path ${outside ? 'NOT ' : ''}LIKE ? ESCAPE '\\'";
-    final scoped = <Variable<Object>>[
-      if (under != null) Variable<String>('${_escapeLike(under)}/%'),
-    ];
-    final select =
-        'SELECT s.stem AS stem, s.source AS source, n.id AS id, n.path AS path '
-        'FROM note_stems AS s JOIN notes AS n ON n.id = s.note_id '
-        'WHERE n.is_dir = 0 AND $files$scope';
-    final List<QueryRow> result;
-    if (q.isEmpty) {
-      result = await _db
-          .customSelect(
-            '$select ORDER BY n.path ASC LIMIT ?',
-            variables: [...scoped, const Variable<int>(_fetch)],
-          )
-          .get();
-    } else {
-      // A prefix match (`q%`) is answered by the stem index, so it is read
-      // first and cut by the cap. A contains match (`%q%`) has no index to
-      // use — SQLite would evaluate the LIKE against every stem and sort the
-      // matches before the LIMIT — so it is read, bounded by what the prefix
-      // left, only when the prefix rows do not fill the cap (#491).
-      final escaped = _escapeLike(q);
-      final prefix = '$escaped%';
-      var rows = await _db
-          .customSelect(
-            "$select AND s.stem LIKE ? ESCAPE '\\' "
-            'ORDER BY n.path ASC LIMIT ?',
-            variables: [
-              ...scoped,
-              Variable<String>(prefix),
-              const Variable<int>(_fetch),
-            ],
-          )
-          .get();
-      if (rows.length < _fetch) {
-        rows = [
-          ...rows,
-          ...await _db
-              .customSelect(
-                "$select AND s.stem LIKE ? ESCAPE '\\' "
-                r"AND s.stem NOT LIKE ? ESCAPE '\' "
-                'ORDER BY n.path ASC LIMIT ?',
-                variables: [
-                  ...scoped,
-                  Variable<String>('%$escaped%'),
-                  Variable<String>(prefix),
-                  Variable<int>(_fetch - rows.length),
-                ],
-              )
-              .get(),
-        ];
-      }
-      result = rows;
-    }
-    return [
-      for (final row in result)
-        _StemRow(
-          id: row.read<int>('id'),
-          path: row.read<String>('path'),
-          stem: row.read<String>('stem'),
-          source: row.read<String>('source'),
-        ),
-    ];
-  }
-
-  /// Escapes the LIKE wildcards in [s] so a query is matched literally.
-  static String _escapeLike(String s) =>
-      s.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_');
-
   /// [rows] grouped by note and ranked: a note whose name or an alias starts
   /// with [q] first, then by path. A note found only through an alias carries
   /// it.
-  List<_Ranked> _rank(List<_StemRow> rows, String q) {
-    final byNote = <int, List<_StemRow>>{};
+  List<_Ranked> _rank(List<StemRow> rows, String q) {
+    final byNote = <int, List<StemRow>>{};
     for (final row in rows) {
-      (byNote[row.id] ??= <_StemRow>[]).add(row);
+      (byNote[row.id] ??= <StemRow>[]).add(row);
     }
     final ranked = <({NoteSuggestion note, String path, bool prefix})>[];
     for (final group in byNote.values) {
@@ -353,21 +263,6 @@ final class NoteNames {
 /// A ranked row: the suggestion with its bare target, and the note's path,
 /// which qualifies the target when the name is shared.
 typedef _Ranked = ({NoteSuggestion note, String path});
-
-/// One `note_stems` row joined to its note.
-final class _StemRow {
-  const new({
-    required this.id,
-    required this.path,
-    required this.stem,
-    required this.source,
-  });
-
-  final int id;
-  final String path;
-  final String stem;
-  final String source;
-}
 
 /// The one note the wiki [target] names — the shortest path first when
 /// several do — or null when it names no indexed note.
