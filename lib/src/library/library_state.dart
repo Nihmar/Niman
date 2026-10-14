@@ -174,6 +174,12 @@ final class LibraryController implements LibrarySession {
 
   final StreamController<int> _events = StreamController<int>.broadcast();
 
+  /// Fires on an index write only ([_onIndexChanged]), not on the session's
+  /// own bumps (a setting, a phase, a progress report): what the links
+  /// re-resolve on (#867).
+  final StreamController<void> _indexEvents =
+      StreamController<void>.broadcast();
+
   /// Fires when the tree's rows may have moved ([IndexChange.tree]).
   final StreamController<int> _treeEvents = StreamController<int>.broadcast();
 
@@ -430,7 +436,7 @@ final class LibraryController implements LibrarySession {
       db,
       // The library announces every index change; a note on screen resolves
       // its dead links again when one lands (#847).
-      changes: _events.stream.map<void>((_) {}),
+      changes: _indexEvents.stream,
       // What the notes that link to a note say about it, and the beginning of
       // one for a preview card, are read off their files on a background
       // isolate, a row at a time (#842, #846).
@@ -1600,6 +1606,9 @@ final class LibraryController implements LibrarySession {
     if (!_events.isClosed) {
       await _events.close();
     }
+    if (!_indexEvents.isClosed) {
+      await _indexEvents.close();
+    }
     if (!_treeEvents.isClosed) {
       await _treeEvents.close();
     }
@@ -1632,8 +1641,10 @@ final class LibraryController implements LibrarySession {
   /// time (#751) — the tree hears that it has rows to read again. Every
   /// other bump is the session's own (the phase, a progress report, a
   /// setting): all of them may move what the tree draws.
-  void _onIndexChanged(IndexChange change) =>
-      _bump(tree: change == IndexChange.tree);
+  void _onIndexChanged(IndexChange change) {
+    _bump(tree: change == IndexChange.tree);
+    if (!_indexEvents.isClosed) _indexEvents.add(null);
+  }
 
   /// Fires with the paths a re-index pruned, and drops their reading
   /// positions: those files are ones the library saw leave (#492).
