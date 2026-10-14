@@ -344,7 +344,7 @@ final class IndexContentStore {
     final MarkdownLink m
         when !LinkPaths.hasScheme(m.href) &&
             !m.href.trim().startsWith('#') &&
-            LinkPaths.markdownPath(m.href) != null =>
+            LinkPaths.markdownTarget(m.href) != null =>
       m.href,
     _ => null,
   };

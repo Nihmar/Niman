@@ -343,6 +343,37 @@ void main() {
       );
     });
 
+    test('a %23 in the path is a # of the file name, not a fragment '
+        '(#918)', () async {
+      final tips = await addNote('C# tips.md', stem: 'c# tips');
+      // The note the old reading handed the link to: its path cut at the #.
+      await addNote('c.md', stem: 'c');
+      expect(await resolver.resolveMarkdown('C%23%20tips.md'), opens(tips));
+      expect(
+        await resolver.resolveMarkdown('C%23%20tips.md#Section'),
+        isA<ResolvedNote>()
+            .having((r) => r.note.id, 'note', tips.id)
+            .having((r) => r.heading, 'heading', 'Section'),
+      );
+      // A real fragment next to an encoded one: only the first raw # splits.
+      expect(
+        await resolver.resolveMarkdown('C%23%20tips.md#A%23B'),
+        isA<ResolvedNote>()
+            .having((r) => r.note.id, 'note', tips.id)
+            .having((r) => r.heading, 'heading', 'A%23B'),
+      );
+      // The batch reads it the same way.
+      final batch = await resolver.resolveBatch([
+        'C%23%20tips.md',
+        'C%23%20tips.md#Section',
+      ], markdown: true);
+      expect(batch['C%23%20tips.md'], opens(tips));
+      expect(
+        batch['C%23%20tips.md#Section'],
+        isA<ResolvedNote>().having((r) => r.heading, 'heading', 'Section'),
+      );
+    });
+
     test('a folder in the path is tried beside the note too', () async {
       await addNote('x/n.md', stem: 'n');
       final beside = await addNote('Sub/x/n.md', stem: 'n');
