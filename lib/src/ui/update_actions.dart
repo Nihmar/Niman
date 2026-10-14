@@ -125,6 +125,8 @@ Future<bool> downloadAndApplyUpdate(
   log.debug('saved ${file.path} (launched=$launched)');
   messenger.showSnackBar(
     SnackBar(
+      // An action would keep it up until it is dismissed by hand.
+      persist: false,
       content: Text(
         launched
             ? AppStrings.updateInstallerStarted
