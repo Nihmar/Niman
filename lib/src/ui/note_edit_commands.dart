@@ -7,9 +7,11 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/editor_tool.dart';
+import 'package:niman/src/editor/list_indent.dart';
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/editor/list_tally_edit.dart';
 import 'package:niman/src/editor/list_to_mindmap.dart' as mindmap;
+import 'package:niman/src/editor/list_window.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
@@ -239,8 +241,10 @@ final class NoteEditCommands {
   void run(
     MarkdownEdit Function(String text, TextSelection selection) command, {
     int context = 0,
+    ({int first, int last}) Function(SourceBuffer buffer, int first, int last)?
+    reach,
   }) {
-    surface()?.applyLineCommand(command, context: context);
+    surface()?.applyLineCommand(command, context: context, reach: reach);
     focus();
   }
 
@@ -503,8 +507,9 @@ final class NoteEditCommands {
     run((text, selection) => orderedList(text: text, selection: selection));
   }
 
-  /// Indents (or outdents, [outdent] true) the selected line(s) by the
-  /// width chosen in settings.
+  /// Indents (or outdents, [outdent] true) the selected line(s): a list item
+  /// to where its list says, any other line by the width chosen in settings
+  /// ([indentLines]). It is handed the list block around the selection.
   void _indentLines({required bool outdent}) {
     run(
       (text, selection) => indentLines(
@@ -513,6 +518,8 @@ final class NoteEditCommands {
         width: indentWidth(),
         outdent: outdent,
       ),
+      reach: (buffer, first, last) =>
+          listIndentWindow(buffer.lineAt, buffer.lineCount, first, last),
     );
   }
 

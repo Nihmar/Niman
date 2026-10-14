@@ -30,7 +30,8 @@ same Markdown either way, and only how it is drawn differs. The read view
   dimmed, and the gutter measures a digit in it, so they line up with the
   characters they count whichever face is chosen.
 - **Editing, in both modes**: Enter carries a list on, **Tab and Shift+Tab
-  indent and outdent** (the note keeps the focus), PageUp/PageDown page, and
+  indent and outdent** (the note keeps the focus; on a list item they nest
+  and un-nest it, see *Indenting a list item* below), PageUp/PageDown page, and
   on a phone a **long press selects a word**, with handles to adjust it and a
   toolbar to cut, copy, paste or select all. Both have the find and replace
   bar, the spelling underline and its panel, the context menu, Ctrl+click on
@@ -785,6 +786,32 @@ The toolbar's **Tools** button opens the editor's extra tools. They are
 not formats: each one reads the note and writes something back. Both
 editors offer the same tools, and a tool that has nothing to work on in
 this note is listed greyed with the reason rather than hidden.
+
+### Indenting a list item
+
+Tab, Shift+Tab and the toolbar's indent and outdent (`Ctrl/⌘+M`,
+`Ctrl/⌘+Shift+M`) move a list item to where its list says, not by a fixed
+number of spaces: Markdown only nests a line under an item when it is indented
+to that item's content, which is three columns for `6. `, four for `10. `, two
+for `- ` or `- [ ] `.
+
+- **Indent** nests the item under the item above it at its level. An
+  ordered item starts the sublist at `1` (or goes on from the last number of a
+  sublist already open under that item); a bulleted item keeps its bullet. The
+  lines under the item that belong to it move with it. The items that were
+  numbered one by one after it close up (`8.` becomes `7.`); a list numbered
+  any other way is left as written. Enter on `6. foo` and then Tab on the empty
+  `7. ` gives `1. ` under `6.`, with the caret ready to type.
+- **Outdent** is the inverse: the item goes back to its parent's indent, takes
+  the number after the parent's when both are ordered, and the parent's next
+  siblings make room. An item with no parent loses up to the indent width of
+  its own indent.
+- The first item of a list has nothing to nest under, so it moves by the
+  indent width (Settings, 2–8). So does every line that is not a list item.
+- On several selected lines, each item is placed by the same rule; items
+  selected together move together, and an item selected with its own children
+  keeps its shape. Inside a quote or a callout the rule is the same, behind the
+  `>`.
 
 ### Count a list
 

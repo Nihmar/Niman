@@ -397,56 +397,9 @@ String nextFootnoteLabel(Iterable<String> labels) {
   return '${highest + 1}';
 }
 
-/// Indents (or outdents, with [outdent] true) every line the [selection]
-/// touches by [width] spaces: indent adds [width] spaces at each line's
-/// start; outdent removes up to [width] leading spaces (never content).
-MarkdownEdit indentLines({
-  required String text,
-  required TextSelection selection,
-  required int width,
-  required bool outdent,
-}) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
-  final lines = text.split('\n');
-  final newLines = <String>[...lines];
-  if (outdent) {
-    for (var i = startLine; i <= endLine; i++) {
-      final line = newLines[i];
-      final spaces = _leadingSpaces(line);
-      newLines[i] = line.substring(spaces < width ? spaces : width);
-    }
-  } else {
-    final pad = ' ' * width;
-    for (var i = startLine; i <= endLine; i++) {
-      newLines[i] = '$pad${newLines[i]}';
-    }
-  }
-  final newText = newLines.join('\n');
-  return MarkdownEdit(
-    text: newText,
-    selection: _shiftSelectionForLines(
-      oldText: text,
-      newText: newText,
-      selection: selection,
-      startLine: startLine,
-      endLine: endLine,
-    ),
-  );
-}
-
 /// A leading run of `#` (1..6) and the one following space — an ATX
 /// heading prefix.
 final RegExp _headingPrefix = RegExp('^(#{1,6}) ?');
-
-/// The number of leading spaces in [line].
-int _leadingSpaces(String line) {
-  var count = 0;
-  while (count < line.length && line.codeUnitAt(count) == 0x20) {
-    count++;
-  }
-  return count;
-}
 
 /// Recomputes [selection] against the text after a line-level edit: the
 /// touched lines (startLine..endLine) changed length at their starts, so
