@@ -49,7 +49,7 @@ void main() {
     await session.open('/fake/library', create: true);
     // The tree's selection used to be where a capture landed: a folder
     // the library holds, and the wrong one for a note.
-    await session.ensureFolder('Attachments');
+    final _ = await session.ensureFolder('Attachments');
     picturesTo = [];
     captured = [];
   });
@@ -119,6 +119,16 @@ void main() {
     expect(captured, ['Clippings/Tending a winter garden.md']);
     expect(await session.find('Clippings'), isNotNull);
     expect(picturesTo, ['Attachments']);
+  });
+
+  testWidgets('a capture folder held under other capitals is the one it '
+      'goes in (#904)', (tester) async {
+    await session.createFolder(parentPath: '', name: 'clippings');
+
+    await captureAndSave(tester);
+
+    expect(captured, ['clippings/Tending a winter garden.md']);
+    expect(await session.find('Clippings'), isNull);
   });
 
   testWidgets('the folder chosen in the settings is the one it goes in', (

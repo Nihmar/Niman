@@ -25,7 +25,7 @@ void main() {
     dir = await Directory.systemTemp.createTemp('niman_template_counter_');
     session = FakeLibrarySession();
     await session.open(dir.path, create: true);
-    await session.ensureFolder('Templates');
+    final _ = await session.ensureFolder('Templates');
     await session.createNote(
       parentPath: 'Templates',
       name: 'Quest',

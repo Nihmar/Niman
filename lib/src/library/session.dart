@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/language.dart';
@@ -60,6 +61,13 @@ abstract interface class NoteOperations {
   /// files its notes in `Journal/2026` means that folder, and a second
   /// note must not land in `Journal/2026 2`. An existing folder is
   /// returned untouched.
+  ///
+  /// The row returned carries the folder's canonical path, which is not
+  /// always the spelling asked for: a folder the library holds under
+  /// another spelling is reused (#857). A note made in [path] as asked
+  /// would land in a folder that does not exist on a case-sensitive file
+  /// system, so the result is what the caller goes on with (#904).
+  @useResult
   Future<Note> ensureFolder(String path);
 
   /// Adds [content] to the end of the note at library-relative [path],

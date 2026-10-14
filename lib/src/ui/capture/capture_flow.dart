@@ -258,8 +258,15 @@ Future<Note> createCapturedNote(
   required String name,
   required String content,
 }) async {
-  if (folder.isNotEmpty) await ops.ensureFolder(folder);
-  return await ops.createNote(parentPath: folder, name: name, content: content);
+  // The folder as the library spells it (#904).
+  final canonical = folder.isEmpty
+      ? folder
+      : (await ops.ensureFolder(folder)).path;
+  return await ops.createNote(
+    parentPath: canonical,
+    name: name,
+    content: content,
+  );
 }
 
 /// A paste no text field or editor took: a web address on the clipboard

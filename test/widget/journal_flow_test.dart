@@ -76,6 +76,19 @@ void main() {
     expect(created, hasLength(1));
   });
 
+  testWidgets('a journal folder held under other capitals is the one the '
+      'entry goes in (#904)', (tester) async {
+    await session.createFolder(parentPath: '', name: 'journal');
+    final context = await pump(tester);
+
+    await flow.openToday(context);
+
+    // The spelling that is there: on a case-sensitive disk `Journal/…`
+    // would be a folder that does not exist.
+    expect(created.single.$1, 'journal/2026/09/2026-09-23.md');
+    expect(await session.find('Journal'), isNull);
+  });
+
   testWidgets('another day asks first, and a no makes nothing', (tester) async {
     final context = await pump(tester);
     final asked = flow.openDay(context, DateTime(2026, 9, 20));
@@ -101,7 +114,7 @@ void main() {
   testWidgets("the journal's template makes the entry, with its day's date", (
     tester,
   ) async {
-    await session.ensureFolder('Templates');
+    final _ = await session.ensureFolder('Templates');
     await session.createNote(
       parentPath: 'Templates',
       name: 'Day',
@@ -154,7 +167,7 @@ void main() {
     final library = FakeLibrarySession();
     addTearDown(library.dispose);
     await library.open(dir.path, create: false);
-    await library.ensureFolder('Templates');
+    final _ = await library.ensureFolder('Templates');
     await library.createNote(
       parentPath: 'Templates',
       name: 'Day',
@@ -208,7 +221,7 @@ void main() {
     final library = FakeLibrarySession();
     addTearDown(library.dispose);
     await library.open(dir.path, create: false);
-    await library.ensureFolder('Templates');
+    final _ = await library.ensureFolder('Templates');
     await library.createNote(
       parentPath: 'Templates',
       name: 'Day',
@@ -253,7 +266,7 @@ void main() {
     tester,
   ) async {
     for (final day in ['2026-09-14', '2026-09-21', '2026-09-23']) {
-      await session.ensureFolder('Journal/2026/09');
+      final _ = await session.ensureFolder('Journal/2026/09');
       await session.createNote(parentPath: 'Journal/2026/09', name: day);
     }
     final context = await pump(tester);
