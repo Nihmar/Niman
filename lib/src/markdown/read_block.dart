@@ -38,11 +38,24 @@ final class ReadInline {
   String get plainText => plainOf(nodes);
 
   /// [nodes] as a reader sees them, as plain text ([plainText]).
-  static String plainOf(List<InlineNode> nodes) {
+  ///
+  /// A node found in [instead] (by identity) is written as its text rather
+  /// than read: how a flashcard's cloze key puts a gap where the hidden
+  /// highlight stands.
+  static String plainOf(
+    List<InlineNode> nodes, {
+    Map<InlineNode, String>? instead,
+  }) {
     final out = StringBuffer();
     final stack = <InlineNode>[...nodes.reversed];
     while (stack.isNotEmpty) {
-      switch (stack.removeLast()) {
+      final next = stack.removeLast();
+      final replacement = instead?[next];
+      if (replacement != null) {
+        out.write(replacement);
+        continue;
+      }
+      switch (next) {
         case TextNode(:final text):
           out.write(text);
         case CodeNode(:final code):
