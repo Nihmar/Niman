@@ -12,6 +12,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/links/link_path.dart';
+import 'package:niman/src/links/link_query.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
@@ -271,7 +272,7 @@ final class IndexContentStore {
         // edge for them and the deferred path's are lost on the next save
         // (#507).
         for (final link in <ParsedLink>[...c.links, ...c.embeds]) {
-          final query = _linkQuery(link, row.path);
+          final query = linkQueryOf(link, row.path);
           if (query != null) batchQueries.add(query);
         }
       }
@@ -326,7 +327,7 @@ final class IndexContentStore {
   /// Whether [link] resolves from the folder of the note it is written in,
   /// so that moving the note can change what it names.
   static bool _dependsOnLocation(ParsedLink link) {
-    final target = _linkTarget(link);
+    final target = linkTargetOf(link);
     return target != null &&
         LinkPaths.dependsOnLocation(target, markdown: link is MarkdownLink);
   }
@@ -336,28 +337,6 @@ final class IndexContentStore {
   /// like the link it is (#507).
   static bool _anyDependsOnLocation(NoteContent c) =>
       c.links.any(_dependsOnLocation) || c.embeds.any(_dependsOnLocation);
-
-  /// The target text of [link] to resolve by, or null for a link that
-  /// never resolves to an indexed note (external URL, anchor, no extension).
-  static String? _linkTarget(ParsedLink link) => switch (link) {
-    final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
-    final MarkdownLink m
-        when !LinkPaths.hasScheme(m.href) &&
-            !m.href.trim().startsWith('#') &&
-            LinkPaths.markdownTarget(m.href) != null =>
-      m.href,
-    _ => null,
-  };
-
-  /// [link] as the resolver is asked about it, written in the note at
-  /// library-relative [from] (a `..` walks from its folder, #491), or null
-  /// for a link that never resolves.
-  static LinkQuery? _linkQuery(ParsedLink link, String from) {
-    final target = _linkTarget(link);
-    return target == null
-        ? null
-        : (target: target, from: from, markdown: link is MarkdownLink);
-  }
 
   /// The content-derived rows of one note within a chunk transaction:
   /// FTS (title + body copy), file + alias stems, tags, and the resolved
@@ -581,7 +560,7 @@ final class IndexContentStore {
       // Embeds and images are references too: they get an edge so a rename
       // or move finds the note and carries the reference with it (#507).
       for (final link in <ParsedLink>[...c.links, ...c.embeds]) {
-        final query = _linkQuery(link, note.path);
+        final query = linkQueryOf(link, note.path);
         if (query == null) continue;
         final kind = link is WikiLink ? 'wiki' : 'md';
         if (pendingLink != null) {

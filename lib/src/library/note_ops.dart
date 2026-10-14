@@ -31,6 +31,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/mentions.dart';
+import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
@@ -61,6 +62,7 @@ final class NoteOps implements NoteOperations {
     FileHolds? holds,
   }) : holds = holds ?? FileHolds.instance,
        _dao = NoteDao(db),
+       _resolver = LinkResolver(db),
        history = NoteHistory(root: root, config: config) {
     writer = NoteWriter(root: root, indexer: indexer, history: history);
     // A note the writer is about to read into the index is left to it by
@@ -92,6 +94,9 @@ final class NoteOps implements NoteOperations {
 
   final NoteDao _dao;
 
+  /// Resolves links against the index, for the links a move has to follow.
+  final LinkResolver _resolver;
+
   /// The views holding files open (#833): a rename, a move, a delete or a
   /// sync's swap waits for every view of the file, or of a file under the
   /// folder, to let go of it, and hands it back after.
@@ -117,6 +122,7 @@ final class NoteOps implements NoteOperations {
   late final NoteRelocator _relocator = NoteRelocator(
     root: root,
     dao: _dao,
+    resolver: _resolver,
     indexer: indexer,
     history: history,
     config: config,

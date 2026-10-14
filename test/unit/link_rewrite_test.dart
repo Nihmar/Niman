@@ -249,6 +249,27 @@ void main() {
     expect(out, r'| [[New\|the doc]] | [[Docs/New#H\|x]] | [[New|plain]] |');
   });
 
+  test('a link known to name one moved file is not carried to another of '
+      'the same name (#919)', () {
+    final moves = LinkMoves({'a/b.md': 'a/c.md', 'z/b.md': 'z/c.md'});
+    expect(moves.find('b')?.path, 'a/c.md', reason: 'by name, the first');
+    expect(moves.find('b', only: 'z/b.md')?.path, 'z/c.md');
+    expect(moves.find('z/b', only: 'Z/B.md')?.path, 'z/c.md');
+    expect(moves.find('z/b', only: 'a/b.md'), isNull);
+    expect(moves.find('a/b.md', tail: false, only: 'z/b.md'), isNull);
+  });
+
+  test('a link is asked about only when it ends with a moved name (#919)', () {
+    final moves = LinkMoves({'Docs/Old note.md': 'Docs/New.md'});
+    expect(moves.mayName('Old note', markdown: false), isTrue);
+    expect(moves.mayName('Docs/Old note.md', markdown: false), isTrue);
+    expect(moves.mayName('Docs/Old%20note.md#H', markdown: true), isTrue);
+    expect(moves.mayName(r'..\Old note.md', markdown: true), isTrue);
+    expect(moves.mayName('Elsewhere', markdown: false), isFalse);
+    expect(moves.mayName('Old note/Other.md', markdown: true), isFalse);
+    expect(moves.mayName('no-extension', markdown: true), isFalse);
+  });
+
   test('an embed that did not move is left exactly as written', () {
     const source = '![[Elsewhere/pic.png]] and ![alt](Elsewhere/pic.png)';
     final out = rewriteMovedLinks(

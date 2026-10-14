@@ -13,6 +13,8 @@ import 'package:niman/src/library/device_home_carry.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/links/link_moves.dart';
+import 'package:niman/src/links/moved_links.dart';
+import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/rewrite.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -48,6 +50,36 @@ final class PendingLinkRewrite {
 /// about, if any.
 typedef Relocated = ({Note row, PendingLinkRewrite? pending});
 
+/// What the index said, before a move, of the links that point at what moves
+/// (#507, #919).
+final class _LinksToMove {
+  const new({
+    required this.moves,
+    required this.referrers,
+    required this.followed,
+  });
+
+  /// Nothing points at what moves.
+  static final _LinksToMove none = _LinksToMove(
+    moves: LinkMoves(const <String, String>{}),
+    referrers: const <String>[],
+    followed: null,
+  );
+
+  /// Every file that moved, old path -> new.
+  final LinkMoves moves;
+
+  /// The old library-relative paths of the notes with an edge to a moved
+  /// file.
+  final List<String> referrers;
+
+  /// By a referrer's old path: its links that resolved to a moved file. A
+  /// referrer with no entry could not be read, and is left as written. Null
+  /// when no moved file shares its name with another one, so the text of a
+  /// link says what it named and nothing was read before the move.
+  final Map<String, MovedLinks>? followed;
+}
+
 /// Moves a note or a folder on disk and carries along everything that
 /// named it by its path: the history, the reading positions, the settings,
 /// the Home, what lies outside the library, the index and the links in the
@@ -60,6 +92,7 @@ final class NoteRelocator {
   new({
     required this.root,
     required this.dao,
+    required this.resolver,
     required this.indexer,
     required this.history,
     required this.config,
@@ -75,6 +108,10 @@ final class NoteRelocator {
 
   /// The library's index, read for the links that point at what moves.
   final NoteDao dao;
+
+  /// Resolves links against the index, to tell which links of a referrer
+  /// named what moves (#919).
+  final LinkResolver resolver;
 
   /// The shared indexer; the move reaches the index through it.
   final Indexer indexer;
@@ -117,6 +154,16 @@ final class NoteRelocator {
   /// updated row.
   Future<Relocated> relocate(Note row, String path, String newRel) async {
     final oldAbs = _abs(path);
+    // Before anything moves: the index still says what each link named, and
+    // the referrers, those inside a moved folder too, are still where it
+    // says they are (#507, #919).
+    final mode = (await config.config).linkUpdate;
+    final links = await _linksToMove(
+      path,
+      newRel,
+      isDir: row.isDir,
+      follow: mode != LinkUpdate.never,
+    );
     if (row.isDir) {
       await Directory(oldAbs).rename(_abs(newRel));
     } else {
@@ -130,14 +177,13 @@ final class NoteRelocator {
     await carryOutsideLibrary(carryOutside, path, newRel, isDir: row.isDir);
     // Before the index hears of the move: a folder's reindex re-creates
     // its notes, and the edges that named them would be gone (#507).
-    final links = await _linksToMove(path, isDir: row.isDir);
     await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
     final pending = await _rewriteLinks(
       path,
       newRel,
       isDir: row.isDir,
-      oldPaths: links.oldPaths,
-      referrers: links.referrers,
+      mode: mode,
+      links: links,
     );
     return (row: await find(newRel), pending: pending);
   }
@@ -174,22 +220,61 @@ final class NoteRelocator {
   /// new ids, and the edges that pointed at them would be gone by the time
   /// the move is done; the referrer's own path is what the rewrite needs, and
   /// it is unchanged for anyone outside the subtree.
-  Future<({List<String> oldPaths, List<String> referrers})> _linksToMove(
-    String from, {
+  ///
+  /// With [follow], each referrer is also read and asked which of its links
+  /// resolved to a moved file ([MovedLinks.of], #919): an edge says that some
+  /// link of the note did, and the index is the only place that still says
+  /// which. Nothing has moved yet, so every referrer is read at its old
+  /// path, the one it is indexed under; [to] is where what moves is going.
+  Future<_LinksToMove> _linksToMove(
+    String from,
+    String to, {
     required bool isDir,
+    required bool follow,
   }) async {
     final oldPaths = isDir ? await dao.filePathsUnder(from) : <String>[from];
-    if (oldPaths.isEmpty) {
-      return (oldPaths: oldPaths, referrers: const <String>[]);
-    }
-    final rows = await dao.byPaths(oldPaths);
-    if (rows.isEmpty) {
-      return (oldPaths: oldPaths, referrers: const <String>[]);
-    }
+    final rows = oldPaths.isEmpty
+        ? const <String, Note>{}
+        : await dao.byPaths(oldPaths);
+    if (rows.isEmpty) return _LinksToMove.none;
     final referrers = await dao.referrers.pathsOf([
       for (final row in rows.values) row.id,
     ]);
-    return (oldPaths: oldPaths, referrers: referrers);
+    // Indexed once for every referrer: a link is a lookup, not a walk of
+    // everything that moved.
+    final moves = LinkMoves({
+      for (final old in oldPaths)
+        old: pathAfterMove(old, from, to, isDir: isDir)!,
+    });
+    // A link can be taken for a moved file's only when another file has the
+    // same name: with names that are unique in the library the text says
+    // all there is, and no referrer is read before the move (a hub note's
+    // thousand referrers are read off the op chain, #859).
+    Map<String, MovedLinks>? followed;
+    if (follow &&
+        referrers.isNotEmpty &&
+        await dao.stemsHeldBeyond(
+          {for (final old in oldPaths) noteStem(p.basename(old))},
+          {for (final row in rows.values) row.id},
+        )) {
+      followed = <String, MovedLinks>{};
+      for (final oldReferrer in referrers) {
+        // One referrer that cannot be read must not stop the rest; it is
+        // left as written, as one that cannot be written is.
+        try {
+          followed[oldReferrer] = await MovedLinks.of(
+            await readNote(oldReferrer),
+            from: oldReferrer,
+            moves: moves,
+            resolver: resolver,
+          );
+        } on Object catch (error) {
+          const AppLogger(name: 'links')
+              .warning('could not read links in "$oldReferrer": $error');
+        }
+      }
+    }
+    return _LinksToMove(moves: moves, referrers: referrers, followed: followed);
   }
 
   /// Rewrites the links in every note that pointed at what moved from [from]
@@ -199,26 +284,26 @@ final class NoteRelocator {
   /// once it is agreed to. Nothing else that followed the move depends on
   /// the answer.
   ///
-  /// [oldPaths] are the moved files' old library-relative paths and
-  /// [referrers] their referring notes' paths, as [_linksToMove] read them
-  /// before the move. Each changed note is written through the writer — the
-  /// normal save path — so its edit is a save with its own history version
-  /// and sync hint. The rewrite itself reads no index: it maps the written
-  /// targets through the old->new paths alone ([rewriteMovedLinks]).
+  /// [links] holds the moved files, their referring notes' paths and the
+  /// links of those that resolved to a moved file, as [_linksToMove] read
+  /// them before the move. Each changed note is written through the writer —
+  /// the normal save path — so its edit is a save with its own history
+  /// version and sync hint. The rewrite itself reads no index: it maps the
+  /// written targets of those links through the old->new paths alone
+  /// ([rewriteMovedLinks]).
   Future<PendingLinkRewrite?> _rewriteLinks(
     String from,
     String to, {
     required bool isDir,
-    required List<String> oldPaths,
-    required List<String> referrers,
+    required LinkUpdate mode,
+    required _LinksToMove links,
   }) async {
-    if (oldPaths.isEmpty || referrers.isEmpty) return null;
-    final mode = (await config.config).linkUpdate;
+    if (links.referrers.isEmpty) return null;
     // A referrer inside the moved subtree moved with it; one note is
     // rewritten once however many of its old paths were referrers.
     final targets = <(String oldReferrer, String path)>[];
     final seen = <String>{};
-    for (final oldReferrer in referrers) {
+    for (final oldReferrer in links.referrers) {
       final path = pathAfterMove(oldReferrer, from, to, isDir: isDir)!;
       if (seen.add(path)) targets.add((oldReferrer, path));
     }
@@ -228,12 +313,6 @@ final class NoteRelocator {
       await _reresolve([for (final (_, path) in targets) path]);
     }
     if (mode == LinkUpdate.never) return null;
-    // Indexed once for every referrer: a link is a lookup, not a walk of
-    // everything that moved.
-    final moves = LinkMoves({
-      for (final old in oldPaths)
-        old: pathAfterMove(old, from, to, isDir: isDir)!,
-    });
     // A renamed file is the one case a bare-name wikilink follows.
     String? renamedFrom;
     String? renamedTo;
@@ -245,6 +324,7 @@ final class NoteRelocator {
         renamedTo = newName;
       }
     }
+    final followed = links.followed;
     Future<String?> rewritten(String oldReferrer, String path) async {
       final text = await readNote(path);
       final next = rewriteMovedLinks(
@@ -253,9 +333,12 @@ final class NoteRelocator {
         // written back from where it stands now.
         from: oldReferrer,
         at: path,
-        moves: moves,
+        moves: links.moves,
         renamedFrom: renamedFrom,
         renamedTo: renamedTo,
+        resolved: followed == null
+            ? null
+            : (followed[oldReferrer] ?? MovedLinks.none),
       );
       return next == text ? null : next;
     }

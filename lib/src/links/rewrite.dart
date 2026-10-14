@@ -24,6 +24,10 @@
 /// * **An embed** (`![[…]]` or `![…](…)`) follows the same rules as the link
 ///   it is, its `!` kept (#507): attachments are cited this way, and a moved
 ///   attachments folder must carry them.
+/// * **Only a link that named a moved file follows** (#919): the caller asks
+///   the index, before the move, which links of the note resolved to one
+///   ([MovedLinks]), because a name or the tail of a path also fits another
+///   note that shares it. Each follows the file it resolved to.
 /// * A `#fragment` and a `|alias` are carried through untouched; only the
 ///   target is rewritten.
 library;
@@ -33,6 +37,7 @@ import 'dart:convert';
 import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/links/link_moves.dart';
 import 'package:niman/src/links/link_path.dart';
+import 'package:niman/src/links/moved_links.dart';
 import 'package:niman/src/links/parser.dart';
 
 /// The links of [source] retargeted for a move.
@@ -45,6 +50,13 @@ import 'package:niman/src/links/parser.dart';
 /// *file* (`Old.md` -> `New.md`), for the bare-name wikilinks; null for a
 /// move, or a folder, whose members keep their names.
 ///
+/// [resolved] says which links of [source] resolved to a moved file, and to
+/// which ([MovedLinks.of], asked before the move): only those are followed,
+/// each to the file it named, so a link that looks like a moved file by its
+/// name or the tail of its path but named another note is left alone (#919).
+/// Null knows nothing of the index: every link that names a moved file by
+/// its text is followed — a rewrite of the text alone.
+///
 /// Answers [source] itself when no link moved, so a caller can compare for
 /// equality and skip the write.
 String rewriteMovedLinks(
@@ -54,6 +66,7 @@ String rewriteMovedLinks(
   String? at,
   String? renamedFrom,
   String? renamedTo,
+  MovedLinks? resolved,
 }) {
   if (moves.isEmpty) return source;
   final here = at ?? from;
@@ -61,6 +74,8 @@ String rewriteMovedLinks(
   for (final link in parseLinks(source, includeEmbeds: true)) {
     switch (link) {
       case WikiLink(:final start, :final end, :final ref, :final embed):
+        final only = resolved?.oldPathOf(ref.target, markdown: false);
+        if (resolved != null && only == null) continue;
         final target = _wikiTarget(
           ref.target,
           from: from,
@@ -68,6 +83,7 @@ String rewriteMovedLinks(
           moves: moves,
           renamedFrom: renamedFrom,
           renamedTo: renamedTo,
+          only: only,
         );
         if (target != null) {
           replacements.add((start, end, _wikiText(target, ref, embed: embed)));
@@ -81,7 +97,9 @@ String rewriteMovedLinks(
         :final angled,
         :final title,
       ):
-        final rewritten = _markdownHref(href, from, here, moves);
+        final only = resolved?.oldPathOf(href, markdown: true);
+        if (resolved != null && only == null) continue;
+        final rewritten = _markdownHref(href, from, here, moves, only: only);
         if (rewritten != null) {
           final bang = embed ? '!' : '';
           final target = angled ? '<$rewritten>' : rewritten;
@@ -124,13 +142,20 @@ String? _wikiTarget(
   required LinkMoves moves,
   required String? renamedFrom,
   required String? renamedTo,
+  required String? only,
 }) {
   if (target.isEmpty) return null;
   if (_isBareName(target)) {
     return _renamedBareName(target, renamedFrom, renamedTo);
   }
   final keepMd = target.toLowerCase().endsWith('.md');
-  final written = _movedPath(target, from: from, here: here, moves: moves);
+  final written = _movedPath(
+    target,
+    from: from,
+    here: here,
+    moves: moves,
+    only: only,
+  );
   if (written == null) return null;
   final path = keepMd ? written : _withoutMd(written);
   return path == _asWritten(target) ? null : path;
@@ -159,8 +184,9 @@ String? _markdownHref(
   String href,
   String? from,
   String? here,
-  LinkMoves moves,
-) {
+  LinkMoves moves, {
+  required String? only,
+}) {
   final trimmed = href.trim();
   if (trimmed.isEmpty ||
       trimmed.startsWith('#') ||
@@ -178,6 +204,7 @@ String? _markdownHref(
     here: here,
     moves: moves,
     beside: true,
+    only: only,
   );
   if (written == null || written == _asWritten(decoded)) return null;
   return '${_encodeHref(written)}$fragment';
@@ -190,12 +217,14 @@ String? _markdownHref(
 /// [from] resolves the target (the linking note's old place: what the link
 /// was written against); [here] writes a relative one back (its place now).
 /// [beside] asks a plain path to be tried next to the linking note first, as
-/// a Markdown href does.
+/// a Markdown href does. [only] is the old path of the one moved file the
+/// link is known to have named ([MovedLinks]): no other counts.
 String? _movedPath(
   String target, {
   required String? from,
   required String? here,
   required LinkMoves moves,
+  String? only,
   bool beside = false,
 }) {
   final cleaned = LinkPaths.clean(target);
@@ -222,7 +251,11 @@ String? _movedPath(
   for (final (candidate, form) in candidates) {
     // Only a path written from the root is looked for by its tail as well:
     // the resolver takes a rooted, a walked or a beside path as it stands.
-    final found = moves.find(candidate, tail: form == _Form.library);
+    final found = moves.find(
+      candidate,
+      tail: form == _Form.library,
+      only: only,
+    );
     if (found == null) continue;
     final moved = found.path;
     if (found.match == MoveMatch.tail) {

@@ -2,6 +2,8 @@
 /// links are rewritten after it (#507).
 library;
 
+import 'package:niman/src/links/link_path.dart';
+
 /// How a written target was found among the moved files.
 enum MoveMatch {
   /// The candidate is a moved file's whole old path.
@@ -39,18 +41,56 @@ final class LinkMoves {
   /// Whether nothing moved.
   bool get isEmpty => _whole.isEmpty;
 
+  /// Whether the file at [oldPath] (any case) is one that moved.
+  bool moved(String oldPath) => _whole.containsKey(oldPath.toLowerCase());
+
+  /// Whether a link written [target] could name a moved file, judged by the
+  /// name it ends with alone: a cheap test that never says no to a link that
+  /// does (a false yes is settled by resolving the link).
+  ///
+  /// [target] is a wiki target as written, or — with [markdown] — a Markdown
+  /// href, whose path is read percent-decoded and without its `#fragment`.
+  bool mayName(String target, {required bool markdown}) {
+    final path = markdown
+        ? LinkPaths.markdownTarget(target.trim())?.path
+        : target;
+    if (path == null) return false;
+    final cleaned = LinkPaths.clean(path);
+    final name = cleaned.substring(cleaned.lastIndexOf('/') + 1).toLowerCase();
+    if (name.isEmpty) return false;
+    for (final variant in LinkPaths.stemVariants(name)) {
+      if (_byName.containsKey(variant) || _byName.containsKey('$variant.md')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// The new path of the file [candidate] names, and how it was matched —
   /// or null when it names nothing that moved. [tail] also looks for it as
   /// the end of a moved path.
-  ({String path, MoveMatch match})? find(String candidate, {bool tail = true}) {
+  ///
+  /// With [only], an old path (any case), no other moved file counts: the
+  /// link is known to have resolved to that one, and a same-named file that
+  /// moved with it is not what it named.
+  ({String path, MoveMatch match})? find(
+    String candidate, {
+    bool tail = true,
+    String? only,
+  }) {
     final c = candidate.toLowerCase();
     final withMd = '$c.md';
-    final whole = _whole[c] ?? _whole[withMd];
-    if (whole != null) return (path: whole, match: MoveMatch.whole);
+    final wanted = only?.toLowerCase();
+    for (final key in [c, withMd]) {
+      if (wanted != null && key != wanted) continue;
+      final whole = _whole[key];
+      if (whole != null) return (path: whole, match: MoveMatch.whole);
+    }
     if (!tail) return null;
     for (final written in [c, withMd]) {
       for (final (key, moved)
           in _byName[_nameOf(written)] ?? const <(String, String)>[]) {
+        if (wanted != null && key != wanted) continue;
         if (key.endsWith('/$written')) {
           return (path: moved, match: MoveMatch.tail);
         }

@@ -295,6 +295,30 @@ final class NoteDao {
     return _db.select(_db.notes).get();
   }
 
+  /// Whether any of [stems] (lowercased file stems, as `noteStem` writes
+  /// them) is also a stem or an alias of a note other than the ones with ids
+  /// [own]: the names a link to one of them could be mistaken for a link to
+  /// the other (#919).
+  ///
+  /// Asked in statement-sized chunks of stems, each an index lookup on the
+  /// stem, and stops at the first chunk that finds one: a folder of a
+  /// hundred thousand files is hundreds of statements, not one per file.
+  Future<bool> stemsHeldBeyond(Iterable<String> stems, Set<int> own) async {
+    final wanted = stems.toSet().toList(growable: false);
+    for (var i = 0; i < wanted.length; i += _pathChunk) {
+      final end = i + _pathChunk < wanted.length
+          ? i + _pathChunk
+          : wanted.length;
+      final query = _db.selectOnly(_db.noteStems, distinct: true)
+        ..addColumns([_db.noteStems.noteId])
+        ..where(_db.noteStems.stem.isIn(wanted.sublist(i, end)));
+      for (final row in await query.get()) {
+        if (!own.contains(row.read(_db.noteStems.noteId))) return true;
+      }
+    }
+    return false;
+  }
+
   /// Whether the index holds any row at all: the first index's own
   /// precondition, answered without loading a row (`Indexer.indexTreeFirst`).
   Future<bool> hasRows() async {
