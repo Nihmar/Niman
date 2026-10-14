@@ -19,6 +19,10 @@ abstract interface class DeckReviewSource {
   /// Forgets every card of the note: **Reset the review of this deck**.
   Future<void> reset(String root, String path);
 
+  /// Records that the card [key] of the note is now in [state]; null takes
+  /// it back to never reviewed: a grade of a study, and its undo.
+  Future<void> write(String root, String path, String key, ReviewState? state);
+
   /// Fires with the library root after the file was written.
   Stream<String> get changes;
 }
@@ -39,6 +43,14 @@ final class FileDeckReviewSource implements DeckReviewSource {
   @override
   Future<void> reset(String root, String path) =>
       ReviewStore(root).resetNote(path);
+
+  @override
+  Future<void> write(
+    String root,
+    String path,
+    String key,
+    ReviewState? state,
+  ) => ReviewStore(root).write(path, key, state);
 
   @override
   Stream<String> get changes => ReviewStore.changes;

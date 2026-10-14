@@ -98,6 +98,20 @@ final class _Reviews implements DeckReviewSource {
   Future<void> reset(String root, String path) async => states.clear();
 
   @override
+  Future<void> write(
+    String root,
+    String path,
+    String key,
+    ReviewState? state,
+  ) async {
+    if (state == null) {
+      states.remove(key);
+    } else {
+      states[key] = state;
+    }
+  }
+
+  @override
   Stream<String> get changes => const Stream.empty();
 }
 

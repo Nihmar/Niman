@@ -38,6 +38,14 @@ final class _Reviews implements DeckReviewSource {
   Future<void> reset(String root, String path) async => resets.add(path);
 
   @override
+  Future<void> write(
+    String root,
+    String path,
+    String key,
+    ReviewState? state,
+  ) async {}
+
+  @override
   Stream<String> get changes => const Stream.empty();
 }
 
