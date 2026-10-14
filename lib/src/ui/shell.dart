@@ -4285,20 +4285,33 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // A stack always, the overlay or not: the islands below keep their
     // place in the tree, and so their editors their state.
     return Stack(
+      key: _wideBodyKey,
       fit: StackFit.expand,
       children: [
         _wideIslands(controller, zen: zen, touch: touch),
         // A window without room for the dock beside the note lays it over
-        // the note instead, under the title bar and the rail.
+        // the note instead, under the title bar and the rail — and under
+        // the note's row, whose button stays in reach to shut it again.
         if (_dock.overlayShown && !zen)
-          DockOverlay(
-            width: _editorSettings.dockWidth,
-            onDismiss: _dock.closeOverlay,
-            dock: _dock.build(context, overlay: true),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            top: _dock.toggles.rowBottom(
+              within: _wideBodyKey.currentContext?.findRenderObject(),
+            ),
+            child: DockOverlay(
+              width: _editorSettings.dockWidth,
+              onDismiss: _dock.closeOverlay,
+              dock: _dock.build(context, overlay: true),
+            ),
           ),
       ],
     );
   }
+
+  /// The wide body, to measure the note row against.
+  final GlobalKey _wideBodyKey = GlobalKey(debugLabel: 'wide body');
 
   /// The wide body's islands and the dividers over their gaps.
   Widget _wideIslands(

@@ -12,6 +12,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/dock/dock_toggle.dart';
+import 'package:niman/src/ui/dock/dock_toggles.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/links_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
@@ -21,7 +23,6 @@ import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
-import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 /// The dock's room, state and widgets, as the shell drives them.
@@ -80,6 +81,9 @@ final class ShellDock {
   /// the saved workspace, so a narrow window at startup (or after a
   /// resize) does not open the panel by itself.
   bool _overlay = false;
+
+  /// The buttons on screen, which the overlay keeps clear.
+  final DockToggles toggles = DockToggles();
 
   /// Whether the window has room for the right dock beside a note (#175):
   /// a desktop, a tablet, a phone in landscape — on the same rule.
@@ -173,14 +177,8 @@ final class ShellDock {
   /// The note row's dock button. It is always there on the wide layout,
   /// whatever the window's width: a control that shows in only some
   /// states would move the row under a thumb crossing the threshold.
-  Widget toggle() => IconButton(
-    key: const Key('dock-toggle'),
-    tooltip: AppStrings.sidePanelTooltip,
-    isSelected: on,
-    icon: const Icon(Icons.view_sidebar_outlined),
-    selectedIcon: const Icon(Icons.view_sidebar),
-    onPressed: toggleOpen,
-  );
+  Widget toggle() =>
+      DockToggle(toggles: toggles, on: on, onPressed: toggleOpen);
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
   /// sheet (the phone's way to the same panes, #175). The outline, as a

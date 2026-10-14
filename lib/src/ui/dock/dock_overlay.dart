@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/ui/island.dart';
 
 /// A scrim over the note's area and the dock on its right edge, full
-/// height, in the width it has when docked (as far as the window leaves).
+/// height of that area, in the width it has when docked (as far as the
+/// window leaves).
 ///
-/// It lies over the body, so the note under it is neither resized nor
-/// moved. A press on the scrim, outside the dock, calls [onDismiss].
+/// It lies over the body, below the note's row of buttons where the shell
+/// puts it, so the note under it is neither resized nor moved. A press
+/// on the scrim, outside the dock, calls [onDismiss].
 final class DockOverlay extends StatelessWidget {
   /// Shows [dock] over its stack's area, [width] wide where it fits.
   const new({

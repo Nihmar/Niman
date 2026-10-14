@@ -3,6 +3,7 @@
 // panel opens over the note instead, shut by its x, Esc, a press outside
 // it, the button or Ctrl+Shift+B. The note under it never moves, and the
 // docked state that was remembered comes back with the room.
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,7 +93,8 @@ void main() {
     final rect = tester.getRect(dock);
     expect(rect.width, defaultDockWidth);
     expect(rect.right, narrow.width - Island.gap, reason: 'right edge');
-    expect(rect.top, note.top);
+    final row = tester.getRect(find.byKey(const Key('note-top-bar')));
+    expect(rect.top, row.bottom, reason: 'under the note row, which stays');
     expect(rect.bottom, note.bottom);
     expect(tester.widget<IconButton>(toggle).isSelected, isTrue);
     expect(
@@ -112,9 +114,6 @@ void main() {
       expect(overlay, findsOne);
     }
 
-    // The button itself lies under the panel while it is open (the panel
-    // takes the edge the button sits at): the panel's own cross, Esc, a
-    // press outside and the key are the ways out.
     await chord(tester, LogicalKeyboardKey.keyB);
     expect(overlay, findsOne);
     await chord(tester, LogicalKeyboardKey.keyB);
@@ -139,6 +138,58 @@ void main() {
       isTrue,
       reason: 'closing the overlay is not closing the dock',
     );
+  }, variant: desktopDensity);
+
+  testWidgets('the button stays clear of the overlay, shows it is on, and '
+      'shuts it', (tester) async {
+    await pumpAt(tester, narrow);
+    final bar = tester.getRect(find.byKey(const Key('note-top-bar')));
+    final button = tester.getRect(toggle);
+    await tester.tap(toggle);
+    await settle(tester);
+    expect(overlay, findsOne);
+
+    expect(tester.getRect(find.byKey(const Key('note-top-bar'))), bar);
+    expect(tester.getRect(toggle), button, reason: 'the button has not moved');
+    expect(tester.widget<IconButton>(toggle).isSelected, isTrue);
+    // Nothing of the panel or its scrim lies over the row.
+    expect(tester.getRect(dock).top, greaterThanOrEqualTo(bar.bottom));
+    expect(tester.getRect(find.byKey(const Key('dock-scrim'))).top, bar.bottom);
+
+    await tester.tap(toggle);
+    await settle(tester);
+    expect(overlay, findsNothing);
+    expect(tester.widget<IconButton>(toggle).isSelected, isFalse);
+    expect(tester.getRect(toggle), button);
+  }, variant: desktopDensity);
+
+  testWidgets('with the panes split, the overlay clears every button', (
+    tester,
+  ) async {
+    await pumpAt(tester, narrow);
+    await controller.createNote(parentPath: '', name: 'beta');
+    await settle(tester);
+    await tester.tapAt(
+      tester.getCenter(noteRow('beta.md')),
+      buttons: kSecondaryButton,
+    );
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-open-beside')));
+    await settle(tester);
+    expect(toggle, findsNWidgets(2));
+    final right = tester.getRect(toggle.last);
+    final left = tester.getRect(toggle.first);
+
+    await tester.tap(toggle.last);
+    await settle(tester);
+    expect(overlay, findsOne);
+    expect(tester.getRect(toggle.last), right);
+    expect(tester.getRect(toggle.first), left);
+    expect(tester.getRect(dock).top, greaterThanOrEqualTo(right.bottom));
+
+    await tester.tap(toggle.last);
+    await settle(tester);
+    expect(overlay, findsNothing);
   }, variant: desktopDensity);
 
   testWidgets('a pane picked in the overlay is kept, and the overlay stays', (
