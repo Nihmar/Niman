@@ -45,6 +45,13 @@ void main() {
     }
   });
 
+  test('a table cell wikilink with an escaped pipe is a link to its note '
+      '(#920)', () {
+    expect(_links('| a | b |\n|---|---|\n| [[Note\\|Alias]] | x |\n'), <String>[
+      'wiki Note#null|Alias',
+    ]);
+  });
+
   test('tags and wikilinks in prose, headings, lists, quotes and tables', () {
     final refs = noteReferencesOf(
       '# Title #Heading-Tag\n'

@@ -87,11 +87,16 @@ final class MarkdownLink extends ParsedLink {
 /// both.
 final class WikiRef {
   /// Creates a wiki ref: [target] and optional [heading] / [block] / [alias].
-  const new({required this.target, this.heading, this.block, this.alias})
-    : assert(
-        heading == null || block == null,
-        'a fragment is a heading or a block, never both',
-      );
+  const new({
+    required this.target,
+    this.heading,
+    this.block,
+    this.alias,
+    this.escapedPipe = false,
+  }) : assert(
+         heading == null || block == null,
+         'a fragment is a heading or a block, never both',
+       );
 
   /// The note reference before any `#`/`|` (trimmed). Empty for `[[#heading]]`
   /// and `[[|alias]]` — "the current note".
@@ -110,6 +115,10 @@ final class WikiRef {
 
   /// The display text after `|` (trimmed), or null when absent or empty.
   final String? alias;
+
+  /// Whether the alias was separated by an escaped pipe, `[[Note\|Alias]]`,
+  /// as a table cell needs it; a rewrite writes it back that way.
+  final bool escapedPipe;
 
   /// The heading path as its levels, outermost first: `A#B` is `[A, B]`.
   /// Empty for a ref with no heading.
@@ -281,8 +290,10 @@ String? _titleOf(String rest) {
 
 /// Parses the inside of `[[…]]` (without the brackets).
 ///
-/// Split rules: the first `|` separates the display alias; the first `#`
-/// before it separates the fragment; everything before `#` is the target.
+/// Split rules: the first `|` separates the display alias — written `\|` in
+/// a table cell, where a bare one would split the cell: the backslash right
+/// before it is not part of the target; the first `#` before it separates
+/// the fragment; everything before `#` is the target.
 /// A fragment that starts with `^` and is a valid block id is a block link;
 /// any other is a heading path, whose further `#` separate the levels
 /// (`H1#H2`) and are kept as written. Parts are trimmed; an absent or empty
@@ -291,7 +302,7 @@ String? _titleOf(String rest) {
 WikiRef parseWikiRef(String inner) {
   final s = inner.trim();
   final pipe = s.indexOf('|');
-  final before = pipe == -1 ? s : s.substring(0, pipe);
+  final before = pipe == -1 ? s : _beforePipe(s, pipe);
   final aliasText = pipe == -1 ? null : s.substring(pipe + 1).trim();
   final hash = before.indexOf('#');
   final target = (hash == -1 ? before : before.substring(0, hash)).trim();
@@ -303,8 +314,17 @@ WikiRef parseWikiRef(String inner) {
     heading: fragment.isEmpty || isBlock ? null : fragment,
     block: isBlock ? fragment.substring(1) : null,
     alias: aliasText == null || aliasText.isEmpty ? null : aliasText,
+    escapedPipe: pipe != -1 && _isEscapedPipe(s, pipe),
   );
 }
+
+/// Whether the `|` of [s] at [pipe] is written `\|`.
+bool _isEscapedPipe(String s, int pipe) =>
+    pipe > 0 && s.codeUnitAt(pipe - 1) == 0x5C;
+
+/// What [s] holds before its `|` at [pipe], without the `\` that escapes it.
+String _beforePipe(String s, int pipe) =>
+    s.substring(0, _isEscapedPipe(s, pipe) ? pipe - 1 : pipe);
 
 /// What a wikilink whose inside is [inner] shows: its alias, else its
 /// target without the heading, else [inner] as written.
@@ -317,7 +337,7 @@ String wikiDisplayText(String inner) {
     final alias = inner.substring(pipe + 1).trim();
     if (alias.isNotEmpty) return alias;
   }
-  final target = pipe >= 0 ? inner.substring(0, pipe) : inner;
+  final target = pipe >= 0 ? _beforePipe(inner, pipe) : inner;
   final hash = target.indexOf('#');
   final name = (hash >= 0 ? target.substring(0, hash) : target).trim();
   return name.isEmpty ? inner : name;

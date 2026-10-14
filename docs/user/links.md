@@ -8,6 +8,8 @@ Forms (target, heading, alias combine freely):
 - `[[note|alias]]` — displayed as `alias`
 - `[[note#heading]]` — jumps to the heading
 - `[[note#heading|alias]]`
+- `[[note\|alias]]` — the same inside a table cell, where a bare `|` would
+  split the cell; renaming the note keeps the `\|`
 - `[[note#heading#subheading]]` — a subheading, by its path
   (see *Heading links* below)
 - `[[note#^id]]` — jumps to a block (see *Block links* below)

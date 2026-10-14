@@ -84,6 +84,30 @@ void main() {
       expect(ref.alias, 'b|c');
     });
 
+    test('an escaped pipe separates the alias, and is not in the target '
+        '(#920)', () {
+      final ref = parseWikiRef(r'Note\|Alias');
+      expect(ref.target, 'Note');
+      expect(ref.alias, 'Alias');
+      expect(ref.escapedPipe, isTrue);
+      final heading = parseWikiRef(r'Note#Head\|Alias');
+      expect(heading.target, 'Note');
+      expect(heading.heading, 'Head');
+      expect(heading.alias, 'Alias');
+      expect(parseWikiRef('Note|Alias').escapedPipe, isFalse);
+      // Only a backslash right before the pipe: a path's own stays.
+      expect(parseWikiRef(r'a\note|x').target, r'a\note');
+      expect(wikiDisplayText(r'Note\|Alias'), 'Alias');
+      expect(wikiDisplayText(r'Note\|'), 'Note');
+    });
+
+    test('a wikilink with an escaped pipe in a table row links to its note '
+        '(#920)', () {
+      final link = parseLinks(r'| [[Note\|Alias]] | b |').single as WikiLink;
+      expect(link.ref.target, 'Note');
+      expect(link.ref.alias, 'Alias');
+    });
+
     test('unicode target and heading', () {
       final ref = parseWikiRef('日本語#見出し|表示');
       expect(ref.target, '日本語');

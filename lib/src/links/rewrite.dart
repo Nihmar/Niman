@@ -148,7 +148,8 @@ String? _renamedBareName(String target, String? from, String? to) {
 /// (`![[…]]`) when it was written as one.
 String _wikiText(String target, WikiRef ref, {required bool embed}) {
   final heading = ref.fragment == null ? '' : '#${ref.fragment}';
-  final alias = ref.alias == null ? '' : '|${ref.alias}';
+  final pipe = ref.escapedPipe ? r'\|' : '|';
+  final alias = ref.alias == null ? '' : '$pipe${ref.alias}';
   return '${embed ? '!' : ''}[[$target$heading$alias]]';
 }
 

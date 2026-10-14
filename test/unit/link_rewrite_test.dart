@@ -238,6 +238,17 @@ void main() {
     expect(out, '[x](docs/b.md "Title") [y](docs/b.md)');
   });
 
+  test(r'a renamed note follows in a table row and keeps the \| (#920)', () {
+    final out = rewriteMovedLinks(
+      r'| [[Old\|the doc]] | [[Docs/Old#H\|x]] | [[Old|plain]] |',
+      from: 'root.md',
+      moves: LinkMoves({'Docs/Old.md': 'Docs/New.md'}),
+      renamedFrom: 'Old.md',
+      renamedTo: 'New.md',
+    );
+    expect(out, r'| [[New\|the doc]] | [[Docs/New#H\|x]] | [[New|plain]] |');
+  });
+
   test('an embed that did not move is left exactly as written', () {
     const source = '![[Elsewhere/pic.png]] and ![alt](Elsewhere/pic.png)';
     final out = rewriteMovedLinks(
