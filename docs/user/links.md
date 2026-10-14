@@ -148,6 +148,10 @@ does; the editor (`live` and `source`) keeps showing it, and the note's
 file is never changed by hiding it. Renaming or moving the note carries
 `#^id` along like any other fragment.
 
+A heading that carries an id is still linked by its text: `## Title ^abc` is
+reached by `[[note#Title]]` as well as by `[[note#^abc]]`; the outline, the
+heading panels and an exported page's heading ids leave the ` ^abc` out.
+
 > **Only Obsidian reads them.** Block references are specific to
 > Obsidian, not part of standard Markdown: in another editor `^37066d`
 > is plain text at the end of a line, and a `[[note#^id]]` link is not

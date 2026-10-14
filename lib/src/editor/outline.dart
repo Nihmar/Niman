@@ -9,6 +9,7 @@
 library;
 
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/links/block_anchors.dart' show withoutTrailingBlockId;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_list.dart';
@@ -25,9 +26,19 @@ final class OutlineEntry {
   /// The heading level (number of `#`), 1..6.
   final int level;
 
-  /// The heading text (the line with the `#` markers stripped, trimmed).
+  /// The heading text (the line with the `#` markers stripped, trimmed, and
+  /// the ` ^id` a block id ends it with taken off: the id names the block for
+  /// a link, it is not part of what the heading says, #912).
   final String text;
 }
+
+/// [heading], the text after a heading's `#`s, as an [OutlineEntry] holds it:
+/// trimmed, the trailing block id off — the one rule every outline path
+/// ([outlineOfText], [outlineOfBlocks], [outlineOf]) shares with the block
+/// scanner (`withoutTrailingBlockId`), so a heading reads the same whichever
+/// way it was found.
+String _headingText(String heading) =>
+    withoutTrailingBlockId(heading.trim()).trim();
 
 /// The headings of [text], without tokenizing it.
 ///
@@ -44,8 +55,9 @@ List<OutlineEntry> outlineOfText(String text) {
   final out = <OutlineEntry>[];
   HighlightDocument.forEachHeading(
     text,
-    (line, level, heading) =>
-        out.add(OutlineEntry(line: line, level: level, text: heading)),
+    (line, level, heading) => out.add(
+      OutlineEntry(line: line, level: level, text: _headingText(heading)),
+    ),
   );
   return out;
 }
@@ -93,7 +105,7 @@ List<OutlineEntry> outlineOfBlocks(
       OutlineEntry(
         line: block.startLine,
         level: block.headingLevel,
-        text: text.substring(after).trim(),
+        text: _headingText(text.substring(after)),
       ),
     );
   }
@@ -120,7 +132,7 @@ List<OutlineEntry> outlineOf(Iterable<StyledLine> lines) {
           // offset — the two only coincide because the marker starts at 0
           // (checked above).
           level: marker.end - marker.start,
-          text: l.text.substring(marker.end).trim(),
+          text: _headingText(l.text.substring(marker.end)),
         ),
       );
     }
