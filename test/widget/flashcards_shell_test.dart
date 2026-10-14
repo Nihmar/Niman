@@ -80,7 +80,8 @@ void main() {
     await dir.delete(recursive: true);
   });
 
-  Widget buildApp({bool study = true}) {
+  /// [study] false: no starter; [realStudy]: the app's own, the review.
+  Widget buildApp({bool study = true, bool realStudy = false}) {
     return ProviderScope(
       overrides: [
         librarySessionProvider.overrideWithValue(controller),
@@ -89,20 +90,26 @@ void main() {
           FakeWindowController(customTitleBar: true),
         ),
         deckReviewSourceProvider.overrideWithValue(reviews),
-        deckStudyStarterProvider.overrideWithValue(
-          study ? (context, path) async => studied.add(path) : null,
-        ),
+        if (!realStudy)
+          deckStudyStarterProvider.overrideWithValue(
+            study ? (context, path) async => studied.add(path) : null,
+          ),
       ],
       child: const NimanApp(),
     );
   }
 
-  Future<void> openDeck(WidgetTester tester, {bool study = true}) async {
-    setSurfaceSize(tester, const Size(1200, 900));
+  Future<void> openDeck(
+    WidgetTester tester, {
+    bool study = true,
+    bool realStudy = false,
+    Size size = const Size(1200, 900),
+  }) async {
+    setSurfaceSize(tester, size);
     await controller.open(dir.path, create: true);
     File(p.join(dir.path, 'Deck.md')).writeAsStringSync(_deck);
     await controller.createNote(parentPath: '', name: 'Deck', content: _deck);
-    await tester.pumpWidget(buildApp(study: study));
+    await tester.pumpWidget(buildApp(study: study, realStudy: realStudy));
     await tester.pump();
     await settle(tester);
     await tester.tap(noteRow('Deck.md'));
@@ -157,6 +164,70 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.f5);
     await settle(tester);
     expect(studied, hasLength(2));
+  });
+
+  testWidgets('Study opens the review beside the deck, its card marked', (
+    tester,
+  ) async {
+    // Room for two panes beside the tree and the dock.
+    await openDeck(tester, realStudy: true, size: const Size(1800, 900));
+    await tester.tap(find.byKey(const Key('deck-study')));
+    for (var i = 0; i < 20; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      if (find.byKey(const Key('review-tab')).evaluate().isNotEmpty) break;
+    }
+    await settle(tester);
+    expect(find.byKey(const Key('review-tab')), findsOneWidget);
+    expect(find.text('Study · Deck'), findsWidgets);
+    // The deck stays on screen, in the pane beside, the card asked marked.
+    expect(find.byKey(const Key('deck-name')), findsOneWidget);
+    expect(find.byKey(const Key('deck-row-studying')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('review-question')),
+        matching: find.text('begin', findRichText: true),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await settle(tester);
+    expect(find.byKey(const Key('review-tab')), findsNothing);
+    expect(find.byKey(const Key('deck-row-studying')), findsNothing);
+    expect(find.byKey(const Key('deck-name')), findsOneWidget);
+  });
+
+  testWidgets('a window too narrow for two panes studies over the deck', (
+    tester,
+  ) async {
+    await openDeck(tester, realStudy: true);
+    await tester.tap(find.byKey(const Key('deck-study')));
+    for (var i = 0; i < 20; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      if (find.byKey(const Key('review-tab')).evaluate().isNotEmpty) break;
+    }
+    await settle(tester);
+    expect(find.byKey(const Key('review-question')), findsOneWidget);
+    expect(find.byKey(const Key('deck-name')), findsNothing);
+
+    // The study keeps its chip while the deck's tab is shown again.
+    await tester.tap(find.text('Deck').first);
+    await settle(tester);
+    expect(find.byKey(const Key('deck-name')), findsOneWidget);
+    expect(find.byKey(const Key('review-question')), findsNothing);
+    await tester.tap(find.byKey(const Key('review-tab')));
+    await settle(tester);
+    expect(find.byKey(const Key('review-question')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('review-tab-close')));
+    await settle(tester);
+    expect(find.byKey(const Key('review-tab')), findsNothing);
+    expect(find.byKey(const Key('deck-name')), findsOneWidget);
   });
 
   testWidgets('Study is greyed while no review can start', (tester) async {

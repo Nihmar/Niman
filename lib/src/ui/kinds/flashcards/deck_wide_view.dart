@@ -20,6 +20,7 @@ final class DeckWideView extends StatelessWidget {
     required this.edits,
     required this.mathCache,
     required this.onStudy,
+    this.studying,
     super.key,
   });
 
@@ -34,6 +35,9 @@ final class DeckWideView extends StatelessWidget {
 
   /// What **Study** does, or null while it cannot.
   final VoidCallback? onStudy;
+
+  /// The key of the card the study beside the deck asks, if any.
+  final String? studying;
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +100,7 @@ final class DeckWideView extends StatelessWidget {
                 card: card,
                 next: nextLabel(reading.stateOf(card), reading.today),
                 repeated: reading.isRepeated(card),
+                studying: card.key == studying,
                 mathCache: mathCache,
                 sentence: () => clozeSentence(edits.host.text, card),
                 onSave: (question, answer) =>

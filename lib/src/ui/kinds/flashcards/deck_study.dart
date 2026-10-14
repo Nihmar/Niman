@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:path/path.dart' as p;
 
@@ -16,7 +18,8 @@ typedef DeckStudyStarter = Future<void> Function(
 );
 
 /// What the deck's **Study** button, its ⋮ entry and `F5` start: the
-/// review of the deck, full screen.
+/// review of the deck — beside it on a wide window, as a tab of the panes
+/// ([ReviewTab]), full screen elsewhere.
 ///
 /// The seam between the deck view and the review: a test puts its own
 /// starter here, or null, and while it is null Study is shown but disabled.
@@ -37,6 +40,8 @@ Future<void> _study(
     paths: [notePath],
   );
   if (run == null || !context.mounted) return;
+  final tab = ref.read(reviewTabProvider);
+  if (tab.hosted && isWideShell(context)) return tab.open(run);
   final navigator = Navigator.of(context, rootNavigator: true);
   final route = MaterialPageRoute<void>(
     builder: (context) => Scaffold(

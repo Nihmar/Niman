@@ -40,9 +40,21 @@ final class ReviewView extends StatefulWidget {
 
 final class _ReviewViewState extends State<ReviewView> {
   final MathCache _math = MathCache();
+  final FocusNode _focus = FocusNode(debugLabel: 'review');
+
+  @override
+  void initState() {
+    super.initState();
+    // Asked once the frame is drawn: a shell that takes the keys back when
+    // a pane changes (#770) has had its turn by then.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
 
   @override
   void dispose() {
+    _focus.dispose();
     _math.dispose();
     super.dispose();
   }
@@ -80,6 +92,7 @@ final class _ReviewViewState extends State<ReviewView> {
 
   @override
   Widget build(BuildContext context) => Focus(
+    focusNode: _focus,
     autofocus: true,
     onKeyEvent: _onKey,
     child: ListenableBuilder(

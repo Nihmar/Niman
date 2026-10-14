@@ -93,6 +93,9 @@ import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_menu_flow.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_study.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/note_menu.dart';
@@ -722,6 +725,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // does.
     FocusManager.instance.primaryFocus?.unfocus();
     _shellFocus.requestFocus();
+    _reviewTab.show(on: false);
     setState(() {
       _compareShows = false;
       _tab = tab;
@@ -819,6 +823,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // they open as a pinned tab in the focused pane and the tree, the
     // panes and the dock stay, instead of taking a whole slot.
     if (!narrow && (tab == ShellTab.home || tab == ShellTab.todo)) {
+      _reviewTab.show(on: false);
       setState(() {
         // The page it shows covers the compare tab's: that tab stays on
         // its chip (#906).
@@ -1636,6 +1641,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     }
     if (!mounted) return;
     FocusManager.instance.primaryFocus?.unfocus();
+    _reviewTab.show(on: false);
     setState(() {
       _compare = (path: path, version: version, pane: _workspace.value.focused);
       _compareShows = true;
@@ -1724,6 +1730,96 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
   }
 
+  /// The study beside the deck (#533, decision 9): a tab of the pane
+  /// [_placeReview] picks, its chip at the end of that pane's row.
+  late final ReviewTab _reviewTab = ref.read(reviewTabProvider);
+
+  /// Which pane draws the study: the one it opened in, or pane 0 when the
+  /// window is not split any more.
+  int get _reviewPaneShown =>
+      _workspace.value.isSplit ? _reviewTab.pane ?? 0 : 0;
+
+  /// Whether [pane] shows the study now.
+  bool _reviewIn(int pane) =>
+      _wide && _reviewTab.shows && pane == _reviewPaneShown;
+
+  void _onReviewTab() {
+    if (!mounted) return;
+    if (_reviewTab.run != null && _reviewTab.pane == null) _placeReview();
+    if (_reviewTab.shows) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      // A study opened over the compare tab's pane covers it.
+      if (_comparePaneShown == _reviewPaneShown) _compareShows = false;
+    }
+    setState(() {});
+  }
+
+  /// Puts a new study beside its deck: in the other pane of a split; in a
+  /// pane split off to the right where the window has room for two; over
+  /// the deck where it has not, as the compare tab opens.
+  void _placeReview() {
+    final w = _workspace.value;
+    final dock = _dockShown ? _dockWidth + ResizeDivider.width : 0;
+    final panes =
+        MediaQuery.sizeOf(context).width - _tabsStart - dock - Island.gap;
+    if (w.isSplit) {
+      _reviewTab.pane = 1 - w.focused;
+    } else if (panes >= 2 * RightDock.minPanesWidth) {
+      // Placed first: the split that follows is no note shown over it.
+      _reviewTab.pane = 1;
+      _workspace.controller.update(
+        (w) => w.split(SplitAxis.right).focus(w.focused),
+      );
+    } else {
+      _reviewTab.pane = w.focused;
+    }
+  }
+
+  Widget _reviewChip(int pane) {
+    final w = _workspace.value;
+    return ReviewTabChip(
+      title: _reviewTab.run!.title,
+      selected: _reviewIn(pane),
+      focused: !w.isSplit || w.focused == pane,
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+        _reviewTab.show();
+      },
+      onClose: _reviewTab.close,
+    );
+  }
+
+  Widget _reviewPage() {
+    final run = _reviewTab.run!;
+    return ReviewView(
+      key: ObjectKey(run),
+      run: run,
+      onClose: _reviewTab.close,
+      onNextDeck: (path) => unawaited(_studyNextDeck(path)),
+    );
+  }
+
+  /// **Next deck** (#533): the deck at library-relative [path] opens where
+  /// the last one was, and its study takes the last one's place.
+  Future<void> _studyNextDeck(String path) async {
+    final root = widget.controller.root;
+    if (root == null) return;
+    final run = await loadReviewRun(
+      session: widget.controller,
+      reviews: ref.read(deckReviewSourceProvider),
+      paths: [p.join(root, path)],
+    );
+    if (!mounted || run == null) return;
+    final pane = _reviewTab.pane;
+    final w = _workspace.value;
+    // Beside the study, the deck shows; over it, it would cover the study.
+    if (w.isSplit && pane != null) {
+      _workspace.focus(1 - pane);
+      _showNote(path);
+    }
+    _reviewTab.open(run, pane: pane);
+  }
+
   /// Back and forward through the notes shown (#700).
   late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
     workspace: _workspace,
@@ -1794,7 +1890,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // A note tab does not read as selected while the content tab shows:
       // the chip is what the pane is showing.
       active:
-          (_contentTabShows && pane == _contentPaneShown) || _compareIn(pane)
+          (_contentTabShows && pane == _contentPaneShown) ||
+              _compareIn(pane) ||
+              _reviewIn(pane)
           ? -1
           : tabs.active,
       focused: !w.isSplit || w.focused == pane,
@@ -1822,7 +1920,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final content = _contentTab;
     final hasContent = content != null && pane == _contentPaneShown;
     final hasCompare = _compare != null && pane == _comparePaneShown;
-    if (!hasContent && !hasCompare) return bar;
+    final hasReview = _reviewTab.run != null && pane == _reviewPaneShown;
+    if (!hasContent && !hasCompare && !hasReview) return bar;
     // At the row's far end, where it comes and goes without moving a note
     // tab under the pointer (#770). The chips take what the tab bar's own
     // buttons leave, no more: a narrow pane (a tablet's, beside the tree
@@ -1843,6 +1942,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (hasReview) Flexible(child: _reviewChip(pane)),
                   if (hasCompare) Flexible(child: _compareChip(pane)),
                   if (hasContent)
                     Flexible(child: _contentTabChip(content, pane)),
@@ -1990,6 +2090,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// [_onWorkspaceChanged] last looked (#906).
   ({int pane, String? path})? _lastComparePane;
 
+  /// The same for the study beside the deck (#533).
+  ({int pane, String? path})? _lastReviewPane;
+
   /// The workspace moved (#23): a tab shown, closed, renamed. On a wide
   /// window the tree follows the showing tab, and a newly shown note is
   /// asked its kind afresh.
@@ -2014,6 +2117,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _lastComparePane?.pane == comparePane &&
         _lastComparePane?.path != comparePanePath;
     _lastComparePane = comparePaneNow;
+    // The same for the study beside the deck (#533).
+    final reviewPane = _reviewPaneShown;
+    final reviewPaneNow = (
+      pane: reviewPane,
+      path: reviewPane < panes.length
+          ? panes[reviewPane].activeTab?.path
+          : null,
+    );
+    if (_reviewTab.shows &&
+        _lastReviewPane?.pane == reviewPane &&
+        _lastReviewPane?.path != reviewPaneNow.path) {
+      _reviewTab.show(on: false);
+    }
+    _lastReviewPane = reviewPaneNow;
     // A caret or a scroll handed in changes nothing drawn here: only the
     // tabs, which listen for themselves. The shell rebuilds for what it
     // draws — tabs, panes, and how each tab shows its note.
@@ -2041,6 +2158,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// there to step through.
   void _activateTab(int pane, int index) {
     if (_compareShows) setState(() => _compareShows = false);
+    if (pane == _reviewPaneShown) _reviewTab.show(on: false);
     if (_tab != ShellTab.files && !_sidebarShowsSearch) {
       _onDestinationSelected(ShellTab.files);
     }
@@ -2108,6 +2226,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _reviewTab
+      ..hosted = true
+      ..addListener(_onReviewTab);
     _todoController = TodoController(
       session: widget.controller,
       reminders: widget.reminders,
@@ -2272,6 +2393,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _searchCommands.dispose();
     _treeFocus.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
+    _reviewTab
+      ..hosted = false
+      ..removeListener(_onReviewTab);
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
     FocusManager.instance.removeListener(_reclaimFocus);
@@ -4553,8 +4677,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// claims nothing, so the step is skipped rather than pointing at a
   /// blank.
   Widget _detailPane(LibrarySession controller, int pane) {
-    final compare = _compareIn(pane);
-    final content = _contentTabShows && pane == _contentPaneShown && !compare
+    final review = _reviewIn(pane);
+    final compare = _compareIn(pane) && !review;
+    final content =
+        _contentTabShows && pane == _contentPaneShown && !compare && !review
         ? _contentTab
         : null;
     final listener = Listener(
@@ -4573,9 +4699,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             fit: StackFit.expand,
             children: [
               Offstage(
-                offstage: content != null || compare,
+                offstage: content != null || compare || review,
                 child: TickerMode(
-                  enabled: content == null && !compare,
+                  enabled: content == null && !compare && !review,
                   child: ShellDetailPane(
                     root: controller.root,
                     tabs: _deck(pane),
@@ -4654,7 +4780,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               if (_contentTab case final tab? when pane == _contentPaneShown)
                 Offstage(
                   key: Key('content-pane-${tab.name}'),
-                  offstage: content == null,
+                  offstage: content == null || review,
                   child: TickerMode(
                     enabled: content != null,
                     child: _tabBodyFor(tab, controller),
@@ -4663,6 +4789,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               // A version beside the note (#712): over the deck, which
               // keeps its notes as they were.
               if (compare) _comparePage(controller),
+              // A study beside the deck (#533): over the pane's notes too.
+              if (review) _reviewPage(),
             ],
           ),
         ),
@@ -5143,6 +5271,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       (_contentTabShows ||
           _sidebarShowsSearch ||
           _compareShows && _compare != null ||
+          _reviewTab.shows ||
           _workspace.value.activePath != null ||
           _gridCanStepUp);
 
@@ -5153,6 +5282,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void _wideBack() {
     if (_immersive.fullScreen.value != null) {
       _immersive.fullScreen.value = null;
+    } else if (_reviewTab.shows) {
+      _reviewTab.close();
     } else if (_compareShows && _compare != null) {
       // The compare page covers the note: it goes before the note (#906).
       _closeCompare();

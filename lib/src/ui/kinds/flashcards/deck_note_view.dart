@@ -18,6 +18,7 @@ import 'package:niman/src/ui/kinds/flashcards/deck_phone_view.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_study.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_wide_view.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 
 /// The flashcard kind's body (#533): the deck the note is — its counts, its
 /// cards with when each comes back — in the shape of the surface, and the
@@ -143,18 +144,32 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
       widget.host,
       ref.read(deckReviewSourceProvider),
     );
-    return isWideShell(context)
-        ? DeckWideView(
+    final onStudy = _study(context);
+    if (!isWideShell(context)) {
+      return DeckPhoneView(
+        reading: reading,
+        edits: edits,
+        mathCache: _math,
+        onStudy: onStudy,
+      );
+    }
+    final tab = ref.watch(reviewTabProvider);
+    // The card the study beside the deck asks is marked in the list.
+    return ListenableBuilder(
+      listenable: tab,
+      builder: (context, _) => ListenableBuilder(
+        listenable: tab.run ?? tab,
+        builder: (context, _) {
+          final current = tab.run?.session.current;
+          return DeckWideView(
             reading: reading,
             edits: edits,
             mathCache: _math,
-            onStudy: _study(context),
-          )
-        : DeckPhoneView(
-            reading: reading,
-            edits: edits,
-            mathCache: _math,
-            onStudy: _study(context),
+            onStudy: onStudy,
+            studying: current?.deckPath == _path ? current?.card.key : null,
           );
+        },
+      ),
+    );
   }
 }

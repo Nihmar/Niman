@@ -85,9 +85,7 @@ Future<ReviewRun?> loadReviewRun({
   final root = session.root;
   if (root == null) return null;
   final rel = [for (final path in paths) ?pathInLibrary(root, path)];
-  final decks = await Isolate.run(
-    () => [for (final path in rel) _read(root, path)],
-  );
+  final decks = await _readAll(root, rel);
   final read = [
     for (var i = 0; i < rel.length; i++)
       if (decks[i] case final deck?) (path: rel[i], deck: deck),
@@ -117,6 +115,12 @@ Future<ReviewRun?> loadReviewRun({
     nextDeck: () => _nextDeck(session, studied),
   );
 }
+
+/// The decks at [paths], library-relative, read on a background isolate:
+/// a function of its own, so the closure carries the paths and nothing of
+/// the caller's.
+Future<List<Deck?>> _readAll(String root, List<String> paths) =>
+    Isolate.run(() => [for (final path in paths) _read(root, path)]);
 
 Deck? _read(String root, String path) {
   try {

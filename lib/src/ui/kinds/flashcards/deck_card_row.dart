@@ -25,6 +25,7 @@ final class DeckCardRow extends StatefulWidget {
     required this.onSave,
     required this.onSaveSentence,
     required this.onDelete,
+    this.studying = false,
     super.key,
   });
 
@@ -36,6 +37,10 @@ final class DeckCardRow extends StatefulWidget {
 
   /// Whether the deck asks the same question earlier.
   final bool repeated;
+
+  /// Whether the study beside the deck is asking this card (#533): the row
+  /// is marked.
+  final bool studying;
 
   /// The formulas typeset so far, shared by the deck's rows.
   final MathCache mathCache;
@@ -129,7 +134,9 @@ final class _DeckCardRowState extends State<DeckCardRow> {
       behavior: HitTestBehavior.opaque,
       onDoubleTap: _edit,
       onSecondaryTapUp: _menu,
-      child: Padding(
+      child: Container(
+        key: widget.studying ? const Key('deck-row-studying') : null,
+        color: widget.studying ? scheme.secondaryContainer : null,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
