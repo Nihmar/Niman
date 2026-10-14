@@ -3992,4 +3992,26 @@ final class UkrainianStrings extends Strings {
   String get flashcardsBackToDeck => 'Назад до колоди';
   @override
   String get flashcardsEndReview => 'Завершити повторення';
+  @override
+  String get tabStudy => 'Навчання';
+  @override
+  String get studyEmpty => 'Ще немає колод';
+  @override
+  String get studyEmptyHint => 'Нотатка з type: flashcard — це колода карток.';
+  @override
+  String get studyOfferBody =>
+      'Навчання показує ваші колоди. Показати його в навігації?';
+  @override
+  String get studyOfferAction => 'Показати';
+  @override
+  String get settingsNewCardsPerDay => 'Нових карток на день';
+  @override
+  String get settingsNewCardsPerDayHint => 'На колоду. 0 — без нових карток.';
+  @override
+  String get settingsResetAllReviews => 'Скинути всі повторення';
+  @override
+  String get resetAllReviewsTitle => 'Скинути всі повторення?';
+  @override
+  String get resetAllReviewsBody =>
+      'Кожна картка кожної колоди знову стане новою. Нотатки не змінюються.';
 }

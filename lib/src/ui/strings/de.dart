@@ -4037,4 +4037,28 @@ final class GermanStrings extends Strings {
   String get flashcardsBackToDeck => 'Zurück zum Stapel';
   @override
   String get flashcardsEndReview => 'Lernen beenden';
+  @override
+  String get tabStudy => 'Lernen';
+  @override
+  String get studyEmpty => 'Noch keine Stapel';
+  @override
+  String get studyEmptyHint =>
+      'Eine Notiz mit type: flashcard ist ein Kartenstapel.';
+  @override
+  String get studyOfferBody =>
+      'Lernen zeigt deine Stapel. In der Navigation anzeigen?';
+  @override
+  String get studyOfferAction => 'Anzeigen';
+  @override
+  String get settingsNewCardsPerDay => 'Neue Karten pro Tag';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Pro Stapel. 0 zeigt keine neuen Karten.';
+  @override
+  String get settingsResetAllReviews => 'Alle Lernstände zurücksetzen';
+  @override
+  String get resetAllReviewsTitle => 'Alle Lernstände zurücksetzen?';
+  @override
+  String get resetAllReviewsBody =>
+      'Jede Karte jedes Stapels wird wieder neu. Keine Notiz wird geändert.';
 }

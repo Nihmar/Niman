@@ -4065,4 +4065,29 @@ final class FrenchStrings extends Strings {
   String get flashcardsBackToDeck => 'Retour au paquet';
   @override
   String get flashcardsEndReview => 'Terminer la révision';
+  @override
+  String get tabStudy => 'Révision';
+  @override
+  String get studyEmpty => 'Aucun paquet pour l’instant';
+  @override
+  String get studyEmptyHint =>
+      'Une note avec type: flashcard est un paquet de cartes.';
+  @override
+  String get studyOfferBody =>
+      'Révision liste vos paquets. L’afficher dans la navigation ?';
+  @override
+  String get studyOfferAction => 'Afficher';
+  @override
+  String get settingsNewCardsPerDay => 'Nouvelles cartes par jour';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Par paquet. 0 n’affiche aucune nouvelle carte.';
+  @override
+  String get settingsResetAllReviews => 'Réinitialiser toutes les révisions';
+  @override
+  String get resetAllReviewsTitle => 'Réinitialiser toutes les révisions ?';
+  @override
+  String get resetAllReviewsBody =>
+      'Chaque carte de chaque paquet redevient nouvelle. Aucune note n’est '
+      'modifiée.';
 }

@@ -3991,4 +3991,28 @@ final class LithuanianStrings extends Strings {
   String get flashcardsBackToDeck => 'Atgal į kaladę';
   @override
   String get flashcardsEndReview => 'Baigti kartojimą';
+  @override
+  String get tabStudy => 'Mokymasis';
+  @override
+  String get studyEmpty => 'Kaladžių dar nėra';
+  @override
+  String get studyEmptyHint =>
+      'Užrašas su type: flashcard yra kortelių kaladė.';
+  @override
+  String get studyOfferBody =>
+      'Mokymasis rodo jūsų kaladės. Rodyti jį naršymo juostoje?';
+  @override
+  String get studyOfferAction => 'Rodyti';
+  @override
+  String get settingsNewCardsPerDay => 'Naujų kortelių per dieną';
+  @override
+  String get settingsNewCardsPerDayHint => 'Kaladei. 0 nerodo naujų kortelių.';
+  @override
+  String get settingsResetAllReviews => 'Atstatyti visus kartojimus';
+  @override
+  String get resetAllReviewsTitle => 'Atstatyti visus kartojimus?';
+  @override
+  String get resetAllReviewsBody =>
+      'Kiekviena kiekvienos kaladės kortelė vėl taps nauja. Užrašai '
+      'nekeičiami.';
 }

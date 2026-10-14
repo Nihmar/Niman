@@ -3938,4 +3938,27 @@ final class DanishStrings extends Strings {
   String get flashcardsBackToDeck => 'Tilbage til kortspillet';
   @override
   String get flashcardsEndReview => 'Afslut repetition';
+  @override
+  String get tabStudy => 'Studér';
+  @override
+  String get studyEmpty => 'Ingen kortspil endnu';
+  @override
+  String get studyEmptyHint => 'En note med type: flashcard er et kortspil.';
+  @override
+  String get studyOfferBody =>
+      'Studér viser dine kortspil. Vis det i navigationen?';
+  @override
+  String get studyOfferAction => 'Vis';
+  @override
+  String get settingsNewCardsPerDay => 'Nye kort pr. dag';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Pr. kortspil. 0 viser ingen nye kort.';
+  @override
+  String get settingsResetAllReviews => 'Nulstil alle repetitioner';
+  @override
+  String get resetAllReviewsTitle => 'Nulstil alle repetitioner?';
+  @override
+  String get resetAllReviewsBody =>
+      'Hvert kort i hvert kortspil bliver nyt igen. Ingen note ændres.';
 }

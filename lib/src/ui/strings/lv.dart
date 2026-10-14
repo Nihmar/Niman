@@ -3943,4 +3943,29 @@ final class LatvianStrings extends Strings {
   String get flashcardsBackToDeck => 'Atpakaļ uz komplektu';
   @override
   String get flashcardsEndReview => 'Beigt atkārtošanu';
+  @override
+  String get tabStudy => 'Mācības';
+  @override
+  String get studyEmpty => 'Vēl nav neviena komplekta';
+  @override
+  String get studyEmptyHint =>
+      'Piezīme ar type: flashcard ir kartīšu komplekts.';
+  @override
+  String get studyOfferBody =>
+      'Mācības rāda jūsu komplektus. Vai rādīt tās navigācijā?';
+  @override
+  String get studyOfferAction => 'Rādīt';
+  @override
+  String get settingsNewCardsPerDay => 'Jaunas kartītes dienā';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Katram komplektam. 0 nerāda jaunas kartītes.';
+  @override
+  String get settingsResetAllReviews => 'Atiestatīt visu atkārtošanu';
+  @override
+  String get resetAllReviewsTitle => 'Vai atiestatīt visu atkārtošanu?';
+  @override
+  String get resetAllReviewsBody =>
+      'Katra komplekta katra kartīte atkal kļūst jauna. Neviena piezīme '
+      'netiek mainīta.';
 }

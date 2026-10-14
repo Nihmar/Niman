@@ -3911,4 +3911,27 @@ final class EnglishStrings extends Strings {
   String get flashcardsBackToDeck => 'Back to the deck';
   @override
   String get flashcardsEndReview => 'End review';
+  @override
+  String get tabStudy => 'Study';
+  @override
+  String get studyEmpty => 'No decks yet';
+  @override
+  String get studyEmptyHint =>
+      'A note with type: flashcard is a deck of cards.';
+  @override
+  String get studyOfferBody =>
+      'Study lists your decks. Show it in the navigation?';
+  @override
+  String get studyOfferAction => 'Show';
+  @override
+  String get settingsNewCardsPerDay => 'New cards per day';
+  @override
+  String get settingsNewCardsPerDayHint => 'Per deck. 0 shows no new cards.';
+  @override
+  String get settingsResetAllReviews => 'Reset all reviews';
+  @override
+  String get resetAllReviewsTitle => 'Reset all reviews?';
+  @override
+  String get resetAllReviewsBody =>
+      'Every card of every deck becomes new again. No note is changed.';
 }

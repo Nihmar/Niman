@@ -3543,4 +3543,24 @@ final class ChineseStrings extends Strings {
   String get flashcardsBackToDeck => '返回牌组';
   @override
   String get flashcardsEndReview => '结束复习';
+  @override
+  String get tabStudy => '学习';
+  @override
+  String get studyEmpty => '还没有牌组';
+  @override
+  String get studyEmptyHint => '带有 type: flashcard 的笔记就是一个卡片牌组。';
+  @override
+  String get studyOfferBody => '学习会列出你的牌组。要在导航中显示吗？';
+  @override
+  String get studyOfferAction => '显示';
+  @override
+  String get settingsNewCardsPerDay => '每日新卡片';
+  @override
+  String get settingsNewCardsPerDayHint => '每个牌组。0 表示不显示新卡片。';
+  @override
+  String get settingsResetAllReviews => '重置所有复习';
+  @override
+  String get resetAllReviewsTitle => '重置所有复习？';
+  @override
+  String get resetAllReviewsBody => '每个牌组的每张卡片都会重新变为新卡。不会更改任何笔记。';
 }

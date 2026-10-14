@@ -3903,4 +3903,27 @@ final class HindiStrings extends Strings {
   String get flashcardsBackToDeck => 'डेक पर वापस';
   @override
   String get flashcardsEndReview => 'दोहराव समाप्त करें';
+  @override
+  String get tabStudy => 'अध्ययन';
+  @override
+  String get studyEmpty => 'अभी कोई डेक नहीं';
+  @override
+  String get studyEmptyHint => 'type: flashcard वाला नोट कार्डों का एक डेक है।';
+  @override
+  String get studyOfferBody =>
+      'अध्ययन आपके डेक दिखाता है। क्या इसे नेविगेशन में दिखाएँ?';
+  @override
+  String get studyOfferAction => 'दिखाएँ';
+  @override
+  String get settingsNewCardsPerDay => 'प्रतिदिन नए कार्ड';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'प्रति डेक। 0 कोई नया कार्ड नहीं दिखाता।';
+  @override
+  String get settingsResetAllReviews => 'सभी दोहराव रीसेट करें';
+  @override
+  String get resetAllReviewsTitle => 'सभी दोहराव रीसेट करें?';
+  @override
+  String get resetAllReviewsBody =>
+      'हर डेक का हर कार्ड फिर से नया हो जाएगा। कोई नोट नहीं बदलता।';
 }

@@ -3952,4 +3952,28 @@ final class IcelandicStrings extends Strings {
   String get flashcardsBackToDeck => 'Aftur í stokkinn';
   @override
   String get flashcardsEndReview => 'Ljúka upprifjun';
+  @override
+  String get tabStudy => 'Nám';
+  @override
+  String get studyEmpty => 'Engir stokkar enn';
+  @override
+  String get studyEmptyHint =>
+      'Minnismiði með type: flashcard er spjaldastokkur.';
+  @override
+  String get studyOfferBody =>
+      'Nám sýnir stokkana þína. Sýna það í leiðsögninni?';
+  @override
+  String get studyOfferAction => 'Sýna';
+  @override
+  String get settingsNewCardsPerDay => 'Ný spjöld á dag';
+  @override
+  String get settingsNewCardsPerDayHint => 'Á stokk. 0 sýnir engin ný spjöld.';
+  @override
+  String get settingsResetAllReviews => 'Endurstilla alla upprifjun';
+  @override
+  String get resetAllReviewsTitle => 'Endurstilla alla upprifjun?';
+  @override
+  String get resetAllReviewsBody =>
+      'Hvert spjald í hverjum stokki verður nýtt aftur. Engum minnismiða er '
+      'breytt.';
 }

@@ -3972,4 +3972,28 @@ final class SerbianStrings extends Strings {
   String get flashcardsBackToDeck => 'Назад на шпил';
   @override
   String get flashcardsEndReview => 'Заврши понављање';
+  @override
+  String get tabStudy => 'Учење';
+  @override
+  String get studyEmpty => 'Још нема шпилова';
+  @override
+  String get studyEmptyHint => 'Белешка са type: flashcard је шпил картица.';
+  @override
+  String get studyOfferBody =>
+      'Учење приказује ваше шпилове. Приказати га у навигацији?';
+  @override
+  String get studyOfferAction => 'Прикажи';
+  @override
+  String get settingsNewCardsPerDay => 'Нових картица дневно';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'По шпилу. 0 не приказује нове картице.';
+  @override
+  String get settingsResetAllReviews => 'Поништи сва понављања';
+  @override
+  String get resetAllReviewsTitle => 'Поништити сва понављања?';
+  @override
+  String get resetAllReviewsBody =>
+      'Свака картица сваког шпила поново постаје нова. Ниједна белешка се не '
+      'мења.';
 }

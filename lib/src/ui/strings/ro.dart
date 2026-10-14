@@ -4012,4 +4012,28 @@ final class RomanianStrings extends Strings {
   String get flashcardsBackToDeck => 'Înapoi la pachet';
   @override
   String get flashcardsEndReview => 'Încheie repetarea';
+  @override
+  String get tabStudy => 'Studiu';
+  @override
+  String get studyEmpty => 'Încă nu există pachete';
+  @override
+  String get studyEmptyHint =>
+      'O notă cu type: flashcard este un pachet de cărți.';
+  @override
+  String get studyOfferBody =>
+      'Studiu îți arată pachetele. Îl afișezi în navigare?';
+  @override
+  String get studyOfferAction => 'Afișează';
+  @override
+  String get settingsNewCardsPerDay => 'Cărți noi pe zi';
+  @override
+  String get settingsNewCardsPerDayHint => 'Pe pachet. 0 nu arată cărți noi.';
+  @override
+  String get settingsResetAllReviews => 'Resetează toate repetările';
+  @override
+  String get resetAllReviewsTitle => 'Resetezi toate repetările?';
+  @override
+  String get resetAllReviewsBody =>
+      'Fiecare carte din fiecare pachet redevine nouă. Nicio notă nu se '
+      'schimbă.';
 }

@@ -3980,4 +3980,28 @@ final class AlbanianStrings extends Strings {
   String get flashcardsBackToDeck => 'Kthehu te pakoja';
   @override
   String get flashcardsEndReview => 'Përfundo përsëritjen';
+  @override
+  String get tabStudy => 'Studim';
+  @override
+  String get studyEmpty => 'Ende nuk ka pako';
+  @override
+  String get studyEmptyHint =>
+      'Një shënim me type: flashcard është një pako kartash.';
+  @override
+  String get studyOfferBody =>
+      'Studimi tregon pakot e tua. Ta shfaq në navigim?';
+  @override
+  String get studyOfferAction => 'Shfaq';
+  @override
+  String get settingsNewCardsPerDay => 'Karta të reja në ditë';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Për pako. 0 nuk shfaq karta të reja.';
+  @override
+  String get settingsResetAllReviews => 'Rivendos të gjitha përsëritjet';
+  @override
+  String get resetAllReviewsTitle => 'Të rivendosen të gjitha përsëritjet?';
+  @override
+  String get resetAllReviewsBody =>
+      'Çdo kartë e çdo pakoje bëhet sërish e re. Asnjë shënim nuk ndryshon.';
 }

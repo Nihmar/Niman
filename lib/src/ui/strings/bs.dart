@@ -3978,4 +3978,28 @@ final class BosnianStrings extends Strings {
   String get flashcardsBackToDeck => 'Nazad na špil';
   @override
   String get flashcardsEndReview => 'Završi ponavljanje';
+  @override
+  String get tabStudy => 'Učenje';
+  @override
+  String get studyEmpty => 'Još nema špilova';
+  @override
+  String get studyEmptyHint => 'Bilješka s type: flashcard je špil kartica.';
+  @override
+  String get studyOfferBody =>
+      'Učenje prikazuje vaše špilove. Prikazati ga u navigaciji?';
+  @override
+  String get studyOfferAction => 'Prikaži';
+  @override
+  String get settingsNewCardsPerDay => 'Novih kartica dnevno';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Po špilu. 0 ne prikazuje nove kartice.';
+  @override
+  String get settingsResetAllReviews => 'Poništi sva ponavljanja';
+  @override
+  String get resetAllReviewsTitle => 'Poništiti sva ponavljanja?';
+  @override
+  String get resetAllReviewsBody =>
+      'Svaka kartica svakog špila ponovo postaje nova. Nijedna bilješka se ne '
+      'mijenja.';
 }

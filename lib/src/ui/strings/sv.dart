@@ -3967,4 +3967,28 @@ final class SwedishStrings extends Strings {
   String get flashcardsBackToDeck => 'Tillbaka till kortleken';
   @override
   String get flashcardsEndReview => 'Avsluta repetitionen';
+  @override
+  String get tabStudy => 'Studera';
+  @override
+  String get studyEmpty => 'Inga kortlekar ännu';
+  @override
+  String get studyEmptyHint =>
+      'En anteckning med type: flashcard är en kortlek.';
+  @override
+  String get studyOfferBody =>
+      'Studera visar dina kortlekar. Visa det i navigeringen?';
+  @override
+  String get studyOfferAction => 'Visa';
+  @override
+  String get settingsNewCardsPerDay => 'Nya kort per dag';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Per kortlek. 0 visar inga nya kort.';
+  @override
+  String get settingsResetAllReviews => 'Nollställ all repetition';
+  @override
+  String get resetAllReviewsTitle => 'Nollställa all repetition?';
+  @override
+  String get resetAllReviewsBody =>
+      'Varje kort i varje kortlek blir nytt igen. Ingen anteckning ändras.';
 }

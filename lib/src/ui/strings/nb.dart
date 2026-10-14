@@ -3943,4 +3943,27 @@ final class NorwegianStrings extends Strings {
   String get flashcardsBackToDeck => 'Tilbake til kortstokken';
   @override
   String get flashcardsEndReview => 'Avslutt repetisjonen';
+  @override
+  String get tabStudy => 'Studer';
+  @override
+  String get studyEmpty => 'Ingen kortstokker ennå';
+  @override
+  String get studyEmptyHint => 'Et notat med type: flashcard er en kortstokk.';
+  @override
+  String get studyOfferBody =>
+      'Studer viser kortstokkene dine. Vise det i navigasjonen?';
+  @override
+  String get studyOfferAction => 'Vis';
+  @override
+  String get settingsNewCardsPerDay => 'Nye kort per dag';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Per kortstokk. 0 viser ingen nye kort.';
+  @override
+  String get settingsResetAllReviews => 'Nullstill all repetisjon';
+  @override
+  String get resetAllReviewsTitle => 'Nullstille all repetisjon?';
+  @override
+  String get resetAllReviewsBody =>
+      'Hvert kort i hver kortstokk blir nytt igjen. Ingen notater endres.';
 }

@@ -3992,4 +3992,27 @@ final class BelarusianStrings extends Strings {
   String get flashcardsBackToDeck => 'Назад да калоды';
   @override
   String get flashcardsEndReview => 'Скончыць паўтарэнне';
+  @override
+  String get tabStudy => 'Вывучэнне';
+  @override
+  String get studyEmpty => 'Пакуль няма калод';
+  @override
+  String get studyEmptyHint =>
+      'Нататка з type: flashcard — гэта калода картак.';
+  @override
+  String get studyOfferBody =>
+      'Вывучэнне паказвае вашы калоды. Паказаць яго ў навігацыі?';
+  @override
+  String get studyOfferAction => 'Паказаць';
+  @override
+  String get settingsNewCardsPerDay => 'Новых картак у дзень';
+  @override
+  String get settingsNewCardsPerDayHint => 'На калоду. 0 — без новых картак.';
+  @override
+  String get settingsResetAllReviews => 'Скінуць усе паўтарэнні';
+  @override
+  String get resetAllReviewsTitle => 'Скінуць усе паўтарэнні?';
+  @override
+  String get resetAllReviewsBody =>
+      'Кожная картка кожнай калоды зноў стане новай. Нататкі не змяняюцца.';
 }

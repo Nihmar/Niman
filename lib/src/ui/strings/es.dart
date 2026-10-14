@@ -4008,4 +4008,29 @@ final class SpanishStrings extends Strings {
   String get flashcardsBackToDeck => 'Volver al mazo';
   @override
   String get flashcardsEndReview => 'Terminar el repaso';
+  @override
+  String get tabStudy => 'Estudio';
+  @override
+  String get studyEmpty => 'Aún no hay mazos';
+  @override
+  String get studyEmptyHint =>
+      'Una nota con type: flashcard es un mazo de tarjetas.';
+  @override
+  String get studyOfferBody =>
+      'Estudio muestra tus mazos. ¿Mostrarlo en la navegación?';
+  @override
+  String get studyOfferAction => 'Mostrar';
+  @override
+  String get settingsNewCardsPerDay => 'Tarjetas nuevas al día';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Por mazo. 0 no muestra tarjetas nuevas.';
+  @override
+  String get settingsResetAllReviews => 'Reiniciar todos los repasos';
+  @override
+  String get resetAllReviewsTitle => '¿Reiniciar todos los repasos?';
+  @override
+  String get resetAllReviewsBody =>
+      'Cada tarjeta de cada mazo vuelve a ser nueva. No se cambia ninguna '
+      'nota.';
 }

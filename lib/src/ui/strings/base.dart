@@ -2123,4 +2123,14 @@ abstract base class Strings {
   String get flashcardsNextDeck;
   String get flashcardsBackToDeck;
   String get flashcardsEndReview;
+  String get tabStudy;
+  String get studyEmpty;
+  String get studyEmptyHint;
+  String get studyOfferBody;
+  String get studyOfferAction;
+  String get settingsNewCardsPerDay;
+  String get settingsNewCardsPerDayHint;
+  String get settingsResetAllReviews;
+  String get resetAllReviewsTitle;
+  String get resetAllReviewsBody;
 }

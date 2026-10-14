@@ -3902,4 +3902,28 @@ final class EstonianStrings extends Strings {
   String get flashcardsBackToDeck => 'Tagasi pakki';
   @override
   String get flashcardsEndReview => 'Lõpeta kordamine';
+  @override
+  String get tabStudy => 'Õppimine';
+  @override
+  String get studyEmpty => 'Pakke veel pole';
+  @override
+  String get studyEmptyHint =>
+      'Märge, millel on type: flashcard, on kaardipakk.';
+  @override
+  String get studyOfferBody =>
+      'Õppimine näitab su pakke. Kas näidata seda navigeerimises?';
+  @override
+  String get studyOfferAction => 'Näita';
+  @override
+  String get settingsNewCardsPerDay => 'Uusi kaarte päevas';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Paki kohta. 0 ei näita uusi kaarte.';
+  @override
+  String get settingsResetAllReviews => 'Lähtesta kõik kordamised';
+  @override
+  String get resetAllReviewsTitle => 'Kas lähtestada kõik kordamised?';
+  @override
+  String get resetAllReviewsBody =>
+      'Iga paki iga kaart muutub taas uueks. Ühtegi märget ei muudeta.';
 }

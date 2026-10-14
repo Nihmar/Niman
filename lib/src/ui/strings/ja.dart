@@ -3639,4 +3639,24 @@ final class JapaneseStrings extends Strings {
   String get flashcardsBackToDeck => 'デッキに戻る';
   @override
   String get flashcardsEndReview => '学習を終了';
+  @override
+  String get tabStudy => '学習';
+  @override
+  String get studyEmpty => 'デッキはまだありません';
+  @override
+  String get studyEmptyHint => 'type: flashcard のノートはカードのデッキです。';
+  @override
+  String get studyOfferBody => '学習にはデッキが一覧表示されます。ナビゲーションに表示しますか？';
+  @override
+  String get studyOfferAction => '表示';
+  @override
+  String get settingsNewCardsPerDay => '1 日の新規カード数';
+  @override
+  String get settingsNewCardsPerDayHint => 'デッキごと。0 で新規カードを表示しません。';
+  @override
+  String get settingsResetAllReviews => 'すべての学習をリセット';
+  @override
+  String get resetAllReviewsTitle => 'すべての学習をリセットしますか？';
+  @override
+  String get resetAllReviewsBody => 'すべてのデッキのすべてのカードが新規に戻ります。ノートは変更されません。';
 }

@@ -3998,4 +3998,29 @@ final class DutchStrings extends Strings {
   String get flashcardsBackToDeck => 'Terug naar de stapel';
   @override
   String get flashcardsEndReview => 'Herhaling beëindigen';
+  @override
+  String get tabStudy => 'Studeren';
+  @override
+  String get studyEmpty => 'Nog geen stapels';
+  @override
+  String get studyEmptyHint =>
+      'Een notitie met type: flashcard is een stapel kaarten.';
+  @override
+  String get studyOfferBody =>
+      'Studeren toont je stapels. Tonen in de navigatie?';
+  @override
+  String get studyOfferAction => 'Tonen';
+  @override
+  String get settingsNewCardsPerDay => 'Nieuwe kaarten per dag';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Per stapel. 0 toont geen nieuwe kaarten.';
+  @override
+  String get settingsResetAllReviews => 'Alle herhalingen resetten';
+  @override
+  String get resetAllReviewsTitle => 'Alle herhalingen resetten?';
+  @override
+  String get resetAllReviewsBody =>
+      'Elke kaart van elke stapel wordt weer nieuw. Er wordt geen notitie '
+      'gewijzigd.';
 }

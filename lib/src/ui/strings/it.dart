@@ -3984,4 +3984,28 @@ final class ItalianStrings extends Strings {
   String get flashcardsBackToDeck => 'Torna al mazzo';
   @override
   String get flashcardsEndReview => 'Termina il ripasso';
+  @override
+  String get tabStudy => 'Studio';
+  @override
+  String get studyEmpty => 'Ancora nessun mazzo';
+  @override
+  String get studyEmptyHint =>
+      'Una nota con type: flashcard è un mazzo di carte.';
+  @override
+  String get studyOfferBody =>
+      'Studio elenca i tuoi mazzi. Mostrarlo nella navigazione?';
+  @override
+  String get studyOfferAction => 'Mostra';
+  @override
+  String get settingsNewCardsPerDay => 'Nuove carte al giorno';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Per mazzo. 0 non mostra carte nuove.';
+  @override
+  String get settingsResetAllReviews => 'Azzera tutti i ripassi';
+  @override
+  String get resetAllReviewsTitle => 'Azzerare tutti i ripassi?';
+  @override
+  String get resetAllReviewsBody =>
+      'Ogni carta di ogni mazzo torna nuova. Nessuna nota viene modificata.';
 }

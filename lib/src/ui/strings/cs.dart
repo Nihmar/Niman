@@ -3948,4 +3948,27 @@ final class CzechStrings extends Strings {
   String get flashcardsBackToDeck => 'Zpět na balíček';
   @override
   String get flashcardsEndReview => 'Ukončit opakování';
+  @override
+  String get tabStudy => 'Studium';
+  @override
+  String get studyEmpty => 'Zatím žádné balíčky';
+  @override
+  String get studyEmptyHint => 'Poznámka s type: flashcard je balíček karet.';
+  @override
+  String get studyOfferBody =>
+      'Studium zobrazuje vaše balíčky. Zobrazit ho v navigaci?';
+  @override
+  String get studyOfferAction => 'Zobrazit';
+  @override
+  String get settingsNewCardsPerDay => 'Nových karet denně';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Na balíček. 0 nezobrazí žádné nové karty.';
+  @override
+  String get settingsResetAllReviews => 'Vynulovat všechna opakování';
+  @override
+  String get resetAllReviewsTitle => 'Vynulovat všechna opakování?';
+  @override
+  String get resetAllReviewsBody =>
+      'Každá karta každého balíčku bude znovu nová. Žádná poznámka se nezmění.';
 }

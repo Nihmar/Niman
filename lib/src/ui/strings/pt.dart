@@ -3977,4 +3977,28 @@ final class PortugueseStrings extends Strings {
   String get flashcardsBackToDeck => 'Voltar ao baralho';
   @override
   String get flashcardsEndReview => 'Terminar a revisão';
+  @override
+  String get tabStudy => 'Estudo';
+  @override
+  String get studyEmpty => 'Ainda não há baralhos';
+  @override
+  String get studyEmptyHint =>
+      'Uma nota com type: flashcard é um baralho de cartas.';
+  @override
+  String get studyOfferBody =>
+      'Estudo mostra os seus baralhos. Mostrá-lo na navegação?';
+  @override
+  String get studyOfferAction => 'Mostrar';
+  @override
+  String get settingsNewCardsPerDay => 'Cartas novas por dia';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Por baralho. 0 não mostra cartas novas.';
+  @override
+  String get settingsResetAllReviews => 'Repor todas as revisões';
+  @override
+  String get resetAllReviewsTitle => 'Repor todas as revisões?';
+  @override
+  String get resetAllReviewsBody =>
+      'Cada carta de cada baralho volta a ser nova. Nenhuma nota é alterada.';
 }

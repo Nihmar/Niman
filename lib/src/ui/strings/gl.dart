@@ -3980,4 +3980,28 @@ final class GalicianStrings extends Strings {
   String get flashcardsBackToDeck => 'Volver ao mazo';
   @override
   String get flashcardsEndReview => 'Rematar o repaso';
+  @override
+  String get tabStudy => 'Estudo';
+  @override
+  String get studyEmpty => 'Aínda non hai mazos';
+  @override
+  String get studyEmptyHint =>
+      'Unha nota con type: flashcard é un mazo de tarxetas.';
+  @override
+  String get studyOfferBody =>
+      'Estudo mostra os teus mazos. Amosalo na navegación?';
+  @override
+  String get studyOfferAction => 'Amosar';
+  @override
+  String get settingsNewCardsPerDay => 'Tarxetas novas ao día';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Por mazo. 0 non amosa tarxetas novas.';
+  @override
+  String get settingsResetAllReviews => 'Reiniciar todos os repasos';
+  @override
+  String get resetAllReviewsTitle => 'Reiniciar todos os repasos?';
+  @override
+  String get resetAllReviewsBody =>
+      'Cada tarxeta de cada mazo volve ser nova. Non se cambia ningunha nota.';
 }

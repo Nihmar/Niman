@@ -3974,4 +3974,26 @@ final class BulgarianStrings extends Strings {
   String get flashcardsBackToDeck => 'Обратно към тестето';
   @override
   String get flashcardsEndReview => 'Край на преговора';
+  @override
+  String get tabStudy => 'Учене';
+  @override
+  String get studyEmpty => 'Още няма тестета';
+  @override
+  String get studyEmptyHint => 'Бележка с type: flashcard е тесте с карти.';
+  @override
+  String get studyOfferBody =>
+      'Учене показва тестетата ви. Да се покаже ли в навигацията?';
+  @override
+  String get studyOfferAction => 'Покажи';
+  @override
+  String get settingsNewCardsPerDay => 'Нови карти на ден';
+  @override
+  String get settingsNewCardsPerDayHint => 'За тесте. 0 не показва нови карти.';
+  @override
+  String get settingsResetAllReviews => 'Нулиране на всички прегледи';
+  @override
+  String get resetAllReviewsTitle => 'Нулиране на всички прегледи?';
+  @override
+  String get resetAllReviewsBody =>
+      'Всяка карта от всяко тесте отново става нова. Бележките не се променят.';
 }

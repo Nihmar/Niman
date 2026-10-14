@@ -2015,4 +2015,14 @@ final class AppStrings {
   static String get flashcardsNextDeck => _s.flashcardsNextDeck;
   static String get flashcardsBackToDeck => _s.flashcardsBackToDeck;
   static String get flashcardsEndReview => _s.flashcardsEndReview;
+  static String get tabStudy => _s.tabStudy;
+  static String get studyEmpty => _s.studyEmpty;
+  static String get studyEmptyHint => _s.studyEmptyHint;
+  static String get studyOfferBody => _s.studyOfferBody;
+  static String get studyOfferAction => _s.studyOfferAction;
+  static String get settingsNewCardsPerDay => _s.settingsNewCardsPerDay;
+  static String get settingsNewCardsPerDayHint => _s.settingsNewCardsPerDayHint;
+  static String get settingsResetAllReviews => _s.settingsResetAllReviews;
+  static String get resetAllReviewsTitle => _s.resetAllReviewsTitle;
+  static String get resetAllReviewsBody => _s.resetAllReviewsBody;
 }

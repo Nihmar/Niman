@@ -3976,4 +3976,28 @@ final class FinnishStrings extends Strings {
   String get flashcardsBackToDeck => 'Takaisin pakkaan';
   @override
   String get flashcardsEndReview => 'Lopeta kertaus';
+  @override
+  String get tabStudy => 'Opiskelu';
+  @override
+  String get studyEmpty => 'Ei vielä pakkoja';
+  @override
+  String get studyEmptyHint =>
+      'Muistiinpano, jossa on type: flashcard, on korttipakka.';
+  @override
+  String get studyOfferBody =>
+      'Opiskelu näyttää pakkasi. Näytetäänkö se navigoinnissa?';
+  @override
+  String get studyOfferAction => 'Näytä';
+  @override
+  String get settingsNewCardsPerDay => 'Uusia kortteja päivässä';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Pakkaa kohden. 0 ei näytä uusia kortteja.';
+  @override
+  String get settingsResetAllReviews => 'Nollaa kaikki kertaukset';
+  @override
+  String get resetAllReviewsTitle => 'Nollataanko kaikki kertaukset?';
+  @override
+  String get resetAllReviewsBody =>
+      'Jokaisen pakan jokainen kortti on taas uusi. Muistiinpanoja ei muuteta.';
 }

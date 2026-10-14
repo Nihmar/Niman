@@ -3993,4 +3993,29 @@ final class BasqueStrings extends Strings {
   String get flashcardsBackToDeck => 'Itzuli mazora';
   @override
   String get flashcardsEndReview => 'Amaitu errepasoa';
+  @override
+  String get tabStudy => 'Ikasketa';
+  @override
+  String get studyEmpty => 'Oraindik ez dago mazorik';
+  @override
+  String get studyEmptyHint =>
+      'type: flashcard duen ohar bat txartel-mazo bat da.';
+  @override
+  String get studyOfferBody =>
+      'Ikasketak zure mazoak erakusten ditu. Nabigazioan erakutsi?';
+  @override
+  String get studyOfferAction => 'Erakutsi';
+  @override
+  String get settingsNewCardsPerDay => 'Txartel berriak eguneko';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Mazo bakoitzeko. 0k ez du txartel berririk erakusten.';
+  @override
+  String get settingsResetAllReviews => 'Berrezarri errepaso guztiak';
+  @override
+  String get resetAllReviewsTitle => 'Errepaso guztiak berrezarri?';
+  @override
+  String get resetAllReviewsBody =>
+      'Mazo guztietako txartel guztiak berriak izango dira berriro. Ez da '
+      'oharrik aldatzen.';
 }

@@ -3973,4 +3973,28 @@ final class SlovenianStrings extends Strings {
   String get flashcardsBackToDeck => 'Nazaj na kupček';
   @override
   String get flashcardsEndReview => 'Končaj ponavljanje';
+  @override
+  String get tabStudy => 'Učenje';
+  @override
+  String get studyEmpty => 'Še ni kupčkov';
+  @override
+  String get studyEmptyHint => 'Zapisek s type: flashcard je kupček kartic.';
+  @override
+  String get studyOfferBody =>
+      'Učenje prikaže vaše kupčke. Ga prikažem v navigaciji?';
+  @override
+  String get studyOfferAction => 'Prikaži';
+  @override
+  String get settingsNewCardsPerDay => 'Novih kartic na dan';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Na kupček. 0 ne prikaže novih kartic.';
+  @override
+  String get settingsResetAllReviews => 'Ponastavi vsa ponavljanja';
+  @override
+  String get resetAllReviewsTitle => 'Ponastavim vsa ponavljanja?';
+  @override
+  String get resetAllReviewsBody =>
+      'Vsaka kartica vsakega kupčka spet postane nova. Noben zapisek se ne '
+      'spremeni.';
 }

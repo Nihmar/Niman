@@ -3979,4 +3979,28 @@ final class MacedonianStrings extends Strings {
   String get flashcardsBackToDeck => 'Назад кон шпилот';
   @override
   String get flashcardsEndReview => 'Заврши со повторувањето';
+  @override
+  String get tabStudy => 'Учење';
+  @override
+  String get studyEmpty => 'Сè уште нема шпилови';
+  @override
+  String get studyEmptyHint => 'Белешка со type: flashcard е шпил картички.';
+  @override
+  String get studyOfferBody =>
+      'Учење ги прикажува вашите шпилови. Да се прикаже во навигацијата?';
+  @override
+  String get studyOfferAction => 'Прикажи';
+  @override
+  String get settingsNewCardsPerDay => 'Нови картички дневно';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'По шпил. 0 не прикажува нови картички.';
+  @override
+  String get settingsResetAllReviews => 'Ресетирај ги сите повторувања';
+  @override
+  String get resetAllReviewsTitle => 'Да се ресетираат сите повторувања?';
+  @override
+  String get resetAllReviewsBody =>
+      'Секоја картичка од секој шпил повторно станува нова. Ниту една белешка '
+      'не се менува.';
 }

@@ -4072,4 +4072,28 @@ final class GreekStrings extends Strings {
   String get flashcardsBackToDeck => 'Πίσω στην τράπουλα';
   @override
   String get flashcardsEndReview => 'Τέλος επανάληψης';
+  @override
+  String get tabStudy => 'Μελέτη';
+  @override
+  String get studyEmpty => 'Δεν υπάρχουν ακόμη τράπουλες';
+  @override
+  String get studyEmptyHint =>
+      'Μια σημείωση με type: flashcard είναι μια τράπουλα καρτών.';
+  @override
+  String get studyOfferBody =>
+      'Η Μελέτη δείχνει τις τράπουλές σας. Να εμφανίζεται στην πλοήγηση;';
+  @override
+  String get studyOfferAction => 'Εμφάνιση';
+  @override
+  String get settingsNewCardsPerDay => 'Νέες κάρτες ανά ημέρα';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Ανά τράπουλα. Το 0 δεν δείχνει νέες κάρτες.';
+  @override
+  String get settingsResetAllReviews => 'Επαναφορά όλων των επαναλήψεων';
+  @override
+  String get resetAllReviewsTitle => 'Επαναφορά όλων των επαναλήψεων;';
+  @override
+  String get resetAllReviewsBody =>
+      'Κάθε κάρτα κάθε τράπουλας γίνεται ξανά νέα. Καμία σημείωση δεν αλλάζει.';
 }

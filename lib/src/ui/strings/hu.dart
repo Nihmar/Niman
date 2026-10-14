@@ -3967,4 +3967,28 @@ final class HungarianStrings extends Strings {
   String get flashcardsBackToDeck => 'Vissza a paklihoz';
   @override
   String get flashcardsEndReview => 'Ismétlés befejezése';
+  @override
+  String get tabStudy => 'Tanulás';
+  @override
+  String get studyEmpty => 'Még nincs pakli';
+  @override
+  String get studyEmptyHint =>
+      'A type: flashcard jelölésű jegyzet egy kártyapakli.';
+  @override
+  String get studyOfferBody =>
+      'A Tanulás a paklijaidat mutatja. Megjelenjen a navigációban?';
+  @override
+  String get studyOfferAction => 'Megjelenítés';
+  @override
+  String get settingsNewCardsPerDay => 'Új kártya naponta';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Paklinként. 0 esetén nincs új kártya.';
+  @override
+  String get settingsResetAllReviews => 'Minden ismétlés visszaállítása';
+  @override
+  String get resetAllReviewsTitle => 'Visszaállítod az összes ismétlést?';
+  @override
+  String get resetAllReviewsBody =>
+      'Minden pakli minden kártyája újra új lesz. Egyik jegyzet sem változik.';
 }

@@ -3917,4 +3917,28 @@ final class TurkishStrings extends Strings {
   String get flashcardsBackToDeck => 'Desteye dön';
   @override
   String get flashcardsEndReview => 'Tekrarı bitir';
+  @override
+  String get tabStudy => 'Çalışma';
+  @override
+  String get studyEmpty => 'Henüz deste yok';
+  @override
+  String get studyEmptyHint =>
+      'type: flashcard içeren bir not bir kart destesidir.';
+  @override
+  String get studyOfferBody =>
+      'Çalışma destelerini gösterir. Gezinmede gösterilsin mi?';
+  @override
+  String get studyOfferAction => 'Göster';
+  @override
+  String get settingsNewCardsPerDay => 'Günlük yeni kart';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Deste başına. 0 yeni kart göstermez.';
+  @override
+  String get settingsResetAllReviews => 'Tüm tekrarları sıfırla';
+  @override
+  String get resetAllReviewsTitle => 'Tüm tekrarlar sıfırlansın mı?';
+  @override
+  String get resetAllReviewsBody =>
+      'Her destenin her kartı yeniden yeni olur. Hiçbir not değişmez.';
 }

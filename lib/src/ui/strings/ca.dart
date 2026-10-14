@@ -4017,4 +4017,29 @@ final class CatalanStrings extends Strings {
   String get flashcardsBackToDeck => 'Torna a la baralla';
   @override
   String get flashcardsEndReview => 'Acaba la revisió';
+  @override
+  String get tabStudy => 'Estudi';
+  @override
+  String get studyEmpty => 'Encara no hi ha cap baralla';
+  @override
+  String get studyEmptyHint =>
+      'Una nota amb type: flashcard és una baralla de targetes.';
+  @override
+  String get studyOfferBody =>
+      'Estudi mostra les teves baralles. Vols mostrar-lo a la navegació?';
+  @override
+  String get studyOfferAction => 'Mostra';
+  @override
+  String get settingsNewCardsPerDay => 'Targetes noves al dia';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Per baralla. 0 no mostra cap targeta nova.';
+  @override
+  String get settingsResetAllReviews => 'Reinicia totes les revisions';
+  @override
+  String get resetAllReviewsTitle => 'Vols reiniciar totes les revisions?';
+  @override
+  String get resetAllReviewsBody =>
+      'Totes les targetes de totes les baralles tornen a ser noves. No es '
+      'canvia cap nota.';
 }

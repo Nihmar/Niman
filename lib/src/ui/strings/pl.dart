@@ -4006,4 +4006,28 @@ final class PolishStrings extends Strings {
   String get flashcardsBackToDeck => 'Wróć do talii';
   @override
   String get flashcardsEndReview => 'Zakończ naukę';
+  @override
+  String get tabStudy => 'Nauka';
+  @override
+  String get studyEmpty => 'Brak talii';
+  @override
+  String get studyEmptyHint => 'Notatka z type: flashcard to talia fiszek.';
+  @override
+  String get studyOfferBody =>
+      'Nauka pokazuje twoje talie. Pokazać ją w nawigacji?';
+  @override
+  String get studyOfferAction => 'Pokaż';
+  @override
+  String get settingsNewCardsPerDay => 'Nowych fiszek dziennie';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Na talię. 0 nie pokazuje nowych fiszek.';
+  @override
+  String get settingsResetAllReviews => 'Zresetuj całą naukę';
+  @override
+  String get resetAllReviewsTitle => 'Zresetować całą naukę?';
+  @override
+  String get resetAllReviewsBody =>
+      'Każda fiszka każdej talii znów stanie się nowa. Żadna notatka się nie '
+      'zmienia.';
 }

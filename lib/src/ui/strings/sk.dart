@@ -3958,4 +3958,28 @@ final class SlovakStrings extends Strings {
   String get flashcardsBackToDeck => 'Späť na balíček';
   @override
   String get flashcardsEndReview => 'Ukončiť opakovanie';
+  @override
+  String get tabStudy => 'Štúdium';
+  @override
+  String get studyEmpty => 'Zatiaľ žiadne balíčky';
+  @override
+  String get studyEmptyHint => 'Poznámka s type: flashcard je balíček kariet.';
+  @override
+  String get studyOfferBody =>
+      'Štúdium zobrazuje vaše balíčky. Zobraziť ho v navigácii?';
+  @override
+  String get studyOfferAction => 'Zobraziť';
+  @override
+  String get settingsNewCardsPerDay => 'Nových kariet denne';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Na balíček. 0 nezobrazí žiadne nové karty.';
+  @override
+  String get settingsResetAllReviews => 'Vynulovať všetky opakovania';
+  @override
+  String get resetAllReviewsTitle => 'Vynulovať všetky opakovania?';
+  @override
+  String get resetAllReviewsBody =>
+      'Každá karta každého balíčka bude znova nová. Žiadna poznámka sa '
+      'nezmení.';
 }
