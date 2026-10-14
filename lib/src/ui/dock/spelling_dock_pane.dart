@@ -38,6 +38,7 @@ final class SpellingDockPane extends StatelessWidget {
       apply: review.apply,
       reveal: review.reveal,
       addWord: review.addWord,
+      ignored: review.ignored,
       edited: review.edited,
       available: review.available,
     );
