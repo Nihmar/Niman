@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 
 /// One row of the desktop menu: an icon, a name, pressed while [active]
 /// (a format that is on at the caret).
@@ -9,9 +10,9 @@ final class ContextMenuRow extends StatelessWidget {
   /// Creates a row.
   const new({
     required this.rowKey,
-    required this.icon,
     required this.label,
     required this.onPressed,
+    this.icon,
     this.active = false,
     this.trailing,
     this.onHover,
@@ -25,8 +26,9 @@ final class ContextMenuRow extends StatelessWidget {
   /// What tests find the row by.
   final Key rowKey;
 
-  /// Its icon.
-  final IconData icon;
+  /// Its icon; none leaves its room, so a menu of some rows with icons
+  /// and some without keeps its labels in one column.
+  final IconData? icon;
 
   /// Its name.
   final String label;
@@ -56,21 +58,24 @@ final class ContextMenuRow extends StatelessWidget {
         onTap: onPressed,
         canRequestFocus: false,
         child: Container(
-          height: 28,
+          height: pointerDenseItemHeight,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           color: active ? scheme.primaryContainer : null,
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: 18,
-                color: !enabled
-                    ? dim
-                    : active
-                    ? scheme.onPrimaryContainer
-                    : scheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 12),
+              if (icon case final icon?)
+                Icon(
+                  icon,
+                  size: theme.menuIconSize,
+                  color: !enabled
+                      ? dim
+                      : active
+                      ? scheme.onPrimaryContainer
+                      : scheme.onSurfaceVariant,
+                )
+              else
+                SizedBox.square(dimension: theme.menuIconSize),
+              SizedBox(width: theme.menuIconGap),
               Expanded(
                 child: Text(
                   label,
@@ -85,7 +90,11 @@ final class ContextMenuRow extends StatelessWidget {
                 ),
               ),
               if (trailing != null)
-                Icon(trailing, size: 18, color: scheme.onSurfaceVariant),
+                Icon(
+                  trailing,
+                  size: theme.menuIconSize,
+                  color: scheme.onSurfaceVariant,
+                ),
             ],
           ),
         ),
@@ -95,3 +104,13 @@ final class ContextMenuRow extends StatelessWidget {
     return MouseRegion(onEnter: (_) => hover(), child: row);
   }
 }
+
+/// The icon a clipboard button of the selection toolbar wears, or null for
+/// a button that is not one of the four.
+IconData? clipboardIconOf(ContextMenuButtonType type) => switch (type) {
+  ContextMenuButtonType.cut => Icons.content_cut,
+  ContextMenuButtonType.copy => Icons.content_copy,
+  ContextMenuButtonType.paste => Icons.content_paste,
+  ContextMenuButtonType.selectAll => Icons.select_all,
+  _ => null,
+};

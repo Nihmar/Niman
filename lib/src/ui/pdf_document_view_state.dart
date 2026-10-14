@@ -21,7 +21,9 @@ import 'package:niman/src/ui/ocr/ocr_lines_scope.dart';
 import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:niman/src/ui/pdf_held_document.dart';
 import 'package:niman/src/ui/pdf_mark_layer.dart';
+import 'package:niman/src/ui/pdf_selection_menu.dart';
 import 'package:niman/src/ui/place_link_button.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -401,6 +403,11 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
         onTextSelectionChange: (selection) => _selection = selection,
       ),
       customizeContextMenuItems: _selectionMenu,
+      // A pointer's menu is the app's compact one (`pointer_menu.dart`).
+      buildContextMenu: pointerDense(Theme.of(context))
+          ? (context, params) =>
+                pdfSelectionMenu(context, params, customize: _selectionMenu)
+          : null,
     ),
   );
 
