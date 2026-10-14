@@ -36,6 +36,10 @@ ReviewState gradeCard(
     reps: reps,
     due: DateTime(today.year, today.month, today.day + interval),
     at: (now ?? DateTime.now()).toUtc(),
+    // The day of the first grade stays with the card for good.
+    first: state == null
+        ? DateTime(today.year, today.month, today.day)
+        : state.first,
   );
 }
 

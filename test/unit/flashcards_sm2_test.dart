@@ -121,6 +121,33 @@ void main() {
     });
   });
 
+  group('the day of the first grade', () {
+    test('is set by the first grade of a card and stays', () {
+      var s = grade(null, Grade.again);
+      expect(s.first, today);
+      s = grade(s, Grade.good, DateTime(2026, 10, 15));
+      expect(s.first, today);
+      s = grade(s, Grade.easy, DateTime(2026, 10, 20));
+      expect(s.first, today);
+    });
+
+    test('is none for a state written before the field existed', () {
+      final old = state();
+      expect(old.first, isNull);
+      expect(grade(old, Grade.good).first, isNull);
+      expect(old.toJson().containsKey('first'), isFalse);
+    });
+
+    test('roundtrips through json, and reads absent when it is no date', () {
+      final s = grade(null, Grade.good);
+      expect(s.toJson()['first'], '2026-10-14');
+      expect(ReviewState.fromJson(s.toJson()), s);
+      final odd = ReviewState.fromJson({...s.toJson(), 'first': 'today'});
+      expect(odd, isNotNull);
+      expect(odd!.first, isNull);
+    });
+  });
+
   group('previews', () {
     test('give each button its interval', () {
       expect(intervalPreviews(null), {

@@ -117,11 +117,25 @@ String? mergeReviewJson({
         base: agreed,
         localNewer: !_readAt(theirs[key]).isAfter(_readAt(mine[key])),
       );
-      if (pick.present) cards[key] = pick.value;
+      if (pick.present)
+        cards[key] = _withEarliestFirst(pick.value, mine[key], theirs[key]);
     }
     if (cards.isNotEmpty) merged[note] = cards;
   }
   return _encode(merged);
+}
+
+/// The card [picked] with the earlier of the two sides' `first` dates: a
+/// card first graded on two devices was first graded on the earlier day,
+/// whichever review is the later. ISO dates compare as text.
+Object? _withEarliestFirst(Object? picked, Object? mine, Object? theirs) {
+  if (picked is! Map) return picked;
+  final firsts = [
+    for (final card in [mine, theirs])
+      if (card is Map && card['first'] is String) card['first']! as String,
+  ]..sort();
+  if (firsts.isEmpty || picked['first'] == firsts.first) return picked;
+  return {...picked, 'first': firsts.first};
 }
 
 /// A note's cards of a review file; none for an entry that is no object.

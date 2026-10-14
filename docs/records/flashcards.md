@@ -118,10 +118,17 @@ Each grade button shows when the card would come back.
 ```json
 {
   "Studio/Irregular verbs.md": {
-    "choose": {"ef": 2.5, "interval": 6, "reps": 2, "due": "2026-10-20", "at": "2026-10-14T09:12:03Z"}
+    "choose": {"ef": 2.5, "interval": 6, "reps": 2, "due": "2026-10-20", "at": "2026-10-14T09:12:03Z", "first": "2026-10-12"}
   }
 }
 ```
+
+`first` is the study day the card was first graded. A card has a state from
+its first grade on, so it is what tells how many **new** cards a deck has
+already shown today (the states whose `first` is today): the daily limit
+needs no other counter. It is written once and kept by every later grade;
+the sync keeps the earlier of two devices' `first`. A state without it (none
+written before it existed) is never counted as a new card of today.
 
 - **Out of the note**, because every grade changes it: inside the note it
   would rewrite the file at every card, flooding the history and the sync

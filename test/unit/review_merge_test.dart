@@ -95,6 +95,39 @@ void main() {
     });
   });
 
+  test('a card first graded on two devices keeps the earlier first day', () {
+    Map<String, Object?> graded(int interval, String at, String first) => {
+      ...card(interval, at),
+      'first': first,
+    };
+    final merged = mergeReviewJson(
+      base: null,
+      local: json({
+        'a.md': {'x': graded(1, early, '2026-10-14')},
+      }),
+      remote: json({
+        'a.md': {'x': graded(6, late, '2026-10-13')},
+      }),
+    );
+    expect(parsed(merged), {
+      'a.md': {'x': graded(6, late, '2026-10-13')},
+    });
+    // One side without the field (an older build) leaves the other's.
+    final legacy = mergeReviewJson(
+      base: null,
+      local: json({
+        'a.md': {'x': card(1, late)},
+      }),
+      remote: json({
+        'a.md': {'x': graded(2, early, '2026-10-13')},
+      }),
+    );
+    expect(
+      ((parsed(legacy)['a.md']! as Map)['x']! as Map)['first'],
+      '2026-10-13',
+    );
+  });
+
   test('a card present on one side only is kept without a base', () {
     final merged = mergeReviewJson(
       base: null,

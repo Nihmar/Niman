@@ -15,6 +15,7 @@ final class ReviewState {
     required this.reps,
     required this.due,
     required this.at,
+    this.first,
   });
 
   /// Reads an entry of the file; null for anything that is not one: a
@@ -35,6 +36,7 @@ final class ReviewState {
       reps: reps,
       due: due,
       at: DateTime.tryParse('${json['at']}')?.toUtc() ?? DateTime.utc(1970),
+      first: _dateOf(json['first']),
     );
   }
 
@@ -60,6 +62,12 @@ final class ReviewState {
   /// compares to keep the later of two devices' entries.
   final DateTime at;
 
+  /// The calendar day the card was first graded, a date at midnight: what
+  /// tells how many new cards a deck has shown today, since the card has a
+  /// state from then on. Null for a state written before the field existed
+  /// (never counted as a new card of today).
+  final DateTime? first;
+
   /// Whether the card is due on or before [today], a date at midnight.
   bool isDue(DateTime today) => !due.isAfter(today);
 
@@ -74,6 +82,7 @@ final class ReviewState {
     'reps': reps,
     'due': dateText(due),
     'at': at.toUtc().toIso8601String(),
+    if (first != null) 'first': dateText(first!),
   };
 
   @override
@@ -83,10 +92,11 @@ final class ReviewState {
       other.interval == interval &&
       other.reps == reps &&
       other.due == due &&
-      other.at == at;
+      other.at == at &&
+      other.first == first;
 
   @override
-  int get hashCode => Object.hash(ef, interval, reps, due, at);
+  int get hashCode => Object.hash(ef, interval, reps, due, at, first);
 
   @override
   String toString() =>
