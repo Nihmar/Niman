@@ -14,6 +14,14 @@ final class FakeWidgetPlacementStore implements WidgetPlacementStore {
     return todoConfigs.remove(androidWidgetId);
   }
 
+  /// Pending Study configs by widget id, cleared once consumed.
+  final Map<int, ({String library})> studyConfigs = {};
+
+  @override
+  Future<({String library})?> consumeStudyConfig(int androidWidgetId) async {
+    return studyConfigs.remove(androidWidgetId);
+  }
+
   @override
   Future<({String library, String note})?> consumeNoteConfig(
     int androidWidgetId,

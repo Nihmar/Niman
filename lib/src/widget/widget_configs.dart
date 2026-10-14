@@ -23,6 +23,9 @@ enum WidgetProvider {
 
   /// The pinned note (preview, or checklist for `type: list`).
   note,
+
+  /// The flashcard decks with cards to study today (#533).
+  study,
 }
 
 /// The widget configurations of this install (issue 6).

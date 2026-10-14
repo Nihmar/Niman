@@ -4,7 +4,7 @@ Android only — on Linux and Windows the **Pin to home widget** row
 just says the widgets are unavailable.
 
 Add one from the launcher: long-press the home screen, then
-**Widgets** → **Niman Todos** or **Niman Note**. Placement walks a
+**Widgets** → **Niman Todos**, **Niman Note** or **Niman Study**. Placement walks a
 short setup dialog: pick the library from the ones you have open
 (or open the app first if there are none yet).
 
@@ -33,11 +33,24 @@ short setup dialog: pick the library from the ones you have open
   adds an item from a home-screen dialog.
 - **Tap the note:** opens it in the app.
 
+## Niman Study
+
+- **Rows:** the [flashcard](flashcards.md) decks with cards to study
+  today, grouped by their `deck:` — the categories alphabetically, *No
+  category* last — each with its due and new cards; the header names the
+  library and today's cards.
+- **Tap a deck:** opens it in the app.
+- **Tap the header:** opens Study.
+- **When it changes:** on a grade, on a deck edited, synced or reset, and
+  when the app comes back after the day turned (the journal's *A new day
+  starts at* applies). The app counts the decks; with the app closed
+  across midnight, the widget shows yesterday's cards until it is opened.
+
 A widget that points at another library than the open one switches to it,
 saving the open notes first; a note that cannot be saved keeps the current
 library open and says so, and the tap opens nothing.
 
-Both wear the app theme (brightness and palette) and refresh when
+All three wear the app theme (brightness and palette) and refresh when
 the app resumes or the files they show change. To point an instance
 at another library or note, remove the widget and place it again —
 there is no in-place reconfiguration yet.

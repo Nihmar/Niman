@@ -788,7 +788,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     updater: widget.widgetUpdater,
     host: widget.widgetHost,
     todoSnapshot: () => _todoController.snapshot,
+    decks: () async => switch (_decks) {
+      final catalog? when catalog.loaded => catalog.summaries,
+      _ => null,
+    },
     openTodo: _openTodo,
+    openStudy: () => _onDestinationSelected(ShellTab.study),
     openNote: _openNoteFromLink,
     mounted: () => mounted,
     onTargetBlocked: () =>
@@ -1833,7 +1838,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   DeckCatalogController? get _decks {
     if (_deckCatalog case final catalog?) return catalog;
     final catalog = deckCatalogOf(widget.controller);
-    if (catalog != null) unawaited(catalog.refresh());
+    if (catalog != null) {
+      // Every count reaches the Study widgets, the first one included.
+      catalog.addListener(_homeWidgets.pushStudy);
+      unawaited(catalog.refresh());
+    }
     return _deckCatalog = catalog;
   }
 
@@ -2341,7 +2350,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
       );
     });
-    _homeWidgets.start();
+    // The Study widgets have no other first push: the decks are counted
+    // for them only when one is placed (#533).
+    _homeWidgets
+      ..start()
+      ..pushStudy();
     _workspace.controller.addListener(_onWorkspaceChanged);
     AppKeyMap.current.addListener(_onKeyMapChanged);
     _chosenKeys.attach();
@@ -2496,6 +2509,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // when clean instead of showing the pre-toggle state.
     unawaited(_todoController.open());
     unawaited(_calendarController.open());
+    // The day may have turned while the app was away: the decks are
+    // counted for the study day it is now, and Study and its widgets
+    // follow (#533).
+    unawaited(_deckCatalog?.refreshStates());
     if (_selected != null && !_selectedIsDir) {
       setState(() => _noteReloadToken++);
     }

@@ -23,6 +23,9 @@ const String todoWidgetAndroidName = 'TodoWidgetProvider';
 /// The Android `AppWidgetProvider` class of the note widget.
 const String noteWidgetAndroidName = 'NoteWidgetProvider';
 
+/// The Android `AppWidgetProvider` class of the Study widget (#533).
+const String studyWidgetAndroidName = 'StudyWidgetProvider';
+
 /// The application id both providers live under.
 const String widgetApplicationId = 'dev.niman.niman';
 
@@ -38,6 +41,7 @@ String widgetProviderAndroidName(WidgetProvider provider) {
   return switch (provider) {
     WidgetProvider.todo => todoWidgetAndroidName,
     WidgetProvider.note => noteWidgetAndroidName,
+    WidgetProvider.study => studyWidgetAndroidName,
   };
 }
 

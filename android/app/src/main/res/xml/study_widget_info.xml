@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Study widget metadata (#533): push updates only (Dart refreshes when
+     the decks are counted again), resizable, home screen. Placement goes
+     through the config activity, as the todo widget's. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_study"
+    android:previewLayout="@layout/widget_study"
+    android:configure="dev.niman.niman.StudyWidgetConfig"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />

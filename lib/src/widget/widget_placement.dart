@@ -20,6 +20,10 @@ abstract interface class WidgetPlacementStore {
   /// read (once, then null).
   Future<({String library})?> consumeTodoConfig(int androidWidgetId);
 
+  /// The library chosen for [androidWidgetId]'s Study widget (#533),
+  /// cleared on read (once, then null).
+  Future<({String library})?> consumeStudyConfig(int androidWidgetId);
+
   /// The library + note chosen for [androidWidgetId]'s note widget,
   /// cleared on read (once, then null).
   Future<({String library, String note})?> consumeNoteConfig(
@@ -51,9 +55,19 @@ final class PlatformWidgetPlacementStore implements WidgetPlacementStore {
   const new();
 
   @override
-  Future<({String library})?> consumeTodoConfig(int androidWidgetId) async {
+  Future<({String library})?> consumeTodoConfig(int androidWidgetId) =>
+      _consumeLibrary(WidgetProvider.todo, androidWidgetId);
+
+  @override
+  Future<({String library})?> consumeStudyConfig(int androidWidgetId) =>
+      _consumeLibrary(WidgetProvider.study, androidWidgetId);
+
+  Future<({String library})?> _consumeLibrary(
+    WidgetProvider provider,
+    int androidWidgetId,
+  ) async {
     final map = await _consume(
-      '${widgetPayloadKey(WidgetProvider.todo, androidWidgetId)}_config',
+      '${widgetPayloadKey(provider, androidWidgetId)}_config',
     );
     final library = map?['library'];
     if (library is! String || library.isEmpty) return null;

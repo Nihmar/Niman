@@ -41,7 +41,7 @@ the two agree.
   background never fires an alarm.
 - **Launcher shortcuts:** long-press the icon (see
   [shortcuts](shortcuts.md)).
-- **Home-screen widgets:** the Niman Todos and Niman Note widgets
+- **Home-screen widgets:** the Niman Todos, Niman Note and Niman Study widgets
   (see [widgets](widgets.md)).
 - **PDF export:** through the system WebView's print adapter, in-process:
   no browser is installed or run, and the PDF's text stays selectable.

@@ -12,9 +12,11 @@ import 'dart:async';
 
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/flashcards/deck_summary.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/widget/study_widget.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_pin.dart';
 import 'package:niman/src/widget/widget_placement.dart';
@@ -36,7 +38,9 @@ final class ShellHomeWidgets {
     required this.updater,
     required this.host,
     required this.todoSnapshot,
+    required this.decks,
     required this.openTodo,
+    required this.openStudy,
     required this.openNote,
     required this.mounted,
     required this.onTargetBlocked,
@@ -62,8 +66,15 @@ final class ShellHomeWidgets {
   /// The todo list as it stands, or null while no library is open.
   final TodoSnapshot? Function() todoSnapshot;
 
+  /// The library's flashcard decks, counted (#533); null while they are
+  /// not, or outside a library. Asked only when a Study widget is placed.
+  final Future<List<DeckSummary>?> Function() decks;
+
   /// Shows the todo list, wherever the layout keeps it.
   final void Function() openTodo;
+
+  /// Shows Study (#533).
+  final void Function() openStudy;
 
   /// Opens a note by library-relative path, at an anchor when given.
   final void Function(String path, String? anchor) openNote;
@@ -140,6 +151,23 @@ final class ShellHomeWidgets {
   void pushAll() {
     pushNotes();
     pushTodos();
+    pushStudy();
+  }
+
+  /// Pushes the decks to the Study widgets reading this library (#533).
+  /// The shell calls it whenever the decks are counted again: a grade, a
+  /// deck changed, a sync.
+  void pushStudy() {
+    if (!mounted()) return;
+    unawaited(
+      refreshStudyWidgets(
+        session: controller,
+        decks: decks,
+        updater: updater,
+        host: host,
+        placement: const PlatformWidgetPlacementStore(),
+      ),
+    );
   }
 
   /// A tap on a widget that started the app (issue 6, cold start), or the
@@ -219,6 +247,8 @@ final class ShellHomeWidgets {
     switch (target.kind) {
       case WidgetTargetKind.todo:
         openTodo();
+      case WidgetTargetKind.study:
+        openStudy();
       case WidgetTargetKind.note:
         final note = target.notePath;
         if (note != null) openNote(note, target.anchor);

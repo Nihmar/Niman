@@ -21,8 +21,9 @@ import org.json.JSONObject
  * Placement screens for both widgets (round 2, R1/R4): which library a
  * fresh instance reads, and which note for the note widget.
  *
- * One class, two launcher entries ([TodoWidgetConfig]/[NoteWidgetConfig]
- * aliases below): the alias component names the kind. No Dart engine
+ * One class, three launcher entries (the TodoWidgetConfig,
+ * NoteWidgetConfig and StudyWidgetConfig aliases): the alias component
+ * names the kind; the Study widget asks for a library as the todo one. No Dart engine
  * runs at placement, so the library list comes from the
  * `SharedPreferences` mirror (`known_libraries`, written by Dart on
  * every open). Choices land in per-instance `*_config` prefs keys; Dart
@@ -42,6 +43,9 @@ class WidgetConfigActivity : Activity() {
         /** Alias serving the note widget. */
         const val NOTE_ALIAS = "dev.niman.niman.NoteWidgetConfig"
 
+        /** Alias serving the Study widget (#533): a library, as the todo one. */
+        const val STUDY_ALIAS = "dev.niman.niman.StudyWidgetConfig"
+
         private const val REQUEST_PICK_NOTE = 2
         private const val STATE_LIBRARY_PATH = "pending_library_path"
         private const val STATE_LIBRARY_NAME = "pending_library_name"
@@ -54,6 +58,9 @@ class WidgetConfigActivity : Activity() {
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private var finished = false
     private var isTodo = true
+
+    /** The widget being placed: `todo`, `note` or `study`, the prefs key's prefix. */
+    private var kind = "todo"
     private var pendingLibrary: MirrorLibrary? = null
 
     private lateinit var titleView: TextView
@@ -72,11 +79,14 @@ class WidgetConfigActivity : Activity() {
             finish()
             return
         }
-        isTodo = intent?.component?.className != NOTE_ALIAS
-        WidgetDebugLog.log(
-            this,
-            "config start: kind=${if (isTodo) "todo" else "note"} widget=$appWidgetId",
-        )
+        kind = when (intent?.component?.className) {
+            NOTE_ALIAS -> "note"
+            STUDY_ALIAS -> "study"
+            else -> "todo"
+        }
+        // The todo and the Study widget read a library and nothing more.
+        isTodo = kind != "note"
+        WidgetDebugLog.log(this, "config start: kind=$kind widget=$appWidgetId")
         savedInstanceState?.let {
             val path = it.getString(STATE_LIBRARY_PATH)
             val name = it.getString(STATE_LIBRARY_NAME)
@@ -133,7 +143,11 @@ class WidgetConfigActivity : Activity() {
                 // pick from.
                 pendingLibrary = null
                 titleView.text = getString(
-                    if (isTodo) R.string.todo_widget_label else R.string.note_widget_label,
+                    when (kind) {
+                        "note" -> R.string.note_widget_label
+                        "study" -> R.string.study_widget_label
+                        else -> R.string.todo_widget_label
+                    },
                 )
                 messageView.visibility = View.VISIBLE
                 messageView.text = getString(R.string.widget_config_no_libraries)
@@ -347,7 +361,7 @@ class WidgetConfigActivity : Activity() {
 
     /** Writes the per-instance choice and places the widget. */
     private fun finishOk(choice: Map<String, String>, isTodo: Boolean) {
-        val key = if (isTodo) "todo_$appWidgetId" else "note_$appWidgetId"
+        val key = if (isTodo) "${kind}_$appWidgetId" else "note_$appWidgetId"
         val json = JSONObject(choice).toString()
         HomeWidgetPlugin.getData(this).edit().putString("${key}_config", json).apply()
         WidgetDebugLog.log(

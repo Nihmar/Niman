@@ -224,7 +224,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) async {
+  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) async =>
+      _adopt(androidWidgetId, libraryPath, 'todo');
+
+  @override
+  Future<void> adoptStudyWidget(
+    int androidWidgetId,
+    String libraryPath,
+  ) async => _adopt(androidWidgetId, libraryPath, 'study');
+
+  void _adopt(int androidWidgetId, String libraryPath, String provider) {
     final existing = [
       for (final config in _widgetConfigs)
         if (config.androidWidgetId == androidWidgetId) config,
@@ -232,7 +241,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (existing.isNotEmpty) return;
     seedWidgetConfig(
       androidWidgetId: androidWidgetId,
-      provider: 'todo',
+      provider: provider,
       libraryPath: libraryPath,
     );
   }

@@ -766,12 +766,23 @@ final class LibraryController implements LibrarySession {
 
   /// Records a placed todo widget for [libraryPath] (issue 6).
   @override
-  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) async {
+  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) =>
+      _adoptLibraryWidget(androidWidgetId, libraryPath, WidgetProvider.todo);
+
+  @override
+  Future<void> adoptStudyWidget(int androidWidgetId, String libraryPath) =>
+      _adoptLibraryWidget(androidWidgetId, libraryPath, WidgetProvider.study);
+
+  Future<void> _adoptLibraryWidget(
+    int androidWidgetId,
+    String libraryPath,
+    WidgetProvider provider,
+  ) async {
     final store = WidgetConfigStore(await appDatabase);
     if (await store.find(androidWidgetId) != null) return;
     await store.upsert(
       androidWidgetId: androidWidgetId,
-      provider: WidgetProvider.todo,
+      provider: provider,
       libraryPath: libraryPath,
     );
   }
