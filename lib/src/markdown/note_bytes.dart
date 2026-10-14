@@ -46,7 +46,7 @@ Stream<String> decodeNoteTextStream(Stream<List<int>> bytes) async* {
   var carry = const <int>[];
   await for (final chunk in bytes) {
     final data = carry.isEmpty ? chunk : <int>[...carry, ...chunk];
-    final cut = _completeUpTo(data);
+    final cut = utf8CompleteUpTo(data);
     carry = data.sublist(cut);
     if (cut > 0) yield decodeNoteText(data.sublist(0, cut));
   }
@@ -185,7 +185,7 @@ int _sequenceLength(List<int> bytes, int at) {
 
 /// How much of [data] can be decoded now without cutting a UTF-8 sequence
 /// the next chunk may complete: all of it, unless it ends inside one.
-int _completeUpTo(List<int> data) {
+int utf8CompleteUpTo(List<int> data) {
   // A sequence is at most four bytes: its lead is among the last four.
   for (var back = 1; back <= 4 && back <= data.length; back++) {
     final at = data.length - back;
