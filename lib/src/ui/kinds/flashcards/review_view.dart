@@ -141,19 +141,30 @@ final class _ReviewViewState extends State<ReviewView> {
       padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
       child: Row(
         children: [
+          // The counts under the name: beside it, a phone's width has no
+          // room for both and the two buttons.
           Expanded(
-            child: Text(
-              AppStrings.flashcardsReviewTitle(widget.run.title),
-              key: const Key('review-title'),
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.flashcardsReviewTitle(widget.run.title),
+                  key: const Key('review-title'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                if (counts.isNotEmpty)
+                  Text(
+                    counts,
+                    key: const Key('review-counts'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: muted),
+                  ),
+              ],
             ),
-          ),
-          Text(
-            counts,
-            key: const Key('review-counts'),
-            style: Theme.of(context).textTheme.bodySmall
-                ?.copyWith(color: muted),
           ),
           IconButton(
             key: const Key('review-undo'),
