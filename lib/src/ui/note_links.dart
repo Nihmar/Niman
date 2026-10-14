@@ -167,10 +167,8 @@ Future<void> _openNoteResult(
   NoteLinkTargets link,
 ) async {
   const log = AppLogger(name: 'links');
-  final root = link.libraryRoot;
-  final currentRel = root == null
-      ? null
-      : p.relative(link.notePath, from: root);
+  // Slash-separated, as the index spells [Note.path] on every platform.
+  final currentRel = link.notePathInLibrary;
   if (currentRel != null && note.path == currentRel) {
     // Same note: stay and jump (or nothing when there is no anchor).
     log.debug(
