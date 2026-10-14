@@ -15,6 +15,7 @@ import 'package:niman/src/links/anchor.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/dead_link_flow.dart';
 import 'package:niman/src/ui/link_snack.dart';
 import 'package:niman/src/ui/note_link_targets.dart';
@@ -196,25 +197,27 @@ Future<void> _openNoteResult(
   open(note.path, anchor);
 }
 
-/// The minimal ambiguous-link picker (M3 list + select; polish M6).
+/// Asks which of [candidates] the link means: the app's list of choices
+/// ([showActionSheet]) — a menu where the pointer went down on a desktop
+/// (#712), the sheet on a phone.
 Future<void> _pickAmbiguous(
   BuildContext context,
   List<Note> candidates,
   NoteLinkTargets link,
 ) async {
   if (!context.mounted) return;
-  final chosen = await showDialog<Note>(
-    context: context,
-    builder: (context) => SimpleDialog(
-      title: Text(AppStrings.ambiguousLinkTitle),
-      children: [
-        for (final note in candidates)
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, note),
-            child: Text(note.path),
-          ),
-      ],
-    ),
+  final chosen = await showActionSheet<Note>(
+    context,
+    title: AppStrings.ambiguousLinkTitle,
+    anchor: link.anchor,
+    items: (context) => [
+      for (final note in candidates)
+        ListTile(
+          leading: const Icon(Icons.description_outlined),
+          title: Text(note.path),
+          onTap: () => Navigator.pop(context, note),
+        ),
+    ],
   );
   if (chosen == null || !context.mounted) return;
   await _openNoteResult(context, chosen, null, link);

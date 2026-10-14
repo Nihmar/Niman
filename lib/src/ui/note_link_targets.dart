@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/painting.dart' show Rect;
 import 'package:niman/src/core/files.dart' show pathInLibrary;
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/library/new_item_folder.dart';
@@ -26,6 +27,7 @@ final class NoteLinkTargets {
     this.onOpenNote,
     this.createMissingNote,
     this.modifier = false,
+    this.anchor,
   });
 
   /// Resolves a link against the library; null while the library is not
@@ -66,6 +68,11 @@ final class NoteLinkTargets {
   /// confirmation, rather than offered (#477); a resolved link is
   /// followed as always, and every other tap keeps the offer.
   final bool modifier;
+
+  /// Where the pointer last went down on the note, on screen: a question
+  /// the link asks a pointer — which note, whether to create it — opens
+  /// there (#712). Null asks a phone's way.
+  final Rect? anchor;
 
   /// The open note's path in the library, slash-separated — what a `..` in
   /// a link walks from (#491); null for a note opened from outside one.

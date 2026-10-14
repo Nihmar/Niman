@@ -47,6 +47,7 @@ import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
@@ -1937,7 +1938,15 @@ final class _NoteViewState extends State<NoteView>
     onOpenNote: widget.onOpenNote,
     createMissingNote: widget.createMissingNote,
     modifier: modifier,
+    anchor: switch (_pointerDownAt) {
+      final at? => menuAnchorAt(at),
+      null => null,
+    },
   );
+
+  /// Where the pointer last went down on the note, for the questions a
+  /// link asks there (#712).
+  Offset? _pointerDownAt;
 
   /// The note's block anchors (#844), read off its buffer when a block link
   /// is followed.
@@ -2083,48 +2092,51 @@ final class _NoteViewState extends State<NoteView>
             actions: widget.barActions,
           ),
         Expanded(
-          // The preview card of a hovered link goes over the note (#846).
-          child: _preview.host(
-            closeOn: _scrolls,
-            child: error == null
-                ? (!_ready || _loading
-                      ? const Center(child: CircularProgressIndicator())
-                      : kindBody
-                      ? kindChild!
-                      // Both panes stay mounted and only one is on stage:
-                      // coming back to the preview finds its parse, scroll
-                      // offset, typeset math and images where they were
-                      // (device report, 2026-09-11: every return re-parsed
-                      // the note and restarted from the top). Offstage
-                      // children skip hit testing, painting and the default
-                      // finders; the panes never show together.
-                      : Stack(
-                          children: [
-                            Offstage(
-                              offstage: showPreview,
-                              child: KeyedSubtree(
-                                key: ValueKey(
-                                  _wysiwygIn(widget)
-                                      ? 'pane-wysiwyg'
-                                      : 'pane-editor',
+          child: Listener(
+            onPointerDown: (event) => _pointerDownAt = event.position,
+            // The preview card of a hovered link goes over the note (#846).
+            child: _preview.host(
+              closeOn: _scrolls,
+              child: error == null
+                  ? (!_ready || _loading
+                        ? const Center(child: CircularProgressIndicator())
+                        : kindBody
+                        ? kindChild!
+                        // Both panes stay mounted and only one is on stage:
+                        // coming back to the preview finds its parse, scroll
+                        // offset, typeset math and images where they were
+                        // (device report, 2026-09-11: every return re-parsed
+                        // the note and restarted from the top). Offstage
+                        // children skip hit testing, painting and the default
+                        // finders; the panes never show together.
+                        : Stack(
+                            children: [
+                              Offstage(
+                                offstage: showPreview,
+                                child: KeyedSubtree(
+                                  key: ValueKey(
+                                    _wysiwygIn(widget)
+                                        ? 'pane-wysiwyg'
+                                        : 'pane-editor',
+                                  ),
+                                  child: _unifiedSurfacePane(),
                                 ),
-                                child: _unifiedSurfacePane(),
                               ),
-                            ),
-                            Offstage(
-                              offstage: !showPreview,
-                              child: KeyedSubtree(
-                                key: const ValueKey('pane-preview'),
-                                child: _previewPane(context),
+                              Offstage(
+                                offstage: !showPreview,
+                                child: KeyedSubtree(
+                                  key: const ValueKey('pane-preview'),
+                                  child: _previewPane(context),
+                                ),
                               ),
-                            ),
-                          ],
-                        ))
-                : NoteLoadError(
-                    message: error,
-                    path: widget.path,
-                    offerDefaultApp: _notText,
-                  ),
+                            ],
+                          ))
+                  : NoteLoadError(
+                      message: error,
+                      path: widget.path,
+                      offerDefaultApp: _notText,
+                    ),
+            ),
           ),
         ),
         if (!kindBody && !widget.zen) ...[

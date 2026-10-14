@@ -325,7 +325,12 @@ Anywhere else — a tap in the preview, or on a touch screen, where
 there is no Ctrl — following a dead link *offers* to create it: a
 dialog shows the proposed path with **Create** and **Cancel**. Create
 makes an empty note there (no frontmatter) and opens it in the editor;
-Cancel changes nothing — no file, no error, no second prompt.
+Cancel changes nothing — no file, no error, no second prompt. On a
+desktop the offer is a small menu where the link was clicked, with the
+path and **Create**; clicking away is the Cancel.
+
+A link that more than one note answers asks which one: on a desktop in a
+menu where it was clicked, on a phone in a sheet.
 
 Where the new note lands is the library setting `newItemLocation`
 (Settings → Editor → **New notes and folders go to**), the one rule every
