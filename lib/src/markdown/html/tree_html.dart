@@ -357,30 +357,54 @@ final class TreeHtml {
     }
     switch (leaf.kind) {
       case BlockKind.paragraph || BlockKind.math:
-        final text = leaf.kind == BlockKind.math
+        final written = leaf.kind == BlockKind.math
             ? LeafText.paragraph(lines)
             : _paragraphs[leaf] ?? '';
-        if (text.isEmpty) return false;
+        if (written.isEmpty) return false;
+        // A trailing ` ^id` is the block's name for a link, not prose: the
+        // page leaves it out, as the read view does, and keeps the name as
+        // an `id` (#928).
+        final block = leaf.kind == BlockKind.paragraph
+            ? hooks.blockId(written)
+            : null;
+        final text = block?.shown ?? written;
+        final anchor = block?.anchor;
+        if (text.isEmpty) {
+          // A line that is only an id names the block above it: nothing
+          // drawn, the name kept where it stands.
+          if (anchor != null) {
+            if (!tight) _cr();
+            _write('<span id="${InlineHtml.escape(anchor)}"></span>');
+            if (!tight) _write('\n');
+          }
+          return false;
+        }
         if (!tight) {
           _cr();
-          _write('<p>');
+          _write(
+            anchor == null ? '<p>' : '<p id="${InlineHtml.escape(anchor)}">',
+          );
         }
-        _inline(text);
+        _write(_named(_inlineHtml(text), anchor, wrap: tight));
         if (tail != null) _write(' $tail');
         if (!tight) _write('</p>\n');
         return tail != null;
       case BlockKind.heading:
         final atx = lines.length == 1;
         final level = leaf.headingLevel;
-        final text = atx
+        final written = atx
             ? LeafText.atxHeading(lines.single)
             : LeafText.setextHeading(lines);
+        final block = hooks.blockId(written);
+        final text = block?.shown ?? written;
         final id = hooks.headingId(text);
         _cr();
         _write(
           id == null ? '<h$level>' : '<h$level id="${InlineHtml.escape(id)}">',
         );
-        _inline(text);
+        // The heading's own `id` is its text's; the block's name rides on
+        // a span around the text, for a link to the block to land.
+        _write(_named(_inlineHtml(text), block?.anchor, wrap: true));
         _write('</h$level>\n');
       case BlockKind.thematicBreak:
         _cr();
@@ -420,7 +444,13 @@ final class TreeHtml {
     return false;
   }
 
-  void _inline(String text) => _write(_inlineHtml(text));
+  /// [html] named [anchor], when it has one and [wrap] says the block has no
+  /// element to carry the name (a heading has its own `id`, a tight list
+  /// item's paragraph no element at all): a span around it.
+  static String _named(String html, String? anchor, {required bool wrap}) =>
+      anchor == null || !wrap
+      ? html
+      : '<span id="${InlineHtml.escape(anchor)}">$html</span>';
 
   /// [text]'s inlines as HTML.
   String _inlineHtml(String text) {

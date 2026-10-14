@@ -49,7 +49,7 @@ final class HtmlSpans {
       return (html: '<span class="wikilink">$shown</span>', plain: plain);
     }
     // A heading path (`A#B`) lands on its last level, the heading itself;
-    // a block link has no anchor in the exported page (its id is not kept).
+    // a block link (`A#^id`) on the block that carries the id (#928).
     final anchor = _anchorOf(ref);
     return (
       html:
@@ -64,6 +64,8 @@ final class HtmlSpans {
   /// target's own headings when the export has them
   /// ([NoteHtmlSource.anchors]).
   String _anchorOf(WikiRef ref) {
+    final block = ref.block;
+    if (block != null) return '#${blockAnchor(block)}';
     final heading = ref.heading;
     final known = heading == null
         ? null
@@ -103,6 +105,13 @@ String headingAnchor(String text) => text
     .trim()
     .replaceAll(_notInAnchor, '')
     .replaceAll(_space, '-');
+
+/// The `id` the block that ends with ` ^id` gets on the page, and the
+/// fragment a `[[note#^id]]` link lands on (#928). The `block.` in front
+/// keeps it out of the heading ids' way: [headingAnchor] drops every dot, so
+/// a block can never take a heading's id; and it keeps the name one an XML
+/// reader accepts (an id starting with a digit is not).
+String blockAnchor(String id) => 'block.$id';
 
 /// [id], or [id] with the first number that makes it new to [taken] (`id-2`),
 /// which then holds it: the ids a page's headings get, in document order.

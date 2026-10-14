@@ -21,8 +21,15 @@ class HtmlHooks {
   /// title's inline HTML, or null for one its type titles.
   String? callout(Callout callout, String body, String? title) => null;
 
-  /// The `id` of a heading whose inline text, as written, is [text]; null
-  /// for none.
+  /// The ` ^id` that ends the inline text of a paragraph or a heading, as
+  /// written, [text] (#928): `shown` is the text the page draws, the id off,
+  /// and `anchor` the `id` the block is given so a link to it can land; null
+  /// when an earlier block already holds that name. Null for a text that
+  /// ends with no block id, drawn as it is.
+  ({String shown, String? anchor})? blockId(String text) => null;
+
+  /// The `id` of a heading whose inline text is [text], as the page draws it
+  /// (a block id already taken off, see [blockId]); null for none.
   String? headingId(String text) => null;
 
   /// One of the app's own inline constructs, or raw HTML, as HTML: a

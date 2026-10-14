@@ -156,6 +156,12 @@ A heading that carries an id is still linked by its text: `## Title ^abc` is
 reached by `[[note#Title]]` as well as by `[[note#^abc]]`; the outline, the
 heading panels and an exported page's heading ids leave the ` ^abc` out.
 
+An exported page (HTML, PDF, EPUB) leaves the ` ^id` out of the text of
+headings, paragraphs and list items, as the read view does, and keeps the id
+on the block as `block.abc` — so a `[[note#^abc]]` link into an exported page
+still lands on the block. A line that is only an id (the form a quote, a
+table or a list takes) draws nothing and leaves the anchor where it stands.
+
 > **Only Obsidian reads them.** Block references are specific to
 > Obsidian, not part of standard Markdown: in another editor `^37066d`
 > is plain text at the end of a line, and a `[[note#^id]]` link is not

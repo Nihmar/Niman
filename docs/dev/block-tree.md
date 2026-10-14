@@ -162,7 +162,7 @@ counts (they may only go up).
    reads a quote's content as the tree does; the index's references
    too. The bridge to the package's parse goes.
 7. **Export on the tree** — done. `NoteHtml` renders with the writer
-   and its hooks (callouts, code, math, diagrams, wikilinks, heading ids,
+   and its hooks (callouts, code, math, diagrams, wikilinks, heading ids, block ids (#928),
    picture targets); checked against the export tests.
 8. **`package:markdown` removed** from `pubspec.yaml` — done.
 
