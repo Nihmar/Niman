@@ -3866,4 +3866,7 @@ final class HindiStrings extends Strings {
   String get flashcardsResetConfirm => 'रीसेट करें';
   @override
   String get commandNeedFlashcardNote => 'एक खुला फ़्लैशकार्ड नोट चाहिए';
+
+  @override
+  String get flashcardsCardsLabel => 'कार्ड';
 }

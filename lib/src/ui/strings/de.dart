@@ -4000,4 +4000,7 @@ final class GermanStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Benötigt eine geöffnete Karteikarten-Notiz';
+
+  @override
+  String get flashcardsCardsLabel => 'Karten';
 }

@@ -3956,4 +3956,7 @@ final class BasqueStrings extends Strings {
   String get flashcardsResetConfirm => 'Berrezarri';
   @override
   String get commandNeedFlashcardNote => 'Fitxa-ohar ireki bat behar du';
+
+  @override
+  String get flashcardsCardsLabel => 'Fitxak';
 }

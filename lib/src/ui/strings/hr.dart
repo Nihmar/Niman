@@ -3938,4 +3938,7 @@ final class CroatianStrings extends Strings {
   String get flashcardsResetConfirm => 'Poništi';
   @override
   String get commandNeedFlashcardNote => 'Traži otvorenu bilješku s karticama';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartice';
 }

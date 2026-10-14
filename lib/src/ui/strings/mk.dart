@@ -3942,4 +3942,7 @@ final class MacedonianStrings extends Strings {
   String get flashcardsResetConfirm => 'Ресетирај';
   @override
   String get commandNeedFlashcardNote => 'Бара отворена белешка со картички';
+
+  @override
+  String get flashcardsCardsLabel => 'Картички';
 }

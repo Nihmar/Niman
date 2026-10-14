@@ -3943,4 +3943,7 @@ final class GalicianStrings extends Strings {
   String get flashcardsResetConfirm => 'Reiniciar';
   @override
   String get commandNeedFlashcardNote => 'Require unha nota de tarxetas aberta';
+
+  @override
+  String get flashcardsCardsLabel => 'Tarxetas';
 }

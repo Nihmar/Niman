@@ -3930,4 +3930,7 @@ final class HungarianStrings extends Strings {
   String get flashcardsResetConfirm => 'Visszaállítás';
   @override
   String get commandNeedFlashcardNote => 'Megnyitott kártyajegyzetet igényel';
+
+  @override
+  String get flashcardsCardsLabel => 'Kártyák';
 }

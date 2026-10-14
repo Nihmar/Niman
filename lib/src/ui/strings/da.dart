@@ -3901,4 +3901,7 @@ final class DanishStrings extends Strings {
   String get flashcardsResetConfirm => 'Nulstil';
   @override
   String get commandNeedFlashcardNote => 'Kræver en åben flashcard-note';
+
+  @override
+  String get flashcardsCardsLabel => 'Kort';
 }

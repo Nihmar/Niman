@@ -3602,4 +3602,7 @@ final class JapaneseStrings extends Strings {
   String get flashcardsResetConfirm => 'リセット';
   @override
   String get commandNeedFlashcardNote => '開いているフラッシュカードのノートが必要です';
+
+  @override
+  String get flashcardsCardsLabel => 'カード';
 }

@@ -4035,4 +4035,7 @@ final class GreekStrings extends Strings {
   String get flashcardsResetConfirm => 'Επαναφορά';
   @override
   String get commandNeedFlashcardNote => 'Απαιτεί ανοιχτή σημείωση καρτών';
+
+  @override
+  String get flashcardsCardsLabel => 'Κάρτες';
 }

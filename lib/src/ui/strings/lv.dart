@@ -3906,4 +3906,7 @@ final class LatvianStrings extends Strings {
   String get flashcardsResetConfirm => 'Atiestatīt';
   @override
   String get commandNeedFlashcardNote => 'Nepieciešama atvērta kartīšu piezīme';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartītes';
 }

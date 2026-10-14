@@ -3935,4 +3935,7 @@ final class SerbianStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Захтева отворену белешку са картицама';
+
+  @override
+  String get flashcardsCardsLabel => 'Картице';
 }

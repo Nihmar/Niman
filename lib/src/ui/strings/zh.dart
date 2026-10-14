@@ -3506,4 +3506,7 @@ final class ChineseStrings extends Strings {
   String get flashcardsResetConfirm => '重置';
   @override
   String get commandNeedFlashcardNote => '需要打开一个闪卡笔记';
+
+  @override
+  String get flashcardsCardsLabel => '卡片';
 }

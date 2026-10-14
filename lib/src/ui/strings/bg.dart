@@ -3937,4 +3937,7 @@ final class BulgarianStrings extends Strings {
   String get flashcardsResetConfirm => 'Нулиране';
   @override
   String get commandNeedFlashcardNote => 'Изисква отворена бележка с карти';
+
+  @override
+  String get flashcardsCardsLabel => 'Карти';
 }

@@ -3906,4 +3906,7 @@ final class NorwegianStrings extends Strings {
   String get flashcardsResetConfirm => 'Nullstill';
   @override
   String get commandNeedFlashcardNote => 'Krever et åpent flashcard-notat';
+
+  @override
+  String get flashcardsCardsLabel => 'Kort';
 }

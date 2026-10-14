@@ -2105,4 +2105,5 @@ abstract base class Strings {
   String get flashcardsResetBody;
   String get flashcardsResetConfirm;
   String get commandNeedFlashcardNote;
+  String get flashcardsCardsLabel;
 }

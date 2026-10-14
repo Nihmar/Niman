@@ -1952,6 +1952,7 @@ final class AppStrings {
   static String get homeActionProject => _s.homeActionProject;
   static String get homeActionTemplate => _s.homeActionTemplate;
   static String homeActionMissing(String path) => _s.homeActionMissing(path);
+  static String get flashcardsCardsLabel => _s.flashcardsCardsLabel;
   static String get flashcardsName => _s.flashcardsName;
   static String get newFlashcardsTitle => _s.newFlashcardsTitle;
   static String get newFlashcardsDefault => _s.newFlashcardsDefault;

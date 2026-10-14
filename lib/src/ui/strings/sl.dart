@@ -3936,4 +3936,7 @@ final class SlovenianStrings extends Strings {
   String get flashcardsResetConfirm => 'Ponastavi';
   @override
   String get commandNeedFlashcardNote => 'Zahteva odprt zapisek s karticami';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartice';
 }

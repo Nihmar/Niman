@@ -3911,4 +3911,7 @@ final class CzechStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Vyžaduje otevřenou poznámku s kartičkami';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartičky';
 }

@@ -3940,4 +3940,7 @@ final class PortugueseStrings extends Strings {
   String get flashcardsResetConfirm => 'Repor';
   @override
   String get commandNeedFlashcardNote => 'Requer uma nota de cartões aberta';
+
+  @override
+  String get flashcardsCardsLabel => 'Cartões';
 }

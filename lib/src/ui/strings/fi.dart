@@ -3939,4 +3939,7 @@ final class FinnishStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Vaatii avoimen muistikorttimuistiinpanon';
+
+  @override
+  String get flashcardsCardsLabel => 'Kortit';
 }

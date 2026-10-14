@@ -3969,4 +3969,7 @@ final class PolishStrings extends Strings {
   String get flashcardsResetConfirm => 'Zresetuj';
   @override
   String get commandNeedFlashcardNote => 'Wymaga otwartej notatki z fiszkami';
+
+  @override
+  String get flashcardsCardsLabel => 'Fiszki';
 }

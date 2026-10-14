@@ -3880,4 +3880,7 @@ final class TurkishStrings extends Strings {
   String get flashcardsResetConfirm => 'Sıfırla';
   @override
   String get commandNeedFlashcardNote => 'Açık bir bilgi kartı notu gerektirir';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartlar';
 }

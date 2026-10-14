@@ -3941,4 +3941,7 @@ final class BosnianStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Zahtijeva otvorenu bilješku s karticama';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartice';
 }

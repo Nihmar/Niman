@@ -3955,4 +3955,7 @@ final class UkrainianStrings extends Strings {
   String get flashcardsResetConfirm => 'Скинути';
   @override
   String get commandNeedFlashcardNote => 'Потрібна відкрита нотатка з картками';
+
+  @override
+  String get flashcardsCardsLabel => 'Картки';
 }

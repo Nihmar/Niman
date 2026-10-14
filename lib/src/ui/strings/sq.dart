@@ -3943,4 +3943,7 @@ final class AlbanianStrings extends Strings {
   String get flashcardsResetConfirm => 'Rivendos';
   @override
   String get commandNeedFlashcardNote => 'Kërkon një shënim kartelash të hapur';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartela';
 }

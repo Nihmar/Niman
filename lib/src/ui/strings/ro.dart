@@ -3975,4 +3975,7 @@ final class RomanianStrings extends Strings {
   String get flashcardsResetConfirm => 'Resetează';
   @override
   String get commandNeedFlashcardNote => 'Necesită o notă de carduri deschisă';
+
+  @override
+  String get flashcardsCardsLabel => 'Carduri';
 }

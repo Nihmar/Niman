@@ -3971,4 +3971,7 @@ final class SpanishStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Requiere una nota de tarjetas abierta';
+
+  @override
+  String get flashcardsCardsLabel => 'Tarjetas';
 }

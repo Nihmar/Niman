@@ -3915,4 +3915,7 @@ final class IcelandicStrings extends Strings {
   String get flashcardsResetConfirm => 'Endurstilla';
   @override
   String get commandNeedFlashcardNote => 'Krefst opinnar minniskortaglósu';
+
+  @override
+  String get flashcardsCardsLabel => 'Kort';
 }

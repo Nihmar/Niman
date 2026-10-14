@@ -3930,4 +3930,7 @@ final class SwedishStrings extends Strings {
   String get flashcardsResetConfirm => 'Nollställ';
   @override
   String get commandNeedFlashcardNote => 'Kräver en öppen flashcard-anteckning';
+
+  @override
+  String get flashcardsCardsLabel => 'Kort';
 }

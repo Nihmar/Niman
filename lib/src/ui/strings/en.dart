@@ -3874,4 +3874,7 @@ final class EnglishStrings extends Strings {
   String get flashcardsResetConfirm => 'Reset';
   @override
   String get commandNeedFlashcardNote => 'Needs an open flashcards note';
+
+  @override
+  String get flashcardsCardsLabel => 'Cards';
 }

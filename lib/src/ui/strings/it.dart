@@ -3947,4 +3947,7 @@ final class ItalianStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Richiede una nota di flashcard aperta';
+
+  @override
+  String get flashcardsCardsLabel => 'Carte';
 }

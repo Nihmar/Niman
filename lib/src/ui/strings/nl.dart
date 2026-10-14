@@ -3961,4 +3961,7 @@ final class DutchStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Vereist een geopende flashcardnotitie';
+
+  @override
+  String get flashcardsCardsLabel => 'Kaarten';
 }

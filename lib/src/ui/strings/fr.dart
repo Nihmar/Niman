@@ -4028,4 +4028,7 @@ final class FrenchStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Nécessite une note de cartes mémoire ouverte';
+
+  @override
+  String get flashcardsCardsLabel => 'Cartes';
 }

@@ -3980,4 +3980,7 @@ final class CatalanStrings extends Strings {
   String get flashcardsResetConfirm => 'Reinicia';
   @override
   String get commandNeedFlashcardNote => 'Cal una nota de targetes oberta';
+
+  @override
+  String get flashcardsCardsLabel => 'Targetes';
 }

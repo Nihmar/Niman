@@ -3865,4 +3865,7 @@ final class EstonianStrings extends Strings {
   String get flashcardsResetConfirm => 'Lähtesta';
   @override
   String get commandNeedFlashcardNote => 'Vajab avatud kaartide märkust';
+
+  @override
+  String get flashcardsCardsLabel => 'Kaardid';
 }

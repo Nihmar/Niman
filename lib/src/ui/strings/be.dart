@@ -3955,4 +3955,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get commandNeedFlashcardNote =>
       'Патрэбна адкрытая нататка з картачкамі';
+
+  @override
+  String get flashcardsCardsLabel => 'Картачкі';
 }

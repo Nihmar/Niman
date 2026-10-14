@@ -3954,4 +3954,7 @@ final class LithuanianStrings extends Strings {
   String get flashcardsResetConfirm => 'Atstatyti';
   @override
   String get commandNeedFlashcardNote => 'Reikia atidaryto kortelių užrašo';
+
+  @override
+  String get flashcardsCardsLabel => 'Kortelės';
 }
