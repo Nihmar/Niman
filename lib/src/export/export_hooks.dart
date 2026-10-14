@@ -10,7 +10,8 @@ import 'package:niman/src/export/html_spans.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html_source.dart';
-import 'package:niman/src/links/block_anchors.dart' show withoutTrailingBlockId;
+import 'package:niman/src/links/block_anchors.dart'
+    show trailingBlockId, withoutTrailingBlockId;
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
@@ -38,6 +39,9 @@ final class ExportHooks extends HtmlHooks {
   /// The heading ids given so far: a second heading of one text gets
   /// `-2`, as pages exported before had it.
   final Set<String> _ids = <String>{};
+
+  /// The block ids given so far.
+  final Set<String> _blockIds = <String>{};
 
   /// Whether the page drew a diagram.
   bool usedDiagram = false;
@@ -78,10 +82,24 @@ final class ExportHooks extends HtmlHooks {
       calloutHtml(callout, body, titleHtml: title);
 
   @override
+  ({String shown, String? anchor})? blockId(String text) {
+    // The read view's rule and the scanner's, not a second one: the page
+    // draws `Title` for `## Title ^abc`, and `abc` names the block (#928).
+    final id = trailingBlockId(text);
+    if (id == null) return null;
+    return (
+      shown: withoutTrailingBlockId(text),
+      // The first block that carries an id owns it, as for the scanner.
+      anchor: _blockIds.add(id) ? blockAnchor(id) : null,
+    );
+  }
+
+  @override
   String? headingId(String text) {
-    // The id of `## Title ^abc` is the one of `Title`, as the outline's
-    // entry for it is: the ` ^id` names the block, not the heading (#912).
-    return uniqueHeadingId(_ids, headingAnchor(withoutTrailingBlockId(text)));
+    // [text] is what the page draws: `Title` for `## Title ^abc`, so the
+    // heading's id is the one of `Title`, as the outline's entry for it is
+    // (#912).
+    return uniqueHeadingId(_ids, headingAnchor(text));
   }
 
   @override
