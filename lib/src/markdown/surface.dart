@@ -33,6 +33,7 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/suggester.dart';
+import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
@@ -104,6 +105,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.templateCommands = false,
     this.wikilinkSuggester,
     this.notePath,
+    this.blockAnchors,
     this.deadLinks,
     this.onLinkHover,
     super.key,
@@ -121,6 +123,9 @@ final class MarkdownSurface extends StatelessWidget {
 
   /// See [MarkdownSourceView.notePath].
   final String? notePath;
+
+  /// See [MarkdownSourceView.blockAnchors].
+  final BufferBlockAnchors? blockAnchors;
 
   /// See [MarkdownSourceView.deadLinks].
   final ValueListenable<DeadLinks>? deadLinks;
@@ -284,6 +289,7 @@ final class MarkdownSurface extends StatelessWidget {
     templateCommands: templateCommands,
     wikilinkSuggester: wikilinkSuggester,
     notePath: notePath,
+    blockAnchors: blockAnchors,
     deadLinks: deadLinks,
     onLinkHover: onLinkHover,
   );

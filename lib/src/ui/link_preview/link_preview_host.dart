@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -165,8 +167,10 @@ final class _CardLayout extends SingleChildLayoutDelegate {
     final height = LinkPreviewCard.size.height;
     return BoxConstraints.tight(
       Size(
-        width.clamp(0, constraints.maxWidth - 2 * _margin),
-        height.clamp(0, constraints.maxHeight - 2 * _margin),
+        // A window narrower than the margins leaves the card no room, not
+        // a bound below zero for clamp to throw on.
+        width.clamp(0, math.max(0, constraints.maxWidth - 2 * _margin)),
+        height.clamp(0, math.max(0, constraints.maxHeight - 2 * _margin)),
       ),
     );
   }
@@ -182,8 +186,14 @@ final class _CardLayout extends SingleChildLayoutDelegate {
       y = pointer.dy - _gap - childSize.height;
     }
     return Offset(
-      x.clamp(_margin, size.width - childSize.width - _margin),
-      y.clamp(_margin, size.height - childSize.height - _margin),
+      x.clamp(
+        _margin,
+        math.max(_margin, size.width - childSize.width - _margin),
+      ),
+      y.clamp(
+        _margin,
+        math.max(_margin, size.height - childSize.height - _margin),
+      ),
     );
   }
 

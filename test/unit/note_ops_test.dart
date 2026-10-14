@@ -152,6 +152,22 @@ void main() {
       expect(await dao.find('journal/2026'), isNull);
     });
 
+    test('the exact spelling wins over another one that is there', () async {
+      final lower = Directory(p.join(root.path, 'journal'))..createSync();
+      final upper = Directory(p.join(root.path, 'Journal'))..createSync();
+      // A case-insensitive filesystem holds one folder under both names.
+      if (lower.statSync().type != FileSystemEntityType.directory ||
+          root.listSync().length != 2) {
+        return;
+      }
+      await indexer.applyEvents(root.path, [lower.path, upper.path]);
+
+      final row = await ops.ensureFolder('Journal/2026');
+
+      expect(row.path, 'Journal/2026');
+      expect(await dao.find('journal/2026'), isNull);
+    });
+
     test('a path out of a settings file is sanitized', () async {
       final row = await ops.ensureFolder('/../World//Places/');
       expect(row.path, 'World/Places');

@@ -11,7 +11,7 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// The [UnsavedNote] view over a note view's revision pair (T-PP-11): no
 /// text copy, so the dirty bit cannot drift from the buffer.
-final class UnsavedNoteAdapter implements UnsavedNote {
+final class UnsavedNoteAdapter implements UnsavedNote, UnsavedNoteHead {
   /// Creates an adapter reading the note's live state through getters,
   /// saving through [saveForClose].
   const new({
@@ -21,6 +21,7 @@ final class UnsavedNoteAdapter implements UnsavedNote {
     required this.lastSavedRevision,
     required this.saveForClose,
     required this.bufferText,
+    required this.bufferHead,
   });
 
   /// The open note's path.
@@ -41,8 +42,15 @@ final class UnsavedNoteAdapter implements UnsavedNote {
   /// The buffer's text.
   final String Function() bufferText;
 
+  /// The first `maxChars` units of the buffer's text, without joining the
+  /// rest.
+  final String Function(int maxChars) bufferHead;
+
   @override
   String get text => bufferText();
+
+  @override
+  String textHead(int maxChars) => bufferHead(maxChars);
 
   @override
   String get path => notePath();

@@ -141,13 +141,36 @@ void main() {
           NewItemLocation.openNoteFolder,
           context(),
         ),
-        'Sub/Foo.md',
+        'Foo.md',
       );
       expect(
         proposedMissingNotePath('Sub/', NewItemLocation.libraryRoot, context()),
         'Sub.md',
       );
     });
+
+    test(
+      'a relative target is walked from the clicked note, as it resolves',
+      () {
+        String? propose(String t, {String note = '/lib/A/B/n.md'}) =>
+            proposedMissingNotePath(
+              t,
+              NewItemLocation.libraryRoot,
+              context(note: note),
+            );
+        expect(propose('../X/Y'), 'A/X/Y.md');
+        expect(propose('./Y'), 'Y.md', reason: 'a bare name keeps the rule');
+        expect(propose('./X/Y'), 'X/Y.md', reason: 'a leading ./ is no walk');
+        expect(propose('X/./Y'), 'A/B/X/Y.md');
+        expect(propose('../../Y'), 'Y.md', reason: 'the root, not the rule');
+        expect(propose('/X/Y'), 'X/Y.md', reason: 'rooted ignores the note');
+        expect(propose('../Q/Y', note: '/lib/a/b/n.md'), 'a/Q/Y.md');
+        expect(propose('../../../Y'), isNull, reason: 'leaves the library');
+        expect(propose('/../Y'), isNull);
+        expect(propose('../..'), isNull, reason: 'the root itself');
+        expect(propose('../.trash/Y'), isNull, reason: 'hidden folder');
+      },
+    );
 
     test('backslash paths normalize to slashes', () {
       expect(
@@ -243,10 +266,12 @@ void main() {
       expect(recording.createCalls, isEmpty);
     });
 
-    test('a target that climbs out of the library stays in it', () async {
+    test('a target that climbs out of the library is not offered', () async {
       final (handler, recording) = buildHandler();
-      await handler.handleDeadLink('../../Out/Foo', context());
-      expect(recording.confirmCalls, ['Out/Foo.md']);
+      final outcome = await handler.handleDeadLink('../../Out/Foo', context());
+      expect(outcome, const DeadLinkNotOffered());
+      expect(recording.confirmCalls, isEmpty);
+      expect(recording.createCalls, isEmpty);
     });
 
     test('the current folder is created when confirmed', () async {

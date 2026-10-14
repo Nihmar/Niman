@@ -46,12 +46,17 @@ final class ShellRowActions {
     this.onRecognize,
     this.renameInPlace,
     this.confirmLinks,
+    this.onLinksRewritten,
   });
 
   /// Asks whether the links to what a rename or a move took are to follow,
   /// under the library's `LinkUpdate.ask` (#848); null asks nothing, and
   /// those links are then left as written.
   final LinkUpdateConfirm? confirmLinks;
+
+  /// The answer was yes and the links were rewritten on disk (#859), some
+  /// time after [onMoved]: the open note re-reads its file.
+  final VoidCallback? onLinksRewritten;
 
   /// Starts a rename in place in the tree (#707): true when it did — a
   /// desktop with the tree on screen — false to ask in a dialog.
@@ -196,6 +201,7 @@ final class ShellRowActions {
         sel,
         name,
         confirmLinks: confirmLinks,
+        onLinksRewritten: onLinksRewritten,
       );
       onMoved(sel, row.path);
     });
@@ -212,7 +218,12 @@ final class ShellRowActions {
     if (problem != null) return problem;
     await guard(() async {
       await saveOpen();
-      final renamed = await ops.rename(path, name, confirmLinks: confirmLinks);
+      final renamed = await ops.rename(
+        path,
+        name,
+        confirmLinks: confirmLinks,
+        onLinksRewritten: onLinksRewritten,
+      );
       onMoved(path, renamed.path);
     });
     return null;
@@ -252,6 +263,7 @@ final class ShellRowActions {
       path,
       target,
       confirmLinks: confirmLinks,
+      onLinksRewritten: onLinksRewritten,
     );
     onMoved(path, row.path);
   });

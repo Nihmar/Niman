@@ -71,19 +71,23 @@ abstract interface class NoteOperations {
   Future<Note> appendToNote(String path, String content);
 
   /// Renames the note or folder at [path] to [newName]. [confirmLinks]
-  /// answers the library's [LinkUpdate.ask] (#848).
+  /// answers the library's [LinkUpdate.ask] (#848) once the rename is done
+  /// and returned, not before it (#859); [onLinksRewritten] runs when a yes
+  /// has rewritten the links.
   Future<Note> rename(
     String path,
     String newName, {
     LinkUpdateConfirm? confirmLinks,
+    void Function()? onLinksRewritten,
   });
 
   /// Moves the note or folder at [path] into [targetParent].
-  /// [confirmLinks] answers the library's [LinkUpdate.ask] (#848).
+  /// [confirmLinks] and [onLinksRewritten] are [rename]'s.
   Future<Note> move(
     String path,
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
+    void Function()? onLinksRewritten,
   });
 
   /// The indexed note/folder at library-relative [path], or null.

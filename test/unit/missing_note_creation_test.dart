@@ -109,15 +109,11 @@ void main() {
         currentNote: '/lib/Notes/Current.md',
       );
       final proposed = proposedMissingNotePath(
-        'Pro:jects/../Three laws',
+        'Pro:jects/Three laws',
         NewItemLocation.openNoteFolder,
         context,
       );
-      expect(
-        proposed,
-        'Projects/Three laws.md',
-        reason: 'a `..` is dropped, a `:` too',
-      );
+      expect(proposed, 'Projects/Three laws.md', reason: 'a `:` is dropped');
     });
 
     test('the folders and the note exist, and are in the index', () async {

@@ -378,6 +378,31 @@ void main() {
     },
   );
 
+  test(
+    "the links hear of index writes, not of the session's bumps (#867)",
+    () async {
+      final controller = makeController();
+      await controller.open(root.path, create: false);
+      final links = (await controller.linkSource)!;
+      var heard = 0;
+      final sub = links.changes.listen((_) => heard++);
+      await Future<void>.delayed(Duration.zero);
+
+      controller.notify();
+      await Future<void>.delayed(Duration.zero);
+      expect(heard, 0, reason: 'a setting bump writes nothing to the index');
+
+      File(p.join(root.path, 'b.md')).writeAsStringSync('b');
+      await controller.rescanNow();
+      await Future<void>.delayed(Duration.zero);
+      expect(heard, greaterThan(0), reason: 'a note indexed is an index write');
+
+      await sub.cancel();
+      await controller.close();
+      await controller.dispose();
+    },
+  );
+
   test('a disk-originated change moves the revision', () async {
     final controller = makeController();
     await controller.open(root.path, create: false);

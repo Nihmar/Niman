@@ -339,29 +339,29 @@ final class WikilinkPanel extends StatelessWidget {
 
   Widget _headingRow(BuildContext context, HeadingSuggestion heading) {
     final scheme = Theme.of(context).colorScheme;
-    return Row(
-      children: <Widget>[
-        Flexible(
-          child: Text.rich(
-            _nameSpan(
-              heading.heading,
-              query,
-              TextStyle(fontSize: 12.5, color: scheme.onSurface),
-              TextStyle(
-                fontSize: 12.5,
-                color: scheme.onSurface,
-                fontWeight: FontWeight.w700,
+    return LayoutBuilder(
+      builder: (context, box) => Row(
+        children: <Widget>[
+          Expanded(
+            child: Text.rich(
+              _nameSpan(
+                heading.heading,
+                query,
+                TextStyle(fontSize: 12.5, color: scheme.onSurface),
+                TextStyle(
+                  fontSize: 12.5,
+                  color: scheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
-        ),
-        if (heading.path != null) ...<Widget>[
-          const Spacer(),
-          _noteName(scheme, heading.path!),
+          if (heading.path != null)
+            _noteName(scheme, heading.path!, box.maxWidth),
         ],
-      ],
+      ),
     );
   }
 
@@ -369,56 +369,69 @@ final class WikilinkPanel extends StatelessWidget {
   /// a row across the library also names its note.
   Widget _blockRow(BuildContext context, BlockIdSuggestion block) {
     final scheme = Theme.of(context).colorScheme;
-    return Row(
-      children: <Widget>[
-        Text.rich(
-          _nameSpan(
-            '^${block.id}',
-            query.isEmpty ? '' : '^$query',
-            TextStyle(fontSize: 12.5, color: scheme.onSurface),
-            TextStyle(
-              fontSize: 12.5,
-              color: scheme.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          maxLines: 1,
-        ),
-        if (block.excerpt.isNotEmpty)
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Text(
-                block.excerpt,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  color: scheme.onSurfaceVariant,
+    return LayoutBuilder(
+      builder: (context, box) => Row(
+        children: <Widget>[
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: box.maxWidth * _nameShare),
+            child: Text.rich(
+              _nameSpan(
+                '^${block.id}',
+                query.isEmpty ? '' : '^$query',
+                TextStyle(fontSize: 12.5, color: scheme.onSurface),
+                TextStyle(
+                  fontSize: 12.5,
+                  color: scheme.onSurface,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-        if (block.path != null) ...<Widget>[
-          const Spacer(),
-          _noteName(scheme, block.path!),
+          Expanded(
+            child: block.excerpt.isEmpty
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Text(
+                      block.excerpt,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+          ),
+          if (block.path != null) _noteName(scheme, block.path!, box.maxWidth),
         ],
-      ],
+      ),
     );
   }
 
-  /// The note a row of the library-wide lists is in, dimmed at the right.
-  Widget _noteName(ColorScheme scheme, String path) {
+  /// The share of a row a block id, or the note name beside it, may take; the
+  /// rest is left to the heading or the excerpt, so neither can push the
+  /// other out of the row.
+  static const double _nameShare = 0.4;
+
+  /// The note a row of the library-wide lists is in, dimmed at the right and
+  /// cut with an ellipsis at [_nameShare] of the [rowWidth].
+  Widget _noteName(ColorScheme scheme, String path, double rowWidth) {
     final name = p.basename(path);
     return Padding(
       padding: const EdgeInsets.only(left: 8),
-      child: Text(
-        name.toLowerCase().endsWith('.md')
-            ? name.substring(0, name.length - 3)
-            : name,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: rowWidth * _nameShare),
+        child: Text(
+          name.toLowerCase().endsWith('.md')
+              ? name.substring(0, name.length - 3)
+              : name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+        ),
       ),
     );
   }

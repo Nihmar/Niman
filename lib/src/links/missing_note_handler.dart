@@ -10,6 +10,7 @@ library;
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/library/new_item_folder.dart';
+import 'package:niman/src/links/link_path.dart';
 
 /// The context of a dead-link click: the note the link was clicked in,
 /// and the open library it belongs to.
@@ -55,25 +56,46 @@ final class LinkContext {
 /// Not a note (null): an empty target after normalization, or a name
 /// with a surviving extension — a `foo.png` target is an attachment, and
 /// attachments are never created. The name is sanitized the way notes
-/// are named ([sanitizeName]); segments that do not name anything (`.`,
-/// `..`, empty) are dropped, so a proposal never leaves the library.
+/// are named ([sanitizeName]); empty segments are dropped.
+///
+/// A target with a leading `/` or a `.`/`..` segment is walked the way the
+/// resolver walks it ([LinkPaths.walk], #491): from the library root, or
+/// from the clicked note's folder, and the note lands exactly there, not
+/// where the rule would put a bare name. A walk that leaves the library, or
+/// ends at the root itself, names nothing: null, so a proposal never leaves
+/// the library.
 String? proposedMissingNotePath(
   String target,
   NewItemLocation location,
   LinkContext context,
 ) {
-  var t = target.trim().replaceAll(r'\', '/');
+  var t = LinkPaths.clean(target);
   final hash = t.indexOf('#');
   if (hash != -1) t = t.substring(0, hash);
   t = t.trim();
   if (t.isEmpty) return null;
   final lower = t.toLowerCase();
   if (lower.endsWith('.md')) t = t.substring(0, t.length - 3);
-  final segments = t
+  var segments = t
       .split('/')
       .map((s) => s.trim())
-      .where((s) => s.isNotEmpty && s != '.' && s != '..')
+      .where((s) => s.isNotEmpty)
       .toList();
+  // A leading `/` or a `.`/`..` segment is walked as the resolver walks it
+  // (#491): from the library root, or from the clicked note's folder. The
+  // folder is walked in its own case (the resolver lowercases, a path made
+  // here must not), so it goes in as part of a rooted path.
+  final relative =
+      t.startsWith('/') || segments.any((s) => s == '.' || s == '..');
+  if (relative) {
+    final walked = LinkPaths.walk(
+      [if (!t.startsWith('/')) ...?_folderSegments(context), ...segments],
+      null,
+      rooted: true,
+    );
+    if (walked == null) return null;
+    segments = walked.split('/');
+  }
   if (segments.isEmpty) return null;
   final name = segments.last;
   // A surviving dot is an extension, not part of a note name: the target
@@ -91,10 +113,15 @@ String? proposedMissingNotePath(
     folders.add(clean);
   }
   final cleanName = sanitizeName(name, fallback: defaultNoteName);
-  final folder = folders.isEmpty
+  final folder = folders.isEmpty && !relative
       ? resolveNewItemFolder(location, activeNote: context.currentNotePath)
       : folders.join('/');
   return folder.isEmpty ? '$cleanName.md' : '$folder/$cleanName.md';
+}
+
+List<String>? _folderSegments(LinkContext context) {
+  final folder = context.currentFolder;
+  return folder?.split('/').where((s) => s.isNotEmpty).toList();
 }
 
 /// What happened when a dead link was handled.

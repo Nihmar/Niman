@@ -67,14 +67,23 @@ final class DeadLinks {
   int get hashCode => Object.hash(Object.hashAllUnordered(wiki), href.length);
 }
 
-/// The part of a wikilink's [alias] that may be a note, as following a link
-/// reads it: before a `#`, trimmed; null when there is nothing there.
-String? aliasTarget(String? alias) {
+/// The label-first reading of a wikilink's [alias] — `[[a label|Note#H]]` —
+/// as following a link, previewing it and drawing it dead all take it: the
+/// part before a `#`, trimmed, is the note, and the part after it, trimmed, is
+/// the heading (null when empty, as for a trailing `#`). Null when there is no
+/// note there.
+({String target, String? fragment})? splitAlias(String? alias) {
   if (alias == null) return null;
   final hash = alias.indexOf('#');
   final target = (hash == -1 ? alias : alias.substring(0, hash)).trim();
-  return target.isEmpty ? null : target;
+  if (target.isEmpty) return null;
+  final fragment = hash == -1 ? '' : alias.substring(hash + 1).trim();
+  return (target: target, fragment: fragment.isEmpty ? null : fragment);
 }
+
+/// The part of a wikilink's [alias] that may be a note, as following a link
+/// reads it: before a `#`, trimmed; null when there is nothing there.
+String? aliasTarget(String? alias) => splitAlias(alias)?.target;
 
 /// A Markdown destination as the set keeps it: trimmed, and without the angle
 /// brackets that may enclose it (`<a b.md>`).

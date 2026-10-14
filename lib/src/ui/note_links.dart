@@ -13,6 +13,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/anchor.dart';
 import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/ui/dead_link_flow.dart';
@@ -90,23 +91,19 @@ Future<void> openWiki(
     // tried as the target (an optional `#heading` rides on it) before
     // the link is declared dead. A link whose first part resolves
     // never reaches this fallback.
-    final alias = ref.alias!;
-    final hash = alias.indexOf('#');
-    final aliasTarget = hash == -1 ? alias : alias.substring(0, hash);
-    final aliasHeading = hash == -1 || hash == alias.length - 1
-        ? null
-        : alias.substring(hash + 1);
-    if (aliasTarget.trim().isNotEmpty) {
+    final aliased = splitAlias(ref.alias);
+    if (aliased != null) {
       log.debug(
         'wikilink: target-first unresolved — retrying the aliased '
-        'part "$aliasTarget" as the target',
+        'part "${aliased.target}" as the target',
       );
-      final swapped = await source.resolveWiki(aliasTarget.trim(), from: from);
+      final swapped = await source.resolveWiki(aliased.target, from: from);
       final swappedOutcome = describeResolved(swapped);
-      log.debug('wikilink alias "$aliasTarget" -> $swappedOutcome');
+      log.debug('wikilink alias "${aliased.target}" -> $swappedOutcome');
+      // Live as the dead-link drawing counts it: anything but unresolved.
       if (swapped is ResolvedNote || swapped is AmbiguousNote) {
         resolved = swapped;
-        anchor = aliasHeading;
+        anchor = aliased.fragment;
       }
     }
   }
@@ -167,10 +164,8 @@ Future<void> _openNoteResult(
   NoteLinkTargets link,
 ) async {
   const log = AppLogger(name: 'links');
-  final root = link.libraryRoot;
-  final currentRel = root == null
-      ? null
-      : p.relative(link.notePath, from: root);
+  // Slash-separated, as the index spells [Note.path] on every platform.
+  final currentRel = link.notePathInLibrary;
   if (currentRel != null && note.path == currentRel) {
     // Same note: stay and jump (or nothing when there is no anchor).
     log.debug(

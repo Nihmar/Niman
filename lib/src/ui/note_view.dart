@@ -28,6 +28,7 @@ import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/library_links.dart';
+import 'package:niman/src/links/link_preview.dart' show PreviewLimits;
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -472,7 +473,12 @@ final class _NoteViewState extends State<NoteView>
   String? _unsavedTextOf(String path) {
     final root = widget.libraryRoot;
     if (root == null) return null;
-    return widget.unsavedTracker?.unsavedTextOf(p.join(root, path));
+    // One unit past the limit, so a note longer than it still reads as
+    // longer: the preview is cut, and says so, as it is for the whole text.
+    return widget.unsavedTracker?.unsavedTextOf(
+      p.join(root, path),
+      maxChars: PreviewLimits.bytes + 1,
+    );
   }
 
   /// The scrolls of both panes: a card closes when the note moves under it.
@@ -721,6 +727,20 @@ final class _NoteViewState extends State<NoteView>
     return _unifiedTextCache;
   }
 
+  /// The first [maxChars] units of [_unifiedText], read from the buffer's
+  /// own lines: O(the head), not O(the note).
+  String _unifiedHead(int maxChars) {
+    final buffer = _unifiedSurfaceBuffer;
+    if (buffer == null) {
+      final text = _unifiedTextCache;
+      return text.length <= maxChars ? text : text.substring(0, maxChars);
+    }
+    return buffer.substring(
+      0,
+      buffer.length < maxChars ? buffer.length : maxChars,
+    );
+  }
+
   /// Seeds [_unifiedText] with the text [_unifiedSurfaceBuffer] was read from.
   set _unifiedText(String text) {
     _unifiedTextCache = text;
@@ -857,6 +877,7 @@ final class _NoteViewState extends State<NoteView>
     lastSavedRevision: () => _saves.lastSavedRevision,
     saveForClose: _saves.saveForClose,
     bufferText: () => _unifiedText,
+    bufferHead: _unifiedHead,
   );
 
   /// How the note reaches the disk: its revisions, the debounce after an
@@ -1439,6 +1460,7 @@ final class _NoteViewState extends State<NoteView>
         deadLinks: _deadLinks,
         onLinkHover: _preview.editorHover,
         notePath: _pathInLibrary,
+        blockAnchors: _blockAnchors,
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.
@@ -1940,7 +1962,7 @@ final class _NoteViewState extends State<NoteView>
   );
 
   /// The note's block anchors (#844), read off its buffer when a block link
-  /// is followed.
+  /// is followed; the source view's `[[#^` panel reads the same (#869).
   late final BufferBlockAnchors _blockAnchors = BufferBlockAnchors(
     () => _surface!.buffer,
   );

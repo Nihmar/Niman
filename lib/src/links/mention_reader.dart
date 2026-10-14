@@ -18,7 +18,7 @@ abstract interface class MentionSource implements IndexChanges {
   Future<Referrers> referrersOf(String path, {int? after});
 
   /// What the note at [referrerPath] says about the note at [path]: the line
-  /// of its first mention, whether that is an embed, and how many there are.
+  /// around its first mention, and whether that is an embed.
   /// Read from the referrer's text when asked, once for each revision of it;
   /// [Mention.unread] when the text no longer names the note.
   Future<Mention> mentionIn(String referrerPath, String path);
@@ -68,12 +68,7 @@ final class MentionReader implements MentionSource {
     );
     return Referrers([
       for (final r in found.items)
-        Referrer(
-          path: r.path,
-          kinds: r.kinds,
-          modified: r.modified,
-          size: r.size,
-        ),
+        Referrer(path: r.path, modified: r.modified, size: r.size),
     ], next: found.next);
   }
 
@@ -125,12 +120,7 @@ final class MentionReader implements MentionSource {
         (s) => !s.embed,
         orElse: () => named.first,
       );
-      mention = Mention(
-        context: shown.context,
-        line: shown.line,
-        embed: shown.embed,
-        count: named.length,
-      );
+      mention = Mention(context: shown.context, embed: shown.embed);
     }
     _mentions[key] = mention;
     return mention;
