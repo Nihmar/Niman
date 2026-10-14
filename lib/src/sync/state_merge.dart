@@ -117,8 +117,9 @@ String? mergeReviewJson({
         base: agreed,
         localNewer: !_readAt(theirs[key]).isAfter(_readAt(mine[key])),
       );
-      if (pick.present)
+      if (pick.present) {
         cards[key] = _withEarliestFirst(pick.value, mine[key], theirs[key]);
+      }
     }
     if (cards.isNotEmpty) merged[note] = cards;
   }
