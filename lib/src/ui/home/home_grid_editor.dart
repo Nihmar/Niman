@@ -5,6 +5,10 @@
 ///
 /// Every drop is written at once, settled first: the tile just placed
 /// keeps its place and the ones it lands on move down.
+///
+/// Where a pointer aims (#712) a tile's settings open in an inspector in
+/// the add panel's place, written as they change, and a right click on a
+/// tile gives its menu: settings, the moves, Hide.
 library;
 
 import 'dart:async';
@@ -19,7 +23,9 @@ import 'package:niman/src/ui/home/home_add_panel.dart';
 import 'package:niman/src/ui/home/home_editing.dart';
 import 'package:niman/src/ui/home/home_grid.dart';
 import 'package:niman/src/ui/home/home_tile_frame.dart';
+import 'package:niman/src/ui/home/home_tile_inspector.dart';
 import 'package:niman/src/ui/home/home_tile_settings.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The grid in edit mode, with the add panel at its side.
@@ -57,6 +63,58 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
 
   /// The grid's width at the last layout, for the drop.
   double _width = 0;
+
+  /// The tile whose settings the inspector shows (#712), or null.
+  String? _inspected;
+
+  /// Opens [tile]'s settings: in the inspector where a pointer aims, in
+  /// the dialog elsewhere.
+  void _settings(HomeTile tile) {
+    if (pointerDense(Theme.of(context))) {
+      setState(() => _inspected = tile.id);
+      return;
+    }
+    unawaited(
+      openTileSettings(context, _editing, tile, controller: widget.controller),
+    );
+  }
+
+  /// A tile's right-click menu (#712): its settings, the moves, Hide.
+  Future<void> _tileMenu(HomeTile tile, Offset at) async {
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final picked = await showMenu<Object>(
+      context: context,
+      position: RelativeRect.fromRect(
+        at & const Size(1, 1),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        if (hasTileSettings(tile))
+          PopupMenuItem(
+            key: Key('home-menu-settings-${tile.id}'),
+            value: 'settings',
+            child: Text(AppStrings.homeTileSettings),
+          ),
+        for (final move in HomeTileMove.values)
+          PopupMenuItem(value: move, child: Text(_EditableTile._label(move))),
+        PopupMenuItem(
+          key: Key('home-menu-hide-${tile.id}'),
+          value: 'hide',
+          child: Text(AppStrings.homeTileHide),
+        ),
+      ],
+    );
+    if (!mounted) return;
+    switch (picked) {
+      case 'settings':
+        _settings(tile);
+      case 'hide':
+        await _editing.change(_editing.layout.hide(tile.id).settled());
+      case final HomeTileMove move:
+        await _place(tile, move.apply(tile.cell));
+    }
+  }
 
   HomeEditing get _editing => widget.editing;
 
@@ -182,15 +240,9 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
                             _editing.change(layout.hide(t.id).settled()),
                           ),
                           onSettings: hasTileSettings(t)
-                              ? () => unawaited(
-                                  openTileSettings(
-                                    context,
-                                    _editing,
-                                    t,
-                                    controller: widget.controller,
-                                  ),
-                                )
+                              ? () => _settings(t)
                               : null,
+                          onMenuAt: (at) => unawaited(_tileMenu(t, at)),
                         ),
                       ),
                   ],
@@ -202,7 +254,15 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
         const SizedBox(width: 16),
         SizedBox(
           width: HomeGridEditor.panelWidth,
-          child: HomeAddPanel(editing: _editing),
+          child: switch (_inspected == null ? null : layout[_inspected!]) {
+            final tile? when !tile.hidden => HomeTileInspector(
+              tile: tile,
+              editing: _editing,
+              controller: widget.controller,
+              onClose: () => setState(() => _inspected = null),
+            ),
+            _ => HomeAddPanel(editing: _editing),
+          },
         ),
       ],
     );
@@ -240,6 +300,7 @@ final class _EditableTile extends StatelessWidget {
     required this.onMove,
     required this.onHide,
     required this.onSettings,
+    required this.onMenuAt,
   });
 
   final HomeTile tile;
@@ -251,6 +312,9 @@ final class _EditableTile extends StatelessWidget {
   final ValueChanged<HomeTileMove> onMove;
   final VoidCallback onHide;
   final VoidCallback? onSettings;
+
+  /// Opens the tile's menu at a point on screen (#712).
+  final ValueChanged<Offset> onMenuAt;
 
   /// The corner handle's touch target: larger than what it draws, for a
   /// finger on a tablet.
@@ -272,17 +336,20 @@ final class _EditableTile extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          MouseRegion(
-            cursor: lifted
-                ? SystemMouseCursors.grabbing
-                : SystemMouseCursors.grab,
-            child: _Grab(
-              key: Key('home-drag-${tile.id}'),
-              onStart: () => onStart(resize: false),
-              onUpdate: onUpdate,
-              onEnd: onEnd,
-              child: IgnorePointer(
-                child: Opacity(opacity: 0.55, child: content),
+          GestureDetector(
+            onSecondaryTapUp: (details) => onMenuAt(details.globalPosition),
+            child: MouseRegion(
+              cursor: lifted
+                  ? SystemMouseCursors.grabbing
+                  : SystemMouseCursors.grab,
+              child: _Grab(
+                key: Key('home-drag-${tile.id}'),
+                onStart: () => onStart(resize: false),
+                onUpdate: onUpdate,
+                onEnd: onEnd,
+                child: IgnorePointer(
+                  child: Opacity(opacity: 0.55, child: content),
+                ),
               ),
             ),
           ),
