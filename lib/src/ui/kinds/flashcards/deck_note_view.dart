@@ -160,13 +160,16 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
       builder: (context, _) => ListenableBuilder(
         listenable: tab.run ?? tab,
         builder: (context, _) {
-          final current = tab.run?.session.current;
+          final run = tab.run;
+          final current = run?.session.current;
           return DeckWideView(
             reading: reading,
             edits: edits,
             mathCache: _math,
             onStudy: onStudy,
             studying: current?.deckPath == _path ? current?.card.key : null,
+            studied:
+                run?.session.decks.any((deck) => deck.path == _path) ?? false,
           );
         },
       ),

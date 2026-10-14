@@ -26,6 +26,7 @@ final class DeckCardRow extends StatefulWidget {
     required this.onSaveSentence,
     required this.onDelete,
     this.studying = false,
+    this.hideAnswer = false,
     super.key,
   });
 
@@ -41,6 +42,10 @@ final class DeckCardRow extends StatefulWidget {
   /// Whether the study beside the deck is asking this card (#533): the row
   /// is marked.
   final bool studying;
+
+  /// Whether the answer is left out: a study of the deck is open beside
+  /// it, and the list must not give its answers away.
+  final bool hideAnswer;
 
   /// The formulas typeset so far, shared by the deck's rows.
   final MathCache mathCache;
@@ -168,8 +173,10 @@ final class _DeckCardRowState extends State<DeckCardRow> {
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(child: _answerText(context, style)),
+            if (!widget.hideAnswer) ...[
+              const SizedBox(width: 16),
+              Expanded(child: _answerText(context, style)),
+            ],
             const SizedBox(width: 16),
             SizedBox(
               width: deckNextWidth,

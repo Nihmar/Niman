@@ -21,6 +21,7 @@ final class DeckWideView extends StatelessWidget {
     required this.mathCache,
     required this.onStudy,
     this.studying,
+    this.studied = false,
     super.key,
   });
 
@@ -39,6 +40,10 @@ final class DeckWideView extends StatelessWidget {
   /// The key of the card the study beside the deck asks, if any.
   final String? studying;
 
+  /// Whether a study of the deck is open beside it: the answers are left
+  /// out of the list.
+  final bool studied;
+
   @override
   Widget build(BuildContext context) {
     final cards = reading.deck.cards;
@@ -54,8 +59,10 @@ final class DeckWideView extends StatelessWidget {
           child: Row(
             children: [
               Expanded(child: Text(AppStrings.flashcardsQuestion, style: head)),
-              const SizedBox(width: 16),
-              Expanded(child: Text(AppStrings.flashcardsAnswer, style: head)),
+              if (!studied) ...[
+                const SizedBox(width: 16),
+                Expanded(child: Text(AppStrings.flashcardsAnswer, style: head)),
+              ],
               const SizedBox(width: 16),
               SizedBox(
                 width: deckNextWidth,
@@ -101,6 +108,7 @@ final class DeckWideView extends StatelessWidget {
                 next: nextLabel(reading.stateOf(card), reading.today),
                 repeated: reading.isRepeated(card),
                 studying: card.key == studying,
+                hideAnswer: studied,
                 mathCache: mathCache,
                 sentence: () => clozeSentence(edits.host.text, card),
                 onSave: (question, answer) =>

@@ -185,6 +185,9 @@ void main() {
     // The deck stays on screen, in the pane beside, the card asked marked.
     expect(find.byKey(const Key('deck-name')), findsOneWidget);
     expect(find.byKey(const Key('deck-row-studying')), findsOneWidget);
+    // The list gives no answer away while the deck is studied.
+    expect(find.text('Answer'), findsNothing);
+    expect(find.text('began', findRichText: true), findsNothing);
     expect(
       find.descendant(
         of: find.byKey(const Key('review-question')),
@@ -198,6 +201,7 @@ void main() {
     expect(find.byKey(const Key('review-tab')), findsNothing);
     expect(find.byKey(const Key('deck-row-studying')), findsNothing);
     expect(find.byKey(const Key('deck-name')), findsOneWidget);
+    expect(find.text('began', findRichText: true), findsOneWidget);
   });
 
   testWidgets('a window too narrow for two panes studies over the deck', (
