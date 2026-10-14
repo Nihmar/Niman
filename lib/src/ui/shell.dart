@@ -3535,6 +3535,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onNewListNote: () => unawaited(_createFlow.createListNote(context)),
       onNewAudioNote: () => unawaited(_createFlow.createAudioNote(context)),
       onNewSlides: () => unawaited(_createFlow.createSlidesNote(context)),
+      onNewFlashcards: () => unawaited(_createFlow.createFlashcards(context)),
       onNewFromTemplate: () =>
           unawaited(_templateFlow.createFromTemplate(context)),
       onNewFolder: () => unawaited(_createFlow.createFolder(context)),
@@ -3865,6 +3866,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_createFlow.createAudioNote(context)),
       AppCommand.newSlides: () =>
           unawaited(_createFlow.createSlidesNote(context)),
+      AppCommand.newFlashcards: () =>
+          unawaited(_createFlow.createFlashcards(context)),
       AppCommand.studyDeck: () => unawaited(_studyDeck()),
       AppCommand.deckColumns: () => unawaited(_chooseDeckColumns()),
       AppCommand.deckReset: () => unawaited(_resetDeckReview()),
@@ -5212,6 +5215,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unawaited(_createFlow.createAudioNote(context));
       case NewShellItem.slides:
         unawaited(_createFlow.createSlidesNote(context));
+      case NewShellItem.flashcards:
+        unawaited(_createFlow.createFlashcards(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
       case NewShellItem.captureWebPage:

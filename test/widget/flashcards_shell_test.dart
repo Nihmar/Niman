@@ -252,7 +252,7 @@ void main() {
     expect(
       offered(),
       containsAll([
-        AppCommand.newNote,
+        AppCommand.newFlashcards,
         AppCommand.studyDeck,
         AppCommand.deckColumns,
         AppCommand.deckReset,
@@ -270,7 +270,47 @@ void main() {
       LogicalKeyboardKey.shiftLeft,
     ]);
     await settle(tester);
-    expect(offered(), contains(AppCommand.newNote));
+    expect(offered(), contains(AppCommand.newFlashcards));
     expect(offered(), isNot(contains(AppCommand.studyDeck)));
+  });
+
+  testWidgets('the wide create menu offers New flashcards', (tester) async {
+    await openDeck(tester);
+    await tester.tap(find.byKey(const Key('new-item-menu')));
+    await settle(tester);
+    expect(find.byKey(const Key('new-flashcards-action')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('new-flashcards-action')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Verbs');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(controller.contentOf('Verbs.md'), contains('type: flashcard'));
+  });
+
+  testWidgets('New flashcards makes a deck with an empty table', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [librarySessionProvider.overrideWithValue(controller)],
+        child: const NimanApp(),
+      ),
+    );
+    await tester.pump();
+    final picker = useFakeFilePicker();
+    await openLibrary(tester, picker);
+
+    await openNewItemMenu(tester);
+    await tester.tap(find.byKey(const Key('new-flashcards-action')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Verbs');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    expect(
+      controller.contentOf('Verbs.md'),
+      '---\ntype: flashcard\ndeck: \n---\n\n'
+      '| Question | Answer |\n|---|---|\n',
+    );
   });
 }
