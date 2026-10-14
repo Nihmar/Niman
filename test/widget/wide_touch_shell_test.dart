@@ -11,6 +11,7 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/folder_grid.dart';
+import 'package:niman/src/ui/history/note_version_screen.dart';
 import 'package:niman/src/ui/palette/palette_swipe.dart';
 import 'package:niman/src/ui/settings_section_pane.dart';
 import 'package:niman/src/ui/tree.dart';
@@ -218,6 +219,34 @@ void main() {
         find.byKey(const Key('note-tab-0')),
         findsOne,
         reason: 'the note it was pinned over stays',
+      );
+    }, variant: _android);
+
+    testWidgets('closes the compare page covering the note before the note', (
+      tester,
+    ) async {
+      controller.seedVersion(
+        'alpha.md',
+        number: 1,
+        savedAt: DateTime(2026, 10, 3, 14, 2),
+        text: 'the old alpha',
+      );
+      await pumpApp(tester, const Size(1280, 800));
+      await openAlpha(tester);
+      await tester.tap(find.byKey(const Key('dock-pane-history')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('dock-history-1')));
+      await settle(tester);
+      expect(find.byType(NoteVersionScreen), findsOne);
+
+      expect(await tester.binding.handlePopRoute(), isTrue);
+      await settle(tester);
+      expect(find.byType(NoteVersionScreen), findsNothing);
+      expect(find.byKey(const Key('compare-tab')), findsNothing);
+      expect(
+        find.byKey(const Key('note-tab-0')),
+        findsOne,
+        reason: 'the note it covered stays',
       );
     }, variant: _android);
 
