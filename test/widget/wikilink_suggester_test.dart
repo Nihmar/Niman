@@ -1003,6 +1003,18 @@ void main() {
       expect(caret, text.length, reason: 'past the link');
     });
 
+    testWidgets('keeps the backslash of an escaped pipe after the target '
+        '(#932)', (tester) async {
+      final (text, _) = await complete(
+        tester,
+        r'| [[Ma\|shown]] |',
+        6,
+        'r',
+        LogicalKeyboardKey.tab,
+      );
+      expect(text, r'| [[Markdown basics\|shown]] |');
+    });
+
     testWidgets('replaces the rest of a heading', (tester) async {
       final (text, caret) = await complete(
         tester,
