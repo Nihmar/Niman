@@ -53,6 +53,11 @@ tree; an automatic one only turns the icon. You can keep writing either
 way. Open notes are saved before a manual sync, and a note that sync
 updated is reloaded.
 
+The icon's **panel** — the status, what is queued or failed, the
+conflicts, *Sync now* and the settings — opens with a long press, or by
+itself when the last sync left something to look at. On a desktop it is
+a pop-up at the icon, and a right click opens it without syncing.
+
 On a desktop the sync settings open as a floating window over the note,
 so the tree and the open note stay where they are; on a phone they are a
 page.

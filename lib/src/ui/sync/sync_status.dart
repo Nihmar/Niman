@@ -5,8 +5,10 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_service.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/spinning_sync_icon.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
@@ -29,8 +31,9 @@ final class SyncStatusButton extends StatelessWidget {
   /// Starts a sync.
   final VoidCallback onSync;
 
-  /// Opens the status panel.
-  final VoidCallback onOpenPanel;
+  /// Opens the status panel; where a pointer aims, under the button's
+  /// place on screen (#712).
+  final ValueChanged<Rect?> onOpenPanel;
 
   @override
   Widget build(BuildContext context) {
@@ -50,13 +53,13 @@ final class SyncStatusButton extends StatelessWidget {
           // would never open. Hovering still shows it.
           triggerMode: TooltipTriggerMode.manual,
           child: GestureDetector(
-            onLongPress: onOpenPanel,
+            onLongPress: () => onOpenPanel(menuAnchorOf(context)),
+            // A mouse's way to the panel without syncing (#712).
+            onSecondaryTap: () => onOpenPanel(menuAnchorOf(context)),
             child: IconButton(
               key: const Key('sync-status-button'),
-              onPressed: status.running
-                  ? onOpenPanel
-                  : attention
-                  ? onOpenPanel
+              onPressed: status.running || attention
+                  ? () => onOpenPanel(menuAnchorOf(context))
                   : onSync,
               icon: Badge(
                 isLabelVisible: attention,
@@ -141,13 +144,16 @@ final class SyncProgressStrip extends StatelessWidget {
 /// Opens the status panel (mockups S7, S10) for [sync].
 ///
 /// [onSyncNow] runs a sync; [onOpenSettings] opens the WebDAV settings
-/// (also for "Update password"); [onResolve] opens a conflict.
+/// (also for "Update password"); [onResolve] opens a conflict. Where a
+/// pointer aims it is a pop-up under [anchor], the sync button (#712); a
+/// wide touch screen gets a dialog, a phone the sheet.
 Future<void> showSyncPanel(
   BuildContext context, {
   required SyncService sync,
   required VoidCallback onSyncNow,
   required VoidCallback onOpenSettings,
   required void Function(String path) onResolve,
+  Rect? anchor,
 }) {
   const AppLogger(name: 'sync').info(
     'ui: status panel opened (${sync.status.pendingHints} queued, '
@@ -173,6 +179,15 @@ Future<void> showSyncPanel(
       },
     ),
   );
+  // Where a pointer aims, a pop-up under the button (#712).
+  if (pointerDense(Theme.of(context))) {
+    return showActionSheet<void>(
+      context,
+      anchor: anchor,
+      menuMaxWidth: 520,
+      items: (context) => [body],
+    );
+  }
   if (isWideShell(context)) {
     return showDialog<void>(
       context: context,

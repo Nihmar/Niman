@@ -20,6 +20,9 @@ import 'package:niman/src/ui/pointer_density.dart';
 /// need instead of the default cap — which silently clipped whatever did
 /// not fit — and bounded at [maxHeightFraction] of the screen so the note
 /// behind it stays visible and a long list scrolls inside the sheet.
+///
+/// [menuMaxWidth] caps the pop-up's width: a panel of its own — the sync
+/// status, the todo filter — takes more room than a list of verbs.
 Future<T?> showActionSheet<T>(
   BuildContext context, {
   required List<Widget> Function(BuildContext context) items,
@@ -27,6 +30,7 @@ Future<T?> showActionSheet<T>(
   Key? sheetKey,
   double maxHeightFraction = 0.7,
   Rect? anchor,
+  double menuMaxWidth = 400,
 }) {
   if (pointerDense(Theme.of(context))) {
     return _showActionSheetMenu<T>(
@@ -35,6 +39,7 @@ Future<T?> showActionSheet<T>(
       title: title,
       menuKey: sheetKey,
       anchor: anchor,
+      maxWidth: menuMaxWidth,
     );
   }
   return showModalBottomSheet<T>(
@@ -86,6 +91,7 @@ Future<T?> _showActionSheetMenu<T>(
   required String? title,
   required Key? menuKey,
   required Rect? anchor,
+  required double maxWidth,
 }) {
   // The overlay the menu's route is drawn in: the navigator's, which
   // `showMenu` pushes on.
@@ -104,7 +110,7 @@ Future<T?> _showActionSheetMenu<T>(
   return showMenu<T>(
     context: context,
     position: RelativeRect.fromRect(at, Offset.zero & overlay.size),
-    constraints: const BoxConstraints(minWidth: 240, maxWidth: 400),
+    constraints: BoxConstraints(minWidth: 240, maxWidth: maxWidth),
     items: [_ActionSheetMenuEntry<T>(key: menuKey, items: items, title: title)],
   );
 }
