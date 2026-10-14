@@ -201,6 +201,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Не ўдалося адкрыць усталёўшчык';
   @override
+  String get updateInstallPermissionMissing =>
+      'Абнаўленне нельга ўсталяваць, пакуль Niman не мае дазволу '
+      'ўсталёўваць праграмы. Спампаваны файл захаваны: «Спампаваць» '
+      'усталюе яго без паўторнай загрузкі.';
+  @override
   String get updateReleasePage => 'Старонка выпуску';
   @override
   String get updateTestingBuild =>

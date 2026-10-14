@@ -202,6 +202,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Diegimo programa neatsidarė';
   @override
+  String get updateInstallPermissionMissing =>
+      'Atnaujinimo įdiegti negalima, kol Niman neturi leidimo diegti '
+      'programų. Atsisiųstas failas išsaugotas: „Atsisiųsti“ jį '
+      'įdiegia be pakartotinio atsisiuntimo.';
+  @override
   String get updateReleasePage => 'Leidimo puslapis';
   @override
   String get updateTestingBuild =>

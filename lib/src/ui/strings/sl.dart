@@ -203,6 +203,11 @@ final class SlovenianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Namestitveni program se ni odprl';
   @override
+  String get updateInstallPermissionMissing =>
+      'Posodobitve ni mogoče namestiti, dokler Niman nima dovoljenja '
+      'za nameščanje aplikacij. Prenesena datoteka je ohranjena: '
+      '»Prenesi« jo namesti brez ponovnega prenosa.';
+  @override
   String get updateReleasePage => 'Stran izdaje';
   @override
   String get updateTestingBuild =>

@@ -200,6 +200,11 @@ final class SlovakStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Inštalátor sa nepodarilo otvoriť';
   @override
+  String get updateInstallPermissionMissing =>
+      'Aktualizáciu nemožno nainštalovať, kým Niman nemá povolenie '
+      'inštalovať aplikácie. Stiahnutý súbor sa zachováva: „Stiahnuť“ '
+      'ho nainštaluje bez opätovného sťahovania.';
+  @override
   String get updateReleasePage => 'Stránka vydania';
   @override
   String get updateTestingBuild =>

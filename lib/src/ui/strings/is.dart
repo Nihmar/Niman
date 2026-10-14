@@ -197,6 +197,11 @@ final class IcelandicStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Uppsetningarforritið opnaðist ekki';
   @override
+  String get updateInstallPermissionMissing =>
+      'Ekki er hægt að setja uppfærsluna upp fyrr en Niman hefur '
+      'leyfi til að setja upp forrit. Niðurhalaða skráin er geymd: '
+      '„Sækja“ setur hana upp án þess að sækja hana aftur.';
+  @override
   String get updateReleasePage => 'Útgáfusíða';
   @override
   String get updateTestingBuild =>

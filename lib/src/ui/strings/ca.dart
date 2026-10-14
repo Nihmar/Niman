@@ -201,6 +201,11 @@ final class CatalanStrings extends Strings {
   @override
   String get updateInstallerFailed => 'No s’ha pogut obrir l’instal·lador';
   @override
+  String get updateInstallPermissionMissing =>
+      'L’actualització no es pot instal·lar fins que Niman tingui '
+      'permís per instal·lar aplicacions. El fitxer baixat es '
+      'conserva: «Baixa» l’instal·la sense tornar-lo a baixar.';
+  @override
   String get updateReleasePage => 'Pàgina de la versió';
   @override
   String get updateTestingBuild =>

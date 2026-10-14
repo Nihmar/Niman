@@ -198,6 +198,11 @@ final class PortugueseStrings extends Strings {
   @override
   String get updateInstallerFailed => 'O instalador não abriu';
   @override
+  String get updateInstallPermissionMissing =>
+      'A atualização não pode ser instalada até que o Niman tenha '
+      'permissão para instalar aplicativos. O arquivo baixado foi '
+      'mantido: «Baixar» o instala sem baixá-lo de novo.';
+  @override
   String get updateReleasePage => 'Página da versão';
   @override
   String get updateTestingBuild =>

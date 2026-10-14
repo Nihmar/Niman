@@ -199,6 +199,11 @@ final class DutchStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Het installatieprogramma ging niet open';
   @override
+  String get updateInstallPermissionMissing =>
+      'De update kan pas worden geïnstalleerd als Niman apps mag '
+      'installeren. Het gedownloade bestand blijft bewaard: '
+      'Downloaden installeert het zonder het opnieuw op te halen.';
+  @override
   String get updateReleasePage => 'Releasepagina';
   @override
   String get updateTestingBuild =>

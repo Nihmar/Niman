@@ -203,6 +203,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Инсталаторът не се отвори';
   @override
+  String get updateInstallPermissionMissing =>
+      'Актуализацията не може да се инсталира, докато Niman няма '
+      'разрешение да инсталира приложения. Изтегленият файл е '
+      'запазен: „Изтегляне“ го инсталира без ново изтегляне.';
+  @override
   String get updateReleasePage => 'Страница на версията';
   @override
   String get updateTestingBuild =>

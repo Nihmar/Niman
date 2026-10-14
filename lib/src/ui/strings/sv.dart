@@ -200,6 +200,11 @@ final class SwedishStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Installationsprogrammet öppnades inte';
   @override
+  String get updateInstallPermissionMissing =>
+      'Uppdateringen kan inte installeras förrän Niman får installera '
+      'appar. Den nedladdade filen sparas: Ladda ned installerar den '
+      'utan att hämta den igen.';
+  @override
   String get updateReleasePage => 'Versionssida';
   @override
   String get updateTestingBuild =>
