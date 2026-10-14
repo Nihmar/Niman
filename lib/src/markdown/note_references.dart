@@ -59,8 +59,13 @@ final class NoteReferences {
 }
 
 /// The tags and links of [text]; see the library comment for what is read.
-NoteReferences noteReferencesOf(String text) {
-  final buffer = SourceBuffer.fromText(text);
+NoteReferences noteReferencesOf(String text) =>
+    noteReferencesOfBuffer(SourceBuffer.fromText(text));
+
+/// The tags and links of the note [buffer] holds, read off its lines as they
+/// are: what [noteReferencesOf] is, for a caller that has the buffer and
+/// would otherwise join it into a string for the read to split again.
+NoteReferences noteReferencesOfBuffer(SourceBuffer buffer) {
   final blocks = BlockScanner(buffer).index.blocks;
   final parser = ReadParser();
   DocumentScope? scope;
