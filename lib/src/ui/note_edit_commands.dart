@@ -527,6 +527,12 @@ final class NoteEditCommands {
     );
   }
 
+  /// The words the review's Ignore was pressed on (#907), for as long as
+  /// the note is open in this view: closing the pane or editing does not
+  /// bring them back. Not stored: a new session starts clean, and the
+  /// library's dictionary is for words to keep.
+  final Set<String> _ignoredSpelling = <String>{};
+
   /// The note's spelling, for the review in the dock (#712); null without
   /// a spell check. [edited] tells of an edit, a pause after it.
   SpellReview? spellReview({required Listenable edited}) {
@@ -538,6 +544,7 @@ final class NoteEditCommands {
       apply: _applySpelling,
       reveal: _revealSpelling,
       addWord: spell.addToDictionary,
+      ignored: _ignoredSpelling,
       edited: edited,
       available: spell.available,
     );

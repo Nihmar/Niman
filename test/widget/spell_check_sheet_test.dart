@@ -57,6 +57,29 @@ final class _SlowChecker implements SpellChecker {
   void dispose() {}
 }
 
+/// A checker that takes [cost] ms a word and finds only 'wrold' wrong.
+final class _SlowWrong implements SpellChecker {
+  const new(this.cost);
+
+  final int cost;
+
+  @override
+  bool get available => true;
+
+  @override
+  bool isCorrect(String word) {
+    final clock = Stopwatch()..start();
+    while (clock.elapsedMilliseconds < cost) {}
+    return word != 'wrold';
+  }
+
+  @override
+  List<String> suggest(String word) => const <String>[];
+
+  @override
+  void dispose() {}
+}
+
 void main() {
   late EditorSpellCheck spell;
 
@@ -159,11 +182,110 @@ void main() {
     expect(added, ['teh']);
     expect(find.text(AppStrings.spellCheckEmpty), findsOne);
 
-    lines[0] = 'still wrold';
+    lines[0] = 'still wrold teh';
     edited.notifyListeners();
     await tester.pumpAndSettle();
     expect(starts, 2);
+    expect(find.text('wrold'), findsNothing, reason: 'ignored, #907');
+    // The fake dictionary did not learn 'teh': it is listed again.
+    expect(find.text('teh'), findsOne);
+  });
+
+  // #907: Ignore was only a drop from the list, and the next edit's rescan
+  // brought the word back.
+  testWidgets('an ignored word stays ignored through the rescans, and in '
+      'a pane built again', (tester) async {
+    final lines = ['wrold teh'];
+    final edited = ChangeNotifier();
+    addTearDown(edited.dispose);
+    final ignored = <String>{};
+    Future<void> open() async {
+      await tester.pumpWidget(
+        _app(
+          SpellCheckSheet(
+            key: UniqueKey(),
+            docked: true,
+            available: true,
+            edited: edited,
+            ignored: ignored,
+            start: () => spell.startScan(
+              lineCount: lines.length,
+              lineAt: (i) => (text: lines[i], skip: const <TextRange>[]),
+            ),
+            suggest: spell.suggestionsFor,
+            apply: (_, _) => true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await open();
+    await tester.tap(find.byKey(const Key('spell-ignore-0-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('wrold'), findsNothing);
+    expect(ignored, {'wrold'});
+
+    // An edit anywhere: the note is checked again.
+    lines[0] = 'wrold teh, and wrold more';
+    edited.notifyListeners();
+    await tester.pumpAndSettle();
+    expect(find.text('wrold'), findsNothing, reason: 'still ignored');
+    expect(find.text('teh'), findsOne);
+
+    // The pane closed and opened again, as on another tab and back.
+    await open();
+    expect(find.text('wrold'), findsNothing);
+    expect(find.text('teh'), findsOne);
+  });
+
+  testWidgets('a rescan keeps the list on screen until the new pass can '
+      'replace it', (tester) async {
+    final slow = EditorSpellCheck(createChecker: (_) => const _SlowWrong(1));
+    addTearDown(slow.dispose);
+    // A new word per line, as a note has: none comes from the cache.
+    final longNote = [
+      for (var i = 0; i < 300; i++)
+        'w${String.fromCharCodes('$i'.codeUnits.map((c) => c + 49))}',
+      'wrold',
+    ];
+    final edited = ChangeNotifier();
+    addTearDown(edited.dispose);
+    var pass = 0;
+    await tester.pumpWidget(
+      _app(
+        SpellCheckSheet(
+          docked: true,
+          available: true,
+          edited: edited,
+          start: () => pass++ == 0
+              ? spell.startScan(
+                  lineCount: 1,
+                  lineAt: (_) => (text: 'wrold teh', skip: const <TextRange>[]),
+                )
+              : slow.startScan(
+                  lineCount: longNote.length,
+                  lineAt: (i) => (text: longNote[i], skip: const <TextRange>[]),
+                ),
+          suggest: spell.suggestionsFor,
+          apply: (_, _) => true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
     expect(find.text('wrold'), findsOne);
+    expect(find.text('teh'), findsOne);
+
+    edited.notifyListeners();
+    await tester.pump();
+    expect(find.byKey(const Key('spell-check-progress')), findsOne);
+    expect(find.text('teh'), findsOne, reason: 'the list is not emptied');
+    expect(find.text(AppStrings.spellCheckScanning), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('spell-check-progress')), findsNothing);
+    expect(find.text('wrold'), findsOne);
+    expect(find.text('teh'), findsNothing, reason: 'the new pass replaced it');
   });
 
   testWidgets('an earlier fix of another length moves what follows it', (

@@ -9,7 +9,8 @@ typedef PastedText = ({int start, String text});
 
 /// A note's spelling, as a review lists and fixes it (#712): a pass over
 /// the note, the suggestions for a word, a word replaced and a word shown,
-/// a word added to the library's dictionary, and what tells of an edit.
+/// a word added to the library's dictionary, the words ignored, and what
+/// tells of an edit.
 ///
 /// `apply` and `reveal` answer whether they acted: false when the note no
 /// longer holds the issue's word where the pass found it (#908), and then
@@ -20,6 +21,7 @@ typedef SpellReview = ({
   bool Function(SpellIssue issue, String replacement) apply,
   bool Function(SpellIssue issue) reveal,
   Future<void> Function(String word) addWord,
+  Set<String> ignored,
   Listenable edited,
   bool available,
 });
