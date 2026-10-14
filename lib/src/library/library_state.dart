@@ -37,6 +37,7 @@ import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
+import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/file_watcher.dart';
@@ -1651,11 +1652,13 @@ final class LibraryController implements LibrarySession {
   }
 
   /// Fires with the paths a re-index pruned, and drops their reading
-  /// positions: those files are ones the library saw leave (#492).
+  /// positions and review states: those files are ones the library saw
+  /// leave (#492, #533).
   void _onRemoved(String root, Set<String> removed) {
     if (removed.isEmpty || _removals.isClosed) return;
     _removals.add(removed);
     unawaited(ReadingPositions(root).removed(removed));
+    unawaited(ReviewStore(root).removed(removed));
   }
 
   /// Drops everything that belongs to the open library, the index file

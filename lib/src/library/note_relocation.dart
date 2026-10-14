@@ -7,6 +7,7 @@ import 'package:niman/src/core/settings/library_settings.dart' show LinkUpdate;
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/library/device_home_carry.dart';
@@ -189,6 +190,7 @@ final class NoteRelocator {
     hint(newRel, SyncOpKind.moved, fromPath: path);
     await history.moved(path, newRel, isDir: row.isDir);
     await _carryReading(path, newRel, isDir: row.isDir);
+    await _carryReview(path, newRel, isDir: row.isDir);
     await _carrySettings(path, newRel, isDir: row.isDir);
     await _carryHome(path, newRel, isDir: row.isDir);
     await carryOutsideLibrary(carryOutside, path, newRel, isDir: row.isDir);
@@ -445,5 +447,13 @@ final class NoteRelocator {
   Future<void> _carryReading(String from, String to, {required bool isDir}) {
     if (!isDir && isMarkdownNote(from)) return Future<void>.value();
     return ReadingPositions(root).moved(from, to);
+  }
+
+  /// Carries the review states of what moved from [from] to [to] (#533):
+  /// a deck note, or a folder that may hold some. Any other file
+  /// holds none, and costs no read of the review file.
+  Future<void> _carryReview(String from, String to, {required bool isDir}) {
+    if (!isDir && !isMarkdownNote(from)) return Future<void>.value();
+    return ReviewStore(root).moved(from, to);
   }
 }

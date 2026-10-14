@@ -18,6 +18,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `workspace/` | The open notes of one library on one device: panes, tabs and their mementos — see [workspace.md](../records/workspace.md) |
 | `journal/` | The journal's day pattern, settings and calendar summaries (see [journal](../user/journal.md)) |
 | `reading/` | Where each PDF and each book was left, kept in `.niman/reading.json` |
+| `flashcards/` | Decks (#533): the cards read from a note (`Deck.read`), the SM-2 scheduler, and the review states kept in `.niman/review.json` — see [flashcards.md](../records/flashcards.md) |
 | `annotations/` | A file's companion notes, the annotation model and its marks — see [annotations.md](../records/annotations.md) |
 | `capture/` | Capturing a web page as a note (#531): the download and its charsets (`fetch/`), a Dart port of Mozilla's Readability.js (`readability/`, held to upstream's test pages), the pictures into the attachments folder, the note — see [web-capture.md](../records/web-capture.md) |
 | `epub/` | Reading an EPUB into Markdown, its table of contents, its look and its marks — see [epub-reader.md](../records/epub-reader.md) |
