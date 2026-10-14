@@ -79,6 +79,10 @@ extension MenuMetrics on ThemeData {
 /// label, the `MenuAnchor` panels' padding, the `MenuItemButton`s' height,
 /// icon and label. A thumb's theme is returned as it came.
 ///
+/// Apply it to the theme the app is *drawn* with, localized — see
+/// `PointerMenuScope` — because the label style is taken from its text
+/// theme as it stands.
+///
 /// What a theme cannot say — the height of a `PopupMenuItem`, the height
 /// of a `PopupMenuDivider` — is [menuItem] and [menuDivider]'s.
 ThemeData pointerMenuTheme(ThemeData theme) {
@@ -88,12 +92,10 @@ ThemeData pointerMenuTheme(ThemeData theme) {
   return theme.copyWith(
     popupMenuTheme: theme.popupMenuTheme.copyWith(
       menuPadding: pointerDenseMenuPadding,
-      labelTextStyle: WidgetStateProperty.resolveWith(
-        (states) => body?.copyWith(
-          color: states.contains(WidgetState.disabled)
-              ? scheme.onSurface.withValues(alpha: 0.38)
-              : scheme.onSurface,
-        ),
+      labelTextStyle: _PopupLabelStyle(
+        body,
+        enabled: scheme.onSurface,
+        disabled: scheme.onSurface.withValues(alpha: 0.38),
       ),
     ),
     menuTheme: const MenuThemeData(
@@ -111,6 +113,8 @@ ThemeData pointerMenuTheme(ThemeData theme) {
         minimumSize: const WidgetStatePropertyAll(
           Size(64, pointerDenseItemHeight),
         ),
+        // A pointer needs no 48 px target round the row.
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         iconSize: const WidgetStatePropertyAll(18),
         textStyle: WidgetStatePropertyAll(body),
       ),
@@ -141,3 +145,32 @@ PopupMenuItem<T> menuItem<T>(
 /// A popup menu's divider at the height [context]'s theme gives menus.
 PopupMenuDivider menuDivider(BuildContext context) =>
     PopupMenuDivider(height: Theme.of(context).menuDividerHeight);
+
+/// A popup menu item's label: body text, dimmed while the item is disabled.
+///
+/// A class rather than a closure so that two themes made from the same
+/// colours are equal, and a rebuild of the app does not tell the whole
+/// tree its theme changed.
+@immutable
+final class _PopupLabelStyle implements WidgetStateProperty<TextStyle?> {
+  const new(this.body, {required this.enabled, required this.disabled});
+
+  final TextStyle? body;
+  final Color enabled;
+  final Color disabled;
+
+  @override
+  TextStyle? resolve(Set<WidgetState> states) => body?.copyWith(
+    color: states.contains(WidgetState.disabled) ? disabled : enabled,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is _PopupLabelStyle &&
+      other.body == body &&
+      other.enabled == enabled &&
+      other.disabled == disabled;
+
+  @override
+  int get hashCode => Object.hash(body, enabled, disabled);
+}
