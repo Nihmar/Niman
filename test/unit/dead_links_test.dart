@@ -151,6 +151,32 @@ void main() {
     });
   });
 
+  group('splitAlias', () {
+    test('a label-first alias is the note and its heading', () {
+      expect(splitAlias('Note#H'), (target: 'Note', fragment: 'H'));
+      expect(splitAlias('Note'), (target: 'Note', fragment: null));
+    });
+
+    test('a trailing # or a blank heading is no heading', () {
+      expect(splitAlias('Note#'), (target: 'Note', fragment: null));
+      expect(splitAlias('Note# '), (target: 'Note', fragment: null));
+    });
+
+    test('the note and the heading are trimmed', () {
+      expect(splitAlias(' Note '), (target: 'Note', fragment: null));
+      expect(splitAlias(' Note # H '), (target: 'Note', fragment: 'H'));
+    });
+
+    test('nothing before the # is no note', () {
+      expect(splitAlias(null), isNull);
+      expect(splitAlias(''), isNull);
+      expect(splitAlias('  '), isNull);
+      expect(splitAlias('#H'), isNull);
+      expect(aliasTarget('Note#H'), 'Note');
+      expect(aliasTarget('#H'), isNull);
+    });
+  });
+
   group('DeadLinks', () {
     test(
       'a wikilink is dead when its target is, unless its alias is a note',

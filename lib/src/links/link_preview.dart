@@ -176,16 +176,14 @@ Future<(String?, String?)> _target(
   if (resolved is! ResolvedNote) {
     // A label-first link, `[[a label|filename#heading]]`, is the note named
     // by its alias when the first part is none — as following reads it.
-    final aliased = aliasTarget(ref.alias);
+    final aliased = splitAlias(ref.alias);
     if (aliased != null) {
-      final swapped = await source.resolveWiki(aliased, from: from);
-      if (swapped is ResolvedNote) {
+      final swapped = await source.resolveWiki(aliased.target, from: from);
+      // Live as the dead-link drawing counts it (not unresolved); an
+      // ambiguous one still names no single note to show.
+      if (swapped is ResolvedNote || swapped is AmbiguousNote) {
         resolved = swapped;
-        final hash = ref.alias!.indexOf('#');
-        final fragment = hash == -1
-            ? ''
-            : ref.alias!.substring(hash + 1).trim();
-        anchor = fragment.isEmpty ? null : fragment;
+        anchor = aliased.fragment;
       }
     }
   }
