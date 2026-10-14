@@ -203,6 +203,11 @@ final class ItalianStrings extends Strings {
   String get updateInstallerFailed =>
       'Il programma di installazione non si è aperto';
   @override
+  String get updateInstallPermissionMissing =>
+      'L’aggiornamento non può essere installato finché Niman non ha '
+      'il permesso di installare app. Il file scaricato viene '
+      'conservato: «Scarica» lo installa senza riscaricarlo.';
+  @override
   String get updateReleasePage => 'Pagina della versione';
   @override
   String get updateTestingBuild =>

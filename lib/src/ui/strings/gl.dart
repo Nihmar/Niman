@@ -201,6 +201,11 @@ final class GalicianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Non se puido abrir o instalador';
   @override
+  String get updateInstallPermissionMissing =>
+      'A actualización non se pode instalar ata que Niman teña '
+      'permiso para instalar aplicacións. O ficheiro descargado '
+      'consérvase: «Descargar» instálao sen volver descargalo.';
+  @override
   String get updateReleasePage => 'Páxina da versión';
   @override
   String get updateTestingBuild =>

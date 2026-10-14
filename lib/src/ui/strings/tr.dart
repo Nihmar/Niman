@@ -195,6 +195,11 @@ final class TurkishStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Yükleyici açılamadı';
   @override
+  String get updateInstallPermissionMissing =>
+      'Niman’a uygulama yükleme izni verilene kadar güncelleme '
+      'yüklenemez. İndirilen dosya saklandı: İndir, onu yeniden '
+      'indirmeden yükler.';
+  @override
   String get updateReleasePage => 'Sürüm sayfası';
   @override
   String get updateTestingBuild =>

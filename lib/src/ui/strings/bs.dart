@@ -202,6 +202,11 @@ final class BosnianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Instalater se nije otvorio';
   @override
+  String get updateInstallPermissionMissing =>
+      'Ažuriranje se ne može instalirati dok Niman nema dozvolu za '
+      'instaliranje aplikacija. Preuzeta datoteka je sačuvana: '
+      '„Preuzmi“ je instalira bez ponovnog preuzimanja.';
+  @override
   String get updateReleasePage => 'Stranica izdanja';
   @override
   String get updateTestingBuild =>

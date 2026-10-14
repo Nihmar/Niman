@@ -196,6 +196,11 @@ final class EnglishStrings extends Strings {
   @override
   String get updateInstallerFailed => 'The installer did not open';
   @override
+  String get updateInstallPermissionMissing =>
+      'The update cannot be installed until Niman is allowed to '
+      'install apps. The download is kept: Download installs it '
+      'without fetching it again.';
+  @override
   String get updateReleasePage => 'Release page';
   @override
   String get updateTestingBuild =>

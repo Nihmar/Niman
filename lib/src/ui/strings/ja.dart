@@ -183,6 +183,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get updateInstallerFailed => 'インストーラーを開けませんでした';
   @override
+  String get updateInstallPermissionMissing =>
+      'Niman にアプリのインストールが許可されるまで、アッ'
+      'プデートはインストールできません。ダウンロードしたファイ'
+      'ルは保持されています。「ダウンロード」を押すと、再ダウン'
+      'ロードせずにインストールします。';
+  @override
   String get updateReleasePage => 'リリースページ';
   @override
   String get updateTestingBuild => 'テスト版は自動で更新されません。次の版は手動でインストールしてください。';

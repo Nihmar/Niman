@@ -200,6 +200,11 @@ final class DanishStrings extends Strings {
   String get updateInstallerFailed =>
       'Installationsprogrammet kunne ikke åbnes';
   @override
+  String get updateInstallPermissionMissing =>
+      'Opdateringen kan ikke installeres, før Niman har tilladelse '
+      'til at installere apps. Den downloadede fil er gemt: Download '
+      'installerer den uden at hente den igen.';
+  @override
   String get updateReleasePage => 'Udgivelsesside';
   @override
   String get updateTestingBuild =>

@@ -196,6 +196,11 @@ final class BasqueStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Instalatzailea ezin izan da ireki';
   @override
+  String get updateInstallPermissionMissing =>
+      'Eguneratzea ezin da instalatu Nimanek aplikazioak instalatzeko '
+      'baimena izan arte. Deskargatutako fitxategia gordeta dago: '
+      '«Deskargatu»k berriro deskargatu gabe instalatzen du.';
+  @override
   String get updateReleasePage => 'Bertsioaren orria';
   @override
   String get updateTestingBuild =>

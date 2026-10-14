@@ -200,6 +200,11 @@ final class CzechStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Instalátor se nepodařilo otevřít';
   @override
+  String get updateInstallPermissionMissing =>
+      'Aktualizaci nelze nainstalovat, dokud Niman nemá povolení '
+      'instalovat aplikace. Stažený soubor zůstává uložen: „Stáhnout“ '
+      'jej nainstaluje bez opětovného stahování.';
+  @override
   String get updateReleasePage => 'Stránka vydání';
   @override
   String get updateTestingBuild =>

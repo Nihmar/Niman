@@ -165,9 +165,11 @@ Future<bool> downloadAndApplyUpdate(
   final bool launched;
   try {
     if (!await steps.canInstall()) {
-      if (!context.mounted) return false;
       log.debug('install permission missing: asking');
-      if (!await _askInstallPermission(context, steps)) return false;
+      if (!context.mounted ||
+          !await _askInstallPermission(context, messenger, steps)) {
+        return false;
+      }
     }
     launched = await steps.apply(file);
   } on Object catch (error) {
@@ -210,9 +212,12 @@ SnackBar _installerFailed() => SnackBar(
 );
 
 /// Explains Android's "Install unknown apps", opens its page, and waits
-/// for the user to come back; true once the permission is there.
+/// for the user to come back; true once the permission is there. Short of
+/// it, a snackbar says why nothing opened and that the download is kept
+/// (#914): [context] is for the dialog, [messenger] outlives it.
 Future<bool> _askInstallPermission(
   BuildContext context,
+  ScaffoldMessengerState messenger,
   UpdateSteps steps,
 ) async {
   final go = await showDialog<bool>(
@@ -241,11 +246,22 @@ Future<bool> _askInstallPermission(
       if (!back.isCompleted) back.complete();
     },
   );
+  var granted = false;
   try {
-    if (!await steps.openPermission()) return false;
-    await back.future;
+    if (await steps.openPermission()) {
+      await back.future;
+      granted = await steps.canInstall();
+    }
   } finally {
     listener.dispose();
   }
-  return await steps.canInstall();
+  if (!granted) {
+    messenger.showSnackBar(
+      SnackBar(
+        persist: false,
+        content: Text(AppStrings.updateInstallPermissionMissing),
+      ),
+    );
+  }
+  return granted;
 }

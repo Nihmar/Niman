@@ -130,4 +130,96 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
     expect(updateDownload.running, isFalse);
   });
+
+  group('without the install permission (#914)', () {
+    final apk = _update('niman-9.9.9-android.apk');
+
+    testWidgets('a settings page that cannot be opened says so, and that the '
+        'download is kept', (tester) async {
+      final result = <bool>[];
+      var applied = false;
+      await _pump(
+        tester,
+        update: apk,
+        result: result,
+        steps: UpdateSteps(
+          download: download,
+          canInstall: () async => false,
+          openPermission: () async => false,
+          apply: (file) async => applied = true,
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('update-install-permission-open')));
+      await tester.pump();
+      await tester.pump();
+      expect(result, [false]);
+      expect(applied, isFalse);
+      expect(find.text(AppStrings.updateInstallPermissionMissing), findsOne);
+    });
+
+    testWidgets('coming back without the grant says so, and that the '
+        'download is kept', (tester) async {
+      final result = <bool>[];
+      var applied = false;
+      await _pump(
+        tester,
+        update: apk,
+        result: result,
+        steps: UpdateSteps(
+          download: download,
+          canInstall: () async => false,
+          openPermission: () async => true,
+          apply: (file) async => applied = true,
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('update-install-permission-open')));
+      await tester.pump();
+      await tester.pump();
+      expect(result, isEmpty, reason: 'waiting for the user to come back');
+      // The settings page took the app to the background, and the user
+      // returned from it.
+      tester.binding
+        ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+        ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+      expect(result, [false]);
+      expect(applied, isFalse);
+      expect(find.text(AppStrings.updateInstallPermissionMissing), findsOne);
+    });
+
+    testWidgets('coming back with the grant installs', (tester) async {
+      final result = <bool>[];
+      var granted = false;
+      var applied = false;
+      await _pump(
+        tester,
+        update: apk,
+        result: result,
+        steps: UpdateSteps(
+          download: download,
+          canInstall: () async => granted,
+          openPermission: () async => granted = true,
+          apply: (file) async => applied = true,
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('update-install-permission-open')));
+      await tester.pump();
+      await tester.pump();
+      tester.binding
+        ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+        ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+      expect(result, [true]);
+      expect(applied, isTrue);
+      expect(
+        find.text(AppStrings.updateInstallPermissionMissing),
+        findsNothing,
+      );
+    });
+  });
 }

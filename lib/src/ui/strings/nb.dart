@@ -198,6 +198,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Installasjonsprogrammet åpnet seg ikke';
   @override
+  String get updateInstallPermissionMissing =>
+      'Oppdateringen kan ikke installeres før Niman har tillatelse '
+      'til å installere apper. Den nedlastede filen er beholdt: «Last '
+      'ned» installerer den uten å laste den ned på nytt.';
+  @override
   String get updateReleasePage => 'Utgivelsesside';
   @override
   String get updateTestingBuild =>

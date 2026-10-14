@@ -201,6 +201,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Инсталаторот не се отвори';
   @override
+  String get updateInstallPermissionMissing =>
+      'Ажурирањето не може да се инсталира додека Niman нема дозвола '
+      'да инсталира апликации. Преземената датотека е зачувана: '
+      '„Преземи“ ја инсталира без повторно преземање.';
+  @override
   String get updateReleasePage => 'Страница на изданието';
   @override
   String get updateTestingBuild =>
