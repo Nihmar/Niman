@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
@@ -25,22 +26,31 @@ typedef DeckStudyStarter = Future<void> Function(
 /// starter here, or null, and while it is null Study is shown but disabled.
 final deckStudyStarterProvider = Provider<DeckStudyStarter?>(
   (ref) =>
-      (context, notePath) => _study(context, ref, notePath),
+      (context, notePath) => studyDecks(context, ref.read, [notePath]),
 );
 
-Future<void> _study(
+/// How a study reads its providers: a `Ref`'s or a `WidgetRef`'s `read`.
+typedef ProviderRead = T Function<T>(ProviderListenable<T> provider);
+
+/// Studies the decks at [paths], absolute, together — one deck, or the
+/// decks of a category under its name [title] — beside them on a wide
+/// window, full screen elsewhere. [replace] takes the place of the full
+/// screen study on show: **Next deck**.
+Future<void> studyDecks(
   BuildContext context,
-  Ref ref,
-  String notePath, {
+  ProviderRead read,
+  List<String> paths, {
+  String? title,
   bool replace = false,
 }) async {
   final run = await loadReviewRun(
-    session: ref.read(librarySessionProvider),
-    reviews: ref.read(deckReviewSourceProvider),
-    paths: [notePath],
+    session: read(librarySessionProvider),
+    reviews: read(deckReviewSourceProvider),
+    paths: paths,
+    title: title,
   );
   if (run == null || !context.mounted) return;
-  final tab = ref.read(reviewTabProvider);
+  final tab = read(reviewTabProvider);
   if (tab.hosted && isWideShell(context)) return tab.open(run);
   final navigator = Navigator.of(context, rootNavigator: true);
   final route = MaterialPageRoute<void>(
@@ -51,7 +61,7 @@ Future<void> _study(
           onClose: () => Navigator.pop(context),
           // The next deck's study takes this one's place.
           onNextDeck: (path) => unawaited(
-            _study(context, ref, p.join(run.root, path), replace: true),
+            studyDecks(context, read, [p.join(run.root, path)], replace: true),
           ),
         ),
       ),

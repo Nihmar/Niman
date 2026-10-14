@@ -75,12 +75,14 @@ final class ReviewRun extends ChangeNotifier {
 
 /// A run over the deck notes at [paths], absolute, of the library [session]
 /// has open: the notes read off the UI isolate, the states from [reviews],
-/// today and the day's new cards from the library's settings. Null outside
-/// a library; a note that does not read is left out.
+/// today and the day's new cards from the library's settings. It is called
+/// [title], or by the first deck's name. Null outside a library, or when no
+/// note reads; a note that does not read is left out.
 Future<ReviewRun?> loadReviewRun({
   required LibrarySession session,
   required DeckReviewSource reviews,
   required List<String> paths,
+  String? title,
 }) async {
   final root = session.root;
   if (root == null) return null;
@@ -109,7 +111,9 @@ Future<ReviewRun?> loadReviewRun({
       newPerDay: newPerDay,
     ),
     title:
-        first.deck.meta.title ?? p.posix.basenameWithoutExtension(first.path),
+        title ??
+        first.deck.meta.title ??
+        p.posix.basenameWithoutExtension(first.path),
     root: root,
     reviews: reviews,
     nextDeck: () => _nextDeck(session, studied),

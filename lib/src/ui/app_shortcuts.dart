@@ -198,6 +198,9 @@ enum AppCommand {
   /// Select the Home tab (#535).
   tabHome,
 
+  /// Select the Study tab (#533).
+  tabStudy,
+
   /// Open the next search sidebar hit (#712).
   searchNextHit,
 
@@ -378,6 +381,10 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
     AppCommand.tabHome,
     SingleActivator(LogicalKeyboardKey.digit6, control: true),
   ),
+  AppShortcut(
+    AppCommand.tabStudy,
+    SingleActivator(LogicalKeyboardKey.digit7, control: true),
+  ),
   // F4/Shift+F4, the key every editor's "find next" sits on (#712).
   AppShortcut(AppCommand.searchNextHit, SingleActivator(LogicalKeyboardKey.f4)),
   AppShortcut(
@@ -453,6 +460,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.tabQuickNote => AppStrings.quickNoteTitle,
   AppCommand.tabSettings => AppStrings.tabSettings,
   AppCommand.tabHome => AppStrings.tabHome,
+  AppCommand.tabStudy => AppStrings.tabStudy,
   // The find bar's own words: the same step, through the hits.
   AppCommand.searchNextHit => AppStrings.editorFindNextTooltip,
   AppCommand.searchPreviousHit => AppStrings.editorFindPreviousTooltip,

@@ -34,6 +34,8 @@ import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/flashcards/deck_catalog_controller.dart';
+import 'package:niman/src/flashcards/library_decks.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -147,6 +149,7 @@ import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/study/study_view.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
@@ -850,7 +853,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _fab.collapse();
         // A sidebar view has no island of its own: picking Search shows
         // the sidebar island it lives in (#712).
-        if (!narrow && tab == ShellTab.search) _sidebarVisible = true;
+        if (!narrow && (tab == ShellTab.search || tab == ShellTab.study)) {
+          _sidebarVisible = true;
+        }
         // Leaving any open note: the tabs show at once (issue #4).
         _noteClosed();
       });
@@ -968,7 +973,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         !_wide ||
         !_sidebarVisible ||
         !_filesSlotVisible ||
-        _sidebarShowsSearch ||
+        _sidebarShowsView ||
         _gridOn) {
       return null;
     }
@@ -1820,6 +1825,42 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _reviewTab.open(run, pane: pane);
   }
 
+  /// The decks of the library, counted (#533): read on Study's first
+  /// visit, kept while the shell lives.
+  DeckCatalogController? _deckCatalog;
+
+  DeckCatalogController? get _decks {
+    if (_deckCatalog case final catalog?) return catalog;
+    final catalog = deckCatalogOf(widget.controller);
+    if (catalog != null) unawaited(catalog.refresh());
+    return _deckCatalog = catalog;
+  }
+
+  /// The Study tree (#533): the left island's on a wide window, the
+  /// destination's body on a phone. One view, built where it shows.
+  Widget _studyView() {
+    final catalog = _decks;
+    if (catalog == null) return const SizedBox.shrink();
+    return StudyView(
+      key: const Key('study-view'),
+      controller: catalog,
+      // A deck opens as a note of the tree does: in place of the tab's,
+      // in a tab of its own on a double click.
+      onOpenDeck: (path) =>
+          _wide ? _showFromTree(path, newTab: false) : _showNote(path),
+      onStudy: (paths, title) {
+        final root = widget.controller.root;
+        if (root == null) return;
+        unawaited(
+          studyDecks(context, ref.read, [
+            for (final path in paths) p.join(root, path),
+          ], title: title),
+        );
+      },
+      onNewDeck: () => unawaited(_createFlow.createFlashcards(context)),
+    );
+  }
+
   /// Back and forward through the notes shown (#700).
   late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
     workspace: _workspace,
@@ -2159,7 +2200,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void _activateTab(int pane, int index) {
     if (_compareShows) setState(() => _compareShows = false);
     if (pane == _reviewPaneShown) _reviewTab.show(on: false);
-    if (_tab != ShellTab.files && !_sidebarShowsSearch) {
+    if (_tab != ShellTab.files && !_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
     }
     _workspace.activate(pane, index);
@@ -2384,6 +2425,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   @override
   void dispose() {
+    _deckCatalog?.dispose();
     // A library closed or switched from a floating window: the window
     // goes with the shell it was over (#202, #203). Off the teardown, which
     // must not change the navigator it runs under.
@@ -3549,6 +3591,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         if (tab != ShellTab.files &&
             tab != ShellTab.quickNote &&
             !(tab == ShellTab.search && _wide) &&
+            // So has Study (#533).
+            !(tab == ShellTab.study && _wide) &&
             // Home and Todo are content destinations on a wide window
             // (#712): they live in a pane, not in a slot of their own.
             !(_wide && (tab == ShellTab.home || tab == ShellTab.todo)))
@@ -3573,6 +3617,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   bool get _filesSlotVisible =>
       _tab == ShellTab.files ||
       (_wide && _tab == ShellTab.search) ||
+      _sidebarShowsStudy ||
       _contentTabShows ||
       (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
 
@@ -3580,6 +3625,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// (#712): Search is a sidebar view on a wide window, so the panes and
   /// the dock stay beside it. A phone keeps Search as a destination.
   bool get _sidebarShowsSearch => _wide && _tab == ShellTab.search;
+
+  /// Whether the left island shows the Study tree in place of the tree
+  /// (#533), as it shows the search.
+  bool get _sidebarShowsStudy => _wide && _tab == ShellTab.study;
+
+  /// Whether a sidebar view holds the left island instead of the tree.
+  bool get _sidebarShowsView => _sidebarShowsSearch || _sidebarShowsStudy;
 
   /// A tab's screen on the wide layout: one island on the base, as the
   /// tree, the panes and the dock are on Files. No band above it: the
@@ -3630,7 +3682,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ShellTab.search ||
       ShellTab.quickNote ||
       ShellTab.settings ||
-      ShellTab.home => null,
+      ShellTab.home ||
+      ShellTab.study => null,
     };
     if (fab == null) return null;
     return KeyedSubtree(key: const Key('shell-tab-fab'), child: fab);
@@ -3737,6 +3790,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ShellTab.quickNote => AppStrings.quickNoteTitle,
     ShellTab.settings => AppStrings.tabSettings,
     ShellTab.home => AppStrings.tabHome,
+    ShellTab.study => AppStrings.tabStudy,
   };
 
   /// The narrow shell: app bar for the tab + the bottom navigation bar.
@@ -4052,6 +4106,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.tabQuickNote: () => _onDestinationSelected(ShellTab.quickNote),
       AppCommand.tabSettings: () => _onDestinationSelected(ShellTab.settings),
       AppCommand.tabHome: () => _onDestinationSelected(ShellTab.home),
+      AppCommand.tabStudy: () => _onDestinationSelected(ShellTab.study),
       AppCommand.togglePreview: _togglePreview,
       AppCommand.switchEditor: () => unawaited(
         _setEditorKind(
@@ -4503,7 +4558,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 fit: StackFit.expand,
                 children: [
                   Offstage(
-                    offstage: _sidebarShowsSearch,
+                    offstage: _sidebarShowsView,
                     child: Column(
                       children: [
                         Expanded(child: _treePane(controller)),
@@ -4523,6 +4578,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                       maintainAnimation: true,
                       maintainSize: true,
                       child: _searchSlot(controller, tree: true),
+                    ),
+                  // The decks (#533): built on the first visit too.
+                  if (_visitedTabs.contains(ShellTab.study))
+                    Offstage(
+                      offstage: !_sidebarShowsStudy,
+                      child: _studyView(),
                     ),
                 ],
               ),
@@ -4970,6 +5031,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         host: _homeHost(controller),
         tab: _tabListenable,
       ),
+      ShellTab.study => _studyView(),
       ShellTab.settings => SettingsTab(
         // A palette pick opens the tab where it points, once (#229).
         key: ValueKey(_settingsTarget),
@@ -5269,7 +5331,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   bool get _wideBackAvailable =>
       _wide &&
       (_contentTabShows ||
-          _sidebarShowsSearch ||
+          _sidebarShowsView ||
           _compareShows && _compare != null ||
           _reviewTab.shows ||
           _workspace.value.activePath != null ||
@@ -5289,7 +5351,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _closeCompare();
     } else if (_contentTabShows) {
       _closeContentTab();
-    } else if (_sidebarShowsSearch) {
+    } else if (_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
     } else if (_workspace.value.activePath != null) {
       _workspace.closeActive();
@@ -5389,7 +5451,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               expanded: _expanded,
               // The keyboard's walk (#727) lets go while the grid holds the
               // pane, and while the search holds the sidebar's slot.
-              active: !_gridOn && !_sidebarShowsSearch,
+              active: !_gridOn && !_sidebarShowsView,
               onToggle: _toggle,
               onSelect: _selectFromPane,
               onOpenInNewTab: (note) => _select(note, newTab: true),
@@ -5468,7 +5530,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         !_wide ||
         !_sidebarVisible ||
         !_filesSlotVisible ||
-        _sidebarShowsSearch) {
+        _sidebarShowsView) {
       return false;
     }
     if (_gridOn) {

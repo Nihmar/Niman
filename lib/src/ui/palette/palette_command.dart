@@ -95,7 +95,8 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.tabSearch ||
   AppCommand.tabQuickNote ||
   AppCommand.tabSettings ||
-  AppCommand.tabHome => PaletteGroup.goTo,
+  AppCommand.tabHome ||
+  AppCommand.tabStudy => PaletteGroup.goTo,
   AppCommand.openPalette ||
   AppCommand.goToNote ||
   AppCommand.welcomeTour ||

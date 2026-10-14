@@ -133,6 +133,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.tabQuickNote ||
   AppCommand.tabSettings ||
   AppCommand.tabHome ||
+  AppCommand.tabStudy ||
   AppCommand.noteBack ||
   AppCommand.noteForward ||
   // The step and the focus no-op when there is no search on screen; the
