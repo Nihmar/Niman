@@ -440,9 +440,7 @@ void main() {
     links.referrers['Notes/Current.md'] = <String>['a.md'];
     links.mentions['a.md -> Notes/Current.md'] = const Mention(
       context: 'a points at [[Current]]',
-      line: 0,
       embed: false,
-      count: 1,
     );
     final opened = <String>[];
     await tester.pumpWidget(
