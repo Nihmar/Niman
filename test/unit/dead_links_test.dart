@@ -274,6 +274,22 @@ void main() {
     });
   });
 
+  group('inlineHrefOf', () {
+    test('reads the destination, not a title', () {
+      expect(inlineHrefOf('[t](a.md)'), 'a.md');
+      expect(inlineHrefOf('[t](a.md "the title")'), 'a.md');
+      expect(inlineHrefOf('[t](<a b.md>)'), '<a b.md>');
+      expect(inlineHrefOf('[t][label]'), isNull);
+    });
+
+    test('a bracket in the text does not end it', () {
+      expect(inlineHrefOf('[![a](i.png)](missing.md)'), 'missing.md');
+      expect(inlineHrefOf('[a [b] c](x.md)'), 'x.md');
+      expect(inlineHrefOf(r'[a \] b](x.md)'), 'x.md');
+      expect(inlineHrefOf('[![a](i.png)][ref]'), isNull);
+    });
+  });
+
   group('DeadLinkWatcher', () {
     late FakeLinkSource source;
     late List<ParsedLink> links;

@@ -76,8 +76,23 @@ bool _isDead(
 /// A title after the destination is not part of it, unless the destination is
 /// angled (`<a b.md>`) and may hold spaces.
 String? inlineHrefOf(String raw) {
-  final close = raw.indexOf(']');
-  if (close < 0 || !raw.contains('](') || !raw.endsWith(')')) return null;
+  if (!raw.endsWith(')')) return null;
+  // The `]` that closes the text is the one that balances the opening `[`:
+  // an image or a bracket inside the text (`[![a](i.png)](b.md)`) holds
+  // `](` of its own, and `\]` is a letter, not a bracket.
+  var depth = 0;
+  var close = -1;
+  for (var i = 0; i < raw.length - 1 && close < 0; i++) {
+    switch (raw[i]) {
+      case r'\':
+        i++;
+      case '[':
+        depth++;
+      case ']':
+        if (--depth == 0 && raw[i + 1] == '(') close = i;
+    }
+  }
+  if (close < 0) return null;
   var written = raw.substring(close + 2, raw.length - 1).trim();
   if (!written.startsWith('<')) {
     final space = written.indexOf(RegExp(r'\s'));
