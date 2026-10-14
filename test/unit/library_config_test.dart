@@ -511,6 +511,7 @@ void main() {
         treeSort: TreeSort.nameDesc,
         linkType: LinkType.markdown,
         indentWidth: 4,
+        newCardsPerDay: 35,
         editorToolbar: 'link,-bold',
         readableLineLength: false,
         noteColumnWidth: 900,
@@ -540,6 +541,7 @@ void main() {
         'treeSort',
         'linkType',
         'indentWidth',
+        'newCardsPerDay',
         'editorToolbar',
         'enabledEditors',
         'treeWidth',
@@ -708,6 +710,7 @@ void main() {
       expect(config.treeSort, TreeSort.nameAsc);
       expect(config.linkType, LinkType.wikilink);
       expect(config.indentWidth, defaultIndentWidth);
+      expect(config.newCardsPerDay, defaultNewCardsPerDay);
       expect(config.editorToolbar, '');
       // #171: the note is a centred column unless someone says otherwise.
       expect(config.readableLineLength, isTrue);
@@ -782,6 +785,28 @@ void main() {
       expect(normalizeIndentWidth(40), maxIndentWidth);
       expect(normalizeIndentWidth(4), 4);
       expect(normalizeIndentWidth('four'), defaultIndentWidth);
+    });
+
+    test('newCardsPerDay is 20 by default, 0 for none, clamped otherwise', () {
+      expect(defaultNewCardsPerDay, 20);
+      expect(normalizeNewCardsPerDay(null), 20);
+      expect(normalizeNewCardsPerDay('many'), 20);
+      expect(normalizeNewCardsPerDay(double.nan), 20);
+      expect(normalizeNewCardsPerDay(0), 0);
+      expect(normalizeNewCardsPerDay(-5), 0);
+      expect(normalizeNewCardsPerDay(35), 35);
+      expect(normalizeNewCardsPerDay(7.9), 7);
+      expect(normalizeNewCardsPerDay(1000000), maxNewCardsPerDay);
+      expect(
+        LibraryConfig.fromJsonMap(const {'newCardsPerDay': 5}).newCardsPerDay,
+        5,
+      );
+      expect(
+        LibraryConfig.defaults
+            .copyWith(newCardsPerDay: 0)
+            .toJsonMap()['newCardsPerDay'],
+        0,
+      );
     });
 
     test('an out-of-range noteColumnWidth is clamped into range', () {

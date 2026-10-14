@@ -137,6 +137,24 @@ int normalizeIndentWidth(Object? raw) {
   return width;
 }
 
+/// The new flashcards a deck shows per day in a fresh library (#533).
+const int defaultNewCardsPerDay = 20;
+
+/// The most new cards per deck per day accepted; 0 is none.
+const int maxNewCardsPerDay = 1000;
+
+/// Reads a `newCardsPerDay` out of the settings file, into range: clamped
+/// like `indentWidth`, since a hand-typed number stays near what was
+/// meant (0 turns new cards off); anything that is not a number reads as
+/// the default.
+int normalizeNewCardsPerDay(Object? raw) {
+  if (raw is! num || !raw.isFinite) return defaultNewCardsPerDay;
+  final count = raw.toInt();
+  if (count < 0) return 0;
+  if (count > maxNewCardsPerDay) return maxNewCardsPerDay;
+  return count;
+}
+
 /// The text size of a fresh library: the sizes the app shipped with.
 const double defaultTextScale = 1;
 
@@ -395,6 +413,7 @@ final class LibraryConfig {
     this.weekStart = WeekStart.system,
     this.newItemLocation = NewItemLocation.openNoteFolder,
     this.indentWidth = defaultIndentWidth,
+    this.newCardsPerDay = defaultNewCardsPerDay,
     this.editorToolbar = '',
     this.uiTextScale = defaultTextScale,
     this.noteTextScale = defaultTextScale,
@@ -512,6 +531,7 @@ final class LibraryConfig {
           newItemLocationFromId(json['newItemLocation']) ??
           newItemLocationFromLegacy(json['missingNoteLocation']),
       indentWidth: normalizeIndentWidth(json['indentWidth']),
+      newCardsPerDay: normalizeNewCardsPerDay(json['newCardsPerDay']),
       editorToolbar: switch (json['editorToolbar']) {
         final String layout => layout,
         _ => '',
@@ -699,6 +719,10 @@ final class LibraryConfig {
   /// Spaces added per indent level (default 2).
   final int indentWidth;
 
+  /// The new flashcards each deck shows per day (default 20, 0 = none,
+  /// #533).
+  final int newCardsPerDay;
+
   /// The arranged editor toolbar; empty means the shipped one.
   final String editorToolbar;
 
@@ -802,6 +826,7 @@ final class LibraryConfig {
     WeekStart? weekStart,
     NewItemLocation? newItemLocation,
     int? indentWidth,
+    int? newCardsPerDay,
     String? editorToolbar,
     double? uiTextScale,
     double? noteTextScale,
@@ -854,6 +879,7 @@ final class LibraryConfig {
       weekStart: weekStart ?? this.weekStart,
       newItemLocation: newItemLocation ?? this.newItemLocation,
       indentWidth: indentWidth ?? this.indentWidth,
+      newCardsPerDay: newCardsPerDay ?? this.newCardsPerDay,
       editorToolbar: editorToolbar ?? this.editorToolbar,
       uiTextScale: uiTextScale ?? this.uiTextScale,
       noteTextScale: noteTextScale ?? this.noteTextScale,
@@ -988,6 +1014,7 @@ final class LibraryConfig {
     // unknown one to preserve forever.
     'missingNoteLocation',
     'indentWidth',
+    'newCardsPerDay',
     'editorToolbar',
     'uiTextScale',
     'noteTextScale',
@@ -1054,6 +1081,7 @@ final class LibraryConfig {
       'weekStart': weekStart.name,
       'newItemLocation': newItemLocation.name,
       'indentWidth': indentWidth,
+      'newCardsPerDay': newCardsPerDay,
       'editorToolbar': editorToolbar,
       'uiTextScale': uiTextScale,
       'noteTextScale': noteTextScale,
@@ -1170,6 +1198,7 @@ final class LibraryConfig {
         weekStart == other.weekStart &&
         newItemLocation == other.newItemLocation &&
         indentWidth == other.indentWidth &&
+        newCardsPerDay == other.newCardsPerDay &&
         editorToolbar == other.editorToolbar &&
         uiTextScale == other.uiTextScale &&
         noteTextScale == other.noteTextScale &&
