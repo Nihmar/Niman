@@ -123,6 +123,52 @@ void main() {
     expect(find.byKey(const Key('history-restored-snack')), findsOne);
   });
 
+  /// Opens version 1 of `alpha.md` as the compare tab, from the dock.
+  Future<void> openCompare(WidgetTester tester) async {
+    controller.seedVersion(
+      'alpha.md',
+      number: 1,
+      savedAt: DateTime(2026, 10, 3, 14, 2),
+      text: 'the old alpha',
+    );
+    await pumpAt(tester, const Size(1400, 900));
+    await tester.tap(find.byKey(const Key('dock-pane-history')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('dock-history-1')));
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsOne);
+  }
+
+  testWidgets('Home from the rail takes the pane from the compare tab, which '
+      'keeps its chip (#906)', (tester) async {
+    await openCompare(tester);
+    await tester.tap(find.byKey(const Key('rail-home')));
+    await settle(tester);
+    expect(find.byKey(const Key('content-tab-home')), findsOne);
+    expect(find.byType(NoteVersionScreen), findsNothing);
+    expect(find.byKey(const Key('compare-tab')), findsOne);
+  });
+
+  testWidgets('Todo from the rail takes the pane from the compare tab (#906)', (
+    tester,
+  ) async {
+    await openCompare(tester);
+    await tester.tap(find.byKey(const Key('rail-todo')));
+    await settle(tester);
+    expect(find.byKey(const Key('content-tab-todo')), findsOne);
+    expect(find.byType(NoteVersionScreen), findsNothing);
+  });
+
+  testWidgets('another note from the tree takes the pane from the compare '
+      'tab (#906)', (tester) async {
+    await openCompare(tester);
+    await tester.tap(noteRow('beta.md'));
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsNothing);
+    expect(controller.workspace.activePath, 'beta.md');
+    expect(find.byKey(const Key('compare-tab')), findsOne);
+  });
+
   testWidgets('the title bar menu runs a command, its key beside it (#712)', (
     tester,
   ) async {
