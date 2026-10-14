@@ -42,8 +42,8 @@ final class ReferrerDao {
       'GROUP BY l.from_note ORDER BY l.from_note LIMIT ?3';
 
   /// The paths of the notes holding a link to any note in [toIds], distinct:
-  /// the backlinks of a moved note, in one lookup per [_idChunk] target ids
-  /// (#507).
+  /// the notes that link to a moved note, in one lookup per [_idChunk]
+  /// target ids (#507).
   Future<List<String>> pathsOf(Iterable<int> toIds) async {
     final wanted = toIds.toSet().toList(growable: false);
     if (wanted.isEmpty) return const <String>[];
