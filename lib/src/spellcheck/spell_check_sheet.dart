@@ -46,7 +46,8 @@ final class SpellCheckSheet extends StatefulWidget {
   final bool docked;
 
   /// Selects an issue's word in the note; null leaves the rows unclickable.
-  final void Function(SpellIssue issue)? reveal;
+  /// False when the note no longer holds the word there (#908).
+  final bool Function(SpellIssue issue)? reveal;
 
   /// Adds a word to the library's dictionary; null offers no such action.
   final Future<void> Function(String word)? addWord;
@@ -61,8 +62,10 @@ final class SpellCheckSheet extends StatefulWidget {
   /// Hunspell's suggestions for a word.
   final List<String> Function(String word) suggest;
 
-  /// Replaces `issue`'s word with `replacement` in the editor.
-  final void Function(SpellIssue issue, String replacement) apply;
+  /// Replaces `issue`'s word with `replacement` in the editor. False, with
+  /// the text untouched, when the note no longer holds the word where the
+  /// pass found it (#908): the panel drops the issue and checks again.
+  final bool Function(SpellIssue issue, String replacement) apply;
 
   /// Whether hunspell loaded; false shows the platform note.
   final bool available;
@@ -181,8 +184,23 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
     }
   }
 
+  /// The note changed under [issue] since the pass saw it (#908): it is
+  /// dropped, and the note is checked again for where its word is now.
+  void _stale(SpellIssue issue) {
+    setState(() {
+      _issues = [
+        for (final other in _issues)
+          if (!identical(other, issue)) other,
+      ];
+      _startScan();
+    });
+  }
+
   void _replace(SpellIssue issue, String replacement) {
-    widget.apply(issue, replacement);
+    if (!widget.apply(issue, replacement)) {
+      _stale(issue);
+      return;
+    }
     final shift = replacement.length - (issue.end - issue.start);
     setState(() {
       _issues = [
@@ -406,6 +424,11 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
       ),
     );
     if (reveal == null) return tile;
-    return InkWell(onTap: () => reveal(issue), child: tile);
+    return InkWell(
+      onTap: () {
+        if (!reveal(issue)) _stale(issue);
+      },
+      child: tile,
+    );
   }
 }

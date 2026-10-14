@@ -584,25 +584,39 @@ final class NoteEditCommands {
     );
   }
 
-  /// Selects one issue's word in the editor and brings it into view.
-  void _revealSpelling(SpellIssue issue) {
-    final surface = this.surface();
-    if (surface == null) return;
-    final buffer = surface.buffer;
-    if (issue.line >= buffer.lineCount) return;
+  /// Where [issue]'s line starts in the buffer, or null when the note no
+  /// longer holds the issue's word at the range the pass found (#908): the
+  /// docked review is not modal, so the note can change between the pass
+  /// and the click, and the range is then another text's.
+  int? _spellingLineStart(SourceBuffer buffer, SpellIssue issue) {
+    if (issue.line >= buffer.lineCount) return null;
+    if (issue.end > buffer.lineLengthAt(issue.line)) return null;
     final start = buffer.offsetOfLine(issue.line);
+    final held = buffer.substring(start + issue.start, start + issue.end);
+    return held == issue.word ? start : null;
+  }
+
+  /// Selects one issue's word in the editor and brings it into view;
+  /// false, and nothing selected, when the word is no longer there.
+  bool _revealSpelling(SpellIssue issue) {
+    final surface = this.surface();
+    if (surface == null) return false;
+    final start = _spellingLineStart(surface.buffer, issue);
+    if (start == null) return false;
     surface.select(
       SelectionModel(anchor: start + issue.start, extent: start + issue.end),
     );
+    return true;
   }
 
-  /// Replaces one issue's word in the controller (the panel's fix).
-  void _applySpelling(SpellIssue issue, String replacement) {
+  /// Replaces one issue's word in the controller (the panel's fix); false,
+  /// and the text untouched, when the word is no longer there.
+  bool _applySpelling(SpellIssue issue, String replacement) {
     final surface = this.surface();
-    if (surface == null) return;
-    final buffer = surface.buffer;
-    if (issue.line >= buffer.lineCount) return;
-    final start = buffer.offsetOfLine(issue.line);
+    if (surface == null) return false;
+    final start = _spellingLineStart(surface.buffer, issue);
+    if (start == null) return false;
     surface.replaceRange(start + issue.start, start + issue.end, replacement);
+    return true;
   }
 }

@@ -82,7 +82,10 @@ void main() {
             );
           },
           suggest: spell.suggestionsFor,
-          apply: (issue, replacement) => applied.add((issue, replacement)),
+          apply: (issue, replacement) {
+            applied.add((issue, replacement));
+            return true;
+          },
         ),
       ),
     );
@@ -133,8 +136,11 @@ void main() {
             );
           },
           suggest: spell.suggestionsFor,
-          apply: (_, _) {},
-          reveal: (issue) => shown.add('${issue.word}@${issue.start}'),
+          apply: (_, _) => true,
+          reveal: (issue) {
+            shown.add('${issue.word}@${issue.start}');
+            return true;
+          },
           addWord: (word) async => added.add(word),
         ),
       ),
@@ -223,7 +229,7 @@ void main() {
             lineAt: (i) => (text: lines[i], skip: const <TextRange>[]),
           ),
           suggest: slow.suggestionsFor,
-          apply: (_, _) {},
+          apply: (_, _) => true,
         ),
       ),
     );
