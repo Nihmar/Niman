@@ -11,7 +11,6 @@ library;
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/link_path.dart';
-import 'package:path/path.dart' as p;
 
 /// The context of a dead-link click: the note the link was clicked in,
 /// and the open library it belongs to.
@@ -30,12 +29,7 @@ final class LinkContext {
 
   /// The clicked note's library-relative path; null when the note is not
   /// inside [libraryRoot].
-  String? get currentNotePath {
-    final root = libraryRoot;
-    if (root == null) return null;
-    if (!p.isWithin(root, currentNote)) return null;
-    return relPath(currentNote, root);
-  }
+  String? get currentNotePath => pathInLibrary(libraryRoot, currentNote);
 
   /// The clicked note's folder, library-relative ('' = the library
   /// root); null when the note is not inside [libraryRoot].
