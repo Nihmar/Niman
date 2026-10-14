@@ -78,4 +78,24 @@ void main() {
     expect(edges, isEmpty, reason: 'the next full scan writes them anew');
     await db.close();
   });
+
+  test('an index from before headings left their block id off is emptied for '
+      'a rescan (#912, #915)', () async {
+    final dir = Directory.systemTemp.createTempSync('niman_index_v9_');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'index.db'));
+
+    // A v9 index whose heading still reads `Title ^abc`: the link by the
+    // heading's text would not find it until the note is read again.
+    sqlite3.sqlite3.open(file.path)
+      ..execute('CREATE TABLE note_headings (note_id INTEGER, heading TEXT)')
+      ..execute("INSERT INTO note_headings VALUES (1, 'Title ^abc')")
+      ..execute('PRAGMA user_version = 9')
+      ..close();
+
+    final db = IndexDatabase(NativeDatabase(file, setup: indexDatabaseSetup));
+    final rows = await db.select(db.noteHeadings).get();
+    expect(rows, isEmpty, reason: 'the next full scan reads them anew');
+    await db.close();
+  });
 }

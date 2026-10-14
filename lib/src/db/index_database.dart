@@ -298,8 +298,12 @@ class IndexDatabase extends _$IndexDatabase {
   /// v9: `links_to` holds the referrer and the link form beside the target,
   /// so "Links to this note" pages a note's edges in index order (#842) —
   /// the same wipe and rescan.
+  /// v10: a heading's text leaves its trailing ` ^id` off (#912), and an
+  /// own-line id below another names no block (#915), so the stored
+  /// headings, block ids and their word index of an index written before
+  /// are stale — the same wipe and rescan.
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
