@@ -493,9 +493,11 @@ final class NoteOps implements NoteOperations {
     String path,
     String newName, {
     LinkUpdateConfirm? confirmLinks,
+    void Function()? onLinksRewritten,
   }) async {
     final done = await _released(path, () => _rename(path, newName));
-    return await _updateLinks(done, confirmLinks);
+    _askLinks(done, confirmLinks, onLinksRewritten);
+    return done.row;
   }
 
   Future<Relocated> _rename(String path, String newName) {
@@ -544,9 +546,11 @@ final class NoteOps implements NoteOperations {
     String path,
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
+    void Function()? onLinksRewritten,
   }) async {
     final done = await _released(path, () => _move(path, targetParent));
-    return await _updateLinks(done, confirmLinks);
+    _askLinks(done, confirmLinks, onLinksRewritten);
+    return done.row;
   }
 
   Future<Relocated> _move(String path, String targetParent) {
@@ -574,24 +578,44 @@ final class NoteOps implements NoteOperations {
     });
   }
 
-  /// Asks [confirm] about the link rewrite [done] left pending (#848), now
-  /// that the turn of the op chain that moved the note is over: a dialog
-  /// the user leaves open must not hold up every other op and every sync
-  /// write. On a yes the rewrite runs in a turn of its own, and reads each
-  /// note again, so an edit made while the question was open is kept.
+  /// The question about the links [rename] and [move] left, still open or
+  /// answered and carried out (#859); completes without error whatever
+  /// became of it. What a test awaits to see the links rewritten.
+  Future<void> get linkQuestion => _linkQuestion;
+  Future<void> _linkQuestion = Future<void>.value();
+
+  /// Asks [confirm] about the link rewrite [done] left pending (#848), once
+  /// the move is over and returned to its caller: the caller follows the
+  /// moved note at once, whatever the user takes to answer or whatever
+  /// moves the note meanwhile (#859). A dialog the user leaves open must
+  /// not hold up every other op and every sync write either, so on a yes
+  /// the rewrite runs in a turn of its own, and reads each note again: an
+  /// edit made while the question was open is kept. [onRewritten] tells the
+  /// caller the notes changed on disk. A failure here is logged, not
+  /// thrown: the move is done, and nobody awaits this.
   /// Without a [confirm] to ask, the links stay as written: a note is never
   /// written unasked.
-  Future<Note> _updateLinks(Relocated done, LinkUpdateConfirm? confirm) async {
+  void _askLinks(
+    Relocated done,
+    LinkUpdateConfirm? confirm,
+    void Function()? onRewritten,
+  ) {
     final pending = done.pending;
-    if (pending == null) return done.row;
+    if (pending == null) return;
+    const log = AppLogger(name: 'links');
     if (confirm == null) {
-      const AppLogger(name: 'links')
-          .info('links to "${done.row.path}" left as written: no prompt');
-      return done.row;
+      log.info('links to "${done.row.path}" left as written: no prompt');
+      return;
     }
-    if (!await confirm(pending.notes)) return done.row;
-    await _synchronized(pending.apply);
-    return await _mustFind(done.row.path);
+    _linkQuestion = () async {
+      try {
+        if (!await confirm(pending.notes)) return;
+        await _synchronized(pending.apply);
+        onRewritten?.call();
+      } on Object catch (error) {
+        log.warning('could not update links to "${done.row.path}": $error');
+      }
+    }();
   }
 
   /// The text of the note at [path], decoded leniently (a note with a

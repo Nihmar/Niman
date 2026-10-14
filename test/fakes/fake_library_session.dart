@@ -1399,6 +1399,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String path,
     String newName, {
     LinkUpdateConfirm? confirmLinks,
+    void Function()? onLinksRewritten,
   }) async {
     final row = _requireRow(path);
     final parent = parentOf(path);
@@ -1428,6 +1429,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String path,
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
+    void Function()? onLinksRewritten,
   }) async {
     final row = _requireRow(path);
     final same = resolvePath(targetParent, p.basename(path)) == path;
