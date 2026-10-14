@@ -221,6 +221,8 @@ final class LithuanianStrings extends Strings {
   String spellCheckLine(int line) => 'eilutė $line';
   @override
   String get addWordToDictionary => 'Pridėti į žodyną';
+  @override
+  String get spellCheckIgnore => 'Ignoruoti';
 
   @override
   String indentWidthValue(int spaces) => '$spaces tarpai';

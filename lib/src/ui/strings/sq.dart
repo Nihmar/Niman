@@ -218,6 +218,8 @@ final class AlbanianStrings extends Strings {
   String spellCheckLine(int line) => 'rreshti $line';
   @override
   String get addWordToDictionary => 'Shto në fjalor';
+  @override
+  String get spellCheckIgnore => 'Shpërfill';
 
   @override
   String indentWidthValue(int spaces) => '$spaces hapësira';

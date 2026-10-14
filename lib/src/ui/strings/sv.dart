@@ -221,6 +221,8 @@ final class SwedishStrings extends Strings {
   String spellCheckLine(int line) => 'rad $line';
   @override
   String get addWordToDictionary => 'Lägg till i ordboken';
+  @override
+  String get spellCheckIgnore => 'Ignorera';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mellanslag';

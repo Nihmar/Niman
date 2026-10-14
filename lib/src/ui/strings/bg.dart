@@ -224,6 +224,8 @@ final class BulgarianStrings extends Strings {
   String spellCheckLine(int line) => 'ред $line';
   @override
   String get addWordToDictionary => 'Добави в речника';
+  @override
+  String get spellCheckIgnore => 'Пропусни';
 
   @override
   String indentWidthValue(int spaces) => '$spaces интервала';

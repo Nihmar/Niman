@@ -224,6 +224,8 @@ final class FrenchStrings extends Strings {
   String spellCheckLine(int line) => 'ligne $line';
   @override
   String get addWordToDictionary => 'Ajouter au dictionnaire';
+  @override
+  String get spellCheckIgnore => 'Ignorer';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espaces';

@@ -221,6 +221,8 @@ final class BelarusianStrings extends Strings {
   String spellCheckLine(int line) => 'радок $line';
   @override
   String get addWordToDictionary => 'Дадаць у слоўнік';
+  @override
+  String get spellCheckIgnore => 'Ігнараваць';
 
   @override
   String indentWidthValue(int spaces) => '$spaces прабелы';

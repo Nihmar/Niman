@@ -218,6 +218,8 @@ final class EstonianStrings extends Strings {
   String spellCheckLine(int line) => 'rida $line';
   @override
   String get addWordToDictionary => 'Lisa sõnaraamatusse';
+  @override
+  String get spellCheckIgnore => 'Eira';
 
   @override
   String indentWidthValue(int spaces) => '$spaces tühikut';

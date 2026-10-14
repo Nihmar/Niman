@@ -103,6 +103,7 @@ abstract base class Strings {
   /// The context-menu entry that adds a word to the personal dictionary
   /// (issue #60).
   String get addWordToDictionary;
+  String get spellCheckIgnore;
 
   /// The indent width as a row's value, e.g. "4 spaces".
   String indentWidthValue(int spaces);

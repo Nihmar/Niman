@@ -221,6 +221,8 @@ final class UkrainianStrings extends Strings {
   String spellCheckLine(int line) => 'рядок $line';
   @override
   String get addWordToDictionary => 'Додати до словника';
+  @override
+  String get spellCheckIgnore => 'Ігнорувати';
 
   @override
   String indentWidthValue(int spaces) => '$spaces проміжки';

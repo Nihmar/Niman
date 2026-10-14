@@ -223,6 +223,8 @@ final class CroatianStrings extends Strings {
   String spellCheckLine(int line) => 'redak $line';
   @override
   String get addWordToDictionary => 'Dodaj u rječnik';
+  @override
+  String get spellCheckIgnore => 'Zanemari';
 
   @override
   String indentWidthValue(int spaces) => '$spaces razmaka';

@@ -222,6 +222,8 @@ final class CzechStrings extends Strings {
   String spellCheckLine(int line) => 'řádek $line';
   @override
   String get addWordToDictionary => 'Přidat do slovníku';
+  @override
+  String get spellCheckIgnore => 'Ignorovat';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mezerníky';

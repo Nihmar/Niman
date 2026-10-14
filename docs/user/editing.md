@@ -873,3 +873,10 @@ belong to. A fix updates the list on the spot, without checking the
 whole note again. The panel lists at most 200 words; when a note has
 more it says so, and **Check again** lists the next ones once some are
 fixed.
+
+On a window with room for the dock the panel is the dock's **Spelling**
+pane, beside the note instead of over it (#712): you keep writing while it
+is open, and it checks the note again after each edit, once you pause. A
+click on a word selects it in the note; **Ignore** takes the word off the
+list, and **Add to dictionary** adds it to the library's words. A phone,
+or a window too narrow for the dock, keeps the panel as a sheet.

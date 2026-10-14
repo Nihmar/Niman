@@ -224,6 +224,8 @@ final class GreekStrings extends Strings {
   String spellCheckLine(int line) => 'γραμμή $line';
   @override
   String get addWordToDictionary => 'Προσθήκη στο λεξικό';
+  @override
+  String get spellCheckIgnore => 'Παράβλεψη';
 
   @override
   String indentWidthValue(int spaces) => '$spaces κενά';

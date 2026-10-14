@@ -220,6 +220,8 @@ final class DanishStrings extends Strings {
   String spellCheckLine(int line) => 'linje $line';
   @override
   String get addWordToDictionary => 'Tilføj til ordbog';
+  @override
+  String get spellCheckIgnore => 'Ignorer';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mellemrum';

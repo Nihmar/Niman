@@ -218,6 +218,8 @@ final class LatvianStrings extends Strings {
   String spellCheckLine(int line) => 'rinda $line';
   @override
   String get addWordToDictionary => 'Pievienot vārdnīcai';
+  @override
+  String get spellCheckIgnore => 'Ignorēt';
 
   @override
   String indentWidthValue(int spaces) => '$spaces atstarpes';

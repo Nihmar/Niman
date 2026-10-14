@@ -32,6 +32,9 @@ enum DockPane {
   /// (#842).
   links,
 
+  /// The note's misspelled words, with their suggestions (#712).
+  spelling,
+
   /// The note's kept versions.
   history,
 

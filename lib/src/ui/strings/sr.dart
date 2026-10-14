@@ -223,6 +223,8 @@ final class SerbianStrings extends Strings {
   String spellCheckLine(int line) => 'ред $line';
   @override
   String get addWordToDictionary => 'Додај у речник';
+  @override
+  String get spellCheckIgnore => 'Занемари';
 
   @override
   String indentWidthValue(int spaces) => '$spaces размака';

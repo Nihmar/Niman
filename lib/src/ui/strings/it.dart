@@ -223,6 +223,8 @@ final class ItalianStrings extends Strings {
   String spellCheckLine(int line) => 'riga $line';
   @override
   String get addWordToDictionary => 'Aggiungi al dizionario';
+  @override
+  String get spellCheckIgnore => 'Ignora';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spazi';

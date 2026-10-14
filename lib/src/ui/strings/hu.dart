@@ -218,6 +218,8 @@ final class HungarianStrings extends Strings {
   String spellCheckLine(int line) => '$line. sor';
   @override
   String get addWordToDictionary => 'Hozzáadás a szótárhoz';
+  @override
+  String get spellCheckIgnore => 'Kihagyás';
 
   @override
   String indentWidthValue(int spaces) => '$spaces szóköz';

@@ -4246,6 +4246,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     zen: _inZen,
                     // The dock's outline pane, where the window has room.
                     outlineInDock: _dockRoom && !_inZen,
+                    // The spelling pane too: beside the note, not over it.
+                    onSpellingInDock: _wide && _dockRoom && !_inZen
+                        ? () => unawaited(_showPanel(DockPane.spelling))
+                        : null,
                     typewriter: _editorSettings.typewriter,
                     cascadeChecklist: _editorSettings.cascadeChecklist,
                     frontmatterPanel: _editorSettings.frontmatterPanel,

@@ -222,6 +222,8 @@ final class CatalanStrings extends Strings {
   String spellCheckLine(int line) => 'línia $line';
   @override
   String get addWordToDictionary => 'Afegeix al diccionari';
+  @override
+  String get spellCheckIgnore => 'Ignora';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espais';

@@ -223,6 +223,8 @@ final class BosnianStrings extends Strings {
   String spellCheckLine(int line) => 'red $line';
   @override
   String get addWordToDictionary => 'Dodaj u rječnik';
+  @override
+  String get spellCheckIgnore => 'Zanemari';
 
   @override
   String indentWidthValue(int spaces) => '$spaces razmaka';

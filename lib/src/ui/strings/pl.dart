@@ -223,6 +223,8 @@ final class PolishStrings extends Strings {
   String spellCheckLine(int line) => 'linia $line';
   @override
   String get addWordToDictionary => 'Dodaj do słownika';
+  @override
+  String get spellCheckIgnore => 'Ignoruj';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spacje';

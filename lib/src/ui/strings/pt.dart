@@ -220,6 +220,8 @@ final class PortugueseStrings extends Strings {
   String spellCheckLine(int line) => 'linha $line';
   @override
   String get addWordToDictionary => 'Adicionar ao dicionário';
+  @override
+  String get spellCheckIgnore => 'Ignorar';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espaços';

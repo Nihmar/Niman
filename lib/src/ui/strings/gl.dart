@@ -223,6 +223,8 @@ final class GalicianStrings extends Strings {
   String spellCheckLine(int line) => 'liña $line';
   @override
   String get addWordToDictionary => 'Engade ao diccionario';
+  @override
+  String get spellCheckIgnore => 'Ignorar';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espazos';

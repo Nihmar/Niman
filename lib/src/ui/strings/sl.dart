@@ -224,6 +224,8 @@ final class SlovenianStrings extends Strings {
   String spellCheckLine(int line) => 'vrstica $line';
   @override
   String get addWordToDictionary => 'Dodaj v slovník';
+  @override
+  String get spellCheckIgnore => 'Prezri';
 
   @override
   String indentWidthValue(int spaces) => '$spaces presledkov';

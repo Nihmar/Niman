@@ -222,6 +222,8 @@ final class GermanStrings extends Strings {
   String spellCheckLine(int line) => 'Zeile $line';
   @override
   String get addWordToDictionary => 'Zum Wörterbuch hinzufügen';
+  @override
+  String get spellCheckIgnore => 'Ignorieren';
 
   @override
   String indentWidthValue(int spaces) => '$spaces Leerzeichen';

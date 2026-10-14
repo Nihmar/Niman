@@ -14,6 +14,7 @@ import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/links_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
+import 'package:niman/src/ui/dock/spelling_dock_pane.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/outline_panel.dart';
@@ -93,6 +94,7 @@ final class ShellDock {
           libraryRoot: controller.root,
           onOpenNote: workspace.show,
         ),
+        DockPane.spelling => SpellingDockPane(note: panelNote()),
         DockPane.history => HistoryDockPane(
           ops: controller.ops,
           path: path,
@@ -132,7 +134,9 @@ final class ShellDock {
       return;
     }
     final note = panelNote();
-    if (note == null) return;
+    // The spelling sheet is the note's own: it opens it where there is no
+    // dock.
+    if (note == null || pane == DockPane.spelling) return;
     if (pane == DockPane.outline) {
       final line = await showOutlineSheet(
         context,

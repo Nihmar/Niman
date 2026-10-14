@@ -224,6 +224,8 @@ final class RomanianStrings extends Strings {
   String spellCheckLine(int line) => 'linia $line';
   @override
   String get addWordToDictionary => 'Adaugă în dicționar';
+  @override
+  String get spellCheckIgnore => 'Ignoră';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spații';

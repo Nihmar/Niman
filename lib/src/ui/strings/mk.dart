@@ -222,6 +222,8 @@ final class MacedonianStrings extends Strings {
   String spellCheckLine(int line) => 'ред $line';
   @override
   String get addWordToDictionary => 'Додади во речник';
+  @override
+  String get spellCheckIgnore => 'Игнорирај';
 
   @override
   String indentWidthValue(int spaces) => '$spaces празнини';

@@ -219,6 +219,8 @@ final class IcelandicStrings extends Strings {
   String spellCheckLine(int line) => 'lína $line';
   @override
   String get addWordToDictionary => 'Setja í orðbók';
+  @override
+  String get spellCheckIgnore => 'Hunsa';
 
   @override
   String indentWidthValue(int spaces) => '$spaces bil';

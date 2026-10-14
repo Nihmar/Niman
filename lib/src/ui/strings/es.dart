@@ -223,6 +223,8 @@ final class SpanishStrings extends Strings {
   String spellCheckLine(int line) => 'línea $line';
   @override
   String get addWordToDictionary => 'Añadir al diccionario';
+  @override
+  String get spellCheckIgnore => 'Ignorar';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espacios';

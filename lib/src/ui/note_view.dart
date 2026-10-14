@@ -133,6 +133,7 @@ final class NoteView extends StatefulWidget {
     this.onLoaded,
     this.kindMode = true,
     this.outlineInDock = false,
+    this.onSpellingInDock,
     this.onNoteKindChanged,
     this.onKindMarkdown,
     this.onPasteAsMarkdown,
@@ -334,6 +335,10 @@ final class NoteView extends StatefulWidget {
   /// left out (desktop chrome, 2026-10-09). Off where nothing else has it
   /// — a phone, a narrow window, a file outside the library.
   final bool outlineInDock;
+
+  /// Opens the spelling review in the dock beside the note (#712), where
+  /// the window has one; null reviews in a sheet over the note.
+  final VoidCallback? onSpellingInDock;
 
   /// Reports the loaded note's kind (the frontmatter `type` value, null =
   /// plain note); the shell shows the kind toggle for known kinds.
@@ -619,7 +624,11 @@ final class _NoteViewState extends State<NoteView>
     onSpellChecked: () {
       if (mounted) setState(() {});
     },
+    inDock: () => widget.onSpellingInDock,
   );
+
+  @override
+  SpellReview? get spellReview => _commands.spellReview(edited: _stats);
 
   /// What the note's file looked like when it was last read or written.
   ///

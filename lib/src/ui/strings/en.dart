@@ -219,6 +219,8 @@ final class EnglishStrings extends Strings {
 
   @override
   String get addWordToDictionary => 'Add to dictionary';
+  @override
+  String get spellCheckIgnore => 'Ignore';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spaces';

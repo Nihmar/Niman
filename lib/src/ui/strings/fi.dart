@@ -220,6 +220,8 @@ final class FinnishStrings extends Strings {
   String spellCheckLine(int line) => 'rivi $line';
   @override
   String get addWordToDictionary => 'Lisää sanakirjaan';
+  @override
+  String get spellCheckIgnore => 'Ohita';
 
   @override
   String indentWidthValue(int spaces) => '$spaces välilyöntiä';

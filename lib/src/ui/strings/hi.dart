@@ -210,6 +210,8 @@ final class HindiStrings extends Strings {
   String spellCheckLine(int line) => 'पंक्ति $line';
   @override
   String get addWordToDictionary => 'शब्दकोश में जोड़ें';
+  @override
+  String get spellCheckIgnore => 'अनदेखा करें';
 
   @override
   String indentWidthValue(int spaces) => '$spaces स्पेस';

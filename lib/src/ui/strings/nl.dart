@@ -220,6 +220,8 @@ final class DutchStrings extends Strings {
   String spellCheckLine(int line) => 'regel $line';
   @override
   String get addWordToDictionary => 'Toevoegen aan woordenlijst';
+  @override
+  String get spellCheckIgnore => 'Negeren';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spaties';

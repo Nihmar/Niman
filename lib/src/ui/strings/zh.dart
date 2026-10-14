@@ -202,6 +202,8 @@ final class ChineseStrings extends Strings {
   String spellCheckLine(int line) => '第 $line 行';
   @override
   String get addWordToDictionary => '加入词典';
+  @override
+  String get spellCheckIgnore => '忽略';
 
   @override
   String indentWidthValue(int spaces) => '$spaces 个空格';
