@@ -97,6 +97,15 @@ final class NoteTabBar extends StatefulWidget {
   /// The least of [filler] the tabs leave free, however many there are.
   static const double minFiller = 48;
 
+  /// The side of each of the two buttons past the tabs (`+` and the list):
+  /// 40 px with a mouse (the compact density), a thumb's target on a touch
+  /// device (#849).
+  static double buttonSide({required bool touch}) => touch ? thumbTarget : 40.0;
+
+  /// The least width the row fits in: its two buttons, with no tab and no
+  /// filler. Whatever shares the row with it leaves it this much (#927).
+  static double minWidth({required bool touch}) => 2 * buttonSide(touch: touch);
+
   /// The height of a pane's tab row: a tab and the air around it, a
   /// mouse's 38 px or, with [touch], a thumb's tab and its margin (#849).
   static double rowHeight({required bool touch}) =>
@@ -362,11 +371,11 @@ final class _NoteTabBarState extends State<NoteTabBar> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final touch = thumbDense(Theme.of(context));
-        // Each of the two buttons past the tabs: 40 px with a mouse (the
-        // compact density), a thumb's target on a touch device (#849).
-        final button = touch ? thumbTarget : 40.0;
-        final room = (constraints.maxWidth - 2 * button - NoteTabBar.minFiller)
-            .clamp(0.0, double.infinity);
+        final room =
+            (constraints.maxWidth -
+                    NoteTabBar.minWidth(touch: touch) -
+                    NoteTabBar.minFiller)
+                .clamp(0.0, double.infinity);
         // Short of room, the tabs shrink first — their names cut with an
         // ellipsis — and only below the narrowest does the row scroll.
         // Scrolling a wide tab into a narrow pane showed its end and cut

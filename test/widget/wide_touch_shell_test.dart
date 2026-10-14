@@ -267,4 +267,42 @@ void main() {
       expect(tester.widget<FolderGrid>(find.byType(FolderGrid)).folder, '');
     }, variant: _android);
   });
+
+  group('The compare page on a 1024 px tablet', () {
+    // The History dock needs 1000 px, so this is the narrowest window that
+    // can hold both it and a compare tab (#927).
+    testWidgets('opens and closes without a layout overflow', (tester) async {
+      controller.seedVersion(
+        'alpha.md',
+        number: 1,
+        savedAt: DateTime(2026, 10, 3, 14, 2),
+        text: 'the old alpha',
+      );
+      await pumpApp(tester, _tablet);
+      await openAlpha(tester);
+      await tester.tap(find.byKey(const Key('dock-pane-history')));
+      await settle(tester);
+
+      // Frame by frame: the overflow showed only while the tab animated.
+      Future<void> animate() async {
+        await tester.pump();
+        for (var i = 0; i < 30; i++) {
+          await tester.pump(const Duration(milliseconds: 16));
+        }
+        await settle(tester);
+      }
+
+      await tester.tap(find.byKey(const Key('dock-history-1')));
+      await animate();
+      expect(find.byKey(const Key('compare-tab')), findsOne);
+      expect(find.byType(NoteVersionScreen), findsOne);
+
+      await tester.tap(find.byKey(const Key('compare-tab-close')));
+      await animate();
+      expect(find.byKey(const Key('compare-tab')), findsNothing);
+      expect(find.byType(NoteVersionScreen), findsNothing);
+
+      expect(tester.takeException(), isNull);
+    }, variant: _android);
+  });
 }

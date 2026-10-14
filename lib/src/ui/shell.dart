@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
@@ -1658,13 +1659,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             const SizedBox(width: 12),
             Icon(Icons.history, size: 15, color: colour),
             const SizedBox(width: 6),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 240),
-              child: Text(
-                '${p.basename(compare.path)} — '
-                '${historyWhen(compare.version.savedAt, DateTime.now())}',
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(color: colour),
+            Flexible(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 240),
+                child: Text(
+                  '${p.basename(compare.path)} — '
+                  '${historyWhen(compare.version.savedAt, DateTime.now())}',
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(color: colour),
+                ),
               ),
             ),
             const SizedBox(width: 6),
@@ -1816,13 +1819,33 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final hasCompare = _compare != null && pane == _comparePaneShown;
     if (!hasContent && !hasCompare) return bar;
     // At the row's far end, where it comes and goes without moving a note
-    // tab under the pointer (#770).
-    return Row(
-      children: [
-        Expanded(child: bar),
-        if (hasCompare) _compareChip(pane),
-        if (hasContent) _contentTabChip(content, pane),
-      ],
+    // tab under the pointer (#770). The chips take what the tab bar's own
+    // buttons leave, no more: a narrow pane (a tablet's, beside the tree
+    // and the dock) cuts the compare chip's name rather than squeeze the
+    // bar below its buttons (#927).
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final chipsRoom = math.max<double>(
+          0,
+          constraints.maxWidth -
+              NoteTabBar.minWidth(touch: thumbDense(Theme.of(context))),
+        );
+        return Row(
+          children: [
+            Expanded(child: bar),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: chipsRoom),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasCompare) Flexible(child: _compareChip(pane)),
+                  if (hasContent) _contentTabChip(content, pane),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
