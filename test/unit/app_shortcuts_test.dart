@@ -7,6 +7,7 @@ import 'package:niman/src/editor/editor_shortcuts.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 
 void main() {
@@ -33,11 +34,30 @@ void main() {
     }
   });
 
-  test('no two commands share a key combination', () {
-    final keys = nimanAppShortcuts
-        .map((s) => describeActivator(s.activation))
-        .toList();
-    expect(keys.toSet().length, keys.length);
+  // F5 presents slides and studies a deck (#533): the one exception, since
+  // each waits on a different kind of note on screen and the shell binds
+  // only the commands that can run, at most one answers the key.
+  test('no two commands share a key combination, bar one per kind of note', () {
+    final byKeys = <String, List<AppCommand>>{};
+    for (final shortcut in nimanAppShortcuts) {
+      byKeys
+          .putIfAbsent(describeActivator(shortcut.activation), () => [])
+          .add(shortcut.command);
+    }
+    const kinds = {CommandNeed.slidesNote, CommandNeed.flashcardNote};
+    for (final MapEntry(key: keys, value: commands) in byKeys.entries) {
+      if (commands.length == 1) continue;
+      final waits = [
+        for (final command in commands)
+          commandNeeds(command).where(kinds.contains).toSet(),
+      ];
+      expect(
+        waits.every((need) => need.length == 1) &&
+            waits.expand((need) => need).toSet().length == commands.length,
+        isTrue,
+        reason: '$keys is shared by ${commands.map((c) => c.name)}',
+      );
+    }
   });
 
   // #370: the editor's formatting keys and the shell's commands must not

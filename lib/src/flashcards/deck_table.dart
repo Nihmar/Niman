@@ -8,18 +8,22 @@ import 'package:niman/src/flashcards/flash_card.dart';
 /// **Add card** appends to.
 @immutable
 final class DeckTable {
-  /// A table of [columns] whose question and answer columns are [question]
+  /// A table with [headers] whose question and answer columns are [question]
   /// and [answer].
   const new({
-    required this.columns,
+    required this.headers,
     required this.question,
     required this.answer,
     required this.template,
     required this.last,
   });
 
+  /// What its head says of each column, as plain text: the names `front:`
+  /// and `back:` pick the question and answer columns by.
+  final List<String> headers;
+
   /// How many columns its head has.
-  final int columns;
+  int get columns => headers.length;
 
   /// The column the questions are read from, counting from 0.
   final int question;

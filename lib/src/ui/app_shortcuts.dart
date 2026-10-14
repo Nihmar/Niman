@@ -147,6 +147,15 @@ enum AppCommand {
   /// The slides note's presenter view (#534).
   presenterView,
 
+  /// Study the deck on screen (#533): the review of its due and new cards.
+  studyDeck,
+
+  /// Pick the question and answer columns of the deck on screen (#533).
+  deckColumns,
+
+  /// Forget the review of every card of the deck on screen (#533).
+  deckReset,
+
   /// Switch the note between the source editor and the WYSIWYG.
   switchEditor,
 
@@ -310,6 +319,9 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
     AppCommand.presenterView,
     SingleActivator(LogicalKeyboardKey.f5, alt: true),
   ),
+  // The same F5 studies a deck (#533): the two commands wait on different
+  // notes on screen (`commandNeeds`), so at most one answers.
+  AppShortcut(AppCommand.studyDeck, SingleActivator(LogicalKeyboardKey.f5)),
   AppShortcut(
     AppCommand.typewriterMode,
     SingleActivator(LogicalKeyboardKey.keyT, control: true, shift: true),
@@ -382,6 +394,9 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newListNote => AppStrings.shortcutNewList,
   AppCommand.newAudioNote => AppStrings.shortcutNewAudio,
   AppCommand.newSlides => AppStrings.newSlidesTitle,
+  AppCommand.studyDeck => AppStrings.flashcardsStudyDeck,
+  AppCommand.deckColumns => AppStrings.flashcardsColumnsTitle,
+  AppCommand.deckReset => AppStrings.flashcardsResetAction,
   AppCommand.presentSlides => AppStrings.slidesPresent,
   AppCommand.presenterView => AppStrings.slidesPresenterView,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,

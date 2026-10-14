@@ -3,6 +3,20 @@ import 'package:niman/src/ui/strings.dart';
 
 /// What the open note's ⋮ menu can do.
 enum NoteMenuAction {
+  /// Study the deck the note is (#533): the review the deck view's button
+  /// starts.
+  studyDeck,
+
+  /// The deck's Markdown, in place of its cards (#533): what the pencil does.
+  editMarkdown,
+
+  /// Which columns of the deck's table are the question and the answer
+  /// (#533).
+  deckColumns,
+
+  /// Forget the review of every card of the deck (#533).
+  deckReset,
+
   /// Present the slides note (#534): the slide alone, full screen.
   present,
 
@@ -89,8 +103,20 @@ final class NoteMenuButton extends StatelessWidget {
     this.kindSwitch,
     this.slides = false,
     this.presenterView = false,
+    this.deck = false,
+    this.studyEnabled = false,
     super.key,
   });
+
+  /// Whether the note on screen is a deck shown as its cards (#533): the
+  /// deck's entries lead the menu, the editor's step aside, and the note's
+  /// own (rename, move, history, export, delete) follow in the order of
+  /// the mockup.
+  final bool deck;
+
+  /// Whether a study session can be started: the deck's Study entry is
+  /// there either way, and grey while it cannot.
+  final bool studyEnabled;
 
   /// Whether the note on screen is a deck shown as slides (#534): the
   /// slide entries lead the menu, and the editor's ones step aside.
@@ -129,6 +155,15 @@ final class NoteMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (deck) {
+      return PopupMenuButton<NoteMenuAction>(
+        key: const Key('note-menu'),
+        tooltip: AppStrings.noteMenuTooltip,
+        icon: const Icon(Icons.more_vert),
+        onSelected: onSelected,
+        itemBuilder: (context) => _deckItems(),
+      );
+    }
     return PopupMenuButton<NoteMenuAction>(
       key: const Key('note-menu'),
       tooltip: AppStrings.noteMenuTooltip,
@@ -238,14 +273,62 @@ final class NoteMenuButton extends StatelessWidget {
     );
   }
 
+  /// The deck's menu (mockup D5): its own entries, then the note's.
+  List<PopupMenuEntry<NoteMenuAction>> _deckItems() => [
+    _item(
+      NoteMenuAction.studyDeck,
+      Icons.style_outlined,
+      AppStrings.flashcardsStudyDeck,
+      enabled: studyEnabled,
+    ),
+    _item(
+      NoteMenuAction.editMarkdown,
+      Icons.edit_outlined,
+      AppStrings.flashcardsEditMarkdown,
+    ),
+    _item(
+      NoteMenuAction.deckColumns,
+      Icons.view_column_outlined,
+      '${AppStrings.flashcardsColumnsTitle}…',
+    ),
+    _item(
+      NoteMenuAction.deckReset,
+      Icons.restart_alt,
+      '${AppStrings.flashcardsResetAction}…',
+    ),
+    if (palette)
+      _item(
+        NoteMenuAction.palette,
+        Icons.bolt_outlined,
+        AppStrings.commandPaletteTitle,
+      ),
+    const PopupMenuDivider(),
+    _item(NoteMenuAction.rename, Icons.edit_outlined, AppStrings.actionRename),
+    _item(
+      NoteMenuAction.move,
+      Icons.drive_folder_upload_outlined,
+      AppStrings.actionMove,
+    ),
+    _item(NoteMenuAction.history, Icons.history, AppStrings.noteHistoryTitle),
+    _item(
+      NoteMenuAction.export,
+      Icons.save_alt_outlined,
+      AppStrings.exportTitle,
+    ),
+    const PopupMenuDivider(),
+    _item(NoteMenuAction.delete, Icons.delete_outline, AppStrings.actionDelete),
+  ];
+
   PopupMenuItem<NoteMenuAction> _item(
     NoteMenuAction action,
     IconData icon,
-    String label,
-  ) {
+    String label, {
+    bool enabled = true,
+  }) {
     return PopupMenuItem(
       key: Key('note-menu-${action.name}'),
       value: action,
+      enabled: enabled,
       child: Row(
         children: [
           Icon(icon, size: 20),

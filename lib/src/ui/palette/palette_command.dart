@@ -54,6 +54,9 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.togglePreview ||
   AppCommand.presentSlides ||
   AppCommand.presenterView ||
+  AppCommand.studyDeck ||
+  AppCommand.deckColumns ||
+  AppCommand.deckReset ||
   AppCommand.switchEditor ||
   AppCommand.typewriterMode ||
   AppCommand.formatNote ||
@@ -110,6 +113,8 @@ bool paletteAsks(AppCommand command) => switch (command) {
   AppCommand.deleteNote ||
   AppCommand.exportNote ||
   AppCommand.recognizeText ||
+  AppCommand.deckColumns ||
+  AppCommand.deckReset ||
   AppCommand.exportLibrary ||
   AppCommand.openFile ||
   AppCommand.switchLibrary => true,

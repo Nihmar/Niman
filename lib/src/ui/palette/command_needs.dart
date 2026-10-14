@@ -55,6 +55,9 @@ enum CommandNeed {
 
   /// A slides note is on screen (#534).
   slidesNote,
+
+  /// A flashcard deck is on screen, shown as its cards (#533).
+  flashcardNote,
 }
 
 /// What [command] waits on; empty for one that can always run.
@@ -98,6 +101,9 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
     CommandNeed.slidesNote,
     CommandNeed.desktop,
   },
+  AppCommand.studyDeck ||
+  AppCommand.deckColumns ||
+  AppCommand.deckReset => const {CommandNeed.flashcardNote},
   AppCommand.openFile => const {CommandNeed.desktop},
   AppCommand.openPalette ||
   AppCommand.goToNote ||
@@ -150,4 +156,5 @@ String commandNeedLabel(CommandNeed need) => switch (need) {
   CommandNeed.journalEntry => AppStrings.commandNeedJournalEntry,
   CommandNeed.ocrFile => AppStrings.commandNeedOcrFile,
   CommandNeed.slidesNote => AppStrings.commandNeedSlidesNote,
+  CommandNeed.flashcardNote => AppStrings.commandNeedFlashcardNote,
 };

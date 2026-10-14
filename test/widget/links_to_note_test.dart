@@ -54,6 +54,9 @@ final class _Note implements NoteViewHandle {
   void setNoteKind(String? type) {}
 
   @override
+  void applyKindEdit(String newText) {}
+
+  @override
   void openFind({bool replace = false}) {}
 
   @override

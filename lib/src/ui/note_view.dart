@@ -532,6 +532,9 @@ final class _NoteViewState extends State<NoteView>
   }
 
   @override
+  void applyKindEdit(String newText) => _applyKindEdit(newText);
+
+  @override
   void insertAtCaret(String markdown) {
     if (!canInsert) return;
     _commands.run(

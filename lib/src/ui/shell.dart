@@ -90,6 +90,9 @@ import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
+import 'package:niman/src/ui/kinds/flashcards/deck_menu_flow.dart';
+import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
+import 'package:niman/src/ui/kinds/flashcards/deck_study.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/note_menu.dart';
@@ -3094,6 +3097,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     palette: _paletteByTouch,
     slides: _showsSlides,
     presenterView: _wide,
+    deck: _showsDeck,
+    studyEnabled: ref.read(deckStudyStarterProvider) != null,
     kindSwitch: switch (_noteKind) {
       'list' => NoteKindSwitch.toShoppingList,
       'shopping-list' => NoteKindSwitch.toChecklist,
@@ -3121,6 +3126,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           () => _recognize(path),
         ),
         NoteMenuAction.kindSwitch => Future<void>.sync(_switchNoteKind),
+        NoteMenuAction.studyDeck => _studyDeck(),
+        NoteMenuAction.editMarkdown => Future<void>.sync(_editKindRaw),
+        NoteMenuAction.deckColumns => _chooseDeckColumns(),
+        NoteMenuAction.deckReset => _resetDeckReview(),
         NoteMenuAction.present => _presentSlides(),
         NoteMenuAction.presenterView => _presentSlides(presenter: true),
         NoteMenuAction.markdownPreview => Future<void>.sync(_showKindMarkdown),
@@ -3138,6 +3147,40 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Whether the note on screen is a deck shown as its slides (#534).
   bool get _showsSlides => _noteKind == 'slides' && !_kindRawMode;
+
+  /// Whether the note on screen is a flashcard deck shown as its cards
+  /// (#533).
+  bool get _showsDeck => _noteKind == 'flashcard' && !_kindRawMode;
+
+  /// What the deck's ⋮ entries do beyond its view (#533).
+  late final DeckMenuFlow _deckFlow = DeckMenuFlow(
+    ref.read(deckReviewSourceProvider),
+  );
+
+  /// Starts a study session of the deck on screen, through the seam the
+  /// review fills (`deckStudyStarterProvider`); nothing while there is none.
+  Future<void> _studyDeck() async {
+    final note = _panelNote;
+    final starter = ref.read(deckStudyStarterProvider);
+    if (note == null || starter == null || !_showsDeck) return;
+    await starter(context, note.notePath);
+  }
+
+  Future<void> _chooseDeckColumns() async {
+    final note = _panelNote;
+    if (note == null || !_showsDeck) return;
+    await _deckFlow.chooseColumns(context, note);
+  }
+
+  Future<void> _resetDeckReview() async {
+    final note = _panelNote;
+    if (note == null || !_showsDeck) return;
+    await _deckFlow.resetReview(
+      context,
+      root: widget.controller.root,
+      notePath: note.notePath,
+    );
+  }
 
   /// Presents the slides note on screen (#534), from the slide its view
   /// shows; [presenter] opens on the presenter view.
@@ -3786,6 +3829,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
     CommandNeed.slidesNote => _noteKind == 'slides',
+    CommandNeed.flashcardNote => _showsDeck,
     CommandNeed.ocrFile =>
       _ocrFlow != null &&
           _shownIsAttachment &&
@@ -3821,6 +3865,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_createFlow.createAudioNote(context)),
       AppCommand.newSlides: () =>
           unawaited(_createFlow.createSlidesNote(context)),
+      AppCommand.studyDeck: () => unawaited(_studyDeck()),
+      AppCommand.deckColumns: () => unawaited(_chooseDeckColumns()),
+      AppCommand.deckReset: () => unawaited(_resetDeckReview()),
       AppCommand.presentSlides: () => unawaited(_presentSlides()),
       AppCommand.presenterView: () =>
           unawaited(_presentSlides(presenter: true)),

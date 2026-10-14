@@ -70,7 +70,7 @@ DeckTable? deckTable(ReadLeaf leaf, SourceBuffer buffer, DeckMeta meta) {
   final last = sourceOf(buffer, [lines.last]);
   final body = lines.length > 2 ? lines.last : lines.first;
   return DeckTable(
-    columns: head.length,
+    headers: [for (final cell in head) cell.plainText.trim()],
     question: question,
     answer: answer,
     template: sourceOf(buffer, [body]).content,
