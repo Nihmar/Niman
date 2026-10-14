@@ -28,6 +28,14 @@ abstract interface class UnsavedNote {
   Future<void> save();
 }
 
+/// An [UnsavedNote] that can give the front of its buffer without reading
+/// all of it: a note of novel length is not joined whole to show its first
+/// screenful (#868).
+abstract interface class UnsavedNoteHead {
+  /// At most the first [maxChars] UTF-16 units of the buffer's text.
+  String textHead(int maxChars);
+}
+
 /// The app-level view of which open notes hold unsaved edits (T-PP-11).
 ///
 /// The source of truth is each [NoteView]'s revision state; the tracker
@@ -55,9 +63,18 @@ final class UnsavedTracker extends ChangeNotifier {
   /// The buffer text of the open note at absolute [path] while it holds
   /// edits the disk does not have yet, else null: what a reader of the note
   /// shows instead of the disk's older text (a link's preview, #846).
-  String? unsavedTextOf(String path) {
+  ///
+  /// With [maxChars], only the front of it — at most that many UTF-16 units,
+  /// asked of a note that can give them without joining the rest
+  /// ([UnsavedNoteHead]); the whole text otherwise.
+  String? unsavedTextOf(String path, {int? maxChars}) {
     for (final note in _notes) {
-      if (note.unsaved && p.equals(note.path, path)) return note.text;
+      if (note.unsaved && p.equals(note.path, path)) {
+        if (maxChars != null && note is UnsavedNoteHead) {
+          return (note as UnsavedNoteHead).textHead(maxChars);
+        }
+        return note.text;
+      }
     }
     return null;
   }
