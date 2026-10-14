@@ -132,7 +132,9 @@ digits and dashes, so a readable one works too (`^quote-of-the-day`).
   ```
 
   Only the whole block is a target: a part of a quote, a callout or a
-  table is not (Obsidian's limit too).
+  table is not (Obsidian's limit too). A line that is only an id is not a
+  block itself: a second id on a line of its own right below it names
+  nothing.
 
 Choose an id from the panel (`[[note#^`) or write it. The id is matched
 **literally**, case included; following the link brings the block into view
