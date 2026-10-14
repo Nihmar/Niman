@@ -395,5 +395,28 @@ void main() {
       '---\ntype: flashcard\ndeck: \n---\n\n'
       '| Question | Answer |\n|---|---|\n',
     );
+
+    // The first deck offers Study, hidden until then, once.
+    expect(find.byKey(const Key('rail-study')), findsNothing);
+    expect(find.byKey(const Key('study-offer')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('study-offer-show')));
+    await settle(tester);
+    expect(find.byKey(const Key('rail-study')), findsOneWidget);
+    expect(
+      (await controller.navigation).library?.hidden,
+      isNot(contains('study')),
+    );
+
+    ScaffoldMessenger.of(tester.element(find.byKey(const Key('rail-study'))))
+        .hideCurrentSnackBar();
+    await settle(tester);
+    await openNewItemMenu(tester);
+    await tester.tap(find.byKey(const Key('new-flashcards-action')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Nouns');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(controller.contentOf('Nouns.md'), isNotNull);
+    expect(find.byKey(const Key('study-offer')), findsNothing);
   });
 }

@@ -19,6 +19,7 @@ import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/kinds/slides/slides_kind.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/study/study_offer.dart';
 
 /// What a finished create hands back: the row's path, whether it is a
 /// folder, and whether the note carries a kind the editor has a GUI for
@@ -165,6 +166,7 @@ final class ShellCreateFlow {
       initial: AppStrings.newFlashcardsDefault,
     );
     if (name == null) return;
+    var made = false;
     await guard(() async {
       final row = await controller.ops!.createNote(
         parentPath: newItemRule.folder,
@@ -172,7 +174,9 @@ final class ShellCreateFlow {
         content: flashcardNoteContent(),
       );
       onCreated((path: row.path, isDir: false, hasKind: true));
+      made = true;
     });
+    if (made && context.mounted) await offerStudy(context, controller);
   }
 
   /// A folder in [parent] (default: where the library's rule puts new
