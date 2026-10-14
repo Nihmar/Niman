@@ -1182,6 +1182,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final icon = switch (_noteKind) {
       'audio' => Icons.mic_outlined,
       'slides' => Icons.slideshow_outlined,
+      'flashcard' => Icons.style_outlined,
       'shopping-list' => Icons.shopping_cart_outlined,
       _ => Icons.checklist,
     };
@@ -1207,6 +1208,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           tooltip: switch (_noteKind) {
             'audio' => AppStrings.showAudioTooltip,
             'slides' => AppStrings.showSlidesTooltip,
+            'flashcard' => AppStrings.showFlashcardsTooltip,
             _ => AppStrings.showListTooltip,
           },
           icon: Icon(icon),

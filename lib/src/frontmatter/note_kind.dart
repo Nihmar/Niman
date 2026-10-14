@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/ui/kinds/audio_note.dart';
+import 'package:niman/src/ui/kinds/flashcards/flashcard_kind.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/kinds/shopping_list_note.dart';
 import 'package:niman/src/ui/kinds/slides/slides_kind.dart';
@@ -66,6 +67,7 @@ final class NoteKinds {
     ShoppingListKindGui(),
     AudioKindGui(),
     SlidesKindGui(),
+    FlashcardKindGui(),
   ];
 
   /// The GUI for [type], or null for an unknown or absent kind.
