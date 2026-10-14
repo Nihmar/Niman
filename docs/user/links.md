@@ -134,7 +134,9 @@ digits and dashes, so a readable one works too (`^quote-of-the-day`).
   ```
 
   Only the whole block is a target: a part of a quote, a callout or a
-  table is not (Obsidian's limit too).
+  table is not (Obsidian's limit too). A line that is only an id is not a
+  block itself: a second id on a line of its own right below it names
+  nothing.
 
 Choose an id from the panel (`[[note#^`) or write it. The id is matched
 **literally**, case included; following the link brings the block into view
@@ -149,6 +151,10 @@ The read view leaves the ` ^id` out of the text, as Obsidian's reading view
 does; the editor (`live` and `source`) keeps showing it, and the note's
 file is never changed by hiding it. Renaming or moving the note carries
 `#^id` along like any other fragment.
+
+A heading that carries an id is still linked by its text: `## Title ^abc` is
+reached by `[[note#Title]]` as well as by `[[note#^abc]]`; the outline, the
+heading panels and an exported page's heading ids leave the ` ^abc` out.
 
 > **Only Obsidian reads them.** Block references are specific to
 > Obsidian, not part of standard Markdown: in another editor `^37066d`

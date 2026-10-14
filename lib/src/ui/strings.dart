@@ -196,6 +196,8 @@ final class AppStrings {
       _s.updateInstallPermissionBody;
   static String get updateOpenSettings => _s.updateOpenSettings;
   static String get updateInstallerFailed => _s.updateInstallerFailed;
+  static String get updateInstallPermissionMissing =>
+      _s.updateInstallPermissionMissing;
   static String get updateReleasePage => _s.updateReleasePage;
   static String get updateTestingBuild => _s.updateTestingBuild;
   static String get settingsSpellCheckTitle => _s.settingsSpellCheckTitle;

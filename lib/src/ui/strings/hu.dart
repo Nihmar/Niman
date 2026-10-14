@@ -197,6 +197,11 @@ final class HungarianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'A telepítő nem nyílt meg';
   @override
+  String get updateInstallPermissionMissing =>
+      'A frissítés addig nem telepíthető, amíg a Niman nem kap '
+      'engedélyt alkalmazások telepítésére. A letöltött fájl '
+      'megmarad: a „Letöltés” újbóli letöltés nélkül telepíti.';
+  @override
   String get updateReleasePage => 'Kiadási oldal';
   @override
   String get updateTestingBuild =>

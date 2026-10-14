@@ -19,6 +19,7 @@ import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/update/app_version.dart';
+import 'package:niman/src/update/cancellable_stream.dart';
 import 'package:niman/src/update/release_asset.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:path/path.dart' as p;
@@ -179,11 +180,14 @@ final class UpdateCancelled implements Exception {
 /// verifies the bytes against the digest the release published.
 ///
 /// [onProgress] hears the bytes received and the size the server gave, if
-/// any, as they come (#900); [isCancelled] is asked at each chunk, and a
-/// yes stops the transfer as [UpdateCancelled], the partial file removed.
-/// A file already there under the asset's name that passes the digest is
-/// the download: an install refused, or left for a permission, does not
-/// fetch the same bytes again.
+/// any, as they come (#900). [cancel] completes when the user gives up (#911):
+/// the transfer is then ended on the spot — a stalled one too — and the
+/// download is refused as [UpdateCancelled], the partial file removed. It is
+/// asked again after the digest and before the rename, and before a file
+/// already there is handed back, so a Cancel that lands while the file is
+/// hashed does not become a download. A file already there under the asset's
+/// name that passes the digest is the download: an install refused, or left
+/// for a permission, does not fetch the same bytes again.
 ///
 /// The body lands in `<name>.part` and is renamed to the asset's base name
 /// only once its digest matches, so a file under the installer's name is
@@ -204,18 +208,29 @@ Future<File> downloadAsset(
   Directory? into,
   Duration stallTimeout = const Duration(seconds: 30),
   void Function(int received, int? total)? onProgress,
-  bool Function()? isCancelled,
+  Future<void>? cancel,
 }) async {
+  var stopped = false;
+  if (cancel != null) {
+    unawaited(cancel.then((_) => stopped = true));
+  }
+  void checkCancelled() {
+    if (stopped) throw const UpdateCancelled();
+  }
+
   final dir = into ?? await updateDownloadDirectory();
   final file = File(p.join(dir.path, p.basename(asset.name)));
   // Hashed off the UI isolate, as a download is; a file that is not there
   // fails the read and is fetched.
+  var cached = false;
   try {
     await _verifyDownload(asset, file);
-    return file;
+    cached = true;
   } on Object {
     await _deleteQuietly(file);
   }
+  checkCancelled();
+  if (cached) return file;
   final part = File('${file.path}.part');
   final client = HttpClient();
   try {
@@ -233,27 +248,31 @@ Future<File> downloadAsset(
     var received = 0;
     final sink = part.openWrite();
     try {
-      await sink.addStream(
-        response
-            .timeout(
-              stallTimeout,
-              onTimeout: (events) => events.addError(
-                TimeoutException(
-                  'no data for ${stallTimeout.inMilliseconds} ms',
-                ),
-              ),
-            )
-            .map((chunk) {
-              if (isCancelled?.call() ?? false) throw const UpdateCancelled();
-              received += chunk.length;
-              onProgress?.call(received, total);
-              return chunk;
-            }),
-      );
+      var body = response
+          .timeout(
+            stallTimeout,
+            onTimeout: (events) => events.addError(
+              TimeoutException('no data for ${stallTimeout.inMilliseconds} ms'),
+            ),
+          )
+          .map((chunk) {
+            received += chunk.length;
+            onProgress?.call(received, total);
+            return chunk;
+          });
+      if (cancel != null) {
+        body = untilCancelled(
+          body,
+          cancel,
+          onCancel: () => const UpdateCancelled(),
+        );
+      }
+      await sink.addStream(body);
     } finally {
       await _closeQuietly(sink);
     }
     await _verifyDownload(asset, part);
+    checkCancelled();
     await part.rename(file.path);
     return file;
   } on Object {

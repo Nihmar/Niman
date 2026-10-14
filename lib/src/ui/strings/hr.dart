@@ -201,6 +201,11 @@ final class CroatianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Instalacijski program se nije otvorio';
   @override
+  String get updateInstallPermissionMissing =>
+      'Ažuriranje se ne može instalirati dok Niman nema dopuštenje za '
+      'instaliranje aplikacija. Preuzeta datoteka je sačuvana: '
+      '„Preuzmi“ je instalira bez ponovnog preuzimanja.';
+  @override
   String get updateReleasePage => 'Stranica izdanja';
   @override
   String get updateTestingBuild =>

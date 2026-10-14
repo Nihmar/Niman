@@ -25,6 +25,15 @@ import 'package:path/path.dart' as p;
 /// library does not draw the question: the shell does.
 typedef LinkUpdateConfirm = Future<bool> Function(int notes);
 
+/// Writes the unsaved edits of the notes open in an editor to disk (#913).
+///
+/// A rewrite of links writes the file, and a buffer that holds edits the
+/// disk does not have would write itself over it at its next autosave: the
+/// editor keeps its own text, and the rewrite is lost. The rewrite calls
+/// this right before it reads each referrer, so the text it rewrites is the
+/// text the buffer holds.
+typedef FlushOpenNotes = Future<void> Function();
+
 /// The rewrite of links a relocation leaves for after its turn of the op
 /// chain, under [LinkUpdate.ask] (#848): the question is a dialog a person
 /// may leave open, and a dialog must not hold the chain every other op and
@@ -152,7 +161,15 @@ final class NoteRelocator {
   /// ask about once its turn is over.
   /// The shared tail of `NoteOps.rename` and `NoteOps.move`; returns the
   /// updated row.
-  Future<Relocated> relocate(Note row, String path, String newRel) async {
+  ///
+  /// [flushOpen] saves the open notes' unsaved edits before each referrer
+  /// is read for the rewrite (#913).
+  Future<Relocated> relocate(
+    Note row,
+    String path,
+    String newRel, {
+    FlushOpenNotes? flushOpen,
+  }) async {
     final oldAbs = _abs(path);
     // Before anything moves: the index still says what each link named, and
     // the referrers, those inside a moved folder too, are still where it
@@ -184,6 +201,7 @@ final class NoteRelocator {
       isDir: row.isDir,
       mode: mode,
       links: links,
+      flushOpen: flushOpen,
     );
     return (row: await find(newRel), pending: pending);
   }
@@ -297,6 +315,7 @@ final class NoteRelocator {
     required bool isDir,
     required LinkUpdate mode,
     required _LinksToMove links,
+    FlushOpenNotes? flushOpen,
   }) async {
     if (links.referrers.isEmpty) return null;
     // A referrer inside the moved subtree moved with it; one note is
@@ -350,6 +369,9 @@ final class NoteRelocator {
         // rest: the move is already done, and the others still need their
         // links fixed.
         try {
+          // Before each referrer, not once for all: a thousand notes take
+          // seconds, and the open one may be typed into meanwhile (#913).
+          await _flush(flushOpen);
           final next = await rewritten(oldReferrer, path);
           if (next == null) continue;
           await writer.save(path, next);
@@ -384,6 +406,19 @@ final class NoteRelocator {
     }
 
     return PendingLinkRewrite(count: count, apply: write);
+  }
+
+  /// Runs [flushOpen] if there is one. A note that cannot be saved is
+  /// logged and does not stop the rewrite of the others: it keeps its text
+  /// in its buffer either way.
+  Future<void> _flush(FlushOpenNotes? flushOpen) async {
+    if (flushOpen == null) return;
+    try {
+      await flushOpen();
+    } on Object catch (error) {
+      const AppLogger(name: 'links')
+          .warning('could not save the open notes before the rewrite: $error');
+    }
   }
 
   /// Re-indexes the referrers at [paths] whose links the move left as

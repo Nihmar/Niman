@@ -197,6 +197,11 @@ final class LatvianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Instalētāju neizdevās atvērt';
   @override
+  String get updateInstallPermissionMissing =>
+      'Atjauninājumu nevar instalēt, kamēr Niman nav atļauts instalēt '
+      'lietotnes. Lejupielādētais fails ir saglabāts: „Lejupielādēt“ '
+      'to instalē, to atkārtoti nelejupielādējot.';
+  @override
   String get updateReleasePage => 'Laidiena lapa';
   @override
   String get updateTestingBuild =>

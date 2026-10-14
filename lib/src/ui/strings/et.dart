@@ -196,6 +196,11 @@ final class EstonianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Paigaldajat ei õnnestunud avada';
   @override
+  String get updateInstallPermissionMissing =>
+      'Värskendust ei saa installida enne, kui Nimanil on luba '
+      'rakendusi installida. Allalaaditud fail jääb alles: „Laadi '
+      'alla“ installib selle ilma uuesti allalaadimata.';
+  @override
   String get updateReleasePage => 'Väljalaske leht';
   @override
   String get updateTestingBuild =>

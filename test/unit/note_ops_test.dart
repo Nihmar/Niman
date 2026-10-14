@@ -95,11 +95,11 @@ void main() {
     test(
       'lists the notes at any depth under a folder, and no folders',
       () async {
-        await ops.ensureFolder('Journal/2026/09');
+        final _ = await ops.ensureFolder('Journal/2026/09');
         await ops.createNote(parentPath: 'Journal/2026/09', name: '2026-09-03');
         await ops.createNote(parentPath: 'Journal', name: 'About');
         await ops.createNote(parentPath: '', name: 'Journal notes');
-        await ops.ensureFolder('Journalism');
+        final _ = await ops.ensureFolder('Journalism');
         await ops.createNote(parentPath: 'Journalism', name: 'Not it');
         expect((await ops.notePathsUnder('Journal'))..sort(), [
           'Journal/2026/09/2026-09-03.md',
@@ -143,7 +143,7 @@ void main() {
     });
 
     test('a new subfolder is made inside the spelling that is there', () async {
-      await ops.ensureFolder('Journal');
+      final _ = await ops.ensureFolder('Journal');
 
       final row = await ops.ensureFolder('journal/2026');
 

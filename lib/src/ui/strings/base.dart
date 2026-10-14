@@ -89,6 +89,7 @@ abstract base class Strings {
   String get updateInstallPermissionBody;
   String get updateOpenSettings;
   String get updateInstallerFailed;
+  String get updateInstallPermissionMissing;
   String get updateReleasePage;
   String get updateTestingBuild;
   String get settingsSpellCheckTitle;

@@ -882,5 +882,10 @@ On a window with room for the dock the panel is the dock's **Spelling**
 pane, beside the note instead of over it (#712): you keep writing while it
 is open, and it checks the note again after each edit, once you pause. A
 click on a word selects it in the note; **Ignore** takes the word off the
-list, and **Add to dictionary** adds it to the library's words. A phone,
-or a window too narrow for the dock, keeps the panel as a sheet.
+list for as long as the note stays open, however much you edit it and even
+if you close the pane and open it again (it is not remembered after that:
+**Add to dictionary** adds it to the library's words for good). The list
+stays on screen while the note is checked again, and if the note changed
+under a word before you used it, nothing is replaced: the list is
+refreshed instead. A phone, or a window too narrow for the dock, keeps the
+panel as a sheet.

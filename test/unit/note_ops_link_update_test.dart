@@ -65,6 +65,11 @@ void main() {
     return [for (final item in page.items) item.path];
   }
 
+  /// An editor holding [text] for the note at [path] that the disk does not
+  /// have yet: its [_Buffer.save] is what the autosave, and what the shell's
+  /// `saveAll`, do (#913).
+  _Buffer openBuffer(String path, String text) => _Buffer(ops, path, text);
+
   group('automatic (the default)', () {
     test('rewrites the links, and asks nothing', () async {
       await seed();
@@ -80,6 +85,15 @@ void main() {
       expect(await ops.readNote('Ref.md'), 'See [[New]] and [[Other]].\n');
       expect(await ops.readNote('Second.md'), '[x](New.md)\n');
       expect(asked, 0);
+    });
+
+    test('saves the open notes before it rewrites them (#913)', () async {
+      await seed();
+      final editor = openBuffer('Ref.md', 'Typed just now: [[Old]].\n');
+      await ops.rename('Old.md', 'New', flushOpen: editor.save);
+      // The autosave that would have been next finds nothing left to write.
+      await editor.save();
+      expect(await ops.readNote('Ref.md'), 'Typed just now: [[New]].\n');
     });
   });
 
@@ -373,6 +387,49 @@ void main() {
       expect(await ops.readNote('Second.md'), '[x](New.md)\n');
     });
 
+    test('saves the open notes before the rewrite, not only before the '
+        'question (#913)', () async {
+      await seed();
+      await use(LinkUpdate.ask);
+      final asked = Completer<int>();
+      final answer = Completer<bool>();
+      final editor = openBuffer('Ref.md', 'Ref text: [[Old]].\n');
+      await ops.rename(
+        'Old.md',
+        'New',
+        flushOpen: editor.save,
+        confirmLinks: (notes) {
+          asked.complete(notes);
+          return answer.future;
+        },
+      );
+      await asked.future.timeout(const Duration(seconds: 10));
+      // Typed while the dialog is up.
+      editor.type('Typed meanwhile: [[Old]].\n');
+      answer.complete(true);
+      await ops.linkQuestion;
+      // The next autosave: the buffer was saved first, so it has nothing
+      // old to write over the rewrite.
+      await editor.save();
+      expect(await ops.readNote('Ref.md'), 'Typed meanwhile: [[New]].\n');
+      expect(await ops.readNote('Second.md'), '[x](New.md)\n');
+    });
+
+    test('a note that cannot be saved does not stop the rewrite of the '
+        'others (#913)', () async {
+      await seed();
+      await use(LinkUpdate.ask);
+      await ops.rename(
+        'Old.md',
+        'New',
+        flushOpen: () async => throw StateError('disk full'),
+        confirmLinks: (_) async => true,
+      );
+      await ops.linkQuestion;
+      expect(await ops.readNote('Ref.md'), 'See [[New]] and [[Other]].\n');
+      expect(await ops.readNote('Second.md'), '[x](New.md)\n');
+    });
+
     test('a failing question is logged, not thrown into the move', () async {
       await seed();
       await use(LinkUpdate.ask);
@@ -386,4 +443,28 @@ void main() {
       expect(await ops.readNote('Ref.md'), 'See [[Old]] and [[Other]].\n');
     });
   });
+}
+
+/// The unsaved text of an open note, as its editor keeps it between
+/// autosaves.
+final class _Buffer {
+  new(this._ops, this._path, this._text) : _dirty = true;
+
+  final NoteOps _ops;
+  final String _path;
+  String _text;
+  bool _dirty;
+
+  /// An edit the disk does not have yet.
+  void type(String text) {
+    _text = text;
+    _dirty = true;
+  }
+
+  /// Writes the buffer when it holds edits, as the autosave does.
+  Future<void> save() async {
+    if (!_dirty) return;
+    _dirty = false;
+    await _ops.saveNote(_path, _text);
+  }
 }

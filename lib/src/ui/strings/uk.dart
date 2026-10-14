@@ -202,6 +202,11 @@ final class UkrainianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Не вдалося відкрити інсталятор';
   @override
+  String get updateInstallPermissionMissing =>
+      'Оновлення не можна встановити, доки Niman не має дозволу '
+      'встановлювати застосунки. Завантажений файл збережено: '
+      '«Завантажити» встановить його без повторного завантаження.';
+  @override
   String get updateReleasePage => 'Сторінка випуску';
   @override
   String get updateTestingBuild =>

@@ -198,6 +198,11 @@ final class FinnishStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Asennusohjelma ei auennut';
   @override
+  String get updateInstallPermissionMissing =>
+      'Päivitystä ei voi asentaa ennen kuin Nimanille on annettu lupa '
+      'asentaa sovelluksia. Ladattu tiedosto säilyy: Lataa asentaa '
+      'sen lataamatta sitä uudelleen.';
+  @override
   String get updateReleasePage => 'Julkaisusivu';
   @override
   String get updateTestingBuild =>

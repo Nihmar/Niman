@@ -45,8 +45,11 @@ Create one with **New list note** in the Files FAB (or
   once, with **Undo** in the snackbar for a few seconds. The note's own
   edit history reaches it too.
 - **Add an item** from the field at the bottom; after each add the list
-  scrolls to the item just written. Pressing Enter adds and keeps the
-  field ready.
+  scrolls to the item just written. Pressing Enter (or the check button)
+  adds and keeps the cursor in the field, so the next item can be typed
+  at once. On Windows and Linux the field already has the cursor when
+  the list opens; on a phone it waits for a tap, so the keyboard does not
+  cover the list.
 
 Prose between items is not shown in the GUI (the raw editor is where it
 lives), and it follows the item above it when that item is dragged or

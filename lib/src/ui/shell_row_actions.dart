@@ -202,6 +202,7 @@ final class ShellRowActions {
         name,
         confirmLinks: confirmLinks,
         onLinksRewritten: onLinksRewritten,
+        flushOpen: saveOpen,
       );
       onMoved(sel, row.path);
     });
@@ -223,6 +224,7 @@ final class ShellRowActions {
         name,
         confirmLinks: confirmLinks,
         onLinksRewritten: onLinksRewritten,
+        flushOpen: saveOpen,
       );
       onMoved(path, renamed.path);
     });
@@ -264,6 +266,7 @@ final class ShellRowActions {
       target,
       confirmLinks: confirmLinks,
       onLinksRewritten: onLinksRewritten,
+      flushOpen: saveOpen,
     );
     onMoved(path, row.path);
   });

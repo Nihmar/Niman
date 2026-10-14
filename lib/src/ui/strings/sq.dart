@@ -196,6 +196,11 @@ final class AlbanianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Instaluesi nuk u hap';
   @override
+  String get updateInstallPermissionMissing =>
+      'Përditësimi nuk mund të instalohet derisa Niman të ketë leje '
+      'për të instaluar aplikacione. Skedari i shkarkuar ruhet: '
+      '«Shkarko» e instalon pa e shkarkuar sërish.';
+  @override
   String get updateReleasePage => 'Faqja e versionit';
   @override
   String get updateTestingBuild =>

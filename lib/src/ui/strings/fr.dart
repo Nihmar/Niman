@@ -204,6 +204,12 @@ final class FrenchStrings extends Strings {
   String get updateInstallerFailed =>
       'Le programme d’installation ne s’est pas ouvert';
   @override
+  String get updateInstallPermissionMissing =>
+      'La mise à jour ne peut pas être installée tant que Niman n’est '
+      'pas autorisé à installer des applications. Le fichier '
+      'téléchargé est conservé : « Télécharger » l’installe sans le '
+      'télécharger de nouveau.';
+  @override
   String get updateReleasePage => 'Page de la version';
   @override
   String get updateTestingBuild =>

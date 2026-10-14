@@ -202,6 +202,11 @@ final class GreekStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Το πρόγραμμα εγκατάστασης δεν άνοιξε';
   @override
+  String get updateInstallPermissionMissing =>
+      'Η ενημέρωση δεν μπορεί να εγκατασταθεί μέχρι να επιτραπεί στο '
+      'Niman η εγκατάσταση εφαρμογών. Το αρχείο που λήφθηκε '
+      'διατηρείται: η «Λήψη» το εγκαθιστά χωρίς να το κατεβάσει ξανά.';
+  @override
   String get updateReleasePage => 'Σελίδα έκδοσης';
   @override
   String get updateTestingBuild =>

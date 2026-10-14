@@ -66,7 +66,7 @@ void main() {
   testWidgets('the template is picked from the templates, or none', (
     tester,
   ) async {
-    await session.ensureFolder('Templates');
+    final _ = await session.ensureFolder('Templates');
     await session.createNote(parentPath: 'Templates', name: 'Day');
     await pump(tester);
     await tester.tap(find.text('None: a heading with the date'));

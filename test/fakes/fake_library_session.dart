@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/files.dart';
@@ -1358,6 +1359,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  @useResult
   Future<Note> ensureFolder(String path) async {
     final clean = cleanFolderPath(path, '');
     if (clean.isEmpty) {
@@ -1400,6 +1402,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String newName, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    FlushOpenNotes? flushOpen,
   }) async {
     final row = _requireRow(path);
     final parent = parentOf(path);
@@ -1430,6 +1433,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    FlushOpenNotes? flushOpen,
   }) async {
     final row = _requireRow(path);
     final same = resolvePath(targetParent, p.basename(path)) == path;

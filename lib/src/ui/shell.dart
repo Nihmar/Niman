@@ -816,6 +816,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // panes and the dock stay, instead of taking a whole slot.
     if (!narrow && (tab == ShellTab.home || tab == ShellTab.todo)) {
       setState(() {
+        // The page it shows covers the compare tab's: that tab stays on
+        // its chip (#906).
+        _compareShows = false;
         _tab = tab;
         _visitedTabs.add(tab);
         _contentTab = tab;
@@ -1951,6 +1954,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The showing tab when [_onWorkspaceChanged] last looked.
   String? _lastShown;
 
+  /// The pane that draws the compare tab and the note it shows, when
+  /// [_onWorkspaceChanged] last looked (#906).
+  ({int pane, String? path})? _lastComparePane;
+
   /// The workspace moved (#23): a tab shown, closed, renamed. On a wide
   /// window the tree follows the showing tab, and a newly shown note is
   /// asked its kind afresh.
@@ -1959,13 +1966,30 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final shown = _workspace.value.activePath;
     final changed = shown != _lastShown;
     _lastShown = shown;
+    // A note shown in the pane the compare tab covers takes the pane back
+    // (#906), whichever way it was opened: the tree, the search, a link.
+    // A note shown in the other pane of a split leaves it alone.
+    final panes = _workspace.value.panes;
+    final comparePane = _comparePaneShown;
+    final comparePanePath = comparePane < panes.length
+        ? panes[comparePane].activeTab?.path
+        : null;
+    final comparePaneNow = (pane: comparePane, path: comparePanePath);
+    // A split opening or closing moves the compare tab to another pane,
+    // which is no note opened over it.
+    final compareCovered =
+        _compareShows &&
+        _lastComparePane?.pane == comparePane &&
+        _lastComparePane?.path != comparePanePath;
+    _lastComparePane = comparePaneNow;
     // A caret or a scroll handed in changes nothing drawn here: only the
     // tabs, which listen for themselves. The shell rebuilds for what it
     // draws — tabs, panes, and how each tab shows its note.
     final shape = _workspaceShape(_workspace.value);
-    if (!changed && shape == _lastShape) return;
+    if (!changed && !compareCovered && shape == _lastShape) return;
     _lastShape = shape;
     setState(() {
+      if (compareCovered) _compareShows = false;
       if (!_wide) return;
       if (changed) _resetNoteKind();
       if (shown != null) {
@@ -5039,6 +5063,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _wide &&
       (_contentTabShows ||
           _sidebarShowsSearch ||
+          _compareShows && _compare != null ||
           _workspace.value.activePath != null ||
           _gridCanStepUp);
 
@@ -5049,6 +5074,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void _wideBack() {
     if (_immersive.fullScreen.value != null) {
       _immersive.fullScreen.value = null;
+    } else if (_compareShows && _compare != null) {
+      // The compare page covers the note: it goes before the note (#906).
+      _closeCompare();
     } else if (_contentTabShows) {
       _closeContentTab();
     } else if (_sidebarShowsSearch) {

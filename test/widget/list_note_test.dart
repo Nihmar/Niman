@@ -910,4 +910,147 @@ void main() {
     expect(find.text('a prose line'), findsNothing);
     expect(find.text('another line'), findsNothing);
   });
+
+  // The add row keeps the focus after an add, so the next item is typed
+  // at once: Enter (the IME "done" action, which unfocuses by default)
+  // and the check button (a desktop click moves focus onto the button).
+  for (final platform in [TargetPlatform.windows, TargetPlatform.android]) {
+    for (final shopping in [false, true]) {
+      for (final viaButton in [false, true]) {
+        final name =
+            '${shopping ? 'shopping list' : 'list'} on ${platform.name}: '
+            'the add field keeps focus after '
+            '${viaButton ? 'the check button' : 'Enter'}';
+        testWidgets(name, (tester) async {
+          final kind = shopping ? 'shopping-list' : 'list';
+          var text = '---\ntype: $kind\n---\n';
+          // A host that feeds the edit back, like NoteView does.
+          late StateSetter rebuild;
+          await tester.pumpWidget(
+            _app(
+              StatefulBuilder(
+                builder: (context, setState) {
+                  rebuild = setState;
+                  return ListNoteView(
+                    text: text,
+                    shopping: shopping,
+                    onChanged: (t) => rebuild(() => text = t),
+                  );
+                },
+              ),
+            ),
+          );
+          final field = find.byKey(const Key('list-add-field'));
+          final editable = find.descendant(
+            of: field,
+            matching: find.byType(EditableText),
+          );
+
+          for (final item in ['one', 'two']) {
+            await tester.tap(field);
+            await tester.pump();
+            await tester.enterText(field, item);
+            if (viaButton) {
+              await tester.tap(find.byKey(const Key('list-add-button')));
+            } else {
+              await tester.testTextInput.receiveAction(TextInputAction.done);
+            }
+            await tester.pumpAndSettle();
+            expect(text, contains('- [ ] $item\n'));
+            expect(
+              tester.widget<EditableText>(editable).focusNode.hasFocus,
+              isTrue,
+              reason: 'the add field is focused after adding "$item"',
+            );
+            expect(
+              tester.testTextInput.isVisible,
+              isTrue,
+              reason: 'the keyboard stays up',
+            );
+          }
+          expect(tester.widget<EditableText>(editable).controller.text, '');
+        }, variant: TargetPlatformVariant.only(platform));
+      }
+    }
+  }
+
+  // Opening a list on a desktop puts the caret in the add field; a phone
+  // would pop its keyboard, so it stays unfocused there.
+  for (final shopping in [false, true]) {
+    final kind = shopping ? 'shopping-list' : 'list';
+    final text = '---\ntype: $kind\n---\n- [ ] one\n';
+    bool addFocused(WidgetTester tester) => tester
+        .widget<EditableText>(
+          find.descendant(
+            of: find.byKey(const Key('list-add-field')),
+            matching: find.byType(EditableText),
+          ),
+        )
+        .focusNode
+        .hasFocus;
+
+    for (final platform in [TargetPlatform.windows, TargetPlatform.linux]) {
+      testWidgets('a $kind note opens with the add field focused on '
+          '${platform.name}', (tester) async {
+        await tester.pumpWidget(
+          _app(ListNoteView(text: text, shopping: shopping, onChanged: (_) {})),
+        );
+        await tester.pump();
+        expect(addFocused(tester), isTrue);
+      }, variant: TargetPlatformVariant.only(platform));
+    }
+
+    testWidgets('a $kind note does not take the focus on android', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(ListNoteView(text: text, shopping: shopping, onChanged: (_) {})),
+      );
+      await tester.pump();
+      expect(addFocused(tester), isFalse);
+      expect(tester.testTextInput.isVisible, isFalse);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  }
+
+  testWidgets('the opening focus does not take it from a field that has it', (
+    tester,
+  ) async {
+    final other = FocusNode();
+    addTearDown(other.dispose);
+    await tester.pumpWidget(
+      _app(
+        Column(
+          children: [
+            TextField(key: const Key('other'), focusNode: other),
+            Expanded(
+              child: ListNoteView(
+                text: '---\ntype: list\n---\n- [ ] one\n',
+                onChanged: (_) {},
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    other.requestFocus();
+    await tester.pump();
+    await tester.pumpWidget(
+      _app(
+        Column(
+          children: [
+            TextField(key: const Key('other'), focusNode: other),
+            Expanded(
+              child: ListNoteView(
+                key: UniqueKey(),
+                text: '---\ntype: list\n---\n- [ ] one\n',
+                onChanged: (_) {},
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(other.hasFocus, isTrue);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 }

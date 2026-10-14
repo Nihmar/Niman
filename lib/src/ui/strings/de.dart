@@ -202,6 +202,11 @@ final class GermanStrings extends Strings {
   String get updateInstallerFailed =>
       'Das Installationsprogramm ließ sich nicht öffnen';
   @override
+  String get updateInstallPermissionMissing =>
+      'Das Update lässt sich erst installieren, wenn Niman Apps '
+      'installieren darf. Die heruntergeladene Datei bleibt erhalten: '
+      '„Herunterladen“ installiert sie, ohne sie erneut zu laden.';
+  @override
   String get updateReleasePage => 'Release-Seite';
   @override
   String get updateTestingBuild =>

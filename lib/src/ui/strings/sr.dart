@@ -201,6 +201,11 @@ final class SerbianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Инсталатор се није отворио';
   @override
+  String get updateInstallPermissionMissing =>
+      'Ажурирање се не може инсталирати док Niman нема дозволу за '
+      'инсталирање апликација. Преузета датотека је сачувана: '
+      '„Преузми“ је инсталира без поновног преузимања.';
+  @override
   String get updateReleasePage => 'Страница издања';
   @override
   String get updateTestingBuild =>

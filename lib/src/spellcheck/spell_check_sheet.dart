@@ -37,6 +37,7 @@ final class SpellCheckSheet extends StatefulWidget {
     this.docked = false,
     this.reveal,
     this.addWord,
+    this.ignored,
     this.edited,
     super.key,
   });
@@ -46,10 +47,18 @@ final class SpellCheckSheet extends StatefulWidget {
   final bool docked;
 
   /// Selects an issue's word in the note; null leaves the rows unclickable.
-  final void Function(SpellIssue issue)? reveal;
+  /// False when the note no longer holds the word there (#908).
+  final bool Function(SpellIssue issue)? reveal;
 
   /// Adds a word to the library's dictionary; null offers no such action.
   final Future<void> Function(String word)? addWord;
+
+  /// The words Ignore was pressed on (#907), kept by the caller for as long
+  /// as the note is open: the pane is built again with each note it shows,
+  /// and a rescan brings every misspelling back, so what is ignored lives
+  /// outside both. The pane adds to it and filters every pass through it;
+  /// null keeps them for the pane's own life only.
+  final Set<String>? ignored;
 
   /// Tells of an edit to the note, a pause after it: the note is checked
   /// again.
@@ -61,8 +70,10 @@ final class SpellCheckSheet extends StatefulWidget {
   /// Hunspell's suggestions for a word.
   final List<String> Function(String word) suggest;
 
-  /// Replaces `issue`'s word with `replacement` in the editor.
-  final void Function(SpellIssue issue, String replacement) apply;
+  /// Replaces `issue`'s word with `replacement` in the editor. False, with
+  /// the text untouched, when the note no longer holds the word where the
+  /// pass found it (#908): the panel drops the issue and checks again.
+  final bool Function(SpellIssue issue, String replacement) apply;
 
   /// Whether hunspell loaded; false shows the platform note.
   final bool available;
@@ -79,6 +90,14 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
   /// new ones are appended: the list may have been fixed meanwhile, and
   /// a fix never touches a line the pass has yet to reach.
   int _taken = 0;
+
+  /// Whether the list on screen is the last pass's, waiting for the new one
+  /// to have something to replace it with (#907): the list is not emptied
+  /// for a rescan, which flashed on a long note.
+  bool _replacing = false;
+
+  final Set<String> _ownIgnored = <String>{};
+  Set<String> get _ignored => widget.ignored ?? _ownIgnored;
 
   /// Suggestions made so far, by word.
   final Map<String, List<String>> _suggestions = {};
@@ -124,6 +143,12 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
     });
   }
 
+  /// Ignores every issue of [word] until the note is closed.
+  void _ignore(String word) {
+    _ignored.add(word);
+    _drop(word);
+  }
+
   Future<void> _addWord(String word) async {
     await widget.addWord!(word);
     if (mounted) _drop(word);
@@ -133,7 +158,7 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
     _stopScan();
     final scan = widget.start()..addListener(_onScan);
     _scan = scan;
-    _issues = const <SpellIssue>[];
+    _replacing = true;
     _taken = 0;
     unawaited(scan.run());
   }
@@ -152,10 +177,27 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
     final scan = _scan;
     if (!mounted || scan == null) return;
     final found = scan.issues;
-    setState(() {
-      _issues = [..._issues, ...found.skip(_taken)];
-      _taken = found.length;
-    });
+    bool kept(SpellIssue issue) => !_ignored.contains(issue.word);
+    if (_replacing) {
+      // The new pass takes the list's place when it is over, or has found
+      // as many as the list shows: not sooner, or the list would shrink and
+      // grow back as the pass goes.
+      final fresh = [...found.where(kept)];
+      if (!scan.done && fresh.length < _issues.length) {
+        setState(() {});
+        return;
+      }
+      setState(() {
+        _replacing = false;
+        _issues = fresh;
+        _taken = found.length;
+      });
+    } else {
+      setState(() {
+        _issues = [..._issues, ...found.skip(_taken).where(kept)];
+        _taken = found.length;
+      });
+    }
     unawaited(_suggestOnward());
   }
 
@@ -181,8 +223,23 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
     }
   }
 
+  /// The note changed under [issue] since the pass saw it (#908): it is
+  /// dropped, and the note is checked again for where its word is now.
+  void _stale(SpellIssue issue) {
+    setState(() {
+      _issues = [
+        for (final other in _issues)
+          if (!identical(other, issue)) other,
+      ];
+      _startScan();
+    });
+  }
+
   void _replace(SpellIssue issue, String replacement) {
-    widget.apply(issue, replacement);
+    if (!widget.apply(issue, replacement)) {
+      _stale(issue);
+      return;
+    }
     final shift = replacement.length - (issue.end - issue.start);
     setState(() {
       _issues = [
@@ -391,7 +448,7 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
               children: [
                 TextButton(
                   key: Key('spell-ignore-${issue.line}-${issue.start}'),
-                  onPressed: () => _drop(issue.word),
+                  onPressed: () => _ignore(issue.word),
                   child: Text(AppStrings.spellCheckIgnore),
                 ),
                 if (widget.addWord != null)
@@ -406,6 +463,11 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
       ),
     );
     if (reveal == null) return tile;
-    return InkWell(onTap: () => reveal(issue), child: tile);
+    return InkWell(
+      onTap: () {
+        if (!reveal(issue)) _stale(issue);
+      },
+      child: tile,
+    );
   }
 }

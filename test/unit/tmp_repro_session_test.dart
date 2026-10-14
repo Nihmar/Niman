@@ -107,7 +107,7 @@ void main() {
     print('>> content:\n$content');
 
     print('>> ensureFolder');
-    await ops.ensureFolder(target);
+    final _ = await ops.ensureFolder(target);
     print('>> ensureFolder done');
 
     print('>> createNote');

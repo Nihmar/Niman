@@ -203,6 +203,11 @@ final class RomanianStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Programul de instalare nu s-a deschis';
   @override
+  String get updateInstallPermissionMissing =>
+      'Actualizarea nu poate fi instalată până când Niman nu are '
+      'permisiunea de a instala aplicații. Fișierul descărcat este '
+      'păstrat: „Descarcă” îl instalează fără a-l descărca din nou.';
+  @override
   String get updateReleasePage => 'Pagina versiunii';
   @override
   String get updateTestingBuild =>

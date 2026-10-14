@@ -190,6 +190,11 @@ final class HindiStrings extends Strings {
   @override
   String get updateInstallerFailed => 'इंस्टॉलर नहीं खुला';
   @override
+  String get updateInstallPermissionMissing =>
+      'जब तक Niman को ऐप्स इंस्टॉल करने की अनुमति नहीं मिलती, अपडेट '
+      'इंस्टॉल नहीं हो सकता। डाउनलोड की गई फ़ाइल रखी गई है: «डाउनलोड '
+      'करें» उसे दोबारा डाउनलोड किए बिना इंस्टॉल कर देगा।';
+  @override
   String get updateReleasePage => 'रिलीज़ पेज';
   @override
   String get updateTestingBuild =>

@@ -202,6 +202,11 @@ final class PolishStrings extends Strings {
   @override
   String get updateInstallerFailed => 'Nie udało się otworzyć instalatora';
   @override
+  String get updateInstallPermissionMissing =>
+      'Aktualizacji nie można zainstalować, dopóki Niman nie ma '
+      'zezwolenia na instalowanie aplikacji. Pobrany plik został '
+      'zachowany: „Pobierz” zainstaluje go bez ponownego pobierania.';
+  @override
   String get updateReleasePage => 'Strona wydania';
   @override
   String get updateTestingBuild =>

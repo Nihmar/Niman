@@ -182,6 +182,10 @@ final class ChineseStrings extends Strings {
   @override
   String get updateInstallerFailed => '安装程序未能打开';
   @override
+  String get updateInstallPermissionMissing =>
+      '在 Niman 获准安装应用之前，无法安装此更新。已下载'
+      '的文件已保留：点击“下载”即可直接安装，无需重新下载。';
+  @override
   String get updateReleasePage => '发布页面';
   @override
   String get updateTestingBuild => '测试版不会自动更新：请手动安装下一个版本。';

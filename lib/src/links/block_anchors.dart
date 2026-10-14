@@ -12,6 +12,8 @@
 ///   own below it, after a blank line — a part of one is not a target, only
 ///   the whole block (`We do not support links to specific parts of
 ///   quotations, callouts, and tables`);
+/// * an id on a line of its own names the block above it; a second one right
+///   below names nothing — a line that is only an id is not a block;
 /// * an id is made of letters, digits and dashes and is matched literally;
 ///   the first block that carries an id owns it.
 ///
@@ -109,6 +111,11 @@ final class BlockAnchorScanner {
   String _previousRunText = '';
   _Kind _previous = _Kind.text;
 
+  /// Whether the run being read is one line that is an id and nothing else:
+  /// such a line names the block above it, and is not a block another id can
+  /// name (#915).
+  bool _ownIdRun = false;
+
   /// The last prose line read, and the id a line ended with waiting to be
   /// owned: it belongs to the block only when the block ends on that very
   /// line — a block that runs on past its id does not carry one (#844).
@@ -140,6 +147,8 @@ final class BlockAnchorScanner {
       _forgetPreviousRun();
       return;
     }
+    // A second line makes the run a paragraph, not a lone id.
+    if (_runStart >= 0) _ownIdRun = false;
     final kind = _kindOf(text);
     final startsBlock =
         _runStart < 0 ||
@@ -172,6 +181,7 @@ final class BlockAnchorScanner {
       if (_previousRunStart >= 0) {
         _claim(id, _previousRunStart, _previousRunText);
       }
+      _ownIdRun = true;
       return;
     }
     _pendingId = id;
@@ -194,9 +204,17 @@ final class BlockAnchorScanner {
   void _endRun() {
     if (_runStart >= 0) {
       _ownPending();
-      _previousRunStart = _runStart;
-      _previousRunText = _runText;
+      if (_ownIdRun) {
+        // The line was an id naming the block above: a second id below it
+        // names no block of its own — Obsidian puts an id on the block it
+        // follows, and a line of nothing but an id is not one (#915).
+        _forgetPreviousRun();
+      } else {
+        _previousRunStart = _runStart;
+        _previousRunText = _runText;
+      }
     }
+    _ownIdRun = false;
     _runStart = -1;
     _blockStart = -1;
     _previous = _Kind.text;

@@ -100,6 +100,16 @@ void main() {
       expect(_anchors('para\n\n```\ncode\n```\n\n^after\n'), isEmpty);
     });
 
+    test('an own-line id below another own-line id names nothing (#915)', () {
+      expect(_anchors('- item\n\n^a\n\n^b\n'), [('a', 0)]);
+      expect(_anchors('- item\n\n^a\n\n^b\n\n^c\n'), [('a', 0)]);
+      expect(_anchors('^a\n\n^b\n'), isEmpty);
+    });
+
+    test('a block between two own-line ids is named by the second', () {
+      expect(_anchors('> one\n\n^a\n\n> two\n\n^b\n'), [('a', 0), ('b', 4)]);
+    });
+
     test('an id in indented code is not an anchor', () {
       expect(_anchors('    indented ^code\n'), isEmpty);
       expect(_anchors('\tindented ^code\n'), isEmpty);

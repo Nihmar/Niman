@@ -10,6 +10,7 @@ import 'package:niman/src/export/html_spans.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/links/block_anchors.dart' show withoutTrailingBlockId;
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
@@ -78,7 +79,9 @@ final class ExportHooks extends HtmlHooks {
 
   @override
   String? headingId(String text) {
-    return uniqueHeadingId(_ids, headingAnchor(text));
+    // The id of `## Title ^abc` is the one of `Title`, as the outline's
+    // entry for it is: the ` ^id` names the block, not the heading (#912).
+    return uniqueHeadingId(_ids, headingAnchor(withoutTrailingBlockId(text)));
   }
 
   @override
