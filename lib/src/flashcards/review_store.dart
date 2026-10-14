@@ -146,6 +146,14 @@ final class ReviewStore {
   Future<void> resetNote(String path) =>
       _update((entries) => entries.remove(path) != null);
 
+  /// Forgets every card of every deck: **Reset all reviews**. The notes
+  /// are not touched.
+  Future<void> resetAll() => _update((entries) {
+    if (entries.isEmpty) return false;
+    entries.clear();
+    return true;
+  });
+
   /// Drops the cards of the note at [path] whose key is not in [keepKeys]:
   /// the orphans a question changed in Niman leaves behind.
   Future<void> pruneNote(String path, Set<String> keepKeys) =>

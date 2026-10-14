@@ -70,6 +70,8 @@ abstract final class SettingsKeys {
   static const journalTemplate = Key('journal-template-setting');
   static const journalDayStart = Key('journal-day-start-setting');
   static const journalEventTimes = Key('journal-event-times-setting');
+  static const newCardsPerDay = Key('new-cards-per-day-setting');
+  static const resetAllReviews = Key('reset-all-reviews-setting');
   static const navigationScope = Key('navigation-scope-setting');
   static const navigationStart = Key('navigation-start-setting');
 

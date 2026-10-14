@@ -27,6 +27,7 @@ import 'package:niman/src/ui/settings_transcription.dart';
 import 'package:niman/src/ui/settings_trash_history.dart';
 import 'package:niman/src/ui/settings_updates.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/study/settings_study.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/sync/sync_settings_screen.dart';
 import 'package:path/path.dart' as p;
@@ -59,6 +60,9 @@ enum SettingsAreaId {
 
   /// The journal (#7).
   journal,
+
+  /// Study: the flashcards' daily new cards and their reviews (#533).
+  study,
 
   /// The bar's and the rail's order and destinations (#536).
   navigation,
@@ -301,6 +305,15 @@ List<SettingsArea> settingsAreas({
         controller: controller,
         highlight: highlight,
       ),
+    ),
+    SettingsArea(
+      id: SettingsAreaId.study,
+      group: SettingsGroup.library,
+      rowKey: const Key('settings-area-study'),
+      icon: () => Icons.style_outlined,
+      title: AppStrings.tabStudy,
+      build: (highlight) =>
+          SettingsStudyScreen(controller: controller, highlight: highlight),
     ),
     SettingsArea(
       id: SettingsAreaId.trashHistory,

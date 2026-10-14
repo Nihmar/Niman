@@ -13,7 +13,7 @@ library.
 Settings is split into areas, grouped by what they change: **App**
 (appearance, themes, editor, keyboard shortcuts, commands, text
 recognition, updates, diagnostics),
-the open **Library** (folders, journal, navigation, trash and history, sync,
+the open **Library** (folders, journal, study, navigation, trash and history, sync,
 transcription, reminders), and **Maintenance** (re-index, rebuild the index, switch or
 close the library; in the settings window only the first two, since the
 rail's library window switches and closes).
@@ -106,7 +106,7 @@ sync) in `.niman/settings.json`.
 | `weekStart` | `system` | The day every calendar starts the week on (**Settings → Appearance → First day of the week**): `system` — the system's region's first day, not the app language's (on Linux `LC_ALL`, `LC_TIME`, `LANG`; on Windows the region settings' first day) — or `monday`, `saturday`, `sunday`, the same on every device of the library |
 | `newItemLocation` | `openNoteFolder` | Where new notes and folders go (**Settings → Editor → New notes and folders go to**): `libraryRoot`, or `openNoteFolder` — the folder of the note open at the time, the library root while none is open. One rule for a new note, a new folder, new slides, a voice note, the quick note's *create*, a note from a template, the note a dead link creates and a shared text file imported as a note; the tree's *Create … here*, a link that names a path, the journal's folder, list notes (`listNoteFolder`) and web captures (`captureFolder`) do not ask it (see [organization](organization.md#where-new-notes-and-folders-go)). It replaced `missingNoteLocation` (`currentFolder` reads as `openNoteFolder`), which is read when `newItemLocation` is absent and no longer written |
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
-| `newCardsPerDay` | 20 | New flashcards each deck shows per day (0 = none, up to 1000, clamped) |
+| `newCardsPerDay` | 20 | New flashcards each deck shows per day (**Settings → Study → New cards per day**; 0 = none, up to 1000, clamped). **Reset all reviews** there makes every card of every deck new again; no note changes |
 | `tidyOnClose` | true | Tidy the Markdown of a note closed after an edit (**Settings → Editor → Tidy the Markdown on close**); notes over 4 MB are left as they are, and a `type: audio` note's clip document is never tidied |
 | `cascadeChecklist` | true | Ticking a checklist item ticks the tasks nested under it (**Settings → Editor → Tick nested checkboxes**); clearing a parent leaves its children as they are |
 | `linkPreview` | true | Whether hovering a link previews the note it points at (**Settings → Editor → Preview links**): a card at the pointer in the read view, with Ctrl (⌘) held in the editor, and a sheet from a long press on a touch screen (see [links](links.md#preview-a-link)) |

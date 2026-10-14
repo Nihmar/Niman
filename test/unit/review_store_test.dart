@@ -161,6 +161,14 @@ void main() {
     await store.resetNote('a.md');
   });
 
+  test('resetAll forgets every card of every note', () async {
+    await store.write('a.md', 'one', state());
+    await store.write('b.md', 'one', state());
+    await store.resetAll();
+    expect(await store.readAll(), isEmpty);
+    await store.resetAll();
+  });
+
   group('pruneNote', () {
     test('keeps the keys given and drops the others', () async {
       await store.write('a.md', 'one', state());
