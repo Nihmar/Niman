@@ -54,6 +54,7 @@ final class MarkdownLink extends ParsedLink {
     required this.href,
     this.embed = false,
     this.angled = false,
+    this.title,
   });
 
   /// The link text between `[` and `]` (trimmed), the alt text for an image.
@@ -70,6 +71,11 @@ final class MarkdownLink extends ParsedLink {
   /// Whether the href was written between angle brackets, `(<a b.md>)`:
   /// [href] is without them, and a rewrite puts them back.
   final bool angled;
+
+  /// The title written after the destination, delimiters included
+  /// (`"Title"`, `'Title'` or `(Title)`), or null when there is none. It is
+  /// not part of [href]; a rewrite writes it back as it was.
+  final String? title;
 }
 
 /// The inside of `[[…]]`, parsed into target / fragment / alias.
@@ -203,13 +209,14 @@ MarkdownLink _parseMarkdown(String src, int start, int end, int absStart) {
   // closes the href.
   final close = src.indexOf(']', start);
   final text = close == -1 ? '' : src.substring(start + 1, close).trim();
-  final (href, angled) = _destination(src.substring(close + 2, end - 1));
+  final (href, angled, title) = _destination(src.substring(close + 2, end - 1));
   return MarkdownLink(
     start: absStart,
     end: absStart + (end - start),
     text: text,
     href: href,
     angled: angled,
+    title: title,
   );
 }
 
@@ -218,7 +225,7 @@ MarkdownLink _parseImage(String src, int start, int end, int absStart) {
   // first `]` closes the alt text, and the last `)` closes the href.
   final close = src.indexOf(']', start);
   final text = close == -1 ? '' : src.substring(start + 2, close).trim();
-  final (href, angled) = _destination(src.substring(close + 2, end - 1));
+  final (href, angled, title) = _destination(src.substring(close + 2, end - 1));
   return MarkdownLink(
     start: absStart,
     end: absStart + (end - start),
@@ -226,17 +233,50 @@ MarkdownLink _parseImage(String src, int start, int end, int absStart) {
     href: href,
     embed: true,
     angled: angled,
+    title: title,
   );
 }
 
-/// A link's destination as written between its parentheses, without the
-/// angle brackets CommonMark allows around it: `<a b.md>` is `a b.md`.
-(String, bool) _destination(String written) {
+/// What sits between a link's parentheses, split as CommonMark splits it:
+/// the destination, whether it was written between angle brackets, and the
+/// title after it, if any.
+///
+/// The destination is without the angle brackets (`<a b.md>` is `a b.md`),
+/// which allow spaces. A title is `"…"`, `'…'` or `(…)`, kept with its
+/// delimiters. What follows a destination and is no title leaves the whole
+/// text as the destination, as it was always read.
+(String, bool, String?) _destination(String written) {
   final trimmed = written.trim();
-  if (trimmed.length >= 2 && trimmed.startsWith('<') && trimmed.endsWith('>')) {
-    return (trimmed.substring(1, trimmed.length - 1), true);
+  if (trimmed.startsWith('<')) {
+    final close = trimmed.indexOf('>');
+    if (close > 0) {
+      final title = _titleOf(trimmed.substring(close + 1));
+      if (title != null || close == trimmed.length - 1) {
+        return (trimmed.substring(1, close), true, title);
+      }
+    }
+    return (trimmed, false, null);
   }
-  return (trimmed, false);
+  final space = trimmed.indexOf(RegExp(r'\s'));
+  if (space > 0) {
+    final title = _titleOf(trimmed.substring(space));
+    if (title != null) return (trimmed.substring(0, space), false, title);
+  }
+  return (trimmed, false, null);
+}
+
+/// [rest], the text after a destination, as a link title — `"…"`, `'…'` or
+/// `(…)` — or null when it is none (or empty).
+String? _titleOf(String rest) {
+  final title = rest.trim();
+  if (title.length < 2) return null;
+  final close = switch (title[0]) {
+    '"' => '"',
+    "'" => "'",
+    '(' => ')',
+    _ => null,
+  };
+  return close != null && title.endsWith(close) ? title : null;
 }
 
 /// Parses the inside of `[[…]]` (without the brackets).

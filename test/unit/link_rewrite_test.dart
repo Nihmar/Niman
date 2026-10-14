@@ -210,6 +210,34 @@ void main() {
     );
   });
 
+  test('a Markdown link with a title follows its note and keeps the title '
+      '(#917)', () {
+    final moves = LinkMoves({'docs/a.md': 'docs/b.md'});
+    for (final title in ['"A title"', "'A title'", '(A title)']) {
+      final out = rewriteMovedLinks(
+        '[x](docs/a.md $title) and ![p](docs/a.md $title) and '
+        '[y](<docs/a.md> $title)',
+        from: 'n.md',
+        moves: moves,
+      );
+      expect(
+        out,
+        '[x](docs/b.md $title) and ![p](docs/b.md $title) and '
+        '[y](<docs/b.md> $title)',
+        reason: title,
+      );
+    }
+  });
+
+  test('a titled link and an untitled one move together (#917)', () {
+    final out = rewriteMovedLinks(
+      '[x](docs/a.md "Title") [y](docs/a.md)',
+      from: 'n.md',
+      moves: LinkMoves({'docs/a.md': 'docs/b.md'}),
+    );
+    expect(out, '[x](docs/b.md "Title") [y](docs/b.md)');
+  });
+
   test('an embed that did not move is left exactly as written', () {
     const source = '![[Elsewhere/pic.png]] and ![alt](Elsewhere/pic.png)';
     final out = rewriteMovedLinks(

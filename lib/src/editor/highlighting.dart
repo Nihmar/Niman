@@ -985,8 +985,14 @@ bool _isFenceCloseInfo(String text, int fenceChar, int fenceLen) {
 }
 
 final class _InlineScanner {
-  static final RegExp _image = RegExp(r'!\[[^\]\n]*\]\([^()\n]*\)');
-  static final RegExp _link = RegExp(r'\[[^\[\]\n]*\]\([^()\n]*\)');
+  // A destination holds no parentheses; a title after it may be one in
+  // parentheses, `[x](a.md (Title))`.
+  static final RegExp _image = RegExp(
+    r'!\[[^\]\n]*\]\([^()\n]*(?:[ \t]\([^()\n]*\))?\)',
+  );
+  static final RegExp _link = RegExp(
+    r'\[[^\[\]\n]*\]\([^()\n]*(?:[ \t]\([^()\n]*\))?\)',
+  );
   static final RegExp _wiki = RegExp(r'\[\[[^\[\]\n]*\]\]');
   static final RegExp _boldStar = RegExp(r'\*\*[^*\n]+\*\*');
   static final RegExp _boldUnder = RegExp('__(?:[^_]|_(?:[^_]))+__');

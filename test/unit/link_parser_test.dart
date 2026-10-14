@@ -271,6 +271,26 @@ void main() {
       expect(link.href, 'href');
     });
 
+    test('a title is not part of the href, whatever its quoting (#917)', () {
+      for (final title in ['"A title"', "'A title'", '(A title)']) {
+        final link = _mdLink('[x](docs/a.md $title)');
+        expect(link.href, 'docs/a.md', reason: title);
+        expect(link.title, title, reason: title);
+        expect(link.angled, isFalse);
+      }
+      final angled = _mdLink('[x](<docs/a b.md> "T")');
+      expect(angled.href, 'docs/a b.md');
+      expect(angled.angled, isTrue);
+      expect(angled.title, '"T"');
+      expect(_mdLink('[x](a.md)').title, isNull);
+    });
+
+    test('an image keeps its title apart from its href (#917)', () {
+      final image = parseLinks('![p](pic.png "T")', includeEmbeds: true).single;
+      expect((image as MarkdownLink).href, 'pic.png');
+      expect(image.title, '"T"');
+    });
+
     test('a bare [text] without parentheses is not a link', () {
       expect(parseLinks('[text]'), isEmpty);
     });
