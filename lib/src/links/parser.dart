@@ -120,6 +120,10 @@ final class WikiRef {
   /// as a table cell needs it; a rewrite writes it back that way.
   final bool escapedPipe;
 
+  /// The words an embed (`![[target|alias]]`) shows when it cannot draw its
+  /// file: the alias, else the target.
+  String get embedLabel => alias ?? target;
+
   /// The heading path as its levels, outermost first: `A#B` is `[A, B]`.
   /// Empty for a ref with no heading.
   List<String> get headingPath => headingPathOf(heading);
@@ -316,6 +320,18 @@ WikiRef parseWikiRef(String inner) {
     alias: aliasText == null || aliasText.isEmpty ? null : aliasText,
     escapedPipe: pipe != -1 && _isEscapedPipe(s, pipe),
   );
+}
+
+/// Where the alias of the wikilink whose inside is [inner] starts, as an
+/// offset into [inner] (untrimmed): just past the first `|` — and so past
+/// the `\` before it, which belongs to the separator — or null when there is
+/// no alias, or an empty one. The same first `|` [parseWikiRef] splits at;
+/// callers that map the alias onto source text ask this rather than looking
+/// for a `|` themselves.
+int? wikiAliasOffset(String inner) {
+  final pipe = inner.indexOf('|');
+  if (pipe < 0 || inner.substring(pipe + 1).trim().isEmpty) return null;
+  return pipe + 1;
 }
 
 /// Whether the `|` of [s] at [pipe] is written `\|`.

@@ -284,10 +284,9 @@ final class InlineSpans {
   /// The alias is what the reader asked to see, and it is what stands in
   /// when a binary or a missing target has to stand in for itself.
   InlineSpan _embed(String inner) {
-    final pipe = inner.indexOf('|');
-    final target = pipe >= 0 ? inner.substring(0, pipe) : inner;
-    final alias = pipe >= 0 ? inner.substring(pipe + 1).trim() : '';
-    final display = alias.isEmpty ? target : alias;
+    final ref = parseWikiRef(inner);
+    final target = ref.target;
+    final display = ref.embedLabel;
     final decoded = taps.embedImages?[target];
     if (decoded != null) {
       return WidgetSpan(

@@ -137,6 +137,26 @@ void main() {
     );
   });
 
+  testWidgets('an escaped pipe in an embed is the separator, in a table or '
+      'out of it (#932)', (tester) async {
+    for (final data in [
+      '| a |\n| - |\n| ![[img.png\\|200]] |\n',
+      'before ![[img.png\\|200]] after\n',
+    ]) {
+      final asked = <String>[];
+      await pump(
+        tester,
+        data,
+        resolve: (target) async {
+          asked.add(target);
+          return png.path;
+        },
+      );
+      expect(asked, ['img.png'], reason: data);
+      expect(find.byType(Image), findsOneWidget, reason: data);
+    }
+  });
+
   testWidgets('a plain wikilink beside an embed stays a wikilink', (
     tester,
   ) async {

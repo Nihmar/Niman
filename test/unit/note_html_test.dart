@@ -98,6 +98,24 @@ void main() {
     expect(html, contains('src="data:image/png;base64,BBB"'));
   });
 
+  test('an embed sized with an escaped pipe is found by its file (#932)', () {
+    final images = {'photo.png': 'data:image/png;base64,AAA'};
+    final cell = body(
+      '| a |\n| - |\n| ![[photo.png\\|200]] |\n',
+      images: images,
+    );
+    final text = body('see ![[photo.png\\|200]]\n', images: images);
+    for (final html in [cell, text]) {
+      expect(
+        html,
+        contains('<img class="embed" src="data:image/png;base64,AAA"'),
+      );
+      expect(html, contains('alt="200"'));
+    }
+    final gone = body('| a |\n| - |\n| ![[gone.png\\|200]] |\n');
+    expect(gone, contains('<span class="embed">![[200]]</span>'));
+  });
+
   test("a task's box shows its state and cannot be ticked", () {
     final html = body('- [x] done\n- [ ] open\n');
     expect(html, contains('<input type="checkbox" checked="" disabled="" />'));

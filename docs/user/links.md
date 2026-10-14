@@ -9,7 +9,9 @@ Forms (target, heading, alias combine freely):
 - `[[note#heading]]` — jumps to the heading
 - `[[note#heading|alias]]`
 - `[[note\|alias]]` — the same inside a table cell, where a bare `|` would
-  split the cell; renaming the note keeps the `\|`
+  split the cell; renaming the note keeps the `\|`. An embed reads it the
+  same way, so `![[photo.png\|200]]` in a table cell is the file
+  `photo.png` — in the read view, the live view, a completion and an export
 - `[[note#heading#subheading]]` — a subheading, by its path
   (see *Heading links* below)
 - `[[note#^id]]` — jumps to a block (see *Block links* below)
