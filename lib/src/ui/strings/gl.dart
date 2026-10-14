@@ -1982,6 +1982,8 @@ final class GalicianStrings extends Strings {
   @override
   String get movedToTrash => 'Movida ao paperilleiro';
   @override
+  String treeMarkedCount(int count) => 'Seleccionados: $count';
+  @override
   String get deletedMessage => 'Borrado';
   @override
   String deleteForeverConfirm(String name) => '$name borraráse permanentemente';

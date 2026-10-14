@@ -1981,6 +1981,8 @@ final class RomanianStrings extends Strings {
   @override
   String get movedToTrash => 'Mutat în coș';
   @override
+  String treeMarkedCount(int count) => 'Selectate: $count';
+  @override
   String get deletedMessage => 'Șters';
   @override
   String deleteForeverConfirm(String name) => '$name se șterge permanent';

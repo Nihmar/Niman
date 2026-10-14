@@ -359,7 +359,7 @@ final class ShellRowActions {
                     onPressed: () async {
                       await guard(() async {
                         for (final restore in [sel, ...taken]) {
-                          final name = await _justDeleted(ops, restore);
+                          final name = await justDeleted(ops, restore);
                           if (name == null) continue;
                           await ops.restoreTrash(name);
                           onDeleted(restore);
@@ -418,7 +418,7 @@ final class ShellRowActions {
   ///
   /// Deleting twice in a row stacks two entries for the same original
   /// path, so the newest deletion wins.
-  Future<String?> _justDeleted(NoteOperations ops, String sel) async {
+  Future<String?> justDeleted(NoteOperations ops, String sel) async {
     final matches = [
       for (final item in await ops.trashItems())
         if (item.originalPath == sel) item,

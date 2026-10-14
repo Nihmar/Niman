@@ -1984,6 +1984,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get movedToTrash => 'Преместено во корпа';
   @override
+  String treeMarkedCount(int count) => 'Избрани: $count';
+  @override
   String get deletedMessage => 'Избришано';
   @override
   String deleteForeverConfirm(String name) => '$name ќе биде трајно избришано';

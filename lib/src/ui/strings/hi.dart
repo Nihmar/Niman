@@ -1939,6 +1939,8 @@ final class HindiStrings extends Strings {
   @override
   String get movedToTrash => 'ट्रैश में गया';
   @override
+  String treeMarkedCount(int count) => 'चयनित: $count';
+  @override
   String get deletedMessage => 'हटाया गया';
   @override
   String deleteForeverConfirm(String name) =>

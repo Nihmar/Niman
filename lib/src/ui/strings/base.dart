@@ -1043,6 +1043,7 @@ abstract base class Strings {
   String get annotationOpenNote;
   String get annotationFailed;
   String get movedToTrash;
+  String treeMarkedCount(int count);
   String get deletedMessage;
   String deleteForeverConfirm(String name);
 

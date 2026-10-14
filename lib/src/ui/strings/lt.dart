@@ -1969,6 +1969,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get movedToTrash => 'Perkelta į šiukšlinę';
   @override
+  String treeMarkedCount(int count) => 'Pažymėta: $count';
+  @override
   String get deletedMessage => 'Ištrintas';
   @override
   String deleteForeverConfirm(String name) =>

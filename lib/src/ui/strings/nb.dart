@@ -1956,6 +1956,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get movedToTrash => 'Flyttet til papirkorg';
   @override
+  String treeMarkedCount(int count) => 'Valgt: $count';
+  @override
   String get deletedMessage => 'Slettet';
   @override
   String deleteForeverConfirm(String name) => '$name slettes permanent';

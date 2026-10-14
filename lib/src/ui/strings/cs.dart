@@ -1959,6 +1959,8 @@ final class CzechStrings extends Strings {
   @override
   String get movedToTrash => 'Přesunuto do koše';
   @override
+  String treeMarkedCount(int count) => 'Vybráno: $count';
+  @override
   String get deletedMessage => 'Smazáno';
   @override
   String deleteForeverConfirm(String name) => '$name se trvale smaže';

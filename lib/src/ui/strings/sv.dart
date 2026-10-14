@@ -1975,6 +1975,8 @@ final class SwedishStrings extends Strings {
   @override
   String get movedToTrash => 'Flyttad till papperskorgen';
   @override
+  String treeMarkedCount(int count) => 'Markerade: $count';
+  @override
   String get deletedMessage => 'Togs bort';
   @override
   String deleteForeverConfirm(String name) => '$name tas bort permanent';

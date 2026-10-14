@@ -1964,6 +1964,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get movedToTrash => 'Preneseno v koš';
   @override
+  String treeMarkedCount(int count) => 'Izbrano: $count';
+  @override
   String get deletedMessage => 'Izbrisano';
   @override
   String deleteForeverConfirm(String name) => '$name se trajno izbriše';

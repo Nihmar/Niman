@@ -1846,6 +1846,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get movedToTrash => 'ごみ箱に移動しました';
   @override
+  String treeMarkedCount(int count) => '選択中: $count';
+  @override
   String get deletedMessage => '削除しました';
   @override
   String deleteForeverConfirm(String name) => '$name を完全に削除します';

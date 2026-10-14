@@ -1973,6 +1973,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get movedToTrash => 'Перамешчана ў кошык';
   @override
+  String treeMarkedCount(int count) => 'Выбрана: $count';
+  @override
   String get deletedMessage => 'Выдалена';
   @override
   String deleteForeverConfirm(String name) => '$name будзе канчаткова выдалена';

@@ -81,6 +81,10 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.closeTab ||
   AppCommand.nextTab ||
   AppCommand.previousTab => const {CommandNeed.wideWindow},
+  AppCommand.revealInTree => const {
+    CommandNeed.openNote,
+    CommandNeed.wideWindow,
+  },
   AppCommand.splitRight ||
   AppCommand.splitDown => const {CommandNeed.wideWindow, CommandNeed.notInZen},
   AppCommand.toggleDock => const {CommandNeed.dockRoom, CommandNeed.notInZen},

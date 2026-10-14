@@ -1981,6 +1981,8 @@ final class FinnishStrings extends Strings {
   @override
   String get movedToTrash => 'Siirretty koriin';
   @override
+  String treeMarkedCount(int count) => 'Valittu: $count';
+  @override
   String get deletedMessage => 'Poistettu';
   @override
   String deleteForeverConfirm(String name) => '$name poistetaan pysyvästi';

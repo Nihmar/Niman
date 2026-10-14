@@ -1953,6 +1953,8 @@ final class TurkishStrings extends Strings {
   @override
   String get movedToTrash => 'Çöp kutusuna taşındı';
   @override
+  String treeMarkedCount(int count) => 'Seçili: $count';
+  @override
   String get deletedMessage => 'Silindi';
   @override
   String deleteForeverConfirm(String name) => '$name kalıcı olarak silinecek';

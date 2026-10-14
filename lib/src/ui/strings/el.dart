@@ -2030,6 +2030,8 @@ final class GreekStrings extends Strings {
   @override
   String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';
   @override
+  String treeMarkedCount(int count) => 'Επιλεγμένα: $count';
+  @override
   String get deletedMessage => 'Διαγράφηκε';
   @override
   String deleteForeverConfirm(String name) => 'Το $name θα διαγραφεί μόνιμα';

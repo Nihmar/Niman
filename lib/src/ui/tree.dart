@@ -90,6 +90,9 @@ final class NoteTree extends StatefulWidget {
     this.onSecondaryTapDown,
     this.onOpenInNewTab,
     this.onBackgroundSecondaryTapUp,
+    this.onMarkedMenu,
+    this.onDeleteMarked,
+    this.focusNode,
     this.onMove,
     this.sort = TreeSort.nameAsc,
     this.ocrQueue,
@@ -162,6 +165,19 @@ final class NoteTree extends StatefulWidget {
   /// goes to the one detector that won, the row when it was on one.
   final void Function(TapUpDetails details)? onBackgroundSecondaryTapUp;
 
+  /// The menu of several rows marked together (#712): a right click on one
+  /// of them, with their paths and where it was clicked. Null leaves the
+  /// tree to one row at a time — `Shift`+click and the marking keys do
+  /// nothing.
+  final void Function(List<String> paths, Rect anchor)? onMarkedMenu;
+
+  /// Deletes the rows marked together, on `Delete` (#712).
+  final ValueChanged<List<String>>? onDeleteMarked;
+
+  /// The keyboard's focus, when the shell asks for it (`Ctrl+Shift+E`,
+  /// #712); null keeps one of the tree's own.
+  final FocusNode? focusNode;
+
   @override
   State<NoteTree> createState() => _NoteTreeState();
 }
@@ -206,7 +222,18 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// The keyboard's own focus (#727): the pane takes it when a row is
   /// clicked, and the arrows walk the rows while it holds it.
-  final FocusNode _focus = FocusNode(debugLabel: 'note-tree');
+  late final FocusNode _focus =
+      widget.focusNode ?? FocusNode(debugLabel: 'note-tree');
+
+  /// The rows marked together (#712), by path: `Shift`+click, `Shift`+the
+  /// arrows and `Space` mark, a plain click or `Esc` lets go. The tree's
+  /// own rows only, not the pinned block's copies.
+  final Set<String> _marked = {};
+
+  /// What has been typed to jump to a row by its name, and when the last
+  /// letter came: a pause starts a new name (#712).
+  String _typed = '';
+  DateTime _typedAt = DateTime(0);
 
   /// The row the keyboard's cursor is on, by path, and whether that is the
   /// pinned block's copy of the note. Held by path rather than by place:
@@ -383,6 +410,10 @@ final class _NoteTreeState extends State<NoteTree> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
+    if (_walkLength > 0) {
+      final marking = _markKey(event);
+      if (marking != null) return marking;
+    }
     // A modified key belongs to the app's accelerators (#23): Alt+Left and
     // Alt+Right walk the notes' history, Ctrl+Shift+PageUp/Down the
     // journal — the walk claims the plain key or none.
@@ -472,6 +503,126 @@ final class _NoteTreeState extends State<NoteTree> {
     return KeyEventResult.ignored;
   }
 
+  /// The keys of several rows and of a name (#712): `Shift`+`↑`/`↓` marks
+  /// on, `Space` marks or unmarks the cursor's row, `Esc` lets the marks
+  /// go, `Delete` deletes the marked rows, `Ctrl`+`Enter` opens the note
+  /// in a new tab, and letters jump to the next row whose name starts with
+  /// them. Null for a key that is not one of these.
+  KeyEventResult? _markKey(KeyEvent event) {
+    final keys = HardwareKeyboard.instance;
+    final key = event.logicalKey;
+    final at = _cursorAt();
+    final row = _walkRow(at);
+    final ctrl = keys.isControlPressed || keys.isMetaPressed;
+    final marks = widget.onMarkedMenu != null;
+    if (ctrl &&
+        !keys.isShiftPressed &&
+        (key == LogicalKeyboardKey.enter ||
+            key == LogicalKeyboardKey.numpadEnter)) {
+      if (row.note.isDir) return KeyEventResult.ignored;
+      widget.onOpenInNewTab?.call(row.note);
+      return KeyEventResult.handled;
+    }
+    if (ctrl || keys.isAltPressed) return null;
+    if (marks &&
+        keys.isShiftPressed &&
+        (key == LogicalKeyboardKey.arrowUp ||
+            key == LogicalKeyboardKey.arrowDown)) {
+      final to = (at + (key == LogicalKeyboardKey.arrowUp ? -1 : 1)).clamp(
+        0,
+        _walkLength - 1,
+      );
+      _markRange(at, to);
+      return _move(to);
+    }
+    if (keys.isShiftPressed) return null;
+    if (marks && key == LogicalKeyboardKey.space && !row.pinned) {
+      setState(() {
+        if (!_marked.remove(row.path)) _marked.add(row.path);
+      });
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.escape && _marked.isNotEmpty) {
+      setState(_marked.clear);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.delete && _marked.length > 1) {
+      final delete = widget.onDeleteMarked;
+      if (delete == null) return KeyEventResult.ignored;
+      delete(_marked.toList());
+      setState(_marked.clear);
+      return KeyEventResult.handled;
+    }
+    final typed = event.character;
+    if (typed != null &&
+        typed.length == 1 &&
+        typed.trim().isNotEmpty &&
+        typed.codeUnitAt(0) >= 0x20 &&
+        typed.codeUnitAt(0) != 0x7f) {
+      return _typeAhead(typed, at);
+    }
+    return null;
+  }
+
+  /// Jumps to the next row, from the cursor's, whose name starts with what
+  /// has been typed: a second letter within a second narrows the name, the
+  /// same letter again moves to the next row that starts with it, and a
+  /// letter that narrows it to nothing starts a name of its own.
+  KeyEventResult _typeAhead(String letter, int at) {
+    final now = DateTime.now();
+    final fresh = now.difference(_typedAt) > const Duration(seconds: 1);
+    _typedAt = now;
+    final repeat = !fresh && _typed == letter;
+    if (!fresh && !repeat && _jumpTo('$_typed$letter', at, from: 0)) {
+      _typed += letter;
+      return KeyEventResult.handled;
+    }
+    _typed = letter;
+    // A letter on its own looks past the cursor's row.
+    _jumpTo(letter, at, from: 1);
+    return KeyEventResult.handled;
+  }
+
+  /// Moves to the first row from [at] + [from] on, wrapping, whose name
+  /// starts with [name]; false when none does.
+  bool _jumpTo(String name, int at, {required int from}) {
+    final wanted = name.toLowerCase();
+    final length = _walkLength;
+    for (var step = from; step < length + from; step++) {
+      final index = (at + step) % length;
+      if (_walkRow(index).note.name.toLowerCase().startsWith(wanted)) {
+        _move(index);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Marks every tree row from [from] to [to] in the walk, and [from]'s
+  /// own when nothing was marked yet.
+  void _markRange(int from, int to) {
+    final lo = math.min(from, to);
+    final hi = math.max(from, to);
+    setState(() {
+      for (var i = lo; i <= hi; i++) {
+        final row = _walkRow(i);
+        if (!row.pinned) _marked.add(row.path);
+      }
+    });
+  }
+
+  /// A right click on [note]: on one of several marked rows, their menu;
+  /// on any other row, its own, the marks let go.
+  void _secondaryTap(Note note, TapDownDetails details) {
+    final marked = widget.onMarkedMenu;
+    if (marked != null && _marked.length > 1 && _marked.contains(note.path)) {
+      marked(_marked.toList(), menuAnchorAt(details.globalPosition));
+      return;
+    }
+    if (_marked.isNotEmpty) setState(_marked.clear);
+    widget.onSecondaryTapDown?.call(note, details);
+  }
+
   /// Puts the cursor on the row at [index], clamped to the rows there are,
   /// and brings it into view.
   KeyEventResult _move(int index) {
@@ -491,7 +642,27 @@ final class _NoteTreeState extends State<NoteTree> {
   /// (#727) — taking the keys here would leave the note unable to be typed
   /// into.
   void _rowActivated(Note note, _WalkRow? row) {
+    // `Shift`+click marks the rows from the cursor's to this one (#712),
+    // and opens nothing.
+    if (widget.onMarkedMenu != null &&
+        HardwareKeyboard.instance.isShiftPressed &&
+        row != null &&
+        !row.pinned &&
+        _walkLength > 0) {
+      final rows = _current!.tree;
+      final to = rows.indexWhere((r) => r.note.path == note.path);
+      if (to >= 0) {
+        _markRange(_cursorAt(), _pinnedWalked + to);
+        setState(() {
+          _cursorPath = note.path;
+          _cursorPinned = false;
+        });
+        _focus.requestFocus();
+        return;
+      }
+    }
     setState(() {
+      _marked.clear();
       _cursorPath = row?.path ?? note.path;
       _cursorPinned = row?.pinned ?? false;
       _keyboardFocus = false;
@@ -541,7 +712,7 @@ final class _NoteTreeState extends State<NoteTree> {
   @override
   void dispose() {
     _focus.removeListener(_onFocusChanged);
-    _focus.dispose();
+    if (widget.focusNode == null) _focus.dispose();
     _scroll.dispose();
     const AppLogger(name: 'tree.ui').debug('dispose');
     super.dispose();
@@ -727,12 +898,16 @@ final class _NoteTreeState extends State<NoteTree> {
                   sidecar: row.sidecar,
                   ocrQueue: widget.ocrQueue,
                   isExpanded: widget.expanded.contains(row.note.path),
-                  selected: row.note.path == widget.selectedPath,
+                  selected:
+                      row.note.path == widget.selectedPath ||
+                      _marked.contains(row.note.path),
                   focused: _isCursor(walked),
                   onSelect: (note) => _rowActivated(note, walked),
                   onToggle: (path) => _rowToggled(path, pinned: false),
                   onLongPress: widget.onLongPress,
-                  onSecondaryTapDown: widget.onSecondaryTapDown,
+                  onSecondaryTapDown: widget.onSecondaryTapDown == null
+                      ? null
+                      : _secondaryTap,
                   onMiddleClick: widget.onOpenInNewTab,
                   onMove: widget.onMove,
                   renaming: widget.renaming?.path == row.note.path

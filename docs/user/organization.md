@@ -230,6 +230,21 @@ keys a note would need — on a desktop, where the keyboard is always there
 to the app's own shortcuts — `Alt`+`←`/`→` walk the notes' history and
 `Ctrl`+`Shift`+`PgUp`/`PgDn` the journal — so the walk never shadows one.
 
+On a desktop the tree also takes (#712): `Ctrl`+`Enter` opens the note
+under the cursor in a new tab, and typing a name jumps to the next row that
+starts with it. **Several rows at once:** `Shift`+click marks the rows from
+the cursor's to the one clicked, `Shift`+`↑`/`↓` marks on from the
+keyboard, `Space` marks or unmarks the cursor's row, and `Esc` or a plain
+click lets them go. A right click on a marked row opens their menu —
+*Selected: N*, **Move…** into one folder, **Delete** — and `Delete` deletes
+them all; into the trash, one **Undo** brings them all back. (A file's own
+notes stay where they are in that case: the question about them is asked
+for one file at a time.) **Reveal in tree**, in the palette and the View
+menu, shows the note on screen as the tree's row and gives the tree the
+keyboard; it has no key by default — `Ctrl`+`Shift`+`E` is the editor's
+inline code — and Settings → Keyboard shortcuts can give it one.
+`Ctrl`+click keeps opening a note in a new tab.
+
 ### The grid
 
 The Files pane has a second shape: a **grid** of one folder's children,

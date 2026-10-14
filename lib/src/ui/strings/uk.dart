@@ -1976,6 +1976,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get movedToTrash => 'Переміщено в кошик';
   @override
+  String treeMarkedCount(int count) => 'Вибрано: $count';
+  @override
   String get deletedMessage => 'Видалено';
   @override
   String deleteForeverConfirm(String name) => '$name буде остаточно видалено';

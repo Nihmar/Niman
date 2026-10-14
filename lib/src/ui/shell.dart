@@ -123,6 +123,7 @@ import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_inbound.dart';
 import 'package:niman/src/ui/shell_journal_ui.dart';
 import 'package:niman/src/ui/shell_layout.dart';
+import 'package:niman/src/ui/shell_marked_actions.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_io.dart';
@@ -984,6 +985,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// What a tree row's menu choice does: rename, move, delete, pin, open
   /// outside the app (issue #100 moved them into [ShellRowActions]).
+  /// What several marked tree rows do together (#712).
+  late final ShellMarkedActions _markedActions = ShellMarkedActions(
+    _rowActions,
+  );
+
   late final ShellRowActions _rowActions = ShellRowActions(
     renameInPlace: _startRenameInPlace,
     // Under "ask", the question is the shell's to put (#848).
@@ -2149,6 +2155,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _markOpenNote(null, null);
     _searchRequests.dispose();
     _searchCommands.dispose();
+    _treeFocus.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
@@ -3772,6 +3779,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.searchNextHit: () => _stepSearchHits(1),
       AppCommand.searchPreviousHit: () => _stepSearchHits(-1),
       AppCommand.focusSearch: _focusSearchField,
+      AppCommand.revealInTree: _revealActiveInTree,
       AppCommand.renameNote: () =>
           unawaited(_rowActions.rename(context, _selected ?? note)),
       AppCommand.moveNote: () => unawaited(_rowActions.move(context, note)),
@@ -4710,6 +4718,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
   }
 
+  /// The tree's keyboard focus, for [_revealActiveInTree] (#712).
+  final FocusNode _treeFocus = FocusNode(debugLabel: 'note-tree');
+
+  /// Shows the note on screen as the tree's row and gives the tree the
+  /// keyboard (#712): the arrows go on from there.
+  void _revealActiveInTree() {
+    final path = _workspace.value.activePath;
+    if (path == null) return;
+    _revealInTree(path);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _treeFocus.requestFocus();
+    });
+  }
+
   /// Shows the note at [path] (library-relative) as the tree's selected
   /// row (#712): the Files view in the sidebar, every folder above it open.
   void _revealInTree(String path) {
@@ -5081,6 +5103,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                   unawaited(_rowActions.moveTo(path, folder)),
               onRename: (path) => unawaited(_rowActions.rename(context, path)),
               onDelete: (path) => unawaited(_rowActions.delete(context, path)),
+              // Several rows at once (#712): a pointer's, with keys.
+              onMarkedMenu: _desktop
+                  ? (paths, anchor) =>
+                        unawaited(_markedActions.menu(context, paths, anchor))
+                  : null,
+              onDeleteMarked: (paths) =>
+                  unawaited(_markedActions.delete(context, paths)),
+              focusNode: _treeFocus,
               renaming: _treeRename,
             ),
           ),

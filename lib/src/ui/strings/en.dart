@@ -1948,6 +1948,8 @@ final class EnglishStrings extends Strings {
   @override
   String get movedToTrash => 'Moved to trash';
   @override
+  String treeMarkedCount(int count) => 'Selected: $count';
+  @override
   String get deletedMessage => 'Deleted';
   @override
   String deleteForeverConfirm(String name) =>

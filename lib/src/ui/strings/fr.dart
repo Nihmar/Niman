@@ -2016,6 +2016,8 @@ final class FrenchStrings extends Strings {
   @override
   String get movedToTrash => 'Mis à la corbeille';
   @override
+  String treeMarkedCount(int count) => 'Sélectionnés: $count';
+  @override
   String get deletedMessage => 'Supprimé';
   @override
   String deleteForeverConfirm(String name) =>

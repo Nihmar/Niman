@@ -1993,6 +1993,8 @@ final class PolishStrings extends Strings {
   @override
   String get movedToTrash => 'Przeniesiono do kosza';
   @override
+  String treeMarkedCount(int count) => 'Zaznaczono: $count';
+  @override
   String get deletedMessage => 'Usunięto';
   @override
   String deleteForeverConfirm(String name) => '$name zostanie trwale usunięte';

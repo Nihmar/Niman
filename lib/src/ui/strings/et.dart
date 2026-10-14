@@ -1949,6 +1949,8 @@ final class EstonianStrings extends Strings {
   @override
   String get movedToTrash => 'Liigutatud prügikastu';
   @override
+  String treeMarkedCount(int count) => 'Valitud: $count';
+  @override
   String get deletedMessage => 'Kustutatud';
   @override
   String deleteForeverConfirm(String name) => '$name kustutatakse püsivalt';

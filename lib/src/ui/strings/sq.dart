@@ -1982,6 +1982,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get movedToTrash => 'U zhvendos në kosh';
   @override
+  String treeMarkedCount(int count) => 'Të zgjedhura: $count';
+  @override
   String get deletedMessage => 'U fshi';
   @override
   String deleteForeverConfirm(String name) =>

@@ -1963,6 +1963,8 @@ final class LatvianStrings extends Strings {
   @override
   String get movedToTrash => 'Pārvietots konteinerā';
   @override
+  String treeMarkedCount(int count) => 'Atlasīti: $count';
+  @override
   String get deletedMessage => 'Dzēsts';
   @override
   String deleteForeverConfirm(String name) =>

@@ -1989,6 +1989,8 @@ final class DutchStrings extends Strings {
   @override
   String get movedToTrash => 'Naar de prullenbak verplaatst';
   @override
+  String treeMarkedCount(int count) => 'Geselecteerd: $count';
+  @override
   String get deletedMessage => 'Verwijderd';
   @override
   String deleteForeverConfirm(String name) =>

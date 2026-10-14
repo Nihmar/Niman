@@ -1972,6 +1972,8 @@ final class SerbianStrings extends Strings {
   @override
   String get movedToTrash => 'Премештено у кош';
   @override
+  String treeMarkedCount(int count) => 'Изабрано: $count';
+  @override
   String get deletedMessage => 'Обрисано';
   @override
   String deleteForeverConfirm(String name) => '$name ће бити трајно обрисано';

@@ -1982,6 +1982,8 @@ final class HungarianStrings extends Strings {
   @override
   String get movedToTrash => 'A kukába került';
   @override
+  String treeMarkedCount(int count) => 'Kijelölve: $count';
+  @override
   String get deletedMessage => 'Törölve';
   @override
   String deleteForeverConfirm(String name) => '$name véglegesen törlődik';
