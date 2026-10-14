@@ -57,8 +57,10 @@ final class TodoPointerList extends StatefulWidget {
 }
 
 final class _TodoPointerListState extends State<TodoPointerList> {
-  /// The line the keyboard's selection is on (#712); a delete leaves it
-  /// on the line that takes the index.
+  /// The line the keyboard's selection is on (#712). A line is an index
+  /// into the file shown, so it means nothing in the other one: the
+  /// selection goes with the view (#910), and [_leaves] keeps it on the
+  /// row that takes a removed one's place.
   int? _selectedLine;
 
   /// The line whose text is a field, or null.
@@ -78,8 +80,26 @@ final class _TodoPointerListState extends State<TodoPointerList> {
   /// The list's keys: the arrows, `Space`, `Enter`/`F2`, `Delete`.
   late final FocusNode _listFocus = FocusNode(debugLabel: 'todo-list');
 
+  /// The list's scroll position, to bring the selected row into view.
+  final ScrollController _scroll = ScrollController();
+
+  @override
+  void didUpdateWidget(TodoPointerList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The other file's lines are other tasks: the selection, the edit in
+    // place, a click awaiting its double and the open menu are not theirs.
+    if (oldWidget.view != widget.view) {
+      _selectedLine = null;
+      _editingLine = null;
+      _lastClick = null;
+      _menuEntry = null;
+      _menu.close();
+    }
+  }
+
   @override
   void dispose() {
+    _scroll.dispose();
     _listFocus.dispose();
     super.dispose();
   }
@@ -101,6 +121,7 @@ final class _TodoPointerListState extends State<TodoPointerList> {
         onKeyEvent: _onListKey,
         child: ListView.builder(
           key: const Key('todo-list'),
+          controller: _scroll,
           itemCount: widget.entries.length,
           itemBuilder: (context, index) {
             final entry = widget.entries[index];
@@ -112,13 +133,13 @@ final class _TodoPointerListState extends State<TodoPointerList> {
               selected: line == _selectedLine,
               editing: line == _editingLine,
               onToggle: (checked) =>
-                  unawaited(widget.onToggle(entry, checked: checked)),
+                  unawaited(_toggle(entry, checked: checked)),
               onClick: () => _click(entry),
               onSubmitText: (text) => unawaited(_writeText(entry, text)),
               onCancelEdit: () => setState(() => _editingLine = null),
               onMenuAt: (at) => _openMenu(entry, at),
               onDueMenuAt: (at) => _openMenu(entry, at, dueOnly: true),
-              onDelete: () => unawaited(widget.onDelete(entry)),
+              onDelete: () => unawaited(_delete(entry)),
             );
           },
         ),
@@ -152,16 +173,22 @@ final class _TodoPointerListState extends State<TodoPointerList> {
     if (rows.isEmpty) return KeyEventResult.ignored;
     final at = rows.indexWhere((e) => e.lineIndex == _selectedLine);
     final selected = at < 0 ? null : rows[at];
-    void select(int index) =>
-        setState(() => _selectedLine = rows[index].lineIndex);
+    void select(int index, {required bool down}) {
+      setState(() => _selectedLine = rows[index].lineIndex);
+      unawaited(_reveal(index, down: down));
+    }
+
     switch (event.logicalKey) {
       case LogicalKeyboardKey.arrowDown:
-        select(at < 0 ? 0 : (at + 1).clamp(0, rows.length - 1));
+        select(at < 0 ? 0 : (at + 1).clamp(0, rows.length - 1), down: true);
       case LogicalKeyboardKey.arrowUp:
-        select(at < 0 ? rows.length - 1 : (at - 1).clamp(0, rows.length - 1));
+        select(
+          at < 0 ? rows.length - 1 : (at - 1).clamp(0, rows.length - 1),
+          down: false,
+        );
       case LogicalKeyboardKey.space
           when selected != null && event is KeyDownEvent:
-        unawaited(widget.onToggle(selected, checked: !selected.task.completed));
+        unawaited(_toggle(selected, checked: !selected.task.completed));
       case LogicalKeyboardKey.enter ||
               LogicalKeyboardKey.numpadEnter ||
               LogicalKeyboardKey.f2
@@ -169,11 +196,116 @@ final class _TodoPointerListState extends State<TodoPointerList> {
         setState(() => _editingLine = selected.lineIndex);
       case LogicalKeyboardKey.delete
           when selected != null && event is KeyDownEvent:
-        unawaited(widget.onDelete(selected));
+        unawaited(_delete(selected));
       default:
         return KeyEventResult.ignored;
     }
     return KeyEventResult.handled;
+  }
+
+  /// Brings the row at [index] into view (#909), scrolling no further than
+  /// its edge: [down] moves bring its bottom in, the others its top. A row
+  /// outside the list's built range has no context to reveal, so the list
+  /// first jumps to where the index is estimated to sit — the list's own
+  /// estimate of its length, shared out by row — and the row, built there
+  /// or near it, is then scrolled to. Each jump lays out real rows around
+  /// the target, which sharpens the estimate (the search list's `_revealHit`
+  /// does the same).
+  Future<void> _reveal(int index, {required bool down}) async {
+    for (var jump = 0; jump < _revealJumps; jump++) {
+      await WidgetsBinding.instance.endOfFrame;
+      final rows = widget.entries;
+      // Another move or a new list since: that one reveals its own.
+      if (!mounted ||
+          index >= rows.length ||
+          rows[index].lineIndex != _selectedLine) {
+        return;
+      }
+      final row = _rowContext(rows[index].lineIndex);
+      if (row != null) {
+        if (!row.mounted) return;
+        await Scrollable.ensureVisible(
+          row,
+          duration: _stepScroll,
+          alignmentPolicy: down
+              ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+              : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
+        return;
+      }
+      if (!_scroll.hasClients) return;
+      final position = _scroll.position;
+      final length = position.maxScrollExtent + position.viewportDimension;
+      final offset =
+          length * index / rows.length - position.viewportDimension / 2;
+      position.jumpTo(
+        offset.clamp(position.minScrollExtent, position.maxScrollExtent),
+      );
+    }
+  }
+
+  /// How many jumps [_reveal] makes at most: a bound keeps a list that
+  /// keeps changing under it from holding the reveal open.
+  static const int _revealJumps = 8;
+
+  /// How long the scroll to a row takes.
+  static const Duration _stepScroll = Duration(milliseconds: 100);
+
+  /// The context of the built row on [line], or null while it is not built.
+  BuildContext? _rowContext(int line) {
+    final key = Key('todo-row-${widget.view}-$line');
+    BuildContext? found;
+    void visit(Element element) {
+      if (found != null) return;
+      if (element.widget.key == key) {
+        found = element;
+        return;
+      }
+      element.visitChildren(visit);
+    }
+
+    _listKey.currentContext?.visitChildElements(visit);
+    return found;
+  }
+
+  /// Checks or unchecks [entry]: its line moves to the other file.
+  Future<void> _toggle(TodoEntry entry, {required bool checked}) {
+    _leaves(entry);
+    return widget.onToggle(entry, checked: checked);
+  }
+
+  /// Deletes [entry]'s line.
+  Future<void> _delete(TodoEntry entry) {
+    _leaves(entry);
+    return widget.onDelete(entry);
+  }
+
+  /// Follows the lines of the file shown when [entry]'s leaves it (deleted,
+  /// or moved to the other file): each below it takes the index above, so
+  /// the selection stays on the same task — or, if it was [entry], on the
+  /// row that takes its place, the one before at the end (#910). The rows
+  /// are in display order, which the sort makes unlike the line order: a
+  /// neighbour may sit above [entry] in the file as well as below.
+  void _leaves(TodoEntry entry) {
+    final rows = widget.entries;
+    final at = rows.indexOf(entry);
+    final gone = entry.lineIndex;
+    int? follow(int? line) => line == null || line < gone ? line : line - 1;
+    setState(() {
+      if (_selectedLine == gone) {
+        _selectedLine = at < 0
+            ? null
+            : at + 1 < rows.length
+            ? follow(rows[at + 1].lineIndex)
+            : at > 0
+            ? follow(rows[at - 1].lineIndex)
+            : null;
+      } else {
+        _selectedLine = follow(_selectedLine);
+      }
+      _editingLine = _editingLine == gone ? null : follow(_editingLine);
+      _lastClick = null;
+    });
   }
 
   /// Writes the text edited in place into [entry]'s line.
@@ -204,7 +336,7 @@ final class _TodoPointerListState extends State<TodoPointerList> {
       case TodoMenuPick.edit:
         await widget.onEdit(entry);
       case TodoMenuPick.delete:
-        await widget.onDelete(entry);
+        await _delete(entry);
       case TodoMenuPick.dueToday:
         await widget.onRewrite(entry, todoLineWithDue(task, today));
       case TodoMenuPick.dueTomorrow:
