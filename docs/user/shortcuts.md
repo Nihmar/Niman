@@ -49,8 +49,9 @@ shortcuts lists them and lets you change them:
   Appearance), in the editor and the preview alike; on a phone, pinch the
   note with two fingers — spread them to zoom in, bring them together to
   zoom out — or use *Zoom in*, *Zoom out* and *Reset zoom* in the command
-  palette; a laptop's trackpad pinches the same way. With a book on screen
-  the same keys, pinch and commands zoom the book's text instead, the
+  palette; a laptop's trackpad pinches the same way, and `Ctrl`+mouse wheel
+  over the note steps it on a desktop. With a book on screen
+  the same keys, pinch, wheel and commands zoom the book's text instead, the
   books' own text size (see
   [organization](organization.md#files-that-are-not-notes))
 - `Ctrl/⌘+1…6` — Files, Todo, Search, Quick note, Settings and
@@ -134,6 +135,12 @@ Selecting with the mouse: drag over the text, or `Shift+click` to select
 from the caret to the click (a drag after it goes on extending).
 
 ## Changing a shortcut
+
+On a desktop with the app's own title bar, the **☰** before the window's
+buttons is the menu (#712): every command of the palette, grouped as the
+palette names them — Note, Editor, View, Library, Journal, Go to — and
+Help, each with its keys beside it. A command that cannot run now is
+there, greyed.
 
 In the palette itself, `Alt+P` pins or unpins the selected command;
 pinned ones head it before anything is typed. On a phone the palette

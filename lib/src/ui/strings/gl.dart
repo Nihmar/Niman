@@ -243,6 +243,8 @@ final class GalicianStrings extends Strings {
   String spellCheckLine(int line) => 'liña $line';
   @override
   String get addWordToDictionary => 'Engade ao diccionario';
+  @override
+  String get spellCheckIgnore => 'Ignorar';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espazos';
@@ -1084,6 +1086,17 @@ final class GalicianStrings extends Strings {
   String get todoEditAction => 'Editar';
   @override
   String get todoDeleteAction => 'Borrar';
+  @override
+  String get todoSetDue => 'Fixar vencemento';
+  @override
+  String get todoDueTomorrow => 'Mañá';
+  @override
+  String get todoDueNextWeek => 'Dentro dunha semana';
+  @override
+  String get todoPickDate => 'Escoller data…';
+  @override
+  String get todoQuickAddHint =>
+      'Engadir unha tarefa — +proxecto @contexto due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1570,7 +1583,17 @@ final class GalicianStrings extends Strings {
   @override
   String get openBeside => 'Abrir ao lado';
   @override
+  String get actionOpen => 'Abrir';
+  @override
+  String get revealInTree => 'Amosar na árbore';
+  @override
   String get closeAllNotes => 'Pechar todas';
+  @override
+  String get tabCloseOthers => 'Pechar as demais';
+  @override
+  String get tabCloseToRight => 'Pechar as da dereita';
+  @override
+  String get copyPathAction => 'Copiar ruta';
   @override
   String get sidePanelTooltip => 'Amosar ou agochar o panel lateral';
   @override
@@ -1589,6 +1612,10 @@ final class GalicianStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteca';
   @override
   String get paletteGroupGoTo => 'Ir a';
+  @override
+  String get appMenuTooltip => 'Menú';
+  @override
+  String get appMenuHelp => 'Axuda';
   @override
   String get paletteGroupJournal => 'Diario';
   @override
@@ -1974,6 +2001,8 @@ final class GalicianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Movida ao paperilleiro';
+  @override
+  String treeMarkedCount(int count) => 'Seleccionados: $count';
   @override
   String get deletedMessage => 'Borrado';
   @override

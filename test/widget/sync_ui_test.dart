@@ -1,6 +1,7 @@
 // WebDAV sync UI (mockups S1–S11): the settings screen with its test and
 // first sync, the status icon and panel, conflicts, and the shell and
 // settings entry points.
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -423,7 +424,8 @@ void main() {
   });
 
   group('status and panel', () {
-    Widget harness() => MaterialApp(
+    Widget harness({bool pointer = false}) => MaterialApp(
+      theme: pointer ? ThemeData(visualDensity: VisualDensity.compact) : null,
       home: Builder(
         builder: (context) => Scaffold(
           appBar: AppBar(
@@ -431,9 +433,10 @@ void main() {
               SyncStatusButton(
                 sync: sync,
                 onSync: () => runSyncFromUi(context, sync),
-                onOpenPanel: () => showSyncPanel(
+                onOpenPanel: (anchor) => showSyncPanel(
                   context,
                   sync: sync,
+                  anchor: anchor,
                   onSyncNow: () => runSyncFromUi(context, sync),
                   onOpenSettings: () {},
                   onResolve: (path) => Navigator.push(
@@ -610,6 +613,24 @@ void main() {
       expect(sync.calls, ['texts todo.md', 'resolve todo.md local']);
       expect(find.byType(SyncConflictScreen), findsNothing);
       expect(sync.status.conflicts, isEmpty);
+    });
+
+    testWidgets('a pointer gets the panel at the button; a right click '
+        'opens it without syncing (#712)', (tester) async {
+      sync.status = SyncStatus(
+        destination: FakeSyncService.destination(lastSyncAtMs: 1),
+      );
+      await tester.pumpWidget(harness(pointer: true));
+      final button = find.byKey(const Key('sync-status-button'));
+      await tester.tap(button, buttons: kSecondaryButton);
+      await tester.pumpAndSettle();
+      expect(sync.calls, isEmpty);
+      final panel = find.byKey(const Key('sync-panel'));
+      expect(panel, findsOneWidget);
+      expect(find.byType(Dialog), findsNothing);
+      expect(find.byType(BottomSheet), findsNothing);
+      // Grown from the button, at the window's top, not centred in it.
+      expect(tester.getTopLeft(panel).dy, lessThan(100));
     });
 
     testWidgets('a mass deletion asks, and cancelling stops it', (

@@ -241,6 +241,8 @@ final class BelarusianStrings extends Strings {
   String spellCheckLine(int line) => 'радок $line';
   @override
   String get addWordToDictionary => 'Дадаць у слоўнік';
+  @override
+  String get spellCheckIgnore => 'Ігнараваць';
 
   @override
   String indentWidthValue(int spaces) => '$spaces прабелы';
@@ -1079,6 +1081,16 @@ final class BelarusianStrings extends Strings {
   String get todoEditAction => 'Рэдагаваць';
   @override
   String get todoDeleteAction => 'Выдаліць';
+  @override
+  String get todoSetDue => 'Задаць тэрмін';
+  @override
+  String get todoDueTomorrow => 'Заўтра';
+  @override
+  String get todoDueNextWeek => 'Праз тыдзень';
+  @override
+  String get todoPickDate => 'Выбраць дату…';
+  @override
+  String get todoQuickAddHint => 'Дадаць задачу — +праект @кантэкст due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1561,7 +1573,17 @@ final class BelarusianStrings extends Strings {
   @override
   String get openBeside => 'Адкрыць збоку';
   @override
+  String get actionOpen => 'Адкрыць';
+  @override
+  String get revealInTree => 'Паказаць у дрэве';
+  @override
   String get closeAllNotes => 'Закрыць усе';
+  @override
+  String get tabCloseOthers => 'Закрыць астатнія';
+  @override
+  String get tabCloseToRight => 'Закрыць справа';
+  @override
+  String get copyPathAction => 'Скапіраваць шлях';
   @override
   String get sidePanelTooltip => 'Паказаць або схаваць бакавую панэль';
   @override
@@ -1580,6 +1602,10 @@ final class BelarusianStrings extends Strings {
   String get paletteGroupLibrary => 'Бібліятэка';
   @override
   String get paletteGroupGoTo => 'Перайсці';
+  @override
+  String get appMenuTooltip => 'Меню';
+  @override
+  String get appMenuHelp => 'Даведка';
   @override
   String get paletteGroupJournal => 'Дзённік';
   @override
@@ -1966,6 +1992,8 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Перамешчана ў кошык';
+  @override
+  String treeMarkedCount(int count) => 'Выбрана: $count';
   @override
   String get deletedMessage => 'Выдалена';
   @override

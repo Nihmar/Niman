@@ -239,6 +239,8 @@ final class HungarianStrings extends Strings {
   String spellCheckLine(int line) => '$line. sor';
   @override
   String get addWordToDictionary => 'Hozzáadás a szótárhoz';
+  @override
+  String get spellCheckIgnore => 'Kihagyás';
 
   @override
   String indentWidthValue(int spaces) => '$spaces szóköz';
@@ -1081,6 +1083,17 @@ final class HungarianStrings extends Strings {
   String get todoEditAction => 'Szerkesztés';
   @override
   String get todoDeleteAction => 'Törlés';
+  @override
+  String get todoSetDue => 'Határidő beállítása';
+  @override
+  String get todoDueTomorrow => 'Holnap';
+  @override
+  String get todoDueNextWeek => 'Egy hét múlva';
+  @override
+  String get todoPickDate => 'Dátum választása…';
+  @override
+  String get todoQuickAddHint =>
+      'Feladat hozzáadása — +projekt @környezet due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1567,7 +1580,17 @@ final class HungarianStrings extends Strings {
   @override
   String get openBeside => 'Megnyitás mellette';
   @override
+  String get actionOpen => 'Megnyitás';
+  @override
+  String get revealInTree => 'Megjelenítés a fában';
+  @override
   String get closeAllNotes => 'Összes bezárása';
+  @override
+  String get tabCloseOthers => 'A többi bezárása';
+  @override
+  String get tabCloseToRight => 'Jobbra lévők bezárása';
+  @override
+  String get copyPathAction => 'Útvonal másolása';
   @override
   String get sidePanelTooltip => 'Oldalsó panel megjelenítése vagy elrejtése';
   @override
@@ -1586,6 +1609,10 @@ final class HungarianStrings extends Strings {
   String get paletteGroupLibrary => 'Könyvtár';
   @override
   String get paletteGroupGoTo => 'Ugrás';
+  @override
+  String get appMenuTooltip => 'Menü';
+  @override
+  String get appMenuHelp => 'Súgó';
   @override
   String get paletteGroupJournal => 'Napló';
   @override
@@ -1975,6 +2002,8 @@ final class HungarianStrings extends Strings {
 
   @override
   String get movedToTrash => 'A kukába került';
+  @override
+  String treeMarkedCount(int count) => 'Kijelölve: $count';
   @override
   String get deletedMessage => 'Törölve';
   @override

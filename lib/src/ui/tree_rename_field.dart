@@ -21,8 +21,13 @@ final class TreeRenameField extends StatefulWidget {
     required this.onSubmit,
     required this.onCancel,
     this.style,
+    this.keepsUnchanged = false,
     super.key,
   });
+
+  /// Whether the name as it came is a name to submit: a new row's
+  /// proposed name is one (#712), a renamed row's own is not.
+  final bool keepsUnchanged;
 
   /// The name as it stands.
   final String name;
@@ -110,7 +115,9 @@ final class _TreeRenameFieldState extends State<TreeRenameField> {
   Future<void> _commit() async {
     if (_busy || _done) return;
     final name = _text.text.trim();
-    if (name.isEmpty || name == widget.name) return _cancel();
+    if (name.isEmpty || (name == widget.name && !widget.keepsUnchanged)) {
+      return _cancel();
+    }
     _busy = true;
     final error = await widget.onSubmit(name);
     if (!mounted) return;

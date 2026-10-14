@@ -111,6 +111,55 @@ void main() {
     expect(find.text(AppStrings.spellCheckEmpty), findsOne);
   });
 
+  testWidgets('docked, a click shows the word, Ignore and Add drop it, and '
+      'an edit checks again (#712)', (tester) async {
+    final lines = ['wrold teh wrold'];
+    final edited = ChangeNotifier();
+    addTearDown(edited.dispose);
+    final shown = <String>[];
+    final added = <String>[];
+    var starts = 0;
+    await tester.pumpWidget(
+      _app(
+        SpellCheckSheet(
+          docked: true,
+          available: true,
+          edited: edited,
+          start: () {
+            starts++;
+            return spell.startScan(
+              lineCount: lines.length,
+              lineAt: (i) => (text: lines[i], skip: const <TextRange>[]),
+            );
+          },
+          suggest: spell.suggestionsFor,
+          apply: (_, _) {},
+          reveal: (issue) => shown.add('${issue.word}@${issue.start}'),
+          addWord: (word) async => added.add(word),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('spell-check-close')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('spell-issue-0-6')));
+    expect(shown, ['teh@6']);
+
+    await tester.tap(find.byKey(const Key('spell-ignore-0-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('wrold'), findsNothing, reason: 'every one of the word');
+    await tester.tap(find.byKey(const Key('spell-add-0-6')));
+    await tester.pumpAndSettle();
+    expect(added, ['teh']);
+    expect(find.text(AppStrings.spellCheckEmpty), findsOne);
+
+    lines[0] = 'still wrold';
+    edited.notifyListeners();
+    await tester.pumpAndSettle();
+    expect(starts, 2);
+    expect(find.text('wrold'), findsOne);
+  });
+
   testWidgets('an earlier fix of another length moves what follows it', (
     tester,
   ) async {

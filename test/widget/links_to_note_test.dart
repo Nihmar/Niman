@@ -27,6 +27,9 @@ final class _Note implements NoteViewHandle {
   final ValueNotifier<List<OutlineEntry>> outline = ValueNotifier(const []);
 
   @override
+  SpellReview? spellReview;
+
+  @override
   void jumpToHeading(int line) {}
 
   @override

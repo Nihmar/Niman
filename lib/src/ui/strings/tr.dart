@@ -235,6 +235,8 @@ final class TurkishStrings extends Strings {
   String spellCheckLine(int line) => '$line. satır';
   @override
   String get addWordToDictionary => 'Sözlüğe ekle';
+  @override
+  String get spellCheckIgnore => 'Yok say';
 
   @override
   String indentWidthValue(int spaces) => '$spaces boşluk';
@@ -1071,6 +1073,16 @@ final class TurkishStrings extends Strings {
   String get todoEditAction => 'Düzenle';
   @override
   String get todoDeleteAction => 'Sil';
+  @override
+  String get todoSetDue => 'Son tarih ayarla';
+  @override
+  String get todoDueTomorrow => 'Yarın';
+  @override
+  String get todoDueNextWeek => 'Bir hafta sonra';
+  @override
+  String get todoPickDate => 'Tarih seç…';
+  @override
+  String get todoQuickAddHint => 'Görev ekle — +proje @bağlam due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1546,7 +1558,17 @@ final class TurkishStrings extends Strings {
   @override
   String get openBeside => 'Yanda aç';
   @override
+  String get actionOpen => 'Aç';
+  @override
+  String get revealInTree => 'Ağaçta göster';
+  @override
   String get closeAllNotes => 'Tümünü kapat';
+  @override
+  String get tabCloseOthers => 'Diğerlerini kapat';
+  @override
+  String get tabCloseToRight => 'Sağdakileri kapat';
+  @override
+  String get copyPathAction => 'Yolu kopyala';
   @override
   String get sidePanelTooltip => 'Yan paneli göster veya gizle';
   @override
@@ -1565,6 +1587,10 @@ final class TurkishStrings extends Strings {
   String get paletteGroupLibrary => 'Kitaplık';
   @override
   String get paletteGroupGoTo => 'Git';
+  @override
+  String get appMenuTooltip => 'Menü';
+  @override
+  String get appMenuHelp => 'Yardım';
   @override
   String get paletteGroupJournal => 'Günlük';
   @override
@@ -1947,6 +1973,8 @@ final class TurkishStrings extends Strings {
 
   @override
   String get movedToTrash => 'Çöp kutusuna taşındı';
+  @override
+  String treeMarkedCount(int count) => 'Seçili: $count';
   @override
   String get deletedMessage => 'Silindi';
   @override

@@ -219,6 +219,8 @@ final class ChineseStrings extends Strings {
   String spellCheckLine(int line) => '第 $line 行';
   @override
   String get addWordToDictionary => '加入词典';
+  @override
+  String get spellCheckIgnore => '忽略';
 
   @override
   String indentWidthValue(int spaces) => '$spaces 个空格';
@@ -1005,6 +1007,16 @@ final class ChineseStrings extends Strings {
   String get todoEditAction => '编辑';
   @override
   String get todoDeleteAction => '删除';
+  @override
+  String get todoSetDue => '设置截止日期';
+  @override
+  String get todoDueTomorrow => '明天';
+  @override
+  String get todoDueNextWeek => '一周后';
+  @override
+  String get todoPickDate => '选择日期…';
+  @override
+  String get todoQuickAddHint => '添加任务 — +项目 @情境 due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1434,7 +1446,17 @@ final class ChineseStrings extends Strings {
   @override
   String get openBeside => '在侧边打开';
   @override
+  String get actionOpen => '打开';
+  @override
+  String get revealInTree => '在文件树中显示';
+  @override
   String get closeAllNotes => '全部关闭';
+  @override
+  String get tabCloseOthers => '关闭其他';
+  @override
+  String get tabCloseToRight => '关闭右侧';
+  @override
+  String get copyPathAction => '复制路径';
   @override
   String get sidePanelTooltip => '显示或隐藏侧边栏';
   @override
@@ -1453,6 +1475,10 @@ final class ChineseStrings extends Strings {
   String get paletteGroupLibrary => '资料库';
   @override
   String get paletteGroupGoTo => '转到';
+  @override
+  String get appMenuTooltip => '菜单';
+  @override
+  String get appMenuHelp => '帮助';
   @override
   String get paletteGroupJournal => '日记';
   @override
@@ -1794,6 +1820,8 @@ final class ChineseStrings extends Strings {
 
   @override
   String get movedToTrash => '已移入回收站';
+  @override
+  String treeMarkedCount(int count) => '已选：$count';
   @override
   String get deletedMessage => '已删除';
   @override

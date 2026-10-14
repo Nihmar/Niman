@@ -241,6 +241,8 @@ final class LithuanianStrings extends Strings {
   String spellCheckLine(int line) => 'eilutė $line';
   @override
   String get addWordToDictionary => 'Pridėti į žodyną';
+  @override
+  String get spellCheckIgnore => 'Ignoruoti';
 
   @override
   String indentWidthValue(int spaces) => '$spaces tarpai';
@@ -1076,6 +1078,17 @@ final class LithuanianStrings extends Strings {
   String get todoEditAction => 'Redaguoti';
   @override
   String get todoDeleteAction => 'Ištrinti';
+  @override
+  String get todoSetDue => 'Nustatyti terminą';
+  @override
+  String get todoDueTomorrow => 'Rytoj';
+  @override
+  String get todoDueNextWeek => 'Po savaitės';
+  @override
+  String get todoPickDate => 'Pasirinkti datą…';
+  @override
+  String get todoQuickAddHint =>
+      'Pridėti užduotį — +projektas @kontekstas due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1559,7 +1572,17 @@ final class LithuanianStrings extends Strings {
   @override
   String get openBeside => 'Atverti šalia';
   @override
+  String get actionOpen => 'Atidaryti';
+  @override
+  String get revealInTree => 'Rodyti medyje';
+  @override
   String get closeAllNotes => 'Uždaryti visus';
+  @override
+  String get tabCloseOthers => 'Uždaryti kitus';
+  @override
+  String get tabCloseToRight => 'Uždaryti dešinėje';
+  @override
+  String get copyPathAction => 'Kopijuoti kelią';
   @override
   String get sidePanelTooltip => 'Rodyti arba slėpti šoninį skydelį';
   @override
@@ -1578,6 +1601,10 @@ final class LithuanianStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteka';
   @override
   String get paletteGroupGoTo => 'Eiti į';
+  @override
+  String get appMenuTooltip => 'Meniu';
+  @override
+  String get appMenuHelp => 'Pagalba';
   @override
   String get paletteGroupJournal => 'Dienoraštis';
   @override
@@ -1961,6 +1988,8 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Perkelta į šiukšlinę';
+  @override
+  String treeMarkedCount(int count) => 'Pažymėta: $count';
   @override
   String get deletedMessage => 'Ištrintas';
   @override

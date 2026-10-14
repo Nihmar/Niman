@@ -239,6 +239,8 @@ final class IcelandicStrings extends Strings {
   String spellCheckLine(int line) => 'lína $line';
   @override
   String get addWordToDictionary => 'Setja í orðbók';
+  @override
+  String get spellCheckIgnore => 'Hunsa';
 
   @override
   String indentWidthValue(int spaces) => '$spaces bil';
@@ -1079,6 +1081,16 @@ final class IcelandicStrings extends Strings {
   String get todoEditAction => 'Breyta';
   @override
   String get todoDeleteAction => 'Eyða';
+  @override
+  String get todoSetDue => 'Setja skiladag';
+  @override
+  String get todoDueTomorrow => 'Á morgun';
+  @override
+  String get todoDueNextWeek => 'Eftir viku';
+  @override
+  String get todoPickDate => 'Velja dagsetningu…';
+  @override
+  String get todoQuickAddHint => 'Bæta við verkefni — +verk @samhengi due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1558,7 +1570,17 @@ final class IcelandicStrings extends Strings {
   @override
   String get openBeside => 'Opna til hliðar';
   @override
+  String get actionOpen => 'Opna';
+  @override
+  String get revealInTree => 'Sýna í trénu';
+  @override
   String get closeAllNotes => 'Loka öllu';
+  @override
+  String get tabCloseOthers => 'Loka hinum';
+  @override
+  String get tabCloseToRight => 'Loka til hægri';
+  @override
+  String get copyPathAction => 'Afrita slóð';
   @override
   String get sidePanelTooltip => 'Sýna eða fela hliðarspjaldið';
   @override
@@ -1577,6 +1599,10 @@ final class IcelandicStrings extends Strings {
   String get paletteGroupLibrary => 'Safn';
   @override
   String get paletteGroupGoTo => 'Fara í';
+  @override
+  String get appMenuTooltip => 'Valmynd';
+  @override
+  String get appMenuHelp => 'Hjálp';
   @override
   String get paletteGroupJournal => 'Dagbók';
   @override
@@ -1960,6 +1986,8 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get movedToTrash => 'Fært í korpu';
+  @override
+  String treeMarkedCount(int count) => 'Valið: $count';
   @override
   String get deletedMessage => 'Eytt';
   @override

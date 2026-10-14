@@ -43,7 +43,9 @@ the area names, and takes you to the row it found.
 Every setting reads the same on both: its name, a line saying what it
 does, and the control under that. A switch flips in place; anything with
 more than two choices shows its current value in a field that opens the
-choices.
+choices: a drop-down under the field on a desktop, a dialog on a phone
+(#712). A size or a width is a slider: in the row itself on a desktop,
+the value at its end and kept when you let go; in a dialog on a phone.
 
 ### Navigation
 

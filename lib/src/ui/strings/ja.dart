@@ -219,6 +219,8 @@ final class JapaneseStrings extends Strings {
   String spellCheckLine(int line) => '$line 行目';
   @override
   String get addWordToDictionary => '辞書に追加';
+  @override
+  String get spellCheckIgnore => '無視';
 
   @override
   String indentWidthValue(int spaces) => 'スペース $spaces 個';
@@ -1013,6 +1015,16 @@ final class JapaneseStrings extends Strings {
   String get todoEditAction => '編集';
   @override
   String get todoDeleteAction => '削除';
+  @override
+  String get todoSetDue => '期限を設定';
+  @override
+  String get todoDueTomorrow => '明日';
+  @override
+  String get todoDueNextWeek => '1週間後';
+  @override
+  String get todoPickDate => '日付を選択…';
+  @override
+  String get todoQuickAddHint => 'タスクを追加 — +プロジェクト @コンテキスト due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1466,7 +1478,17 @@ final class JapaneseStrings extends Strings {
   @override
   String get openBeside => '横に開く';
   @override
+  String get actionOpen => '開く';
+  @override
+  String get revealInTree => 'ツリーで表示';
+  @override
   String get closeAllNotes => 'すべて閉じる';
+  @override
+  String get tabCloseOthers => '他を閉じる';
+  @override
+  String get tabCloseToRight => '右側を閉じる';
+  @override
+  String get copyPathAction => 'パスをコピー';
   @override
   String get sidePanelTooltip => 'サイドパネルの表示・非表示';
   @override
@@ -1485,6 +1507,10 @@ final class JapaneseStrings extends Strings {
   String get paletteGroupLibrary => 'ライブラリ';
   @override
   String get paletteGroupGoTo => '移動';
+  @override
+  String get appMenuTooltip => 'メニュー';
+  @override
+  String get appMenuHelp => 'ヘルプ';
   @override
   String get paletteGroupJournal => '日記';
   @override
@@ -1837,6 +1863,8 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get movedToTrash => 'ごみ箱に移動しました';
+  @override
+  String treeMarkedCount(int count) => '選択中: $count';
   @override
   String get deletedMessage => '削除しました';
   @override

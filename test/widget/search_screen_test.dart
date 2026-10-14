@@ -3,7 +3,9 @@
 // note, and the Words/Contains toggle (which is T-M3-08's UI surface).
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -60,6 +62,76 @@ void main() {
     session = FakeLibrarySession();
     source = FakeSearchSource();
     opened.clear();
+  });
+
+  testWidgets('a right click on a hit opens its menu; its rows open the hit '
+      'in a new tab, beside or in the tree (#712)', (tester) async {
+    source.hits = [_hit('a.md'), _hit('b.md')];
+    final asked = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(visualDensity: VisualDensity.compact),
+        home: Scaffold(
+          body: SearchScreen(
+            controller: session,
+            onOpenNote: opened.add,
+            source: source,
+            hitOpens: (
+              newTab: (path) => asked.add('tab $path'),
+              beside: (path) => asked.add('beside $path'),
+              reveal: (path) => asked.add('reveal $path'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.enterText(find.byKey(const Key('search-query')), 'note');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+
+    for (final action in ['newtab', 'beside', 'reveal', 'open']) {
+      await tester.tap(
+        find.byKey(const Key('search-hit-b.md')),
+        buttons: kSecondaryButton,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('search-hit-action-$action')));
+      await tester.pumpAndSettle();
+    }
+    expect(asked, ['tab b.md', 'beside b.md', 'reveal b.md']);
+    expect(opened, ['b.md']);
+
+    // A middle click opens in a new tab too.
+    await tester.tap(
+      find.byKey(const Key('search-hit-a.md')),
+      buttons: kTertiaryButton,
+    );
+    await tester.pump();
+    expect(asked.last, 'tab a.md');
+  });
+
+  testWidgets('the arrows in the field mark a hit, Enter opens it (#712)', (
+    tester,
+  ) async {
+    source.hits = [_hit('a.md'), _hit('b.md')];
+    await tester.pumpWidget(buildApp(source));
+    await tester.enterText(find.byKey(const Key('search-query')), 'note');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(opened, isEmpty);
+    ListTile tile(String path) =>
+        tester.widget<ListTile>(find.byKey(Key('search-hit-$path')));
+    expect(tile('a.md').selected, isTrue);
+    expect(tile('b.md').selected, isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(opened, ['a.md']);
   });
 
   testWidgets('no query: hint, no results', (tester) async {

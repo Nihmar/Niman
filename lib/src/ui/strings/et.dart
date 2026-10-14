@@ -238,6 +238,8 @@ final class EstonianStrings extends Strings {
   String spellCheckLine(int line) => 'rida $line';
   @override
   String get addWordToDictionary => 'Lisa sõnaraamatusse';
+  @override
+  String get spellCheckIgnore => 'Eira';
 
   @override
   String indentWidthValue(int spaces) => '$spaces tühikut';
@@ -1069,6 +1071,16 @@ final class EstonianStrings extends Strings {
   String get todoEditAction => 'Muuda';
   @override
   String get todoDeleteAction => 'Kustuta';
+  @override
+  String get todoSetDue => 'Määra tähtaeg';
+  @override
+  String get todoDueTomorrow => 'Homme';
+  @override
+  String get todoDueNextWeek => 'Nädala pärast';
+  @override
+  String get todoPickDate => 'Vali kuupäev…';
+  @override
+  String get todoQuickAddHint => 'Lisa ülesanne — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1539,7 +1551,17 @@ final class EstonianStrings extends Strings {
   @override
   String get openBeside => 'Ava kõrval';
   @override
+  String get actionOpen => 'Ava';
+  @override
+  String get revealInTree => 'Näita puus';
+  @override
   String get closeAllNotes => 'Sulge kõik';
+  @override
+  String get tabCloseOthers => 'Sulge teised';
+  @override
+  String get tabCloseToRight => 'Sulge paremal';
+  @override
+  String get copyPathAction => 'Kopeeri tee';
   @override
   String get sidePanelTooltip => 'Näita või peida külgpaneel';
   @override
@@ -1558,6 +1580,10 @@ final class EstonianStrings extends Strings {
   String get paletteGroupLibrary => 'Teek';
   @override
   String get paletteGroupGoTo => 'Mine';
+  @override
+  String get appMenuTooltip => 'Menüü';
+  @override
+  String get appMenuHelp => 'Abi';
   @override
   String get paletteGroupJournal => 'Päevik';
   @override
@@ -1942,6 +1968,8 @@ final class EstonianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Liigutatud prügikastu';
+  @override
+  String treeMarkedCount(int count) => 'Valitud: $count';
   @override
   String get deletedMessage => 'Kustutatud';
   @override

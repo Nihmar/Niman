@@ -247,6 +247,8 @@ final class FrenchStrings extends Strings {
   String spellCheckLine(int line) => 'ligne $line';
   @override
   String get addWordToDictionary => 'Ajouter au dictionnaire';
+  @override
+  String get spellCheckIgnore => 'Ignorer';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espaces';
@@ -1101,6 +1103,16 @@ final class FrenchStrings extends Strings {
   String get todoEditAction => 'Modifier';
   @override
   String get todoDeleteAction => 'Supprimer';
+  @override
+  String get todoSetDue => 'Définir l’échéance';
+  @override
+  String get todoDueTomorrow => 'Demain';
+  @override
+  String get todoDueNextWeek => 'Dans une semaine';
+  @override
+  String get todoPickDate => 'Choisir une date…';
+  @override
+  String get todoQuickAddHint => 'Ajouter une tâche — +projet @contexte due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1598,7 +1610,17 @@ final class FrenchStrings extends Strings {
   @override
   String get openBeside => 'Ouvrir à côté';
   @override
+  String get actionOpen => 'Ouvrir';
+  @override
+  String get revealInTree => 'Afficher dans l’arborescence';
+  @override
   String get closeAllNotes => 'Tout fermer';
+  @override
+  String get tabCloseOthers => 'Fermer les autres';
+  @override
+  String get tabCloseToRight => 'Fermer à droite';
+  @override
+  String get copyPathAction => 'Copier le chemin';
   @override
   String get sidePanelTooltip => 'Afficher ou masquer le panneau latéral';
   @override
@@ -1617,6 +1639,10 @@ final class FrenchStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliothèque';
   @override
   String get paletteGroupGoTo => 'Aller à';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Aide';
   @override
   String get paletteGroupJournal => 'Journal';
   @override
@@ -2012,6 +2038,8 @@ final class FrenchStrings extends Strings {
 
   @override
   String get movedToTrash => 'Mis à la corbeille';
+  @override
+  String treeMarkedCount(int count) => 'Sélectionnés: $count';
   @override
   String get deletedMessage => 'Supprimé';
   @override

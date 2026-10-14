@@ -38,7 +38,18 @@ final class ShellTemplateFlow {
     required this.guard,
     required this.opensPreviewOnly,
     required this.onNoteFiled,
+    this.nameInPlace,
   });
+
+  /// Asks for the new note's name in a row of the tree (#712), as
+  /// `ShellCreateFlow.nameInPlace` does; null, or a null answer, leaves it
+  /// to the dialog.
+  final Future<String?>? Function({
+    required String folder,
+    required bool isDir,
+    required String initial,
+  })?
+  nameInPlace;
 
   /// The open library's session.
   final LibrarySession controller;
@@ -125,13 +136,21 @@ final class ShellTemplateFlow {
       context: surroundings,
     ).namesItself;
     String? name;
+    final into = awayFromTemplates(parent ?? newItemRule.folder, folder);
     if (!namesItself) {
       if (!context.mounted) return;
-      name = await showNameDialog(
-        context,
-        title: AppStrings.newFromTemplateTitle,
-        initial: chosen.name.split('/').last,
-      );
+      final initial = chosen.name.split('/').last;
+      name =
+          await (nameInPlace?.call(
+                folder: into,
+                isDir: false,
+                initial: initial,
+              ) ??
+              showNameDialog(
+                context,
+                title: AppStrings.newFromTemplateTitle,
+                initial: initial,
+              ));
       if (name == null) return;
     }
     if (!context.mounted) return;
@@ -141,7 +160,7 @@ final class ShellTemplateFlow {
       answers: answers,
       surroundings: surroundings,
       name: name,
-      folder: awayFromTemplates(parent ?? newItemRule.folder, folder),
+      folder: into,
       templateName: chosen.name,
     );
   }

@@ -242,6 +242,8 @@ final class SlovakStrings extends Strings {
   String spellCheckLine(int line) => 'riadok $line';
   @override
   String get addWordToDictionary => 'Pridať do slovníka';
+  @override
+  String get spellCheckIgnore => 'Ignorovať';
 
   @override
   String indentWidthValue(int spaces) => '$spaces medzier';
@@ -1080,6 +1082,16 @@ final class SlovakStrings extends Strings {
   String get todoEditAction => 'Upraviť';
   @override
   String get todoDeleteAction => 'Vymazať';
+  @override
+  String get todoSetDue => 'Nastaviť termín';
+  @override
+  String get todoDueTomorrow => 'Zajtra';
+  @override
+  String get todoDueNextWeek => 'O týždeň';
+  @override
+  String get todoPickDate => 'Vybrať dátum…';
+  @override
+  String get todoQuickAddHint => 'Pridať úlohu — +projekt @kontext due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1558,7 +1570,17 @@ final class SlovakStrings extends Strings {
   @override
   String get openBeside => 'Otvoriť vedľa';
   @override
+  String get actionOpen => 'Otvoriť';
+  @override
+  String get revealInTree => 'Zobraziť v strome';
+  @override
   String get closeAllNotes => 'Zavrieť všetky';
+  @override
+  String get tabCloseOthers => 'Zavrieť ostatné';
+  @override
+  String get tabCloseToRight => 'Zavrieť vpravo';
+  @override
+  String get copyPathAction => 'Kopírovať cestu';
   @override
   String get sidePanelTooltip => 'Zobraziť alebo skryť bočný panel';
   @override
@@ -1577,6 +1599,10 @@ final class SlovakStrings extends Strings {
   String get paletteGroupLibrary => 'Knižnica';
   @override
   String get paletteGroupGoTo => 'Prejsť na';
+  @override
+  String get appMenuTooltip => 'Ponuka';
+  @override
+  String get appMenuHelp => 'Pomocník';
   @override
   String get paletteGroupJournal => 'Denník';
   @override
@@ -1959,6 +1985,8 @@ final class SlovakStrings extends Strings {
 
   @override
   String get movedToTrash => 'Presunuté do koša';
+  @override
+  String treeMarkedCount(int count) => 'Vybrané: $count';
   @override
   String get deletedMessage => 'Vymazané';
   @override

@@ -16,6 +16,7 @@ import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -27,6 +28,7 @@ import 'package:niman/src/ui/editor_menu.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
+import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
@@ -66,6 +68,7 @@ final class NoteEditCommands {
     required this.onInserted,
     required this.spellCheck,
     required this.onSpellChecked,
+    required this.inDock,
   });
 
   /// The note on the editor surface, or null before one is open.
@@ -126,6 +129,10 @@ final class NoteEditCommands {
 
   /// The spelling review closed: the pane is drawn again.
   final VoidCallback onSpellChecked;
+
+  /// Opens the review in the dock, where the window has one (#712); null
+  /// opens it as a sheet over the note.
+  final VoidCallback? Function() inDock;
 
   /// What each toolbar button does. The catalogue and the order live in
   /// `editor/toolbar_item.dart`; the commands stay here, with the
@@ -520,10 +527,31 @@ final class NoteEditCommands {
     );
   }
 
-  /// Opens the spelling review panel (T-PP-09).
+  /// The note's spelling, for the review in the dock (#712); null without
+  /// a spell check. [edited] tells of an edit, a pause after it.
+  SpellReview? spellReview({required Listenable edited}) {
+    final spell = spellCheck();
+    if (spell == null) return null;
+    return (
+      start: _scanSpelling,
+      suggest: spell.suggestionsFor,
+      apply: _applySpelling,
+      reveal: _revealSpelling,
+      addWord: spell.addToDictionary,
+      edited: edited,
+      available: spell.available,
+    );
+  }
+
+  /// Opens the spelling review panel (T-PP-09): the dock's pane where the
+  /// window has one ([inDock], #712), else a sheet over the note.
   Future<void> openSpellCheck() async {
     final spell = spellCheck();
     if (spell == null) return;
+    if (inDock() case final open?) {
+      open();
+      return;
+    }
     await showModalBottomSheet<void>(
       context: context(),
       isScrollControlled: true,
@@ -553,6 +581,18 @@ final class NoteEditCommands {
       lineCount: buffer.lineCount,
       lineAt: (i) =>
           (text: buffer.lineAt(i), skip: spellSkipRanges(surface.tokensOf(i))),
+    );
+  }
+
+  /// Selects one issue's word in the editor and brings it into view.
+  void _revealSpelling(SpellIssue issue) {
+    final surface = this.surface();
+    if (surface == null) return;
+    final buffer = surface.buffer;
+    if (issue.line >= buffer.lineCount) return;
+    final start = buffer.offsetOfLine(issue.line);
+    surface.select(
+      SelectionModel(anchor: start + issue.start, extent: start + issue.end),
     );
   }
 

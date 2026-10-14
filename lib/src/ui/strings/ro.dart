@@ -246,6 +246,8 @@ final class RomanianStrings extends Strings {
   String spellCheckLine(int line) => 'linia $line';
   @override
   String get addWordToDictionary => 'Adaugă în dicționar';
+  @override
+  String get spellCheckIgnore => 'Ignoră';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spații';
@@ -1091,6 +1093,16 @@ final class RomanianStrings extends Strings {
   String get todoEditAction => 'Editează';
   @override
   String get todoDeleteAction => 'Șterge';
+  @override
+  String get todoSetDue => 'Setează termenul';
+  @override
+  String get todoDueTomorrow => 'Mâine';
+  @override
+  String get todoDueNextWeek => 'Peste o săptămână';
+  @override
+  String get todoPickDate => 'Alege o dată…';
+  @override
+  String get todoQuickAddHint => 'Adaugă o sarcină — +proiect @context due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1571,7 +1583,17 @@ final class RomanianStrings extends Strings {
   @override
   String get openBeside => 'Deschide alături';
   @override
+  String get actionOpen => 'Deschide';
+  @override
+  String get revealInTree => 'Arată în arbore';
+  @override
   String get closeAllNotes => 'Închide toate';
+  @override
+  String get tabCloseOthers => 'Închide celelalte';
+  @override
+  String get tabCloseToRight => 'Închide la dreapta';
+  @override
+  String get copyPathAction => 'Copiază calea';
   @override
   String get sidePanelTooltip => 'Afișează sau ascunde panoul lateral';
   @override
@@ -1590,6 +1612,10 @@ final class RomanianStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotecă';
   @override
   String get paletteGroupGoTo => 'Mergi la';
+  @override
+  String get appMenuTooltip => 'Meniu';
+  @override
+  String get appMenuHelp => 'Ajutor';
   @override
   String get paletteGroupJournal => 'Jurnal';
   @override
@@ -1976,6 +2002,8 @@ final class RomanianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Mutat în coș';
+  @override
+  String treeMarkedCount(int count) => 'Selectate: $count';
   @override
   String get deletedMessage => 'Șters';
   @override

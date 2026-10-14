@@ -245,6 +245,8 @@ final class SlovenianStrings extends Strings {
   String spellCheckLine(int line) => 'vrstica $line';
   @override
   String get addWordToDictionary => 'Dodaj v slovník';
+  @override
+  String get spellCheckIgnore => 'Prezri';
 
   @override
   String indentWidthValue(int spaces) => '$spaces presledkov';
@@ -1082,6 +1084,16 @@ final class SlovenianStrings extends Strings {
   String get todoEditAction => 'Uredi';
   @override
   String get todoDeleteAction => 'Izbriši';
+  @override
+  String get todoSetDue => 'Nastavi rok';
+  @override
+  String get todoDueTomorrow => 'Jutri';
+  @override
+  String get todoDueNextWeek => 'Čez en teden';
+  @override
+  String get todoPickDate => 'Izberi datum…';
+  @override
+  String get todoQuickAddHint => 'Dodaj opravilo — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1557,7 +1569,17 @@ final class SlovenianStrings extends Strings {
   @override
   String get openBeside => 'Odpri ob strani';
   @override
+  String get actionOpen => 'Odpri';
+  @override
+  String get revealInTree => 'Pokaži v drevesu';
+  @override
   String get closeAllNotes => 'Zapri vse';
+  @override
+  String get tabCloseOthers => 'Zapri druge';
+  @override
+  String get tabCloseToRight => 'Zapri na desni';
+  @override
+  String get copyPathAction => 'Kopiraj pot';
   @override
   String get sidePanelTooltip => 'Pokaži ali skrij stransko ploščo';
   @override
@@ -1576,6 +1598,10 @@ final class SlovenianStrings extends Strings {
   String get paletteGroupLibrary => 'Knjižnica';
   @override
   String get paletteGroupGoTo => 'Pojdi na';
+  @override
+  String get appMenuTooltip => 'Meni';
+  @override
+  String get appMenuHelp => 'Pomoč';
   @override
   String get paletteGroupJournal => 'Dnevnik';
   @override
@@ -1958,6 +1984,8 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Preneseno v koš';
+  @override
+  String treeMarkedCount(int count) => 'Izbrano: $count';
   @override
   String get deletedMessage => 'Izbrisano';
   @override

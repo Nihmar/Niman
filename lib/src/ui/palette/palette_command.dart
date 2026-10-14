@@ -76,7 +76,8 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.nextTab ||
   AppCommand.previousTab ||
   AppCommand.noteBack ||
-  AppCommand.noteForward => PaletteGroup.view,
+  AppCommand.noteForward ||
+  AppCommand.revealInTree => PaletteGroup.view,
   AppCommand.reindexLibrary ||
   AppCommand.exportLibrary ||
   AppCommand.switchLibrary => PaletteGroup.library,

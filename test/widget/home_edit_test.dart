@@ -222,6 +222,48 @@ void main() {
       expect(find.byKey(const Key('home-tile-recent')), findsNothing);
     });
 
+    testWidgets('a pointer sets a tile in the inspector beside the grid, and '
+        'a right click gives its menu (#712)', (tester) async {
+      await open(tester, _desktop);
+      await tester.ensureVisible(find.byKey(const Key('home-add-search')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('home-add-search')));
+      await settle(tester);
+      final searchId = controller.libraryHome!.tiles
+          .firstWhere((t) => t.kind == HomeTileKind.search)
+          .id;
+      await tester.ensureVisible(find.byKey(Key('home-settings-$searchId')));
+      await tester.pump();
+      final id = controller.libraryHome!.tiles
+          .firstWhere((t) => t.kind == HomeTileKind.search)
+          .id;
+      await tester.tap(find.byKey(Key('home-settings-$id')));
+      await settle(tester);
+      expect(find.byKey(const Key('home-tile-inspector')), findsOne);
+      expect(find.byType(AlertDialog), findsNothing);
+      await tester.enterText(
+        find.byKey(const Key('home-search-title')),
+        'Plans',
+      );
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await settle(tester);
+      expect(saved(id).title, 'Plans');
+
+      await tester.tap(
+        find.byKey(Key('home-drag-$id')),
+        buttons: kSecondaryButton,
+      );
+      await settle(tester);
+      await tester.tap(find.byKey(Key('home-menu-hide-$id')));
+      await settle(tester);
+      expect(saved(id).hidden, isTrue);
+      expect(
+        find.byKey(const Key('home-tile-inspector')),
+        findsNothing,
+        reason: 'a hidden tile is not inspected',
+      );
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
     testWidgets('a saved search is added, set and shown', (tester) async {
       await controller.createNote(parentPath: '', name: 'Plans');
       controller.searchHits = [

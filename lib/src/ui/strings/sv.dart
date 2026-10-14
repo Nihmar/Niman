@@ -242,6 +242,8 @@ final class SwedishStrings extends Strings {
   String spellCheckLine(int line) => 'rad $line';
   @override
   String get addWordToDictionary => 'Lägg till i ordboken';
+  @override
+  String get spellCheckIgnore => 'Ignorera';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mellanslag';
@@ -1081,6 +1083,17 @@ final class SwedishStrings extends Strings {
   String get todoEditAction => 'Redigera';
   @override
   String get todoDeleteAction => 'Ta bort';
+  @override
+  String get todoSetDue => 'Ange förfallodag';
+  @override
+  String get todoDueTomorrow => 'I morgon';
+  @override
+  String get todoDueNextWeek => 'Om en vecka';
+  @override
+  String get todoPickDate => 'Välj ett datum…';
+  @override
+  String get todoQuickAddHint =>
+      'Lägg till en uppgift — +projekt @kontext due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1563,7 +1576,17 @@ final class SwedishStrings extends Strings {
   @override
   String get openBeside => 'Öppna vid sidan';
   @override
+  String get actionOpen => 'Öppna';
+  @override
+  String get revealInTree => 'Visa i trädet';
+  @override
   String get closeAllNotes => 'Stäng alla';
+  @override
+  String get tabCloseOthers => 'Stäng andra';
+  @override
+  String get tabCloseToRight => 'Stäng till höger';
+  @override
+  String get copyPathAction => 'Kopiera sökväg';
   @override
   String get sidePanelTooltip => 'Visa eller dölj sidopanelen';
   @override
@@ -1582,6 +1605,10 @@ final class SwedishStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotek';
   @override
   String get paletteGroupGoTo => 'Gå till';
+  @override
+  String get appMenuTooltip => 'Meny';
+  @override
+  String get appMenuHelp => 'Hjälp';
   @override
   String get paletteGroupJournal => 'Dagbok';
   @override
@@ -1968,6 +1995,8 @@ final class SwedishStrings extends Strings {
 
   @override
   String get movedToTrash => 'Flyttad till papperskorgen';
+  @override
+  String treeMarkedCount(int count) => 'Markerade: $count';
   @override
   String get deletedMessage => 'Togs bort';
   @override

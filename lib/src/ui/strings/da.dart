@@ -242,6 +242,8 @@ final class DanishStrings extends Strings {
   String spellCheckLine(int line) => 'linje $line';
   @override
   String get addWordToDictionary => 'Tilføj til ordbog';
+  @override
+  String get spellCheckIgnore => 'Ignorer';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mellemrum';
@@ -1075,6 +1077,16 @@ final class DanishStrings extends Strings {
   String get todoEditAction => 'Rediger';
   @override
   String get todoDeleteAction => 'Slet';
+  @override
+  String get todoSetDue => 'Sæt forfald';
+  @override
+  String get todoDueTomorrow => 'I morgen';
+  @override
+  String get todoDueNextWeek => 'Om en uge';
+  @override
+  String get todoPickDate => 'Vælg en dato…';
+  @override
+  String get todoQuickAddHint => 'Tilføj en opgave — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1555,7 +1567,17 @@ final class DanishStrings extends Strings {
   @override
   String get openBeside => 'Åbn ved siden af';
   @override
+  String get actionOpen => 'Åbn';
+  @override
+  String get revealInTree => 'Vis i træet';
+  @override
   String get closeAllNotes => 'Luk alle';
+  @override
+  String get tabCloseOthers => 'Luk de andre';
+  @override
+  String get tabCloseToRight => 'Luk til højre';
+  @override
+  String get copyPathAction => 'Kopiér sti';
   @override
   String get sidePanelTooltip => 'Vis eller skjul sidepanelet';
   @override
@@ -1574,6 +1596,10 @@ final class DanishStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotek';
   @override
   String get paletteGroupGoTo => 'Gå til';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Hjælp';
   @override
   String get paletteGroupJournal => 'Dagbog';
   @override
@@ -1954,6 +1980,8 @@ final class DanishStrings extends Strings {
 
   @override
   String get movedToTrash => 'Flyttet til affald';
+  @override
+  String treeMarkedCount(int count) => 'Valgt: $count';
   @override
   String get deletedMessage => 'Slettet';
   @override

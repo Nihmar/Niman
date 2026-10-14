@@ -14,6 +14,7 @@ import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
+import 'package:niman/src/ui/history/note_version_screen.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
@@ -79,6 +80,65 @@ void main() {
     await settle(tester);
     expect(controller.workspace.dockPane, DockPane.history);
     await tester.tap(find.byKey(const Key('dock-close')));
+    await settle(tester);
+    expect(dock, findsNothing);
+  });
+
+  testWidgets('a version in the dock opens beside the note as a compare tab, '
+      'and a restore closes it (#712)', (tester) async {
+    controller.seedVersion(
+      'alpha.md',
+      number: 1,
+      savedAt: DateTime(2026, 10, 3, 14, 2),
+      text: 'the old alpha',
+    );
+    await pumpAt(tester, const Size(1400, 900));
+    await tester.tap(find.byKey(const Key('dock-pane-history')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('dock-history-1')));
+    await settle(tester);
+
+    final tab = find.byKey(const Key('compare-tab'));
+    expect(tab, findsOne);
+    expect(
+      find.descendant(of: tab, matching: find.textContaining('alpha.md — ')),
+      findsOne,
+    );
+    expect(find.byType(NoteVersionScreen), findsOne);
+    expect(dock, findsOne, reason: 'the dock stays beside it');
+    // A note tab shows the note again; the chip brings the version back.
+    await tester.tap(find.byKey(const Key('note-tab-0')));
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsNothing);
+    await tester.tap(tab);
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsOne);
+
+    await tester.tap(find.byKey(const Key('history-restore')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('history-restore-confirm')));
+    await settle(tester);
+    expect(controller.restores, [('alpha.md', 1)]);
+    expect(tab, findsNothing);
+    expect(find.byKey(const Key('history-restored-snack')), findsOne);
+  });
+
+  testWidgets('the title bar menu runs a command, its key beside it (#712)', (
+    tester,
+  ) async {
+    await pumpAt(tester, const Size(1400, 900));
+    expect(dock, findsOne);
+    await tester.tap(find.byKey(const Key('app-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('app-menu-group-view')));
+    await settle(tester);
+    final item = find.byKey(const Key('app-menu-toggleDock'));
+    expect(
+      find.descendant(of: item, matching: find.textContaining('B')),
+      findsWidgets,
+      reason: 'Ctrl+Shift+B shown',
+    );
+    await tester.tap(item);
     await settle(tester);
     expect(dock, findsNothing);
   });

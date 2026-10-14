@@ -238,6 +238,8 @@ final class AlbanianStrings extends Strings {
   String spellCheckLine(int line) => 'rreshti $line';
   @override
   String get addWordToDictionary => 'Shto në fjalor';
+  @override
+  String get spellCheckIgnore => 'Shpërfill';
 
   @override
   String indentWidthValue(int spaces) => '$spaces hapësira';
@@ -1083,6 +1085,16 @@ final class AlbanianStrings extends Strings {
   String get todoEditAction => 'Ndrysho';
   @override
   String get todoDeleteAction => 'Fshi';
+  @override
+  String get todoSetDue => 'Cakto afatin';
+  @override
+  String get todoDueTomorrow => 'Nesër';
+  @override
+  String get todoDueNextWeek => 'Pas një jave';
+  @override
+  String get todoPickDate => 'Zgjidh një datë…';
+  @override
+  String get todoQuickAddHint => 'Shto një detyrë — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1573,7 +1585,17 @@ final class AlbanianStrings extends Strings {
   @override
   String get openBeside => 'Hape anash';
   @override
+  String get actionOpen => 'Hap';
+  @override
+  String get revealInTree => 'Shfaq në pemë';
+  @override
   String get closeAllNotes => 'Mbyll të gjitha';
+  @override
+  String get tabCloseOthers => 'Mbyll të tjerat';
+  @override
+  String get tabCloseToRight => 'Mbyll djathtas';
+  @override
+  String get copyPathAction => 'Kopjo shtegun';
   @override
   String get sidePanelTooltip => 'Shfaq ose fshih panelin anësor';
   @override
@@ -1592,6 +1614,10 @@ final class AlbanianStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteka';
   @override
   String get paletteGroupGoTo => 'Shko te';
+  @override
+  String get appMenuTooltip => 'Menyja';
+  @override
+  String get appMenuHelp => 'Ndihmë';
   @override
   String get paletteGroupJournal => 'Ditari';
   @override
@@ -1975,6 +2001,8 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get movedToTrash => 'U zhvendos në kosh';
+  @override
+  String treeMarkedCount(int count) => 'Të zgjedhura: $count';
   @override
   String get deletedMessage => 'U fshi';
   @override

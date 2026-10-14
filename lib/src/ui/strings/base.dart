@@ -111,6 +111,7 @@ abstract base class Strings {
   /// The context-menu entry that adds a word to the personal dictionary
   /// (issue #60).
   String get addWordToDictionary;
+  String get spellCheckIgnore;
 
   /// The indent width as a row's value, e.g. "4 spaces".
   String indentWidthValue(int spaces);
@@ -586,6 +587,11 @@ abstract base class Strings {
   String get todoSave;
   String get todoEditAction;
   String get todoDeleteAction;
+  String get todoSetDue;
+  String get todoDueTomorrow;
+  String get todoDueNextWeek;
+  String get todoPickDate;
+  String get todoQuickAddHint;
 
   // Task filters (T-TD-05).
   String get todoDueOverdue;
@@ -825,7 +831,12 @@ abstract base class Strings {
   String get splitDown;
   String get moveToOtherPane;
   String get openBeside;
+  String get actionOpen;
+  String get revealInTree;
   String get closeAllNotes;
+  String get tabCloseOthers;
+  String get tabCloseToRight;
+  String get copyPathAction;
   String get sidePanelTooltip;
   String get historyAllVersions;
   String get commandPaletteTitle;
@@ -835,6 +846,8 @@ abstract base class Strings {
   String get paletteGroupView;
   String get paletteGroupLibrary;
   String get paletteGroupGoTo;
+  String get appMenuTooltip;
+  String get appMenuHelp;
   String get paletteGroupJournal;
   String get journalToday;
   String get journalPrevious;
@@ -1038,6 +1051,7 @@ abstract base class Strings {
   String get annotationOpenNote;
   String get annotationFailed;
   String get movedToTrash;
+  String treeMarkedCount(int count);
   String get deletedMessage;
   String deleteForeverConfirm(String name);
 

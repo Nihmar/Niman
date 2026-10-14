@@ -20,7 +20,8 @@ import 'package:path/path.dart' as p;
 /// the action into a restore of those alone (issue #67): the note keeps
 /// everything written since, except where the version was chosen.
 ///
-/// Pops with `true` once the version has been restored.
+/// Pops with `true` once the version has been restored — or, as a pane's
+/// compare tab on a desktop (#712), calls [onRestored] instead.
 final class NoteVersionScreen extends StatefulWidget {
   /// Shows [version] of the note at library-relative [path].
   const new({
@@ -28,6 +29,7 @@ final class NoteVersionScreen extends StatefulWidget {
     required this.path,
     required this.version,
     this.window,
+    this.onRestored,
     this.now = DateTime.now,
     this.compute = computeDiff,
     super.key,
@@ -46,6 +48,10 @@ final class NoteVersionScreen extends StatefulWidget {
   /// bar is drawn over the page, so the window keeps its drag area and its
   /// buttons while the page is up.
   final WindowController? window;
+
+  /// Called once the version has been restored, where the screen is a
+  /// pane's tab and has no route to pop (#712); null pops with `true`.
+  final VoidCallback? onRestored;
 
   /// The clock the day labels are read against (a test seam).
   final DateTime Function() now;
@@ -172,7 +178,13 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
           ),
         );
       }
-      if (mounted) Navigator.pop(context, true);
+      if (!mounted) return;
+      setState(() => _restoring = false);
+      if (widget.onRestored case final done?) {
+        done();
+      } else {
+        Navigator.pop(context, true);
+      }
     } on Object catch (e) {
       _log.error('restore "${widget.path}" v${widget.version.number}: $e');
       if (!mounted) return;
@@ -205,6 +217,8 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
               ),
             )
           : AppBar(
+              // A pane's tab has nothing to go back to: its ✕ closes it.
+              automaticallyImplyLeading: widget.onRestored == null,
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

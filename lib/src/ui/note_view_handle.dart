@@ -1,9 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/spell_issue.dart';
 
 /// Text a paste put in a note: where it starts, and the text as the note
 /// stored it — its line endings the note's own.
 typedef PastedText = ({int start, String text});
+
+/// A note's spelling, as a review lists and fixes it (#712): a pass over
+/// the note, the suggestions for a word, a word replaced and a word shown,
+/// a word added to the library's dictionary, and what tells of an edit.
+typedef SpellReview = ({
+  SpellScan Function() start,
+  List<String> Function(String word) suggest,
+  void Function(SpellIssue issue, String replacement) apply,
+  void Function(SpellIssue issue) reveal,
+  Future<void> Function(String word) addWord,
+  Listenable edited,
+  bool available,
+});
 
 /// What of an open note the panels beside it read and drive (#175): the
 /// right dock on a wide window, the ⋮ menu's sheets on a phone.
@@ -63,6 +78,10 @@ abstract interface class NoteViewHandle {
 
   /// The path of the note on screen, as the shell gave it.
   String get notePath;
+
+  /// The note's spelling review, for the dock's pane (#712); null where
+  /// the note has no spell check.
+  SpellReview? get spellReview;
 
   /// The absolute path a picture's [target] names in this note, or null.
   Future<String?> resolveEmbed(String target);

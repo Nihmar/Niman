@@ -240,6 +240,8 @@ final class NorwegianStrings extends Strings {
   String spellCheckLine(int line) => 'linje $line';
   @override
   String get addWordToDictionary => 'Legg til i ordbogen';
+  @override
+  String get spellCheckIgnore => 'Ignorer';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mellomrom';
@@ -1073,6 +1075,17 @@ final class NorwegianStrings extends Strings {
   String get todoEditAction => 'Rediger';
   @override
   String get todoDeleteAction => 'Slett';
+  @override
+  String get todoSetDue => 'Angi forfall';
+  @override
+  String get todoDueTomorrow => 'I morgen';
+  @override
+  String get todoDueNextWeek => 'Om en uke';
+  @override
+  String get todoPickDate => 'Velg en dato…';
+  @override
+  String get todoQuickAddHint =>
+      'Legg til en oppgave — +prosjekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1551,7 +1564,17 @@ final class NorwegianStrings extends Strings {
   @override
   String get openBeside => 'Åpne ved siden av';
   @override
+  String get actionOpen => 'Åpne';
+  @override
+  String get revealInTree => 'Vis i treet';
+  @override
   String get closeAllNotes => 'Lukk alle';
+  @override
+  String get tabCloseOthers => 'Lukk de andre';
+  @override
+  String get tabCloseToRight => 'Lukk til høyre';
+  @override
+  String get copyPathAction => 'Kopier sti';
   @override
   String get sidePanelTooltip => 'Vis eller skjul sidepanelet';
   @override
@@ -1570,6 +1593,10 @@ final class NorwegianStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotek';
   @override
   String get paletteGroupGoTo => 'Gå til';
+  @override
+  String get appMenuTooltip => 'Meny';
+  @override
+  String get appMenuHelp => 'Hjelp';
   @override
   String get paletteGroupJournal => 'Dagbok';
   @override
@@ -1949,6 +1976,8 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Flyttet til papirkorg';
+  @override
+  String treeMarkedCount(int count) => 'Valgt: $count';
   @override
   String get deletedMessage => 'Slettet';
   @override

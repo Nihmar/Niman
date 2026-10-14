@@ -115,7 +115,11 @@ motion keeps the ellipsis instead.
   it on a pane's right or bottom quarter splits the window with that tab
   — the shaded half shows what you are about to get.
 - **Closing** is by the tab's **×**, a middle click, or `Ctrl+W`. The tab
-  to the right takes its place.
+  to the right takes its place. A tab's right-click menu also closes the
+  **others**, those **to the right**, or **all** of the pane's.
+- **The tab's note.** The same menu has **Reveal in tree**, **Copy path**
+  (the library path), **Rename…**, **History** and **Export…** for the
+  note in the tab (#712).
 - **An orange dot** in place of the **×** means the note has edits not
   written yet. They are written a moment later, as always.
 
@@ -873,3 +877,10 @@ belong to. A fix updates the list on the spot, without checking the
 whole note again. The panel lists at most 200 words; when a note has
 more it says so, and **Check again** lists the next ones once some are
 fixed.
+
+On a window with room for the dock the panel is the dock's **Spelling**
+pane, beside the note instead of over it (#712): you keep writing while it
+is open, and it checks the note again after each edit, once you pause. A
+click on a word selects it in the note; **Ignore** takes the word off the
+list, and **Add to dictionary** adds it to the library's words. A phone,
+or a window too narrow for the dock, keeps the panel as a sheet.

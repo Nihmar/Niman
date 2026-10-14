@@ -230,6 +230,8 @@ final class HindiStrings extends Strings {
   String spellCheckLine(int line) => 'पंक्ति $line';
   @override
   String get addWordToDictionary => 'शब्दकोश में जोड़ें';
+  @override
+  String get spellCheckIgnore => 'अनदेखा करें';
 
   @override
   String indentWidthValue(int spaces) => '$spaces स्पेस';
@@ -1060,6 +1062,16 @@ final class HindiStrings extends Strings {
   String get todoEditAction => 'संपादित करें';
   @override
   String get todoDeleteAction => 'हटाएँ';
+  @override
+  String get todoSetDue => 'नियत तिथि तय करें';
+  @override
+  String get todoDueTomorrow => 'कल';
+  @override
+  String get todoDueNextWeek => 'अगले सप्ताह';
+  @override
+  String get todoPickDate => 'तिथि चुनें…';
+  @override
+  String get todoQuickAddHint => 'कार्य जोड़ें — +परियोजना @संदर्भ due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1533,7 +1545,17 @@ final class HindiStrings extends Strings {
   @override
   String get openBeside => 'बगल में खोलें';
   @override
+  String get actionOpen => 'खोलें';
+  @override
+  String get revealInTree => 'ट्री में दिखाएँ';
+  @override
   String get closeAllNotes => 'सभी बंद करें';
+  @override
+  String get tabCloseOthers => 'अन्य बंद करें';
+  @override
+  String get tabCloseToRight => 'दाईं ओर के बंद करें';
+  @override
+  String get copyPathAction => 'पथ कॉपी करें';
   @override
   String get sidePanelTooltip => 'साइड पैनल दिखाएँ या छिपाएँ';
   @override
@@ -1552,6 +1574,10 @@ final class HindiStrings extends Strings {
   String get paletteGroupLibrary => 'लाइब्रेरी';
   @override
   String get paletteGroupGoTo => 'जाएँ';
+  @override
+  String get appMenuTooltip => 'मेनू';
+  @override
+  String get appMenuHelp => 'सहायता';
   @override
   String get paletteGroupJournal => 'डायरी';
   @override
@@ -1932,6 +1958,8 @@ final class HindiStrings extends Strings {
 
   @override
   String get movedToTrash => 'ट्रैश में गया';
+  @override
+  String treeMarkedCount(int count) => 'चयनित: $count';
   @override
   String get deletedMessage => 'हटाया गया';
   @override

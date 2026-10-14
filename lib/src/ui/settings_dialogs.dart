@@ -4,7 +4,25 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
+
+/// Where the next [showSettingsChoice] opens on a desktop: under the value
+/// field of the row clicked (#712). The row sets it just before it asks;
+/// it is taken once.
+// ponytail: one slot, set and taken in the same tap; a row that asks
+// without setting it opens the menu a third of the way down instead.
+Rect? _choiceAnchor;
+
+/// Says where the next settings choice opens: [at], under the row's field.
+void anchorSettingsChoice(Rect? at) => _choiceAnchor = at;
+
+Rect? _takeChoiceAnchor() {
+  final at = _choiceAnchor;
+  _choiceAnchor = null;
+  return at;
+}
 
 /// One option in a [showSettingsChoice] dialog.
 final class SettingsOption<T> {
@@ -23,6 +41,11 @@ final class SettingsOption<T> {
 /// [subtitle] is the explanation the old inline layout printed under
 /// every title. It belongs here: this is the moment the user is deciding,
 /// and the list behind is quieter without it.
+///
+/// Where a pointer aims it is a drop-down under the row's field (#712),
+/// the current option checked: a field that reads as a drop-down acts as
+/// one, instead of a dialog over the Settings window. The row keeps the
+/// explanation under its title.
 Future<T?> showSettingsChoice<T>(
   BuildContext context, {
   required String title,
@@ -31,6 +54,27 @@ Future<T?> showSettingsChoice<T>(
   String? subtitle,
   Key? dialogKey,
 }) {
+  final anchor = _takeChoiceAnchor();
+  if (pointerDense(Theme.of(context))) {
+    return showActionSheet<T>(
+      context,
+      sheetKey: dialogKey,
+      anchor: anchor,
+      items: (context) => [
+        for (final option in options)
+          ListTile(
+            key: Key('settings-choice-${option.value}'),
+            dense: true,
+            leading: option.value == current
+                ? const Icon(Icons.check, size: 20)
+                : const SizedBox(width: 20),
+            title: Text(option.label),
+            selected: option.value == current,
+            onTap: () => Navigator.of(context).pop(option.value),
+          ),
+      ],
+    );
+  }
   return showDialog<T>(
     context: context,
     builder: (context) => SimpleDialog(

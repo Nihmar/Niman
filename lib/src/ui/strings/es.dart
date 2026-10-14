@@ -245,6 +245,8 @@ final class SpanishStrings extends Strings {
   String spellCheckLine(int line) => 'línea $line';
   @override
   String get addWordToDictionary => 'Añadir al diccionario';
+  @override
+  String get spellCheckIgnore => 'Ignorar';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espacios';
@@ -1092,6 +1094,16 @@ final class SpanishStrings extends Strings {
   String get todoEditAction => 'Editar';
   @override
   String get todoDeleteAction => 'Eliminar';
+  @override
+  String get todoSetDue => 'Fijar vencimiento';
+  @override
+  String get todoDueTomorrow => 'Mañana';
+  @override
+  String get todoDueNextWeek => 'Dentro de una semana';
+  @override
+  String get todoPickDate => 'Elegir fecha…';
+  @override
+  String get todoQuickAddHint => 'Añadir una tarea — +proyecto @contexto due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1586,7 +1598,17 @@ final class SpanishStrings extends Strings {
   @override
   String get openBeside => 'Abrir al lado';
   @override
+  String get actionOpen => 'Abrir';
+  @override
+  String get revealInTree => 'Mostrar en el árbol';
+  @override
   String get closeAllNotes => 'Cerrar todas';
+  @override
+  String get tabCloseOthers => 'Cerrar las demás';
+  @override
+  String get tabCloseToRight => 'Cerrar las de la derecha';
+  @override
+  String get copyPathAction => 'Copiar ruta';
   @override
   String get sidePanelTooltip => 'Mostrar u ocultar el panel lateral';
   @override
@@ -1605,6 +1627,10 @@ final class SpanishStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteca';
   @override
   String get paletteGroupGoTo => 'Ir a';
+  @override
+  String get appMenuTooltip => 'Menú';
+  @override
+  String get appMenuHelp => 'Ayuda';
   @override
   String get paletteGroupJournal => 'Diario';
   @override
@@ -1992,6 +2018,8 @@ final class SpanishStrings extends Strings {
 
   @override
   String get movedToTrash => 'Movido a la papelera';
+  @override
+  String treeMarkedCount(int count) => 'Seleccionados: $count';
   @override
   String get deletedMessage => 'Eliminado';
   @override

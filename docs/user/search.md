@@ -12,6 +12,12 @@ end. `Ctrl/⌘+Shift+F` shows the sidebar and puts the cursor in the field,
 from any destination. Choosing *Files* brings the tree back. A phone
 keeps Search as a tab of its own.
 
+In the field, `↓` / `↑` move through the results without opening them and
+`Enter` opens the one marked. A right click on a result opens its menu:
+*Open*, *Open in new tab*, *Open to the side*, *Reveal in tree* and
+*Replace in this note*; a middle click or `Ctrl`+click opens it in a new
+tab. On a phone a long press gives *Replace in this note*.
+
 The index keeps the words of every note, not a copy of its text: it stays
 small, whatever the size of your notes. The text shown under a result is
 read from the note itself, when its row comes on screen.

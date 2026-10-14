@@ -239,6 +239,8 @@ final class EnglishStrings extends Strings {
 
   @override
   String get addWordToDictionary => 'Add to dictionary';
+  @override
+  String get spellCheckIgnore => 'Ignore';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spaces';
@@ -1069,6 +1071,16 @@ final class EnglishStrings extends Strings {
   String get todoEditAction => 'Edit';
   @override
   String get todoDeleteAction => 'Delete';
+  @override
+  String get todoSetDue => 'Set due';
+  @override
+  String get todoDueTomorrow => 'Tomorrow';
+  @override
+  String get todoDueNextWeek => 'Next week';
+  @override
+  String get todoPickDate => 'Pick a date…';
+  @override
+  String get todoQuickAddHint => 'Add a task — +project @context due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1548,7 +1560,17 @@ final class EnglishStrings extends Strings {
   @override
   String get openBeside => 'Open to the side';
   @override
+  String get actionOpen => 'Open';
+  @override
+  String get revealInTree => 'Reveal in tree';
+  @override
   String get closeAllNotes => 'Close all';
+  @override
+  String get tabCloseOthers => 'Close others';
+  @override
+  String get tabCloseToRight => 'Close to the right';
+  @override
+  String get copyPathAction => 'Copy path';
   @override
   String get sidePanelTooltip => 'Show or hide the side panel';
   @override
@@ -1567,6 +1589,10 @@ final class EnglishStrings extends Strings {
   String get paletteGroupLibrary => 'Library';
   @override
   String get paletteGroupGoTo => 'Go to';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Help';
   @override
   String get paletteGroupJournal => 'Journal';
   @override
@@ -1941,6 +1967,8 @@ final class EnglishStrings extends Strings {
 
   @override
   String get movedToTrash => 'Moved to trash';
+  @override
+  String treeMarkedCount(int count) => 'Selected: $count';
   @override
   String get deletedMessage => 'Deleted';
   @override

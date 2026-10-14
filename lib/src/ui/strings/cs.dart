@@ -242,6 +242,8 @@ final class CzechStrings extends Strings {
   String spellCheckLine(int line) => 'řádek $line';
   @override
   String get addWordToDictionary => 'Přidat do slovníku';
+  @override
+  String get spellCheckIgnore => 'Ignorovat';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mezerníky';
@@ -1077,6 +1079,16 @@ final class CzechStrings extends Strings {
   String get todoEditAction => 'Upravit';
   @override
   String get todoDeleteAction => 'Smazat';
+  @override
+  String get todoSetDue => 'Nastavit termín';
+  @override
+  String get todoDueTomorrow => 'Zítra';
+  @override
+  String get todoDueNextWeek => 'Za týden';
+  @override
+  String get todoPickDate => 'Vybrat datum…';
+  @override
+  String get todoQuickAddHint => 'Přidat úkol — +projekt @kontext due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1553,7 +1565,17 @@ final class CzechStrings extends Strings {
   @override
   String get openBeside => 'Otevřít vedle';
   @override
+  String get actionOpen => 'Otevřít';
+  @override
+  String get revealInTree => 'Zobrazit ve stromu';
+  @override
   String get closeAllNotes => 'Zavřít vše';
+  @override
+  String get tabCloseOthers => 'Zavřít ostatní';
+  @override
+  String get tabCloseToRight => 'Zavřít vpravo';
+  @override
+  String get copyPathAction => 'Kopírovat cestu';
   @override
   String get sidePanelTooltip => 'Zobrazit nebo skrýt boční panel';
   @override
@@ -1572,6 +1594,10 @@ final class CzechStrings extends Strings {
   String get paletteGroupLibrary => 'Knihovna';
   @override
   String get paletteGroupGoTo => 'Přejít na';
+  @override
+  String get appMenuTooltip => 'Nabídka';
+  @override
+  String get appMenuHelp => 'Nápověda';
   @override
   String get paletteGroupJournal => 'Deník';
   @override
@@ -1952,6 +1978,8 @@ final class CzechStrings extends Strings {
 
   @override
   String get movedToTrash => 'Přesunuto do koše';
+  @override
+  String treeMarkedCount(int count) => 'Vybráno: $count';
   @override
   String get deletedMessage => 'Smazáno';
   @override

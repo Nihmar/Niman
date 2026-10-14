@@ -246,6 +246,8 @@ final class GreekStrings extends Strings {
   String spellCheckLine(int line) => 'γραμμή $line';
   @override
   String get addWordToDictionary => 'Προσθήκη στο λεξικό';
+  @override
+  String get spellCheckIgnore => 'Παράβλεψη';
 
   @override
   String indentWidthValue(int spaces) => '$spaces κενά';
@@ -1107,6 +1109,16 @@ final class GreekStrings extends Strings {
   String get todoEditAction => 'Επεξεργασία';
   @override
   String get todoDeleteAction => 'Διαγραφή';
+  @override
+  String get todoSetDue => 'Ορισμός προθεσμίας';
+  @override
+  String get todoDueTomorrow => 'Αύριο';
+  @override
+  String get todoDueNextWeek => 'Σε μία εβδομάδα';
+  @override
+  String get todoPickDate => 'Επιλογή ημερομηνίας…';
+  @override
+  String get todoQuickAddHint => 'Προσθήκη εργασίας — +έργο @πλαίσιο due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1608,7 +1620,17 @@ final class GreekStrings extends Strings {
   @override
   String get openBeside => 'Άνοιγμα στο πλάι';
   @override
+  String get actionOpen => 'Άνοιγμα';
+  @override
+  String get revealInTree => 'Εμφάνιση στο δέντρο';
+  @override
   String get closeAllNotes => 'Κλείσιμο όλων';
+  @override
+  String get tabCloseOthers => 'Κλείσιμο των άλλων';
+  @override
+  String get tabCloseToRight => 'Κλείσιμο προς τα δεξιά';
+  @override
+  String get copyPathAction => 'Αντιγραφή διαδρομής';
   @override
   String get sidePanelTooltip => 'Εμφάνιση ή απόκρυψη του πλαϊνού πίνακα';
   @override
@@ -1627,6 +1649,10 @@ final class GreekStrings extends Strings {
   String get paletteGroupLibrary => 'Βιβλιοθήκη';
   @override
   String get paletteGroupGoTo => 'Μετάβαση';
+  @override
+  String get appMenuTooltip => 'Μενού';
+  @override
+  String get appMenuHelp => 'Βοήθεια';
   @override
   String get paletteGroupJournal => 'Ημερολόγιο';
   @override
@@ -2025,6 +2051,8 @@ final class GreekStrings extends Strings {
 
   @override
   String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';
+  @override
+  String treeMarkedCount(int count) => 'Επιλεγμένα: $count';
   @override
   String get deletedMessage => 'Διαγράφηκε';
   @override

@@ -31,6 +31,9 @@ final class _Note implements NoteViewHandle {
   ]);
 
   @override
+  SpellReview? spellReview;
+
+  @override
   void jumpToHeading(int line) => jumps.add(line);
 
   @override

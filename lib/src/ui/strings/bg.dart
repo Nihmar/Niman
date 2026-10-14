@@ -246,6 +246,8 @@ final class BulgarianStrings extends Strings {
   String spellCheckLine(int line) => 'ред $line';
   @override
   String get addWordToDictionary => 'Добави в речника';
+  @override
+  String get spellCheckIgnore => 'Пропусни';
 
   @override
   String indentWidthValue(int spaces) => '$spaces интервала';
@@ -1085,6 +1087,16 @@ final class BulgarianStrings extends Strings {
   String get todoEditAction => 'Редактирай';
   @override
   String get todoDeleteAction => 'Изтрий';
+  @override
+  String get todoSetDue => 'Задай срок';
+  @override
+  String get todoDueTomorrow => 'Утре';
+  @override
+  String get todoDueNextWeek => 'След седмица';
+  @override
+  String get todoPickDate => 'Избери дата…';
+  @override
+  String get todoQuickAddHint => 'Добави задача — +проект @контекст due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1573,7 +1585,17 @@ final class BulgarianStrings extends Strings {
   @override
   String get openBeside => 'Отвори отстрани';
   @override
+  String get actionOpen => 'Отвори';
+  @override
+  String get revealInTree => 'Покажи в дървото';
+  @override
   String get closeAllNotes => 'Затвори всички';
+  @override
+  String get tabCloseOthers => 'Затвори другите';
+  @override
+  String get tabCloseToRight => 'Затвори вдясно';
+  @override
+  String get copyPathAction => 'Копирай пътя';
   @override
   String get sidePanelTooltip => 'Покажи или скрий страничния панел';
   @override
@@ -1592,6 +1614,10 @@ final class BulgarianStrings extends Strings {
   String get paletteGroupLibrary => 'Библиотека';
   @override
   String get paletteGroupGoTo => 'Към';
+  @override
+  String get appMenuTooltip => 'Меню';
+  @override
+  String get appMenuHelp => 'Помощ';
   @override
   String get paletteGroupJournal => 'Дневник';
   @override
@@ -1980,6 +2006,8 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Преместен в коша';
+  @override
+  String treeMarkedCount(int count) => 'Избрани: $count';
   @override
   String get deletedMessage => 'Изтрито';
   @override

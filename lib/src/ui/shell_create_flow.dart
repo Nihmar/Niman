@@ -34,7 +34,31 @@ final class ShellCreateFlow {
     required this.newItemRule,
     required this.guard,
     required this.onCreated,
+    this.nameInPlace,
   });
+
+  /// Asks for a new note's or folder's name in the tree, in a row under
+  /// `folder` (#712): null where the tree cannot take it — a phone, the
+  /// tree out of sight — and the name dialog asks instead. The future is
+  /// the name, or null when the row was given up.
+  final Future<String?>? Function({
+    required String folder,
+    required bool isDir,
+    required String initial,
+  })?
+  nameInPlace;
+
+  /// The name of a note or a folder to make in [folder]: typed in the
+  /// tree where it can be, else in the dialog titled [title].
+  Future<String?> _askName(
+    BuildContext context, {
+    required String folder,
+    required bool isDir,
+    required String title,
+    required String initial,
+  }) =>
+      nameInPlace?.call(folder: folder, isDir: isDir, initial: initial) ??
+      showNameDialog(context, title: title, initial: initial);
 
   /// The open library's session.
   final LibrarySession controller;
@@ -52,15 +76,18 @@ final class ShellCreateFlow {
   /// A plain Markdown note in [parent] (default: where the library's
   /// rule puts new notes).
   Future<void> createNote(BuildContext context, {String? parent}) async {
-    final name = await showNameDialog(
+    final folder = parent ?? newItemRule.folder;
+    final name = await _askName(
       context,
+      folder: folder,
+      isDir: false,
       title: AppStrings.newNoteTitle,
       initial: AppStrings.newNoteTitle,
     );
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createNote(
-        parentPath: parent ?? newItemRule.folder,
+        parentPath: folder,
         name: name,
       );
       onCreated((path: row.path, isDir: false, hasKind: false));
@@ -130,15 +157,18 @@ final class ShellCreateFlow {
   /// A folder in [parent] (default: where the library's rule puts new
   /// folders).
   Future<void> createFolder(BuildContext context, {String? parent}) async {
-    final name = await showNameDialog(
+    final folder = parent ?? newItemRule.folder;
+    final name = await _askName(
       context,
+      folder: folder,
+      isDir: true,
       title: AppStrings.newFolderTitle,
       initial: AppStrings.newFolderTitle,
     );
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createFolder(
-        parentPath: parent ?? newItemRule.folder,
+        parentPath: folder,
         name: name,
       );
       onCreated((path: row.path, isDir: true, hasKind: false));

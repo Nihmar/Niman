@@ -218,6 +218,7 @@ final class AppStrings {
   static String spellCheckLine(int line) => _s.spellCheckLine(line);
 
   static String get addWordToDictionary => _s.addWordToDictionary;
+  static String get spellCheckIgnore => _s.spellCheckIgnore;
 
   /// The indent width as a row's value, e.g. "4 spaces".
   static String indentWidthValue(int spaces) => _s.indentWidthValue(spaces);
@@ -732,6 +733,11 @@ final class AppStrings {
   static String get todoSave => _s.todoSave;
   static String get todoEditAction => _s.todoEditAction;
   static String get todoDeleteAction => _s.todoDeleteAction;
+  static String get todoSetDue => _s.todoSetDue;
+  static String get todoDueTomorrow => _s.todoDueTomorrow;
+  static String get todoDueNextWeek => _s.todoDueNextWeek;
+  static String get todoPickDate => _s.todoPickDate;
+  static String get todoQuickAddHint => _s.todoQuickAddHint;
 
   // Task filters (T-TD-05).
   static String get todoDueOverdue => _s.todoDueOverdue;
@@ -1037,7 +1043,12 @@ final class AppStrings {
   static String get splitDown => _s.splitDown;
   static String get moveToOtherPane => _s.moveToOtherPane;
   static String get openBeside => _s.openBeside;
+  static String get actionOpen => _s.actionOpen;
+  static String get revealInTree => _s.revealInTree;
   static String get closeAllNotes => _s.closeAllNotes;
+  static String get tabCloseOthers => _s.tabCloseOthers;
+  static String get tabCloseToRight => _s.tabCloseToRight;
+  static String get copyPathAction => _s.copyPathAction;
   static String get sidePanelTooltip => _s.sidePanelTooltip;
   static String get historyAllVersions => _s.historyAllVersions;
   static String get commandPaletteTitle => _s.commandPaletteTitle;
@@ -1047,6 +1058,8 @@ final class AppStrings {
   static String get paletteGroupView => _s.paletteGroupView;
   static String get paletteGroupLibrary => _s.paletteGroupLibrary;
   static String get paletteGroupGoTo => _s.paletteGroupGoTo;
+  static String get appMenuTooltip => _s.appMenuTooltip;
+  static String get appMenuHelp => _s.appMenuHelp;
   static String get paletteGroupJournal => _s.paletteGroupJournal;
   static String get journalToday => _s.journalToday;
   static String get journalPrevious => _s.journalPrevious;
@@ -1218,6 +1231,7 @@ final class AppStrings {
   static String get annotationOpenNote => _s.annotationOpenNote;
   static String get annotationFailed => _s.annotationFailed;
   static String get movedToTrash => _s.movedToTrash;
+  static String treeMarkedCount(int count) => _s.treeMarkedCount(count);
   static String get deletedMessage => _s.deletedMessage;
   static String deleteForeverConfirm(String name) =>
       _s.deleteForeverConfirm(name);

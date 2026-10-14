@@ -238,6 +238,8 @@ final class LatvianStrings extends Strings {
   String spellCheckLine(int line) => 'rinda $line';
   @override
   String get addWordToDictionary => 'Pievienot vārdnīcai';
+  @override
+  String get spellCheckIgnore => 'Ignorēt';
 
   @override
   String indentWidthValue(int spaces) => '$spaces atstarpes';
@@ -1075,6 +1077,17 @@ final class LatvianStrings extends Strings {
   String get todoEditAction => 'Rediģēt';
   @override
   String get todoDeleteAction => 'Dzēst';
+  @override
+  String get todoSetDue => 'Iestatīt termiņu';
+  @override
+  String get todoDueTomorrow => 'Rīt';
+  @override
+  String get todoDueNextWeek => 'Pēc nedēļas';
+  @override
+  String get todoPickDate => 'Izvēlēties datumu…';
+  @override
+  String get todoQuickAddHint =>
+      'Pievienot uzdevumu — +projekts @konteksts due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1553,7 +1566,17 @@ final class LatvianStrings extends Strings {
   @override
   String get openBeside => 'Atvērt blakus';
   @override
+  String get actionOpen => 'Atvērt';
+  @override
+  String get revealInTree => 'Rādīt kokā';
+  @override
   String get closeAllNotes => 'Aizvērt visas';
+  @override
+  String get tabCloseOthers => 'Aizvērt pārējās';
+  @override
+  String get tabCloseToRight => 'Aizvērt pa labi';
+  @override
+  String get copyPathAction => 'Kopēt ceļu';
   @override
   String get sidePanelTooltip => 'Rādīt vai slēpt sānu paneli';
   @override
@@ -1572,6 +1595,10 @@ final class LatvianStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotēka';
   @override
   String get paletteGroupGoTo => 'Doties uz';
+  @override
+  String get appMenuTooltip => 'Izvēlne';
+  @override
+  String get appMenuHelp => 'Palīdzība';
   @override
   String get paletteGroupJournal => 'Dienasgrāmata';
   @override
@@ -1955,6 +1982,8 @@ final class LatvianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Pārvietots konteinerā';
+  @override
+  String treeMarkedCount(int count) => 'Atlasīti: $count';
   @override
   String get deletedMessage => 'Dzēsts';
   @override

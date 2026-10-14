@@ -190,4 +190,52 @@ void main() {
     expect(find.byKey(const Key('note-tab-dot-0')), findsOne);
     expect(builds, 2);
   });
+
+  testWidgets('the right-click menu closes the others, those to the right '
+      'or all, and hands the note actions over (#712)', (tester) async {
+    final asked = <(int, NoteTabAction)>[];
+    Future<void> menu(String item, {int tab = 0}) async {
+      await tester.tap(
+        find.byKey(Key('note-tab-$tab')),
+        buttons: kSecondaryButton,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key(item)));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            height: 38,
+            child: NoteTabBar(
+              tabs: const [
+                WorkspaceTab('a.md'),
+                WorkspaceTab('b.md'),
+                WorkspaceTab('c.md'),
+              ],
+              active: 0,
+              unsaved: const {},
+              onActivate: activated.add,
+              onClose: closed.add,
+              onNew: () {},
+              onTabAction: (index, action, _) => asked.add((index, action)),
+            ),
+          ),
+        ),
+      ),
+    );
+    await menu('tab-menu-close-others', tab: 1);
+    expect(closed, [2, 0], reason: 'from the end, the indices stay true');
+    closed.clear();
+    await menu('tab-menu-close-right');
+    expect(closed, [2, 1]);
+    closed.clear();
+    await menu('tab-menu-close-all');
+    expect(closed, [2, 1, 0]);
+    await menu('tab-menu-copyPath', tab: 2);
+    await menu('tab-menu-history', tab: 1);
+    expect(asked, [(2, NoteTabAction.copyPath), (1, NoteTabAction.history)]);
+  });
 }

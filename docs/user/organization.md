@@ -79,6 +79,15 @@ row to show the unchanged lines) or to read its whole text. **Restore
 this version** keeps the current text as a version first, then puts the
 old one back — the snackbar's **Undo** swaps them again.
 
+On a desktop with room for the dock, **History** on the note on screen
+opens the dock's **History** pane instead, and a version there opens
+beside it as a tab of the pane, `note.md — 3 Oct 14:02`, with the same
+Changes / Version switch and **Restore** (#712): the note's own tabs and
+the dock stay where they are, a note tab shows the note again and the
+version's tab brings it back. A restore closes that tab and offers
+**Undo**. **All versions**, at the foot of the pane, and **History** on
+any other note open the history page.
+
 **Following the note.** Renaming or moving a note (or its folder) moves
 its history too, and rewrites the links other notes hold to it: a wikilink
 written by path and a Markdown link follow the new path, and a wikilink
@@ -148,6 +157,14 @@ panel**; off, a note is its own text in both surfaces.
 
 A date is picked, not typed: a `date:` field opens the platform's own calendar,
 and the file gets back the `YYYY-MM-DD` the parser reads as a date.
+
+On a desktop the panel edits in place, with no dialog (#712): a click on a
+value turns it into a field — `Enter` or a click elsewhere keeps it, `Esc`
+leaves it — a date opens a calendar under itself, a list's **+** takes one
+item in a field of its own, **Add field** asks for the key in a row and then
+opens its value, and the type chip at the row's end is a menu that turns the
+field into another type (a list's items joined into one value, a value made
+the one item of a list). A phone keeps the dialog.
 
 In every surface the file is the only copy: an edit rewrites that key's line
 and leaves the rest of the block — comments, quoting, the other keys — exactly
@@ -220,6 +237,21 @@ keys a note would need — on a desktop, where the keyboard is always there
 (a phone's is the **Keyboard on open** setting's). A modified key is left
 to the app's own shortcuts — `Alt`+`←`/`→` walk the notes' history and
 `Ctrl`+`Shift`+`PgUp`/`PgDn` the journal — so the walk never shadows one.
+
+On a desktop the tree also takes (#712): `Ctrl`+`Enter` opens the note
+under the cursor in a new tab, and typing a name jumps to the next row that
+starts with it. **Several rows at once:** `Shift`+click marks the rows from
+the cursor's to the one clicked, `Shift`+`↑`/`↓` marks on from the
+keyboard, `Space` marks or unmarks the cursor's row, and `Esc` or a plain
+click lets them go. A right click on a marked row opens their menu —
+*Selected: N*, **Move…** into one folder, **Delete** — and `Delete` deletes
+them all; into the trash, one **Undo** brings them all back. (A file's own
+notes stay where they are in that case: the question about them is asked
+for one file at a time.) **Reveal in tree**, in the palette and the View
+menu, shows the note on screen as the tree's row and gives the tree the
+keyboard; it has no key by default — `Ctrl`+`Shift`+`E` is the editor's
+inline code — and Settings → Keyboard shortcuts can give it one.
+`Ctrl`+click keeps opening a note in a new tab.
 
 ### The grid
 
@@ -312,6 +344,14 @@ extension: a PDF renamed is still a PDF. With the tree hidden, and on a
 phone, the rename asks for the name in a dialog. `F2` can be changed under
 Settings → Keyboard shortcuts.
 
+A new note or folder is named the same way (#712): **New note** and **New
+folder** — from the tree's menus, the **New** button, `Ctrl+N` or the
+palette — add a row where it will be, under its folder or at the top of
+the tree, with *New note* or *New folder* selected in a field. `Enter` or
+a click elsewhere makes it with that name (and opens a note), `Esc` gives
+it up and nothing is made. With the tree hidden or showing the grid, and
+on a phone, the name is asked in a dialog.
+
 ## Moving a note or a folder
 
 Long-press a row in the tree (right-click on desktop) and pick **Move**.
@@ -400,7 +440,7 @@ library.
 - **Zooming a book's text** works as it does in a note, on the same
   **Text size** the sheet sets: pinch the book with two fingers (or a
   laptop's trackpad) — spread them to zoom in, bring them together to
-  zoom out — or press `Ctrl/⌘+=`, `Ctrl/⌘+-` and `Ctrl/⌘+0` (back to the
+  zoom out — turn the mouse wheel with `Ctrl` held, or press `Ctrl/⌘+=`, `Ctrl/⌘+-` and `Ctrl/⌘+0` (back to the
   normal size), in full screen too; the palette's *Zoom in*, *Zoom out*
   and *Reset zoom* do the same while a book is on screen. The size is
   kept like a pick in the sheet, and stays between 80% and 180%; a note's

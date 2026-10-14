@@ -46,6 +46,26 @@ Future<void> openNoteHistory(
     ),
   );
   if (restored == null || !context.mounted) return;
+  offerRestoreUndo(
+    context,
+    ops: ops,
+    path: path,
+    restored: restored,
+    onRestored: onRestored,
+  );
+}
+
+/// After [restored] went back into the note at [path]: [onRestored]
+/// reloads the open note, and a snackbar offers Undo, which restores the
+/// text the restore replaced. The history page's and the compare tab's
+/// (#712) ending alike.
+void offerRestoreUndo(
+  BuildContext context, {
+  required NoteOperations ops,
+  required String path,
+  required HistoryVersion restored,
+  required VoidCallback onRestored,
+}) {
   _log.info('restored "$path" v${restored.number}, offering undo');
   onRestored();
   ScaffoldMessenger.of(context).showSnackBar(

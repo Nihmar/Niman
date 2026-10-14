@@ -62,7 +62,11 @@ Future<DeadLinkOutcome> _handleDeadLink(
             // The dialog needs a live context; an unmounted note declines,
             // and a dismiss (outside tap) reads as one.
             if (!context.mounted) return false;
-            final confirmed = await showMissingNoteDialog(context, path: path);
+            final confirmed = await showMissingNoteDialog(
+              context,
+              path: path,
+              anchor: link.anchor,
+            );
             return confirmed ?? false;
           },
     createNote: create,

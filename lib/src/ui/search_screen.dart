@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/frontmatter/fields.dart';
@@ -10,11 +11,20 @@ import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/task_events.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart' show displayNameOf;
+
+/// The other ways a hit opens, where the shell has them (#712): in a new
+/// tab, in the other pane, and as a row of the tree.
+typedef SearchHitOpens = ({
+  void Function(String path) newTab,
+  void Function(String path) beside,
+  void Function(String path) reveal,
+});
 
 /// The Search tab/screen (T-M3-05/T-M3-08 toggle, T-M3-10 replace).
 ///
@@ -49,6 +59,7 @@ final class SearchScreen extends StatefulWidget {
     this.taskEvents,
     this.onOpenTaskEvent,
     this.eventTimesClock = false,
+    this.hitOpens,
     super.key,
   });
 
@@ -95,6 +106,10 @@ final class SearchScreen extends StatefulWidget {
   /// (#730), the journal's own setting.
   final bool eventTimesClock;
 
+  /// The other ways a hit opens, offered in its menu (#712); null — a
+  /// phone, with one screen at a time — offers the hit's own open alone.
+  final SearchHitOpens? hitOpens;
+
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -106,8 +121,9 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   final TextEditingController _query = TextEditingController();
 
-  /// The query field's focus, for `Ctrl+Shift+F` (#712).
-  final FocusNode _queryFocus = FocusNode();
+  /// The query field's focus, for `Ctrl+Shift+F` (#712); its keys step
+  /// through the hits.
+  late final FocusNode _queryFocus = FocusNode(onKeyEvent: _queryKey);
 
   /// The hit last opened, from a tap or `F4`/`Shift+F4` (#712): the row
   /// stays highlighted and the steps continue from it.
@@ -422,25 +438,57 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// current one: the list keeps it highlighted, and the steps continue
   /// from it. A hit under the page's cut is listed first.
   void _openHit(int index) {
-    final hit = _hits[index];
+    _markHit(index);
+    widget.onOpenNote(_hits[index].path);
+  }
+
+  /// Makes the hit at [index] the current one, highlighted and in view,
+  /// without opening it.
+  void _markHit(int index) {
     setState(() {
-      _currentHit = hit.path;
+      _currentHit = _hits[index].path;
       if (index >= _shown) _shown = index + 1;
     });
     unawaited(_revealHit(index));
-    widget.onOpenNote(hit.path);
   }
 
   /// Opens the next ([direction] 1) or previous (-1) hit, wrapping at
   /// either end; with no current hit the first (`F4`) or the last
-  /// (`Shift+F4`) is the one.
-  void _stepHit(int direction) {
+  /// (`Shift+F4`) is the one. With [open] false the hit is only marked:
+  /// the arrows in the field move, `Enter` opens.
+  void _stepHit(int direction, {bool open = true}) {
     if (_hits.isEmpty) return;
     final current = _hits.indexWhere((hit) => hit.path == _currentHit);
     final next = current < 0
         ? (direction > 0 ? 0 : _hits.length - 1)
         : (current + direction) % _hits.length;
-    _openHit(next);
+    open ? _openHit(next) : _markHit(next);
+  }
+
+  /// `↓`/`↑` in the query field move through the hits and `Enter` opens
+  /// the one marked (#712); the field keeps the cursor.
+  KeyEventResult _queryKey(FocusNode node, KeyEvent event) {
+    if (event is KeyUpEvent || _replaceMode || _hits.isEmpty) {
+      return KeyEventResult.ignored;
+    }
+    final keys = HardwareKeyboard.instance;
+    if (keys.isControlPressed || keys.isAltPressed || keys.isMetaPressed) {
+      return KeyEventResult.ignored;
+    }
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.arrowDown:
+        _stepHit(1, open: false);
+      case LogicalKeyboardKey.arrowUp:
+        _stepHit(-1, open: false);
+      case LogicalKeyboardKey.enter || LogicalKeyboardKey.numpadEnter
+          when event is KeyDownEvent:
+        final at = _hits.indexWhere((hit) => hit.path == _currentHit);
+        if (at < 0) return KeyEventResult.ignored;
+        _openHit(at);
+      default:
+        return KeyEventResult.ignored;
+    }
+    return KeyEventResult.handled;
   }
 
   /// Brings the hit at [index] into view (#768). A row outside the
@@ -705,52 +753,80 @@ final class _SearchScreenState extends State<SearchScreen> {
         final current = hit.path == _currentHit;
         return KeyedSubtree(
           key: current ? _currentHitKey : null,
-          child: ListTile(
-            key: Key('search-hit-${hit.path}'),
-            selected: current,
-            selectedTileColor: theme.colorScheme.secondaryContainer,
-            title: Text(
-              hit.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  hit.path,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                if (hit.snippet.isNotEmpty)
-                  _snippet(theme, hit.snippet)
-                else if ((_excerptWords, _source) case (
-                  final words?,
-                  final source?,
-                ))
-                  FutureBuilder<String>(
-                    future: _excerpts.putIfAbsent(
-                      hit.path,
-                      () => source.excerpt(hit, words),
+          child: _hitGestures(
+            at,
+            ListTile(
+              key: Key('search-hit-${hit.path}'),
+              selected: current,
+              selectedTileColor: theme.colorScheme.secondaryContainer,
+              title: Text(
+                hit.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hit.path,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    builder: (context, excerpt) {
-                      final text = excerpt.data ?? '';
-                      return text.isEmpty
-                          ? const SizedBox.shrink()
-                          : _snippet(theme, text);
-                    },
                   ),
-              ],
+                  if (hit.snippet.isNotEmpty)
+                    _snippet(theme, hit.snippet)
+                  else if ((_excerptWords, _source) case (
+                    final words?,
+                    final source?,
+                  ))
+                    FutureBuilder<String>(
+                      future: _excerpts.putIfAbsent(
+                        hit.path,
+                        () => source.excerpt(hit, words),
+                      ),
+                      builder: (context, excerpt) {
+                        final text = excerpt.data ?? '';
+                        return text.isEmpty
+                            ? const SizedBox.shrink()
+                            : _snippet(theme, text);
+                      },
+                    ),
+                ],
+              ),
+              onTap: () => _tapHit(at),
+              onLongPress: () => _showNoteActions(at),
             ),
-            onTap: () => _openHit(at),
-            onLongPress: () => _showNoteActions(hit),
           ),
         );
       },
     );
+  }
+
+  /// A hit's pointer ways in (#712): a right click opens its menu at the
+  /// pointer, a middle click opens it in a new tab.
+  Widget _hitGestures(int at, Widget row) => GestureDetector(
+    onSecondaryTapUp: (details) =>
+        _showNoteActions(at, anchor: menuAnchorAt(details.globalPosition)),
+    onTertiaryTapUp: (_) => _newTabHit(at),
+    child: row,
+  );
+
+  /// A tap on a hit opens it; with `Ctrl` held, in a new tab (#712).
+  void _tapHit(int at) {
+    if (HardwareKeyboard.instance.isControlPressed && _newTabHit(at)) return;
+    _openHit(at);
+  }
+
+  /// Opens the hit at [at] in a new tab, where there are tabs; false when
+  /// there are none.
+  bool _newTabHit(int at) {
+    final opens = widget.hitOpens;
+    if (opens == null) return false;
+    _markHit(at);
+    opens.newTab(_hits[at].path);
+    return true;
   }
 
   Widget _snippet(ThemeData theme, String snippet) => Text.rich(
@@ -772,26 +848,52 @@ final class _SearchScreenState extends State<SearchScreen> {
     onPressed: () => _setContains(!_contains),
   );
 
-  /// The result-row long-press menu (T-M3-10): the single-note replace.
-  Future<void> _showNoteActions(SearchHit hit) async {
+  /// A result row's menu: the single-note replace (T-M3-10) and, where
+  /// the shell has them, the other ways to open it (#712). A long press
+  /// on a phone; a right click, at [anchor], where a pointer aims.
+  Future<void> _showNoteActions(int at, {Rect? anchor}) async {
     if (!mounted) return;
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              key: const Key('replace-note-action'),
-              leading: const Icon(Icons.find_replace),
-              title: Text(AppStrings.replaceInNoteAction),
-              onTap: () => Navigator.pop(context, 'replace'),
-            ),
-          ],
-        ),
-      ),
+    final hit = _hits[at];
+    final opens = widget.hitOpens;
+    Widget row(String value, IconData icon, String label) => ListTile(
+      key: Key('search-hit-action-$value'),
+      leading: Icon(icon),
+      title: Text(label),
+      onTap: () => Navigator.pop(context, value),
     );
-    if (action == 'replace' && mounted) {
-      await _enterReplaceMode(onlyPath: hit.path);
+    final action = await showActionSheet<String>(
+      context,
+      anchor: anchor,
+      items: (context) => [
+        if (opens != null) ...[
+          row('open', Icons.open_in_browser_outlined, AppStrings.actionOpen),
+          row('newtab', Icons.tab_outlined, AppStrings.openInNewTab),
+          row('beside', Icons.vertical_split_outlined, AppStrings.openBeside),
+          row('reveal', Icons.account_tree_outlined, AppStrings.revealInTree),
+        ],
+        ListTile(
+          key: const Key('replace-note-action'),
+          leading: const Icon(Icons.find_replace),
+          title: Text(AppStrings.replaceInNoteAction),
+          onTap: () => Navigator.pop(context, 'replace'),
+        ),
+      ],
+    );
+    if (!mounted || action == null) return;
+    // The list may have changed under the menu: the hit is found again.
+    final now = _hits.indexWhere((h) => h.path == hit.path);
+    if (now >= 0 && action != 'reveal' && action != 'replace') _markHit(now);
+    switch (action) {
+      case 'open':
+        widget.onOpenNote(hit.path);
+      case 'newtab':
+        opens?.newTab(hit.path);
+      case 'beside':
+        opens?.beside(hit.path);
+      case 'reveal':
+        opens?.reveal(hit.path);
+      case 'replace':
+        await _enterReplaceMode(onlyPath: hit.path);
     }
   }
 

@@ -103,7 +103,11 @@ void main() {
     // The copy is real disk work on a background isolate: let it run, a
     // frame at a time.
     final copied = File(p.join(controller.root!, 'Drafts', 'one.md'));
-    for (var i = 0; i < 40 && !copied.existsSync(); i++) {
+    final notice = find.textContaining('Imported into Drafts');
+    // Until the notice is up, not only the file: the copy's last write
+    // lands before the isolate answers, and a loaded runner saw the file
+    // with the answer still on its way.
+    for (var i = 0; i < 100 && notice.evaluate().isEmpty; i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 20)),
       );
@@ -114,7 +118,7 @@ void main() {
     // The import no longer blocks the frame on a full rescan (#382): what
     // landed is left to the watcher, so no rescan is asked for here.
     expect(controller.rescans, 0);
-    expect(find.textContaining('Imported into Drafts'), findsOne);
+    expect(notice, findsOne);
   });
 
   testWidgets('declined, the import writes nothing', (tester) async {

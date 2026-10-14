@@ -25,6 +25,11 @@ enum DockPane {
   /// The note's headings.
   outline,
 
+  /// The note's misspelled words, with their suggestions (#712). Second:
+  /// the dock's strip shows its last tabs first, and this one is opened by
+  /// the note's own spelling button.
+  spelling,
+
   /// The note's tags, and the notes that share them.
   tags,
 

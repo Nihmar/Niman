@@ -9,11 +9,13 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/links_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
+import 'package:niman/src/ui/dock/spelling_dock_pane.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/outline_panel.dart';
@@ -37,6 +39,7 @@ final class ShellDock {
     required this.journalBrowser,
     required this.onOpenHistory,
     required this.onOpenNoteFromLink,
+    this.onOpenVersion,
   });
 
   /// The notes that are open, whose active one the dock follows.
@@ -59,6 +62,9 @@ final class ShellDock {
 
   /// Opens the history of a path (the history pane's list).
   final void Function(String path) onOpenHistory;
+
+  /// Opens a version of a note compared with it, as a pane's tab (#712).
+  final void Function(String path, HistoryVersion version)? onOpenVersion;
 
   /// Opens the note at a path, from a link in the tags pane.
   final void Function(String path) onOpenNoteFromLink;
@@ -93,11 +99,16 @@ final class ShellDock {
           libraryRoot: controller.root,
           onOpenNote: workspace.show,
         ),
+        DockPane.spelling => SpellingDockPane(note: panelNote()),
         DockPane.history => HistoryDockPane(
           ops: controller.ops,
           path: path,
           onOpenHistory: () {
             if (path != null) onOpenHistory(path);
+          },
+          onOpenVersion: switch ((onOpenVersion, path)) {
+            (final open?, final path?) => (version) => open(path, version),
+            _ => null,
           },
         ),
         DockPane.journal => journalBrowser(context),
@@ -132,7 +143,9 @@ final class ShellDock {
       return;
     }
     final note = panelNote();
-    if (note == null) return;
+    // The spelling sheet is the note's own: it opens it where there is no
+    // dock.
+    if (note == null || pane == DockPane.spelling) return;
     if (pane == DockPane.outline) {
       final line = await showOutlineSheet(
         context,

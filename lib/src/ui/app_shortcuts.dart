@@ -194,6 +194,11 @@ enum AppCommand {
 
   /// Put the cursor in the search sidebar's field (#712).
   focusSearch,
+
+  /// Show the note on screen as the tree's row, the keyboard on the tree
+  /// (#712). No key of its own by default: `Ctrl+Shift+E`, the usual one,
+  /// is the editor's inline code.
+  revealInTree,
 }
 
 /// One accelerator and the command it runs.
@@ -433,6 +438,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.searchNextHit => AppStrings.editorFindNextTooltip,
   AppCommand.searchPreviousHit => AppStrings.editorFindPreviousTooltip,
   AppCommand.focusSearch => AppStrings.searchHint,
+  AppCommand.revealInTree => AppStrings.revealInTree,
 };
 
 /// The keys as a human reads them ("Ctrl+Shift+N").

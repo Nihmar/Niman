@@ -11,6 +11,11 @@
 /// the list in place instead of checking the note again: the note does
 /// not change under a modal panel, so the other issues stand, and the
 /// ones after the fix on its line only move over.
+///
+/// Docked beside the note on a desktop (#712) it is not modal: the note
+/// changes under it, so it checks the note again after each edit (once the
+/// writer pauses), a click on an issue selects the word in the note, and
+/// each issue can be ignored or added to the library's dictionary.
 library;
 
 import 'dart:async';
@@ -20,7 +25,8 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
 import 'package:niman/src/ui/strings.dart';
 
-/// A bottom sheet over the open note listing its spelling issues.
+/// A bottom sheet over the open note listing its spelling issues, or the
+/// dock's pane beside it ([docked]).
 final class SpellCheckSheet extends StatefulWidget {
   /// Creates the panel over [start], [suggest] and [apply].
   const new({
@@ -28,8 +34,26 @@ final class SpellCheckSheet extends StatefulWidget {
     required this.suggest,
     required this.apply,
     required this.available,
+    this.docked = false,
+    this.reveal,
+    this.addWord,
+    this.edited,
     super.key,
   });
+
+  /// Whether the panel is the dock's pane: it fills it, has no close
+  /// button, and follows the note's edits.
+  final bool docked;
+
+  /// Selects an issue's word in the note; null leaves the rows unclickable.
+  final void Function(SpellIssue issue)? reveal;
+
+  /// Adds a word to the library's dictionary; null offers no such action.
+  final Future<void> Function(String word)? addWord;
+
+  /// Tells of an edit to the note, a pause after it: the note is checked
+  /// again.
+  final Listenable? edited;
 
   /// Starts a pass over the note (on open, and on Check again).
   final SpellScan Function() start;
@@ -63,13 +87,46 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
   @override
   void initState() {
     super.initState();
+    widget.edited?.addListener(_onEdited);
     if (widget.available) _startScan();
   }
 
   @override
+  void didUpdateWidget(SpellCheckSheet old) {
+    super.didUpdateWidget(old);
+    if (old.edited != widget.edited) {
+      old.edited?.removeListener(_onEdited);
+      widget.edited?.addListener(_onEdited);
+    }
+  }
+
+  @override
   void dispose() {
+    widget.edited?.removeListener(_onEdited);
     _stopScan();
     super.dispose();
+  }
+
+  /// The note changed under the panel: the list is checked again.
+  void _onEdited() {
+    if (!mounted || !widget.available) return;
+    setState(_startScan);
+  }
+
+  /// Drops every issue of [word] from the list: ignored here, or known
+  /// now that the dictionary has it.
+  void _drop(String word) {
+    setState(() {
+      _issues = [
+        for (final issue in _issues)
+          if (issue.word != word) issue,
+      ];
+    });
+  }
+
+  Future<void> _addWord(String word) async {
+    await widget.addWord!(word);
+    if (mounted) _drop(word);
   }
 
   void _startScan() {
@@ -142,6 +199,15 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.docked) {
+      return Column(
+        children: [
+          _header(context),
+          _progress(context),
+          Expanded(child: _body(context)),
+        ],
+      );
+    }
     return SafeArea(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -178,12 +244,13 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-          IconButton(
-            key: const Key('spell-check-close'),
-            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+          if (!widget.docked)
+            IconButton(
+              key: const Key('spell-check-close'),
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
         ],
       ),
     );
@@ -263,7 +330,8 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
-    return Padding(
+    final reveal = widget.reveal;
+    final tile = Padding(
       key: Key('spell-issue-${issue.line}-${issue.start}'),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
       child: Column(
@@ -317,8 +385,27 @@ final class _SpellCheckSheetState extends State<SpellCheckSheet> {
                 ],
               ),
             ),
+          if (widget.docked)
+            Wrap(
+              spacing: 4,
+              children: [
+                TextButton(
+                  key: Key('spell-ignore-${issue.line}-${issue.start}'),
+                  onPressed: () => _drop(issue.word),
+                  child: Text(AppStrings.spellCheckIgnore),
+                ),
+                if (widget.addWord != null)
+                  TextButton(
+                    key: Key('spell-add-${issue.line}-${issue.start}'),
+                    onPressed: () => unawaited(_addWord(issue.word)),
+                    child: Text(AppStrings.addWordToDictionary),
+                  ),
+              ],
+            ),
         ],
       ),
     );
+    if (reveal == null) return tile;
+    return InkWell(onTap: () => reveal(issue), child: tile);
   }
 }

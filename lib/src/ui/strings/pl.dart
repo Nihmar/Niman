@@ -244,6 +244,8 @@ final class PolishStrings extends Strings {
   String spellCheckLine(int line) => 'linia $line';
   @override
   String get addWordToDictionary => 'Dodaj do słownika';
+  @override
+  String get spellCheckIgnore => 'Ignoruj';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spacje';
@@ -1090,6 +1092,16 @@ final class PolishStrings extends Strings {
   String get todoEditAction => 'Edytuj';
   @override
   String get todoDeleteAction => 'Usuń';
+  @override
+  String get todoSetDue => 'Ustaw termin';
+  @override
+  String get todoDueTomorrow => 'Jutro';
+  @override
+  String get todoDueNextWeek => 'Za tydzień';
+  @override
+  String get todoPickDate => 'Wybierz datę…';
+  @override
+  String get todoQuickAddHint => 'Dodaj zadanie — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1580,7 +1592,17 @@ final class PolishStrings extends Strings {
   @override
   String get openBeside => 'Otwórz obok';
   @override
+  String get actionOpen => 'Otwórz';
+  @override
+  String get revealInTree => 'Pokaż w drzewie';
+  @override
   String get closeAllNotes => 'Zamknij wszystkie';
+  @override
+  String get tabCloseOthers => 'Zamknij pozostałe';
+  @override
+  String get tabCloseToRight => 'Zamknij po prawej';
+  @override
+  String get copyPathAction => 'Kopiuj ścieżkę';
   @override
   String get sidePanelTooltip => 'Pokaż lub ukryj panel boczny';
   @override
@@ -1599,6 +1621,10 @@ final class PolishStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteka';
   @override
   String get paletteGroupGoTo => 'Przejdź do';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Pomoc';
   @override
   String get paletteGroupJournal => 'Dziennik';
   @override
@@ -1987,6 +2013,8 @@ final class PolishStrings extends Strings {
 
   @override
   String get movedToTrash => 'Przeniesiono do kosza';
+  @override
+  String treeMarkedCount(int count) => 'Zaznaczono: $count';
   @override
   String get deletedMessage => 'Usunięto';
   @override

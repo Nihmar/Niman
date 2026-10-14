@@ -7,6 +7,13 @@
 /// check/uncheck, tap edits (the dialog can also delete), long-press or
 /// right-click opens the bottom sheet (the app's menu pattern) with
 /// edit/delete, and a swipe towards the start deletes after asking.
+///
+/// Where a pointer aims (#712) the rows are a [TodoPointerList]: a click
+/// selects, a double click or `Enter`/`F2` edits the text in place, the
+/// arrows move, `Space` checks, `Delete` deletes, and the row's menu —
+/// Edit…, Set due ▸, Priority ▸, Delete — opens at a right click or under
+/// its ⋯. A quick-add field tops the list, and the filter opens under its
+/// pill.
 library;
 
 import 'dart:async';
@@ -20,13 +27,17 @@ import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/reminder_health_banner.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_filter_bar.dart';
 import 'package:niman/src/ui/todo_filter_sheet.dart';
 import 'package:niman/src/ui/todo_help.dart';
+import 'package:niman/src/ui/todo_pointer_list.dart';
+import 'package:niman/src/ui/todo_quick_add.dart';
 import 'package:niman/src/ui/todo_row.dart';
 
 /// The Todo tab body.
@@ -307,6 +318,7 @@ final class _TodoTabState extends State<TodoTab> {
       for (final entry in applyTodoFilter(fileEntries, _filter, _today))
         if (!_swiped.contains(entry)) entry,
     ];
+    final pointer = pointerDense(Theme.of(context));
     return Column(
       children: [
         TodoFilterBar(
@@ -327,11 +339,28 @@ final class _TodoTabState extends State<TodoTab> {
             _log.debug('todo filter due: ${range.name}');
             setState(() => _filter = _filter.copyWith(dueRange: range));
           },
-          onOpenFilter: () => _openFilterSheet(fileEntries),
+          onOpenFilter: (anchor) => _openFilterSheet(fileEntries, anchor),
         ),
+        if (pointer)
+          TodoQuickAdd(
+            key: const Key('todo-quick-add-row'),
+            onAdd: _quickAdd,
+            knownTokens: _knownTokens,
+          ),
         Expanded(
           child: visible.isEmpty
               ? _emptyList(fileEntries.isEmpty)
+              : pointer
+              ? TodoPointerList(
+                  entries: visible,
+                  view: _showDone ? 'done' : 'open',
+                  today: _today,
+                  onToggle: (entry, {required checked}) =>
+                      _toggle(entry, checked),
+                  onEdit: _edit,
+                  onDelete: _delete,
+                  onRewrite: _rewrite,
+                )
               : ListView.builder(
                   key: const Key('todo-list'),
                   itemCount: visible.length,
@@ -413,29 +442,66 @@ final class _TodoTabState extends State<TodoTab> {
     return confirmed ?? false;
   }
 
-  /// Opens the token + sort sheet (T-TDM-03) over the visible file.
-  void _openFilterSheet(List<TodoEntry> fileEntries) {
+  /// Opens the token + sort sheet (T-TDM-03) over the visible file; where
+  /// a pointer aims, a pop-up under the pill at [anchor] (#712).
+  void _openFilterSheet(List<TodoEntry> fileEntries, Rect? anchor) {
     final counts = tokenCountsFor(fileEntries, _filter.dueRange, _today);
+    if (pointerDense(Theme.of(context))) {
+      unawaited(
+        showActionSheet<void>(
+          context,
+          anchor: anchor,
+          items: (context) => [_filterSheet(counts)],
+        ),
+      );
+      return;
+    }
     unawaited(
       showModalBottomSheet<void>(
         context: context,
-        builder: (context) => TodoFilterSheet(
-          filter: _filter,
-          counts: counts,
-          onToggleToken: (token) {
-            final tokens = {..._filter.tokens};
-            if (!tokens.remove(token)) {
-              tokens.add(token);
-            }
-            _log.debug('todo filter tokens: $tokens');
-            setState(() => _filter = _filter.copyWith(tokens: tokens));
-          },
-          onSort: (sort) {
-            setState(() => _filter = _filter.copyWith(sort: sort));
-          },
+        builder: (context) => _filterSheet(counts),
+      ),
+    );
+  }
+
+  /// The tokens and the sort, as the sheet or the pop-up shows them.
+  Widget _filterSheet(List<({String token, int count})> counts) =>
+      TodoFilterSheet(
+        filter: _filter,
+        counts: counts,
+        onToggleToken: (token) {
+          final tokens = {..._filter.tokens};
+          if (!tokens.remove(token)) {
+            tokens.add(token);
+          }
+          _log.debug('todo filter tokens: $tokens');
+          setState(() => _filter = _filter.copyWith(tokens: tokens));
+        },
+        onSort: (sort) {
+          setState(() => _filter = _filter.copyWith(sort: sort));
+        },
+      );
+
+  /// Adds the task typed in the quick-add field (#712), created today.
+  void _quickAdd(String text) {
+    _log.debug('todo quick add');
+    unawaited(
+      widget.controller.add(
+        formatTodoLine(
+          completed: false,
+          creationDate: _today,
+          description: text,
         ),
       ),
     );
+  }
+
+  /// Writes [line] in place of [entry]'s, in the file it is in.
+  Future<void> _rewrite(TodoEntry entry, String line) {
+    _log.debug('todo row rewritten: line ${entry.lineIndex}');
+    return _showDone
+        ? widget.controller.updateDone(entry, line)
+        : widget.controller.updateTodo(entry, line);
   }
 
   /// The empty state: the file's own when it holds nothing, the filtered

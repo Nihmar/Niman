@@ -244,6 +244,8 @@ final class CatalanStrings extends Strings {
   String spellCheckLine(int line) => 'línia $line';
   @override
   String get addWordToDictionary => 'Afegeix al diccionari';
+  @override
+  String get spellCheckIgnore => 'Ignora';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espais';
@@ -1095,6 +1097,16 @@ final class CatalanStrings extends Strings {
   String get todoEditAction => 'Edita';
   @override
   String get todoDeleteAction => 'Esborra';
+  @override
+  String get todoSetDue => 'Estableix venciment';
+  @override
+  String get todoDueTomorrow => 'Demà';
+  @override
+  String get todoDueNextWeek => 'D’aquí a una setmana';
+  @override
+  String get todoPickDate => 'Tria una data…';
+  @override
+  String get todoQuickAddHint => 'Afegeix una tasca — +projecte @context due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1589,7 +1601,17 @@ final class CatalanStrings extends Strings {
   @override
   String get openBeside => 'Obre al costat';
   @override
+  String get actionOpen => 'Obre';
+  @override
+  String get revealInTree => 'Mostra a l’arbre';
+  @override
   String get closeAllNotes => 'Tanca-les totes';
+  @override
+  String get tabCloseOthers => 'Tanca les altres';
+  @override
+  String get tabCloseToRight => 'Tanca les de la dreta';
+  @override
+  String get copyPathAction => 'Copia el camí';
   @override
   String get sidePanelTooltip => 'Mostra o amaga el plafó lateral';
   @override
@@ -1608,6 +1630,10 @@ final class CatalanStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteca';
   @override
   String get paletteGroupGoTo => 'Ves a';
+  @override
+  String get appMenuTooltip => 'Menú';
+  @override
+  String get appMenuHelp => 'Ajuda';
   @override
   String get paletteGroupJournal => 'Diari';
   @override
@@ -1996,6 +2022,8 @@ final class CatalanStrings extends Strings {
 
   @override
   String get movedToTrash => 'Moguda a la paperera';
+  @override
+  String treeMarkedCount(int count) => 'Seleccionats: $count';
   @override
   String get deletedMessage => 'Esborrat';
   @override

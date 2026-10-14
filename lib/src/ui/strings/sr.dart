@@ -243,6 +243,8 @@ final class SerbianStrings extends Strings {
   String spellCheckLine(int line) => 'ред $line';
   @override
   String get addWordToDictionary => 'Додај у речник';
+  @override
+  String get spellCheckIgnore => 'Занемари';
 
   @override
   String indentWidthValue(int spaces) => '$spaces размака';
@@ -1081,6 +1083,16 @@ final class SerbianStrings extends Strings {
   String get todoEditAction => 'Уреди';
   @override
   String get todoDeleteAction => 'Обриши';
+  @override
+  String get todoSetDue => 'Постави рок';
+  @override
+  String get todoDueTomorrow => 'Сутра';
+  @override
+  String get todoDueNextWeek => 'За недељу дана';
+  @override
+  String get todoPickDate => 'Изабери датум…';
+  @override
+  String get todoQuickAddHint => 'Додај задатак — +пројекат @контекст due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1562,7 +1574,17 @@ final class SerbianStrings extends Strings {
   @override
   String get openBeside => 'Отвори са стране';
   @override
+  String get actionOpen => 'Отвори';
+  @override
+  String get revealInTree => 'Прикажи у стаблу';
+  @override
   String get closeAllNotes => 'Затвори све';
+  @override
+  String get tabCloseOthers => 'Затвори остале';
+  @override
+  String get tabCloseToRight => 'Затвори десно';
+  @override
+  String get copyPathAction => 'Копирај путању';
   @override
   String get sidePanelTooltip => 'Прикажи или сакриј бочну таблу';
   @override
@@ -1581,6 +1603,10 @@ final class SerbianStrings extends Strings {
   String get paletteGroupLibrary => 'Библиотека';
   @override
   String get paletteGroupGoTo => 'Иди на';
+  @override
+  String get appMenuTooltip => 'Мени';
+  @override
+  String get appMenuHelp => 'Помоћ';
   @override
   String get paletteGroupJournal => 'Дневник';
   @override
@@ -1965,6 +1991,8 @@ final class SerbianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Премештено у кош';
+  @override
+  String treeMarkedCount(int count) => 'Изабрано: $count';
   @override
   String get deletedMessage => 'Обрисано';
   @override

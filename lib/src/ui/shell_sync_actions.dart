@@ -39,7 +39,8 @@ final class ShellSyncActions {
     return SyncStatusButton(
       sync: sync,
       onSync: () => unawaited(run(context, controller)),
-      onOpenPanel: () => unawaited(openPanel(context, controller)),
+      onOpenPanel: (anchor) =>
+          unawaited(openPanel(context, controller, anchor: anchor)),
     );
   }
 
@@ -59,8 +60,9 @@ final class ShellSyncActions {
   /// Opens the status panel: what the last run could not settle.
   Future<void> openPanel(
     BuildContext context,
-    LibrarySession controller,
-  ) async {
+    LibrarySession controller, {
+    Rect? anchor,
+  }) async {
     final sync = controller.sync;
     if (sync == null) return;
     await showSyncPanel(
@@ -70,6 +72,7 @@ final class ShellSyncActions {
       onOpenSettings: () => unawaited(openSettings(context, controller)),
       onResolve: (path) =>
           unawaited(resolveConflict(context, controller, path)),
+      anchor: anchor,
     );
   }
 

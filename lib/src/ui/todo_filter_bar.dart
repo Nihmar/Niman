@@ -9,6 +9,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/todo_filter.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The compact filter row over the todo list.
@@ -37,8 +38,9 @@ final class TodoFilterBar extends StatelessWidget {
   /// Selects a due range (single-select).
   final ValueChanged<TodoDueRange> onDueRange;
 
-  /// Opens the token + sort sheet.
-  final VoidCallback onOpenFilter;
+  /// Opens the token + sort sheet, given the pill's place on screen for
+  /// a pop-up to grow from (#712).
+  final ValueChanged<Rect?> onOpenFilter;
 
   /// Optional control before the due-range pill: the desktop folds its
   /// Open/Done switch in here (T-PP-22).
@@ -89,9 +91,9 @@ final class TodoFilterBar extends StatelessWidget {
                 key: const Key('todo-filter-button'),
                 icon: Icons.filter_alt_outlined,
                 label: AppStrings.todoFilter,
-                onPressed: (_) {
+                onPressed: (buttonContext) {
                   _log.debug('todo filter sheet: open');
-                  onOpenFilter();
+                  onOpenFilter(menuAnchorOf(buttonContext));
                 },
               ),
             ),

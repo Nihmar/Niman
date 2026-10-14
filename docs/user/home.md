@@ -121,7 +121,11 @@ editor, with the tiles to add on the right:
   while it has none. A Home can hold several *Actions* and *Saved search*
   tiles.
 - **⚙** on a saved search sets its name and its query; on an actions
-  tile, its buttons.
+  tile, its buttons. With a mouse they open in an inspector in the panel
+  beside the grid, in place of *Add tiles*, and every change is kept as
+  you make it; its ✕ gives the panel back (#712).
+- **A right click** on a tile gives its menu: its settings, the moves of
+  ⋯, and Hide.
 - **Reset** puts the default Home back, after asking.
 
 On a phone, the ✎ beside the date opens the same Home as a list: a handle

@@ -242,6 +242,8 @@ final class DutchStrings extends Strings {
   String spellCheckLine(int line) => 'regel $line';
   @override
   String get addWordToDictionary => 'Toevoegen aan woordenlijst';
+  @override
+  String get spellCheckIgnore => 'Negeren';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spaties';
@@ -1085,6 +1087,16 @@ final class DutchStrings extends Strings {
   String get todoEditAction => 'Bewerken';
   @override
   String get todoDeleteAction => 'Verwijderen';
+  @override
+  String get todoSetDue => 'Vervaldatum instellen';
+  @override
+  String get todoDueTomorrow => 'Morgen';
+  @override
+  String get todoDueNextWeek => 'Over een week';
+  @override
+  String get todoPickDate => 'Kies een datum…';
+  @override
+  String get todoQuickAddHint => 'Taak toevoegen — +project @context due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1574,7 +1586,17 @@ final class DutchStrings extends Strings {
   @override
   String get openBeside => 'Ernaast openen';
   @override
+  String get actionOpen => 'Openen';
+  @override
+  String get revealInTree => 'Tonen in de boom';
+  @override
   String get closeAllNotes => 'Alles sluiten';
+  @override
+  String get tabCloseOthers => 'Andere sluiten';
+  @override
+  String get tabCloseToRight => 'Rechts sluiten';
+  @override
+  String get copyPathAction => 'Pad kopiëren';
   @override
   String get sidePanelTooltip => 'Zijpaneel tonen of verbergen';
   @override
@@ -1593,6 +1615,10 @@ final class DutchStrings extends Strings {
   String get paletteGroupLibrary => 'Bibliotheek';
   @override
   String get paletteGroupGoTo => 'Ga naar';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Help';
   @override
   String get paletteGroupJournal => 'Dagboek';
   @override
@@ -1984,6 +2010,8 @@ final class DutchStrings extends Strings {
 
   @override
   String get movedToTrash => 'Naar de prullenbak verplaatst';
+  @override
+  String treeMarkedCount(int count) => 'Geselecteerd: $count';
   @override
   String get deletedMessage => 'Verwijderd';
   @override

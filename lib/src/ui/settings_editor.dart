@@ -9,9 +9,11 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/settings_slider_row.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
 
@@ -286,6 +288,10 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       format: AppStrings.noteColumnWidthValue,
     );
     if (width == null) return;
+    await _setNoteColumnWidth(width);
+  }
+
+  Future<void> _setNoteColumnWidth(double width) async {
     final controller = widget.controller;
     await controller.setNoteColumnWidth(width.roundToDouble());
     controller.notify();
@@ -354,6 +360,10 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       format: AppStrings.textScaleValue,
     );
     if (scale == null) return;
+    await _setNoteTextScale(scale);
+  }
+
+  Future<void> _setNoteTextScale(double scale) async {
     await widget.controller.setNoteTextScale(scale);
     if (mounted) setState(() => _noteTextScale = scale);
   }
@@ -630,13 +640,26 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           ),
           HighlightRow(
             key: SettingsKeys.noteColumnWidth,
-            child: SettingsValueRow(
-              title: AppStrings.noteColumnWidthTitle,
-              subtitle: AppStrings.noteColumnWidthSubtitle,
-              value: AppStrings.noteColumnWidthValue(_noteColumnWidth),
-              enabled: _readableLineLength,
-              onTap: () => unawaited(_chooseNoteColumnWidth()),
-            ),
+            child: pointerDense(Theme.of(context))
+                ? SettingsSliderRow(
+                    sliderKey: const Key('note-column-width-slider'),
+                    title: AppStrings.noteColumnWidthTitle,
+                    subtitle: AppStrings.noteColumnWidthSubtitle,
+                    value: _noteColumnWidth,
+                    min: minNoteColumnWidth,
+                    max: maxNoteColumnWidth,
+                    divisions: _columnWidthSteps,
+                    format: AppStrings.noteColumnWidthValue,
+                    enabled: _readableLineLength,
+                    onChanged: (width) => unawaited(_setNoteColumnWidth(width)),
+                  )
+                : SettingsValueRow(
+                    title: AppStrings.noteColumnWidthTitle,
+                    subtitle: AppStrings.noteColumnWidthSubtitle,
+                    value: AppStrings.noteColumnWidthValue(_noteColumnWidth),
+                    enabled: _readableLineLength,
+                    onTap: () => unawaited(_chooseNoteColumnWidth()),
+                  ),
           ),
           HighlightRow(
             key: SettingsKeys.typewriter,
@@ -728,12 +751,25 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           ),
           HighlightRow(
             key: SettingsKeys.noteTextScale,
-            child: SettingsValueRow(
-              title: AppStrings.noteTextScaleTitle,
-              subtitle: AppStrings.noteTextScaleSubtitle,
-              value: AppStrings.textScaleValue(_noteTextScale),
-              onTap: () => unawaited(_chooseNoteTextScale()),
-            ),
+            // A desktop's slider sits in the row (#712).
+            child: pointerDense(Theme.of(context))
+                ? SettingsSliderRow(
+                    sliderKey: const Key('note-text-scale-slider'),
+                    title: AppStrings.noteTextScaleTitle,
+                    subtitle: AppStrings.noteTextScaleSubtitle,
+                    value: _noteTextScale,
+                    min: minTextScale,
+                    max: maxTextScale,
+                    divisions: _textScaleSteps,
+                    format: AppStrings.textScaleValue,
+                    onChanged: (scale) => unawaited(_setNoteTextScale(scale)),
+                  )
+                : SettingsValueRow(
+                    title: AppStrings.noteTextScaleTitle,
+                    subtitle: AppStrings.noteTextScaleSubtitle,
+                    value: AppStrings.textScaleValue(_noteTextScale),
+                    onTap: () => unawaited(_chooseNoteTextScale()),
+                  ),
           ),
           // Beside the note text size: both decide how the note reads in the
           // editor, and this one only the source pane (#259).

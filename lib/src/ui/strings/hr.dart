@@ -243,6 +243,8 @@ final class CroatianStrings extends Strings {
   String spellCheckLine(int line) => 'redak $line';
   @override
   String get addWordToDictionary => 'Dodaj u rječnik';
+  @override
+  String get spellCheckIgnore => 'Zanemari';
 
   @override
   String indentWidthValue(int spaces) => '$spaces razmaka';
@@ -1076,6 +1078,16 @@ final class CroatianStrings extends Strings {
   String get todoEditAction => 'Uredi';
   @override
   String get todoDeleteAction => 'Obriši';
+  @override
+  String get todoSetDue => 'Postavi rok';
+  @override
+  String get todoDueTomorrow => 'Sutra';
+  @override
+  String get todoDueNextWeek => 'Za tjedan dana';
+  @override
+  String get todoPickDate => 'Odaberi datum…';
+  @override
+  String get todoQuickAddHint => 'Dodaj zadatak — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1554,7 +1566,17 @@ final class CroatianStrings extends Strings {
   @override
   String get openBeside => 'Otvori sa strane';
   @override
+  String get actionOpen => 'Otvori';
+  @override
+  String get revealInTree => 'Prikaži u stablu';
+  @override
   String get closeAllNotes => 'Zatvori sve';
+  @override
+  String get tabCloseOthers => 'Zatvori ostale';
+  @override
+  String get tabCloseToRight => 'Zatvori desno';
+  @override
+  String get copyPathAction => 'Kopiraj putanju';
   @override
   String get sidePanelTooltip => 'Prikaži ili sakrij bočnu ploču';
   @override
@@ -1573,6 +1595,10 @@ final class CroatianStrings extends Strings {
   String get paletteGroupLibrary => 'Knjižnica';
   @override
   String get paletteGroupGoTo => 'Idi na';
+  @override
+  String get appMenuTooltip => 'Izbornik';
+  @override
+  String get appMenuHelp => 'Pomoć';
   @override
   String get paletteGroupJournal => 'Dnevnik';
   @override
@@ -1959,6 +1985,8 @@ final class CroatianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Premješteno u korpu';
+  @override
+  String treeMarkedCount(int count) => 'Odabrano: $count';
   @override
   String get deletedMessage => 'Obrisano';
   @override

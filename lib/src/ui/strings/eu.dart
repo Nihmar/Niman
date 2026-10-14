@@ -238,6 +238,8 @@ final class BasqueStrings extends Strings {
   String spellCheckLine(int line) => 'lerroa $line';
   @override
   String get addWordToDictionary => 'Gehitu hiztehirian';
+  @override
+  String get spellCheckIgnore => 'Ezikusi';
 
   @override
   String indentWidthValue(int spaces) => '$spaces zuriune';
@@ -1082,6 +1084,17 @@ final class BasqueStrings extends Strings {
   String get todoEditAction => 'Editatu';
   @override
   String get todoDeleteAction => 'Ezabatu';
+  @override
+  String get todoSetDue => 'Ezarri epemuga';
+  @override
+  String get todoDueTomorrow => 'Bihar';
+  @override
+  String get todoDueNextWeek => 'Astebete barru';
+  @override
+  String get todoPickDate => 'Aukeratu data…';
+  @override
+  String get todoQuickAddHint =>
+      'Gehitu zeregina — +proiektua @testuingurua due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1566,7 +1579,17 @@ final class BasqueStrings extends Strings {
   @override
   String get openBeside => 'Ireki alboan';
   @override
+  String get actionOpen => 'Ireki';
+  @override
+  String get revealInTree => 'Erakutsi zuhaitzean';
+  @override
   String get closeAllNotes => 'Itxi guztiak';
+  @override
+  String get tabCloseOthers => 'Itxi besteak';
+  @override
+  String get tabCloseToRight => 'Itxi eskuinekoak';
+  @override
+  String get copyPathAction => 'Kopiatu bidea';
   @override
   String get sidePanelTooltip => 'Erakutsi edo ezkutatu alboko panela';
   @override
@@ -1585,6 +1608,10 @@ final class BasqueStrings extends Strings {
   String get paletteGroupLibrary => 'Liburutegia';
   @override
   String get paletteGroupGoTo => 'Joan';
+  @override
+  String get appMenuTooltip => 'Menua';
+  @override
+  String get appMenuHelp => 'Laguntza';
   @override
   String get paletteGroupJournal => 'Egunkaria';
   @override
@@ -1972,6 +1999,8 @@ final class BasqueStrings extends Strings {
 
   @override
   String get movedToTrash => 'Zakarrontzira mugitua';
+  @override
+  String treeMarkedCount(int count) => 'Hautatuta: $count';
   @override
   String get deletedMessage => 'Ezabatua';
   @override

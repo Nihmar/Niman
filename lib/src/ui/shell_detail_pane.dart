@@ -58,6 +58,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.zen = false,
     this.linkPreview = true,
     this.outlineInDock = false,
+    this.onSpellingInDock,
     this.typewriter = false,
     this.sourceFont = SourceFont.monospace,
     this.cascadeChecklist = true,
@@ -176,6 +177,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// Whether the dock beside the panes has the outline, so a note's own
   /// row leaves its outline button out.
   final bool outlineInDock;
+
+  /// See [NoteView.onSpellingInDock].
+  final VoidCallback? onSpellingInDock;
 
   /// Reports the loaded note's kind.
   final void Function(String? type) onNoteKindChanged;
@@ -348,6 +352,7 @@ final class ShellDetailPane extends StatelessWidget {
     initialCaretOffset: tab.caret,
     kindMode: kindMode,
     outlineInDock: outlineInDock,
+    onSpellingInDock: onSpellingInDock,
     // Only the note showing in the focused pane tells the shell what
     // kind it is.
     onNoteKindChanged: tab.active && tab.focused ? onNoteKindChanged : null,

@@ -243,6 +243,8 @@ final class MacedonianStrings extends Strings {
   String spellCheckLine(int line) => 'ред $line';
   @override
   String get addWordToDictionary => 'Додади во речник';
+  @override
+  String get spellCheckIgnore => 'Игнорирај';
 
   @override
   String indentWidthValue(int spaces) => '$spaces празнини';
@@ -1089,6 +1091,16 @@ final class MacedonianStrings extends Strings {
   String get todoEditAction => 'Уреди';
   @override
   String get todoDeleteAction => 'Избриши';
+  @override
+  String get todoSetDue => 'Постави рок';
+  @override
+  String get todoDueTomorrow => 'Утре';
+  @override
+  String get todoDueNextWeek => 'За една недела';
+  @override
+  String get todoPickDate => 'Избери датум…';
+  @override
+  String get todoQuickAddHint => 'Додај задача — +проект @контекст due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1572,7 +1584,17 @@ final class MacedonianStrings extends Strings {
   @override
   String get openBeside => 'Отвори странично';
   @override
+  String get actionOpen => 'Отвори';
+  @override
+  String get revealInTree => 'Прикажи во дрвото';
+  @override
   String get closeAllNotes => 'Затвори ги сите';
+  @override
+  String get tabCloseOthers => 'Затвори ги другите';
+  @override
+  String get tabCloseToRight => 'Затвори десно';
+  @override
+  String get copyPathAction => 'Копирај патека';
   @override
   String get sidePanelTooltip => 'Прикажи или скриј го страничниот панел';
   @override
@@ -1591,6 +1613,10 @@ final class MacedonianStrings extends Strings {
   String get paletteGroupLibrary => 'Библиотека';
   @override
   String get paletteGroupGoTo => 'Оди на';
+  @override
+  String get appMenuTooltip => 'Мени';
+  @override
+  String get appMenuHelp => 'Помош';
   @override
   String get paletteGroupJournal => 'Дневник';
   @override
@@ -1978,6 +2004,8 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get movedToTrash => 'Преместено во корпа';
+  @override
+  String treeMarkedCount(int count) => 'Избрани: $count';
   @override
   String get deletedMessage => 'Избришано';
   @override

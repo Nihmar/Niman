@@ -241,6 +241,8 @@ final class PortugueseStrings extends Strings {
   String spellCheckLine(int line) => 'linha $line';
   @override
   String get addWordToDictionary => 'Adicionar ao dicionário';
+  @override
+  String get spellCheckIgnore => 'Ignorar';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espaços';
@@ -1082,6 +1084,17 @@ final class PortugueseStrings extends Strings {
   String get todoEditAction => 'Editar';
   @override
   String get todoDeleteAction => 'Excluir';
+  @override
+  String get todoSetDue => 'Definir prazo';
+  @override
+  String get todoDueTomorrow => 'Amanhã';
+  @override
+  String get todoDueNextWeek => 'Daqui a uma semana';
+  @override
+  String get todoPickDate => 'Escolher data…';
+  @override
+  String get todoQuickAddHint =>
+      'Adicionar uma tarefa — +projeto @contexto due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1567,7 +1580,17 @@ final class PortugueseStrings extends Strings {
   @override
   String get openBeside => 'Abrir ao lado';
   @override
+  String get actionOpen => 'Abrir';
+  @override
+  String get revealInTree => 'Mostrar na árvore';
+  @override
   String get closeAllNotes => 'Fechar todas';
+  @override
+  String get tabCloseOthers => 'Fechar as outras';
+  @override
+  String get tabCloseToRight => 'Fechar à direita';
+  @override
+  String get copyPathAction => 'Copiar caminho';
   @override
   String get sidePanelTooltip => 'Mostrar ou ocultar o painel lateral';
   @override
@@ -1586,6 +1609,10 @@ final class PortugueseStrings extends Strings {
   String get paletteGroupLibrary => 'Biblioteca';
   @override
   String get paletteGroupGoTo => 'Ir para';
+  @override
+  String get appMenuTooltip => 'Menu';
+  @override
+  String get appMenuHelp => 'Ajuda';
   @override
   String get paletteGroupJournal => 'Diário';
   @override
@@ -1971,6 +1998,8 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get movedToTrash => 'Movido para a lixeira';
+  @override
+  String treeMarkedCount(int count) => 'Selecionados: $count';
   @override
   String get deletedMessage => 'Excluído';
   @override

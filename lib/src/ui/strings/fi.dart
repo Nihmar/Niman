@@ -240,6 +240,8 @@ final class FinnishStrings extends Strings {
   String spellCheckLine(int line) => 'rivi $line';
   @override
   String get addWordToDictionary => 'Lisää sanakirjaan';
+  @override
+  String get spellCheckIgnore => 'Ohita';
 
   @override
   String indentWidthValue(int spaces) => '$spaces välilyöntiä';
@@ -1082,6 +1084,16 @@ final class FinnishStrings extends Strings {
   String get todoEditAction => 'Muokkaa';
   @override
   String get todoDeleteAction => 'Poista';
+  @override
+  String get todoSetDue => 'Aseta määräpäivä';
+  @override
+  String get todoDueTomorrow => 'Huomenna';
+  @override
+  String get todoDueNextWeek => 'Viikon päästä';
+  @override
+  String get todoPickDate => 'Valitse päivä…';
+  @override
+  String get todoQuickAddHint => 'Lisää tehtävä — +projekti @konteksti due:';
 
   // Task filters (T-TD-05).
   @override
@@ -1570,7 +1582,17 @@ final class FinnishStrings extends Strings {
   @override
   String get openBeside => 'Avaa viereen';
   @override
+  String get actionOpen => 'Avaa';
+  @override
+  String get revealInTree => 'Näytä puussa';
+  @override
   String get closeAllNotes => 'Sulje kaikki';
+  @override
+  String get tabCloseOthers => 'Sulje muut';
+  @override
+  String get tabCloseToRight => 'Sulje oikealta';
+  @override
+  String get copyPathAction => 'Kopioi polku';
   @override
   String get sidePanelTooltip => 'Näytä tai piilota sivupaneeli';
   @override
@@ -1589,6 +1611,10 @@ final class FinnishStrings extends Strings {
   String get paletteGroupLibrary => 'Kirjasto';
   @override
   String get paletteGroupGoTo => 'Siirry';
+  @override
+  String get appMenuTooltip => 'Valikko';
+  @override
+  String get appMenuHelp => 'Ohje';
   @override
   String get paletteGroupJournal => 'Päiväkirja';
   @override
@@ -1974,6 +2000,8 @@ final class FinnishStrings extends Strings {
 
   @override
   String get movedToTrash => 'Siirretty koriin';
+  @override
+  String treeMarkedCount(int count) => 'Valittu: $count';
   @override
   String get deletedMessage => 'Poistettu';
   @override

@@ -113,7 +113,7 @@ final class TodoRow extends StatelessWidget {
             ? const TextStyle(decoration: TextDecoration.lineThrough)
             : null,
       ),
-      subtitle: _RowSubtitle(task: task, today: now),
+      subtitle: TodoRowSubtitle(task: task, today: now),
       onTap: () {
         _log.debug('todo row tap (edit): line ${entry.lineIndex}');
         onEdit();
@@ -129,10 +129,14 @@ final class TodoRow extends StatelessWidget {
 /// The row subtitle: the due/reminder line, then — when the task
 /// carries `+project` / `@context` / `#tag` tokens — a chip per token,
 /// so the row shows what it is filed under (2026-09-07 user feedback).
-final class _RowSubtitle extends StatelessWidget {
-  const new({required this.task, required this.today});
+final class TodoRowSubtitle extends StatelessWidget {
+  /// Creates the subtitle of [task] as of [today].
+  const new({required this.task, required this.today, super.key});
 
+  /// The task the row shows.
   final TodoTask task;
+
+  /// The wall-clock day for the due state.
   final DateTime today;
 
   @override
