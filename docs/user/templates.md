@@ -9,6 +9,13 @@ see [organization](organization.md#where-new-notes-and-folders-go)),
 unless the template names a `folder` or the creation is *Create … here* on
 a folder.
 
+On a desktop the template is picked the way the command palette picks
+(#712): type to narrow the list, `↑` / `↓` to move, `Enter` to choose,
+`Esc` to give up. The new note's name is then typed in a row of the tree,
+where the note will be, as a new note's is (see
+[organization](organization.md)); a phone keeps the list and the name in
+dialogs.
+
 A [Home](home.md#actions) action can make notes from a template with
 some of its questions answered in advance: a fixed value named like a
 question answers it, and the form asks only the rest.

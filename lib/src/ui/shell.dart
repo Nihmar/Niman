@@ -2074,6 +2074,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       guard: _guard,
       opensPreviewOnly: () => _notePreview,
       onNoteFiled: _onTemplateNoteFiled,
+      nameInPlace: _nameInPlace,
     );
     _journalFlow = JournalFlow(
       controller: widget.controller,
