@@ -1069,6 +1069,16 @@ final class RomanianStrings extends Strings {
   String get todoEditAction => 'Editează';
   @override
   String get todoDeleteAction => 'Șterge';
+  @override
+  String get todoSetDue => 'Setează termenul';
+  @override
+  String get todoDueTomorrow => 'Mâine';
+  @override
+  String get todoDueNextWeek => 'Peste o săptămână';
+  @override
+  String get todoPickDate => 'Alege o dată…';
+  @override
+  String get todoQuickAddHint => 'Adaugă o sarcină — +proiect @context due:';
 
   // Task filters (T-TD-05).
   @override

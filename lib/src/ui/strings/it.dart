@@ -1065,6 +1065,17 @@ final class ItalianStrings extends Strings {
   String get todoEditAction => 'Modifica';
   @override
   String get todoDeleteAction => 'Elimina';
+  @override
+  String get todoSetDue => 'Imposta scadenza';
+  @override
+  String get todoDueTomorrow => 'Domani';
+  @override
+  String get todoDueNextWeek => 'Tra una settimana';
+  @override
+  String get todoPickDate => 'Scegli una data…';
+  @override
+  String get todoQuickAddHint =>
+      'Aggiungi un’attività — +progetto @contesto due:';
 
   // Task filters (T-TD-05).
   @override

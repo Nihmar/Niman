@@ -578,6 +578,11 @@ abstract base class Strings {
   String get todoSave;
   String get todoEditAction;
   String get todoDeleteAction;
+  String get todoSetDue;
+  String get todoDueTomorrow;
+  String get todoDueNextWeek;
+  String get todoPickDate;
+  String get todoQuickAddHint;
 
   // Task filters (T-TD-05).
   String get todoDueOverdue;

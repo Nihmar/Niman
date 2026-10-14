@@ -1059,6 +1059,16 @@ final class BelarusianStrings extends Strings {
   String get todoEditAction => 'Рэдагаваць';
   @override
   String get todoDeleteAction => 'Выдаліць';
+  @override
+  String get todoSetDue => 'Задаць тэрмін';
+  @override
+  String get todoDueTomorrow => 'Заўтра';
+  @override
+  String get todoDueNextWeek => 'Праз тыдзень';
+  @override
+  String get todoPickDate => 'Выбраць дату…';
+  @override
+  String get todoQuickAddHint => 'Дадаць задачу — +праект @кантэкст due:';
 
   // Task filters (T-TD-05).
   @override

@@ -1061,6 +1061,17 @@ final class PortugueseStrings extends Strings {
   String get todoEditAction => 'Editar';
   @override
   String get todoDeleteAction => 'Excluir';
+  @override
+  String get todoSetDue => 'Definir prazo';
+  @override
+  String get todoDueTomorrow => 'Amanhã';
+  @override
+  String get todoDueNextWeek => 'Daqui a uma semana';
+  @override
+  String get todoPickDate => 'Escolher data…';
+  @override
+  String get todoQuickAddHint =>
+      'Adicionar uma tarefa — +projeto @contexto due:';
 
   // Task filters (T-TD-05).
   @override

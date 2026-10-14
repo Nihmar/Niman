@@ -1078,6 +1078,16 @@ final class FrenchStrings extends Strings {
   String get todoEditAction => 'Modifier';
   @override
   String get todoDeleteAction => 'Supprimer';
+  @override
+  String get todoSetDue => 'Définir l’échéance';
+  @override
+  String get todoDueTomorrow => 'Demain';
+  @override
+  String get todoDueNextWeek => 'Dans une semaine';
+  @override
+  String get todoPickDate => 'Choisir une date…';
+  @override
+  String get todoQuickAddHint => 'Ajouter une tâche — +projet @contexte due:';
 
   // Task filters (T-TD-05).
   @override

@@ -1085,6 +1085,16 @@ final class GreekStrings extends Strings {
   String get todoEditAction => 'Επεξεργασία';
   @override
   String get todoDeleteAction => 'Διαγραφή';
+  @override
+  String get todoSetDue => 'Ορισμός προθεσμίας';
+  @override
+  String get todoDueTomorrow => 'Αύριο';
+  @override
+  String get todoDueNextWeek => 'Σε μία εβδομάδα';
+  @override
+  String get todoPickDate => 'Επιλογή ημερομηνίας…';
+  @override
+  String get todoQuickAddHint => 'Προσθήκη εργασίας — +έργο @πλαίσιο due:';
 
   // Task filters (T-TD-05).
   @override

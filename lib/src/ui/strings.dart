@@ -721,6 +721,11 @@ final class AppStrings {
   static String get todoSave => _s.todoSave;
   static String get todoEditAction => _s.todoEditAction;
   static String get todoDeleteAction => _s.todoDeleteAction;
+  static String get todoSetDue => _s.todoSetDue;
+  static String get todoDueTomorrow => _s.todoDueTomorrow;
+  static String get todoDueNextWeek => _s.todoDueNextWeek;
+  static String get todoPickDate => _s.todoPickDate;
+  static String get todoQuickAddHint => _s.todoQuickAddHint;
 
   // Task filters (T-TD-05).
   static String get todoDueOverdue => _s.todoDueOverdue;

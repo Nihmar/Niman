@@ -1060,6 +1060,16 @@ final class SlovakStrings extends Strings {
   String get todoEditAction => 'Upraviť';
   @override
   String get todoDeleteAction => 'Vymazať';
+  @override
+  String get todoSetDue => 'Nastaviť termín';
+  @override
+  String get todoDueTomorrow => 'Zajtra';
+  @override
+  String get todoDueNextWeek => 'O týždeň';
+  @override
+  String get todoPickDate => 'Vybrať dátum…';
+  @override
+  String get todoQuickAddHint => 'Pridať úlohu — +projekt @kontext due:';
 
   // Task filters (T-TD-05).
   @override

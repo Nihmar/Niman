@@ -1063,6 +1063,16 @@ final class DutchStrings extends Strings {
   String get todoEditAction => 'Bewerken';
   @override
   String get todoDeleteAction => 'Verwijderen';
+  @override
+  String get todoSetDue => 'Vervaldatum instellen';
+  @override
+  String get todoDueTomorrow => 'Morgen';
+  @override
+  String get todoDueNextWeek => 'Over een week';
+  @override
+  String get todoPickDate => 'Kies een datum…';
+  @override
+  String get todoQuickAddHint => 'Taak toevoegen — +project @context due:';
 
   // Task filters (T-TD-05).
   @override

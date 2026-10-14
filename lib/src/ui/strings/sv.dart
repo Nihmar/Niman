@@ -1060,6 +1060,17 @@ final class SwedishStrings extends Strings {
   String get todoEditAction => 'Redigera';
   @override
   String get todoDeleteAction => 'Ta bort';
+  @override
+  String get todoSetDue => 'Ange förfallodag';
+  @override
+  String get todoDueTomorrow => 'I morgon';
+  @override
+  String get todoDueNextWeek => 'Om en vecka';
+  @override
+  String get todoPickDate => 'Välj ett datum…';
+  @override
+  String get todoQuickAddHint =>
+      'Lägg till en uppgift — +projekt @kontext due:';
 
   // Task filters (T-TD-05).
   @override

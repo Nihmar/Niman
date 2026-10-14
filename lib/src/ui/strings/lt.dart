@@ -1056,6 +1056,17 @@ final class LithuanianStrings extends Strings {
   String get todoEditAction => 'Redaguoti';
   @override
   String get todoDeleteAction => 'Ištrinti';
+  @override
+  String get todoSetDue => 'Nustatyti terminą';
+  @override
+  String get todoDueTomorrow => 'Rytoj';
+  @override
+  String get todoDueNextWeek => 'Po savaitės';
+  @override
+  String get todoPickDate => 'Pasirinkti datą…';
+  @override
+  String get todoQuickAddHint =>
+      'Pridėti užduotį — +projektas @kontekstas due:';
 
   // Task filters (T-TD-05).
   @override

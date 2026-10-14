@@ -1062,6 +1062,16 @@ final class FinnishStrings extends Strings {
   String get todoEditAction => 'Muokkaa';
   @override
   String get todoDeleteAction => 'Poista';
+  @override
+  String get todoSetDue => 'Aseta määräpäivä';
+  @override
+  String get todoDueTomorrow => 'Huomenna';
+  @override
+  String get todoDueNextWeek => 'Viikon päästä';
+  @override
+  String get todoPickDate => 'Valitse päivä…';
+  @override
+  String get todoQuickAddHint => 'Lisää tehtävä — +projekti @konteksti due:';
 
   // Task filters (T-TD-05).
   @override

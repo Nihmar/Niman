@@ -1061,6 +1061,16 @@ final class SlovenianStrings extends Strings {
   String get todoEditAction => 'Uredi';
   @override
   String get todoDeleteAction => 'Izbriši';
+  @override
+  String get todoSetDue => 'Nastavi rok';
+  @override
+  String get todoDueTomorrow => 'Jutri';
+  @override
+  String get todoDueNextWeek => 'Čez en teden';
+  @override
+  String get todoPickDate => 'Izberi datum…';
+  @override
+  String get todoQuickAddHint => 'Dodaj opravilo — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override

@@ -1060,6 +1060,16 @@ final class UkrainianStrings extends Strings {
   String get todoEditAction => 'Редагувати';
   @override
   String get todoDeleteAction => 'Видалити';
+  @override
+  String get todoSetDue => 'Встановити термін';
+  @override
+  String get todoDueTomorrow => 'Завтра';
+  @override
+  String get todoDueNextWeek => 'Через тиждень';
+  @override
+  String get todoPickDate => 'Вибрати дату…';
+  @override
+  String get todoQuickAddHint => 'Додати завдання — +проєкт @контекст due:';
 
   // Task filters (T-TD-05).
   @override

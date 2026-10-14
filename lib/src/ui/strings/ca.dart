@@ -1073,6 +1073,16 @@ final class CatalanStrings extends Strings {
   String get todoEditAction => 'Edita';
   @override
   String get todoDeleteAction => 'Esborra';
+  @override
+  String get todoSetDue => 'Estableix venciment';
+  @override
+  String get todoDueTomorrow => 'Demà';
+  @override
+  String get todoDueNextWeek => 'D’aquí a una setmana';
+  @override
+  String get todoPickDate => 'Tria una data…';
+  @override
+  String get todoQuickAddHint => 'Afegeix una tasca — +projecte @context due:';
 
   // Task filters (T-TD-05).
   @override

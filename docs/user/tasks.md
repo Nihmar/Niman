@@ -15,9 +15,29 @@ The Todo tab reads `todo.txt` files (todo.txt grammar: `x (A)
 
 ## Editing and deleting
 
-Tap a task to edit it; the trash icon in the dialog's title deletes it.
-Long-press a row (right-click on desktop) for the same Edit / Delete as
-a menu, or swipe it to the left (drag it, with a mouse) and confirm. Deleting removes the line from `todo.txt` (or `done.txt`, in the
+On a phone, tap a task to edit it; the trash icon in the dialog's title
+deletes it. Long-press a row for the same Edit / Delete as a menu, or
+swipe it to the left and confirm.
+
+On a desktop the list is driven by the mouse and the keyboard (#712):
+
+- a click selects a row, a double click edits its text in place —
+  `Enter` saves, `Esc` cancels;
+- `↑` / `↓` move the selection, `Space` checks the task, `Enter` or `F2`
+  edits it in place and `Delete` deletes it;
+- a right click opens the row's menu at the pointer: **Edit…** (the
+  dialog, for the dates, the reminder and the priority), **Set due** ▸
+  (Today, Tomorrow, Next week, Pick a date…, No due date), **Priority** ▸
+  (A, B, C, None) and **Delete**;
+- hovering a row shows a calendar (the due days alone), a trash and a ⋯
+  that opens the same menu;
+- a field at the top adds a task per `Enter`, as typed — `+project`,
+  `@context` and `due:` included, with the tokens already in the list
+  completed as you type them (`Tab` takes the first) — and keeps the
+  cursor for the next one;
+- **Filter** opens its tokens and sort under the pill.
+
+Deleting removes the line from `todo.txt` (or `done.txt`, in the
 Done view) outright: there is no trash for tasks. To keep a finished
 task, check it instead.
 

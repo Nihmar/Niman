@@ -1049,6 +1049,16 @@ final class EnglishStrings extends Strings {
   String get todoEditAction => 'Edit';
   @override
   String get todoDeleteAction => 'Delete';
+  @override
+  String get todoSetDue => 'Set due';
+  @override
+  String get todoDueTomorrow => 'Tomorrow';
+  @override
+  String get todoDueNextWeek => 'Next week';
+  @override
+  String get todoPickDate => 'Pick a date…';
+  @override
+  String get todoQuickAddHint => 'Add a task — +project @context due:';
 
   // Task filters (T-TD-05).
   @override

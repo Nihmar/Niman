@@ -31,6 +31,7 @@ import 'package:niman/src/ui/reminder_health_message.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_date_panel.dart';
 import 'package:niman/src/ui/todo_priority_chips.dart';
+import 'package:niman/src/ui/todo_token_completion.dart';
 
 /// Shows the add ([initial] null) or edit dialog.
 ///
@@ -159,53 +160,16 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     setState(() {});
   }
 
-  /// The word under the caret when it opens a `+`/`@`/`#` token, else
-  /// null. [start] receives the word's start offset for replacement.
-  ///
-  /// A lone sigil (e.g. `+`) counts too: right after the toolbar's add
-  /// buttons insert a sigil, the whole pool of that kind shows so an
-  /// already-used project/context/tag can be tapped without typing,
-  /// or typing can narrow it.
-  String? _tokenWord(String text, int caret, List<int> start) {
-    final head = caret < 0 || caret > text.length
-        ? text
-        : text.substring(0, caret);
-    final boundary = head.lastIndexOf(RegExp(r'\s'));
-    final word = head.substring(boundary + 1);
-    if (word.isEmpty || (word[0] != '+' && word[0] != '@' && word[0] != '#')) {
-      return null;
-    }
-    start[0] = boundary + 1;
-    return word;
-  }
-
   /// Known tokens completing the word under the caret.
-  Iterable<String> _options(TextEditingValue value) {
-    final start = <int>[0];
-    final word = _tokenWord(value.text, value.selection.extentOffset, start);
-    if (word == null) {
-      return const Iterable<String>.empty();
-    }
-    return widget.knownTokens.where(
-      (token) => token.startsWith(word) && token != word && token[0] == word[0],
-    );
-  }
+  Iterable<String> _options(TextEditingValue value) =>
+      todoTokenOptions(value, widget.knownTokens);
 
   /// Replaces the word under the caret with [selection] (the known-token
   /// completion pick), keeping the rest of the description untouched.
   void _insertOption(String selection) {
-    final text = _field.text;
-    final caret = _field.selection.extentOffset;
-    final start = <int>[0];
-    final word = _tokenWord(text, caret, start);
-    if (word == null) {
-      return;
-    }
-    final end = caret < 0 || caret > text.length ? text.length : caret;
-    _field.value = TextEditingValue(
-      text: text.replaceRange(start[0], end, selection),
-      selection: TextSelection.collapsed(offset: start[0] + selection.length),
-    );
+    final next = withTodoTokenOption(_field.value, selection);
+    if (next == null) return;
+    _field.value = next;
     // The list is built from what the field holds, and a programmatic value
     // does not rebuild this widget: without this the pool kept offering the
     // token the caret had just left (#311).

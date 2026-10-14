@@ -1071,6 +1071,16 @@ final class GermanStrings extends Strings {
   String get todoEditAction => 'Bearbeiten';
   @override
   String get todoDeleteAction => 'Löschen';
+  @override
+  String get todoSetDue => 'Fälligkeit setzen';
+  @override
+  String get todoDueTomorrow => 'Morgen';
+  @override
+  String get todoDueNextWeek => 'In einer Woche';
+  @override
+  String get todoPickDate => 'Datum wählen…';
+  @override
+  String get todoQuickAddHint => 'Aufgabe hinzufügen — +Projekt @Kontext due:';
 
   // Task filters (T-TD-05).
   @override

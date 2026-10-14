@@ -1070,6 +1070,16 @@ final class SpanishStrings extends Strings {
   String get todoEditAction => 'Editar';
   @override
   String get todoDeleteAction => 'Eliminar';
+  @override
+  String get todoSetDue => 'Fijar vencimiento';
+  @override
+  String get todoDueTomorrow => 'Mañana';
+  @override
+  String get todoDueNextWeek => 'Dentro de una semana';
+  @override
+  String get todoPickDate => 'Elegir fecha…';
+  @override
+  String get todoQuickAddHint => 'Añadir una tarea — +proyecto @contexto due:';
 
   // Task filters (T-TD-05).
   @override

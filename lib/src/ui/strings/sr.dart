@@ -1061,6 +1061,16 @@ final class SerbianStrings extends Strings {
   String get todoEditAction => 'Уреди';
   @override
   String get todoDeleteAction => 'Обриши';
+  @override
+  String get todoSetDue => 'Постави рок';
+  @override
+  String get todoDueTomorrow => 'Сутра';
+  @override
+  String get todoDueNextWeek => 'За недељу дана';
+  @override
+  String get todoPickDate => 'Изабери датум…';
+  @override
+  String get todoQuickAddHint => 'Додај задатак — +пројекат @контекст due:';
 
   // Task filters (T-TD-05).
   @override

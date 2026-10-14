@@ -988,6 +988,16 @@ final class ChineseStrings extends Strings {
   String get todoEditAction => '编辑';
   @override
   String get todoDeleteAction => '删除';
+  @override
+  String get todoSetDue => '设置截止日期';
+  @override
+  String get todoDueTomorrow => '明天';
+  @override
+  String get todoDueNextWeek => '一周后';
+  @override
+  String get todoPickDate => '选择日期…';
+  @override
+  String get todoQuickAddHint => '添加任务 — +项目 @情境 due:';
 
   // Task filters (T-TD-05).
   @override

@@ -1052,6 +1052,17 @@ final class NorwegianStrings extends Strings {
   String get todoEditAction => 'Rediger';
   @override
   String get todoDeleteAction => 'Slett';
+  @override
+  String get todoSetDue => 'Angi forfall';
+  @override
+  String get todoDueTomorrow => 'I morgen';
+  @override
+  String get todoDueNextWeek => 'Om en uke';
+  @override
+  String get todoPickDate => 'Velg en dato…';
+  @override
+  String get todoQuickAddHint =>
+      'Legg til en oppgave — +prosjekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override

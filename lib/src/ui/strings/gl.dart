@@ -1064,6 +1064,17 @@ final class GalicianStrings extends Strings {
   String get todoEditAction => 'Editar';
   @override
   String get todoDeleteAction => 'Borrar';
+  @override
+  String get todoSetDue => 'Fixar vencemento';
+  @override
+  String get todoDueTomorrow => 'Mañá';
+  @override
+  String get todoDueNextWeek => 'Dentro dunha semana';
+  @override
+  String get todoPickDate => 'Escoller data…';
+  @override
+  String get todoQuickAddHint =>
+      'Engadir unha tarefa — +proxecto @contexto due:';
 
   // Task filters (T-TD-05).
   @override

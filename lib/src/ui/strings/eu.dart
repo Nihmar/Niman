@@ -1062,6 +1062,17 @@ final class BasqueStrings extends Strings {
   String get todoEditAction => 'Editatu';
   @override
   String get todoDeleteAction => 'Ezabatu';
+  @override
+  String get todoSetDue => 'Ezarri epemuga';
+  @override
+  String get todoDueTomorrow => 'Bihar';
+  @override
+  String get todoDueNextWeek => 'Astebete barru';
+  @override
+  String get todoPickDate => 'Aukeratu data…';
+  @override
+  String get todoQuickAddHint =>
+      'Gehitu zeregina — +proiektua @testuingurua due:';
 
   // Task filters (T-TD-05).
   @override

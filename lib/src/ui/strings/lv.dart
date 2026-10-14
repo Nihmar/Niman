@@ -1055,6 +1055,17 @@ final class LatvianStrings extends Strings {
   String get todoEditAction => 'Rediģēt';
   @override
   String get todoDeleteAction => 'Dzēst';
+  @override
+  String get todoSetDue => 'Iestatīt termiņu';
+  @override
+  String get todoDueTomorrow => 'Rīt';
+  @override
+  String get todoDueNextWeek => 'Pēc nedēļas';
+  @override
+  String get todoPickDate => 'Izvēlēties datumu…';
+  @override
+  String get todoQuickAddHint =>
+      'Pievienot uzdevumu — +projekts @konteksts due:';
 
   // Task filters (T-TD-05).
   @override

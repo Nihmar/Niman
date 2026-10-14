@@ -1050,6 +1050,16 @@ final class TurkishStrings extends Strings {
   String get todoEditAction => 'Düzenle';
   @override
   String get todoDeleteAction => 'Sil';
+  @override
+  String get todoSetDue => 'Son tarih ayarla';
+  @override
+  String get todoDueTomorrow => 'Yarın';
+  @override
+  String get todoDueNextWeek => 'Bir hafta sonra';
+  @override
+  String get todoPickDate => 'Tarih seç…';
+  @override
+  String get todoQuickAddHint => 'Görev ekle — +proje @bağlam due:';
 
   // Task filters (T-TD-05).
   @override

@@ -1069,6 +1069,16 @@ final class PolishStrings extends Strings {
   String get todoEditAction => 'Edytuj';
   @override
   String get todoDeleteAction => 'Usuń';
+  @override
+  String get todoSetDue => 'Ustaw termin';
+  @override
+  String get todoDueTomorrow => 'Jutro';
+  @override
+  String get todoDueNextWeek => 'Za tydzień';
+  @override
+  String get todoPickDate => 'Wybierz datę…';
+  @override
+  String get todoQuickAddHint => 'Dodaj zadanie — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override

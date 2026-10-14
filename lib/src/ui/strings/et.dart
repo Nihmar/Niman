@@ -1049,6 +1049,16 @@ final class EstonianStrings extends Strings {
   String get todoEditAction => 'Muuda';
   @override
   String get todoDeleteAction => 'Kustuta';
+  @override
+  String get todoSetDue => 'Määra tähtaeg';
+  @override
+  String get todoDueTomorrow => 'Homme';
+  @override
+  String get todoDueNextWeek => 'Nädala pärast';
+  @override
+  String get todoPickDate => 'Vali kuupäev…';
+  @override
+  String get todoQuickAddHint => 'Lisa ülesanne — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override

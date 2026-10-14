@@ -1062,6 +1062,16 @@ final class BosnianStrings extends Strings {
   String get todoEditAction => 'Uredi';
   @override
   String get todoDeleteAction => 'Obriši';
+  @override
+  String get todoSetDue => 'Postavi rok';
+  @override
+  String get todoDueTomorrow => 'Sutra';
+  @override
+  String get todoDueNextWeek => 'Za sedmicu';
+  @override
+  String get todoPickDate => 'Odaberi datum…';
+  @override
+  String get todoQuickAddHint => 'Dodaj zadatak — +projekat @kontekst due:';
 
   // Task filters (T-TD-05).
   @override

@@ -1057,6 +1057,16 @@ final class CzechStrings extends Strings {
   String get todoEditAction => 'Upravit';
   @override
   String get todoDeleteAction => 'Smazat';
+  @override
+  String get todoSetDue => 'Nastavit termín';
+  @override
+  String get todoDueTomorrow => 'Zítra';
+  @override
+  String get todoDueNextWeek => 'Za týden';
+  @override
+  String get todoPickDate => 'Vybrat datum…';
+  @override
+  String get todoQuickAddHint => 'Přidat úkol — +projekt @kontext due:';
 
   // Task filters (T-TD-05).
   @override

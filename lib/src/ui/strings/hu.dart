@@ -1060,6 +1060,17 @@ final class HungarianStrings extends Strings {
   String get todoEditAction => 'Szerkesztés';
   @override
   String get todoDeleteAction => 'Törlés';
+  @override
+  String get todoSetDue => 'Határidő beállítása';
+  @override
+  String get todoDueTomorrow => 'Holnap';
+  @override
+  String get todoDueNextWeek => 'Egy hét múlva';
+  @override
+  String get todoPickDate => 'Dátum választása…';
+  @override
+  String get todoQuickAddHint =>
+      'Feladat hozzáadása — +projekt @környezet due:';
 
   // Task filters (T-TD-05).
   @override

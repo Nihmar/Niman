@@ -7,27 +7,43 @@
 /// check/uncheck, tap edits (the dialog can also delete), long-press or
 /// right-click opens the bottom sheet (the app's menu pattern) with
 /// edit/delete, and a swipe towards the start deletes after asking.
+///
+/// Where a pointer aims (#712) the rows are [TodoPointerRow]s: a click
+/// selects, a double click or `Enter`/`F2` edits the text in place, the
+/// arrows move, `Space` checks, `Delete` deletes, and the row's menu —
+/// Edit…, Set due ▸, Priority ▸, Delete — opens at a right click or under
+/// its ⋯. A quick-add field tops the list, and the filter opens under its
+/// pill.
 library;
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/todo/line_edits.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/os_pickers.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/reminder_health_banner.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_filter_bar.dart';
 import 'package:niman/src/ui/todo_filter_sheet.dart';
 import 'package:niman/src/ui/todo_help.dart';
+import 'package:niman/src/ui/todo_pointer_row.dart';
+import 'package:niman/src/ui/todo_quick_add.dart';
 import 'package:niman/src/ui/todo_row.dart';
+import 'package:niman/src/ui/todo_row_menu.dart';
 
 /// The Todo tab body.
 final class TodoTab extends StatefulWidget {
@@ -82,6 +98,30 @@ final class _TodoTabState extends State<TodoTab> {
   /// or its failure) clears this, and a failed delete brings the row back.
   final Set<TodoEntry> _swiped = {};
 
+  /// The line the keyboard's selection is on (#712); a delete leaves it
+  /// on the line that takes the index.
+  int? _selectedLine;
+
+  /// The line whose text is a field, or null.
+  int? _editingLine;
+
+  /// The last click on a row, to tell a double one.
+  (int, DateTime)? _lastClick;
+
+  /// The rows' menu, one for the list (#712), and what it is open for.
+  final MenuController _menu = MenuController();
+  TodoEntry? _menuEntry;
+  bool _menuDueOnly = false;
+
+  /// The box the menu opens over, to place it at a point on screen.
+  final GlobalKey _listKey = GlobalKey();
+
+  /// The list's keys: the arrows, `Space`, `Enter`/`F2`, `Delete`.
+  late final FocusNode _listFocus = FocusNode(debugLabel: 'todo-list');
+
+  /// The rows on screen, in order, for the arrows.
+  List<TodoEntry> _visible = const [];
+
   @override
   void initState() {
     super.initState();
@@ -92,6 +132,7 @@ final class _TodoTabState extends State<TodoTab> {
   @override
   void dispose() {
     widget.controller.removeListener(_onPublished);
+    _listFocus.dispose();
     super.dispose();
   }
 
@@ -307,6 +348,8 @@ final class _TodoTabState extends State<TodoTab> {
       for (final entry in applyTodoFilter(fileEntries, _filter, _today))
         if (!_swiped.contains(entry)) entry,
     ];
+    final pointer = pointerDense(Theme.of(context));
+    _visible = visible;
     return Column(
       children: [
         TodoFilterBar(
@@ -327,11 +370,19 @@ final class _TodoTabState extends State<TodoTab> {
             _log.debug('todo filter due: ${range.name}');
             setState(() => _filter = _filter.copyWith(dueRange: range));
           },
-          onOpenFilter: () => _openFilterSheet(fileEntries),
+          onOpenFilter: (anchor) => _openFilterSheet(fileEntries, anchor),
         ),
+        if (pointer)
+          TodoQuickAdd(
+            key: const Key('todo-quick-add-row'),
+            onAdd: _quickAdd,
+            knownTokens: _knownTokens,
+          ),
         Expanded(
           child: visible.isEmpty
               ? _emptyList(fileEntries.isEmpty)
+              : pointer
+              ? _pointerList(visible)
               : ListView.builder(
                   key: const Key('todo-list'),
                   itemCount: visible.length,
@@ -413,29 +464,220 @@ final class _TodoTabState extends State<TodoTab> {
     return confirmed ?? false;
   }
 
-  /// Opens the token + sort sheet (T-TDM-03) over the visible file.
-  void _openFilterSheet(List<TodoEntry> fileEntries) {
+  /// Opens the token + sort sheet (T-TDM-03) over the visible file; where
+  /// a pointer aims, a pop-up under the pill at [anchor] (#712).
+  void _openFilterSheet(List<TodoEntry> fileEntries, Rect? anchor) {
     final counts = tokenCountsFor(fileEntries, _filter.dueRange, _today);
+    if (pointerDense(Theme.of(context))) {
+      unawaited(
+        showActionSheet<void>(
+          context,
+          anchor: anchor,
+          items: (context) => [_filterSheet(counts)],
+        ),
+      );
+      return;
+    }
     unawaited(
       showModalBottomSheet<void>(
         context: context,
-        builder: (context) => TodoFilterSheet(
-          filter: _filter,
-          counts: counts,
-          onToggleToken: (token) {
-            final tokens = {..._filter.tokens};
-            if (!tokens.remove(token)) {
-              tokens.add(token);
-            }
-            _log.debug('todo filter tokens: $tokens');
-            setState(() => _filter = _filter.copyWith(tokens: tokens));
-          },
-          onSort: (sort) {
-            setState(() => _filter = _filter.copyWith(sort: sort));
+        builder: (context) => _filterSheet(counts),
+      ),
+    );
+  }
+
+  /// The tokens and the sort, as the sheet or the pop-up shows them.
+  Widget _filterSheet(List<({String token, int count})> counts) =>
+      TodoFilterSheet(
+        filter: _filter,
+        counts: counts,
+        onToggleToken: (token) {
+          final tokens = {..._filter.tokens};
+          if (!tokens.remove(token)) {
+            tokens.add(token);
+          }
+          _log.debug('todo filter tokens: $tokens');
+          setState(() => _filter = _filter.copyWith(tokens: tokens));
+        },
+        onSort: (sort) {
+          setState(() => _filter = _filter.copyWith(sort: sort));
+        },
+      );
+
+  /// Adds the task typed in the quick-add field (#712), created today.
+  void _quickAdd(String text) {
+    _log.debug('todo quick add');
+    unawaited(
+      widget.controller.add(
+        formatTodoLine(
+          completed: false,
+          creationDate: _today,
+          description: text,
+        ),
+      ),
+    );
+  }
+
+  /// The desktop's list (#712): [TodoPointerRow]s under one menu, with the
+  /// keyboard on the list.
+  Widget _pointerList(List<TodoEntry> visible) {
+    final view = _showDone ? 'done' : 'open';
+    return MenuAnchor(
+      controller: _menu,
+      menuChildren: _menuEntry == null
+          ? const []
+          : todoRowMenuItems(
+              dueOnly: _menuDueOnly,
+              onPick: (pick) => unawaited(_runPick(_menuEntry!, pick)),
+            ),
+      child: Focus(
+        key: _listKey,
+        focusNode: _listFocus,
+        onKeyEvent: _onListKey,
+        child: ListView.builder(
+          key: const Key('todo-list'),
+          itemCount: visible.length,
+          itemBuilder: (context, index) {
+            final entry = visible[index];
+            final line = entry.lineIndex;
+            return TodoPointerRow(
+              key: Key('todo-row-$view-$line'),
+              entry: entry,
+              today: _today,
+              selected: line == _selectedLine,
+              editing: line == _editingLine,
+              onToggle: (checked) => _toggle(entry, checked),
+              onClick: () => _click(entry),
+              onSubmitText: (text) => unawaited(_writeText(entry, text)),
+              onCancelEdit: () => setState(() => _editingLine = null),
+              onMenuAt: (at) => _openMenu(entry, at),
+              onDueMenuAt: (at) => _openMenu(entry, at, dueOnly: true),
+              onDelete: () => unawaited(_delete(entry)),
+            );
           },
         ),
       ),
     );
+  }
+
+  /// A click selects the row; a second one on it in time edits its text.
+  void _click(TodoEntry entry) {
+    final now = DateTime.now();
+    final last = _lastClick;
+    final line = entry.lineIndex;
+    final twice =
+        last != null &&
+        last.$1 == line &&
+        now.difference(last.$2) <= kDoubleTapTimeout;
+    _lastClick = twice ? null : (line, now);
+    _listFocus.requestFocus();
+    setState(() {
+      _selectedLine = line;
+      if (twice) _editingLine = line;
+    });
+  }
+
+  /// The list's keys (#712).
+  KeyEventResult _onListKey(FocusNode node, KeyEvent event) {
+    if (event is KeyUpEvent || _editingLine != null) {
+      return KeyEventResult.ignored;
+    }
+    final rows = _visible;
+    if (rows.isEmpty) return KeyEventResult.ignored;
+    final at = rows.indexWhere((e) => e.lineIndex == _selectedLine);
+    final selected = at < 0 ? null : rows[at];
+    void select(int index) =>
+        setState(() => _selectedLine = rows[index].lineIndex);
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.arrowDown:
+        select(at < 0 ? 0 : (at + 1).clamp(0, rows.length - 1));
+      case LogicalKeyboardKey.arrowUp:
+        select(at < 0 ? rows.length - 1 : (at - 1).clamp(0, rows.length - 1));
+      case LogicalKeyboardKey.space
+          when selected != null && event is KeyDownEvent:
+        unawaited(_toggle(selected, !selected.task.completed));
+      case LogicalKeyboardKey.enter ||
+              LogicalKeyboardKey.numpadEnter ||
+              LogicalKeyboardKey.f2
+          when selected != null && event is KeyDownEvent:
+        setState(() => _editingLine = selected.lineIndex);
+      case LogicalKeyboardKey.delete
+          when selected != null && event is KeyDownEvent:
+        unawaited(_delete(selected));
+      default:
+        return KeyEventResult.ignored;
+    }
+    return KeyEventResult.handled;
+  }
+
+  /// Writes the text edited in place into [entry]'s line.
+  Future<void> _writeText(TodoEntry entry, String text) async {
+    setState(() => _editingLine = null);
+    _listFocus.requestFocus();
+    if (text == entry.task.description) return;
+    await _rewrite(entry, todoLineWithText(entry.task, text));
+  }
+
+  /// Opens the row menu for [entry] at [global], a point on screen.
+  void _openMenu(TodoEntry entry, Offset global, {bool dueOnly = false}) {
+    final box = _listKey.currentContext?.findRenderObject();
+    if (box is! RenderBox) return;
+    setState(() {
+      _menuEntry = entry;
+      _menuDueOnly = dueOnly;
+      _selectedLine = entry.lineIndex;
+    });
+    _menu.open(position: box.globalToLocal(global));
+  }
+
+  /// Runs what the row menu picked for [entry].
+  Future<void> _runPick(TodoEntry entry, TodoMenuPick pick) async {
+    final task = entry.task;
+    final today = _today;
+    switch (pick) {
+      case TodoMenuPick.edit:
+        await _edit(entry);
+      case TodoMenuPick.delete:
+        await _delete(entry);
+      case TodoMenuPick.dueToday:
+        await _rewrite(entry, todoLineWithDue(task, today));
+      case TodoMenuPick.dueTomorrow:
+        await _rewrite(
+          entry,
+          todoLineWithDue(task, today.add(const Duration(days: 1))),
+        );
+      case TodoMenuPick.dueNextWeek:
+        await _rewrite(
+          entry,
+          todoLineWithDue(task, today.add(const Duration(days: 7))),
+        );
+      case TodoMenuPick.dueNone:
+        await _rewrite(entry, todoLineWithDue(task, null));
+      case TodoMenuPick.duePick:
+        final day = await showDayPicker(
+          context,
+          initialDate: task.due ?? today,
+          firstDate: DateTime(today.year - 5),
+          lastDate: DateTime(today.year + 10),
+        );
+        if (day != null) await _rewrite(entry, todoLineWithDue(task, day));
+      case TodoMenuPick.priorityA:
+        await _rewrite(entry, todoLineWithPriority(task, 'A'));
+      case TodoMenuPick.priorityB:
+        await _rewrite(entry, todoLineWithPriority(task, 'B'));
+      case TodoMenuPick.priorityC:
+        await _rewrite(entry, todoLineWithPriority(task, 'C'));
+      case TodoMenuPick.priorityNone:
+        await _rewrite(entry, todoLineWithPriority(task, null));
+    }
+  }
+
+  /// Writes [line] in place of [entry]'s, in the file it is in.
+  Future<void> _rewrite(TodoEntry entry, String line) {
+    _log.debug('todo row rewritten: line ${entry.lineIndex}');
+    return _showDone
+        ? widget.controller.updateDone(entry, line)
+        : widget.controller.updateTodo(entry, line);
   }
 
   /// The empty state: the file's own when it holds nothing, the filtered

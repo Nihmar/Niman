@@ -1063,6 +1063,16 @@ final class BulgarianStrings extends Strings {
   String get todoEditAction => 'Редактирай';
   @override
   String get todoDeleteAction => 'Изтрий';
+  @override
+  String get todoSetDue => 'Задай срок';
+  @override
+  String get todoDueTomorrow => 'Утре';
+  @override
+  String get todoDueNextWeek => 'След седмица';
+  @override
+  String get todoPickDate => 'Избери дата…';
+  @override
+  String get todoQuickAddHint => 'Добави задача — +проект @контекст due:';
 
   // Task filters (T-TD-05).
   @override

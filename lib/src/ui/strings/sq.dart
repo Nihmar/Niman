@@ -1063,6 +1063,16 @@ final class AlbanianStrings extends Strings {
   String get todoEditAction => 'Ndrysho';
   @override
   String get todoDeleteAction => 'Fshi';
+  @override
+  String get todoSetDue => 'Cakto afatin';
+  @override
+  String get todoDueTomorrow => 'Nesër';
+  @override
+  String get todoDueNextWeek => 'Pas një jave';
+  @override
+  String get todoPickDate => 'Zgjidh një datë…';
+  @override
+  String get todoQuickAddHint => 'Shto një detyrë — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override

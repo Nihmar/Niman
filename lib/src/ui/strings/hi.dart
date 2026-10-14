@@ -1040,6 +1040,16 @@ final class HindiStrings extends Strings {
   String get todoEditAction => 'संपादित करें';
   @override
   String get todoDeleteAction => 'हटाएँ';
+  @override
+  String get todoSetDue => 'नियत तिथि तय करें';
+  @override
+  String get todoDueTomorrow => 'कल';
+  @override
+  String get todoDueNextWeek => 'अगले सप्ताह';
+  @override
+  String get todoPickDate => 'तिथि चुनें…';
+  @override
+  String get todoQuickAddHint => 'कार्य जोड़ें — +परियोजना @संदर्भ due:';
 
   // Task filters (T-TD-05).
   @override

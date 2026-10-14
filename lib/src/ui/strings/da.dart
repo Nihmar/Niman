@@ -1053,6 +1053,16 @@ final class DanishStrings extends Strings {
   String get todoEditAction => 'Rediger';
   @override
   String get todoDeleteAction => 'Slet';
+  @override
+  String get todoSetDue => 'Sæt forfald';
+  @override
+  String get todoDueTomorrow => 'I morgen';
+  @override
+  String get todoDueNextWeek => 'Om en uge';
+  @override
+  String get todoPickDate => 'Vælg en dato…';
+  @override
+  String get todoQuickAddHint => 'Tilføj en opgave — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override

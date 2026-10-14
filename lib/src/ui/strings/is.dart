@@ -1059,6 +1059,16 @@ final class IcelandicStrings extends Strings {
   String get todoEditAction => 'Breyta';
   @override
   String get todoDeleteAction => 'Eyða';
+  @override
+  String get todoSetDue => 'Setja skiladag';
+  @override
+  String get todoDueTomorrow => 'Á morgun';
+  @override
+  String get todoDueNextWeek => 'Eftir viku';
+  @override
+  String get todoPickDate => 'Velja dagsetningu…';
+  @override
+  String get todoQuickAddHint => 'Bæta við verkefni — +verk @samhengi due:';
 
   // Task filters (T-TD-05).
   @override

@@ -1056,6 +1056,16 @@ final class CroatianStrings extends Strings {
   String get todoEditAction => 'Uredi';
   @override
   String get todoDeleteAction => 'Obriši';
+  @override
+  String get todoSetDue => 'Postavi rok';
+  @override
+  String get todoDueTomorrow => 'Sutra';
+  @override
+  String get todoDueNextWeek => 'Za tjedan dana';
+  @override
+  String get todoPickDate => 'Odaberi datum…';
+  @override
+  String get todoQuickAddHint => 'Dodaj zadatak — +projekt @kontekst due:';
 
   // Task filters (T-TD-05).
   @override

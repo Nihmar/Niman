@@ -1068,6 +1068,16 @@ final class MacedonianStrings extends Strings {
   String get todoEditAction => 'Уреди';
   @override
   String get todoDeleteAction => 'Избриши';
+  @override
+  String get todoSetDue => 'Постави рок';
+  @override
+  String get todoDueTomorrow => 'Утре';
+  @override
+  String get todoDueNextWeek => 'За една недела';
+  @override
+  String get todoPickDate => 'Избери датум…';
+  @override
+  String get todoQuickAddHint => 'Додај задача — +проект @контекст due:';
 
   // Task filters (T-TD-05).
   @override

@@ -995,6 +995,16 @@ final class JapaneseStrings extends Strings {
   String get todoEditAction => '編集';
   @override
   String get todoDeleteAction => '削除';
+  @override
+  String get todoSetDue => '期限を設定';
+  @override
+  String get todoDueTomorrow => '明日';
+  @override
+  String get todoDueNextWeek => '1週間後';
+  @override
+  String get todoPickDate => '日付を選択…';
+  @override
+  String get todoQuickAddHint => 'タスクを追加 — +プロジェクト @コンテキスト due:';
 
   // Task filters (T-TD-05).
   @override
