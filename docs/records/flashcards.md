@@ -260,3 +260,43 @@ One branch, `feat/flashcards`, one PR into `main`; a commit per step.
 
 Main risk: a card's identity when the note changes — kept to the one rule
 above, and tested on every edit the deck view makes.
+
+## As built (2026-10-14)
+
+All eight phases landed on `feat/flashcards`, in that order. Where the
+build parted from the plan above, or said what the plan left open:
+
+- **Make flashcards and the columns dialog are two dialogs** sharing the
+  column pickers (`DeckColumnFields`): a deck's **Question and answer
+  columns…** asks only that. Make flashcards writes `front:` and `back:`
+  only for a table of more than two columns, and leaves out an empty
+  `deck:`. A note with nothing to make cards from is told so and left
+  alone. Fixing it turned up that `applyKindEdit` kept the kind a note
+  was opened with: an edit that writes a `type:` now turns the view.
+- **"Offers once" needs no setting.** The offer writes Study into the
+  navigation layout, still hidden; a layout that already places Study —
+  shown, hidden by hand, offered before — is not asked again.
+- **The deck beside its review hides its answers** (decided 2026-10-14,
+  after the first build): the card under study is marked in the list,
+  and its answer would be one glance away.
+- **The review is a pane tab like the compare tab** (#712): its own
+  state (`ReviewTab`), placed by the shell — the other pane of a split, a
+  split to the right where the panes have room for two
+  (`2 × RightDock.minPanesWidth`), the deck's pane otherwise. A note shown
+  in its pane covers it; Home, Todo and the compare tab do too.
+- **Next deck** is the first other deck, in path order, with cards today;
+  on a phone its review takes the place of the last, and **Back to the
+  deck** returns to where the first study began.
+- **Study opens a deck the way the tree does**, in place of the pane's
+  note. The search's way (`_showNote`) left the new deck *Loading…* in a
+  widget test when another deck was open beside the Study tree; not
+  followed further.
+- **The Home tile is added from the Home's panel**, as Tags and the
+  calendar are; it is not one of a new Home's tiles.
+- **The day's turn reaches the widget when the app comes back**: the
+  decks are counted for the study day it is now on resume. With the app
+  closed across midnight the widget shows the day before until Niman is
+  opened (`docs/user/widgets.md` says so). Its text is English and
+  Italian, as the other widgets'.
+- **Settings › Study** offers 0, 5, 10, 20, 30, 50 and 100 new cards a day;
+  a number typed into `settings.json` keeps its place among them.

@@ -272,7 +272,7 @@ there being no key for it.
 On a wide window (the desktops and an Android tablet; a phone is never
 one, [turned or not](#window-size)) the rail's destinations are not all
 the same shape.
-Files, Search and the tag tree are sidebar views: they swap what the left
+Files, Search, the tag tree and Study are sidebar views: they swap what the left
 panel shows and leave the open notes, the panes and the right panel where
 they are. Home and Todo are content destinations: they open as a pinned
 tab in the focused pane — the chip at the far end of its tab row, so
@@ -282,6 +282,8 @@ tab (its ✕) leaves the notes. Home or Todo on screen when a window grows
 from narrow to wide becomes that pinned tab. A phone keeps its
 one-screen-per-destination model, and the Search sidebar's tag tree is
 the two-level list there ([settings](settings.md#navigation)).
+A flashcard review opens as a tab of its own beside its deck on a wide
+window and full screen on a phone ([flashcards](flashcards.md#studying)).
 
 ## Date created
 

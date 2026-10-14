@@ -53,7 +53,7 @@ the value at its end and kept when you let go; in a dialog on a phone.
 desktop's rail, and hides the destinations you do not use: drag a row by
 its handle to move it, flip its switch to hide it. The same entries mean
 different things on a wide window: Files, Search (and the tag tree behind
-it) are **sidebar views** — they swap what the left panel shows while the
+it) and [Study](flashcards.md#study-the-decks) are **sidebar views** — they swap what the left panel shows while the
 open notes and the right panel stay — and Home and Todo are **content
 destinations**, opening as a tab in the focused pane with the tree still
 beside them ([platforms](platforms.md#destinations)). Settings cannot be
@@ -62,6 +62,10 @@ foot with the library switcher either way. At least one destination
 besides Settings stays shown: its switch is off-limits while it is the
 last one. The bar or the rail under or
 beside the list is a preview of the result.
+
+**Study** starts hidden: a library with no flashcards has no use for it.
+The first deck made offers to show it, once; its switch here shows it any
+time.
 
 A hidden destination is still in the command palette (*Go to: …*). On
 a phone it opens as a page, with a back arrow to where you were; on the

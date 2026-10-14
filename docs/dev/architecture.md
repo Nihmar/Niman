@@ -18,7 +18,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `workspace/` | The open notes of one library on one device: panes, tabs and their mementos — see [workspace.md](../records/workspace.md) |
 | `journal/` | The journal's day pattern, settings and calendar summaries (see [journal](../user/journal.md)) |
 | `reading/` | Where each PDF and each book was left, kept in `.niman/reading.json` |
-| `flashcards/` | Decks (#533): the cards read from a note (`Deck.read`), the SM-2 scheduler, and the review states kept in `.niman/review.json` — see [flashcards.md](../records/flashcards.md) |
+| `flashcards/` | Decks (#533): the cards read from a note (`Deck.read`), the SM-2 scheduler and the study session, the review states kept in `.niman/review.json`, and the deck catalog Study counts from — see [flashcards.md](../records/flashcards.md); the deck view and the review are `ui/kinds/flashcards/`, Study and its settings `ui/study/` |
 | `annotations/` | A file's companion notes, the annotation model and its marks — see [annotations.md](../records/annotations.md) |
 | `capture/` | Capturing a web page as a note (#531): the download and its charsets (`fetch/`), a Dart port of Mozilla's Readability.js (`readability/`, held to upstream's test pages), the pictures into the attachments folder, the note — see [web-capture.md](../records/web-capture.md) |
 | `epub/` | Reading an EPUB into Markdown, its table of contents, its look and its marks — see [epub-reader.md](../records/epub-reader.md) |
@@ -38,7 +38,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
 | `spellcheck/` | hunspell (desktop) / system IME (Android) providers, per-library personal dictionary layered in front (right-click *Add to dictionary*) |
 | `transcription/` | On-device speech-to-text for audio notes (whisper_ggml): model catalog, downloads, the model directory, transcription settings — see [transcription.md](../records/transcription.md) |
-| `ui/` | Shell, tree, settings screens, shared widgets; `ui/welcome/` is the first-run deck (#266) and `ui/tour/` the guided tour with its target registry |
+| `ui/` | Shell, tree, settings screens, shared widgets; `ui/welcome/` is the first-run deck (#266) and `ui/tour/` the guided tour with its target registry; `ui/kinds/` the views of the note kinds (`type:`) |
 | `widget/` | Android home-screen widgets: placement, payload, refresh, theming, background row ops (native Kotlin providers in `android/app/src/main/kotlin/dev/niman/niman/`) |
 
 State: Riverpod. No god classes — one class per file, split at ~300
