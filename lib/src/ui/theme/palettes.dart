@@ -17,6 +17,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/theme_colors.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/theme/catppuccin.dart';
 import 'package:niman/src/ui/theme/gruvbox.dart';
 import 'package:niman/src/ui/theme/niman.dart';
@@ -93,6 +94,8 @@ ThemeData buildAppTheme(AppTheme theme, Brightness brightness) {
       ),
     );
   }
+  // Every menu of a pointer is compact by default (`pointer_menu.dart`).
+  data = pointerMenuTheme(data);
   // Two entries per theme, plus a stale pair per edit; a handful of
   // themes never comes near this, and one that did would only pay for
   // rebuilding what it wears.
