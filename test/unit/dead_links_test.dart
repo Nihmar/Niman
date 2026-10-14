@@ -13,6 +13,7 @@ import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/render/dead_link_ranges.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
 
@@ -474,18 +475,33 @@ void main() {
       () async {
         const text =
             '[[Gone]] `[[In code]]`\n\n```\n[[In fence]]\n```\n[x](y.md)';
-        final read = await linksOfText(text);
+        final read = await linksOfBuffer(SourceBuffer.fromText(text));
         expect(read.whereType<WikiLink>().map((l) => l.ref.target), ['Gone']);
         expect(read.whereType<MarkdownLink>().map((l) => l.href), ['y.md']);
 
         final long = '${'filler line\n' * 8000}[[Far gone]]';
         expect(long.length, greaterThan(deadLinkInlineLimit));
         expect(
-          (await linksOfText(long)).whereType<WikiLink>().single.ref.target,
+          (await linksOfBuffer(SourceBuffer.fromText(long)))
+              .whereType<WikiLink>()
+              .single
+              .ref
+              .target,
           'Far gone',
           reason: 'a long note is read on an isolate, and answers the same',
         );
       },
     );
+
+    test('an edited long buffer is read as it stands', () async {
+      // A line typed into is a string of its own, not a view of the text the
+      // buffer was read from: the shape of a note being edited.
+      final buffer = SourceBuffer.fromText('${'filler line\n' * 8000}end')
+        ..insert(0, '[[Typed]] ');
+      expect(buffer.length, greaterThan(deadLinkInlineLimit));
+      final read = await openNoteLinks(buffer: buffer, kept: () => null);
+      expect(read!.whereType<WikiLink>().single.ref.target, 'Typed');
+      expect(await openNoteLinks(buffer: null, kept: () => null), isNull);
+    });
   });
 }
