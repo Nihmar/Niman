@@ -5,6 +5,7 @@
 library;
 
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/links/parser.dart' show parseWikiRef, wikiAliasOffset;
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
 import 'package:niman/src/markdown/read_block.dart';
@@ -221,11 +222,8 @@ final class LiveInlines {
             depth,
           );
           if (embed) {
-            final pipe = inner.indexOf('|');
-            final target = (pipe >= 0 ? inner.substring(0, pipe) : inner)
-                .trim();
-            final alias = pipe >= 0 ? inner.substring(pipe + 1).trim() : '';
-            _picture(node, target, alias.isEmpty ? target : alias, text, map);
+            final ref = parseWikiRef(inner);
+            _picture(node, ref.target, ref.embedLabel, text, map);
           }
         case TagNode():
           add(TokenKind.tag, node.start, node.end, depth);
@@ -284,12 +282,11 @@ final class LiveInlines {
 
   /// Where a wikilink's text starts: past its `|` when it has an alias,
   /// so `live` shows `[[target|alias]]` as its alias, as the read view
-  /// does; at [open] otherwise. The first `|` splits, as `parseWikiRef`
-  /// reads it.
+  /// does; at [open] otherwise. The separator, a `\|` included, is the
+  /// markup before that start: [wikiAliasOffset] says where it ends.
   static int _aliasStart(String text, int open, int close) {
-    final pipe = text.indexOf('|', open);
-    if (pipe < 0 || pipe >= close) return open;
-    return text.substring(pipe + 1, close).trim().isEmpty ? open : pipe + 1;
+    final alias = wikiAliasOffset(text.substring(open, close));
+    return alias == null ? open : open + alias;
   }
 
   /// How many [char]s [text] has at [at].

@@ -101,6 +101,23 @@ void main() {
       expect(wikiDisplayText(r'Note\|'), 'Note');
     });
 
+    test('an embed reads its escaped-pipe size through the same split '
+        '(#932)', () {
+      final ref = parseWikiRef(r'img.png\|200');
+      expect(ref.target, 'img.png');
+      expect(ref.embedLabel, '200');
+      expect(parseWikiRef('img.png').embedLabel, 'img.png');
+      expect(parseWikiRef('img.png|').embedLabel, 'img.png');
+    });
+
+    test('the alias starts past the separator, a backslash with it (#932)', () {
+      expect(wikiAliasOffset('img.png|200'), 8);
+      expect(wikiAliasOffset(r'img.png\|200'), 9);
+      expect(wikiAliasOffset('img.png'), isNull);
+      expect(wikiAliasOffset('img.png|  '), isNull);
+      expect(wikiAliasOffset(r'img.png\|'), isNull);
+    });
+
     test('a wikilink with an escaped pipe in a table row links to its note '
         '(#920)', () {
       final link = parseLinks(r'| [[Note\|Alias]] | b |').single as WikiLink;

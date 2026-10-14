@@ -88,6 +88,45 @@ void main() {
       expect(_line('a #tag b'), ['tag[#tag]']);
     });
 
+    test('an escaped pipe is the alias separator, backslash hidden with it '
+        '(#932)', () {
+      // The separator is markup: the alias starts past `\|`, so the
+      // backslash is never part of what `live` shows.
+      expect(_line(r'a [[N\|b]] c'), [
+        r'wikilink*[[[N\|]',
+        'wikilink[b]',
+        'wikilink*[]]]',
+      ]);
+      expect(_line(r'a [[N\|]] c'), [
+        'wikilink*[[[]',
+        r'wikilink[N\|]',
+        'wikilink*[]]]',
+      ]);
+      expect(_line(r'a ![[img.png\|200]]'), [
+        'wikilink*[![[]',
+        r'wikilink[img.png\|200]',
+        'wikilink*[]]]',
+      ]);
+    });
+
+    test('an embed with an escaped pipe pictures its file, sized or not, '
+        'in a table row or out of it (#932)', () {
+      for (final (line, row) in [
+        (r'see ![[img.png\|200]] now', 0),
+        (r'| ![[img.png\|200]] | x |', 2),
+      ]) {
+        final note = row == 0 ? line : '| a | b |\n| - | - |\n$line';
+        final pictures = SourceStyler(SourceBuffer.fromText(note))
+            .picturesOf(row);
+        expect(pictures, hasLength(1), reason: line);
+        expect(pictures.single.target, 'img.png', reason: line);
+        expect(pictures.single.display, '200', reason: line);
+        final at = line.indexOf('![[');
+        expect(pictures.single.start, at, reason: line);
+        expect(pictures.single.end, line.indexOf(']]', at) + 2, reason: line);
+      }
+    });
+
     test('a construct inside another keeps the ones around it', () {
       // The tokens are disjoint, so a stretch is the innermost construct's;
       // the ones around it ride along, or `<u>**x**</u>` was bold and not

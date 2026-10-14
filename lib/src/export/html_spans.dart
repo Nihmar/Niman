@@ -78,12 +78,12 @@ final class HtmlSpans {
   /// An embed whose inside is [inner].
   HtmlSpan embed(String inner) {
     final ref = parseWikiRef(inner);
-    final pipe = inner.indexOf('|');
-    final shown = (pipe >= 0 ? inner.substring(pipe + 1) : inner).trim();
+    final alias = ref.alias;
+    final shown = (alias ?? inner).trim();
     final data = source.images[ref.target];
     if (data == null) {
       // What the read view shows for an embed it cannot draw.
-      final written = '![[${pipe >= 0 ? shown : inner}]]';
+      final written = '![[${alias ?? inner}]]';
       return (
         html: '<span class="embed">${escapeHtml(written)}</span>',
         plain: written,

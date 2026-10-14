@@ -167,7 +167,12 @@ final class WikilinkSuggestController extends ChangeNotifier {
       closeAt = lineStart + close;
       end = close;
       for (final stop in hash == -1 ? const ['#', '|'] : const ['|']) {
-        final found = text.indexOf(stop, at);
+        var found = text.indexOf(stop, at);
+        // A `\|` is the separator whole, as `parseWikiRef` reads it: the
+        // backslash stays with the `|`, not in what the target is made.
+        if (found > at && stop == '|' && text.codeUnitAt(found - 1) == 0x5C) {
+          found--;
+        }
         if (found != -1 && found < end) end = found;
       }
     }
