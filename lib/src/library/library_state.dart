@@ -1343,6 +1343,19 @@ final class LibraryController implements LibrarySession {
     );
   }
 
+  /// The new flashcards each deck shows per day (#533).
+  @override
+  Future<int> get newCardsPerDay async => (await _library).newCardsPerDay;
+
+  /// Sets (and persists) the new flashcards per deck per day, into range.
+  @override
+  Future<void> setNewCardsPerDay(int count) async {
+    _log.info('new cards per day set to $count');
+    await _editLibrary(
+      (c) => c.copyWith(newCardsPerDay: normalizeNewCardsPerDay(count)),
+    );
+  }
+
   @override
   Future<int> get trashAutoEmptyDays async =>
       (await _library).trashAutoEmptyDays;

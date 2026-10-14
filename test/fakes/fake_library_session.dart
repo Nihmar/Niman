@@ -602,6 +602,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<int> get newCardsPerDay async => _config.newCardsPerDay;
+
+  @override
+  Future<void> setNewCardsPerDay(int count) async {
+    _config = _config.copyWith(newCardsPerDay: normalizeNewCardsPerDay(count));
+  }
+
+  @override
   Future<SourceFont> get sourceFont async => _config.sourceFont;
 
   @override

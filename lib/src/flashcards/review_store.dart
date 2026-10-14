@@ -53,15 +53,39 @@ final class ReviewStore {
   Future<Map<String, ReviewState>> read(String path) async =>
       _statesOf((await _load())[path]);
 
-  /// Every note's states, by path: what the Study view counts from.
-  Future<Map<String, Map<String, ReviewState>>> readAll() async {
-    final entries = await _load();
+  /// Every note's states, by path: what the Study view counts from. The
+  /// file is read and decoded on a background isolate, being the whole
+  /// library's.
+  Future<Map<String, Map<String, ReviewState>>> readAll() {
+    final library = root;
+    return Isolate.run(() => readAllBlocking(library));
+  }
+
+  /// [readAll] for code already on a background isolate: reads the file
+  /// synchronously. Nothing for a file that is missing or does not read.
+  static Map<String, Map<String, ReviewState>> readAllBlocking(String root) {
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(File(p.join(root, filePath)).readAsStringSync());
+    } on FileSystemException {
+      return const {};
+    } on FormatException {
+      return const {};
+    }
+    if (decoded is! Map) return const {};
     return {
-      for (final MapEntry(:key, :value) in entries.entries)
+      for (final MapEntry(:key, :value) in decoded.entries)
         if (_statesOf(value) case final states when states.isNotEmpty)
-          key: states,
+          key.toString(): states,
     };
   }
+
+  /// Fires with the library root after this app wrote the file: the Study
+  /// view counts again. A copy the sync brings is told by the sync.
+  static Stream<String> get changes => _changes.stream;
+
+  static final StreamController<String> _changes =
+      StreamController<String>.broadcast();
 
   /// Records that the card [key] of the note at [path] is now in [state];
   /// null takes it back to a card never reviewed (an undone first grade).
@@ -157,6 +181,7 @@ final class ReviewStore {
       final entries = await _load();
       if (!change(entries)) return;
       await Isolate.run(() => _writeEntries(root, entries));
+      if (_changes.hasListener) _changes.add(root);
     } on Object catch (error) {
       _log.warning('could not write $filePath: $error');
     } finally {

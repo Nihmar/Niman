@@ -648,6 +648,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the indent/outdent width.
   Future<void> setIndentWidth(int width);
 
+  /// The new flashcards each deck shows per day (default 20, 0 = none,
+  /// #533).
+  Future<int> get newCardsPerDay;
+
+  /// Sets (and persists) the new flashcards per deck per day, into range.
+  Future<void> setNewCardsPerDay(int count);
+
   /// How many days an item waits in `.trash/` before the automatic empty
   /// deletes it for good (default 0 = never).
   Future<int> get trashAutoEmptyDays;
