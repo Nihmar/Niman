@@ -1821,8 +1821,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // At the row's far end, where it comes and goes without moving a note
     // tab under the pointer (#770). The chips take what the tab bar's own
     // buttons leave, no more: a narrow pane (a tablet's, beside the tree
-    // and the dock) cuts the compare chip's name rather than squeeze the
-    // bar below its buttons (#927).
+    // and the dock) cuts the chips' names rather than squeeze the bar
+    // below its buttons (#927).
     return LayoutBuilder(
       builder: (context, constraints) {
         final chipsRoom = math.max<double>(
@@ -1839,7 +1839,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (hasCompare) Flexible(child: _compareChip(pane)),
-                  if (hasContent) _contentTabChip(content, pane),
+                  if (hasContent)
+                    Flexible(child: _contentTabChip(content, pane)),
                 ],
               ),
             ),
@@ -1895,10 +1896,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
             ),
             const SizedBox(width: 6),
-            Text(
-              home ? AppStrings.tabHome : AppStrings.todoTitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
+            Flexible(
+              child: Text(
+                home ? AppStrings.tabHome : AppStrings.todoTitle,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
+                ),
               ),
             ),
             const SizedBox(width: 6),
