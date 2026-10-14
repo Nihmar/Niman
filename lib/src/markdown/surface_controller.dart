@@ -275,18 +275,28 @@ final class MarkdownSurfaceController {
   /// inserted table keeps a blank line from its neighbours — asks for
   /// [context] lines either side, and gets them; one that reaches further
   /// down — a footnote defined under its paragraph — asks for the lines
-  /// [through] a line of its own.
+  /// [through] a line of its own. One that reads a block around them — the
+  /// list an indent nests an item in — says which lines in [reach]: it is
+  /// handed the first and last line chosen so far, and answers the ones it
+  /// wants.
   void applyLineCommand(
     MarkdownEdit Function(String text, TextSelection selection) command, {
     int context = 0,
     int? through,
+    ({int first, int last}) Function(SourceBuffer buffer, int first, int last)?
+    reach,
   }) {
     final current = _caretSelection(selection);
-    final first = math.max(0, buffer.lineOf(current.start) - context);
-    final last = math.min(
+    var first = math.max(0, buffer.lineOf(current.start) - context);
+    var last = math.min(
       buffer.lineCount - 1,
       math.max(buffer.lineOf(current.end) + context, through ?? 0),
     );
+    if (reach != null) {
+      final wanted = reach(buffer, first, last);
+      first = wanted.first;
+      last = wanted.last;
+    }
     final start = buffer.offsetOfLine(first);
     final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
     final result = command(

@@ -42,6 +42,7 @@ import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/list_row.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -62,6 +63,7 @@ import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
+import 'package:niman/src/markdown/edit/list_indent_edit.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
@@ -1921,78 +1923,49 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return false;
   }
 
-  /// Tab: moves the lines the selection touches in by `indentWidth` spaces —
-  /// or, on a plain line with a collapsed caret, inserts them at the caret.
+  /// Tab: moves the lines the selection touches in — a list item to where its
+  /// list says (under the item above it), any other line by `indentWidth`
+  /// spaces — or, on a plain line with a collapsed caret, inserts them at the
+  /// caret. The rule is the toolbar's indent (`indentLines`).
   ///
   /// The surface's own key: left to the app, Tab moves the focus to the next
   /// widget and takes the keyboard away from the note.
   void indent() {
     final selection = _selection.clampTo(widget.buffer.length);
     final line = widget.buffer.lineOf(selection.start);
-    final pad = ' ' * widget.indentWidth;
     if (selection.isCollapsed &&
-        listItemHead(widget.buffer.lineAt(line)) == null) {
+        ListRow(widget.buffer.lineAt(line)).head == null) {
+      final pad = ' ' * widget.indentWidth;
       _replaceRange(selection.start, selection.end, pad);
       return;
     }
-    _shiftLines(selection, (text) => '$pad$text');
+    _indentLines(selection, outdent: false);
   }
 
-  /// Shift+Tab: moves the lines the selection touches out by up to
-  /// `indentWidth` spaces, never taking anything but spaces.
+  /// Shift+Tab: the inverse — a list item goes back to its parent's indent,
+  /// any other line out by up to `indentWidth` spaces, never taking anything
+  /// but spaces.
   void outdent() {
-    final selection = _selection.clampTo(widget.buffer.length);
-    _shiftLines(selection, (text) {
-      var spaces = 0;
-      while (spaces < widget.indentWidth &&
-          spaces < text.length &&
-          text.codeUnitAt(spaces) == 0x20) {
-        spaces++;
-      }
-      return text.substring(spaces);
-    });
+    _indentLines(_selection.clampTo(widget.buffer.length), outdent: true);
   }
 
-  /// Rewrites every line [selection] touches with [shift], as one edit, and
-  /// keeps each end of the selection on its own line and character.
-  void _shiftLines(SelectionModel selection, String Function(String) shift) {
-    final buffer = widget.buffer;
-    final first = buffer.lineOf(selection.start);
-    final last = buffer.lineOf(selection.end);
-    final start = buffer.offsetOfLine(first);
-    final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
-    final block = StringBuffer();
-    final deltas = <int>[];
-    var changed = false;
-    for (var at = first; at <= last; at++) {
-      final before = buffer.lineAt(at);
-      final after = shift(before);
-      // Each line keeps its own terminator: the block goes back verbatim.
-      block.write(after);
-      if (at < last) block.write(buffer.terminatorAt(at));
-      deltas.add(after.length - before.length);
-      changed = changed || after != before;
-    }
-    if (!changed) return;
-    final replaced = block.toString();
-    int moved(int offset) {
-      final line = buffer.lineOf(offset);
-      final column = offset - buffer.offsetOfLine(line);
-      var shiftBefore = 0;
-      for (var at = first; at < line; at++) {
-        shiftBefore += deltas[at - first];
-      }
-      final delta = deltas[line - first];
-      // A column the shift removed collapses onto the line's new start.
-      final newColumn = math.max(0, column + delta);
-      return buffer.offsetOfLine(line) + shiftBefore + newColumn;
-    }
-
-    final next = SelectionModel(
-      anchor: moved(selection.anchor),
-      extent: moved(selection.extent),
+  /// Indents or outdents the lines [selection] touches, as one edit
+  /// ([listIndentEdit]).
+  void _indentLines(SelectionModel selection, {required bool outdent}) {
+    final edit = listIndentEdit(
+      widget.buffer,
+      selection,
+      width: widget.indentWidth,
+      outdent: outdent,
     );
-    _replaceRange(start, end, replaced, caret: next, verbatim: true);
+    if (edit == null) return;
+    _replaceRange(
+      edit.start,
+      edit.end,
+      edit.text,
+      caret: edit.caret,
+      verbatim: true,
+    );
   }
 
   /// PageUp and PageDown: the note moves a viewport, and the caret moves with

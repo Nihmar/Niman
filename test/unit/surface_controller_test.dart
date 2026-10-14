@@ -7,6 +7,8 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/list_indent.dart';
+import 'package:niman/src/editor/list_window.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -37,7 +39,11 @@ final Map<String, _Command> _commands = <String, _Command>{
       indentLines(text: text, selection: selection, width: 2, outdent: true),
 };
 
-String _line(Random random) => switch (random.nextInt(9)) {
+/// The commands that read a block around the lines they touch, and so are
+/// handed it: the list an indent nests an item in.
+const Set<String> _reaching = <String>{'indent', 'outdent'};
+
+String _line(Random random) => switch (random.nextInt(14)) {
   0 => '',
   1 => '# Title',
   2 => '   indented words',
@@ -45,6 +51,11 @@ String _line(Random random) => switch (random.nextInt(9)) {
   4 => '1. first',
   5 => '> quoted',
   6 => '## sub',
+  9 => '  - nested',
+  10 => '10. ten',
+  11 => '   1. sub',
+  12 => '> - quoted item',
+  13 => '    continued',
   _ => 'plain words ${random.nextInt(100)}',
 };
 
@@ -67,7 +78,17 @@ void main() {
         final whole = MarkdownSurfaceController(SourceBuffer.fromText(text))
           ..select(SelectionModel(anchor: anchor, extent: extent));
 
-        windowed.applyLineCommand(command);
+        windowed.applyLineCommand(
+          command,
+          reach: _reaching.contains(name)
+              ? (buffer, first, last) => listIndentWindow(
+                  buffer.lineAt,
+                  buffer.lineCount,
+                  first,
+                  last,
+                )
+              : null,
+        );
         final current = whole.selection;
         final edit = command(
           whole.buffer.text,

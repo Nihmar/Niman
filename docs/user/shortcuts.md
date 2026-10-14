@@ -65,7 +65,8 @@ Formatting, in both editors, on the note's selection:
 - `Ctrl/⌘+K` — link, `Ctrl/⌘+Shift+H` — heading level
 - `Ctrl/⌘+Shift+L` — bulleted list, `Ctrl/⌘+Shift+D` — numbered list
 - `Ctrl/⌘+Shift+Q` — quote
-- `Ctrl/⌘+M` / `Ctrl/⌘+Shift+M` — indent / outdent
+- `Ctrl/⌘+M` / `Ctrl/⌘+Shift+M` — indent / outdent (a list item nests under
+  the item above it, see [editing](editing.md))
 - highlight (`==…==`) has no key of its own as shipped: give it one in
   Settings → Keyboard shortcuts → **Formatting**
 
@@ -91,7 +92,8 @@ Moving and selecting in the source editor, on Windows and Linux:
   frontmatter a `#`, `-` or `>` is text, so only the indentation is skipped
   — there and for `Ctrl+←` / `Ctrl+→` alike
 - `Ctrl+Home` / `Ctrl+End` — start and end of the note
-- `Tab` / `Shift+Tab` — indent and outdent the line; in a table in live
+- `Tab` / `Shift+Tab` — indent and outdent the line (a list item nests under
+  the item above it and back, see [editing](editing.md)); in a table in live
   mode, the next and the previous cell instead
 
 Reading a note in the read view (Markdown notes, with the unified

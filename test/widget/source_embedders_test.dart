@@ -514,6 +514,42 @@ void main() {
           );
         });
 
+        testWidgets('Enter, Tab, then typing nests the new item', (
+          tester,
+        ) async {
+          // The way a sublist is started: Enter makes `7. `, and Tab right on
+          // that empty item has to make it `1. ` under the item above, with
+          // the caret after the marker, ready for the first word.
+          final rig = _Rig(tester, profile, mode, '6. foo\n\n\n\n\n\nprosa\n');
+          await rig.pump();
+          await rig.tapEnd(0);
+          await rig.platform.enter();
+          await tester.pump();
+          rig.agree('6. foo\n7. \n\n\n\n\n\nprosa\n');
+          await rig.platform.press(LogicalKeyboardKey.tab);
+          await tester.pump();
+          rig.agree(
+            '6. foo\n   1. \n\n\n\n\n\nprosa\n',
+            reason: 'the item starts a sublist at 1, under the content of 6.',
+          );
+          await rig.platform.type('bar');
+          rig.agree('6. foo\n   1. bar\n\n\n\n\n\nprosa\n');
+          await rig.platform.enter();
+          await tester.pump();
+          rig.agree(
+            '6. foo\n   1. bar\n   2. \n\n\n\n\n\nprosa\n',
+            reason: 'and the sublist goes on from there',
+          );
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+          await rig.platform.press(LogicalKeyboardKey.tab);
+          await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+          await tester.pump();
+          rig.agree(
+            '6. foo\n   1. bar\n7. \n\n\n\n\n\nprosa\n',
+            reason: 'Shift+Tab takes it back as the next of the outer list',
+          );
+        });
+
         testWidgets('typing at the very end of the note', (tester) async {
           // The caret a delta carries is one past the text as it stood, and it
           // was checked against that length — so it was dropped, and every
