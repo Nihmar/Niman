@@ -8,6 +8,7 @@ library;
 import 'package:meta/meta.dart';
 import 'package:niman/src/flashcards/card_keys.dart';
 import 'package:niman/src/flashcards/deck_meta.dart';
+import 'package:niman/src/flashcards/deck_table.dart';
 import 'package:niman/src/flashcards/flash_card.dart';
 import 'package:niman/src/flashcards/paragraph_cards.dart';
 import 'package:niman/src/flashcards/table_cards.dart';
@@ -23,7 +24,11 @@ import 'package:niman/src/markdown/source_buffer.dart';
 @immutable
 final class Deck {
   /// A deck of [cards].
-  const new({required this.meta, required this.cards});
+  const new({
+    required this.meta,
+    required this.cards,
+    this.tables = const <DeckTable>[],
+  });
 
   /// Reads the deck [text] holds, the whole note, frontmatter included.
   ///
@@ -34,15 +39,17 @@ final class Deck {
     final buffer = SourceBuffer.fromText(text);
     final parser = ReadParser();
     final found = <FlashCard>[];
+    final tables = <DeckTable>[];
     for (final block in BlockScanner(buffer).index.blocks) {
       if (!_holdsCards(block)) continue;
       final read = parser.read(block, buffer);
-      _visit(read.node, read, buffer, meta, found);
+      _visit(read.node, read, buffer, meta, found, tables);
     }
     final keys = uniqueKeys([for (final card in found) card.key]);
     return Deck(
       meta: meta,
       cards: [for (var i = 0; i < found.length; i++) found[i].withKey(keys[i])],
+      tables: tables,
     );
   }
 
@@ -51,6 +58,10 @@ final class Deck {
 
   /// Its cards, in note order, each under a key of its own.
   final List<FlashCard> cards;
+
+  /// Its tables that can hold cards, in note order, those without a row
+  /// yet included: where a card is added.
+  final List<DeckTable> tables;
 
   static bool _holdsCards(Block block) {
     if (block.footnote != 0) return false;
@@ -70,8 +81,10 @@ final class Deck {
     SourceBuffer buffer,
     DeckMeta meta,
     List<FlashCard> out,
+    List<DeckTable> tables,
   ) {
-    void visit(BlockNode child) => _visit(child, read, buffer, meta, out);
+    void visit(BlockNode child) =>
+        _visit(child, read, buffer, meta, out, tables);
     switch (node) {
       case QuoteNode(:final children) || ItemNode(:final children):
         children.forEach(visit);
@@ -86,7 +99,9 @@ final class Deck {
       case LeafNode(:final kind) when kind == BlockKind.paragraph:
         out.addAll(paragraphCards(read.leaf(node), buffer));
       case LeafNode(:final kind) when kind == BlockKind.table:
-        out.addAll(tableCards(read.leaf(node), buffer, meta));
+        final leaf = read.leaf(node);
+        out.addAll(tableCards(leaf, buffer, meta));
+        if (deckTable(leaf, buffer, meta) case final table?) tables.add(table);
       case LeafNode():
         break;
     }

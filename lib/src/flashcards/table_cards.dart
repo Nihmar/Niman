@@ -5,6 +5,7 @@ library;
 import 'package:niman/src/flashcards/card_keys.dart';
 import 'package:niman/src/flashcards/card_ranges.dart';
 import 'package:niman/src/flashcards/deck_meta.dart';
+import 'package:niman/src/flashcards/deck_table.dart';
 import 'package:niman/src/flashcards/flash_card.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -49,11 +50,32 @@ List<FlashCard> tableCards(ReadLeaf leaf, SourceBuffer buffer, DeckMeta meta) {
             0,
             replied.text.length,
           ),
+          questionColumn: question,
+          answerColumn: answer,
         ),
       ),
     );
   }
   return cards;
+}
+
+/// The table [leaf] as a place to add cards to; null for a table that has
+/// no head of its own or a single column, as [tableCards] reads none.
+DeckTable? deckTable(ReadLeaf leaf, SourceBuffer buffer, DeckMeta meta) {
+  if (leaf.continued || leaf.rows.isEmpty) return null;
+  final head = leaf.rows.first;
+  if (head.length < 2) return null;
+  final (:question, :answer) = _columns(head, meta);
+  final lines = leaf.node.lines;
+  final last = sourceOf(buffer, [lines.last]);
+  final body = lines.length > 2 ? lines.last : lines.first;
+  return DeckTable(
+    columns: head.length,
+    question: question,
+    answer: answer,
+    template: sourceOf(buffer, [body]).content,
+    last: (lines: last.lines, content: last.content),
+  );
 }
 
 /// The question and answer columns of a table whose head is [head]: the two

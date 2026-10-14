@@ -33,6 +33,8 @@ final class CardSource {
     required this.lines,
     this.question,
     this.answer,
+    this.questionColumn,
+    this.answerColumn,
   });
 
   /// The first line of the card's source, counting from 0.
@@ -61,6 +63,14 @@ final class CardSource {
   /// it, or a cloze's whole `==highlight==`, delimiters included. Null when
   /// an empty cell has no characters to point at.
   final NoteRange? answer;
+
+  /// For a table row, the column the question was read from, counting from
+  /// 0 among the row's cells; null for any other card. Known even when the
+  /// cell is empty, so an edit can write into it.
+  final int? questionColumn;
+
+  /// For a table row, the column of the answer; null for any other card.
+  final int? answerColumn;
 }
 
 /// One card of a deck.

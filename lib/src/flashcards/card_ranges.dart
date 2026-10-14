@@ -42,6 +42,8 @@ CardSource sourceOf(
   List<SourceSpan> spans, {
   NoteRange? question,
   NoteRange? answer,
+  int? questionColumn,
+  int? answerColumn,
 }) {
   final first = spans.first;
   final last = spans.last;
@@ -58,6 +60,8 @@ CardSource sourceOf(
     ),
     question: question,
     answer: answer,
+    questionColumn: questionColumn,
+    answerColumn: answerColumn,
   );
 }
 
