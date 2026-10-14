@@ -847,7 +847,7 @@ List<BlockAnchor> blocksOfNoteFile(String path) =>
 /// for a background isolate.
 NotePreviewText previewTextOfNoteFile(String path) {
   final file = File(path).openSync();
-  final List<int> head;
+  List<int> head;
   final bool truncated;
   try {
     head = file.readSync(PreviewLimits.bytes);
@@ -855,6 +855,9 @@ NotePreviewText previewTextOfNoteFile(String path) {
   } finally {
     file.closeSync();
   }
+  // A cut inside a UTF-8 sequence would send the whole head to the
+  // Latin-1-mixed decoder: it is backed up to the last whole one.
+  if (truncated) head = head.sublist(0, utf8CompleteUpTo(head));
   var text = decodeNoteText(Uint8List.fromList(head));
   if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
     text = text.substring(1);
