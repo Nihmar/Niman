@@ -10,9 +10,11 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/settings_slider_row.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The Appearance area of the settings home (issue #104): the app's own
@@ -136,6 +138,10 @@ final class _SettingsAppearanceScreenState
       format: AppStrings.textScaleValue,
     );
     if (scale == null) return;
+    await _setUiTextScale(scale);
+  }
+
+  Future<void> _setUiTextScale(double scale) async {
     await widget.controller.setUiTextScale(scale);
     if (mounted) setState(() => _uiTextScale = scale);
   }
@@ -184,12 +190,25 @@ final class _SettingsAppearanceScreenState
           ),
           HighlightRow(
             key: SettingsKeys.uiTextScale,
-            child: SettingsValueRow(
-              title: AppStrings.uiTextScaleTitle,
-              subtitle: AppStrings.uiTextScaleSubtitle,
-              value: AppStrings.textScaleValue(_uiTextScale),
-              onTap: () => unawaited(_chooseUiTextScale()),
-            ),
+            // A desktop's slider sits in the row (#712).
+            child: pointerDense(Theme.of(context))
+                ? SettingsSliderRow(
+                    sliderKey: const Key('ui-text-scale-slider'),
+                    title: AppStrings.uiTextScaleTitle,
+                    subtitle: AppStrings.uiTextScaleSubtitle,
+                    value: _uiTextScale,
+                    min: minTextScale,
+                    max: maxTextScale,
+                    divisions: _textScaleSteps,
+                    format: AppStrings.textScaleValue,
+                    onChanged: (scale) => unawaited(_setUiTextScale(scale)),
+                  )
+                : SettingsValueRow(
+                    title: AppStrings.uiTextScaleTitle,
+                    subtitle: AppStrings.uiTextScaleSubtitle,
+                    value: AppStrings.textScaleValue(_uiTextScale),
+                    onTap: () => unawaited(_chooseUiTextScale()),
+                  ),
           ),
           HighlightRow(
             key: SettingsKeys.epubLook,

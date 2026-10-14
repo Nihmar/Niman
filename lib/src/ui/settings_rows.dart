@@ -20,6 +20,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/settings_dialogs.dart';
 
 export 'package:niman/src/ui/settings_dialogs.dart';
 
@@ -221,18 +223,34 @@ final class SettingsValueRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final value = this.value;
+    // The field's place on screen, for a pointer's drop-down to open
+    // under (#712), whichever part of the row was clicked.
+    BuildContext? field;
+    void tap() {
+      final at = field == null || !field!.mounted ? null : menuAnchorOf(field!);
+      anchorSettingsChoice(
+        at == null ? null : Rect.fromLTWH(at.left, at.bottom, at.width, 0),
+      );
+      onTap();
+    }
+
     return SettingsRowFrame(
       title: title,
       description: subtitle,
       enabled: enabled,
-      onTap: onTap,
+      onTap: value == null ? onTap : tap,
       trailing: value == null ? const Icon(Icons.chevron_right) : null,
       control: value == null
           ? null
-          : _ValueField(
-              value: value,
-              badge: badge,
-              onTap: enabled ? onTap : null,
+          : Builder(
+              builder: (context) {
+                field = context;
+                return _ValueField(
+                  value: value,
+                  badge: badge,
+                  onTap: enabled ? tap : null,
+                );
+              },
             ),
     );
   }
