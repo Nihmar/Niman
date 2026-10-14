@@ -182,6 +182,26 @@ final class LatvianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Instalētājs palaists';
   @override
+  String updateDownloading(Object percent) => 'Lejupielādē… $percent%';
+  @override
+  String get updateLater => 'Vēlāk';
+  @override
+  String get updateInstallPermissionTitle => 'Atļaujiet instalēt atjauninājumu';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android vienreiz pajautā, pirms Niman var instalēt savus '
+      'atjauninājumus. Ieslēdziet Niman iestatījumu “Atļaut no šī avota” un '
+      'atgriezieties: instalēšana turpināsies.';
+  @override
+  String get updateOpenSettings => 'Atvērt iestatījumus';
+  @override
+  String get updateInstallerFailed => 'Instalētāju neizdevās atvērt';
+  @override
+  String get updateReleasePage => 'Laidiena lapa';
+  @override
+  String get updateTestingBuild =>
+      'Testa versijas pašas neatjauninās: nākamo instalējiet manuāli.';
+  @override
   String get settingsSpellCheckTitle => 'Orfogrāfiskā pārbaude';
   @override
   String get settingsSpellCheckSubtitle =>

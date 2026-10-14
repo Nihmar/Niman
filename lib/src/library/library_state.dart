@@ -1029,6 +1029,10 @@ final class LibraryController implements LibrarySession {
     // toggle is irrelevant, nothing polls and no banner can appear.
     if (isTestingBuild) return;
     if (_updateScheduler != null) return;
+    // What an earlier update left in Android's updates folder has done its
+    // work, or was not wanted: the next one is fetched afresh (#900). Once,
+    // at launch — never under a download this run started.
+    unawaited(clearUpdateDownloads());
     final repo = AppSettingsRepo(appDb);
     _updateScheduler = UpdateScheduler(
       isEnabled: repo.autoUpdateEnabled,

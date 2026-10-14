@@ -185,6 +185,29 @@ final class GermanStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Installationsprogramm gestartet';
   @override
+  String updateDownloading(Object percent) => 'Wird geladen … $percent %';
+  @override
+  String get updateLater => 'Später';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Installation des Updates erlauben';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android fragt einmal, bevor Niman eigene Updates installieren darf. '
+      'Schalte für Niman „Dieser Quelle vertrauen“ ein und kehre zurück: Die '
+      'Installation geht weiter.';
+  @override
+  String get updateOpenSettings => 'Einstellungen öffnen';
+  @override
+  String get updateInstallerFailed =>
+      'Das Installationsprogramm ließ sich nicht öffnen';
+  @override
+  String get updateReleasePage => 'Release-Seite';
+  @override
+  String get updateTestingBuild =>
+      'Testversionen aktualisieren sich nicht selbst: Installiere die nächste '
+      'von Hand.';
+  @override
   String get settingsSpellCheckTitle => 'Rechtschreibung prüfen';
   @override
   String get settingsSpellCheckSubtitle =>

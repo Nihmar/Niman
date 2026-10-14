@@ -175,6 +175,26 @@ final class HindiStrings extends Strings {
   @override
   String get updateInstallerStarted => 'इंस्टॉलर शुरू हुआ';
   @override
+  String updateDownloading(Object percent) => 'डाउनलोड हो रहा है… $percent%';
+  @override
+  String get updateLater => 'बाद में';
+  @override
+  String get updateInstallPermissionTitle => 'अपडेट इंस्टॉल करने की अनुमति दें';
+  @override
+  String get updateInstallPermissionBody =>
+      'Niman अपने अपडेट इंस्टॉल कर सके, इससे पहले Android एक बार पूछता है। '
+      'Niman के लिए "इस स्रोत से अनुमति दें" चालू करें, फिर लौटें: इंस्टॉलेशन '
+      'जारी रहेगा।';
+  @override
+  String get updateOpenSettings => 'सेटिंग खोलें';
+  @override
+  String get updateInstallerFailed => 'इंस्टॉलर नहीं खुला';
+  @override
+  String get updateReleasePage => 'रिलीज़ पेज';
+  @override
+  String get updateTestingBuild =>
+      'टेस्ट बिल्ड अपने आप अपडेट नहीं होते: अगला वाला स्वयं इंस्टॉल करें।';
+  @override
   String get settingsSpellCheckTitle => 'व्याकरण जाँचें';
   @override
   String get settingsSpellCheckSubtitle =>

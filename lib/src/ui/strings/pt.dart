@@ -183,6 +183,27 @@ final class PortugueseStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Instalador iniciado';
   @override
+  String updateDownloading(Object percent) => 'A transferir… $percent%';
+  @override
+  String get updateLater => 'Mais tarde';
+  @override
+  String get updateInstallPermissionTitle => 'Permitir instalar a atualização';
+  @override
+  String get updateInstallPermissionBody =>
+      'O Android pergunta uma vez antes de o Niman poder instalar as próprias '
+      'atualizações. Ative «Permitir desta fonte» para o Niman e volte: a '
+      'instalação continua.';
+  @override
+  String get updateOpenSettings => 'Abrir definições';
+  @override
+  String get updateInstallerFailed => 'O instalador não abriu';
+  @override
+  String get updateReleasePage => 'Página da versão';
+  @override
+  String get updateTestingBuild =>
+      'As versões de teste não se atualizam sozinhas: instale a seguinte à '
+      'mão.';
+  @override
   String get settingsSpellCheckTitle => 'Conferir ortografia';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -186,6 +186,27 @@ final class BosnianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Program za instalaciju pokrenut';
   @override
+  String updateDownloading(Object percent) => 'Preuzimanje… $percent%';
+  @override
+  String get updateLater => 'Kasnije';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Dozvolite instaliranje ažuriranja';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android pita jednom prije nego što Niman može instalirati svoja '
+      'ažuriranja. Uključite „Dozvoli iz ovog izvora“ za Niman i vratite se: '
+      'instalacija se nastavlja.';
+  @override
+  String get updateOpenSettings => 'Otvori postavke';
+  @override
+  String get updateInstallerFailed => 'Instalater se nije otvorio';
+  @override
+  String get updateReleasePage => 'Stranica izdanja';
+  @override
+  String get updateTestingBuild =>
+      'Testne verzije se ne ažuriraju same: sljedeću instalirajte ručno.';
+  @override
   String get settingsSpellCheckTitle => 'Provjera pravopisa';
   @override
   String get settingsSpellCheckSubtitle =>

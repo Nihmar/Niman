@@ -204,7 +204,13 @@ launch and then every 6 hours, quietly: a failure (offline, no network)
 is a skipped check, never an error dialog. When a newer release is
 found, a banner offers the download:
 
-- Android: downloads the `.apk` into the app folder and opens the system installer — confirm there, including the per-app "unknown apps" allowlist.
+- Android: downloads the `.apk` into the app's own folder and opens the
+  system installer, where you confirm. The first time, Android has to let
+  Niman install apps: the app explains it and opens the **Install unknown
+  apps** page; turn on *Allow from this source*, come back, and the install
+  goes on — without downloading again (#900). If the installer cannot be
+  opened, the message offers the release page instead. A downloaded APK is
+  cleared at the next launch.
 - Windows: downloads the setup `.exe` and launches the installer.
 - Linux: downloads the installed variant (AppImage, `.tar.gz`, Arch
   package) into Downloads; when the variant cannot be detected, the
@@ -215,6 +221,14 @@ says whether a newer release is out, and when one is, the **Download** row
 under it turns on. Nothing is fetched until you press it. It works even
 with automatic updates off, and an update the automatic check already
 found is ready to download when you open the screen.
+
+While an update downloads, the banner (and the **Download** row) show how
+far it got; **Cancel** there stops it and leaves nothing behind, and a
+second Download is not started over one already running. **Later** puts the
+banner away for this run.
+
+A test (beta) build has no updates of its own: the screen says so, and
+the next one is installed by hand.
 
 The **Diagnostics and info** section holds two read-only facts about the
 installation: the app's own **Version**, and **Changelog**, which opens

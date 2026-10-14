@@ -185,6 +185,26 @@ final class SlovakStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Inštalátor spustený';
   @override
+  String updateDownloading(Object percent) => 'Sťahuje sa… $percent %';
+  @override
+  String get updateLater => 'Neskôr';
+  @override
+  String get updateInstallPermissionTitle => 'Povoľte inštaláciu aktualizácie';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android sa raz opýta, kým Niman môže inštalovať svoje aktualizácie. '
+      'Zapnite pre Niman „Povoliť z tohto zdroja“ a vráťte sa: inštalácia '
+      'bude pokračovať.';
+  @override
+  String get updateOpenSettings => 'Otvoriť nastavenia';
+  @override
+  String get updateInstallerFailed => 'Inštalátor sa nepodarilo otvoriť';
+  @override
+  String get updateReleasePage => 'Stránka vydania';
+  @override
+  String get updateTestingBuild =>
+      'Testovacie zostavy sa neaktualizujú samy: ďalšiu nainštalujte ručne.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
   String get settingsSpellCheckSubtitle =>

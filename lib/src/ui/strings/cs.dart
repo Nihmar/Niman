@@ -185,6 +185,26 @@ final class CzechStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Instalátor spuštěn';
   @override
+  String updateDownloading(Object percent) => 'Stahování… $percent %';
+  @override
+  String get updateLater => 'Později';
+  @override
+  String get updateInstallPermissionTitle => 'Povolte instalaci aktualizace';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android se jednou zeptá, než Niman smí instalovat své aktualizace. '
+      'Zapněte pro Niman „Povolit z tohoto zdroje“ a vraťte se: instalace '
+      'bude pokračovat.';
+  @override
+  String get updateOpenSettings => 'Otevřít nastavení';
+  @override
+  String get updateInstallerFailed => 'Instalátor se nepodařilo otevřít';
+  @override
+  String get updateReleasePage => 'Stránka vydání';
+  @override
+  String get updateTestingBuild =>
+      'Testovací sestavení se neaktualizují sama: další nainstalujte ručně.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -186,6 +186,26 @@ final class SerbianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Инсталер је покренут';
   @override
+  String updateDownloading(Object percent) => 'Преузимање… $percent%';
+  @override
+  String get updateLater => 'Касније';
+  @override
+  String get updateInstallPermissionTitle => 'Дозволите инсталирање ажурирања';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android пита једном пре него што Niman може да инсталира своја '
+      'ажурирања. Укључите „Дозволи из овог извора“ за Niman и вратите се: '
+      'инсталирање се наставља.';
+  @override
+  String get updateOpenSettings => 'Отвори подешавања';
+  @override
+  String get updateInstallerFailed => 'Инсталатор се није отворио';
+  @override
+  String get updateReleasePage => 'Страница издања';
+  @override
+  String get updateTestingBuild =>
+      'Тестне верзије се не ажурирају саме: следећу инсталирајте ручно.';
+  @override
   String get settingsSpellCheckTitle => 'Провера правописа';
   @override
   String get settingsSpellCheckSubtitle =>

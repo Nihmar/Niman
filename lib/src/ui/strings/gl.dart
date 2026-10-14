@@ -186,6 +186,26 @@ final class GalicianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Instalador iniciado';
   @override
+  String updateDownloading(Object percent) => 'Descargando… $percent %';
+  @override
+  String get updateLater => 'Máis tarde';
+  @override
+  String get updateInstallPermissionTitle => 'Permite instalar a actualización';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android pregúntao unha vez antes de que Niman poida instalar as súas '
+      'actualizacións. Activa «Permitir desta fonte» para Niman e volve: a '
+      'instalación continúa.';
+  @override
+  String get updateOpenSettings => 'Abrir axustes';
+  @override
+  String get updateInstallerFailed => 'Non se puido abrir o instalador';
+  @override
+  String get updateReleasePage => 'Páxina da versión';
+  @override
+  String get updateTestingBuild =>
+      'As versións de proba non se actualizan soas: instala a seguinte á man.';
+  @override
   String get settingsSpellCheckTitle => 'Comprobación ortográfica';
   @override
   String get settingsSpellCheckSubtitle =>

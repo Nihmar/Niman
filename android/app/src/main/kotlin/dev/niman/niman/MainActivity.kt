@@ -132,6 +132,18 @@ class MainActivity : FlutterActivity() {
                 when (call.method) {
                     "installApk" ->
                         result.success(installApk(call.argument("path")))
+                    // Whether Android lets Niman install a package (#900):
+                    // "Install unknown apps", per app since Android 8.
+                    "canInstallPackages" ->
+                        result.success(packageManager.canRequestPackageInstalls())
+                    "openInstallPermission" -> result.success(
+                        open(
+                            Intent(
+                                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                Uri.parse("package:$packageName"),
+                            ),
+                        ),
+                    )
                     else -> result.notImplemented()
                 }
             }

@@ -169,6 +169,24 @@ final class JapaneseStrings extends Strings {
   @override
   String get updateInstallerStarted => 'インストーラーを起動しました';
   @override
+  String updateDownloading(Object percent) => 'ダウンロード中… $percent%';
+  @override
+  String get updateLater => '後で';
+  @override
+  String get updateInstallPermissionTitle => 'アップデートのインストールを許可';
+  @override
+  String get updateInstallPermissionBody =>
+      'Niman が自身のアップデートをインストールする前に、Android が一度だけ確認します。Niman '
+      'の「この提供元のアプリを許可」をオンにして戻ると、インストールが続きます。';
+  @override
+  String get updateOpenSettings => '設定を開く';
+  @override
+  String get updateInstallerFailed => 'インストーラーを開けませんでした';
+  @override
+  String get updateReleasePage => 'リリースページ';
+  @override
+  String get updateTestingBuild => 'テスト版は自動で更新されません。次の版は手動でインストールしてください。';
+  @override
   String get settingsSpellCheckTitle => 'スペルチェック';
   @override
   String get settingsSpellCheckSubtitle => '入力しながらスペルミスに下線をつけます。';

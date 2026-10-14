@@ -182,6 +182,27 @@ final class NorwegianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Installasjonsprogrammet er startet';
   @override
+  String updateDownloading(Object percent) => 'Laster ned … $percent %';
+  @override
+  String get updateLater => 'Senere';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Tillat installering av oppdateringen';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android spør én gang før Niman kan installere sine egne oppdateringer. '
+      'Slå på «Tillat fra denne kilden» for Niman, og kom tilbake: '
+      'installeringen fortsetter.';
+  @override
+  String get updateOpenSettings => 'Åpne innstillinger';
+  @override
+  String get updateInstallerFailed => 'Installasjonsprogrammet åpnet seg ikke';
+  @override
+  String get updateReleasePage => 'Utgivelsesside';
+  @override
+  String get updateTestingBuild =>
+      'Testversjoner oppdaterer seg ikke selv: installer den neste manuelt.';
+  @override
   String get settingsSpellCheckTitle => 'Stavekontroll';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -36,8 +36,8 @@ final class SettingsUpdatesScreen extends StatefulWidget {
   final Future<UpdateAvailable?> Function() checkUpdate;
 
   /// Fetches [UpdateAvailable] and hands it to the platform; a test counts
-  /// the calls instead.
-  final Future<void> Function(BuildContext context, UpdateAvailable update)
+  /// the calls instead. True once the platform took it.
+  final Future<bool> Function(BuildContext context, UpdateAvailable update)
   downloadUpdate;
 
   @override
@@ -47,7 +47,6 @@ final class SettingsUpdatesScreen extends StatefulWidget {
 final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
   bool? _autoUpdate;
   bool _checkingUpdates = false;
-  bool _downloading = false;
   String? _updateStatus;
 
   /// The update the last check found, or the one the scheduled check left
@@ -120,18 +119,17 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
     }
   }
 
-  /// Downloads the update the check found and hands it to the platform.
+  /// Downloads the update the check found and hands it to the platform;
+  /// pressed again while it runs, stops it (#900).
   Future<void> _download() async {
     final update = _update;
-    if (update == null || _downloading) return;
-    setState(() => _downloading = true);
-    try {
-      await widget.downloadUpdate(context, update);
+    if (update == null) return;
+    if (updateDownload.running) {
+      updateDownload.cancel();
+      return;
+    }
+    if (await widget.downloadUpdate(context, update)) {
       widget.controller.clearPendingUpdate();
-    } finally {
-      if (mounted) {
-        setState(() => _downloading = false);
-      }
     }
   }
 
@@ -164,15 +162,36 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
               ),
             ),
             // Always here, enabled once a check found something: the row a
-            // thumb is on does not move when the check answers.
-            SettingsActionRow(
-              key: const Key('settings-update-download'),
-              title: AppStrings.actionDownload,
-              busy: _downloading,
-              enabled: _update != null && !_checkingUpdates,
-              onTap: () => unawaited(_download()),
+            // thumb is on does not move when the check answers. While the
+            // download runs it says how far it got, and stops it (#900).
+            ListenableBuilder(
+              listenable: updateDownload,
+              builder: (context, _) {
+                final running = updateDownload.running;
+                return SettingsActionRow(
+                  key: const Key('settings-update-download'),
+                  title: running
+                      ? AppStrings.actionCancel
+                      : AppStrings.actionDownload,
+                  description: running
+                      ? AppStrings.updateDownloading(
+                          ((updateDownload.progress ?? 0) * 100).floor(),
+                        )
+                      : null,
+                  enabled:
+                      _update != null &&
+                      !_checkingUpdates &&
+                      !(running && updateDownload.cancelled),
+                  onTap: () => unawaited(_download()),
+                );
+              },
             ),
-          ],
+          ] else
+            SettingsRowFrame(
+              key: const Key('settings-update-testing'),
+              title: AppStrings.settingsSectionUpdates,
+              description: AppStrings.updateTestingBuild,
+            ),
         ],
       ),
     );

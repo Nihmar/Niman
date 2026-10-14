@@ -181,6 +181,27 @@ final class HungarianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'A telepítő elindult';
   @override
+  String updateDownloading(Object percent) => 'Letöltés… $percent%';
+  @override
+  String get updateLater => 'Később';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Engedélyezze a frissítés telepítését';
+  @override
+  String get updateInstallPermissionBody =>
+      'Az Android egyszer rákérdez, mielőtt a Niman telepítheti a saját '
+      'frissítéseit. Kapcsolja be a Niman számára az „Engedélyezés ebből a '
+      'forrásból” beállítást, majd térjen vissza: a telepítés folytatódik.';
+  @override
+  String get updateOpenSettings => 'Beállítások megnyitása';
+  @override
+  String get updateInstallerFailed => 'A telepítő nem nyílt meg';
+  @override
+  String get updateReleasePage => 'Kiadási oldal';
+  @override
+  String get updateTestingBuild =>
+      'A tesztverziók nem frissülnek maguktól: a következőt kézzel telepítse.';
+  @override
   String get settingsSpellCheckTitle => 'Helyesírásellenőrzés';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -187,6 +187,28 @@ final class BulgarianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Инсталаторът е стартиран';
   @override
+  String updateDownloading(Object percent) => 'Изтегляне… $percent%';
+  @override
+  String get updateLater => 'По-късно';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Разрешете инсталирането на актуализацията';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android пита веднъж, преди Niman да може да инсталира свои '
+      'актуализации. Включете „Разрешаване от този източник“ за Niman и се '
+      'върнете: инсталирането ще продължи.';
+  @override
+  String get updateOpenSettings => 'Отвори настройките';
+  @override
+  String get updateInstallerFailed => 'Инсталаторът не се отвори';
+  @override
+  String get updateReleasePage => 'Страница на версията';
+  @override
+  String get updateTestingBuild =>
+      'Тестовите версии не се актуализират сами: инсталирайте следващата '
+      'ръчно.';
+  @override
   String get settingsSpellCheckTitle => 'Проверка за правопис';
   @override
   String get settingsSpellCheckSubtitle =>

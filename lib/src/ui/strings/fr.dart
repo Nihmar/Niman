@@ -187,6 +187,29 @@ final class FrenchStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Programme d’installation lancé';
   @override
+  String updateDownloading(Object percent) => 'Téléchargement… $percent %';
+  @override
+  String get updateLater => 'Plus tard';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Autoriser l’installation de la mise à jour';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android le demande une fois avant que Niman puisse installer ses '
+      'propres mises à jour. Activez « Autoriser cette source » pour Niman, '
+      'puis revenez : l’installation continue.';
+  @override
+  String get updateOpenSettings => 'Ouvrir les paramètres';
+  @override
+  String get updateInstallerFailed =>
+      'Le programme d’installation ne s’est pas ouvert';
+  @override
+  String get updateReleasePage => 'Page de la version';
+  @override
+  String get updateTestingBuild =>
+      'Les versions de test ne se mettent pas à jour seules : installez la '
+      'suivante à la main.';
+  @override
   String get settingsSpellCheckTitle => 'Vérifier l’orthographe';
   @override
   String get settingsSpellCheckSubtitle =>

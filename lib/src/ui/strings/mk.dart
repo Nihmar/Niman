@@ -185,6 +185,27 @@ final class MacedonianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Инсталерот е стартуван';
   @override
+  String updateDownloading(Object percent) => 'Преземање… $percent%';
+  @override
+  String get updateLater => 'Подоцна';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Дозволете инсталирање на ажурирањето';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android прашува еднаш пред Niman да може да ги инсталира своите '
+      'ажурирања. Вклучете „Дозволи од овој извор“ за Niman и вратете се: '
+      'инсталирањето продолжува.';
+  @override
+  String get updateOpenSettings => 'Отвори поставки';
+  @override
+  String get updateInstallerFailed => 'Инсталаторот не се отвори';
+  @override
+  String get updateReleasePage => 'Страница на изданието';
+  @override
+  String get updateTestingBuild =>
+      'Тестните верзии не се ажурираат сами: следната инсталирајте ја рачно.';
+  @override
   String get settingsSpellCheckTitle => 'Проверка на правопис';
   @override
   String get settingsSpellCheckSubtitle =>

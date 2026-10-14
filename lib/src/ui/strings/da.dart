@@ -183,6 +183,28 @@ final class DanishStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Installationsprogrammet er startet';
   @override
+  String updateDownloading(Object percent) => 'Henter… $percent %';
+  @override
+  String get updateLater => 'Senere';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Tillad installation af opdateringen';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android spørger én gang, før Niman kan installere sine egne '
+      'opdateringer. Slå "Tillad fra denne kilde" til for Niman, og kom '
+      'tilbage: installationen fortsætter.';
+  @override
+  String get updateOpenSettings => 'Åbn indstillinger';
+  @override
+  String get updateInstallerFailed =>
+      'Installationsprogrammet kunne ikke åbnes';
+  @override
+  String get updateReleasePage => 'Udgivelsesside';
+  @override
+  String get updateTestingBuild =>
+      'Testversioner opdaterer ikke sig selv: installer den næste manuelt.';
+  @override
   String get settingsSpellCheckTitle => 'Stavekontrol';
   @override
   String get settingsSpellCheckSubtitle =>
