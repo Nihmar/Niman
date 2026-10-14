@@ -28,14 +28,19 @@ typedef LinkUpdateConfirm = Future<bool> Function(int notes);
 /// may leave open, and a dialog must not hold the chain every other op and
 /// every sync write waits in.
 final class PendingLinkRewrite {
-  /// A rewrite that would change [notes] notes, done by [apply].
-  const new({required this.notes, required this.apply});
+  /// A rewrite of the links in the notes [count] finds changing, done by
+  /// [apply].
+  const new({required this.count, required this.apply});
 
-  /// How many notes the rewrite would change when it was planned.
-  final int notes;
+  /// How many notes the rewrite would change, found by reading each
+  /// referrer and rewriting it in memory (#866). Takes no turn of the op
+  /// chain: it is the caller's to run once the move's turn is over, so a
+  /// library of thousands of referrers is not held up by it.
+  final Future<int> Function() count;
 
   /// Rewrites the links. It reads each note again, so an edit made since
-  /// the plan is kept; it must run in a turn of the op chain of its own.
+  /// the count (or while the question was open) is kept; it must run in a
+  /// turn of the op chain of its own.
   final Future<void> Function() apply;
 }
 
@@ -277,18 +282,20 @@ final class NoteRelocator {
       await write();
       return null;
     }
-    var changing = 0;
-    for (final (oldReferrer, path) in targets) {
-      try {
-        if (await rewritten(oldReferrer, path) != null) changing++;
-      } on Object catch (error) {
-        const AppLogger(name: 'links')
-            .warning('could not read links in "$path": $error');
+    Future<int> count() async {
+      var changing = 0;
+      for (final (oldReferrer, path) in targets) {
+        try {
+          if (await rewritten(oldReferrer, path) != null) changing++;
+        } on Object catch (error) {
+          const AppLogger(name: 'links')
+              .warning('could not read links in "$path": $error');
+        }
       }
+      return changing;
     }
-    return changing == 0
-        ? null
-        : PendingLinkRewrite(notes: changing, apply: write);
+
+    return PendingLinkRewrite(count: count, apply: write);
   }
 
   /// Carries the reading positions of what moved from [from] to [to]

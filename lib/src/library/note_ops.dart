@@ -609,7 +609,10 @@ final class NoteOps implements NoteOperations {
     }
     _linkQuestion = () async {
       try {
-        if (!await confirm(pending.notes)) return;
+        // Counted here, off the op chain (#866): a hub note's thousand
+        // referrers are read without holding up any other op or sync write.
+        final notes = await pending.count();
+        if (notes == 0 || !await confirm(notes)) return;
         await _synchronized(pending.apply);
         onRewritten?.call();
       } on Object catch (error) {
