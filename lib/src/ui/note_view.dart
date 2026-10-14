@@ -1439,6 +1439,7 @@ final class _NoteViewState extends State<NoteView>
         deadLinks: _deadLinks,
         onLinkHover: _preview.editorHover,
         notePath: _pathInLibrary,
+        blockAnchors: _blockAnchors,
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.
@@ -1940,7 +1941,7 @@ final class _NoteViewState extends State<NoteView>
   );
 
   /// The note's block anchors (#844), read off its buffer when a block link
-  /// is followed.
+  /// is followed; the source view's `[[#^` panel reads the same (#869).
   late final BufferBlockAnchors _blockAnchors = BufferBlockAnchors(
     () => _surface!.buffer,
   );

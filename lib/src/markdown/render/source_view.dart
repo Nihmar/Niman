@@ -160,6 +160,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.autofocus = false,
     this.wikilinkSuggester,
     this.notePath,
+    this.blockAnchors,
     this.deadLinks,
     this.onLinkHover,
     super.key,
@@ -321,6 +322,11 @@ final class MarkdownSourceView extends StatefulWidget {
   /// what the wikilink panel tells the note's own headings and blocks from
   /// the rest of the library's when it completes a link (#845).
   final String? notePath;
+
+  /// The note's block anchors (#869), when its owner already reads them for
+  /// the same buffer: the panel then shares that walk instead of making its
+  /// own. Null reads them here.
+  final BufferBlockAnchors? blockAnchors;
 
   /// The links of the note that name nothing (#847), resolved apart from the
   /// drawing and handed in as they arrive: drawn in the muted colour of a
@@ -718,10 +724,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   );
 
   /// The note's block anchors, for a `[[#^` link to the note being edited
-  /// (#844): walked when the panel asks, kept for the revision.
-  late final BufferBlockAnchors _blockAnchors = BufferBlockAnchors(
-    () => widget.buffer,
-  );
+  /// (#844): walked when the panel asks, kept for the revision — or the
+  /// owner's, when it handed in the one it reads (#869).
+  late final BufferBlockAnchors _blockAnchors =
+      widget.blockAnchors ?? BufferBlockAnchors(() => widget.buffer);
 
   /// The suggester's panel opened, closed or changed: the note is built
   /// again, as it always was when the panel moved.
