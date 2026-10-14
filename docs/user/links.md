@@ -180,9 +180,9 @@ three places, one list:
   opens onto the list and shuts again. It is always there while a library is
   open, so it never appears under your thumb; with no one linking in, it opens
   onto the words that say so. A note opened from outside a library has none;
-- **in the side panel** on a window wide enough for it (1000 px and up), the
-  *Links* pane beside Outline, Tags and History, following the note in the
-  focused pane;
+- **in the side panel** on a wide window (beside the note from 1000 px up,
+  over it below), the *Links* pane beside Outline, Tags and History,
+  following the note in the focused pane;
 - **as a sheet on a phone**, from the note's ⋮ menu — *Links to this note* —
   as the Outline and Tags are (see [platforms](platforms.md)).
 

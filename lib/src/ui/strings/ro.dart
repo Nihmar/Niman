@@ -1717,9 +1717,6 @@ final class RomanianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Doar în fereastră lată';
   @override
-  String get commandNeedDockRoom =>
-      'Necesită o fereastră destul de lată pentru panoul lateral';
-  @override
   String get commandNeedDesktop => 'Doar pe desktop';
   @override
   String get commandNeedNotInZen => 'Nu în modul Zen';

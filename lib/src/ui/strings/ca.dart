@@ -1735,9 +1735,6 @@ final class CatalanStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Només amb finestra ampla';
   @override
-  String get commandNeedDockRoom =>
-      'Cal una finestra prou ampla per al plafó lateral';
-  @override
   String get commandNeedDesktop => "Només a l'escriptori";
   @override
   String get commandNeedNotInZen => 'Fora del mode Zen';

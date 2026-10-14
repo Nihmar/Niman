@@ -1721,9 +1721,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Само во широк прозорец';
   @override
-  String get commandNeedDockRoom =>
-      'Потребен е прозорец доволно широк за страничниот панел';
-  @override
   String get commandNeedDesktop => 'Само на компјутер';
   @override
   String get commandNeedNotInZen => 'Не во Зен режим';

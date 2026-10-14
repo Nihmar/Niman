@@ -1749,9 +1749,6 @@ final class FrenchStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Fenêtre large uniquement';
   @override
-  String get commandNeedDockRoom =>
-      'Nécessite une fenêtre assez large pour le panneau latéral';
-  @override
   String get commandNeedDesktop => 'Bureau uniquement';
   @override
   String get commandNeedNotInZen => 'Pas en mode Zen';
