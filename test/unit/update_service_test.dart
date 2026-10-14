@@ -131,10 +131,99 @@ void main() {
         downloadAsset(
           asset(served: bytes, digest: 'sha256:${sha256.convert(bytes)}'),
           into: dir,
-          isCancelled: () => true,
+          cancel: Future<void>.value(),
         ),
         throwsA(isA<UpdateCancelled>()),
       );
+      expect(dir.listSync(), isEmpty);
+    });
+
+    test('a cancel that lands while the file is hashed keeps it from '
+        'becoming the download (#911)', () async {
+      final bytes = List<int>.generate(200000, (i) => i % 251);
+      final cancel = Completer<void>();
+      Timer? watch;
+      addTearDown(() => watch?.cancel());
+      server.listen((request) async {
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..contentLength = bytes.length
+          ..add(bytes);
+        await request.response.close();
+      });
+      final served = ReleaseAsset(
+        name: 'niman-1.0.0-windows-x64-setup.exe',
+        downloadUrl: 'http://${server.address.host}:${server.port}/setup.exe',
+        digest: 'sha256:${sha256.convert(bytes)}',
+      );
+      final hashing = Completer<void>();
+      await expectLater(
+        downloadAsset(
+          served,
+          into: dir,
+          cancel: cancel.future,
+          onProgress: (received, total) {
+            // The last chunk is in: the digest job starts once the body
+            // closes, and the cancel is pressed while it runs.
+            if (received != total || watch != null) return;
+            watch = Timer.periodic(Duration.zero, (timer) {
+              if (IsolateGauge.inFlight == 0) return;
+              timer.cancel();
+              hashing.complete();
+              cancel.complete();
+            });
+          },
+        ),
+        throwsA(isA<UpdateCancelled>()),
+      );
+      expect(hashing.isCompleted, isTrue, reason: 'the cancel came mid-hash');
+      expect(downloaded().existsSync(), isFalse);
+      expect(dir.listSync(), isEmpty, reason: 'the partial file is gone too');
+    });
+
+    test('a cancel on a file already there stops before it is handed back '
+        'and keeps the file (#911)', () async {
+      final bytes = utf8.encode('the genuine installer bytes');
+      final served = asset(
+        served: bytes,
+        digest: 'sha256:${sha256.convert(bytes)}',
+      );
+      await downloadAsset(served, into: dir);
+      await expectLater(
+        downloadAsset(served, into: dir, cancel: Future<void>.value()),
+        throwsA(isA<UpdateCancelled>()),
+      );
+      expect(await downloaded().readAsBytes(), bytes);
+    });
+
+    test('a cancel ends a stalled transfer at once, not at the stall timeout '
+        '(#911)', () async {
+      final cancel = Completer<void>();
+      server.listen((request) async {
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..contentLength = 1000000
+          ..add(utf8.encode('the first bytes'));
+        // Headers and a first chunk, then silence with the socket open.
+        await request.response.flush();
+      });
+      final target = ReleaseAsset(
+        name: 'niman-1.0.0-windows-x64-setup.exe',
+        downloadUrl: 'http://${server.address.host}:${server.port}/setup.exe',
+        digest: 'sha256:${sha256.convert(utf8.encode('the whole installer'))}',
+      );
+      // The server goes quiet; the user gives up after a moment.
+      Timer(const Duration(milliseconds: 300), cancel.complete);
+      final clock = Stopwatch()..start();
+      await expectLater(
+        downloadAsset(
+          target,
+          into: dir,
+          cancel: cancel.future,
+        ).timeout(const Duration(seconds: 10)),
+        throwsA(isA<UpdateCancelled>()),
+      );
+      expect(clock.elapsed, lessThan(const Duration(seconds: 5)));
       expect(dir.listSync(), isEmpty);
     });
 

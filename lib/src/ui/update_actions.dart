@@ -32,11 +32,17 @@ final class UpdateDownload extends ChangeNotifier {
   bool get cancelled => _cancelled;
   bool _cancelled = false;
 
+  /// Completes when its Cancel is pressed, so a transfer can be ended on the
+  /// spot instead of at its next chunk (#911).
+  Future<void> get onCancel => _onCancel.future;
+  Completer<void> _onCancel = Completer<void>();
+
   /// Starts a download; false when one is already running.
   bool start() {
     if (_running) return false;
     _running = true;
     _cancelled = false;
+    _onCancel = Completer<void>();
     _progress = null;
     notifyListeners();
     return true;
@@ -55,10 +61,11 @@ final class UpdateDownload extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Stops the download at its next chunk.
+  /// Stops the download.
   void cancel() {
-    if (!_running) return;
+    if (!_running || _cancelled) return;
     _cancelled = true;
+    _onCancel.complete();
     notifyListeners();
   }
 
@@ -94,7 +101,7 @@ final class UpdateSteps {
   final Future<File> Function(
     ReleaseAsset asset, {
     void Function(int received, int? total)? onProgress,
-    bool Function()? isCancelled,
+    Future<void>? cancel,
   })
   download;
 
@@ -116,6 +123,8 @@ final class UpdateSteps {
 /// is not started twice. Every outcome — and every failure, the hand-over's
 /// too (#905) — surfaces as a snackbar, never a dialog; the permission's
 /// explanation is the one dialog, because it sends the user out of the app.
+/// A download cancelled is never handed over, however late the Cancel came
+/// (#911).
 ///
 /// True once the platform took the update — the installer opened — so a
 /// banner that offered it can go; false leaves the offer standing.
@@ -133,7 +142,7 @@ Future<bool> downloadAndApplyUpdate(
     file = await steps.download(
       update.asset,
       onProgress: updateDownload.report,
-      isCancelled: () => updateDownload.cancelled,
+      cancel: updateDownload.onCancel,
     );
   } on UpdateCancelled {
     log.debug('download cancelled');
@@ -146,6 +155,12 @@ Future<bool> downloadAndApplyUpdate(
     return false;
   } finally {
     updateDownload.finish();
+  }
+  // Cancel pressed while the file was hashed, or on a file already there:
+  // the download came back whole, but it was told to stop.
+  if (updateDownload.cancelled) {
+    log.debug('download cancelled after it finished');
+    return false;
   }
   final bool launched;
   try {

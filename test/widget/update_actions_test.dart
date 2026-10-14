@@ -52,7 +52,7 @@ void main() {
   Future<File> download(
     ReleaseAsset asset, {
     void Function(int received, int? total)? onProgress,
-    bool Function()? isCancelled,
+    Future<void>? cancel,
   }) async => file;
 
   tearDown(() {
@@ -103,5 +103,31 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(result, [false]);
     expect(find.text(AppStrings.updateInstallerFailed), findsOne);
+  });
+
+  testWidgets('a Cancel that lands after the last chunk never opens the '
+      'installer (#911)', (tester) async {
+    final result = <bool>[];
+    var applied = false;
+    await _pump(
+      tester,
+      update: _update('niman-9.9.9-windows-x64-setup.exe'),
+      result: result,
+      steps: UpdateSteps(
+        // The file comes back whole, but Cancel was pressed while it was
+        // hashed: the download step has nothing left to stop.
+        download: (asset, {onProgress, cancel}) async {
+          updateDownload.cancel();
+          return file;
+        },
+        canInstall: () async => true,
+        apply: (file) async => applied = true,
+      ),
+    );
+    await tester.pump();
+    expect(result, [false]);
+    expect(applied, isFalse);
+    expect(find.byType(SnackBar), findsNothing);
+    expect(updateDownload.running, isFalse);
   });
 }
