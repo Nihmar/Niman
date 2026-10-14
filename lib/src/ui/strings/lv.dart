@@ -3909,4 +3909,38 @@ final class LatvianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kartītes';
+  @override
+  String get flashcardsShowAnswer => 'Rādīt atbildi';
+  @override
+  String get flashcardsGradeAgain => 'Vēlreiz';
+  @override
+  String get flashcardsGradeHard => 'Grūti';
+  @override
+  String get flashcardsGradeGood => 'Labi';
+  @override
+  String get flashcardsGradeEasy => 'Viegli';
+  @override
+  String get flashcardsToday => 'šodien';
+  @override
+  String get flashcardsTomorrow => 'rīt';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Mācības · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Vēlreiz: $count';
+  @override
+  String get flashcardsDoneToday => 'Šodienai pabeigts';
+  @override
+  String flashcardsReviewedCount(int count) => 'Atkārtotas: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Nākamās: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nav ieplānotu kartīšu';
+  @override
+  String get flashcardsNextDeck => 'Nākamais komplekts';
+  @override
+  String get flashcardsBackToDeck => 'Atpakaļ uz komplektu';
+  @override
+  String get flashcardsEndReview => 'Beigt atkārtošanu';
 }

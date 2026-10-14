@@ -3946,4 +3946,38 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kartela';
+  @override
+  String get flashcardsShowAnswer => 'Shfaq përgjigjen';
+  @override
+  String get flashcardsGradeAgain => 'Përsëri';
+  @override
+  String get flashcardsGradeHard => 'Vështirë';
+  @override
+  String get flashcardsGradeGood => 'Mirë';
+  @override
+  String get flashcardsGradeEasy => 'Lehtë';
+  @override
+  String get flashcardsToday => 'sot';
+  @override
+  String get flashcardsTomorrow => 'nesër';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studim · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Përsëri: $count';
+  @override
+  String get flashcardsDoneToday => 'Mbaruat për sot';
+  @override
+  String flashcardsReviewedCount(int count) => 'Të përsëritura: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Të tjerat: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Asnjë kartë e planifikuar';
+  @override
+  String get flashcardsNextDeck => 'Pakoja tjetër';
+  @override
+  String get flashcardsBackToDeck => 'Kthehu te pakoja';
+  @override
+  String get flashcardsEndReview => 'Përfundo përsëritjen';
 }

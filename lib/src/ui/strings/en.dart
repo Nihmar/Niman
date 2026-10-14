@@ -3877,4 +3877,38 @@ final class EnglishStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Cards';
+  @override
+  String get flashcardsShowAnswer => 'Show answer';
+  @override
+  String get flashcardsGradeAgain => 'Again';
+  @override
+  String get flashcardsGradeHard => 'Hard';
+  @override
+  String get flashcardsGradeGood => 'Good';
+  @override
+  String get flashcardsGradeEasy => 'Easy';
+  @override
+  String get flashcardsToday => 'today';
+  @override
+  String get flashcardsTomorrow => 'tomorrow';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Study · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count again';
+  @override
+  String get flashcardsDoneToday => 'Done for today';
+  @override
+  String flashcardsReviewedCount(int count) => '$count reviewed';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Next: $when';
+  @override
+  String get flashcardsNothingScheduled => 'No cards scheduled';
+  @override
+  String get flashcardsNextDeck => 'Next deck';
+  @override
+  String get flashcardsBackToDeck => 'Back to the deck';
+  @override
+  String get flashcardsEndReview => 'End review';
 }

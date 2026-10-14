@@ -3904,4 +3904,38 @@ final class DanishStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kort';
+  @override
+  String get flashcardsShowAnswer => 'Vis svar';
+  @override
+  String get flashcardsGradeAgain => 'Igen';
+  @override
+  String get flashcardsGradeHard => 'Svært';
+  @override
+  String get flashcardsGradeGood => 'Godt';
+  @override
+  String get flashcardsGradeEasy => 'Let';
+  @override
+  String get flashcardsToday => 'i dag';
+  @override
+  String get flashcardsTomorrow => 'i morgen';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studér · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count igen';
+  @override
+  String get flashcardsDoneToday => 'Færdig for i dag';
+  @override
+  String flashcardsReviewedCount(int count) => '$count repeteret';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Næste: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ingen kort planlagt';
+  @override
+  String get flashcardsNextDeck => 'Næste kortspil';
+  @override
+  String get flashcardsBackToDeck => 'Tilbage til kortspillet';
+  @override
+  String get flashcardsEndReview => 'Afslut repetition';
 }

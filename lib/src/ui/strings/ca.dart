@@ -3983,4 +3983,38 @@ final class CatalanStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Targetes';
+  @override
+  String get flashcardsShowAnswer => 'Mostra la resposta';
+  @override
+  String get flashcardsGradeAgain => 'Una altra vegada';
+  @override
+  String get flashcardsGradeHard => 'Difícil';
+  @override
+  String get flashcardsGradeGood => 'Bé';
+  @override
+  String get flashcardsGradeEasy => 'Fàcil';
+  @override
+  String get flashcardsToday => 'avui';
+  @override
+  String get flashcardsTomorrow => 'demà';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Estudi · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count una altra vegada';
+  @override
+  String get flashcardsDoneToday => 'Fet per avui';
+  @override
+  String flashcardsReviewedCount(int count) => '$count revisades';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Següents: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Cap targeta programada';
+  @override
+  String get flashcardsNextDeck => 'Baralla següent';
+  @override
+  String get flashcardsBackToDeck => 'Torna a la baralla';
+  @override
+  String get flashcardsEndReview => 'Acaba la revisió';
 }

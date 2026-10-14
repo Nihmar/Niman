@@ -3946,4 +3946,38 @@ final class GalicianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Tarxetas';
+  @override
+  String get flashcardsShowAnswer => 'Amosar a resposta';
+  @override
+  String get flashcardsGradeAgain => 'Outra vez';
+  @override
+  String get flashcardsGradeHard => 'Difícil';
+  @override
+  String get flashcardsGradeGood => 'Ben';
+  @override
+  String get flashcardsGradeEasy => 'Doado';
+  @override
+  String get flashcardsToday => 'hoxe';
+  @override
+  String get flashcardsTomorrow => 'mañá';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Estudo · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count outra vez';
+  @override
+  String get flashcardsDoneToday => 'Feito por hoxe';
+  @override
+  String flashcardsReviewedCount(int count) => '$count repasadas';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Seguintes: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ningunha tarxeta programada';
+  @override
+  String get flashcardsNextDeck => 'Seguinte mazo';
+  @override
+  String get flashcardsBackToDeck => 'Volver ao mazo';
+  @override
+  String get flashcardsEndReview => 'Rematar o repaso';
 }

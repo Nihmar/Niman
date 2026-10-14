@@ -3950,4 +3950,38 @@ final class ItalianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Carte';
+  @override
+  String get flashcardsShowAnswer => 'Mostra la risposta';
+  @override
+  String get flashcardsGradeAgain => 'Ancora';
+  @override
+  String get flashcardsGradeHard => 'Difficile';
+  @override
+  String get flashcardsGradeGood => 'Bene';
+  @override
+  String get flashcardsGradeEasy => 'Facile';
+  @override
+  String get flashcardsToday => 'oggi';
+  @override
+  String get flashcardsTomorrow => 'domani';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studio · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count di nuovo';
+  @override
+  String get flashcardsDoneToday => 'Finito per oggi';
+  @override
+  String flashcardsReviewedCount(int count) => '$count ripassate';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Prossime: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nessuna carta in programma';
+  @override
+  String get flashcardsNextDeck => 'Mazzo successivo';
+  @override
+  String get flashcardsBackToDeck => 'Torna al mazzo';
+  @override
+  String get flashcardsEndReview => 'Termina il ripasso';
 }

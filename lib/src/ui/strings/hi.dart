@@ -3869,4 +3869,38 @@ final class HindiStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'कार्ड';
+  @override
+  String get flashcardsShowAnswer => 'उत्तर दिखाएँ';
+  @override
+  String get flashcardsGradeAgain => 'फिर से';
+  @override
+  String get flashcardsGradeHard => 'कठिन';
+  @override
+  String get flashcardsGradeGood => 'अच्छा';
+  @override
+  String get flashcardsGradeEasy => 'आसान';
+  @override
+  String get flashcardsToday => 'आज';
+  @override
+  String get flashcardsTomorrow => 'कल';
+  @override
+  String flashcardsReviewTitle(String deck) => 'अध्ययन · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'फिर से: $count';
+  @override
+  String get flashcardsDoneToday => 'आज के लिए पूरा';
+  @override
+  String flashcardsReviewedCount(int count) => 'दोहराए गए: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count मिनट';
+  @override
+  String flashcardsNextOn(String when) => 'अगले: $when';
+  @override
+  String get flashcardsNothingScheduled => 'कोई कार्ड निर्धारित नहीं';
+  @override
+  String get flashcardsNextDeck => 'अगला डेक';
+  @override
+  String get flashcardsBackToDeck => 'डेक पर वापस';
+  @override
+  String get flashcardsEndReview => 'दोहराव समाप्त करें';
 }

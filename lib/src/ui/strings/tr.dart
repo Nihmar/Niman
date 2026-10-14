@@ -3883,4 +3883,38 @@ final class TurkishStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kartlar';
+  @override
+  String get flashcardsShowAnswer => 'Cevabı göster';
+  @override
+  String get flashcardsGradeAgain => 'Tekrar';
+  @override
+  String get flashcardsGradeHard => 'Zor';
+  @override
+  String get flashcardsGradeGood => 'İyi';
+  @override
+  String get flashcardsGradeEasy => 'Kolay';
+  @override
+  String get flashcardsToday => 'bugün';
+  @override
+  String get flashcardsTomorrow => 'yarın';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Çalışma · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Tekrar: $count';
+  @override
+  String get flashcardsDoneToday => 'Bugünlük bitti';
+  @override
+  String flashcardsReviewedCount(int count) => 'Tekrarlanan: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count dk';
+  @override
+  String flashcardsNextOn(String when) => 'Sonraki: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Planlanmış kart yok';
+  @override
+  String get flashcardsNextDeck => 'Sonraki deste';
+  @override
+  String get flashcardsBackToDeck => 'Desteye dön';
+  @override
+  String get flashcardsEndReview => 'Tekrarı bitir';
 }

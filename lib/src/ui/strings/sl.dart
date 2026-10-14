@@ -3939,4 +3939,38 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kartice';
+  @override
+  String get flashcardsShowAnswer => 'Pokaži odgovor';
+  @override
+  String get flashcardsGradeAgain => 'Znova';
+  @override
+  String get flashcardsGradeHard => 'Težko';
+  @override
+  String get flashcardsGradeGood => 'Dobro';
+  @override
+  String get flashcardsGradeEasy => 'Lahko';
+  @override
+  String get flashcardsToday => 'danes';
+  @override
+  String get flashcardsTomorrow => 'jutri';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Učenje · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Znova: $count';
+  @override
+  String get flashcardsDoneToday => 'Za danes končano';
+  @override
+  String flashcardsReviewedCount(int count) => 'Ponovljeno: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Naslednje: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ni načrtovanih kartic';
+  @override
+  String get flashcardsNextDeck => 'Naslednji kupček';
+  @override
+  String get flashcardsBackToDeck => 'Nazaj na kupček';
+  @override
+  String get flashcardsEndReview => 'Končaj ponavljanje';
 }

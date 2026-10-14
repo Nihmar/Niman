@@ -3940,4 +3940,38 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Карти';
+  @override
+  String get flashcardsShowAnswer => 'Покажи отговора';
+  @override
+  String get flashcardsGradeAgain => 'Отново';
+  @override
+  String get flashcardsGradeHard => 'Трудно';
+  @override
+  String get flashcardsGradeGood => 'Добре';
+  @override
+  String get flashcardsGradeEasy => 'Лесно';
+  @override
+  String get flashcardsToday => 'днес';
+  @override
+  String get flashcardsTomorrow => 'утре';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Учене · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Отново: $count';
+  @override
+  String get flashcardsDoneToday => 'Готово за днес';
+  @override
+  String flashcardsReviewedCount(int count) => 'Преговорени: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count мин';
+  @override
+  String flashcardsNextOn(String when) => 'Следващи: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Няма планирани карти';
+  @override
+  String get flashcardsNextDeck => 'Следващо тесте';
+  @override
+  String get flashcardsBackToDeck => 'Обратно към тестето';
+  @override
+  String get flashcardsEndReview => 'Край на преговора';
 }

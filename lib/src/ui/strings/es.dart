@@ -3974,4 +3974,38 @@ final class SpanishStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Tarjetas';
+  @override
+  String get flashcardsShowAnswer => 'Mostrar respuesta';
+  @override
+  String get flashcardsGradeAgain => 'Otra vez';
+  @override
+  String get flashcardsGradeHard => 'Difícil';
+  @override
+  String get flashcardsGradeGood => 'Bien';
+  @override
+  String get flashcardsGradeEasy => 'Fácil';
+  @override
+  String get flashcardsToday => 'hoy';
+  @override
+  String get flashcardsTomorrow => 'mañana';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Estudio · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count otra vez';
+  @override
+  String get flashcardsDoneToday => 'Listo por hoy';
+  @override
+  String flashcardsReviewedCount(int count) => '$count repasadas';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Siguientes: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ninguna tarjeta programada';
+  @override
+  String get flashcardsNextDeck => 'Siguiente mazo';
+  @override
+  String get flashcardsBackToDeck => 'Volver al mazo';
+  @override
+  String get flashcardsEndReview => 'Terminar el repaso';
 }

@@ -3943,4 +3943,38 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Cartões';
+  @override
+  String get flashcardsShowAnswer => 'Mostrar resposta';
+  @override
+  String get flashcardsGradeAgain => 'De novo';
+  @override
+  String get flashcardsGradeHard => 'Difícil';
+  @override
+  String get flashcardsGradeGood => 'Bom';
+  @override
+  String get flashcardsGradeEasy => 'Fácil';
+  @override
+  String get flashcardsToday => 'hoje';
+  @override
+  String get flashcardsTomorrow => 'amanhã';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Estudo · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count de novo';
+  @override
+  String get flashcardsDoneToday => 'Concluído por hoje';
+  @override
+  String flashcardsReviewedCount(int count) => '$count revistas';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Seguintes: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nenhuma carta agendada';
+  @override
+  String get flashcardsNextDeck => 'Baralho seguinte';
+  @override
+  String get flashcardsBackToDeck => 'Voltar ao baralho';
+  @override
+  String get flashcardsEndReview => 'Terminar a revisão';
 }

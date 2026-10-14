@@ -3959,4 +3959,38 @@ final class BasqueStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Fitxak';
+  @override
+  String get flashcardsShowAnswer => 'Erakutsi erantzuna';
+  @override
+  String get flashcardsGradeAgain => 'Berriro';
+  @override
+  String get flashcardsGradeHard => 'Zaila';
+  @override
+  String get flashcardsGradeGood => 'Ondo';
+  @override
+  String get flashcardsGradeEasy => 'Erraza';
+  @override
+  String get flashcardsToday => 'gaur';
+  @override
+  String get flashcardsTomorrow => 'bihar';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Ikasketa · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Berriro: $count';
+  @override
+  String get flashcardsDoneToday => 'Gaurkoz amaituta';
+  @override
+  String flashcardsReviewedCount(int count) => 'Errepasatuak: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Hurrengoak: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ez dago txartelik programatuta';
+  @override
+  String get flashcardsNextDeck => 'Hurrengo mazoa';
+  @override
+  String get flashcardsBackToDeck => 'Itzuli mazora';
+  @override
+  String get flashcardsEndReview => 'Amaitu errepasoa';
 }

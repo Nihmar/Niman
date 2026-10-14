@@ -3957,4 +3957,38 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kortelės';
+  @override
+  String get flashcardsShowAnswer => 'Rodyti atsakymą';
+  @override
+  String get flashcardsGradeAgain => 'Dar kartą';
+  @override
+  String get flashcardsGradeHard => 'Sunku';
+  @override
+  String get flashcardsGradeGood => 'Gerai';
+  @override
+  String get flashcardsGradeEasy => 'Lengva';
+  @override
+  String get flashcardsToday => 'šiandien';
+  @override
+  String get flashcardsTomorrow => 'rytoj';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Mokymasis · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Dar kartą: $count';
+  @override
+  String get flashcardsDoneToday => 'Šiandienai baigta';
+  @override
+  String flashcardsReviewedCount(int count) => 'Pakartota: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min.';
+  @override
+  String flashcardsNextOn(String when) => 'Kitos: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nėra suplanuotų kortelių';
+  @override
+  String get flashcardsNextDeck => 'Kita kaladė';
+  @override
+  String get flashcardsBackToDeck => 'Atgal į kaladę';
+  @override
+  String get flashcardsEndReview => 'Baigti kartojimą';
 }

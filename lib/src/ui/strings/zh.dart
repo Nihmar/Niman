@@ -3509,4 +3509,38 @@ final class ChineseStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => '卡片';
+  @override
+  String get flashcardsShowAnswer => '显示答案';
+  @override
+  String get flashcardsGradeAgain => '重来';
+  @override
+  String get flashcardsGradeHard => '困难';
+  @override
+  String get flashcardsGradeGood => '良好';
+  @override
+  String get flashcardsGradeEasy => '简单';
+  @override
+  String get flashcardsToday => '今天';
+  @override
+  String get flashcardsTomorrow => '明天';
+  @override
+  String flashcardsReviewTitle(String deck) => '学习 · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '重来 $count';
+  @override
+  String get flashcardsDoneToday => '今天完成了';
+  @override
+  String flashcardsReviewedCount(int count) => '已复习 $count';
+  @override
+  String flashcardsMinutes(int count) => '$count 分钟';
+  @override
+  String flashcardsNextOn(String when) => '下次：$when';
+  @override
+  String get flashcardsNothingScheduled => '没有已安排的卡片';
+  @override
+  String get flashcardsNextDeck => '下一个牌组';
+  @override
+  String get flashcardsBackToDeck => '返回牌组';
+  @override
+  String get flashcardsEndReview => '结束复习';
 }

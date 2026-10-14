@@ -4003,4 +4003,38 @@ final class GermanStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Karten';
+  @override
+  String get flashcardsShowAnswer => 'Antwort zeigen';
+  @override
+  String get flashcardsGradeAgain => 'Nochmal';
+  @override
+  String get flashcardsGradeHard => 'Schwer';
+  @override
+  String get flashcardsGradeGood => 'Gut';
+  @override
+  String get flashcardsGradeEasy => 'Einfach';
+  @override
+  String get flashcardsToday => 'heute';
+  @override
+  String get flashcardsTomorrow => 'morgen';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Lernen · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count nochmal';
+  @override
+  String get flashcardsDoneToday => 'Für heute fertig';
+  @override
+  String flashcardsReviewedCount(int count) => '$count wiederholt';
+  @override
+  String flashcardsMinutes(int count) => '$count Min.';
+  @override
+  String flashcardsNextOn(String when) => 'Nächste: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Keine Karten geplant';
+  @override
+  String get flashcardsNextDeck => 'Nächster Stapel';
+  @override
+  String get flashcardsBackToDeck => 'Zurück zum Stapel';
+  @override
+  String get flashcardsEndReview => 'Lernen beenden';
 }

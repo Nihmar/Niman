@@ -3924,4 +3924,38 @@ final class SlovakStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kartičky';
+  @override
+  String get flashcardsShowAnswer => 'Zobraziť odpoveď';
+  @override
+  String get flashcardsGradeAgain => 'Znova';
+  @override
+  String get flashcardsGradeHard => 'Ťažké';
+  @override
+  String get flashcardsGradeGood => 'Dobré';
+  @override
+  String get flashcardsGradeEasy => 'Ľahké';
+  @override
+  String get flashcardsToday => 'dnes';
+  @override
+  String get flashcardsTomorrow => 'zajtra';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Štúdium · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Znova: $count';
+  @override
+  String get flashcardsDoneToday => 'Na dnes hotovo';
+  @override
+  String flashcardsReviewedCount(int count) => 'Zopakované: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Ďalšie: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Žiadne naplánované karty';
+  @override
+  String get flashcardsNextDeck => 'Ďalší balíček';
+  @override
+  String get flashcardsBackToDeck => 'Späť na balíček';
+  @override
+  String get flashcardsEndReview => 'Ukončiť opakovanie';
 }

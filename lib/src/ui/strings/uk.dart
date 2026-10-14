@@ -3958,4 +3958,38 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Картки';
+  @override
+  String get flashcardsShowAnswer => 'Показати відповідь';
+  @override
+  String get flashcardsGradeAgain => 'Ще раз';
+  @override
+  String get flashcardsGradeHard => 'Важко';
+  @override
+  String get flashcardsGradeGood => 'Добре';
+  @override
+  String get flashcardsGradeEasy => 'Легко';
+  @override
+  String get flashcardsToday => 'сьогодні';
+  @override
+  String get flashcardsTomorrow => 'завтра';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Навчання · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Ще раз: $count';
+  @override
+  String get flashcardsDoneToday => 'На сьогодні все';
+  @override
+  String flashcardsReviewedCount(int count) => 'Повторено: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count хв';
+  @override
+  String flashcardsNextOn(String when) => 'Далі: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Нічого не заплановано';
+  @override
+  String get flashcardsNextDeck => 'Наступна колода';
+  @override
+  String get flashcardsBackToDeck => 'Назад до колоди';
+  @override
+  String get flashcardsEndReview => 'Завершити повторення';
 }

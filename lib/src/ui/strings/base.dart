@@ -2106,4 +2106,21 @@ abstract base class Strings {
   String get flashcardsResetConfirm;
   String get commandNeedFlashcardNote;
   String get flashcardsCardsLabel;
+  String get flashcardsShowAnswer;
+  String get flashcardsGradeAgain;
+  String get flashcardsGradeHard;
+  String get flashcardsGradeGood;
+  String get flashcardsGradeEasy;
+  String get flashcardsToday;
+  String get flashcardsTomorrow;
+  String flashcardsReviewTitle(String deck);
+  String flashcardsAgainCount(int count);
+  String get flashcardsDoneToday;
+  String flashcardsReviewedCount(int count);
+  String flashcardsMinutes(int count);
+  String flashcardsNextOn(String when);
+  String get flashcardsNothingScheduled;
+  String get flashcardsNextDeck;
+  String get flashcardsBackToDeck;
+  String get flashcardsEndReview;
 }

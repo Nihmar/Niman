@@ -3914,4 +3914,38 @@ final class CzechStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kartičky';
+  @override
+  String get flashcardsShowAnswer => 'Zobrazit odpověď';
+  @override
+  String get flashcardsGradeAgain => 'Znovu';
+  @override
+  String get flashcardsGradeHard => 'Těžké';
+  @override
+  String get flashcardsGradeGood => 'Dobré';
+  @override
+  String get flashcardsGradeEasy => 'Snadné';
+  @override
+  String get flashcardsToday => 'dnes';
+  @override
+  String get flashcardsTomorrow => 'zítra';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studium · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Znovu: $count';
+  @override
+  String get flashcardsDoneToday => 'Pro dnešek hotovo';
+  @override
+  String flashcardsReviewedCount(int count) => 'Zopakováno: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Další: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Žádné naplánované karty';
+  @override
+  String get flashcardsNextDeck => 'Další balíček';
+  @override
+  String get flashcardsBackToDeck => 'Zpět na balíček';
+  @override
+  String get flashcardsEndReview => 'Ukončit opakování';
 }

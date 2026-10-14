@@ -4031,4 +4031,38 @@ final class FrenchStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Cartes';
+  @override
+  String get flashcardsShowAnswer => 'Afficher la réponse';
+  @override
+  String get flashcardsGradeAgain => 'Encore';
+  @override
+  String get flashcardsGradeHard => 'Difficile';
+  @override
+  String get flashcardsGradeGood => 'Correct';
+  @override
+  String get flashcardsGradeEasy => 'Facile';
+  @override
+  String get flashcardsToday => 'aujourd’hui';
+  @override
+  String get flashcardsTomorrow => 'demain';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Révision · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Encore : $count';
+  @override
+  String get flashcardsDoneToday => 'Terminé pour aujourd’hui';
+  @override
+  String flashcardsReviewedCount(int count) => '$count révisées';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Prochaines : $when';
+  @override
+  String get flashcardsNothingScheduled => 'Aucune carte prévue';
+  @override
+  String get flashcardsNextDeck => 'Paquet suivant';
+  @override
+  String get flashcardsBackToDeck => 'Retour au paquet';
+  @override
+  String get flashcardsEndReview => 'Terminer la révision';
 }

@@ -3909,4 +3909,38 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kort';
+  @override
+  String get flashcardsShowAnswer => 'Vis svar';
+  @override
+  String get flashcardsGradeAgain => 'Igjen';
+  @override
+  String get flashcardsGradeHard => 'Vanskelig';
+  @override
+  String get flashcardsGradeGood => 'Bra';
+  @override
+  String get flashcardsGradeEasy => 'Lett';
+  @override
+  String get flashcardsToday => 'i dag';
+  @override
+  String get flashcardsTomorrow => 'i morgen';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studer · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count igjen';
+  @override
+  String get flashcardsDoneToday => 'Ferdig for i dag';
+  @override
+  String flashcardsReviewedCount(int count) => '$count repetert';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Neste: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ingen kort planlagt';
+  @override
+  String get flashcardsNextDeck => 'Neste kortstokk';
+  @override
+  String get flashcardsBackToDeck => 'Tilbake til kortstokken';
+  @override
+  String get flashcardsEndReview => 'Avslutt repetisjonen';
 }

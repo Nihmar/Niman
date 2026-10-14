@@ -3958,4 +3958,38 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Картачкі';
+  @override
+  String get flashcardsShowAnswer => 'Паказаць адказ';
+  @override
+  String get flashcardsGradeAgain => 'Яшчэ раз';
+  @override
+  String get flashcardsGradeHard => 'Цяжка';
+  @override
+  String get flashcardsGradeGood => 'Добра';
+  @override
+  String get flashcardsGradeEasy => 'Лёгка';
+  @override
+  String get flashcardsToday => 'сёння';
+  @override
+  String get flashcardsTomorrow => 'заўтра';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Вывучэнне · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Яшчэ раз: $count';
+  @override
+  String get flashcardsDoneToday => 'На сёння ўсё';
+  @override
+  String flashcardsReviewedCount(int count) => 'Паўторана: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count хв';
+  @override
+  String flashcardsNextOn(String when) => 'Далей: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Нічога не запланавана';
+  @override
+  String get flashcardsNextDeck => 'Наступная калода';
+  @override
+  String get flashcardsBackToDeck => 'Назад да калоды';
+  @override
+  String get flashcardsEndReview => 'Скончыць паўтарэнне';
 }

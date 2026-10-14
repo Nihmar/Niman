@@ -1995,4 +1995,24 @@ final class AppStrings {
   static String get flashcardsResetBody => _s.flashcardsResetBody;
   static String get flashcardsResetConfirm => _s.flashcardsResetConfirm;
   static String get commandNeedFlashcardNote => _s.commandNeedFlashcardNote;
+  static String get flashcardsShowAnswer => _s.flashcardsShowAnswer;
+  static String get flashcardsGradeAgain => _s.flashcardsGradeAgain;
+  static String get flashcardsGradeHard => _s.flashcardsGradeHard;
+  static String get flashcardsGradeGood => _s.flashcardsGradeGood;
+  static String get flashcardsGradeEasy => _s.flashcardsGradeEasy;
+  static String get flashcardsToday => _s.flashcardsToday;
+  static String get flashcardsTomorrow => _s.flashcardsTomorrow;
+  static String flashcardsReviewTitle(String deck) =>
+      _s.flashcardsReviewTitle(deck);
+  static String flashcardsAgainCount(int count) =>
+      _s.flashcardsAgainCount(count);
+  static String get flashcardsDoneToday => _s.flashcardsDoneToday;
+  static String flashcardsReviewedCount(int count) =>
+      _s.flashcardsReviewedCount(count);
+  static String flashcardsMinutes(int count) => _s.flashcardsMinutes(count);
+  static String flashcardsNextOn(String when) => _s.flashcardsNextOn(when);
+  static String get flashcardsNothingScheduled => _s.flashcardsNothingScheduled;
+  static String get flashcardsNextDeck => _s.flashcardsNextDeck;
+  static String get flashcardsBackToDeck => _s.flashcardsBackToDeck;
+  static String get flashcardsEndReview => _s.flashcardsEndReview;
 }

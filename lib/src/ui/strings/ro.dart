@@ -3978,4 +3978,38 @@ final class RomanianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Carduri';
+  @override
+  String get flashcardsShowAnswer => 'Arată răspunsul';
+  @override
+  String get flashcardsGradeAgain => 'Din nou';
+  @override
+  String get flashcardsGradeHard => 'Greu';
+  @override
+  String get flashcardsGradeGood => 'Bine';
+  @override
+  String get flashcardsGradeEasy => 'Ușor';
+  @override
+  String get flashcardsToday => 'azi';
+  @override
+  String get flashcardsTomorrow => 'mâine';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studiu · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Din nou: $count';
+  @override
+  String get flashcardsDoneToday => 'Gata pentru azi';
+  @override
+  String flashcardsReviewedCount(int count) => 'Repetate: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Următoarele: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nicio carte programată';
+  @override
+  String get flashcardsNextDeck => 'Pachetul următor';
+  @override
+  String get flashcardsBackToDeck => 'Înapoi la pachet';
+  @override
+  String get flashcardsEndReview => 'Încheie repetarea';
 }

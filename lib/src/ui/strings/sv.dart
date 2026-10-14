@@ -3933,4 +3933,38 @@ final class SwedishStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kort';
+  @override
+  String get flashcardsShowAnswer => 'Visa svar';
+  @override
+  String get flashcardsGradeAgain => 'Igen';
+  @override
+  String get flashcardsGradeHard => 'Svårt';
+  @override
+  String get flashcardsGradeGood => 'Bra';
+  @override
+  String get flashcardsGradeEasy => 'Lätt';
+  @override
+  String get flashcardsToday => 'i dag';
+  @override
+  String get flashcardsTomorrow => 'i morgon';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studera · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count igen';
+  @override
+  String get flashcardsDoneToday => 'Klart för i dag';
+  @override
+  String flashcardsReviewedCount(int count) => '$count repeterade';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Nästa: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Inga kort schemalagda';
+  @override
+  String get flashcardsNextDeck => 'Nästa kortlek';
+  @override
+  String get flashcardsBackToDeck => 'Tillbaka till kortleken';
+  @override
+  String get flashcardsEndReview => 'Avsluta repetitionen';
 }

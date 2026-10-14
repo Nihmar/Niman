@@ -3944,4 +3944,38 @@ final class BosnianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kartice';
+  @override
+  String get flashcardsShowAnswer => 'Prikaži odgovor';
+  @override
+  String get flashcardsGradeAgain => 'Ponovo';
+  @override
+  String get flashcardsGradeHard => 'Teško';
+  @override
+  String get flashcardsGradeGood => 'Dobro';
+  @override
+  String get flashcardsGradeEasy => 'Lako';
+  @override
+  String get flashcardsToday => 'danas';
+  @override
+  String get flashcardsTomorrow => 'sutra';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Učenje · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Ponovo: $count';
+  @override
+  String get flashcardsDoneToday => 'Gotovo za danas';
+  @override
+  String flashcardsReviewedCount(int count) => 'Ponovljeno: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Sljedeće: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nema zakazanih kartica';
+  @override
+  String get flashcardsNextDeck => 'Sljedeći špil';
+  @override
+  String get flashcardsBackToDeck => 'Nazad na špil';
+  @override
+  String get flashcardsEndReview => 'Završi ponavljanje';
 }

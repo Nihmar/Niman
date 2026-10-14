@@ -3918,4 +3918,38 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kort';
+  @override
+  String get flashcardsShowAnswer => 'Sýna svar';
+  @override
+  String get flashcardsGradeAgain => 'Aftur';
+  @override
+  String get flashcardsGradeHard => 'Erfitt';
+  @override
+  String get flashcardsGradeGood => 'Gott';
+  @override
+  String get flashcardsGradeEasy => 'Auðvelt';
+  @override
+  String get flashcardsToday => 'í dag';
+  @override
+  String get flashcardsTomorrow => 'á morgun';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Nám · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Aftur: $count';
+  @override
+  String get flashcardsDoneToday => 'Búið í dag';
+  @override
+  String flashcardsReviewedCount(int count) => 'Rifjað upp: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count mín.';
+  @override
+  String flashcardsNextOn(String when) => 'Næst: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Engin spjöld á dagskrá';
+  @override
+  String get flashcardsNextDeck => 'Næsti stokkur';
+  @override
+  String get flashcardsBackToDeck => 'Aftur í stokkinn';
+  @override
+  String get flashcardsEndReview => 'Ljúka upprifjun';
 }

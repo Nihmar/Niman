@@ -4038,4 +4038,38 @@ final class GreekStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Κάρτες';
+  @override
+  String get flashcardsShowAnswer => 'Εμφάνιση απάντησης';
+  @override
+  String get flashcardsGradeAgain => 'Ξανά';
+  @override
+  String get flashcardsGradeHard => 'Δύσκολο';
+  @override
+  String get flashcardsGradeGood => 'Καλό';
+  @override
+  String get flashcardsGradeEasy => 'Εύκολο';
+  @override
+  String get flashcardsToday => 'σήμερα';
+  @override
+  String get flashcardsTomorrow => 'αύριο';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Μελέτη · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count ξανά';
+  @override
+  String get flashcardsDoneToday => 'Τέλος για σήμερα';
+  @override
+  String flashcardsReviewedCount(int count) => '$count επαναλήφθηκαν';
+  @override
+  String flashcardsMinutes(int count) => '$count λεπ.';
+  @override
+  String flashcardsNextOn(String when) => 'Επόμενες: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Καμία προγραμματισμένη κάρτα';
+  @override
+  String get flashcardsNextDeck => 'Επόμενη τράπουλα';
+  @override
+  String get flashcardsBackToDeck => 'Πίσω στην τράπουλα';
+  @override
+  String get flashcardsEndReview => 'Τέλος επανάληψης';
 }

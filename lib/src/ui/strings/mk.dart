@@ -3945,4 +3945,38 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Картички';
+  @override
+  String get flashcardsShowAnswer => 'Прикажи одговор';
+  @override
+  String get flashcardsGradeAgain => 'Повторно';
+  @override
+  String get flashcardsGradeHard => 'Тешко';
+  @override
+  String get flashcardsGradeGood => 'Добро';
+  @override
+  String get flashcardsGradeEasy => 'Лесно';
+  @override
+  String get flashcardsToday => 'денес';
+  @override
+  String get flashcardsTomorrow => 'утре';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Учење · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Повторно: $count';
+  @override
+  String get flashcardsDoneToday => 'Готово за денес';
+  @override
+  String flashcardsReviewedCount(int count) => 'Повторени: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count мин';
+  @override
+  String flashcardsNextOn(String when) => 'Следни: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Нема закажани картички';
+  @override
+  String get flashcardsNextDeck => 'Следен шпил';
+  @override
+  String get flashcardsBackToDeck => 'Назад кон шпилот';
+  @override
+  String get flashcardsEndReview => 'Заврши со повторувањето';
 }

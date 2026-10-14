@@ -3964,4 +3964,38 @@ final class DutchStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kaarten';
+  @override
+  String get flashcardsShowAnswer => 'Antwoord tonen';
+  @override
+  String get flashcardsGradeAgain => 'Opnieuw';
+  @override
+  String get flashcardsGradeHard => 'Moeilijk';
+  @override
+  String get flashcardsGradeGood => 'Goed';
+  @override
+  String get flashcardsGradeEasy => 'Makkelijk';
+  @override
+  String get flashcardsToday => 'vandaag';
+  @override
+  String get flashcardsTomorrow => 'morgen';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studeren · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count opnieuw';
+  @override
+  String get flashcardsDoneToday => 'Klaar voor vandaag';
+  @override
+  String flashcardsReviewedCount(int count) => '$count herhaald';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Volgende: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Geen kaarten gepland';
+  @override
+  String get flashcardsNextDeck => 'Volgende stapel';
+  @override
+  String get flashcardsBackToDeck => 'Terug naar de stapel';
+  @override
+  String get flashcardsEndReview => 'Herhaling beëindigen';
 }

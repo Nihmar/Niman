@@ -3868,4 +3868,38 @@ final class EstonianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kaardid';
+  @override
+  String get flashcardsShowAnswer => 'Näita vastust';
+  @override
+  String get flashcardsGradeAgain => 'Uuesti';
+  @override
+  String get flashcardsGradeHard => 'Raske';
+  @override
+  String get flashcardsGradeGood => 'Hea';
+  @override
+  String get flashcardsGradeEasy => 'Lihtne';
+  @override
+  String get flashcardsToday => 'täna';
+  @override
+  String get flashcardsTomorrow => 'homme';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Õppimine · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Uuesti: $count';
+  @override
+  String get flashcardsDoneToday => 'Tänaseks valmis';
+  @override
+  String flashcardsReviewedCount(int count) => 'Korratud: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Järgmised: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ühtegi kaarti pole ajastatud';
+  @override
+  String get flashcardsNextDeck => 'Järgmine pakk';
+  @override
+  String get flashcardsBackToDeck => 'Tagasi pakki';
+  @override
+  String get flashcardsEndReview => 'Lõpeta kordamine';
 }

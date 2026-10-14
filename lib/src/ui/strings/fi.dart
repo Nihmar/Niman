@@ -3942,4 +3942,38 @@ final class FinnishStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kortit';
+  @override
+  String get flashcardsShowAnswer => 'Näytä vastaus';
+  @override
+  String get flashcardsGradeAgain => 'Uudelleen';
+  @override
+  String get flashcardsGradeHard => 'Vaikea';
+  @override
+  String get flashcardsGradeGood => 'Hyvä';
+  @override
+  String get flashcardsGradeEasy => 'Helppo';
+  @override
+  String get flashcardsToday => 'tänään';
+  @override
+  String get flashcardsTomorrow => 'huomenna';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Opiskelu · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Uudelleen: $count';
+  @override
+  String get flashcardsDoneToday => 'Valmista tältä päivältä';
+  @override
+  String flashcardsReviewedCount(int count) => 'Kerrattu: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Seuraavat: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ei ajoitettuja kortteja';
+  @override
+  String get flashcardsNextDeck => 'Seuraava pakka';
+  @override
+  String get flashcardsBackToDeck => 'Takaisin pakkaan';
+  @override
+  String get flashcardsEndReview => 'Lopeta kertaus';
 }

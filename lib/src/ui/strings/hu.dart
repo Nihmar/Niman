@@ -3933,4 +3933,38 @@ final class HungarianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Kártyák';
+  @override
+  String get flashcardsShowAnswer => 'Válasz mutatása';
+  @override
+  String get flashcardsGradeAgain => 'Újra';
+  @override
+  String get flashcardsGradeHard => 'Nehéz';
+  @override
+  String get flashcardsGradeGood => 'Jó';
+  @override
+  String get flashcardsGradeEasy => 'Könnyű';
+  @override
+  String get flashcardsToday => 'ma';
+  @override
+  String get flashcardsTomorrow => 'holnap';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Tanulás · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Újra: $count';
+  @override
+  String get flashcardsDoneToday => 'Mára kész';
+  @override
+  String flashcardsReviewedCount(int count) => 'Ismételve: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count perc';
+  @override
+  String flashcardsNextOn(String when) => 'Következő: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nincs ütemezett kártya';
+  @override
+  String get flashcardsNextDeck => 'Következő pakli';
+  @override
+  String get flashcardsBackToDeck => 'Vissza a paklihoz';
+  @override
+  String get flashcardsEndReview => 'Ismétlés befejezése';
 }

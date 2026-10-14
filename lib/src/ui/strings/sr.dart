@@ -3938,4 +3938,38 @@ final class SerbianStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Картице';
+  @override
+  String get flashcardsShowAnswer => 'Прикажи одговор';
+  @override
+  String get flashcardsGradeAgain => 'Поново';
+  @override
+  String get flashcardsGradeHard => 'Тешко';
+  @override
+  String get flashcardsGradeGood => 'Добро';
+  @override
+  String get flashcardsGradeEasy => 'Лако';
+  @override
+  String get flashcardsToday => 'данас';
+  @override
+  String get flashcardsTomorrow => 'сутра';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Учење · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Поново: $count';
+  @override
+  String get flashcardsDoneToday => 'Готово за данас';
+  @override
+  String flashcardsReviewedCount(int count) => 'Поновљено: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count мин';
+  @override
+  String flashcardsNextOn(String when) => 'Следеће: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Нема заказаних картица';
+  @override
+  String get flashcardsNextDeck => 'Следећи шпил';
+  @override
+  String get flashcardsBackToDeck => 'Назад на шпил';
+  @override
+  String get flashcardsEndReview => 'Заврши понављање';
 }

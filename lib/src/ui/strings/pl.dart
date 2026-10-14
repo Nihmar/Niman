@@ -3972,4 +3972,38 @@ final class PolishStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'Fiszki';
+  @override
+  String get flashcardsShowAnswer => 'Pokaż odpowiedź';
+  @override
+  String get flashcardsGradeAgain => 'Jeszcze raz';
+  @override
+  String get flashcardsGradeHard => 'Trudne';
+  @override
+  String get flashcardsGradeGood => 'Dobre';
+  @override
+  String get flashcardsGradeEasy => 'Łatwe';
+  @override
+  String get flashcardsToday => 'dziś';
+  @override
+  String get flashcardsTomorrow => 'jutro';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Nauka · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Jeszcze raz: $count';
+  @override
+  String get flashcardsDoneToday => 'Na dziś koniec';
+  @override
+  String flashcardsReviewedCount(int count) => 'Powtórzone: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Następne: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Brak zaplanowanych fiszek';
+  @override
+  String get flashcardsNextDeck => 'Następna talia';
+  @override
+  String get flashcardsBackToDeck => 'Wróć do talii';
+  @override
+  String get flashcardsEndReview => 'Zakończ naukę';
 }

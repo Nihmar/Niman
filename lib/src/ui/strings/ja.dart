@@ -3605,4 +3605,38 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get flashcardsCardsLabel => 'カード';
+  @override
+  String get flashcardsShowAnswer => '答えを表示';
+  @override
+  String get flashcardsGradeAgain => 'もう一度';
+  @override
+  String get flashcardsGradeHard => '難しい';
+  @override
+  String get flashcardsGradeGood => '正解';
+  @override
+  String get flashcardsGradeEasy => '簡単';
+  @override
+  String get flashcardsToday => '今日';
+  @override
+  String get flashcardsTomorrow => '明日';
+  @override
+  String flashcardsReviewTitle(String deck) => '学習 · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'もう一度 $count';
+  @override
+  String get flashcardsDoneToday => '今日は完了';
+  @override
+  String flashcardsReviewedCount(int count) => '復習済み $count';
+  @override
+  String flashcardsMinutes(int count) => '$count 分';
+  @override
+  String flashcardsNextOn(String when) => '次回: $when';
+  @override
+  String get flashcardsNothingScheduled => '予定されたカードはありません';
+  @override
+  String get flashcardsNextDeck => '次のデッキ';
+  @override
+  String get flashcardsBackToDeck => 'デッキに戻る';
+  @override
+  String get flashcardsEndReview => '学習を終了';
 }
