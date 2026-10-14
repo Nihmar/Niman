@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/update/release_asset.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/update/update_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -78,28 +79,58 @@ final Uri _releasePage = Uri.parse(
   'https://github.com/Nihmar/Niman/releases/latest',
 );
 
+/// The steps of the flow that reach the platform, so a test can stand in for
+/// them: the download, the install permission and the hand-over.
+final class UpdateSteps {
+  /// The real steps.
+  const new({
+    this.download = downloadAsset,
+    this.canInstall = canInstallPackages,
+    this.openPermission = openInstallPermission,
+    this.apply = applyDownloadedUpdate,
+  });
+
+  /// Fetches and verifies the asset.
+  final Future<File> Function(
+    ReleaseAsset asset, {
+    void Function(int received, int? total)? onProgress,
+    bool Function()? isCancelled,
+  })
+  download;
+
+  /// Whether the platform lets the app install a package now.
+  final Future<bool> Function() canInstall;
+
+  /// Opens the page that grants it; false when it did not open.
+  final Future<bool> Function() openPermission;
+
+  /// Hands the downloaded file to the platform.
+  final Future<bool> Function(File file) apply;
+}
+
 /// Downloads [update]'s asset and hands it to the platform.
 ///
 /// Windows launches the setup installer; Linux reveals the download;
 /// Android asks for "Install unknown apps" first when it is not granted,
 /// and opens the system installer once it is. A download already running
-/// is not started twice. Every outcome — and every failure — surfaces as a
-/// snackbar, never a dialog; the permission's explanation is the one
-/// dialog, because it sends the user out of the app.
+/// is not started twice. Every outcome — and every failure, the hand-over's
+/// too (#905) — surfaces as a snackbar, never a dialog; the permission's
+/// explanation is the one dialog, because it sends the user out of the app.
 ///
 /// True once the platform took the update — the installer opened — so a
 /// banner that offered it can go; false leaves the offer standing.
 Future<bool> downloadAndApplyUpdate(
   BuildContext context,
-  UpdateAvailable update,
-) async {
+  UpdateAvailable update, {
+  UpdateSteps steps = const UpdateSteps(),
+}) async {
   const log = AppLogger(name: 'update');
   if (!updateDownload.start()) return false;
   final messenger = ScaffoldMessenger.of(context);
   log.debug('downloading ${update.asset.name}');
   final File file;
   try {
-    file = await downloadAsset(
+    file = await steps.download(
       update.asset,
       onProgress: updateDownload.report,
       isCancelled: () => updateDownload.cancelled,
@@ -116,42 +147,59 @@ Future<bool> downloadAndApplyUpdate(
   } finally {
     updateDownload.finish();
   }
-  if (!await canInstallPackages()) {
-    if (!context.mounted) return false;
-    log.debug('install permission missing: asking');
-    if (!await _askInstallPermission(context)) return false;
+  final bool launched;
+  try {
+    if (!await steps.canInstall()) {
+      if (!context.mounted) return false;
+      log.debug('install permission missing: asking');
+      if (!await _askInstallPermission(context, steps)) return false;
+    }
+    launched = await steps.apply(file);
+  } on Object catch (error) {
+    // Starting the installer can throw (a ProcessException on Windows: the
+    // setup file blocked, removed or refused): the offer stands, and the
+    // user is told rather than left to an uncaught async error.
+    log.warning('install failed: $error');
+    messenger.showSnackBar(_installerFailed());
+    return false;
   }
-  final launched = await applyDownloadedUpdate(file);
   log.debug('saved ${file.path} (launched=$launched)');
   messenger.showSnackBar(
-    SnackBar(
-      // An action would keep it up until it is dismissed by hand.
-      persist: false,
-      content: Text(
-        launched
-            ? AppStrings.updateInstallerStarted
-            : update.asset.name.endsWith('.apk')
-            ? AppStrings.updateInstallerFailed
-            : AppStrings.updateSavedTo(file.path),
-      ),
-      // The APK is in the app's own storage: what is left to offer is the
-      // release itself.
-      action: launched || !update.asset.name.endsWith('.apk')
-          ? null
-          : SnackBarAction(
-              label: AppStrings.updateReleasePage,
-              onPressed: () => unawaited(
-                launchUrl(_releasePage, mode: LaunchMode.externalApplication),
-              ),
-            ),
-    ),
+    launched
+        ? SnackBar(
+            persist: false,
+            content: Text(AppStrings.updateInstallerStarted),
+          )
+        : update.asset.name.endsWith('.apk')
+        ? _installerFailed()
+        : SnackBar(
+            persist: false,
+            content: Text(AppStrings.updateSavedTo(file.path)),
+          ),
   );
   return launched;
 }
 
+/// The installer did not open: the release itself is what is left to offer,
+/// since the APK is in the app's own storage.
+SnackBar _installerFailed() => SnackBar(
+  // An action would keep it up until it is dismissed by hand.
+  persist: false,
+  content: Text(AppStrings.updateInstallerFailed),
+  action: SnackBarAction(
+    label: AppStrings.updateReleasePage,
+    onPressed: () => unawaited(
+      launchUrl(_releasePage, mode: LaunchMode.externalApplication),
+    ),
+  ),
+);
+
 /// Explains Android's "Install unknown apps", opens its page, and waits
 /// for the user to come back; true once the permission is there.
-Future<bool> _askInstallPermission(BuildContext context) async {
+Future<bool> _askInstallPermission(
+  BuildContext context,
+  UpdateSteps steps,
+) async {
   final go = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
@@ -179,10 +227,10 @@ Future<bool> _askInstallPermission(BuildContext context) async {
     },
   );
   try {
-    if (!await openInstallPermission()) return false;
+    if (!await steps.openPermission()) return false;
     await back.future;
   } finally {
     listener.dispose();
   }
-  return await canInstallPackages();
+  return await steps.canInstall();
 }
