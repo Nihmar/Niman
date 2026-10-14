@@ -212,7 +212,11 @@ the grid.
 
 On Linux and Windows the note tree and its right-click menu are drawn
 for a mouse: shorter rows, a narrower slot for the folder chevron and
-the note icon, and a tighter menu. A phone or a tablet keeps the
+the note icon, and a tighter menu. Every other menu is drawn the same
+way — the ☰ menu, the note's ⋮ menu, the tabs' right-click menu, the
+editor's and the reader's context menus, the pop-ups that stand in for a
+sheet: 32 px rows, small icons and the label in body text. A phone or a
+tablet keeps the
 thumb-sized rows and the long-press sheet. The choice follows the
 platform's own density (compact on a desktop), not the window's width,
 so a tablet in landscape keeps the touch sizes. That holds for the wide

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 
 /// The app's one list of choices.
 ///
@@ -139,14 +140,27 @@ final class _ActionSheetMenuEntry<T> extends PopupMenuEntry<T> {
 final class _ActionSheetMenuEntryState<T>
     extends State<_ActionSheetMenuEntry<T>> {
   @override
-  Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      if (widget.title case final title?) ActionSheetTitle(title),
-      ...widget.items(context),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final rows = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (widget.title case final title?) ActionSheetTitle(title),
+        ...widget.items(context),
+      ],
+    );
+    // The rows are whatever the sheet holds, tiles mostly: they take the
+    // menu's compact tile, icon and label (`pointer_menu.dart`), as the
+    // popup menus' own rows do.
+    return ListTileTheme(
+      data: theme.menuListTileTheme ?? theme.listTileTheme,
+      child: IconTheme.merge(
+        data: IconThemeData(size: theme.menuIconSize),
+        child: rows,
+      ),
+    );
+  }
 }
 
 /// The heading of an action sheet: what the rows below it are for.

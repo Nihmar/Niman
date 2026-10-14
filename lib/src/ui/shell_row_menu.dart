@@ -13,8 +13,9 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/menu_row.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
-import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One entry of the tree-row menu.
@@ -142,55 +143,33 @@ Future<String?> showTreeBackgroundMenuAt(
 
 /// [groups] as a menu at [position], a divider between groups.
 ///
-/// A pointer's menu (#296) shares its metrics with the footer's own menus
-/// (`pointer_density.dart`), and its labels drop the phone's medium weight
-/// for the tree's own body text.
+/// The rows are the app's menu rows (`pointer_menu.dart`): a pointer's
+/// compact ones (#296), a phone's touch-sized ones.
 Future<String?> _showEntriesAt(
   BuildContext context, {
   required Offset position,
   required List<List<RowMenuEntry>> groups,
 }) {
   final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
-  final theme = Theme.of(context);
-  final dense = pointerDense(theme);
-  final error = TextStyle(color: theme.colorScheme.error);
+  final error = Theme.of(context).colorScheme.error;
   return showMenu<String>(
     context: context,
     position: RelativeRect.fromRect(
       position & const Size(1, 1),
       Offset.zero & overlay.size,
     ),
-    menuPadding: dense ? pointerDenseMenuPadding : null,
     items: [
       for (final (index, group) in groups.indexed) ...[
-        if (index > 0)
-          PopupMenuDivider(height: dense ? pointerDenseDividerHeight : 16),
+        if (index > 0) menuDivider(context),
         for (final entry in group)
-          PopupMenuItem(
+          menuItem<String>(
+            context,
             key: entry.key,
             value: entry.value,
-            height: dense ? pointerDenseItemHeight : kMinInteractiveDimension,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  entry.icon,
-                  size: dense ? 18 : 20,
-                  color: entry.destructive ? theme.colorScheme.error : null,
-                ),
-                SizedBox(width: dense ? 10 : 12),
-                Flexible(
-                  child: Text(
-                    entry.label,
-                    overflow: TextOverflow.ellipsis,
-                    style: dense
-                        ? theme.textTheme.bodyMedium?.merge(
-                            entry.destructive ? error : null,
-                          )
-                        : (entry.destructive ? error : null),
-                  ),
-                ),
-              ],
+            child: MenuRow(
+              icon: entry.icon,
+              label: entry.label,
+              color: entry.destructive ? error : null,
             ),
           ),
       ],

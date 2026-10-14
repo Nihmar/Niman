@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
-import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/trash.dart';

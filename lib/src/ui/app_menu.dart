@@ -37,13 +37,22 @@ final class _AppMenuButtonState extends State<AppMenuButton> {
   Widget build(BuildContext context) {
     final handlers = widget.handlers();
     final keys = AppKeyMap.current.value;
+    final theme = Theme.of(context);
+    final hint = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
     Widget item(AppCommand command) {
       final binding = keys.bindingOf(command);
       final label = appCommandLabel(command);
       return MenuItemButton(
         key: Key('app-menu-${command.name}'),
         onPressed: handlers[command],
-        shortcut: binding is MenuSerializableShortcut ? binding : null,
+        // The keys as the app names them, small and quiet at the row's
+        // end: Flutter's own label for `shortcut` is set in the label's
+        // style and no theme reaches it.
+        trailingIcon: binding is SingleActivator
+            ? Text(describeActivator(binding), style: hint)
+            : null,
         child: Text(paletteAsks(command) ? '$label…' : label),
       );
     }

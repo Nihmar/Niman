@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The compact filter row over the todo list.
@@ -202,7 +203,8 @@ final class _DueRangeMenu {
       position: position,
       items: [
         for (final r in TodoDueRange.values)
-          PopupMenuItem<TodoDueRange>(
+          menuItem<TodoDueRange>(
+            context,
             key: Key('todo-due-${r.name}'),
             value: r,
             child: Row(

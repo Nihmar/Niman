@@ -31,6 +31,7 @@ import 'package:niman/src/frontmatter/typed_fields.dart';
 import 'package:niman/src/ui/frontmatter_field_dialog.dart';
 import 'package:niman/src/ui/frontmatter_inline.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// How much of the frontmatter panel is showing (#157).
@@ -364,7 +365,8 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
               onSelected: (type) => _retype(field, type),
               itemBuilder: (context) => [
                 for (final type in FrontmatterFieldType.values)
-                  PopupMenuItem(
+                  menuItem(
+                    context,
                     key: Key('frontmatter-retype-${type.name}'),
                     value: type,
                     child: Text(_typeLabel(type)),

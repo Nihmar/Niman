@@ -17,6 +17,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:niman/src/editor/selection_buttons_menu.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 
 /// Where a selection of the read view is: `line`, the first line of the
 /// block it starts in; `start`, its first character in that block's text;
@@ -164,13 +166,26 @@ final class ReadSelectionArea extends StatelessWidget {
             },
           ),
       ];
+      final buttons = [
+        ...items.take(1),
+        ...region.contextMenuButtonItems,
+        ...items.skip(1),
+      ];
+      // A pointer's menu is the app's compact one; Flutter's desktop
+      // toolbar sets its own button size and cannot be themed.
+      if (pointerDense(Theme.of(context))) {
+        final overlay = Overlay.of(context).context.findRenderObject();
+        final at = region.contextMenuAnchors.primaryAnchor;
+        return SelectionButtonsMenu(
+          anchor: overlay is RenderBox && overlay.hasSize
+              ? overlay.globalToLocal(at)
+              : at,
+          items: buttons,
+        );
+      }
       return AdaptiveTextSelectionToolbar.buttonItems(
         anchors: region.contextMenuAnchors,
-        buttonItems: [
-          ...items.take(1),
-          ...region.contextMenuButtonItems,
-          ...items.skip(1),
-        ],
+        buttonItems: buttons,
       );
     },
     child: child,

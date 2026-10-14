@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_drag.dart';
 
@@ -218,7 +219,8 @@ final class FolderCrumbs extends StatelessWidget {
       onSelected: onOpen,
       itemBuilder: (context) => [
         for (final crumb in folded)
-          PopupMenuItem(
+          menuItem(
+            context,
             key: Key('crumb-${crumb.path}'),
             value: crumb.path,
             child: Text(crumb.label),

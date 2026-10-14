@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What the known-library list needs to draw itself: the entries, and
@@ -206,7 +207,7 @@ final class _KnownLibraryTile extends StatelessWidget {
         icon: const Icon(Icons.more_vert_outlined),
         enabled: enabled,
         onSelected: _run,
-        itemBuilder: (context) => _menuEntries(),
+        itemBuilder: _menuEntries,
       ),
     );
     return GestureDetector(
@@ -229,7 +230,7 @@ final class _KnownLibraryTile extends StatelessWidget {
         Rect.fromPoints(globalPosition, globalPosition),
         Offset.zero & overlay.size,
       ),
-      items: _menuEntries(),
+      items: _menuEntries(context),
     );
     if (action == null) return;
     await _run(action);
@@ -243,8 +244,9 @@ final class _KnownLibraryTile extends StatelessWidget {
   }
 
   /// The row's actions, shared by both ways in.
-  List<PopupMenuEntry<_RowAction>> _menuEntries() => [
-    PopupMenuItem<_RowAction>(
+  List<PopupMenuEntry<_RowAction>> _menuEntries(BuildContext context) => [
+    menuItem<_RowAction>(
+      context,
       key: Key('forget-library-action-${entry.path}'),
       value: _RowAction.forget,
       child: Text(AppStrings.libraryForget),

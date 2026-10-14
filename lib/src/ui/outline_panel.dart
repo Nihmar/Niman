@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The heading outline (T-M2-07): the note's headings, indented by level;
@@ -60,7 +61,10 @@ final class _OutlineRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: theme.menuRowPadding,
+        ),
         child: Row(
           children: [
             SizedBox(width: 8 + (entry.level - 1) * 14.0),

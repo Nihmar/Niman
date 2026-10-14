@@ -9,6 +9,8 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/ui/menu_row.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
@@ -102,32 +104,38 @@ final class ThemeRow extends StatelessWidget {
             itemBuilder: (context) => [
               if (_mine) ...[
                 _item(
+                  context,
                   ThemeRowAction.edit,
                   Icons.palette_outlined,
                   AppStrings.themeEdit,
                 ),
                 _item(
+                  context,
                   ThemeRowAction.duplicate,
                   Icons.copy_all_outlined,
                   AppStrings.themeDuplicate,
                 ),
                 _item(
+                  context,
                   ThemeRowAction.rename,
                   Icons.edit_outlined,
                   AppStrings.actionRename,
                 ),
                 _item(
+                  context,
                   ThemeRowAction.export,
                   Icons.file_upload_outlined,
                   AppStrings.themeExport,
                 ),
                 _item(
+                  context,
                   ThemeRowAction.delete,
                   Icons.delete_outline,
                   AppStrings.actionDelete,
                 ),
               ] else
                 _item(
+                  context,
                   ThemeRowAction.duplicate,
                   Icons.copy_all_outlined,
                   AppStrings.themeDuplicate,
@@ -140,20 +148,16 @@ final class ThemeRow extends StatelessWidget {
   }
 
   PopupMenuItem<ThemeRowAction> _item(
+    BuildContext context,
     ThemeRowAction action,
     IconData icon,
     String label,
   ) {
-    return PopupMenuItem(
+    return menuItem(
+      context,
       key: Key('theme-menu-${action.name}'),
       value: action,
-      child: Row(
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 12),
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-        ],
-      ),
+      child: MenuRow(icon: icon, label: label),
     );
   }
 }

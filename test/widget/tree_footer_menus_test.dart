@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -24,8 +24,10 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp(
-        // Pointer-dense, as a desktop's theme is.
-        theme: ThemeData(visualDensity: VisualDensity.compact),
+        // Pointer-dense, as a desktop's theme is, menus included.
+        theme: pointerMenuTheme(
+          ThemeData(visualDensity: VisualDensity.compact),
+        ),
         home: Scaffold(
           body: Align(
             alignment: Alignment.bottomLeft,

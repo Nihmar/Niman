@@ -30,6 +30,12 @@
     it instead of dropping it, or put it on the side the row grows
     from, so nothing already on screen slides under a thumb that is
     already on it.
+  - A pointer's menus are compact by default (`lib/src/ui/pointer_menu.dart`):
+    `PointerMenuScope` puts `pointerMenuTheme` into the app's theme (popup
+    and `MenuAnchor` menus follow it), and what a theme cannot say is
+    `menuItem()`, `menuDivider()` and `MenuRow`. Never build a raw
+    `PopupMenuItem` or `PopupMenuDivider` (`test/unit/menu_sources_test.dart`
+    fails on one) and never copy the numbers.
 - **Portability:** new tests must be portable — `p.join` for paths
   (never literal `/`), no `chmod`.
 - **Output discipline:** never dump large output into context. Redirect

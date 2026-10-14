@@ -26,6 +26,7 @@ import 'package:niman/src/ui/home/home_tile_frame.dart';
 import 'package:niman/src/ui/home/home_tile_inspector.dart';
 import 'package:niman/src/ui/home/home_tile_settings.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The grid in edit mode, with the add panel at its side.
@@ -91,14 +92,20 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
       ),
       items: [
         if (hasTileSettings(tile))
-          PopupMenuItem(
+          menuItem(
+            context,
             key: Key('home-menu-settings-${tile.id}'),
             value: 'settings',
             child: Text(AppStrings.homeTileSettings),
           ),
         for (final move in HomeTileMove.values)
-          PopupMenuItem(value: move, child: Text(_EditableTile._label(move))),
-        PopupMenuItem(
+          menuItem(
+            context,
+            value: move,
+            child: Text(_EditableTile._label(move)),
+          ),
+        menuItem(
+          context,
           key: Key('home-menu-hide-${tile.id}'),
           value: 'hide',
           child: Text(AppStrings.homeTileHide),
@@ -383,7 +390,7 @@ final class _EditableTile extends StatelessWidget {
                   onSelected: onMove,
                   itemBuilder: (context) => [
                     for (final move in HomeTileMove.values)
-                      PopupMenuItem(value: move, child: Text(_label(move))),
+                      menuItem(context, value: move, child: Text(_label(move))),
                   ],
                 ),
                 IconButton(

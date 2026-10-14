@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What a row's menu picked.
@@ -50,7 +51,7 @@ List<Widget> todoRowMenuItems({
   Widget item(TodoMenuPick pick, String label, {IconData? icon}) =>
       MenuItemButton(
         key: Key('todo-menu-${pick.name}'),
-        leadingIcon: icon == null ? null : Icon(icon, size: 20),
+        leadingIcon: icon == null ? null : Icon(icon),
         onPressed: () => onPick(pick),
         child: Text(label),
       );
@@ -70,13 +71,13 @@ List<Widget> todoRowMenuItems({
     ),
     SubmenuButton(
       key: const Key('todo-menu-due'),
-      leadingIcon: const Icon(Icons.event_outlined, size: 20),
+      leadingIcon: const Icon(Icons.event_outlined),
       menuChildren: due,
       child: Text(AppStrings.todoSetDue),
     ),
     SubmenuButton(
       key: const Key('todo-menu-priority'),
-      leadingIcon: const Icon(Icons.flag_outlined, size: 20),
+      leadingIcon: const Icon(Icons.flag_outlined),
       menuChildren: [
         item(TodoMenuPick.priorityA, '(A)'),
         item(TodoMenuPick.priorityB, '(B)'),
@@ -85,7 +86,7 @@ List<Widget> todoRowMenuItems({
       ],
       child: Text(AppStrings.todoPriorityTitle),
     ),
-    const Divider(height: 9),
+    const Divider(height: pointerDenseDividerHeight),
     item(
       TodoMenuPick.delete,
       AppStrings.todoDeleteAction,

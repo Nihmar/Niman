@@ -29,7 +29,9 @@ import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/menu_row.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/reminder_health_banner.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
@@ -617,18 +619,14 @@ final class _TodoTabState extends State<TodoTab> {
     required String value,
     bool destructive = false,
   }) {
-    final scheme = Theme.of(context).colorScheme;
-    final colour = destructive ? scheme.error : null;
-    return PopupMenuItem<String>(
+    return menuItem<String>(
+      context,
       key: key,
       value: value,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 20, color: colour),
-          const SizedBox(width: 12),
-          Text(label, style: colour == null ? null : TextStyle(color: colour)),
-        ],
+      child: MenuRow(
+        icon: icon,
+        label: label,
+        color: destructive ? Theme.of(context).colorScheme.error : null,
       ),
     );
   }
