@@ -370,6 +370,100 @@ void main() {
     expect(controller.contentOf('Verbs.md'), contains('type: flashcard'));
   });
 
+  Future<void> openPlain(WidgetTester tester, String content) async {
+    setSurfaceSize(tester, const Size(1200, 900));
+    await controller.open(dir.path, create: true);
+    File(p.join(dir.path, 'Verbs.md')).writeAsStringSync(content);
+    await controller.createNote(
+      parentPath: '',
+      name: 'Verbs',
+      content: content,
+    );
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await settle(tester);
+    await tester.tap(noteRow('Verbs.md'));
+    for (var i = 0; i < 10; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await settle(tester);
+  }
+
+  testWidgets('Make flashcards writes the frontmatter and shows the deck', (
+    tester,
+  ) async {
+    const plain =
+        '# Verbs\n\n| Verb | Past | Participle |\n|---|---|---|\n'
+        '| begin | began | begun |\n| choose | chose | chosen |\n\n'
+        '- thrive :: throve\n';
+    await openPlain(tester, plain);
+    await tester.tap(find.byKey(const Key('note-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('note-menu-makeFlashcards')));
+    await settle(tester);
+
+    expect(
+      tester.widget<Text>(find.byKey(const Key('make-flashcards-found'))).data,
+      '2 table rows, 1 :: line',
+    );
+    // The answer: the participle, not the past.
+    await tester.tap(find.byKey(const Key('deck-column-answer')));
+    await settle(tester);
+    await tester.tap(find.text('Participle').last);
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('make-flashcards-deck')),
+      'Lingue/Inglese',
+    );
+    await settle(tester);
+    expect(
+      tester
+          .widget<SelectableText>(
+            find.byKey(const Key('make-flashcards-preview')),
+          )
+          .data,
+      '---\ntype: flashcard\ndeck: Lingue/Inglese\nfront: Verb\n'
+      'back: Participle\n---',
+    );
+    expect(find.text('Make 3 cards'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('make-flashcards-confirm')));
+    await settle(tester);
+
+    expect(
+      controller.contentOf('Verbs.md'),
+      '---\ntype: flashcard\ndeck: Lingue/Inglese\nfront: Verb\n'
+      'back: Participle\n---\n\n$plain',
+    );
+    for (var i = 0; i < 10; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await settle(tester);
+    expect(find.byKey(const Key('deck-name')), findsOneWidget);
+    expect(find.text('begun', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets('a note with nothing to make cards from says so', (tester) async {
+    await openPlain(tester, 'Just prose.\n');
+    await tester.tap(find.byKey(const Key('note-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('note-menu-makeFlashcards')));
+    await settle(tester);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(
+      find.text(
+        'This note has no table, :: line or highlight to make cards from.',
+      ),
+      findsOneWidget,
+    );
+    expect(controller.contentOf('Verbs.md'), 'Just prose.\n');
+  });
+
   testWidgets('New flashcards makes a deck with an empty table', (
     tester,
   ) async {

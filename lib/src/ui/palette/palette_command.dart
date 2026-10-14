@@ -58,6 +58,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.studyDeck ||
   AppCommand.deckColumns ||
   AppCommand.deckReset ||
+  AppCommand.makeFlashcards ||
   AppCommand.switchEditor ||
   AppCommand.typewriterMode ||
   AppCommand.formatNote ||

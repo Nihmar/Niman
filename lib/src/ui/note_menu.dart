@@ -56,6 +56,9 @@ enum NoteMenuAction {
   /// only exists on those two kinds.
   kindSwitch,
 
+  /// Turn a plain note into a flashcard deck (#533).
+  makeFlashcards,
+
   /// Write the note out as a file (#24).
   export,
 
@@ -105,8 +108,13 @@ final class NoteMenuButton extends StatelessWidget {
     this.presenterView = false,
     this.deck = false,
     this.studyEnabled = false,
+    this.makeFlashcards = false,
     super.key,
   });
+
+  /// Whether the note on screen is a plain note, of no `type`: its menu
+  /// offers to make it a deck (#533).
+  final bool makeFlashcards;
 
   /// Whether the note on screen is a deck shown as its cards (#533): the
   /// deck's entries lead the menu, the editor's step aside, and the note's
@@ -210,6 +218,12 @@ final class NoteMenuButton extends StatelessWidget {
               kind == NoteKindSwitch.toShoppingList
                   ? AppStrings.shoppingListName
                   : AppStrings.checklistName,
+            ),
+          if (makeFlashcards)
+            _item(
+              NoteMenuAction.makeFlashcards,
+              Icons.style_outlined,
+              '${AppStrings.makeFlashcardsTitle}…',
             ),
           if (!slides)
             _item(

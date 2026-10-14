@@ -95,6 +95,7 @@ import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_menu_flow.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_study.dart';
+import 'package:niman/src/ui/kinds/flashcards/make_flashcards.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
@@ -3265,6 +3266,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     presenterView: _wide,
     deck: _showsDeck,
     studyEnabled: ref.read(deckStudyStarterProvider) != null,
+    makeFlashcards: _plainNote,
     kindSwitch: switch (_noteKind) {
       'list' => NoteKindSwitch.toShoppingList,
       'shopping-list' => NoteKindSwitch.toChecklist,
@@ -3293,6 +3295,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         ),
         NoteMenuAction.kindSwitch => Future<void>.sync(_switchNoteKind),
         NoteMenuAction.studyDeck => _studyDeck(),
+        NoteMenuAction.makeFlashcards => _makeFlashcards(),
         NoteMenuAction.editMarkdown => Future<void>.sync(_editKindRaw),
         NoteMenuAction.deckColumns => _chooseDeckColumns(),
         NoteMenuAction.deckReset => _resetDeckReview(),
@@ -3330,6 +3333,18 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final starter = ref.read(deckStudyStarterProvider);
     if (note == null || starter == null || !_showsDeck) return;
     await starter(context, note.notePath);
+  }
+
+  /// Whether the note on screen is a plain one, text of no `type`: what
+  /// **Make flashcards** turns into a deck (#533).
+  bool get _plainNote =>
+      _shownNote != null && !_shownIsAttachment && _noteKind == null;
+
+  /// **Make flashcards** of the note on screen (#533).
+  Future<void> _makeFlashcards() async {
+    final note = _panelNote;
+    if (note == null || !_plainNote) return;
+    await makeFlashcards(context, note: note, session: widget.controller);
   }
 
   Future<void> _chooseDeckColumns() async {
@@ -4009,6 +4024,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.journalEntry => _shownJournalDay != null,
     CommandNeed.slidesNote => _noteKind == 'slides',
     CommandNeed.flashcardNote => _showsDeck,
+    CommandNeed.plainNote => _plainNote,
     CommandNeed.ocrFile =>
       _ocrFlow != null &&
           _shownIsAttachment &&
@@ -4049,6 +4065,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.studyDeck: () => unawaited(_studyDeck()),
       AppCommand.deckColumns: () => unawaited(_chooseDeckColumns()),
       AppCommand.deckReset: () => unawaited(_resetDeckReview()),
+      AppCommand.makeFlashcards: () => unawaited(_makeFlashcards()),
       AppCommand.presentSlides: () => unawaited(_presentSlides()),
       AppCommand.presenterView: () =>
           unawaited(_presentSlides(presenter: true)),

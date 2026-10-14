@@ -159,6 +159,9 @@ enum AppCommand {
   /// Forget the review of every card of the deck on screen (#533).
   deckReset,
 
+  /// Make the plain note on screen a flashcard deck (#533).
+  makeFlashcards,
+
   /// Switch the note between the source editor and the WYSIWYG.
   switchEditor,
 
@@ -408,6 +411,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.studyDeck => AppStrings.flashcardsStudyDeck,
   AppCommand.deckColumns => AppStrings.flashcardsColumnsTitle,
   AppCommand.deckReset => AppStrings.flashcardsResetAction,
+  AppCommand.makeFlashcards => AppStrings.makeFlashcardsTitle,
   AppCommand.presentSlides => AppStrings.slidesPresent,
   AppCommand.presenterView => AppStrings.slidesPresenterView,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
