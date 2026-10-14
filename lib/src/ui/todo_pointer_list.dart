@@ -57,8 +57,10 @@ final class TodoPointerList extends StatefulWidget {
 }
 
 final class _TodoPointerListState extends State<TodoPointerList> {
-  /// The line the keyboard's selection is on (#712); a delete leaves it
-  /// on the line that takes the index.
+  /// The line the keyboard's selection is on (#712). A line is an index
+  /// into the file shown, so it means nothing in the other one: the
+  /// selection goes with the view (#910), and [_leaves] keeps it on the
+  /// row that takes a removed one's place.
   int? _selectedLine;
 
   /// The line whose text is a field, or null.
@@ -80,6 +82,20 @@ final class _TodoPointerListState extends State<TodoPointerList> {
 
   /// The list's scroll position, to bring the selected row into view.
   final ScrollController _scroll = ScrollController();
+
+  @override
+  void didUpdateWidget(TodoPointerList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The other file's lines are other tasks: the selection, the edit in
+    // place, a click awaiting its double and the open menu are not theirs.
+    if (oldWidget.view != widget.view) {
+      _selectedLine = null;
+      _editingLine = null;
+      _lastClick = null;
+      _menuEntry = null;
+      _menu.close();
+    }
+  }
 
   @override
   void dispose() {
@@ -117,13 +133,13 @@ final class _TodoPointerListState extends State<TodoPointerList> {
               selected: line == _selectedLine,
               editing: line == _editingLine,
               onToggle: (checked) =>
-                  unawaited(widget.onToggle(entry, checked: checked)),
+                  unawaited(_toggle(entry, checked: checked)),
               onClick: () => _click(entry),
               onSubmitText: (text) => unawaited(_writeText(entry, text)),
               onCancelEdit: () => setState(() => _editingLine = null),
               onMenuAt: (at) => _openMenu(entry, at),
               onDueMenuAt: (at) => _openMenu(entry, at, dueOnly: true),
-              onDelete: () => unawaited(widget.onDelete(entry)),
+              onDelete: () => unawaited(_delete(entry)),
             );
           },
         ),
@@ -172,7 +188,7 @@ final class _TodoPointerListState extends State<TodoPointerList> {
         );
       case LogicalKeyboardKey.space
           when selected != null && event is KeyDownEvent:
-        unawaited(widget.onToggle(selected, checked: !selected.task.completed));
+        unawaited(_toggle(selected, checked: !selected.task.completed));
       case LogicalKeyboardKey.enter ||
               LogicalKeyboardKey.numpadEnter ||
               LogicalKeyboardKey.f2
@@ -180,7 +196,7 @@ final class _TodoPointerListState extends State<TodoPointerList> {
         setState(() => _editingLine = selected.lineIndex);
       case LogicalKeyboardKey.delete
           when selected != null && event is KeyDownEvent:
-        unawaited(widget.onDelete(selected));
+        unawaited(_delete(selected));
       default:
         return KeyEventResult.ignored;
     }
@@ -252,6 +268,46 @@ final class _TodoPointerListState extends State<TodoPointerList> {
     return found;
   }
 
+  /// Checks or unchecks [entry]: its line moves to the other file.
+  Future<void> _toggle(TodoEntry entry, {required bool checked}) {
+    _leaves(entry);
+    return widget.onToggle(entry, checked: checked);
+  }
+
+  /// Deletes [entry]'s line.
+  Future<void> _delete(TodoEntry entry) {
+    _leaves(entry);
+    return widget.onDelete(entry);
+  }
+
+  /// Follows the lines of the file shown when [entry]'s leaves it (deleted,
+  /// or moved to the other file): each below it takes the index above, so
+  /// the selection stays on the same task — or, if it was [entry], on the
+  /// row that takes its place, the one before at the end (#910). The rows
+  /// are in display order, which the sort makes unlike the line order: a
+  /// neighbour may sit above [entry] in the file as well as below.
+  void _leaves(TodoEntry entry) {
+    final rows = widget.entries;
+    final at = rows.indexOf(entry);
+    final gone = entry.lineIndex;
+    int? follow(int? line) => line == null || line < gone ? line : line - 1;
+    setState(() {
+      if (_selectedLine == gone) {
+        _selectedLine = at < 0
+            ? null
+            : at + 1 < rows.length
+            ? follow(rows[at + 1].lineIndex)
+            : at > 0
+            ? follow(rows[at - 1].lineIndex)
+            : null;
+      } else {
+        _selectedLine = follow(_selectedLine);
+      }
+      _editingLine = _editingLine == gone ? null : follow(_editingLine);
+      _lastClick = null;
+    });
+  }
+
   /// Writes the text edited in place into [entry]'s line.
   Future<void> _writeText(TodoEntry entry, String text) async {
     setState(() => _editingLine = null);
@@ -280,7 +336,7 @@ final class _TodoPointerListState extends State<TodoPointerList> {
       case TodoMenuPick.edit:
         await widget.onEdit(entry);
       case TodoMenuPick.delete:
-        await widget.onDelete(entry);
+        await _delete(entry);
       case TodoMenuPick.dueToday:
         await widget.onRewrite(entry, todoLineWithDue(task, today));
       case TodoMenuPick.dueTomorrow:
