@@ -1,5 +1,6 @@
 /// Text zoomed by a pinch (#538): two fingers spread or brought together
-/// over a note or a book, or a trackpad's pinch on the desktop. Which size
+/// over a note or a book, or a trackpad's pinch on the desktop — and by
+/// `Ctrl`+wheel there (#712), a step per notch. Which size
 /// it is, and where it is kept, is the caller's: the note text size over a
 /// note, the books' over a book.
 ///
@@ -10,7 +11,8 @@
 /// together, a pinch changes how far apart they are.
 library;
 
-import 'package:flutter/gestures.dart' show PointerDeviceKind;
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart' show HardwareKeyboard;
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 
@@ -114,8 +116,43 @@ final class _TextZoomPinchState extends State<TextZoomPinch> {
     _shown = null;
   }
 
+  /// `Ctrl`+wheel: a step up or down, kept at once.
+  ///
+  /// Claimed from the pointer-signal resolver, which gives a wheel to the
+  /// first that asks: the listener sits over the child so it asks before
+  /// the note's own scroll does, and the note does not move under the
+  /// zoom.
+  void _signal(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent ||
+        !widget.enabled ||
+        event.scrollDelta.dy == 0 ||
+        !HardwareKeyboard.instance.isControlPressed) {
+      return;
+    }
+    GestureBinding.instance.pointerSignalResolver.register(event, (event) {
+      final up = (event as PointerScrollEvent).scrollDelta.dy < 0;
+      final next = TextZoomPinch.snap(
+        widget.scale() + (up ? TextZoomPinch.step : -TextZoomPinch.step),
+      );
+      widget.onZoom(next, done: true);
+    });
+  }
+
   @override
-  Widget build(BuildContext context) => Listener(
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.passthrough,
+    children: [
+      _pinch(),
+      Positioned.fill(
+        child: Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerSignal: _signal,
+        ),
+      ),
+    ],
+  );
+
+  Widget _pinch() => Listener(
     behavior: HitTestBehavior.translucent,
     onPointerDown: _down,
     onPointerMove: _move,

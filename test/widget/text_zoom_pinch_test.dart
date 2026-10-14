@@ -3,6 +3,7 @@
 // palette's gesture — zoom nothing.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
 
@@ -46,6 +47,28 @@ void main() {
     await two.up();
     await tester.pump();
   }
+
+  testWidgets('Ctrl+wheel steps the size and does not scroll; a bare wheel '
+      'scrolls (#712)', (tester) async {
+    await pump(tester);
+    final list = tester.state<ScrollableState>(find.byType(Scrollable));
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    const at = Offset(200, 300);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendEventToBinding(pointer.hover(at));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, -20)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, -20)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 20)));
+    await tester.pump();
+    expect(told, [(1.05, true), (1.1, true), (1.05, true)]);
+    expect(list.position.pixels, 0);
+
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 40)));
+    await tester.pump();
+    expect(told, hasLength(3));
+    expect(list.position.pixels, greaterThan(0));
+  });
 
   testWidgets('spread, the text grows; pinched, it shrinks; kept at the end', (
     tester,

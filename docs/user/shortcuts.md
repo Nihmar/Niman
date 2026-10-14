@@ -49,8 +49,9 @@ shortcuts lists them and lets you change them:
   Appearance), in the editor and the preview alike; on a phone, pinch the
   note with two fingers — spread them to zoom in, bring them together to
   zoom out — or use *Zoom in*, *Zoom out* and *Reset zoom* in the command
-  palette; a laptop's trackpad pinches the same way. With a book on screen
-  the same keys, pinch and commands zoom the book's text instead, the
+  palette; a laptop's trackpad pinches the same way, and `Ctrl`+mouse wheel
+  over the note steps it on a desktop. With a book on screen
+  the same keys, pinch, wheel and commands zoom the book's text instead, the
   books' own text size (see
   [organization](organization.md#files-that-are-not-notes))
 - `Ctrl/⌘+1…6` — Files, Todo, Search, Quick note, Settings and
