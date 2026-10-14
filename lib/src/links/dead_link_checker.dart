@@ -53,6 +53,6 @@ final class DeadLinkChecker implements DeadLinkSource {
     if (!query.markdown) return true;
     return !LinkPaths.hasScheme(target) &&
         !target.startsWith('#') &&
-        LinkPaths.markdownPath(target) != null;
+        LinkPaths.markdownTarget(target) != null;
   }
 }

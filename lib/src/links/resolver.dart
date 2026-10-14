@@ -113,7 +113,10 @@ final class LinkResolver implements LinkSource {
 
   @override
   Future<ResolveResult> resolveWiki(String target, {String? from}) {
-    return _resolvePath(target, from: from, beside: false);
+    return _resolvePath(
+      target,
+      LinkPaths.read(target, from: from, beside: false),
+    );
   }
 
   @override
@@ -124,26 +127,38 @@ final class LinkResolver implements LinkSource {
     if (h.startsWith('#')) {
       return Future.value(LocalAnchor(heading: h.substring(1)));
     }
-    final read = LinkPaths.markdownPath(h);
+    final read = LinkPaths.markdownTarget(h);
     // A file: a note, or one that is not (a PDF, a book, a picture).
     if (read == null) return Future.value(UnresolvedNote(target: h));
-    return _resolvePath(read, from: from, beside: true);
+    return _resolvePath(
+      _written(read),
+      LinkPaths.readPath(
+        read.path,
+        fragment: read.fragment,
+        from: from,
+        beside: true,
+      ),
+    );
   }
+
+  /// A Markdown target as one text, for a result to name what was asked:
+  /// the path, then `#` and the fragment. Only for naming — it is never
+  /// read back, the two parts are kept apart to resolve.
+  static String _written(MarkdownTarget target) => target.fragment == null
+      ? target.path
+      : '${target.path}#${target.fragment}';
 
   /// Resolves a path-style target: exact stem first (indexed, O(log n)),
   /// then the same-stem candidates filtered by the target's own path
   /// prefix — the "shortest unique path prefix" rule — so `[[a/note]]`
   /// beats `[[note]]` when both `a/note.md` and `b/note.md` exist.
   ///
-  /// A `#fragment` (markdown hrefs) is split off first and rides along on
+  /// [raw] is the target as asked, to name it in an unresolved result; [spec]
+  /// is it read ([LinkPaths.read]), null when it names nothing. A
+  /// `#fragment` (markdown hrefs) is already split off and rides along on
   /// the result.
-  Future<ResolveResult> _resolvePath(
-    String raw, {
-    required String? from,
-    required bool beside,
-  }) async {
+  Future<ResolveResult> _resolvePath(String raw, LinkSpec? spec) async {
     if (LinkPaths.clean(raw).isEmpty) return UnresolvedNote(target: raw);
-    final spec = LinkPaths.read(raw, from: from, beside: beside);
     if (spec == null) return UnresolvedNote(target: raw);
     final t = spec.t;
     if (t.isEmpty) {
@@ -193,19 +208,24 @@ final class LinkResolver implements LinkSource {
     for (final query in queries) {
       if (out.containsKey(query)) continue;
       final written = query.target;
-      // A Markdown href is read as opening it reads it: percent-decoded.
-      final raw = query.markdown
-          ? LinkPaths.markdownPath(written.trim())
-          : written;
-      if (raw == null || LinkPaths.clean(raw).isEmpty) {
-        out[query] = UnresolvedNote(target: written);
-        continue;
+      // A Markdown href is read as opening it reads it: percent-decoded,
+      // its path and its fragment kept apart.
+      final LinkSpec? spec;
+      if (query.markdown) {
+        final read = LinkPaths.markdownTarget(written.trim());
+        spec = read == null || LinkPaths.clean(read.path).isEmpty
+            ? null
+            : LinkPaths.readPath(
+                read.path,
+                fragment: read.fragment,
+                from: query.from,
+                beside: true,
+              );
+      } else {
+        spec = LinkPaths.clean(written).isEmpty
+            ? null
+            : LinkPaths.read(written, from: query.from, beside: false);
       }
-      final spec = LinkPaths.read(
-        raw,
-        from: query.from,
-        beside: query.markdown,
-      );
       if (spec == null) {
         out[query] = UnresolvedNote(target: written);
         continue;

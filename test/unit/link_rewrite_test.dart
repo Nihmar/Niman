@@ -210,6 +210,66 @@ void main() {
     );
   });
 
+  test('a Markdown link with a title follows its note and keeps the title '
+      '(#917)', () {
+    final moves = LinkMoves({'docs/a.md': 'docs/b.md'});
+    for (final title in ['"A title"', "'A title'", '(A title)']) {
+      final out = rewriteMovedLinks(
+        '[x](docs/a.md $title) and ![p](docs/a.md $title) and '
+        '[y](<docs/a.md> $title)',
+        from: 'n.md',
+        moves: moves,
+      );
+      expect(
+        out,
+        '[x](docs/b.md $title) and ![p](docs/b.md $title) and '
+        '[y](<docs/b.md> $title)',
+        reason: title,
+      );
+    }
+  });
+
+  test('a titled link and an untitled one move together (#917)', () {
+    final out = rewriteMovedLinks(
+      '[x](docs/a.md "Title") [y](docs/a.md)',
+      from: 'n.md',
+      moves: LinkMoves({'docs/a.md': 'docs/b.md'}),
+    );
+    expect(out, '[x](docs/b.md "Title") [y](docs/b.md)');
+  });
+
+  test(r'a renamed note follows in a table row and keeps the \| (#920)', () {
+    final out = rewriteMovedLinks(
+      r'| [[Old\|the doc]] | [[Docs/Old#H\|x]] | [[Old|plain]] |',
+      from: 'root.md',
+      moves: LinkMoves({'Docs/Old.md': 'Docs/New.md'}),
+      renamedFrom: 'Old.md',
+      renamedTo: 'New.md',
+    );
+    expect(out, r'| [[New\|the doc]] | [[Docs/New#H\|x]] | [[New|plain]] |');
+  });
+
+  test('a link known to name one moved file is not carried to another of '
+      'the same name (#919)', () {
+    final moves = LinkMoves({'a/b.md': 'a/c.md', 'z/b.md': 'z/c.md'});
+    expect(moves.find('b')?.path, 'a/c.md', reason: 'by name, the first');
+    expect(moves.find('b', only: 'z/b.md')?.path, 'z/c.md');
+    expect(moves.find('z/b', only: 'Z/B.md')?.path, 'z/c.md');
+    expect(moves.find('z/b', only: 'a/b.md'), isNull);
+    expect(moves.find('a/b.md', tail: false, only: 'z/b.md'), isNull);
+  });
+
+  test('a link is asked about only when it ends with a moved name (#919)', () {
+    final moves = LinkMoves({'Docs/Old note.md': 'Docs/New.md'});
+    expect(moves.mayName('Old note', markdown: false), isTrue);
+    expect(moves.mayName('Docs/Old note.md', markdown: false), isTrue);
+    expect(moves.mayName('Docs/Old%20note.md#H', markdown: true), isTrue);
+    expect(moves.mayName(r'..\Old note.md', markdown: true), isTrue);
+    expect(moves.mayName('Elsewhere', markdown: false), isFalse);
+    expect(moves.mayName('Old note/Other.md', markdown: true), isFalse);
+    expect(moves.mayName('no-extension', markdown: true), isFalse);
+  });
+
   test('an embed that did not move is left exactly as written', () {
     const source = '![[Elsewhere/pic.png]] and ![alt](Elsewhere/pic.png)';
     final out = rewriteMovedLinks(

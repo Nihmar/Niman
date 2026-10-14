@@ -84,6 +84,30 @@ void main() {
       expect(ref.alias, 'b|c');
     });
 
+    test('an escaped pipe separates the alias, and is not in the target '
+        '(#920)', () {
+      final ref = parseWikiRef(r'Note\|Alias');
+      expect(ref.target, 'Note');
+      expect(ref.alias, 'Alias');
+      expect(ref.escapedPipe, isTrue);
+      final heading = parseWikiRef(r'Note#Head\|Alias');
+      expect(heading.target, 'Note');
+      expect(heading.heading, 'Head');
+      expect(heading.alias, 'Alias');
+      expect(parseWikiRef('Note|Alias').escapedPipe, isFalse);
+      // Only a backslash right before the pipe: a path's own stays.
+      expect(parseWikiRef(r'a\note|x').target, r'a\note');
+      expect(wikiDisplayText(r'Note\|Alias'), 'Alias');
+      expect(wikiDisplayText(r'Note\|'), 'Note');
+    });
+
+    test('a wikilink with an escaped pipe in a table row links to its note '
+        '(#920)', () {
+      final link = parseLinks(r'| [[Note\|Alias]] | b |').single as WikiLink;
+      expect(link.ref.target, 'Note');
+      expect(link.ref.alias, 'Alias');
+    });
+
     test('unicode target and heading', () {
       final ref = parseWikiRef('日本語#見出し|表示');
       expect(ref.target, '日本語');
@@ -269,6 +293,26 @@ void main() {
       final link = _mdLink('[](href)');
       expect(link.text, '');
       expect(link.href, 'href');
+    });
+
+    test('a title is not part of the href, whatever its quoting (#917)', () {
+      for (final title in ['"A title"', "'A title'", '(A title)']) {
+        final link = _mdLink('[x](docs/a.md $title)');
+        expect(link.href, 'docs/a.md', reason: title);
+        expect(link.title, title, reason: title);
+        expect(link.angled, isFalse);
+      }
+      final angled = _mdLink('[x](<docs/a b.md> "T")');
+      expect(angled.href, 'docs/a b.md');
+      expect(angled.angled, isTrue);
+      expect(angled.title, '"T"');
+      expect(_mdLink('[x](a.md)').title, isNull);
+    });
+
+    test('an image keeps its title apart from its href (#917)', () {
+      final image = parseLinks('![p](pic.png "T")', includeEmbeds: true).single;
+      expect((image as MarkdownLink).href, 'pic.png');
+      expect(image.title, '"T"');
     });
 
     test('a bare [text] without parentheses is not a link', () {

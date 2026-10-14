@@ -19,18 +19,27 @@ import 'package:path/path.dart' as p;
 /// written in. An empty `t` is the note itself (`#heading`).
 typedef LinkSpec = ({String t, String? heading, bool exact, String? near});
 
+/// A Markdown href read: the file it names, percent-decoded, and the
+/// `#fragment` after it as written (without the `#`), null when absent.
+///
+/// Kept apart, never joined in one string: a decoded `%23` is a `#` of the
+/// file's name, and a string that was split again would cut inside it.
+typedef MarkdownTarget = ({String path, String? fragment});
+
 /// The link-path rules, in one place.
 abstract final class LinkPaths {
-  /// The href [h] (trimmed, no scheme, not an anchor) as a path to resolve:
-  /// its path percent-decoded, as Obsidian writes a Markdown link
-  /// (`My%20Note.md`), its fragment left alone, a book's place (#282)
-  /// decoding its own parts. Null when it names no file (no extension).
-  /// Opening a link and indexing it read it through this one function.
-  static String? markdownPath(String h) {
+  /// The href [h] (trimmed, no scheme, not an anchor) as a target to
+  /// resolve: split at its first `#` as written, then its path percent-
+  /// decoded, as Obsidian writes a Markdown link (`My%20Note.md`, and
+  /// `C%23%20tips.md` for `C# tips.md`), its fragment left alone, a book's
+  /// place (#282) decoding its own parts. Null when it names no file (no
+  /// extension). Opening a link and indexing it read it through this one
+  /// function.
+  static MarkdownTarget? markdownTarget(String h) {
     final hash = h.indexOf('#');
     final path = percentDecoded(hash == -1 ? h : h.substring(0, hash));
     if (p.url.extension(path).isEmpty) return null;
-    return hash == -1 ? path : path + h.substring(hash);
+    return (path: path, fragment: hash == -1 ? null : h.substring(hash + 1));
   }
 
   /// Whether the note at [path] is one a target naming [target] — already
@@ -120,13 +129,29 @@ abstract final class LinkPaths {
   static LinkSpec? read(String raw, {required bool beside, String? from}) {
     final kept = clean(raw);
     final hash = kept.indexOf('#');
-    var target = (hash == -1 ? kept : kept.substring(0, hash)).toLowerCase();
+    return readPath(
+      hash == -1 ? kept : kept.substring(0, hash),
+      fragment: hash == -1 ? null : kept.substring(hash + 1),
+      beside: beside,
+      from: from,
+    );
+  }
+
+  /// [path] and [fragment], already apart, read into what they name
+  /// ([LinkSpec]): [read] without the split at a `#`, for a path whose
+  /// name may hold one (a Markdown href's `%23`, [markdownTarget]). An empty
+  /// [fragment] is none.
+  static LinkSpec? readPath(
+    String path, {
+    required bool beside,
+    String? fragment,
+    String? from,
+  }) {
+    var target = clean(path).toLowerCase();
     if (target.endsWith('.md')) target = target.substring(0, target.length - 3);
-    final fragment = hash == -1 || hash == kept.length - 1
-        ? null
-        : kept.substring(hash + 1);
+    final heading = fragment == null || fragment.isEmpty ? null : fragment;
     if (target.isEmpty) {
-      return (t: '', heading: fragment, exact: false, near: null);
+      return (t: '', heading: heading, exact: false, near: null);
     }
     final segments = target.split('/');
     if (!target.startsWith('/') &&
@@ -136,14 +161,14 @@ abstract final class LinkPaths {
       final folder = beside ? folderOf(from) : null;
       return (
         t: target,
-        heading: fragment,
+        heading: heading,
         exact: false,
         near: folder == null ? null : [...folder, target].join('/'),
       );
     }
     final walked = walk(segments, from, rooted: target.startsWith('/'));
     if (walked == null) return null;
-    return (t: walked, heading: fragment, exact: true, near: null);
+    return (t: walked, heading: heading, exact: true, near: null);
   }
 
   /// The folder segments of the note at library-relative [from], lowercased

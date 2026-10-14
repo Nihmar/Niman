@@ -54,6 +54,7 @@ final class MarkdownLink extends ParsedLink {
     required this.href,
     this.embed = false,
     this.angled = false,
+    this.title,
   });
 
   /// The link text between `[` and `]` (trimmed), the alt text for an image.
@@ -70,6 +71,11 @@ final class MarkdownLink extends ParsedLink {
   /// Whether the href was written between angle brackets, `(<a b.md>)`:
   /// [href] is without them, and a rewrite puts them back.
   final bool angled;
+
+  /// The title written after the destination, delimiters included
+  /// (`"Title"`, `'Title'` or `(Title)`), or null when there is none. It is
+  /// not part of [href]; a rewrite writes it back as it was.
+  final String? title;
 }
 
 /// The inside of `[[…]]`, parsed into target / fragment / alias.
@@ -81,11 +87,16 @@ final class MarkdownLink extends ParsedLink {
 /// both.
 final class WikiRef {
   /// Creates a wiki ref: [target] and optional [heading] / [block] / [alias].
-  const new({required this.target, this.heading, this.block, this.alias})
-    : assert(
-        heading == null || block == null,
-        'a fragment is a heading or a block, never both',
-      );
+  const new({
+    required this.target,
+    this.heading,
+    this.block,
+    this.alias,
+    this.escapedPipe = false,
+  }) : assert(
+         heading == null || block == null,
+         'a fragment is a heading or a block, never both',
+       );
 
   /// The note reference before any `#`/`|` (trimmed). Empty for `[[#heading]]`
   /// and `[[|alias]]` — "the current note".
@@ -104,6 +115,10 @@ final class WikiRef {
 
   /// The display text after `|` (trimmed), or null when absent or empty.
   final String? alias;
+
+  /// Whether the alias was separated by an escaped pipe, `[[Note\|Alias]]`,
+  /// as a table cell needs it; a rewrite writes it back that way.
+  final bool escapedPipe;
 
   /// The heading path as its levels, outermost first: `A#B` is `[A, B]`.
   /// Empty for a ref with no heading.
@@ -203,13 +218,14 @@ MarkdownLink _parseMarkdown(String src, int start, int end, int absStart) {
   // closes the href.
   final close = src.indexOf(']', start);
   final text = close == -1 ? '' : src.substring(start + 1, close).trim();
-  final (href, angled) = _destination(src.substring(close + 2, end - 1));
+  final (href, angled, title) = _destination(src.substring(close + 2, end - 1));
   return MarkdownLink(
     start: absStart,
     end: absStart + (end - start),
     text: text,
     href: href,
     angled: angled,
+    title: title,
   );
 }
 
@@ -218,7 +234,7 @@ MarkdownLink _parseImage(String src, int start, int end, int absStart) {
   // first `]` closes the alt text, and the last `)` closes the href.
   final close = src.indexOf(']', start);
   final text = close == -1 ? '' : src.substring(start + 2, close).trim();
-  final (href, angled) = _destination(src.substring(close + 2, end - 1));
+  final (href, angled, title) = _destination(src.substring(close + 2, end - 1));
   return MarkdownLink(
     start: absStart,
     end: absStart + (end - start),
@@ -226,23 +242,58 @@ MarkdownLink _parseImage(String src, int start, int end, int absStart) {
     href: href,
     embed: true,
     angled: angled,
+    title: title,
   );
 }
 
-/// A link's destination as written between its parentheses, without the
-/// angle brackets CommonMark allows around it: `<a b.md>` is `a b.md`.
-(String, bool) _destination(String written) {
+/// What sits between a link's parentheses, split as CommonMark splits it:
+/// the destination, whether it was written between angle brackets, and the
+/// title after it, if any.
+///
+/// The destination is without the angle brackets (`<a b.md>` is `a b.md`),
+/// which allow spaces. A title is `"…"`, `'…'` or `(…)`, kept with its
+/// delimiters. What follows a destination and is no title leaves the whole
+/// text as the destination, as it was always read.
+(String, bool, String?) _destination(String written) {
   final trimmed = written.trim();
-  if (trimmed.length >= 2 && trimmed.startsWith('<') && trimmed.endsWith('>')) {
-    return (trimmed.substring(1, trimmed.length - 1), true);
+  if (trimmed.startsWith('<')) {
+    final close = trimmed.indexOf('>');
+    if (close > 0) {
+      final title = _titleOf(trimmed.substring(close + 1));
+      if (title != null || close == trimmed.length - 1) {
+        return (trimmed.substring(1, close), true, title);
+      }
+    }
+    return (trimmed, false, null);
   }
-  return (trimmed, false);
+  final space = trimmed.indexOf(RegExp(r'\s'));
+  if (space > 0) {
+    final title = _titleOf(trimmed.substring(space));
+    if (title != null) return (trimmed.substring(0, space), false, title);
+  }
+  return (trimmed, false, null);
+}
+
+/// [rest], the text after a destination, as a link title — `"…"`, `'…'` or
+/// `(…)` — or null when it is none (or empty).
+String? _titleOf(String rest) {
+  final title = rest.trim();
+  if (title.length < 2) return null;
+  final close = switch (title[0]) {
+    '"' => '"',
+    "'" => "'",
+    '(' => ')',
+    _ => null,
+  };
+  return close != null && title.endsWith(close) ? title : null;
 }
 
 /// Parses the inside of `[[…]]` (without the brackets).
 ///
-/// Split rules: the first `|` separates the display alias; the first `#`
-/// before it separates the fragment; everything before `#` is the target.
+/// Split rules: the first `|` separates the display alias — written `\|` in
+/// a table cell, where a bare one would split the cell: the backslash right
+/// before it is not part of the target; the first `#` before it separates
+/// the fragment; everything before `#` is the target.
 /// A fragment that starts with `^` and is a valid block id is a block link;
 /// any other is a heading path, whose further `#` separate the levels
 /// (`H1#H2`) and are kept as written. Parts are trimmed; an absent or empty
@@ -251,7 +302,7 @@ MarkdownLink _parseImage(String src, int start, int end, int absStart) {
 WikiRef parseWikiRef(String inner) {
   final s = inner.trim();
   final pipe = s.indexOf('|');
-  final before = pipe == -1 ? s : s.substring(0, pipe);
+  final before = pipe == -1 ? s : _beforePipe(s, pipe);
   final aliasText = pipe == -1 ? null : s.substring(pipe + 1).trim();
   final hash = before.indexOf('#');
   final target = (hash == -1 ? before : before.substring(0, hash)).trim();
@@ -263,8 +314,17 @@ WikiRef parseWikiRef(String inner) {
     heading: fragment.isEmpty || isBlock ? null : fragment,
     block: isBlock ? fragment.substring(1) : null,
     alias: aliasText == null || aliasText.isEmpty ? null : aliasText,
+    escapedPipe: pipe != -1 && _isEscapedPipe(s, pipe),
   );
 }
+
+/// Whether the `|` of [s] at [pipe] is written `\|`.
+bool _isEscapedPipe(String s, int pipe) =>
+    pipe > 0 && s.codeUnitAt(pipe - 1) == 0x5C;
+
+/// What [s] holds before its `|` at [pipe], without the `\` that escapes it.
+String _beforePipe(String s, int pipe) =>
+    s.substring(0, _isEscapedPipe(s, pipe) ? pipe - 1 : pipe);
 
 /// What a wikilink whose inside is [inner] shows: its alias, else its
 /// target without the heading, else [inner] as written.
@@ -277,7 +337,7 @@ String wikiDisplayText(String inner) {
     final alias = inner.substring(pipe + 1).trim();
     if (alias.isNotEmpty) return alias;
   }
-  final target = pipe >= 0 ? inner.substring(0, pipe) : inner;
+  final target = pipe >= 0 ? _beforePipe(inner, pipe) : inner;
   final hash = target.indexOf('#');
   final name = (hash >= 0 ? target.substring(0, hash) : target).trim();
   return name.isEmpty ? inner : name;

@@ -398,6 +398,66 @@ void main() {
       },
     );
 
+    test('only the links that named the moved note follow, not a same-named '
+        'one (#919)', () async {
+      // Two notes share the stem `b`. `a/N` cites `z/b` by its path and
+      // `b.md` beside itself, which is `a/b`; renaming `z/b` is visited
+      // through the first and must not take the second with it.
+      await ops.createFolder(parentPath: '', name: 'a');
+      await ops.createFolder(parentPath: '', name: 'z');
+      await ops.createNote(parentPath: 'a', name: 'b');
+      await ops.createNote(parentPath: 'z', name: 'b');
+      await ops.createNote(
+        parentPath: 'a',
+        name: 'N',
+        content: '[[z/b]] and [x](b.md) and [y](z/b.md)\n',
+      );
+
+      await ops.rename('z/b.md', 'c');
+
+      expect(
+        await ops.readNote('a/N.md'),
+        '[[z/c]] and [x](b.md) and [y](z/c.md)\n',
+        reason: '`b.md` named a/b.md beside the note, which did not move',
+      );
+    });
+
+    test('a bare name that was a choice between notes is not retargeted '
+        '(#919)', () async {
+      await ops.createFolder(parentPath: '', name: 'a');
+      await ops.createFolder(parentPath: '', name: 'z');
+      await ops.createNote(parentPath: 'a', name: 'b');
+      await ops.createNote(parentPath: 'z', name: 'b');
+      await ops.createNote(
+        parentPath: '',
+        name: 'N',
+        content: '[[a/b]] and [[b]]\n',
+      );
+
+      await ops.rename('a/b.md', 'c');
+
+      expect(
+        await ops.readNote('N.md'),
+        '[[a/c]] and [[b]]\n',
+        reason: '`[[b]]` named both notes, and still names the other one',
+      );
+    });
+
+    test('the links of a note that moved with its target still follow '
+        '(#919)', () async {
+      await ops.createFolder(parentPath: '', name: 'Docs');
+      await ops.createNote(parentPath: 'Docs', name: 'b');
+      await ops.createNote(
+        parentPath: 'Docs',
+        name: 'N',
+        content: '[x](b.md) and [[Docs/b]]\n',
+      );
+
+      await ops.rename('Docs', 'Books');
+
+      expect(await ops.readNote('Books/N.md'), '[x](b.md) and [[Books/b]]\n');
+    });
+
     test('renaming a folder follows in every link into its subtree', () async {
       await ops.createFolder(parentPath: '', name: 'Docs');
       await ops.createNote(parentPath: 'Docs', name: 'Note');

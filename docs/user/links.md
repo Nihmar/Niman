@@ -8,6 +8,8 @@ Forms (target, heading, alias combine freely):
 - `[[note|alias]]` — displayed as `alias`
 - `[[note#heading]]` — jumps to the heading
 - `[[note#heading|alias]]`
+- `[[note\|alias]]` — the same inside a table cell, where a bare `|` would
+  split the cell; renaming the note keeps the `\|`
 - `[[note#heading#subheading]]` — a subheading, by its path
   (see *Heading links* below)
 - `[[note#^id]]` — jumps to a block (see *Block links* below)
@@ -242,7 +244,10 @@ note is next indexed.
 Renaming or moving a note, or a folder of them, also rewrites the links
 *other* notes hold to it, so they keep finding it: a path link and a
 Markdown link follow the new path, and a link by name follows a rename (see
-[organization](organization.md) for what else follows the note). **Settings →
+[organization](organization.md) for what else follows the note). Only the
+links that pointed at what moved are rewritten: with two notes of the same
+name in different folders, a link to the other one is left as it is.
+**Settings →
 Editor → Update links after rename or move** chooses what happens:
 
 - **Automatically** (the default) rewrites every note that links to what
