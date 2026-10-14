@@ -1559,6 +1559,10 @@ final class PolishStrings extends Strings {
   @override
   String get openBeside => 'Otwórz obok';
   @override
+  String get actionOpen => 'Otwórz';
+  @override
+  String get revealInTree => 'Pokaż w drzewie';
+  @override
   String get closeAllNotes => 'Zamknij wszystkie';
   @override
   String get sidePanelTooltip => 'Pokaż lub ukryj panel boczny';

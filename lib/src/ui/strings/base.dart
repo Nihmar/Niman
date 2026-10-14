@@ -817,6 +817,8 @@ abstract base class Strings {
   String get splitDown;
   String get moveToOtherPane;
   String get openBeside;
+  String get actionOpen;
+  String get revealInTree;
   String get closeAllNotes;
   String get sidePanelTooltip;
   String get historyAllVersions;

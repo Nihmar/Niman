@@ -1546,6 +1546,10 @@ final class HungarianStrings extends Strings {
   @override
   String get openBeside => 'Megnyitás mellette';
   @override
+  String get actionOpen => 'Megnyitás';
+  @override
+  String get revealInTree => 'Megjelenítés a fában';
+  @override
   String get closeAllNotes => 'Összes bezárása';
   @override
   String get sidePanelTooltip => 'Oldalsó panel megjelenítése vagy elrejtése';

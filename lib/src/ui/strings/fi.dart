@@ -1550,6 +1550,10 @@ final class FinnishStrings extends Strings {
   @override
   String get openBeside => 'Avaa viereen';
   @override
+  String get actionOpen => 'Avaa';
+  @override
+  String get revealInTree => 'Näytä puussa';
+  @override
   String get closeAllNotes => 'Sulje kaikki';
   @override
   String get sidePanelTooltip => 'Näytä tai piilota sivupaneeli';

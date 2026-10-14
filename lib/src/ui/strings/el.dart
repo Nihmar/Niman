@@ -1586,6 +1586,10 @@ final class GreekStrings extends Strings {
   @override
   String get openBeside => 'Άνοιγμα στο πλάι';
   @override
+  String get actionOpen => 'Άνοιγμα';
+  @override
+  String get revealInTree => 'Εμφάνιση στο δέντρο';
+  @override
   String get closeAllNotes => 'Κλείσιμο όλων';
   @override
   String get sidePanelTooltip => 'Εμφάνιση ή απόκρυψη του πλαϊνού πίνακα';

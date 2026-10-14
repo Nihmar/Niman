@@ -1538,6 +1538,10 @@ final class SlovakStrings extends Strings {
   @override
   String get openBeside => 'Otvoriť vedľa';
   @override
+  String get actionOpen => 'Otvoriť';
+  @override
+  String get revealInTree => 'Zobraziť v strome';
+  @override
   String get closeAllNotes => 'Zavrieť všetky';
   @override
   String get sidePanelTooltip => 'Zobraziť alebo skryť bočný panel';

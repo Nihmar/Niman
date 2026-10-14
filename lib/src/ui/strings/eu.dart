@@ -1546,6 +1546,10 @@ final class BasqueStrings extends Strings {
   @override
   String get openBeside => 'Ireki alboan';
   @override
+  String get actionOpen => 'Ireki';
+  @override
+  String get revealInTree => 'Erakutsi zuhaitzean';
+  @override
   String get closeAllNotes => 'Itxi guztiak';
   @override
   String get sidePanelTooltip => 'Erakutsi edo ezkutatu alboko panela';

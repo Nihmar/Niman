@@ -1550,6 +1550,10 @@ final class GalicianStrings extends Strings {
   @override
   String get openBeside => 'Abrir ao lado';
   @override
+  String get actionOpen => 'Abrir';
+  @override
+  String get revealInTree => 'Amosar na árbore';
+  @override
   String get closeAllNotes => 'Pechar todas';
   @override
   String get sidePanelTooltip => 'Amosar ou agochar o panel lateral';

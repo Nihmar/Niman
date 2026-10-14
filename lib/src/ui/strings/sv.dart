@@ -1542,6 +1542,10 @@ final class SwedishStrings extends Strings {
   @override
   String get openBeside => 'Öppna vid sidan';
   @override
+  String get actionOpen => 'Öppna';
+  @override
+  String get revealInTree => 'Visa i trädet';
+  @override
   String get closeAllNotes => 'Stäng alla';
   @override
   String get sidePanelTooltip => 'Visa eller dölj sidopanelen';

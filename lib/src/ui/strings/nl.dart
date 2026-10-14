@@ -1552,6 +1552,10 @@ final class DutchStrings extends Strings {
   @override
   String get openBeside => 'Ernaast openen';
   @override
+  String get actionOpen => 'Openen';
+  @override
+  String get revealInTree => 'Tonen in de boom';
+  @override
   String get closeAllNotes => 'Alles sluiten';
   @override
   String get sidePanelTooltip => 'Zijpaneel tonen of verbergen';

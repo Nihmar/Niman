@@ -1542,6 +1542,10 @@ final class SerbianStrings extends Strings {
   @override
   String get openBeside => 'Отвори са стране';
   @override
+  String get actionOpen => 'Отвори';
+  @override
+  String get revealInTree => 'Прикажи у стаблу';
+  @override
   String get closeAllNotes => 'Затвори све';
   @override
   String get sidePanelTooltip => 'Прикажи или сакриј бочну таблу';

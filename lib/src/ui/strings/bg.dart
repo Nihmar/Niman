@@ -1551,6 +1551,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get openBeside => 'Отвори отстрани';
   @override
+  String get actionOpen => 'Отвори';
+  @override
+  String get revealInTree => 'Покажи в дървото';
+  @override
   String get closeAllNotes => 'Затвори всички';
   @override
   String get sidePanelTooltip => 'Покажи или скрий страничния панел';

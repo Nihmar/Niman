@@ -1448,6 +1448,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get openBeside => '横に開く';
   @override
+  String get actionOpen => '開く';
+  @override
+  String get revealInTree => 'ツリーで表示';
+  @override
   String get closeAllNotes => 'すべて閉じる';
   @override
   String get sidePanelTooltip => 'サイドパネルの表示・非表示';

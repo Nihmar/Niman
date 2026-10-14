@@ -1551,6 +1551,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get openBeside => 'Отвори странично';
   @override
+  String get actionOpen => 'Отвори';
+  @override
+  String get revealInTree => 'Прикажи во дрвото';
+  @override
   String get closeAllNotes => 'Затвори ги сите';
   @override
   String get sidePanelTooltip => 'Прикажи или скриј го страничниот панел';

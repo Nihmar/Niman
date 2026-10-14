@@ -1556,6 +1556,10 @@ final class ItalianStrings extends Strings {
   @override
   String get openBeside => 'Apri di lato';
   @override
+  String get actionOpen => 'Apri';
+  @override
+  String get revealInTree => 'Mostra nell’albero';
+  @override
   String get closeAllNotes => 'Chiudi tutte';
   @override
   String get sidePanelTooltip => 'Mostra o nascondi il pannello laterale';

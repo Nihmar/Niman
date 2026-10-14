@@ -1546,6 +1546,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get openBeside => 'Abrir ao lado';
   @override
+  String get actionOpen => 'Abrir';
+  @override
+  String get revealInTree => 'Mostrar na árvore';
+  @override
   String get closeAllNotes => 'Fechar todas';
   @override
   String get sidePanelTooltip => 'Mostrar ou ocultar o painel lateral';

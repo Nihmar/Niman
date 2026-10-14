@@ -1538,6 +1538,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get openBeside => 'Opna til hliðar';
   @override
+  String get actionOpen => 'Opna';
+  @override
+  String get revealInTree => 'Sýna í trénu';
+  @override
   String get closeAllNotes => 'Loka öllu';
   @override
   String get sidePanelTooltip => 'Sýna eða fela hliðarspjaldið';

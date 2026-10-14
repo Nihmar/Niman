@@ -1513,6 +1513,10 @@ final class HindiStrings extends Strings {
   @override
   String get openBeside => 'बगल में खोलें';
   @override
+  String get actionOpen => 'खोलें';
+  @override
+  String get revealInTree => 'ट्री में दिखाएँ';
+  @override
   String get closeAllNotes => 'सभी बंद करें';
   @override
   String get sidePanelTooltip => 'साइड पैनल दिखाएँ या छिपाएँ';

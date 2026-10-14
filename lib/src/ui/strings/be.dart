@@ -1541,6 +1541,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get openBeside => 'Адкрыць збоку';
   @override
+  String get actionOpen => 'Адкрыць';
+  @override
+  String get revealInTree => 'Паказаць у дрэве';
+  @override
   String get closeAllNotes => 'Закрыць усе';
   @override
   String get sidePanelTooltip => 'Паказаць або схаваць бакавую панэль';

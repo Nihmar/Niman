@@ -1575,6 +1575,10 @@ final class FrenchStrings extends Strings {
   @override
   String get openBeside => 'Ouvrir à côté';
   @override
+  String get actionOpen => 'Ouvrir';
+  @override
+  String get revealInTree => 'Afficher dans l’arborescence';
+  @override
   String get closeAllNotes => 'Tout fermer';
   @override
   String get sidePanelTooltip => 'Afficher ou masquer le panneau latéral';

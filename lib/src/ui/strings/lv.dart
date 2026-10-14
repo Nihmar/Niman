@@ -1533,6 +1533,10 @@ final class LatvianStrings extends Strings {
   @override
   String get openBeside => 'Atvērt blakus';
   @override
+  String get actionOpen => 'Atvērt';
+  @override
+  String get revealInTree => 'Rādīt kokā';
+  @override
   String get closeAllNotes => 'Aizvērt visas';
   @override
   String get sidePanelTooltip => 'Rādīt vai slēpt sānu paneli';

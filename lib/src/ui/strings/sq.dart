@@ -1553,6 +1553,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get openBeside => 'Hape anash';
   @override
+  String get actionOpen => 'Hap';
+  @override
+  String get revealInTree => 'Shfaq në pemë';
+  @override
   String get closeAllNotes => 'Mbyll të gjitha';
   @override
   String get sidePanelTooltip => 'Shfaq ose fshih panelin anësor';

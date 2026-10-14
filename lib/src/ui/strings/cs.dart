@@ -1533,6 +1533,10 @@ final class CzechStrings extends Strings {
   @override
   String get openBeside => 'Otevřít vedle';
   @override
+  String get actionOpen => 'Otevřít';
+  @override
+  String get revealInTree => 'Zobrazit ve stromu';
+  @override
   String get closeAllNotes => 'Zavřít vše';
   @override
   String get sidePanelTooltip => 'Zobrazit nebo skrýt boční panel';

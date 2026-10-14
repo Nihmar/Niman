@@ -1549,6 +1549,10 @@ final class RomanianStrings extends Strings {
   @override
   String get openBeside => 'Deschide alături';
   @override
+  String get actionOpen => 'Deschide';
+  @override
+  String get revealInTree => 'Arată în arbore';
+  @override
   String get closeAllNotes => 'Închide toate';
   @override
   String get sidePanelTooltip => 'Afișează sau ascunde panoul lateral';

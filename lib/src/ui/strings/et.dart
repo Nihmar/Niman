@@ -1519,6 +1519,10 @@ final class EstonianStrings extends Strings {
   @override
   String get openBeside => 'Ava kõrval';
   @override
+  String get actionOpen => 'Ava';
+  @override
+  String get revealInTree => 'Näita puus';
+  @override
   String get closeAllNotes => 'Sulge kõik';
   @override
   String get sidePanelTooltip => 'Näita või peida külgpaneel';

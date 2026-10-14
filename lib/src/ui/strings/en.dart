@@ -1528,6 +1528,10 @@ final class EnglishStrings extends Strings {
   @override
   String get openBeside => 'Open to the side';
   @override
+  String get actionOpen => 'Open';
+  @override
+  String get revealInTree => 'Reveal in tree';
+  @override
   String get closeAllNotes => 'Close all';
   @override
   String get sidePanelTooltip => 'Show or hide the side panel';

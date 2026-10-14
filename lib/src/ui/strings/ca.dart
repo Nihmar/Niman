@@ -1567,6 +1567,10 @@ final class CatalanStrings extends Strings {
   @override
   String get openBeside => 'Obre al costat';
   @override
+  String get actionOpen => 'Obre';
+  @override
+  String get revealInTree => 'Mostra a l’arbre';
+  @override
   String get closeAllNotes => 'Tanca-les totes';
   @override
   String get sidePanelTooltip => 'Mostra o amaga el plafó lateral';

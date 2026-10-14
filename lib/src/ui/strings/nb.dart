@@ -1530,6 +1530,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get openBeside => 'Åpne ved siden av';
   @override
+  String get actionOpen => 'Åpne';
+  @override
+  String get revealInTree => 'Vis i treet';
+  @override
   String get closeAllNotes => 'Lukk alle';
   @override
   String get sidePanelTooltip => 'Vis eller skjul sidepanelet';

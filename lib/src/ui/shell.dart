@@ -4525,7 +4525,26 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       taskEvents: _taskEvents,
       onOpenTaskEvent: _openTaskEvent,
       eventTimesClock: _journal.clockTimes,
+      // Tabs, panes and the tree beside the list are a wide window's.
+      hitOpens: _wide
+          ? (
+              newTab: (path) => _workspace.show(path, newTab: true),
+              beside: (path) => _workspace.openBeside(path, SplitAxis.right),
+              reveal: _revealInTree,
+            )
+          : null,
     );
+  }
+
+  /// Shows the note at [path] (library-relative) as the tree's selected
+  /// row (#712): the Files view in the sidebar, every folder above it open.
+  void _revealInTree(String path) {
+    _revealFolder(parentOf(path));
+    setState(() {
+      _selected = path;
+      _selectedIsDir = false;
+      _treeVisible = true;
+    });
   }
 
   /// What the shell asks Search to do besides showing (#712): the field's

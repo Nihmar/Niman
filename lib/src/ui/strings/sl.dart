@@ -1536,6 +1536,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get openBeside => 'Odpri ob strani';
   @override
+  String get actionOpen => 'Odpri';
+  @override
+  String get revealInTree => 'Pokaži v drevesu';
+  @override
   String get closeAllNotes => 'Zapri vse';
   @override
   String get sidePanelTooltip => 'Pokaži ali skrij stransko ploščo';

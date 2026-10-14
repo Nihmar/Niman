@@ -1544,6 +1544,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get openBeside => 'Відкрити збоку';
   @override
+  String get actionOpen => 'Відкрити';
+  @override
+  String get revealInTree => 'Показати в дереві';
+  @override
   String get closeAllNotes => 'Закрити всі';
   @override
   String get sidePanelTooltip => 'Показати або сховати бічну панель';

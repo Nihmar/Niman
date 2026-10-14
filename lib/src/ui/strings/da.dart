@@ -1533,6 +1533,10 @@ final class DanishStrings extends Strings {
   @override
   String get openBeside => 'Åbn ved siden af';
   @override
+  String get actionOpen => 'Åbn';
+  @override
+  String get revealInTree => 'Vis i træet';
+  @override
   String get closeAllNotes => 'Luk alle';
   @override
   String get sidePanelTooltip => 'Vis eller skjul sidepanelet';

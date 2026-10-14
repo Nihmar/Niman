@@ -1534,6 +1534,10 @@ final class CroatianStrings extends Strings {
   @override
   String get openBeside => 'Otvori sa strane';
   @override
+  String get actionOpen => 'Otvori';
+  @override
+  String get revealInTree => 'Prikaži u stablu';
+  @override
   String get closeAllNotes => 'Zatvori sve';
   @override
   String get sidePanelTooltip => 'Prikaži ili sakrij bočnu ploču';

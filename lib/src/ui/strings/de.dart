@@ -1562,6 +1562,10 @@ final class GermanStrings extends Strings {
   @override
   String get openBeside => 'Daneben öffnen';
   @override
+  String get actionOpen => 'Öffnen';
+  @override
+  String get revealInTree => 'Im Baum zeigen';
+  @override
   String get closeAllNotes => 'Alle schließen';
   @override
   String get sidePanelTooltip => 'Seitenleiste ein- oder ausblenden';

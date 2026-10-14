@@ -1525,6 +1525,10 @@ final class TurkishStrings extends Strings {
   @override
   String get openBeside => 'Yanda aç';
   @override
+  String get actionOpen => 'Aç';
+  @override
+  String get revealInTree => 'Ağaçta göster';
+  @override
   String get closeAllNotes => 'Tümünü kapat';
   @override
   String get sidePanelTooltip => 'Yan paneli göster veya gizle';

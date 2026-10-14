@@ -1539,6 +1539,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get openBeside => 'Atverti šalia';
   @override
+  String get actionOpen => 'Atidaryti';
+  @override
+  String get revealInTree => 'Rodyti medyje';
+  @override
   String get closeAllNotes => 'Uždaryti visus';
   @override
   String get sidePanelTooltip => 'Rodyti arba slėpti šoninį skydelį';

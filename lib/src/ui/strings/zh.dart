@@ -1417,6 +1417,10 @@ final class ChineseStrings extends Strings {
   @override
   String get openBeside => '在侧边打开';
   @override
+  String get actionOpen => '打开';
+  @override
+  String get revealInTree => '在文件树中显示';
+  @override
   String get closeAllNotes => '全部关闭';
   @override
   String get sidePanelTooltip => '显示或隐藏侧边栏';
