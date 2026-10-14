@@ -4014,4 +4014,6 @@ final class SlovenianStrings extends Strings {
       'kartice.';
   @override
   String get commandNeedPlainNote => 'Zahteva odprt zapisek brez vrste';
+  @override
+  String get studyNothingToday => 'Danes ni ničesar za učenje';
 }

@@ -4026,4 +4026,6 @@ final class ItalianStrings extends Strings {
       'carte.';
   @override
   String get commandNeedPlainNote => 'Richiede una nota aperta senza un tipo';
+  @override
+  String get studyNothingToday => 'Niente da studiare oggi';
 }

@@ -3985,4 +3985,6 @@ final class LatvianStrings extends Strings {
       'kartītes.';
   @override
   String get commandNeedPlainNote => 'Nepieciešama atvērta piezīme bez veida';
+  @override
+  String get studyNothingToday => 'Šodien nav ko mācīties';
 }

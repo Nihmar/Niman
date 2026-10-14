@@ -4019,4 +4019,6 @@ final class BosnianStrings extends Strings {
       'kartice.';
   @override
   String get commandNeedPlainNote => 'Zahtijeva otvorenu bilješku bez tipa';
+  @override
+  String get studyNothingToday => 'Danas nema ništa za učenje';
 }

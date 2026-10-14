@@ -3942,4 +3942,6 @@ final class HindiStrings extends Strings {
       'इस नोट में कार्ड बनाने के लिए कोई तालिका, :: पंक्ति या हाइलाइट नहीं है।';
   @override
   String get commandNeedPlainNote => 'बिना प्रकार का एक खुला नोट चाहिए';
+  @override
+  String get studyNothingToday => 'आज पढ़ने के लिए कुछ नहीं';
 }

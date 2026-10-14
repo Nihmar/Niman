@@ -4032,4 +4032,6 @@ final class LithuanianStrings extends Strings {
       'sukurti.';
   @override
   String get commandNeedPlainNote => 'Reikia atidaryto užrašo be tipo';
+  @override
+  String get studyNothingToday => 'Šiandien nėra ką mokytis';
 }

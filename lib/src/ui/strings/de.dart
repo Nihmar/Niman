@@ -4079,4 +4079,6 @@ final class GermanStrings extends Strings {
       'aus der Karten werden könnten.';
   @override
   String get commandNeedPlainNote => 'Benötigt eine geöffnete Notiz ohne Typ';
+  @override
+  String get studyNothingToday => 'Heute nichts zu lernen';
 }

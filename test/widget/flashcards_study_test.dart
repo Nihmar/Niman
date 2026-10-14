@@ -10,6 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/flashcards/review_state.dart';
+import 'package:niman/src/home/home_layout.dart';
+import 'package:niman/src/home/home_tile.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
@@ -216,5 +218,34 @@ void main() {
     await tester.tap(find.byKey(const Key('study-deck-Verbs.md')));
     await wait(tester, find.byKey(const Key('deck-place')));
     expect(find.text('Lingue › Inglese'), findsOneWidget);
+  });
+
+  testWidgets('the Home Study tile: the counts, the decks, Study the first', (
+    tester,
+  ) async {
+    controller.libraryHome = const HomeLayout([
+      HomeTile(
+        id: 'study',
+        kind: HomeTileKind.study,
+        cell: (x: 0, y: 0, w: 2, h: 2),
+        at: 0,
+      ),
+    ]);
+    await boot(tester, size: const Size(400, 800));
+    await tester.tap(find.byKey(const Key('tab-home')));
+    await wait(tester, find.byKey(const Key('home-study-counts')));
+    expect(find.text('0 due · 6 new'), findsOneWidget);
+    // The most cards first.
+    final verbs = tester.getTopLeft(
+      find.byKey(const Key('home-study-Verbs.md')),
+    );
+    final nouns = tester.getTopLeft(
+      find.byKey(const Key('home-study-Nouns.md')),
+    );
+    expect(verbs.dy, lessThan(nouns.dy));
+
+    await tester.tap(find.byKey(const Key('home-study-first')));
+    await wait(tester, find.byKey(const Key('review-question')));
+    expect(find.text('Study · Verbs'), findsOneWidget);
   });
 }

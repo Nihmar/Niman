@@ -8,6 +8,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/calendar/calendar_controller.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/flashcards/deck_catalog_controller.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_controller.dart';
@@ -30,6 +31,8 @@ final class HomeHost {
     required this.openEvent,
     required this.openJournal,
     required this.runAction,
+    required this.decks,
+    required this.study,
   });
 
   /// The open library.
@@ -68,4 +71,12 @@ final class HomeHost {
 
   /// Runs a Home action.
   final void Function(HomeAction action) runAction;
+
+  /// The library's flashcard decks, counted (#533); null outside a library.
+  /// Read on the first ask, as Study reads them.
+  final DeckCatalogController? Function() decks;
+
+  /// Studies the decks at their library-relative paths together, under
+  /// a name (#533).
+  final void Function(List<String> paths, String title) study;
 }

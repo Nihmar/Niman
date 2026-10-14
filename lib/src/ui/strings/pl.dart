@@ -4047,4 +4047,6 @@ final class PolishStrings extends Strings {
       'powstałyby fiszki.';
   @override
   String get commandNeedPlainNote => 'Wymaga otwartej notatki bez typu';
+  @override
+  String get studyNothingToday => 'Dziś nie ma nic do nauki';
 }

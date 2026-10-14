@@ -3993,4 +3993,6 @@ final class IcelandicStrings extends Strings {
       'spjöld úr.';
   @override
   String get commandNeedPlainNote => 'Krefst opinnar glósu án tegundar';
+  @override
+  String get studyNothingToday => 'Ekkert að læra í dag';
 }

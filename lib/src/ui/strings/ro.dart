@@ -4053,4 +4053,6 @@ final class RomanianStrings extends Strings {
       'carduri.';
   @override
   String get commandNeedPlainNote => 'Necesită o notă deschisă fără tip';
+  @override
+  String get studyNothingToday => 'Nimic de studiat azi';
 }

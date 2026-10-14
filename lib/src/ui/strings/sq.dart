@@ -4020,4 +4020,6 @@ final class AlbanianStrings extends Strings {
       'Ky shënim nuk ka tabelë, rresht :: ose theksim nga të krijohen kartela.';
   @override
   String get commandNeedPlainNote => 'Kërkon një shënim të hapur pa lloj';
+  @override
+  String get studyNothingToday => 'Asgjë për të studiuar sot';
 }

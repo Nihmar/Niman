@@ -4041,4 +4041,6 @@ final class DutchStrings extends Strings {
       'maken.';
   @override
   String get commandNeedPlainNote => 'Vereist een geopende notitie zonder type';
+  @override
+  String get studyNothingToday => 'Vandaag niets te studeren';
 }

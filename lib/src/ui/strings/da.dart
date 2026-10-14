@@ -3978,4 +3978,6 @@ final class DanishStrings extends Strings {
       'Denne note har ingen tabel, :: linje eller fremhævning at lave kort af.';
   @override
   String get commandNeedPlainNote => 'Kræver en åben note uden type';
+  @override
+  String get studyNothingToday => 'Intet at studere i dag';
 }

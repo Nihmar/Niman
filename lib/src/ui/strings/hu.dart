@@ -4009,4 +4009,6 @@ final class HungarianStrings extends Strings {
   @override
   String get commandNeedPlainNote =>
       'Típus nélküli megnyitott jegyzetet igényel';
+  @override
+  String get studyNothingToday => 'Ma nincs mit tanulni';
 }

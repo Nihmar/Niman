@@ -4108,4 +4108,6 @@ final class FrenchStrings extends Strings {
       'cartes.';
   @override
   String get commandNeedPlainNote => 'Nécessite une note ouverte sans type';
+  @override
+  String get studyNothingToday => 'Rien à réviser aujourd’hui';
 }

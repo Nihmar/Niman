@@ -4031,4 +4031,6 @@ final class BelarusianStrings extends Strings {
       'У гэтай нататцы няма табліцы, радка :: або вылучэння для картачак.';
   @override
   String get commandNeedPlainNote => 'Патрэбна адкрытая нататка без тыпу';
+  @override
+  String get studyNothingToday => 'Сёння няма чаго вучыць';
 }

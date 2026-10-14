@@ -4031,4 +4031,6 @@ final class UkrainianStrings extends Strings {
       'зробити картки.';
   @override
   String get commandNeedPlainNote => 'Потрібна відкрита нотатка без типу';
+  @override
+  String get studyNothingToday => 'Сьогодні нічого вчити';
 }

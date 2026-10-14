@@ -4035,4 +4035,6 @@ final class BasqueStrings extends Strings {
       'sortzeko.';
   @override
   String get commandNeedPlainNote => 'Motarik gabeko ohar ireki bat behar du';
+  @override
+  String get studyNothingToday => 'Gaur ez dago ezer ikasteko';
 }

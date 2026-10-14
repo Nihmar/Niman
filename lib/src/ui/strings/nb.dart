@@ -3983,4 +3983,6 @@ final class NorwegianStrings extends Strings {
       'Dette notatet har ingen tabell, :: linje eller utheving å lage kort av.';
   @override
   String get commandNeedPlainNote => 'Krever et åpent notat uten type';
+  @override
+  String get studyNothingToday => 'Ingenting å studere i dag';
 }

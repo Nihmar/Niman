@@ -4013,4 +4013,6 @@ final class BulgarianStrings extends Strings {
       'карти.';
   @override
   String get commandNeedPlainNote => 'Изисква отворена бележка без тип';
+  @override
+  String get studyNothingToday => 'Днес няма нищо за учене';
 }

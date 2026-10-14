@@ -26,15 +26,15 @@ void main() {
 
     test('a tile of a kind this build does not know is kept, not shown', () {
       final layout = _read(
-        '{"study": {"kind": "study", "grid": [0, 0, 1, 1], "deck": "x"},'
+        '{"weather": {"kind": "weather", "grid": [0, 0, 1, 1], "city": "x"},'
         ' "recent": {"kind": "recent", "grid": [1, 0, 1, 2]}}',
       );
       expect(layout.column.map((t) => t.id), ['recent']);
-      expect(layout.toJson()['study'], {
+      expect(layout.toJson()['weather'], {
         'grid': [0, 0, 1, 1],
         'phone': {'at': HomeTile.unplaced},
-        'kind': 'study',
-        'deck': 'x',
+        'kind': 'weather',
+        'city': 'x',
       });
     });
 

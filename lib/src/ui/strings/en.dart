@@ -3951,4 +3951,6 @@ final class EnglishStrings extends Strings {
       'This note has no table, :: line or highlight to make cards from.';
   @override
   String get commandNeedPlainNote => 'Needs an open note of no particular type';
+  @override
+  String get studyNothingToday => 'Nothing to study today';
 }

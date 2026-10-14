@@ -2140,4 +2140,5 @@ abstract base class Strings {
   String makeFlashcardsAction(int count);
   String get makeFlashcardsNone;
   String get commandNeedPlainNote;
+  String get studyNothingToday;
 }

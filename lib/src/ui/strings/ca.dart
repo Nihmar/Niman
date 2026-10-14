@@ -4060,4 +4060,6 @@ final class CatalanStrings extends Strings {
       'targetes.';
   @override
   String get commandNeedPlainNote => 'Cal una nota oberta sense tipus';
+  @override
+  String get studyNothingToday => 'Avui no hi ha res per estudiar';
 }

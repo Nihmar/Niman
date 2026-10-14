@@ -3577,4 +3577,6 @@ final class ChineseStrings extends Strings {
   String get makeFlashcardsNone => '此笔记没有可制作卡片的表格、:: 行或高亮。';
   @override
   String get commandNeedPlainNote => '需要打开一个没有类型的笔记';
+  @override
+  String get studyNothingToday => '今天没有要学习的内容';
 }

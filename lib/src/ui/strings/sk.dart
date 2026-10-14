@@ -3999,4 +3999,6 @@ final class SlovakStrings extends Strings {
       'vznikli kartičky.';
   @override
   String get commandNeedPlainNote => 'Vyžaduje otvorenú poznámku bez typu';
+  @override
+  String get studyNothingToday => 'Dnes nie je čo študovať';
 }

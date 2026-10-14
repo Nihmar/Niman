@@ -4016,4 +4016,6 @@ final class CroatianStrings extends Strings {
       'kartice.';
   @override
   String get commandNeedPlainNote => 'Traži otvorenu bilješku bez vrste';
+  @override
+  String get studyNothingToday => 'Danas nema ništa za učenje';
 }

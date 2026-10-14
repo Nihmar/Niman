@@ -1837,6 +1837,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     return _deckCatalog = catalog;
   }
 
+  /// Studies the decks at [paths], library-relative, under [title] (#533).
+  void _studyPaths(List<String> paths, String title) {
+    final root = widget.controller.root;
+    if (root == null) return;
+    unawaited(
+      studyDecks(context, ref.read, [
+        for (final path in paths) p.join(root, path),
+      ], title: title),
+    );
+  }
+
   /// The Study tree (#533): the left island's on a wide window, the
   /// destination's body on a phone. One view, built where it shows.
   Widget _studyView() {
@@ -1849,15 +1860,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // in a tab of its own on a double click.
       onOpenDeck: (path) =>
           _wide ? _showFromTree(path, newTab: false) : _showNote(path),
-      onStudy: (paths, title) {
-        final root = widget.controller.root;
-        if (root == null) return;
-        unawaited(
-          studyDecks(context, ref.read, [
-            for (final path in paths) p.join(root, path),
-          ], title: title),
-        );
-      },
+      onStudy: _studyPaths,
       onNewDeck: () => unawaited(_createFlow.createFlashcards(context)),
     );
   }
@@ -5161,6 +5164,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),
     openTodo: _openTodo,
     runAction: (action) => unawaited(_homeActions.run(context, action)),
+    decks: () => _decks,
+    study: _studyPaths,
   );
 
   /// Runs the Home's actions through the shell's own flows (#535).

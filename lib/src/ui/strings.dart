@@ -2033,4 +2033,5 @@ final class AppStrings {
       _s.makeFlashcardsAction(count);
   static String get makeFlashcardsNone => _s.makeFlashcardsNone;
   static String get commandNeedPlainNote => _s.commandNeedPlainNote;
+  static String get studyNothingToday => _s.studyNothingToday;
 }

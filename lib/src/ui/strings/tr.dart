@@ -3957,4 +3957,6 @@ final class TurkishStrings extends Strings {
       'Bu notta kart yapılacak bir tablo, :: satırı veya vurgu yok.';
   @override
   String get commandNeedPlainNote => 'Türü olmayan açık bir not gerektirir';
+  @override
+  String get studyNothingToday => 'Bugün çalışılacak bir şey yok';
 }

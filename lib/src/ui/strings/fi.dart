@@ -4017,4 +4017,6 @@ final class FinnishStrings extends Strings {
       'korteiksi.';
   @override
   String get commandNeedPlainNote => 'Vaatii avoimen tyypittömän muistiinpanon';
+  @override
+  String get studyNothingToday => 'Tänään ei ole opiskeltavaa';
 }

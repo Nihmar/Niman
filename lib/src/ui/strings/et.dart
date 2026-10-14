@@ -3943,4 +3943,6 @@ final class EstonianStrings extends Strings {
       'teha.';
   @override
   String get commandNeedPlainNote => 'Vajab avatud tüübita märget';
+  @override
+  String get studyNothingToday => 'Täna pole midagi õppida';
 }

@@ -4013,4 +4013,6 @@ final class SerbianStrings extends Strings {
       'картице.';
   @override
   String get commandNeedPlainNote => 'Захтева отворену белешку без врсте';
+  @override
+  String get studyNothingToday => 'Данас нема ничега за учење';
 }

@@ -3673,4 +3673,6 @@ final class JapaneseStrings extends Strings {
   String get makeFlashcardsNone => 'このノートには、カードにできる表、:: の行、ハイライトがありません。';
   @override
   String get commandNeedPlainNote => '種類のない開いているノートが必要です';
+  @override
+  String get studyNothingToday => '今日の学習はありません';
 }

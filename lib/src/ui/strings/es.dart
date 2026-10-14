@@ -4051,4 +4051,6 @@ final class SpanishStrings extends Strings {
       'tarjetas.';
   @override
   String get commandNeedPlainNote => 'Requiere una nota abierta sin tipo';
+  @override
+  String get studyNothingToday => 'Nada que estudiar hoy';
 }

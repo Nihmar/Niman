@@ -4018,4 +4018,6 @@ final class PortugueseStrings extends Strings {
       'Esta nota não tem tabela, linha :: nem destaque com que criar cartões.';
   @override
   String get commandNeedPlainNote => 'Requer uma nota aberta sem tipo';
+  @override
+  String get studyNothingToday => 'Nada para estudar hoje';
 }

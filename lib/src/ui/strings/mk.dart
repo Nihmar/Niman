@@ -4020,4 +4020,6 @@ final class MacedonianStrings extends Strings {
       'направиле картички.';
   @override
   String get commandNeedPlainNote => 'Бара отворена белешка без тип';
+  @override
+  String get studyNothingToday => 'Денес нема ништо за учење';
 }

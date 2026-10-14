@@ -4113,4 +4113,6 @@ final class GreekStrings extends Strings {
       'Αυτή η σημείωση δεν έχει πίνακα, γραμμή :: ή επισήμανση για κάρτες.';
   @override
   String get commandNeedPlainNote => 'Απαιτεί ανοιχτή σημείωση χωρίς τύπο';
+  @override
+  String get studyNothingToday => 'Τίποτα για μελέτη σήμερα';
 }

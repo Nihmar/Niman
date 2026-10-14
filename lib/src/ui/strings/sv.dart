@@ -4009,4 +4009,6 @@ final class SwedishStrings extends Strings {
       'kort av.';
   @override
   String get commandNeedPlainNote => 'Kräver en öppen anteckning utan typ';
+  @override
+  String get studyNothingToday => 'Inget att studera i dag';
 }

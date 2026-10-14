@@ -4022,4 +4022,6 @@ final class GalicianStrings extends Strings {
       'tarxetas.';
   @override
   String get commandNeedPlainNote => 'Require unha nota aberta sen tipo';
+  @override
+  String get studyNothingToday => 'Hoxe non hai nada que estudar';
 }

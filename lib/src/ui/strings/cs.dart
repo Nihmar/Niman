@@ -3988,4 +3988,6 @@ final class CzechStrings extends Strings {
       'vznikly kartičky.';
   @override
   String get commandNeedPlainNote => 'Vyžaduje otevřenou poznámku bez typu';
+  @override
+  String get studyNothingToday => 'Dnes není co studovat';
 }
