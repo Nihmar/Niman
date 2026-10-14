@@ -1,6 +1,5 @@
 // T-TK-04/09: the list-kind GUI — checkable rows, nesting, the add row,
 // in-place text editing and drag reordering/sub-lists.
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
