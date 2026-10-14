@@ -78,8 +78,12 @@ final class _TodoPointerListState extends State<TodoPointerList> {
   /// The list's keys: the arrows, `Space`, `Enter`/`F2`, `Delete`.
   late final FocusNode _listFocus = FocusNode(debugLabel: 'todo-list');
 
+  /// The list's scroll position, to bring the selected row into view.
+  final ScrollController _scroll = ScrollController();
+
   @override
   void dispose() {
+    _scroll.dispose();
     _listFocus.dispose();
     super.dispose();
   }
@@ -101,6 +105,7 @@ final class _TodoPointerListState extends State<TodoPointerList> {
         onKeyEvent: _onListKey,
         child: ListView.builder(
           key: const Key('todo-list'),
+          controller: _scroll,
           itemCount: widget.entries.length,
           itemBuilder: (context, index) {
             final entry = widget.entries[index];
@@ -152,13 +157,19 @@ final class _TodoPointerListState extends State<TodoPointerList> {
     if (rows.isEmpty) return KeyEventResult.ignored;
     final at = rows.indexWhere((e) => e.lineIndex == _selectedLine);
     final selected = at < 0 ? null : rows[at];
-    void select(int index) =>
-        setState(() => _selectedLine = rows[index].lineIndex);
+    void select(int index, {required bool down}) {
+      setState(() => _selectedLine = rows[index].lineIndex);
+      unawaited(_reveal(index, down: down));
+    }
+
     switch (event.logicalKey) {
       case LogicalKeyboardKey.arrowDown:
-        select(at < 0 ? 0 : (at + 1).clamp(0, rows.length - 1));
+        select(at < 0 ? 0 : (at + 1).clamp(0, rows.length - 1), down: true);
       case LogicalKeyboardKey.arrowUp:
-        select(at < 0 ? rows.length - 1 : (at - 1).clamp(0, rows.length - 1));
+        select(
+          at < 0 ? rows.length - 1 : (at - 1).clamp(0, rows.length - 1),
+          down: false,
+        );
       case LogicalKeyboardKey.space
           when selected != null && event is KeyDownEvent:
         unawaited(widget.onToggle(selected, checked: !selected.task.completed));
@@ -174,6 +185,71 @@ final class _TodoPointerListState extends State<TodoPointerList> {
         return KeyEventResult.ignored;
     }
     return KeyEventResult.handled;
+  }
+
+  /// Brings the row at [index] into view (#909), scrolling no further than
+  /// its edge: [down] moves bring its bottom in, the others its top. A row
+  /// outside the list's built range has no context to reveal, so the list
+  /// first jumps to where the index is estimated to sit — the list's own
+  /// estimate of its length, shared out by row — and the row, built there
+  /// or near it, is then scrolled to. Each jump lays out real rows around
+  /// the target, which sharpens the estimate (the search list's `_revealHit`
+  /// does the same).
+  Future<void> _reveal(int index, {required bool down}) async {
+    for (var jump = 0; jump < _revealJumps; jump++) {
+      await WidgetsBinding.instance.endOfFrame;
+      final rows = widget.entries;
+      // Another move or a new list since: that one reveals its own.
+      if (!mounted ||
+          index >= rows.length ||
+          rows[index].lineIndex != _selectedLine) {
+        return;
+      }
+      final row = _rowContext(rows[index].lineIndex);
+      if (row != null) {
+        if (!row.mounted) return;
+        await Scrollable.ensureVisible(
+          row,
+          duration: _stepScroll,
+          alignmentPolicy: down
+              ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+              : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
+        return;
+      }
+      if (!_scroll.hasClients) return;
+      final position = _scroll.position;
+      final length = position.maxScrollExtent + position.viewportDimension;
+      final offset =
+          length * index / rows.length - position.viewportDimension / 2;
+      position.jumpTo(
+        offset.clamp(position.minScrollExtent, position.maxScrollExtent),
+      );
+    }
+  }
+
+  /// How many jumps [_reveal] makes at most: a bound keeps a list that
+  /// keeps changing under it from holding the reveal open.
+  static const int _revealJumps = 8;
+
+  /// How long the scroll to a row takes.
+  static const Duration _stepScroll = Duration(milliseconds: 100);
+
+  /// The context of the built row on [line], or null while it is not built.
+  BuildContext? _rowContext(int line) {
+    final key = Key('todo-row-${widget.view}-$line');
+    BuildContext? found;
+    void visit(Element element) {
+      if (found != null) return;
+      if (element.widget.key == key) {
+        found = element;
+        return;
+      }
+      element.visitChildren(visit);
+    }
+
+    _listKey.currentContext?.visitChildElements(visit);
+    return found;
   }
 
   /// Writes the text edited in place into [entry]'s line.

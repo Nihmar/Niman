@@ -114,6 +114,55 @@ void main() {
     expect(field, findsNothing);
   });
 
+  testWidgets('the arrows keep the selected row in view (#909)', (
+    tester,
+  ) async {
+    await pumpTab(tester, [for (var i = 0; i < 60; i++) 'task $i']);
+    final list = find.byKey(const Key('todo-list'));
+
+    // Whether the row on [line] is built and inside the list's box.
+    bool inView(int line) {
+      final row = find.byKey(Key('todo-row-open-$line'));
+      if (row.evaluate().isEmpty) return false;
+      final box = tester.getRect(list);
+      final at = tester.getRect(row);
+      return at.top >= box.top - 0.5 && at.bottom <= box.bottom + 0.5;
+    }
+
+    expect(inView(59), isFalse, reason: 'more rows than fit');
+    await tester.tap(row0);
+    await tester.pump(const Duration(milliseconds: 500));
+    for (var line = 1; line <= 40; line++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(inView(line), isTrue, reason: 'down to line $line');
+    }
+    for (var line = 39; line >= 0; line--) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expect(inView(line), isTrue, reason: 'up to line $line');
+    }
+  });
+
+  testWidgets('the first arrow up reaches the last row, built or not (#909)', (
+    tester,
+  ) async {
+    await pumpTab(tester, [for (var i = 0; i < 300; i++) 'task $i']);
+    // Tab from the quick-add field to the list: focused, nothing selected.
+    await tester.tap(find.byKey(const Key('todo-quick-add')));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    final last = find.byKey(const Key('todo-row-open-299'));
+    expect(last, findsOne);
+    final box = tester.getRect(find.byKey(const Key('todo-list')));
+    final at = tester.getRect(last);
+    expect(at.top, greaterThanOrEqualTo(box.top - 0.5));
+    expect(at.bottom, lessThanOrEqualTo(box.bottom + 0.5));
+  });
+
   testWidgets('the quick-add field adds a task per Enter and keeps the '
       'cursor', (tester) async {
     await pumpTab(tester, ['old +work']);

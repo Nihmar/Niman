@@ -23,8 +23,8 @@ On a desktop the list is driven by the mouse and the keyboard (#712):
 
 - a click selects a row, a double click edits its text in place —
   `Enter` saves, `Esc` cancels;
-- `↑` / `↓` move the selection, `Space` checks the task, `Enter` or `F2`
-  edits it in place and `Delete` deletes it;
+- `↑` / `↓` move the selection and scroll it into view, `Space` checks
+  the task, `Enter` or `F2` edits it in place and `Delete` deletes it;
 - a right click opens the row's menu at the pointer: **Edit…** (the
   dialog, for the dates, the reminder and the priority), **Set due** ▸
   (Today, Tomorrow, Next week, Pick a date…, No due date), **Priority** ▸
