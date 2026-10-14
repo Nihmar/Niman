@@ -29,6 +29,8 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
 import 'package:niman/src/ui/frontmatter_field_dialog.dart';
+import 'package:niman/src/ui/frontmatter_inline.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// How much of the frontmatter panel is showing (#157).
@@ -81,6 +83,13 @@ final class FrontmatterFields extends StatefulWidget {
 final class _FrontmatterFieldsState extends State<FrontmatterFields> {
   /// Whether the raw YAML is showing instead of the fields.
   bool _raw = false;
+
+  /// Where a pointer aims (#712): the key whose list takes an item in a
+  /// field of its own, whether a new key is being typed, and the key just
+  /// added, whose value opens for typing.
+  String? _addingItem;
+  bool _addingKey = false;
+  String? _justAdded;
 
   /// The width of the key column, so every row's value starts on the same x.
   static const double _keyColumn = 150;
@@ -347,7 +356,24 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
           const SizedBox(width: 10),
           Expanded(child: _fieldValue(context, field)),
           const SizedBox(width: 10),
-          _typeChip(context, field),
+          if (pointerDense(theme))
+            PopupMenuButton<FrontmatterFieldType>(
+              key: Key('frontmatter-type-menu-${field.key}'),
+              tooltip: '',
+              initialValue: field.type,
+              onSelected: (type) => _retype(field, type),
+              itemBuilder: (context) => [
+                for (final type in FrontmatterFieldType.values)
+                  PopupMenuItem(
+                    key: Key('frontmatter-retype-${type.name}'),
+                    value: type,
+                    child: Text(_typeLabel(type)),
+                  ),
+              ],
+              child: _typeChip(context, field),
+            )
+          else
+            _typeChip(context, field),
           IconButton(
             key: Key('frontmatter-remove-${field.key}'),
             visualDensity: VisualDensity.compact,
@@ -432,21 +458,62 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
                   frontmatterListYaml([...field.items]..removeAt(i)),
                 ),
               ),
-            IconButton(
-              key: Key('frontmatter-add-item-${field.key}'),
-              visualDensity: VisualDensity.compact,
-              iconSize: 16,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints.tightFor(width: 28, height: 28),
-              tooltip: AppStrings.frontmatterEditField,
-              icon: const Icon(Icons.add),
-              onPressed: () => _edit(context, field),
-            ),
+            if (_addingItem == field.key)
+              SizedBox(
+                width: 140,
+                child: InlineField(
+                  initial: '',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  onDone: (text) {
+                    setState(() => _addingItem = null);
+                    if (text == null || text.isEmpty) return;
+                    widget.onSet(
+                      field.key,
+                      frontmatterListYaml([
+                        ...field.items,
+                        frontmatterFieldYaml(FrontmatterFieldType.text, [text]),
+                      ]),
+                    );
+                  },
+                ),
+              )
+            else
+              IconButton(
+                key: Key('frontmatter-add-item-${field.key}'),
+                visualDensity: VisualDensity.compact,
+                iconSize: 16,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints.tightFor(
+                  width: 28,
+                  height: 28,
+                ),
+                tooltip: AppStrings.frontmatterEditField,
+                icon: const Icon(Icons.add),
+                // An item in a field of its own where a pointer aims (#712).
+                onPressed: pointerDense(Theme.of(context))
+                    ? () => setState(() => _addingItem = field.key)
+                    : () => _edit(context, field),
+              ),
           ],
         );
       case FrontmatterFieldType.text:
       case FrontmatterFieldType.number:
       case FrontmatterFieldType.date:
+        // Edited where it is, where a pointer aims (#712).
+        if (pointerDense(Theme.of(context))) {
+          final opens = _justAdded == field.key;
+          if (opens) _justAdded = null;
+          return FrontmatterInlineValue(
+            key: Key('frontmatter-value-${field.key}'),
+            value: field.value ?? '',
+            date: field.type == FrontmatterFieldType.date,
+            startEditing: opens,
+            onCommit: (text) => widget.onSet(
+              field.key,
+              frontmatterFieldYaml(field.type, [text]),
+            ),
+          );
+        }
         return InkWell(
           key: Key('frontmatter-value-${field.key}'),
           onTap: () => _edit(context, field),
@@ -463,10 +530,49 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
     }
   }
 
+  /// [field] written as [type]: a list's items joined into one value, a
+  /// value made the one item of a list.
+  void _retype(FrontmatterField field, FrontmatterFieldType type) {
+    if (type == field.type) return;
+    final scalar = field.type == FrontmatterFieldType.list
+        ? field.values.join(', ')
+        : field.value ?? '';
+    final values = type == FrontmatterFieldType.list
+        ? [
+            if (scalar.isNotEmpty)
+              frontmatterFieldYaml(FrontmatterFieldType.text, [scalar]),
+          ]
+        : [scalar];
+    widget.onSet(field.key, _yamlOf(type, values));
+  }
+
   /// The panel's action row: a small box with a plus and the words that add a
-  /// key.
+  /// key — or, while one is being added where a pointer aims, its field.
   Widget _addRow(BuildContext context) {
     final theme = Theme.of(context);
+    if (_addingKey) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7),
+        child: SizedBox(
+          width: _keyColumn,
+          child: InlineField(
+            key: const Key('frontmatter-new-key'),
+            initial: '',
+            hint: AppStrings.frontmatterAddField,
+            style: theme.textTheme.bodySmall,
+            onDone: (key) {
+              setState(() => _addingKey = false);
+              if (key == null || key.isEmpty) return;
+              setState(() => _justAdded = key);
+              widget.onSet(
+                key,
+                frontmatterFieldYaml(FrontmatterFieldType.text, ['']),
+              );
+            },
+          ),
+        ),
+      );
+    }
     return Align(
       alignment: AlignmentDirectional.centerStart,
       child: InkWell(
@@ -531,6 +637,11 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
       field.type == FrontmatterFieldType.list ? field.items : field.values;
 
   Future<void> _add(BuildContext context) async {
+    // A key typed in a row of its own where a pointer aims (#712).
+    if (pointerDense(Theme.of(context))) {
+      setState(() => _addingKey = true);
+      return;
+    }
     final result = await showFrontmatterFieldDialog(context);
     if (result == null) return;
     widget.onSet(result.key, _yamlOf(result.type, result.values));

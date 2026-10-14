@@ -1,0 +1,86 @@
+// #712: where a pointer aims, the frontmatter panel edits in place — a
+// value turns into a field, a date opens a calendar under itself, a list
+// takes an item from a field, a new key is typed in a row, and the type
+// chip is a menu. No dialog.
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/frontmatter_fields.dart';
+
+void main() {
+  late List<(String, String)> set;
+
+  Future<void> pump(WidgetTester tester) async {
+    set = [];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(visualDensity: VisualDensity.compact),
+        home: Scaffold(
+          body: FrontmatterFields(
+            note: '---\ntitle: Hello\ntags: [a]\ndate: 2026-10-01\n---\n',
+            panel: FrontmatterPanel.open,
+            onToggle: () {},
+            onSet: (key, yaml) => set.add((key, yaml)),
+            onRemove: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  final field = find.byKey(const Key('frontmatter-inline-field'));
+
+  testWidgets('a value is edited where it is; Esc leaves it', (tester) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('frontmatter-value-title')));
+    await tester.pump();
+    expect(find.byType(Dialog), findsNothing);
+    await tester.enterText(field, 'Bye');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(set, isEmpty);
+
+    await tester.tap(find.byKey(const Key('frontmatter-value-title')));
+    await tester.pump();
+    await tester.enterText(field, 'Bye');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set.single.$1, 'title');
+    expect(set.single.$2, contains('Bye'));
+  });
+
+  testWidgets('a date opens a calendar under itself', (tester) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('frontmatter-value-date')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('calendar-popover')), findsOne);
+    await tester.tap(find.text('15'));
+    await tester.pumpAndSettle();
+    expect(set.single, ('date', '2026-10-15'));
+  });
+
+  testWidgets('a list takes an item, a key is added in a row, the type is '
+      'a menu', (tester) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('frontmatter-add-item-tags')));
+    await tester.pump();
+    await tester.enterText(field, 'b');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set.last, ('tags', '[a, b]'));
+
+    await tester.tap(find.byKey(const Key('frontmatter-add')));
+    await tester.pump();
+    await tester.enterText(field, 'author');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set.last.$1, 'author');
+
+    await tester.tap(find.byKey(const Key('frontmatter-type-menu-title')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('frontmatter-retype-list')));
+    await tester.pumpAndSettle();
+    expect(set.last, ('title', '[Hello]'));
+  });
+}
