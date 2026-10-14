@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -82,6 +83,10 @@ class _ListNoteViewState extends State<ListNoteView>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late List<ListItem> _items;
   final TextEditingController _newItem = TextEditingController();
+
+  /// The add field's focus: an add hands it back to the field so the next
+  /// item is typed at once, whichever of Enter or the check button added.
+  final FocusNode _addFocus = FocusNode();
 
   /// The quantity the add row will write; one is the absence of a marker,
   /// and the chip resets to it after every add.
@@ -165,7 +170,36 @@ class _ListNoteViewState extends State<ListNoteView>
     super.initState();
     _items = _parse(widget.text);
     WidgetsBinding.instance.addObserver(this);
+    _focusAddFieldOnDesktop();
   }
+
+  /// Opening the list on a desktop puts the caret in the add field: there
+  /// is a keyboard already, and typing is what the note is for. A phone
+  /// would pop its soft keyboard over the list, so it waits for a tap.
+  ///
+  /// Asked for once the frame has put the field under its focus node (the
+  /// field's `autofocus` gives way to whatever its scope already focused),
+  /// and not taken from a text field that already has the keyboard.
+  void _focusAddFieldOnDesktop() {
+    if (!_isDesktop) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _editingIndex != null || _addFocus.hasFocus) return;
+      final focused = FocusManager.instance.primaryFocus?.context;
+      if (focused != null &&
+          (focused.widget is EditableText ||
+              focused.findAncestorWidgetOfExactType<EditableText>() != null)) {
+        return;
+      }
+      _addFocus.requestFocus();
+    });
+  }
+
+  static bool get _isDesktop => switch (defaultTargetPlatform) {
+    TargetPlatform.linux ||
+    TargetPlatform.windows ||
+    TargetPlatform.macOS => true,
+    _ => false,
+  };
 
   /// The items of [text], with quantities when this is a shopping list.
   List<ListItem> _parse(String text) =>
@@ -268,6 +302,7 @@ class _ListNoteViewState extends State<ListNoteView>
     _stopEdgeScroll();
     WidgetsBinding.instance.removeObserver(this);
     _newItem.dispose();
+    _addFocus.dispose();
     _scroll.dispose();
     _addRowShown.dispose();
     _addRowController.dispose();
@@ -281,6 +316,9 @@ class _ListNoteViewState extends State<ListNoteView>
   }
 
   void _add() {
+    // The check button took the focus with the click: give it back, an
+    // empty field included.
+    _addFocus.requestFocus();
     final text = _newItem.text.trim();
     if (text.isEmpty) return;
     _newItem.clear();
@@ -695,6 +733,7 @@ class _ListNoteViewState extends State<ListNoteView>
       child: TextField(
         key: const Key('list-add-field'),
         controller: _newItem,
+        focusNode: _addFocus,
         style: Theme.of(context).textTheme.bodyMedium
             ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         decoration: InputDecoration(
@@ -714,7 +753,10 @@ class _ListNoteViewState extends State<ListNoteView>
           ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        onSubmitted: (_) => _add(),
+        // Not `onSubmitted`: the field's own handling of the action ends
+        // by unfocusing it, which dropped the keyboard on a phone and the
+        // caret on a desktop after every item.
+        onEditingComplete: _add,
       ),
     );
   }
