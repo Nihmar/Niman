@@ -10,6 +10,7 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
@@ -28,6 +29,7 @@ const Set<String> libraryStateFiles = {
   '.niman/counters.json',
   '.niman/dictionary.txt',
   ReadingPositions.filePath,
+  ReviewStore.filePath,
   HomeFile.filePath,
 };
 

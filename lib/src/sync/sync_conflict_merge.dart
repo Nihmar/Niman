@@ -7,6 +7,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/diff/calendar_merge.dart';
 import 'package:niman/src/diff/record_merge.dart';
 import 'package:niman/src/diff/three_way.dart';
+import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -160,13 +161,13 @@ final class SyncConflictMerger {
 
   /// Merges a library state file ([mergeSettingsJson] key by key, for the
   /// settings and for the Home's tiles (#535), [mergeCountersJson],
-  /// [mergeWordList] word by word, [mergeReadingJson] book by book) and
-  /// writes the result on whichever side lacks it; [_StateMerge.notJson]
-  /// when a JSON side does not parse, and [_StateMerge.clockDecides] when
-  /// a settings key or a Home tile both sides changed differently, which
-  /// only the file mtimes could settle — and the remote one is the
-  /// uploading device's clock (#350). Both cases touch nothing and leave
-  /// the path to the caller.
+  /// [mergeWordList] word by word, [mergeReadingJson] book by book,
+  /// [mergeReviewJson] card by card) and writes the result on whichever
+  /// side lacks it; [_StateMerge.notJson] when a JSON side does not parse,
+  /// and [_StateMerge.clockDecides] when a settings key or a Home tile
+  /// both sides changed differently, which only the file mtimes could
+  /// settle — and the remote one is the uploading device's clock (#350).
+  /// Both cases touch nothing and leave the path to the caller.
   Future<_StateMerge> _mergeState(
     SyncRunContext c,
     SyncDecision d,
@@ -213,6 +214,8 @@ final class SyncConflictMerger {
       text = mergeWordList(base: base, local: localText, remote: remoteText);
     } else if (d.path == ReadingPositions.filePath) {
       text = mergeReadingJson(base: base, local: localText, remote: remoteText);
+    } else if (d.path == ReviewStore.filePath) {
+      text = mergeReviewJson(base: base, local: localText, remote: remoteText);
     } else {
       text = mergeCountersJson(local: localText, remote: remoteText);
     }

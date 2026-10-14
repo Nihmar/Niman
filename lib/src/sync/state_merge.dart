@@ -79,6 +79,56 @@ DateTime _readAt(Object? entry) =>
     (entry is Map ? DateTime.tryParse('${entry['at']}') : null) ??
     DateTime.utc(1970);
 
+/// `.niman/review.json` (#533) merged card by card over [base], the
+/// content both sides last agreed on (null when there is none), as
+/// [mergeReadingJson] merges book by book: a card only one side changed
+/// (graded, added or dropped) takes that side, and where both graded it
+/// the later review wins, by the entries' own `at`, not the file's. So
+/// two devices studying two decks, or one deck on two days, never
+/// conflict.
+///
+/// A note is the map of its cards: a note one side lacks is a side with no
+/// cards, so a card present on one side only is kept when the other never
+/// had it (the base lacks it, or there is no base), and dropped when the
+/// other side dropped it (the note was deleted or reset) and this side
+/// did not review it since. A note left with no card is left out.
+///
+/// Returns null when a side does not parse as a JSON object.
+String? mergeReviewJson({
+  required String? base,
+  required String local,
+  required String remote,
+}) {
+  final l = _object(local);
+  final r = _object(remote);
+  if (l == null || r == null) return null;
+  final b = base == null ? null : _object(base);
+  final merged = <String, Object?>{};
+  for (final note in {...l.keys, ...r.keys}) {
+    final mine = _cards(l[note]);
+    final theirs = _cards(r[note]);
+    final agreed = b == null ? null : _cards(b[note]);
+    final cards = <String, Object?>{};
+    for (final key in {...mine.keys, ...theirs.keys}) {
+      final pick = _pick(
+        key,
+        local: mine,
+        remote: theirs,
+        base: agreed,
+        localNewer: !_readAt(theirs[key]).isAfter(_readAt(mine[key])),
+      );
+      if (pick.present) cards[key] = pick.value;
+    }
+    if (cards.isNotEmpty) merged[note] = cards;
+  }
+  return _encode(merged);
+}
+
+/// A note's cards of a review file; none for an entry that is no object.
+Map<String, Object?> _cards(Object? note) => note is Map
+    ? {for (final card in note.entries) card.key.toString(): card.value}
+    : <String, Object?>{};
+
 /// `.niman/counters.json` merged: every counter is the highest either
 /// side reached, so a number a template already handed out on one device
 /// is never handed out again on the other.

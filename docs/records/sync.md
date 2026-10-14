@@ -261,7 +261,8 @@ The first sync (empty table) compares by content only and **never
 deletes** on either side; it shows a summary before it starts.
 
 The library state files (`libraryStateFiles`: `.niman/settings.json`,
-`.niman/counters.json`, `.niman/dictionary.txt`, `.niman/reading.json`) are never deleted either: *deleted | same*
+`.niman/counters.json`, `.niman/dictionary.txt`, `.niman/reading.json`,
+`.niman/review.json`) are never deleted either: *deleted | same*
 downloads and *same | deleted* uploads. A missing settings file is never
 what the user meant, and treating it as a deletion let one device that
 lost its copy delete it on the server, after which every other device
@@ -545,7 +546,10 @@ one runs joins it and gets the same report, saying that it joined.
      changed it; `reading.json` (#281) merges book by book like
      `settings.json`, except that a book both sides moved in keeps the
      later reading by the entries' own `at`, not the newer file — the file
-     is written for every book read, so its date says nothing of any one.
+     is written for every book read, so its date says nothing of any one;
+     `review.json` (#533) merges the same way card by card (a deck's cards
+     are the entries inside its note's), the later review of a card
+     winning by its own `at`.
      A side that does not parse is not merged either: both sides stay and
      the path is reported. Anything else is left untouched on both sides
      and reported, with the pinned base, for the merge (step 7).
