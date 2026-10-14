@@ -404,7 +404,8 @@ final class NoteOps implements NoteOperations {
   /// The folder at [path], created with its parents if missing.
   ///
   /// No uniquifying: the caller named a folder, not a wish for one. A folder
-  /// the library already holds under another spelling is that folder —
+  /// the library already holds under another spelling is that folder, unless
+  /// the exact spelling is there too, which wins (#857) —
   /// `[[Projects/Three laws]]` lands in the `projects` that is there, as
   /// `[[Note]]` opens `note.md` — and the path is canonicalized segment by
   /// segment, so a folder made below a reused one sits inside the spelled
@@ -427,7 +428,9 @@ final class NoteOps implements NoteOperations {
       }
       final canonical = segments.join('/');
       final dir = Directory(_abs(canonical));
-      if (!dir.existsSync()) {
+      // The async form runs off the UI isolate (#875).
+      // ignore: avoid_slow_async_io
+      if (!await dir.exists()) {
         await dir.create(recursive: true);
         // Every folder on the way is new too, so the index hears about
         // the whole chain rather than only its last link.
